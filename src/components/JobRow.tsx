@@ -1,4 +1,4 @@
-import { Job } from "../types";
+import type { Job } from "../types";
 
 const AVATAR_COLORS = [
   "#7c3aed","#0ea5e9","#059669","#d97706","#db2777","#0891b2","#16a34a","#9333ea",

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Job } from "../types";
+import type { Job } from "../types";
 
 interface Props {
   jobs: Job[];

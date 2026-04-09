@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { Job, RunEntry } from "../types";
+import type { Job, RunEntry } from "../types";
 import JobRow from "../components/JobRow";
 import Sidebar from "../components/Sidebar";
 

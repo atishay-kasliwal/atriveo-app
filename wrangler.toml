@@ -2,10 +2,10 @@ name = "atriveo-app"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "dist"
 
-[vars]
-ENVIRONMENT = "production"
+[[d1_databases]]
+binding = "atriveo_auth"
+database_name = "atriveo-auth"
+database_id = "c80daf92-78af-4216-b552-d435ee9ab323"
 
-# Secrets (set via: wrangler pages secret put SECRET_NAME)
-# MONGO_URI         - MongoDB connection string
-# JWT_SECRET        - Random 32+ char string for signing tokens
-# AUTH_MONGO_URI    - Can be same as MONGO_URI (uses atriveo_auth DB)
+# Secrets (set via Cloudflare Pages dashboard → Settings → Environment Variables):
+# JWT_SECRET  — random 32+ char string for signing session tokens
