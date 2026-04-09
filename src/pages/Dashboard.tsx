@@ -1,0 +1,234 @@
+import { useState, useEffect, useMemo } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { Job, RunEntry } from "../types";
+import JobRow from "../components/JobRow";
+import Sidebar from "../components/Sidebar";
+
+type Period = "hour" | "today" | "yesterday";
+type SortBy = "score" | "time";
+
+export default function Dashboard() {
+  const { user, logout } = useAuth();
+  const [hourJobs, setHourJobs] = useState<Job[]>([]);
+  const [todayJobs, setTodayJobs] = useState<Job[]>([]);
+  const [yesterdayJobs, setYesterdayJobs] = useState<Job[]>([]);
+  const [runHistory, setRunHistory] = useState<RunEntry[]>([]);
+  const [period, setPeriod] = useState<Period>("hour");
+  const [sortBy, setSortBy] = useState<SortBy>("time");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [h1bFilter, setH1bFilter] = useState(false);
+  const [termFilter, setTermFilter] = useState("all");
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const [hour, today, yesterday, runs] = await Promise.all([
+        fetch("/api/jobs?type=hour").then((r) => r.json()).catch(() => []),
+        fetch("/api/jobs?type=today").then((r) => r.json()).catch(() => []),
+        fetch("/api/jobs?type=yesterday").then((r) => r.json()).catch(() => []),
+        fetch("/api/jobs?type=runs").then((r) => r.json()).catch(() => []),
+      ]);
+      setHourJobs(hour);
+      setTodayJobs(today);
+      setYesterdayJobs(yesterday);
+      setRunHistory(runs);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const baseJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : yesterdayJobs;
+
+  const filtered = useMemo(() => {
+    let jobs = [...baseJobs];
+    if (levelFilter !== "all") jobs = jobs.filter((j) => j.level === levelFilter);
+    if (h1bFilter) jobs = jobs.filter((j) => j.score_pct >= 60);
+    if (termFilter !== "all") jobs = jobs.filter((j) => j.search_term === termFilter);
+    if (query) {
+      const q = query.toLowerCase();
+      jobs = jobs.filter(
+        (j) =>
+          j.title?.toLowerCase().includes(q) ||
+          j.company?.toLowerCase().includes(q) ||
+          j.location?.toLowerCase().includes(q)
+      );
+    }
+    if (sortBy === "score") jobs.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    else jobs.sort((a, b) => new Date(b.batch_time).getTime() - new Date(a.batch_time).getTime());
+    return jobs;
+  }, [baseJobs, levelFilter, h1bFilter, termFilter, query, sortBy]);
+
+  const searchTerms = useMemo(
+    () => [...new Set(todayJobs.map((j) => j.search_term).filter(Boolean))],
+    [todayJobs]
+  );
+
+  const ngCount = filtered.filter((j) => j.level === "New Grad").length;
+  const bestJob = [...todayJobs].sort((a, b) => (b.score_pct ?? 0) - (a.score_pct ?? 0))[0];
+
+  return (
+    <div>
+      <header>
+        <div className="wrapper header-inner">
+          <div className="logo">
+            <div className="logo-icon">A</div>
+            <div>
+              <div className="logo-name">Atriveo</div>
+              <div className="logo-sub">Job Feed</div>
+            </div>
+          </div>
+          <div className="header-right">
+            <span className="header-user">Hi, {user?.name}</span>
+            <button className="logout-btn" onClick={logout}>Sign out</button>
+          </div>
+        </div>
+      </header>
+
+      <div className="wrapper">
+        {/* KPIs */}
+        <div className="kpi-row">
+          <div className="kpi-card blue">
+            <div className="kpi-value">{hourJobs.length}</div>
+            <div className="kpi-label">This Hour</div>
+            <div className="kpi-sub">{hourJobs.filter((j) => j.level === "New Grad").length} New Grad</div>
+          </div>
+          <div className="kpi-card green">
+            <div className="kpi-value">{todayJobs.length}</div>
+            <div className="kpi-label">Today Total</div>
+            <div className="kpi-sub">across {runHistory.length} runs</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-value">{todayJobs.filter((j) => j.level === "New Grad").length}</div>
+            <div className="kpi-label">New Grad</div>
+            <div className="kpi-sub">across all today</div>
+          </div>
+          <div className="kpi-card orange">
+            <div className="kpi-value">{bestJob ? `${bestJob.score_pct}%` : "—"}</div>
+            <div className="kpi-label">Best Match</div>
+            <div className="kpi-sub">{bestJob?.title?.slice(0, 22) ?? ""}</div>
+          </div>
+        </div>
+
+        {/* Period tabs + sort */}
+        <div className="top-bar">
+          <div className="period-tabs">
+            {(["hour", "today", "yesterday"] as Period[]).map((p) => (
+              <button
+                key={p}
+                className={`period-tab${period === p ? " active" : ""}`}
+                onClick={() => { setPeriod(p); setTermFilter("all"); }}
+              >
+                {p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}
+                <span className="count">
+                  {p === "hour" ? hourJobs.length : p === "today" ? todayJobs.length : yesterdayJobs.length}
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className="sort-group">
+            <button className={`sort-btn${sortBy === "score" ? " active" : ""}`} onClick={() => setSortBy("score")}>★ Score</button>
+            <button className={`sort-btn${sortBy === "time" ? " active" : ""}`} onClick={() => setSortBy("time")}>↓ Recent</button>
+          </div>
+        </div>
+
+        {/* Run history strip */}
+        <div className="run-strip-wrap">
+          <div className="run-strip">
+            {runHistory.slice(0, 20).map((r) => (
+              <div key={r.session_id} className="run-card">
+                <span className="run-card-time">
+                  {new Date(r.run_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                </span>
+                <span className="run-card-count">{r.total_jobs} jobs</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="dashboard-layout">
+          <Sidebar jobs={filtered} />
+
+          <div className="right-panel">
+            {/* Filters */}
+            <div className="filter-bar">
+              <div className="search-wrap">
+                <span className="search-icon">⌕</span>
+                <input
+                  className="search-input"
+                  type="search"
+                  placeholder="Search jobs, companies, locations…"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </div>
+              <div className="level-chips">
+                {["all", "New Grad", "Entry", "Mid"].map((l) => (
+                  <button
+                    key={l}
+                    className={`chip${levelFilter === l ? " active" : ""}`}
+                    onClick={() => setLevelFilter(l)}
+                  >
+                    {l === "all" ? "All" : l}
+                  </button>
+                ))}
+                <button
+                  className={`chip-toggle${h1bFilter ? " active" : ""}`}
+                  onClick={() => setH1bFilter((v) => !v)}
+                >
+                  H1B ✓
+                </button>
+              </div>
+              <select
+                className="term-select"
+                value={termFilter}
+                onChange={(e) => setTermFilter(e.target.value)}
+              >
+                <option value="all">All search terms</option>
+                {searchTerms.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="result-meta">
+              {filtered.length} job{filtered.length !== 1 ? "s" : ""}
+              {ngCount ? ` · ${ngCount} New Grad` : ""}
+            </div>
+
+            {/* Job list */}
+            <div className="job-list">
+              {loading ? (
+                <div className="state-msg"><div className="icon">⏳</div>Loading…</div>
+              ) : filtered.length === 0 ? (
+                <div className="state-msg"><div className="icon">🔍</div>No jobs found</div>
+              ) : (
+                <>
+                  <div className="job-list-header">
+                    <span /><span />
+                    <span>Role</span>
+                    <span style={{ textAlign: "right" }}>Match</span>
+                    <span style={{ textAlign: "right" }}>Score</span>
+                    <span style={{ textAlign: "right" }}>Comp</span>
+                    <span style={{ textAlign: "right" }}>Level</span>
+                    <span style={{ textAlign: "right" }}>Apply</span>
+                  </div>
+                  {filtered.map((job, i) => (
+                    <JobRow key={job.job_url || i} job={job} index={i} />
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div className="wrapper">
+          Atriveo Job Pipeline &nbsp;·&nbsp; Runs hourly 12 AM – 11 PM
+        </div>
+      </footer>
+    </div>
+  );
+}
