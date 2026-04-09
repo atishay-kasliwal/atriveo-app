@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [termFilter, setTermFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedSession, setSelectedSession] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -39,7 +40,17 @@ export default function Dashboard() {
     load();
   }, []);
 
-  const baseJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : yesterdayJobs;
+  // Count jobs per session from loaded data (so run cards show real counts even if MongoDB total_jobs is missing)
+  const sessionCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    [...hourJobs, ...todayJobs, ...yesterdayJobs].forEach((j) => {
+      if (j.session_id) counts[j.session_id] = (counts[j.session_id] || 0) + 1;
+    });
+    return counts;
+  }, [hourJobs, todayJobs, yesterdayJobs]);
+
+  const rawJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : yesterdayJobs;
+  const baseJobs = selectedSession ? rawJobs.filter((j) => j.session_id === selectedSession) : rawJobs;
 
   const filtered = useMemo(() => {
     let jobs = [...baseJobs];
@@ -118,7 +129,7 @@ export default function Dashboard() {
               <button
                 key={p}
                 className={`period-tab${period === p ? " active" : ""}`}
-                onClick={() => { setPeriod(p); setTermFilter("all"); }}
+                onClick={() => { setPeriod(p); setTermFilter("all"); setSelectedSession(null); }}
               >
                 {p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}
                 <span className="count">
@@ -136,14 +147,29 @@ export default function Dashboard() {
         {/* Run history strip */}
         <div className="run-strip-wrap">
           <div className="run-strip">
-            {runHistory.slice(0, 20).map((r) => (
-              <div key={r.session_id} className="run-card">
-                <span className="run-card-time">
-                  {new Date(r.run_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-                </span>
-                <span className="run-card-count">{r.total_jobs} jobs</span>
-              </div>
-            ))}
+            {runHistory.slice(0, 20).map((r) => {
+              const count = sessionCounts[r.session_id] ?? r.total_jobs ?? 0;
+              const isActive = selectedSession === r.session_id;
+              return (
+                <div
+                  key={r.session_id}
+                  className={`run-card${isActive ? " active" : ""}`}
+                  onClick={() => {
+                    if (isActive) {
+                      setSelectedSession(null);
+                    } else {
+                      setSelectedSession(r.session_id);
+                      setPeriod("today");
+                    }
+                  }}
+                >
+                  <span className="run-card-time">
+                    {new Date(r.run_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                  </span>
+                  <span className="run-card-count">{count} jobs</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 

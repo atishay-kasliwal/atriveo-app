@@ -1,4 +1,5 @@
 export interface Job {
+  session_id?: string;
   title: string;
   company: string;
   location: string;
