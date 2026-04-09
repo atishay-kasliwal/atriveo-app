@@ -108,7 +108,7 @@ export default function Dashboard() {
         targetPeriod: sessionPeriod[r.session_id] ?? null,
         displayAt: r.run_at || r.session_id,
       }))
-      .filter((r) => r.count > 0 && r.targetPeriod)
+      .filter((r) => r.count > 0 && r.targetPeriod && r.targetPeriod !== "yesterday")
       .slice(0, 20);
   }, [runHistory, sessionCounts, sessionPeriod]);
 
