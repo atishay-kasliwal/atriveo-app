@@ -44,7 +44,7 @@ function fmtClickTime(iso: string | null): string {
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
-  const { stats, recordClick, getRecord, setTrackerStatus } = useApplyTracker();
+  const { stats, recordClick, getRecord } = useApplyTracker();
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
   const [todayJobs, setTodayJobs] = useState<Job[]>([]);
   const [yesterdayJobs, setYesterdayJobs] = useState<Job[]>([]);
