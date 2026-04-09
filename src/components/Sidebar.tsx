@@ -74,7 +74,7 @@ export default function Sidebar({ jobs }: Props) {
 
       <div className="panel-card">
         <div className="panel-title">Top Companies</div>
-        <div style={{ maxHeight: "340px", overflowY: "auto" }}>
+        <div id="chart-companies">
           {topCompanies.map(([name, count]) => (
             <BarRow key={name} label={name} count={count} max={compMax} />
           ))}
