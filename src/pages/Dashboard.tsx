@@ -320,7 +320,6 @@ export default function Dashboard() {
                       index={i}
                       applyRecord={job.job_url ? getRecord(job.job_url) : null}
                       onApplyClick={recordClick}
-                      onTrackerStatus={setTrackerStatus}
                     />
                   ))}
                 </>
