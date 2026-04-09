@@ -118,7 +118,6 @@ export default function JobRow({ job, index, applyRecord, onApplyClick }: Props)
             <><span className="sep">·</span><span className="apply-inline-meta">Clicked {applyClicks}x · {appliedAt}</span></>
           )}
         </div>
-        {job.summary && <div className="job-summary">{job.summary}</div>}
       </div>
       <div className="job-score">
         <span className="star">★</span>

@@ -353,26 +353,37 @@ header {
   display: flex; flex-direction: column; gap: 0;
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: var(--radius);
-  overflow: hidden;
   background: rgba(7, 14, 28, 0.9);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  max-height: 74vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* themed scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59,130,246,0.35) rgba(255,255,255,0.04);
 }
+.job-list::-webkit-scrollbar { width: 5px; }
+.job-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 99px; }
+.job-list::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.35); border-radius: 99px; }
+.job-list::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.6); }
 
-/* table header */
+/* table header — sticky */
 .job-list-header {
   display: grid;
-  grid-template-columns: 22px 28px minmax(0,1fr) 76px 88px 54px 68px 72px;
+  grid-template-columns: 22px 28px minmax(0,1fr) 76px 88px 44px 68px 72px;
   gap: 0 10px; padding: 6px 12px 6px 16px;
-  background: rgba(255,255,255,0.035);
+  background: rgba(11,18,32,0.97);
   border-bottom: 1px solid rgba(148, 163, 184, 0.2);
   font-size: 9.5px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.08em; color: #7f91ae;
   font-family: "Inter", monospace;
+  position: sticky; top: 0; z-index: 10;
+  backdrop-filter: blur(8px);
 }
 
 .apply-stats-row {
   display: grid;
-  grid-template-columns: 22px 28px minmax(0,1fr) 76px 88px 54px 68px 72px;
+  grid-template-columns: 22px 28px minmax(0,1fr) 76px 88px 44px 68px 72px;
   gap: 0 10px;
   padding: 5px 12px 5px 16px;
   border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -407,7 +418,7 @@ header {
   border-radius: 0;
   padding: 9px 12px 9px 16px;
   display: grid;
-  grid-template-columns: 22px 28px minmax(0,1fr) 76px 88px 54px 68px 72px;
+  grid-template-columns: 22px 28px minmax(0,1fr) 76px 88px 44px 68px 72px;
   align-items: center; gap: 0 10px;
   transition: background 0.12s ease, border-color 0.12s ease;
   text-decoration: none; color: inherit;
@@ -457,10 +468,11 @@ header {
 .job-score .star { color: #4f8dff; font-size: 10px; }
 .score-hi { color: var(--green); }
 .score-md { color: var(--orange); }
-.job-comp { display: flex; align-items: center; justify-content: flex-end; font-size: 13px; font-weight: 700; font-family: "Inter", monospace; }
-.comp-lo  { color: var(--green); }
-.comp-md  { color: var(--orange); }
-.comp-hi  { color: var(--red); }
+.job-comp { display: flex; align-items: center; justify-content: flex-end; font-size: 10px; font-weight: 700; font-family: "Inter", monospace; }
+.comp-val { padding: 1px 5px; border-radius: 4px; }
+.comp-lo  { background: var(--green-lo);  color: var(--green);  border: 1px solid rgba(74,222,128,0.2); }
+.comp-md  { background: var(--orange-lo); color: var(--orange); border: 1px solid rgba(251,146,60,0.2); }
+.comp-hi  { background: var(--red-lo);    color: var(--red);    border: 1px solid rgba(248,113,113,0.2); }
 .job-apply-col { display: flex; justify-content: flex-end; }
 
 /* badges */
