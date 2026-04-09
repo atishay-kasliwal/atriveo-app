@@ -3,7 +3,6 @@ import { useAuth } from "../hooks/useAuth";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import type { Job, RunEntry } from "../types";
 import JobRow from "../components/JobRow";
-import Sidebar from "../components/Sidebar";
 
 type Period = "hour" | "today" | "yesterday";
 type SortBy = "score" | "time";
@@ -236,8 +235,6 @@ export default function Dashboard() {
         </div>
 
         <div className="dashboard-layout">
-          <Sidebar jobs={filtered} />
-
           <div className="right-panel">
             {/* Filters */}
             <div className="filter-bar">
@@ -298,7 +295,7 @@ export default function Dashboard() {
                     <span>Role</span>
                     <span style={{ textAlign: "right" }}>Score</span>
                     <span style={{ textAlign: "right" }}>Match</span>
-                    <span style={{ textAlign: "right" }}>Comp</span>
+                    <span style={{ textAlign: "right" }}>Tag</span>
                     <span style={{ textAlign: "right" }}>Level</span>
                     <span style={{ textAlign: "right" }}>Apply</span>
                   </div>

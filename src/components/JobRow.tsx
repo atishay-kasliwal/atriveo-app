@@ -62,9 +62,6 @@ function scoreColor(s: number) {
   return s >= 12 ? "score-hi" : s >= 6 ? "score-md" : "";
 }
 
-function compClass(c: number) {
-  return c >= 15 ? "comp-hi" : c >= 8 ? "comp-md" : "comp-lo";
-}
 
 interface Props {
   job: Job;
@@ -83,7 +80,6 @@ export default function JobRow({ job, index, applyRecord, onApplyClick }: Props)
   const lvl = job.level || "Entry";
   const exp = fmtExp(job.min_exp, job.max_exp);
   const batch = fmtBatch(job.batch_time);
-  const comp = job.competition_score ?? null;
   const term = (job.search_term || "").replace(/ engineer$/i, "").trim();
   const tier = pct !== null ? (pct >= 60 ? " tier-hi" : pct >= 35 ? " tier-md" : " tier-lo") : "";
   const top = index < 3 && score >= 8;
@@ -128,10 +124,10 @@ export default function JobRow({ job, index, applyRecord, onApplyClick }: Props)
           ? <span className={`match-pct ${matchPctClass(pct)}`}>{pct}%</span>
           : <span>—</span>}
       </div>
-      <div className="job-comp">
-        {comp !== null
-          ? <span className={`comp-val ${compClass(comp)}`}>{comp}</span>
-          : <span style={{ color: "var(--muted)" }}>—</span>}
+      <div className="job-tag-col">
+        {term
+          ? <span className="badge badge-term">{term}</span>
+          : <span style={{ color: "var(--muted)", fontSize: "11px" }}>—</span>}
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <span className={`badge ${levelClass(lvl)}`}>{lvl}</span>

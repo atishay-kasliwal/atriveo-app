@@ -245,7 +245,7 @@ header {
 
 /* ── Two-column layout ───────────────────────────────────────────────── */
 .dashboard-layout {
-  display: grid; grid-template-columns: 204px 1fr;
+  display: grid; grid-template-columns: 1fr;
   gap: 12px; align-items: start; padding-bottom: 32px;
 }
 @media (max-width: 900px) {
@@ -370,7 +370,7 @@ header {
 /* table header — sticky */
 .job-list-header {
   display: grid;
-  grid-template-columns: 22px 28px minmax(0,1fr) 76px 88px 44px 68px 72px;
+  grid-template-columns: 22px 28px minmax(0,1fr) 70px 76px 88px 68px 72px;
   gap: 0 10px; padding: 6px 12px 6px 16px;
   background: rgba(241,245,249,0.98);
   border-bottom: 1px solid rgba(148, 163, 184, 0.2);
@@ -383,7 +383,7 @@ header {
 
 .apply-stats-row {
   display: grid;
-  grid-template-columns: 22px 28px minmax(0,1fr) 76px 88px 44px 68px 72px;
+  grid-template-columns: 22px 28px minmax(0,1fr) 70px 76px 88px 68px 72px;
   gap: 0 10px;
   padding: 5px 12px 5px 16px;
   border-bottom: 1px solid var(--border);
@@ -418,7 +418,7 @@ header {
   border-radius: 0;
   padding: 9px 12px 9px 16px;
   display: grid;
-  grid-template-columns: 22px 28px minmax(0,1fr) 76px 88px 44px 68px 72px;
+  grid-template-columns: 22px 28px minmax(0,1fr) 70px 76px 88px 68px 72px;
   align-items: center; gap: 0 10px;
   transition: background 0.12s ease, border-color 0.12s ease;
   text-decoration: none; color: inherit;
@@ -450,11 +450,11 @@ header {
 /* main col — title + meta on one line */
 .job-main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .job-title-row { display: flex; align-items: center; gap: 6px; }
-.job-title-text { font-size: 13px; font-weight: 600; color: #e7edf8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; line-height: 1.25; }
+.job-title-text { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; line-height: 1.25; }
 .job-title-badges { display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; }
-.job-meta { font-size: 10.5px; color: #93a5c2; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; }
+.job-meta { font-size: 10.5px; color: var(--text-2); display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; }
 .job-meta .sep { color: rgba(0,0,0,0.15); }
-.job-company { font-weight: 600; color: #c5d3e8; }
+.job-company { font-weight: 600; color: var(--text-2); }
 .job-summary { font-size: 10px; color: var(--text-2); line-height: 1.4; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .job-batch { color: var(--cyan); font-weight: 700; font-family: "Inter", monospace; }
 .apply-inline-meta { color: var(--green); font-weight: 700; font-family: "Inter", monospace; }
@@ -468,11 +468,7 @@ header {
 .job-score .star { color: var(--blue); font-size: 10px; }
 .score-hi { color: var(--green); }
 .score-md { color: var(--orange); }
-.job-comp { display: flex; align-items: center; justify-content: flex-end; font-size: 10px; font-weight: 700; font-family: "Inter", monospace; }
-.comp-val { padding: 1px 5px; border-radius: 4px; }
-.comp-lo  { background: var(--green-lo);  color: var(--green);  border: 1px solid rgba(74,222,128,0.2); }
-.comp-md  { background: var(--orange-lo); color: var(--orange); border: 1px solid rgba(251,146,60,0.2); }
-.comp-hi  { background: var(--red-lo);    color: var(--red);    border: 1px solid rgba(248,113,113,0.2); }
+.job-tag-col { display: flex; align-items: center; justify-content: flex-end; }
 .job-apply-col { display: flex; justify-content: flex-end; }
 
 /* badges */
