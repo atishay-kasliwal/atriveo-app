@@ -7,6 +7,36 @@ import Sidebar from "../components/Sidebar";
 type Period = "hour" | "today" | "yesterday";
 type SortBy = "score" | "time";
 
+const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
+
+function parseDateLike(iso?: string | null): Date | null {
+  if (!iso) return null;
+  const value = iso.trim();
+  if (!value) return null;
+  const normalized = TZ_SUFFIX_RE.test(value) ? value : `${value}Z`;
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function toMs(iso?: string | null): number {
+  return parseDateLike(iso)?.getTime() ?? 0;
+}
+
+function formatRunTime(iso?: string | null): string {
+  const date = parseDateLike(iso);
+  if (!date) return "—";
+  const today = new Date();
+  if (date.toDateString() === today.toDateString()) {
+    return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  }
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
@@ -40,17 +70,44 @@ export default function Dashboard() {
     load();
   }, []);
 
-  // Count jobs per session from loaded data (so run cards show real counts even if MongoDB total_jobs is missing)
+  // Count jobs per session from loaded data (prefer day snapshots to avoid hour+today double counting).
   const sessionCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    [...hourJobs, ...todayJobs, ...yesterdayJobs].forEach((j) => {
+    [...todayJobs, ...yesterdayJobs].forEach((j) => {
       if (j.session_id) counts[j.session_id] = (counts[j.session_id] || 0) + 1;
+    });
+    hourJobs.forEach((j) => {
+      if (!j.session_id || counts[j.session_id] !== undefined) return;
+      counts[j.session_id] = (counts[j.session_id] || 0) + 1;
     });
     return counts;
   }, [hourJobs, todayJobs, yesterdayJobs]);
 
+  const sessionPeriod = useMemo(() => {
+    const map: Record<string, Period> = {};
+    hourJobs.forEach((j) => { if (j.session_id) map[j.session_id] = "hour"; });
+    todayJobs.forEach((j) => { if (j.session_id && !map[j.session_id]) map[j.session_id] = "today"; });
+    yesterdayJobs.forEach((j) => { if (j.session_id && !map[j.session_id]) map[j.session_id] = "yesterday"; });
+    return map;
+  }, [hourJobs, todayJobs, yesterdayJobs]);
+
   const rawJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : yesterdayJobs;
   const baseJobs = selectedSession ? rawJobs.filter((j) => j.session_id === selectedSession) : rawJobs;
+
+  const runCards = useMemo(() => {
+    return runHistory
+      .map((r) => {
+        const count = sessionCounts[r.session_id] ?? r.total_jobs ?? 0;
+        return {
+          ...r,
+          count,
+          targetPeriod: sessionPeriod[r.session_id] ?? null,
+          displayAt: r.run_at || r.session_id,
+        };
+      })
+      .filter((r) => r.count > 0 && r.targetPeriod)
+      .slice(0, 20);
+  }, [runHistory, sessionCounts, sessionPeriod]);
 
   const filtered = useMemo(() => {
     let jobs = [...baseJobs];
@@ -67,13 +124,13 @@ export default function Dashboard() {
       );
     }
     if (sortBy === "score") jobs.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-    else jobs.sort((a, b) => new Date(b.batch_time).getTime() - new Date(a.batch_time).getTime());
+    else jobs.sort((a, b) => toMs(b.batch_time) - toMs(a.batch_time));
     return jobs;
   }, [baseJobs, levelFilter, h1bFilter, termFilter, query, sortBy]);
 
   const searchTerms = useMemo(
-    () => [...new Set(todayJobs.map((j) => j.search_term).filter(Boolean))],
-    [todayJobs]
+    () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
+    [rawJobs]
   );
 
   const ngCount = filtered.filter((j) => j.level === "New Grad").length;
@@ -147,7 +204,7 @@ export default function Dashboard() {
         {/* Run history strip */}
         <div className="run-strip-wrap">
           <div className="run-strip">
-            {runHistory.slice(0, 20).map((r) => {
+            {runCards.map((r) => {
               const count = sessionCounts[r.session_id] ?? r.total_jobs ?? 0;
               const isActive = selectedSession === r.session_id;
               return (
@@ -159,12 +216,13 @@ export default function Dashboard() {
                       setSelectedSession(null);
                     } else {
                       setSelectedSession(r.session_id);
-                      setPeriod("today");
+                      if (r.targetPeriod) setPeriod(r.targetPeriod);
+                      setTermFilter("all");
                     }
                   }}
                 >
                   <span className="run-card-time">
-                    {new Date(r.run_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                    {formatRunTime(r.displayAt)}
                   </span>
                   <span className="run-card-count">{count} jobs</span>
                 </div>

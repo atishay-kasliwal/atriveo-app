@@ -1,5 +1,17 @@
 # React + TypeScript + Vite
 
+## Auto Deploy On `main`
+
+This repo now includes a GitHub Actions workflow at `.github/workflows/deploy-main.yml`.
+
+It will build and deploy to Cloudflare Pages on every push to `main`.
+
+Set these GitHub repository secrets first:
+
+- `CLOUDFLARE_ACCOUNT_ID`
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_PROJECT_NAME` (optional; defaults to `atriveo-app` if omitted)
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

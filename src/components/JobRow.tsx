@@ -3,6 +3,7 @@ import type { Job } from "../types";
 const AVATAR_COLORS = [
   "#7c3aed","#0ea5e9","#059669","#d97706","#db2777","#0891b2","#16a34a","#9333ea",
 ];
+const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
 function avatarColor(s: string) {
   const code = [...s].reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -19,7 +20,10 @@ function fmtExp(min: number | null, max: number | null) {
 
 function fmtBatch(iso: string) {
   if (!iso) return null;
-  return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const normalized = TZ_SUFFIX_RE.test(iso) ? iso : `${iso}Z`;
+  const date = new Date(normalized);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 }
 
 function levelClass(l: string) {
