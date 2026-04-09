@@ -1,4 +1,5 @@
 import type { Job } from "../types";
+import type { ApplyRecord } from "../hooks/useApplyTracker";
 
 const AVATAR_COLORS = [
   "#7c3aed","#0ea5e9","#059669","#d97706","#db2777","#0891b2","#16a34a","#9333ea",
@@ -26,6 +27,29 @@ function fmtBatch(iso: string) {
   return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 }
 
+function fmtDate(iso: string | null | undefined): string | null {
+  if (!iso || iso === "null") return null;
+  const normalized = TZ_SUFFIX_RE.test(iso) ? iso : `${iso}Z`;
+  const d = new Date(normalized);
+  if (Number.isNaN(d.getTime())) return null;
+  const now = new Date();
+  const sameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  if (sameDay(d, now)) return "Today";
+  const yest = new Date(now.getTime() - 86400000);
+  if (sameDay(d, yest)) return "Yesterday";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function fmtClickTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const now = new Date();
+  const sameDay = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  if (sameDay) return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true });
+}
+
 function levelClass(l: string) {
   return l === "New Grad" ? "badge-ng" : l === "Mid" ? "badge-mid" : "badge-entry";
 }
@@ -45,9 +69,11 @@ function compClass(c: number) {
 interface Props {
   job: Job;
   index: number;
+  applyRecord: ApplyRecord | null;
+  onApplyClick: (jobUrl: string, title: string, company: string) => void;
 }
 
-export default function JobRow({ job, index }: Props) {
+export default function JobRow({ job, index, applyRecord, onApplyClick }: Props) {
   const co = job.company || "—";
   const title = job.title || "—";
   const initial = co.charAt(0).toUpperCase();
@@ -61,6 +87,11 @@ export default function JobRow({ job, index }: Props) {
   const term = (job.search_term || "").replace(/ engineer$/i, "").trim();
   const tier = pct !== null ? (pct >= 60 ? " tier-hi" : pct >= 35 ? " tier-md" : " tier-lo") : "";
   const top = index < 3 && score >= 8;
+  const posted = fmtDate(job.date_posted);
+  const isNew = posted === "Today";
+  const isApplied = Boolean(applyRecord);
+  const applyClicks = applyRecord?.clicks ?? 0;
+  const appliedAt = applyRecord?.lastAppliedAt ? fmtClickTime(applyRecord.lastAppliedAt) : "";
 
   return (
     <div className={`job-card${top ? " top" : ""}${tier}`}>
@@ -70,6 +101,8 @@ export default function JobRow({ job, index }: Props) {
         <div className="job-title-row">
           <span className="job-title-text" title={title}>{title}</span>
           <span className="job-title-badges">
+            {isNew && <span className="badge badge-new">NEW</span>}
+            {isApplied && <span className="badge badge-applied">Clicked {applyClicks}x</span>}
             {term && <span className="badge badge-term">{term}</span>}
             <span className="badge badge-src badge-src-linkedin">LinkedIn</span>
           </span>
@@ -79,8 +112,13 @@ export default function JobRow({ job, index }: Props) {
           <span className="sep">·</span>
           <span title={job.location}>{job.location || "Remote"}</span>
           {exp && <><span className="sep">·</span><span className="exp-badge">{exp}</span></>}
+          {posted && !isNew && <><span className="sep">·</span><span className="job-date">{posted}</span></>}
           {batch && <><span className="sep">·</span><span className="job-batch">⏱ {batch}</span></>}
+          {isApplied && appliedAt && (
+            <><span className="sep">·</span><span className="apply-inline-meta">Clicked {applyClicks}x · {appliedAt}</span></>
+          )}
         </div>
+        {job.summary && <div className="job-summary">{job.summary}</div>}
       </div>
       <div className="job-score">
         <span className="star">★</span>
@@ -101,7 +139,18 @@ export default function JobRow({ job, index }: Props) {
       </div>
       <div className="job-apply-col">
         {job.job_url
-          ? <a className="apply-btn" href={job.job_url} target="_blank" rel="noopener">Apply ↗</a>
+          ? (
+            <a
+              className={`apply-btn${isApplied ? " applied" : ""}`}
+              href={job.job_url}
+              target="_blank"
+              rel="noopener"
+              title={isApplied && appliedAt ? `${applyClicks} click${applyClicks !== 1 ? "s" : ""} · Last ${appliedAt}` : "Open application"}
+              onClick={() => onApplyClick(job.job_url, title, co)}
+            >
+              {isApplied ? "Applied ✓" : "Apply ↗"}
+            </a>
+          )
           : <span style={{ fontSize: "11px", color: "var(--muted)" }}>—</span>}
       </div>
     </div>

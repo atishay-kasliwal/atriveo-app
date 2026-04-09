@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { useApplyTracker } from "../hooks/useApplyTracker";
 import type { Job, RunEntry } from "../types";
 import JobRow from "../components/JobRow";
 import Sidebar from "../components/Sidebar";
@@ -29,16 +30,22 @@ function formatRunTime(iso?: string | null): string {
   if (date.toDateString() === today.toDateString()) {
     return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   }
-  return date.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return date.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+function fmtClickTime(iso: string | null): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const now = new Date();
+  const sameDay = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  if (sameDay) return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true });
 }
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const { stats, recordClick, getRecord } = useApplyTracker();
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
   const [todayJobs, setTodayJobs] = useState<Job[]>([]);
   const [yesterdayJobs, setYesterdayJobs] = useState<Job[]>([]);
@@ -70,7 +77,6 @@ export default function Dashboard() {
     load();
   }, []);
 
-  // Count jobs per session from loaded data (prefer day snapshots to avoid hour+today double counting).
   const sessionCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     [...todayJobs, ...yesterdayJobs].forEach((j) => {
@@ -96,15 +102,12 @@ export default function Dashboard() {
 
   const runCards = useMemo(() => {
     return runHistory
-      .map((r) => {
-        const count = sessionCounts[r.session_id] ?? r.total_jobs ?? 0;
-        return {
-          ...r,
-          count,
-          targetPeriod: sessionPeriod[r.session_id] ?? null,
-          displayAt: r.run_at || r.session_id,
-        };
-      })
+      .map((r) => ({
+        ...r,
+        count: sessionCounts[r.session_id] ?? r.total_jobs ?? 0,
+        targetPeriod: sessionPeriod[r.session_id] ?? null,
+        displayAt: r.run_at || r.session_id,
+      }))
       .filter((r) => r.count > 0 && r.targetPeriod)
       .slice(0, 20);
   }, [runHistory, sessionCounts, sessionPeriod]);
@@ -135,6 +138,10 @@ export default function Dashboard() {
 
   const ngCount = filtered.filter((j) => j.level === "New Grad").length;
   const bestJob = [...todayJobs].sort((a, b) => (b.score_pct ?? 0) - (a.score_pct ?? 0))[0];
+  const clickedJobCount = Object.keys(stats.appliedJobs).length;
+  const lastJobText = stats.lastJobTitle
+    ? `${stats.lastJobTitle}${stats.lastCompany ? ` · ${stats.lastCompany}` : ""}`
+    : "—";
 
   return (
     <div>
@@ -205,7 +212,6 @@ export default function Dashboard() {
         <div className="run-strip-wrap">
           <div className="run-strip">
             {runCards.map((r) => {
-              const count = sessionCounts[r.session_id] ?? r.total_jobs ?? 0;
               const isActive = selectedSession === r.session_id;
               return (
                 <div
@@ -221,10 +227,8 @@ export default function Dashboard() {
                     }
                   }}
                 >
-                  <span className="run-card-time">
-                    {formatRunTime(r.displayAt)}
-                  </span>
-                  <span className="run-card-count">{count} jobs</span>
+                  <span className="run-card-time">{formatRunTime(r.displayAt)}</span>
+                  <span className="run-card-count">{r.count} jobs</span>
                 </div>
               );
             })}
@@ -298,8 +302,28 @@ export default function Dashboard() {
                     <span style={{ textAlign: "right" }}>Level</span>
                     <span style={{ textAlign: "right" }}>Apply</span>
                   </div>
+                  {/* Apply stats bar */}
+                  {clickedJobCount > 0 && (
+                    <div className="apply-stats-row">
+                      <div className="apply-stats-cell">
+                        Clicked jobs: <span className="apply-stats-value">{clickedJobCount}</span>
+                        <span className="apply-stats-sep">•</span>
+                        Total clicks: <span className="apply-stats-value">{stats.count}</span>
+                        <span className="apply-stats-sep">•</span>
+                        Last: <span className="apply-stats-value">{fmtClickTime(stats.lastClickAt)}</span>
+                        <span className="apply-stats-sep">•</span>
+                        <span className="apply-stats-last" title={lastJobText}>{lastJobText}</span>
+                      </div>
+                    </div>
+                  )}
                   {filtered.map((job, i) => (
-                    <JobRow key={job.job_url || i} job={job} index={i} />
+                    <JobRow
+                      key={job.job_url || i}
+                      job={job}
+                      index={i}
+                      applyRecord={job.job_url ? getRecord(job.job_url) : null}
+                      onApplyClick={recordClick}
+                    />
                   ))}
                 </>
               )}
