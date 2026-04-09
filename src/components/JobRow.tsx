@@ -81,16 +81,15 @@ export default function JobRow({ job, index }: Props) {
           {exp && <><span className="sep">·</span><span className="exp-badge">{exp}</span></>}
           {batch && <><span className="sep">·</span><span className="job-batch">⏱ {batch}</span></>}
         </div>
-        {job.summary && <div className="job-summary">{job.summary}</div>}
+      </div>
+      <div className="job-score">
+        <span className="star">★</span>
+        <span className={scoreColor(score)}>{score}</span>
       </div>
       <div className="match-line">
         {pct !== null
           ? <span className={`match-pct ${matchPctClass(pct)}`}>{pct}%</span>
           : <span>—</span>}
-      </div>
-      <div className="job-score">
-        <span className="star">★</span>
-        <span className={scoreColor(score)}>{score}</span>
       </div>
       <div className="job-comp">
         {comp !== null

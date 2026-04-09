@@ -292,8 +292,8 @@ export default function Dashboard() {
                   <div className="job-list-header">
                     <span /><span />
                     <span>Role</span>
-                    <span style={{ textAlign: "right" }}>Match</span>
                     <span style={{ textAlign: "right" }}>Score</span>
+                    <span style={{ textAlign: "right" }}>Match</span>
                     <span style={{ textAlign: "right" }}>Comp</span>
                     <span style={{ textAlign: "right" }}>Level</span>
                     <span style={{ textAlign: "right" }}>Apply</span>
