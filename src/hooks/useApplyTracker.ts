@@ -2,11 +2,14 @@ import { useState, useCallback } from "react";
 
 const STORAGE_KEY = "atriveo_apply_stats_v1";
 
+export type TrackerStatus = "applied" | "rejected" | null;
+
 export interface ApplyRecord {
   clicks: number;
   lastAppliedAt: string;
   title: string | null;
   company: string | null;
+  trackerStatus: TrackerStatus;
 }
 
 interface ApplyStats {
@@ -48,7 +51,8 @@ function normalizeJobs(raw: unknown): Record<string, ApplyRecord> {
     const rawClicks = Number(r.clicks);
     const clicks = Number.isFinite(rawClicks) && rawClicks > 0 ? Math.floor(rawClicks) : lastAppliedAt ? 1 : 0;
     if (!clicks || !lastAppliedAt) continue;
-    result[url] = { clicks, lastAppliedAt, title: String(r.title || ""), company: String(r.company || "") };
+    const ts = r.trackerStatus === "applied" || r.trackerStatus === "rejected" ? r.trackerStatus : null;
+    result[url] = { clicks, lastAppliedAt, title: String(r.title || ""), company: String(r.company || ""), trackerStatus: ts };
   }
   return result;
 }
@@ -76,6 +80,7 @@ export function useApplyTracker() {
             lastAppliedAt: nowIso,
             title,
             company,
+            trackerStatus: existing?.trackerStatus ?? null,
           },
         },
       };
@@ -88,5 +93,21 @@ export function useApplyTracker() {
     return stats.appliedJobs[jobUrl] ?? null;
   }, [stats]);
 
-  return { stats, recordClick, getRecord };
+  const setTrackerStatus = useCallback((jobUrl: string, status: TrackerStatus) => {
+    setStats((prev) => {
+      const existing = prev.appliedJobs[jobUrl];
+      if (!existing) return prev;
+      const next: ApplyStats = {
+        ...prev,
+        appliedJobs: {
+          ...prev.appliedJobs,
+          [jobUrl]: { ...existing, trackerStatus: status },
+        },
+      };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  return { stats, recordClick, getRecord, setTrackerStatus };
 }

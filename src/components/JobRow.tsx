@@ -68,9 +68,10 @@ interface Props {
   index: number;
   applyRecord: ApplyRecord | null;
   onApplyClick: (jobUrl: string, title: string, company: string) => void;
+  onTrackerStatus: (jobUrl: string, status: "applied" | "rejected") => void;
 }
 
-export default function JobRow({ job, index, applyRecord, onApplyClick }: Props) {
+export default function JobRow({ job, index, applyRecord, onApplyClick, onTrackerStatus }: Props) {
   const co = job.company || "—";
   const title = job.title || "—";
   const initial = co.charAt(0).toUpperCase();
@@ -85,6 +86,7 @@ export default function JobRow({ job, index, applyRecord, onApplyClick }: Props)
   const top = index < 3 && score >= 8;
   const posted = fmtDate(job.date_posted);
   const isNew = posted === "Today";
+  const trackerStatus = applyRecord?.trackerStatus ?? null;
   const isApplied = Boolean(applyRecord);
   const applyClicks = applyRecord?.clicks ?? 0;
   const appliedAt = applyRecord?.lastAppliedAt ? fmtClickTime(applyRecord.lastAppliedAt) : "";
@@ -133,20 +135,28 @@ export default function JobRow({ job, index, applyRecord, onApplyClick }: Props)
         <span className={`badge ${levelClass(lvl)}`}>{lvl}</span>
       </div>
       <div className="job-apply-col">
-        {job.job_url
-          ? (
-            <a
-              className={`apply-btn${isApplied ? " applied" : ""}`}
-              href={job.job_url}
-              target="_blank"
-              rel="noopener"
-              title={isApplied && appliedAt ? `${applyClicks} click${applyClicks !== 1 ? "s" : ""} · Last ${appliedAt}` : "Open application"}
-              onClick={() => onApplyClick(job.job_url, title, co)}
-            >
-              {isApplied ? "Applied ✓" : "Apply ↗"}
-            </a>
-          )
-          : <span style={{ fontSize: "11px", color: "var(--muted)" }}>—</span>}
+        {!job.job_url ? (
+          <span style={{ fontSize: "11px", color: "var(--muted)" }}>—</span>
+        ) : trackerStatus === "applied" ? (
+          <span className="tracker-btn tracker-applied">Applied ✓</span>
+        ) : trackerStatus === "rejected" ? (
+          <span className="tracker-btn tracker-rejected">Rejected</span>
+        ) : isApplied ? (
+          <div className="tracker-actions">
+            <button className="tracker-btn tracker-right" onClick={() => onTrackerStatus(job.job_url, "applied")}>✓ Right</button>
+            <button className="tracker-btn tracker-wrong" onClick={() => onTrackerStatus(job.job_url, "rejected")}>✗ Wrong</button>
+          </div>
+        ) : (
+          <a
+            className="apply-btn"
+            href={job.job_url}
+            target="_blank"
+            rel="noopener"
+            onClick={() => onApplyClick(job.job_url, title, co)}
+          >
+            Apply ↗
+          </a>
+        )}
       </div>
     </div>
   );

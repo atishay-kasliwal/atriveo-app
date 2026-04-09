@@ -370,7 +370,7 @@ header {
 /* table header — sticky */
 .job-list-header {
   display: grid;
-  grid-template-columns: 22px 28px minmax(0,1fr) 70px 76px 88px 68px 72px;
+  grid-template-columns: 22px 28px minmax(0,1fr) 70px 76px 88px 68px 100px;
   gap: 0 10px; padding: 6px 12px 6px 16px;
   background: rgba(241,245,249,0.98);
   border-bottom: 1px solid rgba(148, 163, 184, 0.2);
@@ -383,7 +383,7 @@ header {
 
 .apply-stats-row {
   display: grid;
-  grid-template-columns: 22px 28px minmax(0,1fr) 70px 76px 88px 68px 72px;
+  grid-template-columns: 22px 28px minmax(0,1fr) 70px 76px 88px 68px 100px;
   gap: 0 10px;
   padding: 5px 12px 5px 16px;
   border-bottom: 1px solid var(--border);
@@ -418,7 +418,7 @@ header {
   border-radius: 0;
   padding: 9px 12px 9px 16px;
   display: grid;
-  grid-template-columns: 22px 28px minmax(0,1fr) 70px 76px 88px 68px 72px;
+  grid-template-columns: 22px 28px minmax(0,1fr) 70px 76px 88px 68px 100px;
   align-items: center; gap: 0 10px;
   transition: background 0.12s ease, border-color 0.12s ease;
   text-decoration: none; color: inherit;
@@ -495,6 +495,19 @@ header {
 
 .job-date { font-size: 10px; font-weight: 600; color: var(--muted); white-space: nowrap; font-family: "Inter", monospace; }
 .job-date.fresh { color: var(--cyan); }
+
+.tracker-actions { display: flex; gap: 4px; justify-content: flex-end; }
+.tracker-btn {
+  padding: 3px 8px; border-radius: 99px;
+  font-size: 10px; font-weight: 700; white-space: nowrap; border: none; cursor: default;
+  font-family: "Inter", sans-serif;
+}
+.tracker-right  { background: var(--blue-lo); color: var(--blue); border: 1px solid var(--border-hi); cursor: pointer; }
+.tracker-wrong  { background: var(--red-lo);  color: var(--red);  border: 1px solid rgba(220,38,38,0.3); cursor: pointer; }
+.tracker-right:hover  { background: var(--blue); color: #fff; }
+.tracker-wrong:hover  { background: var(--red);  color: #fff; }
+.tracker-applied  { background: var(--green-lo); color: var(--green); border: 1px solid rgba(22,163,74,0.3); }
+.tracker-rejected { background: rgba(0,0,0,0.05); color: var(--muted); border: 1px solid var(--border); }
 
 .apply-btn {
   padding: 3px 10px; border-radius: 99px;
