@@ -58,6 +58,11 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
 
+  const handlePeriodChange = (nextPeriod: Period) => {
+    setPeriod(nextPeriod);
+    setSortBy(nextPeriod === "hour" ? "time" : "score");
+  };
+
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -107,7 +112,7 @@ export default function Dashboard() {
         targetPeriod: sessionPeriod[r.session_id] ?? null,
         displayAt: r.run_at || r.session_id,
       }))
-      .filter((r) => r.count > 0 && r.targetPeriod && r.targetPeriod !== "yesterday")
+      .filter((r) => r.count > 0 && r.targetPeriod)
       .slice(0, 20);
   }, [runHistory, sessionCounts, sessionPeriod]);
 
@@ -192,7 +197,11 @@ export default function Dashboard() {
               <button
                 key={p}
                 className={`period-tab${period === p ? " active" : ""}`}
-                onClick={() => { setPeriod(p); setTermFilter("all"); setSelectedSession(null); }}
+                onClick={() => {
+                  handlePeriodChange(p);
+                  setTermFilter("all");
+                  setSelectedSession(null);
+                }}
               >
                 {p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}
                 <span className="count">
@@ -221,7 +230,7 @@ export default function Dashboard() {
                       setSelectedSession(null);
                     } else {
                       setSelectedSession(r.session_id);
-                      if (r.targetPeriod) setPeriod(r.targetPeriod);
+                      if (r.targetPeriod) handlePeriodChange(r.targetPeriod);
                       setTermFilter("all");
                     }
                   }}
