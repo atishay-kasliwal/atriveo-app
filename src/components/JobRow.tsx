@@ -90,7 +90,7 @@ export default function JobRow({ job, index, applyRecord, onApplyClick }: Props)
   const appliedAt = applyRecord?.lastAppliedAt ? fmtClickTime(applyRecord.lastAppliedAt) : "";
 
   return (
-    <div className={`job-card${top ? " top" : ""}${tier}`}>
+    <div className={`job-card${top ? " top" : ""}${tier}${isApplied ? " applied" : ""}`}>
       <div className="row-num">{index + 1}</div>
       <div className="avatar" style={{ background: color }}>{initial}</div>
       <div className="job-main">

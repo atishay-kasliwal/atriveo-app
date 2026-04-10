@@ -442,6 +442,16 @@ header {
   text-decoration: none;
 }
 
+.job-card.applied {
+  background: rgba(74, 222, 128, 0.08);
+  border-bottom-color: rgba(74, 222, 128, 0.22);
+}
+
+.job-card.applied:hover {
+  background: rgba(74, 222, 128, 0.12);
+  border-bottom-color: rgba(74, 222, 128, 0.3);
+}
+
 /* columns */
 .row-num { font-size: 9.5px; color: var(--muted); text-align: right; font-family: "Inter", monospace; opacity: 0.4; }
 
