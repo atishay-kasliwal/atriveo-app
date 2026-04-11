@@ -15,6 +15,7 @@ type RunCard = RunEntry & {
   activity: number;
   fillWidth: number;
   progressPct: number;
+  segmentsActive: number;
 };
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
@@ -143,6 +144,7 @@ export default function Dashboard() {
         activity: 0,
         fillWidth: 0,
         progressPct: 0,
+        segmentsActive: 0,
       }))
       .filter((r) => r.count > 0 && r.targetPeriod)
       .slice(0, 20);
@@ -154,6 +156,7 @@ export default function Dashboard() {
         activity,
         fillWidth: r.clickCount > 0 ? 24 + (activity * 76) : 0,
         progressPct: Math.round(activity * 100),
+        segmentsActive: Math.max(0, Math.round(activity * 24)),
       };
     });
   }, [runHistory, sessionCounts, sessionPeriod, sessionClickCounts]);
@@ -283,16 +286,22 @@ export default function Dashboard() {
                     }
                   }}
                 >
-                  <span className="run-card-glow" />
                   <div className="run-card-content">
                     <div className="run-card-head">
                       <span className="run-card-time">{formatRunTime(r.displayAt)}</span>
                       <span className="run-card-pill">{r.progressPct}%</span>
                     </div>
-                    <div className="run-card-foot">
+                    <div className="run-card-countline">
                       <span className="run-card-clicks">{r.clickCount} clicks</span>
                       <span className="run-card-count">{r.count} jobs</span>
-                      <span className="run-card-arrow">↗</span>
+                    </div>
+                    <div className="run-card-bars" aria-hidden="true">
+                      {Array.from({ length: 24 }).map((_, i) => (
+                        <span
+                          key={i}
+                          className={`run-card-bar${i < r.segmentsActive ? " active" : ""}`}
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>
