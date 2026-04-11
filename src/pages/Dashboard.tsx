@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import type { CSSProperties } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import type { Job, RunEntry } from "../types";
@@ -6,6 +7,14 @@ import JobRow from "../components/JobRow";
 
 type Period = "hour" | "today" | "yesterday";
 type SortBy = "score" | "time";
+type RunCard = RunEntry & {
+  count: number;
+  targetPeriod: Period | null;
+  displayAt: string;
+  clickCount: number;
+  activity: number;
+  fillHeight: number;
+};
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -101,20 +110,50 @@ export default function Dashboard() {
     return map;
   }, [hourJobs, todayJobs, yesterdayJobs]);
 
+  const jobSessionMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    [...hourJobs, ...todayJobs, ...yesterdayJobs].forEach((job) => {
+      if (job.job_url && job.session_id) map[job.job_url] = job.session_id;
+    });
+    return map;
+  }, [hourJobs, todayJobs, yesterdayJobs]);
+
+  const sessionClickCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    Object.entries(stats.appliedJobs).forEach(([jobUrl, record]) => {
+      const sessionId = jobSessionMap[jobUrl];
+      if (!sessionId) return;
+      counts[sessionId] = (counts[sessionId] || 0) + (record.clicks || 0);
+    });
+    return counts;
+  }, [jobSessionMap, stats.appliedJobs]);
+
   const rawJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : yesterdayJobs;
   const baseJobs = selectedSession ? rawJobs.filter((j) => j.session_id === selectedSession) : rawJobs;
 
   const runCards = useMemo(() => {
-    return runHistory
+    const cards: RunCard[] = runHistory
       .map((r) => ({
         ...r,
         count: sessionCounts[r.session_id] ?? r.total_jobs ?? 0,
         targetPeriod: sessionPeriod[r.session_id] ?? null,
         displayAt: r.run_at || r.session_id,
+        clickCount: sessionClickCounts[r.session_id] ?? 0,
+        activity: 0,
+        fillHeight: 0,
       }))
       .filter((r) => r.count > 0 && r.targetPeriod)
       .slice(0, 20);
-  }, [runHistory, sessionCounts, sessionPeriod]);
+    const maxClicks = Math.max(0, ...cards.map((r) => r.clickCount));
+    return cards.map((r) => {
+      const activity = maxClicks > 0 ? r.clickCount / maxClicks : 0;
+      return {
+        ...r,
+        activity,
+        fillHeight: r.clickCount > 0 ? 18 + (activity * 62) : 0,
+      };
+    });
+  }, [runHistory, sessionCounts, sessionPeriod, sessionClickCounts]);
 
   const filtered = useMemo(() => {
     let jobs = [...baseJobs];
@@ -225,6 +264,12 @@ export default function Dashboard() {
                 <div
                   key={r.session_id}
                   className={`run-card${isActive ? " active" : ""}`}
+                  style={
+                    {
+                      "--fill-height": `${r.fillHeight}%`,
+                      "--activity": String(r.activity),
+                    } as CSSProperties
+                  }
                   onClick={() => {
                     if (isActive) {
                       setSelectedSession(null);
@@ -235,8 +280,11 @@ export default function Dashboard() {
                     }
                   }}
                 >
-                  <span className="run-card-time">{formatRunTime(r.displayAt)}</span>
-                  <span className="run-card-count">{r.count} jobs</span>
+                  <div className="run-card-content">
+                    <span className="run-card-time">{formatRunTime(r.displayAt)}</span>
+                    <span className="run-card-clicks">{r.clickCount} clicks</span>
+                    <span className="run-card-count">{r.count} jobs</span>
+                  </div>
                 </div>
               );
             })}
