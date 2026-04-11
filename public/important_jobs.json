@@ -1,7 +1,7 @@
 [
   {
     "job_url": "https://www.linkedin.com/jobs/view/4400627929",
-    "session_id": "2026-04-10T23:12:58Z",
+    "session_id": "2026-04-11T01:11:46Z",
     "company": "Zoom",
     "date_posted": null,
     "level": "Entry",
@@ -16,24 +16,8 @@
     "title": "Software Engineer"
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4398184036",
-    "session_id": "2026-04-10T23:12:58Z",
-    "company": "Klaviyo",
-    "date_posted": null,
-    "level": "Mid",
-    "location": "Boston, MA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 90,
-    "score_pct": 69,
-    "site": "linkedin",
-    "summary": "*At Klaviyo, we value the unique backgrounds, experiences and perspectives each Klaviyo (we call ourselves Klaviyos) brings to our workplace each and every day.",
-    "title": "Software Engineer - Core Reporting"
-  },
-  {
     "job_url": "https://www.linkedin.com/jobs/view/4398196349",
-    "session_id": "2026-04-10T23:12:58Z",
+    "session_id": "2026-04-11T01:11:46Z",
     "company": "Adobe",
     "date_posted": null,
     "level": "Entry",
@@ -49,7 +33,7 @@
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4400650033",
-    "session_id": "2026-04-10T23:12:58Z",
+    "session_id": "2026-04-11T01:11:46Z",
     "company": "Uber",
     "date_posted": null,
     "level": "Entry",
@@ -64,40 +48,8 @@
     "title": "Software Engineer"
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4362505482",
-    "session_id": "2026-04-10T23:12:58Z",
-    "company": "Google",
-    "date_posted": null,
-    "level": "Mid",
-    "location": "Sunnyvale, CA",
-    "max_exp": 2.0,
-    "min_exp": 1.0,
-    "pipeline": "important",
-    "priority_score": 52,
-    "score_pct": 40,
-    "site": "linkedin",
-    "summary": "**Minimum qualifications:** * Bachelor\u2019s degree or equivalent practical experience.",
-    "title": "Software Engineer III, Infrastructure, Cloud AI"
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4400606542",
-    "session_id": "2026-04-10T23:12:58Z",
-    "company": "MongoDB",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "New York, NY",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 46,
-    "score_pct": 35,
-    "site": "linkedin",
-    "summary": "The MongoDB Cloud Services Team is a diverse group of contributors working together to help our users manage MongoDB at global scale.",
-    "title": "Software Engineer 3"
-  },
-  {
     "job_url": "https://www.linkedin.com/jobs/view/4362564937",
-    "session_id": "2026-04-10T23:12:58Z",
+    "session_id": "2026-04-11T01:11:46Z",
     "company": "Google",
     "date_posted": null,
     "level": "Mid",
@@ -113,7 +65,7 @@
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4362633122",
-    "session_id": "2026-04-10T23:12:58Z",
+    "session_id": "2026-04-11T01:11:46Z",
     "company": "Google",
     "date_posted": null,
     "level": "Mid",
@@ -128,24 +80,8 @@
     "title": "Software Engineer III, Full Stack, Google Ads"
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4362564938",
-    "session_id": "2026-04-10T23:12:58Z",
-    "company": "Google",
-    "date_posted": null,
-    "level": "Mid",
-    "location": "Irvine, CA",
-    "max_exp": 2.0,
-    "min_exp": 2.0,
-    "pipeline": "important",
-    "priority_score": 39,
-    "score_pct": 30,
-    "site": "linkedin",
-    "summary": "Applicants in the County of Los Angeles: Qualified applications with arrest or conviction records will be considered for employment in accordance with the Los Angeles County Fair Chance Ordinance for\u2026",
-    "title": "Software Engineer III, Full Stack, Google Ads"
-  },
-  {
     "job_url": "https://www.linkedin.com/jobs/view/4398199161",
-    "session_id": "2026-04-10T23:12:58Z",
+    "session_id": "2026-04-11T01:11:46Z",
     "company": "Waymo",
     "date_posted": null,
     "level": "Entry",
@@ -160,19 +96,35 @@
     "title": "ML Engineer, Foundation Model Infrastructure"
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4399061471",
-    "session_id": "2026-04-10T23:12:58Z",
-    "company": "Chime",
+    "job_url": "https://www.linkedin.com/jobs/view/4362660451",
+    "session_id": "2026-04-11T01:11:46Z",
+    "company": "Google",
     "date_posted": null,
-    "level": "Entry",
-    "location": "San Francisco, CA",
-    "max_exp": null,
-    "min_exp": null,
+    "level": "Mid",
+    "location": "Sunnyvale, CA",
+    "max_exp": 2.0,
+    "min_exp": 2.0,
     "pipeline": "important",
-    "priority_score": 29,
-    "score_pct": 22,
+    "priority_score": -999,
+    "score_pct": 0,
     "site": "linkedin",
-    "summary": "**About The Role** Chime\u2019s Instant Loans team builds products that give members upfront liquidity for larger, specific needs, with clear, predictable repayment that helps them build credit responsibl\u2026",
-    "title": "Software Engineer, Instant Loans"
+    "summary": "* 2 years of experience with developing large\\-scale infrastructure, distributed systems or networks, or experience with compute technologies, storage or hardware architecture.",
+    "title": "Software Engineer III, Infrastructure, Google Cloud Platforms"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4363393146",
+    "session_id": "2026-04-11T01:11:46Z",
+    "company": "Google",
+    "date_posted": null,
+    "level": "Mid",
+    "location": "Mountain View, CA",
+    "max_exp": 2.0,
+    "min_exp": 2.0,
+    "pipeline": "important",
+    "priority_score": -999,
+    "score_pct": 0,
+    "site": "linkedin",
+    "summary": "Applicants in the County of Los Angeles: Qualified applications with arrest or conviction records will be considered for employment in accordance with the Los Angeles County Fair Chance Ordinance for\u2026",
+    "title": "Software Engineer III, Google Ads"
   }
 ]
