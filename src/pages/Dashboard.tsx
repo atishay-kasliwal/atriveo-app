@@ -13,7 +13,8 @@ type RunCard = RunEntry & {
   displayAt: string;
   clickCount: number;
   activity: number;
-  fillHeight: number;
+  fillWidth: number;
+  progressPct: number;
 };
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
@@ -140,7 +141,8 @@ export default function Dashboard() {
         displayAt: r.run_at || r.session_id,
         clickCount: sessionClickCounts[r.session_id] ?? 0,
         activity: 0,
-        fillHeight: 0,
+        fillWidth: 0,
+        progressPct: 0,
       }))
       .filter((r) => r.count > 0 && r.targetPeriod)
       .slice(0, 20);
@@ -150,7 +152,8 @@ export default function Dashboard() {
       return {
         ...r,
         activity,
-        fillHeight: r.clickCount > 0 ? 18 + (activity * 62) : 0,
+        fillWidth: r.clickCount > 0 ? 24 + (activity * 76) : 0,
+        progressPct: Math.round(activity * 100),
       };
     });
   }, [runHistory, sessionCounts, sessionPeriod, sessionClickCounts]);
@@ -266,7 +269,7 @@ export default function Dashboard() {
                   className={`run-card${isActive ? " active" : ""}`}
                   style={
                     {
-                      "--fill-height": `${r.fillHeight}%`,
+                      "--fill-width": `${r.fillWidth}%`,
                       "--activity": String(r.activity),
                     } as CSSProperties
                   }
@@ -280,10 +283,17 @@ export default function Dashboard() {
                     }
                   }}
                 >
+                  <span className="run-card-glow" />
                   <div className="run-card-content">
-                    <span className="run-card-time">{formatRunTime(r.displayAt)}</span>
-                    <span className="run-card-clicks">{r.clickCount} clicks</span>
-                    <span className="run-card-count">{r.count} jobs</span>
+                    <div className="run-card-head">
+                      <span className="run-card-time">{formatRunTime(r.displayAt)}</span>
+                      <span className="run-card-pill">{r.progressPct}%</span>
+                    </div>
+                    <div className="run-card-foot">
+                      <span className="run-card-clicks">{r.clickCount} clicks</span>
+                      <span className="run-card-count">{r.count} jobs</span>
+                      <span className="run-card-arrow">↗</span>
+                    </div>
                   </div>
                 </div>
               );
