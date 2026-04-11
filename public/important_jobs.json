@@ -1,7 +1,7 @@
 [
   {
     "job_url": "https://www.linkedin.com/jobs/view/4388257001",
-    "session_id": "2026-04-11T19:28:38Z",
+    "session_id": "2026-04-11T20:29:47Z",
     "company": "Stripe",
     "date_posted": null,
     "level": "Entry",
@@ -15,7 +15,22 @@
     "title": "Backend / API Engineer, Billing"
   },
   {
-    "session_id": "2026-04-11T19:28:38Z",
+    "session_id": "2026-04-11T20:29:47Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4400925947",
+    "company": "Twilio",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 38,
+    "score_pct": 29,
+    "site": "linkedin",
+    "title": "Product Engineer (Backend)"
+  },
+  {
+    "session_id": "2026-04-11T20:29:47Z",
     "job_url": "https://www.linkedin.com/jobs/view/4388570300",
     "company": "Stripe",
     "date_posted": null,
@@ -30,37 +45,7 @@
     "title": "Backend Engineer, Privy"
   },
   {
-    "session_id": "2026-04-11T19:28:38Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4399342043",
-    "company": "Meta",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "San Francisco, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 36,
-    "score_pct": 28,
-    "site": "linkedin",
-    "title": "Software Engineer, Infrastructure"
-  },
-  {
-    "session_id": "2026-04-11T19:28:38Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4378603819",
-    "company": "Coinbase",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 34,
-    "score_pct": 26,
-    "site": "linkedin",
-    "title": "Software Engineer - Salesforce Platform (EAA)"
-  },
-  {
-    "session_id": "2026-04-11T19:28:38Z",
+    "session_id": "2026-04-11T20:29:47Z",
     "job_url": "https://www.linkedin.com/jobs/view/4089515367",
     "company": "Coinbase",
     "date_posted": null,
@@ -73,20 +58,5 @@
     "score_pct": 16,
     "site": "linkedin",
     "title": "Software Engineer, Frontend (Coinbase One)"
-  },
-  {
-    "session_id": "2026-04-11T19:28:38Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4369312266",
-    "company": "Anthropic",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "New York, NY",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": -999,
-    "score_pct": 0,
-    "site": "linkedin",
-    "title": "Software Engineer, Inference Deployment"
   }
 ]
