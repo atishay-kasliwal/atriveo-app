@@ -12,8 +12,6 @@ type RunCard = RunEntry & {
   targetPeriod: Period | null;
   displayAt: string;
   clickCount: number;
-  activity: number;
-  fillWidth: number;
   progressPct: number;
   segmentsActive: number;
 };
@@ -141,8 +139,6 @@ export default function Dashboard() {
         targetPeriod: sessionPeriod[r.session_id] ?? null,
         displayAt: r.run_at || r.session_id,
         clickCount: sessionClickCounts[r.session_id] ?? 0,
-        activity: 0,
-        fillWidth: 0,
         progressPct: 0,
         segmentsActive: 0,
       }))
@@ -153,8 +149,6 @@ export default function Dashboard() {
       const activity = maxClicks > 0 ? r.clickCount / maxClicks : 0;
       return {
         ...r,
-        activity,
-        fillWidth: r.clickCount > 0 ? 24 + (activity * 76) : 0,
         progressPct: Math.round(activity * 100),
         segmentsActive: Math.max(0, Math.round(activity * 24)),
       };
@@ -270,12 +264,6 @@ export default function Dashboard() {
                 <div
                   key={r.session_id}
                   className={`run-card${isActive ? " active" : ""}`}
-                  style={
-                    {
-                      "--fill-width": `${r.fillWidth}%`,
-                      "--activity": String(r.activity),
-                    } as CSSProperties
-                  }
                   onClick={() => {
                     if (isActive) {
                       setSelectedSession(null);
