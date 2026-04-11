@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import type { CSSProperties } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import type { Job, RunEntry } from "../types";
