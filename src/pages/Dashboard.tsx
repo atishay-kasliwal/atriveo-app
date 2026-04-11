@@ -144,13 +144,12 @@ export default function Dashboard() {
       }))
       .filter((r) => r.count > 0 && r.targetPeriod)
       .slice(0, 20);
-    const maxClicks = Math.max(0, ...cards.map((r) => r.clickCount));
     return cards.map((r) => {
-      const activity = maxClicks > 0 ? r.clickCount / maxClicks : 0;
+      const progress = r.count > 0 ? r.clickCount / r.count : 0;
       return {
         ...r,
-        progressPct: Math.round(activity * 100),
-        segmentsActive: Math.max(0, Math.round(activity * 24)),
+        progressPct: Math.min(100, Math.round(progress * 100)),
+        segmentsActive: Math.min(24, Math.max(0, Math.round(progress * 24))),
       };
     });
   }, [runHistory, sessionCounts, sessionPeriod, sessionClickCounts]);
