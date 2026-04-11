@@ -1,7 +1,7 @@
 [
   {
-    "session_id": "2026-04-11T05:26:28Z",
     "job_url": "https://www.linkedin.com/jobs/view/4367631160",
+    "session_id": "2026-04-11T07:29:04Z",
     "company": "Stripe",
     "date_posted": null,
     "level": "Entry",
@@ -15,8 +15,8 @@
     "title": "Backend / API Engineer, Privacy Products"
   },
   {
-    "session_id": "2026-04-11T05:26:28Z",
     "job_url": "https://www.linkedin.com/jobs/view/4400694078",
+    "session_id": "2026-04-11T07:29:04Z",
     "company": "Uber",
     "date_posted": null,
     "level": "Mid",
@@ -30,8 +30,8 @@
     "title": "Software Engineer II, Search Experience"
   },
   {
-    "session_id": "2026-04-11T05:26:28Z",
     "job_url": "https://www.linkedin.com/jobs/view/4366978046",
+    "session_id": "2026-04-11T07:29:04Z",
     "company": "Stripe",
     "date_posted": null,
     "level": "Entry",
@@ -45,8 +45,23 @@
     "title": "Software Engineer, Bridge"
   },
   {
-    "session_id": "2026-04-11T05:26:28Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4399098310",
+    "session_id": "2026-04-11T07:29:04Z",
+    "company": "OpenAI",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": -999,
+    "score_pct": 0,
+    "site": "linkedin",
+    "title": "Software Engineer, Infrastructure - Analytics Platform"
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4368842196",
+    "session_id": "2026-04-11T07:29:04Z",
     "company": "Stripe",
     "date_posted": null,
     "level": "New Grad",
