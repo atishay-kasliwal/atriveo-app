@@ -180,6 +180,28 @@ export default function Dashboard() {
   const ngCount = filtered.filter((j) => j.level === "New Grad").length;
   const bestJob = [...todayJobs].sort((a, b) => (b.score_pct ?? 0) - (a.score_pct ?? 0))[0];
   const clickedJobCount = Object.keys(stats.appliedJobs).length;
+  const latestClickRecord = useMemo(
+    () =>
+      Object.values(stats.appliedJobs).reduce<{
+        clicks: number;
+        lastAppliedAt: string;
+        title: string | null;
+        company: string | null;
+        trackerStatus: "applied" | "rejected" | null;
+      } | null>((latest, record) => {
+        if (!latest) return record;
+        return record.lastAppliedAt > latest.lastAppliedAt ? record : latest;
+      }, null),
+    [stats.appliedJobs]
+  );
+  const clickStatusLabel =
+    latestClickRecord?.trackerStatus === "applied"
+      ? "Applied"
+      : latestClickRecord?.trackerStatus === "rejected"
+        ? "Rejected"
+        : latestClickRecord
+          ? "Clicked"
+          : "No clicks";
   const lastJobText = stats.lastJobTitle
     ? `${stats.lastJobTitle}${stats.lastCompany ? ` · ${stats.lastCompany}` : ""}`
     : "—";
@@ -224,6 +246,11 @@ export default function Dashboard() {
             <div className="kpi-value">{bestJob ? `${bestJob.score_pct}%` : "—"}</div>
             <div className="kpi-label">Best Match</div>
             <div className="kpi-sub">{bestJob?.title?.slice(0, 22) ?? ""}</div>
+          </div>
+          <div className="kpi-card purple">
+            <div className="kpi-value">{stats.count}</div>
+            <div className="kpi-label">Clicks</div>
+            <div className="kpi-sub">{clickStatusLabel}{latestClickRecord?.title ? ` · ${latestClickRecord.title.slice(0, 18)}` : ""}</div>
           </div>
         </div>
 
