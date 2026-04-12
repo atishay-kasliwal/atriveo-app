@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Weekly from "./pages/Weekly";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -16,6 +17,14 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route
+          path="/weekly"
+          element={
+            <ProtectedRoute>
+              <Weekly />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/*"
           element={
