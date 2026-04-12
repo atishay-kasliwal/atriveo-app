@@ -169,8 +169,13 @@ export default function Dashboard() {
     }
     if (sortBy === "score") jobs.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
     else jobs.sort((a, b) => toMs(b.batch_time) - toMs(a.batch_time));
-    return jobs;
-  }, [baseJobs, levelFilter, h1bFilter, termFilter, query, sortBy]);
+    // Push applied jobs to the bottom so unapplied stay front-and-centre
+    const appliedSet = new Set(Object.keys(stats.appliedJobs));
+    return [
+      ...jobs.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
+      ...jobs.filter((j) => j.job_url  &&  appliedSet.has(j.job_url)),
+    ];
+  }, [baseJobs, levelFilter, h1bFilter, termFilter, query, sortBy, stats.appliedJobs]);
 
   const searchTerms = useMemo(
     () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
