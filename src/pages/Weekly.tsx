@@ -23,7 +23,7 @@ function dayLabel(dateStr: string): string {
 
 export default function Weekly() {
   const { user, logout } = useAuth();
-  const { recordClick, getRecord } = useApplyTracker();
+  const { stats, recordClick, getRecord } = useApplyTracker();
   const [weekJobs, setWeekJobs] = useState<WeekJob[]>([]);
   const [activeDay, setActiveDay] = useState("All");
   const [levelFilter, setLevelFilter] = useState("all");
@@ -65,8 +65,14 @@ export default function Weekly() {
         [j.title, j.company, j.location].some((v) => (v || "").toLowerCase().includes(q))
       );
     }
-    return [...jobs].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-  }, [weekJobs, activeDay, levelFilter, query]);
+    jobs = [...jobs].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    // Push applied jobs to the bottom so unapplied stay front-and-centre
+    const appliedSet = new Set(Object.keys(stats.appliedJobs));
+    return [
+      ...jobs.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
+      ...jobs.filter((j) => j.job_url  &&  appliedSet.has(j.job_url)),
+    ];
+  }, [weekJobs, activeDay, levelFilter, query, stats.appliedJobs]);
 
   const uniqueCompanies = useMemo(
     () => new Set(weekJobs.map((j) => j.company).filter(Boolean)).size,
