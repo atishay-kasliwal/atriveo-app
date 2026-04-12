@@ -15,6 +15,7 @@ export interface Job {
   site: string;
   search_term: string;
   summary?: string;
+  scraped_date?: string;
 }
 
 export interface RunEntry {
