@@ -30,6 +30,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     hour:      "/jobs.json",
     today:     "/today_jobs.json",
     yesterday: "/yesterday_jobs.json",
+    week:      "/week_jobs.json",
     runs:      "/run_history.json",
     important: "/important_jobs.json",
   };
