@@ -61,76 +61,70 @@ function levelColor(level: string): { bg: string; text: string; border: string }
 
 // ─── email template ───────────────────────────────────────────────────────────
 
+// Column widths (px) — fixed so every row aligns perfectly.
+const COL = { rank: 44, level: 96, match: 68, apply: 88 };
+
 function renderEmail(jobs: Job[], sessionTime: string): string {
   const rows = jobs.map((j, i) => {
-    const rank = i + 1;
-    const pct  = computePct(j);
-    const sc   = scoreColor(rank);
-    const lc   = levelColor(j.level);
-    const rankBg   = rank <= 3 ? "linear-gradient(135deg,#2563eb,#0891b2)" : "#e2e8f0";
+    const rank      = i + 1;
+    const pct       = computePct(j);
+    const sc        = scoreColor(rank);
+    const lc        = levelColor(j.level);
+    const rankBg    = rank <= 3 ? "linear-gradient(135deg,#2563eb,#0891b2)" : "#e2e8f0";
     const rankColor = rank <= 3 ? "#fff" : "#64748b";
+    const rowBg     = rank % 2 === 0 ? "#f8fafc" : "#ffffff";
 
     return `
-    <tr>
-      <td style="padding:0 0 1px 0;" colspan="5">
-        <table width="100%" cellpadding="0" cellspacing="0" style="
-          background:#fff; border:1px solid #e2e8f0; border-radius:10px;
-          margin-bottom:8px; overflow:hidden;">
-          <tr>
-            <!-- rank -->
-            <td style="width:44px; padding:16px 0 16px 16px; vertical-align:middle;">
-              <span style="
-                display:inline-block; width:26px; height:26px; line-height:26px;
-                border-radius:50%; background:${rankBg};
-                color:${rankColor}; font-size:11px; font-weight:700; text-align:center;">
-                ${rank}
-              </span>
-            </td>
-            <!-- title + company -->
-            <td style="padding:14px 12px; vertical-align:middle;">
-              <a href="${j.job_url}" style="
-                font-size:13.5px; font-weight:600; color:#0f172a;
-                text-decoration:none; line-height:1.3; display:block;">
-                ${j.title}
-              </a>
-              <span style="font-size:12px; color:#64748b; margin-top:2px; display:block;">
-                ${j.company}${j.location ? " &middot; " + j.location : ""}
-              </span>
-            </td>
-            <!-- level chip -->
-            <td style="padding:14px 8px; vertical-align:middle; white-space:nowrap;">
-              <span style="
-                display:inline-block;
-                background:${lc.bg}; color:${lc.text};
-                border:1px solid ${lc.border};
-                border-radius:99px; padding:3px 10px;
-                font-size:11px; font-weight:600;">
-                ${j.level}
-              </span>
-            </td>
-            <!-- score badge -->
-            <td style="padding:14px 8px; vertical-align:middle; white-space:nowrap; text-align:right;">
-              <span style="
-                display:inline-block;
-                background:${sc.bg}; color:${sc.text};
-                border-radius:6px; padding:4px 10px;
-                font-size:12px; font-weight:700;">
-                ${pct}%
-              </span>
-            </td>
-            <!-- apply -->
-            <td style="padding:14px 16px 14px 8px; vertical-align:middle; white-space:nowrap;">
-              <a href="${j.job_url}" style="
-                display:inline-block; background:#2563eb; color:#fff;
-                text-decoration:none; border-radius:6px;
-                padding:5px 12px; font-size:11px; font-weight:600;">
-                Apply →
-              </a>
-            </td>
-          </tr>
-        </table>
+    <tr style="background:${rowBg};">
+      <td width="${COL.rank}" style="padding:14px 0 14px 16px; vertical-align:middle;">
+        <span style="
+          display:inline-block; width:26px; height:26px; line-height:26px;
+          border-radius:50%; background:${rankBg};
+          color:${rankColor}; font-size:11px; font-weight:700; text-align:center;">
+          ${rank}
+        </span>
       </td>
-    </tr>`;
+      <td style="padding:14px 12px; vertical-align:middle;">
+        <a href="${j.job_url}" style="
+          font-size:13px; font-weight:600; color:#0f172a;
+          text-decoration:none; line-height:1.35; display:block;">
+          ${j.title}
+        </a>
+        <span style="font-size:11.5px; color:#64748b; margin-top:2px; display:block;">
+          ${j.company}${j.location ? " &middot; " + j.location : ""}
+        </span>
+      </td>
+      <td width="${COL.level}" style="padding:14px 8px; vertical-align:middle; text-align:center;">
+        <span style="
+          display:inline-block;
+          background:${lc.bg}; color:${lc.text};
+          border:1px solid ${lc.border};
+          border-radius:99px; padding:3px 10px;
+          font-size:11px; font-weight:600; white-space:nowrap;">
+          ${j.level}
+        </span>
+      </td>
+      <td width="${COL.match}" style="padding:14px 8px; vertical-align:middle; text-align:center;">
+        <span style="
+          display:inline-block;
+          background:${sc.bg}; color:${sc.text};
+          border-radius:6px; padding:4px 10px;
+          font-size:12px; font-weight:700; white-space:nowrap;">
+          ${pct}%
+        </span>
+      </td>
+      <td width="${COL.apply}" style="padding:14px 16px 14px 8px; vertical-align:middle; text-align:right;">
+        <a href="${j.job_url}" style="
+          display:inline-block; background:#2563eb; color:#fff;
+          text-decoration:none; border-radius:6px;
+          padding:5px 14px; font-size:11px; font-weight:600; white-space:nowrap;">
+          Apply →
+        </a>
+      </td>
+    </tr>
+    <tr><td colspan="5" style="padding:0; line-height:0; font-size:0;">
+      <div style="height:1px; background:#e2e8f0;"></div>
+    </td></tr>`;
   }).join("");
 
   return `<!DOCTYPE html>
@@ -199,23 +193,24 @@ function renderEmail(jobs: Job[], sessionTime: string): string {
         <!-- ── body ── -->
         <tr>
           <td style="
-            background:#f8fafc;
+            background:#fff;
             border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0;
-            padding:20px 24px 12px;">
+            padding:0;">
             <table width="100%" cellpadding="0" cellspacing="0">
+              <colgroup>
+                <col width="${COL.rank}">
+                <col>
+                <col width="${COL.level}">
+                <col width="${COL.match}">
+                <col width="${COL.apply}">
+              </colgroup>
               <!-- column header -->
-              <tr>
-                <td colspan="5" style="padding:0 0 12px 0;">
-                  <table width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td style="width:44px;"></td>
-                      <td style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em; padding-left:12px;">Role</td>
-                      <td style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em; text-align:right; white-space:nowrap; padding-right:8px;">Level</td>
-                      <td style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em; text-align:right; white-space:nowrap; padding-right:8px;">Match</td>
-                      <td style="width:72px;"></td>
-                    </tr>
-                  </table>
-                </td>
+              <tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">
+                <td width="${COL.rank}" style="padding:10px 0 10px 16px;"></td>
+                <td style="padding:10px 12px; font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em;">Role</td>
+                <td width="${COL.level}" style="padding:10px 8px; font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em; text-align:center;">Level</td>
+                <td width="${COL.match}" style="padding:10px 8px; font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em; text-align:center;">Match</td>
+                <td width="${COL.apply}" style="padding:10px 16px 10px 8px;"></td>
               </tr>
               ${rows}
             </table>
