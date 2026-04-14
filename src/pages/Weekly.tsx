@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useApplyTracker } from "../hooks/useApplyTracker";
+import { useExclusions } from "../hooks/useExclusions";
 import type { Job } from "../types";
 import JobRow from "../components/JobRow";
 
@@ -24,6 +25,7 @@ function dayLabel(dateStr: string): string {
 export default function Weekly() {
   const { user, logout } = useAuth();
   const { stats, recordClick, getRecord } = useApplyTracker();
+  const { isExcluded, excludeCompany } = useExclusions();
   const [weekJobs, setWeekJobs] = useState<WeekJob[]>([]);
   const [activeDay, setActiveDay] = useState("All");
   const [levelFilter, setLevelFilter] = useState("all");
@@ -65,6 +67,7 @@ export default function Weekly() {
         [j.title, j.company, j.location].some((v) => (v || "").toLowerCase().includes(q))
       );
     }
+    jobs = jobs.filter((j) => !isExcluded(j));
     jobs = [...jobs].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
     // Push applied jobs to the bottom so unapplied stay front-and-centre
     const appliedSet = new Set(Object.keys(stats.appliedJobs));
@@ -72,7 +75,7 @@ export default function Weekly() {
       ...jobs.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
       ...jobs.filter((j) => j.job_url  &&  appliedSet.has(j.job_url)),
     ];
-  }, [weekJobs, activeDay, levelFilter, query, stats.appliedJobs]);
+  }, [weekJobs, activeDay, levelFilter, query, stats.appliedJobs, isExcluded]);
 
   const uniqueCompanies = useMemo(
     () => new Set(weekJobs.map((j) => j.company).filter(Boolean)).size,
@@ -100,6 +103,7 @@ export default function Weekly() {
             <nav className="nav-tabs">
               <a href="/" className="nav-tab">Live Feed</a>
               <a href="/weekly" className="nav-tab active">Weekly</a>
+              <a href="/settings" className="nav-tab">Settings</a>
             </nav>
             <span className="header-user">Hi, {user?.name}</span>
             <button className="logout-btn" onClick={logout}>Sign out</button>
@@ -211,6 +215,7 @@ export default function Weekly() {
                   index={i}
                   applyRecord={job.job_url ? getRecord(job.job_url) : null}
                   onApplyClick={recordClick}
+                  onExcludeCompany={excludeCompany}
                 />
               ))}
             </>

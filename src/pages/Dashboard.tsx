@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useApplyTracker } from "../hooks/useApplyTracker";
+import { useExclusions } from "../hooks/useExclusions";
 import type { Job, RunEntry } from "../types";
 import JobRow from "../components/JobRow";
 
@@ -53,6 +54,7 @@ function fmtClickTime(iso: string | null): string {
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const { stats, recordClick, getRecord } = useApplyTracker();
+  const { isExcluded, excludeCompany } = useExclusions();
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
   const [todayJobs, setTodayJobs] = useState<Job[]>([]);
   const [yesterdayJobs, setYesterdayJobs] = useState<Job[]>([]);
@@ -167,6 +169,7 @@ export default function Dashboard() {
           j.location?.toLowerCase().includes(q)
       );
     }
+    jobs = jobs.filter((j) => !isExcluded(j));
     if (sortBy === "score") jobs.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
     else jobs.sort((a, b) => toMs(b.batch_time) - toMs(a.batch_time));
     // Push applied jobs to the bottom so unapplied stay front-and-centre
@@ -175,7 +178,7 @@ export default function Dashboard() {
       ...jobs.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
       ...jobs.filter((j) => j.job_url  &&  appliedSet.has(j.job_url)),
     ];
-  }, [baseJobs, levelFilter, h1bFilter, termFilter, query, sortBy, stats.appliedJobs]);
+  }, [baseJobs, levelFilter, h1bFilter, termFilter, query, sortBy, stats.appliedJobs, isExcluded]);
 
   const searchTerms = useMemo(
     () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
@@ -223,6 +226,11 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="header-right">
+            <nav className="nav-tabs">
+              <a href="/" className="nav-tab active">Live Feed</a>
+              <a href="/weekly" className="nav-tab">Weekly</a>
+              <a href="/settings" className="nav-tab">Settings</a>
+            </nav>
             <span className="header-user">Hi, {user?.name}</span>
             <button className="logout-btn" onClick={logout}>Sign out</button>
           </div>
@@ -417,6 +425,7 @@ export default function Dashboard() {
                       index={i}
                       applyRecord={job.job_url ? getRecord(job.job_url) : null}
                       onApplyClick={recordClick}
+                      onExcludeCompany={excludeCompany}
                     />
                   ))}
                 </>

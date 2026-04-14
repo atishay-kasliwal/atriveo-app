@@ -3,6 +3,7 @@ import { useAuth } from "./hooks/useAuth";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Weekly from "./pages/Weekly";
+import Settings from "./pages/Settings";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -22,6 +23,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Weekly />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           }
         />

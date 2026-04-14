@@ -68,9 +68,10 @@ interface Props {
   index: number;
   applyRecord: ApplyRecord | null;
   onApplyClick: (jobUrl: string, title: string, company: string) => void;
+  onExcludeCompany?: (company: string) => void;
 }
 
-export default function JobRow({ job, index, applyRecord, onApplyClick }: Props) {
+export default function JobRow({ job, index, applyRecord, onApplyClick, onExcludeCompany }: Props) {
   const co = job.company || "—";
   const title = job.title || "—";
   const initial = co.charAt(0).toUpperCase();
@@ -105,6 +106,13 @@ export default function JobRow({ job, index, applyRecord, onApplyClick }: Props)
         </div>
         <div className="job-meta">
           <span className="job-company" title={co}>{co}</span>
+          {onExcludeCompany && (
+            <button
+              className="exclude-btn"
+              title={`Block "${co}" from feed`}
+              onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
+            >⊘</button>
+          )}
           <span className="sep">·</span>
           <span title={job.location}>{job.location || "Remote"}</span>
           {exp && <><span className="sep">·</span><span className="exp-badge">{exp}</span></>}

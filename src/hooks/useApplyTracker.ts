@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
+import { useAuth } from "./useAuth";
 
-const STORAGE_KEY = "atriveo_apply_stats_v1";
+const KEY = (uid: string) => `atriveo_apply_stats_v1_${uid}`;
 
 export type TrackerStatus = "applied" | "rejected" | null;
 
@@ -20,9 +21,10 @@ interface ApplyStats {
   appliedJobs: Record<string, ApplyRecord>;
 }
 
-function load(): ApplyStats {
+function load(uid: string): ApplyStats {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    // Try user-scoped key first, fall back to legacy key for migration
+    const raw = localStorage.getItem(KEY(uid)) ?? localStorage.getItem("atriveo_apply_stats_v1");
     if (!raw) return empty();
     const p = JSON.parse(raw);
     return {
@@ -57,12 +59,15 @@ function normalizeJobs(raw: unknown): Record<string, ApplyRecord> {
   return result;
 }
 
-function save(stats: ApplyStats) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stats)); } catch { /* ignore */ }
+function save(uid: string, stats: ApplyStats) {
+  try { localStorage.setItem(KEY(uid), JSON.stringify(stats)); } catch { /* ignore */ }
 }
 
 export function useApplyTracker() {
-  const [stats, setStats] = useState<ApplyStats>(load);
+  const { user } = useAuth();
+  const uid = user?.email ?? "anon";
+
+  const [stats, setStats] = useState<ApplyStats>(() => load(uid));
 
   const recordClick = useCallback((jobUrl: string, title: string, company: string) => {
     setStats((prev) => {
@@ -84,10 +89,10 @@ export function useApplyTracker() {
           },
         },
       };
-      save(next);
+      save(uid, next);
       return next;
     });
-  }, []);
+  }, [uid]);
 
   const getRecord = useCallback((jobUrl: string): ApplyRecord | null => {
     return stats.appliedJobs[jobUrl] ?? null;
@@ -104,10 +109,10 @@ export function useApplyTracker() {
           [jobUrl]: { ...existing, trackerStatus: status },
         },
       };
-      save(next);
+      save(uid, next);
       return next;
     });
-  }, []);
+  }, [uid]);
 
   return { stats, recordClick, getRecord, setTrackerStatus };
 }
