@@ -1,6 +1,21 @@
 [
   {
-    "session_id": "2026-04-14T20:36:20Z",
+    "session_id": "2026-04-14T21:40:59Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4401107802",
+    "company": "Klaviyo",
+    "date_posted": null,
+    "level": "Mid",
+    "location": "Boston, MA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 115,
+    "score_pct": 88,
+    "site": "linkedin",
+    "title": "Software Engineer II Devx"
+  },
+  {
+    "session_id": "2026-04-14T21:40:59Z",
     "job_url": "https://www.linkedin.com/jobs/view/4399791038",
     "company": "Cloudflare",
     "date_posted": null,
@@ -15,23 +30,38 @@
     "title": "Software Engineer, Growth"
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4401794179",
-    "session_id": "2026-04-14T20:36:20Z",
-    "company": "Box",
+    "session_id": "2026-04-14T21:40:59Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4362505482",
+    "company": "Google",
     "date_posted": null,
     "level": "Mid",
-    "location": "Redwood City, CA",
+    "location": "Sunnyvale, CA",
+    "max_exp": 2.0,
+    "min_exp": 1.0,
+    "pipeline": "important",
+    "priority_score": 52,
+    "score_pct": 40,
+    "site": "linkedin",
+    "title": "Software Engineer III, Infrastructure, Cloud AI"
+  },
+  {
+    "session_id": "2026-04-14T21:40:59Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4367616380",
+    "company": "Stripe",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Seattle, WA",
     "max_exp": null,
     "min_exp": null,
     "pipeline": "important",
-    "priority_score": 54,
-    "score_pct": 42,
+    "priority_score": 43,
+    "score_pct": 33,
     "site": "linkedin",
-    "title": "Software Engineer III, Partner Integrations"
+    "title": "Backend / API Engineer, Privacy Products"
   },
   {
+    "session_id": "2026-04-14T21:40:59Z",
     "job_url": "https://www.linkedin.com/jobs/view/4399769698",
-    "session_id": "2026-04-14T20:36:20Z",
     "company": "OpenAI",
     "date_posted": null,
     "level": "Entry",
@@ -45,12 +75,12 @@
     "title": "Software Engineer, Foundations Retrieval"
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4402040494",
-    "session_id": "2026-04-14T20:36:20Z",
+    "session_id": "2026-04-14T21:40:59Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4402046277",
     "company": "Snowflake",
     "date_posted": null,
     "level": "Entry",
-    "location": "Bellevue, WA",
+    "location": "Menlo Park, CA",
     "max_exp": null,
     "min_exp": null,
     "pipeline": "important",
@@ -60,8 +90,8 @@
     "title": "Software Engineer (AI Engineer/Developer Experience)"
   },
   {
+    "session_id": "2026-04-14T21:40:59Z",
     "job_url": "https://www.linkedin.com/jobs/view/4399774759",
-    "session_id": "2026-04-14T20:36:20Z",
     "company": "Netflix",
     "date_posted": null,
     "level": "Entry",
@@ -75,12 +105,12 @@
     "title": "Software Engineer 5 - TV & Web Player Platform"
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4362564937",
-    "session_id": "2026-04-14T20:36:20Z",
+    "session_id": "2026-04-14T21:40:59Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4362633122",
     "company": "Google",
     "date_posted": null,
     "level": "Mid",
-    "location": "New York, NY",
+    "location": "Mountain View, CA",
     "max_exp": 2.0,
     "min_exp": 2.0,
     "pipeline": "important",
@@ -88,5 +118,35 @@
     "score_pct": 30,
     "site": "linkedin",
     "title": "Software Engineer III, Full Stack, Google Ads"
+  },
+  {
+    "session_id": "2026-04-14T21:40:59Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4366978046",
+    "company": "Stripe",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": -999,
+    "score_pct": 0,
+    "site": "linkedin",
+    "title": "Software Engineer, Bridge"
+  },
+  {
+    "session_id": "2026-04-14T21:40:59Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4368842196",
+    "company": "Stripe",
+    "date_posted": null,
+    "level": "New Grad",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": -999,
+    "score_pct": 0,
+    "site": "linkedin",
+    "title": "Backend Engineer, Payments and Risk"
   }
 ]
