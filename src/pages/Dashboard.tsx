@@ -4,7 +4,7 @@ import { useApplyTracker } from "../hooks/useApplyTracker";
 import type { Job, RunEntry } from "../types";
 import JobRow from "../components/JobRow";
 
-type Period = "hour" | "today" | "yesterday" | "week";
+type Period = "hour" | "today" | "yesterday";
 type SortBy = "score" | "time";
 type RunCard = RunEntry & {
   count: number;
@@ -56,9 +56,6 @@ export default function Dashboard() {
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
   const [todayJobs, setTodayJobs] = useState<Job[]>([]);
   const [yesterdayJobs, setYesterdayJobs] = useState<Job[]>([]);
-  const [weekJobs, setWeekJobs] = useState<Job[]>([]);
-  const [weekLoaded, setWeekLoaded] = useState(false);
-  const [weekLoading, setWeekLoading] = useState(false);
   const [runHistory, setRunHistory] = useState<RunEntry[]>([]);
   const [period, setPeriod] = useState<Period>("hour");
   const [sortBy, setSortBy] = useState<SortBy>("time");
@@ -72,13 +69,6 @@ export default function Dashboard() {
   const handlePeriodChange = (nextPeriod: Period) => {
     setPeriod(nextPeriod);
     setSortBy(nextPeriod === "hour" ? "time" : "score");
-    if (nextPeriod === "week" && !weekLoaded && !weekLoading) {
-      setWeekLoading(true);
-      fetch("/api/jobs?type=week")
-        .then((r) => r.json())
-        .then((data) => { setWeekJobs(data); setWeekLoaded(true); setWeekLoading(false); })
-        .catch(() => setWeekLoading(false));
-    }
   };
 
   useEffect(() => {
@@ -121,11 +111,11 @@ export default function Dashboard() {
 
   const jobSessionMap = useMemo(() => {
     const map: Record<string, string> = {};
-    [...hourJobs, ...todayJobs, ...yesterdayJobs, ...weekJobs].forEach((job) => {
+    [...hourJobs, ...todayJobs, ...yesterdayJobs].forEach((job) => {
       if (job.job_url && job.session_id) map[job.job_url] = job.session_id;
     });
     return map;
-  }, [hourJobs, todayJobs, yesterdayJobs, weekJobs]);
+  }, [hourJobs, todayJobs, yesterdayJobs]);
 
   const sessionClickCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -137,35 +127,7 @@ export default function Dashboard() {
     return counts;
   }, [jobSessionMap, stats.appliedJobs]);
 
-  const rawJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : period === "yesterday" ? yesterdayJobs : weekJobs;
-
-  const weekRunCards = useMemo(() => {
-    const groups: Record<string, { session_id: string; run_at: string; count: number }> = {};
-    weekJobs.forEach((j) => {
-      if (!j.session_id) return;
-      if (!groups[j.session_id]) {
-        groups[j.session_id] = { session_id: j.session_id, run_at: j.batch_time || j.session_id, count: 0 };
-      }
-      groups[j.session_id].count++;
-    });
-    return Object.values(groups)
-      .sort((a, b) => b.run_at.localeCompare(a.run_at))
-      .map((r) => {
-        const clickCount = sessionClickCounts[r.session_id] ?? 0;
-        const progress = r.count > 0 ? clickCount / r.count : 0;
-        return {
-          session_id: r.session_id,
-          run_at: r.run_at,
-          total_jobs: r.count,
-          count: r.count,
-          targetPeriod: "week" as Period,
-          displayAt: r.run_at,
-          clickCount,
-          progressPct: Math.min(100, Math.round(progress * 100)),
-          segmentsActive: Math.min(24, Math.max(0, Math.round(progress * 24))),
-        } as RunCard;
-      });
-  }, [weekJobs, sessionClickCounts]);
+  const rawJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : yesterdayJobs;
   const baseJobs = selectedSession ? rawJobs.filter((j) => j.session_id === selectedSession) : rawJobs;
 
   const runCards = useMemo(() => {
@@ -300,7 +262,7 @@ export default function Dashboard() {
         {/* Period tabs + sort */}
         <div className="top-bar">
           <div className="period-tabs">
-            {(["hour", "today", "yesterday", "week"] as Period[]).map((p) => (
+            {(["hour", "today", "yesterday"] as Period[]).map((p) => (
               <button
                 key={p}
                 className={`period-tab${period === p ? " active" : ""}`}
@@ -310,12 +272,15 @@ export default function Dashboard() {
                   setSelectedSession(null);
                 }}
               >
-                {p === "hour" ? "This Hour" : p === "week" ? "7 Days" : p.charAt(0).toUpperCase() + p.slice(1)}
+                {p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}
                 <span className="count">
-                  {p === "hour" ? hourJobs.length : p === "today" ? todayJobs.length : p === "yesterday" ? yesterdayJobs.length : weekJobs.length}
+                  {p === "hour" ? hourJobs.length : p === "today" ? todayJobs.length : yesterdayJobs.length}
                 </span>
               </button>
             ))}
+            <a href="/weekly" className="period-tab">
+              7 Days
+            </a>
           </div>
           <div className="sort-group">
             <button className={`sort-btn${sortBy === "score" ? " active" : ""}`} onClick={() => setSortBy("score")}>★ Score</button>
@@ -326,7 +291,7 @@ export default function Dashboard() {
         {/* Run history strip */}
         <div className="run-strip-wrap">
           <div className="run-strip">
-            {(period === "week" ? weekRunCards : runCards).map((r) => {
+            {runCards.map((r) => {
               const isActive = selectedSession === r.session_id;
               return (
                 <div
@@ -416,7 +381,7 @@ export default function Dashboard() {
 
             {/* Job list */}
             <div className="job-list">
-              {loading || weekLoading ? (
+              {loading ? (
                 <div className="state-msg"><div className="icon">⏳</div>Loading…</div>
               ) : filtered.length === 0 ? (
                 <div className="state-msg"><div className="icon">🔍</div>No jobs found</div>
