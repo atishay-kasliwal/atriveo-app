@@ -1,6 +1,6 @@
 [
   {
-    "session_id": "2026-04-14T21:40:59Z",
+    "session_id": "2026-04-14T22:16:39Z",
     "job_url": "https://www.linkedin.com/jobs/view/4401107802",
     "company": "Klaviyo",
     "date_posted": null,
@@ -12,10 +12,11 @@
     "priority_score": 115,
     "score_pct": 88,
     "site": "linkedin",
+    "summary": "**Our Stack And Culture** Klaviyo operates a real\\-time data platform coded in Python, built for massive scale on Amazon Web Services (AWS).",
     "title": "Software Engineer II Devx"
   },
   {
-    "session_id": "2026-04-14T21:40:59Z",
+    "session_id": "2026-04-14T22:16:39Z",
     "job_url": "https://www.linkedin.com/jobs/view/4399791038",
     "company": "Cloudflare",
     "date_posted": null,
@@ -27,10 +28,11 @@
     "priority_score": 62,
     "score_pct": 48,
     "site": "linkedin",
+    "summary": "**About Us** At Cloudflare, we are on a mission to help build a better Internet.",
     "title": "Software Engineer, Growth"
   },
   {
-    "session_id": "2026-04-14T21:40:59Z",
+    "session_id": "2026-04-14T22:16:39Z",
     "job_url": "https://www.linkedin.com/jobs/view/4362505482",
     "company": "Google",
     "date_posted": null,
@@ -42,10 +44,11 @@
     "priority_score": 52,
     "score_pct": 40,
     "site": "linkedin",
+    "summary": "**Minimum qualifications:** * Bachelor\u2019s degree or equivalent practical experience.",
     "title": "Software Engineer III, Infrastructure, Cloud AI"
   },
   {
-    "session_id": "2026-04-14T21:40:59Z",
+    "session_id": "2026-04-14T22:16:39Z",
     "job_url": "https://www.linkedin.com/jobs/view/4367616380",
     "company": "Stripe",
     "date_posted": null,
@@ -57,25 +60,11 @@
     "priority_score": 43,
     "score_pct": 33,
     "site": "linkedin",
+    "summary": "Who we are **About Stripe** Stripe is a financial infrastructure platform for businesses.",
     "title": "Backend / API Engineer, Privacy Products"
   },
   {
-    "session_id": "2026-04-14T21:40:59Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4399769698",
-    "company": "OpenAI",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "San Francisco, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 43,
-    "score_pct": 33,
-    "site": "linkedin",
-    "title": "Software Engineer, Foundations Retrieval"
-  },
-  {
-    "session_id": "2026-04-14T21:40:59Z",
+    "session_id": "2026-04-14T22:16:39Z",
     "job_url": "https://www.linkedin.com/jobs/view/4402046277",
     "company": "Snowflake",
     "date_posted": null,
@@ -87,25 +76,27 @@
     "priority_score": 42,
     "score_pct": 32,
     "site": "linkedin",
+    "summary": "Our vision is to build the world's best Developer Experiences platform using the latest AI advancements.",
     "title": "Software Engineer (AI Engineer/Developer Experience)"
   },
   {
-    "session_id": "2026-04-14T21:40:59Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4399774759",
-    "company": "Netflix",
+    "session_id": "2026-04-14T22:16:39Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4402040494",
+    "company": "Snowflake",
     "date_posted": null,
     "level": "Entry",
-    "location": "",
+    "location": "Bellevue, WA",
     "max_exp": null,
     "min_exp": null,
     "pipeline": "important",
-    "priority_score": 39,
-    "score_pct": 30,
+    "priority_score": 42,
+    "score_pct": 32,
     "site": "linkedin",
-    "title": "Software Engineer 5 - TV & Web Player Platform"
+    "summary": "Our vision is to build the world's best Developer Experiences platform using the latest AI advancements.",
+    "title": "Software Engineer (AI Engineer/Developer Experience)"
   },
   {
-    "session_id": "2026-04-14T21:40:59Z",
+    "session_id": "2026-04-14T22:16:39Z",
     "job_url": "https://www.linkedin.com/jobs/view/4362633122",
     "company": "Google",
     "date_posted": null,
@@ -117,10 +108,11 @@
     "priority_score": 39,
     "score_pct": 30,
     "site": "linkedin",
+    "summary": "Applicants in the County of Los Angeles: Qualified applications with arrest or conviction records will be considered for employment in accordance with the Los Angeles County Fair Chance Ordinance for\u2026",
     "title": "Software Engineer III, Full Stack, Google Ads"
   },
   {
-    "session_id": "2026-04-14T21:40:59Z",
+    "session_id": "2026-04-14T22:16:39Z",
     "job_url": "https://www.linkedin.com/jobs/view/4366978046",
     "company": "Stripe",
     "date_posted": null,
@@ -132,10 +124,27 @@
     "priority_score": -999,
     "score_pct": 0,
     "site": "linkedin",
+    "summary": "**About Bridge** We\u2019re creating an entirely new payments platform, built with stablecoins, to simplify global money movement.",
     "title": "Software Engineer, Bridge"
   },
   {
-    "session_id": "2026-04-14T21:40:59Z",
+    "session_id": "2026-04-14T22:16:39Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4339054526",
+    "company": "Notion",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": -999,
+    "score_pct": 0,
+    "site": "linkedin",
+    "summary": "**About Us** Notion helps you build beautiful tools for your life\u2019s work.",
+    "title": "Data Engineer, Go-To-Market"
+  },
+  {
+    "session_id": "2026-04-14T22:16:39Z",
     "job_url": "https://www.linkedin.com/jobs/view/4368842196",
     "company": "Stripe",
     "date_posted": null,
@@ -147,6 +156,23 @@
     "priority_score": -999,
     "score_pct": 0,
     "site": "linkedin",
+    "summary": "Note: if you are an intern, new grad, staff, frontend or fullstack applicant, please do not apply using this link and visit our jobs page for those specific postings.",
     "title": "Backend Engineer, Payments and Risk"
+  },
+  {
+    "session_id": "2026-04-14T22:16:39Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4399797263",
+    "company": "IBM",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Austin, TX",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": -999,
+    "score_pct": 0,
+    "site": "linkedin",
+    "summary": "The IBM Cost Optimization team is seeking a talented individual that can help manage an opportunity to partner across teams in finance, supply chain, product management, development and engineering.",
+    "title": "Data Scientist Intern"
   }
 ]
