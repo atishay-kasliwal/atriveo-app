@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "./useAuth";
 
 const KEY = (uid: string) => `atriveo_apply_stats_v1_${uid}`;
@@ -21,24 +21,6 @@ interface ApplyStats {
   appliedJobs: Record<string, ApplyRecord>;
 }
 
-function load(uid: string): ApplyStats {
-  try {
-    // Try user-scoped key first, fall back to legacy key for migration
-    const raw = localStorage.getItem(KEY(uid)) ?? localStorage.getItem("atriveo_apply_stats_v1");
-    if (!raw) return empty();
-    const p = JSON.parse(raw);
-    return {
-      count: Number(p.count) || 0,
-      lastClickAt: p.lastClickAt || null,
-      lastJobTitle: p.lastJobTitle || null,
-      lastCompany: p.lastCompany || null,
-      appliedJobs: normalizeJobs(p.appliedJobs),
-    };
-  } catch {
-    return empty();
-  }
-}
-
 function empty(): ApplyStats {
   return { count: 0, lastClickAt: null, lastJobTitle: null, lastCompany: null, appliedJobs: {} };
 }
@@ -59,15 +41,67 @@ function normalizeJobs(raw: unknown): Record<string, ApplyRecord> {
   return result;
 }
 
-function save(uid: string, stats: ApplyStats) {
+function normalize(raw: unknown): ApplyStats {
+  if (!raw || typeof raw !== "object") return empty();
+  const p = raw as Record<string, unknown>;
+  return {
+    count: Number(p.count) || 0,
+    lastClickAt: p.lastClickAt ? String(p.lastClickAt) : null,
+    lastJobTitle: p.lastJobTitle ? String(p.lastJobTitle) : null,
+    lastCompany: p.lastCompany ? String(p.lastCompany) : null,
+    appliedJobs: normalizeJobs(p.appliedJobs),
+  };
+}
+
+function load(uid: string): ApplyStats {
+  try {
+    // Try user-scoped key first, fall back to legacy key for migration
+    const raw = localStorage.getItem(KEY(uid)) ?? localStorage.getItem("atriveo_apply_stats_v1");
+    return raw ? normalize(JSON.parse(raw)) : empty();
+  } catch {
+    return empty();
+  }
+}
+
+function persist(uid: string, stats: ApplyStats) {
   try { localStorage.setItem(KEY(uid), JSON.stringify(stats)); } catch { /* ignore */ }
 }
 
+function syncToServer(stats: ApplyStats) {
+  fetch("/api/tracker", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(stats),
+  }).catch(() => { /* non-fatal */ });
+}
+
 export function useApplyTracker() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const uid = user?.email ?? "anon";
 
-  const [stats, setStats] = useState<ApplyStats>(() => load(uid));
+  const [stats, setStats] = useState<ApplyStats>(empty);
+
+  // On auth resolved: load cache instantly, then pull server state
+  useEffect(() => {
+    if (authLoading) return;
+
+    // Instant render from localStorage cache
+    setStats(load(uid));
+
+    // Then fetch from server (cross-device source of truth)
+    if (uid !== "anon") {
+      fetch("/api/tracker")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data: unknown) => {
+          if (data) {
+            const normalized = normalize(data);
+            setStats(normalized);
+            persist(uid, normalized);
+          }
+        })
+        .catch(() => { /* stick with localStorage on network error */ });
+    }
+  }, [uid, authLoading]);
 
   const recordClick = useCallback((jobUrl: string, title: string, company: string) => {
     setStats((prev) => {
@@ -89,7 +123,8 @@ export function useApplyTracker() {
           },
         },
       };
-      save(uid, next);
+      persist(uid, next);
+      if (uid !== "anon") syncToServer(next);
       return next;
     });
   }, [uid]);
@@ -109,7 +144,8 @@ export function useApplyTracker() {
           [jobUrl]: { ...existing, trackerStatus: status },
         },
       };
-      save(uid, next);
+      persist(uid, next);
+      if (uid !== "anon") syncToServer(next);
       return next;
     });
   }, [uid]);

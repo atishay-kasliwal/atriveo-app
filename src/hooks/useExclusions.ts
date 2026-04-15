@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "./useAuth";
 import type { Job } from "../types";
 
@@ -27,16 +27,46 @@ function persist(uid: string, e: Exclusions) {
   try { localStorage.setItem(KEY(uid), JSON.stringify(e)); } catch { /* ignore */ }
 }
 
+function syncToServer(e: Exclusions) {
+  fetch("/api/prefs", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(e),
+  }).catch(() => { /* non-fatal — localStorage is the fallback */ });
+}
+
 export function useExclusions() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const uid = user?.email ?? "anon";
 
-  const [exclusions, setExclusions] = useState<Exclusions>(() => load(uid));
+  const [exclusions, setExclusions] = useState<Exclusions>(empty);
+
+  // On auth resolved: load cache instantly, then pull server state
+  useEffect(() => {
+    if (authLoading) return;
+
+    // Instant render from localStorage cache
+    setExclusions(load(uid));
+
+    // Then fetch from server (cross-device source of truth)
+    if (uid !== "anon") {
+      fetch("/api/prefs")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data: Exclusions | null) => {
+          if (data) {
+            setExclusions(data);
+            persist(uid, data); // keep cache in sync
+          }
+        })
+        .catch(() => { /* stick with localStorage on network error */ });
+    }
+  }, [uid, authLoading]);
 
   const mutate = useCallback((fn: (prev: Exclusions) => Exclusions) => {
     setExclusions((prev) => {
       const next = fn(prev);
       persist(uid, next);
+      if (uid !== "anon") syncToServer(next);
       return next;
     });
   }, [uid]);

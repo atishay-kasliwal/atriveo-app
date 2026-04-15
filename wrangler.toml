@@ -6,6 +6,7 @@ pages_build_output_dir = "dist"
 binding = "atriveo_auth"
 database_name = "atriveo-auth"
 database_id = "c80daf92-78af-4216-b552-d435ee9ab323"
+migrations_dir = "migrations"
 
 # Secrets (set via Cloudflare Pages dashboard → Settings → Environment Variables):
 # JWT_SECRET  — random 32+ char string for signing session tokens
