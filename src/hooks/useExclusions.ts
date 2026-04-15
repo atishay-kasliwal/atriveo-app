@@ -13,7 +13,8 @@ function empty(): Exclusions { return { companies: [], keywords: [] }; }
 
 function load(uid: string): Exclusions {
   try {
-    const raw = localStorage.getItem(KEY(uid));
+    // Try user-scoped key, fall back to anon key for migration
+    const raw = localStorage.getItem(KEY(uid)) ?? localStorage.getItem(KEY("anon"));
     if (!raw) return empty();
     const p = JSON.parse(raw);
     return {
@@ -45,17 +46,23 @@ export function useExclusions() {
   useEffect(() => {
     if (authLoading) return;
 
-    // Instant render from localStorage cache
-    setExclusions(load(uid));
+    // Instant render from localStorage cache (may be migrated from anon)
+    const cached = load(uid);
+    setExclusions(cached);
 
     // Then fetch from server (cross-device source of truth)
     if (uid !== "anon") {
       fetch("/api/prefs")
         .then((r) => (r.ok ? r.json() : null))
         .then((data: Exclusions | null) => {
-          if (data) {
+          // If server has no data yet but we have local/anon data, push it up
+          const serverIsEmpty = !data || (data.companies.length === 0 && data.keywords.length === 0);
+          if (serverIsEmpty && (cached.companies.length > 0 || cached.keywords.length > 0)) {
+            persist(uid, cached);
+            syncToServer(cached);
+          } else if (data) {
             setExclusions(data);
-            persist(uid, data); // keep cache in sync
+            persist(uid, data);
           }
         })
         .catch(() => { /* stick with localStorage on network error */ });

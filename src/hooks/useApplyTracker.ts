@@ -55,8 +55,8 @@ function normalize(raw: unknown): ApplyStats {
 
 function load(uid: string): ApplyStats {
   try {
-    // Try user-scoped key first, fall back to legacy key for migration
-    const raw = localStorage.getItem(KEY(uid)) ?? localStorage.getItem("atriveo_apply_stats_v1");
+    // Try user-scoped key, fall back to anon key, then legacy key for migration
+    const raw = localStorage.getItem(KEY(uid)) ?? localStorage.getItem(KEY("anon")) ?? localStorage.getItem("atriveo_apply_stats_v1");
     return raw ? normalize(JSON.parse(raw)) : empty();
   } catch {
     return empty();
@@ -85,16 +85,22 @@ export function useApplyTracker() {
   useEffect(() => {
     if (authLoading) return;
 
-    // Instant render from localStorage cache
-    setStats(load(uid));
+    // Instant render from localStorage cache (may be migrated from anon)
+    const cached = load(uid);
+    setStats(cached);
 
     // Then fetch from server (cross-device source of truth)
     if (uid !== "anon") {
       fetch("/api/tracker")
         .then((r) => (r.ok ? r.json() : null))
         .then((data: unknown) => {
-          if (data) {
-            const normalized = normalize(data);
+          const normalized = normalize(data);
+          const serverIsEmpty = normalized.count === 0 && Object.keys(normalized.appliedJobs).length === 0;
+          // If server empty but we have local/anon data, push it up
+          if (serverIsEmpty && cached.count > 0) {
+            persist(uid, cached);
+            syncToServer(cached);
+          } else if (!serverIsEmpty) {
             setStats(normalized);
             persist(uid, normalized);
           }
