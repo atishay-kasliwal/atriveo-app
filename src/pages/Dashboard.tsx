@@ -261,7 +261,7 @@ export default function Dashboard() {
             <div className="kpi-sub">{bestJob?.title?.slice(0, 22) ?? ""}</div>
           </div>
           <div className="kpi-card purple">
-            <div className="kpi-value">{stats.todayCount ?? 0}</div>
+            <div className="kpi-value">{stats.todayCount ?? 0} <span style={{ fontSize: "0.45em", fontWeight: 500, opacity: 0.6 }}>/ {todayJobs.length}</span></div>
             <div className="kpi-label">Clicks</div>
             <div className="kpi-sub">{clickStatusLabel}{latestClickRecord?.title ? ` · ${latestClickRecord.title.slice(0, 18)}` : ""}</div>
           </div>
