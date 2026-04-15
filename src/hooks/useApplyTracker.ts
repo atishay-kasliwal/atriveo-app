@@ -15,14 +15,21 @@ export interface ApplyRecord {
 
 interface ApplyStats {
   count: number;
+  todayCount: number;  // resets at midnight EST
+  todayDate: string;   // YYYY-MM-DD in America/New_York — used to detect rollover
   lastClickAt: string | null;
   lastJobTitle: string | null;
   lastCompany: string | null;
   appliedJobs: Record<string, ApplyRecord>;
 }
 
+function todayEst(): string {
+  // Returns "YYYY-MM-DD" in America/New_York — handles both EST and EDT automatically
+  return new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10);
+}
+
 function empty(): ApplyStats {
-  return { count: 0, lastClickAt: null, lastJobTitle: null, lastCompany: null, appliedJobs: {} };
+  return { count: 0, todayCount: 0, todayDate: todayEst(), lastClickAt: null, lastJobTitle: null, lastCompany: null, appliedJobs: {} };
 }
 
 function normalizeJobs(raw: unknown): Record<string, ApplyRecord> {
@@ -44,8 +51,14 @@ function normalizeJobs(raw: unknown): Record<string, ApplyRecord> {
 function normalize(raw: unknown): ApplyStats {
   if (!raw || typeof raw !== "object") return empty();
   const p = raw as Record<string, unknown>;
+  const storedDate = p.todayDate ? String(p.todayDate) : "";
+  const currentDate = todayEst();
+  // Reset daily counter if stored date is from a previous day
+  const todayCount = storedDate === currentDate ? (Number(p.todayCount) || 0) : 0;
   return {
     count: Number(p.count) || 0,
+    todayCount,
+    todayDate: currentDate,
     lastClickAt: p.lastClickAt ? String(p.lastClickAt) : null,
     lastJobTitle: p.lastJobTitle ? String(p.lastJobTitle) : null,
     lastCompany: p.lastCompany ? String(p.lastCompany) : null,
@@ -112,9 +125,14 @@ export function useApplyTracker() {
   const recordClick = useCallback((jobUrl: string, title: string, company: string) => {
     setStats((prev) => {
       const nowIso = new Date().toISOString();
+      const currentDate = todayEst();
       const existing = prev.appliedJobs[jobUrl];
+      // Reset daily counter if we've crossed midnight EST
+      const prevTodayCount = prev.todayDate === currentDate ? prev.todayCount : 0;
       const next: ApplyStats = {
         count: prev.count + 1,
+        todayCount: prevTodayCount + 1,
+        todayDate: currentDate,
         lastClickAt: nowIso,
         lastJobTitle: title,
         lastCompany: company,
