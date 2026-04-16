@@ -120,6 +120,8 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
           </span>
         </div>
         <div className="job-meta">
+          <span className="job-co-mobile" title={co}>{co}</span>
+          <span className="sep mobile-sep">·</span>
           <span title={job.location}>{job.location || "Remote"}</span>
           {exp && <><span className="sep">·</span><span className="exp-badge">{exp}</span></>}
           {posted && !isNew && <><span className="sep">·</span><span className="job-date">{posted}</span></>}
@@ -134,7 +136,7 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
           ? <span className={`match-pct ${matchPctClass(pct)}`}>{pct}%</span>
           : <span>—</span>}
       </div>
-      <div style={{ display: "flex", justifyContent: "flex-start" }}>
+      <div className="job-level-col" style={{ display: "flex", justifyContent: "flex-start" }}>
         <span className={`badge ${levelClass(lvl)}`}>{lvl}</span>
       </div>
       <div className="job-apply-col">

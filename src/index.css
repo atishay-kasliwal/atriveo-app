@@ -702,19 +702,37 @@ footer { padding: 20px 0; text-align: center; font-size: 11px; color: var(--mute
 footer a { color: var(--muted); }
 footer a:hover { color: var(--blue); }
 
+/* hide company in meta on desktop (it has its own column) */
+.job-co-mobile { display: none; }
+.mobile-sep    { display: none; }
+
 /* mobile */
 @media (max-width: 600px) {
   .job-list-header { display: none; }
-  .apply-stats-row {
-    display: block;
-    padding: 6px 10px;
+  .job-list { gap: 3px; }
+
+  /* 3 columns: score | role | apply */
+  .job-card {
+    grid-template-columns: 46px minmax(0,1fr) auto;
+    padding: 8px 10px 8px 10px;
   }
-  .apply-stats-cell { font-size: 9.5px; }
-  .apply-stats-last { max-width: 220px; }
-  .job-card { grid-template-columns: 22px minmax(0,1fr) auto; }
-  .job-card > .avatar, .job-card > .row-num, .job-card > .job-company-col { display: none; }
-  .job-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
-  .job-apply-col { display: none; }
+
+  /* hide columns that don't fit */
+  .job-card > .job-company-col,
+  .job-card > .avatar,
+  .job-card > .match-line,
+  .job-card > .job-level-col { display: none; }
+
+  /* show company inline in meta row */
+  .job-co-mobile { display: inline; font-weight: 600; color: var(--text-2); }
+  .mobile-sep    { display: inline; }
+
+  /* apply col: stack mark+apply vertically, smaller */
+  .job-apply-col { flex-direction: column; gap: 3px; align-items: flex-start; }
+  .apply-btn { font-size: 10px; padding: 3px 8px; }
+  .mark-btn  { width: 20px; height: 20px; font-size: 10px; }
+
+  .job-score { font-size: 15px; }
 }
 
 /* ── Auth / Login ────────────────────────────────────────────────── */
