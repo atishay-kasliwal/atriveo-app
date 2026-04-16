@@ -116,6 +116,10 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
           )}
         </div>
       </div>
+      <div className="job-score">
+        <span className="star">★</span>
+        <span className={scoreColor(score)}>{score}</span>
+      </div>
       <div className="job-company-col">
         <span className="job-company-name" title={co}>{co}</span>
         {onExcludeCompany && (
@@ -125,10 +129,6 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
             onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
           >⊘</button>
         )}
-      </div>
-      <div className="job-score">
-        <span className="star">★</span>
-        <span className={scoreColor(score)}>{score}</span>
       </div>
       <div className="match-line">
         {pct !== null
