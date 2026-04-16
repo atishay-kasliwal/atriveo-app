@@ -407,6 +407,9 @@ header {
 .chip-toggle .chip-count { background: rgba(0,0,0,0.05); border-radius: 6px; padding: 0 5px; font-size: 10px; font-weight: 700; font-family: "Inter", monospace; }
 .chip-toggle.active .chip-count { background: rgba(74,222,128,0.2); }
 
+.chip-toggle-purple:hover { border-color: rgba(124,58,237,0.45); color: #7c3aed; }
+.chip-toggle-purple.active { background: rgba(124,58,237,0.1); border-color: rgba(124,58,237,0.5); color: #7c3aed; box-shadow: 0 0 10px rgba(124,58,237,0.15); }
+
 .term-select {
   appearance: none;
   border: 1px solid var(--border); background: var(--surface);

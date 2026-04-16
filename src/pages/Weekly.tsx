@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
+import { isTop500 } from "../data/top500";
 import type { Job } from "../types";
 import JobRow from "../components/JobRow";
 
@@ -29,6 +30,7 @@ export default function Weekly() {
   const [weekJobs, setWeekJobs] = useState<WeekJob[]>([]);
   const [activeDay, setActiveDay] = useState("All");
   const [levelFilter, setLevelFilter] = useState("all");
+  const [top500Filter, setTop500Filter] = useState(false);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -68,6 +70,7 @@ export default function Weekly() {
       );
     }
     jobs = jobs.filter((j) => !isExcluded(j));
+    if (top500Filter) jobs = jobs.filter((j) => isTop500(j.company || ""));
     jobs = [...jobs].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
     // Push applied jobs to the bottom so unapplied stay front-and-centre
     const appliedSet = new Set(Object.keys(stats.appliedJobs));
@@ -75,7 +78,7 @@ export default function Weekly() {
       ...jobs.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
       ...jobs.filter((j) => j.job_url  &&  appliedSet.has(j.job_url)),
     ];
-  }, [weekJobs, activeDay, levelFilter, query, stats.appliedJobs, isExcluded]);
+  }, [weekJobs, activeDay, levelFilter, top500Filter, query, stats.appliedJobs, isExcluded]);
 
   const uniqueCompanies = useMemo(
     () => new Set(weekJobs.map((j) => j.company).filter(Boolean)).size,
@@ -177,6 +180,12 @@ export default function Weekly() {
                 {l === "all" ? "All" : l}
               </button>
             ))}
+            <button
+              className={`chip-toggle chip-toggle-purple${top500Filter ? " active" : ""}`}
+              onClick={() => setTop500Filter((v) => !v)}
+            >
+              Top 500
+            </button>
           </div>
         </div>
 

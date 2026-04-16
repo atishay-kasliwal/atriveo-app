@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
+import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
 import JobRow from "../components/JobRow";
 
@@ -63,6 +64,7 @@ export default function Dashboard() {
   const [sortBy, setSortBy] = useState<SortBy>("time");
   const [levelFilter, setLevelFilter] = useState("all");
   const [h1bFilter, setH1bFilter] = useState(false);
+  const [top500Filter, setTop500Filter] = useState(false);
   const [termFilter, setTermFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -159,6 +161,7 @@ export default function Dashboard() {
     let jobs = [...baseJobs];
     if (levelFilter !== "all") jobs = jobs.filter((j) => j.level === levelFilter);
     if (h1bFilter) jobs = jobs.filter((j) => j.score_pct >= 60);
+    if (top500Filter) jobs = jobs.filter((j) => isTop500(j.company || ""));
     if (termFilter !== "all") jobs = jobs.filter((j) => j.search_term === termFilter);
     if (query) {
       const q = query.toLowerCase();
@@ -178,7 +181,7 @@ export default function Dashboard() {
       ...jobs.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
       ...jobs.filter((j) => j.job_url  &&  appliedSet.has(j.job_url)),
     ];
-  }, [baseJobs, levelFilter, h1bFilter, termFilter, query, sortBy, stats.appliedJobs, isExcluded]);
+  }, [baseJobs, levelFilter, h1bFilter, top500Filter, termFilter, query, sortBy, stats.appliedJobs, isExcluded]);
 
   const searchTerms = useMemo(
     () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
@@ -368,6 +371,12 @@ export default function Dashboard() {
                   onClick={() => setH1bFilter((v) => !v)}
                 >
                   H1B ✓
+                </button>
+                <button
+                  className={`chip-toggle chip-toggle-purple${top500Filter ? " active" : ""}`}
+                  onClick={() => setTop500Filter((v) => !v)}
+                >
+                  Top 500
                 </button>
               </div>
               <select
