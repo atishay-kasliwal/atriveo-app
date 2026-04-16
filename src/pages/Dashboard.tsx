@@ -191,6 +191,17 @@ export default function Dashboard() {
   const ngCount = filtered.filter((j) => j.level === "New Grad").length;
   const bestJob = [...todayJobs].sort((a, b) => (b.score_pct ?? 0) - (a.score_pct ?? 0))[0];
   const clickedJobCount = Object.keys(stats.appliedJobs).length;
+
+  const top500TodayTotal = useMemo(
+    () => todayJobs.filter((j) => isTop500(j.company || "")).length,
+    [todayJobs]
+  );
+  const top500AppliedToday = useMemo(() => {
+    const todayEst = new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10);
+    return Object.values(stats.appliedJobs).filter(
+      (r) => isTop500(r.company || "") && r.lastAppliedAt.slice(0, 10) === todayEst
+    ).length;
+  }, [stats.appliedJobs]);
   const latestClickRecord = useMemo(
     () =>
       Object.values(stats.appliedJobs).reduce<{
@@ -267,6 +278,11 @@ export default function Dashboard() {
             <div className="kpi-value">{stats.todayCount ?? 0} <span style={{ fontSize: "0.45em", fontWeight: 500, opacity: 0.6 }}>/ {stats.count}</span></div>
             <div className="kpi-label">Applied Today</div>
             <div className="kpi-sub">{latestClickRecord?.company ? latestClickRecord.company.slice(0, 22) : "No applications yet"}</div>
+          </div>
+          <div className="kpi-card kpi-top500">
+            <div className="kpi-value">{top500AppliedToday} <span style={{ fontSize: "0.45em", fontWeight: 500, opacity: 0.6 }}>/ {top500TodayTotal}</span></div>
+            <div className="kpi-label">Top 500 Applied</div>
+            <div className="kpi-sub">{top500TodayTotal} top-co jobs today</div>
           </div>
         </div>
 

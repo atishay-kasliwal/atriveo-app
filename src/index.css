@@ -153,12 +153,14 @@ header {
 .kpi-card.blue::before   { background: linear-gradient(90deg, var(--blue), #2563eb); }
 .kpi-card.green  { background: linear-gradient(145deg, rgba(34,211,238,0.1), transparent); border-color: rgba(34,211,238,0.2); }
 .kpi-card.green::before  { background: linear-gradient(90deg, var(--cyan), #06b6d4); }
-.kpi-card:not(.blue):not(.green):not(.orange) { background: linear-gradient(145deg, rgba(74,222,128,0.09), transparent); border-color: rgba(74,222,128,0.18); }
-.kpi-card:not(.blue):not(.green):not(.orange)::before { background: linear-gradient(90deg, var(--green), #22c55e); }
+.kpi-card:not(.blue):not(.green):not(.orange):not(.purple):not(.kpi-top500) { background: linear-gradient(145deg, rgba(74,222,128,0.09), transparent); border-color: rgba(74,222,128,0.18); }
+.kpi-card:not(.blue):not(.green):not(.orange):not(.purple):not(.kpi-top500)::before { background: linear-gradient(90deg, var(--green), #22c55e); }
 .kpi-card.orange { background: linear-gradient(145deg, rgba(251,146,60,0.1), transparent); border-color: rgba(251,146,60,0.2); }
 .kpi-card.orange::before { background: linear-gradient(90deg, var(--orange), #f59e0b); }
 .kpi-card.purple { background: linear-gradient(145deg, rgba(168,85,247,0.1), transparent); border-color: rgba(168,85,247,0.2); }
 .kpi-card.purple::before { background: linear-gradient(90deg, #a855f7, #8b5cf6); }
+.kpi-card.kpi-top500 { background: linear-gradient(145deg, rgba(124,58,237,0.12), transparent); border-color: rgba(124,58,237,0.25); }
+.kpi-card.kpi-top500::before { background: linear-gradient(90deg, #7c3aed, #6d28d9); }
 
 .kpi-value {
   font-size: 30px; font-weight: 700; line-height: 1;
@@ -166,9 +168,10 @@ header {
 }
 .kpi-card.blue   .kpi-value { color: #93c5fd; }
 .kpi-card.green  .kpi-value { color: var(--cyan); }
-.kpi-card:not(.blue):not(.green):not(.orange) .kpi-value { color: var(--green); }
+.kpi-card:not(.blue):not(.green):not(.orange):not(.purple):not(.kpi-top500) .kpi-value { color: var(--green); }
 .kpi-card.orange .kpi-value { color: var(--orange); }
 .kpi-card.purple .kpi-value { color: #c084fc; }
+.kpi-card.kpi-top500 .kpi-value { color: #a78bfa; }
 .kpi-label { font-size: 9.5px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-family: "Inter", monospace; }
 .kpi-sub   { font-size: 11px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
