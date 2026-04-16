@@ -534,6 +534,18 @@ header {
   border-bottom-color: rgba(22, 163, 74, 0.45);
 }
 
+/* applied always wins over top500 purple */
+.job-card.top500.applied {
+  background: rgba(22, 163, 74, 0.13);
+  border-bottom-color: rgba(22, 163, 74, 0.35);
+  border-left: 3px solid rgba(22, 163, 74, 0.7);
+}
+
+.job-card.top500.applied:hover {
+  background: rgba(22, 163, 74, 0.18);
+  border-bottom-color: rgba(22, 163, 74, 0.45);
+}
+
 /* columns */
 .row-num { font-size: 9.5px; color: var(--muted); text-align: right; font-family: "Inter", monospace; opacity: 0.4; }
 
