@@ -400,14 +400,14 @@ export default function Dashboard() {
               ) : (
                 <>
                   <div className="job-list-header">
-                    <span /><span />
-                    <span>Role</span>
                     <span style={{ textAlign: "right" }}>Score</span>
                     <span
                       className={`col-sort${sortBy === "company" ? " active" : ""}`}
                       onClick={() => setSortBy("company")}
                       title="Sort by company"
                     >Company {sortBy === "company" ? "↑" : ""}</span>
+                    <span />
+                    <span>Role</span>
                     <span style={{ textAlign: "right" }}>Match</span>
                     <span style={{ textAlign: "right" }}>Level</span>
                     <span style={{ textAlign: "right" }}>Apply</span>

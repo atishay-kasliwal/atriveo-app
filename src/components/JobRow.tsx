@@ -94,7 +94,20 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
 
   return (
     <div className={`job-card${top ? " top" : ""}${tier}${isApplied ? " applied" : ""}${isTopCo ? " top500" : ""}`}>
-      <div className="row-num">{index + 1}</div>
+      <div className="job-score">
+        <span className="star">★</span>
+        <span className={scoreColor(score)}>{score}</span>
+      </div>
+      <div className="job-company-col">
+        <span className="job-company-name" title={co}>{co}</span>
+        {onExcludeCompany && (
+          <button
+            className="exclude-btn"
+            title={`Block "${co}" from feed`}
+            onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
+          >⊘</button>
+        )}
+      </div>
       <div className="avatar" style={{ background: color }}>{initial}</div>
       <div className="job-main">
         <div className="job-title-row">
@@ -115,20 +128,6 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
             <><span className="sep">·</span><span className="apply-inline-meta">Clicked {applyClicks}x · {appliedAt}</span></>
           )}
         </div>
-      </div>
-      <div className="job-score">
-        <span className="star">★</span>
-        <span className={scoreColor(score)}>{score}</span>
-      </div>
-      <div className="job-company-col">
-        <span className="job-company-name" title={co}>{co}</span>
-        {onExcludeCompany && (
-          <button
-            className="exclude-btn"
-            title={`Block "${co}" from feed`}
-            onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
-          >⊘</button>
-        )}
       </div>
       <div className="match-line">
         {pct !== null
