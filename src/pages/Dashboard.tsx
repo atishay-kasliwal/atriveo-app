@@ -216,14 +216,6 @@ export default function Dashboard() {
       }, null),
     [stats.appliedJobs]
   );
-  const clickStatusLabel =
-    latestClickRecord?.trackerStatus === "applied"
-      ? "Applied"
-      : latestClickRecord?.trackerStatus === "rejected"
-        ? "Rejected"
-        : latestClickRecord
-          ? "Clicked"
-          : "No clicks";
   const lastJobText = stats.lastJobTitle
     ? `${stats.lastJobTitle}${stats.lastCompany ? ` · ${stats.lastCompany}` : ""}`
     : "—";
