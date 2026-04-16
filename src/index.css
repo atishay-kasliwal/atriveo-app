@@ -775,6 +775,17 @@ footer a:hover { color: var(--blue); }
   color: #fff;
 }
 
+/* ── Top-500 company highlight ───────────────────────────────────── */
+.job-card.top500 {
+  background: linear-gradient(135deg, rgba(124,58,237,0.06) 0%, rgba(139,92,246,0.04) 100%);
+  border-color: rgba(124,58,237,0.25);
+}
+
+.job-card.top500:hover {
+  border-color: rgba(124,58,237,0.45);
+  background: linear-gradient(135deg, rgba(124,58,237,0.10) 0%, rgba(139,92,246,0.07) 100%);
+}
+
 /* ── Exclude button (⊘ next to company name) ─────────────────────── */
 .exclude-btn {
   display: inline-flex;

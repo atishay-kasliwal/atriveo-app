@@ -1,5 +1,6 @@
 import type { Job } from "../types";
 import type { ApplyRecord } from "../hooks/useApplyTracker";
+import { isTop500 } from "../data/top500";
 
 const AVATAR_COLORS = [
   "#7c3aed","#0ea5e9","#059669","#d97706","#db2777","#0891b2","#16a34a","#9333ea",
@@ -89,9 +90,10 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
   const isApplied = Boolean(applyRecord);
   const applyClicks = applyRecord?.clicks ?? 0;
   const appliedAt = applyRecord?.lastAppliedAt ? fmtClickTime(applyRecord.lastAppliedAt) : "";
+  const isTopCo = isTop500(co);
 
   return (
-    <div className={`job-card${top ? " top" : ""}${tier}${isApplied ? " applied" : ""}`}>
+    <div className={`job-card${top ? " top" : ""}${tier}${isApplied ? " applied" : ""}${isTopCo ? " top500" : ""}`}>
       <div className="row-num">{index + 1}</div>
       <div className="avatar" style={{ background: color }}>{initial}</div>
       <div className="job-main">
