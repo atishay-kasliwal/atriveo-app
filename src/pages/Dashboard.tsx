@@ -42,15 +42,6 @@ function formatRunTime(iso?: string | null): string {
   return date.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
-function fmtClickTime(iso: string | null): string {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  const now = new Date();
-  const sameDay = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
-  if (sameDay) return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true });
-}
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -190,8 +181,6 @@ export default function Dashboard() {
 
   const ngCount = filtered.filter((j) => j.level === "New Grad").length;
   const bestJob = [...todayJobs].sort((a, b) => (b.score_pct ?? 0) - (a.score_pct ?? 0))[0];
-  const clickedJobCount = Object.keys(stats.appliedJobs).length;
-
   const top500TodayTotal = useMemo(
     () => todayJobs.filter((j) => isTop500(j.company || "")).length,
     [todayJobs]
@@ -216,9 +205,6 @@ export default function Dashboard() {
       }, null),
     [stats.appliedJobs]
   );
-  const lastJobText = stats.lastJobTitle
-    ? `${stats.lastJobTitle}${stats.lastCompany ? ` · ${stats.lastCompany}` : ""}`
-    : "—";
 
   return (
     <div>
@@ -247,34 +233,34 @@ export default function Dashboard() {
         {/* KPIs */}
         <div className="kpi-row">
           <div className="kpi-card blue">
-            <div className="kpi-value">{hourJobs.length}</div>
             <div className="kpi-label">This Hour</div>
-            <div className="kpi-sub">{hourJobs.filter((j) => j.level === "New Grad").length} New Grad</div>
+            <div className="kpi-value">{hourJobs.length}</div>
+            <div className="kpi-sub">{hourJobs.filter((j) => j.level === "New Grad").length} new grad</div>
           </div>
           <div className="kpi-card green">
-            <div className="kpi-value">{todayJobs.length}</div>
             <div className="kpi-label">Today Total</div>
-            <div className="kpi-sub">across {runHistory.length} runs</div>
+            <div className="kpi-value">{todayJobs.length}</div>
+            <div className="kpi-sub">{runHistory.length} runs</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-value">{todayJobs.filter((j) => j.level === "New Grad").length}</div>
             <div className="kpi-label">New Grad</div>
-            <div className="kpi-sub">across all today</div>
+            <div className="kpi-value">{todayJobs.filter((j) => j.level === "New Grad").length}</div>
+            <div className="kpi-sub">today</div>
           </div>
           <div className="kpi-card orange">
-            <div className="kpi-value">{bestJob ? `${bestJob.score_pct}%` : "—"}</div>
             <div className="kpi-label">Best Match</div>
-            <div className="kpi-sub">{bestJob?.title?.slice(0, 22) ?? ""}</div>
+            <div className="kpi-value">{bestJob ? `${bestJob.score_pct}%` : "—"}</div>
+            <div className="kpi-sub">{bestJob?.company?.slice(0, 20) ?? "—"}</div>
           </div>
           <div className="kpi-card purple">
-            <div className="kpi-value">{stats.todayCount ?? 0} <span style={{ fontSize: "0.45em", fontWeight: 500, opacity: 0.6 }}>/ {stats.count}</span></div>
             <div className="kpi-label">Applied Today</div>
-            <div className="kpi-sub">{latestClickRecord?.company ? latestClickRecord.company.slice(0, 22) : "No applications yet"}</div>
+            <div className="kpi-value">{stats.todayCount ?? 0}<span className="kpi-value-secondary">/{stats.count}</span></div>
+            <div className="kpi-sub">{latestClickRecord?.company ? latestClickRecord.company.slice(0, 20) : "none yet"}</div>
           </div>
           <div className="kpi-card kpi-top500">
-            <div className="kpi-value">{top500AppliedToday} <span style={{ fontSize: "0.45em", fontWeight: 500, opacity: 0.6 }}>/ {top500TodayTotal}</span></div>
             <div className="kpi-label">Top 500 Applied</div>
-            <div className="kpi-sub">{top500TodayTotal} top-co jobs today</div>
+            <div className="kpi-value">{top500AppliedToday}<span className="kpi-value-secondary">/{top500TodayTotal}</span></div>
+            <div className="kpi-sub">{top500TodayTotal} top-co today</div>
           </div>
         </div>
 
@@ -417,24 +403,9 @@ export default function Dashboard() {
                     <span>Role</span>
                     <span style={{ textAlign: "right" }}>Score</span>
                     <span style={{ textAlign: "right" }}>Match</span>
-                    <span style={{ textAlign: "right" }}>Tag</span>
                     <span style={{ textAlign: "right" }}>Level</span>
                     <span style={{ textAlign: "right" }}>Apply</span>
                   </div>
-                  {/* Apply stats bar */}
-                  {clickedJobCount > 0 && (
-                    <div className="apply-stats-row">
-                      <div className="apply-stats-cell">
-                        Clicked jobs: <span className="apply-stats-value">{clickedJobCount}</span>
-                        <span className="apply-stats-sep">•</span>
-                        Total clicks: <span className="apply-stats-value">{stats.count}</span>
-                        <span className="apply-stats-sep">•</span>
-                        Last: <span className="apply-stats-value">{fmtClickTime(stats.lastClickAt)}</span>
-                        <span className="apply-stats-sep">•</span>
-                        <span className="apply-stats-last" title={lastJobText}>{lastJobText}</span>
-                      </div>
-                    </div>
-                  )}
                   {filtered.map((job, i) => (
                     <JobRow
                       key={job.job_url || i}

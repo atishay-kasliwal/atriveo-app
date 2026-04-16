@@ -134,11 +134,6 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
           ? <span className={`match-pct ${matchPctClass(pct)}`}>{pct}%</span>
           : <span>—</span>}
       </div>
-      <div className="job-tag-col">
-        {term
-          ? <span className="badge badge-term">{term}</span>
-          : <span style={{ color: "var(--muted)", fontSize: "11px" }}>—</span>}
-      </div>
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <span className={`badge ${levelClass(lvl)}`}>{lvl}</span>
       </div>
