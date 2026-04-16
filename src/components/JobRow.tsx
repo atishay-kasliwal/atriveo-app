@@ -134,10 +134,17 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
           ? <span className={`match-pct ${matchPctClass(pct)}`}>{pct}%</span>
           : <span>—</span>}
       </div>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+      <div style={{ display: "flex", justifyContent: "flex-start" }}>
         <span className={`badge ${levelClass(lvl)}`}>{lvl}</span>
       </div>
       <div className="job-apply-col">
+        {!isApplied && job.job_url && (
+          <button
+            className="mark-btn"
+            title="Mark as applied without opening"
+            onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}
+          >✓</button>
+        )}
         {job.job_url ? (
           <a
             className={`apply-btn${isApplied ? " applied" : ""}`}

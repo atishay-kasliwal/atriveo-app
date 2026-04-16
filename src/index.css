@@ -464,7 +464,7 @@ header {
 /* table header — sticky */
 .job-list-header {
   display: grid;
-  grid-template-columns: 60px minmax(0,130px) 28px minmax(0,1fr) 68px 68px 92px;
+  grid-template-columns: 60px minmax(0,170px) 28px minmax(0,1fr) 68px 68px 118px;
   gap: 0 10px; padding: 6px 12px 6px 16px;
   background: rgba(241,245,249,0.95);
   border: 1px solid rgba(148,163,184,0.18);
@@ -479,7 +479,7 @@ header {
 
 .apply-stats-row {
   display: grid;
-  grid-template-columns: 60px minmax(0,130px) 28px minmax(0,1fr) 68px 68px 92px;
+  grid-template-columns: 60px minmax(0,170px) 28px minmax(0,1fr) 68px 68px 118px;
   gap: 0 10px;
   padding: 5px 12px 5px 16px;
   border-bottom: 1px solid var(--border);
@@ -513,7 +513,7 @@ header {
   border-radius: 10px;
   padding: 9px 12px 9px 16px;
   display: grid;
-  grid-template-columns: 60px minmax(0,130px) 28px minmax(0,1fr) 68px 68px 92px;
+  grid-template-columns: 60px minmax(0,170px) 28px minmax(0,1fr) 68px 68px 118px;
   align-items: center; gap: 0 10px;
   transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
   text-decoration: none; color: inherit;
@@ -603,20 +603,39 @@ header {
 .job-right {
   display: contents; /* children become direct grid items */
 }
-.match-line { display: flex; align-items: center; justify-content: flex-end; }
+.match-line { display: flex; align-items: center; justify-content: flex-start; }
 .job-score  {
-  display: flex; align-items: center; justify-content: flex-end;
-  font-size: 14px; font-weight: 800; font-family: "Inter", monospace;
-  color: var(--blue); letter-spacing: -0.02em;
+  display: flex; align-items: center; justify-content: flex-start;
+  font-size: 17px; font-weight: 800; font-family: "Inter", monospace;
+  color: var(--blue); letter-spacing: -0.03em;
 }
-.job-score .star { color: var(--blue); font-size: 9px; margin-right: 1px; opacity: 0.7; }
+.job-score .star { color: var(--blue); font-size: 10px; margin-right: 2px; opacity: 0.7; }
 .score-hi { color: var(--green); }
 .score-md { color: var(--orange); }
 .match-pct { font-size: 12px; font-weight: 700; font-family: "Inter", monospace; padding: 2px 6px; border-radius: 99px; }
 .match-hi { background: rgba(74,222,128,0.15); color: var(--green); }
 .match-md { background: rgba(251,146,60,0.15); color: var(--orange); }
 .match-lo { background: rgba(148,163,184,0.12); color: var(--muted); }
-.job-apply-col { display: flex; justify-content: flex-end; }
+.job-apply-col { display: flex; justify-content: flex-start; align-items: center; gap: 5px; }
+
+.mark-btn {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 11px; font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  line-height: 1;
+}
+.mark-btn:hover {
+  border-color: rgba(22,163,74,0.5);
+  color: var(--green);
+  background: var(--green-lo);
+}
 
 /* badges */
 .badge { display: inline-flex; align-items: center; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap; }
