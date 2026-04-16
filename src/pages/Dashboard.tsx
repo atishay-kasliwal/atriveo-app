@@ -7,7 +7,7 @@ import type { Job, RunEntry } from "../types";
 import JobRow from "../components/JobRow";
 
 type Period = "hour" | "today" | "yesterday";
-type SortBy = "score" | "time";
+type SortBy = "score" | "time" | "company";
 type RunCard = RunEntry & {
   count: number;
   targetPeriod: Period | null;
@@ -165,6 +165,7 @@ export default function Dashboard() {
     }
     jobs = jobs.filter((j) => !isExcluded(j));
     if (sortBy === "score") jobs.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    else if (sortBy === "company") jobs.sort((a, b) => (a.company || "").localeCompare(b.company || ""));
     else jobs.sort((a, b) => toMs(b.batch_time) - toMs(a.batch_time));
     // Push applied jobs to the bottom so unapplied stay front-and-centre
     const appliedSet = new Set(Object.keys(stats.appliedJobs));
@@ -237,12 +238,12 @@ export default function Dashboard() {
             <div className="kpi-value">{hourJobs.length}</div>
             <div className="kpi-sub">{hourJobs.filter((j) => j.level === "New Grad").length} new grad</div>
           </div>
-          <div className="kpi-card green">
+          <div className="kpi-card emerald">
             <div className="kpi-label">Today Total</div>
             <div className="kpi-value">{todayJobs.length}</div>
             <div className="kpi-sub">{runHistory.length} runs</div>
           </div>
-          <div className="kpi-card">
+          <div className="kpi-card teal">
             <div className="kpi-label">New Grad</div>
             <div className="kpi-value">{todayJobs.filter((j) => j.level === "New Grad").length}</div>
             <div className="kpi-sub">today</div>
@@ -257,7 +258,7 @@ export default function Dashboard() {
             <div className="kpi-value">{stats.todayCount ?? 0}<span className="kpi-value-secondary">/{stats.count}</span></div>
             <div className="kpi-sub">{latestClickRecord?.company ? latestClickRecord.company.slice(0, 20) : "none yet"}</div>
           </div>
-          <div className="kpi-card kpi-top500">
+          <div className="kpi-card rose">
             <div className="kpi-label">Top 500 Applied</div>
             <div className="kpi-value">{top500AppliedToday}<span className="kpi-value-secondary">/{top500TodayTotal}</span></div>
             <div className="kpi-sub">{top500TodayTotal} top-co today</div>
@@ -401,6 +402,11 @@ export default function Dashboard() {
                   <div className="job-list-header">
                     <span /><span />
                     <span>Role</span>
+                    <span
+                      className={`col-sort${sortBy === "company" ? " active" : ""}`}
+                      onClick={() => setSortBy("company")}
+                      title="Sort by company"
+                    >Company {sortBy === "company" ? "↑" : ""}</span>
                     <span style={{ textAlign: "right" }}>Score</span>
                     <span style={{ textAlign: "right" }}>Match</span>
                     <span style={{ textAlign: "right" }}>Level</span>

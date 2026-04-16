@@ -107,15 +107,6 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
           </span>
         </div>
         <div className="job-meta">
-          <span className="job-company" title={co}>{co}</span>
-          {onExcludeCompany && (
-            <button
-              className="exclude-btn"
-              title={`Block "${co}" from feed`}
-              onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
-            >⊘</button>
-          )}
-          <span className="sep">·</span>
           <span title={job.location}>{job.location || "Remote"}</span>
           {exp && <><span className="sep">·</span><span className="exp-badge">{exp}</span></>}
           {posted && !isNew && <><span className="sep">·</span><span className="job-date">{posted}</span></>}
@@ -124,6 +115,16 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
             <><span className="sep">·</span><span className="apply-inline-meta">Clicked {applyClicks}x · {appliedAt}</span></>
           )}
         </div>
+      </div>
+      <div className="job-company-col">
+        <span className="job-company-name" title={co}>{co}</span>
+        {onExcludeCompany && (
+          <button
+            className="exclude-btn"
+            title={`Block "${co}" from feed`}
+            onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
+          >⊘</button>
+        )}
       </div>
       <div className="job-score">
         <span className="star">★</span>
