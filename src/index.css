@@ -521,13 +521,14 @@ header {
 }
 
 .job-card.applied {
-  background: rgba(74, 222, 128, 0.08);
-  border-bottom-color: rgba(74, 222, 128, 0.22);
+  background: rgba(22, 163, 74, 0.13);
+  border-bottom-color: rgba(22, 163, 74, 0.35);
+  border-left: 3px solid rgba(22, 163, 74, 0.7);
 }
 
 .job-card.applied:hover {
-  background: rgba(74, 222, 128, 0.12);
-  border-bottom-color: rgba(74, 222, 128, 0.3);
+  background: rgba(22, 163, 74, 0.18);
+  border-bottom-color: rgba(22, 163, 74, 0.45);
 }
 
 /* columns */
@@ -607,10 +608,10 @@ header {
 }
 .apply-btn:hover { filter: brightness(1.15); text-decoration: none; color: #fff; box-shadow: 0 0 14px var(--blue-glow); }
 .apply-btn.applied {
-  background: linear-gradient(135deg, rgba(22,163,74,0.95), rgba(16,185,129,0.9));
-  box-shadow: 0 0 12px rgba(74,222,128,0.22);
+  background: linear-gradient(135deg, #16a34a, #059669);
+  box-shadow: 0 0 12px rgba(22,163,74,0.35);
 }
-.apply-btn.applied:hover { box-shadow: 0 0 14px rgba(74,222,128,0.36); }
+.apply-btn.applied:hover { filter: brightness(1.1); box-shadow: 0 0 16px rgba(22,163,74,0.5); }
 
 .exp-badge { font-size: 9.5px; font-weight: 600; padding: 1px 5px; border-radius: 4px; background: rgba(0,0,0,0.04); color: var(--text-2); border: 1px solid var(--border); }
 
