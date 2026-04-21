@@ -1,7 +1,23 @@
 [
   {
+    "session_id": "2026-04-21T01:09:57Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4365570927",
+    "company": "Google",
+    "date_posted": null,
+    "level": "Mid",
+    "location": "Seattle, WA",
+    "max_exp": 2.0,
+    "min_exp": 2.0,
+    "pipeline": "important",
+    "priority_score": 103,
+    "score_pct": 79,
+    "site": "linkedin",
+    "summary": "In accordance with Washington state law, we are highlighting our comprehensive benefits package, which is available to all eligible US based employees.",
+    "title": "Software Engineer III, Infrastructure, AI and Infrastructure"
+  },
+  {
+    "session_id": "2026-04-21T01:09:57Z",
     "job_url": "https://www.linkedin.com/jobs/view/4365571908",
-    "session_id": "2026-04-21T00:10:13Z",
     "company": "Google",
     "date_posted": null,
     "level": "Mid",
@@ -16,8 +32,24 @@
     "title": "Software Engineer III, Full Stack, Google Cloud Platforms"
   },
   {
+    "session_id": "2026-04-21T01:09:57Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4365582190",
+    "company": "Google",
+    "date_posted": null,
+    "level": "Mid",
+    "location": "Raleigh, NC",
+    "max_exp": 2.0,
+    "min_exp": 2.0,
+    "pipeline": "important",
+    "priority_score": 100,
+    "score_pct": 77,
+    "site": "linkedin",
+    "summary": "Note: By applying to this position you will have an opportunity to share your preferred working location from the following: **Sunnyvale, CA, USA; Raleigh, NC, USA; Durham, NC, USA** .",
+    "title": "Software Engineer III, Full Stack, Google Cloud Platforms"
+  },
+  {
+    "session_id": "2026-04-21T01:09:57Z",
     "job_url": "https://www.linkedin.com/jobs/view/4403662958",
-    "session_id": "2026-04-21T00:10:13Z",
     "company": "Adobe",
     "date_posted": null,
     "level": "New Grad",
@@ -32,24 +64,8 @@
     "title": "2026 University Graduate - Software Development Engineer"
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4401668612",
-    "session_id": "2026-04-21T00:10:13Z",
-    "company": "IBM",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Yorktown Heights, NY",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 85,
-    "score_pct": 65,
-    "site": "linkedin",
-    "summary": "**Your Role And Responsibilities** We are looking for an experienced Software Developer to join the core Qiskit SDK team.",
-    "title": "Qiskit SDK software developer"
-  },
-  {
+    "session_id": "2026-04-21T01:09:57Z",
     "job_url": "https://www.linkedin.com/jobs/view/4404377905",
-    "session_id": "2026-04-21T00:10:13Z",
     "company": "Snowflake",
     "date_posted": null,
     "level": "Entry",
@@ -64,8 +80,24 @@
     "title": "Software Engineer - Notebooks"
   },
   {
+    "session_id": "2026-04-21T01:09:57Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4403691255",
+    "company": "NVIDIA",
+    "date_posted": null,
+    "level": "Mid",
+    "location": "Virginia, United States",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 84,
+    "score_pct": 65,
+    "site": "linkedin",
+    "summary": "The NVIDIA DGX Cloud organization is looking for passionate software support engineers to partner closely with our internal customers to support them on our internal platforms.",
+    "title": "Software Platform Support Engineer - GPU Cloud"
+  },
+  {
+    "session_id": "2026-04-21T01:09:57Z",
     "job_url": "https://www.linkedin.com/jobs/view/4370739135",
-    "session_id": "2026-04-21T00:10:13Z",
     "company": "Waymo",
     "date_posted": null,
     "level": "Entry",
@@ -78,21 +110,5 @@
     "site": "linkedin",
     "summary": "Waymo is an autonomous driving technology company with the mission to be the world's most trusted driver.",
     "title": "Software Engineer, Simulator Evaluation"
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4368059211",
-    "session_id": "2026-04-21T00:10:13Z",
-    "company": "Aurora",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Mountain View, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 0,
-    "score_pct": 0,
-    "site": "linkedin",
-    "summary": "**Who We Are** Aurora\u2019s mission is to deliver the benefits of self\\-driving technology safely, quickly, and broadly.",
-    "title": "Software Engineer, Autonomy Controls"
   }
 ]
