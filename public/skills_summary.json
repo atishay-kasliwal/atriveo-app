@@ -1,42 +1,157 @@
 {
-  "generated_at": "2026-04-24T01:40:54.587361+00:00",
-  "total_analyzed": 0,
+  "generated_at": "2026-04-24T03:06:54.671229+00:00",
+  "total_analyzed": 109,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
-      "skills": {}
+      "skills": {
+        "Python": 51,
+        "SQL": 38,
+        "Java": 25,
+        "TypeScript": 20,
+        "JavaScript": 17,
+        "HTML/CSS": 8,
+        "Ruby": 7,
+        ".NET": 7,
+        "Scala": 6,
+        "Bash/Shell": 3,
+        "Kotlin": 2,
+        "Rust": 2,
+        "Swift": 2
+      }
     },
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
-      "skills": {}
+      "skills": {
+        "React": 22,
+        "PyTorch": 16,
+        "TensorFlow": 14,
+        "Angular": 8,
+        "Node.js": 8,
+        "Express": 7,
+        "Spring": 6,
+        "Spring Boot": 5,
+        "LangChain": 5,
+        "Scikit-learn": 5,
+        "Next.js": 4,
+        "Vue": 4,
+        "Pandas": 4,
+        "NumPy": 4,
+        "Rails": 3,
+        "Django": 2,
+        "FastAPI": 1,
+        "Flask": 1,
+        "Selenium": 1
+      }
     },
     "Cloud": {
       "color": "#f59e0b",
-      "skills": {}
+      "skills": {
+        "AWS": 28,
+        "GCP": 19,
+        "Azure": 17,
+        "Lambda": 3,
+        "S3": 3,
+        "Serverless": 3,
+        "GKE": 2,
+        "ECS": 1,
+        "EC2": 1,
+        "DynamoDB": 1,
+        "API Gateway": 1,
+        "Cloud Run": 1
+      }
     },
     "Backend & Architecture": {
       "color": "#0ea5e9",
-      "skills": {}
+      "skills": {
+        "Scalability": 37,
+        "REST API": 11,
+        "Distributed Systems": 10,
+        "System Design": 9,
+        "Microservices": 7,
+        "API Design": 5,
+        "Kafka": 4,
+        "RabbitMQ": 1,
+        "WebSocket": 1,
+        "Caching": 1
+      }
     },
     "DevOps & Infrastructure": {
       "color": "#10b981",
-      "skills": {}
+      "skills": {
+        "CI/CD": 30,
+        "Git": 16,
+        "Docker": 10,
+        "Linux": 10,
+        "Terraform": 7,
+        "Kubernetes": 6,
+        "Jenkins": 6,
+        "GitHub Actions": 5,
+        "Datadog": 3,
+        "Helm": 1
+      }
     },
     "Data & Storage": {
       "color": "#f43f5e",
-      "skills": {}
+      "skills": {
+        "ETL/ELT": 21,
+        "PostgreSQL": 9,
+        "Spark": 9,
+        "Airflow": 9,
+        "Databricks": 9,
+        "Kafka": 4,
+        "MySQL": 3,
+        "MongoDB": 3,
+        "BigQuery": 3,
+        "Vector DB": 3,
+        "Snowflake": 2,
+        "Redis": 1,
+        "Elasticsearch": 1,
+        "Cassandra": 1,
+        "Flink": 1
+      }
     },
     "AI & Machine Learning": {
       "color": "#ec4899",
-      "skills": {}
+      "skills": {
+        "Machine Learning": 30,
+        "LLM": 21,
+        "PyTorch": 16,
+        "TensorFlow": 14,
+        "Deep Learning": 12,
+        "Agents": 12,
+        "Fine-tuning": 10,
+        "GenAI": 9,
+        "RAG": 8,
+        "MLflow": 8,
+        "NLP": 7,
+        "Prompt Eng": 7,
+        "LangChain": 5,
+        "Vertex AI": 4,
+        "OpenAI": 3,
+        "Embeddings": 2,
+        "Hugging Face": 1,
+        "SageMaker": 1
+      }
     },
     "Security": {
       "color": "#6366f1",
-      "skills": {}
+      "skills": {
+        "GDPR": 3,
+        "OAuth/OIDC": 1,
+        "JWT": 1,
+        "Encryption": 1
+      }
     },
     "Soft Skills & Process": {
       "color": "#64748b",
-      "skills": {}
+      "skills": {
+        "Cross-functional": 31,
+        "Code Review": 30,
+        "Mentorship": 29,
+        "Agile/Scrum": 22,
+        "Leadership": 1
+      }
     }
   }
 }
