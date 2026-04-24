@@ -1048,3 +1048,115 @@ footer a:hover { color: var(--blue); }
   color: var(--muted);
   font-style: italic;
 }
+
+/* ── Skills page ──────────────────────────────────────────────────────── */
+.skills-top-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.skills-section-title {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--muted);
+  font-family: "Inter", monospace;
+  margin-bottom: 12px;
+}
+
+.skills-top-grid {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+
+.skills-top-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border-radius: 8px;
+  background: rgba(0,0,0,0.03);
+  border: 1px solid var(--border);
+  font-family: "Inter", monospace;
+}
+
+.skills-top-rank {
+  font-size: 9px; font-weight: 700; color: var(--muted);
+}
+
+.skills-top-name {
+  font-size: 12px; font-weight: 600; color: var(--text);
+  text-transform: capitalize;
+}
+
+.skills-top-count {
+  font-size: 11px; font-weight: 700; color: var(--blue);
+  background: var(--blue-lo); padding: 1px 6px;
+  border-radius: 99px; font-family: "Inter", monospace;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 1100px) { .skills-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .skills-grid { grid-template-columns: 1fr; } }
+
+.skills-cat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+
+.skills-cat-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+}
+
+.skills-cat-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+
+.skills-cat-title {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.01em; flex: 1;
+}
+
+.skills-cat-count {
+  font-size: 10px; color: var(--muted);
+  font-family: "Inter", monospace;
+}
+
+.skills-bars { display: flex; flex-direction: column; gap: 8px; }
+
+.skills-bar-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 30px 36px;
+  align-items: center; gap: 8px;
+}
+
+.skills-bar-label {
+  font-size: 11.5px; font-weight: 500; color: var(--text-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-transform: capitalize;
+}
+
+.skills-bar-track {
+  height: 6px; background: rgba(0,0,0,0.06);
+  border-radius: 99px; overflow: hidden;
+}
+
+.skills-bar-fill {
+  height: 100%; border-radius: 99px;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  opacity: 0.85;
+}
+
+.skills-bar-val {
+  font-size: 11px; font-weight: 700; color: var(--text);
+  font-family: "Inter", monospace; text-align: right;
+}
+
+.skills-bar-pct {
+  font-size: 10px; color: var(--muted);
+  font-family: "Inter", monospace; text-align: right;
+}

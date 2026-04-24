@@ -222,6 +222,7 @@ export default function Dashboard() {
             <nav className="nav-tabs">
               <a href="/" className="nav-tab active">Live Feed</a>
               <a href="/weekly" className="nav-tab">Weekly</a>
+              <a href="/skills" className="nav-tab">Skills</a>
               <a href="/settings" className="nav-tab">Settings</a>
             </nav>
             <span className="header-user">Hi, {user?.name}</span>
