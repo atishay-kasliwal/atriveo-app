@@ -27,6 +27,12 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     return Response.json({ error: "GITHUB_TOKEN not configured" }, { status: 503 });
   }
 
+  let resumeText = "";
+  try {
+    const body = await request.json() as { resume?: string };
+    resumeText = (body?.resume ?? "").trim();
+  } catch { /* no body is fine */ }
+
   const res = await fetch(
     "https://api.github.com/repos/atishay-kasliwal/job-pipeline/actions/workflows/update-pages.yml/dispatches",
     {
@@ -38,7 +44,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         "User-Agent": "atriveo-app",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ref: "main" }),
+      body: JSON.stringify({ ref: "main", inputs: { resume_text: resumeText } }),
     }
   );
 

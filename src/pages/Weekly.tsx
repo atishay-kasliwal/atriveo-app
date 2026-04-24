@@ -209,14 +209,14 @@ export default function Weekly() {
           ) : (
             <>
               <div className="job-list-header">
-                <span />
+                <span>Score</span>
+                <span>Company</span>
                 <span />
                 <span>Role</span>
-                <span style={{ textAlign: "right" }}>Score</span>
-                <span style={{ textAlign: "right" }}>Match</span>
-                <span style={{ textAlign: "right" }}>Tag</span>
-                <span style={{ textAlign: "right" }}>Level</span>
-                <span style={{ textAlign: "right" }}>Apply</span>
+                <span>ATS</span>
+                <span>Fit</span>
+                <span>Level</span>
+                <span>Apply</span>
               </div>
               {filtered.map((job, i) => (
                 <JobRow

@@ -232,7 +232,12 @@ export default function Skills() {
     setRefreshing(true);
     setRefreshMsg("");
     try {
-      const res = await fetch("/api/refresh", { method: "POST" });
+      const resume = localStorage.getItem("atriveo_resume") || "";
+      const res = await fetch("/api/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resume }),
+      });
       const data = await res.json() as { ok?: boolean; message?: string; error?: string };
       setRefreshMsg(data.ok ? (data.message ?? "Triggered!") : (data.error ?? "Failed"));
     } catch {

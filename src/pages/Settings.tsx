@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useExclusions } from "../hooks/useExclusions";
+
+const RESUME_KEY = "atriveo_resume";
 
 export default function Settings() {
   const { user, logout } = useAuth();
@@ -8,6 +10,19 @@ export default function Settings() {
 
   const [companyInput, setCompanyInput] = useState("");
   const [keywordInput, setKeywordInput] = useState("");
+  const [resumeText, setResumeText] = useState("");
+  const [resumeSaved, setResumeSaved] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(RESUME_KEY) || "";
+    setResumeText(saved);
+  }, []);
+
+  function saveResume() {
+    localStorage.setItem(RESUME_KEY, resumeText);
+    setResumeSaved(true);
+    setTimeout(() => setResumeSaved(false), 2500);
+  }
 
   function addCompany() {
     const v = companyInput.trim();
@@ -38,6 +53,7 @@ export default function Settings() {
             <nav className="nav-tabs">
               <a href="/" className="nav-tab">Live Feed</a>
               <a href="/weekly" className="nav-tab">Weekly</a>
+              <a href="/skills" className="nav-tab">Skills</a>
               <a href="/settings" className="nav-tab active">Settings</a>
             </nav>
             <span className="header-user">Hi, {user?.name}</span>
@@ -140,6 +156,37 @@ export default function Settings() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* ── Resume ── */}
+        <div className="settings-section" style={{ marginTop: 8 }}>
+          <div className="settings-section-header">
+            <div>
+              <div className="settings-section-title">Resume</div>
+              <div className="settings-section-sub">
+                Used to compute ATS and Fit scores for each job. Paste plain text.
+                Click <strong>↺ Refresh Data</strong> on the Skills page after saving to trigger scoring.
+              </div>
+            </div>
+            {resumeText && (
+              <span className="settings-count">{resumeText.length.toLocaleString()} chars</span>
+            )}
+          </div>
+          <textarea
+            className="skills-resume-input"
+            style={{ minHeight: 180, marginBottom: 10 }}
+            placeholder="Paste your resume text here…"
+            value={resumeText}
+            onChange={e => setResumeText(e.target.value)}
+          />
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button className="settings-add-btn" onClick={saveResume}>
+              Save Resume
+            </button>
+            {resumeSaved && (
+              <span style={{ fontSize: 12, color: "#4ade80" }}>Saved ✓</span>
+            )}
+          </div>
         </div>
 
         <div style={{ fontSize: 11.5, color: "var(--muted)", marginTop: 8 }}>

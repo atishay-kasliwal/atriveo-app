@@ -464,7 +464,7 @@ header {
 /* table header — sticky */
 .job-list-header {
   display: grid;
-  grid-template-columns: 60px minmax(0,170px) 28px minmax(0,1fr) 68px 68px 118px;
+  grid-template-columns: 60px minmax(0,145px) 28px minmax(0,1fr) 56px 56px 62px 108px;
   gap: 0 10px; padding: 6px 12px 6px 16px;
   background: rgba(241,245,249,0.95);
   border: 1px solid rgba(148,163,184,0.18);
@@ -479,7 +479,7 @@ header {
 
 .apply-stats-row {
   display: grid;
-  grid-template-columns: 60px minmax(0,170px) 28px minmax(0,1fr) 68px 68px 118px;
+  grid-template-columns: 60px minmax(0,145px) 28px minmax(0,1fr) 56px 56px 62px 108px;
   gap: 0 10px;
   padding: 5px 12px 5px 16px;
   border-bottom: 1px solid var(--border);
@@ -513,7 +513,7 @@ header {
   border-radius: 10px;
   padding: 9px 12px 9px 16px;
   display: grid;
-  grid-template-columns: 60px minmax(0,170px) 28px minmax(0,1fr) 68px 68px 118px;
+  grid-template-columns: 60px minmax(0,145px) 28px minmax(0,1fr) 56px 56px 62px 108px;
   align-items: center; gap: 0 10px;
   transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
   text-decoration: none; color: inherit;
@@ -603,7 +603,7 @@ header {
 .job-right {
   display: contents; /* children become direct grid items */
 }
-.match-line { display: flex; align-items: center; justify-content: flex-start; }
+.score-col { display: flex; align-items: center; justify-content: flex-start; }
 .job-score  {
   display: flex; align-items: center; justify-content: flex-start;
   font-size: 17px; font-weight: 800; font-family: "Inter", monospace;
@@ -612,6 +612,7 @@ header {
 .job-score .star { color: var(--blue); font-size: 10px; margin-right: 2px; opacity: 0.7; }
 .score-hi { color: var(--green); }
 .score-md { color: var(--orange); }
+.score-pending { font-size: 11px; color: var(--muted); }
 .match-pct { font-size: 12px; font-weight: 700; font-family: "Inter", monospace; padding: 2px 6px; border-radius: 99px; }
 .match-hi { background: rgba(74,222,128,0.15); color: var(--green); }
 .match-md { background: rgba(251,146,60,0.15); color: var(--orange); }
@@ -720,7 +721,8 @@ footer a:hover { color: var(--blue); }
   /* hide columns that don't fit */
   .job-card > .job-company-col,
   .job-card > .avatar,
-  .job-card > .match-line,
+  .job-card > .ats-col,
+  .job-card > .fit-col,
   .job-card > .job-level-col { display: none; }
 
   /* show company inline in meta row */

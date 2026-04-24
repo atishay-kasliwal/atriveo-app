@@ -16,6 +16,8 @@ export interface Job {
   search_term: string;
   summary?: string;
   scraped_date?: string;
+  ats_score?: number;
+  fit_score?: number;
 }
 
 export interface RunEntry {

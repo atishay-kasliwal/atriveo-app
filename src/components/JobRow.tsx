@@ -55,8 +55,8 @@ function levelClass(l: string) {
   return l === "New Grad" ? "badge-ng" : l === "Mid" ? "badge-mid" : "badge-entry";
 }
 
-function matchPctClass(p: number) {
-  return p >= 60 ? "match-hi" : p >= 40 ? "match-md" : "match-lo";
+function scorePctClass(p: number) {
+  return p >= 60 ? "match-hi" : p >= 35 ? "match-md" : "match-lo";
 }
 
 function scoreColor(s: number) {
@@ -78,12 +78,13 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
   const initial = co.charAt(0).toUpperCase();
   const color = avatarColor(co);
   const score = job.score ?? 0;
-  const pct = job.score_pct ?? null;
+  const ats = job.ats_score ?? null;
+  const fit = job.fit_score ?? null;
   const lvl = job.level || "Entry";
   const exp = fmtExp(job.min_exp, job.max_exp);
   const batch = fmtBatch(job.batch_time);
   const term = (job.search_term || "").replace(/ engineer$/i, "").trim();
-  const tier = pct !== null ? (pct >= 60 ? " tier-hi" : pct >= 35 ? " tier-md" : " tier-lo") : "";
+  const tier = ats !== null ? (ats >= 60 ? " tier-hi" : ats >= 35 ? " tier-md" : " tier-lo") : "";
   const top = index < 3 && score >= 8;
   const posted = fmtDate(job.date_posted);
   const isNew = posted === "Today";
@@ -131,10 +132,15 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
           )}
         </div>
       </div>
-      <div className="match-line">
-        {pct !== null
-          ? <span className={`match-pct ${matchPctClass(pct)}`}>{pct}%</span>
-          : <span>—</span>}
+      <div className="score-col ats-col">
+        {ats !== null
+          ? <span className={`match-pct ${scorePctClass(ats)}`}>{ats}%</span>
+          : <span className="score-pending">—</span>}
+      </div>
+      <div className="score-col fit-col">
+        {fit !== null
+          ? <span className={`match-pct ${scorePctClass(fit)}`}>{fit}%</span>
+          : <span className="score-pending">—</span>}
       </div>
       <div className="job-level-col" style={{ display: "flex", justifyContent: "flex-start" }}>
         <span className={`badge ${levelClass(lvl)}`}>{lvl}</span>

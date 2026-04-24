@@ -151,7 +151,7 @@ export default function Dashboard() {
   const filtered = useMemo(() => {
     let jobs = [...baseJobs];
     if (levelFilter !== "all") jobs = jobs.filter((j) => j.level === levelFilter);
-    if (h1bFilter) jobs = jobs.filter((j) => j.score_pct >= 60);
+    if (h1bFilter) jobs = jobs.filter((j) => (j.ats_score ?? j.score_pct ?? 0) >= 60);
     if (top500Filter) jobs = jobs.filter((j) => isTop500(j.company || ""));
     if (termFilter !== "all") jobs = jobs.filter((j) => j.search_term === termFilter);
     if (query) {
@@ -181,7 +181,7 @@ export default function Dashboard() {
   );
 
   const ngCount = filtered.filter((j) => j.level === "New Grad").length;
-  const bestJob = [...todayJobs].sort((a, b) => (b.score_pct ?? 0) - (a.score_pct ?? 0))[0];
+  const bestJob = [...todayJobs].sort((a, b) => (b.ats_score ?? b.score_pct ?? 0) - (a.ats_score ?? a.score_pct ?? 0))[0];
   const top500TodayTotal = useMemo(
     () => todayJobs.filter((j) => isTop500(j.company || "")).length,
     [todayJobs]
@@ -250,8 +250,8 @@ export default function Dashboard() {
             <div className="kpi-sub">today</div>
           </div>
           <div className="kpi-card orange">
-            <div className="kpi-label">Best Match</div>
-            <div className="kpi-value">{bestJob ? `${bestJob.score_pct}%` : "—"}</div>
+            <div className="kpi-label">Best ATS</div>
+            <div className="kpi-value">{bestJob ? `${bestJob.ats_score ?? bestJob.score_pct ?? "—"}%` : "—"}</div>
             <div className="kpi-sub">{bestJob?.company?.slice(0, 20) ?? "—"}</div>
           </div>
           <div className="kpi-card purple">
@@ -409,7 +409,8 @@ export default function Dashboard() {
                     >Company {sortBy === "company" ? "↑" : ""}</span>
                     <span />
                     <span>Role</span>
-                    <span>Match</span>
+                    <span>ATS</span>
+                    <span>Fit</span>
                     <span>Level</span>
                     <span>Apply</span>
                   </div>
