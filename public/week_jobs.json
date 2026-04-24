@@ -1,5 +1,149 @@
 [
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4403282004",
+    "session_id": "2026-04-24T04:14:58Z",
+    "batch_time": "2026-04-24T04:14:58Z",
+    "company": "eBay",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Jose, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 50,
+    "score_pct": 38,
+    "site": "linkedin",
+    "title": "Software Engineer \u2013 Identity Management",
+    "scraped_date": "2026-04-24"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4405068648",
+    "session_id": "2026-04-24T04:14:58Z",
+    "batch_time": "2026-04-24T04:14:58Z",
+    "company": "ROI Services LLC",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 48,
+    "score_pct": 37,
+    "site": "linkedin",
+    "title": "Software Engineer",
+    "scraped_date": "2026-04-24"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4406107213",
+    "session_id": "2026-04-24T04:14:58Z",
+    "batch_time": "2026-04-24T04:14:58Z",
+    "company": "Akkodis Group Nordics",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Dearborn, MI",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 46,
+    "score_pct": 35,
+    "site": "linkedin",
+    "title": "Front-end Software Developer",
+    "scraped_date": "2026-04-24"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4403293894",
+    "session_id": "2026-04-24T04:14:58Z",
+    "batch_time": "2026-04-24T04:14:58Z",
+    "company": "Walmart",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Mid",
+    "location": "Sunnyvale, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 39,
+    "score_pct": 30,
+    "site": "linkedin",
+    "title": "Software Engineer III",
+    "scraped_date": "2026-04-24"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4405072432",
+    "session_id": "2026-04-24T04:14:58Z",
+    "batch_time": "2026-04-24T04:14:58Z",
+    "company": "Kargo",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 28,
+    "score_pct": 22,
+    "site": "linkedin",
+    "title": "Backend Software Engineer - Internship",
+    "scraped_date": "2026-04-24"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4405073469",
+    "session_id": "2026-04-24T04:14:58Z",
+    "batch_time": "2026-04-24T04:14:58Z",
+    "company": "BioRender",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 22,
+    "score_pct": 17,
+    "site": "linkedin",
+    "title": "Software Engineer",
+    "scraped_date": "2026-04-24"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4406103831",
+    "session_id": "2026-04-24T04:14:58Z",
+    "batch_time": "2026-04-24T04:14:58Z",
+    "company": "Alignerr",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 21,
+    "score_pct": 16,
+    "site": "linkedin",
+    "title": "Fluent English Software Engineer \u2013 AI Testing",
+    "scraped_date": "2026-04-24"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4406129027",
+    "session_id": "2026-04-24T04:14:58Z",
+    "batch_time": "2026-04-24T04:14:58Z",
+    "company": "Moog Inc.",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "New Grad",
+    "location": "Santa Barbara, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": -999,
+    "score_pct": 0,
+    "site": "linkedin",
+    "title": "Associate Software Engineer",
+    "scraped_date": "2026-04-24"
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4383294920",
     "session_id": "2026-04-23T13:19:54Z",
     "batch_time": "2026-04-23T13:19:53Z",
@@ -1835,7 +1979,7 @@
     "title": "Agentic AI Developer (Python)",
     "scraped_date": "2026-04-23",
     "ats_score": 41,
-    "fit_score": 10
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4405006339",
@@ -2279,7 +2423,7 @@
     "title": "Software Engineer - Real Time Aviation Data",
     "scraped_date": "2026-04-23",
     "ats_score": 44,
-    "fit_score": 9
+    "fit_score": 10
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4372400037",
@@ -4717,7 +4861,7 @@
     "title": "Software Engineer -- AI Experiences",
     "scraped_date": "2026-04-23",
     "ats_score": 33,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-04-24T03:19:47Z",
@@ -5287,7 +5431,7 @@
     "title": "Associate Software Engineer, RLE",
     "scraped_date": "2026-04-23",
     "ats_score": 83,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4392991703",
@@ -5969,6 +6113,24 @@
     "score_pct": 51,
     "site": "linkedin",
     "title": "Software Engineer III",
+    "scraped_date": "2026-04-23"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4406100365",
+    "session_id": "2026-04-24T03:56:55Z",
+    "batch_time": "2026-04-24T03:56:55Z",
+    "company": "Parsons Corporation",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Virginia, United States",
+    "max_exp": 5.0,
+    "min_exp": 5.0,
+    "pipeline": "standard",
+    "score": 66,
+    "score_pct": 51,
+    "site": "linkedin",
+    "title": "Software Developer",
     "scraped_date": "2026-04-23"
   },
   {
@@ -7062,6 +7224,24 @@
     "fit_score": 7
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4405048973",
+    "session_id": "2026-04-24T03:56:55Z",
+    "batch_time": "2026-04-24T03:56:55Z",
+    "company": "HTC Global Services",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Phoenix, AZ",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 55,
+    "score_pct": 42,
+    "site": "linkedin",
+    "title": "Backend Data Engineer -PHP, APIs & ETL",
+    "scraped_date": "2026-04-23"
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4405621748",
     "session_id": "2026-04-23T12:21:23Z",
     "batch_time": "2026-04-23T12:21:22Z",
@@ -7757,7 +7937,7 @@
     "title": "Java Software Engineer",
     "scraped_date": "2026-04-23",
     "ats_score": 66,
-    "fit_score": 18
+    "fit_score": 19
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4405828344",
@@ -8846,6 +9026,24 @@
     "scraped_date": "2026-04-23"
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4403271064",
+    "session_id": "2026-04-24T03:56:55Z",
+    "batch_time": "2026-04-24T03:56:55Z",
+    "company": "IBM",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Poughkeepsie, AR",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 46,
+    "score_pct": 35,
+    "site": "linkedin",
+    "title": "Backend Engineer (Cryptography)- Hashicorp Vault",
+    "scraped_date": "2026-04-23"
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4395430695",
     "session_id": "2026-04-23T12:21:23Z",
     "batch_time": "2026-04-23T12:21:22Z",
@@ -9801,6 +9999,24 @@
     "score_pct": 32,
     "site": "linkedin",
     "title": "C# Backend Developer",
+    "scraped_date": "2026-04-23"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4405054781",
+    "session_id": "2026-04-24T03:56:55Z",
+    "batch_time": "2026-04-24T03:56:55Z",
+    "company": "Comcast",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Irvine, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 41,
+    "score_pct": 32,
+    "site": "linkedin",
+    "title": "Jr Software Engineer-Xumo (onsite Irvine, CA)",
     "scraped_date": "2026-04-23"
   },
   {
@@ -12651,7 +12867,7 @@
     "title": "Software Engineer, Full-Stack (Agents)",
     "scraped_date": "2026-04-23",
     "ats_score": 18,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-04-24T01:12:03Z",
@@ -13207,7 +13423,7 @@
     "title": "Bioinformatics Data Scientist",
     "scraped_date": "2026-04-23",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-04-24T00:19:34Z",
@@ -13812,6 +14028,24 @@
     "fit_score": 6
   },
   {
+    "session_id": "2026-04-24T03:56:55Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4405035877",
+    "batch_time": "2026-04-24T03:56:55Z",
+    "company": "Citi",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Irving, TX",
+    "max_exp": 8.0,
+    "min_exp": 8.0,
+    "pipeline": "standard",
+    "score": 28,
+    "score_pct": 22,
+    "site": "linkedin",
+    "title": "Java Backend Developer",
+    "scraped_date": "2026-04-23"
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4366416071",
     "session_id": "2026-04-23T12:21:23Z",
     "batch_time": "2026-04-23T12:21:22Z",
@@ -14012,6 +14246,24 @@
     "scraped_date": "2026-04-23",
     "ats_score": 33,
     "fit_score": 3
+  },
+  {
+    "session_id": "2026-04-24T03:56:55Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4405034979",
+    "batch_time": "2026-04-24T03:56:55Z",
+    "company": "TSMC",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Phoenix, AZ",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 27,
+    "score_pct": 21,
+    "site": "linkedin",
+    "title": "Dispatching Algorithm & Infrastructure Software Developers",
+    "scraped_date": "2026-04-23"
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4405624853",
@@ -18289,7 +18541,7 @@
     "title": "Data Engineer",
     "scraped_date": "2026-04-23",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4405868997",
@@ -18733,7 +18985,7 @@
     "title": "Embedded Software Engineer 5 (contract)",
     "scraped_date": "2026-04-23",
     "ats_score": 0,
-    "fit_score": 3
+    "fit_score": 2
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4405877865",
@@ -25289,7 +25541,9 @@
     "site": "linkedin",
     "summary": "**About The Company** Hi, we're Ondo Finance.",
     "title": "Full-Stack Software Engineer",
-    "scraped_date": "2026-04-22"
+    "scraped_date": "2026-04-22",
+    "ats_score": 33,
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4405240787",
@@ -38333,7 +38587,7 @@
     "title": "GenAI Software Engineer (Full Stack)",
     "scraped_date": "2026-04-21",
     "ats_score": 52,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4403990293",

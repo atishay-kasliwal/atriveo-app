@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-04-24T03:27:49.789946+00:00",
-  "total_analyzed": 165,
+  "generated_at": "2026-04-24T04:18:23.654941+00:00",
+  "total_analyzed": 167,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 75,
+        "Python": 76,
         "SQL": 57,
         "Java": 41,
-        "TypeScript": 32,
-        "JavaScript": 27,
+        "TypeScript": 34,
+        "JavaScript": 28,
         "Ruby": 11,
         "HTML/CSS": 10,
         "Scala": 8,
@@ -23,10 +23,10 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 33,
+        "React": 35,
         "PyTorch": 24,
         "TensorFlow": 19,
-        "Node.js": 16,
+        "Node.js": 18,
         "Angular": 8,
         "LangChain": 8,
         "Scikit-learn": 8,
@@ -38,9 +38,9 @@
         "NumPy": 5,
         "Next.js": 4,
         "Rails": 4,
+        "GraphQL": 3,
         "FastAPI": 2,
         "Django": 2,
-        "GraphQL": 2,
         "Flask": 1,
         "Playwright": 1,
         "Selenium": 1
@@ -49,7 +49,7 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 49,
+        "AWS": 50,
         "GCP": 26,
         "Azure": 23,
         "Lambda": 6,
@@ -67,11 +67,11 @@
       "color": "#0ea5e9",
       "skills": {
         "Scalability": 66,
-        "REST API": 22,
-        "Distributed Systems": 20,
+        "REST API": 23,
+        "Distributed Systems": 22,
         "System Design": 17,
-        "Microservices": 11,
-        "API Design": 10,
+        "Microservices": 12,
+        "API Design": 11,
         "Kafka": 8,
         "Event-Driven": 5,
         "Service Mesh": 4,
@@ -102,7 +102,7 @@
       "color": "#f43f5e",
       "skills": {
         "ETL/ELT": 28,
-        "PostgreSQL": 21,
+        "PostgreSQL": 22,
         "Spark": 17,
         "Databricks": 12,
         "Airflow": 11,
@@ -159,11 +159,11 @@
       "color": "#64748b",
       "skills": {
         "Code Review": 52,
+        "Mentorship": 42,
         "Cross-functional": 41,
-        "Mentorship": 41,
         "Agile/Scrum": 31,
         "On-call": 5,
-        "Leadership": 4
+        "Leadership": 5
       }
     }
   }
