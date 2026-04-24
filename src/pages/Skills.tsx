@@ -199,6 +199,8 @@ export default function Skills() {
   const [loading, setLoading] = useState(true);
   const [resumeText, setResumeText] = useState("");
   const [activeTab, setActiveTab] = useState<"market" | "gap">("market");
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshMsg, setRefreshMsg] = useState("");
 
   useEffect(() => {
     fetch("/api/jobs?type=skills_summary")
@@ -226,6 +228,20 @@ export default function Skills() {
 
   const hasResume = resumeText.trim().length > 50;
 
+  async function handleRefresh() {
+    setRefreshing(true);
+    setRefreshMsg("");
+    try {
+      const res = await fetch("/api/refresh", { method: "POST" });
+      const data = await res.json() as { ok?: boolean; message?: string; error?: string };
+      setRefreshMsg(data.ok ? (data.message ?? "Triggered!") : (data.error ?? "Failed"));
+    } catch {
+      setRefreshMsg("Network error");
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   return (
     <div>
       <header>
@@ -252,17 +268,32 @@ export default function Skills() {
 
       <div className="wrapper" style={{ paddingTop: 24, paddingBottom: 48 }}>
         {/* Page header */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.03em", color: "var(--text)" }}>
-            Skills Intelligence
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24, gap: 12, flexWrap: "wrap" }}>
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.03em", color: "var(--text)" }}>
+              Skills Intelligence
+            </div>
+            <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 3 }}>
+              {loading
+                ? "Loading…"
+                : summary
+                  ? `Based on ${summary.total_analyzed.toLocaleString()} full job descriptions · Generated ${new Date(summary.generated_at).toLocaleDateString()}`
+                  : "Data unavailable"}
+            </div>
+            {refreshMsg && (
+              <div style={{ fontSize: 11, marginTop: 4, color: refreshMsg.includes("error") || refreshMsg.includes("Error") ? "#f87171" : "#4ade80" }}>
+                {refreshMsg}
+              </div>
+            )}
           </div>
-          <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 3 }}>
-            {loading
-              ? "Loading…"
-              : summary
-                ? `Based on ${summary.total_analyzed.toLocaleString()} full job descriptions · Generated ${new Date(summary.generated_at).toLocaleDateString()}`
-                : "Data unavailable"}
-          </div>
+          <button
+            className="refresh-btn"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            title="Re-run data export from latest job descriptions"
+          >
+            {refreshing ? "Refreshing…" : "↺ Refresh Data"}
+          </button>
         </div>
 
         {/* Tab bar */}

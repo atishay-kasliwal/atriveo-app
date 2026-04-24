@@ -1161,6 +1161,16 @@ footer a:hover { color: var(--blue); }
   font-family: "Inter", monospace; text-align: right;
 }
 
+.refresh-btn {
+  padding: 7px 14px; font-size: 12px; font-weight: 600;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text-2); cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.refresh-btn:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+.refresh-btn:disabled { opacity: 0.5; cursor: default; }
+
 /* Skills tab bar */
 .skills-tab-bar {
   display: flex; gap: 4px; margin-bottom: 0;
