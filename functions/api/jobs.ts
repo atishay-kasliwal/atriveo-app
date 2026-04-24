@@ -27,12 +27,13 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const type = url.searchParams.get("type") || "today";
 
   const fileMap: Record<string, string> = {
-    hour:      "/jobs.json",
-    today:     "/today_jobs.json",
-    yesterday: "/yesterday_jobs.json",
-    week:      "/week_jobs.json",
-    runs:      "/run_history.json",
-    important: "/important_jobs.json",
+    hour:           "/jobs.json",
+    today:          "/today_jobs.json",
+    yesterday:      "/yesterday_jobs.json",
+    week:           "/week_jobs.json",
+    runs:           "/run_history.json",
+    important:      "/important_jobs.json",
+    skills_summary: "/skills_summary.json",
   };
 
   const file = fileMap[type] || "/jobs.json";

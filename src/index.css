@@ -1160,3 +1160,69 @@ footer a:hover { color: var(--blue); }
   font-size: 10px; color: var(--muted);
   font-family: "Inter", monospace; text-align: right;
 }
+
+/* Skills tab bar */
+.skills-tab-bar {
+  display: flex; gap: 4px; margin-bottom: 0;
+  border-bottom: 1px solid var(--border);
+}
+.skills-tab {
+  padding: 8px 18px; font-size: 13px; font-weight: 600;
+  color: var(--muted); background: transparent; border: none;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  cursor: pointer; transition: color 0.15s, border-color 0.15s;
+  letter-spacing: -0.01em;
+}
+.skills-tab.active { color: var(--text); border-bottom-color: var(--blue); }
+.skills-tab:hover:not(.active) { color: var(--text-2); }
+
+/* Resume gap tab */
+.skills-resume-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.skills-resume-input {
+  width: 100%; resize: vertical; min-height: 140px;
+  background: rgba(0,0,0,0.04); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px;
+  font-size: 13px; color: var(--text); font-family: inherit;
+  line-height: 1.6; outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.skills-resume-input:focus { border-color: var(--blue); }
+.skills-resume-input::placeholder { color: var(--muted); }
+
+.skills-gap-summary {
+  display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+}
+.skills-gap-stat {
+  flex: 1; min-width: 120px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 18px;
+  text-align: center;
+}
+.skills-gap-stat.green { border-top: 3px solid #22c55e; }
+.skills-gap-stat.red   { border-top: 3px solid #f87171; }
+.skills-gap-stat.blue  { border-top: 3px solid var(--blue); }
+.skills-gap-num { font-size: 26px; font-weight: 800; letter-spacing: -0.04em; color: var(--text); }
+.skills-gap-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.skills-gap-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.skills-gap-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border-radius: 8px;
+  border: 1px solid var(--border);
+  font-family: "Inter", monospace;
+}
+.skills-gap-chip.missing { background: rgba(248,113,113,0.06); }
+.skills-gap-chip.covered { background: rgba(34,197,94,0.06); }
+.skills-gap-rank { font-size: 9px; font-weight: 700; color: var(--muted); }
+.skills-gap-check { font-size: 11px; color: #22c55e; font-weight: 700; }
+.skills-gap-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.skills-gap-count {
+  font-size: 10px; color: var(--muted);
+  font-family: "Inter", monospace;
+}
