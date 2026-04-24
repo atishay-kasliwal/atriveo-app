@@ -7,7 +7,7 @@ import type { Job, RunEntry } from "../types";
 import JobRow from "../components/JobRow";
 
 type Period = "hour" | "today" | "yesterday";
-type SortBy = "score" | "time" | "company";
+type SortBy = "score" | "time" | "company" | "ats" | "fit";
 type RunCard = RunEntry & {
   count: number;
   targetPeriod: Period | null;
@@ -166,6 +166,8 @@ export default function Dashboard() {
     jobs = jobs.filter((j) => !isExcluded(j));
     if (sortBy === "score") jobs.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
     else if (sortBy === "company") jobs.sort((a, b) => (a.company || "").localeCompare(b.company || ""));
+    else if (sortBy === "ats") jobs.sort((a, b) => (b.ats_score ?? -1) - (a.ats_score ?? -1));
+    else if (sortBy === "fit") jobs.sort((a, b) => (b.fit_score ?? -1) - (a.fit_score ?? -1));
     else jobs.sort((a, b) => toMs(b.batch_time) - toMs(a.batch_time));
     // Push applied jobs to the bottom so unapplied stay front-and-centre
     const appliedSet = new Set(Object.keys(stats.appliedJobs));
@@ -292,6 +294,8 @@ export default function Dashboard() {
           <div className="sort-group">
             <button className={`sort-btn${sortBy === "score" ? " active" : ""}`} onClick={() => setSortBy("score")}>★ Score</button>
             <button className={`sort-btn${sortBy === "time" ? " active" : ""}`} onClick={() => setSortBy("time")}>↓ Recent</button>
+            <button className={`sort-btn${sortBy === "ats" ? " active" : ""}`} onClick={() => setSortBy("ats")}>ATS</button>
+            <button className={`sort-btn${sortBy === "fit" ? " active" : ""}`} onClick={() => setSortBy("fit")}>Fit</button>
           </div>
         </div>
 
@@ -409,8 +413,16 @@ export default function Dashboard() {
                     >Company {sortBy === "company" ? "↑" : ""}</span>
                     <span />
                     <span>Role</span>
-                    <span>ATS</span>
-                    <span>Fit</span>
+                    <span
+                      className={`col-sort${sortBy === "ats" ? " active" : ""}`}
+                      onClick={() => setSortBy("ats")}
+                      title="Sort by ATS score"
+                    >ATS {sortBy === "ats" ? "↓" : ""}</span>
+                    <span
+                      className={`col-sort${sortBy === "fit" ? " active" : ""}`}
+                      onClick={() => setSortBy("fit")}
+                      title="Sort by Fit score"
+                    >Fit {sortBy === "fit" ? "↓" : ""}</span>
                     <span>Level</span>
                     <span>Apply</span>
                   </div>
