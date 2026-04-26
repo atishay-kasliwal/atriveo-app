@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-04-25T23:07:59.096333+00:00",
-  "total_analyzed": 2227,
+  "generated_at": "2026-04-26T00:04:49.387530+00:00",
+  "total_analyzed": 2232,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
         "Python": 1626,
-        "Java": 1136,
-        "JavaScript": 952,
+        "Java": 1139,
+        "JavaScript": 954,
         "TypeScript": 887,
         "Kotlin": 741,
         "Swift": 735,
         "SQL": 488,
-        "HTML/CSS": 128,
-        ".NET": 72,
+        "HTML/CSS": 130,
+        ".NET": 73,
         "Rust": 59,
         "Bash/Shell": 46,
         "Scala": 37,
@@ -30,12 +30,12 @@
         "PyTorch": 172,
         "TensorFlow": 138,
         "LangChain": 96,
-        "Node.js": 89,
-        "Angular": 88,
+        "Node.js": 91,
+        "Angular": 90,
         "Scikit-learn": 86,
         "Pandas": 84,
         "NumPy": 66,
-        "Spring": 63,
+        "Spring": 65,
         "GraphQL": 61,
         "Next.js": 44,
         "Selenium": 41,
@@ -53,7 +53,7 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 452,
+        "AWS": 454,
         "Azure": 270,
         "GCP": 242,
         "S3": 47,
@@ -75,7 +75,7 @@
       "color": "#0ea5e9",
       "skills": {
         "Scalability": 641,
-        "REST API": 227,
+        "REST API": 229,
         "Distributed Systems": 185,
         "Microservices": 118,
         "System Design": 114,
@@ -93,7 +93,7 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 344,
+        "CI/CD": 346,
         "Git": 222,
         "Kubernetes": 197,
         "Docker": 171,
@@ -172,10 +172,10 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 397,
-        "Code Review": 341,
-        "Mentorship": 283,
-        "Agile/Scrum": 238,
+        "Cross-functional": 398,
+        "Code Review": 343,
+        "Mentorship": 286,
+        "Agile/Scrum": 240,
         "On-call": 117,
         "Leadership": 57
       }
