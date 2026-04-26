@@ -1,7 +1,7 @@
 [
   {
     "job_url": "https://www.linkedin.com/jobs/view/4373725973",
-    "session_id": "2026-04-26T15:09:46Z",
+    "session_id": "2026-04-26T16:09:37Z",
     "company": "OpenAI",
     "date_posted": null,
     "level": "Entry",
@@ -19,7 +19,7 @@
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4359699083",
-    "session_id": "2026-04-26T15:09:46Z",
+    "session_id": "2026-04-26T16:09:37Z",
     "company": "SoFi",
     "date_posted": null,
     "level": "Entry",
@@ -36,26 +36,8 @@
     "fit_score": 12
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4244087611",
-    "session_id": "2026-04-26T15:09:46Z",
-    "company": "OpenAI",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "San Francisco, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 103,
-    "score_pct": 79,
-    "site": "linkedin",
-    "summary": "**About The Role** As a software engineer on the Fleet High Performance Computing (HPC) team, you will be responsible for the reliability and uptime of all of OpenAI\u2019s compute fleet.",
-    "title": "Software Engineer, GPU Infrastructure - HPC",
-    "ats_score": 37,
-    "fit_score": 3
-  },
-  {
     "job_url": "https://www.linkedin.com/jobs/view/4332201577",
-    "session_id": "2026-04-26T15:09:46Z",
+    "session_id": "2026-04-26T16:09:37Z",
     "company": "Twitch",
     "date_posted": null,
     "level": "Entry",
@@ -72,26 +54,26 @@
     "fit_score": 4
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4337884276",
-    "session_id": "2026-04-26T15:09:46Z",
-    "company": "Chime",
+    "job_url": "https://www.linkedin.com/jobs/view/4359756078",
+    "session_id": "2026-04-26T16:09:37Z",
+    "company": "Amazon",
     "date_posted": null,
     "level": "Entry",
-    "location": "New York, NY",
+    "location": "New York, United States",
     "max_exp": null,
     "min_exp": null,
     "pipeline": "important",
-    "priority_score": 91,
-    "score_pct": 70,
+    "priority_score": 93,
+    "score_pct": 72,
     "site": "linkedin",
-    "summary": "**About The Role** We are looking for a Software Engineer to help build our new financial platform that is highly reliable, scalable, and will serve as the backbone for Chime.",
-    "title": "Software Engineer, Financial Platform",
-    "ats_score": 66,
-    "fit_score": 7
+    "summary": "**Description** Amazon Ads is re\\-imagining the advertising landscape through advanced generative AI technologies, revolutionizing how millions of customers discover products and engage with brands a\u2026",
+    "title": "Software Development Engineer, Amazon Ads",
+    "ats_score": 33,
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4367690357",
-    "session_id": "2026-04-26T15:09:46Z",
+    "session_id": "2026-04-26T16:09:37Z",
     "company": "Plaid",
     "date_posted": null,
     "level": "Entry",
@@ -109,7 +91,7 @@
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4367914047",
-    "session_id": "2026-04-26T15:09:46Z",
+    "session_id": "2026-04-26T16:09:37Z",
     "company": "Amazon",
     "date_posted": null,
     "level": "Entry",
@@ -127,7 +109,7 @@
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4374695018",
-    "session_id": "2026-04-26T15:09:46Z",
+    "session_id": "2026-04-26T16:09:37Z",
     "company": "Waymo",
     "date_posted": null,
     "level": "Entry",
@@ -144,26 +126,8 @@
     "fit_score": 2
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4374686604",
-    "session_id": "2026-04-26T15:09:46Z",
-    "company": "Waymo",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Mountain View, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 73,
-    "score_pct": 56,
-    "site": "linkedin",
-    "summary": "Waymo is an autonomous driving technology company with the mission to be the world's most trusted driver.",
-    "title": "Machine Learning Engineer, Model Optimization",
-    "ats_score": 40,
-    "fit_score": 3
-  },
-  {
     "job_url": "https://www.linkedin.com/jobs/view/4374685706",
-    "session_id": "2026-04-26T15:09:46Z",
+    "session_id": "2026-04-26T16:09:37Z",
     "company": "Waymo",
     "date_posted": null,
     "level": "Entry",
@@ -178,23 +142,5 @@
     "title": "Machine Learning Engineer, Model Optimization",
     "ats_score": 40,
     "fit_score": 3
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4374313687",
-    "session_id": "2026-04-26T15:09:46Z",
-    "company": "Nuro",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Mountain View, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 37,
-    "score_pct": 28,
-    "site": "linkedin",
-    "summary": "**Who We Are** Nuro is a self\\-driving technology company on a mission to make autonomy accessible to all.",
-    "title": "Software Engineer, Offboard Infrastructure",
-    "ats_score": 66,
-    "fit_score": 5
   }
 ]
