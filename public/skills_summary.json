@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-04-26T01:05:06.931893+00:00",
-  "total_analyzed": 2237,
+  "generated_at": "2026-04-26T02:05:17.497969+00:00",
+  "total_analyzed": 2241,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
@@ -8,7 +8,7 @@
         "Python": 1627,
         "Java": 1139,
         "JavaScript": 954,
-        "TypeScript": 887,
+        "TypeScript": 888,
         "Kotlin": 741,
         "Swift": 735,
         "SQL": 488,
@@ -37,7 +37,7 @@
         "NumPy": 66,
         "Spring": 65,
         "GraphQL": 61,
-        "Next.js": 44,
+        "Next.js": 45,
         "Selenium": 41,
         "Express": 37,
         "Flask": 35,
@@ -55,7 +55,7 @@
       "skills": {
         "AWS": 454,
         "Azure": 270,
-        "GCP": 242,
+        "GCP": 243,
         "S3": 47,
         "Serverless": 42,
         "Lambda": 38,
@@ -137,7 +137,7 @@
       "skills": {
         "Machine Learning": 1186,
         "LLM": 286,
-        "Agents": 259,
+        "Agents": 260,
         "GenAI": 250,
         "RAG": 173,
         "PyTorch": 173,
