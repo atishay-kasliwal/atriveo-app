@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-04-27T03:05:27.115476+00:00",
-  "total_analyzed": 2541,
+  "generated_at": "2026-04-27T04:04:35.500932+00:00",
+  "total_analyzed": 2542,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
@@ -53,9 +53,9 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 526,
-        "Azure": 303,
-        "GCP": 274,
+        "AWS": 527,
+        "Azure": 304,
+        "GCP": 275,
         "S3": 56,
         "Serverless": 49,
         "Lambda": 45,
@@ -136,11 +136,11 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 1293,
-        "LLM": 342,
+        "LLM": 343,
         "Agents": 282,
         "GenAI": 267,
         "PyTorch": 222,
-        "RAG": 195,
+        "RAG": 196,
         "TensorFlow": 163,
         "Deep Learning": 136,
         "NLP": 131,
