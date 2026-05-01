@@ -1,85 +1,39 @@
-# React + TypeScript + Vite
+# Atriveo App
 
-## Auto Deploy On `main`
+A full-stack job search platform that automatically captures job applications through a Chrome extension, tracks them in a centralized dashboard, and provides AI-powered insights to streamline your job search.
 
-This repo now includes a GitHub Actions workflow at `.github/workflows/deploy-main.yml`.
+## Features
 
-It will build and deploy to Cloudflare Pages on every push to `main`.
+- **Chrome Extension** — One-click job capture from LinkedIn, Indeed, and other job boards (5.0 stars on the Chrome Web Store)
+- **Application Dashboard** — Centralized tracking for all applications with status, company, and timeline
+- **AI-Powered Search** — RAG-based contextual recommendations and search across your pipeline
+- **Analytics** — Visual insights into application pipeline and response rates
 
-Set these GitHub repository secrets first:
+## Tech Stack
+
+**Frontend:** React, TypeScript, Vite, TailwindCSS
+**Backend:** Python, FastAPI, PostgreSQL
+**AI:** LangChain, RAG pipeline
+**Infrastructure:** Docker, Cloudflare Pages, Cloudflare Workers
+
+## Highlights
+
+- 100+ active users, 2K+ daily queries, 99.9% uptime
+- Open source Chrome extension with 5.0 stars on the Chrome Web Store
+- Multi-service architecture with serverless edge deployment
+
+## Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+Set these GitHub repository secrets for deployment:
 
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_PROJECT_NAME` (optional; defaults to `atriveo-app` if omitted)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## License
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+MIT
