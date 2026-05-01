@@ -1163,6 +1163,30 @@ footer a:hover { color: var(--blue); }
   font-family: "Inter", monospace; text-align: right;
 }
 
+/* Today split layout */
+.today-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 900px) { .today-split { grid-template-columns: 1fr; } }
+
+.split-panel { min-width: 0; }
+
+.split-panel-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 6px; padding: 0 2px;
+}
+.split-panel-title {
+  font-size: 11px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text-2);
+}
+.split-panel-count {
+  font-size: 10px; color: var(--muted);
+  font-family: "Inter", monospace;
+}
+
 .refresh-btn {
   padding: 7px 14px; font-size: 12px; font-weight: 600;
   background: var(--surface); border: 1px solid var(--border);

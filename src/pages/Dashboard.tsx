@@ -19,6 +19,16 @@ type RunCard = RunEntry & {
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
+const DS_TERM_RE  = /data\s*sci/i;
+const DS_TITLE_RE = /data\s*sci/i;
+
+function isDataScientist(job: Job): boolean {
+  return (
+    DS_TERM_RE.test(job.search_term || "") ||
+    DS_TITLE_RE.test(job.title || "")
+  );
+}
+
 function parseDateLike(iso?: string | null): Date | null {
   if (!iso) return null;
   const value = iso.trim();
@@ -181,6 +191,10 @@ export default function Dashboard() {
     () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
     [rawJobs]
   );
+
+  const isSplitView = period === "today";
+  const dsJobs    = useMemo(() => isSplitView ? filtered.filter(isDataScientist)    : [], [filtered, isSplitView]);
+  const otherJobs = useMemo(() => isSplitView ? filtered.filter(j => !isDataScientist(j)) : [], [filtered, isSplitView]);
 
   const ngCount = filtered.filter((j) => j.level === "New Grad").length;
   const bestJob = [...todayJobs].sort((a, b) => (b.ats_score ?? b.score_pct ?? 0) - (a.ats_score ?? a.score_pct ?? 0))[0];
@@ -391,54 +405,90 @@ export default function Dashboard() {
               </select>
             </div>
 
-            <div className="result-meta">
-              {filtered.length} job{filtered.length !== 1 ? "s" : ""}
-              {ngCount ? ` · ${ngCount} New Grad` : ""}
-            </div>
+            {!isSplitView && (
+              <div className="result-meta">
+                {filtered.length} job{filtered.length !== 1 ? "s" : ""}
+                {ngCount ? ` · ${ngCount} New Grad` : ""}
+              </div>
+            )}
 
-            {/* Job list */}
-            <div className="job-list">
-              {loading ? (
-                <div className="state-msg"><div className="icon">⏳</div>Loading…</div>
-              ) : filtered.length === 0 ? (
-                <div className="state-msg"><div className="icon">🔍</div>No jobs found</div>
-              ) : (
-                <>
-                  <div className="job-list-header">
-                    <span>Score</span>
-                    <span
-                      className={`col-sort${sortBy === "company" ? " active" : ""}`}
-                      onClick={() => setSortBy("company")}
-                      title="Sort by company"
-                    >Company {sortBy === "company" ? "↑" : ""}</span>
-                    <span />
-                    <span>Role</span>
-                    <span
-                      className={`col-sort${sortBy === "ats" ? " active" : ""}`}
-                      onClick={() => setSortBy("ats")}
-                      title="Sort by ATS score"
-                    >ATS {sortBy === "ats" ? "↓" : ""}</span>
-                    <span
-                      className={`col-sort${sortBy === "fit" ? " active" : ""}`}
-                      onClick={() => setSortBy("fit")}
-                      title="Sort by Fit score"
-                    >Fit {sortBy === "fit" ? "↓" : ""}</span>
-                    <span>Level</span>
-                    <span>Apply</span>
+            {/* Job list — split (Today) or single */}
+            {isSplitView ? (
+              <div className="today-split">
+                {[
+                  { label: "Data Scientist", jobs: dsJobs },
+                  { label: "Everything Else", jobs: otherJobs },
+                ].map(({ label, jobs }) => (
+                  <div key={label} className="split-panel">
+                    <div className="split-panel-header">
+                      <span className="split-panel-title">{label}</span>
+                      <span className="split-panel-count">{jobs.length} jobs{jobs.filter(j => j.level === "New Grad").length ? ` · ${jobs.filter(j => j.level === "New Grad").length} NG` : ""}</span>
+                    </div>
+                    <div className="job-list">
+                      {loading ? (
+                        <div className="state-msg"><div className="spin" style={{ margin: "0 auto" }} /></div>
+                      ) : jobs.length === 0 ? (
+                        <div className="state-msg" style={{ fontSize: 13 }}>No jobs found</div>
+                      ) : (
+                        <>
+                          <div className="job-list-header">
+                            <span>Score</span>
+                            <span className={`col-sort${sortBy === "company" ? " active" : ""}`} onClick={() => setSortBy("company")} title="Sort by company">Co {sortBy === "company" ? "↑" : ""}</span>
+                            <span />
+                            <span>Role</span>
+                            <span className={`col-sort${sortBy === "ats" ? " active" : ""}`} onClick={() => setSortBy("ats")} title="Sort by ATS">ATS {sortBy === "ats" ? "↓" : ""}</span>
+                            <span className={`col-sort${sortBy === "fit" ? " active" : ""}`} onClick={() => setSortBy("fit")} title="Sort by Fit">Fit {sortBy === "fit" ? "↓" : ""}</span>
+                            <span>Level</span>
+                            <span>Apply</span>
+                          </div>
+                          {jobs.map((job, i) => (
+                            <JobRow
+                              key={job.job_url || i}
+                              job={job}
+                              index={i}
+                              applyRecord={job.job_url ? getRecord(job.job_url) : null}
+                              onApplyClick={recordClick}
+                              onExcludeCompany={excludeCompany}
+                            />
+                          ))}
+                        </>
+                      )}
+                    </div>
                   </div>
-                  {filtered.map((job, i) => (
-                    <JobRow
-                      key={job.job_url || i}
-                      job={job}
-                      index={i}
-                      applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                      onApplyClick={recordClick}
-                      onExcludeCompany={excludeCompany}
-                    />
-                  ))}
-                </>
-              )}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="job-list">
+                {loading ? (
+                  <div className="state-msg"><div className="icon">⏳</div>Loading…</div>
+                ) : filtered.length === 0 ? (
+                  <div className="state-msg"><div className="icon">🔍</div>No jobs found</div>
+                ) : (
+                  <>
+                    <div className="job-list-header">
+                      <span>Score</span>
+                      <span className={`col-sort${sortBy === "company" ? " active" : ""}`} onClick={() => setSortBy("company")} title="Sort by company">Company {sortBy === "company" ? "↑" : ""}</span>
+                      <span />
+                      <span>Role</span>
+                      <span className={`col-sort${sortBy === "ats" ? " active" : ""}`} onClick={() => setSortBy("ats")} title="Sort by ATS score">ATS {sortBy === "ats" ? "↓" : ""}</span>
+                      <span className={`col-sort${sortBy === "fit" ? " active" : ""}`} onClick={() => setSortBy("fit")} title="Sort by Fit score">Fit {sortBy === "fit" ? "↓" : ""}</span>
+                      <span>Level</span>
+                      <span>Apply</span>
+                    </div>
+                    {filtered.map((job, i) => (
+                      <JobRow
+                        key={job.job_url || i}
+                        job={job}
+                        index={i}
+                        applyRecord={job.job_url ? getRecord(job.job_url) : null}
+                        onApplyClick={recordClick}
+                        onExcludeCompany={excludeCompany}
+                      />
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
