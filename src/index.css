@@ -1174,6 +1174,21 @@ footer a:hover { color: var(--blue); }
 
 .split-panel { min-width: 0; }
 
+/* Compact grid for split panels — collapse avatar col, tighten everything */
+.split-panel .job-list-header,
+.split-panel .job-card {
+  grid-template-columns: 44px minmax(0,120px) 0px minmax(0,1fr) 42px 42px 54px 78px;
+  gap: 0 6px;
+}
+/* Hide avatar (0px col keeps grid alignment) */
+.split-panel .job-card > .avatar { display: none; }
+/* Hide search-term badge — redundant in a pre-filtered panel */
+.split-panel .badge-term { display: none; }
+/* Slightly smaller apply button */
+.split-panel .apply-btn { font-size: 11px; padding: 4px 8px; }
+/* Company column: smaller font so it fits */
+.split-panel .job-company-col { font-size: 11.5px; }
+
 .split-panel-header {
   display: flex; align-items: baseline; justify-content: space-between;
   margin-bottom: 6px; padding: 0 2px;
