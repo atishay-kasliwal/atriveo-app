@@ -437,8 +437,6 @@ export default function Dashboard() {
                             <span />
                             <span>Role</span>
                             <span className={`col-sort${sortBy === "ats" ? " active" : ""}`} onClick={() => setSortBy("ats")} title="Sort by ATS">ATS {sortBy === "ats" ? "↓" : ""}</span>
-                            <span className={`col-sort${sortBy === "fit" ? " active" : ""}`} onClick={() => setSortBy("fit")} title="Sort by Fit">Fit {sortBy === "fit" ? "↓" : ""}</span>
-                            <span>Level</span>
                             <span>Apply</span>
                           </div>
                           {jobs.map((job, i) => (
