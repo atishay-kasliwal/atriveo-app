@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-05-03T04:04:17.050542+00:00",
-  "total_analyzed": 6687,
+  "generated_at": "2026-05-03T05:04:49.874965+00:00",
+  "total_analyzed": 6689,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 4195,
-        "Java": 2322,
-        "JavaScript": 1676,
-        "SQL": 1630,
+        "Python": 4197,
+        "Java": 2323,
+        "JavaScript": 1677,
+        "SQL": 1631,
         "TypeScript": 1469,
         "Kotlin": 968,
         "Swift": 867,
-        "HTML/CSS": 354,
-        ".NET": 255,
+        "HTML/CSS": 355,
+        ".NET": 256,
         "Rust": 244,
         "Bash/Shell": 160,
         "Go": 148,
@@ -27,19 +27,19 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 1596,
+        "React": 1597,
         "PyTorch": 648,
         "TensorFlow": 505,
         "Node.js": 319,
         "Pandas": 314,
         "LangChain": 302,
-        "Angular": 295,
+        "Angular": 296,
         "Scikit-learn": 292,
         "Spring": 258,
         "NumPy": 247,
         "GraphQL": 175,
         "Express": 138,
-        "Vue": 137,
+        "Vue": 138,
         "Spring Boot": 136,
         "FastAPI": 128,
         "Next.js": 125,
@@ -75,11 +75,11 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 2379,
+        "Scalability": 2381,
         "REST API": 861,
-        "Distributed Systems": 827,
+        "Distributed Systems": 828,
         "System Design": 569,
-        "Microservices": 400,
+        "Microservices": 401,
         "Kafka": 300,
         "Event-Driven": 193,
         "API Design": 193,
@@ -94,10 +94,10 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 1224,
-        "Kubernetes": 759,
+        "CI/CD": 1225,
+        "Kubernetes": 760,
         "Git": 728,
-        "Docker": 639,
+        "Docker": 640,
         "Linux": 590,
         "Terraform": 297,
         "Jenkins": 218,
@@ -173,9 +173,9 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 1541,
-        "Code Review": 1262,
-        "Mentorship": 1128,
+        "Cross-functional": 1542,
+        "Code Review": 1264,
+        "Mentorship": 1129,
         "Agile/Scrum": 943,
         "On-call": 380,
         "Leadership": 292
