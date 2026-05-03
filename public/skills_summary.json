@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-05-03T00:05:14.244054+00:00",
-  "total_analyzed": 6677,
+  "generated_at": "2026-05-03T01:05:11.286298+00:00",
+  "total_analyzed": 6680,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
         "Python": 4189,
-        "Java": 2319,
+        "Java": 2320,
         "JavaScript": 1675,
-        "SQL": 1626,
+        "SQL": 1627,
         "TypeScript": 1468,
         "Kotlin": 968,
         "Swift": 867,
@@ -18,7 +18,7 @@
         "Bash/Shell": 159,
         "Go": 148,
         "Scala": 143,
-        "Ruby": 110,
+        "Ruby": 111,
         "PHP": 37,
         "C#": 2,
         "C++": 1
@@ -54,7 +54,7 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 1636,
+        "AWS": 1637,
         "Azure": 989,
         "GCP": 824,
         "S3": 168,
@@ -76,9 +76,9 @@
       "color": "#0ea5e9",
       "skills": {
         "Scalability": 2376,
-        "REST API": 860,
+        "REST API": 861,
         "Distributed Systems": 827,
-        "System Design": 568,
+        "System Design": 569,
         "Microservices": 400,
         "Kafka": 300,
         "Event-Driven": 193,
@@ -94,13 +94,13 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 1223,
+        "CI/CD": 1224,
         "Kubernetes": 759,
         "Git": 727,
         "Docker": 639,
         "Linux": 590,
         "Terraform": 297,
-        "Jenkins": 217,
+        "Jenkins": 218,
         "GitHub Actions": 127,
         "Grafana": 69,
         "Ansible": 67,
@@ -138,7 +138,7 @@
       "skills": {
         "Machine Learning": 2373,
         "LLM": 1000,
-        "Agents": 896,
+        "Agents": 897,
         "GenAI": 708,
         "PyTorch": 648,
         "RAG": 527,
@@ -173,9 +173,9 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 1537,
-        "Code Review": 1260,
-        "Mentorship": 1127,
+        "Cross-functional": 1538,
+        "Code Review": 1261,
+        "Mentorship": 1128,
         "Agile/Scrum": 941,
         "On-call": 380,
         "Leadership": 292
