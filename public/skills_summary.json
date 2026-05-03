@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-05-03T03:05:00.358859+00:00",
-  "total_analyzed": 6686,
+  "generated_at": "2026-05-03T04:04:17.050542+00:00",
+  "total_analyzed": 6687,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 4194,
-        "Java": 2321,
+        "Python": 4195,
+        "Java": 2322,
         "JavaScript": 1676,
-        "SQL": 1629,
+        "SQL": 1630,
         "TypeScript": 1469,
         "Kotlin": 968,
         "Swift": 867,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 2378,
+        "Scalability": 2379,
         "REST API": 861,
         "Distributed Systems": 827,
         "System Design": 569,
@@ -136,17 +136,17 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 2375,
-        "LLM": 1001,
-        "Agents": 898,
-        "GenAI": 709,
+        "Machine Learning": 2376,
+        "LLM": 1002,
+        "Agents": 899,
+        "GenAI": 710,
         "PyTorch": 648,
-        "RAG": 527,
+        "RAG": 528,
         "TensorFlow": 505,
-        "NLP": 460,
+        "NLP": 461,
         "Deep Learning": 405,
-        "Fine-tuning": 344,
-        "Prompt Eng": 303,
+        "Fine-tuning": 345,
+        "Prompt Eng": 304,
         "LangChain": 302,
         "OpenAI": 249,
         "Hugging Face": 179,
