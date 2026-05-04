@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-05-04T02:05:22.675197+00:00",
-  "total_analyzed": 6997,
+  "generated_at": "2026-05-04T03:04:16.663952+00:00",
+  "total_analyzed": 7001,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 4396,
+        "Python": 4398,
         "Java": 2397,
         "JavaScript": 1735,
-        "SQL": 1718,
+        "SQL": 1720,
         "TypeScript": 1505,
         "Kotlin": 976,
         "Swift": 898,
@@ -124,7 +124,7 @@
         "Databricks": 197,
         "Airflow": 188,
         "MongoDB": 174,
-        "Redis": 157,
+        "Redis": 158,
         "BigQuery": 99,
         "Elasticsearch": 88,
         "dbt": 85,
@@ -136,14 +136,14 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 2479,
+        "Machine Learning": 2481,
         "LLM": 1071,
-        "Agents": 930,
+        "Agents": 931,
         "GenAI": 735,
         "PyTorch": 697,
         "RAG": 550,
         "TensorFlow": 547,
-        "NLP": 489,
+        "NLP": 490,
         "Deep Learning": 434,
         "Fine-tuning": 369,
         "Prompt Eng": 319,

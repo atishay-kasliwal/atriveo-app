@@ -270,7 +270,7 @@
     "summary": "This role works closely with solution architects and platform teams to ensure AI solutions are production\\-ready, aligned with GEI standards, and capable of scaling across use cases.",
     "title": "AI Engineer",
     "ats_score": 33,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4409847429",
@@ -2307,7 +2307,7 @@
     "summary": "**Job Description** **Software Engineer** **Locations** : San Francisco CA (hybrid) **Get To Know The Team** The Geneva Web Team is part of the Geneva Product Development.",
     "title": "Software Engineer",
     "ats_score": 66,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-05-03T14:08:53Z",
@@ -3703,7 +3703,7 @@
     "summary": "**About Pinterest** Millions of people around the world come to our platform to find creative ideas, dream about new possibilities and plan for memories that will last a lifetime.",
     "title": "Machine Learning Engineer, Monetization Engineering",
     "ats_score": 28,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4357633225",
@@ -5775,7 +5775,7 @@
     "summary": "This role works closely with solution architects and platform teams to ensure AI solutions are production\\-ready, aligned with GEI standards, and capable of scaling across use cases.",
     "title": "AI Engineer",
     "ats_score": 33,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-05-03T21:07:59Z",
@@ -5838,7 +5838,7 @@
     "summary": "* 1\\+ years of experience of cloud native development with AWS, Microsoft Azure, or another cloud service.",
     "title": "Software Engineer",
     "ats_score": 28,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-05-03T21:07:59Z",
@@ -6595,5 +6595,89 @@
     "title": "Pricipal Forward Deployed AI engineer",
     "ats_score": 0,
     "fit_score": 6
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4409888661",
+    "session_id": "2026-05-04T03:03:12Z",
+    "batch_time": "2026-05-04T03:03:11Z",
+    "company": "The New York Times",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "New York, NY",
+    "max_exp": 2.0,
+    "min_exp": 2.0,
+    "pipeline": "standard",
+    "score": 56,
+    "score_pct": 43,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**The mission of The New York Times is to seek the truth and help people understand the world.",
+    "title": "Machine Learning Scientist, Marketing",
+    "ats_score": 75,
+    "fit_score": 6
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4408618122",
+    "session_id": "2026-05-04T03:03:12Z",
+    "batch_time": "2026-05-04T03:03:11Z",
+    "company": "Mercor",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "New York, NY",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 23,
+    "score_pct": 18,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**Qualifications** **Must\\-Have** * 4\\+ years of professional experience in data analysis, analytics engineering, or data science.",
+    "title": "Data Scientist | Upto $120/hr",
+    "ats_score": 100,
+    "fit_score": 3
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4408636143",
+    "session_id": "2026-05-04T03:03:12Z",
+    "batch_time": "2026-05-04T03:03:11Z",
+    "company": "Mercor",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "* Design and implement tool\\-use runtimes and multi\\-step workflows for agent systems. * Collaborate on both frontier\\-lab and applied\\-product projects to innovate AI solutions.",
+    "title": "AI Software Engineer | Upto $500",
+    "ats_score": 0,
+    "fit_score": 3
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4410005308",
+    "session_id": "2026-05-04T03:03:12Z",
+    "batch_time": "2026-05-04T03:03:11Z",
+    "company": "Alignerr",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "We're looking for domain experts with deep machine learning knowledge to design evaluation challenges that push state\\-of\\-the\\-art AI systems to their limits.",
+    "title": "Machine Learning Evaluation Specialist",
+    "ats_score": 0,
+    "fit_score": 4
   }
 ]
