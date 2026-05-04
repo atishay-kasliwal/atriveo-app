@@ -1,24 +1,24 @@
 {
-  "generated_at": "2026-05-04T01:04:47.726020+00:00",
-  "total_analyzed": 6978,
+  "generated_at": "2026-05-04T02:05:22.675197+00:00",
+  "total_analyzed": 6997,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 4384,
-        "Java": 2393,
-        "JavaScript": 1730,
-        "SQL": 1710,
-        "TypeScript": 1499,
+        "Python": 4396,
+        "Java": 2397,
+        "JavaScript": 1735,
+        "SQL": 1718,
+        "TypeScript": 1505,
         "Kotlin": 976,
         "Swift": 898,
-        "HTML/CSS": 384,
+        "HTML/CSS": 385,
+        "Rust": 265,
         ".NET": 265,
-        "Rust": 261,
         "Bash/Shell": 163,
         "Go": 154,
         "Scala": 148,
-        "Ruby": 117,
+        "Ruby": 118,
         "PHP": 43,
         "C#": 2,
         "C++": 1
@@ -27,26 +27,26 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 1633,
-        "PyTorch": 689,
-        "TensorFlow": 539,
+        "React": 1634,
+        "PyTorch": 697,
+        "TensorFlow": 547,
         "Node.js": 332,
         "Pandas": 329,
+        "Scikit-learn": 320,
         "LangChain": 312,
-        "Scikit-learn": 312,
-        "Angular": 306,
+        "Angular": 307,
         "Spring": 273,
         "NumPy": 258,
         "GraphQL": 187,
         "Express": 152,
         "Spring Boot": 144,
-        "Vue": 140,
+        "Vue": 141,
+        "Next.js": 132,
         "FastAPI": 131,
-        "Next.js": 131,
         "Django": 125,
         "Flask": 111,
         "Selenium": 105,
-        "Rails": 67,
+        "Rails": 68,
         "Playwright": 41,
         "NestJS": 16
       }
@@ -54,13 +54,13 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 1718,
+        "AWS": 1719,
         "Azure": 1039,
         "GCP": 857,
-        "S3": 180,
+        "S3": 181,
         "Lambda": 151,
         "Serverless": 132,
-        "EC2": 112,
+        "EC2": 113,
         "DynamoDB": 98,
         "API Gateway": 74,
         "SQS": 60,
@@ -77,7 +77,7 @@
       "skills": {
         "Scalability": 2497,
         "REST API": 894,
-        "Distributed Systems": 862,
+        "Distributed Systems": 863,
         "System Design": 585,
         "Microservices": 430,
         "Kafka": 313,
@@ -94,9 +94,9 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 1267,
+        "CI/CD": 1277,
         "Kubernetes": 798,
-        "Git": 755,
+        "Git": 756,
         "Docker": 674,
         "Linux": 611,
         "Terraform": 309,
@@ -114,9 +114,9 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 971,
-        "PostgreSQL": 471,
-        "Spark": 409,
+        "ETL/ELT": 973,
+        "PostgreSQL": 472,
+        "Spark": 417,
         "Kafka": 313,
         "Vector DB": 295,
         "MySQL": 280,
@@ -136,16 +136,16 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 2471,
-        "LLM": 1061,
-        "Agents": 928,
+        "Machine Learning": 2479,
+        "LLM": 1071,
+        "Agents": 930,
         "GenAI": 735,
-        "PyTorch": 689,
-        "RAG": 549,
-        "TensorFlow": 539,
-        "NLP": 481,
-        "Deep Learning": 426,
-        "Fine-tuning": 367,
+        "PyTorch": 697,
+        "RAG": 550,
+        "TensorFlow": 547,
+        "NLP": 489,
+        "Deep Learning": 434,
+        "Fine-tuning": 369,
         "Prompt Eng": 319,
         "LangChain": 312,
         "OpenAI": 262,
@@ -153,7 +153,7 @@
         "Embeddings": 179,
         "Vertex AI": 124,
         "SageMaker": 106,
-        "MLflow": 75
+        "MLflow": 76
       }
     },
     "Security": {
@@ -174,8 +174,8 @@
       "color": "#64748b",
       "skills": {
         "Cross-functional": 1613,
-        "Code Review": 1313,
-        "Mentorship": 1184,
+        "Code Review": 1318,
+        "Mentorship": 1193,
         "Agile/Scrum": 974,
         "On-call": 394,
         "Leadership": 307
