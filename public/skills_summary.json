@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-04T00:04:57.046573+00:00",
-  "total_analyzed": 6974,
+  "generated_at": "2026-05-04T01:04:47.726020+00:00",
+  "total_analyzed": 6978,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 4382,
+        "Python": 4384,
         "Java": 2393,
         "JavaScript": 1730,
         "SQL": 1710,
@@ -14,7 +14,7 @@
         "Swift": 898,
         "HTML/CSS": 384,
         ".NET": 265,
-        "Rust": 260,
+        "Rust": 261,
         "Bash/Shell": 163,
         "Go": 154,
         "Scala": 148,
@@ -42,7 +42,7 @@
         "Spring Boot": 144,
         "Vue": 140,
         "FastAPI": 131,
-        "Next.js": 130,
+        "Next.js": 131,
         "Django": 125,
         "Flask": 111,
         "Selenium": 105,
@@ -75,10 +75,10 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 2496,
+        "Scalability": 2497,
         "REST API": 894,
         "Distributed Systems": 862,
-        "System Design": 584,
+        "System Design": 585,
         "Microservices": 430,
         "Kafka": 313,
         "Event-Driven": 208,
@@ -94,14 +94,14 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 1265,
+        "CI/CD": 1267,
         "Kubernetes": 798,
-        "Git": 754,
+        "Git": 755,
         "Docker": 674,
-        "Linux": 609,
+        "Linux": 611,
         "Terraform": 309,
         "Jenkins": 224,
-        "GitHub Actions": 130,
+        "GitHub Actions": 131,
         "Grafana": 74,
         "Prometheus": 70,
         "Ansible": 68,
@@ -114,7 +114,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 970,
+        "ETL/ELT": 971,
         "PostgreSQL": 471,
         "Spark": 409,
         "Kafka": 313,
@@ -137,8 +137,8 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 2471,
-        "LLM": 1060,
-        "Agents": 927,
+        "LLM": 1061,
+        "Agents": 928,
         "GenAI": 735,
         "PyTorch": 689,
         "RAG": 549,
@@ -146,7 +146,7 @@
         "NLP": 481,
         "Deep Learning": 426,
         "Fine-tuning": 367,
-        "Prompt Eng": 318,
+        "Prompt Eng": 319,
         "LangChain": 312,
         "OpenAI": 262,
         "Hugging Face": 193,
@@ -164,7 +164,7 @@
         "GDPR": 70,
         "JWT": 52,
         "IAM": 43,
-        "SOC 2": 42,
+        "SOC 2": 43,
         "TLS/SSL": 25,
         "RBAC": 23,
         "Zero Trust": 5
