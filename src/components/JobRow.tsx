@@ -63,6 +63,15 @@ function scoreColor(s: number) {
   return s >= 12 ? "score-hi" : s >= 6 ? "score-md" : "";
 }
 
+function finiteOrNull(value: unknown): number | null {
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function finiteOrZero(value: unknown): number {
+  return finiteOrNull(value) ?? 0;
+}
+
 
 interface Props {
   job: Job;
@@ -77,9 +86,9 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
   const title = job.title || "—";
   const initial = co.charAt(0).toUpperCase();
   const color = avatarColor(co);
-  const score = job.score ?? 0;
-  const ats = job.ats_score ?? null;
-  const fit = job.fit_score ?? null;
+  const score = finiteOrZero(job.score);
+  const ats = finiteOrNull(job.ats_score ?? job.score_pct);
+  const fit = finiteOrNull(job.fit_score);
   const lvl = job.level || "Entry";
   const exp = fmtExp(job.min_exp, job.max_exp);
   const batch = fmtBatch(job.batch_time);

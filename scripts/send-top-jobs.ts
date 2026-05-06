@@ -32,14 +32,31 @@ interface Job {
   company: string;
   location: string;
   level: string;
-  keyword_score: number;
+  keyword_score?: number;
+  score_pct?: number;
+  ats_score?: number;
   job_url: string;
 }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
 function computePct(job: Job): number {
-  return Math.min(100, Math.round((job.keyword_score / MAX_SCORE) * 100));
+  const pctFromScorePct = Number(job.score_pct);
+  if (Number.isFinite(pctFromScorePct)) {
+    return Math.max(0, Math.min(100, Math.round(pctFromScorePct)));
+  }
+
+  const pctFromAts = Number(job.ats_score);
+  if (Number.isFinite(pctFromAts)) {
+    return Math.max(0, Math.min(100, Math.round(pctFromAts)));
+  }
+
+  const rawKeyword = Number(job.keyword_score);
+  if (Number.isFinite(rawKeyword) && rawKeyword >= 0) {
+    return Math.min(100, Math.round((rawKeyword / MAX_SCORE) * 100));
+  }
+
+  return 0;
 }
 
 // Use rank-based colours so the digest always has meaningful visual hierarchy
@@ -350,14 +367,26 @@ async function main() {
     hour: "numeric", minute: "2-digit", hour12: true,
   });
 
-  // 2. Fetch top 20 jobs by keyword_score from that session
-  const jobs = (await db
+  // 2. Fetch jobs and sort by best available score field for top 20 email.
+  const jobsAll = (await db
     .collection("jobs")
     .find({ session_id: sessionId })
-    .sort({ keyword_score: -1 })
-    .limit(20)
-    .project({ _id: 0, title: 1, company: 1, location: 1, level: 1, keyword_score: 1, job_url: 1 })
+    .project({
+      _id: 0,
+      title: 1,
+      company: 1,
+      location: 1,
+      level: 1,
+      keyword_score: 1,
+      score_pct: 1,
+      ats_score: 1,
+      job_url: 1,
+    })
     .toArray()) as Job[];
+
+  const jobs = jobsAll
+    .sort((a, b) => computePct(b) - computePct(a))
+    .slice(0, 20);
 
   await client.close();
 
