@@ -1177,24 +1177,28 @@ footer a:hover { color: var(--blue); }
 /* Split panel: 6-column layout (Score | Co | Avatar | Role | ATS | Apply) */
 .split-panel .job-list-header,
 .split-panel .job-card {
-  grid-template-columns: 44px minmax(0,110px) 22px minmax(0,1fr) 52px 90px;
+  grid-template-columns: 44px minmax(0,110px) 22px minmax(0,1fr) 52px 84px;
   gap: 0 6px;
 }
 /* Explicit grid-column on every card child so display:none doesn't shift others */
-.split-panel .job-card > .job-score       { grid-column: 1; }
-.split-panel .job-card > .job-company-col { grid-column: 2; }
-.split-panel .job-card > .avatar         { grid-column: 3; width: 22px; height: 22px; font-size: 9px; border-radius: 6px; }
-.split-panel .job-card > .job-main       { grid-column: 4; }
-.split-panel .job-card > .ats-col        { grid-column: 5; }
-.split-panel .job-card > .fit-col        { display: none; }
-.split-panel .job-card > .job-level-col  { display: none; }
-.split-panel .job-card > .job-apply-col  { grid-column: 6; }
-/* Hide source badge (LinkedIn etc.) and search-term badge */
+.split-panel .job-score       { grid-column: 1; }
+.split-panel .job-company-col { grid-column: 2; }
+.split-panel .avatar          { grid-column: 3; width: 22px; height: 22px; font-size: 9px; border-radius: 6px; }
+.split-panel .job-main        { grid-column: 4; }
+.split-panel .ats-col         { grid-column: 5; }
+.split-panel .fit-col         { display: none !important; }
+.split-panel .job-level-col   { display: none !important; }
+.split-panel .job-apply-col   { grid-column: 6; }
+/* Hide source badge, search-term badge */
 .split-panel .badge-src,
 .split-panel .badge-term { display: none; }
-/* Slightly smaller apply button */
-.split-panel .apply-btn { font-size: 11px; padding: 4px 8px; }
-/* Company column: smaller font */
+/* Compact rows */
+.split-panel .job-card { padding: 7px 10px 7px 12px; }
+/* Inline apply area — mark + button side by side */
+.split-panel .job-apply-col { flex-direction: row; gap: 4px; align-items: center; }
+.split-panel .apply-btn { font-size: 11px; padding: 4px 9px; }
+.split-panel .mark-btn  { width: 20px; height: 20px; font-size: 10px; }
+/* Company smaller font */
 .split-panel .job-company-col { font-size: 11.5px; }
 
 .split-panel-header {

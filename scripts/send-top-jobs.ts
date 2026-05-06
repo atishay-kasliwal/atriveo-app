@@ -1,5 +1,5 @@
 /**
- * Send a top-10 jobs digest email via Resend for the most recent pipeline session.
+ * Send a top-20 jobs digest email via Resend for the latest session in this hour.
  *
  * Usage:  npx tsx scripts/send-top-jobs.ts
  *
@@ -65,6 +65,10 @@ function levelColor(level: string): { bg: string; text: string; border: string }
 const COL = { rank: 44, level: 96, match: 68, apply: 88 };
 
 function renderEmail(jobs: Job[], sessionTime: string): string {
+  const avgMatch = Math.round(
+    jobs.reduce((sum, job) => sum + computePct(job), 0) / Math.max(1, jobs.length),
+  );
+
   const rows = jobs.map((j, i) => {
     const rank      = i + 1;
     const pct       = computePct(j);
@@ -112,6 +116,15 @@ function renderEmail(jobs: Job[], sessionTime: string): string {
           font-size:12px; font-weight:700; white-space:nowrap;">
           ${pct}%
         </span>
+        <div style="
+          width:54px; height:4px; border-radius:999px;
+          background:#e2e8f0; margin:6px auto 0;">
+          <div style="
+            width:${Math.max(6, Math.min(54, Math.round((pct / 100) * 54)))}px;
+            height:4px; border-radius:999px;
+            background:linear-gradient(90deg,#2563eb,#0ea5e9);">
+          </div>
+        </div>
       </td>
       <td width="${COL.apply}" style="padding:14px 16px 14px 8px; vertical-align:middle; text-align:right;">
         <a href="${j.job_url}" style="
@@ -166,7 +179,7 @@ function renderEmail(jobs: Job[], sessionTime: string): string {
               </tr>
               <tr><td style="padding-top:18px;">
                 <div style="color:#fff; font-size:24px; font-weight:700; letter-spacing:-0.03em;">
-                  Top 10 Jobs This Hour
+                  Top 20 Jobs This Hour
                 </div>
                 <div style="color:#94a3b8; font-size:12.5px; margin-top:5px;">
                   <span style="
@@ -176,6 +189,39 @@ function renderEmail(jobs: Job[], sessionTime: string): string {
                   </span>
                   Run at ${sessionTime} &nbsp;&middot;&nbsp; ranked by match score
                 </div>
+              </td></tr>
+              <tr><td style="padding-top:14px;">
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-right:8px;">
+                      <span style="
+                        display:inline-block; border-radius:999px;
+                        border:1px solid rgba(148,163,184,.35);
+                        color:#cbd5e1; font-size:11px; font-weight:600;
+                        padding:5px 10px;">
+                        ${jobs.length} roles
+                      </span>
+                    </td>
+                    <td style="padding-right:8px;">
+                      <span style="
+                        display:inline-block; border-radius:999px;
+                        border:1px solid rgba(148,163,184,.35);
+                        color:#cbd5e1; font-size:11px; font-weight:600;
+                        padding:5px 10px;">
+                        Avg match ${avgMatch}%
+                      </span>
+                    </td>
+                    <td>
+                      <span style="
+                        display:inline-block; border-radius:999px;
+                        border:1px solid rgba(34,197,94,.45);
+                        color:#bbf7d0; font-size:11px; font-weight:600;
+                        padding:5px 10px;">
+                        Updated hourly
+                      </span>
+                    </td>
+                  </tr>
+                </table>
               </td></tr>
             </table>
           </td>
@@ -266,10 +312,30 @@ async function main() {
 
   const db = client.db("job_pipeline");
 
-  // 1. Find the most recent non-archived session
-  const latestSession = await db
-    .collection("sessions")
-    .findOne({ archived: false }, { sort: { run_at: -1 } });
+  // 1. Prefer the latest non-archived session from the current hour.
+  const now = new Date();
+  const hourStart = new Date(now);
+  hourStart.setMinutes(0, 0, 0);
+  const hourEnd = new Date(hourStart);
+  hourEnd.setHours(hourEnd.getHours() + 1);
+
+  let latestSession = await db.collection("sessions").findOne(
+    {
+      archived: false,
+      run_at: {
+        $gte: hourStart.toISOString(),
+        $lt: hourEnd.toISOString(),
+      },
+    },
+    { sort: { run_at: -1 } },
+  );
+
+  // Fallback: if no run landed in the current hour, use the latest session.
+  if (!latestSession) {
+    latestSession = await db
+      .collection("sessions")
+      .findOne({ archived: false }, { sort: { run_at: -1 } });
+  }
 
   if (!latestSession) {
     console.log("No active sessions found — nothing to send.");
@@ -284,12 +350,12 @@ async function main() {
     hour: "numeric", minute: "2-digit", hour12: true,
   });
 
-  // 2. Fetch top 10 jobs by keyword_score from that session
+  // 2. Fetch top 20 jobs by keyword_score from that session
   const jobs = (await db
     .collection("jobs")
     .find({ session_id: sessionId })
     .sort({ keyword_score: -1 })
-    .limit(10)
+    .limit(20)
     .project({ _id: 0, title: 1, company: 1, location: 1, level: 1, keyword_score: 1, job_url: 1 })
     .toArray()) as Job[];
 
