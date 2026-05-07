@@ -167,8 +167,8 @@ function JobCard({ job, isApplied, onApply }: CardProps) {
 
 export default function Unclicked100() {
   const { user, logout } = useAuth();
-  const { stats, recordClick, getRecord } = useApplyTracker();
-  const { isExcluded, excludeCompany } = useExclusions();
+  const { stats, recordClick } = useApplyTracker();
+  const { isExcluded } = useExclusions();
   const [weekJobs, setWeekJobs] = useState<WeekJob[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
