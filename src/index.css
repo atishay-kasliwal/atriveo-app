@@ -621,10 +621,11 @@ header {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
   padding-bottom: 32px;
 }
+@media (max-width: 700px) { .card-grid { grid-template-columns: 1fr; } }
 
 .message-btn {
   flex-shrink: 0;

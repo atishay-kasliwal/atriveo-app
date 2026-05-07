@@ -52,17 +52,28 @@ function scrapedDateLabel(dateStr?: string): string {
   return dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
-function scorePctClass(p: number) {
-  return p >= 60 ? "match-hi" : p >= 35 ? "match-md" : "match-lo";
-}
-
-function levelClass(l: string) {
-  return l === "New Grad" ? "badge-ng" : l === "Mid" ? "badge-mid" : "badge-entry";
-}
-
 function finiteOrNull(value: unknown): number | null {
   const n = typeof value === "number" ? value : Number(value);
   return Number.isFinite(n) ? n : null;
+}
+
+function scoreBg(s: number) {
+  if (s >= 150) return { bg: "linear-gradient(135deg,#7c3aed,#6d28d9)", text: "#fff" };
+  if (s >= 100) return { bg: "linear-gradient(135deg,#0ea5e9,#2563eb)", text: "#fff" };
+  if (s >= 70)  return { bg: "linear-gradient(135deg,#059669,#16a34a)", text: "#fff" };
+  return { bg: "linear-gradient(135deg,#64748b,#475569)", text: "#fff" };
+}
+
+function atsBar(pct: number) {
+  if (pct >= 60) return "#16a34a";
+  if (pct >= 35) return "#0891b2";
+  return "#ea580c";
+}
+
+function levelColors(l: string): { bg: string; color: string; border: string } {
+  if (l === "New Grad") return { bg: "rgba(22,163,74,0.1)", color: "#16a34a", border: "rgba(22,163,74,0.25)" };
+  if (l === "Mid")      return { bg: "rgba(234,88,12,0.1)", color: "#ea580c", border: "rgba(234,88,12,0.25)" };
+  return { bg: "rgba(37,99,235,0.1)", color: "#2563eb", border: "rgba(37,99,235,0.25)" };
 }
 
 interface Props {
@@ -74,6 +85,7 @@ interface Props {
 
 export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompany }: Props) {
   const [msgCopied, setMsgCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const co = job.company || "—";
   const title = job.title || "—";
@@ -84,6 +96,8 @@ export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompa
   const color = avatarColor(co);
   const isTopCo = isTop500(co);
   const isApplied = Boolean(applyRecord);
+  const sc = scoreBg(score);
+  const lc = levelColors(lvl);
 
   const dateLabel = job.scraped_date
     ? scrapedDateLabel(job.scraped_date)
@@ -98,110 +112,172 @@ export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompa
   }
 
   return (
-    <div style={{
-      background: "var(--surface-2)",
-      border: `1px solid ${isApplied ? "rgba(22,163,74,0.3)" : "var(--border)"}`,
-      borderRadius: "var(--radius)",
-      padding: "14px 16px",
-      display: "flex",
-      flexDirection: "column",
-      gap: "10px",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-    }}>
-      {/* Header: avatar + company + score */}
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: "#fff",
+        border: `1px solid ${isApplied ? "rgba(22,163,74,0.4)" : hovered ? "rgba(37,99,235,0.3)" : "#e2e8f0"}`,
+        borderRadius: 16,
+        padding: "16px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "12px",
+        boxShadow: hovered
+          ? "0 8px 24px rgba(37,99,235,0.1), 0 2px 8px rgba(0,0,0,0.06)"
+          : "0 1px 4px rgba(0,0,0,0.06)",
+        transform: hovered ? "translateY(-2px)" : "none",
+        transition: "all 0.18s ease",
+        cursor: "default",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Top accent line based on score */}
+      <div style={{
+        position: "absolute", top: 0, left: 0, right: 0, height: 3,
+        background: sc.bg, borderRadius: "16px 16px 0 0",
+      }} />
+
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 4 }}>
         <div style={{
-          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+          width: 36, height: 36, borderRadius: 10, flexShrink: 0,
           background: color, color: "#fff",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontWeight: 700, fontSize: 13,
+          fontWeight: 800, fontSize: 15, boxShadow: `0 4px 10px ${color}44`,
         }}>
           {co.charAt(0).toUpperCase()}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ fontWeight: 700, fontSize: 13, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
+            <span style={{ fontWeight: 700, fontSize: 13.5, color: "#0f172a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 140 }}>
               {co}
             </span>
-            {isTopCo && <span style={{ fontSize: 9, background: "var(--blue-lo)", color: "var(--blue)", borderRadius: 3, padding: "1px 4px", fontWeight: 700, flexShrink: 0 }}>TOP 500</span>}
+            {isTopCo && (
+              <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 5px", borderRadius: 4, background: "rgba(37,99,235,0.08)", color: "#2563eb", border: "1px solid rgba(37,99,235,0.2)", flexShrink: 0 }}>
+                TOP 500
+              </span>
+            )}
             {onExcludeCompany && (
-              <button
-                title={`Block "${co}"`}
-                onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
-                style={{ border: "none", background: "none", color: "var(--muted)", cursor: "pointer", fontSize: 12, padding: "0 2px", flexShrink: 0 }}
-              >⊘</button>
+              <button onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
+                style={{ border: "none", background: "none", color: "#94a3b8", cursor: "pointer", fontSize: 13, padding: 0, lineHeight: 1, flexShrink: 0 }}
+                title={`Block "${co}"`}>⊘</button>
             )}
           </div>
-          <div style={{ fontSize: 11, color: "var(--muted)" }}>{job.location || "Remote"}</div>
+          <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>{job.location || "Remote"}</div>
         </div>
+        {/* Score bubble */}
         <div style={{
-          flexShrink: 0, fontWeight: 800, fontSize: 17,
-          color: score >= 150 ? "#7c3aed" : score >= 100 ? "#0ea5e9" : "var(--blue)",
-          fontVariantNumeric: "tabular-nums",
+          flexShrink: 0,
+          background: sc.bg,
+          color: sc.text,
+          borderRadius: 10,
+          padding: "5px 10px",
+          fontWeight: 800,
+          fontSize: 15,
+          letterSpacing: "-0.3px",
+          boxShadow: `0 3px 8px ${score >= 100 ? "rgba(37,99,235,0.25)" : "rgba(0,0,0,0.1)"}`,
         }}>
           ★{score}
         </div>
       </div>
 
       {/* Title */}
-      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", lineHeight: 1.35 }}>
+      <div style={{ fontSize: 13.5, fontWeight: 600, color: "#1e293b", lineHeight: 1.4 }}>
         {title}
+      </div>
+
+      {/* Tags row */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+        <span style={{ fontSize: 10.5, fontWeight: 600, padding: "3px 8px", borderRadius: 99, background: "#f1f5f9", color: "#64748b", border: "1px solid #e2e8f0" }}>
+          🕐 {dateLabel}
+        </span>
+        <span style={{ fontSize: 10.5, fontWeight: 700, padding: "3px 8px", borderRadius: 99, background: lc.bg, color: lc.color, border: `1px solid ${lc.border}` }}>
+          {lvl}
+        </span>
         {isApplied && (
-          <span style={{ marginLeft: 6, fontSize: 9, background: "rgba(22,163,74,0.1)", color: "var(--green)", borderRadius: 3, padding: "1px 5px", fontWeight: 700, verticalAlign: "middle" }}>
-            Clicked {applyRecord?.clicks}x
+          <span style={{ fontSize: 10.5, fontWeight: 700, padding: "3px 8px", borderRadius: 99, background: "rgba(22,163,74,0.1)", color: "#16a34a", border: "1px solid rgba(22,163,74,0.25)" }}>
+            ✓ Applied ×{applyRecord?.clicks}
           </span>
         )}
       </div>
 
-      {/* Fields */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: 11, color: "var(--muted)", fontWeight: 600 }}>Date</span>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-2)" }}>{dateLabel}</span>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: 11, color: "var(--muted)", fontWeight: 600 }}>Level</span>
-          <span className={`badge ${levelClass(lvl)}`}>{lvl}</span>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: 11, color: "var(--muted)", fontWeight: 600 }}>ATS</span>
-          {ats !== null
-            ? <span className={`match-pct ${scorePctClass(ats)}`}>{ats}%</span>
-            : <span style={{ fontSize: 11, color: "var(--muted)" }}>—</span>}
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: 11, color: "var(--muted)", fontWeight: 600 }}>Fit</span>
-          {fit !== null
-            ? <span className={`match-pct ${scorePctClass(fit)}`}>{fit}%</span>
-            : <span style={{ fontSize: 11, color: "var(--muted)" }}>—</span>}
-        </div>
+      {/* ATS / Fit bars */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+        {ats !== null && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <span style={{ fontSize: 10.5, fontWeight: 600, color: "#94a3b8" }}>ATS Match</span>
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: atsBar(ats) }}>{ats}%</span>
+            </div>
+            <div style={{ height: 5, background: "#f1f5f9", borderRadius: 99, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${Math.min(ats, 100)}%`, background: atsBar(ats), borderRadius: 99, transition: "width 0.4s ease" }} />
+            </div>
+          </div>
+        )}
+        {fit !== null && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <span style={{ fontSize: 10.5, fontWeight: 600, color: "#94a3b8" }}>Fit Score</span>
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: atsBar(fit) }}>{fit}%</span>
+            </div>
+            <div style={{ height: 5, background: "#f1f5f9", borderRadius: 99, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${Math.min(fit, 100)}%`, background: atsBar(fit), borderRadius: 99, transition: "width 0.4s ease" }} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Actions */}
-      <div style={{ display: "flex", gap: 6, paddingTop: 4, borderTop: "1px solid var(--border)" }}>
+      <div style={{ display: "flex", gap: 6, paddingTop: 4, borderTop: "1px solid #f1f5f9", marginTop: "auto" }}>
         {!isApplied && job.job_url && (
           <button
-            className="mark-btn"
-            title="Mark as applied without opening"
             onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}
+            title="Mark as applied"
+            style={{
+              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+              border: "1px solid #e2e8f0", background: "#f8fafc",
+              color: "#64748b", cursor: "pointer", fontSize: 14,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "all 0.15s",
+            }}
           >✓</button>
         )}
-        <button className="message-btn" style={{ flex: 1 }} onClick={handleMsg}>
-          {msgCopied ? "Copied!" : "Message"}
+        <button
+          onClick={handleMsg}
+          style={{
+            flex: 1, padding: "7px 0", borderRadius: 8,
+            border: "1px solid rgba(99,102,241,0.3)",
+            background: msgCopied ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.06)",
+            color: "#6366f1", fontSize: 11.5, fontWeight: 700,
+            cursor: "pointer", transition: "all 0.15s",
+          }}
+        >
+          {msgCopied ? "✓ Copied" : "Message"}
         </button>
         {job.job_url ? (
           <a
-            className={`apply-btn${isApplied ? " applied" : ""}`}
-            style={{ flex: 1, textAlign: "center", textDecoration: "none" }}
             href={job.job_url}
             target="_blank"
             rel="noopener"
             onClick={() => onApplyClick(job.job_url, title, co)}
+            style={{
+              flex: 1.5, padding: "7px 0", borderRadius: 8, textAlign: "center",
+              background: isApplied
+                ? "linear-gradient(135deg,#16a34a,#059669)"
+                : "linear-gradient(135deg,#2563eb,#1d4ed8)",
+              color: "#fff", fontSize: 11.5, fontWeight: 700,
+              textDecoration: "none", transition: "all 0.15s",
+              boxShadow: isApplied
+                ? "0 2px 8px rgba(22,163,74,0.3)"
+                : "0 2px 8px rgba(37,99,235,0.3)",
+            }}
           >
             {isApplied ? "Applied ✓" : "Apply ↗"}
           </a>
         ) : (
-          <span style={{ flex: 1, fontSize: 11, color: "var(--muted)", textAlign: "center" }}>—</span>
+          <span style={{ flex: 1, fontSize: 11, color: "#94a3b8", textAlign: "center", padding: "7px 0" }}>—</span>
         )}
       </div>
     </div>
