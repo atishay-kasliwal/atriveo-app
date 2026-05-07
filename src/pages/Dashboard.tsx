@@ -4,7 +4,7 @@ import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
 import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
-import JobRow from "../components/JobRow";
+import JobCard from "../components/JobCard";
 
 type Period = "hour" | "today" | "yesterday";
 type SortBy = "score" | "time" | "company" | "ats" | "fit";
@@ -425,68 +425,46 @@ export default function Dashboard() {
                       <span className="split-panel-title">{label}</span>
                       <span className="split-panel-count">{jobs.length} jobs{jobs.filter(j => j.level === "New Grad").length ? ` · ${jobs.filter(j => j.level === "New Grad").length} NG` : ""}</span>
                     </div>
-                    <div className="job-list">
-                      {loading ? (
+                    {loading ? (
                         <div className="state-msg"><div className="spin" style={{ margin: "0 auto" }} /></div>
                       ) : jobs.length === 0 ? (
                         <div className="state-msg" style={{ fontSize: 13 }}>No jobs found</div>
                       ) : (
-                        <>
-                          <div className="job-list-header">
-                            <span>Score</span>
-                            <span className={`col-sort${sortBy === "company" ? " active" : ""}`} onClick={() => setSortBy("company")} title="Sort by company">Co {sortBy === "company" ? "↑" : ""}</span>
-                            <span />
-                            <span>Role</span>
-                            <span className={`col-sort${sortBy === "ats" ? " active" : ""}`} onClick={() => setSortBy("ats")} title="Sort by ATS">ATS {sortBy === "ats" ? "↓" : ""}</span>
-                            <span>Apply</span>
-                          </div>
+                        <div className="card-grid">
                           {jobs.map((job, i) => (
-                            <JobRow
+                            <JobCard
                               key={job.job_url || i}
                               job={job}
-                              index={i}
                               applyRecord={job.job_url ? getRecord(job.job_url) : null}
                               onApplyClick={recordClick}
                               onExcludeCompany={excludeCompany}
                             />
                           ))}
-                        </>
+                        </div>
                       )}
-                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="job-list">
+              <>
                 {loading ? (
                   <div className="state-msg"><div className="icon">⏳</div>Loading…</div>
                 ) : filtered.length === 0 ? (
                   <div className="state-msg"><div className="icon">🔍</div>No jobs found</div>
                 ) : (
-                  <>
-                    <div className="job-list-header">
-                      <span>Score</span>
-                      <span className={`col-sort${sortBy === "company" ? " active" : ""}`} onClick={() => setSortBy("company")} title="Sort by company">Company {sortBy === "company" ? "↑" : ""}</span>
-                      <span />
-                      <span>Role</span>
-                      <span className={`col-sort${sortBy === "ats" ? " active" : ""}`} onClick={() => setSortBy("ats")} title="Sort by ATS score">ATS {sortBy === "ats" ? "↓" : ""}</span>
-                      <span className={`col-sort${sortBy === "fit" ? " active" : ""}`} onClick={() => setSortBy("fit")} title="Sort by Fit score">Fit {sortBy === "fit" ? "↓" : ""}</span>
-                      <span>Level</span>
-                      <span>Apply</span>
-                    </div>
+                  <div className="card-grid">
                     {filtered.map((job, i) => (
-                      <JobRow
+                      <JobCard
                         key={job.job_url || i}
                         job={job}
-                        index={i}
                         applyRecord={job.job_url ? getRecord(job.job_url) : null}
                         onApplyClick={recordClick}
                         onExcludeCompany={excludeCompany}
                       />
                     ))}
-                  </>
+                  </div>
                 )}
-              </div>
+              </>
             )}
           </div>
         </div>

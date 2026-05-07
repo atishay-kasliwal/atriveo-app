@@ -4,7 +4,7 @@ import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
 import { isTop500 } from "../data/top500";
 import type { Job } from "../types";
-import JobRow from "../components/JobRow";
+import JobCard from "../components/JobCard";
 
 type WeekJob = Job & { scraped_date?: string };
 
@@ -198,40 +198,23 @@ export default function Weekly() {
         </div>
 
         {/* Job list */}
-        <div className="job-list">
-          {loading ? (
-            <div className="state-msg">
-              <div className="icon">⏳</div>Loading…
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="state-msg">
-              <div className="icon">🔍</div>No jobs found
-            </div>
-          ) : (
-            <>
-              <div className="job-list-header">
-                <span>Score</span>
-                <span>Company</span>
-                <span />
-                <span>Role</span>
-                <span>ATS</span>
-                <span>Fit</span>
-                <span>Level</span>
-                <span>Apply</span>
-              </div>
-              {filtered.map((job, i) => (
-                <JobRow
-                  key={job.job_url || i}
-                  job={job}
-                  index={i}
-                  applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                  onApplyClick={recordClick}
-                  onExcludeCompany={excludeCompany}
-                />
-              ))}
-            </>
-          )}
-        </div>
+        {loading ? (
+          <div className="state-msg"><div className="icon">⏳</div>Loading…</div>
+        ) : filtered.length === 0 ? (
+          <div className="state-msg"><div className="icon">🔍</div>No jobs found</div>
+        ) : (
+          <div className="card-grid">
+            {filtered.map((job, i) => (
+              <JobCard
+                key={job.job_url || i}
+                job={job}
+                applyRecord={job.job_url ? getRecord(job.job_url) : null}
+                onApplyClick={recordClick}
+                onExcludeCompany={excludeCompany}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <footer>
