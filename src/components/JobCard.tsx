@@ -234,15 +234,14 @@ export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompa
         {!isApplied && job.job_url && (
           <button
             onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}
-            title="Mark as applied"
+            title="Mark as clicked"
             style={{
-              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+              padding: "7px 10px", borderRadius: 8, flexShrink: 0,
               border: "1px solid #e2e8f0", background: "#f8fafc",
-              color: "#64748b", cursor: "pointer", fontSize: 14,
-              display: "flex", alignItems: "center", justifyContent: "center",
+              color: "#64748b", cursor: "pointer", fontSize: 11, fontWeight: 700,
               transition: "all 0.15s",
             }}
-          >✓</button>
+          >Click</button>
         )}
         <button
           onClick={handleMsg}
