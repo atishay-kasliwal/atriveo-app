@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import Weekly from "./pages/Weekly";
 import Settings from "./pages/Settings";
 import Skills from "./pages/Skills";
+import Unclicked100 from "./pages/Unclicked100";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -24,6 +25,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Weekly />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/unclicked-100"
+          element={
+            <ProtectedRoute>
+              <Unclicked100 />
             </ProtectedRoute>
           }
         />

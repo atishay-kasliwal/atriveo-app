@@ -1,6 +1,20 @@
+import { useState } from "react";
 import type { Job } from "../types";
 import type { ApplyRecord } from "../hooks/useApplyTracker";
 import { isTop500 } from "../data/top500";
+
+function extractJobId(url: string | null | undefined): string {
+  if (!url) return "";
+  const match = url.match(/\/jobs\/view\/(\d+)/);
+  return match ? match[1] : "";
+}
+
+function buildReferralMessage(job: Job): string {
+  const title = job.title || "this role";
+  const company = job.company || "your company";
+  const jobId = extractJobId(job.job_url);
+  return `Hi Kavish,\nI hope you're doing well! I'm a former SDE2 at Bounteous, currently pursuing my MS in Data Science at Stony Brook. I came across the ${title} role (Job ID: ${jobId}) at ${company}, and would appreciate it if you could review my resume or consider referring me.\nThanks!`;
+}
 
 const AVATAR_COLORS = [
   "#7c3aed","#0ea5e9","#059669","#d97706","#db2777","#0891b2","#16a34a","#9333ea",
@@ -82,6 +96,15 @@ interface Props {
 }
 
 export default function JobRow({ job, index, applyRecord, onApplyClick, onExcludeCompany }: Props) {
+  const [msgCopied, setMsgCopied] = useState(false);
+
+  function handleMessageClick(e: React.MouseEvent) {
+    e.preventDefault();
+    navigator.clipboard.writeText(buildReferralMessage(job)).then(() => {
+      setMsgCopied(true);
+      setTimeout(() => setMsgCopied(false), 1200);
+    });
+  }
   const co = job.company || "—";
   const title = job.title || "—";
   const initial = co.charAt(0).toUpperCase();
@@ -162,6 +185,9 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
             onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}
           >✓</button>
         )}
+        <button className="message-btn" onClick={handleMessageClick}>
+          {msgCopied ? "Copied!" : "Msg"}
+        </button>
         {job.job_url ? (
           <a
             className={`apply-btn${isApplied ? " applied" : ""}`}
