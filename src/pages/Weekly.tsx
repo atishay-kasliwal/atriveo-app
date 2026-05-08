@@ -27,7 +27,7 @@ function dayLabel(dateStr: string): string {
 export default function Weekly() {
   const { user, logout } = useAuth();
   const { stats, recordClick, getRecord } = useApplyTracker();
-  const { addToCart, removeFromCart, isInCart } = useCart();
+  const { items: cartItems, addToCart, removeFromCart, isInCart } = useCart();
   const handleCartToggle = (job: WeekJob) => {
     if (isInCart(job.job_url)) removeFromCart(job.job_url);
     else addToCart(job);
@@ -77,6 +77,8 @@ export default function Weekly() {
     }
     jobs = jobs.filter((j) => !isExcluded(j));
     if (top500Filter) jobs = jobs.filter((j) => isTop500(j.company || ""));
+    const cartUrlSet = new Set(cartItems.map((i) => i.url));
+    jobs = jobs.filter((j) => !j.job_url || !cartUrlSet.has(j.job_url));
     jobs = [...jobs].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
     // Push applied jobs to the bottom so unapplied stay front-and-centre
     const appliedSet = new Set(Object.keys(stats.appliedJobs));
@@ -84,7 +86,7 @@ export default function Weekly() {
       ...jobs.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
       ...jobs.filter((j) => j.job_url  &&  appliedSet.has(j.job_url)),
     ];
-  }, [weekJobs, activeDay, levelFilter, top500Filter, query, stats.appliedJobs, isExcluded]);
+  }, [weekJobs, activeDay, levelFilter, top500Filter, query, stats.appliedJobs, isExcluded, cartItems]);
 
   const uniqueCompanies = useMemo(
     () => new Set(weekJobs.map((j) => j.company).filter(Boolean)).size,

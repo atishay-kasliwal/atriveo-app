@@ -57,7 +57,7 @@ function formatRunTime(iso?: string | null): string {
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const { stats, recordClick, getRecord } = useApplyTracker();
-  const { addToCart, removeFromCart, isInCart } = useCart();
+  const { items: cartItems, addToCart, removeFromCart, isInCart } = useCart();
   const { isExcluded, excludeCompany } = useExclusions();
   const handleCartToggle = (job: Job) => {
     if (isInCart(job.job_url)) removeFromCart(job.job_url);
@@ -180,6 +180,8 @@ export default function Dashboard() {
       );
     }
     jobs = jobs.filter((j) => !isExcluded(j));
+    const cartUrlSet = new Set(cartItems.map((i) => i.url));
+    jobs = jobs.filter((j) => !j.job_url || !cartUrlSet.has(j.job_url));
     if (sortBy === "score") jobs.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
     else if (sortBy === "company") jobs.sort((a, b) => (a.company || "").localeCompare(b.company || ""));
     else if (sortBy === "ats") jobs.sort((a, b) => (b.ats_score ?? -1) - (a.ats_score ?? -1));
@@ -191,7 +193,7 @@ export default function Dashboard() {
       ...jobs.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
       ...jobs.filter((j) => j.job_url  &&  appliedSet.has(j.job_url)),
     ];
-  }, [baseJobs, levelFilter, h1bFilter, top500Filter, termFilter, query, sortBy, stats.appliedJobs, isExcluded]);
+  }, [baseJobs, levelFilter, h1bFilter, top500Filter, termFilter, query, sortBy, stats.appliedJobs, isExcluded, cartItems]);
 
   const searchTerms = useMemo(
     () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
