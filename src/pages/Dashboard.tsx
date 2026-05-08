@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useApplyTracker } from "../hooks/useApplyTracker";
+import { useCart } from "../hooks/useCart";
 import { useExclusions } from "../hooks/useExclusions";
 import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
@@ -56,7 +57,12 @@ function formatRunTime(iso?: string | null): string {
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const { stats, recordClick, getRecord } = useApplyTracker();
+  const { addToCart, removeFromCart, isInCart } = useCart();
   const { isExcluded, excludeCompany } = useExclusions();
+  const handleCartToggle = (job: Job) => {
+    if (isInCart(job.job_url)) removeFromCart(job.job_url);
+    else addToCart(job);
+  };
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
   const [todayJobs, setTodayJobs] = useState<Job[]>([]);
   const [yesterdayJobs, setYesterdayJobs] = useState<Job[]>([]);
@@ -239,6 +245,7 @@ export default function Dashboard() {
               <a href="/" className="nav-tab active">Live Feed</a>
               <a href="/weekly" className="nav-tab">Weekly</a>
               <a href="/unclicked-100" className="nav-tab">100+ Unclicked</a>
+              <a href="/cart" className="nav-tab">Cart</a>
               <a href="/skills" className="nav-tab">Skills</a>
               <a href="/settings" className="nav-tab">Settings</a>
             </nav>
@@ -438,6 +445,8 @@ export default function Dashboard() {
                               applyRecord={job.job_url ? getRecord(job.job_url) : null}
                               onApplyClick={recordClick}
                               onExcludeCompany={excludeCompany}
+                              onCartToggle={handleCartToggle}
+                              isInCart={job.job_url ? isInCart(job.job_url) : false}
                             />
                           ))}
                         </div>
@@ -460,6 +469,8 @@ export default function Dashboard() {
                         applyRecord={job.job_url ? getRecord(job.job_url) : null}
                         onApplyClick={recordClick}
                         onExcludeCompany={excludeCompany}
+                        onCartToggle={handleCartToggle}
+                        isInCart={job.job_url ? isInCart(job.job_url) : false}
                       />
                     ))}
                   </div>

@@ -81,9 +81,11 @@ interface Props {
   applyRecord: ApplyRecord | null;
   onApplyClick: (jobUrl: string, title: string, company: string) => void;
   onExcludeCompany?: (company: string) => void;
+  onCartToggle?: (job: Job) => void;
+  isInCart?: boolean;
 }
 
-export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompany }: Props) {
+export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompany, onCartToggle, isInCart }: Props) {
   const [msgCopied, setMsgCopied] = useState(false);
   const [hovered, setHovered] = useState(false);
 
@@ -231,6 +233,26 @@ export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompa
 
       {/* Actions */}
       <div style={{ display: "flex", gap: 6, paddingTop: 4, borderTop: "1px solid #f1f5f9", marginTop: "auto" }}>
+        {onCartToggle && (
+          <button
+            onClick={(e) => { e.preventDefault(); onCartToggle(job); }}
+            title={isInCart ? "Remove from cart" : "Save to cart"}
+            style={{
+              flexShrink: 0, padding: "7px 9px", borderRadius: 8,
+              border: isInCart ? "1px solid rgba(234,88,12,0.4)" : "1px solid #e2e8f0",
+              background: isInCart ? "rgba(234,88,12,0.08)" : "#f8fafc",
+              color: isInCart ? "#ea580c" : "#94a3b8",
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "all 0.15s",
+            }}
+          >
+            {isInCart ? (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            ) : (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            )}
+          </button>
+        )}
         {!isApplied && job.job_url && (
           <button
             onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}

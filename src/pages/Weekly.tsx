@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useApplyTracker } from "../hooks/useApplyTracker";
+import { useCart } from "../hooks/useCart";
 import { useExclusions } from "../hooks/useExclusions";
 import { isTop500 } from "../data/top500";
 import type { Job } from "../types";
@@ -26,6 +27,11 @@ function dayLabel(dateStr: string): string {
 export default function Weekly() {
   const { user, logout } = useAuth();
   const { stats, recordClick, getRecord } = useApplyTracker();
+  const { addToCart, removeFromCart, isInCart } = useCart();
+  const handleCartToggle = (job: WeekJob) => {
+    if (isInCart(job.job_url)) removeFromCart(job.job_url);
+    else addToCart(job);
+  };
   const { isExcluded, excludeCompany } = useExclusions();
   const [weekJobs, setWeekJobs] = useState<WeekJob[]>([]);
   const [activeDay, setActiveDay] = useState("All");
@@ -107,6 +113,7 @@ export default function Weekly() {
               <a href="/" className="nav-tab">Live Feed</a>
               <a href="/weekly" className="nav-tab active">Weekly</a>
               <a href="/unclicked-100" className="nav-tab">100+ Unclicked</a>
+              <a href="/cart" className="nav-tab">Cart</a>
               <a href="/skills" className="nav-tab">Skills</a>
               <a href="/settings" className="nav-tab">Settings</a>
             </nav>
@@ -211,6 +218,8 @@ export default function Weekly() {
                 applyRecord={job.job_url ? getRecord(job.job_url) : null}
                 onApplyClick={recordClick}
                 onExcludeCompany={excludeCompany}
+                onCartToggle={handleCartToggle}
+                isInCart={job.job_url ? isInCart(job.job_url) : false}
               />
             ))}
           </div>

@@ -6,6 +6,7 @@ import Weekly from "./pages/Weekly";
 import Settings from "./pages/Settings";
 import Skills from "./pages/Skills";
 import Unclicked100 from "./pages/Unclicked100";
+import Cart from "./pages/Cart";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Unclicked100 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
             </ProtectedRoute>
           }
         />
