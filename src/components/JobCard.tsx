@@ -76,6 +76,19 @@ function levelColors(l: string): { bg: string; color: string; border: string } {
   return { bg: "rgba(37,99,235,0.1)", color: "#2563eb", border: "rgba(37,99,235,0.25)" };
 }
 
+function locationColors(loc: string): { bg: string; color: string; border: string } {
+  const l = loc.toLowerCase();
+  if (l.includes("new york") || / ny[,\s]/.test(l) || l.endsWith(", ny") || l === "ny")
+    return { bg: "rgba(22,163,74,0.1)", color: "#16a34a", border: "rgba(22,163,74,0.3)" };
+  if (l.includes("north carolina") || / nc[,\s]/.test(l) || l.endsWith(", nc") || l === "nc")
+    return { bg: "rgba(124,58,237,0.1)", color: "#7c3aed", border: "rgba(124,58,237,0.3)" };
+  if (l.includes("seattle") || / wa[,\s]/.test(l) || l.endsWith(", wa") || l === "wa")
+    return { bg: "rgba(8,145,178,0.1)", color: "#0891b2", border: "rgba(8,145,178,0.3)" };
+  if (l.includes("remote"))
+    return { bg: "rgba(100,116,139,0.08)", color: "#475569", border: "rgba(100,116,139,0.2)" };
+  return { bg: "#f8fafc", color: "#64748b", border: "#e2e8f0" };
+}
+
 interface Props {
   job: Job;
   applyRecord: ApplyRecord | null;
@@ -198,6 +211,15 @@ export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompa
         <span style={{ fontSize: 10.5, fontWeight: 700, padding: "3px 8px", borderRadius: 99, background: lc.bg, color: lc.color, border: `1px solid ${lc.border}` }}>
           {lvl}
         </span>
+        {(() => {
+          const loc = job.location || "Remote";
+          const loc_c = locationColors(loc);
+          return (
+            <span style={{ fontSize: 10.5, fontWeight: 600, padding: "3px 8px", borderRadius: 99, background: loc_c.bg, color: loc_c.color, border: `1px solid ${loc_c.border}` }}>
+              📍 {loc}
+            </span>
+          );
+        })()}
         {isApplied && (
           <span style={{ fontSize: 10.5, fontWeight: 700, padding: "3px 8px", borderRadius: 99, background: "rgba(22,163,74,0.1)", color: "#16a34a", border: "1px solid rgba(22,163,74,0.25)" }}>
             ✓ Applied ×{applyRecord?.clicks}
