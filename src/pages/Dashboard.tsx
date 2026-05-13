@@ -528,8 +528,16 @@ export default function Dashboard() {
                 {[
                   { label: "Data Scientist", jobs: dsJobs },
                   { label: "Everything Else", jobs: otherJobs },
-                ].map(({ label, jobs }) => (
-                  <div key={label} className="split-panel">
+                ].map(({ label, jobs }, idx) => (
+                  <div key={label}>
+                    {idx > 0 && (
+                      <div className="split-section-divider" role="separator" aria-label={`Start of ${label} section`}>
+                        <span className="split-section-divider-line" />
+                        <span className="split-section-divider-label">Next Section: {label}</span>
+                        <span className="split-section-divider-line" />
+                      </div>
+                    )}
+                  <div className="split-panel">
                     <div className="split-panel-header">
                       <span className="split-panel-title">{label}</span>
                       <span className="split-panel-count">{jobs.length} jobs{jobs.filter(j => j.level === "New Grad").length ? ` · ${jobs.filter(j => j.level === "New Grad").length} NG` : ""}</span>
@@ -553,6 +561,7 @@ export default function Dashboard() {
                           ))}
                         </div>
                       )}
+                  </div>
                   </div>
                 ))}
               </div>
