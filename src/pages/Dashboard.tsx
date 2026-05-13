@@ -210,10 +210,15 @@ export default function Dashboard() {
 
   const isSplitView = period === "today";
 
-  const locationCounts = useMemo(() =>
+  const locationRows = useMemo(() =>
     LOCATION_FILTERS.map(({ key, match }) => {
-      const jobs = filtered.filter(j => match(j.location?.toLowerCase() || ""));
-      return { key, total: jobs.length, ds: jobs.filter(isDataScientist).length, other: jobs.filter(j => !isDataScientist(j)).length };
+      const jobs = filtered.filter((j) => match(j.location?.toLowerCase() || ""));
+      return {
+        key,
+        jobs,
+        dsJobs: jobs.filter(isDataScientist),
+        otherJobs: jobs.filter((j) => !isDataScientist(j)),
+      };
     }),
   [filtered]);
 
@@ -222,6 +227,39 @@ export default function Dashboard() {
     const lf = LOCATION_FILTERS.find(f => f.key === locationFilter);
     return lf ? filtered.filter(j => lf.match(j.location?.toLowerCase() || "")) : filtered;
   }, [filtered, locationFilter]);
+
+  const allDataSciJobs = useMemo(() => filtered.filter(isDataScientist), [filtered]);
+  const allOtherJobs = useMemo(() => filtered.filter((j) => !isDataScientist(j)), [filtered]);
+
+  const formatLocationAppLabel = (job: Job): string => {
+    const title = job.title?.trim() || "Untitled role";
+    const company = job.company?.trim();
+    return company ? `${company} - ${title}` : title;
+  };
+
+  const renderLocationAppList = (jobs: Job[]) => {
+    if (!jobs.length) return <span className="loc-empty">No applications</span>;
+    const preview = jobs.slice(0, 3);
+    return (
+      <div className="loc-app-list">
+        {preview.map((job, idx) => {
+          const label = formatLocationAppLabel(job);
+          return (
+            <span
+              key={`${job.job_url || label}-${idx}`}
+              className="loc-app-chip"
+              title={label}
+            >
+              {label}
+            </span>
+          );
+        })}
+        {jobs.length > preview.length && (
+          <span className="loc-more">+{jobs.length - preview.length} more</span>
+        )}
+      </div>
+    );
+  };
 
   const dsJobs    = useMemo(() => isSplitView ? locationFiltered.filter(isDataScientist)    : [], [locationFiltered, isSplitView]);
   const otherJobs = useMemo(() => isSplitView ? locationFiltered.filter(j => !isDataScientist(j)) : [], [locationFiltered, isSplitView]);
@@ -252,6 +290,31 @@ export default function Dashboard() {
       }, null),
     [stats.appliedJobs]
   );
+
+  const selectedRun = useMemo(
+    () => runCards.find((r) => r.session_id === selectedSession) || null,
+    [runCards, selectedSession]
+  );
+
+  const hasActiveFilters = Boolean(
+    selectedSession ||
+    query ||
+    levelFilter !== "all" ||
+    h1bFilter ||
+    top500Filter ||
+    termFilter !== "all" ||
+    locationFilter !== "all"
+  );
+
+  const clearFilters = () => {
+    setSelectedSession(null);
+    setQuery("");
+    setLevelFilter("all");
+    setH1bFilter(false);
+    setTop500Filter(false);
+    setTermFilter("all");
+    setLocationFilter("all");
+  };
 
   return (
     <div>
@@ -435,12 +498,18 @@ export default function Dashboard() {
                   <option key={t} value={t}>{t}</option>
                 ))}
               </select>
+              {hasActiveFilters && (
+                <button className="clear-filters-btn" onClick={clearFilters}>
+                  Clear Filters
+                </button>
+              )}
             </div>
 
             {!isSplitView && (
               <div className="result-meta">
                 {filtered.length} job{filtered.length !== 1 ? "s" : ""}
                 {ngCount ? ` · ${ngCount} New Grad` : ""}
+                {selectedRun ? ` · Run ${formatRunTime(selectedRun.displayAt)}` : ""}
               </div>
             )}
 
@@ -451,9 +520,9 @@ export default function Dashboard() {
                   <thead>
                     <tr>
                       <th>Location</th>
-                      <th>Total</th>
-                      <th>Data Sci</th>
-                      <th>Other</th>
+                      <th>Applications</th>
+                      <th>Data Sci Apps</th>
+                      <th>Other Apps</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -462,20 +531,20 @@ export default function Dashboard() {
                       onClick={() => setLocationFilter("all")}
                     >
                       <td><span className="loc-badge">All</span></td>
-                      <td>{filtered.length}</td>
-                      <td>{filtered.filter(isDataScientist).length}</td>
-                      <td>{filtered.filter(j => !isDataScientist(j)).length}</td>
+                      <td>{renderLocationAppList(filtered)}</td>
+                      <td>{renderLocationAppList(allDataSciJobs)}</td>
+                      <td>{renderLocationAppList(allOtherJobs)}</td>
                     </tr>
-                    {locationCounts.map(({ key, total, ds, other }) => (
+                    {locationRows.map(({ key, jobs, dsJobs, otherJobs }) => (
                       <tr
                         key={key}
                         className={locationFilter === key ? "loc-active" : ""}
                         onClick={() => setLocationFilter(key)}
                       >
                         <td><span className="loc-badge">{key}</span></td>
-                        <td>{total}</td>
-                        <td>{ds}</td>
-                        <td>{other}</td>
+                        <td>{renderLocationAppList(jobs)}</td>
+                        <td>{renderLocationAppList(dsJobs)}</td>
+                        <td>{renderLocationAppList(otherJobs)}</td>
                       </tr>
                     ))}
                   </tbody>
