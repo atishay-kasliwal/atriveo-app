@@ -72,6 +72,12 @@ interface Trend {
   hasPrev: boolean;
 }
 
+interface MarketPulse {
+  ny: number;
+  nc: number;
+  sea: number;
+}
+
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
 function escapeHtml(s: string | undefined | null): string {
@@ -149,6 +155,17 @@ function fmtHourLabel(d: Date): string {
 function truncate(s: string, max: number): string {
   if (s.length <= max) return s;
   return s.slice(0, Math.max(0, max - 1)) + "…";
+}
+
+function getMarketPulse(insights: Insights): MarketPulse {
+  const read = (matcher: (name: string) => boolean) =>
+    insights.targetMarkets.find((m) => matcher(m.name))?.count ?? 0;
+
+  return {
+    ny: read((name) => /new york/i.test(name)),
+    nc: read((name) => /north carolina/i.test(name)),
+    sea: read((name) => /seattle/i.test(name)),
+  };
 }
 
 // ─── data loaders ─────────────────────────────────────────────────────────────
@@ -289,7 +306,28 @@ async function loadInsights(
 
 const COL = { rank: 44, level: 96, match: 76, apply: 88 };
 
-function renderHeader(sessionTime: string, jobsCount: number, avgMatch: number): string {
+function renderHeader(
+  sessionTime: string,
+  jobsCount: number,
+  avgMatch: number,
+  marketPulse: MarketPulse,
+): string {
+  const chip = (label: string, count: number, tint: string) => `
+    <span style="
+      display:inline-block;
+      border:1px solid ${tint};
+      background:rgba(255,255,255,0.08);
+      color:#dbeafe;
+      border-radius:999px;
+      padding:4px 9px;
+      font-size:10.5px;
+      font-weight:700;
+      letter-spacing:.02em;
+      margin-right:6px;
+      margin-top:8px;">
+      ${label} ${count}
+    </span>`;
+
   return `
     <tr>
       <td style="
@@ -334,6 +372,11 @@ function renderHeader(sessionTime: string, jobsCount: number, avgMatch: number):
             </div>
             <div style="color:#94a3b8; font-size:13px; margin-top:6px;">
               Ranked by match score · avg fit ${avgMatch}% · scored against your resume
+            </div>
+            <div style="margin-top:6px;">
+              ${chip("NY", marketPulse.ny, "rgba(59,130,246,.65)")}
+              ${chip("NC", marketPulse.nc, "rgba(34,197,94,.55)")}
+              ${chip("SEA", marketPulse.sea, "rgba(8,145,178,.65)")}
             </div>
           </td></tr>
         </table>
@@ -803,7 +846,8 @@ function renderFooter(): string {
 // ─── render: full email ───────────────────────────────────────────────────────
 
 function renderEmail(insights: Insights, jobs: Job[], sessionTime: string): string {
-  const preheader = `${fmtNumber(insights.thisHour)} jobs this hour · ${insights.highMatchCount} high-match · avg ${insights.avgMatchThisHour}%`;
+  const marketPulse = getMarketPulse(insights);
+  const preheader = `${fmtNumber(insights.thisHour)} jobs this hour · NY ${marketPulse.ny} · NC ${marketPulse.nc} · SEA ${marketPulse.sea} · ${insights.highMatchCount} high-match`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -819,7 +863,7 @@ function renderEmail(insights: Insights, jobs: Job[], sessionTime: string): stri
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f6; padding:24px 12px;">
     <tr><td align="center">
       <table width="880" cellpadding="0" cellspacing="0" style="max-width:880px; width:100%;">
-        ${renderHeader(sessionTime, jobs.length, insights.avgMatchThisHour)}
+        ${renderHeader(sessionTime, jobs.length, insights.avgMatchThisHour, marketPulse)}
         ${renderHeroStats(insights)}
         ${renderTwelveHourChart(insights)}
         ${renderBestMatch(insights.bestMatch)}
@@ -844,6 +888,7 @@ function renderEmail(insights: Insights, jobs: Job[], sessionTime: string): stri
 function renderText(insights: Insights, jobs: Job[], sessionTime: string): string {
   const tHour  = trendArrow(insights.thisHour, insights.lastHour);
   const tToday = trendArrow(insights.todayTotal, insights.yesterdayTotal);
+  const marketPulse = getMarketPulse(insights);
   const lines: string[] = [];
 
   lines.push(`ATRIVEO · Top ${jobs.length} jobs · ${sessionTime}`);
@@ -855,6 +900,7 @@ function renderText(insights: Insights, jobs: Job[], sessionTime: string): strin
     lines.push(`  Yesterday: ${fmtNumber(insights.yesterdayTotal)} full-day total`);
   }
   lines.push(`  Avg match: ${insights.avgMatchThisHour}%  ·  ${insights.highMatchCount} high-match (≥70%)`);
+  lines.push(`  Location pulse: NY ${marketPulse.ny} · NC ${marketPulse.nc} · SEA ${marketPulse.sea}`);
   lines.push("");
 
   if (insights.bestMatch) {
@@ -961,7 +1007,10 @@ async function main() {
   }
 
   // 3. Insights queries (volume trends, last 12h, etc.)
-  const insights = await loadInsights(db, hourStart, hourEnd, jobsAll);
+  // Use the exact latest-session jobs length for "this hour" so subject/header
+  // never drift from the actual digest dataset.
+  const rawInsights = await loadInsights(db, hourStart, hourEnd, jobsAll);
+  const insights: Insights = { ...rawInsights, thisHour: jobsAll.length };
 
   await client.close();
 
@@ -970,7 +1019,8 @@ async function main() {
     .slice(0, 20);
 
   // 4. Render and send (or preview locally with PREVIEW=1)
-  const subject = `Atriveo · ${insights.thisHour} jobs this hour · ${insights.highMatchCount} high-match`;
+  const marketPulse = getMarketPulse(insights);
+  const subject = `Atriveo · ${insights.thisHour} jobs · NY ${marketPulse.ny} · NC ${marketPulse.nc} · SEA ${marketPulse.sea}`;
   const html    = renderEmail(insights, jobs, sessionTime);
   const text    = renderText(insights, jobs, sessionTime);
 
