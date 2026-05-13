@@ -228,38 +228,25 @@ export default function Dashboard() {
     return lf ? filtered.filter(j => lf.match(j.location?.toLowerCase() || "")) : filtered;
   }, [filtered, locationFilter]);
 
-  const allDataSciJobs = useMemo(() => filtered.filter(isDataScientist), [filtered]);
-  const allOtherJobs = useMemo(() => filtered.filter((j) => !isDataScientist(j)), [filtered]);
-
-  const formatLocationAppLabel = (job: Job): string => {
-    const title = job.title?.trim() || "Untitled role";
-    const company = job.company?.trim();
-    return company ? `${company} - ${title}` : title;
-  };
-
-  const renderLocationAppList = (jobs: Job[]) => {
-    if (!jobs.length) return <span className="loc-empty">No applications</span>;
-    const preview = jobs.slice(0, 3);
-    return (
-      <div className="loc-app-list">
-        {preview.map((job, idx) => {
-          const label = formatLocationAppLabel(job);
-          return (
-            <span
-              key={`${job.job_url || label}-${idx}`}
-              className="loc-app-chip"
-              title={label}
-            >
-              {label}
-            </span>
-          );
-        })}
-        {jobs.length > preview.length && (
-          <span className="loc-more">+{jobs.length - preview.length} more</span>
-        )}
-      </div>
-    );
-  };
+  const locationPanels = useMemo(
+    () => [
+      {
+        key: "all",
+        label: "All",
+        total: filtered.length,
+        ds: filtered.filter(isDataScientist).length,
+        other: filtered.filter((j) => !isDataScientist(j)).length,
+      },
+      ...locationRows.map(({ key, jobs, dsJobs, otherJobs }) => ({
+        key,
+        label: key,
+        total: jobs.length,
+        ds: dsJobs.length,
+        other: otherJobs.length,
+      })),
+    ],
+    [filtered, locationRows]
+  );
 
   const dsJobs    = useMemo(() => isSplitView ? locationFiltered.filter(isDataScientist)    : [], [locationFiltered, isSplitView]);
   const otherJobs = useMemo(() => isSplitView ? locationFiltered.filter(j => !isDataScientist(j)) : [], [locationFiltered, isSplitView]);
@@ -513,42 +500,25 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Location filter table — shown in Today split view */}
+            {/* Location filter cards — shown in Today split view */}
             {isSplitView && (
-              <div className="location-table-wrap">
-                <table className="location-table">
-                  <thead>
-                    <tr>
-                      <th>Location</th>
-                      <th>Applications</th>
-                      <th>Data Sci Apps</th>
-                      <th>Other Apps</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      className={locationFilter === "all" ? "loc-active" : ""}
-                      onClick={() => setLocationFilter("all")}
-                    >
-                      <td><span className="loc-badge">All</span></td>
-                      <td>{renderLocationAppList(filtered)}</td>
-                      <td>{renderLocationAppList(allDataSciJobs)}</td>
-                      <td>{renderLocationAppList(allOtherJobs)}</td>
-                    </tr>
-                    {locationRows.map(({ key, jobs, dsJobs, otherJobs }) => (
-                      <tr
-                        key={key}
-                        className={locationFilter === key ? "loc-active" : ""}
-                        onClick={() => setLocationFilter(key)}
-                      >
-                        <td><span className="loc-badge">{key}</span></td>
-                        <td>{renderLocationAppList(jobs)}</td>
-                        <td>{renderLocationAppList(dsJobs)}</td>
-                        <td>{renderLocationAppList(otherJobs)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="location-panel-grid">
+                {locationPanels.map((panel) => (
+                  <button
+                    key={panel.key}
+                    className={`location-panel-card${locationFilter === panel.key ? " active" : ""}`}
+                    onClick={() => setLocationFilter(panel.key)}
+                  >
+                    <div className="location-panel-head">
+                      <span className="location-panel-name">{panel.label}</span>
+                      <span className="location-panel-total">{panel.total}</span>
+                    </div>
+                    <div className="location-panel-meta">
+                      <span>Data Sci {panel.ds}</span>
+                      <span>Other {panel.other}</span>
+                    </div>
+                  </button>
+                ))}
               </div>
             )}
 
