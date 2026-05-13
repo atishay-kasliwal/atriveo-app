@@ -23,6 +23,12 @@ const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 const DS_TERM_RE  = /data\s*sci/i;
 const DS_TITLE_RE = /data\s*sci/i;
 
+const LOCATION_FILTERS = [
+  { key: "New York", match: (loc: string) => loc.includes("new york") },
+  { key: "Seattle",  match: (loc: string) => loc.includes("seattle") },
+  { key: "NC",       match: (loc: string) => loc.includes(", nc") || loc.includes("north carolina") },
+];
+
 function isDataScientist(job: Job): boolean {
   return (
     DS_TERM_RE.test(job.search_term || "") ||
@@ -76,10 +82,12 @@ export default function Dashboard() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
+  const [locationFilter, setLocationFilter] = useState<string>("all");
 
   const handlePeriodChange = (nextPeriod: Period) => {
     setPeriod(nextPeriod);
     setSortBy(nextPeriod === "hour" ? "time" : "score");
+    setLocationFilter("all");
   };
 
   useEffect(() => {
@@ -201,8 +209,22 @@ export default function Dashboard() {
   );
 
   const isSplitView = period === "today";
-  const dsJobs    = useMemo(() => isSplitView ? filtered.filter(isDataScientist)    : [], [filtered, isSplitView]);
-  const otherJobs = useMemo(() => isSplitView ? filtered.filter(j => !isDataScientist(j)) : [], [filtered, isSplitView]);
+
+  const locationCounts = useMemo(() =>
+    LOCATION_FILTERS.map(({ key, match }) => {
+      const jobs = filtered.filter(j => match(j.location?.toLowerCase() || ""));
+      return { key, total: jobs.length, ds: jobs.filter(isDataScientist).length, other: jobs.filter(j => !isDataScientist(j)).length };
+    }),
+  [filtered]);
+
+  const locationFiltered = useMemo(() => {
+    if (locationFilter === "all") return filtered;
+    const lf = LOCATION_FILTERS.find(f => f.key === locationFilter);
+    return lf ? filtered.filter(j => lf.match(j.location?.toLowerCase() || "")) : filtered;
+  }, [filtered, locationFilter]);
+
+  const dsJobs    = useMemo(() => isSplitView ? locationFiltered.filter(isDataScientist)    : [], [locationFiltered, isSplitView]);
+  const otherJobs = useMemo(() => isSplitView ? locationFiltered.filter(j => !isDataScientist(j)) : [], [locationFiltered, isSplitView]);
 
   const ngCount = filtered.filter((j) => j.level === "New Grad").length;
   const bestJob = [...todayJobs].sort((a, b) => (b.ats_score ?? b.score_pct ?? 0) - (a.ats_score ?? a.score_pct ?? 0))[0];
@@ -419,6 +441,45 @@ export default function Dashboard() {
               <div className="result-meta">
                 {filtered.length} job{filtered.length !== 1 ? "s" : ""}
                 {ngCount ? ` · ${ngCount} New Grad` : ""}
+              </div>
+            )}
+
+            {/* Location filter table — shown in Today split view */}
+            {isSplitView && (
+              <div className="location-table-wrap">
+                <table className="location-table">
+                  <thead>
+                    <tr>
+                      <th>Location</th>
+                      <th>Total</th>
+                      <th>Data Sci</th>
+                      <th>Other</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      className={locationFilter === "all" ? "loc-active" : ""}
+                      onClick={() => setLocationFilter("all")}
+                    >
+                      <td><span className="loc-badge">All</span></td>
+                      <td>{filtered.length}</td>
+                      <td>{filtered.filter(isDataScientist).length}</td>
+                      <td>{filtered.filter(j => !isDataScientist(j)).length}</td>
+                    </tr>
+                    {locationCounts.map(({ key, total, ds, other }) => (
+                      <tr
+                        key={key}
+                        className={locationFilter === key ? "loc-active" : ""}
+                        onClick={() => setLocationFilter(key)}
+                      >
+                        <td><span className="loc-badge">{key}</span></td>
+                        <td>{total}</td>
+                        <td>{ds}</td>
+                        <td>{other}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
 

@@ -1185,12 +1185,16 @@ footer a:hover { color: var(--blue); }
 
 /* Today split layout */
 .today-split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
-@media (max-width: 900px) { .today-split { grid-template-columns: 1fr; } }
+
+/* 2-column card grid inside each split panel */
+.split-panel .card-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+@media (max-width: 700px) { .split-panel .card-grid { grid-template-columns: 1fr; } }
 
 .split-panel { min-width: 0; }
 
@@ -1232,6 +1236,57 @@ footer a:hover { color: var(--blue); }
 .split-panel-count {
   font-size: 10px; color: var(--muted);
   font-family: "Inter", monospace;
+}
+
+/* Location filter table */
+.location-table-wrap {
+  margin-bottom: 16px;
+}
+.location-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: var(--surface);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.location-table th {
+  text-align: left;
+  padding: 7px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.location-table td {
+  padding: 8px 14px;
+  color: var(--text-1);
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+.location-table tr:last-child td { border-bottom: none; }
+.location-table tbody tr {
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.location-table tbody tr:hover { background: var(--hover, rgba(255,255,255,0.04)); }
+.location-table tbody tr.loc-active { background: rgba(99,102,241,0.12); }
+.location-table tbody tr.loc-active td:first-child {
+  color: var(--blue);
+  font-weight: 700;
+}
+.location-table .loc-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: rgba(99,102,241,0.15);
+  color: var(--blue);
 }
 
 .refresh-btn {
