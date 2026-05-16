@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-05-16T17:30:32.441673+00:00",
-  "total_analyzed": 16420,
+  "generated_at": "2026-05-16T18:19:38.077774+00:00",
+  "total_analyzed": 16474,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 9596,
-        "Java": 4826,
-        "SQL": 4189,
-        "JavaScript": 3213,
-        "TypeScript": 2579,
-        "Kotlin": 1298,
-        "Swift": 1186,
-        "HTML/CSS": 931,
-        "Rust": 653,
+        "Python": 9648,
+        "Java": 4875,
+        "SQL": 4193,
+        "JavaScript": 3263,
+        "TypeScript": 2625,
+        "Kotlin": 1344,
+        "Swift": 1236,
+        "HTML/CSS": 935,
+        "Rust": 654,
         ".NET": 623,
         "Bash/Shell": 428,
         "Go": 414,
@@ -27,12 +27,12 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 2817,
+        "React": 2863,
         "PyTorch": 1750,
         "TensorFlow": 1347,
         "LangChain": 843,
         "Scikit-learn": 830,
-        "Node.js": 828,
+        "Node.js": 829,
         "Pandas": 768,
         "Angular": 750,
         "Spring": 712,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 6142,
+        "Scalability": 6143,
         "Distributed Systems": 2347,
         "REST API": 2173,
         "System Design": 1310,
@@ -94,11 +94,11 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 2973,
+        "CI/CD": 2975,
         "Kubernetes": 1973,
-        "Git": 1744,
-        "Docker": 1685,
-        "Linux": 1456,
+        "Git": 1745,
+        "Docker": 1686,
+        "Linux": 1458,
         "Terraform": 820,
         "Jenkins": 562,
         "GitHub Actions": 344,
@@ -136,7 +136,7 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 5478,
+        "Machine Learning": 5525,
         "LLM": 2819,
         "Agents": 2421,
         "GenAI": 1925,
@@ -144,7 +144,7 @@
         "RAG": 1384,
         "TensorFlow": 1347,
         "NLP": 1209,
-        "Deep Learning": 961,
+        "Deep Learning": 962,
         "Prompt Eng": 956,
         "LangChain": 843,
         "Fine-tuning": 836,
@@ -160,7 +160,7 @@
       "color": "#6366f1",
       "skills": {
         "OAuth/OIDC": 225,
-        "Encryption": 191,
+        "Encryption": 192,
         "GDPR": 176,
         "JWT": 119,
         "IAM": 101,
@@ -173,10 +173,10 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 4041,
-        "Code Review": 3081,
+        "Cross-functional": 4042,
+        "Code Review": 3082,
         "Mentorship": 3015,
-        "Agile/Scrum": 2378,
+        "Agile/Scrum": 2380,
         "On-call": 899,
         "Leadership": 809
       }
