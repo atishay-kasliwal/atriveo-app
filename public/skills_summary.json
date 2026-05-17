@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-05-17T20:10:51.939056+00:00",
-  "total_analyzed": 16869,
+  "generated_at": "2026-05-17T21:09:52.682074+00:00",
+  "total_analyzed": 16884,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 9918,
-        "Java": 5085,
-        "SQL": 4248,
-        "JavaScript": 3476,
+        "Python": 9927,
+        "Java": 5092,
+        "SQL": 4255,
+        "JavaScript": 3482,
         "TypeScript": 2783,
         "Kotlin": 1497,
         "Swift": 1399,
@@ -75,10 +75,10 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 6235,
-        "Distributed Systems": 2377,
+        "Scalability": 6237,
+        "Distributed Systems": 2378,
         "REST API": 2223,
-        "System Design": 1325,
+        "System Design": 1327,
         "Microservices": 1115,
         "Kafka": 717,
         "Event-Driven": 612,
@@ -114,37 +114,37 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 2272,
+        "ETL/ELT": 2273,
         "PostgreSQL": 1106,
-        "Spark": 1014,
+        "Spark": 1015,
         "Vector DB": 790,
         "Kafka": 717,
         "MySQL": 657,
         "Databricks": 532,
-        "Snowflake": 509,
+        "Snowflake": 510,
         "MongoDB": 417,
         "Airflow": 399,
         "Redis": 332,
-        "BigQuery": 232,
+        "BigQuery": 233,
         "Elasticsearch": 226,
         "dbt": 149,
         "Flink": 118,
         "Cassandra": 95,
-        "ClickHouse": 51
+        "ClickHouse": 52
       }
     },
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 5729,
-        "LLM": 2887,
-        "Agents": 2459,
-        "GenAI": 1975,
+        "Machine Learning": 5732,
+        "LLM": 2893,
+        "Agents": 2465,
+        "GenAI": 1979,
         "PyTorch": 1755,
         "RAG": 1413,
         "TensorFlow": 1354,
-        "NLP": 1231,
-        "Deep Learning": 985,
+        "NLP": 1234,
+        "Deep Learning": 988,
         "Prompt Eng": 963,
         "LangChain": 845,
         "Fine-tuning": 839,
@@ -173,9 +173,9 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 4096,
-        "Code Review": 3136,
-        "Mentorship": 3063,
+        "Cross-functional": 4097,
+        "Code Review": 3137,
+        "Mentorship": 3065,
         "Agile/Scrum": 2402,
         "On-call": 931,
         "Leadership": 818
