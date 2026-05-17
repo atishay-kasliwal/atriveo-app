@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-17T04:05:32.611903+00:00",
-  "total_analyzed": 16656,
+  "generated_at": "2026-05-17T05:05:36.258077+00:00",
+  "total_analyzed": 16658,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
@@ -114,7 +114,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 2230,
+        "ETL/ELT": 2231,
         "PostgreSQL": 1104,
         "Spark": 1011,
         "Vector DB": 788,
@@ -136,7 +136,7 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 5631,
+        "Machine Learning": 5633,
         "LLM": 2834,
         "Agents": 2435,
         "GenAI": 1936,
