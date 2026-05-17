@@ -1,7 +1,7 @@
 [
   {
+    "session_id": "2026-05-17T02:05:35Z",
     "job_url": "https://www.linkedin.com/jobs/view/4415891550",
-    "session_id": "2026-05-17T01:08:54Z",
     "company": "Amazon",
     "date_posted": null,
     "level": "Entry",
@@ -18,7 +18,25 @@
     "fit_score": 4
   },
   {
-    "session_id": "2026-05-17T01:08:54Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4415897428",
+    "session_id": "2026-05-17T02:05:35Z",
+    "company": "Amazon",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Seattle, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 168,
+    "score_pct": 100,
+    "site": "linkedin",
+    "summary": "**Description** Amazon is building a world class advertising business and delivering a collection of self\\-service performance advertising products that drive discovery and sales of merchandise.",
+    "title": "Software Development Engineer, Conversational Ads Experience",
+    "ats_score": 0,
+    "fit_score": 4
+  },
+  {
+    "session_id": "2026-05-17T02:05:35Z",
     "job_url": "https://www.linkedin.com/jobs/view/4416007268",
     "company": "Open Systems Technologies",
     "date_posted": null,
@@ -36,8 +54,38 @@
     "fit_score": 5
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4416002686",
+    "session_id": "2026-05-17T02:05:35Z",
+    "company": "Air Apps",
+    "date_posted": null,
+    "keyword_score": 74,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "min_exp": null,
+    "pipeline": "keywords",
+    "site": "linkedin",
+    "title": "Backend Engineer",
+    "ats_score": 58,
+    "fit_score": 12
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4415410292",
+    "session_id": "2026-05-17T02:05:35Z",
+    "company": "Egotechworld",
+    "date_posted": null,
+    "keyword_score": 58,
+    "level": "Entry",
+    "location": "Mobile, AL",
+    "min_exp": null,
+    "pipeline": "keywords",
+    "site": "linkedin",
+    "title": "Software Design Engineer in Test",
+    "ats_score": 56,
+    "fit_score": 12
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4415411288",
-    "session_id": "2026-05-17T01:08:54Z",
+    "session_id": "2026-05-17T02:05:35Z",
     "company": "FetchJobs.co",
     "date_posted": null,
     "keyword_score": 36,
@@ -51,8 +99,23 @@
     "fit_score": 8
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4415417679",
+    "session_id": "2026-05-17T02:05:35Z",
+    "company": "InterScripts, Inc.",
+    "date_posted": null,
+    "keyword_score": 26,
+    "level": "Entry",
+    "location": "Daly City, CA",
+    "min_exp": 0.0,
+    "pipeline": "keywords",
+    "site": "linkedin",
+    "title": "Software Engineer I (Full Stack) \u2013 Immediate Joiners",
+    "ats_score": 54,
+    "fit_score": 11
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4415402471",
-    "session_id": "2026-05-17T01:08:54Z",
+    "session_id": "2026-05-17T02:05:35Z",
     "company": "FetchJobs.co",
     "date_posted": null,
     "keyword_score": 26,
@@ -67,7 +130,7 @@
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4415400502",
-    "session_id": "2026-05-17T01:08:54Z",
+    "session_id": "2026-05-17T02:05:35Z",
     "company": "FetchJobs.co",
     "date_posted": null,
     "keyword_score": 18,
@@ -81,8 +144,23 @@
     "fit_score": 3
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4415406366",
+    "session_id": "2026-05-17T02:05:35Z",
+    "company": "FetchJobs.co",
+    "date_posted": null,
+    "keyword_score": 18,
+    "level": "Entry",
+    "location": "",
+    "min_exp": null,
+    "pipeline": "keywords",
+    "site": "linkedin",
+    "title": "Software Developer",
+    "ats_score": 33,
+    "fit_score": 4
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4412214142",
-    "session_id": "2026-05-17T01:08:54Z",
+    "session_id": "2026-05-17T02:05:35Z",
     "company": "ChatGPT Jobs",
     "date_posted": null,
     "keyword_score": 15,
