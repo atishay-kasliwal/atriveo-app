@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-05-17T17:32:40.059579+00:00",
-  "total_analyzed": 16833,
+  "generated_at": "2026-05-17T18:17:04.821232+00:00",
+  "total_analyzed": 16843,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 9897,
-        "Java": 5068,
-        "SQL": 4237,
-        "JavaScript": 3458,
-        "TypeScript": 2775,
-        "Kotlin": 1492,
-        "Swift": 1391,
-        "HTML/CSS": 974,
+        "Python": 9904,
+        "Java": 5075,
+        "SQL": 4240,
+        "JavaScript": 3466,
+        "TypeScript": 2782,
+        "Kotlin": 1497,
+        "Swift": 1397,
+        "HTML/CSS": 977,
         "Rust": 664,
         ".NET": 629,
         "Bash/Shell": 432,
@@ -27,15 +27,15 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 3021,
+        "React": 3028,
         "PyTorch": 1755,
         "TensorFlow": 1353,
         "LangChain": 845,
         "Node.js": 834,
         "Scikit-learn": 832,
         "Pandas": 770,
-        "Angular": 755,
-        "Spring": 716,
+        "Angular": 757,
+        "Spring": 718,
         "NumPy": 655,
         "Express": 479,
         "GraphQL": 435,
@@ -75,9 +75,9 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 6225,
+        "Scalability": 6228,
         "Distributed Systems": 2375,
-        "REST API": 2220,
+        "REST API": 2221,
         "System Design": 1323,
         "Microservices": 1113,
         "Kafka": 717,
@@ -85,7 +85,7 @@
         "API Design": 557,
         "Caching": 306,
         "gRPC": 251,
-        "RabbitMQ": 200,
+        "RabbitMQ": 202,
         "Service Mesh": 98,
         "WebSocket": 90,
         "Load Balancing": 74
@@ -136,8 +136,8 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 5718,
-        "LLM": 2878,
+        "Machine Learning": 5724,
+        "LLM": 2879,
         "Agents": 2452,
         "GenAI": 1972,
         "PyTorch": 1755,
@@ -173,9 +173,9 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 4090,
-        "Code Review": 3131,
-        "Mentorship": 3057,
+        "Cross-functional": 4091,
+        "Code Review": 3133,
+        "Mentorship": 3058,
         "Agile/Scrum": 2401,
         "On-call": 930,
         "Leadership": 816
