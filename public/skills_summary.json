@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-05-18T00:08:30.860256+00:00",
-  "total_analyzed": 16911,
+  "generated_at": "2026-05-18T01:08:30.649186+00:00",
+  "total_analyzed": 16914,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
         "Python": 9940,
-        "Java": 5100,
+        "Java": 5101,
         "SQL": 4261,
-        "JavaScript": 3487,
+        "JavaScript": 3488,
         "TypeScript": 2786,
         "Kotlin": 1497,
         "Swift": 1401,
-        "HTML/CSS": 982,
+        "HTML/CSS": 983,
         "Rust": 664,
         ".NET": 631,
         "Bash/Shell": 432,
@@ -54,7 +54,7 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 4458,
+        "AWS": 4459,
         "Azure": 2524,
         "GCP": 2335,
         "S3": 473,
@@ -76,14 +76,14 @@
       "color": "#0ea5e9",
       "skills": {
         "Scalability": 6247,
-        "Distributed Systems": 2381,
-        "REST API": 2227,
+        "Distributed Systems": 2382,
+        "REST API": 2228,
         "System Design": 1329,
         "Microservices": 1119,
         "Kafka": 717,
         "Event-Driven": 613,
         "API Design": 558,
-        "Caching": 306,
+        "Caching": 307,
         "gRPC": 251,
         "RabbitMQ": 202,
         "Service Mesh": 99,
@@ -138,7 +138,7 @@
       "skills": {
         "Machine Learning": 5739,
         "LLM": 2904,
-        "Agents": 2469,
+        "Agents": 2470,
         "GenAI": 1984,
         "PyTorch": 1756,
         "RAG": 1417,
@@ -174,10 +174,10 @@
       "color": "#64748b",
       "skills": {
         "Cross-functional": 4107,
-        "Code Review": 3142,
-        "Mentorship": 3072,
-        "Agile/Scrum": 2408,
-        "On-call": 932,
+        "Code Review": 3143,
+        "Mentorship": 3073,
+        "Agile/Scrum": 2409,
+        "On-call": 933,
         "Leadership": 819
       }
     }
