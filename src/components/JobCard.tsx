@@ -168,21 +168,6 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
         </div>
       </div>
 
-      {/* Company name — full, wraps to 2 lines */}
-      <div style={{
-        padding: "5px 10px 0 10px",
-        fontSize: 10.5,
-        fontWeight: 700,
-        color: "#64748b",
-        lineHeight: 1.3,
-        display: "-webkit-box",
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: "vertical",
-        overflow: "hidden",
-      } as React.CSSProperties}>
-        {co}
-      </div>
-
       {/* Job title — hero element */}
       <div style={{
         padding: "5px 10px 0 10px",
@@ -197,6 +182,20 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
         flex: 1,
       } as React.CSSProperties}>
         {title}
+      </div>
+
+      {/* Company name */}
+      <div style={{
+        padding: "4px 10px 0 10px",
+        fontSize: 10.5,
+        fontWeight: 600,
+        color: "#64748b",
+        lineHeight: 1.3,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      }}>
+        {co}
       </div>
 
       {/* Meta: date · location */}
@@ -225,25 +224,6 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
 
       {/* Action bar */}
       <div style={{ padding: "8px 8px 8px", display: "flex", gap: 4, marginTop: "auto" }}>
-        {onCartToggle && (
-          <button
-            onClick={(e) => { e.preventDefault(); onCartToggle(job); }}
-            title={isInCart ? "Remove from cart" : "Save"}
-            style={{
-              flexShrink: 0, width: 26, height: 26, borderRadius: 6,
-              border: isInCart ? "1px solid rgba(234,88,12,0.4)" : "1px solid #e2e8f0",
-              background: isInCart ? "rgba(234,88,12,0.08)" : "#f8fafc",
-              color: isInCart ? "#ea580c" : "#94a3b8",
-              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "all 0.15s",
-            }}
-          >
-            {isInCart
-              ? <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-              : <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            }
-          </button>
-        )}
         {!isApplied && job.job_url && (
           <button
             onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}
