@@ -51,10 +51,6 @@ function scrapedDateLabel(dateStr?: string): string {
   return dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
-function finiteOrNull(value: unknown): number | null {
-  const n = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(n) ? n : null;
-}
 
 function scoreBg(s: number) {
   if (s >= 150) return { bg: "linear-gradient(135deg,#7c3aed,#6d28d9)", text: "#fff", bar: "#7c3aed" };
@@ -63,11 +59,6 @@ function scoreBg(s: number) {
   return { bg: "linear-gradient(135deg,#64748b,#475569)", text: "#fff", bar: "#64748b" };
 }
 
-function atsColor(pct: number) {
-  if (pct >= 60) return "#16a34a";
-  if (pct >= 35) return "#0891b2";
-  return "#ea580c";
-}
 
 
 interface Props {
@@ -87,8 +78,6 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
   const co = job.company || "—";
   const title = job.title || "—";
   const score = job.score ?? 0;
-  const ats = finiteOrNull(job.ats_score ?? job.score_pct);
-  const fit = finiteOrNull(job.fit_score);
   const color = avatarColor(co);
   const isApplied = Boolean(applyRecord);
   const sc = scoreBg(score);
@@ -161,7 +150,9 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
               <span style={{
                 fontWeight: 700, fontSize: 11.5, color: "#0f172a",
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-              }}>
+                maxWidth: "100%", display: "block",
+              }}
+                title={co}>
                 {co}
               </span>
               {onExcludeCompany && (
@@ -201,31 +192,6 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
           {job.location && <span>📍 {job.location}</span>}
         </div>
 
-        {/* Score bars */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-          {ats !== null && (
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                <span style={{ fontSize: 9.5, color: "#94a3b8", fontWeight: 600 }}>ATS Match</span>
-                <span style={{ fontSize: 9.5, fontWeight: 700, color: atsColor(ats) }}>{ats}%</span>
-              </div>
-              <div style={{ height: 4, background: "#f1f5f9", borderRadius: 99, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${Math.min(ats, 100)}%`, background: atsColor(ats), borderRadius: 99 }} />
-              </div>
-            </div>
-          )}
-          {fit !== null && (
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                <span style={{ fontSize: 9.5, color: "#94a3b8", fontWeight: 600 }}>Fit Score</span>
-                <span style={{ fontSize: 9.5, fontWeight: 700, color: atsColor(fit) }}>{fit}%</span>
-              </div>
-              <div style={{ height: 4, background: "#f1f5f9", borderRadius: 99, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${Math.min(fit, 100)}%`, background: atsColor(fit), borderRadius: 99 }} />
-              </div>
-            </div>
-          )}
-        </div>
 
         {isApplied && (
           <div style={{ fontSize: 10, fontWeight: 700, color: "#16a34a", background: "rgba(22,163,74,0.08)", border: "1px solid rgba(22,163,74,0.2)", borderRadius: 6, padding: "3px 7px", textAlign: "center" }}>
@@ -255,6 +221,18 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
             )}
           </button>
+        )}
+        {!isApplied && job.job_url && (
+          <button
+            onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}
+            title="Mark as clicked"
+            style={{
+              flexShrink: 0, height: 28, padding: "0 8px", borderRadius: 7,
+              border: "1px solid #e2e8f0", background: "#f8fafc",
+              color: "#64748b", cursor: "pointer", fontSize: 10.5, fontWeight: 700,
+              transition: "all 0.15s",
+            }}
+          >Click</button>
         )}
         <button
           onClick={handleMsg}
