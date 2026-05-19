@@ -682,7 +682,7 @@ header {
 .card-grid {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 14px;
+  gap: 10px;
   padding-bottom: 32px;
 }
 @media (max-width: 1400px) { .card-grid { grid-template-columns: repeat(6, 1fr); } }
