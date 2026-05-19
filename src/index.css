@@ -62,7 +62,7 @@ body::after {
 a { color: var(--blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-.wrapper { max-width: 1380px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+.wrapper { width: 100%; padding: 0 24px; position: relative; z-index: 1; box-sizing: border-box; }
 
 /* ── Header ─────────────────────────────────────────────────────────── */
 header {
@@ -681,12 +681,10 @@ header {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
   gap: 10px;
   padding-bottom: 32px;
 }
-@media (max-width: 1400px) { .card-grid { grid-template-columns: repeat(6, 1fr); } }
-@media (max-width: 1100px) { .card-grid { grid-template-columns: repeat(4, 1fr); } }
 @media (max-width: 700px) { .card-grid { grid-template-columns: 1fr; } }
 
 .message-btn {
