@@ -552,6 +552,7 @@ export default function Dashboard() {
                             <JobCard
                               key={job.job_url || i}
                               job={job}
+                              index={i + 1}
                               applyRecord={job.job_url ? getRecord(job.job_url) : null}
                               onApplyClick={recordClick}
                               onExcludeCompany={excludeCompany}
@@ -577,6 +578,7 @@ export default function Dashboard() {
                       <JobCard
                         key={job.job_url || i}
                         job={job}
+                        index={i + 1}
                         applyRecord={job.job_url ? getRecord(job.job_url) : null}
                         onApplyClick={recordClick}
                         onExcludeCompany={excludeCompany}

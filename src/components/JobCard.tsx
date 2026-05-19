@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { Job } from "../types";
 import type { ApplyRecord } from "../hooks/useApplyTracker";
-import { isTop500 } from "../data/top500";
 
 const AVATAR_COLORS = [
   "#7c3aed","#0ea5e9","#059669","#d97706","#db2777","#0891b2","#16a34a","#9333ea",
@@ -70,14 +69,10 @@ function atsColor(pct: number) {
   return "#ea580c";
 }
 
-function levelColors(l: string): { bg: string; color: string; border: string } {
-  if (l === "New Grad") return { bg: "rgba(22,163,74,0.1)", color: "#16a34a", border: "rgba(22,163,74,0.25)" };
-  if (l === "Mid")      return { bg: "rgba(234,88,12,0.1)", color: "#ea580c", border: "rgba(234,88,12,0.25)" };
-  return { bg: "rgba(37,99,235,0.1)", color: "#2563eb", border: "rgba(37,99,235,0.25)" };
-}
 
 interface Props {
   job: Job;
+  index?: number;
   applyRecord: ApplyRecord | null;
   onApplyClick: (jobUrl: string, title: string, company: string) => void;
   onExcludeCompany?: (company: string) => void;
@@ -85,7 +80,7 @@ interface Props {
   isInCart?: boolean;
 }
 
-export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompany, onCartToggle, isInCart }: Props) {
+export default function JobCard({ job, index, applyRecord, onApplyClick, onExcludeCompany, onCartToggle, isInCart }: Props) {
   const [msgCopied, setMsgCopied] = useState(false);
   const [hovered, setHovered] = useState(false);
 
@@ -94,12 +89,9 @@ export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompa
   const score = job.score ?? 0;
   const ats = finiteOrNull(job.ats_score ?? job.score_pct);
   const fit = finiteOrNull(job.fit_score);
-  const lvl = job.level || "Entry";
   const color = avatarColor(co);
-  const isTopCo = isTop500(co);
   const isApplied = Boolean(applyRecord);
   const sc = scoreBg(score);
-  const lc = levelColors(lvl);
 
   const dateLabel = job.scraped_date
     ? scrapedDateLabel(job.scraped_date)
@@ -144,8 +136,18 @@ export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompa
       {/* Card body */}
       <div style={{ padding: "10px 10px 0", display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
 
-        {/* Header: avatar + company + score */}
+        {/* Header: number + avatar + company + score */}
         <div style={{ display: "flex", alignItems: "flex-start", gap: 7 }}>
+          {index !== undefined && (
+            <div style={{
+              flexShrink: 0, width: 18, height: 18, borderRadius: 5,
+              background: "rgba(100,116,139,0.1)", color: "#64748b",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontWeight: 700, fontSize: 9.5, marginTop: 1,
+            }}>
+              {index}
+            </div>
+          )}
           <div style={{
             width: 30, height: 30, borderRadius: 8, flexShrink: 0,
             background: color, color: "#fff",
@@ -167,16 +169,6 @@ export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompa
                   style={{ border: "none", background: "none", color: "#cbd5e1", cursor: "pointer", fontSize: 11, padding: 0, lineHeight: 1, flexShrink: 0 }}
                   title={`Block "${co}"`}>⊘</button>
               )}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2, flexWrap: "wrap" }}>
-              {isTopCo && (
-                <span style={{ fontSize: 8.5, fontWeight: 700, padding: "1px 4px", borderRadius: 3, background: "rgba(37,99,235,0.08)", color: "#2563eb", border: "1px solid rgba(37,99,235,0.18)", flexShrink: 0 }}>
-                  TOP 500
-                </span>
-              )}
-              <span style={{ fontSize: 9.5, fontWeight: 700, padding: "1px 5px", borderRadius: 99, background: lc.bg, color: lc.color, border: `1px solid ${lc.border}`, flexShrink: 0 }}>
-                {lvl}
-              </span>
             </div>
           </div>
           <div style={{
