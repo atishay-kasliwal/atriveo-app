@@ -51,12 +51,12 @@ function scrapedDateLabel(dateStr?: string): string {
   return dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
-function scoreTier(s: number): { gradient: string; solid: string; label: string } {
-  if (s >= 150) return { gradient: "linear-gradient(135deg,#7c3aed,#6d28d9)", solid: "#7c3aed", label: "S" };
-  if (s >= 100) return { gradient: "linear-gradient(135deg,#0ea5e9,#2563eb)", solid: "#2563eb", label: "A" };
-  if (s >= 70)  return { gradient: "linear-gradient(135deg,#059669,#16a34a)", solid: "#16a34a", label: "B" };
-  if (s >= 40)  return { gradient: "linear-gradient(135deg,#d97706,#ea580c)", solid: "#d97706", label: "C" };
-  return { gradient: "linear-gradient(135deg,#94a3b8,#64748b)", solid: "#94a3b8", label: "D" };
+function tier(s: number) {
+  if (s >= 150) return { gradient: "linear-gradient(135deg,#7c3aed,#a855f7)", solid: "#7c3aed", glow: "rgba(124,58,237,0.28)", bg: "rgba(124,58,237,0.035)" };
+  if (s >= 100) return { gradient: "linear-gradient(135deg,#2563eb,#3b82f6)", solid: "#2563eb", glow: "rgba(37,99,235,0.28)", bg: "rgba(37,99,235,0.035)" };
+  if (s >= 70)  return { gradient: "linear-gradient(135deg,#059669,#10b981)", solid: "#059669", glow: "rgba(5,150,105,0.28)", bg: "rgba(5,150,105,0.035)" };
+  if (s >= 40)  return { gradient: "linear-gradient(135deg,#d97706,#f59e0b)", solid: "#d97706", glow: "rgba(217,119,6,0.25)", bg: "rgba(217,119,6,0.03)" };
+  return { gradient: "linear-gradient(135deg,#64748b,#94a3b8)", solid: "#94a3b8", glow: "rgba(100,116,139,0.2)", bg: "rgba(100,116,139,0.02)" };
 }
 
 interface Props {
@@ -78,7 +78,7 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
   const score = job.score ?? 0;
   const color = avatarColor(co);
   const isApplied = Boolean(applyRecord);
-  const tier = scoreTier(score);
+  const t = tier(score);
 
   const dateLabel = job.scraped_date
     ? scrapedDateLabel(job.scraped_date)
@@ -105,73 +105,80 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? "#f8faff" : "#fff",
-        borderRadius: 10,
-        border: `1px solid ${isApplied ? "rgba(22,163,74,0.4)" : hovered ? "rgba(37,99,235,0.2)" : "#e8edf3"}`,
-        borderLeft: `3px solid ${isApplied ? "#16a34a" : tier.solid}`,
+        background: hovered
+          ? `linear-gradient(160deg, ${t.bg.replace("0.035", "0.07")} 0%, #fff 55%)`
+          : `linear-gradient(160deg, ${t.bg} 0%, #fff 55%)`,
+        borderRadius: 12,
+        border: `1px solid ${hovered ? t.solid + "44" : "rgba(0,0,0,0.07)"}`,
         display: "flex",
         flexDirection: "column",
-        transition: "all 0.15s ease",
-        boxShadow: hovered ? "0 4px 16px rgba(0,0,0,0.07)" : "0 1px 3px rgba(0,0,0,0.04)",
-        transform: hovered ? "translateY(-1px)" : "none",
+        transition: "all 0.18s ease",
+        boxShadow: hovered
+          ? `0 8px 24px ${t.glow}, 0 2px 8px rgba(0,0,0,0.06)`
+          : "0 1px 4px rgba(0,0,0,0.05)",
+        transform: hovered ? "translateY(-2px)" : "none",
         overflow: "hidden",
         cursor: "default",
         minWidth: 0,
+        position: "relative",
       }}
     >
-      {/* Header: rank + avatar + score */}
+      {/* Top row: rank + score badge */}
       <div style={{
-        padding: "9px 10px 0 10px",
+        padding: "10px 10px 0",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: 6,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {index !== undefined && (
             <span style={{
               fontSize: 10, fontWeight: 800, color: "#94a3b8",
-              minWidth: 14, flexShrink: 0,
+              letterSpacing: "0.04em",
             }}>#{index}</span>
           )}
+          {/* Avatar with color ring */}
           <div style={{
-            width: 28, height: 28, borderRadius: 7, flexShrink: 0,
+            width: 28, height: 28, borderRadius: 8, flexShrink: 0,
             background: color, color: "#fff",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontWeight: 800, fontSize: 12,
+            boxShadow: `0 0 0 2px #fff, 0 0 0 3.5px ${color}55`,
           }}>
             {co.charAt(0).toUpperCase()}
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           {onExcludeCompany && (
             <button
               onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
-              style={{ border: "none", background: "none", color: "#cbd5e1", cursor: "pointer", fontSize: 12, padding: 0, lineHeight: 1 }}
+              style={{ border: "none", background: "none", color: "#cbd5e1", cursor: "pointer", fontSize: 12, padding: 0, lineHeight: 1, opacity: hovered ? 1 : 0, transition: "opacity 0.15s" }}
               title={`Block "${co}"`}
             >⊘</button>
           )}
+          {/* Score badge */}
           <div style={{
-            background: tier.gradient,
+            background: t.gradient,
             color: "#fff",
-            borderRadius: 6,
-            padding: "3px 7px",
+            borderRadius: 20,
+            padding: "3px 8px",
             fontWeight: 800,
-            fontSize: 12,
-            letterSpacing: "-0.3px",
+            fontSize: 11.5,
+            letterSpacing: "-0.2px",
             whiteSpace: "nowrap",
-            flexShrink: 0,
+            boxShadow: hovered ? `0 3px 10px ${t.glow}` : `0 1px 4px ${t.glow}`,
+            transition: "box-shadow 0.18s",
           }}>
             ★{score}
           </div>
         </div>
       </div>
 
-      {/* Job title — hero element */}
+      {/* Job title */}
       <div style={{
-        padding: "5px 10px 0 10px",
-        fontSize: 12.5,
+        padding: "8px 10px 0",
+        fontSize: 13,
         fontWeight: 700,
         color: "#0f172a",
         lineHeight: 1.4,
@@ -184,53 +191,59 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
         {title}
       </div>
 
-      {/* Company name */}
+      {/* Company */}
       <div style={{
-        padding: "4px 10px 0 10px",
+        padding: "3px 10px 0",
         fontSize: 10.5,
         fontWeight: 600,
-        color: "#64748b",
-        lineHeight: 1.3,
+        color: color,
         overflow: "hidden",
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
+        opacity: 0.85,
       }}>
         {co}
       </div>
 
-      {/* Meta: date · location */}
+      {/* Meta */}
       <div style={{
-        padding: "5px 10px 0 10px",
+        padding: "4px 10px 0",
         fontSize: 10,
         color: "#94a3b8",
-        whiteSpace: "nowrap",
         overflow: "hidden",
         textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
       }}>
         🕐 {dateLabel}{locationShort ? ` · ${locationShort}` : ""}
       </div>
 
+      {/* Applied badge */}
       {isApplied && (
         <div style={{
-          margin: "5px 10px 0",
+          margin: "6px 10px 0",
           fontSize: 10, fontWeight: 700, color: "#16a34a",
           background: "rgba(22,163,74,0.08)",
           border: "1px solid rgba(22,163,74,0.2)",
-          borderRadius: 5, padding: "2px 6px", textAlign: "center",
+          borderRadius: 6, padding: "2px 7px", textAlign: "center",
         }}>
           ✓ Applied ×{applyRecord?.clicks}
         </div>
       )}
 
+      {/* Divider */}
+      <div style={{ margin: "8px 10px 0", height: 1, background: "rgba(0,0,0,0.05)" }} />
+
       {/* Action bar */}
-      <div style={{ padding: "8px 8px 8px", display: "flex", gap: 4, marginTop: "auto" }}>
+      <div style={{ padding: "7px 8px 8px", display: "flex", gap: 4 }}>
         {!isApplied && job.job_url && (
           <button
             onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}
             style={{
-              height: 26, padding: "0 7px", borderRadius: 6, flexShrink: 0,
-              border: "1px solid #e2e8f0", background: "#f8fafc",
+              height: 26, padding: "0 8px", borderRadius: 6, flexShrink: 0,
+              border: "1px solid rgba(0,0,0,0.1)",
+              background: "rgba(255,255,255,0.8)",
               color: "#475569", cursor: "pointer", fontSize: 10.5, fontWeight: 700,
+              backdropFilter: "blur(4px)",
               transition: "all 0.15s",
             }}
           >Click</button>
@@ -239,13 +252,13 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
           onClick={handleMsg}
           style={{
             flex: 1, height: 26, borderRadius: 6,
-            border: "1px solid rgba(99,102,241,0.25)",
-            background: msgCopied ? "rgba(99,102,241,0.1)" : "transparent",
+            border: "1px solid rgba(99,102,241,0.2)",
+            background: msgCopied ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.05)",
             color: "#6366f1", fontSize: 10.5, fontWeight: 700,
             cursor: "pointer", transition: "all 0.15s",
           }}
         >
-          {msgCopied ? "✓" : "Msg"}
+          {msgCopied ? "✓ Copied" : "Msg"}
         </button>
         {job.job_url ? (
           <a
@@ -256,9 +269,10 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
             style={{
               flex: 2, height: 26, borderRadius: 6,
               display: "flex", alignItems: "center", justifyContent: "center",
-              background: isApplied ? "linear-gradient(135deg,#16a34a,#059669)" : tier.gradient,
+              background: isApplied ? "linear-gradient(135deg,#16a34a,#059669)" : t.gradient,
               color: "#fff", fontSize: 10.5, fontWeight: 700,
-              textDecoration: "none", transition: "all 0.15s",
+              textDecoration: "none", transition: "all 0.18s",
+              boxShadow: hovered ? `0 3px 10px ${t.glow}` : "none",
             }}
           >
             {isApplied ? "Applied ✓" : "Apply ↗"}
