@@ -58,13 +58,13 @@ function finiteOrNull(value: unknown): number | null {
 }
 
 function scoreBg(s: number) {
-  if (s >= 150) return { bg: "linear-gradient(135deg,#7c3aed,#6d28d9)", text: "#fff" };
-  if (s >= 100) return { bg: "linear-gradient(135deg,#0ea5e9,#2563eb)", text: "#fff" };
-  if (s >= 70)  return { bg: "linear-gradient(135deg,#059669,#16a34a)", text: "#fff" };
-  return { bg: "linear-gradient(135deg,#64748b,#475569)", text: "#fff" };
+  if (s >= 150) return { bg: "linear-gradient(135deg,#7c3aed,#6d28d9)", text: "#fff", bar: "#7c3aed" };
+  if (s >= 100) return { bg: "linear-gradient(135deg,#0ea5e9,#2563eb)", text: "#fff", bar: "#0ea5e9" };
+  if (s >= 70)  return { bg: "linear-gradient(135deg,#059669,#16a34a)", text: "#fff", bar: "#059669" };
+  return { bg: "linear-gradient(135deg,#64748b,#475569)", text: "#fff", bar: "#64748b" };
 }
 
-function atsBar(pct: number) {
+function atsColor(pct: number) {
   if (pct >= 60) return "#16a34a";
   if (pct >= 35) return "#0891b2";
   return "#ea580c";
@@ -74,19 +74,6 @@ function levelColors(l: string): { bg: string; color: string; border: string } {
   if (l === "New Grad") return { bg: "rgba(22,163,74,0.1)", color: "#16a34a", border: "rgba(22,163,74,0.25)" };
   if (l === "Mid")      return { bg: "rgba(234,88,12,0.1)", color: "#ea580c", border: "rgba(234,88,12,0.25)" };
   return { bg: "rgba(37,99,235,0.1)", color: "#2563eb", border: "rgba(37,99,235,0.25)" };
-}
-
-function locationColors(loc: string): { bg: string; color: string; border: string } {
-  const l = loc.toLowerCase();
-  if (l.includes("new york") || / ny[,\s]/.test(l) || l.endsWith(", ny") || l === "ny")
-    return { bg: "rgba(22,163,74,0.1)", color: "#16a34a", border: "rgba(22,163,74,0.3)" };
-  if (l.includes("north carolina") || / nc[,\s]/.test(l) || l.endsWith(", nc") || l === "nc")
-    return { bg: "rgba(124,58,237,0.1)", color: "#7c3aed", border: "rgba(124,58,237,0.3)" };
-  if (l.includes("seattle") || / wa[,\s]/.test(l) || l.endsWith(", wa") || l === "wa")
-    return { bg: "rgba(8,145,178,0.1)", color: "#0891b2", border: "rgba(8,145,178,0.3)" };
-  if (l.includes("remote"))
-    return { bg: "rgba(100,116,139,0.08)", color: "#475569", border: "rgba(100,116,139,0.2)" };
-  return { bg: "#f8fafc", color: "#64748b", border: "#e2e8f0" };
 }
 
 interface Props {
@@ -131,127 +118,138 @@ export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompa
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: "#fff",
-        border: `1px solid ${isApplied ? "rgba(22,163,74,0.4)" : hovered ? "rgba(37,99,235,0.3)" : "#e2e8f0"}`,
+        background: hovered ? "rgba(248,250,255,1)" : "#fff",
+        border: `1px solid ${isApplied ? "rgba(22,163,74,0.35)" : hovered ? "rgba(37,99,235,0.25)" : "#e8edf3"}`,
         borderRadius: 12,
-        padding: "10px",
         display: "flex",
         flexDirection: "column",
-        gap: "8px",
         boxShadow: hovered
-          ? "0 8px 24px rgba(37,99,235,0.1), 0 2px 8px rgba(0,0,0,0.06)"
-          : "0 1px 4px rgba(0,0,0,0.06)",
+          ? "0 6px 20px rgba(37,99,235,0.09), 0 1px 4px rgba(0,0,0,0.05)"
+          : "0 1px 3px rgba(0,0,0,0.05)",
         transform: hovered ? "translateY(-2px)" : "none",
-        transition: "all 0.18s ease",
+        transition: "all 0.16s ease",
         cursor: "default",
         position: "relative",
         overflow: "hidden",
+        minWidth: 0,
       }}
     >
-      {/* Top accent line based on score */}
+      {/* Score-colored top stripe */}
       <div style={{
-        position: "absolute", top: 0, left: 0, right: 0, height: 3,
-        background: sc.bg, borderRadius: "16px 16px 0 0",
+        height: 3,
+        background: sc.bg,
+        flexShrink: 0,
       }} />
 
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, paddingTop: 2 }}>
-        <div style={{
-          width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-          background: color, color: "#fff",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontWeight: 800, fontSize: 12, boxShadow: `0 3px 7px ${color}44`,
-        }}>
-          {co.charAt(0).toUpperCase()}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-            <span style={{ fontWeight: 700, fontSize: 11.5, color: "#0f172a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {co}
-            </span>
-            {isTopCo && (
-              <span style={{ fontSize: 8, fontWeight: 700, padding: "1px 4px", borderRadius: 3, background: "rgba(37,99,235,0.08)", color: "#2563eb", border: "1px solid rgba(37,99,235,0.2)", flexShrink: 0 }}>
-                T500
+      {/* Card body */}
+      <div style={{ padding: "10px 10px 0", display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
+
+        {/* Header: avatar + company + score */}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 7 }}>
+          <div style={{
+            width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+            background: color, color: "#fff",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontWeight: 800, fontSize: 13,
+          }}>
+            {co.charAt(0).toUpperCase()}
+          </div>
+          <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+              <span style={{
+                fontWeight: 700, fontSize: 11.5, color: "#0f172a",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>
+                {co}
               </span>
-            )}
-            {onExcludeCompany && (
-              <button onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
-                style={{ border: "none", background: "none", color: "#94a3b8", cursor: "pointer", fontSize: 11, padding: 0, lineHeight: 1, flexShrink: 0 }}
-                title={`Block "${co}"`}>⊘</button>
-            )}
+              {onExcludeCompany && (
+                <button onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
+                  style={{ border: "none", background: "none", color: "#cbd5e1", cursor: "pointer", fontSize: 11, padding: 0, lineHeight: 1, flexShrink: 0 }}
+                  title={`Block "${co}"`}>⊘</button>
+              )}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2, flexWrap: "wrap" }}>
+              {isTopCo && (
+                <span style={{ fontSize: 8.5, fontWeight: 700, padding: "1px 4px", borderRadius: 3, background: "rgba(37,99,235,0.08)", color: "#2563eb", border: "1px solid rgba(37,99,235,0.18)", flexShrink: 0 }}>
+                  TOP 500
+                </span>
+              )}
+              <span style={{ fontSize: 9.5, fontWeight: 700, padding: "1px 5px", borderRadius: 99, background: lc.bg, color: lc.color, border: `1px solid ${lc.border}`, flexShrink: 0 }}>
+                {lvl}
+              </span>
+            </div>
           </div>
-          <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{job.location || "Remote"}</div>
+          <div style={{
+            flexShrink: 0,
+            background: sc.bg,
+            color: "#fff",
+            borderRadius: 7,
+            padding: "3px 6px",
+            fontWeight: 800,
+            fontSize: 11.5,
+            letterSpacing: "-0.2px",
+            whiteSpace: "nowrap",
+          }}>
+            ★{score}
+          </div>
         </div>
-        {/* Score bubble */}
+
+        {/* Job title */}
         <div style={{
-          flexShrink: 0,
-          background: sc.bg,
-          color: sc.text,
-          borderRadius: 7,
-          padding: "3px 7px",
-          fontWeight: 800,
-          fontSize: 12,
-          letterSpacing: "-0.3px",
-          boxShadow: `0 2px 6px ${score >= 100 ? "rgba(37,99,235,0.25)" : "rgba(0,0,0,0.1)"}`,
-        }}>
-          ★{score}
+          fontSize: 12, fontWeight: 600, color: "#1e293b", lineHeight: 1.4,
+          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+        } as React.CSSProperties}>
+          {title}
         </div>
-      </div>
 
-      {/* Title */}
-      <div style={{ fontSize: 11.5, fontWeight: 600, color: "#1e293b", lineHeight: 1.35 }}>
-        {title}
-      </div>
+        {/* Meta: date + location */}
+        <div style={{ fontSize: 10, color: "#94a3b8", display: "flex", flexWrap: "wrap", gap: "2px 6px" }}>
+          <span>🕐 {dateLabel}</span>
+          {job.location && <span>📍 {job.location}</span>}
+        </div>
 
-      {/* Tags row */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-        <span style={{ fontSize: 9.5, fontWeight: 600, padding: "2px 5px", borderRadius: 99, background: "#f1f5f9", color: "#64748b", border: "1px solid #e2e8f0" }}>
-          🕐 {dateLabel}
-        </span>
-        <span style={{ fontSize: 9.5, fontWeight: 700, padding: "2px 5px", borderRadius: 99, background: lc.bg, color: lc.color, border: `1px solid ${lc.border}` }}>
-          {lvl}
-        </span>
+        {/* Score bars */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+          {ats !== null && (
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                <span style={{ fontSize: 9.5, color: "#94a3b8", fontWeight: 600 }}>ATS Match</span>
+                <span style={{ fontSize: 9.5, fontWeight: 700, color: atsColor(ats) }}>{ats}%</span>
+              </div>
+              <div style={{ height: 4, background: "#f1f5f9", borderRadius: 99, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${Math.min(ats, 100)}%`, background: atsColor(ats), borderRadius: 99 }} />
+              </div>
+            </div>
+          )}
+          {fit !== null && (
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                <span style={{ fontSize: 9.5, color: "#94a3b8", fontWeight: 600 }}>Fit Score</span>
+                <span style={{ fontSize: 9.5, fontWeight: 700, color: atsColor(fit) }}>{fit}%</span>
+              </div>
+              <div style={{ height: 4, background: "#f1f5f9", borderRadius: 99, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${Math.min(fit, 100)}%`, background: atsColor(fit), borderRadius: 99 }} />
+              </div>
+            </div>
+          )}
+        </div>
+
         {isApplied && (
-          <span style={{ fontSize: 9.5, fontWeight: 700, padding: "2px 5px", borderRadius: 99, background: "rgba(22,163,74,0.1)", color: "#16a34a", border: "1px solid rgba(22,163,74,0.25)" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#16a34a", background: "rgba(22,163,74,0.08)", border: "1px solid rgba(22,163,74,0.2)", borderRadius: 6, padding: "3px 7px", textAlign: "center" }}>
             ✓ Applied ×{applyRecord?.clicks}
-          </span>
-        )}
-      </div>
-
-      {/* ATS / Fit bars */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-        {ats !== null && (
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-              <span style={{ fontSize: 9.5, fontWeight: 600, color: "#94a3b8" }}>ATS</span>
-              <span style={{ fontSize: 9.5, fontWeight: 700, color: atsBar(ats) }}>{ats}%</span>
-            </div>
-            <div style={{ height: 4, background: "#f1f5f9", borderRadius: 99, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${Math.min(ats, 100)}%`, background: atsBar(ats), borderRadius: 99, transition: "width 0.4s ease" }} />
-            </div>
-          </div>
-        )}
-        {fit !== null && (
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-              <span style={{ fontSize: 9.5, fontWeight: 600, color: "#94a3b8" }}>Fit</span>
-              <span style={{ fontSize: 9.5, fontWeight: 700, color: atsBar(fit) }}>{fit}%</span>
-            </div>
-            <div style={{ height: 4, background: "#f1f5f9", borderRadius: 99, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${Math.min(fit, 100)}%`, background: atsBar(fit), borderRadius: 99, transition: "width 0.4s ease" }} />
-            </div>
           </div>
         )}
       </div>
 
-      {/* Actions */}
-      <div style={{ display: "flex", gap: 4, paddingTop: 4, borderTop: "1px solid #f1f5f9", marginTop: "auto" }}>
+      {/* Actions footer */}
+      <div style={{ padding: "8px 10px 10px", display: "flex", gap: 5, marginTop: "auto" }}>
         {onCartToggle && (
           <button
             onClick={(e) => { e.preventDefault(); onCartToggle(job); }}
             title={isInCart ? "Remove from cart" : "Save to cart"}
             style={{
-              flexShrink: 0, padding: "5px 6px", borderRadius: 6,
+              flexShrink: 0, width: 28, height: 28, borderRadius: 7,
               border: isInCart ? "1px solid rgba(234,88,12,0.4)" : "1px solid #e2e8f0",
               background: isInCart ? "rgba(234,88,12,0.08)" : "#f8fafc",
               color: isInCart ? "#ea580c" : "#94a3b8",
@@ -266,25 +264,13 @@ export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompa
             )}
           </button>
         )}
-        {!isApplied && job.job_url && (
-          <button
-            onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}
-            title="Mark as clicked"
-            style={{
-              padding: "5px 7px", borderRadius: 6, flexShrink: 0,
-              border: "1px solid #e2e8f0", background: "#f8fafc",
-              color: "#64748b", cursor: "pointer", fontSize: 10, fontWeight: 700,
-              transition: "all 0.15s",
-            }}
-          >Click</button>
-        )}
         <button
           onClick={handleMsg}
           style={{
-            flex: 1, padding: "5px 0", borderRadius: 6,
+            flex: 1, height: 28, borderRadius: 7,
             border: "1px solid rgba(99,102,241,0.3)",
             background: msgCopied ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.06)",
-            color: "#6366f1", fontSize: 10, fontWeight: 700,
+            color: "#6366f1", fontSize: 10.5, fontWeight: 700,
             cursor: "pointer", transition: "all 0.15s",
           }}
         >
@@ -297,21 +283,19 @@ export default function JobCard({ job, applyRecord, onApplyClick, onExcludeCompa
             rel="noopener"
             onClick={() => onApplyClick(job.job_url, title, co)}
             style={{
-              flex: 1.5, padding: "5px 0", borderRadius: 6, textAlign: "center",
+              flex: 2, height: 28, borderRadius: 7, textAlign: "center",
+              display: "flex", alignItems: "center", justifyContent: "center",
               background: isApplied
                 ? "linear-gradient(135deg,#16a34a,#059669)"
                 : "linear-gradient(135deg,#2563eb,#1d4ed8)",
-              color: "#fff", fontSize: 10, fontWeight: 700,
+              color: "#fff", fontSize: 10.5, fontWeight: 700,
               textDecoration: "none", transition: "all 0.15s",
-              boxShadow: isApplied
-                ? "0 2px 6px rgba(22,163,74,0.3)"
-                : "0 2px 6px rgba(37,99,235,0.3)",
             }}
           >
             {isApplied ? "Applied ✓" : "Apply ↗"}
           </a>
         ) : (
-          <span style={{ flex: 1, fontSize: 10, color: "#94a3b8", textAlign: "center", padding: "5px 0" }}>—</span>
+          <span style={{ flex: 2, fontSize: 10, color: "#94a3b8", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center" }}>—</span>
         )}
       </div>
     </div>
