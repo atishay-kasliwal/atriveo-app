@@ -69,7 +69,7 @@ interface Props {
   isInCart?: boolean;
 }
 
-export default function JobCard({ job, index, applyRecord, onApplyClick, onExcludeCompany, onCartToggle, isInCart }: Props) {
+export default function JobCard({ job, index, applyRecord, onApplyClick, onExcludeCompany }: Props) {
   const [msgCopied, setMsgCopied] = useState(false);
   const [hovered, setHovered] = useState(false);
 
