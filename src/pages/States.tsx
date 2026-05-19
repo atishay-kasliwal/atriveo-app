@@ -291,15 +291,16 @@ export default function States() {
                     {/* Sub-header */}
                     <div style={{
                       display: "grid",
-                      gridTemplateColumns: "28px 1fr 160px 70px 80px 180px",
-                      padding: "7px 20px 7px 52px", gap: 12,
-                      fontSize: 10, fontWeight: 700, color: "#94a3b8",
+                      gridTemplateColumns: "36px 2fr 1fr 1fr 90px 80px 220px",
+                      padding: "8px 24px", gap: 16,
+                      fontSize: 10.5, fontWeight: 700, color: "#94a3b8",
                       textTransform: "uppercase", letterSpacing: "0.06em",
-                      borderBottom: "1px solid #e8edf3", background: "#eef4ff",
+                      borderBottom: "1px solid #dbeafe", background: "#eef4ff",
                     }}>
                       <div>#</div>
                       <div>Job Title</div>
                       <div>Company</div>
+                      <div>Location</div>
                       <div>Score</div>
                       <div>Level</div>
                       <div>Actions</div>
@@ -315,48 +316,54 @@ export default function States() {
                           key={job.job_url || ji}
                           style={{
                             display: "grid",
-                            gridTemplateColumns: "28px 1fr 160px 70px 80px 180px",
-                            padding: "9px 20px 9px 52px", gap: 12,
+                            gridTemplateColumns: "36px 2fr 1fr 1fr 90px 80px 220px",
+                            padding: "11px 24px", gap: 16,
                             alignItems: "center",
-                            borderBottom: ji < row.jobs.length - 1 ? "1px solid #e8edf3" : "none",
+                            borderBottom: ji < row.jobs.length - 1 ? "1px solid #f1f5f9" : "none",
                             background: isApplied ? "rgba(22,163,74,0.04)" : "transparent",
                             transition: "background 0.1s",
                           }}
-                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = isApplied ? "rgba(22,163,74,0.07)" : "rgba(37,99,235,0.03)"; }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = isApplied ? "rgba(22,163,74,0.07)" : "rgba(37,99,235,0.025)"; }}
                           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isApplied ? "rgba(22,163,74,0.04)" : "transparent"; }}
                         >
                           {/* Index */}
-                          <div style={{ fontSize: 10.5, fontWeight: 700, color: "#cbd5e1" }}>{ji + 1}</div>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: "#cbd5e1" }}>{ji + 1}</div>
 
                           {/* Title */}
-                          <div style={{ fontSize: 12.5, fontWeight: 600, color: "#0f172a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "#0f172a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {job.title || "—"}
                           </div>
 
                           {/* Company */}
-                          <div style={{ fontSize: 11.5, color: "#64748b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }}>
+                          <div style={{ fontSize: 12, color: "#475569", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 600 }}>
                             {job.company || "—"}
+                          </div>
+
+                          {/* Location */}
+                          <div style={{ fontSize: 11.5, color: "#94a3b8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            📍 {job.location || "—"}
                           </div>
 
                           {/* Score */}
                           <div style={{
-                            display: "inline-flex", alignItems: "center",
-                            background: `${jColor}18`, color: jColor,
-                            borderRadius: 6, padding: "2px 7px",
-                            fontSize: 11.5, fontWeight: 800,
-                          }}>★{jScore}</div>
+                            display: "inline-flex", alignItems: "center", justifyContent: "center",
+                            background: `${jColor}15`, color: jColor,
+                            borderRadius: 7, padding: "3px 10px",
+                            fontSize: 12, fontWeight: 800, whiteSpace: "nowrap",
+                          }}>★ {jScore}</div>
 
                           {/* Level */}
-                          <div style={{ fontSize: 10.5, color: "#64748b", fontWeight: 600 }}>{job.level || "—"}</div>
+                          <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600 }}>{job.level || "—"}</div>
 
                           {/* Actions */}
-                          <div style={{ display: "flex", gap: 5 }}>
+                          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                             {!isApplied && job.job_url && (
                               <button
                                 onClick={() => recordClick(job.job_url, job.title || "", job.company || "")}
                                 style={{
-                                  padding: "4px 8px", borderRadius: 5, border: "1px solid #e2e8f0",
-                                  background: "#fff", color: "#64748b", fontSize: 10.5, fontWeight: 700, cursor: "pointer",
+                                  padding: "5px 12px", borderRadius: 6, border: "1px solid #e2e8f0",
+                                  background: "#fff", color: "#64748b", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                                  whiteSpace: "nowrap",
                                 }}
                               >Click</button>
                             )}
@@ -367,15 +374,15 @@ export default function States() {
                                 rel="noopener"
                                 onClick={() => recordClick(job.job_url, job.title || "", job.company || "")}
                                 style={{
-                                  padding: "4px 10px", borderRadius: 5,
+                                  padding: "5px 14px", borderRadius: 6,
                                   background: isApplied ? "linear-gradient(135deg,#16a34a,#059669)" : `linear-gradient(135deg,${jColor},${jColor}cc)`,
-                                  color: "#fff", fontSize: 10.5, fontWeight: 700,
-                                  textDecoration: "none",
+                                  color: "#fff", fontSize: 11, fontWeight: 700,
+                                  textDecoration: "none", whiteSpace: "nowrap",
                                 }}
                               >{isApplied ? "Applied ✓" : "Apply ↗"}</a>
                             )}
                             {isApplied && (
-                              <span style={{ fontSize: 10.5, color: "#16a34a", fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
+                              <span style={{ fontSize: 11, color: "#16a34a", fontWeight: 700 }}>
                                 ×{rec?.clicks} clicks
                               </span>
                             )}
