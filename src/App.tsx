@@ -7,6 +7,7 @@ import Settings from "./pages/Settings";
 import Skills from "./pages/Skills";
 import Unclicked100 from "./pages/Unclicked100";
 import Cart from "./pages/Cart";
+import States from "./pages/States";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -58,6 +59,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Skills />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/states"
+          element={
+            <ProtectedRoute>
+              <States />
             </ProtectedRoute>
           }
         />

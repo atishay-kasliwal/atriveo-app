@@ -321,6 +321,7 @@ export default function Dashboard() {
               <a href="/unclicked-100" className="nav-tab">100+ Unclicked</a>
               <a href="/cart" className="nav-tab">Cart</a>
               <a href="/skills" className="nav-tab">Skills</a>
+              <a href="/states" className="nav-tab">States</a>
               <a href="/settings" className="nav-tab">Settings</a>
             </nav>
             <span className="header-user">Hi, {user?.name}</span>
