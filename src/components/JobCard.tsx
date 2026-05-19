@@ -51,15 +51,13 @@ function scrapedDateLabel(dateStr?: string): string {
   return dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
-
-function scoreBg(s: number) {
-  if (s >= 150) return { bg: "linear-gradient(135deg,#7c3aed,#6d28d9)", text: "#fff", bar: "#7c3aed" };
-  if (s >= 100) return { bg: "linear-gradient(135deg,#0ea5e9,#2563eb)", text: "#fff", bar: "#0ea5e9" };
-  if (s >= 70)  return { bg: "linear-gradient(135deg,#059669,#16a34a)", text: "#fff", bar: "#059669" };
-  return { bg: "linear-gradient(135deg,#64748b,#475569)", text: "#fff", bar: "#64748b" };
+function scoreTier(s: number): { gradient: string; solid: string; label: string } {
+  if (s >= 150) return { gradient: "linear-gradient(135deg,#7c3aed,#6d28d9)", solid: "#7c3aed", label: "S" };
+  if (s >= 100) return { gradient: "linear-gradient(135deg,#0ea5e9,#2563eb)", solid: "#2563eb", label: "A" };
+  if (s >= 70)  return { gradient: "linear-gradient(135deg,#059669,#16a34a)", solid: "#16a34a", label: "B" };
+  if (s >= 40)  return { gradient: "linear-gradient(135deg,#d97706,#ea580c)", solid: "#d97706", label: "C" };
+  return { gradient: "linear-gradient(135deg,#94a3b8,#64748b)", solid: "#94a3b8", label: "D" };
 }
-
-
 
 interface Props {
   job: Job;
@@ -80,11 +78,19 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
   const score = job.score ?? 0;
   const color = avatarColor(co);
   const isApplied = Boolean(applyRecord);
-  const sc = scoreBg(score);
+  const tier = scoreTier(score);
 
   const dateLabel = job.scraped_date
     ? scrapedDateLabel(job.scraped_date)
     : fmtDate(job.batch_time || job.date_posted);
+
+  const locationShort = (() => {
+    const loc = job.location || "";
+    if (!loc) return null;
+    if (loc.toLowerCase().includes("remote")) return "Remote";
+    const parts = loc.split(",");
+    return parts.length >= 2 ? parts.slice(-2).join(",").trim() : loc;
+  })();
 
   function handleMsg(e: React.MouseEvent) {
     e.preventDefault();
@@ -99,115 +105,132 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? "rgba(248,250,255,1)" : "#fff",
-        border: `1px solid ${isApplied ? "rgba(22,163,74,0.35)" : hovered ? "rgba(37,99,235,0.25)" : "#e8edf3"}`,
-        borderRadius: 12,
+        background: hovered ? "#f8faff" : "#fff",
+        borderRadius: 10,
+        border: `1px solid ${isApplied ? "rgba(22,163,74,0.4)" : hovered ? "rgba(37,99,235,0.2)" : "#e8edf3"}`,
+        borderLeft: `3px solid ${isApplied ? "#16a34a" : tier.solid}`,
         display: "flex",
         flexDirection: "column",
-        boxShadow: hovered
-          ? "0 6px 20px rgba(37,99,235,0.09), 0 1px 4px rgba(0,0,0,0.05)"
-          : "0 1px 3px rgba(0,0,0,0.05)",
-        transform: hovered ? "translateY(-2px)" : "none",
-        transition: "all 0.16s ease",
-        cursor: "default",
-        position: "relative",
+        transition: "all 0.15s ease",
+        boxShadow: hovered ? "0 4px 16px rgba(0,0,0,0.07)" : "0 1px 3px rgba(0,0,0,0.04)",
+        transform: hovered ? "translateY(-1px)" : "none",
         overflow: "hidden",
+        cursor: "default",
         minWidth: 0,
       }}
     >
-      {/* Score-colored top stripe */}
+      {/* Header: rank + avatar + score */}
       <div style={{
-        height: 3,
-        background: sc.bg,
-        flexShrink: 0,
-      }} />
-
-      {/* Card body */}
-      <div style={{ padding: "10px 10px 0", display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
-
-        {/* Header: number + avatar + company + score */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 7 }}>
+        padding: "9px 10px 0 10px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 6,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
           {index !== undefined && (
-            <div style={{
-              flexShrink: 0, width: 18, height: 18, borderRadius: 5,
-              background: "rgba(100,116,139,0.1)", color: "#64748b",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontWeight: 700, fontSize: 9.5, marginTop: 1,
-            }}>
-              {index}
-            </div>
+            <span style={{
+              fontSize: 10, fontWeight: 800, color: "#94a3b8",
+              minWidth: 14, flexShrink: 0,
+            }}>#{index}</span>
           )}
           <div style={{
-            width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+            width: 28, height: 28, borderRadius: 7, flexShrink: 0,
             background: color, color: "#fff",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontWeight: 800, fontSize: 13,
+            fontWeight: 800, fontSize: 12,
           }}>
             {co.charAt(0).toUpperCase()}
           </div>
-          <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-              <span style={{
-                fontWeight: 700, fontSize: 11.5, color: "#0f172a",
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                maxWidth: "100%", display: "block",
-              }}
-                title={co}>
-                {co}
-              </span>
-              {onExcludeCompany && (
-                <button onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
-                  style={{ border: "none", background: "none", color: "#cbd5e1", cursor: "pointer", fontSize: 11, padding: 0, lineHeight: 1, flexShrink: 0 }}
-                  title={`Block "${co}"`}>⊘</button>
-              )}
-            </div>
-          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {onExcludeCompany && (
+            <button
+              onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
+              style={{ border: "none", background: "none", color: "#cbd5e1", cursor: "pointer", fontSize: 12, padding: 0, lineHeight: 1 }}
+              title={`Block "${co}"`}
+            >⊘</button>
+          )}
           <div style={{
-            flexShrink: 0,
-            background: sc.bg,
+            background: tier.gradient,
             color: "#fff",
-            borderRadius: 7,
-            padding: "3px 6px",
+            borderRadius: 6,
+            padding: "3px 7px",
             fontWeight: 800,
-            fontSize: 11.5,
-            letterSpacing: "-0.2px",
+            fontSize: 12,
+            letterSpacing: "-0.3px",
             whiteSpace: "nowrap",
+            flexShrink: 0,
           }}>
             ★{score}
           </div>
         </div>
-
-        {/* Job title */}
-        <div style={{
-          fontSize: 12, fontWeight: 600, color: "#1e293b", lineHeight: 1.4,
-          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-        } as React.CSSProperties}>
-          {title}
-        </div>
-
-        {/* Meta: date + location */}
-        <div style={{ fontSize: 10, color: "#94a3b8", display: "flex", flexWrap: "wrap", gap: "2px 6px" }}>
-          <span>🕐 {dateLabel}</span>
-          {job.location && <span>📍 {job.location}</span>}
-        </div>
-
-
-        {isApplied && (
-          <div style={{ fontSize: 10, fontWeight: 700, color: "#16a34a", background: "rgba(22,163,74,0.08)", border: "1px solid rgba(22,163,74,0.2)", borderRadius: 6, padding: "3px 7px", textAlign: "center" }}>
-            ✓ Applied ×{applyRecord?.clicks}
-          </div>
-        )}
       </div>
 
-      {/* Actions footer */}
-      <div style={{ padding: "8px 10px 10px", display: "flex", gap: 5, marginTop: "auto" }}>
+      {/* Company name — full, wraps to 2 lines */}
+      <div style={{
+        padding: "5px 10px 0 10px",
+        fontSize: 10.5,
+        fontWeight: 700,
+        color: "#64748b",
+        lineHeight: 1.3,
+        display: "-webkit-box",
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: "vertical",
+        overflow: "hidden",
+      } as React.CSSProperties}>
+        {co}
+      </div>
+
+      {/* Job title — hero element */}
+      <div style={{
+        padding: "5px 10px 0 10px",
+        fontSize: 12.5,
+        fontWeight: 700,
+        color: "#0f172a",
+        lineHeight: 1.4,
+        display: "-webkit-box",
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: "vertical",
+        overflow: "hidden",
+        flex: 1,
+      } as React.CSSProperties}>
+        {title}
+      </div>
+
+      {/* Meta: date · location */}
+      <div style={{
+        padding: "5px 10px 0 10px",
+        fontSize: 10,
+        color: "#94a3b8",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+      }}>
+        🕐 {dateLabel}{locationShort ? ` · ${locationShort}` : ""}
+      </div>
+
+      {isApplied && (
+        <div style={{
+          margin: "5px 10px 0",
+          fontSize: 10, fontWeight: 700, color: "#16a34a",
+          background: "rgba(22,163,74,0.08)",
+          border: "1px solid rgba(22,163,74,0.2)",
+          borderRadius: 5, padding: "2px 6px", textAlign: "center",
+        }}>
+          ✓ Applied ×{applyRecord?.clicks}
+        </div>
+      )}
+
+      {/* Action bar */}
+      <div style={{ padding: "8px 8px 8px", display: "flex", gap: 4, marginTop: "auto" }}>
         {onCartToggle && (
           <button
             onClick={(e) => { e.preventDefault(); onCartToggle(job); }}
-            title={isInCart ? "Remove from cart" : "Save to cart"}
+            title={isInCart ? "Remove from cart" : "Save"}
             style={{
-              flexShrink: 0, width: 28, height: 28, borderRadius: 7,
+              flexShrink: 0, width: 26, height: 26, borderRadius: 6,
               border: isInCart ? "1px solid rgba(234,88,12,0.4)" : "1px solid #e2e8f0",
               background: isInCart ? "rgba(234,88,12,0.08)" : "#f8fafc",
               color: isInCart ? "#ea580c" : "#94a3b8",
@@ -215,21 +238,19 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
               transition: "all 0.15s",
             }}
           >
-            {isInCart ? (
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            ) : (
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            )}
+            {isInCart
+              ? <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              : <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            }
           </button>
         )}
         {!isApplied && job.job_url && (
           <button
             onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}
-            title="Mark as clicked"
             style={{
-              flexShrink: 0, height: 28, padding: "0 8px", borderRadius: 7,
+              height: 26, padding: "0 7px", borderRadius: 6, flexShrink: 0,
               border: "1px solid #e2e8f0", background: "#f8fafc",
-              color: "#64748b", cursor: "pointer", fontSize: 10.5, fontWeight: 700,
+              color: "#475569", cursor: "pointer", fontSize: 10.5, fontWeight: 700,
               transition: "all 0.15s",
             }}
           >Click</button>
@@ -237,9 +258,9 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
         <button
           onClick={handleMsg}
           style={{
-            flex: 1, height: 28, borderRadius: 7,
-            border: "1px solid rgba(99,102,241,0.3)",
-            background: msgCopied ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.06)",
+            flex: 1, height: 26, borderRadius: 6,
+            border: "1px solid rgba(99,102,241,0.25)",
+            background: msgCopied ? "rgba(99,102,241,0.1)" : "transparent",
             color: "#6366f1", fontSize: 10.5, fontWeight: 700,
             cursor: "pointer", transition: "all 0.15s",
           }}
@@ -253,11 +274,9 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
             rel="noopener"
             onClick={() => onApplyClick(job.job_url, title, co)}
             style={{
-              flex: 2, height: 28, borderRadius: 7, textAlign: "center",
+              flex: 2, height: 26, borderRadius: 6,
               display: "flex", alignItems: "center", justifyContent: "center",
-              background: isApplied
-                ? "linear-gradient(135deg,#16a34a,#059669)"
-                : "linear-gradient(135deg,#2563eb,#1d4ed8)",
+              background: isApplied ? "linear-gradient(135deg,#16a34a,#059669)" : tier.gradient,
               color: "#fff", fontSize: 10.5, fontWeight: 700,
               textDecoration: "none", transition: "all 0.15s",
             }}
@@ -265,7 +284,7 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
             {isApplied ? "Applied ✓" : "Apply ↗"}
           </a>
         ) : (
-          <span style={{ flex: 2, fontSize: 10, color: "#94a3b8", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center" }}>—</span>
+          <span style={{ flex: 2, fontSize: 10, color: "#94a3b8", display: "flex", alignItems: "center", justifyContent: "center" }}>—</span>
         )}
       </div>
     </div>
