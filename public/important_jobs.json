@@ -1,11 +1,26 @@
 [
   {
-    "session_id": "2026-05-24T13:00:40Z",
+    "session_id": "2026-05-24T14:52:40Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4297642437",
+    "company": "Scale AI",
+    "date_posted": null,
+    "level": "New Grad",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 149,
+    "score_pct": 100,
+    "site": "linkedin",
+    "title": "Software Engineer - New Grad"
+  },
+  {
+    "session_id": "2026-05-24T14:52:40Z",
     "job_url": "https://www.linkedin.com/jobs/view/4220344508",
     "company": "Netflix",
     "date_posted": null,
     "level": "Entry",
-    "location": "Los Angeles, CA",
+    "location": "",
     "max_exp": null,
     "min_exp": null,
     "pipeline": "important",
@@ -18,7 +33,7 @@
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4400908660",
-    "session_id": "2026-05-24T13:00:40Z",
+    "session_id": "2026-05-24T14:52:40Z",
     "company": "Rippling",
     "date_posted": null,
     "level": "Mid",
@@ -34,8 +49,8 @@
     "fit_score": 10
   },
   {
+    "session_id": "2026-05-24T14:52:40Z",
     "job_url": "https://www.linkedin.com/jobs/view/4377638476",
-    "session_id": "2026-05-24T13:00:40Z",
     "company": "Klaviyo",
     "date_posted": null,
     "level": "Mid",
@@ -51,23 +66,8 @@
     "fit_score": 3
   },
   {
-    "session_id": "2026-05-24T13:00:40Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4418663145",
-    "company": "Tesla",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Austin, TX",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": -999,
-    "score_pct": 0,
-    "site": "linkedin",
-    "title": "Software Engineer, Fleet Management"
-  },
-  {
+    "session_id": "2026-05-24T14:52:40Z",
     "job_url": "https://www.linkedin.com/jobs/view/4408325482",
-    "session_id": "2026-05-24T13:00:40Z",
     "company": "Qualcomm",
     "date_posted": null,
     "level": "Entry",
@@ -78,6 +78,8 @@
     "priority_score": -999,
     "score_pct": 0,
     "site": "linkedin",
-    "title": "#Software Engineer \u2013 Engineer"
+    "title": "#Software Engineer \u2013 Engineer",
+    "ats_score": 42,
+    "fit_score": 7
   }
 ]
