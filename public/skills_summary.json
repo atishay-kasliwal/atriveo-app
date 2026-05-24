@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-05-23T23:12:08.152505+00:00",
-  "total_analyzed": 20585,
+  "generated_at": "2026-05-24T00:09:35.951789+00:00",
+  "total_analyzed": 20592,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 12024,
-        "Java": 6133,
+        "Python": 12026,
+        "Java": 6135,
         "SQL": 5186,
         "JavaScript": 4219,
         "TypeScript": 3325,
         "Kotlin": 1595,
         "Swift": 1459,
         "HTML/CSS": 1218,
-        "Rust": 781,
+        "Rust": 782,
         ".NET": 767,
         "Bash/Shell": 503,
         "Go": 493,
@@ -54,7 +54,7 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 5573,
+        "AWS": 5574,
         "Azure": 3212,
         "GCP": 2937,
         "S3": 594,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 7811,
+        "Scalability": 7813,
         "Distributed Systems": 2891,
         "REST API": 2806,
         "System Design": 1640,
@@ -98,7 +98,7 @@
         "Kubernetes": 2474,
         "Docker": 2255,
         "Git": 2241,
-        "Linux": 1810,
+        "Linux": 1812,
         "Terraform": 1027,
         "Jenkins": 711,
         "GitHub Actions": 502,
@@ -136,9 +136,9 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 6520,
-        "LLM": 3773,
-        "Agents": 3391,
+        "Machine Learning": 6521,
+        "LLM": 3774,
+        "Agents": 3393,
         "GenAI": 2627,
         "PyTorch": 2038,
         "RAG": 1854,
@@ -148,7 +148,7 @@
         "Deep Learning": 1205,
         "LangChain": 1105,
         "Fine-tuning": 1030,
-        "OpenAI": 992,
+        "OpenAI": 993,
         "Embeddings": 519,
         "Hugging Face": 512,
         "SageMaker": 359,
@@ -173,12 +173,12 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 5034,
+        "Cross-functional": 5036,
         "Code Review": 3890,
-        "Mentorship": 3807,
-        "Agile/Scrum": 3029,
+        "Mentorship": 3811,
+        "Agile/Scrum": 3030,
         "On-call": 1100,
-        "Leadership": 1066
+        "Leadership": 1067
       }
     }
   }
