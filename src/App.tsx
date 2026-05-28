@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Swipe from "./pages/Swipe";
 import Weekly from "./pages/Weekly";
 import Settings from "./pages/Settings";
 import Skills from "./pages/Skills";
@@ -67,6 +68,22 @@ export default function App() {
           element={
             <ProtectedRoute>
               <States />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Swipe />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/swipe"
+          element={
+            <ProtectedRoute>
+              <Swipe />
             </ProtectedRoute>
           }
         />

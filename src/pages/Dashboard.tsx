@@ -316,7 +316,8 @@ export default function Dashboard() {
           </div>
           <div className="header-right">
             <nav className="nav-tabs">
-              <a href="/" className="nav-tab active">Live Feed</a>
+              <a href="/" className="nav-tab">Swipe</a>
+              <a href="/dashboard" className="nav-tab active">Live Feed</a>
               <a href="/weekly" className="nav-tab">Weekly</a>
               <a href="/unclicked-100" className="nav-tab">100+ Unclicked</a>
               <a href="/cart" className="nav-tab">Cart</a>
