@@ -74,10 +74,13 @@ function renderInline(text: string, keyBase: string): ReactNode[] {
 
 function renderDescription(text: string): JSX.Element[] {
   if (!text) return [];
-  // Normalize escaped chars and excessive whitespace
+  // Normalize: literal "\n" → newline, CRLF, collapse blank lines,
+  // unescape markdown backslash-escapes (\&, \-, \(, \), \., \_, etc.)
   const cleaned = text
     .replace(/\\n/g, "\n")
     .replace(/\r\n/g, "\n")
+    .replace(/\\([\\`*_{}\[\]()#+\-.!&|<>~/])/g, "$1")
+    .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
