@@ -47,7 +47,7 @@ function scoreClass(s: number) {
   return s >= 5 ? "high" : s >= 2 ? "medium" : "low";
 }
 
-// ── Card component ────────────────────────────────────────────────────────────
+// ── Swipe card ────────────────────────────────────────────────────────────────
 
 interface SwipeCardHandle {
   animateOut: (dir: "left" | "right") => Promise<void>;
@@ -60,10 +60,10 @@ interface SwipeCardProps {
 }
 
 const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(({ job, isNext, onSwipe }, ref) => {
-  const cardRef   = useRef<HTMLDivElement>(null);
-  const overlayR  = useRef<HTMLDivElement>(null);
-  const overlayL  = useRef<HTMLDivElement>(null);
-  const drag      = useRef({ startX: 0, active: false });
+  const cardRef  = useRef<HTMLDivElement>(null);
+  const overlayR = useRef<HTMLDivElement>(null);
+  const overlayL = useRef<HTMLDivElement>(null);
+  const drag     = useRef({ startX: 0, active: false });
   const THRESHOLD = 80;
 
   useImperativeHandle(ref, () => ({
@@ -106,7 +106,6 @@ const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(({ job, isNext, on
     }
   }, [onSwipe]);
 
-  // Window mouse handlers (so drag works when cursor leaves the card)
   useEffect(() => {
     if (isNext) return;
     const mm = (e: MouseEvent) => onMove(e.clientX);
@@ -175,30 +174,64 @@ const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(({ job, isNext, on
 });
 SwipeCard.displayName = "SwipeCard";
 
+// ── Picks sidebar card ────────────────────────────────────────────────────────
+
+function PickCard({ job }: { job: Job }) {
+  const pal     = avatarPal(job.company || "?");
+  const initial = (job.company || "?")[0].toUpperCase();
+  const score   = job.score ?? 0;
+  const match   = Math.max(0, Math.round(job.score_pct ?? 0));
+  const url     = job.job_url || null;
+
+  return (
+    <div className="sw-pick">
+      <div className="sw-pick-avatar" style={{ background: pal.bg, color: pal.color }}>{initial}</div>
+      <div className="sw-pick-info">
+        <div className="sw-pick-title">{job.title || "Untitled"}</div>
+        <div className="sw-pick-company">{job.company || "—"}</div>
+        <div className="sw-pick-meta">★ {score} · {match}% match</div>
+      </div>
+      {url && (
+        <a href={url} target="_blank" rel="noopener noreferrer" className="sw-pick-apply">↗</a>
+      )}
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 type PageState = "loading" | "error" | "done" | "swiping";
 
 export default function Swipe() {
-  const navigate    = useNavigate();
-  const [pageState, setPageState] = useState<PageState>("loading");
-  const [errorMsg,  setErrorMsg]  = useState("");
-  const [queue,     setQueue]     = useState<Job[]>([]);
-  const [total,     setTotal]     = useState(0);
+  const navigate       = useNavigate();
+  const [pageState,  setPageState]  = useState<PageState>("loading");
+  const [errorMsg,   setErrorMsg]   = useState("");
+  const [queue,      setQueue]      = useState<Job[]>([]);
+  const [total,      setTotal]      = useState(0);
   const [currentIdx, setCurrentIdx] = useState(0);
-  const isSwipingRef  = useRef(false);
+  const [picks,      setPicks]      = useState<Job[]>([]);
+  const isSwipingRef   = useRef(false);
   const currentCardRef = useRef<SwipeCardHandle>(null);
 
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`${API_BASE}/api/swipe-queue?date=${todayLocal()}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        const jobs: Job[] = data.jobs || [];
+        const [queueRes, picksRes] = await Promise.all([
+          fetch(`${API_BASE}/api/swipe-queue?date=${todayLocal()}`),
+          fetch(`${API_BASE}/api/swipes?direction=right&date=${todayLocal()}`),
+        ]);
+        if (!queueRes.ok) throw new Error(`HTTP ${queueRes.status}`);
+        const queueData = await queueRes.json();
+        const jobs: Job[] = queueData.jobs || [];
         setQueue(jobs);
-        setTotal(data.count || jobs.length);
+        setTotal(queueData.count || jobs.length);
         setCurrentIdx(0);
+
+        if (picksRes.ok) {
+          const picksData = await picksRes.json();
+          setPicks(picksData.jobs || []);
+        }
+
         if (jobs.length === 0) {
           setPageState("done");
           setTimeout(() => navigate("/dashboard"), 2200);
@@ -226,6 +259,10 @@ export default function Swipe() {
       body:    JSON.stringify({ job_url: job.job_url, direction: dir, date: todayLocal() }),
     }).catch(() => {});
 
+    if (dir === "right") {
+      setPicks((prev) => [job, ...prev]);
+    }
+
     await currentCardRef.current?.animateOut(dir);
     isSwipingRef.current = false;
 
@@ -252,77 +289,108 @@ export default function Swipe() {
 
   return (
     <div className="sw-root">
+      {/* Header */}
       <div className="sw-topbar">
         <div className="sw-brand">
           <div className="sw-brand-mark">A</div>
           <span className="sw-brand-name">Atriveo</span>
         </div>
+        <nav className="sw-nav">
+          <Link to="/dashboard" className="sw-nav-link">Live Feed</Link>
+          <Link to="/weekly" className="sw-nav-link">Weekly</Link>
+          <Link to="/unclicked-100" className="sw-nav-link">100+ Unclicked</Link>
+        </nav>
         <Link to="/dashboard" className="sw-skip">Skip →</Link>
       </div>
 
-      {pageState === "loading" && (
-        <div className="sw-state">
-          <div className="sw-state-icon">⏳</div>
-          <div className="sw-state-title">Loading today's jobs…</div>
-          <div className="sw-state-sub">Fetching your queue</div>
-        </div>
-      )}
+      {/* Body */}
+      <div className="sw-body">
 
-      {pageState === "error" && (
-        <div className="sw-state">
-          <div className="sw-state-icon">⚠️</div>
-          <div className="sw-state-title">Couldn't load jobs</div>
-          <div className="sw-state-sub">{errorMsg}</div>
-          <button className="sw-state-btn" onClick={() => window.location.reload()}>Retry</button>
-        </div>
-      )}
-
-      {pageState === "done" && (
-        <div className="sw-state">
-          <div className="sw-state-icon">🎉</div>
-          <div className="sw-state-title">All caught up!</div>
-          <div className="sw-state-sub">No more jobs to review.<br />Redirecting to your picks…</div>
-        </div>
-      )}
-
-      {pageState === "swiping" && (
-        <div className="sw-ui">
-          <div className="sw-progress-row">
-            <div className="sw-progress-bar">
-              <div className="sw-progress-fill" style={{ width: `${pct}%` }} />
+        {/* Left: card area */}
+        <div className="sw-main">
+          {pageState === "loading" && (
+            <div className="sw-state">
+              <div className="sw-state-icon">⏳</div>
+              <div className="sw-state-title">Loading today's jobs…</div>
+              <div className="sw-state-sub">Fetching your queue</div>
             </div>
-            <div className="sw-progress-label">{remaining} left</div>
-          </div>
+          )}
 
-          <div className="sw-stack">
-            {currentIdx + 1 < queue.length && (
-              <SwipeCard
-                key={`next-${currentIdx + 1}`}
-                job={queue[currentIdx + 1]}
-                isNext
-                onSwipe={doSwipe}
-              />
-            )}
-            {currentIdx < queue.length && (
-              <SwipeCard
-                ref={currentCardRef}
-                key={`current-${currentIdx}`}
-                job={queue[currentIdx]}
-                onSwipe={doSwipe}
-              />
-            )}
-          </div>
+          {pageState === "error" && (
+            <div className="sw-state">
+              <div className="sw-state-icon">⚠️</div>
+              <div className="sw-state-title">Couldn't load jobs</div>
+              <div className="sw-state-sub">{errorMsg}</div>
+              <button className="sw-state-btn" onClick={() => window.location.reload()}>Retry</button>
+            </div>
+          )}
 
-          <div className="sw-actions">
-            <button className="sw-btn-nope" onClick={() => doSwipe("left")}>
-              <span>✕</span><span className="sw-btn-label">Skip</span>
-            </button>
-            <button className="sw-btn-like" onClick={() => doSwipe("right")}>
-              <span className="sw-btn-label">Save</span><span>✓</span>
-            </button>
-          </div>
+          {pageState === "done" && (
+            <div className="sw-state">
+              <div className="sw-state-icon">🎉</div>
+              <div className="sw-state-title">All caught up!</div>
+              <div className="sw-state-sub">
+                No more jobs to review.<br />Redirecting to your picks…
+              </div>
+            </div>
+          )}
+
+          {pageState === "swiping" && (
+            <div className="sw-ui">
+              <div className="sw-progress-row">
+                <div className="sw-progress-bar">
+                  <div className="sw-progress-fill" style={{ width: `${pct}%` }} />
+                </div>
+                <div className="sw-progress-label">{remaining} left</div>
+              </div>
+
+              <div className="sw-stack">
+                {currentIdx + 1 < queue.length && (
+                  <SwipeCard
+                    key={`next-${currentIdx + 1}`}
+                    job={queue[currentIdx + 1]}
+                    isNext
+                    onSwipe={doSwipe}
+                  />
+                )}
+                {currentIdx < queue.length && (
+                  <SwipeCard
+                    ref={currentCardRef}
+                    key={`current-${currentIdx}`}
+                    job={queue[currentIdx]}
+                    onSwipe={doSwipe}
+                  />
+                )}
+              </div>
+
+              <div className="sw-actions">
+                <button className="sw-btn-nope" onClick={() => doSwipe("left")}>
+                  <span>✕</span><span className="sw-btn-label">Skip</span>
+                </button>
+                <button className="sw-btn-like" onClick={() => doSwipe("right")}>
+                  <span className="sw-btn-label">Save</span><span>✓</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Right: picks sidebar (desktop only) */}
+        <aside className="sw-picks-panel">
+          <div className="sw-picks-header">
+            <span className="sw-picks-title">★ Your Picks Today</span>
+            <span className="sw-picks-count">{picks.length}</span>
+          </div>
+          <div className="sw-picks-list">
+            {picks.length === 0 ? (
+              <div className="sw-picks-empty">Swipe right on jobs you like — they'll appear here.</div>
+            ) : (
+              picks.map((job, i) => <PickCard key={job.job_url || i} job={job} />)
+            )}
+          </div>
+        </aside>
+
+      </div>
     </div>
   );
 }
