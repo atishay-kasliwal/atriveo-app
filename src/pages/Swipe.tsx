@@ -34,12 +34,15 @@ function avatarPal(company: string) {
   return AVATAR_PAL[(company || "?").toUpperCase().charCodeAt(0) % AVATAR_PAL.length];
 }
 
-function formatPosted(v?: string | null): string {
-  if (!v) return "--";
-  const d = new Date(v);
-  if (isNaN(d.getTime())) return "--";
+function formatPosted(v?: string | null, fallback?: string | null): string {
+  const raw = v || fallback;
+  if (!raw) return null as unknown as string;
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return null as unknown as string;
   const h = Math.floor((Date.now() - d.getTime()) / 3_600_000);
   if (h >= 0 && h < 24) return h === 0 ? "just now" : `${h}h ago`;
+  const days = Math.floor(h / 24);
+  if (days < 7) return `${days}d ago`;
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
@@ -131,6 +134,9 @@ const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(({ job, isNext, on
   const comp     = job.competition_score ?? 0;
   const compCls  = comp >= 7 ? "sw-badge-ch" : comp >= 4 ? "sw-badge-cm" : "sw-badge-cl";
   const compLabel = comp >= 7 ? "High comp" : comp >= 4 ? "Med comp" : "Low comp";
+  const ats      = job.ats_score ?? null;
+  const fit      = job.fit_score ?? null;
+  const postedAt = formatPosted(job.date_posted, job.batch_time);
 
   return (
     <div
@@ -145,30 +151,82 @@ const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(({ job, isNext, on
       <div ref={overlayR} className="sw-overlay-r"><span className="sw-overlay-label">SAVE</span></div>
       <div ref={overlayL} className="sw-overlay-l"><span className="sw-overlay-label">SKIP</span></div>
 
+      {/* Header */}
       <div className="sw-card-header">
         <div className="sw-avatar" style={{ background: pal.bg, color: pal.color }}>{initial}</div>
-        <span className={`sw-score sw-score-${scoreClass(score)}`}>★ {score}</span>
+        <div className="sw-card-header-right">
+          <span className={`sw-score sw-score-${scoreClass(score)}`}>★ {score}</span>
+          {postedAt && <span className="sw-posted-chip">🕐 {postedAt}</span>}
+        </div>
       </div>
 
+      {/* Identity */}
       <div className="sw-title">{job.title || "Untitled role"}</div>
-      <div className="sw-company">{job.company || "—"}</div>
-      {job.location && <div className="sw-location">📍 {job.location}</div>}
+      <div className="sw-company-row">
+        <span className="sw-company">{job.company || "—"}</span>
+        {job.location && <span className="sw-location">· 📍 {job.location}</span>}
+      </div>
 
       <div className="sw-rule" />
 
+      {/* Badges */}
       <div className="sw-badges">
         <span className={`sw-badge ${lvlCls}`}>{level || "Unknown"}</span>
         <span className={`sw-badge ${matchCls}`}>{match}% match</span>
         {expLabel && <span className="sw-badge sw-badge-exp">{expLabel} exp</span>}
         {job.site && <span className="sw-badge sw-badge-site">{job.site}</span>}
-      </div>
-
-      <div className="sw-detail">
-        <span className="sw-detail-label">Competition</span>
         <span className={`sw-badge ${compCls}`}>{compLabel}</span>
       </div>
 
-      <div className="sw-posted">Posted {formatPosted(job.date_posted)}</div>
+      {/* Summary */}
+      {job.summary && (
+        <>
+          <div className="sw-rule" />
+          <p className="sw-summary">{job.summary}</p>
+        </>
+      )}
+
+      {/* ATS / Fit score bars */}
+      {(ats != null || fit != null) && (
+        <>
+          <div className="sw-rule" />
+          <div className="sw-score-bars">
+            {ats != null && (
+              <div className="sw-bar-row">
+                <span className="sw-bar-label">ATS</span>
+                <div className="sw-bar-track">
+                  <div className="sw-bar-fill sw-bar-ats" style={{ width: `${Math.min(ats, 100)}%` }} />
+                </div>
+                <span className="sw-bar-pct">{ats}%</span>
+              </div>
+            )}
+            {fit != null && (
+              <div className="sw-bar-row">
+                <span className="sw-bar-label">Fit</span>
+                <div className="sw-bar-track">
+                  <div className="sw-bar-fill sw-bar-fit" style={{ width: `${Math.min(fit, 100)}%` }} />
+                </div>
+                <span className="sw-bar-pct">{fit}%</span>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Apply button */}
+      {job.job_url && (
+        <a
+          href={job.job_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="sw-apply-btn"
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
+          Apply ↗
+        </a>
+      )}
     </div>
   );
 });
