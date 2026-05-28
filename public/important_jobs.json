@@ -1,7 +1,7 @@
 [
   {
-    "session_id": "2026-05-28T20:15:10Z",
     "job_url": "https://www.linkedin.com/jobs/view/4420479255",
+    "session_id": "2026-05-28T21:14:26Z",
     "company": "Snap Inc.",
     "date_posted": null,
     "level": "Entry",
@@ -18,7 +18,7 @@
     "fit_score": 5
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
+    "session_id": "2026-05-28T21:14:26Z",
     "job_url": "https://www.linkedin.com/jobs/view/4420470634",
     "company": "Snap Inc.",
     "date_posted": null,
@@ -36,25 +36,7 @@
     "fit_score": 3
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4420477298",
-    "company": "Snap Inc.",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Seattle, WA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 153,
-    "score_pct": 100,
-    "site": "linkedin",
-    "summary": "Snap Engineering teams build fun and technically sophisticated products that reach hundreds of millions of Snapchatters around the world, every day.",
-    "title": "Machine Learning Engineer, Level 4",
-    "ats_score": 25,
-    "fit_score": 3
-  },
-  {
-    "session_id": "2026-05-28T20:15:10Z",
+    "session_id": "2026-05-28T21:14:26Z",
     "job_url": "https://www.linkedin.com/jobs/view/4420486055",
     "company": "Snap Inc.",
     "date_posted": null,
@@ -72,7 +54,25 @@
     "fit_score": 3
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4420477298",
+    "session_id": "2026-05-28T21:14:26Z",
+    "company": "Snap Inc.",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Seattle, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 153,
+    "score_pct": 100,
+    "site": "linkedin",
+    "summary": "Snap Engineering teams build fun and technically sophisticated products that reach hundreds of millions of Snapchatters around the world, every day.",
+    "title": "Machine Learning Engineer, Level 4",
+    "ats_score": 25,
+    "fit_score": 3
+  },
+  {
+    "session_id": "2026-05-28T21:14:26Z",
     "job_url": "https://www.linkedin.com/jobs/view/4407565544",
     "company": "ServiceNow",
     "date_posted": null,
@@ -90,43 +90,7 @@
     "fit_score": 7
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4420478845",
-    "company": "Salesforce",
-    "date_posted": null,
-    "level": "Mid",
-    "location": "Herndon, VA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 112,
-    "score_pct": 86,
-    "site": "linkedin",
-    "summary": "*To get the best candidate experience, please consider applying for a maximum of 3 roles within 12 months to ensure you are not duplicating efforts.* Job Category Software Engineering Job Details **A\u2026",
-    "title": "Software Engineer II, Service Network - Slack",
-    "ats_score": 54,
-    "fit_score": 6
-  },
-  {
-    "session_id": "2026-05-28T20:15:10Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4420492232",
-    "company": "Salesforce",
-    "date_posted": null,
-    "level": "Mid",
-    "location": "McLean, VA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 112,
-    "score_pct": 86,
-    "site": "linkedin",
-    "summary": "*To get the best candidate experience, please consider applying for a maximum of 3 roles within 12 months to ensure you are not duplicating efforts.* Job Category Software Engineering Job Details **A\u2026",
-    "title": "Software Engineer II, Service Network - Slack",
-    "ats_score": 54,
-    "fit_score": 6
-  },
-  {
-    "session_id": "2026-05-28T20:15:10Z",
+    "session_id": "2026-05-28T21:14:26Z",
     "job_url": "https://www.linkedin.com/jobs/view/4420486054",
     "company": "Snap Inc.",
     "date_posted": null,
@@ -144,25 +108,25 @@
     "fit_score": 5
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4419312218",
-    "company": "Intel",
+    "job_url": "https://www.linkedin.com/jobs/view/4419300761",
+    "session_id": "2026-05-28T21:14:26Z",
+    "company": "Google",
     "date_posted": null,
-    "level": "Entry",
-    "location": "Folsom, CA",
-    "max_exp": null,
-    "min_exp": null,
+    "level": "Mid",
+    "location": "Mountain View, CA",
+    "max_exp": 2.0,
+    "min_exp": 2.0,
     "pipeline": "important",
-    "priority_score": 84,
-    "score_pct": 65,
+    "priority_score": 86,
+    "score_pct": 66,
     "site": "linkedin",
-    "summary": "**Job Details** Job Description: **Join Intel and Build a Better Tomorrow** Intel is in the midst of an exciting transformation, with a vision to create and extend computing technology to connect and\u2026",
-    "title": "GPU Software Development Engineer",
-    "ats_score": 100,
-    "fit_score": 3
+    "summary": "* 2 years of experience with developing large\\-scale infrastructure, distributed systems or networks, or experience with compute technologies, storage or hardware architecture.",
+    "title": "Software Engineer III, Infrastructure, YouTube",
+    "ats_score": 25,
+    "fit_score": 5
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
+    "session_id": "2026-05-28T21:14:26Z",
     "job_url": "https://www.linkedin.com/jobs/view/4420475911",
     "company": "ServiceNow",
     "date_posted": null,
@@ -180,7 +144,7 @@
     "fit_score": 6
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
+    "session_id": "2026-05-28T21:14:26Z",
     "job_url": "https://www.linkedin.com/jobs/view/4328804814",
     "company": "MongoDB",
     "date_posted": null,
@@ -198,8 +162,26 @@
     "fit_score": 12
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4420478292",
+    "session_id": "2026-05-28T21:14:26Z",
+    "company": "Snap Inc.",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Los Angeles, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 73,
+    "score_pct": 56,
+    "site": "linkedin",
+    "summary": "Snap Engineering teams build fun and technically sophisticated products that reach hundreds of millions of Snapchatters around the world, every day.",
+    "title": "Machine Learning Engineer, Level 4",
+    "ats_score": 25,
+    "fit_score": 3
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4419099727",
+    "session_id": "2026-05-28T21:14:26Z",
     "company": "Intel",
     "date_posted": null,
     "level": "Entry",
@@ -216,26 +198,8 @@
     "fit_score": 3
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4420483152",
-    "company": "Snap Inc.",
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Palo Alto, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 73,
-    "score_pct": 56,
-    "site": "linkedin",
-    "summary": "Snap Engineering teams build fun and technically sophisticated products that reach hundreds of millions of Snapchatters around the world, every day.",
-    "title": "Machine Learning Engineer, Level 4",
-    "ats_score": 25,
-    "fit_score": 3
-  },
-  {
-    "session_id": "2026-05-28T20:15:10Z",
     "job_url": "https://www.linkedin.com/jobs/view/4419095831",
+    "session_id": "2026-05-28T21:14:26Z",
     "company": "Intel",
     "date_posted": null,
     "level": "Entry",
@@ -252,7 +216,7 @@
     "fit_score": 3
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
+    "session_id": "2026-05-28T21:14:26Z",
     "job_url": "https://www.linkedin.com/jobs/view/4419314079",
     "company": "Intel",
     "date_posted": null,
@@ -270,12 +234,12 @@
     "fit_score": 3
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4420478292",
+    "session_id": "2026-05-28T21:14:26Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4420483152",
     "company": "Snap Inc.",
     "date_posted": null,
     "level": "Entry",
-    "location": "Los Angeles, CA",
+    "location": "Palo Alto, CA",
     "max_exp": null,
     "min_exp": null,
     "pipeline": "important",
@@ -288,8 +252,8 @@
     "fit_score": 3
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
     "job_url": "https://www.linkedin.com/jobs/view/4420488705",
+    "session_id": "2026-05-28T21:14:26Z",
     "company": "ServiceNow",
     "date_posted": null,
     "level": "Entry",
@@ -306,7 +270,7 @@
     "fit_score": 3
   },
   {
-    "session_id": "2026-05-28T20:15:10Z",
+    "session_id": "2026-05-28T21:14:26Z",
     "job_url": "https://www.linkedin.com/jobs/view/4420605152",
     "company": "Airbnb",
     "date_posted": null,
