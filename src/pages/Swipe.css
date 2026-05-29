@@ -598,13 +598,16 @@
 .sw-picks-list {
   flex: 1;
   overflow-y: auto;
-  display: flex; flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   padding-top: 16px;
   padding-right: 4px;
+  align-content: start;
 }
 
 .sw-picks-empty {
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -622,14 +625,16 @@
   line-height: 1.6;
 }
 
+/* Compact 2-col pick card */
 .sw-pick {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   background: var(--sw-surface-2);
   border: 1px solid var(--sw-line);
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 10px 11px;
+  min-width: 0;
   transition: border-color 140ms, background 140ms, transform 100ms;
 }
 .sw-pick:hover {
@@ -638,42 +643,93 @@
   transform: translateY(-1px);
 }
 
+/* Top: index + time */
+.sw-pick-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.sw-pick-idx {
+  font-size: 10px; font-weight: 700;
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--sw-green);
+  background: rgba(82,217,138,0.12);
+  border: 1px solid rgba(82,217,138,0.25);
+  border-radius: 5px;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.sw-pick-time {
+  font-size: 10px;
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--sw-mute-2);
+  white-space: nowrap;
+}
+
+/* Middle: avatar + title/company */
+.sw-pick-body {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
 .sw-pick-avatar {
-  width: 36px; height: 36px;
-  border-radius: 9px;
+  width: 32px; height: 32px;
+  border-radius: 8px;
   display: grid; place-items: center;
-  font-weight: 800; font-size: 15px;
+  font-weight: 800; font-size: 13px;
   flex-shrink: 0;
 }
 
 .sw-pick-info { flex: 1; min-width: 0; }
 
 .sw-pick-title {
-  font-size: 13px; font-weight: 600;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 12.5px; font-weight: 600;
   line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .sw-pick-company {
   font-size: 11px; color: var(--sw-teal);
+  margin-top: 3px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
+/* Bottom: score + apply */
+.sw-pick-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border-top: 1px solid var(--sw-line);
+  padding-top: 7px;
+  margin-top: auto;
+}
+
 .sw-pick-meta {
-  font-size: 10px; color: var(--sw-muted);
+  font-size: 10.5px;
+  color: var(--sw-muted);
   font-family: "IBM Plex Mono", monospace;
-  margin-top: 2px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .sw-pick-apply {
   flex-shrink: 0;
-  width: 30px; height: 30px;
+  width: 24px; height: 24px;
   display: grid; place-items: center;
-  border-radius: 8px;
+  border-radius: 6px;
   background: rgba(52,211,196,0.12);
   color: var(--sw-teal);
   text-decoration: none;
-  font-size: 14px; font-weight: 700;
+  font-size: 12px; font-weight: 700;
   transition: background 140ms;
 }
 .sw-pick-apply:hover { background: rgba(52,211,196,0.28); }
@@ -794,7 +850,7 @@
   .sw-picks-panel {
     display: flex;
     flex-direction: column;
-    width: 340px;
+    width: 420px;
     flex-shrink: 0;
     background: var(--sw-surface);
     border: 1px solid var(--sw-line);
@@ -807,6 +863,6 @@
 
 @media (min-width: 1400px) {
   .sw-main { max-width: 1040px; }
-  .sw-picks-panel { width: 360px; }
+  .sw-picks-panel { width: 460px; }
   .sw-card-rail { width: 340px; }
 }

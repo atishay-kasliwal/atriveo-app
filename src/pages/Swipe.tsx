@@ -53,6 +53,14 @@ function scoreClass(s: number) {
   return s >= 5 ? "high" : s >= 2 ? "medium" : "low";
 }
 
+function formatSwipeTime(iso?: string | null): string {
+  if (!iso) return "";
+  const normalized = /[zZ]|[+-]\d{2}:\d{2}$/.test(iso) ? iso : iso + "Z";
+  const d = new Date(normalized);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
 // ── Lightweight markdown renderer ────────────────────────────────────────────
 
 function renderInline(text: string, keyBase: string): ReactNode[] {
@@ -363,23 +371,34 @@ SwipeCard.displayName = "SwipeCard";
 
 // ── Picks sidebar ─────────────────────────────────────────────────────────────
 
-function PickRow({ job }: { job: Job }) {
+function PickRow({ job, index }: { job: Job; index: number }) {
   const pal     = avatarPal(job.company || "?");
   const initial = (job.company || "?")[0].toUpperCase();
   const match   = Math.max(0, Math.round(job.score_pct ?? 0));
   const url     = job.job_url || null;
+  const time    = formatSwipeTime(job.swiped_at);
 
   return (
     <div className="sw-pick">
-      <div className="sw-pick-avatar" style={{ background: pal.bg, color: pal.color }}>{initial}</div>
-      <div className="sw-pick-info">
-        <div className="sw-pick-title">{job.title || "Untitled"}</div>
-        <div className="sw-pick-company">{job.company || "—"}</div>
-        <div className="sw-pick-meta">★ {job.score ?? 0} · {match}% match</div>
+      <div className="sw-pick-head">
+        <span className="sw-pick-idx">#{index}</span>
+        {time && <span className="sw-pick-time">{time}</span>}
       </div>
-      {url && (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="sw-pick-apply" title="Apply">↗</a>
-      )}
+
+      <div className="sw-pick-body">
+        <div className="sw-pick-avatar" style={{ background: pal.bg, color: pal.color }}>{initial}</div>
+        <div className="sw-pick-info">
+          <div className="sw-pick-title">{job.title || "Untitled"}</div>
+          <div className="sw-pick-company">{job.company || "—"}</div>
+        </div>
+      </div>
+
+      <div className="sw-pick-foot">
+        <span className="sw-pick-meta">★ {job.score ?? 0} · {match}%</span>
+        {url && (
+          <a href={url} target="_blank" rel="noopener noreferrer" className="sw-pick-apply" title="Apply">↗</a>
+        )}
+      </div>
     </div>
   );
 }
@@ -475,8 +494,12 @@ export default function Swipe() {
       body:    JSON.stringify({ job_url: job.job_url, direction: dir, date: todayLocal() }),
     }).catch(() => {});
 
-    if (dir === "right") setPicks((prev) => [job, ...prev]);
-    else                 setSkippedCount((c) => c + 1);
+    if (dir === "right") {
+      const stamped: Job = { ...job, swiped_at: new Date().toISOString() };
+      setPicks((prev) => [stamped, ...prev]);
+    } else {
+      setSkippedCount((c) => c + 1);
+    }
 
     await currentCardRef.current?.animateOut(dir);
     isSwipingRef.current = false;
@@ -640,7 +663,7 @@ export default function Swipe() {
                 <div className="sw-picks-empty-sub">Swipe right or press → to save jobs you like.</div>
               </div>
             ) : (
-              picks.map((job, i) => <PickRow key={job.job_url || i} job={job} />)
+              picks.map((job, i) => <PickRow key={job.job_url || i} job={job} index={i + 1} />)
             )}
           </div>
         </aside>
