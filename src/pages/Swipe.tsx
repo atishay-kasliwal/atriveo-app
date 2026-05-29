@@ -606,6 +606,19 @@ export default function Swipe() {
 
           {pageState === "swiping" && (
             <Fragment>
+              <div className="sw-actions">
+                <button className="sw-btn-nope" onClick={() => doSwipe("left")}>
+                  <span aria-hidden>✕</span>
+                  <span className="sw-btn-label">Skip</span>
+                  <kbd className="sw-btn-kbd">←</kbd>
+                </button>
+                <button className="sw-btn-like" onClick={() => doSwipe("right")}>
+                  <kbd className="sw-btn-kbd">→</kbd>
+                  <span className="sw-btn-label">Save</span>
+                  <span aria-hidden>✓</span>
+                </button>
+              </div>
+
               <div className="sw-stack">
                 {nextJob && (
                   <SwipeCard
@@ -627,19 +640,6 @@ export default function Swipe() {
                     onSwipe={doSwipe}
                   />
                 )}
-              </div>
-
-              <div className="sw-actions">
-                <button className="sw-btn-nope" onClick={() => doSwipe("left")}>
-                  <span aria-hidden>✕</span>
-                  <span className="sw-btn-label">Skip</span>
-                  <kbd className="sw-btn-kbd">←</kbd>
-                </button>
-                <button className="sw-btn-like" onClick={() => doSwipe("right")}>
-                  <kbd className="sw-btn-kbd">→</kbd>
-                  <span className="sw-btn-label">Save</span>
-                  <span aria-hidden>✓</span>
-                </button>
               </div>
             </Fragment>
           )}
