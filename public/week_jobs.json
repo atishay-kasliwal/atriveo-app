@@ -106235,6 +106235,24 @@
     "scraped_date": "2026-05-24"
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4418646218",
+    "session_id": "2026-05-24T05:17:41Z",
+    "batch_time": "2026-05-24T05:17:41Z",
+    "company": "Tesla",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Palo Alto, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": -999,
+    "score_pct": 0,
+    "site": "linkedin",
+    "title": "Embedded Software Engineer, Body Controls Firmware",
+    "scraped_date": "2026-05-24"
+  },
+  {
     "session_id": "2026-05-24T05:17:41Z",
     "job_url": "https://www.linkedin.com/jobs/view/4418663145",
     "batch_time": "2026-05-24T05:17:41Z",
@@ -106829,41 +106847,5 @@
     "site": "linkedin",
     "title": "Backend Engineer (Ruby, SQL)",
     "scraped_date": "2026-05-24"
-  },
-  {
-    "session_id": "2026-05-24T03:39:41Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4417562765",
-    "batch_time": "2026-05-24T03:39:41Z",
-    "company": "FetchJobs.co",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 16,
-    "score_pct": 12,
-    "site": "linkedin",
-    "title": "Backend Web Developer",
-    "scraped_date": "2026-05-23"
-  },
-  {
-    "session_id": "2026-05-24T03:39:41Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4418646218",
-    "batch_time": "2026-05-24T03:39:41Z",
-    "company": "Tesla",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Palo Alto, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": -999,
-    "score_pct": 0,
-    "site": "linkedin",
-    "title": "Embedded Software Engineer, Body Controls Firmware",
-    "scraped_date": "2026-05-23"
   }
 ]
