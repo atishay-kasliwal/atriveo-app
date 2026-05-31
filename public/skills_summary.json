@@ -1,24 +1,24 @@
 {
-  "generated_at": "2026-05-31T15:30:19.927120+00:00",
-  "total_analyzed": 23652,
+  "generated_at": "2026-05-31T16:29:43.767107+00:00",
+  "total_analyzed": 23665,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 13831,
-        "Java": 7141,
-        "SQL": 6047,
-        "JavaScript": 4730,
-        "TypeScript": 3639,
-        "Kotlin": 1641,
-        "Swift": 1486,
+        "Python": 13839,
+        "Java": 7149,
+        "SQL": 6051,
+        "JavaScript": 4734,
+        "TypeScript": 3641,
+        "Kotlin": 1642,
+        "Swift": 1487,
         "HTML/CSS": 1383,
-        "Rust": 890,
+        "Rust": 891,
         ".NET": 865,
-        "Bash/Shell": 566,
+        "Bash/Shell": 567,
         "Go": 558,
         "Scala": 487,
-        "Ruby": 475,
+        "Ruby": 476,
         "PHP": 187,
         "C++": 6,
         "C#": 3
@@ -27,21 +27,21 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 4061,
-        "PyTorch": 2358,
-        "TensorFlow": 1869,
-        "Node.js": 1290,
+        "React": 4063,
+        "PyTorch": 2359,
+        "TensorFlow": 1870,
+        "Node.js": 1291,
         "LangChain": 1225,
-        "Spring": 1164,
+        "Spring": 1166,
         "Angular": 1156,
         "Pandas": 1133,
-        "Scikit-learn": 1100,
+        "Scikit-learn": 1101,
         "NumPy": 986,
         "Spring Boot": 691,
-        "GraphQL": 684,
+        "GraphQL": 686,
         "Express": 666,
         "Next.js": 603,
-        "Django": 551,
+        "Django": 552,
         "FastAPI": 531,
         "Flask": 473,
         "Vue": 383,
@@ -54,9 +54,9 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 6437,
-        "Azure": 3691,
-        "GCP": 3372,
+        "AWS": 6442,
+        "Azure": 3693,
+        "GCP": 3375,
         "S3": 696,
         "Lambda": 640,
         "Serverless": 478,
@@ -67,7 +67,7 @@
         "API Gateway": 288,
         "SQS": 282,
         "CloudWatch": 208,
-        "Cloud Run": 159,
+        "Cloud Run": 160,
         "GKE": 125,
         "Kinesis": 116
       }
@@ -75,8 +75,8 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 8960,
-        "Distributed Systems": 3320,
+        "Scalability": 8964,
+        "Distributed Systems": 3321,
         "REST API": 3226,
         "Microservices": 1894,
         "System Design": 1892,
@@ -94,10 +94,10 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 4584,
-        "Kubernetes": 2895,
-        "Docker": 2663,
-        "Git": 2546,
+        "CI/CD": 4587,
+        "Kubernetes": 2896,
+        "Docker": 2664,
+        "Git": 2547,
         "Linux": 2044,
         "Terraform": 1200,
         "Jenkins": 818,
@@ -114,7 +114,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 3245,
+        "ETL/ELT": 3246,
         "PostgreSQL": 1621,
         "Spark": 1540,
         "Vector DB": 1172,
@@ -136,15 +136,15 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 7492,
-        "LLM": 4415,
-        "Agents": 3959,
+        "Machine Learning": 7497,
+        "LLM": 4417,
+        "Agents": 3962,
         "GenAI": 2983,
-        "PyTorch": 2358,
+        "PyTorch": 2359,
         "RAG": 2084,
-        "TensorFlow": 1869,
-        "NLP": 1794,
-        "Deep Learning": 1444,
+        "TensorFlow": 1870,
+        "NLP": 1795,
+        "Deep Learning": 1446,
         "Prompt Eng": 1354,
         "LangChain": 1225,
         "Fine-tuning": 1154,
@@ -174,11 +174,11 @@
       "color": "#64748b",
       "skills": {
         "Cross-functional": 5738,
-        "Code Review": 4403,
-        "Mentorship": 4392,
-        "Agile/Scrum": 3448,
+        "Code Review": 4406,
+        "Mentorship": 4394,
+        "Agile/Scrum": 3452,
         "Leadership": 1296,
-        "On-call": 1230
+        "On-call": 1232
       }
     }
   }
