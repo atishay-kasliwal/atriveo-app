@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-31T04:24:42.159627+00:00",
-  "total_analyzed": 23580,
+  "generated_at": "2026-05-31T05:24:11.251178+00:00",
+  "total_analyzed": 23582,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
@@ -54,9 +54,9 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 6421,
-        "Azure": 3680,
-        "GCP": 3363,
+        "AWS": 6422,
+        "Azure": 3681,
+        "GCP": 3364,
         "S3": 696,
         "Lambda": 640,
         "Serverless": 478,
@@ -76,7 +76,7 @@
       "color": "#0ea5e9",
       "skills": {
         "Scalability": 8937,
-        "Distributed Systems": 3310,
+        "Distributed Systems": 3311,
         "REST API": 3217,
         "Microservices": 1893,
         "System Design": 1892,
@@ -116,7 +116,7 @@
       "skills": {
         "ETL/ELT": 3240,
         "PostgreSQL": 1618,
-        "Spark": 1537,
+        "Spark": 1538,
         "Vector DB": 1172,
         "Kafka": 1022,
         "MySQL": 903,
@@ -138,10 +138,10 @@
       "skills": {
         "Machine Learning": 7473,
         "LLM": 4388,
-        "Agents": 3933,
+        "Agents": 3935,
         "GenAI": 2980,
         "PyTorch": 2353,
-        "RAG": 2083,
+        "RAG": 2084,
         "TensorFlow": 1867,
         "NLP": 1792,
         "Deep Learning": 1442,
