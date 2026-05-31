@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-31T02:26:06.137911+00:00",
-  "total_analyzed": 23577,
+  "generated_at": "2026-05-31T03:24:50.698553+00:00",
+  "total_analyzed": 23580,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
@@ -28,7 +28,7 @@
       "color": "#8b5cf6",
       "skills": {
         "React": 4051,
-        "PyTorch": 2352,
+        "PyTorch": 2353,
         "TensorFlow": 1867,
         "Node.js": 1284,
         "LangChain": 1225,
@@ -75,8 +75,8 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 8936,
-        "Distributed Systems": 3309,
+        "Scalability": 8937,
+        "Distributed Systems": 3310,
         "REST API": 3217,
         "Microservices": 1893,
         "System Design": 1892,
@@ -138,9 +138,9 @@
       "skills": {
         "Machine Learning": 7473,
         "LLM": 4388,
-        "Agents": 3932,
+        "Agents": 3933,
         "GenAI": 2980,
-        "PyTorch": 2352,
+        "PyTorch": 2353,
         "RAG": 2083,
         "TensorFlow": 1867,
         "NLP": 1792,
@@ -176,7 +176,7 @@
         "Cross-functional": 5721,
         "Code Review": 4389,
         "Mentorship": 4384,
-        "Agile/Scrum": 3440,
+        "Agile/Scrum": 3441,
         "Leadership": 1286,
         "On-call": 1222
       }

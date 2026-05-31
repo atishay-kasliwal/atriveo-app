@@ -4596,7 +4596,7 @@
     "summary": "This role focuses on developing flight\\-critical Vehicle Management System (VMS) software for advanced platforms within a mission\\-driven environment.",
     "title": "Software Engineer",
     "ats_score": 0,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4380033977",
@@ -9132,7 +9132,7 @@
     "summary": "**Company Description** **Who we are** Moveworks is the Agentic AI Assistant platform that empowers the entire workforce.",
     "title": "Software Engineer, Agentic AI Product - Moveworks",
     "ats_score": 20,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "session_id": "2026-05-30T22:09:14Z",
@@ -9363,7 +9363,7 @@
     "summary": "This role focuses on developing flight\\-critical Vehicle Management System (VMS) software for advanced platforms within a mission\\-driven environment.",
     "title": "Software Engineer",
     "ats_score": 0,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-05-30T23:04:56Z",
@@ -10539,6 +10539,90 @@
     "summary": "**The ideal candidate** * 3\\+ years of experience building and deploying production\\-grade AI/ML systems or agentic architectures.",
     "title": "AI Engineer ($150k-$300k + Equity) at 776 and Neo-backed software creation startup",
     "ats_score": 60,
+    "fit_score": 2
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4413497438",
+    "session_id": "2026-05-31T03:04:21Z",
+    "batch_time": "2026-05-31T03:04:18Z",
+    "company": "Stripe",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 79,
+    "score_pct": 61,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "Who we are **About Stripe** Stripe is a financial infrastructure platform for businesses.",
+    "title": "Software Engineer, Security Analytics Infrastructure",
+    "ats_score": 100,
+    "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4421383182",
+    "session_id": "2026-05-31T03:04:21Z",
+    "batch_time": "2026-05-31T03:04:18Z",
+    "company": "Craven Solutions",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Warrenton, NC",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "**Company Description** Craven Solutions is a software development agency delivering scalable and innovative digital products for startups and enterprises globally.",
+    "title": "Software Engineer",
+    "ats_score": 50,
+    "fit_score": 5
+  },
+  {
+    "session_id": "2026-05-31T03:04:21Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4422550063",
+    "batch_time": "2026-05-31T03:04:18Z",
+    "company": "David Joseph & Company",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**Location:** San Francisco, CA (Onsite) **Compensation:** $150,000 \u2013 $350,000 base \\+ 0\\.5% \u2013 1% equity **About Tilde Research** Tilde Research is a frontier AI research lab focused on mechanistic u\u2026",
+    "title": "ML Engineer \u2014 Tilde Research",
+    "ats_score": 50,
+    "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4422515954",
+    "session_id": "2026-05-31T03:04:21Z",
+    "batch_time": "2026-05-31T03:04:18Z",
+    "company": "Jack & Jill",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
+    "title": "Founding AI Engineer Intern at San Francisco AI agent startup",
+    "ats_score": 0,
     "fit_score": 2
   }
 ]
