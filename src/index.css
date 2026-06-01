@@ -133,6 +133,12 @@ a:hover { text-decoration: underline; }
     gap: 12px;
   }
 
+  .dashboard-info-rail > .best-jobs-panel {
+    position: sticky;
+    top: 66px;
+    z-index: 3;
+  }
+
   .dashboard-info-rail > .page-hero .page-hero-aside {
     width: 100%;
     align-items: stretch;
@@ -431,9 +437,16 @@ header {
 .best-jobs-title {
   margin-top: 5px;
   color: var(--text);
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.1;
   letter-spacing: -0.05em;
+}
+
+.best-jobs-subtitle {
+  margin-top: 5px;
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.45;
 }
 
 .best-jobs-list {
@@ -445,13 +458,28 @@ header {
 
 .best-job-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 9px;
   padding: 8px 9px;
   border: 1px solid rgba(119,118,106,0.18);
   border-radius: 12px;
   background: rgba(255,253,244,0.66);
+}
+
+.best-job-rank {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bean-dark);
+  background: rgba(154,118,83,0.12);
+  border: 1px solid rgba(154,118,83,0.22);
+  font-family: "Inter", monospace;
+  font-size: 10px;
+  font-weight: 900;
 }
 
 .best-job-copy {
@@ -1707,7 +1735,7 @@ header {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(clamp(208px, 11.6vw, 252px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(clamp(198px, 11vw, 242px), 1fr));
   gap: 11px;
   padding-bottom: 32px;
   align-items: stretch;
@@ -1722,7 +1750,7 @@ header {
   display: flex;
   flex-direction: column;
   container-type: inline-size;
-  min-height: 214px;
+  min-height: 188px;
 }
 
 .job-tile.is-applied {
@@ -1731,7 +1759,7 @@ header {
 
 .job-tile.is-top-opportunity {
   box-shadow:
-    0 12px 28px rgba(79,79,71,0.13),
+    0 14px 30px rgba(79,79,71,0.16),
     inset 0 0 0 1px rgba(255,253,244,0.65);
 }
 
@@ -1740,8 +1768,12 @@ header {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  border: 2px solid rgba(47,125,82,0.22);
+  border: 2px solid rgba(169,120,38,0.24);
   pointer-events: none;
+}
+
+.job-tile--green.is-top-opportunity::before {
+  border-color: rgba(47,125,82,0.32);
 }
 
 .job-tile.is-saved::after {
@@ -1753,7 +1785,7 @@ header {
 }
 
 .job-tile-top {
-  padding: 12px 12px 0;
+  padding: 10px 11px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1776,8 +1808,8 @@ header {
 }
 
 .job-tile-rank {
-  min-width: 22px;
-  font-size: 11px;
+  min-width: 20px;
+  font-size: 12px;
   font-weight: 800;
   color: var(--muted);
   letter-spacing: 0.04em;
@@ -1835,7 +1867,7 @@ header {
   grid-template-rows: auto auto;
   column-gap: 4px;
   align-items: center;
-  min-width: 68px;
+  min-width: 72px;
   padding: 5px 8px;
   border-radius: 12px;
   color: #fff;
@@ -1871,8 +1903,8 @@ header {
 .job-tile-match--gray { background: linear-gradient(135deg, var(--tier-gray), var(--bean-dark)); }
 
 .job-tile-title {
-  padding: 10px 12px 0;
-  font-size: 13.5px;
+  padding: 8px 11px 0;
+  font-size: 13px;
   font-weight: 800;
   color: var(--text);
   line-height: 1.35;
@@ -1882,11 +1914,11 @@ header {
   overflow: hidden;
   flex: 1 1 auto;
   min-width: 0;
-  min-height: 38px;
+  min-height: 34px;
 }
 
 .job-tile-company {
-  padding: 5px 12px 0;
+  padding: 4px 11px 0;
   font-size: 11.5px;
   font-weight: 700;
   overflow: hidden;
@@ -1896,11 +1928,11 @@ header {
 }
 
 .job-tile-confidence {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 12px 0;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 5px 11px 0;
   font-family: "Inter", monospace;
 }
 
@@ -1919,7 +1951,7 @@ header {
 }
 
 .job-tile-meta {
-  padding: 4px 12px 0;
+  padding: 4px 11px 0;
   font-size: 10px;
   color: var(--muted);
   overflow: hidden;
@@ -1928,44 +1960,46 @@ header {
   min-width: 0;
 }
 
-.job-tile-signals {
+.job-tile-meta.has-urgency {
+  color: var(--bean-umber);
+  font-weight: 800;
+}
+
+.job-tile-details {
   display: flex;
   align-items: center;
   gap: 4px;
   flex-wrap: wrap;
-  padding: 7px 12px 0;
-  min-height: 22px;
+  padding: 5px 11px 0;
+  min-height: 18px;
 }
 
 .job-tile-reasons {
   display: flex;
   align-items: center;
-  gap: 4px;
-  flex-wrap: wrap;
-  padding: 7px 12px 0;
-}
-
-.job-tile-reasons-label {
-  color: var(--muted);
-  font-family: "Inter", monospace;
-  font-size: 9px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  gap: 5px;
+  padding: 5px 11px 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .job-tile-reason {
-  max-width: 100%;
-  border-radius: 999px;
-  border: 1px solid rgba(47,125,82,0.18);
-  background: rgba(47,125,82,0.08);
-  color: var(--tier-green);
+  max-width: 72px;
+  color: var(--text-2);
   font-family: "Inter", monospace;
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 800;
   line-height: 1;
-  padding: 4px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.job-tile-reason:not(:last-child)::after {
+  content: "•";
+  color: var(--muted);
+  margin-left: 5px;
 }
 
 .job-tile-signal {
@@ -1975,10 +2009,10 @@ header {
   background: rgba(251,248,236,0.74);
   color: var(--text-2);
   font-family: "Inter", monospace;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   line-height: 1;
-  padding: 4px 6px;
+  padding: 3px 5px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1989,7 +2023,7 @@ header {
 }
 
 .job-tile-applied {
-  margin: 7px 12px 0;
+  margin: 6px 11px 0;
   font-size: 10px;
   font-weight: 700;
   color: var(--green);
@@ -2013,13 +2047,13 @@ header {
 }
 
 .job-tile-divider {
-  margin: 8px 12px 0;
+  margin: 7px 11px 0;
   height: 1px;
   background: rgba(79,79,71,0.08);
 }
 
 .job-tile-actions {
-  padding: 8px 10px 10px;
+  padding: 7px 9px 9px;
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -2104,8 +2138,11 @@ header {
 .job-tile-action--apply {
   order: 1;
   flex: 1 0 100%;
-  height: 28px;
+  height: 30px;
+  font-size: 11px;
+  font-weight: 800;
   color: #fff;
+  box-shadow: 0 8px 18px rgba(79,79,71,0.16);
 }
 
 .job-tile-action--apply:hover {
@@ -2782,7 +2819,7 @@ footer a:hover { color: var(--blue); }
 .split-panel { min-width: 0; }
 
 .split-panel .card-grid {
-  grid-template-columns: repeat(auto-fill, minmax(clamp(208px, 11.6vw, 252px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(clamp(198px, 11vw, 242px), 1fr));
 }
 
 .split-panel-header {

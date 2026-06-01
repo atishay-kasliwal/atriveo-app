@@ -58,6 +58,18 @@ function compactTerm(term?: string | null): string | null {
   return term.replace(/ engineer$/i, "").trim() || null;
 }
 
+function urgencyLabel(iso?: string | null, scrapedDate?: string): string | null {
+  const normalized = iso && iso !== "null" ? (TZ_SUFFIX_RE.test(iso) ? iso : `${iso}Z`) : "";
+  const postedAt = normalized ? new Date(normalized) : null;
+  if (postedAt && !Number.isNaN(postedAt.getTime())) {
+    const minutes = Math.max(0, Math.round((Date.now() - postedAt.getTime()) / 60000));
+    if (minutes <= 30) return `🔥 Posted ${Math.max(1, minutes)}m ago`;
+    if (minutes <= 120) return "⚡ Early applicant window";
+  }
+  const today = new Date().toLocaleDateString("en-CA");
+  return scrapedDate === today ? "⚡ Fresh today" : null;
+}
+
 interface Props {
   job: Job;
   index?: number;
@@ -87,7 +99,7 @@ export default function JobCard({
   const t = tier(score);
   const match = scoreTier(score);
   const confidence = confidenceStars(score);
-  const reasons = matchReasons(job, 4);
+  const reasons = matchReasons(job, 3);
   const rank = rankBadge(index);
   const isTopOpportunity = Boolean(index && index <= 5 && score >= 90);
   const trackerSyncStatus = applyRecord?.trackerSyncStatus ?? null;
@@ -118,13 +130,12 @@ export default function JobCard({
     : isInCart
       ? "rgba(79,79,71,0.28)"
       : "rgba(79,79,71,0.14)";
-  const atsScore = job.ats_score ?? job.score_pct;
-  const fitScore = job.fit_score;
   const searchTerm = compactTerm(job.search_term);
 
   const dateLabel = job.scraped_date
     ? scrapedDateLabel(job.scraped_date)
     : fmtDate(job.batch_time || job.date_posted);
+  const urgency = urgencyLabel(job.batch_time || job.date_posted, job.scraped_date);
 
   const locationShort = (() => {
     const loc = job.location || "";
@@ -207,31 +218,24 @@ export default function JobCard({
         {co}
       </div>
 
-      <div className="job-tile-confidence" aria-label={`Application confidence ${confidence}`}>
-        <span>Confidence</span>
+      <div className="job-tile-confidence" aria-label={`Apply confidence ${confidence}`}>
         <strong>{confidence}</strong>
+        <span>{match.label} apply confidence</span>
       </div>
 
-      <div className="job-tile-meta">
-        🕐 {dateLabel}{locationShort ? ` · ${locationShort}` : ""}
+      <div className={`job-tile-meta${urgency ? " has-urgency" : ""}`}>
+        {urgency || `🕐 ${dateLabel}`}{locationShort ? ` · ${locationShort}` : ""}
       </div>
 
-      <div className="job-tile-signals">
+      <div className="job-tile-details" title={`ATS ${job.ats_score ?? job.score_pct ?? "—"} · Fit ${job.fit_score ?? "—"}`}>
         {job.level && <span className="job-tile-signal">{job.level}</span>}
-        {atsScore !== undefined && atsScore !== null && (
-          <span className="job-tile-signal">ATS {atsScore}%</span>
-        )}
-        {fitScore !== undefined && fitScore !== null && (
-          <span className="job-tile-signal">Fit {fitScore}%</span>
-        )}
         {searchTerm && <span className="job-tile-signal job-tile-signal--term">{searchTerm}</span>}
       </div>
 
       {reasons.length > 0 && (
-        <div className="job-tile-reasons">
-          <span className="job-tile-reasons-label">Why</span>
+        <div className="job-tile-reasons" aria-label="Resume match">
           {reasons.map((reason) => (
-            <span key={reason} className="job-tile-reason">✓ {reason}</span>
+            <span key={reason} className="job-tile-reason">{reason}</span>
           ))}
         </div>
       )}

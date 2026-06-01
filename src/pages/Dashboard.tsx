@@ -418,15 +418,19 @@ export default function Dashboard() {
       <div className="wrapper page-shell page-shell-wide dashboard-shell">
         <aside className="dashboard-info-rail" aria-label="Dashboard context">
           <section className="best-jobs-panel" aria-label="Best jobs today">
-            <div className="best-jobs-kicker">Recommendation Engine</div>
+            <div className="best-jobs-kicker">Job Search Copilot</div>
             <h1 className="best-jobs-title">
-              🚀 You have {highProbabilityCount || topOpportunities.length || 0} high-probability opportunit{(highProbabilityCount || topOpportunities.length) === 1 ? "y" : "ies"} today
+              🔥 Apply these first
             </h1>
+            <p className="best-jobs-subtitle">
+              {highProbabilityCount || topOpportunities.length || 0} high-probability opportunit{(highProbabilityCount || topOpportunities.length) === 1 ? "y" : "ies"} in this view.
+            </p>
             <div className="best-jobs-list">
               {topOpportunities.length > 0 ? topOpportunities.map((job, index) => {
                 const tier = scoreTier(job.score ?? 0);
                 return (
                   <div className="best-job-row" key={job.job_url || `${job.company}-${job.title}-${index}`}>
+                    <span className="best-job-rank">{index + 1}</span>
                     <CompanyLogo company={job.company} size="sm" />
                     <div className="best-job-copy">
                       <strong>{job.company || "Unknown company"}</strong>
@@ -440,8 +444,8 @@ export default function Dashboard() {
               )}
             </div>
             <div className="best-jobs-footer">
-              <span>Potential response rate</span>
-              <strong>{responseLabel}</strong>
+              <span>Expected sprint</span>
+              <strong>{topOpportunities.length ? `${topOpportunities.length * 5} min · ${responseLabel}` : responseLabel}</strong>
             </div>
           </section>
 
