@@ -17,7 +17,7 @@ function buildReferralMessage(job: Job): string {
 }
 
 const AVATAR_COLORS = [
-  "#7c3aed","#0ea5e9","#059669","#d97706","#db2777","#0891b2","#16a34a","#9333ea",
+  "#4f4f47","#5f5e54","#77766a","#69725a","#7a624a","#8d534c","#6f6855","#3f4039",
 ];
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 

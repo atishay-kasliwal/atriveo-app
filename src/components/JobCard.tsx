@@ -3,7 +3,7 @@ import type { Job } from "../types";
 import type { ApplyRecord } from "../hooks/useApplyTracker";
 
 const AVATAR_COLORS = [
-  "#7c3aed","#0ea5e9","#059669","#d97706","#db2777","#0891b2","#16a34a","#9333ea",
+  "#4f4f47","#5f5e54","#77766a","#69725a","#7a624a","#8d534c","#6f6855","#3f4039",
 ];
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -52,11 +52,11 @@ function scrapedDateLabel(dateStr?: string): string {
 }
 
 function tier(s: number) {
-  if (s >= 150) return { gradient: "linear-gradient(135deg,#7c3aed,#a855f7)", solid: "#7c3aed", glow: "rgba(124,58,237,0.28)", bg: "rgba(124,58,237,0.035)", bgHover: "rgba(124,58,237,0.07)" };
-  if (s >= 100) return { gradient: "linear-gradient(135deg,#2563eb,#3b82f6)", solid: "#2563eb", glow: "rgba(37,99,235,0.28)", bg: "rgba(37,99,235,0.035)", bgHover: "rgba(37,99,235,0.07)" };
-  if (s >= 70)  return { gradient: "linear-gradient(135deg,#059669,#10b981)", solid: "#059669", glow: "rgba(5,150,105,0.28)", bg: "rgba(5,150,105,0.035)", bgHover: "rgba(5,150,105,0.07)" };
-  if (s >= 40)  return { gradient: "linear-gradient(135deg,#d97706,#f59e0b)", solid: "#d97706", glow: "rgba(217,119,6,0.25)", bg: "rgba(217,119,6,0.03)", bgHover: "rgba(217,119,6,0.06)" };
-  return { gradient: "linear-gradient(135deg,#64748b,#94a3b8)", solid: "#94a3b8", glow: "rgba(100,116,139,0.2)", bg: "rgba(100,116,139,0.02)", bgHover: "rgba(100,116,139,0.04)" };
+  if (s >= 150) return { gradient: "linear-gradient(135deg,#4f4f47,#77766a)", solid: "#4f4f47", glow: "rgba(79,79,71,0.24)", bg: "rgba(79,79,71,0.05)", bgHover: "rgba(79,79,71,0.09)" };
+  if (s >= 100) return { gradient: "linear-gradient(135deg,#5f5e54,#8a8776)", solid: "#5f5e54", glow: "rgba(95,94,84,0.22)", bg: "rgba(119,118,106,0.055)", bgHover: "rgba(119,118,106,0.1)" };
+  if (s >= 70)  return { gradient: "linear-gradient(135deg,#69725a,#8a9272)", solid: "#69725a", glow: "rgba(105,114,90,0.22)", bg: "rgba(105,114,90,0.05)", bgHover: "rgba(105,114,90,0.09)" };
+  if (s >= 40)  return { gradient: "linear-gradient(135deg,#9a7653,#b6946e)", solid: "#9a7653", glow: "rgba(154,118,83,0.22)", bg: "rgba(154,118,83,0.045)", bgHover: "rgba(154,118,83,0.085)" };
+  return { gradient: "linear-gradient(135deg,#77766a,#c4c0ab)", solid: "#77766a", glow: "rgba(119,118,106,0.18)", bg: "rgba(119,118,106,0.035)", bgHover: "rgba(119,118,106,0.07)" };
 }
 
 function compactTerm(term?: string | null): string | null {
@@ -93,10 +93,10 @@ export default function JobCard({
   const isApplied = Boolean(applyRecord);
   const t = tier(score);
   const restingBorder = isApplied
-    ? "rgba(22,163,74,0.34)"
+    ? "rgba(105,114,90,0.34)"
     : isInCart
-      ? "rgba(37,99,235,0.28)"
-      : "rgba(0,0,0,0.07)";
+      ? "rgba(79,79,71,0.28)"
+      : "rgba(79,79,71,0.14)";
   const atsScore = job.ats_score ?? job.score_pct;
   const fitScore = job.fit_score;
   const searchTerm = compactTerm(job.search_term);
@@ -138,8 +138,8 @@ export default function JobCard({
       onMouseLeave={() => setHovered(false)}
       style={{
         background: hovered
-          ? `linear-gradient(160deg, ${t.bgHover} 0%, #fff 55%)`
-          : `linear-gradient(160deg, ${t.bg} 0%, #fff 55%)`,
+          ? `linear-gradient(160deg, ${t.bgHover} 0%, #fffdf4 55%)`
+          : `linear-gradient(160deg, ${t.bg} 0%, #fffdf4 55%)`,
         borderRadius: 12,
         border: `1px solid ${hovered ? t.solid + "44" : restingBorder}`,
         display: "flex",
@@ -147,7 +147,7 @@ export default function JobCard({
         transition: "all 0.18s ease",
         boxShadow: hovered
           ? `0 8px 24px ${t.glow}, 0 2px 8px rgba(0,0,0,0.06)`
-          : "0 1px 4px rgba(0,0,0,0.05)",
+          : "0 1px 4px rgba(79,79,71,0.09)",
         transform: hovered ? "translateY(-2px)" : "none",
         overflow: "hidden",
         cursor: "default",
@@ -257,7 +257,7 @@ export default function JobCard({
             rel="noopener"
             onClick={() => onApplyClick(job.job_url, title, co)}
             style={{
-              background: isApplied ? "linear-gradient(135deg,#16a34a,#059669)" : t.gradient,
+              background: isApplied ? "linear-gradient(135deg,#69725a,#4f4f47)" : t.gradient,
               color: "#fff",
               boxShadow: hovered ? `0 3px 10px ${t.glow}` : "none",
             }}

@@ -33,11 +33,11 @@ function extractState(location: string): string | null {
 }
 
 function scoreBg(s: number) {
-  if (s >= 150) return "#7c3aed";
-  if (s >= 100) return "#2563eb";
-  if (s >= 70)  return "#059669";
-  if (s >= 40)  return "#d97706";
-  return "#94a3b8";
+  if (s >= 150) return "#4f4f47";
+  if (s >= 100) return "#5f5e54";
+  if (s >= 70)  return "#69725a";
+  if (s >= 40)  return "#9a7653";
+  return "#8a8776";
 }
 
 function roleLabel(title: string) {
@@ -147,19 +147,19 @@ export default function States() {
         {/* Summary cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
           {[
-            { label: "States Covered", value: loading ? "—" : `${totalCovered} / 51`, sub: `${51 - totalCovered} with no jobs`, color: "#2563eb" },
-            { label: "Total Jobs Mapped", value: loading ? "—" : totalJobs.toLocaleString(), sub: "across all states today", color: "#059669" },
-            { label: "Top State", value: loading ? "—" : (topState?.abbr || "—"), sub: topState ? `${topState.count} jobs · ${topState.name}` : "no data", color: "#7c3aed" },
-            { label: "Zero-Job States", value: loading ? "—" : zeroStates.length.toString(), sub: zeroStates.slice(0, 6).join(", ") + (zeroStates.length > 6 ? "…" : ""), color: "#d97706" },
+            { label: "States Covered", value: loading ? "—" : `${totalCovered} / 51`, sub: `${51 - totalCovered} with no jobs`, color: "#5f5e54" },
+            { label: "Total Jobs Mapped", value: loading ? "—" : totalJobs.toLocaleString(), sub: "across all states today", color: "#69725a" },
+            { label: "Top State", value: loading ? "—" : (topState?.abbr || "—"), sub: topState ? `${topState.count} jobs · ${topState.name}` : "no data", color: "#4f4f47" },
+            { label: "Zero-Job States", value: loading ? "—" : zeroStates.length.toString(), sub: zeroStates.slice(0, 6).join(", ") + (zeroStates.length > 6 ? "…" : ""), color: "#9a7653" },
           ].map(card => (
             <div key={card.label} style={{
-              background: "#fff", borderRadius: 10, padding: "14px 16px",
+              background: "var(--bean-milk)", borderRadius: 10, padding: "14px 16px",
               border: `1px solid ${card.color}22`, borderLeft: `3px solid ${card.color}`,
               boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
             }}>
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{card.label}</div>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{card.label}</div>
               <div style={{ fontSize: 26, fontWeight: 800, color: card.color, letterSpacing: "-0.5px", lineHeight: 1 }}>{card.value}</div>
-              <div style={{ fontSize: 11, color: "#64748b", marginTop: 5 }}>{card.sub}</div>
+              <div style={{ fontSize: 11, color: "var(--text-2)", marginTop: 5 }}>{card.sub}</div>
             </div>
           ))}
         </div>
@@ -169,14 +169,14 @@ export default function States() {
           <input
             value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search state…"
-            style={{ padding: "7px 12px", borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 13, outline: "none", width: 200, background: "#fff" }}
+            style={{ padding: "7px 12px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 13, outline: "none", width: 200, background: "var(--surface-2)" }}
           />
           <div style={{ display: "flex", gap: 4, marginLeft: "auto" }}>
             {(["count", "avg", "name"] as const).map(s => (
               <button key={s} onClick={() => setSort(s)} style={{
-                padding: "6px 12px", borderRadius: 7, border: "1px solid #e2e8f0",
-                background: sort === s ? "#0f172a" : "#fff",
-                color: sort === s ? "#fff" : "#64748b",
+                padding: "6px 12px", borderRadius: 7, border: "1px solid var(--border)",
+                background: sort === s ? "var(--bean-dark)" : "var(--surface-2)",
+                color: sort === s ? "#fff" : "var(--text-2)",
                 fontSize: 11.5, fontWeight: 700, cursor: "pointer",
               }}>
                 {s === "count" ? "Job Count" : s === "avg" ? "Avg Score" : "A–Z"}
@@ -186,14 +186,14 @@ export default function States() {
         </div>
 
         {/* Table */}
-        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e8edf3", overflow: "hidden", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
+        <div style={{ background: "var(--bean-milk)", borderRadius: 12, border: "1px solid var(--border)", overflow: "hidden", boxShadow: "0 1px 6px rgba(79,79,71,0.08)" }}>
           {/* Header */}
           <div style={{
             display: "grid",
             gridTemplateColumns: "36px 180px 1fr 160px 160px 70px 70px 24px",
             padding: "10px 16px", gap: 12,
-            background: "#f8fafc", borderBottom: "1px solid #e8edf3",
-            fontSize: 10.5, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em",
+            background: "rgba(237,232,208,0.42)", borderBottom: "1px solid var(--border)",
+            fontSize: 10.5, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.06em",
           }}>
             <div>#</div><div>State</div><div>Jobs</div>
             <div>Top Companies</div><div>Roles</div>
@@ -201,7 +201,7 @@ export default function States() {
           </div>
 
           {loading ? (
-            <div style={{ padding: 40, textAlign: "center", color: "#94a3b8" }}>
+            <div style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}>
               <div className="spin" style={{ margin: "0 auto 12px" }} />Loading…
             </div>
           ) : sorted.map((row, i) => {
@@ -217,71 +217,71 @@ export default function States() {
                     gridTemplateColumns: "36px 180px 1fr 160px 160px 70px 70px 24px",
                     padding: "11px 16px", gap: 12,
                     alignItems: "center",
-                    borderBottom: isOpen ? "none" : "1px solid #f1f5f9",
-                    background: isOpen ? "#f0f7ff" : row.count === 0 ? "#fafafa" : "#fff",
+                    borderBottom: isOpen ? "none" : "1px solid rgba(119,118,106,0.14)",
+                    background: isOpen ? "rgba(237,232,208,0.72)" : row.count === 0 ? "#f7f3e5" : "var(--bean-milk)",
                     cursor: row.count > 0 ? "pointer" : "default",
                     transition: "background 0.12s",
                   }}
-                  onMouseEnter={e => { if (row.count > 0 && !isOpen) (e.currentTarget as HTMLElement).style.background = "#f8fbff"; }}
-                  onMouseLeave={e => { if (!isOpen) (e.currentTarget as HTMLElement).style.background = row.count === 0 ? "#fafafa" : "#fff"; }}
+                  onMouseEnter={e => { if (row.count > 0 && !isOpen) (e.currentTarget as HTMLElement).style.background = "#fbf8ec"; }}
+                  onMouseLeave={e => { if (!isOpen) (e.currentTarget as HTMLElement).style.background = row.count === 0 ? "#f7f3e5" : "var(--bean-milk)"; }}
                 >
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#cbd5e1" }}>{row.count > 0 ? i + 1 : "—"}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--bean-taupe)" }}>{row.count > 0 ? i + 1 : "—"}</div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <div style={{
                       width: 32, height: 22, borderRadius: 5, flexShrink: 0,
-                      background: row.count > 0 ? `linear-gradient(135deg,${tierColor},${tierColor}aa)` : "#f1f5f9",
+                      background: row.count > 0 ? `linear-gradient(135deg,${tierColor},${tierColor}aa)` : "var(--bean-cream)",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 10, fontWeight: 800, color: row.count > 0 ? "#fff" : "#94a3b8",
+                      fontSize: 10, fontWeight: 800, color: row.count > 0 ? "#fff" : "var(--muted)",
                     }}>{row.abbr}</div>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: row.count > 0 ? "#0f172a" : "#94a3b8" }}>{row.name}</span>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: row.count > 0 ? "var(--text)" : "var(--muted)" }}>{row.name}</span>
                   </div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ flex: 1, height: 6, background: "#f1f5f9", borderRadius: 99, overflow: "hidden" }}>
+                    <div style={{ flex: 1, height: 6, background: "var(--bean-cream)", borderRadius: 99, overflow: "hidden" }}>
                       <div style={{
                         height: "100%", width: `${(row.count / maxCount) * 100}%`,
                         background: row.count > 0 ? `linear-gradient(90deg,${tierColor},${tierColor}bb)` : "transparent",
                         borderRadius: 99, transition: "width 0.5s ease",
                       }} />
                     </div>
-                    <span style={{ fontSize: 12, fontWeight: 800, color: row.count > 0 ? tierColor : "#cbd5e1", minWidth: 24, textAlign: "right" }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: row.count > 0 ? tierColor : "var(--bean-taupe)", minWidth: 24, textAlign: "right" }}>
                       {row.count || "0"}
                     </span>
                   </div>
 
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
                     {row.topCompanies.length ? row.topCompanies.map(c => (
-                      <span key={c} style={{ fontSize: 9.5, fontWeight: 600, padding: "1px 5px", borderRadius: 4, background: "#f1f5f9", color: "#475569", border: "1px solid #e2e8f0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 90 }}>{c}</span>
-                    )) : <span style={{ fontSize: 11, color: "#cbd5e1" }}>—</span>}
+                      <span key={c} style={{ fontSize: 9.5, fontWeight: 600, padding: "1px 5px", borderRadius: 4, background: "var(--bean-cream)", color: "var(--text-2)", border: "1px solid var(--border)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 90 }}>{c}</span>
+                    )) : <span style={{ fontSize: 11, color: "var(--bean-taupe)" }}>—</span>}
                   </div>
 
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
                     {row.topRoles.length ? row.topRoles.map(r => (
-                      <span key={r} style={{ fontSize: 9.5, fontWeight: 700, padding: "1px 5px", borderRadius: 4, background: "rgba(37,99,235,0.07)", color: "#2563eb", border: "1px solid rgba(37,99,235,0.15)" }}>{r}</span>
-                    )) : <span style={{ fontSize: 11, color: "#cbd5e1" }}>—</span>}
+                      <span key={r} style={{ fontSize: 9.5, fontWeight: 700, padding: "1px 5px", borderRadius: 4, background: "rgba(79,79,71,0.08)", color: "var(--bean-dark)", border: "1px solid rgba(79,79,71,0.16)" }}>{r}</span>
+                    )) : <span style={{ fontSize: 11, color: "var(--bean-taupe)" }}>—</span>}
                   </div>
 
-                  <div style={{ fontSize: 12, fontWeight: 800, color: row.avgScore > 0 ? tierColor : "#cbd5e1" }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: row.avgScore > 0 ? tierColor : "var(--bean-taupe)" }}>
                     {row.avgScore > 0 ? `★${row.avgScore}` : "—"}
                   </div>
 
-                  <div style={{ fontSize: 11, color: "#94a3b8" }}>{fmtTime(row.latestTime)}</div>
+                  <div style={{ fontSize: 11, color: "var(--muted)" }}>{fmtTime(row.latestTime)}</div>
 
-                  <div style={{ fontSize: 13, color: row.count > 0 ? "#94a3b8" : "transparent", transition: "transform 0.2s", transform: isOpen ? "rotate(90deg)" : "none" }}>›</div>
+                  <div style={{ fontSize: 13, color: row.count > 0 ? "var(--muted)" : "transparent", transition: "transform 0.2s", transform: isOpen ? "rotate(90deg)" : "none" }}>›</div>
                 </div>
 
                 {/* Expanded job sub-table */}
                 {isOpen && (
-                  <div style={{ borderBottom: "1px solid #e8edf3", background: "#f8fbff" }}>
+                  <div style={{ borderBottom: "1px solid var(--border)", background: "#fbf8ec" }}>
                     {/* Sub-header */}
                     <div style={{
                       display: "grid",
                       gridTemplateColumns: "36px 2fr 1fr 1fr 90px 80px 220px",
                       padding: "8px 24px", gap: 16,
-                      fontSize: 10.5, fontWeight: 700, color: "#94a3b8",
+                      fontSize: 10.5, fontWeight: 700, color: "var(--muted)",
                       textTransform: "uppercase", letterSpacing: "0.06em",
-                      borderBottom: "1px solid #dbeafe", background: "#eef4ff",
+                      borderBottom: "1px solid var(--border)", background: "rgba(237,232,208,0.72)",
                     }}>
                       <div>#</div>
                       <div>Job Title</div>
@@ -305,18 +305,18 @@ export default function States() {
                             gridTemplateColumns: "36px 2fr 1fr 1fr 90px 80px 220px",
                             padding: "11px 24px", gap: 16,
                             alignItems: "center",
-                            borderBottom: ji < row.jobs.length - 1 ? "1px solid #f1f5f9" : "none",
-                            background: isApplied ? "rgba(22,163,74,0.04)" : "transparent",
+                            borderBottom: ji < row.jobs.length - 1 ? "1px solid rgba(119,118,106,0.14)" : "none",
+                            background: isApplied ? "rgba(105,114,90,0.06)" : "transparent",
                             transition: "background 0.1s",
                           }}
-                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = isApplied ? "rgba(22,163,74,0.07)" : "rgba(37,99,235,0.025)"; }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isApplied ? "rgba(22,163,74,0.04)" : "transparent"; }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = isApplied ? "rgba(105,114,90,0.1)" : "rgba(79,79,71,0.045)"; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isApplied ? "rgba(105,114,90,0.06)" : "transparent"; }}
                         >
                           {/* Index */}
-                          <div style={{ fontSize: 11, fontWeight: 700, color: "#cbd5e1" }}>{ji + 1}</div>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--bean-taupe)" }}>{ji + 1}</div>
 
                           {/* Title */}
-                          <div style={{ fontSize: 13, fontWeight: 600, color: "#0f172a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {job.title || "—"}
                           </div>
 
@@ -326,7 +326,7 @@ export default function States() {
                           </div>
 
                           {/* Location */}
-                          <div style={{ fontSize: 11.5, color: "#94a3b8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <div style={{ fontSize: 11.5, color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             📍 {job.location || "—"}
                           </div>
 
@@ -339,7 +339,7 @@ export default function States() {
                           }}>★ {jScore}</div>
 
                           {/* Level */}
-                          <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600 }}>{job.level || "—"}</div>
+                          <div style={{ fontSize: 11, color: "var(--text-2)", fontWeight: 600 }}>{job.level || "—"}</div>
 
                           {/* Actions */}
                           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -347,8 +347,8 @@ export default function States() {
                               <button
                                 onClick={() => recordClick(job.job_url, job.title || "", job.company || "")}
                                 style={{
-                                  padding: "5px 12px", borderRadius: 6, border: "1px solid #e2e8f0",
-                                  background: "#fff", color: "#64748b", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                                  padding: "5px 12px", borderRadius: 6, border: "1px solid var(--border)",
+                                  background: "var(--surface-2)", color: "var(--text-2)", fontSize: 11, fontWeight: 700, cursor: "pointer",
                                   whiteSpace: "nowrap",
                                 }}
                               >Click</button>
@@ -361,14 +361,14 @@ export default function States() {
                                 onClick={() => recordClick(job.job_url, job.title || "", job.company || "")}
                                 style={{
                                   padding: "5px 14px", borderRadius: 6,
-                                  background: isApplied ? "linear-gradient(135deg,#16a34a,#059669)" : `linear-gradient(135deg,${jColor},${jColor}cc)`,
+                                  background: isApplied ? "linear-gradient(135deg,#69725a,#4f4f47)" : `linear-gradient(135deg,${jColor},${jColor}cc)`,
                                   color: "#fff", fontSize: 11, fontWeight: 700,
                                   textDecoration: "none", whiteSpace: "nowrap",
                                 }}
                               >{isApplied ? "Applied ✓" : "Apply ↗"}</a>
                             )}
                             {isApplied && (
-                              <span style={{ fontSize: 11, color: "#16a34a", fontWeight: 700 }}>
+                              <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 700 }}>
                                 ×{rec?.clicks} clicks
                               </span>
                             )}

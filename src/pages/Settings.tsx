@@ -166,7 +166,7 @@ export default function Settings() {
               Save Resume
             </button>
             {resumeSaved && (
-              <span style={{ fontSize: 12, color: "#4ade80" }}>Saved ✓</span>
+              <span style={{ fontSize: 12, color: "var(--green)" }}>Saved ✓</span>
             )}
           </div>
         </div>

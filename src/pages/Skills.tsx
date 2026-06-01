@@ -174,6 +174,13 @@ type SkillSummary = {
   }>;
 };
 
+const SKILL_PALETTE = ["#4f4f47", "#77766a", "#69725a", "#9a7653", "#8d534c", "#5f5e54"];
+
+function skillPaletteColor(category: string): string {
+  const code = [...category].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return SKILL_PALETTE[code % SKILL_PALETTE.length];
+}
+
 function extractResumeSkills(text: string): Set<string> {
   const found = new Set<string>();
   for (const catSkills of Object.values(RESUME_PATTERNS)) {
@@ -186,9 +193,9 @@ function extractResumeSkills(text: string): Set<string> {
 
 function flatTopSkills(summary: SkillSummary, n: number): Array<{ skill: string; count: number; category: string; color: string }> {
   const all: Array<{ skill: string; count: number; category: string; color: string }> = [];
-  for (const [cat, { skills, color }] of Object.entries(summary.categories)) {
+  for (const [cat, { skills }] of Object.entries(summary.categories)) {
     for (const [skill, count] of Object.entries(skills)) {
-      all.push({ skill, count, category: cat, color });
+      all.push({ skill, count, category: cat, color: skillPaletteColor(cat) });
     }
   }
   return all.sort((a, b) => b.count - a.count).slice(0, n);
@@ -214,9 +221,9 @@ export default function Skills() {
   const gapData = useMemo(() => {
     if (!summary) return [];
     const all: Array<{ skill: string; count: number; category: string; color: string; have: boolean }> = [];
-    for (const [cat, { skills, color }] of Object.entries(summary.categories)) {
+    for (const [cat, { skills }] of Object.entries(summary.categories)) {
       for (const [skill, count] of Object.entries(skills)) {
-        all.push({ skill, count, category: cat, color, have: resumeSkills.has(skill) });
+        all.push({ skill, count, category: cat, color: skillPaletteColor(cat), have: resumeSkills.has(skill) });
       }
     }
     return all.sort((a, b) => b.count - a.count);
@@ -279,7 +286,7 @@ export default function Skills() {
           ]}
         />
         {refreshMsg && (
-          <div style={{ fontSize: 11, marginTop: -4, color: refreshMsg.includes("error") || refreshMsg.includes("Error") ? "#f87171" : "#4ade80" }}>
+          <div style={{ fontSize: 11, marginTop: -4, color: refreshMsg.includes("error") || refreshMsg.includes("Error") ? "var(--red)" : "var(--green)" }}>
             {refreshMsg}
           </div>
         )}
@@ -325,10 +332,11 @@ export default function Skills() {
 
             {/* Category cards */}
             <div className="skills-grid" style={{ marginTop: 24 }}>
-              {Object.entries(summary.categories).map(([category, { skills, color }]) => {
+              {Object.entries(summary.categories).map(([category, { skills }]) => {
                 const catSkills = Object.entries(skills);
                 if (catSkills.length === 0) return null;
                 const maxCount = catSkills[0][1];
+                const color = skillPaletteColor(category);
                 return (
                   <div key={category} className="skills-cat-card">
                     <div className="skills-cat-header">
@@ -370,7 +378,7 @@ export default function Skills() {
                 </div>
                 {hasResume && (
                   <div style={{ fontSize: 12, color: "var(--muted)" }}>
-                    <span style={{ color: "#22c55e", fontWeight: 700 }}>{covered.length}</span> skills detected
+                    <span style={{ color: "var(--green)", fontWeight: 700 }}>{covered.length}</span> skills detected
                   </div>
                 )}
               </div>
@@ -407,7 +415,7 @@ export default function Skills() {
 
                 {/* Top missing */}
                 <div className="skills-top-card" style={{ marginTop: 20 }}>
-                  <div className="skills-section-title" style={{ color: "#f87171" }}>
+                  <div className="skills-section-title" style={{ color: "var(--red)" }}>
                     Top Skills to Add to Your Resume
                   </div>
                   <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 14 }}>
@@ -426,7 +434,7 @@ export default function Skills() {
 
                 {/* Covered skills */}
                 <div className="skills-top-card" style={{ marginTop: 20 }}>
-                  <div className="skills-section-title" style={{ color: "#4ade80" }}>
+                  <div className="skills-section-title" style={{ color: "var(--green)" }}>
                     Skills You Already Cover
                   </div>
                   <div className="skills-gap-grid">
