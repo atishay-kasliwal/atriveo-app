@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-01T03:24:05.132822+00:00",
-  "total_analyzed": 23775,
+  "generated_at": "2026-06-01T04:24:03.521053+00:00",
+  "total_analyzed": 23776,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
@@ -136,14 +136,14 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 7529,
+        "Machine Learning": 7530,
         "LLM": 4455,
         "Agents": 3994,
         "GenAI": 2992,
         "PyTorch": 2379,
         "RAG": 2089,
         "TensorFlow": 1887,
-        "NLP": 1814,
+        "NLP": 1815,
         "Deep Learning": 1462,
         "Prompt Eng": 1357,
         "LangChain": 1227,
