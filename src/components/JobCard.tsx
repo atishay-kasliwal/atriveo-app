@@ -203,10 +203,10 @@ export default function JobCard({
               title={`Block "${co}"`}
             >⊘</button>
           )}
-          <div className={`job-tile-match job-tile-match--${match.key}`}>
+          <div className={`job-tile-match job-tile-match--${match.key}`} title="Raw ranking score out of 250">
             <span className="job-tile-match-icon">{match.icon}</span>
             <strong>{score}</strong>
-            <span>Career Ops</span>
+            <span>Score /250</span>
           </div>
         </div>
       </div>
