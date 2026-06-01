@@ -379,161 +379,163 @@ export default function Dashboard() {
       <AppHeader />
 
       <div className="wrapper page-shell page-shell-wide dashboard-shell">
-        <PageIntro
-          compact
-          kicker="Live Feed"
-          title="Fresh jobs, ranked for application sprints"
-          description="Keep the best roles in front, apply in focused bursts, and use momentum signals to avoid letting strong matches sit untouched."
-          stats={[
-            { label: "This hour", value: hourJobs.length, tone: "blue" },
-            { label: "Today", value: todayJobs.length, tone: "green" },
-            { label: "Yesterday", value: yesterdayJobs.length, tone: "orange" },
-          ]}
-        />
+        <aside className="dashboard-info-rail" aria-label="Dashboard context">
+          <PageIntro
+            compact
+            kicker="Live Feed"
+            title="Fresh jobs, ranked for application sprints"
+            description="Keep the best roles in front, apply in focused bursts, and use momentum signals to avoid letting strong matches sit untouched."
+            stats={[
+              { label: "This hour", value: hourJobs.length, tone: "blue" },
+              { label: "Today", value: todayJobs.length, tone: "green" },
+              { label: "Yesterday", value: yesterdayJobs.length, tone: "orange" },
+            ]}
+          />
 
-        <section className="momentum-panel" aria-label="Apply momentum">
-          <div className="momentum-primary">
-            <div className="momentum-copy">
-              <div className="momentum-kicker">Apply Momentum</div>
-              <div className="momentum-title">{applyMomentum.motivation}</div>
-            </div>
-            <div className="momentum-target">
-              <strong>{applyMomentum.todayCount}</strong>
-              <span>/ {DAILY_APPLY_TARGET} today</span>
-            </div>
-          </div>
-
-          <div className="momentum-progress" aria-hidden="true">
-            <span style={{ width: `${applyMomentum.progressPct}%` }} />
-          </div>
-
-          <div className="momentum-grid">
-            <div className="momentum-stat">
-              <span>Next burst</span>
-              <strong>{nextBurstCount}</strong>
-              <small>{highScoreOpenCount ? `${highScoreOpenCount} high-score open` : `${openDisplayedJobs.length} open in view`}</small>
-            </div>
-            <div className="momentum-stat">
-              <span>Saved queue</span>
-              <strong>{cartItems.length}</strong>
-              <small>{cartItems.length ? "ready for review" : "empty"}</small>
-            </div>
-            <div className="momentum-stat">
-              <span>Best open score</span>
-              <strong>{topScoreOpen || "—"}</strong>
-              <small>{selectedRun ? "in selected run" : "in current view"}</small>
-            </div>
-            <div className="momentum-chart">
-              <div className="momentum-chart-head">
-                <span>Today by hour</span>
-                <strong>{applyMomentum.remaining ? `${applyMomentum.remaining} left` : "target hit"}</strong>
+          <section className="momentum-panel" aria-label="Apply momentum">
+            <div className="momentum-primary">
+              <div className="momentum-copy">
+                <div className="momentum-kicker">Apply Momentum</div>
+                <div className="momentum-title">{applyMomentum.motivation}</div>
               </div>
-              <div className="momentum-bars" aria-hidden="true">
-                {applyMomentum.bars.map((bar) => (
-                  <span key={bar.hour} className="momentum-bar-wrap">
-                    <span className="momentum-bar" style={{ height: `${bar.heightPct}%` }} />
-                    <span className="momentum-bar-count">{bar.count || ""}</span>
-                  </span>
-                ))}
-              </div>
-              <div className="momentum-axis">
-                <span>{applyMomentum.bars[0]?.label}</span>
-                <span>{applyMomentum.bars[applyMomentum.bars.length - 1]?.label}</span>
+              <div className="momentum-target">
+                <strong>{applyMomentum.todayCount}</strong>
+                <span>/ {DAILY_APPLY_TARGET} today</span>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* Period tabs + sort */}
-        <div className="top-bar">
-          <div className="top-bar-main">
-            <div className="period-tabs" aria-label="Feed period">
-              {(["hour", "today", "yesterday"] as Period[]).map((p) => (
-                <button
-                  key={p}
-                  className={`period-tab${period === p ? " active" : ""}`}
-                  onClick={() => {
-                    handlePeriodChange(p);
-                    setTermFilter("all");
-                    setSelectedSession(null);
-                  }}
-                >
-                  {p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}
-                  <span className="count">
-                    {p === "hour" ? hourJobs.length : p === "today" ? todayJobs.length : yesterdayJobs.length}
-                  </span>
-                </button>
-              ))}
-              <a href="/weekly" className="period-tab">
-                7 Days
-              </a>
+            <div className="momentum-progress" aria-hidden="true">
+              <span style={{ width: `${applyMomentum.progressPct}%` }} />
             </div>
-            <div className="sort-group" aria-label="Sort jobs">
-              <button className={`sort-btn${sortBy === "score" ? " active" : ""}`} onClick={() => setSortBy("score")}>★ Score</button>
-              <button className={`sort-btn${sortBy === "time" ? " active" : ""}`} onClick={() => setSortBy("time")}>↓ Recent</button>
-              <button className={`sort-btn${sortBy === "ats" ? " active" : ""}`} onClick={() => setSortBy("ats")}>ATS</button>
-              <button className={`sort-btn${sortBy === "fit" ? " active" : ""}`} onClick={() => setSortBy("fit")}>Fit</button>
-            </div>
-          </div>
-          <div className="feed-summary" aria-live="polite">
-            <span className="feed-summary-primary">{displayedJobs.length} job{displayedJobs.length !== 1 ? "s" : ""}</span>
-            {ngCount > 0 && <span className="feed-summary-chip">{ngCount} New Grad</span>}
-            {selectedRun && <span className="feed-summary-chip">Run {formatRunTime(selectedRun.displayAt)}</span>}
-          </div>
-        </div>
 
-        {/* Run history strip */}
-        {runCards.length > 0 && (
-          <section className="run-strip-wrap" aria-label="Session history">
-            <div className="run-strip-head">
-              <span className="run-strip-label">Session History</span>
-              <span className="run-strip-status">
-                {selectedRun ? `Viewing ${formatRunTime(selectedRun.displayAt)}` : `${runCards.length} recent runs`}
-              </span>
-            </div>
-            <div className="run-strip">
-            {runCards.map((r) => {
-              const isActive = selectedSession === r.session_id;
-              return (
-                <button
-                  type="button"
-                  key={r.session_id}
-                  className={`run-card${isActive ? " active" : ""}`}
-                  aria-pressed={isActive}
-                  onClick={() => {
-                    if (isActive) {
-                      setSelectedSession(null);
-                    } else {
-                      setSelectedSession(r.session_id);
-                      if (r.targetPeriod) handlePeriodChange(r.targetPeriod);
-                      setTermFilter("all");
-                    }
-                  }}
-                >
-                  <div className="run-card-content">
-                    <div className="run-card-head">
-                      <span className="run-card-time">{formatRunTime(r.displayAt)}</span>
-                      <span className="run-card-pill">{r.progressPct}%</span>
-                    </div>
-                    <div className="run-card-countline">
-                      <span className="run-card-clicks">{r.clickCount} clicks</span>
-                      <span className="run-card-count">{r.count} jobs</span>
-                    </div>
-                    <div className="run-card-bars" aria-hidden="true">
-                      {Array.from({ length: 24 }).map((_, i) => (
-                        <span
-                          key={i}
-                          className={`run-card-bar${i < r.segmentsActive ? " active" : ""}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
+            <div className="momentum-grid">
+              <div className="momentum-stat">
+                <span>Next burst</span>
+                <strong>{nextBurstCount}</strong>
+                <small>{highScoreOpenCount ? `${highScoreOpenCount} high-score open` : `${openDisplayedJobs.length} open in view`}</small>
+              </div>
+              <div className="momentum-stat">
+                <span>Saved queue</span>
+                <strong>{cartItems.length}</strong>
+                <small>{cartItems.length ? "ready for review" : "empty"}</small>
+              </div>
+              <div className="momentum-stat">
+                <span>Best open score</span>
+                <strong>{topScoreOpen || "—"}</strong>
+                <small>{selectedRun ? "in selected run" : "in current view"}</small>
+              </div>
+              <div className="momentum-chart">
+                <div className="momentum-chart-head">
+                  <span>Today by hour</span>
+                  <strong>{applyMomentum.remaining ? `${applyMomentum.remaining} left` : "target hit"}</strong>
+                </div>
+                <div className="momentum-bars" aria-hidden="true">
+                  {applyMomentum.bars.map((bar) => (
+                    <span key={bar.hour} className="momentum-bar-wrap">
+                      <span className="momentum-bar" style={{ height: `${bar.heightPct}%` }} />
+                      <span className="momentum-bar-count">{bar.count || ""}</span>
+                    </span>
+                  ))}
+                </div>
+                <div className="momentum-axis">
+                  <span>{applyMomentum.bars[0]?.label}</span>
+                  <span>{applyMomentum.bars[applyMomentum.bars.length - 1]?.label}</span>
+                </div>
+              </div>
             </div>
           </section>
-        )}
+
+          {/* Period tabs + sort */}
+          <div className="top-bar">
+            <div className="top-bar-main">
+              <div className="period-tabs" aria-label="Feed period">
+                {(["hour", "today", "yesterday"] as Period[]).map((p) => (
+                  <button
+                    key={p}
+                    className={`period-tab${period === p ? " active" : ""}`}
+                    onClick={() => {
+                      handlePeriodChange(p);
+                      setTermFilter("all");
+                      setSelectedSession(null);
+                    }}
+                  >
+                    {p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}
+                    <span className="count">
+                      {p === "hour" ? hourJobs.length : p === "today" ? todayJobs.length : yesterdayJobs.length}
+                    </span>
+                  </button>
+                ))}
+                <a href="/weekly" className="period-tab">
+                  7 Days
+                </a>
+              </div>
+              <div className="sort-group" aria-label="Sort jobs">
+                <button className={`sort-btn${sortBy === "score" ? " active" : ""}`} onClick={() => setSortBy("score")}>★ Score</button>
+                <button className={`sort-btn${sortBy === "time" ? " active" : ""}`} onClick={() => setSortBy("time")}>↓ Recent</button>
+                <button className={`sort-btn${sortBy === "ats" ? " active" : ""}`} onClick={() => setSortBy("ats")}>ATS</button>
+                <button className={`sort-btn${sortBy === "fit" ? " active" : ""}`} onClick={() => setSortBy("fit")}>Fit</button>
+              </div>
+            </div>
+            <div className="feed-summary" aria-live="polite">
+              <span className="feed-summary-primary">{displayedJobs.length} job{displayedJobs.length !== 1 ? "s" : ""}</span>
+              {ngCount > 0 && <span className="feed-summary-chip">{ngCount} New Grad</span>}
+              {selectedRun && <span className="feed-summary-chip">Run {formatRunTime(selectedRun.displayAt)}</span>}
+            </div>
+          </div>
+
+          {/* Run history strip */}
+          {runCards.length > 0 && (
+            <section className="run-strip-wrap" aria-label="Session history">
+              <div className="run-strip-head">
+                <span className="run-strip-label">Session History</span>
+                <span className="run-strip-status">
+                  {selectedRun ? `Viewing ${formatRunTime(selectedRun.displayAt)}` : `${runCards.length} recent runs`}
+                </span>
+              </div>
+              <div className="run-strip">
+              {runCards.map((r) => {
+                const isActive = selectedSession === r.session_id;
+                return (
+                  <button
+                    type="button"
+                    key={r.session_id}
+                    className={`run-card${isActive ? " active" : ""}`}
+                    aria-pressed={isActive}
+                    onClick={() => {
+                      if (isActive) {
+                        setSelectedSession(null);
+                      } else {
+                        setSelectedSession(r.session_id);
+                        if (r.targetPeriod) handlePeriodChange(r.targetPeriod);
+                        setTermFilter("all");
+                      }
+                    }}
+                  >
+                    <div className="run-card-content">
+                      <div className="run-card-head">
+                        <span className="run-card-time">{formatRunTime(r.displayAt)}</span>
+                        <span className="run-card-pill">{r.progressPct}%</span>
+                      </div>
+                      <div className="run-card-countline">
+                        <span className="run-card-clicks">{r.clickCount} clicks</span>
+                        <span className="run-card-count">{r.count} jobs</span>
+                      </div>
+                      <div className="run-card-bars" aria-hidden="true">
+                        {Array.from({ length: 24 }).map((_, i) => (
+                          <span
+                            key={i}
+                            className={`run-card-bar${i < r.segmentsActive ? " active" : ""}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+              </div>
+            </section>
+          )}
+        </aside>
 
         <div className="dashboard-layout">
           <div className="right-panel">
