@@ -195,6 +195,10 @@ export default function Dashboard() {
   const rawJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : yesterdayJobs;
   const baseJobs = selectedSession ? rawJobs.filter((j) => j.session_id === selectedSession) : rawJobs;
   const appliedUrlSet = useMemo(() => new Set(Object.keys(stats.appliedJobs)), [stats.appliedJobs]);
+  const applyClickUrlSet = useMemo(
+    () => new Set(applyClickRecords.map((record) => record.jobUrl)),
+    [applyClickRecords]
+  );
 
   const runCards = useMemo(() => {
     const cards: RunCard[] = runHistory
@@ -237,8 +241,9 @@ export default function Dashboard() {
     jobs = jobs.filter((j) => !isExcluded(j));
     const cartUrlSet = new Set(cartItems.map((i) => i.url));
     jobs = jobs.filter((j) => !j.job_url || !cartUrlSet.has(j.job_url));
+    jobs = jobs.filter((j) => !j.job_url || !applyClickUrlSet.has(j.job_url));
     return jobs;
-  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, cartItems]);
+  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, cartItems, applyClickUrlSet]);
 
   const filtered = useMemo(() => {
     let jobs = [...visibleJobs];
