@@ -891,7 +891,7 @@
     "title": "Software Engineer, TPU Compiler Development Infrastructure",
     "scraped_date": "2026-06-01",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4392095309",
@@ -1498,6 +1498,28 @@
     "fit_score": 7
   },
   {
+    "job_url": "https://www.indeed.com/viewjob?jk=5a073e33a9128dc9",
+    "session_id": "2026-06-01T16:29:11Z",
+    "batch_time": "2026-06-01T16:29:09Z",
+    "company": "Ribbon Communications",
+    "competition_score": 0,
+    "date_posted": "2026-06-01T00:00:00",
+    "level": "Entry",
+    "location": "Westford, MA, US",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 70,
+    "score_pct": 54,
+    "search_term": "machine learning engineer",
+    "site": "indeed",
+    "summary": "ABOUT RIBBON COMMUNICATIONS Ribbon Communications is a company with two decades of leadership in real\\-time communications.",
+    "title": "Software Engineer (Co-op)",
+    "scraped_date": "2026-06-01",
+    "ats_score": 57,
+    "fit_score": 11
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4401291509",
     "session_id": "2026-06-01T13:09:47Z",
     "batch_time": "2026-06-01T13:09:41Z",
@@ -1833,7 +1855,7 @@
     "title": "Python Unix machine learning Support Engineer",
     "scraped_date": "2026-06-01",
     "ats_score": 42,
-    "fit_score": 10
+    "fit_score": 11
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4389327049",
@@ -3662,6 +3684,50 @@
     "scraped_date": "2026-06-01"
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4309695749",
+    "session_id": "2026-06-01T16:29:11Z",
+    "batch_time": "2026-06-01T16:29:09Z",
+    "company": "DataAnnotation",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Kentucky, United States",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 28,
+    "score_pct": 22,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "We are looking for a Backend Software Engineer to join our team to train AI models.",
+    "title": "Backend Software Engineer",
+    "scraped_date": "2026-06-01",
+    "ats_score": 40,
+    "fit_score": 3
+  },
+  {
+    "job_url": "https://www.indeed.com/viewjob?jk=e8b6d7c6a78144e3",
+    "session_id": "2026-06-01T16:29:11Z",
+    "batch_time": "2026-06-01T16:29:09Z",
+    "company": "ROAMLY",
+    "competition_score": 0,
+    "date_posted": "2026-06-01T00:00:00",
+    "level": "Entry",
+    "location": "Austin, TX, US",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 26,
+    "score_pct": 20,
+    "search_term": "data scientist",
+    "site": "indeed",
+    "summary": "About Roamly Labs \\& The Outdoorsy Group At the Outdoorsy Group, we\u2019ve already revolutionized how people experience the open road.",
+    "title": "AI Engineer - Roamly Labs",
+    "scraped_date": "2026-06-01",
+    "ats_score": 42,
+    "fit_score": 6
+  },
+  {
     "session_id": "2026-06-01T12:07:56Z",
     "job_url": "https://www.linkedin.com/jobs/view/4412720258",
     "batch_time": "2026-06-01T12:07:52Z",
@@ -3807,7 +3873,9 @@
     "site": "linkedin",
     "summary": "**Senior Data Scientist \\- Washington DC \\- $150k\\-$210k** We are partnered with an established start up building AI products that deliver real social impact.",
     "title": "Data Scientist",
-    "scraped_date": "2026-06-01"
+    "scraped_date": "2026-06-01",
+    "ats_score": 50,
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4422816311",
@@ -6439,7 +6507,7 @@
     "title": "Full Stack Python/Django Engineer",
     "scraped_date": "2026-05-31",
     "ats_score": 46,
-    "fit_score": 10
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4421321035",
@@ -13015,7 +13083,7 @@
     "title": "Pre-Silicon SoC Modeling Engineer, Annapurna Labs Machine Learning Accelerators, AWS",
     "scraped_date": "2026-05-31",
     "ats_score": 60,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-05-31T17:09:35Z",
@@ -13257,7 +13325,7 @@
     "title": "SoC Systems Software Engineer, Annapurna Labs Machine Learning Accelerators, AWS",
     "scraped_date": "2026-05-31",
     "ats_score": 33,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-05-31T19:07:44Z",
@@ -49159,7 +49227,7 @@
     "title": "Python engineer",
     "scraped_date": "2026-05-28",
     "ats_score": 42,
-    "fit_score": 10
+    "fit_score": 11
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4420606412",
@@ -57157,7 +57225,7 @@
     "title": "Junior Data Scientist with Data Engineering Skills",
     "scraped_date": "2026-05-28",
     "ats_score": 53,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-05-29T02:13:15Z",
@@ -61461,7 +61529,7 @@
     "title": "Junior Data Scientist",
     "scraped_date": "2026-05-28",
     "ats_score": 42,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-05-28T04:30:44Z",
@@ -62029,7 +62097,7 @@
     "title": "Robotics Software Engineer: Simulation and Data Collection",
     "scraped_date": "2026-05-28",
     "ats_score": 100,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-05-28T09:10:13Z",
@@ -68865,7 +68933,7 @@
     "title": "Software Engineer - Secret, Cryptographic and Identity Infrastructure",
     "scraped_date": "2026-05-27",
     "ats_score": 46,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-05-28T00:13:14Z",
@@ -93345,7 +93413,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-05-26",
     "ats_score": 73,
-    "fit_score": 24
+    "fit_score": 25
   },
   {
     "session_id": "2026-05-26T15:12:39Z",
@@ -96059,7 +96127,7 @@
     "title": "Software Engineer - Credit Technology",
     "scraped_date": "2026-05-26",
     "ats_score": 50,
-    "fit_score": 13
+    "fit_score": 14
   },
   {
     "session_id": "2026-05-27T01:11:21Z",
@@ -109675,7 +109743,7 @@
     "title": "Machine Learning Engineer",
     "scraped_date": "2026-05-26",
     "ats_score": 0,
-    "fit_score": 1
+    "fit_score": 2
   },
   {
     "session_id": "2026-05-26T17:30:11Z",

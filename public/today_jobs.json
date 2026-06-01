@@ -3858,7 +3858,7 @@
     "summary": "This role is designed to manage the infrastructure friction that compiler engineers face daily, effectively multiplying output of the entire team.",
     "title": "Software Engineer, TPU Compiler Development Infrastructure",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-01T14:09:13Z",
@@ -5404,7 +5404,7 @@
     "summary": "**Role: Python Unix machine learning Support Engineer** **Location: Chandler, AZ (Onsite)** **Duration: Full Time** **Job Description:** **Must Have Technical/Functional Skills** Unix, ShellScripting\u2026",
     "title": "Python Unix machine learning Support Engineer",
     "ats_score": 42,
-    "fit_score": 10
+    "fit_score": 11
   },
   {
     "session_id": "2026-06-01T15:10:51Z",
@@ -6369,7 +6369,9 @@
     "search_term": "machine learning engineer",
     "site": "linkedin",
     "summary": "**Senior Data Scientist \\- Washington DC \\- $150k\\-$210k** We are partnered with an established start up building AI products that deliver real social impact.",
-    "title": "Data Scientist"
+    "title": "Data Scientist",
+    "ats_score": 50,
+    "fit_score": 6
   },
   {
     "session_id": "2026-06-01T15:57:42Z",
@@ -6389,5 +6391,68 @@
     "site": "linkedin",
     "summary": "Job Title: AI Engineer Rate: Open Location: Downtown, Houston, Texas **Skills** * Hands\u2011on **Databricks \\+ Spark expertise (PySpark, SQL, Delta, Unity Catalog).** * Proven data engineering skills (in\u2026",
     "title": "AI Engineer"
+  },
+  {
+    "job_url": "https://www.indeed.com/viewjob?jk=5a073e33a9128dc9",
+    "session_id": "2026-06-01T16:29:11Z",
+    "batch_time": "2026-06-01T16:29:09Z",
+    "company": "Ribbon Communications",
+    "competition_score": 0,
+    "date_posted": "2026-06-01T00:00:00",
+    "level": "Entry",
+    "location": "Westford, MA, US",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 70,
+    "score_pct": 54,
+    "search_term": "machine learning engineer",
+    "site": "indeed",
+    "summary": "ABOUT RIBBON COMMUNICATIONS Ribbon Communications is a company with two decades of leadership in real\\-time communications.",
+    "title": "Software Engineer (Co-op)",
+    "ats_score": 57,
+    "fit_score": 11
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4309695749",
+    "session_id": "2026-06-01T16:29:11Z",
+    "batch_time": "2026-06-01T16:29:09Z",
+    "company": "DataAnnotation",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Kentucky, United States",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 28,
+    "score_pct": 22,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "We are looking for a Backend Software Engineer to join our team to train AI models.",
+    "title": "Backend Software Engineer",
+    "ats_score": 40,
+    "fit_score": 3
+  },
+  {
+    "job_url": "https://www.indeed.com/viewjob?jk=e8b6d7c6a78144e3",
+    "session_id": "2026-06-01T16:29:11Z",
+    "batch_time": "2026-06-01T16:29:09Z",
+    "company": "ROAMLY",
+    "competition_score": 0,
+    "date_posted": "2026-06-01T00:00:00",
+    "level": "Entry",
+    "location": "Austin, TX, US",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 26,
+    "score_pct": 20,
+    "search_term": "data scientist",
+    "site": "indeed",
+    "summary": "About Roamly Labs \\& The Outdoorsy Group At the Outdoorsy Group, we\u2019ve already revolutionized how people experience the open road.",
+    "title": "AI Engineer - Roamly Labs",
+    "ats_score": 42,
+    "fit_score": 6
   }
 ]
