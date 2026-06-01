@@ -31,6 +31,8 @@ const LOCATION_FILTERS = [
   { key: "NC",       match: (loc: string) => loc.includes(", nc") || loc.includes("north carolina") },
 ];
 const LEVEL_FILTERS: LevelFilter[] = ["all", "New Grad", "Entry", "Mid"];
+const DAILY_APPLY_TARGET = 50;
+const BURST_SIZE = 5;
 
 function isDataScientist(job: Job): boolean {
   return (
@@ -50,6 +52,29 @@ function parseDateLike(iso?: string | null): Date | null {
 
 function toMs(iso?: string | null): number {
   return parseDateLike(iso)?.getTime() ?? 0;
+}
+
+function estDateKey(date = new Date()): string {
+  return date.toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10);
+}
+
+function estHour(iso?: string | null): number {
+  const date = iso ? parseDateLike(iso) : new Date();
+  if (!date) return 0;
+  const part = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    hour: "2-digit",
+    hour12: false,
+  }).formatToParts(date).find((p) => p.type === "hour")?.value;
+  const hour = Number(part ?? 0);
+  return hour === 24 ? 0 : hour;
+}
+
+function hourLabel(hour: number): string {
+  if (hour === 0) return "12a";
+  if (hour < 12) return `${hour}a`;
+  if (hour === 12) return "12p";
+  return `${hour - 12}p`;
 }
 
 function formatRunTime(iso?: string | null): string {
@@ -150,6 +175,7 @@ export default function Dashboard() {
 
   const rawJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : yesterdayJobs;
   const baseJobs = selectedSession ? rawJobs.filter((j) => j.session_id === selectedSession) : rawJobs;
+  const appliedUrlSet = useMemo(() => new Set(Object.keys(stats.appliedJobs)), [stats.appliedJobs]);
 
   const runCards = useMemo(() => {
     const cards: RunCard[] = runHistory
@@ -203,13 +229,11 @@ export default function Dashboard() {
     else if (sortBy === "ats") jobs.sort((a, b) => (b.ats_score ?? -1) - (a.ats_score ?? -1));
     else if (sortBy === "fit") jobs.sort((a, b) => (b.fit_score ?? -1) - (a.fit_score ?? -1));
     else jobs.sort((a, b) => toMs(b.batch_time) - toMs(a.batch_time));
-    // Push applied jobs to the bottom so unapplied stay front-and-centre
-    const appliedSet = new Set(Object.keys(stats.appliedJobs));
     return [
-      ...jobs.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
-      ...jobs.filter((j) => j.job_url  &&  appliedSet.has(j.job_url)),
+      ...jobs.filter((j) => !j.job_url || !appliedUrlSet.has(j.job_url)),
+      ...jobs.filter((j) => j.job_url  &&  appliedUrlSet.has(j.job_url)),
     ];
-  }, [visibleJobs, levelFilter, sortBy, stats.appliedJobs]);
+  }, [visibleJobs, levelFilter, sortBy, appliedUrlSet]);
 
   const searchTerms = useMemo(
     () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
@@ -270,11 +294,56 @@ export default function Dashboard() {
   );
   const displayedJobs = isSplitView ? locationFiltered : filtered;
   const ngCount = displayedJobs.filter((j) => j.level === "New Grad").length;
+  const openDisplayedJobs = useMemo(
+    () => displayedJobs.filter((j) => !j.job_url || !appliedUrlSet.has(j.job_url)),
+    [displayedJobs, appliedUrlSet]
+  );
+  const highScoreOpenCount = openDisplayedJobs.filter((j) => (j.score ?? 0) >= 100).length;
+  const topScoreOpen = openDisplayedJobs.reduce((best, job) => Math.max(best, job.score ?? 0), 0);
 
   const selectedRun = useMemo(
     () => runCards.find((r) => r.session_id === selectedSession) || null,
     [runCards, selectedSession]
   );
+
+  const applyMomentum = useMemo(() => {
+    const todayKey = estDateKey();
+    const hourlyCounts = Array.from({ length: 24 }, () => 0);
+    Object.values(stats.appliedJobs).forEach((record) => {
+      const appliedAt = parseDateLike(record.lastAppliedAt);
+      if (!appliedAt || estDateKey(appliedAt) !== todayKey) return;
+      hourlyCounts[estHour(record.lastAppliedAt)] += record.clicks || 1;
+    });
+    const nowHour = estHour();
+    const hourWindow = Array.from({ length: 12 }, (_, index) => (nowHour - 11 + index + 24) % 24);
+    const maxHourCount = Math.max(1, ...hourWindow.map((hour) => hourlyCounts[hour]));
+    const todayCount = stats.todayCount ?? 0;
+    const progressPct = Math.min(100, Math.round((todayCount / DAILY_APPLY_TARGET) * 100));
+    const remaining = Math.max(0, DAILY_APPLY_TARGET - todayCount);
+    const motivation =
+      todayCount >= DAILY_APPLY_TARGET
+        ? "Daily target hit. Keep stacking bonus wins."
+        : todayCount === 0
+          ? "Start with one focused application sprint."
+          : remaining <= BURST_SIZE
+            ? "One small sprint closes today's target."
+            : `${remaining} applications left to hit today's target.`;
+
+    return {
+      todayCount,
+      progressPct,
+      remaining,
+      motivation,
+      bars: hourWindow.map((hour) => ({
+        hour,
+        label: hourLabel(hour),
+        count: hourlyCounts[hour],
+        heightPct: Math.max(8, Math.round((hourlyCounts[hour] / maxHourCount) * 100)),
+      })),
+    };
+  }, [stats.appliedJobs, stats.todayCount]);
+
+  const nextBurstCount = Math.min(BURST_SIZE, highScoreOpenCount || openDisplayedJobs.length);
   const activeFilterCount = [
     selectedSession,
     query.trim(),
@@ -313,14 +382,67 @@ export default function Dashboard() {
         <PageIntro
           compact
           kicker="Live Feed"
-          title="Fresh jobs, ranked for quick review"
-          description="A compact live view of the latest jobs in your pipeline. Use the search, filters, and session history to keep the feed focused without losing context."
+          title="Fresh jobs, ranked for application sprints"
+          description="Keep the best roles in front, apply in focused bursts, and use momentum signals to avoid letting strong matches sit untouched."
           stats={[
             { label: "This hour", value: hourJobs.length, tone: "blue" },
             { label: "Today", value: todayJobs.length, tone: "green" },
             { label: "Yesterday", value: yesterdayJobs.length, tone: "orange" },
           ]}
         />
+
+        <section className="momentum-panel" aria-label="Apply momentum">
+          <div className="momentum-primary">
+            <div className="momentum-copy">
+              <div className="momentum-kicker">Apply Momentum</div>
+              <div className="momentum-title">{applyMomentum.motivation}</div>
+            </div>
+            <div className="momentum-target">
+              <strong>{applyMomentum.todayCount}</strong>
+              <span>/ {DAILY_APPLY_TARGET} today</span>
+            </div>
+          </div>
+
+          <div className="momentum-progress" aria-hidden="true">
+            <span style={{ width: `${applyMomentum.progressPct}%` }} />
+          </div>
+
+          <div className="momentum-grid">
+            <div className="momentum-stat">
+              <span>Next burst</span>
+              <strong>{nextBurstCount}</strong>
+              <small>{highScoreOpenCount ? `${highScoreOpenCount} high-score open` : `${openDisplayedJobs.length} open in view`}</small>
+            </div>
+            <div className="momentum-stat">
+              <span>Saved queue</span>
+              <strong>{cartItems.length}</strong>
+              <small>{cartItems.length ? "ready for review" : "empty"}</small>
+            </div>
+            <div className="momentum-stat">
+              <span>Best open score</span>
+              <strong>{topScoreOpen || "—"}</strong>
+              <small>{selectedRun ? "in selected run" : "in current view"}</small>
+            </div>
+            <div className="momentum-chart">
+              <div className="momentum-chart-head">
+                <span>Today by hour</span>
+                <strong>{applyMomentum.remaining ? `${applyMomentum.remaining} left` : "target hit"}</strong>
+              </div>
+              <div className="momentum-bars" aria-hidden="true">
+                {applyMomentum.bars.map((bar) => (
+                  <span key={bar.hour} className="momentum-bar-wrap">
+                    <span className="momentum-bar" style={{ height: `${bar.heightPct}%` }} />
+                    <span className="momentum-bar-count">{bar.count || ""}</span>
+                  </span>
+                ))}
+              </div>
+              <div className="momentum-axis">
+                <span>{applyMomentum.bars[0]?.label}</span>
+                <span>{applyMomentum.bars[applyMomentum.bars.length - 1]?.label}</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Period tabs + sort */}
         <div className="top-bar">

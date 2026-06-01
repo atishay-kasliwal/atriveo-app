@@ -273,6 +273,217 @@ header {
 }
 .admin-link:hover { border-color: var(--blue); color: var(--blue); text-decoration: none; background: var(--blue-lo); }
 
+/* ── Apply momentum ───────────────────────────────────────────────────── */
+.momentum-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(148,163,184,0.22);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.72));
+  box-shadow: 0 6px 18px rgba(15,23,42,0.05);
+}
+
+.momentum-primary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.momentum-copy {
+  min-width: 0;
+}
+
+.momentum-kicker {
+  font-family: "Inter", monospace;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+
+.momentum-title {
+  margin-top: 2px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.momentum-target {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  flex-shrink: 0;
+  font-family: "Inter", monospace;
+  color: var(--text-2);
+}
+
+.momentum-target strong {
+  color: var(--text);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.momentum-target span {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.momentum-progress {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(148,163,184,0.15);
+}
+
+.momentum-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--green), var(--cyan), var(--blue));
+  transition: width 0.25s ease;
+}
+
+.momentum-grid {
+  display: grid;
+  grid-template-columns: 130px 130px 140px minmax(260px, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.momentum-stat {
+  min-width: 0;
+  padding: 9px 10px;
+  border-left: 3px solid rgba(37,99,235,0.28);
+  background: rgba(248,250,252,0.58);
+}
+
+.momentum-stat span,
+.momentum-chart-head span {
+  display: block;
+  color: var(--muted);
+  font-family: "Inter", monospace;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.momentum-stat strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--text);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.momentum-stat small {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-2);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.momentum-chart {
+  min-width: 0;
+  padding: 9px 10px;
+  border-left: 3px solid rgba(22,163,74,0.28);
+  background: rgba(248,250,252,0.58);
+}
+
+.momentum-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.momentum-chart-head strong {
+  color: var(--green);
+  font-family: "Inter", monospace;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.momentum-bars {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 4px;
+  height: 46px;
+  align-items: end;
+  margin-top: 8px;
+}
+
+.momentum-bar-wrap {
+  position: relative;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  height: 100%;
+  min-width: 0;
+  border-radius: 5px;
+  background: rgba(148,163,184,0.12);
+  overflow: hidden;
+}
+
+.momentum-bar {
+  display: block;
+  width: 100%;
+  min-height: 3px;
+  border-radius: 5px 5px 0 0;
+  background: linear-gradient(180deg, var(--green), var(--cyan));
+}
+
+.momentum-bar-count {
+  position: absolute;
+  top: 3px;
+  color: var(--text);
+  font-family: "Inter", monospace;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.momentum-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  color: var(--muted);
+  font-family: "Inter", monospace;
+  font-size: 9.5px;
+}
+
+@media (max-width: 1100px) {
+  .momentum-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .momentum-chart {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  .momentum-primary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .momentum-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .momentum-stat small {
+    white-space: normal;
+  }
+}
+
 /* ── KPI row ─────────────────────────────────────────────────────────── */
 .kpi-row {
   display: grid;
