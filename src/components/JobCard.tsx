@@ -46,11 +46,11 @@ function scrapedDateLabel(dateStr?: string): string {
 }
 
 function tier(s: number) {
-  if (s >= 150) return { gradient: "linear-gradient(135deg,#4f4f47,#77766a)", solid: "#4f4f47", glow: "rgba(79,79,71,0.24)", bg: "rgba(79,79,71,0.05)", bgHover: "rgba(79,79,71,0.09)" };
-  if (s >= 100) return { gradient: "linear-gradient(135deg,#5f5e54,#8a8776)", solid: "#5f5e54", glow: "rgba(95,94,84,0.22)", bg: "rgba(119,118,106,0.055)", bgHover: "rgba(119,118,106,0.1)" };
-  if (s >= 70)  return { gradient: "linear-gradient(135deg,#69725a,#8a9272)", solid: "#69725a", glow: "rgba(105,114,90,0.22)", bg: "rgba(105,114,90,0.05)", bgHover: "rgba(105,114,90,0.09)" };
-  if (s >= 40)  return { gradient: "linear-gradient(135deg,#9a7653,#b6946e)", solid: "#9a7653", glow: "rgba(154,118,83,0.22)", bg: "rgba(154,118,83,0.045)", bgHover: "rgba(154,118,83,0.085)" };
-  return { gradient: "linear-gradient(135deg,#77766a,#c4c0ab)", solid: "#77766a", glow: "rgba(119,118,106,0.18)", bg: "rgba(119,118,106,0.035)", bgHover: "rgba(119,118,106,0.07)" };
+  if (s >= 150) return { gradient: "linear-gradient(135deg,#1f7a4d,#44a86f)", solid: "#1f7a4d", glow: "rgba(31,122,77,0.24)", bg: "rgba(31,122,77,0.06)", bgHover: "rgba(31,122,77,0.1)" };
+  if (s >= 120) return { gradient: "linear-gradient(135deg,#1f6aa5,#4a98d2)", solid: "#1f6aa5", glow: "rgba(31,106,165,0.22)", bg: "rgba(31,106,165,0.055)", bgHover: "rgba(31,106,165,0.095)" };
+  if (s >= 90)  return { gradient: "linear-gradient(135deg,#a66b16,#d79a2b)", solid: "#a66b16", glow: "rgba(166,107,22,0.22)", bg: "rgba(166,107,22,0.05)", bgHover: "rgba(166,107,22,0.09)" };
+  if (s >= 40)  return { gradient: "linear-gradient(135deg,#6f6757,#948b75)", solid: "#6f6757", glow: "rgba(111,103,87,0.2)", bg: "rgba(111,103,87,0.045)", bgHover: "rgba(111,103,87,0.08)" };
+  return { gradient: "linear-gradient(135deg,#5e5b50,#827f70)", solid: "#5e5b50", glow: "rgba(94,91,80,0.18)", bg: "rgba(94,91,80,0.04)", bgHover: "rgba(94,91,80,0.075)" };
 }
 
 function compactTerm(term?: string | null): string | null {
@@ -174,6 +174,7 @@ export default function JobCard({
           : `linear-gradient(160deg, ${t.bg} 0%, #fffdf4 55%)`,
         borderRadius: 12,
         border: `1px solid ${hovered ? t.solid + "44" : restingBorder}`,
+        borderLeft: `3px solid ${t.solid}`,
         display: "flex",
         flexDirection: "column",
         transition: "all 0.18s ease",
@@ -205,7 +206,7 @@ export default function JobCard({
           <div className={`job-tile-match job-tile-match--${match.key}`}>
             <span className="job-tile-match-icon">{match.icon}</span>
             <strong>{score}</strong>
-            <span>Match</span>
+            <span>Career Ops</span>
           </div>
         </div>
       </div>

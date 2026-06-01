@@ -18,9 +18,9 @@
   --surface-2:   rgba(255,253,244,0.96);
   --border:      rgba(119,118,106,0.24);
   --border-hi:   rgba(79,79,71,0.42);
-  --text:        var(--bean-ink);
-  --text-2:      #5f5e54;
-  --muted:       #8a8776;
+  --text:        #171610;
+  --text-2:      #454236;
+  --muted:       #6f6b5c;
   --blue:        var(--bean-dark);
   --blue-lo:     rgba(79,79,71,0.11);
   --blue-glow:   rgba(79,79,71,0.18);
@@ -33,14 +33,14 @@
   --orange-lo:   rgba(154,118,83,0.13);
   --red:         var(--bean-clay);
   --red-lo:      rgba(141,83,76,0.12);
-  --tier-green:  #2f7d52;
-  --tier-green-lo: rgba(47,125,82,0.12);
-  --tier-blue:   #326b9f;
-  --tier-blue-lo: rgba(50,107,159,0.12);
-  --tier-yellow: #a97826;
-  --tier-yellow-lo: rgba(169,120,38,0.13);
-  --tier-gray:   #77766a;
-  --tier-gray-lo: rgba(119,118,106,0.12);
+  --tier-green:  #1f7a4d;
+  --tier-green-lo: rgba(31,122,77,0.13);
+  --tier-blue:   #1f6aa5;
+  --tier-blue-lo: rgba(31,106,165,0.13);
+  --tier-yellow: #a66b16;
+  --tier-yellow-lo: rgba(166,107,22,0.14);
+  --tier-gray:   #5e5b50;
+  --tier-gray-lo: rgba(94,91,80,0.13);
   --radius:      14px;
   --radius-sm:   9px;
   --radius-xs:   5px;
@@ -507,14 +507,29 @@ header {
 }
 
 .best-job-score {
-  min-width: 40px;
-  padding: 4px 8px;
+  min-width: 48px;
+  padding: 4px 8px 3px;
   border-radius: 999px;
   color: #fff;
   font-family: "Inter", monospace;
+  text-align: center;
+  display: grid;
+  gap: 1px;
+  line-height: 1;
+}
+
+.best-job-score strong {
   font-size: 12px;
   font-weight: 900;
-  text-align: center;
+  letter-spacing: -0.03em;
+}
+
+.best-job-score span {
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.86;
 }
 
 .best-job-score--green { background: var(--tier-green); }
@@ -1751,6 +1766,28 @@ header {
   flex-direction: column;
   container-type: inline-size;
   min-height: 188px;
+  --job-accent: var(--tier-gray);
+  --job-accent-lo: var(--tier-gray-lo);
+}
+
+.job-tile--green {
+  --job-accent: var(--tier-green);
+  --job-accent-lo: var(--tier-green-lo);
+}
+
+.job-tile--blue {
+  --job-accent: var(--tier-blue);
+  --job-accent-lo: var(--tier-blue-lo);
+}
+
+.job-tile--yellow {
+  --job-accent: var(--tier-yellow);
+  --job-accent-lo: var(--tier-yellow-lo);
+}
+
+.job-tile--gray {
+  --job-accent: var(--tier-gray);
+  --job-accent-lo: var(--tier-gray-lo);
 }
 
 .job-tile.is-applied {
@@ -1867,7 +1904,7 @@ header {
   grid-template-rows: auto auto;
   column-gap: 4px;
   align-items: center;
-  min-width: 72px;
+  min-width: 84px;
   padding: 5px 8px;
   border-radius: 12px;
   color: #fff;
@@ -1889,18 +1926,18 @@ header {
 
 .job-tile-match span:last-child {
   font-family: "Inter", monospace;
-  font-size: 8.5px;
+  font-size: 7.5px;
   font-weight: 900;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.055em;
   line-height: 1;
   text-transform: uppercase;
   opacity: 0.9;
 }
 
-.job-tile-match--green { background: linear-gradient(135deg, var(--tier-green), #55a06b); }
-.job-tile-match--blue { background: linear-gradient(135deg, var(--tier-blue), #5e91bf); }
-.job-tile-match--yellow { background: linear-gradient(135deg, var(--tier-yellow), #c99b47); }
-.job-tile-match--gray { background: linear-gradient(135deg, var(--tier-gray), var(--bean-dark)); }
+.job-tile-match--green { background: linear-gradient(135deg, var(--tier-green), #44a86f); }
+.job-tile-match--blue { background: linear-gradient(135deg, var(--tier-blue), #4a98d2); }
+.job-tile-match--yellow { background: linear-gradient(135deg, var(--tier-yellow), #d79a2b); }
+.job-tile-match--gray { background: linear-gradient(135deg, var(--tier-gray), #827f70); }
 
 .job-tile-title {
   padding: 8px 11px 0;
@@ -1937,7 +1974,7 @@ header {
 }
 
 .job-tile-confidence span {
-  color: var(--muted);
+  color: var(--text-2);
   font-size: 9px;
   font-weight: 900;
   text-transform: uppercase;
@@ -1945,7 +1982,7 @@ header {
 }
 
 .job-tile-confidence strong {
-  color: var(--tier-yellow);
+  color: var(--job-accent);
   font-size: 11px;
   letter-spacing: 0.04em;
 }
@@ -1953,7 +1990,7 @@ header {
 .job-tile-meta {
   padding: 4px 11px 0;
   font-size: 10px;
-  color: var(--muted);
+  color: var(--text-2);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1961,7 +1998,7 @@ header {
 }
 
 .job-tile-meta.has-urgency {
-  color: var(--bean-umber);
+  color: var(--job-accent);
   font-weight: 800;
 }
 
@@ -1985,28 +2022,30 @@ header {
 }
 
 .job-tile-reason {
-  max-width: 72px;
-  color: var(--text-2);
+  max-width: 86px;
+  color: var(--job-accent);
   font-family: "Inter", monospace;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.05;
+  border: 1px solid var(--job-accent-lo);
+  background: color-mix(in srgb, var(--job-accent-lo) 72%, white);
+  border-radius: 999px;
+  padding: 3px 6px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .job-tile-reason:not(:last-child)::after {
-  content: "•";
-  color: var(--muted);
-  margin-left: 5px;
+  content: none;
 }
 
 .job-tile-signal {
   max-width: 100%;
-  border: 1px solid rgba(119,118,106,0.22);
+  border: 1px solid rgba(79,79,71,0.18);
   border-radius: 6px;
-  background: rgba(251,248,236,0.74);
+  background: rgba(255,253,244,0.82);
   color: var(--text-2);
   font-family: "Inter", monospace;
   font-size: 9px;

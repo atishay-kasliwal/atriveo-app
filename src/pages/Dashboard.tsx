@@ -436,7 +436,10 @@ export default function Dashboard() {
                       <strong>{job.company || "Unknown company"}</strong>
                       <span>{job.title || "Open role"}</span>
                     </div>
-                    <span className={`best-job-score best-job-score--${tier.key}`}>{job.score ?? 0}</span>
+                    <span className={`best-job-score best-job-score--${tier.key}`} title="Career Ops Score">
+                      <strong>{job.score ?? 0}</strong>
+                      <span>Ops</span>
+                    </span>
                   </div>
                 );
               }) : (
