@@ -239,7 +239,7 @@ export default function Dashboard() {
     [rawJobs]
   );
 
-  const isSplitView = period === "today";
+  const isSplitView = false;
 
   const locationRows = useMemo(() =>
     LOCATION_FILTERS.map(({ key, match }) => {
