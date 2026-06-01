@@ -231,11 +231,8 @@ export default function Dashboard() {
     else if (sortBy === "ats") jobs.sort((a, b) => (b.ats_score ?? -1) - (a.ats_score ?? -1));
     else if (sortBy === "fit") jobs.sort((a, b) => (b.fit_score ?? -1) - (a.fit_score ?? -1));
     else jobs.sort((a, b) => toMs(b.batch_time) - toMs(a.batch_time));
-    return [
-      ...jobs.filter((j) => !j.job_url || !appliedUrlSet.has(j.job_url)),
-      ...jobs.filter((j) => j.job_url  &&  appliedUrlSet.has(j.job_url)),
-    ];
-  }, [visibleJobs, levelFilter, sortBy, appliedUrlSet]);
+    return jobs;
+  }, [visibleJobs, levelFilter, sortBy]);
 
   const searchTerms = useMemo(
     () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
