@@ -59,6 +59,11 @@ function tier(s: number) {
   return { gradient: "linear-gradient(135deg,#64748b,#94a3b8)", solid: "#94a3b8", glow: "rgba(100,116,139,0.2)", bg: "rgba(100,116,139,0.02)", bgHover: "rgba(100,116,139,0.04)" };
 }
 
+function compactTerm(term?: string | null): string | null {
+  if (!term) return null;
+  return term.replace(/ engineer$/i, "").trim() || null;
+}
+
 interface Props {
   job: Job;
   index?: number;
@@ -69,7 +74,15 @@ interface Props {
   isInCart?: boolean;
 }
 
-export default function JobCard({ job, index, applyRecord, onApplyClick, onExcludeCompany }: Props) {
+export default function JobCard({
+  job,
+  index,
+  applyRecord,
+  onApplyClick,
+  onExcludeCompany,
+  onCartToggle,
+  isInCart = false,
+}: Props) {
   const [msgCopied, setMsgCopied] = useState(false);
   const [hovered, setHovered] = useState(false);
 
@@ -79,6 +92,14 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
   const color = avatarColor(co);
   const isApplied = Boolean(applyRecord);
   const t = tier(score);
+  const restingBorder = isApplied
+    ? "rgba(22,163,74,0.34)"
+    : isInCart
+      ? "rgba(37,99,235,0.28)"
+      : "rgba(0,0,0,0.07)";
+  const atsScore = job.ats_score ?? job.score_pct;
+  const fitScore = job.fit_score;
+  const searchTerm = compactTerm(job.search_term);
 
   const dateLabel = job.scraped_date
     ? scrapedDateLabel(job.scraped_date)
@@ -100,9 +121,19 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
     });
   }
 
+  function handleCartClick(e: React.MouseEvent) {
+    e.preventDefault();
+    onCartToggle?.(job);
+  }
+
+  function handleMarkClick(e: React.MouseEvent) {
+    e.preventDefault();
+    if (job.job_url) onApplyClick(job.job_url, title, co);
+  }
+
   return (
     <div
-      className="job-tile"
+      className={`job-tile${isApplied ? " is-applied" : ""}${isInCart ? " is-saved" : ""}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -110,7 +141,7 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
           ? `linear-gradient(160deg, ${t.bgHover} 0%, #fff 55%)`
           : `linear-gradient(160deg, ${t.bg} 0%, #fff 55%)`,
         borderRadius: 12,
-        border: `1px solid ${hovered ? t.solid + "44" : "rgba(0,0,0,0.07)"}`,
+        border: `1px solid ${hovered ? t.solid + "44" : restingBorder}`,
         display: "flex",
         flexDirection: "column",
         transition: "all 0.18s ease",
@@ -137,6 +168,7 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
         <div className="job-tile-score-group">
           {onExcludeCompany && (
             <button
+              type="button"
               className="job-tile-exclude"
               onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
               title={`Block "${co}"`}
@@ -166,6 +198,17 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
         🕐 {dateLabel}{locationShort ? ` · ${locationShort}` : ""}
       </div>
 
+      <div className="job-tile-signals">
+        {job.level && <span className="job-tile-signal">{job.level}</span>}
+        {atsScore !== undefined && atsScore !== null && (
+          <span className="job-tile-signal">ATS {atsScore}%</span>
+        )}
+        {fitScore !== undefined && fitScore !== null && (
+          <span className="job-tile-signal">Fit {fitScore}%</span>
+        )}
+        {searchTerm && <span className="job-tile-signal job-tile-signal--term">{searchTerm}</span>}
+      </div>
+
       {isApplied && (
         <div className="job-tile-applied">
           ✓ Applied ×{applyRecord?.clicks}
@@ -175,18 +218,37 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
       <div className="job-tile-divider" />
 
       <div className="job-tile-actions">
-        {!isApplied && job.job_url && (
+        <div className="job-tile-secondary-actions">
+          {onCartToggle && job.job_url && (
+            <button
+              type="button"
+              className={`job-tile-action job-tile-action--save${isInCart ? " is-saved" : ""}`}
+              onClick={handleCartClick}
+              title={isInCart ? "Remove from saved jobs" : "Save job"}
+              aria-pressed={isInCart}
+            >
+              {isInCart ? "Saved" : "Save"}
+            </button>
+          )}
           <button
-            className="job-tile-action job-tile-action--click"
-            onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}
-          >Click</button>
-        )}
-        <button
-          className={`job-tile-action job-tile-action--message${msgCopied ? " is-copied" : ""}`}
-          onClick={handleMsg}
-        >
-          {msgCopied ? "✓ Copied" : "Msg"}
-        </button>
+            type="button"
+            className={`job-tile-action job-tile-action--message${msgCopied ? " is-copied" : ""}`}
+            onClick={handleMsg}
+            title="Copy referral message"
+          >
+            {msgCopied ? "Copied" : "Msg"}
+          </button>
+          {!isApplied && job.job_url && (
+            <button
+              type="button"
+              className="job-tile-action job-tile-action--mark"
+              onClick={handleMarkClick}
+              title="Mark as applied without opening"
+            >
+              Mark
+            </button>
+          )}
+        </div>
         {job.job_url ? (
           <a
             className={`job-tile-action job-tile-action--apply${isApplied ? " is-applied" : ""}`}

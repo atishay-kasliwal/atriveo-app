@@ -997,6 +997,18 @@ header {
   container-type: inline-size;
 }
 
+.job-tile.is-applied {
+  background-color: rgba(240,253,244,0.58);
+}
+
+.job-tile.is-saved::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: 3px solid rgba(37,99,235,0.34);
+  pointer-events: none;
+}
+
 .job-tile-top {
   padding: 10px 10px 0;
   display: flex;
@@ -1107,6 +1119,35 @@ header {
   min-width: 0;
 }
 
+.job-tile-signals {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: 7px 10px 0;
+  min-height: 24px;
+}
+
+.job-tile-signal {
+  max-width: 100%;
+  border: 1px solid rgba(148,163,184,0.2);
+  border-radius: 6px;
+  background: rgba(248,250,252,0.74);
+  color: #64748b;
+  font-family: "Inter", monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 4px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.job-tile-signal--term {
+  flex: 1 1 54px;
+}
+
 .job-tile-applied {
   margin: 6px 10px 0;
   font-size: 10px;
@@ -1133,10 +1174,20 @@ header {
   min-width: 0;
 }
 
+.job-tile-secondary-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .job-tile-action {
   min-width: 0;
   height: 26px;
   border-radius: 6px;
+  border: none;
+  font-family: "Inter", sans-serif;
   font-size: 10.5px;
   font-weight: 700;
   cursor: pointer;
@@ -1147,36 +1198,51 @@ header {
   text-decoration: none;
 }
 
-.job-tile-action--click {
-  width: 46px;
-  flex-shrink: 0;
-  border: 1px solid rgba(0,0,0,0.1);
-  background: rgba(255,255,255,0.8);
-  color: #475569;
-  backdrop-filter: blur(4px);
-}
-
-.job-tile-action--click:hover {
-  background: rgba(255,255,255,0.95);
-}
-
+.job-tile-action--mark,
 .job-tile-action--message {
-  flex: 1;
+  flex: 1 1 42px;
   border: 1px solid rgba(99,102,241,0.2);
   background: rgba(99,102,241,0.05);
   color: #6366f1;
+}
+
+.job-tile-action--mark {
+  border-color: rgba(22,163,74,0.22);
+  background: rgba(22,163,74,0.06);
+  color: #15803d;
+}
+
+.job-tile-action--save {
+  flex: 1 1 46px;
+  border: 1px solid rgba(37,99,235,0.18);
+  background: rgba(37,99,235,0.05);
+  color: #2563eb;
+}
+
+.job-tile-action--save.is-saved {
+  border-color: rgba(37,99,235,0.32);
+  background: rgba(37,99,235,0.12);
 }
 
 .job-tile-action--message.is-copied {
   background: rgba(99,102,241,0.12);
 }
 
+.job-tile-action--mark:hover,
 .job-tile-action--message:hover {
   background: rgba(99,102,241,0.2);
 }
 
+.job-tile-action--mark:hover {
+  background: rgba(22,163,74,0.14);
+}
+
+.job-tile-action--save:hover {
+  background: rgba(37,99,235,0.13);
+}
+
 .job-tile-action--apply {
-  flex: 2;
+  flex: 1.15 0 76px;
   color: #fff;
 }
 
@@ -1198,6 +1264,8 @@ header {
   .job-tile-title { padding: 7px 8px 0; font-size: 12px; }
   .job-tile-company { padding: 3px 8px 0; font-size: 10px; }
   .job-tile-meta { padding: 3px 8px 0; font-size: 9.5px; }
+  .job-tile-signals { padding: 6px 8px 0; min-height: 22px; }
+  .job-tile-signal { font-size: 9px; padding: 3px 5px; }
   .job-tile-applied { margin: 5px 8px 0; font-size: 9.5px; }
   .job-tile-divider { margin: 7px 8px 0; }
   .job-tile-actions { padding: 6px 6px 7px; gap: 3px; }
@@ -1206,14 +1274,14 @@ header {
 
 @container (max-width: 250px) {
   .job-tile-title { -webkit-line-clamp: 1; }
-  .job-tile-action--click { width: 38px; }
+  .job-tile-signal--term { display: none; }
   .job-tile-action--message { flex: 1.15; }
   .job-tile-action--apply { flex: 1.55; }
 }
 
 @container (max-width: 210px) {
   .job-tile-applied { display: none; }
-  .job-tile-action--click { display: none; }
+  .job-tile-action--mark { display: none; }
   .job-tile-action--message { flex: 1; }
   .job-tile-action--apply { flex: 1.35; }
 }
