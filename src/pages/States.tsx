@@ -345,7 +345,7 @@ export default function States() {
                           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                             {!isApplied && job.job_url && (
                               <button
-                                onClick={() => recordClick(job.job_url, job.title || "", job.company || "")}
+                                onClick={() => recordClick(job.job_url, job.title || "", job.company || "", { location: job.location || null })}
                                 style={{
                                   padding: "5px 12px", borderRadius: 6, border: "1px solid var(--border)",
                                   background: "var(--surface-2)", color: "var(--text-2)", fontSize: 11, fontWeight: 700, cursor: "pointer",
@@ -358,7 +358,7 @@ export default function States() {
                                 href={job.job_url}
                                 target="_blank"
                                 rel="noopener"
-                                onClick={() => recordClick(job.job_url, job.title || "", job.company || "")}
+                                onClick={() => recordClick(job.job_url, job.title || "", job.company || "", { location: job.location || null })}
                                 style={{
                                   padding: "5px 14px", borderRadius: 6,
                                   background: isApplied ? "linear-gradient(135deg,#69725a,#4f4f47)" : `linear-gradient(135deg,${jColor},${jColor}cc)`,

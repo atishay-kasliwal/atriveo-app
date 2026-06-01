@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Job } from "../types";
-import type { ApplyRecord } from "../hooks/useApplyTracker";
+import type { ApplyMetadata, ApplyRecord } from "../hooks/useApplyTracker";
 
 const AVATAR_COLORS = [
   "#4f4f47","#5f5e54","#77766a","#69725a","#7a624a","#8d534c","#6f6855","#3f4039",
@@ -68,7 +68,7 @@ interface Props {
   job: Job;
   index?: number;
   applyRecord: ApplyRecord | null;
-  onApplyClick: (jobUrl: string, title: string, company: string) => void;
+  onApplyClick: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
   onExcludeCompany?: (company: string) => void;
   onCartToggle?: (job: Job) => void;
   isInCart?: boolean;
@@ -128,7 +128,7 @@ export default function JobCard({
 
   function handleMarkClick(e: React.MouseEvent) {
     e.preventDefault();
-    if (job.job_url) onApplyClick(job.job_url, title, co);
+    if (job.job_url) onApplyClick(job.job_url, title, co, { location: job.location || null });
   }
 
   return (
@@ -255,7 +255,7 @@ export default function JobCard({
             href={job.job_url}
             target="_blank"
             rel="noopener"
-            onClick={() => onApplyClick(job.job_url, title, co)}
+            onClick={() => onApplyClick(job.job_url, title, co, { location: job.location || null })}
             style={{
               background: isApplied ? "linear-gradient(135deg,#69725a,#4f4f47)" : t.gradient,
               color: "#fff",

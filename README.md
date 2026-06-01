@@ -34,6 +34,12 @@ Set these GitHub repository secrets for deployment:
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_API_TOKEN`
 
+Set these Cloudflare Pages environment variables for tracker sync:
+
+- `JWT_SECRET` — random 32+ char string for signing sessions
+- `TRACKER_API_URL` — Atriveo tracker API base URL; the app posts to `/integrations/atriveo/applications`
+- `TRACKER_API_TOKEN` — Bearer token for the tracker integration; keep this only in Cloudflare server env/secrets
+
 ## License
 
 MIT

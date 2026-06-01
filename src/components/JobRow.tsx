@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Job } from "../types";
-import type { ApplyRecord } from "../hooks/useApplyTracker";
+import type { ApplyMetadata, ApplyRecord } from "../hooks/useApplyTracker";
 import { isTop500 } from "../data/top500";
 
 function extractJobId(url: string | null | undefined): string {
@@ -91,7 +91,7 @@ interface Props {
   job: Job;
   index: number;
   applyRecord: ApplyRecord | null;
-  onApplyClick: (jobUrl: string, title: string, company: string) => void;
+  onApplyClick: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
   onExcludeCompany?: (company: string) => void;
 }
 
@@ -182,7 +182,7 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
           <button
             className="mark-btn"
             title="Mark as applied without opening"
-            onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}
+            onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co, { location: job.location || null }); }}
           >✓</button>
         )}
         <button className="message-btn" onClick={handleMessageClick}>
@@ -194,7 +194,7 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
             href={job.job_url}
             target="_blank"
             rel="noopener"
-            onClick={() => onApplyClick(job.job_url, title, co)}
+            onClick={() => onApplyClick(job.job_url, title, co, { location: job.location || null })}
           >
             {isApplied ? "Applied ✓" : "Apply ↗"}
           </a>

@@ -10,3 +10,5 @@ migrations_dir = "migrations"
 
 # Secrets (set via Cloudflare Pages dashboard → Settings → Environment Variables):
 # JWT_SECRET  — random 32+ char string for signing session tokens
+# TRACKER_API_URL — Atriveo tracker API base URL, e.g. https://job-tracker-api.katishay.workers.dev
+# TRACKER_API_TOKEN — Bearer token for /integrations/atriveo/applications; server secret only

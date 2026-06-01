@@ -5,11 +5,18 @@ const KEY = (uid: string) => `atriveo_apply_stats_v1_${uid}`;
 
 export type TrackerStatus = "applied" | "rejected" | null;
 
+export interface ApplyMetadata {
+  location?: string | null;
+  jobApplicationId?: string | null;
+}
+
 export interface ApplyRecord {
   clicks: number;
   lastAppliedAt: string;
   title: string | null;
   company: string | null;
+  location: string | null;
+  jobApplicationId: string | null;
   trackerStatus: TrackerStatus;
 }
 
@@ -43,7 +50,15 @@ function normalizeJobs(raw: unknown): Record<string, ApplyRecord> {
     const clicks = Number.isFinite(rawClicks) && rawClicks > 0 ? Math.floor(rawClicks) : lastAppliedAt ? 1 : 0;
     if (!clicks || !lastAppliedAt) continue;
     const ts = r.trackerStatus === "applied" || r.trackerStatus === "rejected" ? r.trackerStatus : null;
-    result[url] = { clicks, lastAppliedAt, title: String(r.title || ""), company: String(r.company || ""), trackerStatus: ts };
+    result[url] = {
+      clicks,
+      lastAppliedAt,
+      title: String(r.title || ""),
+      company: String(r.company || ""),
+      location: r.location ? String(r.location) : null,
+      jobApplicationId: r.jobApplicationId || r.job_application_id ? String(r.jobApplicationId || r.job_application_id) : null,
+      trackerStatus: ts,
+    };
   }
   return result;
 }
@@ -122,7 +137,7 @@ export function useApplyTracker() {
     }
   }, [uid, authLoading]);
 
-  const recordClick = useCallback((jobUrl: string, title: string, company: string) => {
+  const recordClick = useCallback((jobUrl: string, title: string, company: string, metadata: ApplyMetadata = {}) => {
     setStats((prev) => {
       const nowIso = new Date().toISOString();
       const currentDate = todayEst();
@@ -143,6 +158,8 @@ export function useApplyTracker() {
             lastAppliedAt: nowIso,
             title,
             company,
+            location: metadata.location ?? existing?.location ?? null,
+            jobApplicationId: metadata.jobApplicationId ?? existing?.jobApplicationId ?? null,
             trackerStatus: existing?.trackerStatus ?? null,
           },
         },
