@@ -12,6 +12,7 @@ export interface ApplyMetadata {
 
 export type ApplySyncStatus = "idle" | "syncing" | "synced" | "queued" | "error";
 export type ApplySyncScope = "latest" | "today";
+export type JobTrackerSyncStatus = "pending" | "synced" | "duplicate" | "error" | "not_configured" | "skipped" | null;
 
 export interface ApplySyncState {
   status: ApplySyncStatus;
@@ -29,6 +30,9 @@ export interface ApplyRecord {
   location: string | null;
   jobApplicationId: string | null;
   trackerStatus: TrackerStatus;
+  trackerSyncStatus: JobTrackerSyncStatus;
+  trackerSyncMessage: string | null;
+  trackerSyncedAt: string | null;
 }
 
 interface ApplyStats {
@@ -69,9 +73,23 @@ function normalizeJobs(raw: unknown): Record<string, ApplyRecord> {
       location: r.location ? String(r.location) : null,
       jobApplicationId: r.jobApplicationId || r.job_application_id ? String(r.jobApplicationId || r.job_application_id) : null,
       trackerStatus: ts,
+      trackerSyncStatus: normalizeTrackerSyncStatus(r.trackerSyncStatus),
+      trackerSyncMessage: r.trackerSyncMessage ? String(r.trackerSyncMessage) : null,
+      trackerSyncedAt: r.trackerSyncedAt ? String(r.trackerSyncedAt) : null,
     };
   }
   return result;
+}
+
+function normalizeTrackerSyncStatus(raw: unknown): JobTrackerSyncStatus {
+  return raw === "pending" ||
+    raw === "synced" ||
+    raw === "duplicate" ||
+    raw === "error" ||
+    raw === "not_configured" ||
+    raw === "skipped"
+    ? raw
+    : null;
 }
 
 function normalize(raw: unknown): ApplyStats {
@@ -106,6 +124,16 @@ function persist(uid: string, stats: ApplyStats) {
   try { localStorage.setItem(KEY(uid), JSON.stringify(stats)); } catch { /* ignore */ }
 }
 
+function latestJobUrl(stats: ApplyStats): string | null {
+  let latest: { url: string; time: number } | null = null;
+  for (const [url, record] of Object.entries(stats.appliedJobs)) {
+    const time = Date.parse(record.lastAppliedAt || "");
+    if (!Number.isFinite(time)) continue;
+    if (!latest || time > latest.time) latest = { url, time };
+  }
+  return latest?.url ?? null;
+}
+
 function syncToServer(stats: ApplyStats, scope: ApplySyncScope = "latest") {
   const suffix = scope === "today" ? "?sync=today" : "";
   return fetch(`/api/tracker${suffix}`, {
@@ -119,39 +147,127 @@ function syncToServer(stats: ApplyStats, scope: ApplySyncScope = "latest") {
   });
 }
 
-function describeTrackerSync(data: unknown, scope: ApplySyncScope): { failed: boolean; message: string } {
+type TrackerSyncDescription = {
+  status: ApplySyncStatus;
+  message: string;
+  lastSynced: boolean;
+  jobUpdates: Array<{
+    jobUrl: string;
+    trackerSyncStatus: JobTrackerSyncStatus;
+    trackerSyncMessage: string;
+    trackerSyncedAt?: string;
+  }>;
+};
+
+function trackerResultToJobUpdate(result: Record<string, unknown>, nowIso: string): TrackerSyncDescription["jobUpdates"][number] | null {
+  const jobUrl = typeof result.jobUrl === "string" ? result.jobUrl : "";
+  if (!jobUrl) return null;
+  if (result.synced === true) {
+    const duplicate = result.duplicate === true;
+    return {
+      jobUrl,
+      trackerSyncStatus: duplicate ? "duplicate" : "synced",
+      trackerSyncMessage: duplicate ? "Already exists in Atriveo tracker." : "Added to Atriveo tracker.",
+      trackerSyncedAt: nowIso,
+    };
+  }
+  if (typeof result.skipped === "string") {
+    return {
+      jobUrl,
+      trackerSyncStatus: "skipped",
+      trackerSyncMessage: `Tracker skipped: ${result.skipped}`,
+    };
+  }
+  const status = Number(result.status || 0);
+  return {
+    jobUrl,
+    trackerSyncStatus: "error",
+    trackerSyncMessage: status ? `Atriveo tracker returned HTTP ${status}.` : "Atriveo tracker sync failed.",
+  };
+}
+
+function describeTrackerSync(data: unknown, scope: ApplySyncScope, nowIso: string): TrackerSyncDescription {
   const envelope = data && typeof data === "object" ? data as { trackerSync?: Record<string, unknown> } : {};
   const trackerSync = envelope.trackerSync;
-  if (!trackerSync) return { failed: false, message: "Saved locally and synced to Atriveo." };
+  if (!trackerSync) {
+    return { status: "error", message: "Saved locally, but tracker response was missing.", lastSynced: false, jobUpdates: [] };
+  }
 
   if (trackerSync.configured === false) {
-    return { failed: false, message: "Saved locally. Add tracker secrets to enable API sync." };
+    const missing = Array.isArray(trackerSync.missing)
+      ? trackerSync.missing.filter((item) => typeof item === "string").join(", ")
+      : "TRACKER_API_URL/TRACKER_API_TOKEN";
+    const jobUrl = typeof trackerSync.jobUrl === "string" ? trackerSync.jobUrl : "";
+    return {
+      status: "queued",
+      message: `Saved locally. Missing Cloudflare secret/env: ${missing}.`,
+      lastSynced: false,
+      jobUpdates: jobUrl ? [{
+        jobUrl,
+        trackerSyncStatus: "not_configured",
+        trackerSyncMessage: `Missing Cloudflare secret/env: ${missing}.`,
+      }] : [],
+    };
   }
 
   const failed = Number(trackerSync.failed || 0);
   const total = Number(trackerSync.total || 0);
   const duplicates = Number(trackerSync.duplicates || 0);
   if (scope === "today" && total > 0) {
+    const results = Array.isArray(trackerSync.results) ? trackerSync.results : [];
+    const jobUpdates = results
+      .map((result) => result && typeof result === "object" ? trackerResultToJobUpdate(result as Record<string, unknown>, nowIso) : null)
+      .filter((update): update is NonNullable<typeof update> => Boolean(update));
     if (failed > 0) {
-      return { failed: true, message: `${failed} tracker sync issue${failed === 1 ? "" : "s"} — local progress is safe.` };
+      return {
+        status: "error",
+        message: `${failed} Atriveo tracker sync issue${failed === 1 ? "" : "s"} — local progress is safe.`,
+        lastSynced: false,
+        jobUpdates,
+      };
     }
     const duplicateText = duplicates > 0 ? ` · ${duplicates} already there` : "";
-    return { failed: false, message: `End-day sync checked ${total} application${total === 1 ? "" : "s"}${duplicateText}.` };
+    return {
+      status: "synced",
+      message: `End-day sync checked ${total} application${total === 1 ? "" : "s"}${duplicateText}.`,
+      lastSynced: true,
+      jobUpdates,
+    };
   }
 
   if (trackerSync.synced === true) {
-    return { failed: false, message: trackerSync.duplicate ? "Already synced in tracker." : "Synced to tracker." };
+    const duplicate = trackerSync.duplicate === true;
+    return {
+      status: "synced",
+      message: duplicate ? "Already exists in Atriveo tracker." : "Added to Atriveo tracker.",
+      lastSynced: true,
+      jobUpdates: trackerSync.jobUrl ? [trackerResultToJobUpdate(trackerSync, nowIso)].filter((update): update is NonNullable<typeof update> => Boolean(update)) : [],
+    };
   }
 
   if (typeof trackerSync.skipped === "string") {
-    return { failed: false, message: `Saved locally. Tracker skipped ${trackerSync.skipped}.` };
+    return {
+      status: "queued",
+      message: `Saved locally. Tracker skipped ${trackerSync.skipped}.`,
+      lastSynced: false,
+      jobUpdates: trackerSync.jobUrl ? [trackerResultToJobUpdate(trackerSync, nowIso)].filter((update): update is NonNullable<typeof update> => Boolean(update)) : [],
+    };
   }
 
   if (trackerSync.synced === false || trackerSync.error) {
-    return { failed: true, message: "Tracker sync needs retry — local progress is safe." };
+    const status = Number(trackerSync.status || 0);
+    const detail = typeof trackerSync.error === "string" && trackerSync.error
+      ? ` ${trackerSync.error.slice(0, 120)}`
+      : "";
+    return {
+      status: "error",
+      message: status ? `Atriveo tracker returned HTTP ${status}.${detail}` : `Tracker sync needs retry — local progress is safe.${detail}`,
+      lastSynced: false,
+      jobUpdates: trackerSync.jobUrl ? [trackerResultToJobUpdate(trackerSync, nowIso)].filter((update): update is NonNullable<typeof update> => Boolean(update)) : [],
+    };
   }
 
-  return { failed: false, message: "Saved locally and synced to Atriveo." };
+  return { status: "error", message: "Saved locally, but tracker sync result was unclear.", lastSynced: false, jobUpdates: [] };
 }
 
 export function useApplyTracker() {
@@ -190,17 +306,38 @@ export function useApplyTracker() {
 
     return syncToServer(snapshot, scope)
       .then((data) => {
-        const result = describeTrackerSync(data, scope);
         const nowIso = new Date().toISOString();
+        const result = describeTrackerSync(data, scope, nowIso);
         setSyncState((prev) => ({
           ...prev,
-          status: result.failed ? "error" : "synced",
+          status: result.status,
           scope,
           message: result.message,
           lastAttemptAt,
-          lastSyncedAt: result.failed ? prev.lastSyncedAt : nowIso,
+          lastSyncedAt: result.lastSynced ? nowIso : prev.lastSyncedAt,
         }));
-        return !result.failed;
+        if (result.jobUpdates.length) {
+          setStats((prev) => {
+            let changed = false;
+            const appliedJobs = { ...prev.appliedJobs };
+            result.jobUpdates.forEach((update) => {
+              const existing = appliedJobs[update.jobUrl];
+              if (!existing) return;
+              changed = true;
+              appliedJobs[update.jobUrl] = {
+                ...existing,
+                trackerSyncStatus: update.trackerSyncStatus,
+                trackerSyncMessage: update.trackerSyncMessage,
+                trackerSyncedAt: update.trackerSyncedAt ?? existing.trackerSyncedAt,
+              };
+            });
+            if (!changed) return prev;
+            const next = { ...prev, appliedJobs };
+            persist(uid, next);
+            return next;
+          });
+        }
+        return result.status === "synced";
       })
       .catch(() => {
         setSyncState((prev) => ({
@@ -210,6 +347,26 @@ export function useApplyTracker() {
           message: "Network hiccup — saved locally, retry sync later.",
           lastAttemptAt,
         }));
+        const jobUrl = scope === "latest" ? latestJobUrl(snapshot) : null;
+        if (jobUrl) {
+          setStats((prev) => {
+            const existing = prev.appliedJobs[jobUrl];
+            if (!existing) return prev;
+            const next = {
+              ...prev,
+              appliedJobs: {
+                ...prev.appliedJobs,
+                [jobUrl]: {
+                  ...existing,
+                  trackerSyncStatus: "error" as const,
+                  trackerSyncMessage: "Could not reach app server or Atriveo tracker.",
+                },
+              },
+            };
+            persist(uid, next);
+            return next;
+          });
+        }
         return false;
       });
   }, [uid]);
@@ -247,11 +404,12 @@ export function useApplyTracker() {
       const nowIso = new Date().toISOString();
       const currentDate = todayEst();
       const existing = prev.appliedJobs[jobUrl];
+      const isNewJob = !existing;
       // Reset daily counter if we've crossed midnight EST
       const prevTodayCount = prev.todayDate === currentDate ? prev.todayCount : 0;
       const next: ApplyStats = {
-        count: prev.count + 1,
-        todayCount: prevTodayCount + 1,
+        count: prev.count + (isNewJob ? 1 : 0),
+        todayCount: prevTodayCount + (isNewJob ? 1 : 0),
         todayDate: currentDate,
         lastClickAt: nowIso,
         lastJobTitle: title,
@@ -259,13 +417,16 @@ export function useApplyTracker() {
         appliedJobs: {
           ...prev.appliedJobs,
           [jobUrl]: {
-            clicks: (existing?.clicks || 0) + 1,
+            clicks: (existing?.clicks || 0) + (isNewJob ? 1 : 0),
             lastAppliedAt: nowIso,
             title,
             company,
             location: metadata.location ?? existing?.location ?? null,
             jobApplicationId: metadata.jobApplicationId ?? existing?.jobApplicationId ?? null,
             trackerStatus: existing?.trackerStatus ?? null,
+            trackerSyncStatus: "pending",
+            trackerSyncMessage: "Sending to Atriveo tracker…",
+            trackerSyncedAt: existing?.trackerSyncedAt ?? null,
           },
         },
       };

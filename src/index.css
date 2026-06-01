@@ -2000,6 +2000,18 @@ header {
   text-align: center;
 }
 
+.job-tile-applied.needs-sync {
+  color: var(--bean-umber);
+  background: rgba(154,118,83,0.1);
+  border-color: rgba(154,118,83,0.24);
+}
+
+.job-tile-applied.has-error {
+  color: var(--bean-clay);
+  background: rgba(141,83,76,0.1);
+  border-color: rgba(141,83,76,0.24);
+}
+
 .job-tile-divider {
   margin: 8px 12px 0;
   height: 1px;

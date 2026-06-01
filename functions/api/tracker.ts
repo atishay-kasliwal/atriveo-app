@@ -215,9 +215,19 @@ async function syncApplicationToTracker(
 async function syncApplicationsToTracker(env: Env, user: AuthUser, stats: ApplyStats, scope: SyncScope) {
   const trackerApiUrl = env.TRACKER_API_URL?.trim().replace(/\/+$/, "");
   const trackerApiToken = env.TRACKER_API_TOKEN?.trim();
-  if (!trackerApiUrl || !trackerApiToken) return { configured: false, scope };
-
   const entries = appliedJobEntries(stats);
+  if (!trackerApiUrl || !trackerApiToken) {
+    return {
+      configured: false,
+      scope,
+      jobUrl: scope === "latest" ? entries.at(-1)?.jobUrl : undefined,
+      missing: [
+        ...(!trackerApiUrl ? ["TRACKER_API_URL"] : []),
+        ...(!trackerApiToken ? ["TRACKER_API_TOKEN"] : []),
+      ],
+    };
+  }
+
   const today = easternDateKey(new Date().toISOString());
   const scopedEntries = scope === "today" && today
     ? entries.filter((entry) => entry.submittedLocalDate === today)

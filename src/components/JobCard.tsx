@@ -90,6 +90,29 @@ export default function JobCard({
   const reasons = matchReasons(job, 4);
   const rank = rankBadge(index);
   const isTopOpportunity = Boolean(index && index <= 5 && score >= 90);
+  const trackerSyncStatus = applyRecord?.trackerSyncStatus ?? null;
+  const isTrackerSynced = trackerSyncStatus === "synced" || trackerSyncStatus === "duplicate";
+  const isTrackerPending = trackerSyncStatus === "pending";
+  const canSendToTracker = Boolean(job.job_url && (!isApplied || (!isTrackerSynced && !isTrackerPending)));
+  const trackerActionCopy = !isApplied
+    ? "Add to tracker"
+    : trackerSyncStatus === "error" || trackerSyncStatus === "not_configured"
+      ? "Retry tracker"
+      : "Sync tracker";
+  const trackerStatusCopy =
+    !isApplied
+      ? ""
+      : isTrackerSynced
+        ? `✓ Added to Atriveo tracker ×${applyRecord?.clicks}`
+        : isTrackerPending
+          ? "↻ Sending to Atriveo tracker…"
+          : trackerSyncStatus === "not_configured"
+            ? "⚠ Saved locally — tracker not configured"
+            : trackerSyncStatus === "error"
+              ? "⚠ Saved locally — tracker sync failed"
+              : trackerSyncStatus === "skipped"
+                ? "⚠ Saved locally — tracker skipped"
+                : "Saved locally — sync tracker";
   const restingBorder = isApplied
     ? "rgba(105,114,90,0.34)"
     : isInCart
@@ -214,8 +237,11 @@ export default function JobCard({
       )}
 
       {isApplied && (
-        <div className="job-tile-applied">
-          ✓ Added to tracker ×{applyRecord?.clicks}
+        <div
+          className={`job-tile-applied${!isTrackerSynced ? " needs-sync" : ""}${trackerSyncStatus === "error" || trackerSyncStatus === "not_configured" ? " has-error" : ""}`}
+          title={applyRecord?.trackerSyncMessage || undefined}
+        >
+          {trackerStatusCopy}
         </div>
       )}
 
@@ -247,15 +273,15 @@ export default function JobCard({
               </>
             )}
           </button>
-          {!isApplied && job.job_url && (
+          {canSendToTracker && (
             <button
               type="button"
               className="job-tile-action job-tile-action--tracker"
               onClick={handleTrackerClick}
               title="Add to Atriveo tracker"
             >
-              <span className="job-tile-action-label-full">Add to tracker</span>
-              <span className="job-tile-action-label-short">Tracker +</span>
+              <span className="job-tile-action-label-full">{trackerActionCopy}</span>
+              <span className="job-tile-action-label-short">{isApplied ? "Retry" : "Tracker +"}</span>
             </button>
           )}
         </div>
