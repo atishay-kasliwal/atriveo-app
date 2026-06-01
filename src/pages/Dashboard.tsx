@@ -10,6 +10,7 @@ import JobCard from "../components/JobCard";
 
 type Period = "hour" | "today" | "yesterday";
 type SortBy = "score" | "time" | "company" | "ats" | "fit";
+type LevelFilter = "all" | "New Grad" | "Entry" | "Mid";
 type RunCard = RunEntry & {
   count: number;
   targetPeriod: Period | null;
@@ -29,6 +30,7 @@ const LOCATION_FILTERS = [
   { key: "Seattle",  match: (loc: string) => loc.includes("seattle") },
   { key: "NC",       match: (loc: string) => loc.includes(", nc") || loc.includes("north carolina") },
 ];
+const LEVEL_FILTERS: LevelFilter[] = ["all", "New Grad", "Entry", "Mid"];
 
 function isDataScientist(job: Job): boolean {
   return (
@@ -75,7 +77,7 @@ export default function Dashboard() {
   const [runHistory, setRunHistory] = useState<RunEntry[]>([]);
   const [period, setPeriod] = useState<Period>("hour");
   const [sortBy, setSortBy] = useState<SortBy>("time");
-  const [levelFilter, setLevelFilter] = useState("all");
+  const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
   const [h1bFilter, setH1bFilter] = useState(false);
   const [top500Filter, setTop500Filter] = useState(false);
   const [termFilter, setTermFilter] = useState("all");
@@ -172,14 +174,14 @@ export default function Dashboard() {
     });
   }, [runHistory, sessionCounts, sessionPeriod, sessionClickCounts]);
 
-  const filtered = useMemo(() => {
+  const visibleJobs = useMemo(() => {
     let jobs = [...baseJobs];
-    if (levelFilter !== "all") jobs = jobs.filter((j) => j.level === levelFilter);
     if (h1bFilter) jobs = jobs.filter((j) => (j.ats_score ?? j.score_pct ?? 0) >= 60);
     if (top500Filter) jobs = jobs.filter((j) => isTop500(j.company || ""));
     if (termFilter !== "all") jobs = jobs.filter((j) => j.search_term === termFilter);
-    if (query) {
-      const q = query.toLowerCase();
+    const trimmedQuery = query.trim();
+    if (trimmedQuery) {
+      const q = trimmedQuery.toLowerCase();
       jobs = jobs.filter(
         (j) =>
           j.title?.toLowerCase().includes(q) ||
@@ -190,6 +192,12 @@ export default function Dashboard() {
     jobs = jobs.filter((j) => !isExcluded(j));
     const cartUrlSet = new Set(cartItems.map((i) => i.url));
     jobs = jobs.filter((j) => !j.job_url || !cartUrlSet.has(j.job_url));
+    return jobs;
+  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, cartItems]);
+
+  const filtered = useMemo(() => {
+    let jobs = [...visibleJobs];
+    if (levelFilter !== "all") jobs = jobs.filter((j) => j.level === levelFilter);
     if (sortBy === "score") jobs.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
     else if (sortBy === "company") jobs.sort((a, b) => (a.company || "").localeCompare(b.company || ""));
     else if (sortBy === "ats") jobs.sort((a, b) => (b.ats_score ?? -1) - (a.ats_score ?? -1));
@@ -201,7 +209,7 @@ export default function Dashboard() {
       ...jobs.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
       ...jobs.filter((j) => j.job_url  &&  appliedSet.has(j.job_url)),
     ];
-  }, [baseJobs, levelFilter, h1bFilter, top500Filter, termFilter, query, sortBy, stats.appliedJobs, isExcluded, cartItems]);
+  }, [visibleJobs, levelFilter, sortBy, stats.appliedJobs]);
 
   const searchTerms = useMemo(
     () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
@@ -251,12 +259,31 @@ export default function Dashboard() {
   const dsJobs    = useMemo(() => isSplitView ? locationFiltered.filter(isDataScientist)    : [], [locationFiltered, isSplitView]);
   const otherJobs = useMemo(() => isSplitView ? locationFiltered.filter(j => !isDataScientist(j)) : [], [locationFiltered, isSplitView]);
 
-  const ngCount = filtered.filter((j) => j.level === "New Grad").length;
+  const levelCounts = useMemo(
+    () => ({
+      all: visibleJobs.length,
+      "New Grad": visibleJobs.filter((j) => j.level === "New Grad").length,
+      Entry: visibleJobs.filter((j) => j.level === "Entry").length,
+      Mid: visibleJobs.filter((j) => j.level === "Mid").length,
+    }),
+    [visibleJobs]
+  );
+  const displayedJobs = isSplitView ? locationFiltered : filtered;
+  const ngCount = displayedJobs.filter((j) => j.level === "New Grad").length;
 
   const selectedRun = useMemo(
     () => runCards.find((r) => r.session_id === selectedSession) || null,
     [runCards, selectedSession]
   );
+  const activeFilterCount = [
+    selectedSession,
+    query.trim(),
+    levelFilter !== "all",
+    h1bFilter,
+    top500Filter,
+    termFilter !== "all",
+    locationFilter !== "all",
+  ].filter(Boolean).length;
 
   const hasActiveFilters = Boolean(
     selectedSession ||
@@ -297,44 +324,60 @@ export default function Dashboard() {
 
         {/* Period tabs + sort */}
         <div className="top-bar">
-          <div className="period-tabs">
-            {(["hour", "today", "yesterday"] as Period[]).map((p) => (
-              <button
-                key={p}
-                className={`period-tab${period === p ? " active" : ""}`}
-                onClick={() => {
-                  handlePeriodChange(p);
-                  setTermFilter("all");
-                  setSelectedSession(null);
-                }}
-              >
-                {p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}
-                <span className="count">
-                  {p === "hour" ? hourJobs.length : p === "today" ? todayJobs.length : yesterdayJobs.length}
-                </span>
-              </button>
-            ))}
-            <a href="/weekly" className="period-tab">
-              7 Days
-            </a>
+          <div className="top-bar-main">
+            <div className="period-tabs" aria-label="Feed period">
+              {(["hour", "today", "yesterday"] as Period[]).map((p) => (
+                <button
+                  key={p}
+                  className={`period-tab${period === p ? " active" : ""}`}
+                  onClick={() => {
+                    handlePeriodChange(p);
+                    setTermFilter("all");
+                    setSelectedSession(null);
+                  }}
+                >
+                  {p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}
+                  <span className="count">
+                    {p === "hour" ? hourJobs.length : p === "today" ? todayJobs.length : yesterdayJobs.length}
+                  </span>
+                </button>
+              ))}
+              <a href="/weekly" className="period-tab">
+                7 Days
+              </a>
+            </div>
+            <div className="sort-group" aria-label="Sort jobs">
+              <button className={`sort-btn${sortBy === "score" ? " active" : ""}`} onClick={() => setSortBy("score")}>★ Score</button>
+              <button className={`sort-btn${sortBy === "time" ? " active" : ""}`} onClick={() => setSortBy("time")}>↓ Recent</button>
+              <button className={`sort-btn${sortBy === "ats" ? " active" : ""}`} onClick={() => setSortBy("ats")}>ATS</button>
+              <button className={`sort-btn${sortBy === "fit" ? " active" : ""}`} onClick={() => setSortBy("fit")}>Fit</button>
+            </div>
           </div>
-          <div className="sort-group">
-            <button className={`sort-btn${sortBy === "score" ? " active" : ""}`} onClick={() => setSortBy("score")}>★ Score</button>
-            <button className={`sort-btn${sortBy === "time" ? " active" : ""}`} onClick={() => setSortBy("time")}>↓ Recent</button>
-            <button className={`sort-btn${sortBy === "ats" ? " active" : ""}`} onClick={() => setSortBy("ats")}>ATS</button>
-            <button className={`sort-btn${sortBy === "fit" ? " active" : ""}`} onClick={() => setSortBy("fit")}>Fit</button>
+          <div className="feed-summary" aria-live="polite">
+            <span className="feed-summary-primary">{displayedJobs.length} job{displayedJobs.length !== 1 ? "s" : ""}</span>
+            {ngCount > 0 && <span className="feed-summary-chip">{ngCount} New Grad</span>}
+            {selectedRun && <span className="feed-summary-chip">Run {formatRunTime(selectedRun.displayAt)}</span>}
           </div>
         </div>
 
         {/* Run history strip */}
-        <div className="run-strip-wrap">
-          <div className="run-strip">
+        {runCards.length > 0 && (
+          <section className="run-strip-wrap" aria-label="Session history">
+            <div className="run-strip-head">
+              <span className="run-strip-label">Session History</span>
+              <span className="run-strip-status">
+                {selectedRun ? `Viewing ${formatRunTime(selectedRun.displayAt)}` : `${runCards.length} recent runs`}
+              </span>
+            </div>
+            <div className="run-strip">
             {runCards.map((r) => {
               const isActive = selectedSession === r.session_id;
               return (
-                <div
+                <button
+                  type="button"
                   key={r.session_id}
                   className={`run-card${isActive ? " active" : ""}`}
+                  aria-pressed={isActive}
                   onClick={() => {
                     if (isActive) {
                       setSelectedSession(null);
@@ -363,11 +406,12 @@ export default function Dashboard() {
                       ))}
                     </div>
                   </div>
-                </div>
+                </button>
               );
             })}
-          </div>
-        </div>
+            </div>
+          </section>
+        )}
 
         <div className="dashboard-layout">
           <div className="right-panel">
@@ -384,13 +428,14 @@ export default function Dashboard() {
                 />
               </div>
               <div className="level-chips">
-                {["all", "New Grad", "Entry", "Mid"].map((l) => (
+                {LEVEL_FILTERS.map((l) => (
                   <button
                     key={l}
                     className={`chip${levelFilter === l ? " active" : ""}`}
                     onClick={() => setLevelFilter(l)}
                   >
-                    {l === "all" ? "All" : l}
+                    <span>{l === "all" ? "All" : l}</span>
+                    <span className="chip-count">{levelCounts[l]}</span>
                   </button>
                 ))}
                 <button
@@ -418,18 +463,10 @@ export default function Dashboard() {
               </select>
               {hasActiveFilters && (
                 <button className="clear-filters-btn" onClick={clearFilters}>
-                  Clear Filters
+                  Clear {activeFilterCount} filter{activeFilterCount !== 1 ? "s" : ""}
                 </button>
               )}
             </div>
-
-            {!isSplitView && (
-              <div className="result-meta">
-                {filtered.length} job{filtered.length !== 1 ? "s" : ""}
-                {ngCount ? ` · ${ngCount} New Grad` : ""}
-                {selectedRun ? ` · Run ${formatRunTime(selectedRun.displayAt)}` : ""}
-              </div>
-            )}
 
             {/* Location filter cards — shown in Today split view */}
             {isSplitView && (
