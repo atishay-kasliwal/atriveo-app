@@ -6,6 +6,17 @@ type MatchTier = {
   label: string;
 };
 
+export type CareerOpsRating = MatchTier & {
+  score: number;
+  grade: "A+" | "A" | "B+" | "B" | "C";
+  rawPct: number;
+  atsPct: number | null;
+  fitPct: number | null;
+  tooltip: string;
+};
+
+const MAX_RAW_SCORE = 250;
+
 const COMPANY_DOMAINS: Record<string, string> = {
   adobe: "adobe.com",
   airbnb: "airbnb.com",
@@ -120,6 +131,51 @@ export function scoreTier(score = 0): MatchTier {
   return { key: "gray", icon: "•", label: "Watch" };
 }
 
+function clampPct(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function normalizeFitScore(value: number | null | undefined): number | null {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return null;
+  return clampPct(numeric <= 10 ? numeric * 10 : numeric);
+}
+
+export function careerOpsRating(job: Job): CareerOpsRating {
+  const rawPct = clampPct(((Number(job.score) || 0) / MAX_RAW_SCORE) * 100);
+  const atsPct = Number.isFinite(Number(job.ats_score ?? job.score_pct))
+    ? clampPct(Number(job.ats_score ?? job.score_pct))
+    : null;
+  const fitPct = normalizeFitScore(job.fit_score);
+  const weightedParts = [
+    { value: rawPct, weight: 0.7 },
+    ...(atsPct == null ? [] : [{ value: atsPct, weight: 0.2 }]),
+    ...(fitPct == null ? [] : [{ value: fitPct, weight: 0.1 }]),
+  ];
+  const totalWeight = weightedParts.reduce((sum, part) => sum + part.weight, 0) || 1;
+  const score = clampPct(weightedParts.reduce((sum, part) => sum + part.value * part.weight, 0) / totalWeight);
+  const tier: Pick<CareerOpsRating, "key" | "icon" | "label" | "grade"> =
+    score >= 85 ? { key: "green", icon: "🔥", label: "Elite", grade: "A+" }
+      : score >= 75 ? { key: "blue", icon: "⚡", label: "Strong", grade: "A" }
+        : score >= 62 ? { key: "yellow", icon: "⭐", label: "Good", grade: "B+" }
+          : score >= 50 ? { key: "yellow", icon: "⭐", label: "Review", grade: "B" }
+            : { key: "gray", icon: "•", label: "Watch", grade: "C" };
+  const details = [
+    `CareerOps ${score}/100`,
+    `Raw ${job.score ?? 0}/${MAX_RAW_SCORE}`,
+    atsPct == null ? null : `ATS ${atsPct}%`,
+    fitPct == null ? null : `Fit ${fitPct}%`,
+  ].filter(Boolean).join(" · ");
+
+  return { ...tier, score, rawPct, atsPct, fitPct, tooltip: details };
+}
+
+export function careerOpsStars(score = 0): string {
+  const stars = score >= 85 ? 5 : score >= 75 ? 4 : score >= 62 ? 3 : score >= 50 ? 2 : 1;
+  return "★★★★★".slice(0, stars) + "☆☆☆☆☆".slice(0, 5 - stars);
+}
+
 export function confidenceStars(score = 0): string {
   const stars = score >= 150 ? 5 : score >= 120 ? 4 : score >= 90 ? 3 : score >= 70 ? 2 : 1;
   return "★★★★★".slice(0, stars) + "☆☆☆☆☆".slice(0, 5 - stars);
@@ -151,4 +207,16 @@ export function rankBadge(index?: number): string | null {
   if (index === 2) return "🥈";
   if (index === 3) return "🥉";
   return index && index <= 5 ? `#${index}` : null;
+}
+
+export function jobBoardLabel(site?: string | null, jobUrl?: string | null): string {
+  const source = `${site || ""} ${jobUrl || ""}`.toLowerCase();
+  if (source.includes("linkedin")) return "LinkedIn";
+  if (source.includes("indeed")) return "Indeed";
+  if (source.includes("greenhouse")) return "Greenhouse";
+  if (source.includes("lever.co")) return "Lever";
+  if (source.includes("workday")) return "Workday";
+  if (source.includes("ashby")) return "Ashby";
+  if (site?.trim()) return site.trim().replace(/^\w/, (char) => char.toUpperCase());
+  return "Job Board";
 }

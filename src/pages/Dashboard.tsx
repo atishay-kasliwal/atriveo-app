@@ -7,8 +7,7 @@ import { useExclusions } from "../hooks/useExclusions";
 import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
 import JobCard from "../components/JobCard";
-import CompanyLogo from "../components/CompanyLogo";
-import { responseRateLabel, scoreTier } from "../utils/jobPresentation";
+import { careerOpsRating } from "../utils/jobPresentation";
 
 type Period = "hour" | "today" | "yesterday";
 type SortBy = "score" | "time" | "company" | "ats" | "fit";
@@ -112,6 +111,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [showTodayApplications, setShowTodayApplications] = useState(false);
 
   const handlePeriodChange = (nextPeriod: Period) => {
     setPeriod(nextPeriod);
@@ -226,7 +226,7 @@ export default function Dashboard() {
   const filtered = useMemo(() => {
     let jobs = [...visibleJobs];
     if (levelFilter !== "all") jobs = jobs.filter((j) => j.level === levelFilter);
-    if (sortBy === "score") jobs.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    if (sortBy === "score") jobs.sort((a, b) => careerOpsRating(b).score - careerOpsRating(a).score);
     else if (sortBy === "company") jobs.sort((a, b) => (a.company || "").localeCompare(b.company || ""));
     else if (sortBy === "ats") jobs.sort((a, b) => (b.ats_score ?? -1) - (a.ats_score ?? -1));
     else if (sortBy === "fit") jobs.sort((a, b) => (b.fit_score ?? -1) - (a.fit_score ?? -1));
@@ -300,14 +300,8 @@ export default function Dashboard() {
     () => displayedJobs.filter((j) => !j.job_url || !appliedUrlSet.has(j.job_url)),
     [displayedJobs, appliedUrlSet]
   );
-  const highScoreOpenCount = openDisplayedJobs.filter((j) => (j.score ?? 0) >= 100).length;
-  const topScoreOpen = openDisplayedJobs.reduce((best, job) => Math.max(best, job.score ?? 0), 0);
-  const topOpportunities = useMemo(
-    () => [...openDisplayedJobs].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 3),
-    [openDisplayedJobs]
-  );
-  const highProbabilityCount = openDisplayedJobs.filter((j) => (j.score ?? 0) >= 120).length || highScoreOpenCount;
-  const responseLabel = responseRateLabel(topScoreOpen);
+  const highScoreOpenCount = openDisplayedJobs.filter((j) => careerOpsRating(j).score >= 75).length;
+  const topCareerOpsOpen = openDisplayedJobs.reduce((best, job) => Math.max(best, careerOpsRating(job).score), 0);
 
   const selectedRun = useMemo(
     () => runCards.find((r) => r.session_id === selectedSession) || null,
@@ -350,6 +344,25 @@ export default function Dashboard() {
       })),
     };
   }, [stats.appliedJobs, stats.todayCount]);
+
+  const todayApplicationRows = useMemo(() => {
+    const todayKey = estDateKey();
+    return Object.entries(stats.appliedJobs)
+      .map(([url, record]) => {
+        const appliedAt = parseDateLike(record.lastAppliedAt);
+        if (!appliedAt || estDateKey(appliedAt) !== todayKey) return null;
+        return {
+          url,
+          title: record.title || "Untitled role",
+          company: record.company || "Unknown company",
+          appliedAt: record.lastAppliedAt,
+          clicks: record.clicks || 1,
+          trackerSyncStatus: record.trackerSyncStatus,
+        };
+      })
+      .filter((row): row is NonNullable<typeof row> => Boolean(row))
+      .sort((a, b) => toMs(b.appliedAt) - toMs(a.appliedAt));
+  }, [stats.appliedJobs]);
 
   const nextBurstCount = Math.min(BURST_SIZE, highScoreOpenCount || openDisplayedJobs.length);
   const activeFilterCount = [
@@ -417,39 +430,51 @@ export default function Dashboard() {
 
       <div className="wrapper page-shell page-shell-wide dashboard-shell">
         <aside className="dashboard-info-rail" aria-label="Dashboard context">
-          <section className="best-jobs-panel" aria-label="Best jobs today">
-            <div className="best-jobs-kicker">Job Search Copilot</div>
-            <h1 className="best-jobs-title">
-              🔥 Apply these first
-            </h1>
-            <p className="best-jobs-subtitle">
-              {highProbabilityCount || topOpportunities.length || 0} high-probability opportunit{(highProbabilityCount || topOpportunities.length) === 1 ? "y" : "ies"} in this view.
-            </p>
-            <div className="best-jobs-list">
-              {topOpportunities.length > 0 ? topOpportunities.map((job, index) => {
-                const tier = scoreTier(job.score ?? 0);
-                return (
-                  <div className="best-job-row" key={job.job_url || `${job.company}-${job.title}-${index}`}>
-                    <span className="best-job-rank">{index + 1}</span>
-                    <CompanyLogo company={job.company} size="sm" />
-                    <div className="best-job-copy">
-                      <strong>{job.company || "Unknown company"}</strong>
-                      <span>{job.title || "Open role"}</span>
-                    </div>
-                    <span className={`best-job-score best-job-score--${tier.key}`} title="Raw ranking score out of 250">
-                      <strong>{job.score ?? 0}</strong>
-                      <span>/250</span>
+          <section className={`today-apps-panel${showTodayApplications ? " is-open" : ""}`} aria-label="Today applications">
+            <button
+              type="button"
+              className="today-apps-button"
+              onClick={() => setShowTodayApplications((value) => !value)}
+              aria-expanded={showTodayApplications}
+            >
+              <span className="today-apps-copy">
+                <span className="today-apps-kicker">Today</span>
+                <strong>Applications</strong>
+                <small>{todayApplicationRows.length ? "Review everything you touched today" : "No applications logged yet"}</small>
+              </span>
+              <span className="today-apps-count">{todayApplicationRows.length}</span>
+            </button>
+
+            {showTodayApplications && (
+              <div className="today-apps-list">
+                {todayApplicationRows.length === 0 ? (
+                  <div className="today-apps-empty">Apply to a role, then it will appear here.</div>
+                ) : todayApplicationRows.map((item) => (
+                  <a className="today-app-row" href={item.url} target="_blank" rel="noopener" key={item.url}>
+                    <span className="today-app-row-main">
+                      <strong>{item.company}</strong>
+                      <small>{item.title}</small>
                     </span>
-                  </div>
-                );
-              }) : (
-                <div className="best-jobs-empty">Clear filters to see the strongest matches.</div>
+                    <span className="today-app-row-meta">
+                      <span>{formatRunTime(item.appliedAt)}</span>
+                      <span>{item.trackerSyncStatus === "synced" || item.trackerSyncStatus === "duplicate" ? "Synced" : `${item.clicks}×`}</span>
+                    </span>
+                  </a>
+                ))}
+                <button
+                  type="button"
+                  className="today-apps-feed-button"
+                  onClick={() => {
+                    handlePeriodChange("today");
+                    setSelectedSession(null);
+                    setTermFilter("all");
+                    setShowTodayApplications(false);
+                  }}
+                >
+                  Open today feed →
+                </button>
+              </div>
               )}
-            </div>
-            <div className="best-jobs-footer">
-              <span>Expected sprint</span>
-              <strong>{topOpportunities.length ? `${topOpportunities.length * 5} min · ${responseLabel}` : responseLabel}</strong>
-            </div>
           </section>
 
           <PageIntro
@@ -492,8 +517,8 @@ export default function Dashboard() {
                 <small>{cartItems.length ? "ready for review" : "empty"}</small>
               </div>
               <div className="momentum-stat">
-                <span>Best open score</span>
-                <strong>{topScoreOpen || "—"}</strong>
+                <span>Best CareerOps</span>
+                <strong>{topCareerOpsOpen || "—"}</strong>
                 <small>{selectedRun ? "in selected run" : "in current view"}</small>
               </div>
               <div className="momentum-chart">
@@ -590,7 +615,7 @@ export default function Dashboard() {
                 </a>
               </div>
               <div className="sort-group" aria-label="Sort jobs">
-                <button className={`sort-btn${sortBy === "score" ? " active" : ""}`} onClick={() => setSortBy("score")}>★ Score</button>
+                <button className={`sort-btn${sortBy === "score" ? " active" : ""}`} onClick={() => setSortBy("score")}>★ CareerOps</button>
                 <button className={`sort-btn${sortBy === "time" ? " active" : ""}`} onClick={() => setSortBy("time")}>↓ Recent</button>
                 <button className={`sort-btn${sortBy === "ats" ? " active" : ""}`} onClick={() => setSortBy("ats")}>ATS</button>
                 <button className={`sort-btn${sortBy === "fit" ? " active" : ""}`} onClick={() => setSortBy("fit")}>Fit</button>

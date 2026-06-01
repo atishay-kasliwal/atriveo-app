@@ -118,6 +118,7 @@ a:hover { text-decoration: underline; }
 
 @media (min-width: 1181px) {
   .dashboard-info-rail > .page-hero,
+  .dashboard-info-rail > .today-apps-panel,
   .dashboard-info-rail > .best-jobs-panel,
   .dashboard-info-rail > .momentum-panel,
   .dashboard-info-rail > .sync-dock,
@@ -133,6 +134,7 @@ a:hover { text-decoration: underline; }
     gap: 12px;
   }
 
+  .dashboard-info-rail > .today-apps-panel,
   .dashboard-info-rail > .best-jobs-panel {
     position: sticky;
     top: 66px;
@@ -411,6 +413,161 @@ header {
   transition: all 0.18s;
 }
 .admin-link:hover { border-color: var(--blue); color: var(--blue); text-decoration: none; background: var(--blue-lo); }
+
+/* ── Today applications quick view ───────────────────────────────────── */
+.today-apps-panel {
+  border: 1px solid rgba(119,118,106,0.24);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(31,122,77,0.12), transparent 36%),
+    linear-gradient(180deg, rgba(255,253,244,0.97), rgba(251,248,236,0.82));
+  box-shadow: 0 10px 28px rgba(79,79,71,0.09);
+  overflow: hidden;
+}
+
+.today-apps-button {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 15px;
+  text-align: left;
+}
+
+.today-apps-button:hover {
+  background: rgba(105,114,90,0.06);
+}
+
+.today-apps-copy {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.today-apps-kicker {
+  color: var(--green);
+  font-family: "Inter", monospace;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.today-apps-copy strong {
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1.05;
+  letter-spacing: -0.05em;
+}
+
+.today-apps-copy small {
+  color: var(--text-2);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.today-apps-count {
+  min-width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--tier-green), #44a86f);
+  color: #fff;
+  font-family: "Inter", monospace;
+  font-size: 22px;
+  font-weight: 900;
+  box-shadow: 0 10px 22px rgba(31,122,77,0.18);
+}
+
+.today-apps-list {
+  border-top: 1px solid rgba(119,118,106,0.16);
+  padding: 9px;
+  display: grid;
+  gap: 7px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.today-app-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px;
+  border: 1px solid rgba(119,118,106,0.18);
+  border-radius: 12px;
+  background: rgba(255,253,244,0.7);
+  text-decoration: none;
+}
+
+.today-app-row:hover {
+  background: rgba(105,114,90,0.08);
+  text-decoration: none;
+}
+
+.today-app-row-main {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.today-app-row-main strong,
+.today-app-row-main small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today-app-row-main strong {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.today-app-row-main small {
+  color: var(--text-2);
+  font-size: 11px;
+}
+
+.today-app-row-meta {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  color: var(--muted);
+  font-family: "Inter", monospace;
+  font-size: 9.5px;
+  font-weight: 800;
+}
+
+.today-apps-empty {
+  padding: 12px 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.today-apps-feed-button {
+  border: 1px solid rgba(31,122,77,0.24);
+  border-radius: 10px;
+  background: rgba(31,122,77,0.1);
+  color: var(--tier-green);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 9px 10px;
+}
+
+.today-apps-feed-button:hover {
+  background: rgba(31,122,77,0.16);
+}
 
 /* ── Apply momentum ───────────────────────────────────────────────────── */
 .best-jobs-panel {
@@ -1844,6 +2001,24 @@ header {
   flex-shrink: 0;
 }
 
+.job-board-tag {
+  max-width: 68px;
+  border: 1px solid rgba(79,79,71,0.18);
+  border-radius: 999px;
+  background: rgba(255,253,244,0.82);
+  color: var(--text-2);
+  font-family: "Inter", monospace;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 4px 6px;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .job-tile-rank {
   min-width: 20px;
   font-size: 12px;
@@ -1904,11 +2079,12 @@ header {
   grid-template-rows: auto auto;
   column-gap: 4px;
   align-items: center;
-  min-width: 84px;
-  padding: 5px 8px;
+  min-width: 92px;
+  padding: 5px 24px 5px 8px;
   border-radius: 12px;
   color: #fff;
   box-shadow: 0 7px 16px rgba(79,79,71,0.14);
+  position: relative;
 }
 
 .job-tile-match-icon {
@@ -1926,12 +2102,27 @@ header {
 
 .job-tile-match span:last-child {
   font-family: "Inter", monospace;
-  font-size: 7.5px;
+  font-size: 7.4px;
   font-weight: 900;
   letter-spacing: 0.055em;
   line-height: 1;
   text-transform: uppercase;
   opacity: 0.9;
+}
+
+.job-tile-match em {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  font-family: "Inter", monospace;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+  padding: 3px 4px;
 }
 
 .job-tile-match--green { background: linear-gradient(135deg, var(--tier-green), #44a86f); }
@@ -1956,12 +2147,12 @@ header {
 
 .job-tile-company {
   padding: 4px 11px 0;
-  font-size: 11.5px;
-  font-weight: 700;
+  font-size: 12.5px;
+  font-weight: 850;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--text-2);
+  color: var(--text);
 }
 
 .job-tile-confidence {
@@ -2199,10 +2390,12 @@ header {
   .job-tile-top { padding: 9px 8px 0; }
   .job-tile-avatar { width: 26px; height: 26px; font-size: 11px; }
   .job-tile-score { padding: 2px 7px; font-size: 11px; }
-  .job-tile-match { min-width: 62px; padding: 4px 7px; }
+  .job-board-tag { max-width: 56px; font-size: 8px; padding-inline: 5px; }
+  .job-tile-match { min-width: 84px; padding: 4px 22px 4px 7px; }
   .job-tile-match strong { font-size: 14px; }
+  .job-tile-match em { right: 6px; font-size: 7.5px; }
   .job-tile-title { padding: 7px 8px 0; font-size: 12px; }
-  .job-tile-company { padding: 3px 8px 0; font-size: 10px; }
+  .job-tile-company { padding: 3px 8px 0; font-size: 11.5px; }
   .job-tile-confidence { padding: 5px 8px 0; }
   .job-tile-meta { padding: 3px 8px 0; font-size: 9.5px; }
   .job-tile-signals { padding: 6px 8px 0; min-height: 22px; }

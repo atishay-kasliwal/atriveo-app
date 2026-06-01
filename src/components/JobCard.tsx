@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { Job } from "../types";
 import type { ApplyMetadata, ApplyRecord } from "../hooks/useApplyTracker";
 import CompanyLogo from "./CompanyLogo";
-import { confidenceStars, matchReasons, rankBadge, scoreTier } from "../utils/jobPresentation";
+import { careerOpsRating, careerOpsStars, jobBoardLabel, matchReasons, rankBadge } from "../utils/jobPresentation";
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -46,10 +46,9 @@ function scrapedDateLabel(dateStr?: string): string {
 }
 
 function tier(s: number) {
-  if (s >= 150) return { gradient: "linear-gradient(135deg,#1f7a4d,#44a86f)", solid: "#1f7a4d", glow: "rgba(31,122,77,0.24)", bg: "rgba(31,122,77,0.06)", bgHover: "rgba(31,122,77,0.1)" };
-  if (s >= 120) return { gradient: "linear-gradient(135deg,#1f6aa5,#4a98d2)", solid: "#1f6aa5", glow: "rgba(31,106,165,0.22)", bg: "rgba(31,106,165,0.055)", bgHover: "rgba(31,106,165,0.095)" };
-  if (s >= 90)  return { gradient: "linear-gradient(135deg,#a66b16,#d79a2b)", solid: "#a66b16", glow: "rgba(166,107,22,0.22)", bg: "rgba(166,107,22,0.05)", bgHover: "rgba(166,107,22,0.09)" };
-  if (s >= 40)  return { gradient: "linear-gradient(135deg,#6f6757,#948b75)", solid: "#6f6757", glow: "rgba(111,103,87,0.2)", bg: "rgba(111,103,87,0.045)", bgHover: "rgba(111,103,87,0.08)" };
+  if (s >= 85) return { gradient: "linear-gradient(135deg,#1f7a4d,#44a86f)", solid: "#1f7a4d", glow: "rgba(31,122,77,0.24)", bg: "rgba(31,122,77,0.06)", bgHover: "rgba(31,122,77,0.1)" };
+  if (s >= 75) return { gradient: "linear-gradient(135deg,#1f6aa5,#4a98d2)", solid: "#1f6aa5", glow: "rgba(31,106,165,0.22)", bg: "rgba(31,106,165,0.055)", bgHover: "rgba(31,106,165,0.095)" };
+  if (s >= 50) return { gradient: "linear-gradient(135deg,#a66b16,#d79a2b)", solid: "#a66b16", glow: "rgba(166,107,22,0.22)", bg: "rgba(166,107,22,0.05)", bgHover: "rgba(166,107,22,0.09)" };
   return { gradient: "linear-gradient(135deg,#5e5b50,#827f70)", solid: "#5e5b50", glow: "rgba(94,91,80,0.18)", bg: "rgba(94,91,80,0.04)", bgHover: "rgba(94,91,80,0.075)" };
 }
 
@@ -94,14 +93,15 @@ export default function JobCard({
 
   const co = job.company || "—";
   const title = job.title || "—";
-  const score = job.score ?? 0;
+  const rawScore = job.score ?? 0;
+  const careerOps = careerOpsRating(job);
   const isApplied = Boolean(applyRecord);
-  const t = tier(score);
-  const match = scoreTier(score);
-  const confidence = confidenceStars(score);
+  const t = tier(careerOps.score);
+  const confidence = careerOpsStars(careerOps.score);
   const reasons = matchReasons(job, 3);
   const rank = rankBadge(index);
-  const isTopOpportunity = Boolean(index && index <= 5 && score >= 90);
+  const boardLabel = jobBoardLabel(job.site, job.job_url);
+  const isTopOpportunity = Boolean(index && index <= 5 && careerOps.score >= 62);
   const trackerSyncStatus = applyRecord?.trackerSyncStatus ?? null;
   const isTrackerSynced = trackerSyncStatus === "synced" || trackerSyncStatus === "duplicate";
   const isTrackerPending = trackerSyncStatus === "pending";
@@ -165,7 +165,7 @@ export default function JobCard({
 
   return (
     <div
-      className={`job-tile job-tile--${match.key}${isApplied ? " is-applied" : ""}${isInCart ? " is-saved" : ""}${isTopOpportunity ? " is-top-opportunity" : ""}`}
+      className={`job-tile job-tile--${careerOps.key}${isApplied ? " is-applied" : ""}${isInCart ? " is-saved" : ""}${isTopOpportunity ? " is-top-opportunity" : ""}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -192,6 +192,7 @@ export default function JobCard({
         <div className="job-tile-lead">
           {rank && <span className="job-tile-rank">{rank}</span>}
           <CompanyLogo company={co} size="md" />
+          <span className="job-board-tag">{boardLabel}</span>
         </div>
 
         <div className="job-tile-score-group">
@@ -203,10 +204,11 @@ export default function JobCard({
               title={`Block "${co}"`}
             >⊘</button>
           )}
-          <div className={`job-tile-match job-tile-match--${match.key}`} title="Raw ranking score out of 250">
-            <span className="job-tile-match-icon">{match.icon}</span>
-            <strong>{score}</strong>
-            <span>Score /250</span>
+          <div className={`job-tile-match job-tile-match--${careerOps.key}`} title={careerOps.tooltip}>
+            <span className="job-tile-match-icon">{careerOps.icon}</span>
+            <strong>{careerOps.score}</strong>
+            <span>CareerOps</span>
+            <em>{careerOps.grade}</em>
           </div>
         </div>
       </div>
@@ -221,15 +223,16 @@ export default function JobCard({
 
       <div className="job-tile-confidence" aria-label={`Apply confidence ${confidence}`}>
         <strong>{confidence}</strong>
-        <span>{match.label} apply confidence</span>
+        <span>{careerOps.label} CareerOps rating</span>
       </div>
 
       <div className={`job-tile-meta${urgency ? " has-urgency" : ""}`}>
         {urgency || `🕐 ${dateLabel}`}{locationShort ? ` · ${locationShort}` : ""}
       </div>
 
-      <div className="job-tile-details" title={`ATS ${job.ats_score ?? job.score_pct ?? "—"} · Fit ${job.fit_score ?? "—"}`}>
+      <div className="job-tile-details" title={careerOps.tooltip}>
         {job.level && <span className="job-tile-signal">{job.level}</span>}
+        <span className="job-tile-signal">Score {rawScore}/250</span>
         {searchTerm && <span className="job-tile-signal job-tile-signal--term">{searchTerm}</span>}
       </div>
 
