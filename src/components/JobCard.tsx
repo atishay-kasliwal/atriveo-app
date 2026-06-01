@@ -52,11 +52,11 @@ function scrapedDateLabel(dateStr?: string): string {
 }
 
 function tier(s: number) {
-  if (s >= 150) return { gradient: "linear-gradient(135deg,#7c3aed,#a855f7)", solid: "#7c3aed", glow: "rgba(124,58,237,0.28)", bg: "rgba(124,58,237,0.035)" };
-  if (s >= 100) return { gradient: "linear-gradient(135deg,#2563eb,#3b82f6)", solid: "#2563eb", glow: "rgba(37,99,235,0.28)", bg: "rgba(37,99,235,0.035)" };
-  if (s >= 70)  return { gradient: "linear-gradient(135deg,#059669,#10b981)", solid: "#059669", glow: "rgba(5,150,105,0.28)", bg: "rgba(5,150,105,0.035)" };
-  if (s >= 40)  return { gradient: "linear-gradient(135deg,#d97706,#f59e0b)", solid: "#d97706", glow: "rgba(217,119,6,0.25)", bg: "rgba(217,119,6,0.03)" };
-  return { gradient: "linear-gradient(135deg,#64748b,#94a3b8)", solid: "#94a3b8", glow: "rgba(100,116,139,0.2)", bg: "rgba(100,116,139,0.02)" };
+  if (s >= 150) return { gradient: "linear-gradient(135deg,#7c3aed,#a855f7)", solid: "#7c3aed", glow: "rgba(124,58,237,0.28)", bg: "rgba(124,58,237,0.035)", bgHover: "rgba(124,58,237,0.07)" };
+  if (s >= 100) return { gradient: "linear-gradient(135deg,#2563eb,#3b82f6)", solid: "#2563eb", glow: "rgba(37,99,235,0.28)", bg: "rgba(37,99,235,0.035)", bgHover: "rgba(37,99,235,0.07)" };
+  if (s >= 70)  return { gradient: "linear-gradient(135deg,#059669,#10b981)", solid: "#059669", glow: "rgba(5,150,105,0.28)", bg: "rgba(5,150,105,0.035)", bgHover: "rgba(5,150,105,0.07)" };
+  if (s >= 40)  return { gradient: "linear-gradient(135deg,#d97706,#f59e0b)", solid: "#d97706", glow: "rgba(217,119,6,0.25)", bg: "rgba(217,119,6,0.03)", bgHover: "rgba(217,119,6,0.06)" };
+  return { gradient: "linear-gradient(135deg,#64748b,#94a3b8)", solid: "#94a3b8", glow: "rgba(100,116,139,0.2)", bg: "rgba(100,116,139,0.02)", bgHover: "rgba(100,116,139,0.04)" };
 }
 
 interface Props {
@@ -102,11 +102,12 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
 
   return (
     <div
+      className="job-tile"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         background: hovered
-          ? `linear-gradient(160deg, ${t.bg.replace("0.035", "0.07")} 0%, #fff 55%)`
+          ? `linear-gradient(160deg, ${t.bgHover} 0%, #fff 55%)`
           : `linear-gradient(160deg, ${t.bg} 0%, #fff 55%)`,
         borderRadius: 12,
         border: `1px solid ${hovered ? t.solid + "44" : "rgba(0,0,0,0.07)"}`,
@@ -123,162 +124,86 @@ export default function JobCard({ job, index, applyRecord, onApplyClick, onExclu
         position: "relative",
       }}
     >
-      {/* Top row: rank + score badge */}
-      <div style={{
-        padding: "10px 10px 0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div className="job-tile-top">
+        <div className="job-tile-lead">
           {index !== undefined && (
-            <span style={{
-              fontSize: 10, fontWeight: 800, color: "#94a3b8",
-              letterSpacing: "0.04em",
-            }}>#{index}</span>
+            <span className="job-tile-rank">#{index}</span>
           )}
-          {/* Avatar with color ring */}
-          <div style={{
-            width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-            background: color, color: "#fff",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontWeight: 800, fontSize: 12,
-            boxShadow: `0 0 0 2px #fff, 0 0 0 3.5px ${color}55`,
-          }}>
+          <div className="job-tile-avatar" style={{ background: color }}>
             {co.charAt(0).toUpperCase()}
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div className="job-tile-score-group">
           {onExcludeCompany && (
             <button
+              className="job-tile-exclude"
               onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
-              style={{ border: "none", background: "none", color: "#cbd5e1", cursor: "pointer", fontSize: 12, padding: 0, lineHeight: 1, opacity: hovered ? 1 : 0, transition: "opacity 0.15s" }}
               title={`Block "${co}"`}
             >⊘</button>
           )}
-          {/* Score badge */}
-          <div style={{
+          <div
+            className="job-tile-score"
+            style={{
             background: t.gradient,
-            color: "#fff",
-            borderRadius: 20,
-            padding: "3px 8px",
-            fontWeight: 800,
-            fontSize: 11.5,
-            letterSpacing: "-0.2px",
-            whiteSpace: "nowrap",
             boxShadow: hovered ? `0 3px 10px ${t.glow}` : `0 1px 4px ${t.glow}`,
-            transition: "box-shadow 0.18s",
-          }}>
+            }}
+          >
             ★{score}
           </div>
         </div>
       </div>
 
-      {/* Job title */}
-      <div style={{
-        padding: "8px 10px 0",
-        fontSize: 13,
-        fontWeight: 700,
-        color: "#0f172a",
-        lineHeight: 1.4,
-        display: "-webkit-box",
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: "vertical",
-        overflow: "hidden",
-        flex: 1,
-      } as React.CSSProperties}>
+      <div className="job-tile-title">
         {title}
       </div>
 
-      {/* Company */}
-      <div style={{
-        padding: "3px 10px 0",
-        fontSize: 10.5,
-        fontWeight: 600,
-        color: color,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-        opacity: 0.85,
-      }}>
+      <div className="job-tile-company" style={{ color }}>
         {co}
       </div>
 
-      {/* Meta */}
-      <div style={{
-        padding: "4px 10px 0",
-        fontSize: 10,
-        color: "#94a3b8",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-      }}>
+      <div className="job-tile-meta">
         🕐 {dateLabel}{locationShort ? ` · ${locationShort}` : ""}
       </div>
 
-      {/* Applied badge */}
       {isApplied && (
-        <div style={{
-          margin: "6px 10px 0",
-          fontSize: 10, fontWeight: 700, color: "#16a34a",
-          background: "rgba(22,163,74,0.08)",
-          border: "1px solid rgba(22,163,74,0.2)",
-          borderRadius: 6, padding: "2px 7px", textAlign: "center",
-        }}>
+        <div className="job-tile-applied">
           ✓ Applied ×{applyRecord?.clicks}
         </div>
       )}
 
-      {/* Divider */}
-      <div style={{ margin: "8px 10px 0", height: 1, background: "rgba(0,0,0,0.05)" }} />
+      <div className="job-tile-divider" />
 
-      {/* Action bar */}
-      <div style={{ padding: "7px 8px 8px", display: "flex", gap: 4 }}>
+      <div className="job-tile-actions">
         {!isApplied && job.job_url && (
           <button
+            className="job-tile-action job-tile-action--click"
             onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co); }}
-            style={{
-              height: 26, padding: "0 8px", borderRadius: 6, flexShrink: 0,
-              border: "1px solid rgba(0,0,0,0.1)",
-              background: "rgba(255,255,255,0.8)",
-              color: "#475569", cursor: "pointer", fontSize: 10.5, fontWeight: 700,
-              backdropFilter: "blur(4px)",
-              transition: "all 0.15s",
-            }}
           >Click</button>
         )}
         <button
+          className={`job-tile-action job-tile-action--message${msgCopied ? " is-copied" : ""}`}
           onClick={handleMsg}
-          style={{
-            flex: 1, height: 26, borderRadius: 6,
-            border: "1px solid rgba(99,102,241,0.2)",
-            background: msgCopied ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.05)",
-            color: "#6366f1", fontSize: 10.5, fontWeight: 700,
-            cursor: "pointer", transition: "all 0.15s",
-          }}
         >
           {msgCopied ? "✓ Copied" : "Msg"}
         </button>
         {job.job_url ? (
           <a
+            className={`job-tile-action job-tile-action--apply${isApplied ? " is-applied" : ""}`}
             href={job.job_url}
             target="_blank"
             rel="noopener"
             onClick={() => onApplyClick(job.job_url, title, co)}
             style={{
-              flex: 2, height: 26, borderRadius: 6,
-              display: "flex", alignItems: "center", justifyContent: "center",
               background: isApplied ? "linear-gradient(135deg,#16a34a,#059669)" : t.gradient,
-              color: "#fff", fontSize: 10.5, fontWeight: 700,
-              textDecoration: "none", transition: "all 0.18s",
+              color: "#fff",
               boxShadow: hovered ? `0 3px 10px ${t.glow}` : "none",
             }}
           >
             {isApplied ? "Applied ✓" : "Apply ↗"}
           </a>
         ) : (
-          <span style={{ flex: 2, fontSize: 10, color: "#94a3b8", display: "flex", alignItems: "center", justifyContent: "center" }}>—</span>
+          <span className="job-tile-action job-tile-action--empty">—</span>
         )}
       </div>
     </div>
