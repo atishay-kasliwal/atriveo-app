@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useAuth } from "../hooks/useAuth";
+import AppHeader from "../components/AppHeader";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useCart } from "../hooks/useCart";
 import { useExclusions } from "../hooks/useExclusions";
@@ -25,7 +25,6 @@ function dayLabel(dateStr: string): string {
 }
 
 export default function Weekly() {
-  const { user, logout } = useAuth();
   const { stats, recordClick, getRecord } = useApplyTracker();
   const { items: cartItems, addToCart, removeFromCart, isInCart } = useCart();
   const handleCartToggle = (job: WeekJob) => {
@@ -101,29 +100,7 @@ export default function Weekly() {
 
   return (
     <div>
-      <header>
-        <div className="wrapper header-inner">
-          <div className="logo">
-            <div className="logo-icon">A</div>
-            <div>
-              <div className="logo-name">Atriveo</div>
-              <div className="logo-sub">Weekly View</div>
-            </div>
-          </div>
-          <div className="header-right">
-            <nav className="nav-tabs">
-              <a href="/" className="nav-tab">Live Feed</a>
-              <a href="/weekly" className="nav-tab active">Weekly</a>
-              <a href="/unclicked-100" className="nav-tab">100+ Unclicked</a>
-              <a href="/cart" className="nav-tab">Cart</a>
-              <a href="/skills" className="nav-tab">Skills</a>
-              <a href="/settings" className="nav-tab">Settings</a>
-            </nav>
-            <span className="header-user">Hi, {user?.name}</span>
-            <button className="logout-btn" onClick={logout}>Sign out</button>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       <div className="wrapper">
         {/* KPIs */}

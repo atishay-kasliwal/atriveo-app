@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useAuth } from "../hooks/useAuth";
+import AppHeader from "../components/AppHeader";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
 import type { Job } from "../types";
@@ -8,7 +8,6 @@ import JobCard from "../components/JobCard";
 type WeekJob = Job & { scraped_date?: string };
 
 export default function Unclicked100() {
-  const { user, logout } = useAuth();
   const { stats, recordClick, getRecord } = useApplyTracker();
   const { isExcluded } = useExclusions();
   const [weekJobs, setWeekJobs] = useState<WeekJob[]>([]);
@@ -55,28 +54,7 @@ export default function Unclicked100() {
 
   return (
     <div>
-      <header>
-        <div className="wrapper header-inner">
-          <div className="logo">
-            <div className="logo-icon">A</div>
-            <div>
-              <div className="logo-name">Atriveo</div>
-              <div className="logo-sub">100+ Unclicked</div>
-            </div>
-          </div>
-          <div className="header-right">
-            <nav className="nav-tabs">
-              <a href="/" className="nav-tab">Live Feed</a>
-              <a href="/weekly" className="nav-tab">Weekly</a>
-              <a href="/unclicked-100" className="nav-tab active">100+ Unclicked</a>
-              <a href="/skills" className="nav-tab">Skills</a>
-              <a href="/settings" className="nav-tab">Settings</a>
-            </nav>
-            <span className="header-user">Hi, {user?.name}</span>
-            <button className="logout-btn" onClick={logout}>Sign out</button>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       <div className="wrapper">
         <div className="kpi-row">

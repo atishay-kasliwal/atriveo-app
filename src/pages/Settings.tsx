@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
+import AppHeader from "../components/AppHeader";
 import { useExclusions } from "../hooks/useExclusions";
 
 const RESUME_KEY = "atriveo_resume";
 
 export default function Settings() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { exclusions, excludeCompany, excludeKeyword, removeExclusion } = useExclusions();
 
   const [companyInput, setCompanyInput] = useState("");
@@ -40,27 +41,7 @@ export default function Settings() {
 
   return (
     <div>
-      <header>
-        <div className="wrapper header-inner">
-          <div className="logo">
-            <div className="logo-icon">A</div>
-            <div>
-              <div className="logo-name">Atriveo</div>
-              <div className="logo-sub">Settings</div>
-            </div>
-          </div>
-          <div className="header-right">
-            <nav className="nav-tabs">
-              <a href="/" className="nav-tab">Live Feed</a>
-              <a href="/weekly" className="nav-tab">Weekly</a>
-              <a href="/skills" className="nav-tab">Skills</a>
-              <a href="/settings" className="nav-tab active">Settings</a>
-            </nav>
-            <span className="header-user">Hi, {user?.name}</span>
-            <button className="logout-btn" onClick={logout}>Sign out</button>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       <div className="wrapper" style={{ maxWidth: 720, paddingTop: 28 }}>
 

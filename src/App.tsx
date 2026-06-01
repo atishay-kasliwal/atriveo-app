@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
+import AppHeader from "./components/AppHeader";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Swipe from "./pages/Swipe";
 import Weekly from "./pages/Weekly";
 import Settings from "./pages/Settings";
 import Skills from "./pages/Skills";
@@ -13,7 +13,17 @@ import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="loading-screen"><div className="spin" /></div>;
+  // While auth resolves, render the SAME shell (header) every page uses, with a
+  // spinner only in the content area — so a full-page reload never blanks the
+  // screen or shifts the header.
+  if (loading) {
+    return (
+      <div>
+        <AppHeader />
+        <div className="content-loading"><div className="spin" /></div>
+      </div>
+    );
+  }
   if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
@@ -23,6 +33,16 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/swipe" element={<Navigate to="/dashboard" replace />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/weekly"
           element={
@@ -72,26 +92,10 @@ export default function App() {
           }
         />
         <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Swipe />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/swipe"
-          element={
-            <ProtectedRoute>
-              <Swipe />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/*"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <Navigate to="/dashboard" replace />
             </ProtectedRoute>
           }
         />

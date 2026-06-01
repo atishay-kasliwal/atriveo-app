@@ -18,7 +18,6 @@ export interface Job {
   scraped_date?: string;
   ats_score?: number;
   fit_score?: number;
-  swiped_at?: string | null;
 }
 
 export interface RunEntry {

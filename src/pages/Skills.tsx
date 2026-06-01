@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useAuth } from "../hooks/useAuth";
+import AppHeader from "../components/AppHeader";
 
 // Mirror of Python extraction patterns — must stay in sync with build_skills_summary.py
 const RESUME_PATTERNS: Record<string, Record<string, RegExp[]>> = {
@@ -194,7 +194,6 @@ function flatTopSkills(summary: SkillSummary, n: number): Array<{ skill: string;
 }
 
 export default function Skills() {
-  const { user, logout } = useAuth();
   const [summary, setSummary] = useState<SkillSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [resumeText, setResumeText] = useState("");
@@ -249,27 +248,7 @@ export default function Skills() {
 
   return (
     <div>
-      <header>
-        <div className="wrapper header-inner">
-          <div className="logo">
-            <div className="logo-icon">A</div>
-            <div>
-              <div className="logo-name">Atriveo</div>
-              <div className="logo-sub">Skills Intel</div>
-            </div>
-          </div>
-          <div className="header-right">
-            <nav className="nav-tabs">
-              <a href="/" className="nav-tab">Live Feed</a>
-              <a href="/weekly" className="nav-tab">Weekly</a>
-              <a href="/skills" className="nav-tab active">Skills</a>
-              <a href="/settings" className="nav-tab">Settings</a>
-            </nav>
-            <span className="header-user">Hi, {user?.name}</span>
-            <button className="logout-btn" onClick={logout}>Sign out</button>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       <div className="wrapper" style={{ paddingTop: 24, paddingBottom: 48 }}>
         {/* Page header */}
