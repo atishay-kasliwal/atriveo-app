@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AppHeader from "../components/AppHeader";
+import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useCart } from "../hooks/useCart";
 import JobCard from "../components/JobCard";
@@ -25,11 +26,25 @@ export default function Cart() {
     );
   });
 
+  const appliedCount = items.filter((i) => i.job.job_url && getRecord(i.job.job_url)).length;
+
   return (
     <div>
       <AppHeader />
 
-      <div className="wrapper">
+      <div className="wrapper page-shell page-shell-wide">
+        <PageIntro
+          compact
+          kicker="Focus Cart"
+          title="Saved jobs with the context preserved"
+          description="Keep the roles you want to revisit in one place. The cart stays searchable, remembers application progress, and keeps your saved set out of the noise."
+          stats={[
+            { label: "Saved", value: items.length, tone: "blue" },
+            { label: "Applied", value: appliedCount, tone: "green" },
+            { label: "Visible", value: filtered.length, tone: "orange" },
+          ]}
+        />
+
         <div className="kpi-row">
           <div className="kpi-card blue">
             <div className="kpi-label">Saved</div>

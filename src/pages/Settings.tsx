@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import AppHeader from "../components/AppHeader";
+import PageIntro from "../components/PageIntro";
 import { useExclusions } from "../hooks/useExclusions";
 
 const RESUME_KEY = "atriveo_resume";
@@ -43,17 +44,17 @@ export default function Settings() {
     <div>
       <AppHeader />
 
-      <div className="wrapper" style={{ maxWidth: 720, paddingTop: 28 }}>
-
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 20, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.02em" }}>
-            Feed Filters
-          </div>
-          <div style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>
-            Jobs matching these rules are hidden from your Live Feed and Weekly view.
-            Changes take effect immediately — no reload needed.
-          </div>
-        </div>
+      <div className="wrapper page-shell page-shell-narrow">
+        <PageIntro
+          kicker="Filters"
+          title="Feed filters and resume text, kept local"
+          description="Hide companies or title keywords that aren’t relevant and keep your resume text saved in the browser so scoring stays aligned with what you care about."
+          stats={[
+            { label: "Companies", value: exclusions.companies.length, tone: "blue" },
+            { label: "Keywords", value: exclusions.keywords.length, tone: "orange" },
+            { label: "Resume", value: resumeText ? `${resumeText.length.toLocaleString()} chars` : "Empty", tone: "green" },
+          ]}
+        />
 
         {/* ── Excluded companies ── */}
         <div className="settings-section">

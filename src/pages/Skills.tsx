@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import AppHeader from "../components/AppHeader";
+import PageIntro from "../components/PageIntro";
 
 // Mirror of Python extraction patterns — must stay in sync with build_skills_summary.py
 const RESUME_PATTERNS: Record<string, Record<string, RegExp[]>> = {
@@ -250,35 +251,38 @@ export default function Skills() {
     <div>
       <AppHeader />
 
-      <div className="wrapper" style={{ paddingTop: 24, paddingBottom: 48 }}>
-        {/* Page header */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24, gap: 12, flexWrap: "wrap" }}>
-          <div>
-            <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.03em", color: "var(--text)" }}>
-              Skills Intelligence
-            </div>
-            <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 3 }}>
-              {loading
-                ? "Loading…"
-                : summary
-                  ? `Based on ${summary.total_analyzed.toLocaleString()} full job descriptions · Generated ${new Date(summary.generated_at).toLocaleDateString()}`
-                  : "Data unavailable"}
-            </div>
-            {refreshMsg && (
-              <div style={{ fontSize: 11, marginTop: 4, color: refreshMsg.includes("error") || refreshMsg.includes("Error") ? "#f87171" : "#4ade80" }}>
-                {refreshMsg}
-              </div>
-            )}
+      <div className="wrapper page-shell page-shell-narrow">
+        <PageIntro
+          kicker="Skills Intelligence"
+          title="What the market wants versus what your resume shows"
+          description={
+            loading
+              ? "Loading the latest job-description analysis…"
+              : summary
+                ? `Based on ${summary.total_analyzed.toLocaleString()} full job descriptions, updated ${new Date(summary.generated_at).toLocaleDateString()}.`
+                : "Data unavailable"
+          }
+          action={
+            <button
+              className="refresh-btn"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              title="Re-run data export from latest job descriptions"
+            >
+              {refreshing ? "Refreshing…" : "↺ Refresh Data"}
+            </button>
+          }
+          stats={[
+            { label: "Analyzed", value: summary ? summary.total_analyzed.toLocaleString() : "—", tone: "blue" },
+            { label: "Covered", value: covered.length, tone: "green" },
+            { label: "Missing", value: missing.length, tone: "red" },
+          ]}
+        />
+        {refreshMsg && (
+          <div style={{ fontSize: 11, marginTop: -4, color: refreshMsg.includes("error") || refreshMsg.includes("Error") ? "#f87171" : "#4ade80" }}>
+            {refreshMsg}
           </div>
-          <button
-            className="refresh-btn"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            title="Re-run data export from latest job descriptions"
-          >
-            {refreshing ? "Refreshing…" : "↺ Refresh Data"}
-          </button>
-        </div>
+        )}
 
         {/* Tab bar */}
         <div className="skills-tab-bar">

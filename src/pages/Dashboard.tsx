@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import AppHeader from "../components/AppHeader";
+import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useCart } from "../hooks/useCart";
 import { useExclusions } from "../hooks/useExclusions";
@@ -306,7 +307,19 @@ export default function Dashboard() {
     <div>
       <AppHeader />
 
-      <div className="wrapper">
+      <div className="wrapper page-shell page-shell-wide">
+        <PageIntro
+          compact
+          kicker="Live Feed"
+          title="Fresh jobs, ranked for quick review"
+          description="A compact live view of the latest jobs in your pipeline. Use the search, filters, and session history to keep the feed focused without losing context."
+          stats={[
+            { label: "This hour", value: hourJobs.length, tone: "blue" },
+            { label: "Today", value: todayJobs.length, tone: "green" },
+            { label: "Yesterday", value: yesterdayJobs.length, tone: "orange" },
+          ]}
+        />
+
         {/* KPIs */}
         <div className="kpi-row">
           <div className="kpi-card blue">

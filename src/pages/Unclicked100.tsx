@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import AppHeader from "../components/AppHeader";
+import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
 import type { Job } from "../types";
@@ -56,7 +57,19 @@ export default function Unclicked100() {
     <div>
       <AppHeader />
 
-      <div className="wrapper">
+      <div className="wrapper page-shell page-shell-wide">
+        <PageIntro
+          compact
+          kicker="High Priority"
+          title="100+ scored jobs you haven’t touched yet"
+          description="A focused list of the highest-scoring weekly roles that still need attention. Search, review, and clear the strongest matches first."
+          stats={[
+            { label: "100+ jobs", value: hundredPlus.length, tone: "blue" },
+            { label: "Unclicked", value: unclicked.length, tone: "green" },
+            { label: "Top score", value: topScore || "—", tone: "orange" },
+          ]}
+        />
+
         <div className="kpi-row">
           <div className="kpi-card blue">
             <div className="kpi-value">{hundredPlus.length}</div>

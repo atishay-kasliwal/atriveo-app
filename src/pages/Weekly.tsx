@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import AppHeader from "../components/AppHeader";
+import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useCart } from "../hooks/useCart";
 import { useExclusions } from "../hooks/useExclusions";
@@ -102,7 +103,19 @@ export default function Weekly() {
     <div>
       <AppHeader />
 
-      <div className="wrapper">
+      <div className="wrapper page-shell page-shell-wide">
+        <PageIntro
+          compact
+          kicker="Weekly View"
+          title="A seven-day job archive that stays readable"
+          description="Browse the week at a glance with day chips, scoring filters, and applied jobs pushed to the bottom so the useful stuff stays up top."
+          stats={[
+            { label: "This week", value: weekJobs.length, tone: "blue" },
+            { label: "Companies", value: uniqueCompanies, tone: "green" },
+            { label: "Today", value: todayCount, tone: "purple" },
+          ]}
+        />
+
         {/* KPIs */}
         <div className="kpi-row">
           <div className="kpi-card blue">

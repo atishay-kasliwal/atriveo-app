@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import AppHeader from "../components/AppHeader";
+import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import type { Job } from "../types";
 
@@ -130,7 +131,18 @@ export default function States() {
     <div>
       <AppHeader />
 
-      <div className="wrapper" style={{ paddingTop: 28, paddingBottom: 48 }}>
+      <div className="wrapper page-shell page-shell-wide">
+        <PageIntro
+          compact
+          kicker="State Coverage"
+          title="Where jobs are clustering across the country"
+          description="A compact map of today’s postings by state, with average score, top companies, and expandable rows when you want more detail."
+          stats={[
+            { label: "Covered", value: totalCovered, tone: "blue" },
+            { label: "Mapped", value: totalJobs, tone: "green" },
+            { label: "Top state", value: topState?.abbr || "—", tone: "purple" },
+          ]}
+        />
 
         {/* Summary cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
