@@ -270,6 +270,19 @@ export default function JobCard({
               {isInCart ? "♥ Saved" : "♡ Save"}
             </button>
           )}
+          {job.job_url && onApplyClick && (
+            <button
+              type="button"
+              className="job-tile-action job-tile-action--click"
+              onClick={(e) => {
+                e.preventDefault();
+                onApplyClick(job);
+              }}
+              title="Log to Apply table without opening"
+            >
+              Click
+            </button>
+          )}
           <button
             type="button"
             className={`job-tile-action job-tile-action--message${msgCopied ? " is-copied" : ""}`}

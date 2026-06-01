@@ -2579,6 +2579,7 @@ header {
 }
 
 .job-tile-action--tracker,
+.job-tile-action--click,
 .job-tile-action--message {
   flex: 1 1 42px;
   border: 1px solid rgba(119,118,106,0.22);
@@ -2591,6 +2592,12 @@ header {
   border-color: rgba(105,114,90,0.24);
   background: rgba(105,114,90,0.08);
   color: var(--green);
+}
+
+.job-tile-action--click {
+  border-color: rgba(31,106,165,0.22);
+  background: rgba(31,106,165,0.08);
+  color: var(--tier-blue);
 }
 
 .job-tile-action-label-short {
@@ -2614,8 +2621,13 @@ header {
 }
 
 .job-tile-action--tracker:hover,
+.job-tile-action--click:hover,
 .job-tile-action--message:hover {
   background: rgba(119,118,106,0.18);
+}
+
+.job-tile-action--click:hover {
+  background: rgba(31,106,165,0.14);
 }
 
 .job-tile-action--tracker:hover {
