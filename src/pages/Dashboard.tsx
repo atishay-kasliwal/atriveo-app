@@ -378,7 +378,7 @@ export default function Dashboard() {
     <div>
       <AppHeader />
 
-      <div className="wrapper page-shell page-shell-wide">
+      <div className="wrapper page-shell page-shell-wide dashboard-shell">
         <PageIntro
           compact
           kicker="Live Feed"
