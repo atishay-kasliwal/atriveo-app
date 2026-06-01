@@ -252,31 +252,6 @@ export default function Dashboard() {
   const otherJobs = useMemo(() => isSplitView ? locationFiltered.filter(j => !isDataScientist(j)) : [], [locationFiltered, isSplitView]);
 
   const ngCount = filtered.filter((j) => j.level === "New Grad").length;
-  const bestJob = [...todayJobs].sort((a, b) => (b.ats_score ?? b.score_pct ?? 0) - (a.ats_score ?? a.score_pct ?? 0))[0];
-  const top500TodayTotal = useMemo(
-    () => todayJobs.filter((j) => isTop500(j.company || "")).length,
-    [todayJobs]
-  );
-  const top500AppliedToday = useMemo(() => {
-    const todayEst = new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10);
-    return Object.values(stats.appliedJobs).filter(
-      (r) => isTop500(r.company || "") && r.lastAppliedAt.slice(0, 10) === todayEst
-    ).length;
-  }, [stats.appliedJobs]);
-  const latestClickRecord = useMemo(
-    () =>
-      Object.values(stats.appliedJobs).reduce<{
-        clicks: number;
-        lastAppliedAt: string;
-        title: string | null;
-        company: string | null;
-        trackerStatus: "applied" | "rejected" | null;
-      } | null>((latest, record) => {
-        if (!latest) return record;
-        return record.lastAppliedAt > latest.lastAppliedAt ? record : latest;
-      }, null),
-    [stats.appliedJobs]
-  );
 
   const selectedRun = useMemo(
     () => runCards.find((r) => r.session_id === selectedSession) || null,
@@ -319,40 +294,6 @@ export default function Dashboard() {
             { label: "Yesterday", value: yesterdayJobs.length, tone: "orange" },
           ]}
         />
-
-        {/* KPIs */}
-        <div className="kpi-row">
-          <div className="kpi-card blue">
-            <div className="kpi-label">This Hour</div>
-            <div className="kpi-value">{hourJobs.length}</div>
-            <div className="kpi-sub">{hourJobs.filter((j) => j.level === "New Grad").length} new grad</div>
-          </div>
-          <div className="kpi-card emerald">
-            <div className="kpi-label">Today Total</div>
-            <div className="kpi-value">{todayJobs.length}</div>
-            <div className="kpi-sub">{runHistory.length} runs</div>
-          </div>
-          <div className="kpi-card teal">
-            <div className="kpi-label">New Grad</div>
-            <div className="kpi-value">{todayJobs.filter((j) => j.level === "New Grad").length}</div>
-            <div className="kpi-sub">today</div>
-          </div>
-          <div className="kpi-card orange">
-            <div className="kpi-label">Best ATS</div>
-            <div className="kpi-value">{bestJob ? `${bestJob.ats_score ?? bestJob.score_pct ?? "—"}%` : "—"}</div>
-            <div className="kpi-sub">{bestJob?.company?.slice(0, 20) ?? "—"}</div>
-          </div>
-          <div className="kpi-card purple">
-            <div className="kpi-label">Applied Today</div>
-            <div className="kpi-value">{stats.todayCount ?? 0}<span className="kpi-value-secondary">/{stats.count}</span></div>
-            <div className="kpi-sub">{latestClickRecord?.company ? latestClickRecord.company.slice(0, 20) : "none yet"}</div>
-          </div>
-          <div className="kpi-card rose">
-            <div className="kpi-label">Top 500 Applied</div>
-            <div className="kpi-value">{top500AppliedToday}<span className="kpi-value-secondary">/{top500TodayTotal}</span></div>
-            <div className="kpi-sub">{top500TodayTotal} top-co today</div>
-          </div>
-        </div>
 
         {/* Period tabs + sort */}
         <div className="top-bar">
