@@ -3482,3 +3482,440 @@ footer a:hover { color: var(--blue); }
   font-size: 10px; color: var(--muted);
   font-family: "Inter", monospace;
 }
+
+/* ── Soft Vanilla UI pass ───────────────────────────────────────────────
+   Inspired by the warmer “soft cards + black CTA” direction: keep Atriveo
+   dense and useful, but make the whole cockpit feel calmer and easier to scan.
+*/
+:root {
+  --bg: #ede8d0;
+  --surface: rgba(247, 244, 232, 0.82);
+  --surface-2: rgba(255, 253, 245, 0.94);
+  --border: rgba(91, 88, 77, 0.16);
+  --border-hi: rgba(91, 88, 77, 0.28);
+  --text: #12110d;
+  --text-2: #59564c;
+  --muted: #8a8577;
+  --blue: #514f47;
+  --blue-hi: #34332d;
+  --blue-lo: rgba(18, 17, 13, 0.06);
+  --blue-glow: rgba(18, 17, 13, 0.12);
+  --cyan: #7b786b;
+  --cyan-lo: rgba(123, 120, 107, 0.1);
+  --green: #2f7d55;
+  --green-lo: rgba(47, 125, 85, 0.1);
+  --orange: #ad7623;
+  --orange-lo: rgba(173, 118, 35, 0.11);
+  --red: #9f5a50;
+  --red-lo: rgba(159, 90, 80, 0.1);
+  --tier-green: #2f7d55;
+  --tier-green-lo: rgba(47, 125, 85, 0.12);
+  --tier-blue: #2f6f9f;
+  --tier-blue-lo: rgba(47, 111, 159, 0.11);
+  --tier-yellow: #b67b21;
+  --tier-yellow-lo: rgba(182, 123, 33, 0.12);
+  --tier-gray: #69665c;
+  --tier-gray-lo: rgba(105, 102, 92, 0.11);
+}
+
+body {
+  background:
+    radial-gradient(circle at 20% 8%, rgba(255, 253, 245, 0.86), transparent 28%),
+    linear-gradient(180deg, #f4f0dc 0%, #ede8d0 46%, #e8e0c2 100%);
+}
+
+body::before {
+  background:
+    radial-gradient(ellipse 46% 38% at 6% 4%, rgba(255, 253, 245, 0.82) 0%, transparent 72%),
+    radial-gradient(ellipse 34% 30% at 88% 8%, rgba(196, 192, 171, 0.22) 0%, transparent 72%),
+    radial-gradient(ellipse 48% 34% at 52% 100%, rgba(154, 118, 83, 0.1) 0%, transparent 72%);
+}
+
+body::after {
+  opacity: 0.42;
+  background-image:
+    linear-gradient(rgba(79, 79, 71, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 79, 71, 0.018) 1px, transparent 1px);
+}
+
+header {
+  background: rgba(237, 232, 208, 0.84);
+  border-bottom-color: rgba(91, 88, 77, 0.12);
+  box-shadow: 0 1px 0 rgba(255, 253, 245, 0.48);
+}
+
+.logo-icon {
+  background: linear-gradient(135deg, #11100d, #6b685c);
+  border-radius: 10px;
+  box-shadow: 0 9px 22px rgba(18, 17, 13, 0.12);
+}
+
+.logo-name {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: #5b584f;
+}
+
+.nav-tabs {
+  background: rgba(18, 17, 13, 0.035);
+  border-color: rgba(91, 88, 77, 0.14);
+  border-radius: 7px;
+}
+
+.nav-tab.active,
+.period-tab.active,
+.week-day-chip.active {
+  background: linear-gradient(135deg, #11100d, #565248);
+  color: #fffdf5;
+  box-shadow: 0 8px 18px rgba(18, 17, 13, 0.14);
+}
+
+.dashboard-shell {
+  gap: 14px;
+}
+
+.page-hero,
+.today-apps-panel,
+.tracker-week-panel,
+.best-jobs-panel,
+.momentum-panel,
+.sync-dock,
+.quest-panel,
+.top-bar,
+.run-strip-wrap,
+.filter-bar,
+.apply-click-log,
+.panel-card,
+.skills-top-card,
+.settings-section,
+.skills-resume-box,
+.skills-gap-stat {
+  border-color: rgba(91, 88, 77, 0.14);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255, 253, 245, 0.54), transparent 38%),
+    linear-gradient(180deg, rgba(255, 253, 245, 0.86), rgba(237, 232, 208, 0.7));
+  box-shadow:
+    0 18px 45px rgba(68, 64, 52, 0.06),
+    0 1px 0 rgba(255, 253, 245, 0.72) inset;
+}
+
+.page-hero,
+.today-apps-panel,
+.best-jobs-panel {
+  border-radius: 24px;
+}
+
+.tracker-week-panel,
+.momentum-panel,
+.sync-dock,
+.quest-panel,
+.top-bar,
+.run-strip-wrap,
+.filter-bar,
+.apply-click-log {
+  border-radius: 18px;
+}
+
+.page-hero-kicker,
+.today-apps-kicker,
+.tracker-week-kicker,
+.best-jobs-kicker,
+.momentum-kicker,
+.sync-dock-kicker,
+.quest-kicker,
+.apply-click-log-kicker,
+.run-strip-label {
+  color: #6c685d;
+  letter-spacing: 0.14em;
+}
+
+.page-hero-title,
+.best-jobs-title,
+.today-apps-copy strong,
+.momentum-title,
+.sync-dock-title,
+.quest-title,
+.apply-click-log h2 {
+  color: #11100d;
+  letter-spacing: -0.055em;
+}
+
+.page-hero-stat,
+.quest-card,
+.momentum-stat,
+.momentum-chart,
+.today-app-row,
+.best-job-row,
+.location-panel-card {
+  background: rgba(255, 253, 245, 0.58);
+  border-color: rgba(91, 88, 77, 0.13);
+  box-shadow: 0 1px 0 rgba(255, 253, 245, 0.62) inset;
+}
+
+.today-apps-count,
+.tracker-week-head > strong {
+  background: #11100d;
+  color: #fffdf5;
+  box-shadow: 0 12px 24px rgba(18, 17, 13, 0.16);
+}
+
+.sync-dock-button,
+.refresh-btn:hover:not(:disabled),
+.login-btn {
+  background: linear-gradient(135deg, #11100d, #565248);
+  color: #fffdf5;
+  box-shadow: 0 10px 20px rgba(18, 17, 13, 0.14);
+}
+
+.period-tabs,
+.sort-group,
+.search-input,
+.term-select,
+.chip,
+.chip-toggle,
+.logout-btn,
+.refresh-btn {
+  background: rgba(255, 253, 245, 0.62);
+  border-color: rgba(91, 88, 77, 0.14);
+}
+
+.chip.active,
+.chip-toggle.active,
+.sort-btn.active {
+  background: rgba(18, 17, 13, 0.07);
+  border-color: rgba(18, 17, 13, 0.18);
+  color: #222019;
+  box-shadow: none;
+}
+
+.search-input:focus,
+.term-select:focus {
+  border-color: rgba(18, 17, 13, 0.34);
+  box-shadow: 0 0 0 4px rgba(18, 17, 13, 0.055);
+}
+
+.card-grid,
+.split-panel .card-grid {
+  gap: 12px;
+}
+
+.job-tile {
+  min-height: 192px;
+  border-radius: 18px !important;
+  border: 1px solid rgba(91, 88, 77, 0.16) !important;
+  border-left: 1px solid rgba(91, 88, 77, 0.16) !important;
+  background:
+    radial-gradient(circle at 88% 0%, color-mix(in srgb, var(--job-accent-lo) 46%, transparent), transparent 42%),
+    linear-gradient(160deg, rgba(255, 253, 245, 0.86), rgba(237, 232, 208, 0.76)) !important;
+  box-shadow:
+    0 12px 28px rgba(68, 64, 52, 0.08),
+    0 1px 0 rgba(255, 253, 245, 0.82) inset !important;
+  transform: none !important;
+}
+
+.job-tile:hover {
+  border-color: color-mix(in srgb, var(--job-accent) 28%, rgba(91, 88, 77, 0.16)) !important;
+  background:
+    radial-gradient(circle at 88% 0%, color-mix(in srgb, var(--job-accent-lo) 60%, transparent), transparent 44%),
+    linear-gradient(160deg, rgba(255, 253, 245, 0.94), rgba(239, 234, 213, 0.86)) !important;
+  box-shadow:
+    0 18px 38px rgba(68, 64, 52, 0.12),
+    0 1px 0 rgba(255, 253, 245, 0.86) inset !important;
+  transform: translateY(-2px) !important;
+}
+
+.job-tile.is-top-opportunity {
+  box-shadow:
+    0 18px 42px rgba(68, 64, 52, 0.13),
+    0 0 0 1px color-mix(in srgb, var(--job-accent) 16%, transparent),
+    0 1px 0 rgba(255, 253, 245, 0.86) inset !important;
+}
+
+.job-tile.is-top-opportunity::before {
+  border-color: color-mix(in srgb, var(--job-accent) 28%, transparent);
+  border-width: 1px;
+}
+
+.job-tile.is-saved::after {
+  border-top-color: rgba(18, 17, 13, 0.16);
+}
+
+.job-tile-top {
+  padding: 12px 12px 0;
+}
+
+.company-logo,
+.job-tile-avatar {
+  box-shadow:
+    0 0 0 2px rgba(255, 253, 245, 0.96),
+    0 0 0 3px rgba(91, 88, 77, 0.16),
+    0 8px 18px rgba(68, 64, 52, 0.1);
+}
+
+.job-board-tag {
+  max-width: 74px;
+  background: rgba(255, 253, 245, 0.72);
+  border-color: rgba(91, 88, 77, 0.14);
+  color: #6b675c;
+  font-size: 8px;
+}
+
+.job-tile-match {
+  min-width: 88px;
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(68, 64, 52, 0.12);
+}
+
+.job-tile-match--green { background: linear-gradient(135deg, #2f7d55, #5f9a77); }
+.job-tile-match--blue { background: linear-gradient(135deg, #2f6f9f, #6d99b8); }
+.job-tile-match--yellow { background: linear-gradient(135deg, #b67b21, #d8a64c); }
+.job-tile-match--gray { background: linear-gradient(135deg, #5d5a51, #858174); }
+
+.job-tile-title {
+  padding: 9px 12px 0;
+  font-size: 13.5px;
+  line-height: 1.34;
+  letter-spacing: -0.035em;
+}
+
+.job-tile-company {
+  padding: 6px 12px 0;
+  font-size: 13px;
+  font-weight: 900;
+  color: #25231d;
+}
+
+.job-tile-confidence {
+  padding: 6px 12px 0;
+}
+
+.job-tile-confidence span {
+  color: #6e6a5e;
+  font-size: 8.5px;
+}
+
+.job-tile-meta {
+  padding: 4px 12px 0;
+  color: #6e6a5e;
+}
+
+.job-tile-meta.has-urgency {
+  color: color-mix(in srgb, var(--job-accent) 78%, #4b473d);
+}
+
+.job-tile-details,
+.job-tile-reasons {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.job-tile-signal,
+.job-tile-reason {
+  background: rgba(255, 253, 245, 0.66);
+  border-color: color-mix(in srgb, var(--job-accent) 18%, rgba(91, 88, 77, 0.12));
+}
+
+.job-tile-reason {
+  color: color-mix(in srgb, var(--job-accent) 78%, #34322c);
+}
+
+.job-tile-divider {
+  margin: 8px 12px 0;
+  background: rgba(91, 88, 77, 0.12);
+}
+
+.job-tile-actions {
+  padding: 8px 10px 10px;
+}
+
+.job-tile-action {
+  border-radius: 8px;
+}
+
+.job-tile-action--apply {
+  height: 31px;
+  background: linear-gradient(135deg, #11100d, #3d3a33) !important;
+  color: #fffdf5 !important;
+  box-shadow: 0 12px 20px rgba(18, 17, 13, 0.16) !important;
+}
+
+.job-tile-action--apply:hover {
+  filter: none;
+  background: linear-gradient(135deg, #000, #4d493f) !important;
+  transform: translateY(-1px);
+}
+
+.job-tile-action--tracker,
+.job-tile-action--click,
+.job-tile-action--message,
+.job-tile-action--save {
+  background: rgba(255, 253, 245, 0.6);
+  border: 1px solid rgba(91, 88, 77, 0.16);
+  color: #4f4b41;
+}
+
+.job-tile-action--tracker {
+  color: #3f6f51;
+  background: rgba(47, 125, 85, 0.07);
+}
+
+.job-tile-action--click {
+  color: #355f81;
+  background: rgba(47, 111, 159, 0.07);
+}
+
+.job-tile-action--tracker:hover,
+.job-tile-action--click:hover,
+.job-tile-action--message:hover,
+.job-tile-action--save:hover {
+  background: rgba(255, 253, 245, 0.86);
+  border-color: rgba(18, 17, 13, 0.24);
+}
+
+.run-card {
+  background: rgba(255, 253, 245, 0.58);
+  border-color: rgba(91, 88, 77, 0.14);
+  border-radius: 14px;
+  box-shadow: 0 1px 0 rgba(255, 253, 245, 0.66) inset;
+}
+
+.run-card.active {
+  background: rgba(255, 253, 245, 0.82);
+  border-color: rgba(18, 17, 13, 0.28);
+  box-shadow: 0 12px 24px rgba(68, 64, 52, 0.1);
+}
+
+.run-card-bar.active,
+.tracker-week-bar-shell span,
+.tracker-week-day.is-today .tracker-week-bar-shell span,
+.momentum-bar,
+.momentum-progress span {
+  background: linear-gradient(180deg, #11100d, #716d60);
+}
+
+.momentum-bar-count {
+  color: #11100d;
+}
+
+.location-panel-card.active {
+  border-color: rgba(18, 17, 13, 0.26);
+  background: rgba(255, 253, 245, 0.72);
+  box-shadow: 0 12px 24px rgba(68, 64, 52, 0.08);
+}
+
+.location-panel-total,
+.feed-summary-chip,
+.apply-click-log-head > strong {
+  background: rgba(18, 17, 13, 0.055);
+  border-color: rgba(18, 17, 13, 0.12);
+  color: #34322c;
+}
+
+.apply-click-table th,
+.apply-click-table td {
+  border-bottom-color: rgba(91, 88, 77, 0.1);
+}
+
+.apply-click-table a {
+  color: #11100d;
+}
