@@ -74,6 +74,7 @@ interface Props {
   index?: number;
   applyRecord: ApplyRecord | null;
   onAddToTracker: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
+  onApplyClick?: (job: Job) => void;
   onExcludeCompany?: (company: string) => void;
   onCartToggle?: (job: Job) => void;
   isInCart?: boolean;
@@ -84,6 +85,7 @@ export default function JobCard({
   index,
   applyRecord,
   onAddToTracker,
+  onApplyClick,
   onExcludeCompany,
   onCartToggle,
   isInCart = false,
@@ -295,17 +297,18 @@ export default function JobCard({
         </div>
         {job.job_url ? (
           <a
-            className={`job-tile-action job-tile-action--apply${isApplied ? " is-applied" : ""}`}
+            className="job-tile-action job-tile-action--apply"
             href={job.job_url}
             target="_blank"
             rel="noopener"
+            onClick={() => onApplyClick?.(job)}
             style={{
-              background: isApplied ? "linear-gradient(135deg,#69725a,#4f4f47)" : t.gradient,
+              background: t.gradient,
               color: "#fff",
               boxShadow: hovered ? `0 3px 10px ${t.glow}` : "none",
             }}
           >
-            {isApplied ? "Open ↗" : "🚀 Apply"}
+            🚀 Apply
           </a>
         ) : (
           <span className="job-tile-action job-tile-action--empty">—</span>

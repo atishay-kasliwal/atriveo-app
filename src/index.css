@@ -2059,6 +2059,123 @@ header {
 }
 @media (max-width: 700px) { .card-grid { grid-template-columns: 1fr; } }
 
+.apply-click-log {
+  margin-top: 16px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(119,118,106,0.24);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(31,106,165,0.08), transparent 34%),
+    linear-gradient(180deg, rgba(255,253,244,0.96), rgba(251,248,236,0.78));
+  box-shadow: 0 8px 22px rgba(79,79,71,0.08);
+  overflow: hidden;
+}
+
+.apply-click-log-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(119,118,106,0.16);
+}
+
+.apply-click-log-kicker {
+  color: var(--tier-blue);
+  font-family: "Inter", monospace;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.apply-click-log h2 {
+  margin-top: 2px;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.apply-click-log p {
+  margin-top: 4px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.apply-click-log-head > strong {
+  border: 1px solid rgba(31,106,165,0.24);
+  border-radius: 999px;
+  background: rgba(31,106,165,0.1);
+  color: var(--tier-blue);
+  font-family: "Inter", monospace;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 7px 10px;
+  white-space: nowrap;
+}
+
+.apply-click-table-wrap {
+  overflow-x: auto;
+}
+
+.apply-click-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.apply-click-table th,
+.apply-click-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(119,118,106,0.12);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.apply-click-table th {
+  color: var(--muted);
+  font-family: "Inter", monospace;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.apply-click-table td {
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.apply-click-table td:nth-child(2),
+.apply-click-table td:nth-child(3) {
+  color: var(--text);
+  font-weight: 850;
+}
+
+.apply-click-table td:nth-child(3) {
+  max-width: 360px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.apply-click-table td:nth-child(4),
+.apply-click-table td:nth-child(5) {
+  font-family: "Inter", monospace;
+  font-size: 11px;
+}
+
+.apply-click-table a {
+  color: var(--tier-blue);
+  font-weight: 900;
+}
+
+.apply-click-table tr:last-child td {
+  border-bottom: 0;
+}
+
 .job-tile {
   min-width: 0;
   position: relative;

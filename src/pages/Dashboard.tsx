@@ -1,13 +1,14 @@
 import { useState, useEffect, useMemo } from "react";
 import AppHeader from "../components/AppHeader";
 import PageIntro from "../components/PageIntro";
+import { useApplyClickLog } from "../hooks/useApplyClickLog";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useCart } from "../hooks/useCart";
 import { useExclusions } from "../hooks/useExclusions";
 import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
 import JobCard from "../components/JobCard";
-import { careerOpsRating } from "../utils/jobPresentation";
+import { careerOpsRating, jobBoardLabel } from "../utils/jobPresentation";
 
 type Period = "hour" | "today" | "yesterday";
 type SortBy = "score" | "time" | "company" | "ats" | "fit";
@@ -106,6 +107,7 @@ function formatRunTime(iso?: string | null): string {
 
 export default function Dashboard() {
   const { stats, recordClick, getRecord, syncState, syncNow } = useApplyTracker();
+  const { records: applyClickRecords, todayRecords: todayApplyClicks, recordApplyClick } = useApplyClickLog();
   const { items: cartItems, addToCart, removeFromCart, isInCart } = useCart();
   const { isExcluded, excludeCompany } = useExclusions();
   const handleCartToggle = (job: Job) => {
@@ -405,6 +407,11 @@ export default function Dashboard() {
     const bestLabel = best.count ? `${best.label} led with ${best.count}` : "No additions yet";
     return { days, max, total, bestLabel, todayKey };
   }, [stats.appliedJobs]);
+
+  const applyClickTableRows = useMemo(
+    () => applyClickRecords.slice(0, 40),
+    [applyClickRecords]
+  );
 
   const nextBurstCount = Math.min(BURST_SIZE, highScoreOpenCount || openDisplayedJobs.length);
   const activeFilterCount = [
@@ -867,6 +874,7 @@ export default function Dashboard() {
                               index={i + 1}
                               applyRecord={job.job_url ? getRecord(job.job_url) : null}
                               onAddToTracker={recordClick}
+                              onApplyClick={recordApplyClick}
                               onExcludeCompany={excludeCompany}
                               onCartToggle={handleCartToggle}
                               isInCart={job.job_url ? isInCart(job.job_url) : false}
@@ -893,12 +901,53 @@ export default function Dashboard() {
                         index={i + 1}
                         applyRecord={job.job_url ? getRecord(job.job_url) : null}
                         onAddToTracker={recordClick}
+                        onApplyClick={recordApplyClick}
                         onExcludeCompany={excludeCompany}
                         onCartToggle={handleCartToggle}
                         isInCart={job.job_url ? isInCart(job.job_url) : false}
                       />
                     ))}
                   </div>
+                )}
+                {applyClickTableRows.length > 0 && (
+                  <section className="apply-click-log" aria-label="Apply button click log">
+                    <div className="apply-click-log-head">
+                      <div>
+                        <span className="apply-click-log-kicker">Apply Log</span>
+                        <h2>Opened from Apply</h2>
+                        <p>Local-only list from the Apply button. Tracker sync is separate.</p>
+                      </div>
+                      <strong>{todayApplyClicks.length} today</strong>
+                    </div>
+                    <div className="apply-click-table-wrap">
+                      <table className="apply-click-table">
+                        <thead>
+                          <tr>
+                            <th>Time</th>
+                            <th>Company</th>
+                            <th>Role</th>
+                            <th>Board</th>
+                            <th>Clicks</th>
+                            <th>Link</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {applyClickTableRows.map((record) => (
+                            <tr key={record.jobUrl}>
+                              <td>{formatRunTime(record.clickedAt)}</td>
+                              <td>{record.company}</td>
+                              <td>{record.title}</td>
+                              <td>{jobBoardLabel(record.site, record.jobUrl)}</td>
+                              <td>{record.clicks}</td>
+                              <td>
+                                <a href={record.jobUrl} target="_blank" rel="noopener">Open ↗</a>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
                 )}
               </>
             )}
