@@ -7,6 +7,8 @@ import { useExclusions } from "../hooks/useExclusions";
 import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
 import JobCard from "../components/JobCard";
+import CompanyLogo from "../components/CompanyLogo";
+import { responseRateLabel, scoreTier } from "../utils/jobPresentation";
 
 type Period = "hour" | "today" | "yesterday";
 type SortBy = "score" | "time" | "company" | "ats" | "fit";
@@ -300,6 +302,12 @@ export default function Dashboard() {
   );
   const highScoreOpenCount = openDisplayedJobs.filter((j) => (j.score ?? 0) >= 100).length;
   const topScoreOpen = openDisplayedJobs.reduce((best, job) => Math.max(best, job.score ?? 0), 0);
+  const topOpportunities = useMemo(
+    () => [...openDisplayedJobs].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 3),
+    [openDisplayedJobs]
+  );
+  const highProbabilityCount = openDisplayedJobs.filter((j) => (j.score ?? 0) >= 120).length || highScoreOpenCount;
+  const responseLabel = responseRateLabel(topScoreOpen);
 
   const selectedRun = useMemo(
     () => runCards.find((r) => r.session_id === selectedSession) || null,
@@ -409,6 +417,34 @@ export default function Dashboard() {
 
       <div className="wrapper page-shell page-shell-wide dashboard-shell">
         <aside className="dashboard-info-rail" aria-label="Dashboard context">
+          <section className="best-jobs-panel" aria-label="Best jobs today">
+            <div className="best-jobs-kicker">Recommendation Engine</div>
+            <h1 className="best-jobs-title">
+              🚀 You have {highProbabilityCount || topOpportunities.length || 0} high-probability opportunit{(highProbabilityCount || topOpportunities.length) === 1 ? "y" : "ies"} today
+            </h1>
+            <div className="best-jobs-list">
+              {topOpportunities.length > 0 ? topOpportunities.map((job, index) => {
+                const tier = scoreTier(job.score ?? 0);
+                return (
+                  <div className="best-job-row" key={job.job_url || `${job.company}-${job.title}-${index}`}>
+                    <CompanyLogo company={job.company} size="sm" />
+                    <div className="best-job-copy">
+                      <strong>{job.company || "Unknown company"}</strong>
+                      <span>{job.title || "Open role"}</span>
+                    </div>
+                    <span className={`best-job-score best-job-score--${tier.key}`}>{job.score ?? 0}</span>
+                  </div>
+                );
+              }) : (
+                <div className="best-jobs-empty">Clear filters to see the strongest matches.</div>
+              )}
+            </div>
+            <div className="best-jobs-footer">
+              <span>Potential response rate</span>
+              <strong>{responseLabel}</strong>
+            </div>
+          </section>
+
           <PageIntro
             compact
             kicker="Live Feed"

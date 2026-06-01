@@ -1,16 +1,10 @@
 import { useState } from "react";
 import type { Job } from "../types";
 import type { ApplyMetadata, ApplyRecord } from "../hooks/useApplyTracker";
+import CompanyLogo from "./CompanyLogo";
+import { confidenceStars, matchReasons, rankBadge, scoreTier } from "../utils/jobPresentation";
 
-const AVATAR_COLORS = [
-  "#4f4f47","#5f5e54","#77766a","#69725a","#7a624a","#8d534c","#6f6855","#3f4039",
-];
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
-
-function avatarColor(s: string) {
-  const code = [...s].reduce((a, c) => a + c.charCodeAt(0), 0);
-  return AVATAR_COLORS[code % AVATAR_COLORS.length];
-}
 
 function extractJobId(url: string | null | undefined): string {
   if (!url) return "";
@@ -89,9 +83,13 @@ export default function JobCard({
   const co = job.company || "—";
   const title = job.title || "—";
   const score = job.score ?? 0;
-  const color = avatarColor(co);
   const isApplied = Boolean(applyRecord);
   const t = tier(score);
+  const match = scoreTier(score);
+  const confidence = confidenceStars(score);
+  const reasons = matchReasons(job, 4);
+  const rank = rankBadge(index);
+  const isTopOpportunity = Boolean(index && index <= 5 && score >= 90);
   const restingBorder = isApplied
     ? "rgba(105,114,90,0.34)"
     : isInCart
@@ -133,7 +131,7 @@ export default function JobCard({
 
   return (
     <div
-      className={`job-tile${isApplied ? " is-applied" : ""}${isInCart ? " is-saved" : ""}`}
+      className={`job-tile job-tile--${match.key}${isApplied ? " is-applied" : ""}${isInCart ? " is-saved" : ""}${isTopOpportunity ? " is-top-opportunity" : ""}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -157,12 +155,8 @@ export default function JobCard({
     >
       <div className="job-tile-top">
         <div className="job-tile-lead">
-          {index !== undefined && (
-            <span className="job-tile-rank">#{index}</span>
-          )}
-          <div className="job-tile-avatar" style={{ background: color }}>
-            {co.charAt(0).toUpperCase()}
-          </div>
+          {rank && <span className="job-tile-rank">{rank}</span>}
+          <CompanyLogo company={co} size="md" />
         </div>
 
         <div className="job-tile-score-group">
@@ -174,14 +168,10 @@ export default function JobCard({
               title={`Block "${co}"`}
             >⊘</button>
           )}
-          <div
-            className="job-tile-score"
-            style={{
-            background: t.gradient,
-            boxShadow: hovered ? `0 3px 10px ${t.glow}` : `0 1px 4px ${t.glow}`,
-            }}
-          >
-            ★{score}
+          <div className={`job-tile-match job-tile-match--${match.key}`}>
+            <span className="job-tile-match-icon">{match.icon}</span>
+            <strong>{score}</strong>
+            <span>Match</span>
           </div>
         </div>
       </div>
@@ -190,8 +180,13 @@ export default function JobCard({
         {title}
       </div>
 
-      <div className="job-tile-company" style={{ color }}>
+      <div className="job-tile-company">
         {co}
+      </div>
+
+      <div className="job-tile-confidence" aria-label={`Application confidence ${confidence}`}>
+        <span>Confidence</span>
+        <strong>{confidence}</strong>
       </div>
 
       <div className="job-tile-meta">
@@ -208,6 +203,15 @@ export default function JobCard({
         )}
         {searchTerm && <span className="job-tile-signal job-tile-signal--term">{searchTerm}</span>}
       </div>
+
+      {reasons.length > 0 && (
+        <div className="job-tile-reasons">
+          <span className="job-tile-reasons-label">Why</span>
+          {reasons.map((reason) => (
+            <span key={reason} className="job-tile-reason">✓ {reason}</span>
+          ))}
+        </div>
+      )}
 
       {isApplied && (
         <div className="job-tile-applied">
@@ -227,7 +231,7 @@ export default function JobCard({
               title={isInCart ? "Remove from saved jobs" : "Save job"}
               aria-pressed={isInCart}
             >
-              {isInCart ? "Saved" : "Save"}
+              {isInCart ? "♥ Saved" : "♡ Save"}
             </button>
           )}
           <button
@@ -236,7 +240,12 @@ export default function JobCard({
             onClick={handleMsg}
             title="Copy referral message"
           >
-            {msgCopied ? "Copied" : "Msg"}
+            {msgCopied ? "Copied" : (
+              <>
+                <span className="job-tile-action-label-full">Recruiter</span>
+                <span className="job-tile-action-label-short">Msg</span>
+              </>
+            )}
           </button>
           {!isApplied && job.job_url && (
             <button
@@ -262,7 +271,7 @@ export default function JobCard({
               boxShadow: hovered ? `0 3px 10px ${t.glow}` : "none",
             }}
           >
-            {isApplied ? "Open ↗" : "Apply ↗"}
+            {isApplied ? "Open ↗" : "🚀 Apply"}
           </a>
         ) : (
           <span className="job-tile-action job-tile-action--empty">—</span>
