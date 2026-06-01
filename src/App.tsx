@@ -43,6 +43,11 @@ export default function App() {
             <Dashboard />
           </ProtectedRoute>
         } />
+        <Route path="/today" element={
+          <ProtectedRoute>
+            <Dashboard initialPeriod="today" />
+          </ProtectedRoute>
+        } />
         <Route path="/swipe" element={<Navigate to="/" replace />} />
         <Route
           path="/weekly"

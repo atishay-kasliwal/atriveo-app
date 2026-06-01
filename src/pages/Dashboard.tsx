@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import AppHeader from "../components/AppHeader";
 import PageIntro from "../components/PageIntro";
 import { useApplyClickLog } from "../hooks/useApplyClickLog";
@@ -36,6 +37,10 @@ const LEVEL_FILTERS: LevelFilter[] = ["all", "New Grad", "Entry", "Mid"];
 const DAILY_APPLY_TARGET = 50;
 const BURST_SIZE = 5;
 const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+interface DashboardProps {
+  initialPeriod?: Period;
+}
 
 function isDataScientist(job: Job): boolean {
   return (
@@ -105,7 +110,8 @@ function formatRunTime(iso?: string | null): string {
 }
 
 
-export default function Dashboard() {
+export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
+  const navigate = useNavigate();
   const { stats, recordClick, getRecord, syncState, syncNow } = useApplyTracker();
   const { records: applyClickRecords, todayRecords: todayApplyClicks, recordApplyClick } = useApplyClickLog();
   const { items: cartItems, addToCart, removeFromCart, isInCart } = useCart();
@@ -118,8 +124,8 @@ export default function Dashboard() {
   const [todayJobs, setTodayJobs] = useState<Job[]>([]);
   const [yesterdayJobs, setYesterdayJobs] = useState<Job[]>([]);
   const [runHistory, setRunHistory] = useState<RunEntry[]>([]);
-  const [period, setPeriod] = useState<Period>("hour");
-  const [sortBy, setSortBy] = useState<SortBy>("time");
+  const [period, setPeriod] = useState<Period>(initialPeriod);
+  const [sortBy, setSortBy] = useState<SortBy>(initialPeriod === "hour" ? "time" : "score");
   const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
   const [h1bFilter, setH1bFilter] = useState(false);
   const [top500Filter, setTop500Filter] = useState(false);
@@ -130,10 +136,14 @@ export default function Dashboard() {
   const [locationFilter, setLocationFilter] = useState<string>("all");
   const [showTodayApplications, setShowTodayApplications] = useState(false);
 
-  const handlePeriodChange = (nextPeriod: Period) => {
+  const handlePeriodChange = (nextPeriod: Period, syncPath = true) => {
     setPeriod(nextPeriod);
     setSortBy(nextPeriod === "hour" ? "time" : "score");
     setLocationFilter("all");
+    if (syncPath) {
+      const nextPath = nextPeriod === "today" ? "/today" : "/";
+      if (window.location.pathname !== nextPath) navigate(nextPath);
+    }
   };
 
   useEffect(() => {

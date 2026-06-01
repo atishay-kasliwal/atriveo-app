@@ -16,7 +16,7 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { href: "/",              label: "Live Feed",      match: (p) => p === "/" || p.startsWith("/dashboard") },
+  { href: "/",              label: "Live Feed",      match: (p) => p === "/" || p.startsWith("/dashboard") || p.startsWith("/today") },
   { href: "/weekly",        label: "Weekly",         match: (p) => p.startsWith("/weekly") },
   { href: "/unclicked-100", label: "100+ Unclicked", match: (p) => p.startsWith("/unclicked-100") },
   { href: "/cart",          label: "Cart",           match: (p) => p.startsWith("/cart") },
