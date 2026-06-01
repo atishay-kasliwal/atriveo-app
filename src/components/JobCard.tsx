@@ -46,9 +46,9 @@ function scrapedDateLabel(dateStr?: string): string {
 }
 
 function tier(s: number) {
-  if (s >= 85) return { gradient: "linear-gradient(135deg,#1f7a4d,#44a86f)", solid: "#1f7a4d", glow: "rgba(31,122,77,0.24)", bg: "rgba(31,122,77,0.06)", bgHover: "rgba(31,122,77,0.1)" };
-  if (s >= 75) return { gradient: "linear-gradient(135deg,#1f6aa5,#4a98d2)", solid: "#1f6aa5", glow: "rgba(31,106,165,0.22)", bg: "rgba(31,106,165,0.055)", bgHover: "rgba(31,106,165,0.095)" };
-  if (s >= 50) return { gradient: "linear-gradient(135deg,#a66b16,#d79a2b)", solid: "#a66b16", glow: "rgba(166,107,22,0.22)", bg: "rgba(166,107,22,0.05)", bgHover: "rgba(166,107,22,0.09)" };
+  if (s >= 75) return { gradient: "linear-gradient(135deg,#1f7a4d,#44a86f)", solid: "#1f7a4d", glow: "rgba(31,122,77,0.24)", bg: "rgba(31,122,77,0.06)", bgHover: "rgba(31,122,77,0.1)" };
+  if (s >= 50) return { gradient: "linear-gradient(135deg,#1f6aa5,#4a98d2)", solid: "#1f6aa5", glow: "rgba(31,106,165,0.22)", bg: "rgba(31,106,165,0.055)", bgHover: "rgba(31,106,165,0.095)" };
+  if (s >= 25) return { gradient: "linear-gradient(135deg,#a66b16,#d79a2b)", solid: "#a66b16", glow: "rgba(166,107,22,0.22)", bg: "rgba(166,107,22,0.05)", bgHover: "rgba(166,107,22,0.09)" };
   return { gradient: "linear-gradient(135deg,#5e5b50,#827f70)", solid: "#5e5b50", glow: "rgba(94,91,80,0.18)", bg: "rgba(94,91,80,0.04)", bgHover: "rgba(94,91,80,0.075)" };
 }
 

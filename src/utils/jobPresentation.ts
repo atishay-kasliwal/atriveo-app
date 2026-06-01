@@ -8,7 +8,7 @@ type MatchTier = {
 
 export type CareerOpsRating = MatchTier & {
   score: number;
-  grade: "A+" | "A" | "B+" | "B" | "C";
+  grade: "A" | "B" | "C" | "D";
   rawPct: number;
   atsPct: number | null;
   fitPct: number | null;
@@ -156,11 +156,10 @@ export function careerOpsRating(job: Job): CareerOpsRating {
   const totalWeight = weightedParts.reduce((sum, part) => sum + part.weight, 0) || 1;
   const score = clampPct(weightedParts.reduce((sum, part) => sum + part.value * part.weight, 0) / totalWeight);
   const tier: Pick<CareerOpsRating, "key" | "icon" | "label" | "grade"> =
-    score >= 85 ? { key: "green", icon: "🔥", label: "Elite", grade: "A+" }
-      : score >= 75 ? { key: "blue", icon: "⚡", label: "Strong", grade: "A" }
-        : score >= 62 ? { key: "yellow", icon: "⭐", label: "Good", grade: "B+" }
-          : score >= 50 ? { key: "yellow", icon: "⭐", label: "Review", grade: "B" }
-            : { key: "gray", icon: "•", label: "Watch", grade: "C" };
+    score >= 75 ? { key: "green", icon: "🔥", label: "Strong", grade: "A" }
+      : score >= 50 ? { key: "blue", icon: "⚡", label: "Good", grade: "B" }
+        : score >= 25 ? { key: "yellow", icon: "⭐", label: "Review", grade: "C" }
+          : { key: "gray", icon: "•", label: "Watch", grade: "D" };
   const details = [
     `CareerOps ${score}/100`,
     `Raw ${job.score ?? 0}/${MAX_RAW_SCORE}`,
@@ -172,7 +171,7 @@ export function careerOpsRating(job: Job): CareerOpsRating {
 }
 
 export function careerOpsStars(score = 0): string {
-  const stars = score >= 85 ? 5 : score >= 75 ? 4 : score >= 62 ? 3 : score >= 50 ? 2 : 1;
+  const stars = score >= 75 ? 4 : score >= 50 ? 3 : score >= 25 ? 2 : 1;
   return "★★★★★".slice(0, stars) + "☆☆☆☆☆".slice(0, 5 - stars);
 }
 
