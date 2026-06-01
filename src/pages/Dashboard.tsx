@@ -34,6 +34,7 @@ const LOCATION_FILTERS = [
 const LEVEL_FILTERS: LevelFilter[] = ["all", "New Grad", "Entry", "Mid"];
 const DAILY_APPLY_TARGET = 50;
 const BURST_SIZE = 5;
+const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function isDataScientist(job: Job): boolean {
   return (
@@ -57,6 +58,20 @@ function toMs(iso?: string | null): number {
 
 function estDateKey(date = new Date()): string {
   return date.toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10);
+}
+
+function shiftDateKey(dateKey: string, days: number): string {
+  const date = new Date(`${dateKey}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function estWeekStartKey(date = new Date()): string {
+  const todayKey = estDateKey(date);
+  const noonUtc = new Date(`${todayKey}T12:00:00Z`);
+  const day = noonUtc.getUTCDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  return shiftDateKey(todayKey, mondayOffset);
 }
 
 function estHour(iso?: string | null): number {
@@ -361,6 +376,36 @@ export default function Dashboard() {
       .sort((a, b) => toMs(b.appliedAt) - toMs(a.appliedAt));
   }, [stats.appliedJobs]);
 
+  const trackerWeek = useMemo(() => {
+    const startKey = estWeekStartKey();
+    const todayKey = estDateKey();
+    const days = WEEKDAY_LABELS.map((label, index) => ({
+      label,
+      key: shiftDateKey(startKey, index),
+      count: 0,
+      synced: 0,
+      pending: 0,
+    }));
+    const dayByKey = new Map(days.map((day) => [day.key, day]));
+
+    Object.values(stats.appliedJobs).forEach((record) => {
+      const appliedAt = parseDateLike(record.lastAppliedAt);
+      if (!appliedAt) return;
+      const key = estDateKey(appliedAt);
+      const day = dayByKey.get(key);
+      if (!day) return;
+      day.count += 1;
+      if (record.trackerSyncStatus === "synced" || record.trackerSyncStatus === "duplicate") day.synced += 1;
+      else day.pending += 1;
+    });
+
+    const max = Math.max(1, ...days.map((day) => day.count));
+    const total = days.reduce((sum, day) => sum + day.count, 0);
+    const best = days.reduce((winner, day) => (day.count > winner.count ? day : winner), days[0]);
+    const bestLabel = best.count ? `${best.label} led with ${best.count}` : "No additions yet";
+    return { days, max, total, bestLabel, todayKey };
+  }, [stats.appliedJobs]);
+
   const nextBurstCount = Math.min(BURST_SIZE, highScoreOpenCount || openDisplayedJobs.length);
   const activeFilterCount = [
     selectedSession,
@@ -472,6 +517,39 @@ export default function Dashboard() {
                 </button>
               </div>
               )}
+          </section>
+
+          <section className="tracker-week-panel" aria-label="Tracker additions by weekday">
+            <div className="tracker-week-head">
+              <div>
+                <div className="tracker-week-kicker">Tracker Graph</div>
+                <div className="tracker-week-title">Added this week</div>
+              </div>
+              <strong>{trackerWeek.total}</strong>
+            </div>
+            <div className="tracker-week-bars">
+              {trackerWeek.days.map((day) => {
+                const height = day.count ? Math.max(18, Math.round((day.count / trackerWeek.max) * 100)) : 6;
+                return (
+                  <div
+                    className={`tracker-week-day${day.key === trackerWeek.todayKey ? " is-today" : ""}`}
+                    key={day.key}
+                    title={`${day.label}: ${day.count} added · ${day.synced} synced`}
+                  >
+                    <div className="tracker-week-bar-shell">
+                      <span style={{ height: `${height}%` }}>
+                        <em>{day.count || ""}</em>
+                      </span>
+                    </div>
+                    <small>{day.label}</small>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="tracker-week-foot">
+              <span>Mon–Sun</span>
+              <strong>{trackerWeek.bestLabel}</strong>
+            </div>
           </section>
 
           <PageIntro

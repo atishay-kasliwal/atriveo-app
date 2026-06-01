@@ -119,6 +119,7 @@ a:hover { text-decoration: underline; }
 @media (min-width: 1181px) {
   .dashboard-info-rail > .page-hero,
   .dashboard-info-rail > .today-apps-panel,
+  .dashboard-info-rail > .tracker-week-panel,
   .dashboard-info-rail > .best-jobs-panel,
   .dashboard-info-rail > .momentum-panel,
   .dashboard-info-rail > .sync-dock,
@@ -567,6 +568,149 @@ header {
 
 .today-apps-feed-button:hover {
   background: rgba(31,122,77,0.16);
+}
+
+/* ── Weekly tracker graph ────────────────────────────────────────────── */
+.tracker-week-panel {
+  border: 1px solid rgba(119,118,106,0.24);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(31,106,165,0.1), transparent 34%),
+    linear-gradient(180deg, rgba(255,253,244,0.94), rgba(251,248,236,0.76));
+  box-shadow: 0 8px 22px rgba(79,79,71,0.08);
+  padding: 12px;
+}
+
+.tracker-week-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tracker-week-kicker {
+  color: var(--blue);
+  font-family: "Inter", monospace;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tracker-week-title {
+  margin-top: 2px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.tracker-week-head > strong {
+  min-width: 42px;
+  height: 38px;
+  border-radius: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--tier-blue), #4a98d2);
+  color: #fff;
+  font-family: "Inter", monospace;
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow: 0 8px 18px rgba(31,106,165,0.16);
+}
+
+.tracker-week-bars {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  align-items: end;
+  margin-top: 12px;
+}
+
+.tracker-week-day {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  justify-items: center;
+}
+
+.tracker-week-bar-shell {
+  position: relative;
+  width: 100%;
+  height: 72px;
+  border-radius: 9px;
+  background: rgba(119,118,106,0.12);
+  overflow: hidden;
+  display: flex;
+  align-items: end;
+}
+
+.tracker-week-bar-shell span {
+  position: relative;
+  width: 100%;
+  min-height: 4px;
+  border-radius: 9px 9px 0 0;
+  background: linear-gradient(180deg, var(--tier-blue), var(--bean-olive));
+  transition: height 0.2s ease;
+}
+
+.tracker-week-day.is-today .tracker-week-bar-shell {
+  box-shadow: inset 0 0 0 2px rgba(31,122,77,0.18);
+}
+
+.tracker-week-day.is-today .tracker-week-bar-shell span {
+  background: linear-gradient(180deg, var(--tier-green), #44a86f);
+}
+
+.tracker-week-bar-shell em {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-family: "Inter", monospace;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.16);
+}
+
+.tracker-week-day small {
+  color: var(--text-2);
+  font-family: "Inter", monospace;
+  font-size: 9.5px;
+  font-weight: 900;
+}
+
+.tracker-week-day.is-today small {
+  color: var(--tier-green);
+}
+
+.tracker-week-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(119,118,106,0.16);
+  font-family: "Inter", monospace;
+}
+
+.tracker-week-foot span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.tracker-week-foot strong {
+  color: var(--green);
+  font-size: 10px;
+  text-align: right;
 }
 
 /* ── Apply momentum ───────────────────────────────────────────────────── */
