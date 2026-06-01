@@ -33,16 +33,17 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/swipe" element={<Navigate to="/dashboard" replace />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/swipe" element={<Navigate to="/" replace />} />
         <Route
           path="/weekly"
           element={
@@ -95,7 +96,7 @@ export default function App() {
           path="/*"
           element={
             <ProtectedRoute>
-              <Navigate to="/dashboard" replace />
+              <Navigate to="/" replace />
             </ProtectedRoute>
           }
         />

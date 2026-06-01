@@ -16,7 +16,7 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { href: "/dashboard",     label: "Live Feed",      match: (p) => p.startsWith("/dashboard") },
+  { href: "/",              label: "Live Feed",      match: (p) => p === "/" || p.startsWith("/dashboard") },
   { href: "/weekly",        label: "Weekly",         match: (p) => p.startsWith("/weekly") },
   { href: "/unclicked-100", label: "100+ Unclicked", match: (p) => p.startsWith("/unclicked-100") },
   { href: "/cart",          label: "Cart",           match: (p) => p.startsWith("/cart") },
@@ -32,7 +32,7 @@ export default function AppHeader() {
   return (
     <header>
       <div className="wrapper header-inner">
-        <a href="/dashboard" className="logo">
+        <a href="/" className="logo">
           <div className="logo-icon">A</div>
           <div>
             <div className="logo-name">Atriveo</div>
