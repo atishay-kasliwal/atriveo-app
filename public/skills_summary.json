@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-06-01T02:24:50.736650+00:00",
-  "total_analyzed": 23765,
+  "generated_at": "2026-06-01T03:24:05.132822+00:00",
+  "total_analyzed": 23775,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 13899,
-        "Java": 7184,
-        "SQL": 6093,
-        "JavaScript": 4766,
-        "TypeScript": 3647,
+        "Python": 13904,
+        "Java": 7185,
+        "SQL": 6098,
+        "JavaScript": 4768,
+        "TypeScript": 3649,
         "Kotlin": 1645,
         "Swift": 1491,
-        "HTML/CSS": 1391,
+        "HTML/CSS": 1392,
         "Rust": 891,
         ".NET": 872,
         "Bash/Shell": 568,
         "Go": 559,
         "Scala": 489,
         "Ruby": 476,
-        "PHP": 189,
+        "PHP": 190,
         "C++": 6,
         "C#": 3
       }
@@ -27,19 +27,19 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 4070,
-        "PyTorch": 2376,
-        "TensorFlow": 1884,
-        "Node.js": 1293,
+        "React": 4072,
+        "PyTorch": 2379,
+        "TensorFlow": 1887,
+        "Node.js": 1294,
         "LangChain": 1227,
         "Spring": 1166,
         "Angular": 1160,
-        "Pandas": 1137,
-        "Scikit-learn": 1110,
-        "NumPy": 988,
+        "Pandas": 1138,
+        "Scikit-learn": 1114,
+        "NumPy": 989,
         "Spring Boot": 691,
         "GraphQL": 688,
-        "Express": 671,
+        "Express": 672,
         "Next.js": 604,
         "Django": 552,
         "FastAPI": 533,
@@ -54,8 +54,8 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 6456,
-        "Azure": 3701,
+        "AWS": 6458,
+        "Azure": 3702,
         "GCP": 3381,
         "S3": 696,
         "Lambda": 641,
@@ -75,9 +75,9 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 8991,
+        "Scalability": 8993,
         "Distributed Systems": 3327,
-        "REST API": 3234,
+        "REST API": 3235,
         "Microservices": 1896,
         "System Design": 1896,
         "Event-Driven": 1075,
@@ -86,7 +86,7 @@
         "Caching": 446,
         "gRPC": 332,
         "RabbitMQ": 290,
-        "WebSocket": 131,
+        "WebSocket": 132,
         "Service Mesh": 128,
         "Load Balancing": 119
       }
@@ -94,10 +94,10 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 4597,
+        "CI/CD": 4600,
         "Kubernetes": 2901,
         "Docker": 2667,
-        "Git": 2555,
+        "Git": 2556,
         "Linux": 2048,
         "Terraform": 1202,
         "Jenkins": 818,
@@ -115,45 +115,45 @@
       "color": "#f43f5e",
       "skills": {
         "ETL/ELT": 3255,
-        "PostgreSQL": 1625,
-        "Spark": 1549,
+        "PostgreSQL": 1626,
+        "Spark": 1553,
         "Vector DB": 1174,
         "Kafka": 1026,
-        "MySQL": 917,
+        "MySQL": 918,
         "Databricks": 776,
-        "Snowflake": 707,
+        "Snowflake": 708,
         "MongoDB": 645,
         "Airflow": 626,
         "Redis": 519,
         "Elasticsearch": 372,
-        "BigQuery": 312,
+        "BigQuery": 313,
         "dbt": 287,
         "Flink": 145,
         "Cassandra": 125,
-        "ClickHouse": 78
+        "ClickHouse": 79
       }
     },
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 7524,
+        "Machine Learning": 7529,
         "LLM": 4455,
         "Agents": 3994,
         "GenAI": 2992,
-        "PyTorch": 2376,
+        "PyTorch": 2379,
         "RAG": 2089,
-        "TensorFlow": 1884,
-        "NLP": 1809,
-        "Deep Learning": 1459,
+        "TensorFlow": 1887,
+        "NLP": 1814,
+        "Deep Learning": 1462,
         "Prompt Eng": 1357,
         "LangChain": 1227,
         "Fine-tuning": 1162,
-        "OpenAI": 1135,
+        "OpenAI": 1136,
         "Embeddings": 625,
         "Hugging Face": 575,
         "SageMaker": 400,
         "Vertex AI": 392,
-        "MLflow": 302
+        "MLflow": 303
       }
     },
     "Security": {
@@ -177,7 +177,7 @@
         "Code Review": 4416,
         "Mentorship": 4411,
         "Agile/Scrum": 3459,
-        "Leadership": 1300,
+        "Leadership": 1301,
         "On-call": 1233
       }
     }
