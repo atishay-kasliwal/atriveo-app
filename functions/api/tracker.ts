@@ -60,11 +60,21 @@ type ApplyStats = {
   appliedJobs?: Record<string, ApplyRecord>;
 };
 
-function latestAppliedJob(stats: ApplyStats): { jobUrl: string; record: ApplyRecord } | null {
-  const appliedJobs = stats.appliedJobs;
-  if (!appliedJobs || typeof appliedJobs !== "object") return null;
+type SyncScope = "latest" | "today";
 
-  let latest: { jobUrl: string; record: ApplyRecord; time: number } | null = null;
+type AppliedJobEntry = {
+  jobUrl: string;
+  record: ApplyRecord;
+  submittedAt: string;
+  submittedLocalDate: string;
+  time: number;
+};
+
+function appliedJobEntries(stats: ApplyStats): AppliedJobEntry[] {
+  const appliedJobs = stats.appliedJobs;
+  if (!appliedJobs || typeof appliedJobs !== "object") return [];
+
+  const entries: AppliedJobEntry[] = [];
   for (const [jobUrl, record] of Object.entries(appliedJobs)) {
     if (!jobUrl || !record || typeof record !== "object") continue;
     let parsedUrl: URL;
@@ -78,9 +88,11 @@ function latestAppliedJob(stats: ApplyStats): { jobUrl: string; record: ApplyRec
     const rawAppliedAt = record.lastAppliedAt || record.appliedAt;
     const time = rawAppliedAt ? Date.parse(rawAppliedAt) : 0;
     if (!Number.isFinite(time) || time <= 0) continue;
-    if (!latest || time > latest.time) latest = { jobUrl, record, time };
+    const submittedLocalDate = easternDateKey(rawAppliedAt);
+    if (!submittedLocalDate) continue;
+    entries.push({ jobUrl, record, submittedAt: rawAppliedAt, submittedLocalDate, time });
   }
-  return latest ? { jobUrl: latest.jobUrl, record: latest.record } : null;
+  return entries.sort((a, b) => a.time - b.time);
 }
 
 function easternDateKey(iso: string | undefined): string | undefined {
@@ -118,31 +130,27 @@ async function getUserName(env: Env, email: string, tokenName?: string): Promise
   return row?.name?.trim() || undefined;
 }
 
-async function syncLatestApplicationToTracker(env: Env, user: AuthUser, stats: ApplyStats) {
-  const trackerApiUrl = env.TRACKER_API_URL?.trim().replace(/\/+$/, "");
-  const trackerApiToken = env.TRACKER_API_TOKEN?.trim();
-  if (!trackerApiUrl || !trackerApiToken) return { configured: false };
-
-  const latest = latestAppliedJob(stats);
-  if (!latest) return { configured: true, skipped: "no-valid-application" };
-
-  const title = String(latest.record.title || stats.lastJobTitle || "").trim();
-  const company = String(latest.record.company || stats.lastCompany || "").trim();
+async function syncApplicationToTracker(
+  env: Env,
+  user: AuthUser,
+  stats: ApplyStats,
+  entry: AppliedJobEntry,
+  userName: string | undefined,
+  trackerApiUrl: string,
+  trackerApiToken: string,
+) {
+  const title = String(entry.record.title || stats.lastJobTitle || "").trim();
+  const company = String(entry.record.company || stats.lastCompany || "").trim();
   if (!title || !company) return { configured: true, skipped: "missing-title-or-company" };
 
-  const submittedAt = latest.record.lastAppliedAt || latest.record.appliedAt || new Date().toISOString();
-  const submittedLocalDate = easternDateKey(submittedAt);
-  if (!submittedLocalDate) return { configured: true, skipped: "invalid-submitted-at" };
-
   const jobApplicationId =
-    latest.record.jobApplicationId?.trim() ||
-    latest.record.job_application_id?.trim() ||
-    extractJobApplicationId(latest.jobUrl);
-  const location = latest.record.location?.trim();
-  const userName = await getUserName(env, user.email, user.name);
+    entry.record.jobApplicationId?.trim() ||
+    entry.record.job_application_id?.trim() ||
+    extractJobApplicationId(entry.jobUrl);
+  const location = entry.record.location?.trim();
 
   const extractedJob: { url: string; location?: string } = {
-    url: latest.jobUrl,
+    url: entry.jobUrl,
   };
   if (location) extractedJob.location = location;
 
@@ -157,7 +165,7 @@ async function syncLatestApplicationToTracker(env: Env, user: AuthUser, stats: A
   } = {
     job_title: title,
     company,
-    job_link: latest.jobUrl,
+    job_link: entry.jobUrl,
     keyword_match: "Medium",
     referral: "No",
     notes: "Applied from Atriveo Job Platform.",
@@ -178,8 +186,8 @@ async function syncLatestApplicationToTracker(env: Env, user: AuthUser, stats: A
     user_email: user.email,
     ...(userName ? { user_name: userName } : {}),
     source: "Atriveo Job Platform",
-    submitted_at: submittedAt,
-    submitted_local_date: submittedLocalDate,
+    submitted_at: entry.submittedAt,
+    submitted_local_date: entry.submittedLocalDate,
     extracted_job: extractedJob,
     application,
   };
@@ -194,14 +202,47 @@ async function syncLatestApplicationToTracker(env: Env, user: AuthUser, stats: A
   });
 
   if (response.status === 200 || response.status === 201) {
-    return { configured: true, synced: true, status: response.status };
+    return { configured: true, synced: true, status: response.status, jobUrl: entry.jobUrl };
   }
   if (response.status === 409) {
-    return { configured: true, synced: true, duplicate: true, status: response.status };
+    return { configured: true, synced: true, duplicate: true, status: response.status, jobUrl: entry.jobUrl };
   }
 
   const detail = await response.text().catch(() => "");
-  return { configured: true, synced: false, status: response.status, error: detail.slice(0, 500) };
+  return { configured: true, synced: false, status: response.status, error: detail.slice(0, 500), jobUrl: entry.jobUrl };
+}
+
+async function syncApplicationsToTracker(env: Env, user: AuthUser, stats: ApplyStats, scope: SyncScope) {
+  const trackerApiUrl = env.TRACKER_API_URL?.trim().replace(/\/+$/, "");
+  const trackerApiToken = env.TRACKER_API_TOKEN?.trim();
+  if (!trackerApiUrl || !trackerApiToken) return { configured: false, scope };
+
+  const entries = appliedJobEntries(stats);
+  const today = easternDateKey(new Date().toISOString());
+  const scopedEntries = scope === "today" && today
+    ? entries.filter((entry) => entry.submittedLocalDate === today)
+    : entries.slice(-1);
+  if (!scopedEntries.length) return { configured: true, scope, skipped: "no-valid-application" };
+
+  const userName = await getUserName(env, user.email, user.name);
+  const selectedEntries = scope === "today" ? scopedEntries.slice(-150) : scopedEntries;
+  const results = [];
+  for (const entry of selectedEntries) {
+    results.push(await syncApplicationToTracker(env, user, stats, entry, userName, trackerApiUrl, trackerApiToken));
+  }
+
+  if (scope === "latest") return results[0];
+
+  return {
+    configured: true,
+    scope,
+    total: results.length,
+    synced: results.filter((result) => result.synced).length,
+    duplicates: results.filter((result) => result.duplicate).length,
+    failed: results.filter((result) => result.synced === false).length,
+    skipped: results.filter((result) => result.skipped).length,
+    results,
+  };
 }
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
@@ -235,8 +276,10 @@ export const onRequestPut: PagesFunction<Env> = async ({ request, env }) => {
     .bind(user.email, data)
     .run();
 
-  const trackerSync = await syncLatestApplicationToTracker(env, user, body).catch((error) => ({
+  const syncScope: SyncScope = new URL(request.url).searchParams.get("sync") === "today" ? "today" : "latest";
+  const trackerSync = await syncApplicationsToTracker(env, user, body, syncScope).catch((error) => ({
     configured: Boolean(env.TRACKER_API_URL && env.TRACKER_API_TOKEN),
+    scope: syncScope,
     synced: false,
     error: error instanceof Error ? error.message : String(error),
   }));

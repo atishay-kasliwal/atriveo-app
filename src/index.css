@@ -111,6 +111,8 @@ a:hover { text-decoration: underline; }
 @media (min-width: 1181px) {
   .dashboard-info-rail > .page-hero,
   .dashboard-info-rail > .momentum-panel,
+  .dashboard-info-rail > .sync-dock,
+  .dashboard-info-rail > .quest-panel,
   .dashboard-info-rail > .top-bar,
   .dashboard-info-rail > .run-strip-wrap {
     align-self: start;
@@ -603,6 +605,235 @@ header {
 
   .momentum-stat small {
     white-space: normal;
+  }
+}
+
+/* ── End-day sync dock ───────────────────────────────────────────────── */
+.sync-dock,
+.quest-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(119,118,106,0.24);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(217,210,184,0.35), transparent 34%),
+    linear-gradient(180deg, rgba(255,253,244,0.92), rgba(251,248,236,0.74));
+  box-shadow: 0 8px 22px rgba(79,79,71,0.08);
+}
+
+.sync-dock {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px;
+}
+
+.sync-dock::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--bean-dark), var(--bean-olive), var(--bean-moss));
+}
+
+.sync-dock-top,
+.quest-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.sync-dock-kicker,
+.quest-kicker {
+  color: var(--blue);
+  font-family: "Inter", monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sync-dock-title,
+.quest-title {
+  margin-top: 2px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.sync-dock-orb {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--bean-dark), var(--bean-olive));
+  box-shadow: 0 8px 18px rgba(79,79,71,0.18);
+}
+
+.sync-dock--syncing .sync-dock-orb {
+  animation: sync-spin 1.05s linear infinite;
+}
+
+.sync-dock--synced .sync-dock-orb {
+  background: linear-gradient(135deg, var(--bean-moss), var(--bean-olive));
+}
+
+.sync-dock--error .sync-dock-orb {
+  background: linear-gradient(135deg, var(--bean-clay), var(--bean-umber));
+}
+
+@keyframes sync-spin {
+  to { transform: rotate(360deg); }
+}
+
+.sync-dock-message {
+  position: relative;
+  z-index: 1;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.sync-dock-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.sync-dock-button {
+  flex: 1;
+  min-height: 34px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--bean-dark), var(--bean-olive));
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(79,79,71,0.16);
+  transition: transform 0.14s, filter 0.14s, opacity 0.14s;
+}
+
+.sync-dock-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.sync-dock-button:disabled {
+  cursor: default;
+  opacity: 0.56;
+  box-shadow: none;
+}
+
+.sync-dock-chip {
+  border: 1px solid rgba(105,114,90,0.24);
+  border-radius: 999px;
+  background: rgba(105,114,90,0.1);
+  color: var(--green);
+  font-family: "Inter", monospace;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 6px 8px;
+  white-space: nowrap;
+}
+
+.sync-dock-foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-family: "Inter", monospace;
+  font-size: 9.5px;
+}
+
+/* ── Daily quest panel ───────────────────────────────────────────────── */
+.quest-panel {
+  padding: 12px;
+}
+
+.quest-spark {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bean-umber);
+  background: rgba(154,118,83,0.1);
+  border: 1px solid rgba(154,118,83,0.22);
+  font-size: 15px;
+}
+
+.quest-card-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.quest-card {
+  min-width: 0;
+  padding: 9px 8px;
+  border: 1px solid rgba(119,118,106,0.2);
+  border-radius: 11px;
+  background: rgba(255,253,244,0.72);
+}
+
+.quest-emoji {
+  display: block;
+  font-size: 17px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.quest-label {
+  display: block;
+  color: var(--muted);
+  font-family: "Inter", monospace;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.quest-card strong {
+  display: block;
+  margin-top: 2px;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.quest-card small {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-2);
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+@media (max-width: 520px) {
+  .quest-card-grid {
+    grid-template-columns: 1fr;
   }
 }
 

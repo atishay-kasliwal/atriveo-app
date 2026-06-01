@@ -10,6 +10,17 @@ export interface ApplyMetadata {
   jobApplicationId?: string | null;
 }
 
+export type ApplySyncStatus = "idle" | "syncing" | "synced" | "queued" | "error";
+export type ApplySyncScope = "latest" | "today";
+
+export interface ApplySyncState {
+  status: ApplySyncStatus;
+  scope: ApplySyncScope;
+  message: string;
+  lastAttemptAt: string | null;
+  lastSyncedAt: string | null;
+}
+
 export interface ApplyRecord {
   clicks: number;
   lastAppliedAt: string;
@@ -95,12 +106,52 @@ function persist(uid: string, stats: ApplyStats) {
   try { localStorage.setItem(KEY(uid), JSON.stringify(stats)); } catch { /* ignore */ }
 }
 
-function syncToServer(stats: ApplyStats) {
-  fetch("/api/tracker", {
+function syncToServer(stats: ApplyStats, scope: ApplySyncScope = "latest") {
+  const suffix = scope === "today" ? "?sync=today" : "";
+  return fetch(`/api/tracker${suffix}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(stats),
-  }).catch(() => { /* non-fatal */ });
+  }).then(async (response) => {
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Unable to sync tracker");
+    return data;
+  });
+}
+
+function describeTrackerSync(data: unknown, scope: ApplySyncScope): { failed: boolean; message: string } {
+  const envelope = data && typeof data === "object" ? data as { trackerSync?: Record<string, unknown> } : {};
+  const trackerSync = envelope.trackerSync;
+  if (!trackerSync) return { failed: false, message: "Saved locally and synced to Atriveo." };
+
+  if (trackerSync.configured === false) {
+    return { failed: false, message: "Saved locally. Add tracker secrets to enable API sync." };
+  }
+
+  const failed = Number(trackerSync.failed || 0);
+  const total = Number(trackerSync.total || 0);
+  const duplicates = Number(trackerSync.duplicates || 0);
+  if (scope === "today" && total > 0) {
+    if (failed > 0) {
+      return { failed: true, message: `${failed} tracker sync issue${failed === 1 ? "" : "s"} — local progress is safe.` };
+    }
+    const duplicateText = duplicates > 0 ? ` · ${duplicates} already there` : "";
+    return { failed: false, message: `End-day sync checked ${total} application${total === 1 ? "" : "s"}${duplicateText}.` };
+  }
+
+  if (trackerSync.synced === true) {
+    return { failed: false, message: trackerSync.duplicate ? "Already synced in tracker." : "Synced to tracker." };
+  }
+
+  if (typeof trackerSync.skipped === "string") {
+    return { failed: false, message: `Saved locally. Tracker skipped ${trackerSync.skipped}.` };
+  }
+
+  if (trackerSync.synced === false || trackerSync.error) {
+    return { failed: true, message: "Tracker sync needs retry — local progress is safe." };
+  }
+
+  return { failed: false, message: "Saved locally and synced to Atriveo." };
 }
 
 export function useApplyTracker() {
@@ -108,6 +159,60 @@ export function useApplyTracker() {
   const uid = user?.email ?? "anon";
 
   const [stats, setStats] = useState<ApplyStats>(empty);
+  const [syncState, setSyncState] = useState<ApplySyncState>({
+    status: "idle",
+    scope: "latest",
+    message: "Ready to sync applications.",
+    lastAttemptAt: null,
+    lastSyncedAt: null,
+  });
+
+  const syncSnapshot = useCallback((snapshot: ApplyStats, scope: ApplySyncScope = "latest") => {
+    const lastAttemptAt = new Date().toISOString();
+    if (uid === "anon") {
+      setSyncState((prev) => ({
+        ...prev,
+        status: "queued",
+        scope,
+        message: "Sign in to sync this progress.",
+        lastAttemptAt,
+      }));
+      return Promise.resolve(false);
+    }
+
+    setSyncState((prev) => ({
+      ...prev,
+      status: "syncing",
+      scope,
+      message: scope === "today" ? "Running end-day sync…" : "Syncing latest application…",
+      lastAttemptAt,
+    }));
+
+    return syncToServer(snapshot, scope)
+      .then((data) => {
+        const result = describeTrackerSync(data, scope);
+        const nowIso = new Date().toISOString();
+        setSyncState((prev) => ({
+          ...prev,
+          status: result.failed ? "error" : "synced",
+          scope,
+          message: result.message,
+          lastAttemptAt,
+          lastSyncedAt: result.failed ? prev.lastSyncedAt : nowIso,
+        }));
+        return !result.failed;
+      })
+      .catch(() => {
+        setSyncState((prev) => ({
+          ...prev,
+          status: "error",
+          scope,
+          message: "Network hiccup — saved locally, retry sync later.",
+          lastAttemptAt,
+        }));
+        return false;
+      });
+  }, [uid]);
 
   // On auth resolved: load cache instantly, then pull server state
   useEffect(() => {
@@ -127,7 +232,7 @@ export function useApplyTracker() {
           // If server empty but we have local/anon data, push it up
           if (serverIsEmpty && cached.count > 0) {
             persist(uid, cached);
-            syncToServer(cached);
+            syncSnapshot(cached);
           } else if (!serverIsEmpty) {
             setStats(normalized);
             persist(uid, normalized);
@@ -135,7 +240,7 @@ export function useApplyTracker() {
         })
         .catch(() => { /* stick with localStorage on network error */ });
     }
-  }, [uid, authLoading]);
+  }, [uid, authLoading, syncSnapshot]);
 
   const recordClick = useCallback((jobUrl: string, title: string, company: string, metadata: ApplyMetadata = {}) => {
     setStats((prev) => {
@@ -165,10 +270,10 @@ export function useApplyTracker() {
         },
       };
       persist(uid, next);
-      if (uid !== "anon") syncToServer(next);
+      syncSnapshot(next);
       return next;
     });
-  }, [uid]);
+  }, [syncSnapshot, uid]);
 
   const getRecord = useCallback((jobUrl: string): ApplyRecord | null => {
     return stats.appliedJobs[jobUrl] ?? null;
@@ -186,10 +291,15 @@ export function useApplyTracker() {
         },
       };
       persist(uid, next);
-      if (uid !== "anon") syncToServer(next);
+      syncSnapshot(next);
       return next;
     });
-  }, [uid]);
+  }, [syncSnapshot, uid]);
 
-  return { stats, recordClick, getRecord, setTrackerStatus };
+  const syncNow = useCallback((scope: ApplySyncScope = "today") => {
+    persist(uid, stats);
+    return syncSnapshot(stats, scope);
+  }, [stats, syncSnapshot, uid]);
+
+  return { stats, recordClick, getRecord, setTrackerStatus, syncState, syncNow };
 }

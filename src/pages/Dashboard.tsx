@@ -89,7 +89,7 @@ function formatRunTime(iso?: string | null): string {
 
 
 export default function Dashboard() {
-  const { stats, recordClick, getRecord } = useApplyTracker();
+  const { stats, recordClick, getRecord, syncState, syncNow } = useApplyTracker();
   const { items: cartItems, addToCart, removeFromCart, isInCart } = useCart();
   const { isExcluded, excludeCompany } = useExclusions();
   const handleCartToggle = (job: Job) => {
@@ -354,6 +354,35 @@ export default function Dashboard() {
     locationFilter !== "all",
   ].filter(Boolean).length;
 
+  const syncStatusLabel =
+    syncState.status === "syncing" ? "Syncing"
+      : syncState.status === "synced" ? "Synced"
+        : syncState.status === "error" ? "Retry"
+          : syncState.status === "queued" ? "Queued"
+            : "Ready";
+  const syncToneClass = `sync-dock--${syncState.status}`;
+  const lastSyncLabel = syncState.lastSyncedAt ? `Last synced ${formatRunTime(syncState.lastSyncedAt)}` : "No tracker sync yet";
+  const questCards = [
+    {
+      emoji: "⚡",
+      label: "Next burst",
+      value: `${nextBurstCount || 1} cards`,
+      helper: highScoreOpenCount ? `${highScoreOpenCount} strong matches waiting` : "clear the current view",
+    },
+    {
+      emoji: "🧺",
+      label: "Saved queue",
+      value: `${cartItems.length}`,
+      helper: cartItems.length ? "review before closing" : "use Save for maybe-laters",
+    },
+    {
+      emoji: "🧾",
+      label: "Sync check",
+      value: syncStatusLabel,
+      helper: syncState.status === "error" ? "local progress is safe" : "tracker stays caught up",
+    },
+  ];
+
   const hasActiveFilters = Boolean(
     selectedSession ||
     query ||
@@ -442,6 +471,54 @@ export default function Dashboard() {
                   <span>{applyMomentum.bars[applyMomentum.bars.length - 1]?.label}</span>
                 </div>
               </div>
+            </div>
+          </section>
+
+          <section className={`sync-dock ${syncToneClass}`} aria-label="End of day tracker sync">
+            <div className="sync-dock-top">
+              <div>
+                <div className="sync-dock-kicker">End-Day Sync</div>
+                <div className="sync-dock-title">Close the loop before you log off.</div>
+              </div>
+              <div className="sync-dock-orb" aria-hidden="true">
+                {syncState.status === "synced" ? "✓" : syncState.status === "error" ? "!" : "↻"}
+              </div>
+            </div>
+            <p className="sync-dock-message">{syncState.message}</p>
+            <div className="sync-dock-actions">
+              <button
+                type="button"
+                className="sync-dock-button"
+                disabled={syncState.status === "syncing" || stats.todayCount === 0}
+                onClick={() => { void syncNow("today"); }}
+              >
+                {syncState.status === "syncing" && syncState.scope === "today" ? "Syncing…" : "Run end-day sync"}
+              </button>
+              <span className="sync-dock-chip">{stats.todayCount} today</span>
+            </div>
+            <div className="sync-dock-foot">
+              <span>{lastSyncLabel}</span>
+              <span>{syncStatusLabel}</span>
+            </div>
+          </section>
+
+          <section className="quest-panel" aria-label="Daily application quest">
+            <div className="quest-panel-head">
+              <div>
+                <div className="quest-kicker">Daily Quest</div>
+                <div className="quest-title">Apply in tiny boss fights.</div>
+              </div>
+              <span className="quest-spark">✦</span>
+            </div>
+            <div className="quest-card-grid">
+              {questCards.map((card) => (
+                <div className="quest-card" key={card.label}>
+                  <span className="quest-emoji" aria-hidden="true">{card.emoji}</span>
+                  <span className="quest-label">{card.label}</span>
+                  <strong>{card.value}</strong>
+                  <small>{card.helper}</small>
+                </div>
+              ))}
             </div>
           </section>
 
