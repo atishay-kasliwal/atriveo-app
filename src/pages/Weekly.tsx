@@ -208,7 +208,7 @@ export default function Weekly() {
                 key={job.job_url || i}
                 job={job}
                 applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                onApplyClick={recordClick}
+                onAddToTracker={recordClick}
                 onExcludeCompany={excludeCompany}
                 onCartToggle={handleCartToggle}
                 isInCart={job.job_url ? isInCart(job.job_url) : false}

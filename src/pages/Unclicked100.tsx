@@ -79,12 +79,12 @@ export default function Unclicked100() {
           <div className="kpi-card green">
             <div className="kpi-value">{unclicked.length}</div>
             <div className="kpi-label">Unclicked</div>
-            <div className="kpi-sub">not yet applied</div>
+            <div className="kpi-sub">not yet tracked</div>
           </div>
           <div className="kpi-card orange">
             <div className="kpi-value">{hundredPlus.length - unclicked.length}</div>
-            <div className="kpi-label">Clicked</div>
-            <div className="kpi-sub">already applied</div>
+            <div className="kpi-label">Tracked</div>
+            <div className="kpi-sub">already in tracker</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-value">{topScore}</div>
@@ -121,7 +121,7 @@ export default function Unclicked100() {
                 key={job.job_url || i}
                 job={job}
                 applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                onApplyClick={recordClick}
+                onAddToTracker={recordClick}
               />
             ))}
           </div>

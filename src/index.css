@@ -1766,7 +1766,7 @@ header {
   text-decoration: none;
 }
 
-.job-tile-action--mark,
+.job-tile-action--tracker,
 .job-tile-action--message {
   flex: 1 1 42px;
   border: 1px solid rgba(119,118,106,0.22);
@@ -1774,10 +1774,15 @@ header {
   color: var(--bean-dark);
 }
 
-.job-tile-action--mark {
+.job-tile-action--tracker {
+  flex: 1.35 1 72px;
   border-color: rgba(105,114,90,0.24);
   background: rgba(105,114,90,0.08);
   color: var(--green);
+}
+
+.job-tile-action-label-short {
+  display: none;
 }
 
 .job-tile-action--save {
@@ -1796,12 +1801,12 @@ header {
   background: rgba(119,118,106,0.14);
 }
 
-.job-tile-action--mark:hover,
+.job-tile-action--tracker:hover,
 .job-tile-action--message:hover {
   background: rgba(119,118,106,0.18);
 }
 
-.job-tile-action--mark:hover {
+.job-tile-action--tracker:hover {
   background: rgba(105,114,90,0.14);
 }
 
@@ -1845,15 +1850,18 @@ header {
   .job-tile-signal--term { display: none; }
   .job-tile-action--message { flex: 1.15; }
   .job-tile-action--apply { flex: 1.55; }
+  .job-tile-action-label-full { display: none; }
+  .job-tile-action-label-short { display: inline; }
 }
 
 @container (max-width: 240px) {
-  .job-tile-action--mark { display: none; }
+  .job-tile-action--save { display: none; }
 }
 
 @container (max-width: 210px) {
   .job-tile-applied { display: none; }
-  .job-tile-action--message { flex: 1; }
+  .job-tile-action--message { display: none; }
+  .job-tile-action--tracker { flex: 1.25; }
   .job-tile-action--apply { flex: 1.35; }
 }
 
@@ -1893,6 +1901,18 @@ header {
   border-color: rgba(105,114,90,0.5);
   color: var(--green);
   background: var(--green-lo);
+}
+
+.tracker-add-btn {
+  width: auto;
+  min-width: 104px;
+  height: 24px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border-color: rgba(105,114,90,0.28);
+  background: rgba(105,114,90,0.08);
+  color: var(--green);
+  white-space: nowrap;
 }
 
 /* badges */
@@ -1986,10 +2006,11 @@ footer a:hover { color: var(--blue); }
   .job-co-mobile { display: inline; font-weight: 600; color: var(--text-2); }
   .mobile-sep    { display: inline; }
 
-  /* apply col: stack mark+apply vertically, smaller */
+  /* apply col: stack tracker+apply vertically, smaller */
   .job-apply-col { flex-direction: column; gap: 3px; align-items: flex-start; }
   .apply-btn { font-size: 10px; padding: 3px 8px; }
   .mark-btn  { width: 20px; height: 20px; font-size: 10px; }
+  .tracker-add-btn { width: auto; min-width: 94px; padding: 3px 7px; }
 
   .job-score { font-size: 15px; }
 }

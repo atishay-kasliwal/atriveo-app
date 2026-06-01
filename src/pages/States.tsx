@@ -351,25 +351,24 @@ export default function States() {
                                   background: "var(--surface-2)", color: "var(--text-2)", fontSize: 11, fontWeight: 700, cursor: "pointer",
                                   whiteSpace: "nowrap",
                                 }}
-                              >Click</button>
+                              >Add to tracker</button>
                             )}
                             {job.job_url && (
                               <a
                                 href={job.job_url}
                                 target="_blank"
                                 rel="noopener"
-                                onClick={() => recordClick(job.job_url, job.title || "", job.company || "", { location: job.location || null })}
                                 style={{
                                   padding: "5px 14px", borderRadius: 6,
                                   background: isApplied ? "linear-gradient(135deg,#69725a,#4f4f47)" : `linear-gradient(135deg,${jColor},${jColor}cc)`,
                                   color: "#fff", fontSize: 11, fontWeight: 700,
                                   textDecoration: "none", whiteSpace: "nowrap",
                                 }}
-                              >{isApplied ? "Applied ✓" : "Apply ↗"}</a>
+                              >{isApplied ? "Open ↗" : "Apply ↗"}</a>
                             )}
                             {isApplied && (
                               <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 700 }}>
-                                ×{rec?.clicks} clicks
+                                tracked ×{rec?.clicks}
                               </span>
                             )}
                           </div>

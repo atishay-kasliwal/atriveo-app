@@ -107,7 +107,7 @@ export default function Cart() {
                     key={item.url || i}
                     job={item.job}
                     applyRecord={item.job.job_url ? getRecord(item.job.job_url) : null}
-                    onApplyClick={recordClick}
+                    onAddToTracker={recordClick}
                     onCartToggle={handleCartToggle}
                     isInCart={true}
                   />

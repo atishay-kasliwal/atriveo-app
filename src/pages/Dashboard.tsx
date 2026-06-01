@@ -723,7 +723,7 @@ export default function Dashboard() {
                               job={job}
                               index={i + 1}
                               applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                              onApplyClick={recordClick}
+                              onAddToTracker={recordClick}
                               onExcludeCompany={excludeCompany}
                               onCartToggle={handleCartToggle}
                               isInCart={job.job_url ? isInCart(job.job_url) : false}
@@ -749,7 +749,7 @@ export default function Dashboard() {
                         job={job}
                         index={i + 1}
                         applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                        onApplyClick={recordClick}
+                        onAddToTracker={recordClick}
                         onExcludeCompany={excludeCompany}
                         onCartToggle={handleCartToggle}
                         isInCart={job.job_url ? isInCart(job.job_url) : false}

@@ -91,11 +91,11 @@ interface Props {
   job: Job;
   index: number;
   applyRecord: ApplyRecord | null;
-  onApplyClick: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
+  onAddToTracker: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
   onExcludeCompany?: (company: string) => void;
 }
 
-export default function JobRow({ job, index, applyRecord, onApplyClick, onExcludeCompany }: Props) {
+export default function JobRow({ job, index, applyRecord, onAddToTracker, onExcludeCompany }: Props) {
   const [msgCopied, setMsgCopied] = useState(false);
 
   function handleMessageClick(e: React.MouseEvent) {
@@ -147,7 +147,7 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
           <span className="job-title-text" title={title}>{title}</span>
           <span className="job-title-badges">
             {isNew && <span className="badge badge-new">NEW</span>}
-            {isApplied && <span className="badge badge-applied">Clicked {applyClicks}x</span>}
+            {isApplied && <span className="badge badge-applied">Tracked {applyClicks}x</span>}
             {term && <span className="badge badge-term">{term}</span>}
             <span className="badge badge-src badge-src-linkedin">LinkedIn</span>
           </span>
@@ -160,7 +160,7 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
           {posted && !isNew && <><span className="sep">·</span><span className="job-date">{posted}</span></>}
           {batch && <><span className="sep">·</span><span className="job-batch">⏱ {batch}</span></>}
           {isApplied && appliedAt && (
-            <><span className="sep">·</span><span className="apply-inline-meta">Clicked {applyClicks}x · {appliedAt}</span></>
+            <><span className="sep">·</span><span className="apply-inline-meta">Tracked {applyClicks}x · {appliedAt}</span></>
           )}
         </div>
       </div>
@@ -180,10 +180,10 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
       <div className="job-apply-col">
         {!isApplied && job.job_url && (
           <button
-            className="mark-btn"
-            title="Mark as applied without opening"
-            onClick={(e) => { e.preventDefault(); onApplyClick(job.job_url, title, co, { location: job.location || null }); }}
-          >✓</button>
+            className="mark-btn tracker-add-btn"
+            title="Add to Atriveo tracker"
+            onClick={(e) => { e.preventDefault(); onAddToTracker(job.job_url, title, co, { location: job.location || null }); }}
+          >Add to tracker</button>
         )}
         <button className="message-btn" onClick={handleMessageClick}>
           {msgCopied ? "Copied!" : "Msg"}
@@ -194,9 +194,8 @@ export default function JobRow({ job, index, applyRecord, onApplyClick, onExclud
             href={job.job_url}
             target="_blank"
             rel="noopener"
-            onClick={() => onApplyClick(job.job_url, title, co, { location: job.location || null })}
           >
-            {isApplied ? "Applied ✓" : "Apply ↗"}
+            {isApplied ? "Open ↗" : "Apply ↗"}
           </a>
         ) : (
           <span style={{ fontSize: "11px", color: "var(--muted)" }}>—</span>

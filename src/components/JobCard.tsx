@@ -68,7 +68,7 @@ interface Props {
   job: Job;
   index?: number;
   applyRecord: ApplyRecord | null;
-  onApplyClick: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
+  onAddToTracker: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
   onExcludeCompany?: (company: string) => void;
   onCartToggle?: (job: Job) => void;
   isInCart?: boolean;
@@ -78,7 +78,7 @@ export default function JobCard({
   job,
   index,
   applyRecord,
-  onApplyClick,
+  onAddToTracker,
   onExcludeCompany,
   onCartToggle,
   isInCart = false,
@@ -126,9 +126,9 @@ export default function JobCard({
     onCartToggle?.(job);
   }
 
-  function handleMarkClick(e: React.MouseEvent) {
+  function handleTrackerClick(e: React.MouseEvent) {
     e.preventDefault();
-    if (job.job_url) onApplyClick(job.job_url, title, co, { location: job.location || null });
+    if (job.job_url) onAddToTracker(job.job_url, title, co, { location: job.location || null });
   }
 
   return (
@@ -211,7 +211,7 @@ export default function JobCard({
 
       {isApplied && (
         <div className="job-tile-applied">
-          ✓ Applied ×{applyRecord?.clicks}
+          ✓ Added to tracker ×{applyRecord?.clicks}
         </div>
       )}
 
@@ -241,11 +241,12 @@ export default function JobCard({
           {!isApplied && job.job_url && (
             <button
               type="button"
-              className="job-tile-action job-tile-action--mark"
-              onClick={handleMarkClick}
-              title="Mark as applied without opening"
+              className="job-tile-action job-tile-action--tracker"
+              onClick={handleTrackerClick}
+              title="Add to Atriveo tracker"
             >
-              Mark
+              <span className="job-tile-action-label-full">Add to tracker</span>
+              <span className="job-tile-action-label-short">Tracker +</span>
             </button>
           )}
         </div>
@@ -255,14 +256,13 @@ export default function JobCard({
             href={job.job_url}
             target="_blank"
             rel="noopener"
-            onClick={() => onApplyClick(job.job_url, title, co, { location: job.location || null })}
             style={{
               background: isApplied ? "linear-gradient(135deg,#69725a,#4f4f47)" : t.gradient,
               color: "#fff",
               boxShadow: hovered ? `0 3px 10px ${t.glow}` : "none",
             }}
           >
-            {isApplied ? "Applied ✓" : "Apply ↗"}
+            {isApplied ? "Open ↗" : "Apply ↗"}
           </a>
         ) : (
           <span className="job-tile-action job-tile-action--empty">—</span>
