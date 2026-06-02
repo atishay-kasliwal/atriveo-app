@@ -21,8 +21,8 @@ export default function BulkJobCopyBar({
     <div className={`bulk-copy-bar${selectedCount ? " has-selection" : ""}`}>
       <div className="bulk-copy-copy">
         <span>Bulk copy</span>
-        <strong>{selectedCount ? `${selectedCount} selected` : "Select jobs to copy JDs"}</strong>
-        <small>Copies title, company, scores, link, tags, and captured JD/summary.</small>
+        <strong>{selectedCount ? `${selectedCount} selected` : "Select jobs to copy full JDs"}</strong>
+        <small>Copies title, company, scores, link, tags, and full JD when exported.</small>
       </div>
 
       <div className="bulk-copy-actions">

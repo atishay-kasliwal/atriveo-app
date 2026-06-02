@@ -11,6 +11,10 @@ function normalizeBody(text?: string | null): string {
   return cleaned || "No captured JD/summary available for this job.";
 }
 
+function isCapturedSummaryLikelyTruncated(text?: string | null): boolean {
+  return /…\s*$/.test((text || "").trim());
+}
+
 function experienceRange(job: Job): string {
   if (job.min_exp == null && job.max_exp == null) return "—";
   if (job.min_exp != null && job.max_exp != null) return `${job.min_exp} - ${job.max_exp} years`;
@@ -22,9 +26,15 @@ export function jobCopyKey(job: Job): string {
   return job.job_url || `${job.company}::${job.title}::${job.location}::${job.batch_time}`;
 }
 
-export function formatJobForClipboard(job: Job, index: number): string {
+export function formatJobForClipboard(job: Job, index: number, fullDescription?: string): string {
   const careerOps = careerOpsRating(job);
   const reasons = matchReasons(job, 8);
+  const hasFullDescription = Boolean(fullDescription?.trim());
+  const descriptionLabel = hasFullDescription
+    ? "Full Job Description:"
+    : isCapturedSummaryLikelyTruncated(job.summary)
+      ? "Captured Summary (full JD unavailable in current export):"
+      : "JD / Summary:";
   const rows = [
     `Company: ${value(job.company)}`,
     `Title: ${value(job.title)}`,
@@ -50,12 +60,12 @@ export function formatJobForClipboard(job: Job, index: number): string {
     `## ${index}. ${value(job.title)} — ${value(job.company)}`,
     ...rows,
     "",
-    "JD / Summary:",
-    normalizeBody(job.summary),
+    descriptionLabel,
+    normalizeBody(fullDescription || job.summary),
   ].join("\n");
 }
 
-export function formatJobsForClipboard(jobs: Job[]): string {
+export function formatJobsForClipboard(jobs: Job[], descriptionsByUrl: Record<string, string> = {}): string {
   const copiedAt = new Date().toLocaleString("en-US", {
     timeZone: "America/New_York",
     weekday: "short",
@@ -72,7 +82,7 @@ export function formatJobsForClipboard(jobs: Job[]): string {
 
   return [
     header,
-    ...jobs.map((job, index) => formatJobForClipboard(job, index + 1)),
+    ...jobs.map((job, index) => formatJobForClipboard(job, index + 1, descriptionsByUrl[job.job_url])),
   ].join("\n\n---\n\n");
 }
 

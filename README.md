@@ -29,6 +29,14 @@ npm install
 npm run dev
 ```
 
+To refresh full job-description buckets used by bulk copy:
+
+```bash
+npm run export:descriptions
+```
+
+This reads `MONGO_URI` locally and writes `public/job_descriptions/*.json`.
+
 Set these GitHub repository secrets for deployment:
 
 - `CLOUDFLARE_ACCOUNT_ID`

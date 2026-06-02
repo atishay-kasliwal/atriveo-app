@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Job } from "../types";
+import { loadJobDescriptions } from "../utils/jobDescriptionBuckets";
 import { copyTextToClipboard, formatJobsForClipboard, jobCopyKey } from "../utils/jobCopy";
 
 export function useJobSelection(jobs: Job[]) {
@@ -47,9 +48,14 @@ export function useJobSelection(jobs: Job[]) {
 
   const copySelectedJobs = async () => {
     if (!selectedJobs.length) return;
+    setCopyMessage("Loading full JDs…");
     try {
-      await copyTextToClipboard(formatJobsForClipboard(selectedJobs));
-      setCopyMessage(`Copied ${selectedJobs.length} job${selectedJobs.length === 1 ? "" : "s"}`);
+      const descriptionsByUrl = await loadJobDescriptions(selectedJobs);
+      const fullCount = selectedJobs.filter((job) => descriptionsByUrl[job.job_url]).length;
+      await copyTextToClipboard(formatJobsForClipboard(selectedJobs, descriptionsByUrl));
+      setCopyMessage(
+        `Copied ${selectedJobs.length} job${selectedJobs.length === 1 ? "" : "s"} · ${fullCount} full JD${fullCount === 1 ? "" : "s"}`,
+      );
     } catch {
       setCopyMessage("Copy failed — browser blocked clipboard");
     }
