@@ -938,6 +938,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                       <table className="apply-click-table">
                         <thead>
                           <tr>
+                            <th>#</th>
                             <th>Time</th>
                             <th>Company</th>
                             <th>Role</th>
@@ -948,7 +949,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                           </tr>
                         </thead>
                         <tbody>
-                          {applyClickTableRows.map((record) => {
+                          {applyClickTableRows.map((record, index) => {
                             const trackerRecord = getRecord(record.jobUrl);
                             const trackerStatus = trackerRecord?.trackerSyncStatus ?? null;
                             const isSynced = trackerStatus === "synced" || trackerStatus === "duplicate";
@@ -972,6 +973,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                                   : "";
                             return (
                               <tr key={record.jobUrl}>
+                                <td className="apply-click-index">{index + 1}</td>
                                 <td>{formatRunTime(record.clickedAt)}</td>
                                 <td>{record.company}</td>
                                 <td>{record.title}</td>
