@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import AppHeader from "../components/AppHeader";
+import BulkJobAnalysisPanel from "../components/BulkJobAnalysisPanel";
 import BulkJobCopyBar from "../components/BulkJobCopyBar";
 import PageIntro from "../components/PageIntro";
 import { useApplyClickLog } from "../hooks/useApplyClickLog";
@@ -833,10 +834,13 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               selectedCount={jobSelection.selectedCount}
               visibleCount={displayedJobs.length}
               copyMessage={jobSelection.copyMessage}
+              analysisMessage={jobSelection.analysisMessage}
               onCopy={jobSelection.copySelectedJobs}
+              onAnalyze={jobSelection.analyzeSelectedJobDescriptions}
               onSelectVisible={jobSelection.selectVisibleJobs}
               onClear={jobSelection.clearSelectedJobs}
             />
+            <BulkJobAnalysisPanel analysis={jobSelection.analysis} />
 
             {/* Location filter cards — shown in Today split view */}
             {isSplitView && (

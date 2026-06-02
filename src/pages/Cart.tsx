@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
+import BulkJobAnalysisPanel from "../components/BulkJobAnalysisPanel";
 import BulkJobCopyBar from "../components/BulkJobCopyBar";
 import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
@@ -93,10 +94,13 @@ export default function Cart() {
           selectedCount={jobSelection.selectedCount}
           visibleCount={visibleJobs.length}
           copyMessage={jobSelection.copyMessage}
+          analysisMessage={jobSelection.analysisMessage}
           onCopy={jobSelection.copySelectedJobs}
+          onAnalyze={jobSelection.analyzeSelectedJobDescriptions}
           onSelectVisible={jobSelection.selectVisibleJobs}
           onClear={jobSelection.clearSelectedJobs}
         />
+        <BulkJobAnalysisPanel analysis={jobSelection.analysis} />
 
         <div className="job-list">
           {items.length === 0 ? (

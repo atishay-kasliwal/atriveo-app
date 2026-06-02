@@ -3,8 +3,10 @@ interface Props {
   visibleCount: number;
   copyMessage: string;
   onCopy: () => void;
+  onAnalyze?: () => void;
   onSelectVisible: () => void;
   onClear: () => void;
+  analysisMessage?: string;
 }
 
 export default function BulkJobCopyBar({
@@ -12,8 +14,10 @@ export default function BulkJobCopyBar({
   visibleCount,
   copyMessage,
   onCopy,
+  onAnalyze,
   onSelectVisible,
   onClear,
+  analysisMessage,
 }: Props) {
   if (!visibleCount) return null;
 
@@ -26,10 +30,15 @@ export default function BulkJobCopyBar({
       </div>
 
       <div className="bulk-copy-actions">
-        {copyMessage && <span className="bulk-copy-status">{copyMessage}</span>}
+        {(copyMessage || analysisMessage) && <span className="bulk-copy-status">{analysisMessage || copyMessage}</span>}
         <button type="button" className="bulk-copy-btn" onClick={onSelectVisible}>
           Select visible
         </button>
+        {onAnalyze && (
+          <button type="button" className="bulk-copy-btn" onClick={onAnalyze} disabled={!selectedCount}>
+            Analyze JDs
+          </button>
+        )}
         <button type="button" className="bulk-copy-btn primary" onClick={onCopy} disabled={!selectedCount}>
           Copy selected
         </button>
