@@ -2122,7 +2122,7 @@ header {
 .apply-click-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 720px;
+  min-width: 840px;
 }
 
 .apply-click-table th,
@@ -2170,6 +2170,51 @@ header {
 .apply-click-table a {
   color: var(--tier-blue);
   font-weight: 900;
+}
+
+.apply-click-tracker-btn {
+  min-width: 82px;
+  height: 26px;
+  border: 1px solid rgba(105,114,90,0.24);
+  border-radius: 8px;
+  background: rgba(105,114,90,0.08);
+  color: var(--green);
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-size: 10.5px;
+  font-weight: 900;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.12s;
+  white-space: nowrap;
+}
+
+.apply-click-tracker-btn:hover:not(:disabled) {
+  background: rgba(105,114,90,0.14);
+  border-color: rgba(105,114,90,0.36);
+  transform: translateY(-1px);
+}
+
+.apply-click-tracker-btn.pending {
+  border-color: rgba(154,118,83,0.22);
+  background: rgba(154,118,83,0.08);
+  color: var(--bean-umber);
+}
+
+.apply-click-tracker-btn.synced {
+  border-color: rgba(105,114,90,0.18);
+  background: rgba(105,114,90,0.12);
+  color: var(--green);
+}
+
+.apply-click-tracker-btn.retry {
+  border-color: rgba(141,83,76,0.22);
+  background: rgba(141,83,76,0.08);
+  color: var(--bean-clay);
+}
+
+.apply-click-tracker-btn:disabled {
+  cursor: default;
+  opacity: 0.72;
+  transform: none;
 }
 
 .apply-click-table tr:last-child td {

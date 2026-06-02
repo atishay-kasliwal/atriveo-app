@@ -930,7 +930,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                       <div>
                         <span className="apply-click-log-kicker">Apply Log</span>
                         <h2>Opened from Apply</h2>
-                        <p>Local-only list from the Apply button. Tracker sync is separate.</p>
+                        <p>Review opened jobs and add the strong ones to Atriveo tracker.</p>
                       </div>
                       <strong>{todayApplyClicks.length} today</strong>
                     </div>
@@ -943,22 +943,57 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                             <th>Role</th>
                             <th>Board</th>
                             <th>Clicks</th>
+                            <th>Tracker</th>
                             <th>Link</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {applyClickTableRows.map((record) => (
-                            <tr key={record.jobUrl}>
-                              <td>{formatRunTime(record.clickedAt)}</td>
-                              <td>{record.company}</td>
-                              <td>{record.title}</td>
-                              <td>{jobBoardLabel(record.site, record.jobUrl)}</td>
-                              <td>{record.clicks}</td>
-                              <td>
-                                <a href={record.jobUrl} target="_blank" rel="noopener">Open ↗</a>
-                              </td>
-                            </tr>
-                          ))}
+                          {applyClickTableRows.map((record) => {
+                            const trackerRecord = getRecord(record.jobUrl);
+                            const trackerStatus = trackerRecord?.trackerSyncStatus ?? null;
+                            const isSynced = trackerStatus === "synced" || trackerStatus === "duplicate";
+                            const isSending = trackerStatus === "pending";
+                            const isRetryable = trackerStatus === "error" || trackerStatus === "not_configured" || trackerStatus === "skipped";
+                            const trackerCopy = isSending
+                              ? "Sending…"
+                              : isSynced
+                                ? "Synced"
+                                : isRetryable
+                                  ? "Retry"
+                                  : trackerRecord
+                                    ? "Sync"
+                                    : "Tracker +";
+                            const trackerTone = isSending
+                              ? " pending"
+                              : isSynced
+                                ? " synced"
+                                : isRetryable
+                                  ? " retry"
+                                  : "";
+                            return (
+                              <tr key={record.jobUrl}>
+                                <td>{formatRunTime(record.clickedAt)}</td>
+                                <td>{record.company}</td>
+                                <td>{record.title}</td>
+                                <td>{jobBoardLabel(record.site, record.jobUrl)}</td>
+                                <td>{record.clicks}</td>
+                                <td>
+                                  <button
+                                    type="button"
+                                    className={`apply-click-tracker-btn${trackerTone}`}
+                                    disabled={isSending || isSynced}
+                                    title={trackerRecord?.trackerSyncMessage || "Add this job to Atriveo tracker"}
+                                    onClick={() => recordClick(record.jobUrl, record.title, record.company, { location: record.location })}
+                                  >
+                                    {trackerCopy}
+                                  </button>
+                                </td>
+                                <td>
+                                  <a href={record.jobUrl} target="_blank" rel="noopener">Open ↗</a>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
