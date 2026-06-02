@@ -4277,3 +4277,214 @@ body::after {
   .job-tile-title { padding-inline: 9px; font-size: 12px; }
   .job-tile-match { min-width: 56px; }
 }
+
+/* ── 4-up job card redesign ──────────────────────────────────────────── */
+@media (min-width: 1280px) {
+  .dashboard-layout .card-grid,
+  .split-panel .card-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1279px) {
+  .dashboard-layout .card-grid,
+  .split-panel .card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 641px) and (max-width: 899px) {
+  .dashboard-layout .card-grid,
+  .split-panel .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.dashboard-layout .card-grid,
+.split-panel .card-grid {
+  gap: 18px;
+  align-items: stretch;
+}
+
+.job-tile {
+  min-height: 248px;
+  border-radius: 22px !important;
+  background:
+    radial-gradient(circle at 94% -8%, color-mix(in srgb, var(--job-solid) 12%, transparent), transparent 34%),
+    linear-gradient(180deg, rgba(255, 253, 246, 0.98), rgba(243, 238, 219, 0.9)) !important;
+  border-color: rgba(79, 74, 61, 0.17) !important;
+  box-shadow:
+    0 16px 36px rgba(54, 49, 38, 0.085),
+    0 1px 0 rgba(255, 253, 246, 0.92) inset !important;
+}
+
+.job-tile:hover {
+  border-color: color-mix(in srgb, var(--job-solid) 36%, rgba(79, 74, 61, 0.18)) !important;
+  box-shadow:
+    0 22px 46px rgba(54, 49, 38, 0.13),
+    0 1px 0 rgba(255, 253, 246, 0.95) inset !important;
+}
+
+.job-tile-top {
+  padding: 16px 16px 0;
+  align-items: flex-start;
+}
+
+.job-tile-lead {
+  gap: 9px;
+  align-items: center;
+}
+
+.job-tile-rank {
+  color: #8b8371;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.job-tile .company-logo {
+  --logo-size: 38px;
+  border-radius: 13px;
+}
+
+.job-board-tag {
+  max-width: 92px;
+  padding: 4px 7px;
+  border-radius: 999px;
+  color: #706a5c;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+
+.job-tile-match {
+  min-width: 100px;
+  padding: 7px 26px 7px 10px;
+  border-radius: 17px;
+  column-gap: 5px;
+}
+
+.job-tile-match-icon {
+  font-size: 13px;
+}
+
+.job-tile-match strong {
+  font-size: 19px;
+}
+
+.job-tile-match span:last-child {
+  font-size: 7.2px;
+  letter-spacing: 0.065em;
+}
+
+.job-tile-match em {
+  top: 7px;
+  right: 7px;
+}
+
+.job-tile-match--gray {
+  background: rgba(101, 97, 85, 0.1);
+  color: #5f5a4f;
+}
+
+.job-tile-company {
+  padding: 18px 16px 0;
+  color: #15130f;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.job-tile-title {
+  min-height: 44px;
+  padding: 5px 16px 0;
+  color: #2d2a22;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.38;
+  letter-spacing: -0.025em;
+}
+
+.job-tile-confidence {
+  padding: 9px 16px 0;
+}
+
+.job-tile-confidence strong {
+  font-size: 12px;
+}
+
+.job-tile-confidence span {
+  color: #6d6658;
+  font-size: 8.5px;
+}
+
+.job-tile-meta {
+  padding: 5px 16px 0;
+  font-size: 10.5px;
+}
+
+.job-tile-details,
+.job-tile-reasons {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.job-tile-details {
+  padding-top: 8px;
+  gap: 6px;
+}
+
+.job-tile-reasons {
+  padding-top: 7px;
+  gap: 6px;
+}
+
+.job-tile-signal,
+.job-tile-reason {
+  padding: 4px 7px;
+  font-size: 9.2px;
+}
+
+.job-tile-divider {
+  margin: auto 16px 0;
+}
+
+.job-tile-actions {
+  padding: 10px 14px 14px;
+  gap: 8px;
+}
+
+.job-tile-action--apply {
+  height: 38px;
+  border-radius: 11px;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+}
+
+.job-tile-secondary-actions {
+  gap: 7px;
+}
+
+.job-tile-action {
+  height: 30px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+.job-tile-action--tracker {
+  flex: 1.25 1 86px;
+}
+
+.job-tile.is-low-priority .job-tile-match {
+  min-width: 78px;
+}
+
+@media (max-width: 640px) {
+  .dashboard-layout .card-grid,
+  .split-panel .card-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .job-tile {
+    min-height: 218px;
+  }
+}

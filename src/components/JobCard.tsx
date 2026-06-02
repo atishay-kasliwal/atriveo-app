@@ -188,7 +188,7 @@ export default function JobCard({
           <div className={`job-tile-match job-tile-match--${careerOps.key}`} title={careerOps.tooltip}>
             <span className="job-tile-match-icon">{careerOps.icon}</span>
             <strong>{careerOps.score}</strong>
-            <span>Ops</span>
+            <span>CareerOps</span>
             <em>{careerOps.grade}</em>
           </div>
         </div>
