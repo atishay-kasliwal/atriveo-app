@@ -76,6 +76,8 @@ interface Props {
   onAddToTracker: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
   onApplyClick?: (job: Job) => void;
   onExcludeCompany?: (company: string) => void;
+  isSelected?: boolean;
+  onSelectionToggle?: (job: Job) => void;
 }
 
 export default function JobCard({
@@ -85,6 +87,8 @@ export default function JobCard({
   onAddToTracker,
   onApplyClick,
   onExcludeCompany,
+  isSelected = false,
+  onSelectionToggle,
 }: Props) {
   const [msgCopied, setMsgCopied] = useState(false);
 
@@ -155,13 +159,29 @@ export default function JobCard({
     if (job.job_url) onAddToTracker(job.job_url, title, co, { location: job.location || null });
   }
 
+  function handleSelectionClick(e: React.MouseEvent) {
+    e.preventDefault();
+    onSelectionToggle?.(job);
+  }
+
   return (
     <div
-      className={`job-tile job-tile--${careerOps.key}${careerOps.score < 25 ? " is-low-priority" : ""}${isApplied ? " is-applied" : ""}${isTopOpportunity ? " is-top-opportunity" : ""}`}
+      className={`job-tile job-tile--${careerOps.key}${careerOps.score < 25 ? " is-low-priority" : ""}${isApplied ? " is-applied" : ""}${isSelected ? " is-selected" : ""}${isTopOpportunity ? " is-top-opportunity" : ""}`}
       style={cardStyle}
     >
       <div className="job-tile-top">
         <div className="job-tile-lead">
+          {onSelectionToggle && (
+            <button
+              type="button"
+              className={`job-tile-select${isSelected ? " is-selected" : ""}`}
+              onClick={handleSelectionClick}
+              aria-pressed={isSelected}
+              title={isSelected ? "Remove from bulk copy" : "Select for bulk copy"}
+            >
+              {isSelected ? "✓" : "+"}
+            </button>
+          )}
           {rank && <span className="job-tile-rank">{rank}</span>}
           <CompanyLogo company={co} size="md" />
           <span className="job-board-tag">{boardLabel}</span>

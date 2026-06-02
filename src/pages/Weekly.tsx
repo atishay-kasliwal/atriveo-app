@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import AppHeader from "../components/AppHeader";
+import BulkJobCopyBar from "../components/BulkJobCopyBar";
 import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
+import { useJobSelection } from "../hooks/useJobSelection";
 import { isTop500 } from "../data/top500";
 import type { Job } from "../types";
 import JobCard from "../components/JobCard";
@@ -90,6 +92,7 @@ export default function Weekly() {
   );
   const ngCount = filtered.filter((j) => j.level === "New Grad").length;
   const todayCount = weekJobs.filter((j) => j.scraped_date === todayLocal()).length;
+  const jobSelection = useJobSelection(filtered);
 
   return (
     <div>
@@ -188,6 +191,15 @@ export default function Weekly() {
           {activeDay !== "All" ? ` · ${dayLabel(activeDay)}` : " · last 7 days"}
         </div>
 
+        <BulkJobCopyBar
+          selectedCount={jobSelection.selectedCount}
+          visibleCount={filtered.length}
+          copyMessage={jobSelection.copyMessage}
+          onCopy={jobSelection.copySelectedJobs}
+          onSelectVisible={jobSelection.selectVisibleJobs}
+          onClear={jobSelection.clearSelectedJobs}
+        />
+
         {/* Job list */}
         {loading ? (
           <div className="state-msg"><div className="icon">⏳</div>Loading…</div>
@@ -202,6 +214,8 @@ export default function Weekly() {
                 applyRecord={job.job_url ? getRecord(job.job_url) : null}
                 onAddToTracker={recordClick}
                 onExcludeCompany={excludeCompany}
+                isSelected={jobSelection.isJobSelected(job)}
+                onSelectionToggle={jobSelection.toggleJobSelection}
               />
             ))}
           </div>

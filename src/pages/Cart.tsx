@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
+import BulkJobCopyBar from "../components/BulkJobCopyBar";
 import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useCart } from "../hooks/useCart";
+import { useJobSelection } from "../hooks/useJobSelection";
 import JobCard from "../components/JobCard";
 
 export default function Cart() {
@@ -10,7 +12,7 @@ export default function Cart() {
   const { items, removeFromCart } = useCart();
   const [query, setQuery] = useState("");
 
-  const filtered = items.filter((item) => {
+  const filtered = useMemo(() => items.filter((item) => {
     if (!query) return true;
     const q = query.toLowerCase();
     return (
@@ -18,9 +20,11 @@ export default function Cart() {
       item.job.company?.toLowerCase().includes(q) ||
       item.job.location?.toLowerCase().includes(q)
     );
-  });
+  }), [items, query]);
 
   const appliedCount = items.filter((i) => i.job.job_url && getRecord(i.job.job_url)).length;
+  const visibleJobs = useMemo(() => filtered.map((item) => item.job), [filtered]);
+  const jobSelection = useJobSelection(visibleJobs);
 
   return (
     <div>
@@ -85,6 +89,15 @@ export default function Cart() {
           )}
         </div>
 
+        <BulkJobCopyBar
+          selectedCount={jobSelection.selectedCount}
+          visibleCount={visibleJobs.length}
+          copyMessage={jobSelection.copyMessage}
+          onCopy={jobSelection.copySelectedJobs}
+          onSelectVisible={jobSelection.selectVisibleJobs}
+          onClear={jobSelection.clearSelectedJobs}
+        />
+
         <div className="job-list">
           {items.length === 0 ? (
             <div className="state-msg">
@@ -102,6 +115,8 @@ export default function Cart() {
                     job={item.job}
                     applyRecord={item.job.job_url ? getRecord(item.job.job_url) : null}
                     onAddToTracker={recordClick}
+                    isSelected={jobSelection.isJobSelected(item.job)}
+                    onSelectionToggle={jobSelection.toggleJobSelection}
                   />
                 ))}
               </div>

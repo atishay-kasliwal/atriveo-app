@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import AppHeader from "../components/AppHeader";
+import BulkJobCopyBar from "../components/BulkJobCopyBar";
 import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
+import { useJobSelection } from "../hooks/useJobSelection";
 import type { Job } from "../types";
 import JobCard from "../components/JobCard";
 
@@ -52,6 +54,7 @@ export default function Unclicked100() {
     () => hundredPlus.reduce((m, j) => Math.max(m, j.score ?? 0), 0),
     [hundredPlus]
   );
+  const jobSelection = useJobSelection(filtered);
 
   return (
     <div>
@@ -110,6 +113,15 @@ export default function Unclicked100() {
           {filtered.length} job{filtered.length !== 1 ? "s" : ""} · weekly · score ≥ 100 · unclicked
         </div>
 
+        <BulkJobCopyBar
+          selectedCount={jobSelection.selectedCount}
+          visibleCount={filtered.length}
+          copyMessage={jobSelection.copyMessage}
+          onCopy={jobSelection.copySelectedJobs}
+          onSelectVisible={jobSelection.selectVisibleJobs}
+          onClear={jobSelection.clearSelectedJobs}
+        />
+
         {loading ? (
           <div className="state-msg"><div className="icon">⏳</div>Loading…</div>
         ) : filtered.length === 0 ? (
@@ -122,6 +134,8 @@ export default function Unclicked100() {
                 job={job}
                 applyRecord={job.job_url ? getRecord(job.job_url) : null}
                 onAddToTracker={recordClick}
+                isSelected={jobSelection.isJobSelected(job)}
+                onSelectionToggle={jobSelection.toggleJobSelection}
               />
             ))}
           </div>

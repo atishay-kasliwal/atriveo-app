@@ -12,6 +12,7 @@ export interface Job {
   score: number;
   score_pct: number;
   competition_score: number;
+  pipeline?: string;
   site: string;
   search_term: string;
   summary?: string;

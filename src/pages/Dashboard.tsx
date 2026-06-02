@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import AppHeader from "../components/AppHeader";
+import BulkJobCopyBar from "../components/BulkJobCopyBar";
 import PageIntro from "../components/PageIntro";
 import { useApplyClickLog } from "../hooks/useApplyClickLog";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
+import { useJobSelection } from "../hooks/useJobSelection";
 import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
 import JobCard from "../components/JobCard";
@@ -316,6 +318,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     [visibleJobs]
   );
   const displayedJobs = isSplitView ? locationFiltered : filtered;
+  const jobSelection = useJobSelection(displayedJobs);
   const ngCount = displayedJobs.filter((j) => j.level === "New Grad").length;
   const openDisplayedJobs = useMemo(
     () => displayedJobs.filter((j) => !j.job_url || !appliedUrlSet.has(j.job_url)),
@@ -826,6 +829,15 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               )}
             </div>
 
+            <BulkJobCopyBar
+              selectedCount={jobSelection.selectedCount}
+              visibleCount={displayedJobs.length}
+              copyMessage={jobSelection.copyMessage}
+              onCopy={jobSelection.copySelectedJobs}
+              onSelectVisible={jobSelection.selectVisibleJobs}
+              onClear={jobSelection.clearSelectedJobs}
+            />
+
             {/* Location filter cards — shown in Today split view */}
             {isSplitView && (
               <div className="location-panel-grid">
@@ -883,6 +895,8 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                               onAddToTracker={recordClick}
                               onApplyClick={recordApplyClick}
                               onExcludeCompany={excludeCompany}
+                              isSelected={jobSelection.isJobSelected(job)}
+                              onSelectionToggle={jobSelection.toggleJobSelection}
                             />
                           ))}
                         </div>
@@ -908,6 +922,8 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                         onAddToTracker={recordClick}
                         onApplyClick={recordApplyClick}
                         onExcludeCompany={excludeCompany}
+                        isSelected={jobSelection.isJobSelected(job)}
+                        onSelectionToggle={jobSelection.toggleJobSelection}
                       />
                     ))}
                   </div>
