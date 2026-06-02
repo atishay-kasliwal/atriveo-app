@@ -2284,14 +2284,6 @@ header {
   border-color: rgba(47,125,82,0.32);
 }
 
-.job-tile.is-saved::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-top: 3px solid rgba(79,79,71,0.34);
-  pointer-events: none;
-}
-
 .job-tile-top {
   padding: 10px 11px 0;
   display: flex;
@@ -2657,18 +2649,6 @@ header {
   display: none;
 }
 
-.job-tile-action--save {
-  flex: 1 1 46px;
-  border: 1px solid rgba(79,79,71,0.2);
-  background: rgba(79,79,71,0.07);
-  color: var(--blue);
-}
-
-.job-tile-action--save.is-saved {
-  border-color: rgba(79,79,71,0.34);
-  background: rgba(79,79,71,0.13);
-}
-
 .job-tile-action--message.is-copied {
   background: rgba(119,118,106,0.14);
 }
@@ -2685,10 +2665,6 @@ header {
 
 .job-tile-action--tracker:hover {
   background: rgba(105,114,90,0.14);
-}
-
-.job-tile-action--save:hover {
-  background: rgba(79,79,71,0.13);
 }
 
 .job-tile-action--apply {
@@ -2740,10 +2716,6 @@ header {
   .job-tile-action--apply { flex: 1 0 100%; }
   .job-tile-action-label-full { display: none; }
   .job-tile-action-label-short { display: inline; }
-}
-
-@container (max-width: 240px) {
-  .job-tile-action--save { display: none; }
 }
 
 @container (max-width: 210px) {
@@ -3789,10 +3761,6 @@ header {
   border-width: 1px;
 }
 
-.job-tile.is-saved::after {
-  border-top-color: rgba(18, 17, 13, 0.16);
-}
-
 .job-tile-top {
   padding: 12px 12px 0;
 }
@@ -3900,8 +3868,7 @@ header {
 
 .job-tile-action--tracker,
 .job-tile-action--click,
-.job-tile-action--message,
-.job-tile-action--save {
+.job-tile-action--message {
   background: rgba(255, 253, 245, 0.6);
   border: 1px solid rgba(91, 88, 77, 0.16);
   color: #4f4b41;
@@ -3919,8 +3886,7 @@ header {
 
 .job-tile-action--tracker:hover,
 .job-tile-action--click:hover,
-.job-tile-action--message:hover,
-.job-tile-action--save:hover {
+.job-tile-action--message:hover {
   background: rgba(255, 253, 245, 0.86);
   border-color: rgba(18, 17, 13, 0.24);
 }
@@ -4250,8 +4216,7 @@ body::after {
 
 .job-tile-action--tracker,
 .job-tile-action--click,
-.job-tile-action--message,
-.job-tile-action--save {
+.job-tile-action--message {
   background: rgba(255, 253, 246, 0.56);
   border-color: rgba(83, 80, 69, 0.14);
   color: #4f4b41;

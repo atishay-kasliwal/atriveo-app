@@ -4,17 +4,11 @@ import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useCart } from "../hooks/useCart";
 import JobCard from "../components/JobCard";
-import type { Job } from "../types";
 
 export default function Cart() {
   const { recordClick, getRecord } = useApplyTracker();
-  const { items, removeFromCart, addToCart, isInCart } = useCart();
+  const { items, removeFromCart } = useCart();
   const [query, setQuery] = useState("");
-
-  const handleCartToggle = (job: Job) => {
-    if (isInCart(job.job_url)) removeFromCart(job.job_url);
-    else addToCart(job);
-  };
 
   const filtered = items.filter((item) => {
     if (!query) return true;
@@ -95,7 +89,7 @@ export default function Cart() {
           {items.length === 0 ? (
             <div className="state-msg">
               <div className="icon">🔖</div>
-              <div>No saved jobs yet. Hit the bookmark icon on any job to add it here.</div>
+              <div>No saved jobs here. Cards now use Click, Apply, and Tracker instead.</div>
             </div>
           ) : filtered.length === 0 ? (
             <div className="state-msg" style={{ fontSize: 13 }}>No jobs match your search.</div>
@@ -108,8 +102,6 @@ export default function Cart() {
                     job={item.job}
                     applyRecord={item.job.job_url ? getRecord(item.job.job_url) : null}
                     onAddToTracker={recordClick}
-                    onCartToggle={handleCartToggle}
-                    isInCart={true}
                   />
                 ))}
               </div>

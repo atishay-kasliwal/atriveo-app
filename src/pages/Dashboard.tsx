@@ -4,7 +4,6 @@ import AppHeader from "../components/AppHeader";
 import PageIntro from "../components/PageIntro";
 import { useApplyClickLog } from "../hooks/useApplyClickLog";
 import { useApplyTracker } from "../hooks/useApplyTracker";
-import { useCart } from "../hooks/useCart";
 import { useExclusions } from "../hooks/useExclusions";
 import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
@@ -114,12 +113,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const navigate = useNavigate();
   const { stats, recordClick, getRecord, syncState, syncNow } = useApplyTracker();
   const { records: applyClickRecords, todayRecords: todayApplyClicks, recordApplyClick } = useApplyClickLog();
-  const { items: cartItems, addToCart, removeFromCart, isInCart } = useCart();
   const { isExcluded, excludeCompany } = useExclusions();
-  const handleCartToggle = (job: Job) => {
-    if (isInCart(job.job_url)) removeFromCart(job.job_url);
-    else addToCart(job);
-  };
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
   const [todayJobs, setTodayJobs] = useState<Job[]>([]);
   const [yesterdayJobs, setYesterdayJobs] = useState<Job[]>([]);
@@ -249,11 +243,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       );
     }
     jobs = jobs.filter((j) => !isExcluded(j));
-    const cartUrlSet = new Set(cartItems.map((i) => i.url));
-    jobs = jobs.filter((j) => !j.job_url || !cartUrlSet.has(j.job_url));
     jobs = jobs.filter((j) => !j.job_url || !applyClickUrlSet.has(j.job_url));
     return jobs;
-  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, cartItems, applyClickUrlSet]);
+  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, applyClickUrlSet]);
 
   const filtered = useMemo(() => {
     let jobs = [...visibleJobs];
@@ -455,10 +447,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       helper: highScoreOpenCount ? `${highScoreOpenCount} strong matches waiting` : "clear the current view",
     },
     {
-      emoji: "🧺",
-      label: "Saved queue",
-      value: `${cartItems.length}`,
-      helper: cartItems.length ? "review before closing" : "use Save for maybe-laters",
+      emoji: "🧭",
+      label: "Opened log",
+      value: `${todayApplyClicks.length}`,
+      helper: todayApplyClicks.length ? "review and track winners" : "click jobs to build context",
     },
     {
       emoji: "🧾",
@@ -609,9 +601,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 <small>{highScoreOpenCount ? `${highScoreOpenCount} high-score open` : `${openDisplayedJobs.length} open in view`}</small>
               </div>
               <div className="momentum-stat">
-                <span>Saved queue</span>
-                <strong>{cartItems.length}</strong>
-                <small>{cartItems.length ? "ready for review" : "empty"}</small>
+                <span>Opened log</span>
+                <strong>{todayApplyClicks.length}</strong>
+                <small>{todayApplyClicks.length ? "review strong ones" : "nothing opened yet"}</small>
               </div>
               <div className="momentum-stat">
                 <span>Best CareerOps</span>
@@ -891,8 +883,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                               onAddToTracker={recordClick}
                               onApplyClick={recordApplyClick}
                               onExcludeCompany={excludeCompany}
-                              onCartToggle={handleCartToggle}
-                              isInCart={job.job_url ? isInCart(job.job_url) : false}
                             />
                           ))}
                         </div>
@@ -918,8 +908,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                         onAddToTracker={recordClick}
                         onApplyClick={recordApplyClick}
                         onExcludeCompany={excludeCompany}
-                        onCartToggle={handleCartToggle}
-                        isInCart={job.job_url ? isInCart(job.job_url) : false}
                       />
                     ))}
                   </div>

@@ -76,8 +76,6 @@ interface Props {
   onAddToTracker: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
   onApplyClick?: (job: Job) => void;
   onExcludeCompany?: (company: string) => void;
-  onCartToggle?: (job: Job) => void;
-  isInCart?: boolean;
 }
 
 export default function JobCard({
@@ -87,8 +85,6 @@ export default function JobCard({
   onAddToTracker,
   onApplyClick,
   onExcludeCompany,
-  onCartToggle,
-  isInCart = false,
 }: Props) {
   const [msgCopied, setMsgCopied] = useState(false);
 
@@ -154,11 +150,6 @@ export default function JobCard({
     });
   }
 
-  function handleCartClick(e: React.MouseEvent) {
-    e.preventDefault();
-    onCartToggle?.(job);
-  }
-
   function handleTrackerClick(e: React.MouseEvent) {
     e.preventDefault();
     if (job.job_url) onAddToTracker(job.job_url, title, co, { location: job.location || null });
@@ -166,7 +157,7 @@ export default function JobCard({
 
   return (
     <div
-      className={`job-tile job-tile--${careerOps.key}${careerOps.score < 25 ? " is-low-priority" : ""}${isApplied ? " is-applied" : ""}${isInCart ? " is-saved" : ""}${isTopOpportunity ? " is-top-opportunity" : ""}`}
+      className={`job-tile job-tile--${careerOps.key}${careerOps.score < 25 ? " is-low-priority" : ""}${isApplied ? " is-applied" : ""}${isTopOpportunity ? " is-top-opportunity" : ""}`}
       style={cardStyle}
     >
       <div className="job-tile-top">
@@ -238,17 +229,6 @@ export default function JobCard({
 
       <div className="job-tile-actions">
         <div className="job-tile-secondary-actions">
-          {onCartToggle && job.job_url && (
-            <button
-              type="button"
-              className={`job-tile-action job-tile-action--save${isInCart ? " is-saved" : ""}`}
-              onClick={handleCartClick}
-              title={isInCart ? "Remove from saved jobs" : "Save job"}
-              aria-pressed={isInCart}
-            >
-              {isInCart ? "♥ Saved" : "♡ Save"}
-            </button>
-          )}
           {job.job_url && onApplyClick && (
             <button
               type="button"

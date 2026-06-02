@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import AppHeader from "../components/AppHeader";
 import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
-import { useCart } from "../hooks/useCart";
 import { useExclusions } from "../hooks/useExclusions";
 import { isTop500 } from "../data/top500";
 import type { Job } from "../types";
@@ -27,11 +26,6 @@ function dayLabel(dateStr: string): string {
 
 export default function Weekly() {
   const { stats, recordClick, getRecord } = useApplyTracker();
-  const { items: cartItems, addToCart, removeFromCart, isInCart } = useCart();
-  const handleCartToggle = (job: WeekJob) => {
-    if (isInCart(job.job_url)) removeFromCart(job.job_url);
-    else addToCart(job);
-  };
   const { isExcluded, excludeCompany } = useExclusions();
   const [weekJobs, setWeekJobs] = useState<WeekJob[]>([]);
   const [activeDay, setActiveDay] = useState("All");
@@ -77,8 +71,6 @@ export default function Weekly() {
     }
     jobs = jobs.filter((j) => !isExcluded(j));
     if (top500Filter) jobs = jobs.filter((j) => isTop500(j.company || ""));
-    const cartUrlSet = new Set(cartItems.map((i) => i.url));
-    jobs = jobs.filter((j) => !j.job_url || !cartUrlSet.has(j.job_url));
     jobs = [...jobs].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
     // Push applied jobs to the bottom so unapplied stay front-and-centre
     const appliedSet = new Set(Object.keys(stats.appliedJobs));
@@ -86,7 +78,7 @@ export default function Weekly() {
       ...jobs.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
       ...jobs.filter((j) => j.job_url  &&  appliedSet.has(j.job_url)),
     ];
-  }, [weekJobs, activeDay, levelFilter, top500Filter, query, stats.appliedJobs, isExcluded, cartItems]);
+  }, [weekJobs, activeDay, levelFilter, top500Filter, query, stats.appliedJobs, isExcluded]);
 
   const uniqueCompanies = useMemo(
     () => new Set(weekJobs.map((j) => j.company).filter(Boolean)).size,
@@ -210,8 +202,6 @@ export default function Weekly() {
                 applyRecord={job.job_url ? getRecord(job.job_url) : null}
                 onAddToTracker={recordClick}
                 onExcludeCompany={excludeCompany}
-                onCartToggle={handleCartToggle}
-                isInCart={job.job_url ? isInCart(job.job_url) : false}
               />
             ))}
           </div>
