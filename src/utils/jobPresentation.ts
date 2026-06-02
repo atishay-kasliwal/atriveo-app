@@ -156,10 +156,10 @@ export function careerOpsRating(job: Job): CareerOpsRating {
   const totalWeight = weightedParts.reduce((sum, part) => sum + part.weight, 0) || 1;
   const score = clampPct(weightedParts.reduce((sum, part) => sum + part.value * part.weight, 0) / totalWeight);
   const tier: Pick<CareerOpsRating, "key" | "icon" | "label" | "grade"> =
-    score >= 75 ? { key: "green", icon: "🔥", label: "Strong", grade: "A" }
-      : score >= 50 ? { key: "blue", icon: "⚡", label: "Good", grade: "B" }
-        : score >= 25 ? { key: "yellow", icon: "⭐", label: "Review", grade: "C" }
-          : { key: "gray", icon: "•", label: "Watch", grade: "D" };
+    score >= 75 ? { key: "green", icon: "🔥", label: "Strong match", grade: "A" }
+      : score >= 50 ? { key: "blue", icon: "⚡", label: "Good match", grade: "B" }
+        : score >= 25 ? { key: "yellow", icon: "⭐", label: "Review first", grade: "C" }
+          : { key: "gray", icon: "•", label: "Low priority", grade: "D" };
   const details = [
     `CareerOps ${score}/100`,
     `Raw ${job.score ?? 0}/${MAX_RAW_SCORE}`,
@@ -190,14 +190,24 @@ export function responseRateLabel(score = 0): string {
 export function matchReasons(job: Job, limit = 4): string[] {
   const haystack = [job.title, job.summary, job.search_term, job.level].filter(Boolean).join(" ");
   const matches: string[] = [];
+  const seen = new Set<string>();
+  const addReason = (reason?: string | null) => {
+    const cleaned = reason?.trim();
+    if (!cleaned) return;
+    const key = cleaned.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    matches.push(cleaned);
+  };
+
   for (const [label, pattern] of KEYWORD_PATTERNS) {
-    if (pattern.test(haystack) && !matches.includes(label)) matches.push(label);
+    if (pattern.test(haystack)) addReason(label);
     if (matches.length >= limit) return matches;
   }
 
   const compactTerm = job.search_term?.replace(/ engineer$/i, "").trim();
-  if (compactTerm && !matches.includes(compactTerm)) matches.push(compactTerm);
-  if (job.level && !matches.includes(job.level)) matches.push(job.level);
+  addReason(compactTerm);
+  addReason(job.level);
   return matches.slice(0, limit);
 }
 
