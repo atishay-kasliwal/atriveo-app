@@ -1,7 +1,7 @@
 import { jwtVerify } from "jose";
 import { FREE_EMAIL_DOMAINS, ROLE_PREFIXES } from "./_email_data";
 
-interface Env {
+export interface Env {
   JWT_SECRET: string;
   // Provider keys for real per-mailbox lookups. The resolver tries each that
   // is set, in order, and returns the first verified hit. With none set, the
@@ -24,13 +24,13 @@ export function isRoleAddress(email: string): boolean {
   return ROLE_PREFIXES.has(local);
 }
 
-interface VerifiedHit {
+export interface VerifiedHit {
   email: string;
   score: number; // 0–100 confidence
   provider: string;
 }
 
-async function getEmail(request: Request, secret: string): Promise<string | null> {
+export async function getEmail(request: Request, secret: string): Promise<string | null> {
   const cookie = request.headers.get("Cookie") || "";
   const token = cookie.match(/atriveo_token=([^;]+)/)?.[1];
   if (!token) return null;
@@ -114,6 +114,43 @@ function buildCandidates(first: string, last: string, domain: string): Candidate
   }
   return out;
 }
+
+// Build the local part for a given pattern name. Mirrors buildCandidates so a
+// detected pattern can be applied to other names at the same company.
+export function localForPattern(pattern: string, first: string, last: string): string {
+  const fi = first.charAt(0);
+  const li = last.charAt(0);
+  switch (pattern) {
+    case "first.last": return `${first}.${last}`;
+    case "flast": return `${fi}${last}`;
+    case "firstlast": return `${first}${last}`;
+    case "first": return first;
+    case "first_last": return `${first}_${last}`;
+    case "first.l": return `${first}.${li}`;
+    case "f.last": return `${fi}.${last}`;
+    case "last.first": return `${last}.${first}`;
+    case "lastf": return `${last}${fi}`;
+    case "last": return last;
+    default: return `${first}.${last}`; // safe default
+  }
+}
+
+// Given a confirmed email and the person's name, reverse-engineer which
+// pattern the company uses (e.g. jane.doe@x → "first.last"). Returns null if
+// no known pattern matches the local part.
+export function detectPattern(email: string, first: string, last: string): string | null {
+  const local = email.split("@")[0]?.toLowerCase() ?? "";
+  const patterns = [
+    "first.last", "flast", "firstlast", "first", "first_last",
+    "first.l", "f.last", "last.first", "lastf", "last",
+  ];
+  for (const p of patterns) {
+    if (localForPattern(p, first, last) === local) return p;
+  }
+  return null;
+}
+
+export { splitName, toDomain, domainHasMx };
 
 // Free domain reality check: does the domain have MX records (can it receive
 // mail)? Uses Cloudflare/Google DNS-over-HTTPS. This confirms the *domain*,
@@ -250,7 +287,7 @@ async function skrappLookup(
 
 // Try every configured provider in order (biggest free tier first) and return
 // the first verified hit. Skips any provider whose key isn't set.
-async function resolveVerified(
+export async function resolveVerified(
   first: string,
   last: string,
   domain: string,

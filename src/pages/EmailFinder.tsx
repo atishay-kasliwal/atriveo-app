@@ -30,7 +30,23 @@ interface FindResult {
   note: string;
 }
 
+interface BulkRow {
+  name: string;
+  email: string;
+  basis: "verified-pattern" | "guessed-pattern" | "error";
+}
+interface BulkResult {
+  domain: string;
+  mxValid: boolean;
+  pattern: string;
+  patternBasis: "verified" | "default";
+  verifiedSample: { name: string; email: string; provider: string } | null;
+  rows: BulkRow[];
+  note: string;
+}
+
 export default function EmailFinder() {
+  const [mode, setMode] = useState<"single" | "bulk">("single");
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
@@ -40,6 +56,10 @@ export default function EmailFinder() {
   const [copied, setCopied] = useState<string | null>(null);
   const [saved, setSaved] = useState<Set<string>>(new Set());
   const [contacts, setContacts] = useState<Contact[]>([]);
+  // Bulk mode
+  const [bulkNames, setBulkNames] = useState("");
+  const [bulkCompany, setBulkCompany] = useState("");
+  const [bulkResult, setBulkResult] = useState<BulkResult | null>(null);
 
   const loadContacts = useCallback(async () => {
     try {
@@ -145,6 +165,54 @@ Thanks for your time,
     )}&body=${encodeURIComponent(body)}`;
   }
 
+  // Bulk: verify the company's pattern once, apply to all pasted names.
+  async function handleBulk(e: React.FormEvent) {
+    e.preventDefault();
+    const names = bulkNames.split("\n").map((n) => n.trim()).filter(Boolean);
+    if (!bulkCompany.trim() || names.length === 0) return;
+    setLoading(true);
+    setError("");
+    setBulkResult(null);
+    try {
+      const res = await fetch("/api/emailfinder-bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ names, company: bulkCompany }),
+      });
+      const data = (await res.json()) as BulkResult & { error?: string };
+      if (!res.ok) setError(data.error || "Bulk lookup failed");
+      else setBulkResult(data);
+    } catch {
+      setError("Network error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function copyAllBulk() {
+    if (!bulkResult) return;
+    const text = bulkResult.rows
+      .filter((r) => r.email)
+      .map((r) => r.email)
+      .join(", ");
+    copy(text);
+  }
+
+  function downloadBulkCsv() {
+    if (!bulkResult) return;
+    const header = "name,email,basis\n";
+    const lines = bulkResult.rows
+      .map((r) => `"${r.name}",${r.email},${r.basis}`)
+      .join("\n");
+    const blob = new Blob([header + lines], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `emails-${bulkResult.domain}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div>
       <AppHeader />
@@ -169,6 +237,104 @@ Thanks for your time,
           }
         />
 
+        <div className="skills-tab-bar" style={{ marginTop: 16 }}>
+          <button
+            className={`skills-tab${mode === "single" ? " active" : ""}`}
+            onClick={() => setMode("single")}
+          >
+            One person
+          </button>
+          <button
+            className={`skills-tab${mode === "bulk" ? " active" : ""}`}
+            onClick={() => setMode("bulk")}
+          >
+            Bulk (many at one company)
+          </button>
+        </div>
+
+        {mode === "bulk" && (
+          <>
+            <form onSubmit={handleBulk} className="skills-resume-box" style={{ marginTop: 20 }}>
+              <div style={{ display: "grid", gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>
+                    Company name or domain
+                  </label>
+                  <input
+                    className="skills-resume-input"
+                    style={{ minHeight: 0, height: 40 }}
+                    placeholder="Nvidia  ·  or  ·  nvidia.com"
+                    value={bulkCompany}
+                    onChange={(e) => setBulkCompany(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>
+                    Names <span style={{ fontWeight: 400, color: "var(--muted)" }}>(one per line)</span>
+                  </label>
+                  <textarea
+                    className="skills-resume-input"
+                    placeholder={"Jane Doe\nJohn Smith\nMaria Garcia"}
+                    value={bulkNames}
+                    onChange={(e) => setBulkNames(e.target.value)}
+                    rows={8}
+                  />
+                </div>
+                <button
+                  className="refresh-btn"
+                  type="submit"
+                  disabled={loading || !bulkCompany.trim() || !bulkNames.trim()}
+                >
+                  {loading ? "Finding…" : "Find all emails"}
+                </button>
+              </div>
+            </form>
+
+            {error && (
+              <div style={{ fontSize: 12, marginTop: 12, color: "var(--red)" }}>{error}</div>
+            )}
+
+            {bulkResult && (
+              <div className="skills-top-card" style={{ marginTop: 20 }}>
+                <div
+                  className="skills-section-title"
+                  style={{ color: bulkResult.patternBasis === "verified" ? "var(--green)" : "var(--orange, #b8702a)" }}
+                >
+                  {bulkResult.rows.length} emails · pattern: {bulkResult.pattern}
+                  {bulkResult.patternBasis === "verified" ? " (verified ✓)" : " (unverified guess)"}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 12 }}>
+                  {bulkResult.note}
+                </div>
+                <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                  <button className="refresh-btn" onClick={copyAllBulk}>Copy all</button>
+                  <button className="refresh-btn" onClick={downloadBulkCsv}>Download CSV</button>
+                </div>
+                <div className="skills-top-grid">
+                  {bulkResult.rows.map((r) => (
+                    <div key={r.name + r.email} className="skills-top-chip" style={{ borderLeft: "3px solid var(--blue)" }}>
+                      <span className="skills-top-name" style={{ textTransform: "none" }}>
+                        {r.email || `(couldn't parse "${r.name}")`}
+                      </span>
+                      <span className="skills-top-count" style={{ textTransform: "none" }}>{r.name}</span>
+                      {r.email && (
+                        <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+                          <button className="refresh-btn" onClick={() => copy(r.email)}>
+                            {copied === r.email ? "Copied ✓" : "Copy"}
+                          </button>
+                          <a className="refresh-btn" href={`mailto:${r.email}`}>Compose</a>
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {mode === "single" && (
+        <>
         <form onSubmit={handleFind} className="skills-resume-box" style={{ marginTop: 20 }}>
           <div style={{ display: "grid", gap: 12 }}>
             <div>
@@ -303,6 +469,8 @@ Thanks for your time,
             </div>
             )}
           </>
+        )}
+        </>
         )}
 
         {/* Saved recruiter contacts */}
