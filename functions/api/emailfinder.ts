@@ -2,17 +2,18 @@ import { jwtVerify } from "jose";
 
 interface Env {
   JWT_SECRET: string;
-  // Optional provider keys for real per-mailbox lookups. Set whichever you
-  // have in wrangler env — the resolver tries them in order (biggest free
-  // tier first) and returns the first verified hit. Combined free quota of
-  // all four is ~550+ lookups/month. With none set, the endpoint falls back
-  // to pattern generation + MX/domain verification only.
-  QUICKENRICH_API_KEY?: string; // ~300 free/mo
-  APOLLO_API_KEY?: string; //      ~100 free/mo, largest DB
-  PROSPEO_API_KEY?: string; //     ~75 free/mo, verified-only
-  HUNTER_API_KEY?: string; //      ~50 free/mo
-  SKRAPP_API_KEY?: string; //      ~100 free/mo, credits roll over
-  CONTACTOUT_API_KEY?: string; //  small free tier, strong personal-email coverage
+  // Provider keys for real per-mailbox lookups. The resolver tries each that
+  // is set, in order, and returns the first verified hit. With none set, the
+  // endpoint falls back to pattern generation + MX verification only.
+  //
+  // Confirmed working on FREE keys (verified live via ?debug=1):
+  QUICKENRICH_API_KEY?: string; // works — GET /api/employees/search
+  HUNTER_API_KEY?: string; //      works — /v2/email-finder
+  SKRAPP_API_KEY?: string; //      coded, untested (no key); ~100/mo rolls over
+  // NOT usable on free keys (kept for documentation; not wired):
+  //   APOLLO_API_KEY     — /people/match is paid-only (403 API_INACCESSIBLE)
+  //   PROSPEO_API_KEY    — /email-finder removed (400 DEPRECATED)
+  //   CONTACTOUT_API_KEY — free key returns a fake SAMPLE profile, not real data
 }
 
 interface VerifiedHit {
@@ -152,34 +153,6 @@ async function hunterLookup(
   }
 }
 
-async function apolloLookup(
-  first: string,
-  last: string,
-  domain: string,
-  key: string
-): Promise<VerifiedHit | null> {
-  try {
-    const res = await fetch("https://api.apollo.io/v1/people/match", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Api-Key": key },
-      body: JSON.stringify({
-        first_name: first,
-        last_name: last,
-        domain,
-        reveal_personal_emails: false,
-      }),
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { person?: { email?: string } };
-    if (data.person?.email) {
-      return { email: data.person.email, score: 90, provider: "apollo" };
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
 // QuickEnrich: GET https://app.quickenrich.io/api/employees/search
 // Auth: Authorization: Bearer <key>. Either linkedin_url OR
 // company_url + first_name + last_name. Response envelope:
@@ -267,87 +240,6 @@ async function skrappLookup(
   }
 }
 
-// Prospeo: POST https://api.prospeo.io/email-finder, header X-KEY.
-// Body { first_name, last_name, company }. Response includes email,
-// verification_status (valid/invalid/catch-all), catch_all. Verified-only.
-// NOTE: this endpoint is marked deprecated in favor of /enrich-person, but
-// still functional. Shape from prospeo.io/api-docs — confirm via ?debug=1.
-async function prospeoLookup(
-  first: string,
-  last: string,
-  domain: string,
-  key: string
-): Promise<VerifiedHit | null> {
-  try {
-    const res = await fetch("https://api.prospeo.io/email-finder", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-KEY": key },
-      body: JSON.stringify({ first_name: first, last_name: last, company: domain }),
-    });
-    if (!res.ok) return null;
-    // Prospeo wraps results; email may be at response.email or response.email
-    // inside a `response` object depending on version. Handle both.
-    const json = (await res.json()) as {
-      error?: boolean;
-      email?: string;
-      verification_status?: string;
-      response?: { email?: string; verification_status?: string };
-    };
-    const email = json.email ?? json.response?.email;
-    const status = json.verification_status ?? json.response?.verification_status;
-    if (email && status !== "invalid") {
-      return { email, score: status === "valid" ? 95 : 80, provider: "prospeo" };
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-// ContactOut: POST https://api.contactout.com/v1/people/enrich, header `token`.
-// Body { first_name, last_name, company_domain, include:["work_email"] }.
-// Work emails at profile.work_email (array); status at profile.work_email_status.
-// Shape from api.contactout.com — confirm via ?debug=1.
-async function contactoutLookup(
-  first: string,
-  last: string,
-  domain: string,
-  key: string
-): Promise<VerifiedHit | null> {
-  try {
-    const res = await fetch("https://api.contactout.com/v1/people/enrich", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        token: key,
-      },
-      body: JSON.stringify({
-        first_name: first,
-        last_name: last,
-        company_domain: domain,
-        include: ["work_email"],
-      }),
-    });
-    if (!res.ok) return null;
-    const json = (await res.json()) as {
-      profile?: {
-        work_email?: string[];
-        work_email_status?: Record<string, string>;
-      };
-    };
-    const emails = json.profile?.work_email;
-    const email = Array.isArray(emails) ? emails[0] : undefined;
-    if (email) {
-      const status = json.profile?.work_email_status?.[email];
-      return { email, score: status === "Verified" ? 95 : 75, provider: "contactout" };
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
 // Try every configured provider in order (biggest free tier first) and return
 // the first verified hit. Skips any provider whose key isn't set.
 async function resolveVerified(
@@ -366,14 +258,17 @@ async function resolveVerified(
   }
 
   // Name + domain lookups (biggest free tier first). These need both names.
-  // NOTE: Apollo's /people/match is not available on free API keys (returns
-  // 403 API_INACCESSIBLE), so it is intentionally not in the chain.
+  // Confirmed working on free API keys via ?debug=1: QuickEnrich and Hunter.
+  // Intentionally NOT in the chain (free key does not return usable data):
+  //  - Apollo:     /people/match returns 403 API_INACCESSIBLE (paid only)
+  //  - Prospeo:    /email-finder returns 400 DEPRECATED (endpoint removed)
+  //  - ContactOut: returns a fake SAMPLE profile ("book a call to unlock"),
+  //                i.e. placeholder emails — must not be trusted/saved.
+  // Their lookup functions are kept below in case of a future paid upgrade.
   if (first && last) {
     if (env.QUICKENRICH_API_KEY) chain.push(() => quickenrichByCompany(first, last, domain, env.QUICKENRICH_API_KEY!));
     if (env.SKRAPP_API_KEY) chain.push(() => skrappLookup(first, last, domain, env.SKRAPP_API_KEY!));
-    if (env.PROSPEO_API_KEY) chain.push(() => prospeoLookup(first, last, domain, env.PROSPEO_API_KEY!));
     if (env.HUNTER_API_KEY) chain.push(() => hunterLookup(first, last, domain, env.HUNTER_API_KEY!));
-    if (env.CONTACTOUT_API_KEY) chain.push(() => contactoutLookup(first, last, domain, env.CONTACTOUT_API_KEY!));
   }
 
   for (const lookup of chain) {
