@@ -23,7 +23,9 @@ interface Contact {
 interface FindResult {
   domain: string;
   mxValid: boolean;
+  freeProvider: boolean;
   verified: { email: string; score: number; provider: string } | null;
+  verifiedIsRole: boolean;
   candidates: Candidate[];
   note: string;
 }
@@ -219,6 +221,19 @@ Thanks for your time,
 
         {result && (
           <>
+            {result.freeProvider && (
+              <div
+                className="skills-top-card"
+                style={{ marginTop: 20, borderLeft: "3px solid var(--orange, #b8702a)" }}
+              >
+                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--orange, #b8702a)" }}>
+                  ⚠ Free email provider
+                </div>
+                <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>
+                  {result.note}
+                </div>
+              </div>
+            )}
             {result.verified && (
               <div className="skills-top-card" style={{ marginTop: 20 }}>
                 <div className="skills-section-title" style={{ color: "var(--green)" }}>
@@ -229,6 +244,11 @@ Thanks for your time,
                   <span className="skills-top-count">
                     {result.verified.score}% · {result.verified.provider}
                   </span>
+                  {result.verifiedIsRole && (
+                    <span className="skills-top-count" style={{ color: "var(--orange, #b8702a)" }}>
+                      role address
+                    </span>
+                  )}
                   <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
                     <button className="refresh-btn" onClick={() => copy(result.verified!.email)}>
                       {copied === result.verified.email ? "Copied ✓" : "Copy"}

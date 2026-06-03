@@ -1,4 +1,5 @@
 import { jwtVerify } from "jose";
+import { FREE_EMAIL_DOMAINS, ROLE_PREFIXES } from "./_email_data";
 
 interface Env {
   JWT_SECRET: string;
@@ -14,6 +15,13 @@ interface Env {
   //   APOLLO_API_KEY     — /people/match is paid-only (403 API_INACCESSIBLE)
   //   PROSPEO_API_KEY    — /email-finder removed (400 DEPRECATED)
   //   CONTACTOUT_API_KEY — free key returns a fake SAMPLE profile, not real data
+}
+
+// True if an email's local part is a known role address (info@, hr@, careers@…)
+// rather than a named person. Exported for reuse by the contacts endpoint.
+export function isRoleAddress(email: string): boolean {
+  const local = email.split("@")[0]?.toLowerCase().replace(/[._-]/g, "") ?? "";
+  return ROLE_PREFIXES.has(local);
 }
 
 interface VerifiedHit {
@@ -307,17 +315,6 @@ async function probeProviders(
         ),
     });
   }
-  if (env.APOLLO_API_KEY) {
-    probes.push({
-      provider: "apollo",
-      req: () =>
-        fetch("https://api.apollo.io/v1/people/match", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Api-Key": env.APOLLO_API_KEY! },
-          body: JSON.stringify({ first_name: first, last_name: last, domain }),
-        }),
-    });
-  }
   if (env.HUNTER_API_KEY) {
     probes.push({
       provider: "hunter",
@@ -341,37 +338,6 @@ async function probeProviders(
           )}&lastName=${encodeURIComponent(last)}&domain=${encodeURIComponent(domain)}`,
           { headers: { "X-Access-Key": env.SKRAPP_API_KEY! } }
         ),
-    });
-  }
-  if (env.PROSPEO_API_KEY) {
-    probes.push({
-      provider: "prospeo",
-      req: () =>
-        fetch("https://api.prospeo.io/email-finder", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-KEY": env.PROSPEO_API_KEY! },
-          body: JSON.stringify({ first_name: first, last_name: last, company: domain }),
-        }),
-    });
-  }
-  if (env.CONTACTOUT_API_KEY) {
-    probes.push({
-      provider: "contactout",
-      req: () =>
-        fetch("https://api.contactout.com/v1/people/enrich", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            token: env.CONTACTOUT_API_KEY!,
-          },
-          body: JSON.stringify({
-            first_name: first,
-            last_name: last,
-            company_domain: domain,
-            include: ["work_email"],
-          }),
-        }),
     });
   }
 
@@ -438,6 +404,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const candidates = domain ? buildCandidates(first, last, domain) : [];
   const mxValid = domain ? await domainHasMx(domain) : false;
 
+  // Is the "company" actually a free email provider (gmail/yahoo/…)? If so,
+  // pattern guessing against it is meaningless — flag it.
+  const freeProvider = !!domain && FREE_EMAIL_DOMAINS.has(domain.toLowerCase());
+
   const verified = await resolveVerified(first, last, domain, linkedinUrl, env);
 
   // ?debug=1 → also return each configured provider's raw response so we can
@@ -445,14 +415,20 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const debug = new URL(request.url).searchParams.get("debug") === "1";
   const probes = debug ? await probeProviders(first, last, domain, env) : undefined;
 
+  const note = freeProvider
+    ? `${domain} is a free email provider, not a company domain — pattern guessing won't work. You'll need this person's actual address.`
+    : mxValid
+      ? "Domain accepts mail. Candidates are ranked by how common each pattern is — they are educated guesses, not confirmed mailboxes."
+      : "No MX records found for this domain. Double-check the company domain.";
+
   return Response.json({
     domain,
     mxValid, // domain can receive mail
+    freeProvider, // company is actually gmail/yahoo/etc — guessing is futile
     verified, // null unless a provider key is configured and a hit was found
+    verifiedIsRole: verified ? isRoleAddress(verified.email) : false,
     candidates, // ranked best-guess addresses
-    note: mxValid
-      ? "Domain accepts mail. Candidates are ranked by how common each pattern is — they are educated guesses, not confirmed mailboxes."
-      : "No MX records found for this domain. Double-check the company domain.",
+    note,
     ...(probes ? { _debug: probes } : {}),
   });
 };
