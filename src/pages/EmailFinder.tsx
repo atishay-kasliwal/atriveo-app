@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AppHeader from "../components/AppHeader";
 import PageIntro from "../components/PageIntro";
 
@@ -6,6 +6,18 @@ interface Candidate {
   email: string;
   pattern: string;
   confidence: number;
+}
+
+interface Contact {
+  id: number;
+  contact_email: string;
+  name: string;
+  company: string;
+  domain: string;
+  source: string;
+  score: number;
+  status: string;
+  created_at: string;
 }
 
 interface FindResult {
@@ -24,6 +36,24 @@ export default function EmailFinder() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
+  const [saved, setSaved] = useState<Set<string>>(new Set());
+  const [contacts, setContacts] = useState<Contact[]>([]);
+
+  const loadContacts = useCallback(async () => {
+    try {
+      const res = await fetch("/api/contacts");
+      if (res.ok) {
+        const data = (await res.json()) as { contacts: Contact[] };
+        setContacts(data.contacts ?? []);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    loadContacts();
+  }, [loadContacts]);
 
   async function handleFind(e: React.FormEvent) {
     e.preventDefault();
@@ -59,6 +89,58 @@ export default function EmailFinder() {
     } catch {
       /* ignore */
     }
+  }
+
+  // Save a found address to the recruiter contacts list (D1).
+  async function save(contactEmail: string, score: number, source: string) {
+    try {
+      const res = await fetch("/api/contacts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contact_email: contactEmail,
+          name,
+          company,
+          domain: result?.domain ?? "",
+          linkedin_url: linkedinUrl,
+          source,
+          score,
+        }),
+      });
+      if (res.ok) {
+        setSaved((s) => new Set(s).add(contactEmail));
+        loadContacts();
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function removeContact(id: number) {
+    try {
+      const res = await fetch(`/api/contacts?id=${id}`, { method: "DELETE" });
+      if (res.ok) setContacts((cs) => cs.filter((c) => c.id !== id));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  // Build a personalized (NOT mass-BCC) outreach mailto for a single contact.
+  function composeHref(contactEmail: string): string {
+    const firstName = name.trim().split(/\s+/)[0] || "there";
+    const co = company.trim() || "your team";
+    const subject = `Exploring opportunities at ${co}`;
+    const body = `Hi ${firstName},
+
+I came across ${co} while researching teams working on scalable systems and data-driven products, and your profile stood out.
+
+I'm a software engineer / data scientist currently exploring relevant roles where I can contribute. If you're the right person, I'd value a quick chat — and if not, I'd be grateful for a pointer to the right contact.
+
+Thanks for your time,
+`;
+    return `mailto:${contactEmail}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
   }
 
   return (
@@ -143,17 +225,23 @@ export default function EmailFinder() {
                   Verified match
                 </div>
                 <div className="skills-top-chip" style={{ borderLeft: "3px solid var(--green)" }}>
-                  <span className="skills-top-name">{result.verified.email}</span>
+                  <span className="skills-top-name" style={{ textTransform: "none" }}>{result.verified.email}</span>
                   <span className="skills-top-count">
                     {result.verified.score}% · {result.verified.provider}
                   </span>
-                  <button
-                    className="refresh-btn"
-                    style={{ marginLeft: "auto" }}
-                    onClick={() => copy(result.verified!.email)}
-                  >
-                    {copied === result.verified.email ? "Copied ✓" : "Copy"}
-                  </button>
+                  <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+                    <button className="refresh-btn" onClick={() => copy(result.verified!.email)}>
+                      {copied === result.verified.email ? "Copied ✓" : "Copy"}
+                    </button>
+                    <a className="refresh-btn" href={composeHref(result.verified.email)}>Compose</a>
+                    <button
+                      className="refresh-btn"
+                      onClick={() => save(result.verified!.email, result.verified!.score, result.verified!.provider)}
+                      disabled={saved.has(result.verified.email)}
+                    >
+                      {saved.has(result.verified.email) ? "Saved ✓" : "Save"}
+                    </button>
+                  </span>
                 </div>
               </div>
             )}
@@ -174,21 +262,66 @@ export default function EmailFinder() {
                     }}
                   >
                     <span className="skills-top-rank">#{i + 1}</span>
-                    <span className="skills-top-name">{c.email}</span>
+                    <span className="skills-top-name" style={{ textTransform: "none" }}>{c.email}</span>
                     <span className="skills-top-count">{Math.round(c.confidence * 100)}%</span>
-                    <button
-                      className="refresh-btn"
-                      style={{ marginLeft: "auto" }}
-                      onClick={() => copy(c.email)}
-                    >
-                      {copied === c.email ? "Copied ✓" : "Copy"}
-                    </button>
+                    <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+                      <button className="refresh-btn" onClick={() => copy(c.email)}>
+                        {copied === c.email ? "Copied ✓" : "Copy"}
+                      </button>
+                      <a className="refresh-btn" href={composeHref(c.email)}>Compose</a>
+                      <button
+                        className="refresh-btn"
+                        onClick={() => save(c.email, Math.round(c.confidence * 100), "guess")}
+                        disabled={saved.has(c.email)}
+                      >
+                        {saved.has(c.email) ? "Saved ✓" : "Save"}
+                      </button>
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
             )}
           </>
+        )}
+
+        {/* Saved recruiter contacts */}
+        {contacts.length > 0 && (
+          <div className="skills-top-card" style={{ marginTop: 28 }}>
+            <div className="skills-section-title">Saved contacts ({contacts.length})</div>
+            <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 12 }}>
+              Your reusable recruiter list. Compose opens a personalized email.
+            </div>
+            <div className="skills-top-grid">
+              {contacts.map((c) => (
+                <div key={c.id} className="skills-top-chip" style={{ borderLeft: "3px solid var(--blue)" }}>
+                  <span className="skills-top-name" style={{ textTransform: "none" }}>
+                    {c.contact_email}
+                  </span>
+                  <span className="skills-top-count">
+                    {c.name || c.company || c.domain}
+                    {c.score ? ` · ${c.score}%` : ""} · {c.source}
+                  </span>
+                  <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+                    <button className="refresh-btn" onClick={() => copy(c.contact_email)}>
+                      {copied === c.contact_email ? "Copied ✓" : "Copy"}
+                    </button>
+                    <a
+                      className="refresh-btn"
+                      href={`mailto:${c.contact_email}?subject=${encodeURIComponent(
+                        `Exploring opportunities at ${c.company || "your team"}`
+                      )}`}
+                    >
+                      Compose
+                    </a>
+                    <button className="refresh-btn" onClick={() => removeContact(c.id)}>
+                      Remove
+                    </button>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
 
