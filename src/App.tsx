@@ -9,6 +9,7 @@ import Skills from "./pages/Skills";
 import Unclicked100 from "./pages/Unclicked100";
 import Cart from "./pages/Cart";
 import States from "./pages/States";
+import EmailFinder from "./pages/EmailFinder";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -94,6 +95,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <States />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/emailfinder"
+          element={
+            <ProtectedRoute>
+              <EmailFinder />
             </ProtectedRoute>
           }
         />
