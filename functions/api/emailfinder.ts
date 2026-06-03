@@ -35,6 +35,7 @@ async function getEmail(request: Request, secret: string): Promise<string | null
 interface FindBody {
   name?: string;
   company?: string; // company name OR a domain
+  linkedinUrl?: string; // optional — enables exact LinkedIn lookup (QuickEnrich)
 }
 
 interface Candidate {
@@ -177,21 +178,64 @@ async function apolloLookup(
   }
 }
 
-async function quickenrichLookup(
+// QuickEnrich: GET https://app.quickenrich.io/api/employees/search
+// Auth: Authorization: Bearer <key>. Either linkedin_url OR
+// company_url + first_name + last_name. Response envelope:
+// { success, message, code, data: { email, ... } }. Endpoint/shape confirmed
+// from the official n8n node (bcharleson/n8n-nodes-quickenrich).
+interface QuickenrichData {
+  email?: string;
+  email_verification_date?: string;
+}
+interface QuickenrichResponse {
+  success?: boolean;
+  code?: number;
+  data?: QuickenrichData | null;
+}
+
+async function quickenrichByCompany(
   first: string,
   last: string,
   domain: string,
   key: string
 ): Promise<VerifiedHit | null> {
   try {
-    const url = `https://api.quickenrich.io/v1/email-finder?domain=${encodeURIComponent(
+    const url = `https://app.quickenrich.io/api/employees/search?company_url=${encodeURIComponent(
       domain
     )}&first_name=${encodeURIComponent(first)}&last_name=${encodeURIComponent(last)}`;
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${key}` } });
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${key}`, Accept: "application/json" },
+    });
     if (!res.ok) return null;
-    const data = (await res.json()) as { email?: string; score?: number };
-    if (data.email) {
-      return { email: data.email, score: data.score ?? 85, provider: "quickenrich" };
+    const json = (await res.json()) as QuickenrichResponse;
+    const email = json.data?.email;
+    if (json.success !== false && email) {
+      return { email, score: 88, provider: "quickenrich" };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// QuickEnrich also supports exact LinkedIn-URL lookup — the original goal of
+// turning a LinkedIn profile into an email. Used when a linkedinUrl is given.
+async function quickenrichByLinkedin(
+  linkedinUrl: string,
+  key: string
+): Promise<VerifiedHit | null> {
+  try {
+    const url = `https://app.quickenrich.io/api/employees/search?linkedin_url=${encodeURIComponent(
+      linkedinUrl
+    )}`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${key}`, Accept: "application/json" },
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as QuickenrichResponse;
+    const email = json.data?.email;
+    if (json.success !== false && email) {
+      return { email, score: 92, provider: "quickenrich" };
     }
     return null;
   } catch {
@@ -227,14 +271,24 @@ async function resolveVerified(
   first: string,
   last: string,
   domain: string,
+  linkedinUrl: string,
   env: Env
 ): Promise<VerifiedHit | null> {
-  if (!first || !last) return null;
   const chain: Array<() => Promise<VerifiedHit | null>> = [];
-  if (env.QUICKENRICH_API_KEY) chain.push(() => quickenrichLookup(first, last, domain, env.QUICKENRICH_API_KEY!));
-  if (env.APOLLO_API_KEY) chain.push(() => apolloLookup(first, last, domain, env.APOLLO_API_KEY!));
-  if (env.HUNTER_API_KEY) chain.push(() => hunterLookup(first, last, domain, env.HUNTER_API_KEY!));
-  if (env.SKRAPP_API_KEY) chain.push(() => skrappLookup(first, last, domain, env.SKRAPP_API_KEY!));
+
+  // If a LinkedIn URL is supplied, QuickEnrich can resolve it directly — the
+  // most accurate path, so try it first.
+  if (env.QUICKENRICH_API_KEY && linkedinUrl) {
+    chain.push(() => quickenrichByLinkedin(linkedinUrl, env.QUICKENRICH_API_KEY!));
+  }
+
+  // Name + domain lookups (biggest free tier first). These need both names.
+  if (first && last) {
+    if (env.QUICKENRICH_API_KEY) chain.push(() => quickenrichByCompany(first, last, domain, env.QUICKENRICH_API_KEY!));
+    if (env.APOLLO_API_KEY) chain.push(() => apolloLookup(first, last, domain, env.APOLLO_API_KEY!));
+    if (env.HUNTER_API_KEY) chain.push(() => hunterLookup(first, last, domain, env.HUNTER_API_KEY!));
+    if (env.SKRAPP_API_KEY) chain.push(() => skrappLookup(first, last, domain, env.SKRAPP_API_KEY!));
+  }
 
   for (const lookup of chain) {
     const hit = await lookup();
@@ -265,10 +319,10 @@ async function probeProviders(
       provider: "quickenrich",
       req: () =>
         fetch(
-          `https://api.quickenrich.io/v1/email-finder?domain=${encodeURIComponent(
+          `https://app.quickenrich.io/api/employees/search?company_url=${encodeURIComponent(
             domain
           )}&first_name=${encodeURIComponent(first)}&last_name=${encodeURIComponent(last)}`,
-          { headers: { Authorization: `Bearer ${env.QUICKENRICH_API_KEY}` } }
+          { headers: { Authorization: `Bearer ${env.QUICKENRICH_API_KEY}`, Accept: "application/json" } }
         ),
     });
   }
@@ -335,20 +389,26 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const body = (await request.json()) as FindBody;
   const name = (body.name || "").trim();
   const company = (body.company || "").trim();
-  if (!name || !company) {
-    return Response.json({ error: "name and company are required" }, { status: 400 });
+  const linkedinUrl = (body.linkedinUrl || "").trim();
+  // Need either name+company (to generate/verify patterns) or a LinkedIn URL
+  // (which QuickEnrich can resolve on its own).
+  if ((!name || !company) && !linkedinUrl) {
+    return Response.json(
+      { error: "Provide name + company, or a LinkedIn URL" },
+      { status: 400 }
+    );
   }
 
   const { first, last } = splitName(name);
-  const domain = toDomain(company);
-  if (!domain) {
+  const domain = company ? toDomain(company) : "";
+  if (company && !domain) {
     return Response.json({ error: "Could not derive a domain from company" }, { status: 422 });
   }
 
-  const candidates = buildCandidates(first, last, domain);
-  const mxValid = await domainHasMx(domain);
+  const candidates = domain ? buildCandidates(first, last, domain) : [];
+  const mxValid = domain ? await domainHasMx(domain) : false;
 
-  const verified = await resolveVerified(first, last, domain, env);
+  const verified = await resolveVerified(first, last, domain, linkedinUrl, env);
 
   // ?debug=1 → also return each configured provider's raw response so we can
   // confirm/repair the parsers after adding a key.

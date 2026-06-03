@@ -19,6 +19,7 @@ interface FindResult {
 export default function EmailFinder() {
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
   const [result, setResult] = useState<FindResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -26,7 +27,8 @@ export default function EmailFinder() {
 
   async function handleFind(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !company.trim()) return;
+    const hasNameCompany = name.trim() && company.trim();
+    if (!hasNameCompany && !linkedinUrl.trim()) return;
     setLoading(true);
     setError("");
     setResult(null);
@@ -34,7 +36,7 @@ export default function EmailFinder() {
       const res = await fetch("/api/emailfinder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, company }),
+        body: JSON.stringify({ name, company, linkedinUrl }),
       });
       const data = (await res.json()) as FindResult & { error?: string };
       if (!res.ok) {
@@ -107,7 +109,23 @@ export default function EmailFinder() {
                 onChange={(e) => setCompany(e.target.value)}
               />
             </div>
-            <button className="refresh-btn" type="submit" disabled={loading || !name.trim() || !company.trim()}>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>
+                LinkedIn URL <span style={{ fontWeight: 400, color: "var(--muted)" }}>(optional — exact match via QuickEnrich)</span>
+              </label>
+              <input
+                className="skills-resume-input"
+                style={{ minHeight: 0, height: 40 }}
+                placeholder="https://linkedin.com/in/janedoe"
+                value={linkedinUrl}
+                onChange={(e) => setLinkedinUrl(e.target.value)}
+              />
+            </div>
+            <button
+              className="refresh-btn"
+              type="submit"
+              disabled={loading || (!(name.trim() && company.trim()) && !linkedinUrl.trim())}
+            >
               {loading ? "Finding…" : "Find emails"}
             </button>
           </div>
@@ -140,6 +158,7 @@ export default function EmailFinder() {
               </div>
             )}
 
+            {result.candidates.length > 0 && (
             <div className="skills-top-card" style={{ marginTop: 20 }}>
               <div className="skills-section-title">Likely addresses</div>
               <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 12 }}>
@@ -168,6 +187,7 @@ export default function EmailFinder() {
                 ))}
               </div>
             </div>
+            )}
           </>
         )}
       </div>
