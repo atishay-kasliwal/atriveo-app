@@ -22,6 +22,7 @@ const NAV: NavItem[] = [
   { href: "/cart",          label: "Cart",           match: (p) => p.startsWith("/cart") },
   { href: "/skills",        label: "Skills",         match: (p) => p.startsWith("/skills") },
   { href: "/states",        label: "States",         match: (p) => p.startsWith("/states") },
+  { href: "/emailfinder",   label: "Email Finder",   match: (p) => p.startsWith("/emailfinder") },
   { href: "/settings",      label: "Settings",       match: (p) => p.startsWith("/settings") },
 ];
 
