@@ -9,8 +9,10 @@ interface Env {
   // to pattern generation + MX/domain verification only.
   QUICKENRICH_API_KEY?: string; // ~300 free/mo
   APOLLO_API_KEY?: string; //      ~100 free/mo, largest DB
+  PROSPEO_API_KEY?: string; //     ~75 free/mo, verified-only
   HUNTER_API_KEY?: string; //      ~50 free/mo
   SKRAPP_API_KEY?: string; //      ~100 free/mo, credits roll over
+  CONTACTOUT_API_KEY?: string; //  small free tier, strong personal-email coverage
 }
 
 interface VerifiedHit {
@@ -265,6 +267,87 @@ async function skrappLookup(
   }
 }
 
+// Prospeo: POST https://api.prospeo.io/email-finder, header X-KEY.
+// Body { first_name, last_name, company }. Response includes email,
+// verification_status (valid/invalid/catch-all), catch_all. Verified-only.
+// NOTE: this endpoint is marked deprecated in favor of /enrich-person, but
+// still functional. Shape from prospeo.io/api-docs — confirm via ?debug=1.
+async function prospeoLookup(
+  first: string,
+  last: string,
+  domain: string,
+  key: string
+): Promise<VerifiedHit | null> {
+  try {
+    const res = await fetch("https://api.prospeo.io/email-finder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-KEY": key },
+      body: JSON.stringify({ first_name: first, last_name: last, company: domain }),
+    });
+    if (!res.ok) return null;
+    // Prospeo wraps results; email may be at response.email or response.email
+    // inside a `response` object depending on version. Handle both.
+    const json = (await res.json()) as {
+      error?: boolean;
+      email?: string;
+      verification_status?: string;
+      response?: { email?: string; verification_status?: string };
+    };
+    const email = json.email ?? json.response?.email;
+    const status = json.verification_status ?? json.response?.verification_status;
+    if (email && status !== "invalid") {
+      return { email, score: status === "valid" ? 95 : 80, provider: "prospeo" };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// ContactOut: POST https://api.contactout.com/v1/people/enrich, header `token`.
+// Body { first_name, last_name, company_domain, include:["work_email"] }.
+// Work emails at profile.work_email (array); status at profile.work_email_status.
+// Shape from api.contactout.com — confirm via ?debug=1.
+async function contactoutLookup(
+  first: string,
+  last: string,
+  domain: string,
+  key: string
+): Promise<VerifiedHit | null> {
+  try {
+    const res = await fetch("https://api.contactout.com/v1/people/enrich", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        token: key,
+      },
+      body: JSON.stringify({
+        first_name: first,
+        last_name: last,
+        company_domain: domain,
+        include: ["work_email"],
+      }),
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      profile?: {
+        work_email?: string[];
+        work_email_status?: Record<string, string>;
+      };
+    };
+    const emails = json.profile?.work_email;
+    const email = Array.isArray(emails) ? emails[0] : undefined;
+    if (email) {
+      const status = json.profile?.work_email_status?.[email];
+      return { email, score: status === "Verified" ? 95 : 75, provider: "contactout" };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 // Try every configured provider in order (biggest free tier first) and return
 // the first verified hit. Skips any provider whose key isn't set.
 async function resolveVerified(
@@ -286,8 +369,10 @@ async function resolveVerified(
   if (first && last) {
     if (env.QUICKENRICH_API_KEY) chain.push(() => quickenrichByCompany(first, last, domain, env.QUICKENRICH_API_KEY!));
     if (env.APOLLO_API_KEY) chain.push(() => apolloLookup(first, last, domain, env.APOLLO_API_KEY!));
-    if (env.HUNTER_API_KEY) chain.push(() => hunterLookup(first, last, domain, env.HUNTER_API_KEY!));
     if (env.SKRAPP_API_KEY) chain.push(() => skrappLookup(first, last, domain, env.SKRAPP_API_KEY!));
+    if (env.PROSPEO_API_KEY) chain.push(() => prospeoLookup(first, last, domain, env.PROSPEO_API_KEY!));
+    if (env.HUNTER_API_KEY) chain.push(() => hunterLookup(first, last, domain, env.HUNTER_API_KEY!));
+    if (env.CONTACTOUT_API_KEY) chain.push(() => contactoutLookup(first, last, domain, env.CONTACTOUT_API_KEY!));
   }
 
   for (const lookup of chain) {
@@ -360,6 +445,37 @@ async function probeProviders(
           )}&lastName=${encodeURIComponent(last)}&domain=${encodeURIComponent(domain)}`,
           { headers: { "X-Access-Key": env.SKRAPP_API_KEY! } }
         ),
+    });
+  }
+  if (env.PROSPEO_API_KEY) {
+    probes.push({
+      provider: "prospeo",
+      req: () =>
+        fetch("https://api.prospeo.io/email-finder", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-KEY": env.PROSPEO_API_KEY! },
+          body: JSON.stringify({ first_name: first, last_name: last, company: domain }),
+        }),
+    });
+  }
+  if (env.CONTACTOUT_API_KEY) {
+    probes.push({
+      provider: "contactout",
+      req: () =>
+        fetch("https://api.contactout.com/v1/people/enrich", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            token: env.CONTACTOUT_API_KEY!,
+          },
+          body: JSON.stringify({
+            first_name: first,
+            last_name: last,
+            company_domain: domain,
+            include: ["work_email"],
+          }),
+        }),
     });
   }
 
