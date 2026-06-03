@@ -45,8 +45,15 @@ interface BulkResult {
   note: string;
 }
 
+interface Template {
+  id: number;
+  title: string;
+  body: string;
+  created_at: string;
+}
+
 export default function EmailFinder() {
-  const [mode, setMode] = useState<"single" | "bulk">("single");
+  const [mode, setMode] = useState<"single" | "bulk" | "templates">("single");
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
@@ -60,6 +67,53 @@ export default function EmailFinder() {
   const [bulkNames, setBulkNames] = useState("");
   const [bulkCompany, setBulkCompany] = useState("");
   const [bulkResult, setBulkResult] = useState<BulkResult | null>(null);
+  // Templates
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [tplTitle, setTplTitle] = useState("");
+  const [tplBody, setTplBody] = useState("");
+
+  const loadTemplates = useCallback(async () => {
+    try {
+      const res = await fetch("/api/templates");
+      if (res.ok) {
+        const data = (await res.json()) as { templates: Template[] };
+        setTemplates(data.templates ?? []);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
+
+  async function saveTemplate() {
+    if (!tplBody.trim()) return;
+    try {
+      const res = await fetch("/api/templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: tplTitle, body: tplBody }),
+      });
+      if (res.ok) {
+        setTplTitle("");
+        setTplBody("");
+        loadTemplates();
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function removeTemplate(id: number) {
+    try {
+      const res = await fetch(`/api/templates?id=${id}`, { method: "DELETE" });
+      if (res.ok) setTemplates((ts) => ts.filter((t) => t.id !== id));
+    } catch {
+      /* ignore */
+    }
+  }
 
   const loadContacts = useCallback(async () => {
     try {
@@ -250,7 +304,92 @@ Thanks for your time,
           >
             Bulk (many at one company)
           </button>
+          <button
+            className={`skills-tab${mode === "templates" ? " active" : ""}`}
+            onClick={() => setMode("templates")}
+          >
+            Templates
+          </button>
         </div>
+
+        {mode === "templates" && (
+          <>
+            <div className="skills-resume-box" style={{ marginTop: 20 }}>
+              <div style={{ display: "grid", gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>
+                    Title <span style={{ fontWeight: 400, color: "var(--muted)" }}>(optional)</span>
+                  </label>
+                  <input
+                    className="skills-resume-input"
+                    style={{ minHeight: 0, height: 40 }}
+                    placeholder="e.g. Direct intro with metric"
+                    value={tplTitle}
+                    onChange={(e) => setTplTitle(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>
+                    Template
+                  </label>
+                  <textarea
+                    className="skills-resume-input"
+                    placeholder="Paste your outreach email here…"
+                    value={tplBody}
+                    onChange={(e) => setTplBody(e.target.value)}
+                    rows={8}
+                  />
+                </div>
+                <button className="refresh-btn" onClick={saveTemplate} disabled={!tplBody.trim()}>
+                  Save template
+                </button>
+              </div>
+            </div>
+
+            {templates.length > 0 && (
+              <div className="skills-top-card" style={{ marginTop: 20 }}>
+                <div className="skills-section-title">Saved templates ({templates.length})</div>
+                <div style={{ display: "grid", gap: 12, marginTop: 8 }}>
+                  {templates.map((t) => (
+                    <div
+                      key={t.id}
+                      style={{
+                        border: "1px solid var(--border, #ddd)",
+                        borderRadius: 8,
+                        padding: 12,
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>
+                          {t.title || "Untitled"}
+                        </span>
+                        <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+                          <button className="refresh-btn" onClick={() => copy(t.body)}>
+                            {copied === t.body ? "Copied ✓" : "Copy"}
+                          </button>
+                          <button className="refresh-btn" onClick={() => removeTemplate(t.id)}>
+                            Remove
+                          </button>
+                        </span>
+                      </div>
+                      <pre
+                        style={{
+                          whiteSpace: "pre-wrap",
+                          fontFamily: "inherit",
+                          fontSize: 12,
+                          color: "var(--muted)",
+                          margin: 0,
+                        }}
+                      >
+                        {t.body}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
 
         {mode === "bulk" && (
           <>
