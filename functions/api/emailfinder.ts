@@ -366,9 +366,10 @@ async function resolveVerified(
   }
 
   // Name + domain lookups (biggest free tier first). These need both names.
+  // NOTE: Apollo's /people/match is not available on free API keys (returns
+  // 403 API_INACCESSIBLE), so it is intentionally not in the chain.
   if (first && last) {
     if (env.QUICKENRICH_API_KEY) chain.push(() => quickenrichByCompany(first, last, domain, env.QUICKENRICH_API_KEY!));
-    if (env.APOLLO_API_KEY) chain.push(() => apolloLookup(first, last, domain, env.APOLLO_API_KEY!));
     if (env.SKRAPP_API_KEY) chain.push(() => skrappLookup(first, last, domain, env.SKRAPP_API_KEY!));
     if (env.PROSPEO_API_KEY) chain.push(() => prospeoLookup(first, last, domain, env.PROSPEO_API_KEY!));
     if (env.HUNTER_API_KEY) chain.push(() => hunterLookup(first, last, domain, env.HUNTER_API_KEY!));
@@ -479,6 +480,24 @@ async function probeProviders(
     });
   }
 
+  // Strip any api_key / token query param from a URL before returning it, so
+  // the debug output never echoes a secret.
+  const redactUrl = (u: string) =>
+    u.replace(/([?&](api_key|token|key)=)[^&]*/gi, "$1REDACTED");
+
+  // Hunter returns a huge `sources` array; drop it so the debug output stays
+  // readable (and doesn't get truncated in a console).
+  const trimBody = (b: unknown): unknown => {
+    if (b && typeof b === "object") {
+      const obj = b as Record<string, unknown>;
+      const data = obj.data as Record<string, unknown> | undefined;
+      if (data && Array.isArray(data.sources)) {
+        return { ...obj, data: { ...data, sources: `[${data.sources.length} omitted]` } };
+      }
+    }
+    return b;
+  };
+
   const out: ProviderProbe[] = [];
   for (const { provider, req } of probes) {
     try {
@@ -486,11 +505,11 @@ async function probeProviders(
       const text = await res.text();
       let body: unknown = text;
       try {
-        body = JSON.parse(text);
+        body = trimBody(JSON.parse(text));
       } catch {
         /* keep raw text */
       }
-      out.push({ provider, url: res.url, status: res.status, body });
+      out.push({ provider, url: redactUrl(res.url), status: res.status, body });
     } catch (err) {
       out.push({ provider, url: "", status: "error", body: String(err) });
     }
