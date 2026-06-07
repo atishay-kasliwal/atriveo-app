@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-06-07T19:29:35.041788+00:00",
-  "total_analyzed": 27524,
+  "generated_at": "2026-06-07T20:27:00.553874+00:00",
+  "total_analyzed": 27525,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
         "Python": 16025,
-        "Java": 8175,
+        "Java": 8176,
         "SQL": 7149,
         "JavaScript": 5421,
         "TypeScript": 4186,
@@ -54,7 +54,7 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 7559,
+        "AWS": 7560,
         "Azure": 4309,
         "GCP": 3894,
         "S3": 818,
@@ -94,7 +94,7 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 5352,
+        "CI/CD": 5353,
         "Kubernetes": 3332,
         "Docker": 3159,
         "Git": 2977,
@@ -174,8 +174,8 @@
       "color": "#64748b",
       "skills": {
         "Cross-functional": 6741,
-        "Code Review": 5261,
-        "Mentorship": 5106,
+        "Code Review": 5262,
+        "Mentorship": 5107,
         "Agile/Scrum": 4089,
         "Leadership": 1509,
         "On-call": 1424
