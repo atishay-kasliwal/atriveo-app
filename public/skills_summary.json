@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-06-07T21:31:25.254564+00:00",
-  "total_analyzed": 27547,
+  "generated_at": "2026-06-07T22:29:43.138047+00:00",
+  "total_analyzed": 27551,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 16039,
+        "Python": 16040,
         "Java": 8188,
-        "SQL": 7151,
+        "SQL": 7152,
         "JavaScript": 5433,
         "TypeScript": 4197,
         "Kotlin": 1768,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 10420,
+        "Scalability": 10421,
         "REST API": 3791,
         "Distributed Systems": 3758,
         "Microservices": 2225,
@@ -136,7 +136,7 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 8553,
+        "Machine Learning": 8554,
         "LLM": 5150,
         "Agents": 4848,
         "GenAI": 3533,
@@ -148,7 +148,7 @@
         "Prompt Eng": 1654,
         "LangChain": 1505,
         "Fine-tuning": 1344,
-        "OpenAI": 1290,
+        "OpenAI": 1291,
         "Embeddings": 713,
         "Hugging Face": 663,
         "SageMaker": 500,
@@ -174,9 +174,9 @@
       "color": "#64748b",
       "skills": {
         "Cross-functional": 6751,
-        "Code Review": 5268,
-        "Mentorship": 5111,
-        "Agile/Scrum": 4092,
+        "Code Review": 5269,
+        "Mentorship": 5113,
+        "Agile/Scrum": 4093,
         "Leadership": 1511,
         "On-call": 1424
       }
