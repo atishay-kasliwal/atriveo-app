@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-06-07T02:05:17.042782+00:00",
-  "total_analyzed": 27453,
+  "generated_at": "2026-06-07T03:06:32.394137+00:00",
+  "total_analyzed": 27471,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 15977,
-        "Java": 8158,
-        "SQL": 7119,
-        "JavaScript": 5396,
+        "Python": 15995,
+        "Java": 8162,
+        "SQL": 7136,
+        "JavaScript": 5410,
         "TypeScript": 4177,
         "Kotlin": 1756,
         "HTML/CSS": 1614,
@@ -79,7 +79,7 @@
         "REST API": 3780,
         "Distributed Systems": 3754,
         "Microservices": 2222,
-        "System Design": 2163,
+        "System Design": 2165,
         "Event-Driven": 1214,
         "Kafka": 1181,
         "API Design": 900,
@@ -94,10 +94,10 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 5343,
+        "CI/CD": 5345,
         "Kubernetes": 3326,
         "Docker": 3149,
-        "Git": 2970,
+        "Git": 2971,
         "Linux": 2385,
         "Terraform": 1385,
         "Jenkins": 948,
@@ -136,16 +136,16 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 8518,
+        "Machine Learning": 8521,
         "LLM": 5140,
-        "Agents": 4823,
+        "Agents": 4837,
         "GenAI": 3527,
         "PyTorch": 2785,
         "RAG": 2459,
         "TensorFlow": 2202,
         "NLP": 2121,
         "Deep Learning": 1671,
-        "Prompt Eng": 1639,
+        "Prompt Eng": 1653,
         "LangChain": 1503,
         "Fine-tuning": 1343,
         "OpenAI": 1287,
