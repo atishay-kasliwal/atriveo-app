@@ -2342,7 +2342,7 @@
     "site": "linkedin",
     "title": "Software Engineer (L2) Segment Team",
     "ats_score": 60,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4425148394",
@@ -2456,7 +2456,7 @@
     "site": "linkedin",
     "title": "Software Engineer, Data",
     "ats_score": 54,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4397453584",
@@ -3013,7 +3013,7 @@
     "summary": "As our next Software Engineer of Data, you should have 3\\+ years of experience, plus: * Ability to write well\\-tested, API\\-driven applications and services that run at scale in production.",
     "title": "Software Engineer, Data",
     "ats_score": 54,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-06-07T14:07:52Z",
@@ -3160,7 +3160,7 @@
     "summary": "As our next Software Engineer of Data, you should have 3\\+ years of experience, plus: * Ability to write well\\-tested, API\\-driven applications and services that run at scale in production.",
     "title": "Software Engineer, Data",
     "ats_score": 54,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4258382945",
@@ -3412,7 +3412,7 @@
     "summary": "At Strattec, we\u2019re reshaping how people experience and interact with their vehicles by making access seamless, secure, and safe.",
     "title": "Software Engineer 2",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4397540706",
@@ -8972,5 +8972,89 @@
     "title": "Machine Learning Engineer",
     "ats_score": 23,
     "fit_score": 3
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4424288009",
+    "session_id": "2026-06-08T01:04:44Z",
+    "batch_time": "2026-06-08T01:04:42Z",
+    "company": "Palantir Technologies",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "New York, NY",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 197,
+    "score_pct": 100,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**A World\\-Changing Company** Palantir builds the world\u2019s leading software for data\\-driven decisions and operations.",
+    "title": "Software Engineer - Hosted Model Infrastructure",
+    "ats_score": 66,
+    "fit_score": 7
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4425417480",
+    "session_id": "2026-06-08T01:04:44Z",
+    "batch_time": "2026-06-08T01:04:42Z",
+    "company": "SIRITECH SOLUTIONS CORP",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Albany, NY",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 127,
+    "score_pct": 98,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Hybrid Position** **Job Description:** The New York State Department of Transportation (NYSDOT) is seeking an experienced Software Developer to design, develop, test, deploy, and maintain enterpris\u2026",
+    "title": "Software Developer  Java / J2EE / Oracle",
+    "ats_score": 66,
+    "fit_score": 7
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4421910401",
+    "session_id": "2026-06-08T01:04:44Z",
+    "batch_time": "2026-06-08T01:04:42Z",
+    "company": "Playsaurus Inc.",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Alameda, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 22,
+    "score_pct": 17,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "Thank you for your interest in the backend developer role. **Some Things To Note** * This role is specifically for individuals located in LATAM (Spanish America and Brazil).",
+    "title": "LATAM - Backend Developer",
+    "ats_score": 0,
+    "fit_score": 1
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4415080988",
+    "session_id": "2026-06-08T01:04:44Z",
+    "batch_time": "2026-06-08T01:04:42Z",
+    "company": "Prowess Consulting",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Bellevue, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": -92,
+    "score_pct": 0,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "***No third party agencies, please.*** **The Role and Responsibilities** * Designs secure, reliable, scalable, and sustainable software components and services.",
+    "title": "Software Engineer (Windows optimization)",
+    "ats_score": 50,
+    "fit_score": 5
   }
 ]
