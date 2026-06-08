@@ -1,21 +1,21 @@
 {
-  "generated_at": "2026-06-08T01:28:18.729682+00:00",
-  "total_analyzed": 27571,
+  "generated_at": "2026-06-08T02:29:53.462112+00:00",
+  "total_analyzed": 27588,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 16049,
+        "Python": 16059,
         "Java": 8191,
-        "SQL": 7157,
-        "JavaScript": 5436,
-        "TypeScript": 4201,
+        "SQL": 7166,
+        "JavaScript": 5437,
+        "TypeScript": 4203,
         "Kotlin": 1768,
-        "HTML/CSS": 1616,
+        "HTML/CSS": 1617,
         "Swift": 1594,
         ".NET": 1052,
         "Rust": 1050,
-        "Go": 710,
+        "Go": 711,
         "Bash/Shell": 678,
         "Scala": 560,
         "Ruby": 522,
@@ -27,26 +27,26 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 4730,
-        "PyTorch": 2790,
-        "TensorFlow": 2207,
+        "React": 4733,
+        "PyTorch": 2801,
+        "TensorFlow": 2216,
         "LangChain": 1506,
         "Node.js": 1505,
-        "Angular": 1377,
+        "Angular": 1378,
         "Spring": 1363,
-        "Scikit-learn": 1351,
-        "Pandas": 1349,
+        "Scikit-learn": 1360,
+        "Pandas": 1350,
         "NumPy": 1152,
-        "GraphQL": 827,
+        "GraphQL": 828,
         "Spring Boot": 795,
         "Express": 728,
         "FastAPI": 669,
         "Next.js": 656,
         "Django": 629,
         "Flask": 549,
-        "Vue": 435,
+        "Vue": 436,
         "Selenium": 308,
-        "Rails": 267,
+        "Rails": 268,
         "Playwright": 177,
         "NestJS": 78
       }
@@ -54,7 +54,7 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 7566,
+        "AWS": 7567,
         "Azure": 4311,
         "GCP": 3898,
         "S3": 819,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 10425,
+        "Scalability": 10426,
         "REST API": 3792,
         "Distributed Systems": 3759,
         "Microservices": 2226,
@@ -94,7 +94,7 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 5358,
+        "CI/CD": 5366,
         "Kubernetes": 3334,
         "Docker": 3160,
         "Git": 2981,
@@ -114,9 +114,9 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 3810,
-        "PostgreSQL": 1954,
-        "Spark": 1806,
+        "ETL/ELT": 3812,
+        "PostgreSQL": 1955,
+        "Spark": 1814,
         "Vector DB": 1400,
         "Kafka": 1182,
         "MySQL": 1061,
@@ -127,7 +127,7 @@
         "Redis": 631,
         "Elasticsearch": 406,
         "BigQuery": 355,
-        "dbt": 318,
+        "dbt": 319,
         "Flink": 163,
         "Cassandra": 146,
         "ClickHouse": 82
@@ -136,24 +136,24 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 8560,
-        "LLM": 5151,
-        "Agents": 4854,
-        "GenAI": 3535,
-        "PyTorch": 2790,
+        "Machine Learning": 8572,
+        "LLM": 5158,
+        "Agents": 4860,
+        "GenAI": 3536,
+        "PyTorch": 2801,
         "RAG": 2465,
-        "TensorFlow": 2207,
-        "NLP": 2127,
-        "Deep Learning": 1677,
+        "TensorFlow": 2216,
+        "NLP": 2137,
+        "Deep Learning": 1685,
         "Prompt Eng": 1656,
         "LangChain": 1506,
-        "Fine-tuning": 1345,
+        "Fine-tuning": 1347,
         "OpenAI": 1291,
         "Embeddings": 713,
-        "Hugging Face": 663,
+        "Hugging Face": 664,
         "SageMaker": 500,
         "Vertex AI": 427,
-        "MLflow": 396
+        "MLflow": 397
       }
     },
     "Security": {
@@ -173,11 +173,11 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 6759,
+        "Cross-functional": 6760,
         "Code Review": 5275,
-        "Mentorship": 5116,
+        "Mentorship": 5118,
         "Agile/Scrum": 4096,
-        "Leadership": 1511,
+        "Leadership": 1512,
         "On-call": 1424
       }
     }
