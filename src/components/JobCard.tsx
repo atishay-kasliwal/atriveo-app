@@ -170,7 +170,24 @@ export default function JobCard({
       style={cardStyle}
     >
       <div className="job-tile-top">
+        <div className="job-tile-score-group">
+          <div className={`job-tile-match job-tile-match--${careerOps.key} is-number-only`} title={careerOps.tooltip}>
+            <strong>{careerOps.score}</strong>
+          </div>
+        </div>
+
         <div className="job-tile-lead">
+          {rank && <span className="job-tile-rank">{rank}</span>}
+          <CompanyLogo company={co} size="md" />
+          <span className="job-board-tag">{boardLabel}</span>
+          {onExcludeCompany && (
+            <button
+              type="button"
+              className="job-tile-exclude"
+              onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
+              title={`Block "${co}"`}
+            >⊘</button>
+          )}
           {onSelectionToggle && (
             <button
               type="button"
@@ -182,26 +199,6 @@ export default function JobCard({
               {isSelected ? "✓" : "+"}
             </button>
           )}
-          {rank && <span className="job-tile-rank">{rank}</span>}
-          <CompanyLogo company={co} size="md" />
-          <span className="job-board-tag">{boardLabel}</span>
-        </div>
-
-        <div className="job-tile-score-group">
-          {onExcludeCompany && (
-            <button
-              type="button"
-              className="job-tile-exclude"
-              onClick={(e) => { e.preventDefault(); onExcludeCompany(co); }}
-              title={`Block "${co}"`}
-            >⊘</button>
-          )}
-          <div className={`job-tile-match job-tile-match--${careerOps.key}`} title={careerOps.tooltip}>
-            <span className="job-tile-match-icon">{careerOps.icon}</span>
-            <strong>{careerOps.score}</strong>
-            <span>CareerOps</span>
-            <em>{careerOps.grade}</em>
-          </div>
         </div>
       </div>
 

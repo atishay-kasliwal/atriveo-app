@@ -2781,6 +2781,25 @@ header {
   padding: 3px 4px;
 }
 
+/* Number-only badge: compact, centered, no reserved icon/grade space */
+.job-tile-match.is-number-only {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  grid-template-columns: none;
+  grid-template-rows: none;
+  min-width: 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 13px;
+}
+
+.job-tile-match.is-number-only strong {
+  font-size: 18px;
+  letter-spacing: -0.04em;
+}
+
 .job-tile-match--green { background: linear-gradient(135deg, var(--tier-green), #4f46e5); }
 .job-tile-match--blue { background: linear-gradient(135deg, var(--tier-blue), #6366f1); }
 .job-tile-match--yellow { background: linear-gradient(135deg, var(--tier-yellow), #a5b4fc); }
@@ -4715,20 +4734,21 @@ body::after {
 
 .job-tile-company {
   padding: 18px 16px 0;
-  color: #15130f;
-  font-size: 16px;
+  color: var(--blue);
+  font-size: 11.5px;
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .job-tile-title {
-  min-height: 44px;
-  padding: 5px 16px 0;
-  color: #2d2a22;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.38;
-  letter-spacing: -0.025em;
+  min-height: 46px;
+  padding: 3px 16px 0;
+  color: #0a0a0a;
+  font-size: 17.5px;
+  font-weight: 800;
+  line-height: 1.22;
+  letter-spacing: -0.035em;
 }
 
 .job-tile-confidence {
