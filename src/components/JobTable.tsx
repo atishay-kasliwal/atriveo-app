@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import type { Job } from "../types";
 import type { ApplyMetadata, ApplyRecord } from "../hooks/useApplyTracker";
 import CompanyLogo from "./CompanyLogo";
@@ -56,6 +56,9 @@ interface RowProps {
   onApplyClick?: (job: Job) => void;
   isSelected?: boolean;
   onSelectionToggle?: (job: Job) => void;
+  onExcludeCompany?: (company: string) => void;
+  nested?: boolean;
+  showCompany?: boolean;
 }
 
 function JobTableRow({
@@ -66,6 +69,9 @@ function JobTableRow({
   onApplyClick,
   isSelected = false,
   onSelectionToggle,
+  onExcludeCompany,
+  nested = false,
+  showCompany = true,
 }: RowProps) {
   const [msgCopied, setMsgCopied] = useState(false);
   const co = job.company || "—";
@@ -90,7 +96,7 @@ function JobTableRow({
 
   return (
     <tr
-      className={`job-table-row job-table-row--${careerOps.key}${isApplied ? " is-applied" : ""}${isSelected ? " is-selected" : ""}`}
+      className={`job-table-row job-table-row--${careerOps.key}${isApplied ? " is-applied" : ""}${isSelected ? " is-selected" : ""}${nested ? " is-nested" : ""}`}
       title={reasons.join(" · ") || careerOps.tooltip}
     >
       <td className="job-table-check">
@@ -106,11 +112,26 @@ function JobTableRow({
           </button>
         )}
       </td>
-      <td className="job-table-num">{index}</td>
+      <td className="job-table-num">{nested ? "" : index}</td>
       <td className="job-table-score">
         <span className={`job-table-score-badge job-table-score-badge--${careerOps.key}`}>{careerOps.score}</span>
       </td>
-      <td className="job-table-title" title={title}>{title}</td>
+      <td className="job-table-job">
+        {showCompany ? (
+          <div className="job-table-job-stack">
+            <div className="job-table-job-company">
+              <CompanyLogo company={co} size="sm" />
+              <span title={co}>{co}</span>
+              {onExcludeCompany && (
+                <button type="button" className="job-table-exclude" onClick={() => onExcludeCompany(co)} title={`Block ${co}`}>⊘</button>
+              )}
+            </div>
+            <div className="job-table-job-title" title={title}>{title}</div>
+          </div>
+        ) : (
+          <div className="job-table-job-title job-table-job-title--nested" title={title}>{title}</div>
+        )}
+      </td>
       <td className="job-table-match">
         <span className="job-table-stars">{stars}</span>
         <span className={`job-table-match-label job-table-match-label--${careerOps.key}`}>{careerOps.label}</span>
@@ -159,49 +180,57 @@ function JobTableRow({
   );
 }
 
-interface GroupProps {
+interface CompanyGroupRowProps {
   group: CompanyJobGroup;
-  startIndex: number;
-  getRecord: (jobUrl: string) => ApplyRecord | null;
-  onAddToTracker: RowProps["onAddToTracker"];
-  onApplyClick?: (job: Job) => void;
+  index: number;
+  expanded: boolean;
+  onToggle: () => void;
   onExcludeCompany?: (company: string) => void;
-  isJobSelected?: (job: Job) => boolean;
-  onSelectionToggle?: (job: Job) => void;
   onGroupSelectAll?: (jobs: Job[]) => void;
   isGroupFullySelected?: (jobs: Job[]) => boolean;
 }
 
-function CompanyJobGroupTable({
+function CompanyGroupRow({
   group,
-  startIndex,
-  getRecord,
-  onAddToTracker,
-  onApplyClick,
+  index,
+  expanded,
+  onToggle,
   onExcludeCompany,
-  isJobSelected,
-  onSelectionToggle,
   onGroupSelectAll,
   isGroupFullySelected,
-}: GroupProps) {
+}: CompanyGroupRowProps) {
+  const top = group.jobs[0];
+  const topOps = careerOpsRating(top);
   const allSelected = isGroupFullySelected?.(group.jobs) ?? false;
-  const topTier = careerOpsRating(group.jobs[0]).key;
 
   return (
-    <section className="job-table-group">
-      <header className="job-table-group-head">
-        <CompanyLogo company={group.company} size="md" />
-        <div className="job-table-group-meta">
-          <strong title={group.company}>{group.company}</strong>
-          <span>{group.jobs.length} role{group.jobs.length === 1 ? "" : "s"}</span>
-        </div>
-        <span className={`job-table-group-score job-table-score-badge job-table-score-badge--${topTier}`}>
-          {group.bestScore}
-        </span>
+    <tr className={`job-table-row job-table-row--group job-table-row--${topOps.key}${expanded ? " is-expanded" : ""}`}>
+      <td className="job-table-check" />
+      <td className="job-table-num">{index}</td>
+      <td className="job-table-score">
+        <span className={`job-table-score-badge job-table-score-badge--${topOps.key}`}>{group.bestScore}</span>
+      </td>
+      <td className="job-table-job">
+        <button type="button" className="job-table-group-toggle" onClick={onToggle} aria-expanded={expanded}>
+          <span className="job-table-group-chevron">{expanded ? "▾" : "▸"}</span>
+          <CompanyLogo company={group.company} size="sm" />
+          <span className="job-table-group-name" title={group.company}>{group.company}</span>
+          <span className="job-table-group-count">{group.jobs.length} roles</span>
+        </button>
+      </td>
+      <td className="job-table-match">
+        <span className="job-table-stars">{careerOpsStars(topOps.score)}</span>
+        <span className={`job-table-match-label job-table-match-label--${topOps.key}`}>{topOps.label}</span>
+      </td>
+      <td className="job-table-loc" colSpan={2}>
+        <span className="job-table-group-hint">{expanded ? "Expanded" : "Click to expand roles"}</span>
+      </td>
+      <td className="job-table-time">—</td>
+      <td className="job-table-actions">
         {onGroupSelectAll && (
           <button
             type="button"
-            className={`job-table-group-select${allSelected ? " is-selected" : ""}`}
+            className={`job-table-action job-table-group-select${allSelected ? " is-selected" : ""}`}
             onClick={() => onGroupSelectAll(group.jobs)}
           >
             {allSelected ? "Deselect all" : "Select all"}
@@ -210,46 +239,15 @@ function CompanyJobGroupTable({
         {onExcludeCompany && (
           <button
             type="button"
-            className="job-table-group-exclude"
+            className="job-table-action"
             onClick={() => onExcludeCompany(group.company)}
             title={`Block ${group.company}`}
           >
             ⊘
           </button>
         )}
-      </header>
-      <div className="job-table-wrap job-table-wrap--nested">
-        <table className="job-table">
-          <thead>
-            <tr>
-              <th aria-label="Select" />
-              <th>#</th>
-              <th>Score</th>
-              <th>Role</th>
-              <th>Match</th>
-              <th>Location</th>
-              <th>Level</th>
-              <th>Time</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {group.jobs.map((job, i) => (
-              <JobTableRow
-                key={job.job_url || `${group.company}-${i}`}
-                job={job}
-                index={startIndex + i + 1}
-                applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                onAddToTracker={onAddToTracker}
-                onApplyClick={onApplyClick}
-                isSelected={isJobSelected?.(job)}
-                onSelectionToggle={onSelectionToggle}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
+      </td>
+    </tr>
   );
 }
 
@@ -282,26 +280,87 @@ export default function JobTable({
     () => (groupByCompany ? groupJobsByCompany(jobs) : []),
     [jobs, groupByCompany],
   );
+  const [expandedCompanies, setExpandedCompanies] = useState<Set<string>>(() => new Set());
 
-  if (!groupByCompany) {
-    return (
-      <div className="job-table-wrap">
-        <table className="job-table">
-          <thead>
-            <tr>
-              <th aria-label="Select" />
-              <th>#</th>
-              <th>Score</th>
-              <th>Role</th>
-              <th>Match</th>
-              <th>Location</th>
-              <th>Level</th>
-              <th>Time</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {jobs.map((job, i) => (
+  const toggleCompany = (company: string) => {
+    setExpandedCompanies((prev) => {
+      const next = new Set(prev);
+      if (next.has(company)) next.delete(company);
+      else next.add(company);
+      return next;
+    });
+  };
+
+  return (
+    <div className="job-table-wrap">
+      <table className="job-table">
+        <thead>
+          <tr>
+            <th aria-label="Select" />
+            <th>#</th>
+            <th>Score</th>
+            <th>Job</th>
+            <th>Match</th>
+            <th>Location</th>
+            <th>Level</th>
+            <th>Time</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {groupByCompany ? (
+            groups.map((group, i) => {
+              const rowIndex = i + 1;
+              if (group.jobs.length === 1) {
+                const job = group.jobs[0];
+                return (
+                  <JobTableRow
+                    key={job.job_url || group.company}
+                    job={job}
+                    index={rowIndex}
+                    applyRecord={job.job_url ? getRecord(job.job_url) : null}
+                    onAddToTracker={onAddToTracker}
+                    onApplyClick={onApplyClick}
+                    isSelected={isJobSelected?.(job)}
+                    onSelectionToggle={onSelectionToggle}
+                    onExcludeCompany={onExcludeCompany}
+                    showCompany
+                  />
+                );
+              }
+
+              const expanded = expandedCompanies.has(group.company);
+              return (
+                <Fragment key={group.company}>
+                  <CompanyGroupRow
+                    group={group}
+                    index={rowIndex}
+                    expanded={expanded}
+                    onToggle={() => toggleCompany(group.company)}
+                    onExcludeCompany={onExcludeCompany}
+                    onGroupSelectAll={onGroupSelectAll}
+                    isGroupFullySelected={isGroupFullySelected}
+                  />
+                  {expanded &&
+                    group.jobs.map((job, j) => (
+                      <JobTableRow
+                        key={job.job_url || `${group.company}-${j}`}
+                        job={job}
+                        index={rowIndex}
+                        applyRecord={job.job_url ? getRecord(job.job_url) : null}
+                        onAddToTracker={onAddToTracker}
+                        onApplyClick={onApplyClick}
+                        isSelected={isJobSelected?.(job)}
+                        onSelectionToggle={onSelectionToggle}
+                        nested
+                        showCompany={false}
+                      />
+                    ))}
+                </Fragment>
+              );
+            })
+          ) : (
+            jobs.map((job, i) => (
               <JobTableRow
                 key={job.job_url || i}
                 job={job}
@@ -311,36 +370,12 @@ export default function JobTable({
                 onApplyClick={onApplyClick}
                 isSelected={isJobSelected?.(job)}
                 onSelectionToggle={onSelectionToggle}
+                showCompany
               />
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-
-  let runningIndex = 0;
-  return (
-    <div className="job-table-groups">
-      {groups.map((group) => {
-        const startIndex = runningIndex;
-        runningIndex += group.jobs.length;
-        return (
-          <CompanyJobGroupTable
-            key={group.company}
-            group={group}
-            startIndex={startIndex}
-            getRecord={getRecord}
-            onAddToTracker={onAddToTracker}
-            onApplyClick={onApplyClick}
-            onExcludeCompany={onExcludeCompany}
-            isJobSelected={isJobSelected}
-            onSelectionToggle={onSelectionToggle}
-            onGroupSelectAll={onGroupSelectAll}
-            isGroupFullySelected={isGroupFullySelected}
-          />
-        );
-      })}
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }

@@ -1459,96 +1459,6 @@ header {
 }
 
 /* ── Job table (Airtable-style feed) ───────────────────────────────────── */
-.job-table-groups {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-bottom: 24px;
-}
-
-.job-table-group {
-  border: 1px solid rgba(91, 88, 77, 0.14);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 8px 24px rgba(65, 60, 47, 0.06);
-  overflow: hidden;
-}
-
-.job-table-group-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(91, 88, 77, 0.1);
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-}
-
-.job-table-group-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-  flex: 1;
-}
-
-.job-table-group-meta strong {
-  font-size: 14px;
-  font-weight: 800;
-  color: #0f172a;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.job-table-group-meta span {
-  font-size: 11px;
-  color: #64748b;
-  font-weight: 600;
-}
-
-.job-table-group-score {
-  flex-shrink: 0;
-}
-
-.job-table-group-select {
-  border: 1px solid rgba(79, 70, 229, 0.25);
-  border-radius: 8px;
-  background: #fff;
-  color: #4f46e5;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 5px 10px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.job-table-group-select.is-selected {
-  background: #4f46e5;
-  border-color: #4f46e5;
-  color: #fff;
-}
-
-.job-table-group-exclude {
-  border: none;
-  background: none;
-  color: #94a3b8;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 2px 4px;
-}
-
-.job-table-group-exclude:hover {
-  color: #64748b;
-}
-
-.job-table-wrap--nested {
-  margin-bottom: 0;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  max-height: none;
-}
-
 .job-table-wrap {
   margin-bottom: 24px;
   border: 1px solid rgba(91, 88, 77, 0.14);
@@ -1675,6 +1585,127 @@ header {
 }
 
 .job-table-company,
+.job-table-job {
+  min-width: 200px;
+  max-width: 420px;
+}
+
+.job-table-job-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.job-table-job-company {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.job-table-job-company span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.job-table-exclude {
+  border: none;
+  background: none;
+  color: #94a3b8;
+  cursor: pointer;
+  opacity: 0;
+  padding: 0 2px;
+  font-size: 11px;
+}
+
+.job-table-row:hover .job-table-exclude {
+  opacity: 1;
+}
+
+.job-table-job-title {
+  padding-left: 30px;
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #334155;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.job-table-job-title--nested {
+  padding-left: 18px;
+  border-left: 2px solid rgba(79, 70, 229, 0.2);
+}
+
+.job-table-row.is-nested td {
+  background: rgba(79, 70, 229, 0.02);
+}
+
+.job-table-row--group td {
+  background: rgba(241, 245, 249, 0.85);
+}
+
+.job-table-row--group.is-expanded td {
+  background: rgba(79, 70, 229, 0.04);
+}
+
+.job-table-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.job-table-group-chevron {
+  color: #4f46e5;
+  font-size: 11px;
+  width: 12px;
+  flex-shrink: 0;
+}
+
+.job-table-group-name {
+  font-weight: 800;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.job-table-group-count {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.1);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.job-table-group-hint {
+  font-size: 11px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.job-table-group-select.is-selected {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+}
+
 .job-table-title {
   min-width: 180px;
   max-width: 420px;
