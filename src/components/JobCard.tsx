@@ -46,10 +46,10 @@ function scrapedDateLabel(dateStr?: string): string {
 }
 
 function tier(s: number) {
-  if (s >= 75) return { gradient: "linear-gradient(135deg,#1e40af,#3b82f6)", solid: "#1e40af", glow: "rgba(30,64,175,0.24)" };
-  if (s >= 50) return { gradient: "linear-gradient(135deg,#2563eb,#60a5fa)", solid: "#2563eb", glow: "rgba(37,99,235,0.22)" };
-  if (s >= 25) return { gradient: "linear-gradient(135deg,#3b82f6,#7cb0fb)", solid: "#3b82f6", glow: "rgba(59,130,246,0.22)" };
-  return { gradient: "linear-gradient(135deg,#64748b,#94a3b8)", solid: "#64748b", glow: "rgba(100,116,139,0.18)" };
+  if (s >= 75) return { gradient: "linear-gradient(180deg,#1f1f23,#0a0a0a)", solid: "#0a0a0a", glow: "rgba(10,10,10,0.2)" };
+  if (s >= 50) return { gradient: "linear-gradient(180deg,#5b53ea,#4f46e5)", solid: "#4f46e5", glow: "rgba(79,70,229,0.2)" };
+  if (s >= 25) return { gradient: "linear-gradient(180deg,#6366f1,#4f46e5)", solid: "#6366f1", glow: "rgba(99,102,241,0.18)" };
+  return { gradient: "linear-gradient(180deg,#a1a1aa,#71717a)", solid: "#71717a", glow: "rgba(113,113,122,0.16)" };
 }
 
 function compactTerm(term?: string | null): string | null {
