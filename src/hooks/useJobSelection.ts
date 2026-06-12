@@ -1,10 +1,80 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Job } from "../types";
+import type { TailorRunState, TailorStreamEvent } from "../types/tailor";
 import { analyzeSelectedJobs, type SelectedJobAnalysis } from "../utils/jobAnalysis";
 import { loadJobDescriptions } from "../utils/jobDescriptionBuckets";
 import { copyTextToClipboard, formatJobsForClipboard, jobCopyKey } from "../utils/jobCopy";
 
 const TAILOR_SERVER = "http://localhost:8787";
+
+async function readTailorStream(
+  body: ReadableStream<Uint8Array>,
+  onEvent: (event: TailorStreamEvent) => void,
+) {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      onEvent(JSON.parse(line) as TailorStreamEvent);
+    }
+  }
+  if (buffer.trim()) onEvent(JSON.parse(buffer) as TailorStreamEvent);
+}
+
+function applyTailorEvent(prev: TailorRunState, event: TailorStreamEvent): TailorRunState {
+  if (event.type === "start") {
+    return {
+      ...prev,
+      dateDir: event.dateDir,
+      model: event.model,
+      total: event.total ?? prev.total,
+    };
+  }
+  if (event.type === "fatal") {
+    return { ...prev, active: false, fatalError: event.error };
+  }
+  if (event.type === "end") {
+    const ok = prev.jobs.filter((j) => j.phase === "done" && j.status === "ok" && j.pdf).length;
+    return {
+      ...prev,
+      active: false,
+      completed: prev.total,
+      summary: `Finished ${prev.total} job${prev.total === 1 ? "" : "s"} · ${ok} PDF${ok === 1 ? "" : "s"} saved to drive`,
+    };
+  }
+  if (event.type !== "job" || event.index === undefined) return prev;
+
+  const jobs = [...prev.jobs];
+  const current = jobs[event.index] || {
+    index: event.index,
+    company: event.company || "Unknown",
+    role: event.role || "Role",
+    phase: "queued" as const,
+  };
+  jobs[event.index] = {
+    ...current,
+    company: event.company || current.company,
+    role: event.role || current.role,
+    phase: event.phase || current.phase,
+    status: event.status ?? current.status,
+    ats: event.ats ?? current.ats,
+    folder: event.folder ?? current.folder,
+    dir: event.dir ?? current.dir,
+    pdfPath: event.pdfPath ?? current.pdfPath,
+    pdf: event.pdf ?? current.pdf,
+    error: event.error ?? current.error,
+    headerTitle: event.headerTitle ?? current.headerTitle,
+  };
+  const completed = jobs.filter((j) => j.phase === "done").length;
+  return { ...prev, jobs, completed };
+}
 
 export function useJobSelection(jobs: Job[]) {
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
@@ -12,7 +82,7 @@ export function useJobSelection(jobs: Job[]) {
   const [analysisMessage, setAnalysisMessage] = useState("");
   const [analysis, setAnalysis] = useState<SelectedJobAnalysis | null>(null);
   const [tailoring, setTailoring] = useState(false);
-  const [tailorMessage, setTailorMessage] = useState("");
+  const [tailorRun, setTailorRun] = useState<TailorRunState | null>(null);
 
   useEffect(() => {
     const visibleKeys = new Set(jobs.map(jobCopyKey));
@@ -88,58 +158,107 @@ export function useJobSelection(jobs: Job[]) {
     }
   };
 
-  // Send selected jobs (with full JD text) to the local tailor sidecar, which
-  // runs Ollama, applies bullet rewrites to the resume template, compiles a
-  // PDF, and saves everything to the external drive. Requires `npm run tailor`.
+  // Stream selected jobs to the local tailor sidecar (npm run tailor). Each job
+  // emits live NDJSON progress: queued → analyzing → assembling → compiling → done.
   const tailorSelectedJobs = async () => {
     if (!selectedJobs.length || tailoring) return;
     const resumeText = localStorage.getItem("atriveo_resume") || "";
     if (resumeText.trim().length < 50) {
-      setTailorMessage("Save your resume in Settings first.");
+      setTailorRun({
+        active: false,
+        total: 0,
+        completed: 0,
+        jobs: [],
+        fatalError: "Save your resume in Settings first.",
+      });
       return;
     }
+
     setTailoring(true);
-    setTailorMessage("Loading full JDs…");
     try {
       const descriptionsByUrl = await loadJobDescriptions(selectedJobs);
-      const payload = {
-        resumeText,
-        jobs: selectedJobs.map((job) => ({
+      const jobsWithJd = selectedJobs
+        .map((job) => ({
           company: job.company,
           title: job.title,
           job_url: job.job_url,
           score_pct: job.score_pct,
           jd: descriptionsByUrl[job.job_url] || job.summary || "",
-        })),
-      };
-      const withJd = payload.jobs.filter((j) => j.jd.trim().length > 50).length;
-      if (!withJd) {
-        setTailorMessage("None of the selected jobs have a full JD captured.");
-        setTailoring(false);
+        }))
+        .filter((j) => j.jd.trim().length > 50);
+
+      if (!jobsWithJd.length) {
+        setTailorRun({
+          active: false,
+          total: 0,
+          completed: 0,
+          jobs: [],
+          fatalError: "None of the selected jobs have a full JD captured.",
+        });
         return;
       }
-      setTailorMessage(`Tailoring ${withJd} job${withJd === 1 ? "" : "s"} locally… (~2 min each)`);
+
+      const initialRun: TailorRunState = {
+        active: true,
+        total: jobsWithJd.length,
+        completed: 0,
+        jobs: jobsWithJd.map((job, index) => ({
+          index,
+          company: job.company || "Unknown",
+          role: job.title || "Role",
+          phase: "queued",
+        })),
+      };
+      setTailorRun(initialRun);
+
       const res = await fetch(`${TAILOR_SERVER}/tailor`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ resumeText, jobs: jobsWithJd }),
       });
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.error || "tailor failed");
-      const ok = data.results.filter((r: { pdf?: boolean }) => r.pdf).length;
-      const applied = data.results.reduce((n: number, r: { applied?: number }) => n + (r.applied || 0), 0);
-      setTailorMessage(`Done: ${ok}/${data.results.length} PDF${ok === 1 ? "" : "s"}, ${applied} bullets rewritten → saved to drive.`);
+
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok && !contentType.includes("ndjson")) {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        throw new Error(err.error || "tailor failed");
+      }
+      if (!res.body) throw new Error("no response from tailor server");
+
+      await readTailorStream(res.body, (event) => {
+        setTailorRun((prev) => (prev ? applyTailorEvent(prev, event) : prev));
+      });
     } catch (e) {
       const msg = (e as Error).message || String(e);
-      setTailorMessage(
-        msg.includes("Failed to fetch")
+      setTailorRun((prev) => ({
+        active: false,
+        total: prev?.total ?? 0,
+        completed: prev?.completed ?? 0,
+        jobs: prev?.jobs ?? [],
+        fatalError: msg.includes("Failed to fetch")
           ? "Tailor server not running. Start it with: npm run tailor"
-          : `Failed: ${msg}`,
-      );
+          : msg,
+      }));
     } finally {
       setTailoring(false);
     }
   };
+
+  const openTailorPath = async (targetPath: string) => {
+    try {
+      const res = await fetch(`${TAILOR_SERVER}/open`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: targetPath }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "open failed");
+    } catch (e) {
+      const msg = (e as Error).message || String(e);
+      setTailorRun((prev) => (prev ? { ...prev, fatalError: `Could not open in Finder: ${msg}` } : prev));
+    }
+  };
+
+  const clearTailorRun = () => setTailorRun(null);
 
   return {
     selectedCount: selectedJobs.length,
@@ -147,7 +266,7 @@ export function useJobSelection(jobs: Job[]) {
     analysisMessage,
     analysis,
     tailoring,
-    tailorMessage,
+    tailorRun,
     isJobSelected: (job: Job) => selectedKeys.has(jobCopyKey(job)),
     toggleJobSelection,
     selectVisibleJobs,
@@ -155,5 +274,7 @@ export function useJobSelection(jobs: Job[]) {
     copySelectedJobs,
     analyzeSelectedJobDescriptions,
     tailorSelectedJobs,
+    openTailorPath,
+    clearTailorRun,
   };
 }

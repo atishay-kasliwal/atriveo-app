@@ -32,7 +32,7 @@ const SAFE_CLAIMS = loadSafeClaims(BANK);
 // ─── Config ──────────────────────────────────────────────────────────────────
 const PORT = 8787;
 const OLLAMA = "http://localhost:11434/api/chat";
-const DEFAULT_MODEL = "gemma3:12b";
+const DEFAULT_MODEL = "gemma4:12b";
 const OUT_ROOT = "/Volumes/Kasliwal v2/tailored-resumes";
 const TEMPLATE =
   "/Users/atishaykasliwal/Desktop/June/Resume claude/tailored/2026-06-12/04-veryai-fullstack-engineer/resume.tex";

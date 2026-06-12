@@ -1167,6 +1167,227 @@ header {
   margin-top: 8px;
 }
 
+/* ── Tailor progress panel ─────────────────────────────────────────────── */
+.tailor-panel {
+  margin-bottom: 16px;
+  border: 1px solid rgba(91, 88, 77, 0.14);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(79, 70, 229, 0.08), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(241, 245, 249, 0.82));
+  box-shadow: 0 10px 28px rgba(65, 60, 47, 0.06);
+  padding: 16px 18px;
+}
+
+.tailor-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tailor-panel-kicker {
+  display: block;
+  color: #6c685d;
+  font-family: "Inter", monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.tailor-panel-head h3 {
+  margin: 4px 0 0;
+  color: #0f172a;
+  font-size: 18px;
+  letter-spacing: -0.04em;
+}
+
+.tailor-panel-head p {
+  margin: 6px 0 0;
+  color: #475569;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.tailor-panel-path {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.05);
+  color: #334155;
+  font-family: "Inter", monospace;
+  font-size: 10.5px;
+  word-break: break-all;
+}
+
+.tailor-panel-head-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.tailor-panel-btn {
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4338ca, #6366f1);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.tailor-panel-btn.subtle {
+  background: rgba(255, 255, 255, 0.72);
+  color: #334155;
+  border: 1px solid rgba(91, 88, 77, 0.16);
+}
+
+.tailor-panel-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.tailor-panel-progress-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(83, 80, 69, 0.12);
+  overflow: hidden;
+}
+
+.tailor-panel-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4338ca, #6366f1);
+  transition: width 0.25s ease;
+}
+
+.tailor-panel-progress strong {
+  min-width: 36px;
+  color: #4f46e5;
+  font-family: "Inter", monospace;
+  font-size: 11px;
+  text-align: right;
+}
+
+.tailor-job-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tailor-job-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid rgba(91, 88, 77, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.tailor-job-row.is-running,
+.tailor-job-row.is-active {
+  border-color: rgba(79, 70, 229, 0.22);
+  background: rgba(79, 70, 229, 0.04);
+}
+
+.tailor-job-row.is-success {
+  border-color: rgba(79, 70, 229, 0.18);
+}
+
+.tailor-job-row.is-blocked {
+  border-color: rgba(217, 119, 6, 0.24);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.tailor-job-row.is-error {
+  border-color: rgba(220, 38, 38, 0.2);
+  background: rgba(254, 226, 226, 0.35);
+}
+
+.tailor-job-main {
+  min-width: 0;
+}
+
+.tailor-job-main strong,
+.tailor-job-main span,
+.tailor-job-main small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tailor-job-main strong {
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.tailor-job-main span {
+  margin-top: 2px;
+  color: #475569;
+  font-size: 12px;
+}
+
+.tailor-job-main small {
+  margin-top: 4px;
+  color: #64748b;
+  font-family: "Inter", monospace;
+  font-size: 10px;
+}
+
+.tailor-job-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: #334155;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.tailor-job-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(79, 70, 229, 0.18);
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: sync-spin 0.9s linear infinite;
+  flex-shrink: 0;
+}
+
+.tailor-job-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 860px) {
+  .tailor-job-row {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .tailor-panel-head {
+    flex-direction: column;
+  }
+}
+
+@keyframes sync-spin {
+  to { transform: rotate(360deg); }
+}
+
 @media (max-width: 760px) {
   .bulk-copy-bar {
     grid-template-columns: 1fr;

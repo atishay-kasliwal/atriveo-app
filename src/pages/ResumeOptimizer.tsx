@@ -6,7 +6,8 @@ const RESUME_KEY = "atriveo_resume";
 const OLLAMA_BASE = "http://localhost:11434";
 
 const MODELS = [
-  { id: "gemma3:12b", label: "Gemma3 12B",  note: "Recommended · best quality" },
+  { id: "gemma4:12b", label: "Gemma4 12B",  note: "Recommended · best quality" },
+  { id: "gemma3:12b", label: "Gemma3 12B",  note: "Fallback · also reliable" },
   { id: "qwen3:8b",   label: "Qwen3 8B",    note: "Faster · may truncate" },
   { id: "qwen3:4b",   label: "Qwen3 4B",    note: "Fastest · lighter" },
 ];
@@ -152,7 +153,7 @@ function extractJSON(raw: string): string {
 export default function ResumeOptimizer() {
   const [resumeText, setResumeText] = useState("");
   const [jdText, setJdText]         = useState("");
-  const [model, setModel]           = useState("gemma3:12b");
+  const [model, setModel]           = useState("gemma4:12b");
   const [loading, setLoading]       = useState(false);
   const [result, setResult]         = useState<OptimizeResult | null>(null);
   const [error, setError]           = useState<string | null>(null);
@@ -230,7 +231,7 @@ export default function ResumeOptimizer() {
       // (qwen3) do this; show a clear message instead of a cryptic parse crash.
       if (doneReason === "length") {
         throw new Error(
-          `The ${MODELS.find(m => m.id === model)?.label ?? model} response was cut off at its token limit, so the result is incomplete. Try again, or switch to Gemma3 12B which completes more reliably.`,
+          `The ${MODELS.find(m => m.id === model)?.label ?? model} response was cut off at its token limit, so the result is incomplete. Try again, or switch to Gemma4 12B which completes more reliably.`,
         );
       }
 
@@ -240,7 +241,7 @@ export default function ResumeOptimizer() {
         parsed = JSON.parse(jsonStr) as OptimizeResult;
       } catch {
         throw new Error(
-          "The model returned malformed JSON. Try again, or switch to Gemma3 12B for more reliable output.",
+          "The model returned malformed JSON. Try again, or switch to Gemma4 12B for more reliable output.",
         );
       }
       // Smaller models pad the list with unchanged "no-op" bullets. Drop any

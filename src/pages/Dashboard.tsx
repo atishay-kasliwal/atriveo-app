@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AppHeader from "../components/AppHeader";
 import BulkJobAnalysisPanel from "../components/BulkJobAnalysisPanel";
 import BulkJobCopyBar from "../components/BulkJobCopyBar";
+import TailorPanel from "../components/TailorPanel";
 import { useApplyClickLog } from "../hooks/useApplyClickLog";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
@@ -546,7 +547,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
             <BulkJobCopyBar
               selectedCount={jobSelection.selectedCount}
               visibleCount={displayedJobs.length}
-              copyMessage={jobSelection.tailorMessage || jobSelection.copyMessage}
+              copyMessage={jobSelection.copyMessage}
               analysisMessage={jobSelection.analysisMessage}
               onCopy={jobSelection.copySelectedJobs}
               onAnalyze={jobSelection.analyzeSelectedJobDescriptions}
@@ -554,6 +555,11 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               tailoring={jobSelection.tailoring}
               onSelectVisible={jobSelection.selectVisibleJobs}
               onClear={jobSelection.clearSelectedJobs}
+            />
+            <TailorPanel
+              run={jobSelection.tailorRun}
+              onOpenPath={jobSelection.openTailorPath}
+              onDismiss={jobSelection.clearTailorRun}
             />
             <BulkJobAnalysisPanel analysis={jobSelection.analysis} />
 
