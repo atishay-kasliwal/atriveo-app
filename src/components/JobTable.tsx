@@ -202,48 +202,78 @@ function CompanyGroupRow({
   const top = group.jobs[0];
   const topOps = careerOpsRating(top);
   const allSelected = isGroupFullySelected?.(group.jobs) ?? false;
+  const title = top.title || "—";
 
   return (
-    <tr className={`job-table-row job-table-row--group job-table-row--${topOps.key}${expanded ? " is-expanded" : ""}`}>
-      <td className="job-table-check" />
+    <tr
+      className={`job-table-row job-table-row--group job-table-row--${topOps.key}${expanded ? " is-expanded" : ""}`}
+      onClick={onToggle}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      aria-expanded={expanded}
+    >
+      <td className="job-table-check" onClick={(e) => e.stopPropagation()}>
+        {onGroupSelectAll && (
+          <button
+            type="button"
+            className={`job-table-select${allSelected ? " is-selected" : ""}`}
+            onClick={() => onGroupSelectAll(group.jobs)}
+            aria-pressed={allSelected}
+            title={allSelected ? "Deselect all roles" : "Select all roles"}
+          >
+            {allSelected ? "✓" : ""}
+          </button>
+        )}
+      </td>
       <td className="job-table-num">{index}</td>
       <td className="job-table-score">
         <span className={`job-table-score-badge job-table-score-badge--${topOps.key}`}>{group.bestScore}</span>
       </td>
       <td className="job-table-job">
-        <button type="button" className="job-table-group-toggle" onClick={onToggle} aria-expanded={expanded}>
-          <span className="job-table-group-chevron">{expanded ? "▾" : "▸"}</span>
+        <div className="job-table-group-head">
+          <span className="job-table-group-chevron" aria-hidden>{expanded ? "▾" : "▸"}</span>
           <CompanyLogo company={group.company} size="sm" />
-          <span className="job-table-group-name" title={group.company}>{group.company}</span>
-          <span className="job-table-group-count">{group.jobs.length} roles</span>
-        </button>
+          <div className="job-table-group-copy">
+            <span className="job-table-group-name" title={group.company}>{group.company}</span>
+            {!expanded && (
+              <span className="job-table-group-preview" title={title}>
+                {title}
+                {group.jobs.length > 1 ? ` · +${group.jobs.length - 1} more` : ""}
+              </span>
+            )}
+          </div>
+          <span className="job-table-group-count">{group.jobs.length}</span>
+        </div>
       </td>
       <td className="job-table-match">
         <span className="job-table-stars">{careerOpsStars(topOps.score)}</span>
         <span className={`job-table-match-label job-table-match-label--${topOps.key}`}>{topOps.label}</span>
       </td>
-      <td className="job-table-loc" colSpan={2}>
-        <span className="job-table-group-hint">{expanded ? "Expanded" : "Click to expand roles"}</span>
-      </td>
-      <td className="job-table-time">—</td>
-      <td className="job-table-actions">
-        {onGroupSelectAll && (
-          <button
-            type="button"
-            className={`job-table-action job-table-group-select${allSelected ? " is-selected" : ""}`}
-            onClick={() => onGroupSelectAll(group.jobs)}
-          >
-            {allSelected ? "Deselect all" : "Select all"}
-          </button>
-        )}
+      <td className="job-table-loc" title={top.location}>{locationShort(top.location)}</td>
+      <td className="job-table-level">{top.level || "—"}</td>
+      <td className="job-table-time">{fmtTime(top.batch_time || top.date_posted, top.scraped_date)}</td>
+      <td className="job-table-actions" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          className={`job-table-action job-table-action--ghost${allSelected ? " is-active" : ""}`}
+          onClick={() => onGroupSelectAll?.(group.jobs)}
+        >
+          {allSelected ? "Deselect" : "Select all"}
+        </button>
         {onExcludeCompany && (
           <button
             type="button"
-            className="job-table-action"
+            className="job-table-action job-table-action--ghost"
             onClick={() => onExcludeCompany(group.company)}
             title={`Block ${group.company}`}
           >
-            ⊘
+            Block
           </button>
         )}
       </td>
