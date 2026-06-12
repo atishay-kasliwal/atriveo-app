@@ -70,7 +70,7 @@ fs.mkdirSync(path.dirname(plistPath), { recursive: true });
 fs.writeFileSync(plistPath, plist);
 
 const uid = os.userInfo().uid;
-run("launchctl", ["bootout", `gui/${uid}/${LABEL}`], { stdio: "pipe" });
+spawnSync("launchctl", ["bootout", `gui/${uid}/${LABEL}`], { stdio: "pipe" });
 run("launchctl", ["bootstrap", `gui/${uid}`, plistPath]);
 run("launchctl", ["enable", `gui/${uid}/${LABEL}`]);
 run("launchctl", ["kickstart", "-k", `gui/${uid}/${LABEL}`]);
