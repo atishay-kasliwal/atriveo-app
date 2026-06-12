@@ -35,8 +35,6 @@ const LOCATION_FILTERS = [
   { key: "NC",       match: (loc: string) => loc.includes(", nc") || loc.includes("north carolina") },
 ];
 const LEVEL_FILTERS: LevelFilter[] = ["all", "New Grad", "Entry", "Mid"];
-const DAILY_APPLY_TARGET = 50;
-const BURST_SIZE = 5;
 
 interface DashboardProps {
   initialPeriod?: Period;
@@ -67,25 +65,6 @@ function estDateKey(date = new Date()): string {
 }
 
 
-function estHour(iso?: string | null): number {
-  const date = iso ? parseDateLike(iso) : new Date();
-  if (!date) return 0;
-  const part = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
-    hour: "2-digit",
-    hour12: false,
-  }).formatToParts(date).find((p) => p.type === "hour")?.value;
-  const hour = Number(part ?? 0);
-  return hour === 24 ? 0 : hour;
-}
-
-function hourLabel(hour: number): string {
-  if (hour === 0) return "12a";
-  if (hour < 12) return `${hour}a`;
-  if (hour === 12) return "12p";
-  return `${hour - 12}p`;
-}
-
 function formatRunTime(iso?: string | null): string {
   const date = parseDateLike(iso);
   if (!date) return "—";
@@ -99,7 +78,7 @@ function formatRunTime(iso?: string | null): string {
 
 export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const navigate = useNavigate();
-  const { stats, recordClick, getRecord, syncState, syncNow } = useApplyTracker();
+  const { stats, recordClick, getRecord } = useApplyTracker();
   const { records: applyClickRecords, todayRecords: todayApplyClicks, recordApplyClick } = useApplyClickLog();
   const { isExcluded, excludeCompany } = useExclusions();
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
@@ -186,7 +165,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
 
   const rawJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : yesterdayJobs;
   const baseJobs = selectedSession ? rawJobs.filter((j) => j.session_id === selectedSession) : rawJobs;
-  const appliedUrlSet = useMemo(() => new Set(Object.keys(stats.appliedJobs)), [stats.appliedJobs]);
   const applyClickUrlSet = useMemo(
     () => new Set(applyClickRecords.map((record) => record.jobUrl)),
     [applyClickRecords]
@@ -306,54 +284,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const displayedJobs = isSplitView ? locationFiltered : filtered;
   const jobSelection = useJobSelection(displayedJobs);
   const ngCount = displayedJobs.filter((j) => j.level === "New Grad").length;
-  const openDisplayedJobs = useMemo(
-    () => displayedJobs.filter((j) => !j.job_url || !appliedUrlSet.has(j.job_url)),
-    [displayedJobs, appliedUrlSet]
-  );
-  const highScoreOpenCount = openDisplayedJobs.filter((j) => careerOpsRating(j).score >= 75).length;
-  const topCareerOpsOpen = openDisplayedJobs.reduce((best, job) => Math.max(best, careerOpsRating(job).score), 0);
-
   const selectedRun = useMemo(
     () => runCards.find((r) => r.session_id === selectedSession) || null,
     [runCards, selectedSession]
   );
-
-  const applyMomentum = useMemo(() => {
-    const todayKey = estDateKey();
-    const hourlyCounts = Array.from({ length: 24 }, () => 0);
-    Object.values(stats.appliedJobs).forEach((record) => {
-      const appliedAt = parseDateLike(record.lastAppliedAt);
-      if (!appliedAt || estDateKey(appliedAt) !== todayKey) return;
-      hourlyCounts[estHour(record.lastAppliedAt)] += record.clicks || 1;
-    });
-    const nowHour = estHour();
-    const hourWindow = Array.from({ length: 12 }, (_, index) => (nowHour - 11 + index + 24) % 24);
-    const maxHourCount = Math.max(1, ...hourWindow.map((hour) => hourlyCounts[hour]));
-    const todayCount = stats.todayCount ?? 0;
-    const progressPct = Math.min(100, Math.round((todayCount / DAILY_APPLY_TARGET) * 100));
-    const remaining = Math.max(0, DAILY_APPLY_TARGET - todayCount);
-    const motivation =
-      todayCount >= DAILY_APPLY_TARGET
-        ? "Daily target hit. Keep stacking bonus wins."
-        : todayCount === 0
-          ? "Start with one focused application sprint."
-          : remaining <= BURST_SIZE
-            ? "One small sprint closes today's target."
-            : `${remaining} applications left to hit today's target.`;
-
-    return {
-      todayCount,
-      progressPct,
-      remaining,
-      motivation,
-      bars: hourWindow.map((hour) => ({
-        hour,
-        label: hourLabel(hour),
-        count: hourlyCounts[hour],
-        heightPct: Math.max(8, Math.round((hourlyCounts[hour] / maxHourCount) * 100)),
-      })),
-    };
-  }, [stats.appliedJobs, stats.todayCount]);
 
   const todayApplicationRows = useMemo(() => {
     const todayKey = estDateKey();
@@ -379,7 +313,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     [applyClickRecords]
   );
 
-  const nextBurstCount = Math.min(BURST_SIZE, highScoreOpenCount || openDisplayedJobs.length);
   const activeFilterCount = [
     selectedSession,
     query.trim(),
@@ -389,35 +322,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     termFilter !== "all",
     locationFilter !== "all",
   ].filter(Boolean).length;
-
-  const syncStatusLabel =
-    syncState.status === "syncing" ? "Syncing"
-      : syncState.status === "synced" ? "Synced"
-        : syncState.status === "error" ? "Retry"
-          : syncState.status === "queued" ? "Queued"
-            : "Ready";
-  const syncToneClass = `sync-dock--${syncState.status}`;
-  const lastSyncLabel = syncState.lastSyncedAt ? `Last synced ${formatRunTime(syncState.lastSyncedAt)}` : "No tracker sync yet";
-  const questCards = [
-    {
-      emoji: "⚡",
-      label: "Next burst",
-      value: `${nextBurstCount || 1} cards`,
-      helper: highScoreOpenCount ? `${highScoreOpenCount} strong matches waiting` : "clear the current view",
-    },
-    {
-      emoji: "🧭",
-      label: "Opened log",
-      value: `${todayApplyClicks.length}`,
-      helper: todayApplyClicks.length ? "review and track winners" : "click jobs to build context",
-    },
-    {
-      emoji: "🧾",
-      label: "Sync check",
-      value: syncStatusLabel,
-      helper: syncState.status === "error" ? "local progress is safe" : "tracker stays caught up",
-    },
-  ];
 
   const hasActiveFilters = Boolean(
     selectedSession ||
@@ -490,107 +394,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 </button>
               </div>
               )}
-          </section>
-
-          <section className="momentum-panel" aria-label="Apply momentum">
-            <div className="momentum-primary">
-              <div className="momentum-copy">
-                <div className="momentum-kicker">Apply Momentum</div>
-                <div className="momentum-title">{applyMomentum.motivation}</div>
-              </div>
-              <div className="momentum-target">
-                <strong>{applyMomentum.todayCount}</strong>
-                <span>/ {DAILY_APPLY_TARGET} today</span>
-              </div>
-            </div>
-
-            <div className="momentum-progress" aria-hidden="true">
-              <span style={{ width: `${applyMomentum.progressPct}%` }} />
-            </div>
-
-            <div className="momentum-grid">
-              <div className="momentum-stat">
-                <span>Next burst</span>
-                <strong>{nextBurstCount}</strong>
-                <small>{highScoreOpenCount ? `${highScoreOpenCount} high-score open` : `${openDisplayedJobs.length} open in view`}</small>
-              </div>
-              <div className="momentum-stat">
-                <span>Opened log</span>
-                <strong>{todayApplyClicks.length}</strong>
-                <small>{todayApplyClicks.length ? "review strong ones" : "nothing opened yet"}</small>
-              </div>
-              <div className="momentum-stat">
-                <span>Best CareerOps</span>
-                <strong>{topCareerOpsOpen || "—"}</strong>
-                <small>{selectedRun ? "in selected run" : "in current view"}</small>
-              </div>
-              <div className="momentum-chart">
-                <div className="momentum-chart-head">
-                  <span>Today by hour</span>
-                  <strong>{applyMomentum.remaining ? `${applyMomentum.remaining} left` : "target hit"}</strong>
-                </div>
-                <div className="momentum-bars" aria-hidden="true">
-                  {applyMomentum.bars.map((bar) => (
-                    <span key={bar.hour} className="momentum-bar-wrap">
-                      <span className="momentum-bar" style={{ height: `${bar.heightPct}%` }} />
-                      <span className="momentum-bar-count">{bar.count || ""}</span>
-                    </span>
-                  ))}
-                </div>
-                <div className="momentum-axis">
-                  <span>{applyMomentum.bars[0]?.label}</span>
-                  <span>{applyMomentum.bars[applyMomentum.bars.length - 1]?.label}</span>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section className={`sync-dock ${syncToneClass}`} aria-label="End of day tracker sync">
-            <div className="sync-dock-top">
-              <div>
-                <div className="sync-dock-kicker">End-Day Sync</div>
-                <div className="sync-dock-title">Close the loop before you log off.</div>
-              </div>
-              <div className="sync-dock-orb" aria-hidden="true">
-                {syncState.status === "synced" ? "✓" : syncState.status === "error" ? "!" : "↻"}
-              </div>
-            </div>
-            <p className="sync-dock-message">{syncState.message}</p>
-            <div className="sync-dock-actions">
-              <button
-                type="button"
-                className="sync-dock-button"
-                disabled={syncState.status === "syncing" || stats.todayCount === 0}
-                onClick={() => { void syncNow("today"); }}
-              >
-                {syncState.status === "syncing" && syncState.scope === "today" ? "Syncing…" : "Run end-day sync"}
-              </button>
-              <span className="sync-dock-chip">{stats.todayCount} today</span>
-            </div>
-            <div className="sync-dock-foot">
-              <span>{lastSyncLabel}</span>
-              <span>{syncStatusLabel}</span>
-            </div>
-          </section>
-
-          <section className="quest-panel" aria-label="Daily application quest">
-            <div className="quest-panel-head">
-              <div>
-                <div className="quest-kicker">Daily Quest</div>
-                <div className="quest-title">Apply in tiny boss fights.</div>
-              </div>
-              <span className="quest-spark">✦</span>
-            </div>
-            <div className="quest-card-grid">
-              {questCards.map((card) => (
-                <div className="quest-card" key={card.label}>
-                  <span className="quest-emoji" aria-hidden="true">{card.emoji}</span>
-                  <span className="quest-label">{card.label}</span>
-                  <strong>{card.value}</strong>
-                  <small>{card.helper}</small>
-                </div>
-              ))}
-            </div>
           </section>
 
           {/* Period tabs + sort */}
