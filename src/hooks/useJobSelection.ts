@@ -142,6 +142,24 @@ export function useJobSelection(jobs: Job[]) {
     });
   };
 
+  const toggleGroupSelection = (groupJobs: Job[]) => {
+    if (!groupJobs.length) return;
+    setCopyMessage("");
+    setAnalysisMessage("");
+    setAnalysis(null);
+    const keys = groupJobs.map(jobCopyKey);
+    setSelectedKeys((previous) => {
+      const allSelected = keys.every((key) => previous.has(key));
+      const next = new Set(previous);
+      if (allSelected) keys.forEach((key) => next.delete(key));
+      else keys.forEach((key) => next.add(key));
+      return next;
+    });
+  };
+
+  const isGroupFullySelected = (groupJobs: Job[]) =>
+    groupJobs.length > 0 && groupJobs.every((job) => selectedKeys.has(jobCopyKey(job)));
+
   const selectVisibleJobs = () => {
     setCopyMessage("");
     setAnalysisMessage("");
@@ -298,6 +316,8 @@ export function useJobSelection(jobs: Job[]) {
     tailorRun,
     isJobSelected: (job: Job) => selectedKeys.has(jobCopyKey(job)),
     toggleJobSelection,
+    toggleGroupSelection,
+    isGroupFullySelected,
     selectVisibleJobs,
     clearSelectedJobs,
     copySelectedJobs,

@@ -646,6 +646,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                     onExcludeCompany={excludeCompany}
                     isJobSelected={jobSelection.isJobSelected}
                     onSelectionToggle={jobSelection.toggleJobSelection}
+                    onGroupSelectAll={jobSelection.toggleGroupSelection}
+                    isGroupFullySelected={jobSelection.isGroupFullySelected}
+                    groupByCompany
                   />
                 )}
                 {applyClickTableRows.length > 0 && (

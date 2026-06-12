@@ -1,4 +1,5 @@
 import type { Job } from "../types";
+import syncedCompanyDomains from "../../public/company_domains.json";
 
 type MatchTier = {
   key: "green" | "blue" | "yellow" | "gray";
@@ -18,6 +19,7 @@ export type CareerOpsRating = MatchTier & {
 const MAX_RAW_SCORE = 250;
 
 const COMPANY_DOMAINS: Record<string, string> = {
+  ...(syncedCompanyDomains as Record<string, string>),
   adobe: "adobe.com",
   airbnb: "airbnb.com",
   amazon: "amazon.com",
@@ -53,7 +55,16 @@ const COMPANY_DOMAINS: Record<string, string> = {
   recruitingfromscratch: "recruitingfromscratch.com",
   salesforce: "salesforce.com",
   snowflake: "snowflake.com",
-  stripe: "stripe.com",
+  blackrock: "blackrock.com",
+  brex: "brex.com",
+  jpmorganchase: "jpmorganchase.com",
+  jpmorgan: "jpmorgan.com",
+  nuveen: "nuveen.com",
+  paramount: "paramount.com",
+  ramp: "ramp.com",
+  renaissance: "renaissance.com",
+  uber: "uber.com",
+  varonis: "varonis.com",
   tata: "tcs.com",
   "tata consultancy": "tcs.com",
   tempus: "tempus.com",
@@ -109,12 +120,23 @@ export function companyDomain(company?: string | null): string | null {
     if (normalized.includes(compactKey) || compactKey.includes(normalized)) return domain;
   }
 
+  const slug = normalized.replace(/\s+/g, "");
+  if (slug.length >= 3) return `${slug}.com`;
   return null;
 }
 
-export function companyLogoUrl(company?: string | null): string | null {
+/** Try Clearbit first, then Google favicons — CompanyLogo cycles on error. */
+export function companyLogoUrls(company?: string | null): string[] {
   const domain = companyDomain(company);
-  return domain ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64` : null;
+  if (!domain) return [];
+  return [
+    `https://logo.clearbit.com/${domain}`,
+    `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`,
+  ];
+}
+
+export function companyLogoUrl(company?: string | null): string | null {
+  return companyLogoUrls(company)[0] ?? null;
 }
 
 export function companyColor(company?: string | null): string {

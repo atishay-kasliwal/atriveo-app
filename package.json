@@ -13,7 +13,7 @@
     "tailor:install": "node scripts/install-tailor-service.mjs",
     "tailor:uninstall": "node scripts/uninstall-tailor-service.mjs",
     "dev:full": "wrangler pages dev dist --compatibility-date=2024-01-01",
-    "export:descriptions": "node scripts/export-job-descriptions.mjs",
+    "sync:logos": "node scripts/sync-company-domains.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
