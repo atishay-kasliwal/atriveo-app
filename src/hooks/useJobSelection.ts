@@ -7,6 +7,31 @@ import { copyTextToClipboard, formatJobsForClipboard, jobCopyKey } from "../util
 
 const TAILOR_SERVER = "http://localhost:8787";
 
+function tailorUnavailableMessage(): string {
+  const host = window.location.hostname;
+  const isLocal = host === "localhost" || host === "127.0.0.1";
+  if (!isLocal) {
+    return "Tailoring only works on localhost. Open http://localhost:5173 (not application.atriveo.com) with npm run dev and npm run tailor running.";
+  }
+  return "Tailor server not running. In a second terminal run: cd ~/atriveo-app && npm run tailor";
+}
+
+async function assertTailorServerReady(): Promise<void> {
+  try {
+    const res = await fetch(`${TAILOR_SERVER}/health`, { signal: AbortSignal.timeout(4000) });
+    if (!res.ok) throw new Error("unreachable");
+    const data = await res.json();
+    if (!data.ok) throw new Error("unreachable");
+    if (!data.driveMounted) {
+      throw new Error('External drive not mounted. Plug in "Kasliwal v2" and retry.');
+    }
+  } catch (e) {
+    const msg = (e as Error).message || String(e);
+    if (msg.includes("drive")) throw e;
+    throw new Error(tailorUnavailableMessage());
+  }
+}
+
 async function readTailorStream(
   body: ReadableStream<Uint8Array>,
   onEvent: (event: TailorStreamEvent) => void,
@@ -176,6 +201,8 @@ export function useJobSelection(jobs: Job[]) {
 
     setTailoring(true);
     try {
+      await assertTailorServerReady();
+
       const descriptionsByUrl = await loadJobDescriptions(selectedJobs);
       const jobsWithJd = selectedJobs
         .map((job) => ({
@@ -234,9 +261,7 @@ export function useJobSelection(jobs: Job[]) {
         total: prev?.total ?? 0,
         completed: prev?.completed ?? 0,
         jobs: prev?.jobs ?? [],
-        fatalError: msg.includes("Failed to fetch")
-          ? "Tailor server not running. Start it with: npm run tailor"
-          : msg,
+        fatalError: msg.includes("Failed to fetch") ? tailorUnavailableMessage() : msg,
       }));
     } finally {
       setTailoring(false);

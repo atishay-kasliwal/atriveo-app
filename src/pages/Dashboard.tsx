@@ -10,6 +10,7 @@ import { useExclusions } from "../hooks/useExclusions";
 import { useJobSelection } from "../hooks/useJobSelection";
 import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
+import JobTable from "../components/JobTable";
 import JobCard from "../components/JobCard";
 import { careerOpsRating, jobBoardLabel } from "../utils/jobPresentation";
 
@@ -183,7 +184,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
         segmentsActive: 0,
       }))
       .filter((r) => r.count > 0 && r.targetPeriod)
-      .slice(0, 20);
+      .slice(0, 5);
     return cards.map((r) => {
       const progress = r.count > 0 ? r.clickCount / r.count : 0;
       return {
@@ -637,21 +638,15 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 ) : filtered.length === 0 ? (
                   <div className="state-msg"><div className="icon">🔍</div>No jobs found</div>
                 ) : (
-                  <div className="card-grid">
-                    {filtered.map((job, i) => (
-                      <JobCard
-                        key={job.job_url || i}
-                        job={job}
-                        index={i + 1}
-                        applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                        onAddToTracker={recordClick}
-                        onApplyClick={recordApplyClick}
-                        onExcludeCompany={excludeCompany}
-                        isSelected={jobSelection.isJobSelected(job)}
-                        onSelectionToggle={jobSelection.toggleJobSelection}
-                      />
-                    ))}
-                  </div>
+                  <JobTable
+                    jobs={filtered}
+                    getRecord={getRecord}
+                    onAddToTracker={recordClick}
+                    onApplyClick={recordApplyClick}
+                    onExcludeCompany={excludeCompany}
+                    isJobSelected={jobSelection.isJobSelected}
+                    onSelectionToggle={jobSelection.toggleJobSelection}
+                  />
                 )}
                 {applyClickTableRows.length > 0 && (
                   <section className="apply-click-log" aria-label="Apply button click log">
