@@ -47,7 +47,7 @@ function run(label, cmd, args) {
 }
 
 const tailor = run("tailor", process.execPath, ["--env-file=.env.tailor", "scripts/tailor-server.mjs"]);
-const tunnel = run("tunnel", "cloudflared", ["tunnel", "run", "--token", tunnelToken, "--no-autoupdate"]);
+const tunnel = run("tunnel", "cloudflared", ["tunnel", "--no-autoupdate", "run", "--token", tunnelToken]);
 
 function shutdown() {
   tailor.kill("SIGTERM");
