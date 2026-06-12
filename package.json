@@ -5,8 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "tailor": "node scripts/tailor-server.mjs",
-    "tailor:tunnel": "cloudflared tunnel --config scripts/cloudflared-tailor.example.yml run",
+    "tailor": "node --env-file=.env.tailor scripts/tailor-server.mjs",
+    "tailor:tunnel": "cloudflared tunnel --config scripts/cloudflared-tailor.yml run",
+    "tailor:setup": "node scripts/setup-tailor-tunnel.mjs",
+    "tailor:prod": "node scripts/tailor-prod.mjs",
+    "tailor:dns": "cloudflared tunnel route dns atriveo-tailor tailor-relay.atriveo.com",
     "dev:full": "wrangler pages dev dist --compatibility-date=2024-01-01",
     "export:descriptions": "node scripts/export-job-descriptions.mjs",
     "build": "tsc -b && vite build",
