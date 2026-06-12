@@ -7,6 +7,10 @@ interface Env {
 const PUBLIC_API_PATHS = ["/api/auth/login", "/api/auth/logout"];
 const ASSET_RE = /\.(js|css|ico|svg|png|jpe?g|gif|webp|avif|woff2?|map)$/i;
 
+function isJsonRoute(path: string): boolean {
+  return path.startsWith("/api/") || path.startsWith("/tailor");
+}
+
 export const onRequest: PagesFunction<Env> = async ({ request, env, next }) => {
   const url = new URL(request.url);
   const path = url.pathname;
@@ -37,8 +41,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, env, next }) => {
   }
 
   if (!token) {
-    // API routes return 401, page routes redirect to login
-    if (path.startsWith("/api/")) {
+    if (isJsonRoute(path)) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
     return Response.redirect(new URL("/login", request.url).toString(), 302);
@@ -48,13 +51,13 @@ export const onRequest: PagesFunction<Env> = async ({ request, env, next }) => {
     const secret = new TextEncoder().encode(env.JWT_SECRET);
     await jwtVerify(token, secret);
   } catch {
-    if (path.startsWith("/api/")) {
+    if (isJsonRoute(path)) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
     return Response.redirect(new URL("/login", request.url).toString(), 302);
   }
 
-  if (path.startsWith("/api/")) {
+  if (isJsonRoute(path)) {
     return next();
   }
 

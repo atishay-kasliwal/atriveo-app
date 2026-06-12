@@ -4,21 +4,23 @@ import type { TailorRunState, TailorStreamEvent } from "../types/tailor";
 import { analyzeSelectedJobs, type SelectedJobAnalysis } from "../utils/jobAnalysis";
 import { loadJobDescriptions } from "../utils/jobDescriptionBuckets";
 import { copyTextToClipboard, formatJobsForClipboard, jobCopyKey } from "../utils/jobCopy";
-
-const TAILOR_SERVER = "http://localhost:8787";
+import { getTailorServerBase, isLocalTailorHost } from "../utils/tailorServer";
 
 function tailorUnavailableMessage(): string {
-  const host = window.location.hostname;
-  const isLocal = host === "localhost" || host === "127.0.0.1";
-  if (!isLocal) {
-    return "Tailoring only works on localhost. Open http://localhost:5173 (not application.atriveo.com) with npm run dev and npm run tailor running.";
+  if (!isLocalTailorHost()) {
+    return "Tailor relay unreachable. On your Mac run: npm run tailor && npm run tailor:tunnel (and set TAILOR_ORIGIN on Cloudflare Pages).";
   }
   return "Tailor server not running. In a second terminal run: cd ~/atriveo-app && npm run tailor";
 }
 
 async function assertTailorServerReady(): Promise<void> {
+  const base = getTailorServerBase();
   try {
-    const res = await fetch(`${TAILOR_SERVER}/health`, { signal: AbortSignal.timeout(4000) });
+    const res = await fetch(`${base}/health`, { signal: AbortSignal.timeout(8000), credentials: "include" });
+    if (res.status === 503) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || "Tailor relay not configured on Cloudflare.");
+    }
     if (!res.ok) throw new Error("unreachable");
     const data = await res.json();
     if (!data.ok) throw new Error("unreachable");
@@ -27,7 +29,7 @@ async function assertTailorServerReady(): Promise<void> {
     }
   } catch (e) {
     const msg = (e as Error).message || String(e);
-    if (msg.includes("drive")) throw e;
+    if (msg.includes("drive") || msg.includes("relay not configured")) throw e;
     throw new Error(tailorUnavailableMessage());
   }
 }
@@ -238,9 +240,10 @@ export function useJobSelection(jobs: Job[]) {
       };
       setTailorRun(initialRun);
 
-      const res = await fetch(`${TAILOR_SERVER}/tailor`, {
+      const res = await fetch(`${getTailorServerBase()}/tailor`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ resumeText, jobs: jobsWithJd }),
       });
 
@@ -270,9 +273,10 @@ export function useJobSelection(jobs: Job[]) {
 
   const openTailorPath = async (targetPath: string) => {
     try {
-      const res = await fetch(`${TAILOR_SERVER}/open`, {
+      const res = await fetch(`${getTailorServerBase()}/open`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ path: targetPath }),
       });
       const data = await res.json();

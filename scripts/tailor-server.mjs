@@ -31,6 +31,7 @@ const SAFE_CLAIMS = loadSafeClaims(BANK);
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 const PORT = 8787;
+const TAILOR_TOKEN = process.env.TAILOR_TOKEN?.trim() || "";
 const OLLAMA = "http://localhost:11434/api/chat";
 const DEFAULT_MODEL = "gemma4:12b";
 const OUT_ROOT = "/Volumes/Kasliwal v2/tailored-resumes";
@@ -348,17 +349,23 @@ async function tailorOne(job, resumeText, model, seq, dateDir, emit = () => {}) 
 const server = http.createServer(async (req, res) => {
   // permissive CORS so the Vite dev origin can reach us
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Tailor-Token");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   if (req.method === "OPTIONS") { res.writeHead(204); return res.end(); }
 
-  if (req.method === "GET" && req.url === "/health") {
+  const pathname = (req.url || "/").split("?")[0];
+  if (TAILOR_TOKEN && req.headers["x-tailor-token"] !== TAILOR_TOKEN) {
+    res.writeHead(401, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify({ ok: false, error: "Unauthorized" }));
+  }
+
+  if (req.method === "GET" && pathname === "/health") {
     const driveOk = fs.existsSync(path.dirname(OUT_ROOT));
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({ ok: true, driveMounted: driveOk, outRoot: OUT_ROOT }));
   }
 
-  if (req.method === "POST" && req.url === "/tailor") {
+  if (req.method === "POST" && pathname === "/tailor") {
     let raw = "";
     req.on("data", (c) => (raw += c));
     req.on("end", async () => {
@@ -404,7 +411,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Reveal a saved PDF or its folder in Finder.
-  if (req.method === "POST" && req.url === "/open") {
+  if (req.method === "POST" && pathname === "/open") {
     let raw = "";
     req.on("data", (c) => (raw += c));
     req.on("end", () => {

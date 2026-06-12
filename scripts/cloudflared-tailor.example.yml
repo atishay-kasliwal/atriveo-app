@@ -1,0 +1,23 @@
+# Example Cloudflare Tunnel for the local tailor sidecar (localhost:8787).
+#
+# Setup (one-time):
+#   1. cloudflared tunnel create atriveo-tailor
+#   2. Copy tunnel UUID into tunnel: below
+#   3. cloudflared tunnel route dns atriveo-tailor tailor-relay.atriveo.com
+#   4. In Cloudflare Pages → Settings → Environment variables:
+#        TAILOR_ORIGIN = https://tailor-relay.atriveo.com
+#        TAILOR_TOKEN  = (same random secret on Mac + Pages)
+#   5. On Mac: TAILOR_TOKEN=... npm run tailor
+#   6. cloudflared tunnel --config scripts/cloudflared-tailor.example.yml run
+#
+# The app calls https://application.atriveo.com/tailor/* (Pages Function proxy),
+# which forwards to TAILOR_ORIGIN with X-Tailor-Token. Do not expose :8787 publicly
+# without TAILOR_TOKEN.
+
+tunnel: REPLACE_WITH_TUNNEL_UUID
+credentials-file: /Users/atishaykasliwal/.cloudflared/REPLACE_WITH_TUNNEL_UUID.json
+
+ingress:
+  - hostname: tailor-relay.atriveo.com
+    service: http://127.0.0.1:8787
+  - service: http_status:404
