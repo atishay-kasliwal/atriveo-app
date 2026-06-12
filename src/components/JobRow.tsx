@@ -149,7 +149,6 @@ export default function JobRow({ job, index, applyRecord, onAddToTracker, onExcl
             {isNew && <span className="badge badge-new">NEW</span>}
             {isApplied && <span className="badge badge-applied">Tracked {applyClicks}x</span>}
             {term && <span className="badge badge-term">{term}</span>}
-            <span className="badge badge-src badge-src-linkedin">LinkedIn</span>
           </span>
         </div>
         <div className="job-meta">

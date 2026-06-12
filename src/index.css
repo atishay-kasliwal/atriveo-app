@@ -99,7 +99,7 @@ a:hover { text-decoration: underline; }
   padding-top: 18px;
   gap: 12px;
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(360px, 3fr);
+  grid-template-columns: minmax(0, 17fr) minmax(180px, 3fr);
   align-items: start;
 }
 
@@ -141,7 +141,7 @@ a:hover { text-decoration: underline; }
 
   .dashboard-info-rail > .run-strip-wrap .run-strip {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 8px;
     max-height: 310px;
     overflow-y: auto;
@@ -3966,11 +3966,11 @@ body::after {
   .job-tile-match { min-width: 56px; }
 }
 
-/* ── 4-up job card redesign ──────────────────────────────────────────── */
+/* ── 5-up job card grid on dashboard ─────────────────────────────────── */
 @media (min-width: 1280px) {
   .dashboard-layout .card-grid,
   .split-panel .card-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
@@ -3990,7 +3990,7 @@ body::after {
 
 .dashboard-layout .card-grid,
 .split-panel .card-grid {
-  gap: 18px;
+  gap: 14px;
   align-items: stretch;
 }
 

@@ -179,7 +179,9 @@ export default function JobCard({
         <div className="job-tile-lead">
           {rank && <span className="job-tile-rank">{rank}</span>}
           <CompanyLogo company={co} size="md" />
-          <span className="job-board-tag">{boardLabel}</span>
+          {boardLabel !== "LinkedIn" && (
+            <span className="job-board-tag">{boardLabel}</span>
+          )}
           {onExcludeCompany && (
             <button
               type="button"
