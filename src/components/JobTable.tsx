@@ -47,11 +47,6 @@ function locationShort(loc?: string | null): string {
   return parts.length >= 2 ? parts.slice(-2).join(",").trim() : loc;
 }
 
-function compactTerm(term?: string | null): string | null {
-  if (!term) return null;
-  return term.replace(/ engineer$/i, "").trim() || null;
-}
-
 interface RowProps {
   job: Job;
   index: number;
@@ -79,7 +74,6 @@ function JobTableRow({
   const careerOps = careerOpsRating(job);
   const stars = careerOpsStars(careerOps.score);
   const reasons = matchReasons(job, 2);
-  const term = compactTerm(job.search_term);
   const isApplied = Boolean(applyRecord);
   const trackerSyncStatus = applyRecord?.trackerSyncStatus ?? null;
   const isTrackerSynced = trackerSyncStatus === "synced" || trackerSyncStatus === "duplicate";
@@ -117,33 +111,23 @@ function JobTableRow({
       <td className="job-table-score">
         <span className={`job-table-score-badge job-table-score-badge--${careerOps.key}`}>{careerOps.score}</span>
       </td>
-      <td className="job-table-company">
-        <div className="job-table-company-inner">
+      <td className="job-table-role">
+        <div className="job-table-role-company">
           <CompanyLogo company={co} size="sm" />
           <span title={co}>{co}</span>
           {onExcludeCompany && (
             <button type="button" className="job-table-exclude" onClick={() => onExcludeCompany(co)} title={`Block ${co}`}>⊘</button>
           )}
         </div>
+        <div className="job-table-role-title" title={title}>{title}</div>
       </td>
-      <td className="job-table-title" title={title}>{title}</td>
       <td className="job-table-match">
         <span className="job-table-stars">{stars}</span>
-        <span className="job-table-match-label">{careerOps.label}</span>
+        <span className={`job-table-match-label job-table-match-label--${careerOps.key}`}>{careerOps.label}</span>
       </td>
       <td className="job-table-loc" title={job.location}>{locationShort(job.location)}</td>
       <td className="job-table-level">{job.level || "—"}</td>
       <td className="job-table-time">{fmtTime(job.batch_time || job.date_posted, job.scraped_date)}</td>
-      <td className="job-table-term">{term || "—"}</td>
-      <td className="job-table-tracker">
-        {isApplied ? (
-          <span className={`job-table-tracker-pill${isTrackerSynced ? " is-synced" : isTrackerPending ? " is-pending" : ""}`}>
-            {trackerCopy}
-          </span>
-        ) : (
-          <span className="job-table-tracker-pill is-empty">—</span>
-        )}
-      </td>
       <td className="job-table-actions">
         {job.job_url ? (
           <a
@@ -212,14 +196,11 @@ export default function JobTable({
             <th aria-label="Select" />
             <th>#</th>
             <th>Score</th>
-            <th>Company</th>
-            <th>Role</th>
+            <th>Job</th>
             <th>Match</th>
             <th>Location</th>
             <th>Level</th>
             <th>Time</th>
-            <th>Term</th>
-            <th>Tracker</th>
             <th>Actions</th>
           </tr>
         </thead>

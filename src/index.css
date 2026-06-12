@@ -1471,7 +1471,7 @@ header {
 
 .job-table {
   width: 100%;
-  min-width: 980px;
+  min-width: 860px;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 12px;
@@ -1584,22 +1584,41 @@ header {
   color: #64748b;
 }
 
-.job-table-company {
-  max-width: 140px;
+.job-table-company,
+.job-table-role {
+  min-width: 200px;
+  max-width: 360px;
 }
 
-.job-table-company-inner {
+.job-table-company-inner,
+.job-table-role-company {
   display: flex;
   align-items: center;
   gap: 6px;
   min-width: 0;
 }
 
-.job-table-company-inner span {
+.job-table-company-inner span,
+.job-table-role-company span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 700;
+  font-size: 12px;
+}
+
+.job-table-role-title {
+  margin-top: 3px;
+  padding-left: 26px;
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #334155;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .job-table-exclude {
@@ -1626,22 +1645,34 @@ header {
 }
 
 .job-table-match {
-  min-width: 120px;
-  white-space: nowrap;
+  min-width: 88px;
+  vertical-align: middle;
+}
+
+.job-table-match .job-table-stars,
+.job-table-match .job-table-match-label {
+  display: block;
 }
 
 .job-table-stars {
   color: #4f46e5;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: -1px;
-  margin-right: 4px;
+  line-height: 1.2;
+  margin-bottom: 2px;
 }
 
 .job-table-match-label {
-  color: #64748b;
-  font-size: 10px;
-  font-weight: 700;
+  color: #4f46e5;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.job-table-match-label--weak {
+  color: #64748b;
 }
 
 .job-table-loc {
@@ -1653,35 +1684,10 @@ header {
 }
 
 .job-table-level,
-.job-table-time,
-.job-table-term {
+.job-table-time {
   white-space: nowrap;
   color: #475569;
   font-size: 11px;
-}
-
-.job-table-tracker {
-  width: 64px;
-}
-
-.job-table-tracker-pill {
-  display: inline-block;
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: #f1f5f9;
-  color: #64748b;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.job-table-tracker-pill.is-synced {
-  background: rgba(79, 70, 229, 0.12);
-  color: #4f46e5;
-}
-
-.job-table-tracker-pill.is-pending {
-  background: rgba(251, 191, 36, 0.18);
-  color: #b45309;
 }
 
 .job-table-actions {

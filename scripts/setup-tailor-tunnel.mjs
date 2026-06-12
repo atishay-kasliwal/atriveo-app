@@ -134,9 +134,15 @@ async function main() {
   console.log("\n✓ Tailor tunnel ready");
   console.log("  TAILOR_ORIGIN:", origin);
   if (!dnsOk) {
-    console.log("\n  Optional: add CNAME tailor-relay.atriveo.com →", cname, "for a pretty hostname.");
+    console.log("\n  DNS required for permanent relay. Run once:");
+    console.log("    cloudflared tunnel login");
+    console.log("    npm run tailor:dns");
+    console.log(`    (CNAME tailor-relay → ${cname})`);
+    console.log("\n  Then install auto-start:");
+    console.log("    npm run tailor:install");
+  } else {
+    console.log("  Install auto-start: npm run tailor:install");
   }
-  console.log("  Start stack:  npm run tailor:prod");
 }
 
 function cryptoRandom(n) {
