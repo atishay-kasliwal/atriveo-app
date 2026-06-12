@@ -46,10 +46,10 @@ function scrapedDateLabel(dateStr?: string): string {
 }
 
 function tier(s: number) {
-  if (s >= 75) return { gradient: "linear-gradient(135deg,#0f3a26,#1f7a47)", solid: "#0f3a26", glow: "rgba(15,58,38,0.24)" };
-  if (s >= 50) return { gradient: "linear-gradient(135deg,#1f7a47,#4f9a6c)", solid: "#1f7a47", glow: "rgba(31,122,71,0.22)" };
-  if (s >= 25) return { gradient: "linear-gradient(135deg,#4f8c63,#76ad8a)", solid: "#4f8c63", glow: "rgba(79,140,99,0.22)" };
-  return { gradient: "linear-gradient(135deg,#5e6b5f,#828d83)", solid: "#5e6b5f", glow: "rgba(94,107,95,0.18)" };
+  if (s >= 75) return { gradient: "linear-gradient(135deg,#1e40af,#3b82f6)", solid: "#1e40af", glow: "rgba(30,64,175,0.24)" };
+  if (s >= 50) return { gradient: "linear-gradient(135deg,#2563eb,#60a5fa)", solid: "#2563eb", glow: "rgba(37,99,235,0.22)" };
+  if (s >= 25) return { gradient: "linear-gradient(135deg,#3b82f6,#7cb0fb)", solid: "#3b82f6", glow: "rgba(59,130,246,0.22)" };
+  return { gradient: "linear-gradient(135deg,#64748b,#94a3b8)", solid: "#64748b", glow: "rgba(100,116,139,0.18)" };
 }
 
 function compactTerm(term?: string | null): string | null {
