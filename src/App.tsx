@@ -10,6 +10,7 @@ import Unclicked100 from "./pages/Unclicked100";
 import Cart from "./pages/Cart";
 import States from "./pages/States";
 import EmailFinder from "./pages/EmailFinder";
+import ResumeOptimizer from "./pages/ResumeOptimizer";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -103,6 +104,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <EmailFinder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/optimizer"
+          element={
+            <ProtectedRoute>
+              <ResumeOptimizer />
             </ProtectedRoute>
           }
         />

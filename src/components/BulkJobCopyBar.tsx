@@ -4,6 +4,8 @@ interface Props {
   copyMessage: string;
   onCopy: () => void;
   onAnalyze?: () => void;
+  onTailor?: () => void;
+  tailoring?: boolean;
   onSelectVisible: () => void;
   onClear: () => void;
   analysisMessage?: string;
@@ -15,6 +17,8 @@ export default function BulkJobCopyBar({
   copyMessage,
   onCopy,
   onAnalyze,
+  onTailor,
+  tailoring,
   onSelectVisible,
   onClear,
   analysisMessage,
@@ -39,7 +43,12 @@ export default function BulkJobCopyBar({
             Analyze JDs
           </button>
         )}
-        <button type="button" className="bulk-copy-btn primary" onClick={onCopy} disabled={!selectedCount}>
+        {onTailor && (
+          <button type="button" className="bulk-copy-btn primary" onClick={onTailor} disabled={!selectedCount || tailoring}>
+            {tailoring ? "Tailoring…" : "Tailor selected"}
+          </button>
+        )}
+        <button type="button" className="bulk-copy-btn" onClick={onCopy} disabled={!selectedCount}>
           Copy selected
         </button>
         {selectedCount > 0 && (
