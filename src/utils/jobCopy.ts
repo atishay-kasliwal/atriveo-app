@@ -26,6 +26,11 @@ export function jobCopyKey(job: Job): string {
   return job.job_url || `${job.company}::${job.title}::${job.location}::${job.batch_time}`;
 }
 
+/** Stable per-posting id for dismiss / restore (never company-wide). */
+export function jobDismissKey(job: Job): string {
+  return jobCopyKey(job);
+}
+
 export function formatJobForClipboard(job: Job, index: number, fullDescription?: string): string {
   const careerOps = careerOpsRating(job);
   const reasons = matchReasons(job, 8);

@@ -6,6 +6,7 @@ import type { ApplyMetadata, ApplyRecord } from "../hooks/useApplyTracker";
 import CompanyLogo from "./CompanyLogo";
 import { careerOpsRating, careerOpsStars, companyDomain, matchReasons } from "../utils/jobPresentation";
 import { groupJobsByCompany, type CompanyJobGroup } from "../utils/jobGrouping";
+import type { TailorRecord } from "../types/tailorQueue";
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -87,6 +88,18 @@ function ratingPillLabel(key: string): string {
     case "blue":  return "Good";
     case "yellow": return "Review";
     default: return "Low";
+  }
+}
+
+function tailoredPill(record: TailorRecord | null | undefined): { label: string; tone: string } {
+  if (!record || record.status === "none") return { label: "—", tone: "none" };
+  switch (record.status) {
+    case "done": return { label: "Done", tone: "done" };
+    case "running": return { label: "Running", tone: "running" };
+    case "queued": return { label: "Queued", tone: "queued" };
+    case "no-go": return { label: "Skip", tone: "skip" };
+    case "failed": return { label: "Fail", tone: "failed" };
+    default: return { label: "—", tone: "none" };
   }
 }
 
@@ -172,7 +185,7 @@ function CompanyBandRow({ group }: { group: CompanyJobGroup }) {
 
   return (
     <tr className="job-table-band">
-      <td colSpan={10}>
+      <td colSpan={11}>
         <div className="job-table-band-inner">
           <CompanyLogo company={group.company} size="sm" />
           <span className="job-table-band-name">{group.company.toUpperCase()}</span>
@@ -205,6 +218,8 @@ interface RowProps {
   isSelected?: boolean;
   onSelectionToggle?: (job: Job) => void;
   onExcludeCompany?: (company: string) => void;
+  getTailorRecord?: (job: Job) => TailorRecord | null;
+  onQueueUrgent?: (job: Job) => void;
   nested?: boolean;
   showCompany?: boolean;
   board?: boolean;
@@ -219,6 +234,8 @@ function JobTableRow({
   isSelected = false,
   onSelectionToggle,
   onExcludeCompany,
+  getTailorRecord,
+  onQueueUrgent,
   nested = false,
   showCompany = true,
   board = false,
@@ -244,8 +261,12 @@ function JobTableRow({
         : trackerSyncStatus === "error" || trackerSyncStatus === "not_configured"
           ? "Retry"
           : "Sync";
+  const tailorRecord = getTailorRecord?.(job) ?? null;
+  const tailor = tailoredPill(tailorRecord);
 
-  function saveJob(source: SavedJobSource) {
+  function saveJob(source: SavedJobSource, e?: React.MouseEvent) {
+    e?.stopPropagation();
+    e?.preventDefault();
     if (!onSaveJob) return;
     onSaveJob(job, source);
     setSavedFeedback(source);
@@ -283,7 +304,14 @@ function JobTableRow({
               <div className="job-table-role-company" title={co}>{co.toUpperCase()}</div>
             </div>
             {onExcludeCompany && (
-              <button type="button" className="job-table-exclude" onClick={() => onExcludeCompany(co)} title={`Block ${co}`}>⊘</button>
+              <button
+                type="button"
+                className="job-table-exclude"
+                onClick={(e) => { e.stopPropagation(); onExcludeCompany(co); }}
+                title={`Block ${co}`}
+              >
+                ⊘
+              </button>
             )}
           </div>
         ) : showCompany ? (
@@ -292,7 +320,14 @@ function JobTableRow({
               <CompanyLogo company={co} size="sm" />
               <span title={co}>{co}</span>
               {onExcludeCompany && (
-                <button type="button" className="job-table-exclude" onClick={() => onExcludeCompany(co)} title={`Block ${co}`}>⊘</button>
+                <button
+                  type="button"
+                  className="job-table-exclude"
+                  onClick={(e) => { e.stopPropagation(); onExcludeCompany(co); }}
+                  title={`Block ${co}`}
+                >
+                  ⊘
+                </button>
               )}
             </div>
             <div className="job-table-job-title" title={title}>{title}</div>
@@ -319,6 +354,16 @@ function JobTableRow({
         {compLabel(job.competition_score)}
       </td>
       <td className="job-table-level">{job.level || "—"}</td>
+      {board && (
+        <td className="job-table-tailored">
+          <span
+            className={`job-table-tailored-pill job-table-tailored-pill--${tailor.tone}`}
+            title={tailorRecord?.ats ? `ATS ${tailorRecord.ats}` : tailorRecord?.error || "Tailor status"}
+          >
+            {tailor.label}
+          </span>
+        </td>
+      )}
       <td className="job-table-time">{fmtTime(job.batch_time || job.date_posted, job.scraped_date, board)}</td>
       <td className={`job-table-actions${board ? " job-table-actions--board" : ""}`}>
         {board ? (
@@ -330,7 +375,10 @@ function JobTableRow({
                 target="_blank"
                 rel="noopener"
                 title="Apply"
-                onClick={() => onSaveJob?.(job, "apply")}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSaveJob?.(job, "apply");
+                }}
               >
                 {savedFeedback === "apply" ? "Moved ✓" : "Apply"}
               </a>
@@ -339,7 +387,7 @@ function JobTableRow({
               <button
                 type="button"
                 className={`job-table-board-apply${savedFeedback === "click" ? " is-logged" : ""}`}
-                onClick={() => saveJob("click")}
+                onClick={(e) => saveJob("click", e)}
                 title="Move this posting to Clicked Jobs"
               >
                 {savedFeedback === "click" ? "Moved ✓" : "Click"}
@@ -363,12 +411,26 @@ function JobTableRow({
                 type="button"
                 className={`job-table-board-apply${savedFeedback === "add" ? " is-logged" : ""}`}
                 title="Add to Atriveo tracker and move to Clicked Jobs"
-                onClick={() => {
-                  if (onSaveJob) saveJob("add");
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onSaveJob) saveJob("add", e);
                   else onAddToTracker(job.job_url, title, co, { location: job.location || null });
                 }}
               >
                 {savedFeedback === "add" ? "Moved ✓" : trackerCopy}
+              </button>
+            )}
+            {onQueueUrgent && tailorRecord?.status !== "done" && (
+              <button
+                type="button"
+                className="job-table-board-apply job-table-board-apply--urgent"
+                title="Add to tailor queue (urgent)"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onQueueUrgent(job);
+                }}
+              >
+                Queue
               </button>
             )}
           </div>
@@ -380,13 +442,16 @@ function JobTableRow({
                 href={job.job_url}
                 target="_blank"
                 rel="noopener"
-                onClick={() => onSaveJob?.(job, "apply")}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSaveJob?.(job, "apply");
+                }}
               >
                 Apply
               </a>
             ) : null}
             {job.job_url && onSaveJob && (
-              <button type="button" className="job-table-action" onClick={() => saveJob("click")}>Click</button>
+              <button type="button" className="job-table-action" onClick={(e) => saveJob("click", e)}>Click</button>
             )}
             <button
               type="button"
@@ -499,6 +564,7 @@ function CompanyGroupRow({
         {compLabel(top.competition_score)}
       </td>
       <td className="job-table-level">{top.level || "—"}</td>
+      <td className="job-table-tailored" />
       <td className="job-table-time">{fmtTime(top.batch_time || top.date_posted, top.scraped_date)}</td>
       <td className="job-table-actions" onClick={(e) => e.stopPropagation()}>
         <button
@@ -534,6 +600,9 @@ interface Props {
   onGroupSelectAll?: (jobs: Job[]) => void;
   isGroupFullySelected?: (jobs: Job[]) => boolean;
   groupByCompany?: boolean;
+  companyBandKeys?: Set<string>;
+  getTailorRecord?: (job: Job) => TailorRecord | null;
+  onQueueUrgent?: (job: Job) => void;
   variant?: "default" | "board";
   sortBy?: SortBy;
   sortDir?: SortDir;
@@ -551,6 +620,9 @@ export default function JobTable({
   onGroupSelectAll,
   isGroupFullySelected,
   groupByCompany = true,
+  companyBandKeys,
+  getTailorRecord,
+  onQueueUrgent,
   variant = "default",
   sortBy,
   sortDir,
@@ -587,6 +659,7 @@ export default function JobTable({
             <col className="col-loc" />
             <col className="col-comp" />
             <col className="col-level" />
+            <col className="col-tailored" />
             <col className="col-posted" />
             <col className="col-actions" />
           </colgroup>
@@ -603,6 +676,7 @@ export default function JobTable({
                 <SortableHeader label="Location" column="location" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Comp" column="comp" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Level" column="level" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <th>Tailored</th>
                 <SortableHeader label="Posted" column="time" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
               </>
             ) : (
@@ -613,6 +687,7 @@ export default function JobTable({
                 <th>Location</th>
                 <th>Comp</th>
                 <th>Level</th>
+                {variant === "board" ? <th>Tailored</th> : null}
                 <th>{variant === "board" ? "Posted" : "Time"}</th>
               </>
             )}
@@ -623,7 +698,7 @@ export default function JobTable({
           {groupByCompany ? (
             variant === "board" ? (
               groups.map((group, gi) => {
-                const showBand = group.jobs.length > 1;
+                const showBand = companyBandKeys?.has(group.company) ?? group.jobs.length > 1;
                 const priorCount = groups.slice(0, gi).reduce((acc, g) => acc + g.jobs.length, 0);
                 return (
                   <Fragment key={group.company}>
@@ -639,6 +714,8 @@ export default function JobTable({
                         isSelected={isJobSelected?.(job)}
                         onSelectionToggle={onSelectionToggle}
                         onExcludeCompany={onExcludeCompany}
+                        getTailorRecord={getTailorRecord}
+                        onQueueUrgent={onQueueUrgent}
                         nested={showBand}
                         board
                       />

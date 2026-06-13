@@ -1248,3 +1248,135 @@ body.is-today-board .nav-tab.active {
   border-color: #f3d9a8;
   color: #b07219;
 }
+
+/* Tailor queue bar */
+.tailor-queue-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border: 1px solid var(--board-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.tailor-queue-bar-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tailor-queue-bar-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+}
+
+.tailor-queue-stat {
+  font-size: 12px;
+  color: var(--board-ink);
+}
+
+.tailor-queue-stat strong {
+  font-weight: 700;
+}
+
+.tailor-queue-stat--muted {
+  color: var(--board-muted);
+}
+
+.tailor-queue-running,
+.tailor-queue-message {
+  font-size: 11px;
+  color: var(--board-sub);
+}
+
+.tailor-queue-bar-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.tailor-queue-btn {
+  border: 1px solid var(--board-line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--board-sub);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.tailor-queue-btn--primary {
+  background: var(--board-accent);
+  border-color: var(--board-accent);
+  color: #fff;
+}
+
+.tailor-queue-btn--ghost {
+  background: transparent;
+}
+
+.tailor-queue-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tailored column */
+.job-table--board .col-tailored {
+  width: 72px;
+}
+
+.job-table-tailored {
+  text-align: left;
+}
+
+.job-table-tailored-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.job-table-tailored-pill--done {
+  background: #e8f5ec;
+  color: #1f7a3f;
+}
+
+.job-table-tailored-pill--queued {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.job-table-tailored-pill--running {
+  background: #fff4e5;
+  color: #b45309;
+}
+
+.job-table-tailored-pill--failed,
+.job-table-tailored-pill--skip {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.job-table-tailored-pill--none {
+  color: var(--board-muted);
+  font-weight: 500;
+  text-transform: none;
+}
+
+.job-table-board-apply--urgent {
+  border-color: #c4b5fd;
+  color: #5b21b6;
+}

@@ -28,7 +28,7 @@ interface Props {
   records: ApplyClickRecord[];
   getRecord: (jobUrl: string) => ApplyRecord | null;
   onAddToTracker: (jobUrl: string, title: string, company: string, metadata?: { location: string | null }) => void;
-  onRestore?: (jobUrl: string) => void;
+  onRestore?: (jobKey: string) => void;
   emptyMessage?: string;
 }
 
@@ -86,7 +86,7 @@ export default function ClickedJobsTable({
                   : "";
 
             return (
-              <tr key={record.jobUrl}>
+              <tr key={record.jobKey}>
                 <td className="clicked-jobs-index">{index + 1}</td>
                 <td>{formatRunTime(record.clickedAt)}</td>
                 <td>{sourceLabel(record.source)}</td>
@@ -116,7 +116,7 @@ export default function ClickedJobsTable({
                       <button
                         type="button"
                         className="clicked-jobs-restore-btn"
-                        onClick={() => onRestore(record.jobUrl)}
+                        onClick={() => onRestore(record.jobKey)}
                         title="Move back to the live feed"
                       >
                         Restore

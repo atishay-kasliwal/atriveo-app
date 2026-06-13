@@ -2,12 +2,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "./useAuth";
 import type { Job } from "../types";
 import { careerOpsRating } from "../utils/jobPresentation";
+import { jobDismissKey } from "../utils/jobCopy";
 
 const KEY = (uid: string) => `atriveo_apply_click_log_v1_${uid}`;
 
 export type SavedJobSource = "apply" | "click" | "add";
 
 export interface ApplyClickRecord {
+  jobKey: string;
   jobUrl: string;
   title: string;
   company: string;
@@ -37,9 +39,11 @@ function normalize(raw: unknown): ApplyClickRecord[] {
       if (!item || typeof item !== "object") return null;
       const record = item as Record<string, unknown>;
       const jobUrl = String(record.jobUrl || "");
+      const jobKey = String(record.jobKey || jobUrl || "");
       const clickedAt = String(record.clickedAt || "");
-      if (!jobUrl || !clickedAt) return null;
+      if (!jobKey || !clickedAt) return null;
       return {
+        jobKey,
         jobUrl,
         title: String(record.title || "Untitled role"),
         company: String(record.company || "Unknown company"),
@@ -83,12 +87,14 @@ export function useApplyClickLog() {
   }, [loading, uid]);
 
   const recordSavedJob = useCallback((job: Job, source: SavedJobSource) => {
-    if (!job.job_url) return;
+    const jobKey = jobDismissKey(job);
+    if (!jobKey) return;
     setRecords((prev) => {
       const nowIso = new Date().toISOString();
-      const existing = prev.find((record) => record.jobUrl === job.job_url);
+      const existing = prev.find((record) => record.jobKey === jobKey);
       const nextRecord: ApplyClickRecord = {
-        jobUrl: job.job_url,
+        jobKey,
+        jobUrl: job.job_url || "",
         title: job.title || "Untitled role",
         company: job.company || "Unknown company",
         location: job.location || null,
@@ -99,23 +105,23 @@ export function useApplyClickLog() {
         score: careerOpsRating(job).score,
         source,
       };
-      const next = [nextRecord, ...prev.filter((record) => record.jobUrl !== job.job_url)];
+      const next = [nextRecord, ...prev.filter((record) => record.jobKey !== jobKey)];
       persist(uid, next);
       return next;
     });
   }, [uid]);
 
-  const removeApplyClick = useCallback((jobUrl: string) => {
-    if (!jobUrl) return;
+  const removeApplyClick = useCallback((jobKey: string) => {
+    if (!jobKey) return;
     setRecords((prev) => {
-      const next = prev.filter((record) => record.jobUrl !== jobUrl);
+      const next = prev.filter((record) => record.jobKey !== jobKey);
       persist(uid, next);
       return next;
     });
   }, [uid]);
 
-  const clickedUrlSet = useMemo(
-    () => new Set(records.map((record) => record.jobUrl)),
+  const clickedKeySet = useMemo(
+    () => new Set(records.map((record) => record.jobKey)),
     [records],
   );
 
@@ -124,5 +130,5 @@ export function useApplyClickLog() {
     return records.filter((record) => estDateKey(record.clickedAt) === today);
   }, [records]);
 
-  return { records, todayRecords, clickedUrlSet, recordSavedJob, removeApplyClick };
+  return { records, todayRecords, clickedKeySet, recordSavedJob, removeApplyClick };
 }

@@ -11,14 +11,20 @@ import { useApplyClickLog } from "../hooks/useApplyClickLog";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
 import { useJobSelection } from "../hooks/useJobSelection";
+import { useTailorQueue } from "../hooks/useTailorQueue";
+import { useTailorStatus } from "../hooks/useTailorStatus";
 import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
 import type { SavedJobSource } from "../hooks/useApplyClickLog";
 import JobTable from "../components/JobTable";
 import JobCard from "../components/JobCard";
+import TailorQueueBar from "../components/TailorQueueBar";
 import { careerOpsRating } from "../utils/jobPresentation";
 import type { Period, SortBy, SortDir } from "./Dashboard.types";
 import { defaultSortDir, sortJobs } from "../utils/jobSort";
+import { jobDismissKey } from "../utils/jobCopy";
+import { multiRoleCompanies } from "../utils/companyGrouping";
+import { runSingleTailorJob } from "../utils/tailorRun";
 
 type LevelFilter = "all" | "New Grad" | "Entry" | "Mid";
 type RunCard = RunEntry & {
@@ -85,7 +91,7 @@ function formatRunTime(iso?: string | null): string {
 export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const navigate = useNavigate();
   const { stats, recordClick, getRecord } = useApplyTracker();
-  const { clickedUrlSet, recordSavedJob } = useApplyClickLog();
+  const { clickedKeySet, recordSavedJob } = useApplyClickLog();
   const { isExcluded, excludeCompany } = useExclusions();
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
   const [todayJobs, setTodayJobs] = useState<Job[]>([]);
@@ -209,7 +215,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     });
   }, [runHistory, sessionCounts, sessionPeriod, sessionClickCounts]);
 
-  const visibleJobs = useMemo(() => {
+  const feedJobsBeforeDismiss = useMemo(() => {
     let jobs = [...baseJobs];
     if (h1bFilter) jobs = jobs.filter((j) => (j.ats_score ?? j.score_pct ?? 0) >= 60);
     if (top500Filter) jobs = jobs.filter((j) => isTop500(j.company || ""));
@@ -225,12 +231,20 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       );
     }
     jobs = jobs.filter((j) => !isExcluded(j));
-    jobs = jobs.filter((j) => !j.job_url || !clickedUrlSet.has(j.job_url));
     if (activeView === "high-match") {
       jobs = jobs.filter((j) => careerOpsRating(j).score >= 75);
     }
     return jobs;
-  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, activeView, clickedUrlSet]);
+  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, activeView]);
+
+  const companyBandKeys = useMemo(
+    () => multiRoleCompanies(feedJobsBeforeDismiss),
+    [feedJobsBeforeDismiss],
+  );
+
+  const visibleJobs = useMemo(() => {
+    return feedJobsBeforeDismiss.filter((j) => !clickedKeySet.has(jobDismissKey(j)));
+  }, [feedJobsBeforeDismiss, clickedKeySet]);
 
   const handleSortColumn = useCallback((column: SortBy) => {
     if (sortBy === column) {
@@ -321,6 +335,36 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   );
   const displayedJobs = isSplitView ? locationFiltered : filtered;
   const jobSelection = useJobSelection(displayedJobs);
+  const tailorStatus = useTailorStatus();
+  const tailorQueue = useTailorQueue(displayedJobs, {
+    tailorStatus,
+    onProcessJob: runSingleTailorJob,
+  });
+
+  useEffect(() => {
+    const run = jobSelection.tailorRun;
+    if (!run || run.active) return;
+    for (const job of run.jobs) {
+      if (job.phase !== "done") continue;
+      const match = displayedJobs.find((j) => j.company === job.company && j.title === job.role);
+      if (!match) continue;
+      const key = jobDismissKey(match);
+      if (job.status === "ok" && job.pdf) {
+        tailorStatus.markStatus(key, "done", {
+          jobUrl: match.job_url || "",
+          company: job.company,
+          title: job.role,
+          ats: job.ats,
+          pdfPath: job.pdfPath,
+          tailoredAt: new Date().toISOString(),
+        });
+      } else if (job.status === "no-go") {
+        tailorStatus.markStatus(key, "no-go", { error: "no-go" });
+      } else if (job.error) {
+        tailorStatus.markStatus(key, "failed", { error: job.error });
+      }
+    }
+  }, [jobSelection.tailorRun, displayedJobs, tailorStatus]);
   const ngCount = displayedJobs.filter((j) => j.level === "New Grad").length;
   const selectedRun = useMemo(
     () => runCards.find((r) => r.session_id === selectedSession) || null,
@@ -384,9 +428,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const catalogJobs = useMemo(() => {
     let jobs = [...baseJobs];
     jobs = jobs.filter((j) => !isExcluded(j));
-    jobs = jobs.filter((j) => !j.job_url || !clickedUrlSet.has(j.job_url));
+    jobs = jobs.filter((j) => !clickedKeySet.has(jobDismissKey(j)));
     return jobs;
-  }, [baseJobs, isExcluded, clickedUrlSet]);
+  }, [baseJobs, isExcluded, clickedKeySet]);
 
   const viewCounts = useMemo(
     () => ({
@@ -506,6 +550,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           onGroupSelectAll={jobSelection.toggleGroupSelection}
           isGroupFullySelected={jobSelection.isGroupFullySelected}
           groupByCompany
+          companyBandKeys={companyBandKeys}
+          getTailorRecord={tailorStatus.getRecordForJob}
+          onQueueUrgent={(job) => tailorQueue.enqueueJob(job, "manual", true)}
           variant={isTodayBoard ? "board" : "default"}
           sortBy={sortBy}
           sortDir={sortDir}
@@ -577,6 +624,17 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
 
               {filtersOpen && filterBar}
 
+              <TailorQueueBar
+                pendingCount={tailorQueue.pendingCount}
+                doneInQueue={tailorQueue.doneInQueue}
+                processing={tailorQueue.processing}
+                runningItem={tailorQueue.runningItem}
+                lastHourlySyncAt={tailorQueue.lastHourlySyncAt}
+                syncMessage={tailorQueue.syncMessage}
+                onSyncNow={() => tailorQueue.runHourlySync(displayedJobs, true)}
+                onProcessNow={() => void tailorQueue.processQueue()}
+                onClearDone={tailorQueue.clearDone}
+              />
               <BulkJobCopyBar
                 variant="board"
                 selectedCount={jobSelection.selectedCount}
