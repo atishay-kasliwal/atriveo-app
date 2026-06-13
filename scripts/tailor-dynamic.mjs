@@ -50,6 +50,15 @@ STYLE (humanize — must not read AI-generated):
 - Active voice, real verbs, no passive fragments. Vary bullet structure and length.
 - No rule-of-three padding ("X, Y, and Z" stacking). No synonym-cycling. One bullet = one concrete win with a number or named tool.
 
+QUALITY BAR (this is why a resume gets the interview — enforce all):
+- STRONG OPENER: the FIRST bullet of the first role (Stony Brook) must carry the single strongest metric AND a clear architecture/system-design signal AND the tightest match to this JD's domain. It alone should earn a callback.
+- METRIC CREDIBILITY: NEVER invent, round, or inflate a number. Use ONLY numbers that already appear in the candidate's bank bullet you are rewriting. Prefer before→after with context ("from 11 min to 90s") over bare percentages. Do not stack round numbers (90%, 40%, 99.9%) back to back.
+- DEPTH, NOT LISTING: every bullet must show HOW something was built or WHY it mattered — architecture, a tradeoff, or a concrete outcome. Never "Built X with Python, Kafka, Redis" as a tool dump. Each tool named must be shown in use.
+- BULLET UNIQUENESS: within a section, every bullet must carry a DIFFERENT signal — pick across {architecture/system design, scale/throughput, ownership/initiative, reliability/uptime, latency/performance, user or business impact, automation}. No two bullets telling the same story.
+- CADENCE VARIATION: do not start consecutive bullets with the same verb or the same structure. Mix bullet lengths. It must read like a human engineer wrote it.
+- KEYWORD CEILING: do not repeat any single keyword more than 3 times across the whole resume. Use semantic variants (distributed systems / event-driven / async; LLM pipelines / agentic workflows / retrieval).
+- SENIOR FRAMING: bullets read as owning a system, not completing a task. Ban "implemented a feature", "assisted with", "worked on".
+
 ELIGIBILITY: read the JD for work-authorization / sponsorship / security-clearance / citizenship bars. If it HARD-blocks an international candidate needing future sponsorship, set "eligible": false and "no_go_reason"; otherwise "eligible": true.
 
 EXPERIENCE STRUCTURE (FIXED — do not deviate):
@@ -122,6 +131,71 @@ export const RESPONSE_SCHEMA = {
 
 export function buildUserMessage(bank, jd) {
   return `JOB DESCRIPTION:\n${jd.trim()}\n\n=== CANDIDATE BULLET BANK (select & rewrite from these only) ===\n${bankToPrompt(bank)}`;
+}
+
+// ─── Self-critique pass (rule 8 / 43: every bullet must be 9+/10) ─────────────
+// Second model call. Takes the drafted bullets + the JD, scores each 1-10
+// against the quality bar, and rewrites any bullet under 9. Truth rules still
+// apply: it may only re-word real bullets, never add new numbers.
+export const CRITIQUE_SYSTEM = `You are a brutal senior hiring manager reviewing a resume draft for THIS job. Output ONE valid JSON object only — no markdown, no prose.
+
+For each bullet you are given, score it 1-10 on this bar:
+- Carries a concrete metric or named scale (no vague claims).
+- Shows architecture, a tradeoff, or a real outcome — not a tool dump.
+- Reads as OWNING a system, not completing a task.
+- Distinct signal from the other bullets in its section.
+- Natural human cadence, varied structure, no AI-vocabulary, no semicolons/em-dashes.
+
+RULES for any rewrite:
+- Rewrite ONLY bullets scoring below 9. Leave 9-10 bullets unchanged (return them as-is).
+- NEVER add or change a number that is not already in the original bullet text. No inflation, no rounding.
+- Keep every JD keyword and tool that was already present. Do not weaken ATS signal.
+- Keep it one line, impact-forward, truthful.
+
+Return ONLY:
+{
+  "bullets": [ { "id": "<same id>", "score": <int 1-10>, "text": "<final bullet — rewritten if it was <9, else unchanged>" } ]
+}`;
+
+export const CRITIQUE_SCHEMA = {
+  type: "object",
+  properties: {
+    bullets: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: { id: { type: "string" }, score: { type: "integer" }, text: { type: "string" } },
+        required: ["id", "score", "text"],
+      },
+    },
+  },
+  required: ["bullets"],
+};
+
+// Flatten the drafted AI plan into an id->text list for the critique pass.
+export function collectDraftBullets(ai) {
+  const out = [];
+  for (const exp of ai.experience || []) for (const b of exp.bullets || []) out.push({ id: b.id, text: b.text });
+  for (const proj of ai.projects || []) for (const b of proj.bullets || []) out.push({ id: b.id, text: b.text });
+  return out;
+}
+
+export function buildCritiqueMessage(jd, draftBullets) {
+  const lines = draftBullets.map((b) => `${b.id}: ${b.text}`).join("\n");
+  return `JOB DESCRIPTION (score relevance against this):\n${jd.trim()}\n\n=== DRAFTED BULLETS (score each, rewrite any below 9) ===\n${lines}`;
+}
+
+// Merge critique results back into the AI plan by id, and record scores.
+export function applyCritique(ai, critique) {
+  const byId = new Map((critique.bullets || []).map((b) => [b.id, b]));
+  const apply = (b) => {
+    const c = byId.get(b.id);
+    if (c) { b.text = c.text; b.score = c.score; }
+    return b;
+  };
+  for (const exp of ai.experience || []) exp.bullets = (exp.bullets || []).map(apply);
+  for (const proj of ai.projects || []) proj.bullets = (proj.bullets || []).map(apply);
+  return ai;
 }
 
 // ─── Truth guard: strip skills not backed by the safe-claim allowlist ────────

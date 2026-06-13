@@ -19,15 +19,18 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
-import { loadBullets, loadSafeClaims } from "./tailor-bank.mjs";
+import { loadBullets, loadSafeClaims, loadBankNumbers, bulletNumbers } from "./tailor-bank.mjs";
 import {
   SYSTEM_PROMPT as DYN_SYSTEM, RESPONSE_SCHEMA as DYN_SCHEMA,
+  CRITIQUE_SYSTEM, CRITIQUE_SCHEMA,
   buildUserMessage, assembleResume, filterSkillsLine,
+  collectDraftBullets, buildCritiqueMessage, applyCritique,
 } from "./tailor-dynamic.mjs";
 
 // Load the engine bank once at startup.
 const BANK = loadBullets();
 const SAFE_CLAIMS = loadSafeClaims(BANK);
+const BANK_NUMBERS = loadBankNumbers(BANK);
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 const PORT = 8787;
@@ -601,6 +604,40 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
     }
 
     logAiPlan(onLog, ai, BANK);
+
+    // ── Self-critique pass: score every bullet, rewrite anything below 9 ──
+    onLog?.("step", "Phase 1b · Self-critique — scoring every bullet, rewriting any below 9/10");
+    try {
+      const draft = collectDraftBullets(ai);
+      const critique = await chatJSON(model, CRITIQUE_SYSTEM, buildCritiqueMessage(jd, draft), CRITIQUE_SCHEMA, [3072, 4608], onLog);
+      const scores = (critique.bullets || []).map((b) => b.score);
+      const low = (critique.bullets || []).filter((b) => b.score < 9);
+      applyCritique(ai, critique);
+      if (scores.length) {
+        const avg = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+        onLog?.("result", `Critique done · avg ${avg}/10 · rewrote ${low.length}/${scores.length} weak bullet(s)`);
+        for (const b of low) onLog?.("think", `  ↑ ${b.id} (${b.score}/10) → ${b.text.slice(0, 90)}${b.text.length > 90 ? "…" : ""}`);
+      }
+    } catch (e) {
+      onLog?.("warn", `Critique pass skipped (${e.message}) — using first-draft bullets`);
+    }
+
+    // ── Metric lock (rule 28): flag any number not present in the bank ──
+    const invented = [];
+    const checkBullet = (b) => {
+      for (const n of bulletNumbers(b.text)) {
+        if (n.length <= 1 && !/[%kmb]/.test(n)) continue; // ignore bare single digits (counts like "3 streams")
+        if (!BANK_NUMBERS.has(n)) invented.push(`${b.id}:${n}`);
+      }
+    };
+    for (const exp of ai.experience || []) (exp.bullets || []).forEach(checkBullet);
+    for (const proj of ai.projects || []) (proj.bullets || []).forEach(checkBullet);
+    if (invented.length) {
+      onLog?.("warn", `Metric lock · numbers NOT in bank (review for inflation): ${invented.join(", ")}`);
+      ai._invented_metrics = invented;
+    } else {
+      onLog?.("result", "Metric lock passed — every number traces to a real bank bullet");
+    }
 
     onLog?.("step", "Phase 2/4 · Truth guard — filtering skills against safe-claim allowlist");
     const droppedSkills = [];

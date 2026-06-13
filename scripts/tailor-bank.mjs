@@ -80,6 +80,26 @@ export function loadSafeClaims(bank) {
   return claims;
 }
 
+// ─── Metric lock (rule 28) ───────────────────────────────────────────────────
+// Every number that legitimately appears in the bank's bullet text. The model
+// may re-use these but must not invent or round new ones. Returns a Set of
+// normalized numeric tokens (digits + optional , . + % K M B suffixes).
+const NUM_RE = /\d[\d,.]*\+?%?[KMB]?/g;
+export function normalizeNum(tok) {
+  return String(tok).toLowerCase().replace(/,/g, "").trim();
+}
+export function loadBankNumbers(bank) {
+  const nums = new Set();
+  for (const group of [...bank.roles, ...bank.projects])
+    for (const bl of group.bullets)
+      for (const t of (bl.text || "").match(NUM_RE) || []) nums.add(normalizeNum(t));
+  return nums;
+}
+// Extract numeric tokens from a single rewritten bullet (for verification).
+export function bulletNumbers(text) {
+  return (String(text).match(NUM_RE) || []).map(normalizeNum);
+}
+
 // ─── Banned phrases (REVIEWER_FEEDBACK_BANK.md) ──────────────────────────────
 export function loadBannedPhrases() {
   // Hard-banned set: rulebook + REVIEWER_FEEDBACK_BANK + the resume-relevant
