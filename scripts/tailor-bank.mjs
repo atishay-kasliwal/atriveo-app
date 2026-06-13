@@ -75,7 +75,15 @@ export function loadSafeClaims(bank) {
     if (/^(The|This|Safe|Use|Context|Required|Additions|Confirmed|Always|Never|Job|Per|JD|Reusable|Stable|Usage|Rule|Purpose|Check|Ask|Location|Sponsorship)$/.test(t)) continue;
     add(t);
     // also add a no-space variant so "Spring Boot" and "SpringBoot" both match
-    if (/\s/.test(t)) add(t.replace(/\s+/g, ""));
+    if (/\s/.test(t)) {
+      add(t.replace(/\s+/g, ""));
+      // and each individual word, so "Netflix Eureka" also yields "Eureka",
+      // "Apache Avro" -> "Avro", "MongoDB Atlas" -> "MongoDB". Skip common
+      // vendor/filler prefixes that are not skills on their own.
+      for (const w of t.split(/\s+/)) {
+        if (w.length >= 3 && !/^(Apache|Netflix|Confluent|Spring|Amazon|Google|Microsoft|Atlas|Server|Cloud)$/.test(w)) add(w);
+      }
+    }
   }
   return claims;
 }
