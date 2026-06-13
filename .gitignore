@@ -3,4 +3,5 @@ dist
 .env
 .env.tailor
 scripts/cloudflared-tailor.yml
+scripts/preview.html
 .dev.vars

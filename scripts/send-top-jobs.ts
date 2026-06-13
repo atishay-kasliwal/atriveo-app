@@ -31,8 +31,11 @@ const DASHBOARD_URL = "https://atriveo-app.pages.dev";
 const NY_TZ = "America/New_York";
 const RANKED_ROLES_VISIBLE = 5;
 
-// 250 is the max possible raw score from the scoring rubric.
-const MAX_SCORE = 250;
+// The Today page reads these published JSON assets (same files /api/jobs serves),
+// NOT MongoDB. They carry score/ats_score/fit_score — the CareerOps inputs — so
+// the email must read them too to match the dashboard. Prefer the deployed URL
+// (what the live site serves) and fall back to the local public/ build.
+const JOBS_BASE_URL = process.env.JOBS_BASE_URL ?? DASHBOARD_URL;
 
 // ─── types ────────────────────────────────────────────────────────────────────
 
@@ -44,6 +47,10 @@ interface Job {
   keyword_score?: number;
   score_pct?: number;
   ats_score?: number;
+  /** raw pipeline score (0–250), primary CareerOps input */
+  score?: number;
+  /** resume fit, 0–100 or 0–10 (auto-normalized) */
+  fit_score?: number;
   job_url: string;
 }
 
@@ -108,26 +115,52 @@ function fmtNumber(n: number): string {
   return n.toLocaleString("en-US");
 }
 
-function computePct(job: Job): number {
-  const pctFromScorePct = Number(job.score_pct);
-  if (Number.isFinite(pctFromScorePct)) {
-    return Math.max(0, Math.min(100, Math.round(pctFromScorePct)));
-  }
-  const pctFromAts = Number(job.ats_score);
-  if (Number.isFinite(pctFromAts)) {
-    return Math.max(0, Math.min(100, Math.round(pctFromAts)));
-  }
-  const rawKeyword = Number(job.keyword_score);
-  if (Number.isFinite(rawKeyword) && rawKeyword >= 0) {
-    return Math.min(100, Math.round((rawKeyword / MAX_SCORE) * 100));
-  }
-  return 0;
+// ── CareerOps score (mirrors src/utils/jobPresentation.ts) ──────────────────
+// The Today page ranks and scores every job with this exact weighted formula.
+// We replicate it verbatim so the email's percentages, "strong fit" counts, and
+// averages line up 1:1 with the dashboard. Keep these in sync if the page changes.
+
+const MAX_RAW_SCORE = 250;
+// A CareerOps score at/above this is a "Strong match" on the Today page.
+const STRONG_FIT_THRESHOLD = 75;
+
+function clampPct(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(100, Math.round(value)));
 }
 
+function normalizeFitScore(value: number | null | undefined): number | null {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return null;
+  // fit_score may arrive on a 0–10 or 0–100 scale; lift the small scale to %.
+  return clampPct(numeric <= 10 ? numeric * 10 : numeric);
+}
+
+/** CareerOps 0–100 score — identical weighting to the Today page. */
+function careerOpsScore(job: Job): number {
+  const rawPct = clampPct(((Number(job.score) || 0) / MAX_RAW_SCORE) * 100);
+  const atsRaw = Number(job.ats_score ?? job.score_pct);
+  const atsPct = Number.isFinite(atsRaw) ? clampPct(atsRaw) : null;
+  const fitPct = normalizeFitScore(job.fit_score);
+  const weightedParts = [
+    { value: rawPct, weight: 0.7 },
+    ...(atsPct == null ? [] : [{ value: atsPct, weight: 0.2 }]),
+    ...(fitPct == null ? [] : [{ value: fitPct, weight: 0.1 }]),
+  ];
+  const totalWeight = weightedParts.reduce((s, p) => s + p.weight, 0) || 1;
+  return clampPct(weightedParts.reduce((s, p) => s + p.value * p.weight, 0) / totalWeight);
+}
+
+/** Email % shown for a job = its CareerOps score (same number as the dashboard). */
+function computePct(job: Job): number {
+  return careerOpsScore(job);
+}
+
+// Tier colors mirror the Today page CareerOps tiers (75 / 50 / 25 cutoffs).
 function matchColor(pct: number): string {
-  if (pct >= 70) return "#10b981";
-  if (pct >= 50) return "#f59e0b";
-  return "#94a3b8";
+  if (pct >= STRONG_FIT_THRESHOLD) return "#10b981"; // strong
+  if (pct >= 50) return "#f59e0b";                    // good
+  return "#94a3b8";                                   // review / low
 }
 
 function companyInitials(company: string): string {
@@ -184,13 +217,48 @@ function getMarketPulse(insights: Insights): MarketPulse {
 
 // ─── data loaders ─────────────────────────────────────────────────────────────
 
+/**
+ * Load the published jobs feed the Today page reads. Tries the deployed URL
+ * first (the live asset), then the local public/ build. Returns the raw job
+ * objects with their full score fields intact.
+ */
+async function loadFeedJobs(type: "hour" | "today"): Promise<Job[]> {
+  const file = type === "today" ? "today_jobs.json" : "jobs.json";
+
+  // 1. Try the deployed asset over HTTP.
+  try {
+    const res = await fetch(`${JOBS_BASE_URL}/${file}`, { redirect: "follow" });
+    if (res.ok) {
+      const data = await res.json();
+      const arr = Array.isArray(data) ? data : (data?.jobs ?? []);
+      if (Array.isArray(arr) && arr.length) return arr as Job[];
+    }
+  } catch {
+    /* fall through to local file */
+  }
+
+  // 2. Fall back to the local public/ build.
+  try {
+    const fs = await import("fs/promises");
+    const localPath = resolve(__dirname, "../public", file);
+    const raw = await fs.readFile(localPath, "utf8");
+    const data = JSON.parse(raw);
+    const arr = Array.isArray(data) ? data : (data?.jobs ?? []);
+    if (Array.isArray(arr)) return arr as Job[];
+  } catch {
+    /* no local file either */
+  }
+
+  return [];
+}
+
 async function loadInsights(
-  db: Db,
+  db: Db | null,
   hourStart: Date,
   hourEnd: Date,
   jobsAll: Job[],
 ): Promise<Insights> {
-  const sessionsCol = db.collection("sessions");
+  const sessionsCol = db?.collection("sessions") ?? null;
 
   const lastHourStart        = new Date(hourStart.getTime() - 60 * 60 * 1000);
   const todayStart           = new Date(hourStart);
@@ -201,7 +269,9 @@ async function loadInsights(
   const twelveHoursAgo       = new Date(hourStart.getTime() - 11 * 60 * 60 * 1000);
 
   // run_at is stored as a BSON Date (datetime in Python) — pass Date objects, not ISO strings.
+  // Returns 0 when Mongo isn't available (volume trends are best-effort only).
   const sumJobs = async (gte: Date, lt: Date): Promise<number> => {
+    if (!sessionsCol) return 0;
     const docs = await sessionsCol
       .find({ run_at: { $gte: gte, $lt: lt } }, { projection: { job_count: 1 } })
       .toArray();
@@ -217,12 +287,14 @@ async function loadInsights(
   ]);
 
   // Last 12 hours bucketed: pull all sessions in the window, then bin by hour.
-  const recentSessions = await sessionsCol
-    .find(
-      { run_at: { $gte: twelveHoursAgo, $lt: hourEnd } },
-      { projection: { run_at: 1, job_count: 1 } },
-    )
-    .toArray();
+  const recentSessions = sessionsCol
+    ? await sessionsCol
+        .find(
+          { run_at: { $gte: twelveHoursAgo, $lt: hourEnd } },
+          { projection: { run_at: 1, job_count: 1 } },
+        )
+        .toArray()
+    : [];
 
   const last12h: HourBucket[] = [];
   for (let i = 11; i >= 0; i--) {
@@ -242,8 +314,9 @@ async function loadInsights(
   const avgMatchThisHour = pcts.length
     ? Math.round(pcts.reduce((s, p) => s + p, 0) / pcts.length)
     : 0;
-  const highMatchCount = pcts.filter((p) => p >= 70).length;
-  const midMatchCount  = pcts.filter((p) => p >= 50 && p < 70).length;
+  // Match the Today page tiers exactly: strong ≥75, good ≥50, else review/low.
+  const highMatchCount = pcts.filter((p) => p >= STRONG_FIT_THRESHOLD).length;
+  const midMatchCount  = pcts.filter((p) => p >= 50 && p < STRONG_FIT_THRESHOLD).length;
   const lowMatchCount  = pcts.filter((p) => p < 50).length;
 
   const levelOrder = ["New Grad", "Entry", "Mid", "Other"];
@@ -392,7 +465,7 @@ function renderTitleBlock(jobsCount: number, avgMatch: number): string {
           Top ${jobsCount} jobs this hour
         </div>
         <div style="color:#64748b; font-size:13px; margin-top:8px;">
-          Ranked by match score · avg fit ${avgMatch}% · scored against your resume
+          Ranked by CareerOps score · avg ${avgMatch} · same scoring as your dashboard
         </div>
       </td>
     </tr>`;
@@ -490,8 +563,8 @@ function renderStatsCards(insights: Insights): string {
             ${card("Yesterday", yestValue, yestSub)}
             ${card(
               "Avg match",
-              `${insights.avgMatchThisHour}%`,
-              `<span style="color:#10b981; font-weight:700; font-size:12px;">${insights.highMatchCount} ≥70%</span>`,
+              `${insights.avgMatchThisHour}`,
+              `<span style="color:#10b981; font-weight:700; font-size:12px;">${insights.highMatchCount} strong fit${insights.highMatchCount === 1 ? "" : "s"}</span>`,
             )}
           </tr>
         </table>
@@ -793,7 +866,7 @@ function renderText(insights: Insights, jobs: Job[], sessionTime: string): strin
   if (insights.yesterdayTotal != null) {
     lines.push(`  Yesterday: ${fmtNumber(insights.yesterdayTotal)} full-day total`);
   }
-  lines.push(`  Avg match: ${insights.avgMatchThisHour}%  ·  ${insights.highMatchCount} high-match (≥70%)`);
+  lines.push(`  Avg match: ${insights.avgMatchThisHour}  ·  ${insights.highMatchCount} strong fit (CareerOps ≥${STRONG_FIT_THRESHOLD})`);
   lines.push(`  Location pulse: NY ${marketPulse.ny} · NC ${marketPulse.nc} · SEA ${marketPulse.sea}`);
   lines.push("");
 
@@ -836,8 +909,15 @@ function renderText(insights: Insights, jobs: Job[], sessionTime: string): strin
 // ─── mock data (MOCK=1 preview) ───────────────────────────────────────────────
 
 function mockJobs(): Job[] {
+  // Provide raw `score` (0–250) + ats/fit so CareerOps resolves the same way
+  // the dashboard would. `pct` is the intended CareerOps result; back it out
+  // into a raw score (0.7 weight dominates) for a faithful preview.
   const mk = (title: string, company: string, location: string, level: string, pct: number): Job => ({
-    title, company, location, level, score_pct: pct,
+    title, company, location, level,
+    score: Math.round((pct / 100) * MAX_RAW_SCORE),
+    ats_score: pct,
+    fit_score: pct,
+    score_pct: pct,
     job_url: "https://example.com/apply",
   });
 
@@ -878,17 +958,24 @@ function mockInsights(): Insights {
 
   const jobs = mockJobs();
 
+  // Derive aggregates from the mock jobs through the real CareerOps path so the
+  // preview reflects exactly what loadInsights() produces on live data.
+  const pcts = jobs.map(computePct);
+  const avgMatchThisHour = pcts.length
+    ? Math.round(pcts.reduce((s, p) => s + p, 0) / pcts.length)
+    : 0;
+
   return {
-    thisHour: 100,
+    thisHour: jobs.length,
     lastHour: 233,
     todayTotal: 3577,
     yesterdaySameHour: 120,
     yesterdayTotal: 4455,
     last12h,
-    avgMatchThisHour: 18,
-    highMatchCount: 2,
-    midMatchCount: 6,
-    lowMatchCount: 92,
+    avgMatchThisHour,
+    highMatchCount: pcts.filter((p) => p >= STRONG_FIT_THRESHOLD).length,
+    midMatchCount: pcts.filter((p) => p >= 50 && p < STRONG_FIT_THRESHOLD).length,
+    lowMatchCount: pcts.filter((p) => p < 50).length,
     levelMix: [],
     topCompanies: [
       { name: "BeaconFire Inc.", count: 20 },
@@ -933,15 +1020,6 @@ async function main() {
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) throw new Error("RESEND_API_KEY not set");
 
-  const mongoUri = process.env.MONGO_URI;
-  if (!mongoUri) throw new Error("MONGO_URI not set");
-
-  const { MongoClient } = await import("mongodb");
-  const client = new MongoClient(mongoUri, { appName: "AtriveoMailer" });
-  await client.connect();
-
-  const db = client.db("job_pipeline");
-
   // Hour window for the latest run.
   const now = new Date();
   const hourStart = new Date(now);
@@ -949,55 +1027,57 @@ async function main() {
   const hourEnd = new Date(hourStart);
   hourEnd.setHours(hourEnd.getHours() + 1);
 
-  // 1. Latest non-archived session in the current hour, falling back to most recent.
-  let latestSession = await db.collection("sessions").findOne(
-    { archived: false, run_at: { $gte: hourStart, $lt: hourEnd } },
-    { sort: { run_at: -1 } },
-  );
-  if (!latestSession) {
-    latestSession = await db
-      .collection("sessions")
-      .findOne({ archived: false }, { sort: { run_at: -1 } });
-  }
-  if (!latestSession) {
-    console.log("No active sessions found — nothing to send.");
-    await client.close();
+  // 1. Jobs come from the SAME published feed the Today page reads (carries
+  //    score/ats_score/fit_score), so CareerOps scoring matches the dashboard.
+  const jobsAll = await loadFeedJobs("hour");
+  if (jobsAll.length === 0) {
+    console.log("Hour feed is empty — nothing to send.");
     return;
   }
 
-  const sessionId = latestSession.session_id as string;
-  const runAtRaw = latestSession.run_at;
-  const runAt = runAtRaw instanceof Date ? runAtRaw : new Date(runAtRaw as string);
-  const sessionTime = runAt.toLocaleString("en-US", {
+  // 2. MongoDB is used ONLY for volume trends (session run_at + job_count).
+  //    It's optional: if unavailable, trends fall back to empty and the digest
+  //    still sends with page-accurate job data.
+  const mongoUri = process.env.MONGO_URI;
+  let db: Db | null = null;
+  let client: import("mongodb").MongoClient | null = null;
+  let sessionTime = now.toLocaleString("en-US", {
     timeZone: NY_TZ,
     month: "short", day: "numeric",
     hour: "numeric", minute: "2-digit", hour12: true,
   });
 
-  // 2. Fetch all jobs for this session — used both for the table and aggregates.
-  const jobsAll = (await db
-    .collection("jobs")
-    .find({ session_id: sessionId })
-    .project({
-      _id: 0,
-      title: 1, company: 1, location: 1, level: 1,
-      keyword_score: 1, score_pct: 1, ats_score: 1, job_url: 1,
-    })
-    .toArray()) as unknown as Job[];
+  if (mongoUri) {
+    try {
+      const { MongoClient } = await import("mongodb");
+      client = new MongoClient(mongoUri, { appName: "AtriveoMailer" });
+      await client.connect();
+      db = client.db("job_pipeline");
 
-  if (jobsAll.length === 0) {
-    console.log(`Session ${sessionId} has no jobs — skipping.`);
-    await client.close();
-    return;
+      const latestSession = await db
+        .collection("sessions")
+        .findOne({ archived: false }, { sort: { run_at: -1 } });
+      if (latestSession?.run_at) {
+        const runAtRaw = latestSession.run_at;
+        const runAt = runAtRaw instanceof Date ? runAtRaw : new Date(runAtRaw as string);
+        sessionTime = runAt.toLocaleString("en-US", {
+          timeZone: NY_TZ,
+          month: "short", day: "numeric",
+          hour: "numeric", minute: "2-digit", hour12: true,
+        });
+      }
+    } catch (err) {
+      console.warn("MongoDB unavailable — volume trends will be empty.", (err as Error).message);
+      db = null;
+    }
   }
 
-  // 3. Insights queries (volume trends, last 12h, etc.)
-  // Use the exact latest-session jobs length for "this hour" so subject/header
-  // never drift from the actual digest dataset.
+  // 3. Build insights. Per-job aggregates use the page's feed jobs; volume
+  //    trends use Mongo when present. "This hour" = the feed's job count.
   const rawInsights = await loadInsights(db, hourStart, hourEnd, jobsAll);
   const insights: Insights = { ...rawInsights, thisHour: jobsAll.length };
 
-  await client.close();
+  if (client) await client.close();
 
   const jobs = jobsAll
     .sort((a, b) => computePct(b) - computePct(a))
@@ -1013,7 +1093,7 @@ async function main() {
     const fs = await import("fs/promises");
     const previewPath = resolve(__dirname, "preview.html");
     await fs.writeFile(previewPath, html, "utf8");
-    console.log(`✓ Preview written: ${previewPath} (session: ${sessionId} · jobs: ${jobs.length})`);
+    console.log(`✓ Preview written: ${previewPath} (feed jobs: ${jobsAll.length} · top: ${jobs.length})`);
     console.log(`  Subject would be: ${subject}`);
     return;
   }
@@ -1039,7 +1119,7 @@ async function main() {
   }
 
   const data = await res.json() as { id: string };
-  console.log(`✓ Email sent (id: ${data.id}) · session: ${sessionId} · jobs: ${jobs.length}`);
+  console.log(`✓ Email sent (id: ${data.id}) · feed jobs: ${jobsAll.length} · top: ${jobs.length}`);
 }
 
 main().catch(console.error);
