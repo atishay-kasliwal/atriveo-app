@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { TailorProcessLogEntry, TailorQueueItem } from "../types/tailorQueue";
 import { HOURLY_QUEUE_SIZE } from "../types/tailorQueue";
 import { formatTailorDuration } from "../utils/tailorProgress";
@@ -78,6 +78,14 @@ export default function TailorQueueBar({
   const [expanded, setExpanded] = useState(false);
   const [logsOpen, setLogsOpen] = useState(true);
   const [dragKey, setDragKey] = useState<string | null>(null);
+  const prevPendingRef = useRef(pendingCount);
+
+  useEffect(() => {
+    if (pendingCount > prevPendingRef.current) {
+      setExpanded(true);
+    }
+    prevPendingRef.current = pendingCount;
+  }, [pendingCount]);
 
   const pendingItems = useMemo(
     () => queue.filter((item) => item.status === "pending"),

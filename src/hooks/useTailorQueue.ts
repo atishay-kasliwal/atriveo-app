@@ -69,6 +69,63 @@ function isActiveStatus(status: TailorQueueItemStatus): boolean {
   return status === "pending" || status === "running";
 }
 
+function mergeQueues(base: TailorQueueItem[], incoming: TailorQueueItem[]): TailorQueueItem[] {
+  const byKey = new Map(base.map((item) => [item.jobKey, item]));
+  for (const item of incoming) {
+    if (!byKey.has(item.jobKey)) byKey.set(item.jobKey, item);
+  }
+  return sortQueue([...byKey.values()]);
+}
+
+interface HourlyMark {
+  key: string;
+  patch: {
+    jobUrl: string;
+    company: string;
+    title: string;
+    score: number;
+  };
+}
+
+function buildHourlyAdditions(
+  prev: TailorQueueItem[],
+  ranked: Array<{ job: Job; score: number; key: string }>,
+  batch: string,
+): { next: TailorQueueItem[]; marks: HourlyMark[] } {
+  const activeKeys = new Set(
+    prev.filter((item) => isActiveStatus(item.status)).map((item) => item.jobKey),
+  );
+  const next = [...prev];
+  const marks: HourlyMark[] = [];
+  for (const { job, score, key } of ranked) {
+    if (marks.length >= HOURLY_QUEUE_SIZE) break;
+    if (activeKeys.has(key)) continue;
+    next.push({
+      jobKey: key,
+      jobUrl: job.job_url || "",
+      title: job.title || "Untitled role",
+      company: job.company || "Unknown",
+      score,
+      priority: score,
+      enqueuedAt: new Date().toISOString(),
+      hourBatch: batch,
+      source: "hourly",
+      status: "pending",
+    });
+    marks.push({
+      key,
+      patch: {
+        jobUrl: job.job_url || "",
+        company: job.company || "Unknown",
+        title: job.title || "Untitled role",
+        score,
+      },
+    });
+    activeKeys.add(key);
+  }
+  return { next, marks };
+}
+
 type TailorStatusApi = Pick<
   ReturnType<typeof useTailorStatus>,
   "getRecord" | "markStatus"
@@ -97,6 +154,8 @@ export function useTailorQueue(jobs: Job[], options: Options) {
   const [processLogs, setProcessLogs] = useState<TailorProcessLogEntry[]>([]);
   const processingRef = useRef(false);
   const logSeqRef = useRef(0);
+  const queueRef = useRef<TailorQueueItem[]>([]);
+  const processQueueRef = useRef<(() => Promise<void>) | null>(null);
 
   const pushLog = useCallback((message: string, durationMs?: number) => {
     const at = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" });
@@ -111,18 +170,49 @@ export function useTailorQueue(jobs: Job[], options: Options) {
   }, []);
 
   useEffect(() => {
+    queueRef.current = queue;
+  }, [queue]);
+
+  const kickProcess = useCallback(() => {
+    window.setTimeout(() => {
+      void processQueueRef.current?.();
+    }, 0);
+  }, []);
+
+  useEffect(() => {
     if (loading) return;
-    setQueue(loadQueue(uid));
+    let loaded = loadQueue(uid);
+    if (uid !== "anon") {
+      try {
+        const anonRaw = localStorage.getItem(QUEUE_KEY("anon"));
+        if (anonRaw) {
+          loaded = mergeQueues(loaded, JSON.parse(anonRaw) as TailorQueueItem[]);
+          persistQueue(uid, loaded);
+          localStorage.removeItem(QUEUE_KEY("anon"));
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    queueRef.current = loaded;
+    setQueue(loaded);
     setLastHourlySyncAt(loadLastSync(uid));
-  }, [loading, uid]);
+    if (loaded.some((item) => item.status === "pending")) {
+      kickProcess();
+    }
+  }, [loading, uid, kickProcess]);
+
+  const commitQueue = useCallback((next: TailorQueueItem[]) => {
+    const sorted = sortQueue(next);
+    queueRef.current = sorted;
+    setQueue(sorted);
+    persistQueue(uid, sorted);
+    return sorted;
+  }, [uid]);
 
   const updateQueue = useCallback((updater: (prev: TailorQueueItem[]) => TailorQueueItem[]) => {
-    setQueue((prev) => {
-      const next = sortQueue(updater(prev));
-      persistQueue(uid, next);
-      return next;
-    });
-  }, [uid]);
+    return commitQueue(updater(queueRef.current));
+  }, [commitQueue]);
 
   const enqueueJob = useCallback((job: Job, source: TailorQueueItem["source"], urgent = false) => {
     const jobKey = jobDismissKey(job);
@@ -133,18 +223,25 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       return false;
     }
 
-    let added = false;
+    let changed = false;
+    let markPatch: {
+      jobUrl: string;
+      company: string;
+      title: string;
+      score: number;
+    } | null = null;
+
     updateQueue((prev) => {
       const idx = prev.findIndex((item) => item.jobKey === jobKey && isActiveStatus(item.status));
       if (idx >= 0) {
         if (!urgent) return prev;
+        changed = true;
         const bumped = [...prev];
         bumped[idx] = {
           ...bumped[idx],
           priority: Math.max(bumped[idx].priority, 1000) + 1,
           source: "manual",
         };
-        added = true;
         return bumped;
       }
       const item: TailorQueueItem = {
@@ -159,20 +256,27 @@ export function useTailorQueue(jobs: Job[], options: Options) {
         source,
         status: "pending",
       };
-      tailorStatus.markStatus(jobKey, "queued", {
+      markPatch = {
         jobUrl: item.jobUrl,
         company: item.company,
         title: item.title,
         score,
-      });
-      added = true;
+      };
+      changed = true;
       return [item, ...prev];
     });
-    if (added) {
-      setSyncMessage(urgent ? `Queued urgent: ${job.title || "role"}` : `Queued: ${job.title || "role"}`);
+
+    if (!changed) return false;
+
+    if (markPatch) {
+      tailorStatus.markStatus(jobKey, "queued", markPatch);
+    } else {
+      tailorStatus.markStatus(jobKey, "queued");
     }
-    return added;
-  }, [tailorStatus, updateQueue]);
+    setSyncMessage(urgent ? `Queued urgent: ${job.title || "role"}` : `Queued: ${job.title || "role"}`);
+    kickProcess();
+    return true;
+  }, [tailorStatus, updateQueue, kickProcess]);
 
   const runHourlySync = useCallback((availableJobs: Job[], force = false) => {
     const now = Date.now();
@@ -191,49 +295,26 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       })
       .sort((a, b) => b.score - a.score);
 
-    let added = 0;
-    updateQueue((prev) => {
-      const activeKeys = new Set(
-        prev.filter((item) => isActiveStatus(item.status)).map((item) => item.jobKey),
-      );
-      const next = [...prev];
-      for (const { job, score, key } of ranked) {
-        if (added >= HOURLY_QUEUE_SIZE) break;
-        if (activeKeys.has(key)) continue;
-        next.push({
-          jobKey: key,
-          jobUrl: job.job_url || "",
-          title: job.title || "Untitled role",
-          company: job.company || "Unknown",
-          score,
-          priority: score,
-          enqueuedAt: new Date().toISOString(),
-          hourBatch: batch,
-          source: "hourly",
-          status: "pending",
-        });
-        tailorStatus.markStatus(key, "queued", {
-          jobUrl: job.job_url || "",
-          company: job.company || "Unknown",
-          title: job.title || "Untitled role",
-          score,
-        });
-        activeKeys.add(key);
-        added += 1;
+    const { next, marks } = buildHourlyAdditions(queueRef.current, ranked, batch);
+    if (marks.length > 0) {
+      commitQueue(next);
+      for (const mark of marks) {
+        tailorStatus.markStatus(mark.key, "queued", mark.patch);
       }
-      return next;
-    });
+    }
 
+    const added = marks.length;
     const ts = Date.now();
     setLastHourlySyncAt(ts);
     persistLastSync(uid, ts);
     if (added > 0) {
       setSyncMessage(`Hourly sync added ${added} job${added === 1 ? "" : "s"} to the tailor queue`);
+      kickProcess();
     } else if (force) {
       setSyncMessage("Hourly sync: no new jobs to add");
     }
     return added;
-  }, [lastHourlySyncAt, tailorStatus, uid, updateQueue]);
+  }, [lastHourlySyncAt, tailorStatus, uid, commitQueue, kickProcess]);
 
   const bumpUrgent = useCallback((jobKey: string) => {
     updateQueue((prev) => prev.map((item) => (
@@ -273,7 +354,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
 
   const processQueue = useCallback(async () => {
     if (!onProcessJob || processingRef.current) return;
-    const nextItem = queue.find((item) => item.status === "pending");
+    const nextItem = queueRef.current.find((item) => item.status === "pending");
     if (!nextItem) return;
 
     processingRef.current = true;
@@ -311,6 +392,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       pushLog(`Skipped ${nextItem.company} · job no longer in feed`, durationMs);
       processingRef.current = false;
       setProcessing(false);
+      kickProcess();
       return;
     }
 
@@ -364,8 +446,11 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     } finally {
       processingRef.current = false;
       setProcessing(false);
+      kickProcess();
     }
-  }, [jobs, onProcessJob, queue, tailorStatus, updateQueue, pushLog]);
+  }, [jobs, onProcessJob, tailorStatus, updateQueue, pushLog, kickProcess]);
+
+  processQueueRef.current = processQueue;
 
   useEffect(() => {
     if (processing || !onProcessJob) return;
