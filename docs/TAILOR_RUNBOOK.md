@@ -41,7 +41,15 @@ TAILOR SIDECAR (npm run tailor)  builds resume with gemma3:12b → compiles PDF
 ```
 
 The single most important rule: **`jd:export` must run after the scraper.**
-If it doesn't, the app serves yesterday's JDs and today's jobs fail.
+If it doesn't, the app serves stale JDs and new jobs fail.
+
+**This is now automated.** The hourly scraper LaunchAgent
+(`com.atriveo.job-pipeline`) runs `~/job-pipeline/run-pipeline-and-export.sh`,
+which does scrape → `jd:export` in one shot, every hour. So buckets stay fresh
+automatically. If "No JD" / "short snippet" failures reappear, the auto-export
+failed — check `/tmp/atriveo_pipeline.log` for the `jd:export exit=` line, then
+run `npm run jd:export` manually to recover. The original plist is backed up at
+`~/Library/LaunchAgents/com.atriveo.job-pipeline.plist.bak-*`.
 
 ---
 
