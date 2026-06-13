@@ -1,0 +1,120 @@
+import type { Period } from "../pages/Dashboard.types";
+
+type ViewKey = "all" | "high-match" | "new-grad" | "h1b" | "top500";
+
+interface RunCard {
+  session_id: string;
+  displayAt: string;
+  count: number;
+  clickCount: number;
+  progressPct: number;
+  targetPeriod: Period | null;
+}
+
+interface Props {
+  activeView: ViewKey;
+  onViewChange: (view: ViewKey) => void;
+  viewCounts: Record<ViewKey, number>;
+  period: Period;
+  onPeriodChange: (period: Period) => void;
+  periodCounts: { hour: number; today: number; yesterday: number };
+  runCards: RunCard[];
+  selectedSession: string | null;
+  onSessionSelect: (sessionId: string | null, targetPeriod?: Period | null) => void;
+  formatRunTime: (iso?: string | null) => string;
+}
+
+const VIEWS: { key: ViewKey; label: string }[] = [
+  { key: "all", label: "All Jobs" },
+  { key: "high-match", label: "High Match" },
+  { key: "new-grad", label: "New Grad" },
+  { key: "h1b", label: "H1B Ready" },
+  { key: "top500", label: "Top 500" },
+];
+
+export default function TodayBoardSidebar({
+  activeView,
+  onViewChange,
+  viewCounts,
+  period,
+  onPeriodChange,
+  periodCounts,
+  runCards,
+  selectedSession,
+  onSessionSelect,
+  formatRunTime,
+}: Props) {
+  return (
+    <aside className="today-board-sidebar" aria-label="Views and pipeline">
+      <section className="today-board-nav-section">
+        <h2 className="today-board-nav-label">Views</h2>
+        <ul className="today-board-nav-list">
+          {VIEWS.map(({ key, label }) => (
+            <li key={key}>
+              <button
+                type="button"
+                className={`today-board-nav-item${activeView === key ? " is-active" : ""}`}
+                onClick={() => onViewChange(key)}
+              >
+                <span>{label}</span>
+                <span className="today-board-nav-count">{viewCounts[key]}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="today-board-nav-section">
+        <h2 className="today-board-nav-label">Pipeline</h2>
+        <ul className="today-board-nav-list">
+          {(["hour", "today", "yesterday"] as Period[]).map((p) => (
+            <li key={p}>
+              <button
+                type="button"
+                className={`today-board-nav-item${period === p ? " is-active" : ""}`}
+                onClick={() => onPeriodChange(p)}
+              >
+                <span>{p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}</span>
+                <span className="today-board-nav-count">
+                  {p === "hour" ? periodCounts.hour : p === "today" ? periodCounts.today : periodCounts.yesterday}
+                </span>
+              </button>
+            </li>
+          ))}
+          <li>
+            <a href="/weekly" className="today-board-nav-item today-board-nav-link">
+              <span>7 Days</span>
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      {runCards.length > 0 && (
+        <section className="today-board-nav-section today-board-sessions">
+          <h2 className="today-board-nav-label">Sessions</h2>
+          <ul className="today-board-nav-list">
+            {runCards.map((r) => {
+              const isActive = selectedSession === r.session_id;
+              return (
+                <li key={r.session_id}>
+                  <button
+                    type="button"
+                    className={`today-board-nav-item today-board-session-item${isActive ? " is-active" : ""}`}
+                    onClick={() => onSessionSelect(isActive ? null : r.session_id, r.targetPeriod)}
+                  >
+                    <span className="today-board-session-time">{formatRunTime(r.displayAt)}</span>
+                    <span className="today-board-session-meta">
+                      {r.progressPct}% · {r.count} jobs
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+    </aside>
+  );
+}
+
+export type { ViewKey };

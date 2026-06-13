@@ -63,6 +63,8 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
     outHeaders.set("Access-Control-Allow-Origin", url.origin);
     outHeaders.set("Cache-Control", "no-cache, no-transform");
     outHeaders.set("X-Accel-Buffering", "no");
+    // Pass origin NDJSON through; tailor-server emits ping events every 12s during
+    // long Ollama calls so this stream does not idle-timeout (~100s on CF).
     return new Response(res.body, { status: res.status, headers: outHeaders });
   } catch {
     return Response.json(

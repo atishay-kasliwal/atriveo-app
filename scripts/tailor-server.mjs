@@ -94,6 +94,29 @@ const RESPONSE_SCHEMA = {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const log = (...a) => console.log(`[tailor]`, ...a);
 
+/** Keep NDJSON lines flowing so Cloudflare / browser proxies don't idle-timeout (~100s). */
+const STREAM_HEARTBEAT_MS = 12_000;
+
+function makeNdjsonSender(res) {
+  res.socket?.setNoDelay(true);
+  return (obj) => {
+    if (res.writableEnded) return false;
+    const ok = res.write(JSON.stringify(obj) + "\n");
+    if (typeof res.flush === "function") res.flush();
+    return ok;
+  };
+}
+
+function startStreamHeartbeat(send) {
+  return setInterval(() => {
+    try {
+      send({ type: "ping", ts: new Date().toISOString() });
+    } catch {
+      /* stream closed */
+    }
+  }, STREAM_HEARTBEAT_MS);
+}
+
 function slug(s, max = 40) {
   return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, max) || "untitled";
 }
@@ -181,57 +204,69 @@ async function chatJSON(model, system, user, schema, budgets = [6144, 9216], onL
       options: { temperature: 0.2, num_predict: budget, num_ctx: 16384 },
     };
     const t0 = Date.now();
-    const res = await fetch(OLLAMA, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    if (!res.ok) {
-      const errText = await res.text();
-      onLog?.("error", `Ollama HTTP ${res.status}: ${errText.slice(0, 200)}`);
-      throw new Error(`Ollama ${res.status}: ${errText}`);
-    }
-    onLog?.("result", "Ollama stream opened — waiting for model response…");
-
     let content = "";
     let thinkBuf = "";
     let thinkLineEmitted = 0;
     let doneReason = null;
     let evalCount = null;
-    let lastHeartbeat = Date.now();
-    const decoder = new TextDecoder();
-    let buffer = "";
 
-    const emitThinkLines = () => {
-      if (!onLog) return;
-      const lines = thinkBuf.split("\n");
-      while (thinkLineEmitted < lines.length - 1) {
-        const line = lines[thinkLineEmitted].trim();
-        if (line) onLog("think", line);
-        thinkLineEmitted += 1;
+    // Interval keepalive: reader.read() can block for minutes during thinking with no
+    // Ollama chunks, which starves the NDJSON stream and trips proxy idle timeouts.
+    const ollamaKeepalive = onLog
+      ? setInterval(() => {
+          const elapsed = ((Date.now() - t0) / 1000).toFixed(0);
+          onLog(
+            "step",
+            `Ollama working… ${elapsed}s elapsed${content ? ` · JSON ${content.length.toLocaleString()} chars` : ""}${thinkBuf ? ` · thinking ${thinkBuf.length.toLocaleString()} chars` : ""}`,
+          );
+        }, STREAM_HEARTBEAT_MS)
+      : null;
+
+    let res;
+    try {
+      res = await fetch(OLLAMA, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (!res.ok) {
+        const errText = await res.text();
+        onLog?.("error", `Ollama HTTP ${res.status}: ${errText.slice(0, 200)}`);
+        throw new Error(`Ollama ${res.status}: ${errText}`);
       }
-    };
+      onLog?.("result", "Ollama stream opened — waiting for model response…");
 
-    const reader = res.body.getReader();
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const parts = buffer.split("\n");
-      buffer = parts.pop() || "";
-      for (const line of parts) {
-        if (!line.trim()) continue;
-        let chunk;
-        try { chunk = JSON.parse(line); } catch { continue; }
-        if (chunk.message?.thinking) {
-          thinkBuf += chunk.message.thinking;
-          emitThinkLines();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      const emitThinkLines = () => {
+        if (!onLog) return;
+        const lines = thinkBuf.split("\n");
+        while (thinkLineEmitted < lines.length - 1) {
+          const line = lines[thinkLineEmitted].trim();
+          if (line) onLog("think", line);
+          thinkLineEmitted += 1;
         }
-        if (chunk.message?.content) content += chunk.message.content;
-        if (chunk.done_reason) doneReason = chunk.done_reason;
-        if (chunk.eval_count != null) evalCount = chunk.eval_count;
+      };
+
+      const reader = res.body.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n");
+        buffer = parts.pop() || "";
+        for (const line of parts) {
+          if (!line.trim()) continue;
+          let chunk;
+          try { chunk = JSON.parse(line); } catch { continue; }
+          if (chunk.message?.thinking) {
+            thinkBuf += chunk.message.thinking;
+            emitThinkLines();
+          }
+          if (chunk.message?.content) content += chunk.message.content;
+          if (chunk.done_reason) doneReason = chunk.done_reason;
+          if (chunk.eval_count != null) evalCount = chunk.eval_count;
+        }
       }
-      const elapsed = ((Date.now() - t0) / 1000).toFixed(0);
-      if (onLog && Date.now() - lastHeartbeat > 8000) {
-        onLog("step", `Ollama generating… ${elapsed}s · JSON ${content.length.toLocaleString()} chars received${thinkBuf ? ` · thinking ${thinkBuf.length.toLocaleString()} chars` : ""}`);
-        lastHeartbeat = Date.now();
-      }
+    } finally {
+      if (ollamaKeepalive) clearInterval(ollamaKeepalive);
     }
     if (thinkBuf && thinkLineEmitted < thinkBuf.split("\n").length) {
       const tail = thinkBuf.split("\n").slice(thinkLineEmitted).join("\n").trim();
@@ -647,7 +682,8 @@ const server = http.createServer(async (req, res) => {
     req.on("end", async () => {
       // Stream newline-delimited JSON events so the frontend shows live, per-job
       // progress instead of waiting minutes for one big response.
-      const send = (obj) => res.write(JSON.stringify(obj) + "\n");
+      const send = makeNdjsonSender(res);
+      let heartbeat = null;
       try {
         const { jobs, resumeText, model } = JSON.parse(raw);
         if (!Array.isArray(jobs) || !jobs.length) throw new Error("no jobs");
@@ -677,6 +713,7 @@ const server = http.createServer(async (req, res) => {
         runLog("think", `Output date folder · ${dateDir} · ${existing.length} existing run(s) today`);
         send({ type: "start", total: jobs.length, dateDir, model: useModel });
         runLog("result", `Stream started · model=${useModel}`);
+        heartbeat = startStreamHeartbeat(send);
         log(`tailoring ${jobs.length} job(s) with ${useModel} → ${dateDir}`);
 
         for (let i = 0; i < jobs.length; i++) {
@@ -702,6 +739,8 @@ const server = http.createServer(async (req, res) => {
         // header may already be sent; emit an error event then close
         try { send({ type: "fatal", error: String(e.message || e) }); res.end(); }
         catch { res.writeHead(400, { "Content-Type": "application/json" }); res.end(JSON.stringify({ ok: false, error: String(e.message || e) })); }
+      } finally {
+        if (heartbeat) clearInterval(heartbeat);
       }
     });
     return;

@@ -48,6 +48,42 @@ function locationShort(loc?: string | null): string {
   return parts.length >= 2 ? parts.slice(-2).join(",").trim() : loc;
 }
 
+function scoreTrend(careerOps: ReturnType<typeof careerOpsRating>): "up" | "down" | "flat" {
+  const { atsPct, fitPct } = careerOps;
+  if (atsPct == null || fitPct == null) return "flat";
+  if (fitPct > atsPct + 5) return "up";
+  if (fitPct < atsPct - 5) return "down";
+  return "flat";
+}
+
+function compLabel(value: number | null | undefined): string {
+  const score = Number(value);
+  if (!Number.isFinite(score) || score <= 0) return "Low";
+  if (score <= 3) return "Med";
+  return "High";
+}
+
+function ScoreCell({ job }: { job: Job }) {
+  const careerOps = careerOpsRating(job);
+  const trend = scoreTrend(careerOps);
+  const trendSymbol = trend === "up" ? "↑" : trend === "down" ? "↓" : "→";
+
+  return (
+    <div className="job-table-score-cell">
+      <div className="job-table-score-top">
+        <span className={`job-table-score-badge job-table-score-badge--${careerOps.key}`}>{careerOps.score}</span>
+        <span className={`job-table-score-trend job-table-score-trend--${trend}`} title="Fit vs ATS">{trendSymbol}</span>
+      </div>
+      <div className="job-table-score-bar" aria-hidden>
+        <span
+          className={`job-table-score-bar-fill job-table-score-bar-fill--${careerOps.key}`}
+          style={{ width: `${careerOps.score}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 interface RowProps {
   job: Job;
   index: number;
@@ -114,7 +150,7 @@ function JobTableRow({
       </td>
       <td className="job-table-num">{nested ? "" : index}</td>
       <td className="job-table-score">
-        <span className={`job-table-score-badge job-table-score-badge--${careerOps.key}`}>{careerOps.score}</span>
+        <ScoreCell job={job} />
       </td>
       <td className="job-table-job">
         {showCompany ? (
@@ -133,10 +169,13 @@ function JobTableRow({
         )}
       </td>
       <td className="job-table-match">
-        <span className="job-table-stars">{stars}</span>
+        <span className="job-table-stars" aria-label={`Rating ${stars.replace(/☆/g, "").length} of 5`}>{stars}</span>
         <span className={`job-table-match-label job-table-match-label--${careerOps.key}`}>{careerOps.label}</span>
       </td>
       <td className="job-table-loc" title={job.location}>{locationShort(job.location)}</td>
+      <td className="job-table-comp" title={`Competition score: ${job.competition_score ?? 0}`}>
+        {compLabel(job.competition_score)}
+      </td>
       <td className="job-table-level">{job.level || "—"}</td>
       <td className="job-table-time">{fmtTime(job.batch_time || job.date_posted, job.scraped_date)}</td>
       <td className="job-table-actions">
@@ -233,7 +272,7 @@ function CompanyGroupRow({
       </td>
       <td className="job-table-num">{index}</td>
       <td className="job-table-score">
-        <span className={`job-table-score-badge job-table-score-badge--${topOps.key}`}>{group.bestScore}</span>
+        <ScoreCell job={top} />
       </td>
       <td className="job-table-job">
         <div className="job-table-group-head">
@@ -256,6 +295,9 @@ function CompanyGroupRow({
         <span className={`job-table-match-label job-table-match-label--${topOps.key}`}>{topOps.label}</span>
       </td>
       <td className="job-table-loc" title={top.location}>{locationShort(top.location)}</td>
+      <td className="job-table-comp" title={`Competition score: ${top.competition_score ?? 0}`}>
+        {compLabel(top.competition_score)}
+      </td>
       <td className="job-table-level">{top.level || "—"}</td>
       <td className="job-table-time">{fmtTime(top.batch_time || top.date_posted, top.scraped_date)}</td>
       <td className="job-table-actions" onClick={(e) => e.stopPropagation()}>
@@ -292,6 +334,7 @@ interface Props {
   onGroupSelectAll?: (jobs: Job[]) => void;
   isGroupFullySelected?: (jobs: Job[]) => boolean;
   groupByCompany?: boolean;
+  variant?: "default" | "board";
 }
 
 export default function JobTable({
@@ -305,6 +348,7 @@ export default function JobTable({
   onGroupSelectAll,
   isGroupFullySelected,
   groupByCompany = true,
+  variant = "default",
 }: Props) {
   const groups = useMemo(
     () => (groupByCompany ? groupJobsByCompany(jobs) : []),
@@ -321,19 +365,23 @@ export default function JobTable({
     });
   };
 
+  const wrapClass = variant === "board" ? "job-table-wrap job-table-wrap--board" : "job-table-wrap";
+  const tableClass = variant === "board" ? "job-table job-table--board" : "job-table";
+
   return (
-    <div className="job-table-wrap">
-      <table className="job-table">
+    <div className={wrapClass}>
+      <table className={tableClass}>
         <thead>
           <tr>
             <th aria-label="Select" />
             <th>#</th>
             <th>Score</th>
-            <th>Job</th>
-            <th>Match</th>
+            <th>{variant === "board" ? "Role & Company" : "Job"}</th>
+            <th>{variant === "board" ? "Rating" : "Match"}</th>
             <th>Location</th>
+            <th>Comp</th>
             <th>Level</th>
-            <th>Time</th>
+            <th>{variant === "board" ? "Posted" : "Time"}</th>
             <th>Actions</th>
           </tr>
         </thead>

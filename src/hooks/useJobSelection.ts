@@ -13,6 +13,29 @@ function tailorUnavailableMessage(): string {
   return "Tailor server not running. In a second terminal run: cd ~/atriveo-app && npm run tailor";
 }
 
+function isTailorStreamNetworkError(message: string): boolean {
+  const m = message.toLowerCase();
+  return (
+    m.includes("failed to fetch")
+    || m.includes("network error")
+    || m.includes("networkerror")
+    || m.includes("load failed")
+    || m.includes("connection reset")
+    || m.includes("aborted")
+  );
+}
+
+function tailorStreamErrorMessage(raw: string): string {
+  if (isTailorStreamNetworkError(raw)) {
+    if (!isLocalTailorHost()) {
+      return "Connection dropped during tailoring — the relay likely idle-timed out while Ollama was thinking (often ~2 min). Restart the sidecar (npm run tailor:prod), redeploy if needed, and retry. The job may still have finished on your Mac; check the output folder.";
+    }
+    return "Connection dropped during tailoring while waiting on Ollama. Retry the run; if it keeps failing, restart npm run tailor.";
+  }
+  if (raw.includes("Failed to fetch")) return tailorUnavailableMessage();
+  return raw;
+}
+
 async function assertTailorServerReady(): Promise<void> {
   const base = getTailorServerBase();
   try {
@@ -104,6 +127,7 @@ const PHASE_LOG: Record<TailorJobState["phase"], string> = {
 };
 
 function applyTailorEvent(prev: TailorRunState, event: TailorStreamEvent): TailorRunState {
+  if (event.type === "ping") return prev;
   const runLogs = prev.runLogs ?? [];
   if (event.type === "start") {
     return {
@@ -366,7 +390,7 @@ export function useJobSelection(jobs: Job[]) {
       });
     } catch (e) {
       const msg = (e as Error).message || String(e);
-      const fatal = msg.includes("Failed to fetch") ? tailorUnavailableMessage() : msg;
+      const fatal = tailorStreamErrorMessage(msg);
       setTailorRun((prev) => ({
         active: false,
         total: prev?.total ?? 0,

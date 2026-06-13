@@ -44,5 +44,6 @@ export type TailorStreamEvent =
   | { type: "start"; total: number; dateDir?: string; model?: string }
   | { type: "job"; index: number; phase: TailorPhase; company?: string; role?: string; status?: string; ats?: string; folder?: string; dir?: string; pdfPath?: string; pdf?: boolean; error?: string; headerTitle?: string }
   | { type: "log"; index: number; kind: TailorLogKind; text: string; step?: number; elapsedMs?: number; ts?: string }
+  | { type: "ping"; ts?: string }
   | { type: "end" }
   | { type: "fatal"; error: string };

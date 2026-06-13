@@ -1,9 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import AppHeader from "../components/AppHeader";
 import BulkJobAnalysisPanel from "../components/BulkJobAnalysisPanel";
 import BulkJobCopyBar from "../components/BulkJobCopyBar";
+import FeedTableToolbar from "../components/FeedTableToolbar";
 import TailorPanel from "../components/TailorPanel";
+import TodayBoardSidebar, { type ViewKey } from "../components/TodayBoardSidebar";
 import { useApplyClickLog } from "../hooks/useApplyClickLog";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
@@ -13,9 +15,8 @@ import type { Job, RunEntry } from "../types";
 import JobTable from "../components/JobTable";
 import JobCard from "../components/JobCard";
 import { careerOpsRating, jobBoardLabel } from "../utils/jobPresentation";
+import type { Period, SortBy } from "./Dashboard.types";
 
-type Period = "hour" | "today" | "yesterday";
-type SortBy = "score" | "time" | "company" | "ats" | "fit";
 type LevelFilter = "all" | "New Grad" | "Entry" | "Mid";
 type RunCard = RunEntry & {
   count: number;
@@ -100,6 +101,16 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [locationFilter, setLocationFilter] = useState<string>("all");
   const [showTodayApplications, setShowTodayApplications] = useState(false);
+  const [activeView, setActiveView] = useState<ViewKey>("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [shareMessage, setShareMessage] = useState("");
+
+  const applyView = useCallback((view: ViewKey) => {
+    setActiveView(view);
+    setLevelFilter(view === "new-grad" ? "New Grad" : "all");
+    setH1bFilter(view === "h1b");
+    setTop500Filter(view === "top500");
+  }, []);
 
   const handlePeriodChange = (nextPeriod: Period, syncPath = true) => {
     setPeriod(nextPeriod);
@@ -214,8 +225,11 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     }
     jobs = jobs.filter((j) => !isExcluded(j));
     jobs = jobs.filter((j) => !j.job_url || !applyClickUrlSet.has(j.job_url));
+    if (activeView === "high-match") {
+      jobs = jobs.filter((j) => careerOpsRating(j).score >= 75);
+    }
     return jobs;
-  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, applyClickUrlSet]);
+  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, applyClickUrlSet, activeView]);
 
   const filtered = useMemo(() => {
     let jobs = [...visibleJobs];
@@ -345,12 +359,303 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     setTop500Filter(false);
     setTermFilter("all");
     setLocationFilter("all");
+    setActiveView("all");
   };
+
+  const isTodayBoard = period === "today";
+
+  const catalogJobs = useMemo(() => {
+    let jobs = [...baseJobs];
+    jobs = jobs.filter((j) => !isExcluded(j));
+    jobs = jobs.filter((j) => !j.job_url || !applyClickUrlSet.has(j.job_url));
+    return jobs;
+  }, [baseJobs, isExcluded, applyClickUrlSet]);
+
+  const viewCounts = useMemo(
+    () => ({
+      all: catalogJobs.length,
+      "high-match": catalogJobs.filter((j) => careerOpsRating(j).score >= 75).length,
+      "new-grad": catalogJobs.filter((j) => j.level === "New Grad").length,
+      h1b: catalogJobs.filter((j) => (j.ats_score ?? j.score_pct ?? 0) >= 60).length,
+      top500: catalogJobs.filter((j) => isTop500(j.company || "")).length,
+    }),
+    [catalogJobs],
+  );
+
+  const uniqueCompanies = useMemo(
+    () => new Set(displayedJobs.map((j) => j.company).filter(Boolean)).size,
+    [displayedJobs],
+  );
+
+  const highMatchCount = useMemo(
+    () => displayedJobs.filter((j) => careerOpsRating(j).score >= 75).length,
+    [displayedJobs],
+  );
+
+  const handleShare = () => {
+    const url = `${window.location.origin}/today`;
+    navigator.clipboard.writeText(url).then(() => {
+      setShareMessage("Copied!");
+      setTimeout(() => setShareMessage(""), 1500);
+    });
+  };
+
+  const handleSessionSelect = (sessionId: string | null, targetPeriod?: Period | null) => {
+    if (!sessionId) {
+      setSelectedSession(null);
+      return;
+    }
+    setSelectedSession(sessionId);
+    if (targetPeriod) handlePeriodChange(targetPeriod);
+    setTermFilter("all");
+  };
+
+  const filterBar = (
+    <div className="filter-bar">
+      <div className="search-wrap">
+        <span className="search-icon">⌕</span>
+        <input
+          className="search-input"
+          type="search"
+          placeholder="Search jobs, companies, locations…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+      <div className="level-chips">
+        {LEVEL_FILTERS.map((l) => (
+          <button
+            key={l}
+            className={`chip${levelFilter === l ? " active" : ""}`}
+            onClick={() => setLevelFilter(l)}
+          >
+            <span>{l === "all" ? "All" : l}</span>
+            <span className="chip-count">{levelCounts[l]}</span>
+          </button>
+        ))}
+        <button
+          className={`chip-toggle${h1bFilter ? " active" : ""}`}
+          onClick={() => setH1bFilter((v) => !v)}
+        >
+          H1B ✓
+        </button>
+        <button
+          className={`chip-toggle chip-toggle-purple${top500Filter ? " active" : ""}`}
+          onClick={() => setTop500Filter((v) => !v)}
+        >
+          Top 500
+        </button>
+      </div>
+      <select
+        className="term-select"
+        value={termFilter}
+        onChange={(e) => setTermFilter(e.target.value)}
+      >
+        <option value="all">All search terms</option>
+        {searchTerms.map((t) => (
+          <option key={t} value={t}>{t}</option>
+        ))}
+      </select>
+      {hasActiveFilters && (
+        <button className="clear-filters-btn" onClick={clearFilters}>
+          Clear {activeFilterCount} filter{activeFilterCount !== 1 ? "s" : ""}
+        </button>
+      )}
+    </div>
+  );
+
+  const jobListContent = (
+    <>
+      {loading ? (
+        <div className="state-msg"><div className="icon">⏳</div>Loading…</div>
+      ) : filtered.length === 0 ? (
+        <div className="state-msg"><div className="icon">🔍</div>No jobs found</div>
+      ) : (
+        <JobTable
+          jobs={filtered}
+          getRecord={getRecord}
+          onAddToTracker={recordClick}
+          onApplyClick={recordApplyClick}
+          onExcludeCompany={excludeCompany}
+          isJobSelected={jobSelection.isJobSelected}
+          onSelectionToggle={jobSelection.toggleJobSelection}
+          onGroupSelectAll={jobSelection.toggleGroupSelection}
+          isGroupFullySelected={jobSelection.isGroupFullySelected}
+          groupByCompany
+          variant={isTodayBoard ? "board" : "default"}
+        />
+      )}
+      {applyClickTableRows.length > 0 && (
+        <section className="apply-click-log" aria-label="Apply button click log">
+          <div className="apply-click-log-head">
+            <div>
+              <span className="apply-click-log-kicker">Apply Log</span>
+              <h2>Opened from Apply</h2>
+              <p>Review opened jobs and add the strong ones to Atriveo tracker.</p>
+            </div>
+            <strong>{todayApplyClicks.length} today</strong>
+          </div>
+          <div className="apply-click-table-wrap">
+            <table className="apply-click-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Time</th>
+                  <th>Company</th>
+                  <th>Role</th>
+                  <th>Board</th>
+                  <th>Clicks</th>
+                  <th>Tracker</th>
+                  <th>Link</th>
+                </tr>
+              </thead>
+              <tbody>
+                {applyClickTableRows.map((record, index) => {
+                  const trackerRecord = getRecord(record.jobUrl);
+                  const trackerStatus = trackerRecord?.trackerSyncStatus ?? null;
+                  const isSynced = trackerStatus === "synced" || trackerStatus === "duplicate";
+                  const isSending = trackerStatus === "pending";
+                  const isRetryable = trackerStatus === "error" || trackerStatus === "not_configured" || trackerStatus === "skipped";
+                  const trackerCopy = isSending
+                    ? "Sending…"
+                    : isSynced
+                      ? "Synced"
+                      : isRetryable
+                        ? "Retry"
+                        : trackerRecord
+                          ? "Sync"
+                          : "Tracker +";
+                  const trackerTone = isSending
+                    ? " pending"
+                    : isSynced
+                      ? " synced"
+                      : isRetryable
+                        ? " retry"
+                        : "";
+                  return (
+                    <tr key={record.jobUrl}>
+                      <td className="apply-click-index">{index + 1}</td>
+                      <td>{formatRunTime(record.clickedAt)}</td>
+                      <td>{record.company}</td>
+                      <td>{record.title}</td>
+                      <td>{jobBoardLabel(record.site, record.jobUrl)}</td>
+                      <td>{record.clicks}</td>
+                      <td>
+                        <button
+                          type="button"
+                          className={`apply-click-tracker-btn${trackerTone}`}
+                          disabled={isSending || isSynced}
+                          title={trackerRecord?.trackerSyncMessage || "Add this job to Atriveo tracker"}
+                          onClick={() => recordClick(record.jobUrl, record.title, record.company, { location: record.location })}
+                        >
+                          {trackerCopy}
+                        </button>
+                      </td>
+                      <td>
+                        <a href={record.jobUrl} target="_blank" rel="noopener">Open ↗</a>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+    </>
+  );
 
   return (
     <div>
       <AppHeader />
 
+      {isTodayBoard ? (
+        <div className="wrapper page-shell page-shell-wide today-board-page">
+          <div className="today-board-shell">
+            <TodayBoardSidebar
+              activeView={activeView}
+              onViewChange={applyView}
+              viewCounts={viewCounts}
+              period={period}
+              onPeriodChange={(p) => {
+                handlePeriodChange(p);
+                setTermFilter("all");
+                setSelectedSession(null);
+              }}
+              periodCounts={{ hour: hourJobs.length, today: todayJobs.length, yesterday: yesterdayJobs.length }}
+              runCards={runCards}
+              selectedSession={selectedSession}
+              onSessionSelect={handleSessionSelect}
+              formatRunTime={formatRunTime}
+            />
+
+            <div className="today-board-main">
+              <div className="today-board-metrics kpi-row">
+                <div className="kpi-card blue">
+                  <div className="kpi-value">{displayedJobs.length}</div>
+                  <div className="kpi-label">Total Roles</div>
+                  <div className="kpi-sub">matching current view</div>
+                </div>
+                <div className="kpi-card purple">
+                  <div className="kpi-value">{uniqueCompanies}</div>
+                  <div className="kpi-label">Companies</div>
+                  <div className="kpi-sub">unique employers</div>
+                </div>
+                <div className="kpi-card emerald">
+                  <div className="kpi-value">{highMatchCount}</div>
+                  <div className="kpi-label">High Match</div>
+                  <div className="kpi-sub">CareerOps 75+</div>
+                </div>
+                <div className="kpi-card orange">
+                  <div className="kpi-value">{ngCount}</div>
+                  <div className="kpi-label">New Grad</div>
+                  <div className="kpi-sub">entry-level roles</div>
+                </div>
+                <div className="kpi-card teal">
+                  <div className="kpi-value">{todayApplicationRows.length}</div>
+                  <div className="kpi-label">Applied Today</div>
+                  <div className="kpi-sub">tracker activity</div>
+                </div>
+              </div>
+
+              <FeedTableToolbar
+                jobCount={displayedJobs.length}
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+                query={query}
+                onQueryChange={setQuery}
+                onFilterToggle={() => setFiltersOpen((v) => !v)}
+                filtersOpen={filtersOpen}
+                onShare={handleShare}
+                shareMessage={shareMessage}
+              />
+
+              {filtersOpen && filterBar}
+
+              <BulkJobCopyBar
+                selectedCount={jobSelection.selectedCount}
+                visibleCount={displayedJobs.length}
+                copyMessage={jobSelection.copyMessage}
+                analysisMessage={jobSelection.analysisMessage}
+                onCopy={jobSelection.copySelectedJobs}
+                onAnalyze={jobSelection.analyzeSelectedJobDescriptions}
+                onTailor={jobSelection.tailorSelectedJobs}
+                tailoring={jobSelection.tailoring}
+                onSelectVisible={jobSelection.selectVisibleJobs}
+                onClear={jobSelection.clearSelectedJobs}
+              />
+              <TailorPanel
+                run={jobSelection.tailorRun}
+                onOpenPath={jobSelection.openTailorPath}
+                onDismiss={jobSelection.clearTailorRun}
+              />
+              <BulkJobAnalysisPanel analysis={jobSelection.analysis} />
+
+              {jobListContent}
+            </div>
+          </div>
+        </div>
+      ) : (
       <div className="wrapper page-shell page-shell-wide dashboard-shell">
         <aside className="dashboard-info-rail" aria-label="Dashboard context">
           <section className={`today-apps-panel${showTodayApplications ? " is-open" : ""}`} aria-label="Today applications">
@@ -494,58 +799,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
 
         <div className="dashboard-layout">
           <div className="right-panel">
-            {/* Filters */}
-            <div className="filter-bar">
-              <div className="search-wrap">
-                <span className="search-icon">⌕</span>
-                <input
-                  className="search-input"
-                  type="search"
-                  placeholder="Search jobs, companies, locations…"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-              </div>
-              <div className="level-chips">
-                {LEVEL_FILTERS.map((l) => (
-                  <button
-                    key={l}
-                    className={`chip${levelFilter === l ? " active" : ""}`}
-                    onClick={() => setLevelFilter(l)}
-                  >
-                    <span>{l === "all" ? "All" : l}</span>
-                    <span className="chip-count">{levelCounts[l]}</span>
-                  </button>
-                ))}
-                <button
-                  className={`chip-toggle${h1bFilter ? " active" : ""}`}
-                  onClick={() => setH1bFilter((v) => !v)}
-                >
-                  H1B ✓
-                </button>
-                <button
-                  className={`chip-toggle chip-toggle-purple${top500Filter ? " active" : ""}`}
-                  onClick={() => setTop500Filter((v) => !v)}
-                >
-                  Top 500
-                </button>
-              </div>
-              <select
-                className="term-select"
-                value={termFilter}
-                onChange={(e) => setTermFilter(e.target.value)}
-              >
-                <option value="all">All search terms</option>
-                {searchTerms.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-              {hasActiveFilters && (
-                <button className="clear-filters-btn" onClick={clearFilters}>
-                  Clear {activeFilterCount} filter{activeFilterCount !== 1 ? "s" : ""}
-                </button>
-              )}
-            </div>
+            {filterBar}
 
             <BulkJobCopyBar
               selectedCount={jobSelection.selectedCount}
@@ -634,107 +888,12 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 ))}
               </div>
             ) : (
-              <>
-                {loading ? (
-                  <div className="state-msg"><div className="icon">⏳</div>Loading…</div>
-                ) : filtered.length === 0 ? (
-                  <div className="state-msg"><div className="icon">🔍</div>No jobs found</div>
-                ) : (
-                  <JobTable
-                    jobs={filtered}
-                    getRecord={getRecord}
-                    onAddToTracker={recordClick}
-                    onApplyClick={recordApplyClick}
-                    onExcludeCompany={excludeCompany}
-                    isJobSelected={jobSelection.isJobSelected}
-                    onSelectionToggle={jobSelection.toggleJobSelection}
-                    onGroupSelectAll={jobSelection.toggleGroupSelection}
-                    isGroupFullySelected={jobSelection.isGroupFullySelected}
-                    groupByCompany
-                  />
-                )}
-                {applyClickTableRows.length > 0 && (
-                  <section className="apply-click-log" aria-label="Apply button click log">
-                    <div className="apply-click-log-head">
-                      <div>
-                        <span className="apply-click-log-kicker">Apply Log</span>
-                        <h2>Opened from Apply</h2>
-                        <p>Review opened jobs and add the strong ones to Atriveo tracker.</p>
-                      </div>
-                      <strong>{todayApplyClicks.length} today</strong>
-                    </div>
-                    <div className="apply-click-table-wrap">
-                      <table className="apply-click-table">
-                        <thead>
-                          <tr>
-                            <th>#</th>
-                            <th>Time</th>
-                            <th>Company</th>
-                            <th>Role</th>
-                            <th>Board</th>
-                            <th>Clicks</th>
-                            <th>Tracker</th>
-                            <th>Link</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {applyClickTableRows.map((record, index) => {
-                            const trackerRecord = getRecord(record.jobUrl);
-                            const trackerStatus = trackerRecord?.trackerSyncStatus ?? null;
-                            const isSynced = trackerStatus === "synced" || trackerStatus === "duplicate";
-                            const isSending = trackerStatus === "pending";
-                            const isRetryable = trackerStatus === "error" || trackerStatus === "not_configured" || trackerStatus === "skipped";
-                            const trackerCopy = isSending
-                              ? "Sending…"
-                              : isSynced
-                                ? "Synced"
-                                : isRetryable
-                                  ? "Retry"
-                                  : trackerRecord
-                                    ? "Sync"
-                                    : "Tracker +";
-                            const trackerTone = isSending
-                              ? " pending"
-                              : isSynced
-                                ? " synced"
-                                : isRetryable
-                                  ? " retry"
-                                  : "";
-                            return (
-                              <tr key={record.jobUrl}>
-                                <td className="apply-click-index">{index + 1}</td>
-                                <td>{formatRunTime(record.clickedAt)}</td>
-                                <td>{record.company}</td>
-                                <td>{record.title}</td>
-                                <td>{jobBoardLabel(record.site, record.jobUrl)}</td>
-                                <td>{record.clicks}</td>
-                                <td>
-                                  <button
-                                    type="button"
-                                    className={`apply-click-tracker-btn${trackerTone}`}
-                                    disabled={isSending || isSynced}
-                                    title={trackerRecord?.trackerSyncMessage || "Add this job to Atriveo tracker"}
-                                    onClick={() => recordClick(record.jobUrl, record.title, record.company, { location: record.location })}
-                                  >
-                                    {trackerCopy}
-                                  </button>
-                                </td>
-                                <td>
-                                  <a href={record.jobUrl} target="_blank" rel="noopener">Open ↗</a>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </section>
-                )}
-              </>
+              jobListContent
             )}
           </div>
         </div>
       </div>
+      )}
 
       <footer>
         <div className="wrapper">
