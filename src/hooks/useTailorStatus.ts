@@ -52,6 +52,22 @@ export function useTailorStatus() {
     setRecords(loaded);
   }, [loading, uid]);
 
+  // Keep tailor records in sync when another tab updates localStorage.
+  useEffect(() => {
+    const storageKey = KEY(uid);
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== storageKey || !event.newValue) return;
+      try {
+        const parsed = JSON.parse(event.newValue) as Record<string, TailorRecord>;
+        if (parsed && typeof parsed === "object") setRecords(parsed);
+      } catch {
+        /* ignore */
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [uid]);
+
   const upsertRecord = useCallback((record: TailorRecord) => {
     setRecords((prev) => {
       const next = { ...prev, [record.jobKey]: record };

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AppHeader from "../components/AppHeader";
 import BulkJobAnalysisPanel from "../components/BulkJobAnalysisPanel";
@@ -15,6 +15,7 @@ import { useTailorQueue } from "../hooks/useTailorQueue";
 import { useTailorStatus } from "../hooks/useTailorStatus";
 import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
+import type { TailorRecord } from "../types/tailorQueue";
 import type { SavedJobSource } from "../hooks/useApplyClickLog";
 import JobTable from "../components/JobTable";
 import JobCard from "../components/JobCard";
@@ -25,7 +26,7 @@ import { defaultSortDir, sortJobs } from "../utils/jobSort";
 import { jobDismissKey } from "../utils/jobCopy";
 import { runSingleTailorJob, openTailorPath } from "../utils/tailorRun";
 import { buildTailorStreamHandler } from "../utils/tailorStreamHandler";
-import { outcomeFromServerStatus } from "../utils/tailorOutcome";
+import { outcomeFromServerStatus, resolveTailorOutcome } from "../utils/tailorOutcome";
 import { tailorPhaseProgress } from "../utils/tailorProgress";
 import { estDateKey } from "../utils/estDate";
 
@@ -50,6 +51,45 @@ const LOCATION_FILTERS = [
   { key: "NC",       match: (loc: string) => loc.includes(", nc") || loc.includes("north carolina") },
 ];
 const LEVEL_FILTERS: LevelFilter[] = ["all", "New Grad", "Entry", "Mid"];
+
+// Filter the feed by tailor outcome. The many TailorOutcomeKind values are
+// grouped into a few user-friendly buckets that match what the table shows.
+type TailorFilter = "all" | "done" | "error" | "skip" | "no-jd" | "untailored";
+const TAILOR_FILTERS: { key: TailorFilter; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "done", label: "Done" },
+  { key: "error", label: "Error" },
+  { key: "skip", label: "Skip" },
+  { key: "no-jd", label: "No JD" },
+  { key: "untailored", label: "Not tailored" },
+];
+
+// Map a resolved outcome (+ whether a record exists) to a filter bucket.
+function tailorFilterBucket(record: TailorRecord | null): TailorFilter {
+  if (!record || record.status === "none") return "untailored";
+  const outcome = resolveTailorOutcome(record);
+  switch (outcome) {
+    case "done":
+      return "done";
+    case "skip":
+      return "skip";
+    case "no-jd":
+      return "no-jd";
+    case "running":
+    case "queued":
+      return "untailored"; // in-flight: not a finished result yet
+    // every genuine failure bucket → "error"
+    case "compile":
+    case "ai":
+    case "offline":
+    case "timeout":
+    case "missing":
+    case "no-resume":
+    case "error":
+    default:
+      return "error";
+  }
+}
 
 interface DashboardProps {
   initialPeriod?: Period;
@@ -83,7 +123,12 @@ function formatRunTime(iso?: string | null): string {
   const dateEt = date.toLocaleString("en-US", { timeZone: tz });
   const sameDay = nowEt.slice(0, 10) === dateEt.slice(0, 10);
   if (sameDay) {
-    return date.toLocaleTimeString("en-US", { timeZone: tz, hour: "numeric", minute: "2-digit" });
+    return date.toLocaleTimeString("en-US", {
+      timeZone: tz,
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+    });
   }
   return date.toLocaleString("en-US", {
     timeZone: tz,
@@ -91,6 +136,7 @@ function formatRunTime(iso?: string | null): string {
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    second: "2-digit",
   });
 }
 
@@ -110,6 +156,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const [sortBy, setSortBy] = useState<SortBy>(initialSort);
   const [sortDir, setSortDir] = useState<SortDir>(() => defaultSortDir(initialSort));
   const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
+  const [tailorFilter, setTailorFilter] = useState<TailorFilter>("all");
   const [h1bFilter, setH1bFilter] = useState(false);
   const [top500Filter, setTop500Filter] = useState(false);
   const [termFilter, setTermFilter] = useState("all");
@@ -121,6 +168,8 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const [activeView, setActiveView] = useState<ViewKey>("all");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
+  const [feedRefreshNotice, setFeedRefreshNotice] = useState("");
+  const hourSessionRef = useRef<string | null>(null);
 
   const applyView = useCallback((view: ViewKey) => {
     setActiveView(view);
@@ -141,33 +190,66 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     }
   };
 
+  const refreshJobFeeds = useCallback(async (opts: { initial?: boolean } = {}) => {
+    const [hour, today, yesterday, runs] = await Promise.all([
+      fetch("/api/jobs?type=hour").then((r) => r.json()).catch(() => []),
+      fetch("/api/jobs?type=today").then((r) => r.json()).catch(() => []),
+      fetch("/api/jobs?type=yesterday").then((r) => r.json()).catch(() => []),
+      fetch("/api/jobs?type=runs").then((r) => r.json()).catch(() => []),
+    ]);
+    const hourList = Array.isArray(hour) ? hour as Job[] : [];
+    const nextSession = hourList[0]?.session_id ?? null;
+    if (!opts.initial && nextSession && hourSessionRef.current && nextSession !== hourSessionRef.current) {
+      const label = formatRunTime(hourList[0]?.batch_time || nextSession);
+      setFeedRefreshNotice(`New hourly batch loaded (${label} ET) — ${hourList.length} jobs`);
+      window.setTimeout(() => setFeedRefreshNotice(""), 12_000);
+    }
+    hourSessionRef.current = nextSession;
+    setHourJobs(hourList);
+    setTodayJobs(Array.isArray(today) ? today : []);
+    setYesterdayJobs(Array.isArray(yesterday) ? yesterday : []);
+    setRunHistory(Array.isArray(runs) ? runs : []);
+    return hourList;
+  }, []);
+
   useEffect(() => {
+    let cancelled = false;
     async function load() {
       setLoading(true);
-      const [hour, today, yesterday, runs] = await Promise.all([
-        fetch("/api/jobs?type=hour").then((r) => r.json()).catch(() => []),
-        fetch("/api/jobs?type=today").then((r) => r.json()).catch(() => []),
-        fetch("/api/jobs?type=yesterday").then((r) => r.json()).catch(() => []),
-        fetch("/api/jobs?type=runs").then((r) => r.json()).catch(() => []),
-      ]);
-      setHourJobs(hour);
-      setTodayJobs(today);
-      setYesterdayJobs(yesterday);
-      setRunHistory(runs);
-      setLoading(false);
+      await refreshJobFeeds({ initial: true });
+      if (!cancelled) setLoading(false);
     }
-    load();
-  }, []);
+    void load();
+    return () => { cancelled = true; };
+  }, [refreshJobFeeds]);
+
+  // Poll for new hourly batches — pipeline publishes ~12–18 min past each ET hour.
+  useEffect(() => {
+    const pollMs = 3 * 60 * 1000;
+    const id = window.setInterval(() => { void refreshJobFeeds(); }, pollMs);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refreshJobFeeds();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [refreshJobFeeds]);
 
   const sessionCounts = useMemo(() => {
     const counts: Record<string, number> = {};
+    const hourOnlyCounts: Record<string, number> = {};
     [...todayJobs, ...yesterdayJobs].forEach((j) => {
       if (j.session_id) counts[j.session_id] = (counts[j.session_id] || 0) + 1;
     });
     hourJobs.forEach((j) => {
-      if (!j.session_id || counts[j.session_id] !== undefined) return;
-      counts[j.session_id] = (counts[j.session_id] || 0) + 1;
+      if (!j.session_id) return;
+      hourOnlyCounts[j.session_id] = (hourOnlyCounts[j.session_id] || 0) + 1;
     });
+    for (const [sessionId, count] of Object.entries(hourOnlyCounts)) {
+      if (counts[sessionId] === undefined) counts[sessionId] = count;
+    }
     return counts;
   }, [hourJobs, todayJobs, yesterdayJobs]);
 
@@ -280,8 +362,25 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const filtered = useMemo(() => {
     let jobs = [...visibleJobs];
     if (levelFilter !== "all") jobs = jobs.filter((j) => j.level === levelFilter);
+    if (tailorFilter !== "all") {
+      jobs = jobs.filter(
+        (j) => tailorFilterBucket(tailorStatus.getRecordForJob(j)) === tailorFilter,
+      );
+    }
     return sortJobs(jobs, sortBy, sortDir, tailorStatus.getRecordForJob);
-  }, [visibleJobs, levelFilter, sortBy, sortDir, tailorStatus.getRecordForJob, tailorStatus.records]);
+  }, [visibleJobs, levelFilter, tailorFilter, sortBy, sortDir, tailorStatus.getRecordForJob, tailorStatus.records]);
+
+  // Counts per tailor-status bucket for the filter chips.
+  const tailorCounts = useMemo(() => {
+    const counts: Record<TailorFilter, number> = {
+      all: visibleJobs.length, done: 0, error: 0, skip: 0, "no-jd": 0, untailored: 0,
+    };
+    for (const job of visibleJobs) {
+      const bucket = tailorFilterBucket(tailorStatus.getRecordForJob(job));
+      counts[bucket] += 1;
+    }
+    return counts;
+  }, [visibleJobs, tailorStatus.getRecordForJob, tailorStatus.records]);
 
   const searchTerms = useMemo(
     () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
@@ -500,6 +599,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     selectedSession,
     query.trim(),
     levelFilter !== "all",
+    tailorFilter !== "all",
     h1bFilter,
     top500Filter,
     termFilter !== "all",
@@ -510,6 +610,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     selectedSession ||
     query ||
     levelFilter !== "all" ||
+    tailorFilter !== "all" ||
     h1bFilter ||
     top500Filter ||
     termFilter !== "all" ||
@@ -520,6 +621,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     setSelectedSession(null);
     setQuery("");
     setLevelFilter("all");
+    setTailorFilter("all");
     setH1bFilter(false);
     setTop500Filter(false);
     setTermFilter("all");
@@ -619,6 +721,21 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
         >
           Top 500
         </button>
+      </div>
+      <div className="level-chips tailor-status-chips" aria-label="Filter by tailor status">
+        <span className="tailor-status-chips-label">Tailored:</span>
+        {TAILOR_FILTERS.map((f) => (
+          (f.key === "all" || tailorCounts[f.key] > 0) ? (
+            <button
+              key={f.key}
+              className={`chip chip-tailor chip-tailor--${f.key}${tailorFilter === f.key ? " active" : ""}`}
+              onClick={() => setTailorFilter(f.key)}
+            >
+              <span>{f.label}</span>
+              <span className="chip-count">{tailorCounts[f.key]}</span>
+            </button>
+          ) : null
+        ))}
       </div>
       <select
         className="term-select"
@@ -735,6 +852,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               />
 
               {filtersOpen && filterBar}
+
+              {feedRefreshNotice ? (
+                <div className="feed-refresh-notice" role="status">{feedRefreshNotice}</div>
+              ) : null}
 
               <TailorQueueBar
                 queue={tailorQueue.queue}
@@ -936,6 +1057,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
 
         <div className="dashboard-layout">
           <div className="right-panel">
+            {feedRefreshNotice ? (
+              <div className="feed-refresh-notice" role="status">{feedRefreshNotice}</div>
+            ) : null}
             {filterBar}
 
             <BulkJobCopyBar

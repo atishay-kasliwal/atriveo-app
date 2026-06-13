@@ -2378,6 +2378,73 @@ header {
 .chip-toggle-purple:hover { border-color: rgba(100, 116, 139,0.45); color: var(--bean-olive); }
 .chip-toggle-purple.active { background: rgba(100, 116, 139,0.12); border-color: rgba(100, 116, 139,0.5); color: var(--bean-dark); box-shadow: 0 0 10px rgba(100, 116, 139,0.16); }
 
+/* Tailor status filter chips — tones match job-table-tailored-pill */
+.tailor-status-chips {
+  flex-basis: 100%;
+  align-items: center;
+  gap: 6px;
+}
+.tailor-status-chips-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-right: 2px;
+  flex-shrink: 0;
+  font-family: "Inter", monospace;
+}
+
+.chip-tailor--done { border-color: rgba(31, 122, 63, 0.28); color: #1f7a3f; }
+.chip-tailor--done:hover { border-color: rgba(31, 122, 63, 0.5); color: #166534; }
+.chip-tailor--done.active {
+  background: #e8f5ec;
+  border-color: #1f7a3f;
+  color: #1f7a3f;
+  box-shadow: 0 0 10px rgba(31, 122, 63, 0.14);
+}
+.chip-tailor--done.active .chip-count { background: rgba(31, 122, 63, 0.16); }
+
+.chip-tailor--error { border-color: rgba(185, 28, 28, 0.28); color: #b91c1c; }
+.chip-tailor--error:hover { border-color: rgba(185, 28, 28, 0.5); color: #991b1b; }
+.chip-tailor--error.active {
+  background: #fef2f2;
+  border-color: #b91c1c;
+  color: #b91c1c;
+  box-shadow: 0 0 10px rgba(185, 28, 28, 0.14);
+}
+.chip-tailor--error.active .chip-count { background: rgba(185, 28, 28, 0.14); }
+
+.chip-tailor--skip { border-color: rgba(107, 114, 128, 0.28); color: #6b7280; }
+.chip-tailor--skip:hover { border-color: rgba(107, 114, 128, 0.5); color: #4b5563; }
+.chip-tailor--skip.active {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #4b5563;
+  box-shadow: 0 0 10px rgba(107, 114, 128, 0.12);
+}
+.chip-tailor--skip.active .chip-count { background: rgba(107, 114, 128, 0.14); }
+
+.chip-tailor--no-jd { border-color: rgba(180, 83, 9, 0.28); color: #b45309; }
+.chip-tailor--no-jd:hover { border-color: rgba(180, 83, 9, 0.5); color: #92400e; }
+.chip-tailor--no-jd.active {
+  background: #fffbeb;
+  border-color: #b45309;
+  color: #b45309;
+  box-shadow: 0 0 10px rgba(180, 83, 9, 0.14);
+}
+.chip-tailor--no-jd.active .chip-count { background: rgba(180, 83, 9, 0.14); }
+
+.chip-tailor--untailored { border-color: rgba(107, 114, 128, 0.2); color: var(--muted); }
+.chip-tailor--untailored:hover { border-color: rgba(107, 114, 128, 0.4); color: var(--text-2); }
+.chip-tailor--untailored.active {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(107, 114, 128, 0.45);
+  color: var(--text-2);
+  box-shadow: 0 0 10px rgba(107, 114, 128, 0.1);
+}
+.chip-tailor--untailored.active .chip-count { background: rgba(0, 0, 0, 0.08); }
+
 .term-select {
   appearance: none;
   border: 1px solid var(--border); background: var(--surface);

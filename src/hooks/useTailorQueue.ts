@@ -19,7 +19,7 @@ import {
   tryAcquireProcessLock,
 } from "../utils/tailorPersistence";
 import { resetTailorLogCapture } from "../utils/tailorLogCapture";
-import { abortActiveTailorJob } from "../utils/tailorRun";
+import { abortActiveTailorJob, checkJobOnDisk } from "../utils/tailorRun";
 import { useAuth } from "./useAuth";
 import type { useTailorStatus } from "./useTailorStatus";
 
@@ -31,6 +31,10 @@ const RUNNING_STALE_MS = 3 * 60 * 1000;
 const RECOVER_RETRY_MS = 8_000;
 /** When the Mac reports busy, wait this long before re-checking (a real run takes minutes). */
 const BUSY_BACKOFF_MS = 20_000;
+/** Pause between queue jobs so logs/results stay readable. */
+const INTER_JOB_PAUSE_MS = 2_500;
+/** Poll Mac output folder while a job runs — sync PDF to the table before the stream closes. */
+const DISK_POLL_MS = 20_000;
 
 function hourBatchKey(date = new Date()): string {
   return date.toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 13);
@@ -236,10 +240,10 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     queueRef.current = queue;
   }, [queue]);
 
-  const kickProcess = useCallback(() => {
+  const kickProcess = useCallback((delayMs = 0) => {
     window.setTimeout(() => {
       void processQueueRef.current?.();
-    }, 0);
+    }, delayMs);
   }, []);
 
   const forceReleaseProcessing = useCallback(() => {
@@ -626,6 +630,29 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       return;
     }
 
+    let diskPollId: number | null = null;
+    const pollDiskForPdf = () => {
+      void checkJobOnDisk(job).then((check) => {
+        if (!check.found || !check.pdfPath) return;
+        tailorStatus.markStatus(nextItem.jobKey, "done", {
+          jobUrl: nextItem.jobUrl,
+          company: nextItem.company,
+          title: nextItem.title,
+          score: nextItem.score,
+          ats: check.ats,
+          pdfPath: check.pdfPath,
+          dir: check.dir,
+          folder: check.folder,
+          progressPct: 100,
+          tailoredAt: new Date().toISOString(),
+          outcome: "done",
+          serverStatus: "ok",
+        });
+      });
+    };
+    pollDiskForPdf();
+    diskPollId = window.setInterval(pollDiskForPdf, DISK_POLL_MS);
+
     try {
       const result = await onProcessJob(job);
       const durationMs = Date.now() - Date.parse(startedAt);
@@ -728,6 +755,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       pushLog(`Failed ${nextItem.company} · ${error}`, durationMs, failureOutcome);
       handleRecoverableFailure(nextItem.jobKey, error, failureOutcome);
     } finally {
+      if (diskPollId !== null) window.clearInterval(diskPollId);
       if (recoverTimerRef.current) {
         window.clearTimeout(recoverTimerRef.current);
         recoverTimerRef.current = null;
@@ -737,7 +765,10 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       releaseProcessLockIfOwned(uid, tabIdRef.current);
       processingRef.current = false;
       setProcessing(false);
-      kickProcess();
+      const hasMorePending = queueRef.current.some(
+        (item) => item.status === "pending" && !dismissedRef.current.has(item.jobKey),
+      );
+      kickProcess(hasMorePending ? INTER_JOB_PAUSE_MS : 0);
     }
   }, [onProcessJob, tailorStatus, updateQueue, pushLog, kickProcess, commitQueue, uid, handleRecoverableFailure]);
 

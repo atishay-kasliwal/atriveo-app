@@ -25,14 +25,16 @@ function buildReferralMessage(job: Job): string {
   return `Hi Kavish,\nI hope you're doing well! I'm a former SDE2 at Bounteous, currently pursuing my MS in Data Science at Stony Brook. I came across the ${title} role (Job ID: ${jobId}) at ${company}, and would appreciate it if you could review my resume or consider referring me.\nThanks!`;
 }
 
-function fmtTime(iso?: string | null, scrapedDate?: string, relative = false): string {
+function fmtTime(iso?: string | null, scrapedDate?: string, relative = false, board = false): string {
+  const tz = "America/New_York";
   if (iso && iso !== "null") {
     const normalized = TZ_SUFFIX_RE.test(iso) ? iso : `${iso}Z`;
     const d = new Date(normalized);
     if (!Number.isNaN(d.getTime())) {
       const now = new Date();
-      const today = new Date();
-      if (relative && d.toDateString() === today.toDateString()) {
+      const todayEt = now.toLocaleDateString("en-CA", { timeZone: tz });
+      const dateEt = d.toLocaleDateString("en-CA", { timeZone: tz });
+      if (relative && dateEt === todayEt) {
         const diffMs = now.getTime() - d.getTime();
         const diffM = Math.floor(diffMs / 60000);
         if (diffM < 1) return "Just now";
@@ -40,12 +42,19 @@ function fmtTime(iso?: string | null, scrapedDate?: string, relative = false): s
         const diffH = Math.floor(diffM / 60);
         if (diffH < 24) return `${diffH}h ago`;
       }
-      if (d.toDateString() === today.toDateString()) {
-        return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+      const timeOpts: Intl.DateTimeFormatOptions = {
+        timeZone: tz,
+        hour: "numeric",
+        minute: "2-digit",
+        ...(board ? { second: "2-digit" } : {}),
+      };
+      if (dateEt === todayEt) {
+        return d.toLocaleTimeString("en-US", timeOpts);
       }
-      const yest = new Date(today.getTime() - 86400000);
-      if (d.toDateString() === yest.toDateString()) return "Yesterday";
-      return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const yest = new Date(now.getTime() - 86400000);
+      const yestEt = yest.toLocaleDateString("en-CA", { timeZone: tz });
+      if (dateEt === yestEt) return "Yesterday";
+      return d.toLocaleDateString("en-US", { timeZone: tz, month: "short", day: "numeric" });
     }
   }
   if (scrapedDate) {

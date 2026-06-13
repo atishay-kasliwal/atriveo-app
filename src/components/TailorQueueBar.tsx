@@ -127,13 +127,31 @@ export default function TailorQueueBar({
   const [streamOpen, setStreamOpen] = useState(true);
   const [dragKey, setDragKey] = useState<string | null>(null);
   const prevPendingRef = useRef(pendingCount);
+  const frozenStreamRef = useRef<TailorLogEntry[]>([]);
+  const [streamFrozenUntil, setStreamFrozenUntil] = useState(0);
 
   useEffect(() => {
     if (pendingCount > prevPendingRef.current) {
-      setExpanded(true);
+      setLogsOpen(true);
+      setStreamOpen(true);
     }
     prevPendingRef.current = pendingCount;
   }, [pendingCount]);
+
+  useEffect(() => {
+    if (processing) {
+      if (runningLogs.length) frozenStreamRef.current = runningLogs;
+      return;
+    }
+    if (!frozenStreamRef.current.length) return;
+    setStreamFrozenUntil(Date.now() + 45_000);
+    const remaining = 45_000;
+    const id = window.setTimeout(() => {
+      setStreamFrozenUntil(0);
+      frozenStreamRef.current = [];
+    }, remaining);
+    return () => window.clearTimeout(id);
+  }, [processing, runningLogs]);
 
   const pendingItems = useMemo(
     () => queue.filter((item) => item.status === "pending"),
@@ -155,11 +173,16 @@ export default function TailorQueueBar({
   const showClearTailor = !logsPanelCleared && (
     processing || processLogs.length > 0 || totalInQueue > 0 || showProcessStream
   );
-  const streamLogs = processing ? runningLogs : lastFinishedLogs;
+  const frozenStreamActive = !processing && streamFrozenUntil > Date.now() && frozenStreamRef.current.length > 0;
+  const streamLogs = processing
+    ? runningLogs
+    : (frozenStreamActive ? frozenStreamRef.current : lastFinishedLogs);
   const streamLive = processing && Boolean(runningItem);
   const streamTitle = streamLive
     ? `Live · ${runningItem?.company ?? "Tailoring"}`
-    : lastFinishedLabel ?? "Last job";
+    : frozenStreamActive
+      ? `Finished · ${runningItem?.company ?? lastFinishedLabel ?? "Last job"}`
+      : lastFinishedLabel ?? "Last job";
   const streamEmptyLabel = streamLive
     ? "Connected — waiting for analyze / compile steps from your Mac…"
     : "No detailed step log saved for the last job.";
@@ -169,13 +192,18 @@ export default function TailorQueueBar({
   const waitingForMac = recentFinished.some(
     (e) => e.outcome === "queued" || /Mac still finishing/.test(e.message),
   ) && !processing;
-  const statusNow: { tone: "live" | "wait" | "idle" | "queued"; text: string } = processing && runningItem
+  const statusNow: { tone: "live" | "wait" | "idle" | "queued" | "done"; text: string } = processing && runningItem
     ? { tone: "live", text: `Building resume for ${runningItem.company} — ${runningItem.title}. This takes ~2-4 min.` }
     : waitingForMac
       ? { tone: "wait", text: "Your Mac is finishing a resume started earlier — the next job starts automatically when it frees up." }
-      : pendingCount > 0
-        ? { tone: "queued", text: `${pendingCount} job${pendingCount === 1 ? "" : "s"} waiting — press Process queue or wait for the hourly batch.` }
-        : { tone: "idle", text: "Idle — no jobs running. Select jobs and Tailor, or wait for the hourly sync." };
+      : recentFinished[0]?.outcome === "done"
+        ? {
+            tone: "done",
+            text: `Resume ready — ${recentFinished[0].message.replace(/^Finished\s+/, "")}. Check the Tailored column for 100% / folder link.`,
+          }
+        : pendingCount > 0
+          ? { tone: "queued", text: `${pendingCount} job${pendingCount === 1 ? "" : "s"} waiting — press Process queue or wait for the hourly batch.` }
+          : { tone: "idle", text: "Idle — no jobs running. Select jobs and Tailor, or wait for the hourly sync." };
 
   function handleDrop(targetKey: string) {
     if (!dragKey || dragKey === targetKey) {

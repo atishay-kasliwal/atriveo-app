@@ -91,7 +91,7 @@ export interface SingleTailorResult {
   outcome?: TailorOutcomeKind;
 }
 
-async function checkJobOnDisk(job: Job): Promise<{ found: boolean; pdfPath?: string; dir?: string; folder?: string; ats?: string }> {
+export async function checkJobOnDisk(job: Job): Promise<{ found: boolean; pdfPath?: string; dir?: string; folder?: string; ats?: string }> {
   try {
     const res = await fetch(`${getTailorServerBase()}/check-job`, {
       method: "POST",
@@ -239,18 +239,21 @@ export async function runSingleTailorJob(
     // If the stream ended without a "done" event (stream dropped mid-run), check
     // whether the Mac actually finished the job and wrote a PDF to disk.
     if (!result.ok && (result.outcome === "timeout" || result.outcome === "error" || result.outcome === "ai")) {
-      const check = await checkJobOnDisk(job);
-      if (check.found) {
-        return {
-          ok: true,
-          ats: check.ats,
-          pdfPath: check.pdfPath,
-          dir: check.dir,
-          folder: check.folder,
-          logs: result.logs,
-          serverStatus: "ok",
-          outcome: "done",
-        };
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        const check = await checkJobOnDisk(job);
+        if (check.found) {
+          return {
+            ok: true,
+            ats: check.ats,
+            pdfPath: check.pdfPath,
+            dir: check.dir,
+            folder: check.folder,
+            logs: result.logs,
+            serverStatus: "ok",
+            outcome: "done",
+          };
+        }
+        if (attempt < 3) await new Promise((r) => window.setTimeout(r, 5000));
       }
     }
 
