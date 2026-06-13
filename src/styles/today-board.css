@@ -542,15 +542,15 @@ body.is-today-board .nav-tab.active {
 }
 
 .job-table--board .col-check { width: 32px; }
-.job-table--board .col-num { width: 28px; }
-.job-table--board .col-score { width: 62px; }
-.job-table--board .col-role { width: auto; }
-.job-table--board .col-rating { width: 124px; }
+.job-table--board .col-num { width: 40px; }
+.job-table--board .col-score { width: 78px; }
+.job-table--board .col-role { width: 28%; }
+.job-table--board .col-rating { width: 150px; }
 .job-table--board .col-loc { width: 116px; }
 .job-table--board .col-comp { width: 52px; }
 .job-table--board .col-level { width: 72px; }
-.job-table--board .col-posted { width: 70px; }
-.job-table--board .col-actions { width: 190px; }
+.job-table--board .col-posted { width: 90px; }
+.job-table--board .col-actions { width: 224px; }
 
 .job-table--board thead th {
   padding: 7px 10px;
@@ -712,7 +712,13 @@ body.is-today-board .nav-tab.active {
   background: #cfcbc2;
 }
 
-/* Role cell */
+/* Role cell — cap width so other columns get room */
+.job-table--board .job-table-job {
+  min-width: 0;
+  max-width: none;
+  overflow: hidden;
+}
+
 .job-table-role-cell {
   display: flex;
   align-items: center;
