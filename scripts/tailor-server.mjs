@@ -476,22 +476,38 @@ function createRunLogger(send) {
   };
 }
 
+// Health-check Ollama with retries. A cold model load from the external drive
+// (--no-mmap reads the whole model into RAM) can stall even the lightweight
+// /api/tags call for 10-30s, so a single 5s timeout would wrongly declare a
+// healthy-but-warming Ollama "unreachable" and fail the whole job. Retry with
+// growing timeouts before giving up.
+const OLLAMA_HEALTH_TIMEOUTS = [8000, 15000, 25000];
+
 async function checkOllama(model, onLog) {
   onLog?.("step", `Checking Ollama at http://${OLLAMA_HOST}:${OLLAMA_PORT}…`);
-  try {
-    const res = await fetch("http://localhost:11434/api/tags", { signal: AbortSignal.timeout(5000) });
-    if (!res.ok) throw new Error(`Ollama tags HTTP ${res.status}`);
-    const data = await res.json();
-    const names = (data.models || []).map((m) => m.name);
-    const hasModel = names.some((n) => n === model || n.startsWith(`${model}:`));
-    onLog?.("result", `Ollama online · ${names.length} model(s) installed`);
-    if (hasModel) onLog?.("result", `Model available · ${model}`);
-    else onLog?.("warn", `Model "${model}" not in list — will try anyway (${names.slice(0, 4).join(", ")}${names.length > 4 ? "…" : ""})`);
-    return true;
-  } catch (e) {
-    onLog?.("error", `Ollama unreachable · ${e.message} · run: ollama serve`);
-    throw e;
+  let lastErr;
+  for (let attempt = 0; attempt < OLLAMA_HEALTH_TIMEOUTS.length; attempt++) {
+    const timeout = OLLAMA_HEALTH_TIMEOUTS[attempt];
+    if (attempt > 0) {
+      onLog?.("warn", `Ollama not ready (likely loading a model) — retry ${attempt + 1}/${OLLAMA_HEALTH_TIMEOUTS.length}, waiting up to ${timeout / 1000}s…`);
+    }
+    try {
+      const res = await fetch("http://localhost:11434/api/tags", { signal: AbortSignal.timeout(timeout) });
+      if (!res.ok) throw new Error(`Ollama tags HTTP ${res.status}`);
+      const data = await res.json();
+      const names = (data.models || []).map((m) => m.name);
+      const hasModel = names.some((n) => n === model || n.startsWith(`${model}:`));
+      onLog?.("result", `Ollama online · ${names.length} model(s) installed`);
+      if (hasModel) onLog?.("result", `Model available · ${model}`);
+      else onLog?.("warn", `Model "${model}" not in list — will try anyway (${names.slice(0, 4).join(", ")}${names.length > 4 ? "…" : ""})`);
+      return true;
+    } catch (e) {
+      lastErr = e;
+      if (attempt < OLLAMA_HEALTH_TIMEOUTS.length - 1) await sleep(2000);
+    }
   }
+  onLog?.("error", `Ollama unreachable after ${OLLAMA_HEALTH_TIMEOUTS.length} tries · ${lastErr?.message} · run: ollama serve`);
+  throw lastErr;
 }
 
 function scanJdSignals(jd) {
