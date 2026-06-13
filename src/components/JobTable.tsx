@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from "react";
 import type { Job } from "../types";
+import type { SortBy, SortDir } from "../pages/Dashboard.types";
 import type { ApplyMetadata, ApplyRecord } from "../hooks/useApplyTracker";
 import CompanyLogo from "./CompanyLogo";
 import { careerOpsRating, careerOpsStars, companyDomain, matchReasons } from "../utils/jobPresentation";
@@ -86,6 +87,37 @@ function ratingPillLabel(key: string): string {
     case "yellow": return "Review";
     default: return "Low";
   }
+}
+
+interface SortableHeaderProps {
+  label: string;
+  column: SortBy;
+  sortBy?: SortBy;
+  sortDir?: SortDir;
+  onSort?: (column: SortBy) => void;
+}
+
+function SortableHeader({ label, column, sortBy, sortDir, onSort }: SortableHeaderProps) {
+  const active = sortBy === column;
+  const ariaSort = active ? (sortDir === "asc" ? "ascending" : "descending") : undefined;
+
+  if (!onSort) {
+    return <th>{label}</th>;
+  }
+
+  return (
+    <th
+      className={`job-table-sort-th${active ? " is-active" : ""}`}
+      aria-sort={ariaSort}
+    >
+      <button type="button" className="job-table-sort-btn" onClick={() => onSort(column)}>
+        <span className="job-table-sort-label">{label}</span>
+        <span className="job-table-sort-icon" aria-hidden>
+          {active ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
+        </span>
+      </button>
+    </th>
+  );
 }
 
 function ScoreCell({ job, board = false }: { job: Job; board?: boolean }) {
@@ -493,6 +525,9 @@ interface Props {
   isGroupFullySelected?: (jobs: Job[]) => boolean;
   groupByCompany?: boolean;
   variant?: "default" | "board";
+  sortBy?: SortBy;
+  sortDir?: SortDir;
+  onSortColumn?: (column: SortBy) => void;
 }
 
 export default function JobTable({
@@ -507,6 +542,9 @@ export default function JobTable({
   isGroupFullySelected,
   groupByCompany = true,
   variant = "default",
+  sortBy,
+  sortDir,
+  onSortColumn,
 }: Props) {
   const groups = useMemo(
     () => (groupByCompany ? groupJobsByCompany(jobs) : []),
@@ -547,13 +585,27 @@ export default function JobTable({
           <tr>
             <th aria-label="Select" />
             <th>#</th>
-            <th>Score</th>
-            <th>{variant === "board" ? "Role & Company" : "Job"}</th>
-            <th>{variant === "board" ? "Rating" : "Match"}</th>
-            <th>Location</th>
-            <th>Comp</th>
-            <th>Level</th>
-            <th>{variant === "board" ? "Posted" : "Time"}</th>
+            {variant === "board" && onSortColumn ? (
+              <>
+                <SortableHeader label="Score" column="score" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Role & Company" column="company" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Rating" column="rating" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Location" column="location" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Comp" column="comp" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Level" column="level" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Posted" column="time" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+              </>
+            ) : (
+              <>
+                <th>Score</th>
+                <th>{variant === "board" ? "Role & Company" : "Job"}</th>
+                <th>{variant === "board" ? "Rating" : "Match"}</th>
+                <th>Location</th>
+                <th>Comp</th>
+                <th>Level</th>
+                <th>{variant === "board" ? "Posted" : "Time"}</th>
+              </>
+            )}
             <th>{variant === "board" ? "Actions" : "Actions"}</th>
           </tr>
         </thead>

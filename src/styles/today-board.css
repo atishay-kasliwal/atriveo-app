@@ -351,6 +351,7 @@ body.is-today-board .nav-tab.active {
 
 .today-board-table-shell .job-table-wrap--board {
   flex: 1;
+  min-height: 0;
   margin: 0;
   border: none;
   border-radius: 0;
@@ -558,6 +559,7 @@ body.is-today-board .nav-tab.active {
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  text-align: left;
   color: var(--board-muted);
   background: var(--board-surface);
   border-bottom: 1px solid var(--board-line);
@@ -569,12 +571,60 @@ body.is-today-board .nav-tab.active {
   border-right: none;
 }
 
+.job-table--board .job-table-sort-th {
+  padding: 0;
+}
+
+.job-table--board .job-table-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.12s ease, background 0.12s ease;
+}
+
+.job-table--board .job-table-sort-btn:hover {
+  color: var(--board-ink);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.job-table--board .job-table-sort-th.is-active .job-table-sort-btn {
+  color: var(--board-accent-strong);
+}
+
+.job-table--board .job-table-sort-label {
+  min-width: 0;
+}
+
+.job-table--board .job-table-sort-icon {
+  flex-shrink: 0;
+  font-size: 9px;
+  line-height: 1;
+  color: var(--board-muted);
+  opacity: 0.65;
+}
+
+.job-table--board .job-table-sort-th.is-active .job-table-sort-icon {
+  color: var(--board-accent-strong);
+  opacity: 1;
+}
+
 .job-table--board tbody td {
   padding: 0 10px;
   height: 42px;
   border-bottom: 1px solid var(--board-line-soft);
   border-right: 1px solid var(--board-line-soft);
   vertical-align: middle;
+  text-align: left;
   color: var(--board-ink);
   font-size: 13px;
 }
@@ -589,6 +639,10 @@ body.is-today-board .nav-tab.active {
 
 .job-table--board .job-table-row.is-selected td {
   background: var(--board-accent-soft);
+}
+
+.job-table--board .job-table-check {
+  text-align: left;
 }
 
 .job-table--board .job-table-num {
@@ -659,8 +713,16 @@ body.is-today-board .nav-tab.active {
 }
 
 /* Score */
+.job-table-score-cell--board {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .job-table-score-cell--board .job-table-score-top {
+  display: flex;
   align-items: baseline;
+  justify-content: flex-start;
   gap: 3px;
 }
 
@@ -763,6 +825,7 @@ body.is-today-board .nav-tab.active {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: flex-start;
   gap: 8px;
   min-width: 0;
 }
@@ -830,13 +893,13 @@ body.is-today-board .nav-tab.active {
 }
 
 .job-table-actions--board {
-  text-align: right;
+  text-align: left;
 }
 
 .job-table-board-actions {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 5px;
 }
 
@@ -1050,4 +1113,138 @@ body.is-today-board .nav-tab.active {
   .feed-table-search {
     width: 100%;
   }
+}
+
+/* ── Apply click log (bottom table) ───────────────────────────────────── */
+
+.today-board-table-body .apply-click-log--board {
+  flex-shrink: 0;
+  margin: 0;
+  border: none;
+  border-top: 1px solid var(--board-line);
+  border-radius: 0;
+  background: var(--board-canvas);
+  box-shadow: none;
+  max-height: min(42vh, 420px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.apply-click-log--board .apply-click-log-head {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--board-line-soft);
+  background: var(--board-surface);
+}
+
+.apply-click-log--board .apply-click-log-kicker {
+  color: var(--board-muted);
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.apply-click-log--board h2 {
+  margin-top: 2px;
+  color: var(--board-ink);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.apply-click-log--board p {
+  margin-top: 2px;
+  color: var(--board-sub);
+  font-size: 11px;
+}
+
+.apply-click-log--board .apply-click-log-head > strong {
+  border: 1px solid var(--board-line);
+  border-radius: 999px;
+  background: var(--board-accent-soft);
+  color: var(--board-accent-strong);
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 5px 9px;
+}
+
+.apply-click-log--board .apply-click-table-wrap {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow: auto;
+}
+
+.apply-click-log--board .apply-click-table {
+  min-width: 760px;
+  font-size: 12px;
+}
+
+.apply-click-log--board .apply-click-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 7px 12px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--board-muted);
+  background: var(--board-surface);
+  border-bottom: 1px solid var(--board-line);
+}
+
+.apply-click-log--board .apply-click-table td {
+  padding: 8px 12px;
+  color: var(--board-ink);
+  border-bottom: 1px solid var(--board-line-soft);
+}
+
+.apply-click-log--board .apply-click-index {
+  color: var(--board-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.apply-click-log--board .apply-click-table a {
+  color: var(--board-accent-strong);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.apply-click-log--board .apply-click-table a:hover {
+  text-decoration: underline;
+}
+
+.apply-click-log--board .apply-click-tracker-btn {
+  border: 1px solid var(--board-line);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--board-sub);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+}
+
+.apply-click-log--board .apply-click-tracker-btn:hover:not(:disabled) {
+  border-color: var(--board-accent-border);
+  background: var(--board-accent-soft);
+  color: var(--board-accent-strong);
+}
+
+.apply-click-log--board .apply-click-tracker-btn.synced {
+  border-color: #9fd6b1;
+  background: #e7f6ec;
+  color: #15803d;
+}
+
+.apply-click-log--board .apply-click-tracker-btn.pending {
+  opacity: 0.7;
+}
+
+.apply-click-log--board .apply-click-tracker-btn.retry {
+  border-color: #f3d9a8;
+  color: #b07219;
 }

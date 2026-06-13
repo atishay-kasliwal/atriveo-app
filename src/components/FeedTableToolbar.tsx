@@ -13,9 +13,13 @@ interface Props {
 }
 
 const SORT_OPTIONS: { key: SortBy; label: string }[] = [
-  { key: "score", label: "CareerOps" },
-  { key: "time", label: "Recent" },
-  { key: "company", label: "Company" },
+  { key: "score", label: "Score" },
+  { key: "rating", label: "Rating" },
+  { key: "time", label: "Posted" },
+  { key: "company", label: "Role & Company" },
+  { key: "location", label: "Location" },
+  { key: "comp", label: "Comp" },
+  { key: "level", label: "Level" },
   { key: "ats", label: "ATS" },
   { key: "fit", label: "Fit" },
 ];

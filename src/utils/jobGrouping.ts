@@ -8,24 +8,23 @@ export interface CompanyJobGroup {
 }
 
 export function groupJobsByCompany(jobs: Job[]): CompanyJobGroup[] {
-  const map = new Map<string, Job[]>();
+  const groups: CompanyJobGroup[] = [];
+  const indexByCompany = new Map<string, number>();
+
   for (const job of jobs) {
     const company = (job.company || "Unknown").trim() || "Unknown";
-    const list = map.get(company) ?? [];
-    list.push(job);
-    map.set(company, list);
+    let idx = indexByCompany.get(company);
+    if (idx === undefined) {
+      idx = groups.length;
+      indexByCompany.set(company, idx);
+      groups.push({ company, jobs: [], bestScore: 0 });
+    }
+    groups[idx].jobs.push(job);
   }
 
-  return [...map.entries()]
-    .map(([company, groupJobs]) => {
-      const sorted = [...groupJobs].sort(
-        (a, b) => careerOpsRating(b).score - careerOpsRating(a).score,
-      );
-      return {
-        company,
-        jobs: sorted,
-        bestScore: careerOpsRating(sorted[0]).score,
-      };
-    })
-    .sort((a, b) => b.bestScore - a.bestScore);
+  for (const group of groups) {
+    group.bestScore = Math.max(...group.jobs.map((job) => careerOpsRating(job).score));
+  }
+
+  return groups;
 }

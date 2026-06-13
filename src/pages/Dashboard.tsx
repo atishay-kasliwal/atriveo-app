@@ -16,7 +16,8 @@ import type { Job, RunEntry } from "../types";
 import JobTable from "../components/JobTable";
 import JobCard from "../components/JobCard";
 import { careerOpsRating, jobBoardLabel } from "../utils/jobPresentation";
-import type { Period, SortBy } from "./Dashboard.types";
+import type { Period, SortBy, SortDir } from "./Dashboard.types";
+import { defaultSortDir, sortJobs } from "../utils/jobSort";
 
 type LevelFilter = "all" | "New Grad" | "Entry" | "Mid";
 type RunCard = RunEntry & {
@@ -92,7 +93,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const [yesterdayJobs, setYesterdayJobs] = useState<Job[]>([]);
   const [runHistory, setRunHistory] = useState<RunEntry[]>([]);
   const [period, setPeriod] = useState<Period>(initialPeriod);
-  const [sortBy, setSortBy] = useState<SortBy>(initialPeriod === "hour" ? "time" : "score");
+  const initialSort = initialPeriod === "hour" ? "time" : "score";
+  const [sortBy, setSortBy] = useState<SortBy>(initialSort);
+  const [sortDir, setSortDir] = useState<SortDir>(() => defaultSortDir(initialSort));
   const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
   const [h1bFilter, setH1bFilter] = useState(false);
   const [top500Filter, setTop500Filter] = useState(false);
@@ -115,7 +118,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
 
   const handlePeriodChange = (nextPeriod: Period, syncPath = true) => {
     setPeriod(nextPeriod);
-    setSortBy(nextPeriod === "hour" ? "time" : "score");
+    const nextSort = nextPeriod === "hour" ? "time" : "score";
+    setSortBy(nextSort);
+    setSortDir(defaultSortDir(nextSort));
     setLocationFilter("all");
     if (syncPath) {
       const nextPath = nextPeriod === "today" ? "/today" : "/";
@@ -230,16 +235,25 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     return jobs;
   }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, activeView]);
 
+  const handleSortColumn = useCallback((column: SortBy) => {
+    if (sortBy === column) {
+      setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
+      return;
+    }
+    setSortBy(column);
+    setSortDir(defaultSortDir(column));
+  }, [sortBy]);
+
+  const handleToolbarSortChange = useCallback((column: SortBy) => {
+    setSortBy(column);
+    setSortDir(defaultSortDir(column));
+  }, []);
+
   const filtered = useMemo(() => {
     let jobs = [...visibleJobs];
     if (levelFilter !== "all") jobs = jobs.filter((j) => j.level === levelFilter);
-    if (sortBy === "score") jobs.sort((a, b) => careerOpsRating(b).score - careerOpsRating(a).score);
-    else if (sortBy === "company") jobs.sort((a, b) => (a.company || "").localeCompare(b.company || ""));
-    else if (sortBy === "ats") jobs.sort((a, b) => (b.ats_score ?? -1) - (a.ats_score ?? -1));
-    else if (sortBy === "fit") jobs.sort((a, b) => (b.fit_score ?? -1) - (a.fit_score ?? -1));
-    else jobs.sort((a, b) => toMs(b.batch_time) - toMs(a.batch_time));
-    return jobs;
-  }, [visibleJobs, levelFilter, sortBy]);
+    return sortJobs(jobs, sortBy, sortDir);
+  }, [visibleJobs, levelFilter, sortBy, sortDir]);
 
   const searchTerms = useMemo(
     () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
@@ -491,10 +505,16 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           isGroupFullySelected={jobSelection.isGroupFullySelected}
           groupByCompany
           variant={isTodayBoard ? "board" : "default"}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          onSortColumn={isTodayBoard ? handleSortColumn : undefined}
         />
       )}
-      {applyClickTableRows.length > 0 && !isTodayBoard && (
-        <section className="apply-click-log" aria-label="Apply button click log">
+      {applyClickTableRows.length > 0 && (
+        <section
+          className={`apply-click-log${isTodayBoard ? " apply-click-log--board" : ""}`}
+          aria-label="Apply button click log"
+        >
           <div className="apply-click-log-head">
             <div>
               <span className="apply-click-log-kicker">Apply Log</span>
@@ -624,7 +644,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               <FeedTableToolbar
                 jobCount={displayedJobs.length}
                 sortBy={sortBy}
-                onSortChange={setSortBy}
+                onSortChange={handleToolbarSortChange}
                 query={query}
                 onQueryChange={setQuery}
                 onFilterToggle={() => setFiltersOpen((v) => !v)}
@@ -741,10 +761,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 </a>
               </div>
               <div className="sort-group" aria-label="Sort jobs">
-                <button className={`sort-btn${sortBy === "score" ? " active" : ""}`} onClick={() => setSortBy("score")}>★ CareerOps</button>
-                <button className={`sort-btn${sortBy === "time" ? " active" : ""}`} onClick={() => setSortBy("time")}>↓ Recent</button>
-                <button className={`sort-btn${sortBy === "ats" ? " active" : ""}`} onClick={() => setSortBy("ats")}>ATS</button>
-                <button className={`sort-btn${sortBy === "fit" ? " active" : ""}`} onClick={() => setSortBy("fit")}>Fit</button>
+                <button className={`sort-btn${sortBy === "score" ? " active" : ""}`} onClick={() => handleSortColumn("score")}>★ CareerOps</button>
+                <button className={`sort-btn${sortBy === "time" ? " active" : ""}`} onClick={() => handleSortColumn("time")}>↓ Recent</button>
+                <button className={`sort-btn${sortBy === "ats" ? " active" : ""}`} onClick={() => handleSortColumn("ats")}>ATS</button>
+                <button className={`sort-btn${sortBy === "fit" ? " active" : ""}`} onClick={() => handleSortColumn("fit")}>Fit</button>
               </div>
             </div>
             <div className="feed-summary" aria-live="polite">
