@@ -74,16 +74,15 @@ export default function FeedTableToolbar({
           <input
             type="search"
             className="feed-table-search-input"
-            placeholder="Search…"
+            placeholder="Search jobs, companies, skills…"
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             aria-label="Search jobs"
           />
         </div>
-        <button type="button" className="feed-table-tool feed-table-tool--share" onClick={onShare}>
-          {shareMessage || "Share"}
+        <button type="button" className="feed-table-tool feed-table-tool--share-dark" onClick={onShare}>
+          {shareMessage || `Share ${jobCount} roles`}
         </button>
-        <span className="feed-table-count">{jobCount} roles</span>
       </div>
     </div>
   );

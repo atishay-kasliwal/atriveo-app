@@ -9,6 +9,7 @@ interface Props {
   onSelectVisible: () => void;
   onClear: () => void;
   analysisMessage?: string;
+  variant?: "default" | "board";
 }
 
 export default function BulkJobCopyBar({
@@ -22,15 +23,18 @@ export default function BulkJobCopyBar({
   onSelectVisible,
   onClear,
   analysisMessage,
+  variant = "default",
 }: Props) {
   if (!visibleCount) return null;
 
+  const compact = variant === "board";
+
   return (
-    <div className={`bulk-copy-bar${selectedCount ? " has-selection" : ""}`}>
+    <div className={`bulk-copy-bar${selectedCount ? " has-selection" : ""}${compact ? " bulk-copy-bar--board" : ""}`}>
       <div className="bulk-copy-copy">
-        <span>Bulk copy</span>
+        {!compact && <span>Bulk copy</span>}
         <strong>{selectedCount ? `${selectedCount} selected` : "Select jobs to copy full JDs"}</strong>
-        <small>Copies title, company, scores, link, tags, and full JD when exported.</small>
+        {!compact && <small>Copies title, company, scores, link, tags, and full JD when exported.</small>}
       </div>
 
       <div className="bulk-copy-actions">

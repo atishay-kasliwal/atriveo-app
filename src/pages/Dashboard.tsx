@@ -590,34 +590,35 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
             />
 
             <div className="today-board-main">
-              <div className="today-board-metrics kpi-row">
-                <div className="kpi-card blue">
-                  <div className="kpi-value">{displayedJobs.length}</div>
-                  <div className="kpi-label">Total Roles</div>
-                  <div className="kpi-sub">matching current view</div>
+              <div className="board-metrics">
+                <div className="board-metric">
+                  <span className="board-metric-label">Total Roles</span>
+                  <span className="board-metric-value">{displayedJobs.length}</span>
+                  <span className="board-metric-sub">matching current view</span>
                 </div>
-                <div className="kpi-card purple">
-                  <div className="kpi-value">{uniqueCompanies}</div>
-                  <div className="kpi-label">Companies</div>
-                  <div className="kpi-sub">unique employers</div>
+                <div className="board-metric">
+                  <span className="board-metric-label">Companies</span>
+                  <span className="board-metric-value">{uniqueCompanies}</span>
+                  <span className="board-metric-sub">unique employers</span>
                 </div>
-                <div className="kpi-card emerald">
-                  <div className="kpi-value">{highMatchCount}</div>
-                  <div className="kpi-label">High Match</div>
-                  <div className="kpi-sub">CareerOps 75+</div>
+                <div className="board-metric board-metric--accent">
+                  <span className="board-metric-label">High Match</span>
+                  <span className="board-metric-value">{highMatchCount}</span>
+                  <span className="board-metric-sub">CareerOps 75+</span>
                 </div>
-                <div className="kpi-card orange">
-                  <div className="kpi-value">{ngCount}</div>
-                  <div className="kpi-label">New Grad</div>
-                  <div className="kpi-sub">entry-level roles</div>
+                <div className="board-metric">
+                  <span className="board-metric-label">New Grad</span>
+                  <span className="board-metric-value">{ngCount}</span>
+                  <span className="board-metric-sub">entry-level roles</span>
                 </div>
-                <div className="kpi-card teal">
-                  <div className="kpi-value">{todayApplicationRows.length}</div>
-                  <div className="kpi-label">Applied Today</div>
-                  <div className="kpi-sub">tracker activity</div>
+                <div className="board-metric">
+                  <span className="board-metric-label">Applied Today</span>
+                  <span className="board-metric-value">{todayApplicationRows.length}</span>
+                  <span className="board-metric-sub">tracker activity</span>
                 </div>
               </div>
 
+              <div className="today-board-table-shell">
               <FeedTableToolbar
                 jobCount={displayedJobs.length}
                 sortBy={sortBy}
@@ -633,6 +634,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               {filtersOpen && filterBar}
 
               <BulkJobCopyBar
+                variant="board"
                 selectedCount={jobSelection.selectedCount}
                 visibleCount={displayedJobs.length}
                 copyMessage={jobSelection.copyMessage}
@@ -652,6 +654,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               <BulkJobAnalysisPanel analysis={jobSelection.analysis} />
 
               {jobListContent}
+              </div>
             </div>
           </div>
         </div>

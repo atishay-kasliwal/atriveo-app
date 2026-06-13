@@ -2,7 +2,7 @@ import { Fragment, useMemo, useState } from "react";
 import type { Job } from "../types";
 import type { ApplyMetadata, ApplyRecord } from "../hooks/useApplyTracker";
 import CompanyLogo from "./CompanyLogo";
-import { careerOpsRating, careerOpsStars, matchReasons } from "../utils/jobPresentation";
+import { careerOpsRating, careerOpsStars, companyDomain, matchReasons } from "../utils/jobPresentation";
 import { groupJobsByCompany, type CompanyJobGroup } from "../utils/jobGrouping";
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
@@ -56,6 +56,12 @@ function scoreTrend(careerOps: ReturnType<typeof careerOpsRating>): "up" | "down
   return "flat";
 }
 
+function scoreDelta(careerOps: ReturnType<typeof careerOpsRating>): number | null {
+  const { atsPct, fitPct } = careerOps;
+  if (atsPct == null || fitPct == null) return null;
+  return Math.abs(Math.round(fitPct - atsPct));
+}
+
 function compLabel(value: number | null | undefined): string {
   const score = Number(value);
   if (!Number.isFinite(score) || score <= 0) return "Low";
@@ -63,16 +69,40 @@ function compLabel(value: number | null | undefined): string {
   return "High";
 }
 
-function ScoreCell({ job }: { job: Job }) {
+function ScoreCell({ job, board = false }: { job: Job; board?: boolean }) {
   const careerOps = careerOpsRating(job);
   const trend = scoreTrend(careerOps);
-  const trendSymbol = trend === "up" ? "↑" : trend === "down" ? "↓" : "→";
+  const delta = scoreDelta(careerOps);
+  const trendSymbol = trend === "up" ? "▲" : trend === "down" ? "▼" : "→";
+
+  if (board) {
+    return (
+      <div className="job-table-score-cell job-table-score-cell--board">
+        <div className="job-table-score-top">
+          <span className="job-table-score-num">{careerOps.score}</span>
+          {delta != null && delta > 0 && (
+            <span className={`job-table-score-delta job-table-score-delta--${trend}`} title="Fit vs ATS">
+              {trendSymbol} {delta}
+            </span>
+          )}
+        </div>
+        <div className="job-table-score-bar" aria-hidden>
+          <span
+            className={`job-table-score-bar-fill job-table-score-bar-fill--${careerOps.key}`}
+            style={{ width: `${careerOps.score}%` }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="job-table-score-cell">
       <div className="job-table-score-top">
         <span className={`job-table-score-badge job-table-score-badge--${careerOps.key}`}>{careerOps.score}</span>
-        <span className={`job-table-score-trend job-table-score-trend--${trend}`} title="Fit vs ATS">{trendSymbol}</span>
+        <span className={`job-table-score-trend job-table-score-trend--${trend}`} title="Fit vs ATS">
+          {trend === "up" ? "↑" : trend === "down" ? "↓" : "→"}
+        </span>
       </div>
       <div className="job-table-score-bar" aria-hidden>
         <span
@@ -81,6 +111,36 @@ function ScoreCell({ job }: { job: Job }) {
         />
       </div>
     </div>
+  );
+}
+
+function CompanyBandRow({ group }: { group: CompanyJobGroup }) {
+  const domain = companyDomain(group.company);
+  const openings = group.jobs.length;
+
+  return (
+    <tr className="job-table-band">
+      <td colSpan={10}>
+        <div className="job-table-band-inner">
+          <CompanyLogo company={group.company} size="sm" />
+          <span className="job-table-band-name">{group.company}</span>
+          <span className="job-table-band-openings">
+            {openings} opening{openings !== 1 ? "s" : ""}
+          </span>
+          {domain && (
+            <a
+              className="job-table-band-link"
+              href={`https://${domain}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {domain}
+            </a>
+          )}
+        </div>
+      </td>
+    </tr>
   );
 }
 
@@ -95,6 +155,7 @@ interface RowProps {
   onExcludeCompany?: (company: string) => void;
   nested?: boolean;
   showCompany?: boolean;
+  board?: boolean;
 }
 
 function JobTableRow({
@@ -108,6 +169,7 @@ function JobTableRow({
   onExcludeCompany,
   nested = false,
   showCompany = true,
+  board = false,
 }: RowProps) {
   const [msgCopied, setMsgCopied] = useState(false);
   const co = job.company || "—";
@@ -132,7 +194,7 @@ function JobTableRow({
 
   return (
     <tr
-      className={`job-table-row job-table-row--${careerOps.key}${isApplied ? " is-applied" : ""}${isSelected ? " is-selected" : ""}${nested ? " is-nested" : ""}`}
+      className={`job-table-row job-table-row--${careerOps.key}${isApplied ? " is-applied" : ""}${isSelected ? " is-selected" : ""}${nested ? " is-nested" : ""}${board ? " job-table-row--board" : ""}`}
       title={reasons.join(" · ") || careerOps.tooltip}
     >
       <td className="job-table-check">
@@ -150,10 +212,21 @@ function JobTableRow({
       </td>
       <td className="job-table-num">{nested ? "" : index}</td>
       <td className="job-table-score">
-        <ScoreCell job={job} />
+        <ScoreCell job={job} board={board} />
       </td>
       <td className="job-table-job">
-        {showCompany ? (
+        {board ? (
+          <div className="job-table-role-cell">
+            <CompanyLogo company={co} size="sm" />
+            <div className="job-table-role-copy">
+              <div className="job-table-role-title" title={title}>{title}</div>
+              <div className="job-table-role-company" title={co}>{co}</div>
+            </div>
+            {onExcludeCompany && (
+              <button type="button" className="job-table-exclude" onClick={() => onExcludeCompany(co)} title={`Block ${co}`}>⊘</button>
+            )}
+          </div>
+        ) : showCompany ? (
           <div className="job-table-job-stack">
             <div className="job-table-job-company">
               <CompanyLogo company={co} size="sm" />
@@ -170,7 +243,11 @@ function JobTableRow({
       </td>
       <td className="job-table-match">
         <span className="job-table-stars" aria-label={`Rating ${stars.replace(/☆/g, "").length} of 5`}>{stars}</span>
-        <span className={`job-table-match-label job-table-match-label--${careerOps.key}`}>{careerOps.label}</span>
+        {board ? (
+          <span className={`job-table-rating-pill job-table-rating-pill--${careerOps.key}`}>{careerOps.label}</span>
+        ) : (
+          <span className={`job-table-match-label job-table-match-label--${careerOps.key}`}>{careerOps.label}</span>
+        )}
       </td>
       <td className="job-table-loc" title={job.location}>{locationShort(job.location)}</td>
       <td className="job-table-comp" title={`Competition score: ${job.competition_score ?? 0}`}>
@@ -178,8 +255,8 @@ function JobTableRow({
       </td>
       <td className="job-table-level">{job.level || "—"}</td>
       <td className="job-table-time">{fmtTime(job.batch_time || job.date_posted, job.scraped_date)}</td>
-      <td className="job-table-actions">
-        {job.job_url ? (
+      <td className={`job-table-actions${board ? " job-table-actions--board" : ""}`}>
+        {!board && job.job_url ? (
           <a
             className="job-table-action job-table-action--apply"
             href={job.job_url}
@@ -190,7 +267,7 @@ function JobTableRow({
             Apply
           </a>
         ) : null}
-        {job.job_url && onApplyClick && (
+        {!board && job.job_url && onApplyClick && (
           <button type="button" className="job-table-action" onClick={() => onApplyClick(job)}>Click</button>
         )}
         <button
@@ -203,7 +280,7 @@ function JobTableRow({
             });
           }}
         >
-          {msgCopied ? "Copied" : "Msg"}
+          {msgCopied ? "Copied" : board ? "Msg" : "Msg"}
         </button>
         {canSendToTracker && job.job_url && (
           <button
@@ -214,6 +291,17 @@ function JobTableRow({
             {trackerCopy}
           </button>
         )}
+        {board && job.job_url ? (
+          <a
+            className="job-table-action job-table-action--apply"
+            href={job.job_url}
+            target="_blank"
+            rel="noopener"
+            onClick={() => onApplyClick?.(job)}
+          >
+            Apply
+          </a>
+        ) : null}
       </td>
     </tr>
   );
@@ -387,56 +475,83 @@ export default function JobTable({
         </thead>
         <tbody>
           {groupByCompany ? (
-            groups.map((group, i) => {
-              const rowIndex = i + 1;
-              if (group.jobs.length === 1) {
-                const job = group.jobs[0];
+            variant === "board" ? (
+              groups.map((group, gi) => {
+                const showBand = group.jobs.length > 1;
+                const priorCount = groups.slice(0, gi).reduce((acc, g) => acc + g.jobs.length, 0);
                 return (
-                  <JobTableRow
-                    key={job.job_url || group.company}
-                    job={job}
-                    index={rowIndex}
-                    applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                    onAddToTracker={onAddToTracker}
-                    onApplyClick={onApplyClick}
-                    isSelected={isJobSelected?.(job)}
-                    onSelectionToggle={onSelectionToggle}
-                    onExcludeCompany={onExcludeCompany}
-                    showCompany
-                  />
-                );
-              }
-
-              const expanded = expandedCompanies.has(group.company);
-              return (
-                <Fragment key={group.company}>
-                  <CompanyGroupRow
-                    group={group}
-                    index={rowIndex}
-                    expanded={expanded}
-                    onToggle={() => toggleCompany(group.company)}
-                    onExcludeCompany={onExcludeCompany}
-                    onGroupSelectAll={onGroupSelectAll}
-                    isGroupFullySelected={isGroupFullySelected}
-                  />
-                  {expanded &&
-                    group.jobs.map((job, j) => (
+                  <Fragment key={group.company}>
+                    {showBand && <CompanyBandRow group={group} />}
+                    {group.jobs.map((job, j) => (
                       <JobTableRow
                         key={job.job_url || `${group.company}-${j}`}
                         job={job}
-                        index={rowIndex}
+                        index={priorCount + j + 1}
                         applyRecord={job.job_url ? getRecord(job.job_url) : null}
                         onAddToTracker={onAddToTracker}
                         onApplyClick={onApplyClick}
                         isSelected={isJobSelected?.(job)}
                         onSelectionToggle={onSelectionToggle}
-                        nested
-                        showCompany={false}
+                        onExcludeCompany={onExcludeCompany}
+                        nested={showBand}
+                        board
                       />
                     ))}
-                </Fragment>
-              );
-            })
+                  </Fragment>
+                );
+              })
+            ) : (
+              groups.map((group, i) => {
+                const rowIndex = i + 1;
+                if (group.jobs.length === 1) {
+                  const job = group.jobs[0];
+                  return (
+                    <JobTableRow
+                      key={job.job_url || group.company}
+                      job={job}
+                      index={rowIndex}
+                      applyRecord={job.job_url ? getRecord(job.job_url) : null}
+                      onAddToTracker={onAddToTracker}
+                      onApplyClick={onApplyClick}
+                      isSelected={isJobSelected?.(job)}
+                      onSelectionToggle={onSelectionToggle}
+                      onExcludeCompany={onExcludeCompany}
+                      showCompany
+                    />
+                  );
+                }
+
+                const expanded = expandedCompanies.has(group.company);
+                return (
+                  <Fragment key={group.company}>
+                    <CompanyGroupRow
+                      group={group}
+                      index={rowIndex}
+                      expanded={expanded}
+                      onToggle={() => toggleCompany(group.company)}
+                      onExcludeCompany={onExcludeCompany}
+                      onGroupSelectAll={onGroupSelectAll}
+                      isGroupFullySelected={isGroupFullySelected}
+                    />
+                    {expanded &&
+                      group.jobs.map((job, j) => (
+                        <JobTableRow
+                          key={job.job_url || `${group.company}-${j}`}
+                          job={job}
+                          index={rowIndex}
+                          applyRecord={job.job_url ? getRecord(job.job_url) : null}
+                          onAddToTracker={onAddToTracker}
+                          onApplyClick={onApplyClick}
+                          isSelected={isJobSelected?.(job)}
+                          onSelectionToggle={onSelectionToggle}
+                          nested
+                          showCompany={false}
+                        />
+                      ))}
+                  </Fragment>
+                );
+              })
+            )
           ) : (
             jobs.map((job, i) => (
               <JobTableRow

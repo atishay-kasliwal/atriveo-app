@@ -46,6 +46,14 @@ export default function TodayBoardSidebar({
 }: Props) {
   return (
     <aside className="today-board-sidebar" aria-label="Views and pipeline">
+      <div className="today-board-brand">
+        <span className="today-board-brand-mark">A</span>
+        <div>
+          <strong>Atriveo</strong>
+          <span>Job Platform</span>
+        </div>
+      </div>
+
       <section className="today-board-nav-section">
         <h2 className="today-board-nav-label">Views</h2>
         <ul className="today-board-nav-list">
