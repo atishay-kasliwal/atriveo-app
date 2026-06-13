@@ -164,6 +164,19 @@ export default function TailorQueueBar({
     ? "Connected — waiting for analyze / compile steps from your Mac…"
     : "No detailed step log saved for the last job.";
 
+  // One honest line that always says what the pipeline is doing right now, so
+  // you never have to decode the logs to know the state.
+  const waitingForMac = recentFinished.some(
+    (e) => e.outcome === "queued" || /Mac still finishing/.test(e.message),
+  ) && !processing;
+  const statusNow: { tone: "live" | "wait" | "idle" | "queued"; text: string } = processing && runningItem
+    ? { tone: "live", text: `Building resume for ${runningItem.company} — ${runningItem.title}. This takes ~2-4 min.` }
+    : waitingForMac
+      ? { tone: "wait", text: "Your Mac is finishing a resume started earlier — the next job starts automatically when it frees up." }
+      : pendingCount > 0
+        ? { tone: "queued", text: `${pendingCount} job${pendingCount === 1 ? "" : "s"} waiting — press Process queue or wait for the hourly batch.` }
+        : { tone: "idle", text: "Idle — no jobs running. Select jobs and Tailor, or wait for the hourly sync." };
+
   function handleDrop(targetKey: string) {
     if (!dragKey || dragKey === targetKey) {
       setDragKey(null);
@@ -255,6 +268,11 @@ export default function TailorQueueBar({
               </div>
             </div>
           ) : null}
+
+          <div className={`tailor-queue-status tailor-queue-status--${statusNow.tone}`}>
+            <span className="tailor-queue-status-dot" aria-hidden />
+            <span className="tailor-queue-status-text">{statusNow.text}</span>
+          </div>
 
           {processing && runningItem ? (
             <div className="tailor-queue-running">

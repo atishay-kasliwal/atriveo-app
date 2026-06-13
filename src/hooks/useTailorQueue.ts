@@ -6,7 +6,7 @@ import { careerOpsRating } from "../utils/jobPresentation";
 import { jobDismissKey } from "../utils/jobCopy";
 import { snapshotJobForQueue } from "../utils/manualJob";
 import { mapResultToRecordStatus, outcomeFromError } from "../utils/tailorOutcome";
-import { isRecoverableTailorFailure, requestTailorRecovery } from "../utils/tailorRecover";
+import { isRecoverableTailorFailure, isTailorBusy, requestTailorRecovery } from "../utils/tailorRecover";
 import {
   getTailorTabId,
   installProcessLockRelease,
@@ -29,6 +29,8 @@ const LOGS_KEY = (uid: string) => `atriveo_tailor_process_logs_v1_${uid}`;
 /** Abort a stuck running job if the browser↔Mac stream drops but fetch never settles. */
 const RUNNING_STALE_MS = 3 * 60 * 1000;
 const RECOVER_RETRY_MS = 8_000;
+/** When the Mac reports busy, wait this long before re-checking (a real run takes minutes). */
+const BUSY_BACKOFF_MS = 20_000;
 
 function hourBatchKey(date = new Date()): string {
   return date.toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 13);
@@ -627,6 +629,33 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     try {
       const result = await onProcessJob(job);
       const durationMs = Date.now() - Date.parse(startedAt);
+
+      // Server busy = another job is legitimately running on the Mac (e.g. after
+      // a refresh left the prior run going). Do NOT mark failed or recover — that
+      // creates a hammer loop. Put this job back to pending, release our lock,
+      // and let the watchdog retry after a backoff once the Mac frees up.
+      if (!result.ok && isTailorBusy(result.error)) {
+        updateQueue((prev) => prev.map((item) => (
+          item.jobKey === nextItem.jobKey
+            ? { ...item, status: "pending" as const, startedAt: undefined }
+            : item
+        )));
+        tailorStatus.markStatus(nextItem.jobKey, "queued", {
+          jobUrl: nextItem.jobUrl,
+          company: nextItem.company,
+          title: nextItem.title,
+          score: nextItem.score,
+        });
+        pushLog(`Waiting · ${nextItem.company} — Mac still finishing another resume`);
+        if (heartbeatRef.current) window.clearInterval(heartbeatRef.current);
+        heartbeatRef.current = null;
+        releaseProcessLockIfOwned(uid, tabIdRef.current);
+        processingRef.current = false;
+        setProcessing(false);
+        window.setTimeout(() => kickProcess(), BUSY_BACKOFF_MS);
+        return;
+      }
+
       const done = result.ok;
       const dismissed = dismissedRef.current.has(nextItem.jobKey);
       updateQueue((prev) => prev.map((item) => (

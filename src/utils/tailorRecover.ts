@@ -4,10 +4,23 @@ import { getTailorServerBase } from "./tailorServer";
 const RECOVER_COOLDOWN_MS = 2 * 60 * 1000;
 let lastRecoverAt = 0;
 
+/**
+ * "Tailor busy" / 503 means another job is LEGITIMATELY running on the Mac —
+ * it is not a failure to recover from, and triggering auto-recovery + retry on
+ * it creates a hammer loop (re-queue → 503 → recover → re-queue …) that starves
+ * the real job of the GPU. Detect it so callers can wait politely instead.
+ */
+export function isTailorBusy(error?: string | null): boolean {
+  const err = (error || "").toLowerCase();
+  return err.includes("tailor busy") || err.includes("another job is still running");
+}
+
 export function isRecoverableTailorFailure(
   error?: string | null,
   outcome?: TailorOutcomeKind | null,
 ): boolean {
+  // Busy is never "recoverable" — it means wait, not repair.
+  if (isTailorBusy(error)) return false;
   if (outcome === "offline" || outcome === "timeout" || outcome === "ai") return true;
   const err = (error || "").toLowerCase();
   return (
@@ -20,8 +33,6 @@ export function isRecoverableTailorFailure(
     || err.includes("not running")
     || err.includes("unreachable")
     || err.includes("502")
-    || err.includes("503")
-    || err.includes("tailor busy")
     || err.includes("could not reach")
     || err.includes("ollama")
   );

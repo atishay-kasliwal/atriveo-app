@@ -1480,6 +1480,34 @@ body.is-today-board .nav-tab.active {
   font-size: 11px;
 }
 
+/* Always-present "what's happening now" banner. */
+.tailor-queue-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.tailor-queue-status-dot {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.tailor-queue-status--live { color: #1f7a3f; }
+.tailor-queue-status--live .tailor-queue-status-dot {
+  animation: tailor-pulse 1.4s ease-in-out infinite;
+}
+.tailor-queue-status--wait { color: #b45309; }
+.tailor-queue-status--queued { color: #1d4ed8; }
+.tailor-queue-status--idle { color: var(--board-muted); }
+@keyframes tailor-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 .tailor-queue-running {
   display: flex;
   flex-wrap: wrap;
