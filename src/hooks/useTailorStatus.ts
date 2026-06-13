@@ -59,6 +59,9 @@ export function useTailorStatus() {
         ats: patch.ats ?? existing?.ats,
         tailoredAt: patch.tailoredAt ?? existing?.tailoredAt,
         pdfPath: patch.pdfPath ?? existing?.pdfPath,
+        dir: patch.dir ?? existing?.dir,
+        folder: patch.folder ?? existing?.folder,
+        progressPct: patch.progressPct ?? existing?.progressPct,
         error: patch.error ?? existing?.error,
       };
       const next = { ...prev, [jobKey]: nextRecord };

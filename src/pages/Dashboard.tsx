@@ -24,7 +24,8 @@ import type { Period, SortBy, SortDir } from "./Dashboard.types";
 import { defaultSortDir, sortJobs } from "../utils/jobSort";
 import { jobDismissKey } from "../utils/jobCopy";
 import { multiRoleCompanies } from "../utils/companyGrouping";
-import { runSingleTailorJob } from "../utils/tailorRun";
+import { runSingleTailorJob, openTailorPath } from "../utils/tailorRun";
+import { tailorPhaseProgress } from "../utils/tailorProgress";
 
 type LevelFilter = "all" | "New Grad" | "Entry" | "Mid";
 type RunCard = RunEntry & {
@@ -336,14 +337,53 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const displayedJobs = isSplitView ? locationFiltered : filtered;
   const jobSelection = useJobSelection(displayedJobs);
   const tailorStatus = useTailorStatus();
+  const processQueueJob = useCallback(async (job: Job) => {
+    const key = jobDismissKey(job);
+    return runSingleTailorJob(job, (event) => {
+      if (event.type !== "job" || event.index !== 0) return;
+      const phase = event.phase;
+      if (!phase || phase === "done") return;
+      tailorStatus.markStatus(key, "running", {
+        jobUrl: job.job_url || "",
+        company: job.company || "Unknown",
+        title: job.title || "Untitled role",
+        score: job.score_pct,
+        progressPct: tailorPhaseProgress(phase),
+      });
+    });
+  }, [tailorStatus]);
   const tailorQueue = useTailorQueue(displayedJobs, {
     tailorStatus,
-    onProcessJob: runSingleTailorJob,
+    onProcessJob: processQueueJob,
   });
+  const handleOpenTailorPath = useCallback(async (path: string) => {
+    try {
+      await openTailorPath(path);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
 
   useEffect(() => {
     const run = jobSelection.tailorRun;
-    if (!run || run.active) return;
+    if (!run) return;
+
+    if (run.active) {
+      for (const job of run.jobs) {
+        if (job.phase === "done") continue;
+        const match = displayedJobs.find((j) => j.company === job.company && j.title === job.role);
+        if (!match) continue;
+        const key = jobDismissKey(match);
+        tailorStatus.markStatus(key, "running", {
+          jobUrl: match.job_url || "",
+          company: job.company,
+          title: job.role,
+          progressPct: tailorPhaseProgress(job.phase),
+        });
+      }
+      return;
+    }
+
     for (const job of run.jobs) {
       if (job.phase !== "done") continue;
       const match = displayedJobs.find((j) => j.company === job.company && j.title === job.role);
@@ -356,10 +396,13 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           title: job.role,
           ats: job.ats,
           pdfPath: job.pdfPath,
+          dir: job.dir,
+          folder: job.folder,
+          progressPct: 100,
           tailoredAt: new Date().toISOString(),
         });
       } else if (job.status === "no-go") {
-        tailorStatus.markStatus(key, "no-go", { error: "no-go" });
+        tailorStatus.markStatus(key, "no-go", { error: "no-go", dir: job.dir, folder: job.folder });
       } else if (job.error) {
         tailorStatus.markStatus(key, "failed", { error: job.error });
       }
@@ -553,6 +596,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           companyBandKeys={companyBandKeys}
           getTailorRecord={tailorStatus.getRecordForJob}
           onQueueUrgent={(job) => tailorQueue.enqueueJob(job, "manual", true)}
+          onOpenTailorPath={handleOpenTailorPath}
           variant={isTodayBoard ? "board" : "default"}
           sortBy={sortBy}
           sortDir={sortDir}
@@ -628,6 +672,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 queue={tailorQueue.queue}
                 pendingCount={tailorQueue.pendingCount}
                 doneInQueue={tailorQueue.doneInQueue}
+                failedInQueue={tailorQueue.failedInQueue}
+                totalInQueue={tailorQueue.totalInQueue}
+                overallProgressPct={tailorQueue.overallProgressPct}
+                processLogs={tailorQueue.processLogs}
                 processing={tailorQueue.processing}
                 runningItem={tailorQueue.runningItem}
                 lastHourlySyncAt={tailorQueue.lastHourlySyncAt}

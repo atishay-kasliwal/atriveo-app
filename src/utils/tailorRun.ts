@@ -49,10 +49,26 @@ export interface SingleTailorResult {
   ok: boolean;
   ats?: string;
   pdfPath?: string;
+  dir?: string;
+  folder?: string;
   error?: string;
 }
 
-export async function runSingleTailorJob(job: Job): Promise<SingleTailorResult> {
+export async function openTailorPath(targetPath: string): Promise<void> {
+  const res = await fetch(`${getTailorServerBase()}/open`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ path: targetPath }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!data.ok) throw new Error(data.error || "Could not open folder");
+}
+
+export async function runSingleTailorJob(
+  job: Job,
+  onEvent?: (event: TailorStreamEvent) => void,
+): Promise<SingleTailorResult> {
   const resumeText = localStorage.getItem("atriveo_resume") || "";
   if (resumeText.trim().length < 50) {
     return { ok: false, error: "Save your resume in Settings first." };
@@ -91,6 +107,7 @@ export async function runSingleTailorJob(job: Job): Promise<SingleTailorResult> 
   if (!res.body) return { ok: false, error: "No response from tailor server" };
 
   await readTailorStream(res.body, (event) => {
+    onEvent?.(event);
     if (event.type === "fatal") {
       result = { ok: false, error: event.error };
       return;
@@ -102,11 +119,13 @@ export async function runSingleTailorJob(job: Job): Promise<SingleTailorResult> 
         ok: true,
         ats: event.ats,
         pdfPath: event.pdfPath,
+        dir: event.dir,
+        folder: event.folder,
       };
       return;
     }
     if (event.status === "no-go") {
-      result = { ok: false, error: "no-go: not worth tailoring" };
+      result = { ok: false, error: "no-go: not worth tailoring", dir: event.dir, folder: event.folder };
       return;
     }
     result = {
@@ -114,6 +133,8 @@ export async function runSingleTailorJob(job: Job): Promise<SingleTailorResult> 
       error: event.error || `Tailor finished with status ${event.status || "unknown"}`,
       ats: event.ats,
       pdfPath: event.pdfPath,
+      dir: event.dir,
+      folder: event.folder,
     };
   });
 

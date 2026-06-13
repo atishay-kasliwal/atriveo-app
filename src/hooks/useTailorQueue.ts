@@ -76,7 +76,14 @@ type TailorStatusApi = Pick<
 
 interface Options {
   tailorStatus: TailorStatusApi;
-  onProcessJob?: (job: Job) => Promise<{ ok: boolean; ats?: string; pdfPath?: string; error?: string }>;
+  onProcessJob?: (job: Job) => Promise<{
+    ok: boolean;
+    ats?: string;
+    pdfPath?: string;
+    dir?: string;
+    folder?: string;
+    error?: string;
+  }>;
 }
 
 export function useTailorQueue(jobs: Job[], options: Options) {
@@ -87,7 +94,13 @@ export function useTailorQueue(jobs: Job[], options: Options) {
   const [processing, setProcessing] = useState(false);
   const [lastHourlySyncAt, setLastHourlySyncAt] = useState(0);
   const [syncMessage, setSyncMessage] = useState("");
+  const [processLogs, setProcessLogs] = useState<string[]>([]);
   const processingRef = useRef(false);
+
+  const pushLog = useCallback((line: string) => {
+    const stamp = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" });
+    setProcessLogs((prev) => [`${stamp} · ${line}`, ...prev].slice(0, 40));
+  }, []);
 
   useEffect(() => {
     if (loading) return;
@@ -266,7 +279,9 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       company: nextItem.company,
       title: nextItem.title,
       score: nextItem.score,
+      progressPct: 5,
     });
+    pushLog(`Started ${nextItem.company} · ${nextItem.title}`);
 
     const job = jobs.find((j) => jobDismissKey(j) === nextItem.jobKey);
     if (!job) {
@@ -303,10 +318,16 @@ export function useTailorQueue(jobs: Job[], options: Options) {
           score: nextItem.score,
           ats: result.ats,
           pdfPath: result.pdfPath,
+          dir: result.dir,
+          folder: result.folder,
+          progressPct: done ? 100 : undefined,
           tailoredAt: done ? new Date().toISOString() : undefined,
           error: result.error,
         },
       );
+      pushLog(done
+        ? `Finished ${nextItem.company} · ${nextItem.title}${result.ats ? ` · ATS ${result.ats}` : ""}`
+        : `Failed ${nextItem.company} · ${result.error || "unknown error"}`);
     } catch (e) {
       const error = (e as Error).message || String(e);
       updateQueue((prev) => prev.map((item) => (
@@ -317,7 +338,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       processingRef.current = false;
       setProcessing(false);
     }
-  }, [jobs, onProcessJob, queue, tailorStatus, updateQueue]);
+  }, [jobs, onProcessJob, queue, tailorStatus, updateQueue, pushLog]);
 
   useEffect(() => {
     if (processing || !onProcessJob) return;
@@ -345,6 +366,22 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     () => queue.filter((item) => item.status === "done").length,
     [queue],
   );
+  const failedInQueue = useMemo(
+    () => queue.filter((item) => item.status === "failed" || item.status === "skipped").length,
+    [queue],
+  );
+  const totalInQueue = useMemo(
+    () => queue.filter((item) => item.status !== "skipped").length,
+    [queue],
+  );
+  const overallProgressPct = useMemo(() => {
+    const total = Math.max(1, pendingCount + (runningItem ? 1 : 0) + doneInQueue + failedInQueue);
+    const doneWeight = doneInQueue + failedInQueue;
+    const runningWeight = runningItem
+      ? (tailorStatus.getRecord(runningItem.jobKey)?.progressPct ?? 28) / 100
+      : 0;
+    return Math.min(100, Math.round(((doneWeight + runningWeight) / total) * 100));
+  }, [pendingCount, runningItem, doneInQueue, failedInQueue, tailorStatus]);
 
   const clearDone = useCallback(() => {
     updateQueue((prev) => prev.filter((item) => item.status !== "done" && item.status !== "failed" && item.status !== "skipped"));
@@ -356,6 +393,10 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     pendingCount,
     runningItem,
     doneInQueue,
+    failedInQueue,
+    totalInQueue,
+    overallProgressPct,
+    processLogs,
     processing,
     lastHourlySyncAt,
     syncMessage,

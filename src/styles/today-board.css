@@ -1289,6 +1289,81 @@ body.is-today-board .nav-tab.active {
   color: var(--board-muted);
 }
 
+.tailor-queue-stat--progress {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.tailor-queue-stat-sub {
+  font-size: 10px;
+  color: var(--board-muted);
+  font-weight: 500;
+}
+
+.tailor-queue-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.tailor-queue-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.tailor-queue-progress-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+  transition: width 0.35s ease;
+}
+
+.tailor-queue-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 10px;
+  color: var(--board-muted);
+}
+
+.tailor-queue-logs {
+  margin-top: 6px;
+  border: 1px solid var(--board-border);
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.tailor-queue-logs-toggle {
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--board-muted);
+  cursor: pointer;
+}
+
+.tailor-queue-logs-body {
+  max-height: 120px;
+  overflow-y: auto;
+  padding: 0 10px 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  line-height: 1.45;
+  color: #374151;
+}
+
+.tailor-queue-log-line + .tailor-queue-log-line {
+  margin-top: 2px;
+}
+
 .tailor-queue-running,
 .tailor-queue-message {
   font-size: 11px;
@@ -1329,24 +1404,54 @@ body.is-today-board .nav-tab.active {
 
 /* Tailored column */
 .job-table--board .col-tailored {
-  width: 72px;
+  width: 96px;
 }
 
 .job-table-tailored {
   text-align: left;
 }
 
+.job-table-tailored-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
 .job-table-tailored-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 52px;
+  min-width: 44px;
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.job-table-tailored-pill--done,
+.job-table-tailored-pill--running {
+  text-transform: none;
+}
+
+.job-table-tailored-pill--queued,
+.job-table-tailored-pill--failed,
+.job-table-tailored-pill--skip {
   text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.job-table-tailored-folder {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--board-accent-strong);
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .job-table-tailored-pill--done {

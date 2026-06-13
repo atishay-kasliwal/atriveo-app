@@ -7,6 +7,7 @@ import CompanyLogo from "./CompanyLogo";
 import { careerOpsRating, careerOpsStars, companyDomain, matchReasons } from "../utils/jobPresentation";
 import { groupJobsByCompany, type CompanyJobGroup } from "../utils/jobGrouping";
 import type { TailorRecord } from "../types/tailorQueue";
+import { tailorCellLabel, tailorFolderPath } from "../utils/tailorProgress";
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -88,18 +89,6 @@ function ratingPillLabel(key: string): string {
     case "blue":  return "Good";
     case "yellow": return "Review";
     default: return "Low";
-  }
-}
-
-function tailoredPill(record: TailorRecord | null | undefined): { label: string; tone: string } {
-  if (!record || record.status === "none") return { label: "—", tone: "none" };
-  switch (record.status) {
-    case "done": return { label: "Done", tone: "done" };
-    case "running": return { label: "Running", tone: "running" };
-    case "queued": return { label: "Queued", tone: "queued" };
-    case "no-go": return { label: "Skip", tone: "skip" };
-    case "failed": return { label: "Fail", tone: "failed" };
-    default: return { label: "—", tone: "none" };
   }
 }
 
@@ -220,6 +209,7 @@ interface RowProps {
   onExcludeCompany?: (company: string) => void;
   getTailorRecord?: (job: Job) => TailorRecord | null;
   onQueueUrgent?: (job: Job) => void;
+  onOpenTailorPath?: (path: string) => void;
   nested?: boolean;
   showCompany?: boolean;
   board?: boolean;
@@ -236,6 +226,7 @@ function JobTableRow({
   onExcludeCompany,
   getTailorRecord,
   onQueueUrgent,
+  onOpenTailorPath,
   nested = false,
   showCompany = true,
   board = false,
@@ -262,7 +253,8 @@ function JobTableRow({
           ? "Retry"
           : "Sync";
   const tailorRecord = getTailorRecord?.(job) ?? null;
-  const tailor = tailoredPill(tailorRecord);
+  const tailor = tailorCellLabel(tailorRecord);
+  const folderPath = tailorFolderPath(tailorRecord);
 
   function saveJob(source: SavedJobSource, e?: React.MouseEvent) {
     e?.stopPropagation();
@@ -356,12 +348,27 @@ function JobTableRow({
       <td className="job-table-level">{job.level || "—"}</td>
       {board && (
         <td className="job-table-tailored">
-          <span
-            className={`job-table-tailored-pill job-table-tailored-pill--${tailor.tone}`}
-            title={tailorRecord?.ats ? `ATS ${tailorRecord.ats}` : tailorRecord?.error || "Tailor status"}
-          >
-            {tailor.label}
-          </span>
+          <div className="job-table-tailored-inner">
+            <span
+              className={`job-table-tailored-pill job-table-tailored-pill--${tailor.tone}`}
+              title={tailorRecord?.ats ? `ATS ${tailorRecord.ats}` : tailorRecord?.error || "Tailor progress"}
+            >
+              {tailor.label}
+            </span>
+            {folderPath && onOpenTailorPath ? (
+              <button
+                type="button"
+                className="job-table-tailored-folder"
+                title={tailorRecord?.folder || folderPath}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenTailorPath(folderPath);
+                }}
+              >
+                Folder
+              </button>
+            ) : null}
+          </div>
         </td>
       )}
       <td className="job-table-time">{fmtTime(job.batch_time || job.date_posted, job.scraped_date, board)}</td>
@@ -603,6 +610,7 @@ interface Props {
   companyBandKeys?: Set<string>;
   getTailorRecord?: (job: Job) => TailorRecord | null;
   onQueueUrgent?: (job: Job) => void;
+  onOpenTailorPath?: (path: string) => void;
   variant?: "default" | "board";
   sortBy?: SortBy;
   sortDir?: SortDir;
@@ -623,6 +631,7 @@ export default function JobTable({
   companyBandKeys,
   getTailorRecord,
   onQueueUrgent,
+  onOpenTailorPath,
   variant = "default",
   sortBy,
   sortDir,
@@ -716,6 +725,7 @@ export default function JobTable({
                         onExcludeCompany={onExcludeCompany}
                         getTailorRecord={getTailorRecord}
                         onQueueUrgent={onQueueUrgent}
+                        onOpenTailorPath={onOpenTailorPath}
                         nested={showBand}
                         board
                       />

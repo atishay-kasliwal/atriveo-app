@@ -12,6 +12,10 @@ interface Props {
   queue: TailorQueueItem[];
   pendingCount: number;
   doneInQueue: number;
+  failedInQueue: number;
+  totalInQueue: number;
+  overallProgressPct: number;
+  processLogs: string[];
   processing: boolean;
   runningItem: TailorQueueItem | null;
   lastHourlySyncAt: number;
@@ -28,6 +32,10 @@ export default function TailorQueueBar({
   queue,
   pendingCount,
   doneInQueue,
+  failedInQueue,
+  totalInQueue,
+  overallProgressPct,
+  processLogs,
   processing,
   runningItem,
   lastHourlySyncAt,
@@ -40,12 +48,16 @@ export default function TailorQueueBar({
   onReorderPending,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [logsOpen, setLogsOpen] = useState(true);
   const [dragKey, setDragKey] = useState<string | null>(null);
 
   const pendingItems = useMemo(
     () => queue.filter((item) => item.status === "pending"),
     [queue],
   );
+
+  const finishedCount = doneInQueue + failedInQueue;
+  const showProgress = totalInQueue > 0 && (processing || finishedCount > 0 || pendingCount > 0);
 
   function handleDrop(targetKey: string) {
     if (!dragKey || dragKey === targetKey) {
@@ -77,6 +89,14 @@ export default function TailorQueueBar({
             <span className="tailor-queue-stat">
               <strong>{doneInQueue}</strong> done
             </span>
+            {showProgress ? (
+              <span className="tailor-queue-stat tailor-queue-stat--progress">
+                <strong>{overallProgressPct}%</strong> complete
+                <span className="tailor-queue-stat-sub">
+                  {finishedCount + (runningItem ? 1 : 0)}/{totalInQueue}
+                </span>
+              </span>
+            ) : null}
             <span className="tailor-queue-stat tailor-queue-stat--muted">
               Hourly batch: top {HOURLY_QUEUE_SIZE} by score
             </span>
@@ -93,6 +113,19 @@ export default function TailorQueueBar({
               </button>
             ) : null}
           </div>
+
+          {showProgress ? (
+            <div className="tailor-queue-progress" aria-label="Queue progress">
+              <div className="tailor-queue-progress-track">
+                <span style={{ width: `${overallProgressPct}%` }} />
+              </div>
+              <div className="tailor-queue-progress-meta">
+                <span>{overallProgressPct}% done</span>
+                <span>{finishedCount} finished · {pendingCount} waiting{runningItem ? " · 1 running" : ""}</span>
+              </div>
+            </div>
+          ) : null}
+
           {processing && runningItem ? (
             <div className="tailor-queue-running">
               Tailoring <strong>{runningItem.company}</strong> · {runningItem.title}
@@ -119,6 +152,21 @@ export default function TailorQueueBar({
           ) : null}
         </div>
       </div>
+
+      {processLogs.length > 0 ? (
+        <div className={`tailor-queue-logs${logsOpen ? " is-open" : ""}`}>
+          <button type="button" className="tailor-queue-logs-toggle" onClick={() => setLogsOpen((v) => !v)}>
+            {logsOpen ? "▾" : "▸"} Queue log · {processLogs.length} lines
+          </button>
+          {logsOpen ? (
+            <div className="tailor-queue-logs-body">
+              {processLogs.map((line) => (
+                <div key={line} className="tailor-queue-log-line">{line}</div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {expanded && pendingItems.length > 0 ? (
         <ul className="tailor-queue-list">

@@ -28,6 +28,9 @@ export interface TailorRecord {
   ats?: string;
   tailoredAt?: string;
   pdfPath?: string;
+  dir?: string;
+  folder?: string;
+  progressPct?: number;
   error?: string;
 }
 
