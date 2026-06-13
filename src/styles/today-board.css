@@ -62,7 +62,7 @@ body.is-today-board .nav-tab {
   font-weight: 500;
   padding: 5px 10px;
   border-radius: 6px;
-  color: #52525b;
+  color: var(--board-sub);
 }
 
 body.is-today-board .nav-tab.active {
@@ -522,10 +522,10 @@ body.is-today-board .nav-tab.active {
   top: 50%;
   transform: translateY(-50%);
   padding: 2px 5px;
-  border: 1px solid #e4e4e7;
+  border: 1px solid var(--board-line);
   border-radius: 4px;
-  background: #fafafa;
-  color: #a1a1aa;
+  background: var(--board-canvas);
+  color: var(--board-muted);
   font-size: 10px;
   font-weight: 600;
   font-family: inherit;
@@ -682,7 +682,7 @@ body.is-today-board .nav-tab.active {
 
 .job-table-score-delta--up { color: #16a34a; }
 .job-table-score-delta--down { color: #dc2626; }
-.job-table-score-delta--flat { color: #a1a1aa; }
+.job-table-score-delta--flat { color: var(--board-muted); }
 
 .job-table-score-cell--board .job-table-score-bar {
   width: 100%;
@@ -747,12 +747,18 @@ body.is-today-board .nav-tab.active {
   white-space: nowrap;
 }
 
-/* Rating */
+/* Rating — keep the <td> a normal table-cell (so borders/height render
+   cleanly) and flex an inner wrapper instead. */
 .job-table--board .job-table-match {
+  overflow: hidden;
+}
+
+.job-table--board .job-table-rating-inner {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .job-table--board .job-table-stars {
@@ -767,6 +773,8 @@ body.is-today-board .nav-tab.active {
 .job-table-rating-pill {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
+  max-width: 100%;
   padding: 2px 7px;
   border: 1px solid var(--board-line);
   border-radius: 4px;
@@ -775,6 +783,8 @@ body.is-today-board .nav-tab.active {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   background: #fff;
 }
 
@@ -939,7 +949,7 @@ body.is-today-board .nav-tab.active {
   min-width: 18px;
   height: 18px;
   padding: 0 4px;
-  border: 1px solid #e4e4e7;
+  border: 1px solid var(--board-line);
   border-radius: 4px;
   background: var(--board-canvas);
   font-size: 10px;

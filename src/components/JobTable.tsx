@@ -78,6 +78,16 @@ function compLabel(value: number | null | undefined): string {
   return "High";
 }
 
+// Short, single-word pill label for the dense board rating column.
+function ratingPillLabel(key: string): string {
+  switch (key) {
+    case "green": return "Strong";
+    case "blue":  return "Good";
+    case "yellow": return "Review";
+    default: return "Low";
+  }
+}
+
 function ScoreCell({ job, board = false }: { job: Job; board?: boolean }) {
   const careerOps = careerOpsRating(job);
   const trend = scoreTrend(careerOps);
@@ -251,11 +261,16 @@ function JobTableRow({
         )}
       </td>
       <td className="job-table-match">
-        <span className="job-table-stars" aria-label={`Rating ${stars.replace(/☆/g, "").length} of 5`}>{stars}</span>
         {board ? (
-          <span className={`job-table-rating-pill job-table-rating-pill--${careerOps.key}`}>{careerOps.label}</span>
+          <div className="job-table-rating-inner">
+            <span className="job-table-stars" aria-label={`Rating ${stars.replace(/☆/g, "").length} of 5`}>{stars}</span>
+            <span className={`job-table-rating-pill job-table-rating-pill--${careerOps.key}`} title={careerOps.label}>{ratingPillLabel(careerOps.key)}</span>
+          </div>
         ) : (
-          <span className={`job-table-match-label job-table-match-label--${careerOps.key}`}>{careerOps.label}</span>
+          <>
+            <span className="job-table-stars" aria-label={`Rating ${stars.replace(/☆/g, "").length} of 5`}>{stars}</span>
+            <span className={`job-table-match-label job-table-match-label--${careerOps.key}`}>{careerOps.label}</span>
+          </>
         )}
       </td>
       <td className="job-table-loc" title={job.location}>{locationShort(job.location)}</td>

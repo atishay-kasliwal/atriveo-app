@@ -181,10 +181,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
 
   const rawJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : yesterdayJobs;
   const baseJobs = selectedSession ? rawJobs.filter((j) => j.session_id === selectedSession) : rawJobs;
-  const applyClickUrlSet = useMemo(
-    () => new Set(applyClickRecords.map((record) => record.jobUrl)),
-    [applyClickRecords]
-  );
 
   const runCards = useMemo(() => {
     const cards: RunCard[] = runHistory
@@ -225,12 +221,14 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       );
     }
     jobs = jobs.filter((j) => !isExcluded(j));
-    jobs = jobs.filter((j) => !j.job_url || !applyClickUrlSet.has(j.job_url));
+    // NOTE: previously we also removed any job already in the apply-click log,
+    // which made rows vanish from the table the moment you hit Apply/Click.
+    // Clicking now just logs quietly and the row stays put (marked is-applied).
     if (activeView === "high-match") {
       jobs = jobs.filter((j) => careerOpsRating(j).score >= 75);
     }
     return jobs;
-  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, applyClickUrlSet, activeView]);
+  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, activeView]);
 
   const filtered = useMemo(() => {
     let jobs = [...visibleJobs];
@@ -363,14 +361,16 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     setActiveView("all");
   };
 
-  const isTodayBoard = period === "today";
+  // Unified warm Matchflow board is used for ALL periods (This Hour / Today /
+  // Yesterday) so the Live Feed and Today page share one consistent design.
+  const isTodayBoard = true;
 
   const catalogJobs = useMemo(() => {
     let jobs = [...baseJobs];
     jobs = jobs.filter((j) => !isExcluded(j));
-    jobs = jobs.filter((j) => !j.job_url || !applyClickUrlSet.has(j.job_url));
+    // Apply-clicked jobs stay in the catalog too (counts no longer drop on click).
     return jobs;
-  }, [baseJobs, isExcluded, applyClickUrlSet]);
+  }, [baseJobs, isExcluded]);
 
   const viewCounts = useMemo(
     () => ({
