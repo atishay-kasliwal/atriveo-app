@@ -16,7 +16,7 @@ const LABEL = "com.atriveo.tailor";
 const DRIVE_ROOT = "/Volumes/Kasliwal v2";
 const SIDEcar = "http://127.0.0.1:8787/health";
 const OLLAMA_TAGS = "http://127.0.0.1:11434/api/tags";
-const DEFAULT_MODEL = "gemma3:12b";
+const DEFAULT_MODEL = "gemma4:12b";
 
 function log(line) {
   const row = `[${new Date().toISOString()}] ${line}`;

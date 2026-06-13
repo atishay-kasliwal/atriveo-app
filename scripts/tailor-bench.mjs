@@ -12,7 +12,7 @@ import { loadBullets } from "./tailor-bank.mjs";
 import { SYSTEM_PROMPT as DYN_SYSTEM, RESPONSE_SCHEMA as DYN_SCHEMA, buildUserMessage } from "./tailor-dynamic.mjs";
 
 const JD_PATH = process.argv[2];
-const MODELS = process.argv.slice(3).length ? process.argv.slice(3) : ["gemma3:12b", "gemma4:12b", "qwen3:8b"];
+const MODELS = process.argv.slice(3).length ? process.argv.slice(3) : ["gemma4:12b"];
 if (!JD_PATH || !fs.existsSync(JD_PATH)) {
   console.error("Provide a valid jd.txt path");
   process.exit(1);

@@ -18,6 +18,7 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import zlib from "node:zlib";
 import { spawnSync, spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadBullets, loadSafeClaims, loadBankNumbers, bulletNumbers } from "./tailor-bank.mjs";
@@ -63,7 +64,7 @@ const BANK_NUMBERS = loadBankNumbers(BANK);
 // ─── Config ──────────────────────────────────────────────────────────────────
 const PORT = 8787;
 const TAILOR_TOKEN = process.env.TAILOR_TOKEN?.trim() || "";
-const DEFAULT_MODEL = "gemma3:12b";
+const DEFAULT_MODEL = "gemma4:12b";
 const OUT_ROOT = "/Volumes/Kasliwal v2/tailored-resumes";
 const TEMPLATE =
   "/Users/atishaykasliwal/Desktop/June/Resume claude/tailored/2026-06-12/04-veryai-fullstack-engineer/resume.tex";
@@ -679,6 +680,36 @@ function applyRewrites(tex, bullets, rewrites) {
   return { tex, applied: edits.length };
 }
 
+// Count pages in the COMPILED PDF — the authoritative answer. tectonic writes
+// fully compressed PDFs (FlateDecode object streams), so the page objects are
+// hidden inside zlib streams. We inflate every stream and count /Type /Page
+// objects (excluding /Pages). This is exact, unlike a content-length estimate.
+// Node built-in zlib only. Returns null if it can't be determined.
+function pdfPageCount(pdfPath) {
+  try {
+    const data = fs.readFileSync(pdfPath);
+    let pages = 0;
+    // inflate each `stream ... endstream` chunk and count page objects inside
+    const re = /stream\r?\n/g;
+    let m;
+    while ((m = re.exec(data.toString("latin1"))) !== null) {
+      const start = m.index + m[0].length;
+      const end = data.toString("latin1").indexOf("endstream", start);
+      if (end === -1) continue;
+      const chunk = data.subarray(start, end);
+      try {
+        const dec = zlib.inflateSync(chunk).toString("latin1");
+        pages += (dec.match(/\/Type\s*\/Page(?![s])/g) || []).length;
+      } catch { /* not a flate stream */ }
+    }
+    // also count any uncompressed page objects in the raw bytes
+    pages += (data.toString("latin1").match(/\/Type\s*\/Page(?![s])/g) || []).length;
+    return pages > 0 ? pages : null;
+  } catch {
+    return null;
+  }
+}
+
 function compileTex(dir, onLog) {
   const t0 = Date.now();
   onLog?.("step", `Running: tectonic resume.tex (cwd: ${dir})`);
@@ -700,7 +731,15 @@ function compileTex(dir, onLog) {
   } else {
     onLog?.("warn", "resume.pdf not found after compile — check tectonic output");
   }
-  return { ok: true, pdf: named };
+  const pages = pdfPageCount(named);
+  if (pages != null) {
+    if (pages > 1) {
+      onLog?.("warn", `PDF is ${pages} pages — RULEBOOK requires ONE page. Bullets ran long; regenerate tighter.`);
+    } else {
+      onLog?.("result", "Page check passed · 1 page");
+    }
+  }
+  return { ok: true, pdf: named, pages };
 }
 
 // ─── Per-job tailor ──────────────────────────────────────────────────────────
@@ -757,6 +796,11 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
     onLog?.("think", "System prompt: dynamic select-and-rewrite rules (fixed 3-role structure, truth guard)");
 
     const ai = await chatJSON(model, DYN_SYSTEM, user, DYN_SCHEMA, [6144, 9216], onLog);
+
+    // Clamp ATS to 0-100 — some models ignore the schema max and emit junk like 90000.
+    const clampPct = (n) => Math.max(0, Math.min(100, Math.round(Number(n) || 0)));
+    ai.ats_before = clampPct(ai.ats_before);
+    ai.ats_after = clampPct(ai.ats_after);
 
     onLog?.("step", "Phase 1 complete · reviewing model output");
     if (ai.eligible === false) {
@@ -846,11 +890,14 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
     result.pdf = c.ok;
     result.pdfPath = c.ok ? c.pdf : "";
     result.dropped = droppedSkills.length;
+    result.pages = c.pages ?? null;
     if (!c.ok) {
       result.status = "tex-failed";
       result.error = c.err;
     } else {
-      onLog?.("result", `✓ Complete · ATS ${result.ats} · ${c.pdf}`);
+      // Still a success (PDF exists), but flag overflow so it is visible, not silent.
+      result.overflow = c.pages != null && c.pages > 1;
+      onLog?.("result", `✓ Complete · ATS ${result.ats}${result.overflow ? ` · ⚠ ${c.pages} pages` : " · 1 page"} · ${c.pdf}`);
     }
   } catch (e) {
     result.status = "ai-failed";

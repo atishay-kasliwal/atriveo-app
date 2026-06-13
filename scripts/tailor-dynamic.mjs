@@ -36,10 +36,15 @@ export const SYSTEM_PROMPT = `You are an elite technical recruiter and resume st
 
 STRATEGY (SELECT-FIRST — the bank bullets are already excellent, do NOT degrade them):
 - The bank bullets are pre-written, expert-rated 9+/10. Your PRIMARY job is SELECTION: pick the bullets from the bank that best match THIS JD. You do NOT have to use every role.
-- PRESERVE every concrete detail in the bullet you pick: named clients (e.g. "for Fidelity", "for BT Telecom"), every tool (e.g. "Spring Cloud"), and EVERY metric (some bullets carry two — keep both). Never drop a detail to make a bullet shorter.
 - TUNE, do not rewrite: only adjust wording lightly so the bullet mirrors the JD's exact keywords for tools the candidate already used. If a bullet already fits, copy it verbatim. Re-write substantially ONLY when a bullet is weak for this JD.
 - Order experience reverse-chronologically (most recent first).
 - Front-load impact (metric/scale in first 8-12 words). Strong verbs: Built, Engineered, Architected, Automated, Optimized, Scaled, Shipped, Reduced, Owned, Deployed.
+
+LENGTH (HARD — the resume MUST fit ONE page; this overrides verbosity):
+- Each bullet must be at most ~200 characters (~1.5 rendered lines). Target ~150. A bullet that runs 3 lines breaks the one-page limit and is INVALID.
+- KEEP at all costs (never cut these): every metric/number, named clients (e.g. "for Fidelity"), and any tool that appears in the JD.
+- TRIM to fit, in this order: filler adjectives, redundant connectors, trailing "across X contexts"-type closers, then a SECOND metric only if the bullet still exceeds ~200 chars. Never drop the primary metric or a JD tool.
+- If a bank bullet is longer than ~200 chars, compress it to fit while preserving the facts above. Tight and complete beats long and overflowing.
 
 TRUTH (non-negotiable — this is what survives the interview):
 - Only claim tools/skills the candidate actually has (they are in the bank's bullets and tags). NEVER invent a tool, metric, or experience.
@@ -52,8 +57,8 @@ STYLE (humanize — must not read AI-generated):
 - No rule-of-three padding ("X, Y, and Z" stacking). No synonym-cycling. One bullet = one concrete win with a number or named tool.
 
 QUALITY BAR (this is why a resume gets the interview — enforce all):
-- STRONG OPENER: the FIRST bullet of the first role (Stony Brook) must carry the single strongest metric AND a clear architecture/system-design signal AND the tightest match to this JD's domain. It alone should earn a callback.
-- METRIC CREDIBILITY: NEVER invent, round, or inflate a number. Use ONLY numbers that already appear in the candidate's bank bullet you are rewriting. Prefer before→after with context ("from 11 min to 90s") over bare percentages. Do not stack round numbers (90%, 40%, 99.9%) back to back.
+- STRONG OPENER: the FIRST bullet of the first role (Stony Brook) must carry the single strongest metric AND a clear architecture/system-design signal AND the tightest match to this JD's domain. It alone should earn a callback. When the JD is health/AI/backend-infra, lead with the bullet that best signals that lane (the profile's primary lane is Health AI / backend systems / production agentic AI).
+- METRIC CREDIBILITY: NEVER invent, round, or inflate a number. Use ONLY numbers that already appear in the candidate's bank bullet you are rewriting. Prefer concrete before→after with context ("from 11 min to 90s", "from 4h to under 2h") over bare percentages. Avoid dramatic round numbers; do NOT stack round percentages (90%, 40%, 99.9%) back to back — if two adjacent bullets both end in a round %, reword one to a before→after or scale figure.
 - DEPTH, NOT LISTING: every bullet must show HOW something was built or WHY it mattered — architecture, a tradeoff, or a concrete outcome. Never "Built X with Python, Kafka, Redis" as a tool dump. Each tool named must be shown in use.
 - BULLET UNIQUENESS: within a section, every bullet must carry a DIFFERENT signal — pick across {architecture/system design, scale/throughput, ownership/initiative, reliability/uptime, latency/performance, user or business impact, automation}. No two bullets telling the same story.
 - CADENCE VARIATION: do not start consecutive bullets with the same verb or the same structure. Mix bullet lengths. It must read like a human engineer wrote it.
@@ -93,8 +98,8 @@ export const RESPONSE_SCHEMA = {
     eligible: { type: "boolean" },
     no_go_reason: { type: "string" },
     header_title: { type: "string" },
-    ats_before: { type: "integer" },
-    ats_after: { type: "integer" },
+    ats_before: { type: "integer", minimum: 0, maximum: 100 },
+    ats_after: { type: "integer", minimum: 0, maximum: 100 },
     experience: {
       type: "array", maxItems: 3,
       items: {
@@ -150,9 +155,9 @@ For each bullet you are given, score it 1-10 on this bar:
 RULES for any rewrite:
 - Rewrite ONLY bullets scoring below 9. Leave 9-10 bullets unchanged (return them as-is).
 - NEVER add, change, round, or inflate a number that is not already in the original bullet text.
-- When rewriting, ADD BACK detail, do not strip it: keep every client name, every tool, and every metric already present. A bullet should get RICHER, never thinner.
+- LENGTH IS A HARD CONSTRAINT: every bullet must stay at most ~200 characters (~1.5 lines) so the resume fits ONE page. If a bullet is over ~200 chars, you MUST trim it (filler, connectors, trailing closers, then a second metric only if still too long) — keep every client name, JD tool, and the primary metric. Do NOT make bullets longer.
 - Keep every JD keyword and tool that was already present. Do not weaken ATS signal.
-- Keep it one line, impact-forward, truthful.
+- Keep it tight, one line where possible, impact-forward, truthful.
 
 Return ONLY:
 {

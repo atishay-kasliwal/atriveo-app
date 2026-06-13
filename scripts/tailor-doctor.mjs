@@ -23,7 +23,7 @@ const DRIVE_ROOT = "/Volumes/Kasliwal v2";
 const OUT_ROOT = path.join(DRIVE_ROOT, "tailored-resumes");
 const OLLAMA = "http://127.0.0.1:11434";
 const SIDECAR = "http://127.0.0.1:8787";
-const DEFAULT_MODEL = "gemma3:12b";
+const DEFAULT_MODEL = "gemma4:12b";
 // Buckets older than this are suspicious. The scraper + auto-export run hourly
 // (com.atriveo.job-pipeline → run-pipeline-and-export.sh), so anything older
 // than ~2h means the auto-export after the last scrape failed — check
