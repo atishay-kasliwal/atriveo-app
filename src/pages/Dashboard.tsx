@@ -115,6 +115,35 @@ function toMs(iso?: string | null): number {
   return parseDateLike(iso)?.getTime() ?? 0;
 }
 
+/** Pipeline publishes hourly; warn when static JSON is older than this. */
+const FEED_STALE_MS = 90 * 60 * 1000;
+
+function formatFeedAge(iso?: string | null): string {
+  const date = parseDateLike(iso);
+  if (!date) return "unknown";
+  const diffMs = Date.now() - date.getTime();
+  const diffM = Math.floor(diffMs / 60_000);
+  if (diffM < 1) return "just now";
+  if (diffM < 60) return `${diffM}m ago`;
+  const diffH = Math.floor(diffM / 60);
+  if (diffH < 24) return `${diffH}h ago`;
+  return formatRunTime(iso);
+}
+
+async function fetchJobFeed(type: string): Promise<Job[]> {
+  try {
+    // Bust browser + edge caches so the hourly-polled feed actually reflects the
+    // latest deploy. Without no-store + a cache-buster, a cached /api/jobs
+    // response makes the frontend look frozen even after new data is published.
+    const res = await fetch(`/api/jobs?type=${type}&t=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data as Job[] : [];
+  } catch {
+    return [];
+  }
+}
+
 function formatRunTime(iso?: string | null): string {
   const date = parseDateLike(iso);
   if (!date) return "—";
@@ -169,6 +198,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
   const [feedRefreshNotice, setFeedRefreshNotice] = useState("");
+  const [feedLastUpdated, setFeedLastUpdated] = useState<string | null>(null);
+  const [feedFetchError, setFeedFetchError] = useState("");
+  const [pipelineRefreshing, setPipelineRefreshing] = useState(false);
+  const [pipelineRefreshMsg, setPipelineRefreshMsg] = useState("");
   const hourSessionRef = useRef<string | null>(null);
 
   const applyView = useCallback((view: ViewKey) => {
@@ -191,13 +224,31 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   };
 
   const refreshJobFeeds = useCallback(async (opts: { initial?: boolean } = {}) => {
-    const [hour, today, yesterday, runs] = await Promise.all([
-      fetch("/api/jobs?type=hour").then((r) => r.json()).catch(() => []),
-      fetch("/api/jobs?type=today").then((r) => r.json()).catch(() => []),
-      fetch("/api/jobs?type=yesterday").then((r) => r.json()).catch(() => []),
-      fetch("/api/jobs?type=runs").then((r) => r.json()).catch(() => []),
+    const [hourList, todayList, yesterdayList, runsRes, metaRes] = await Promise.all([
+      fetchJobFeed("hour"),
+      fetchJobFeed("today"),
+      fetchJobFeed("yesterday"),
+      fetch("/api/jobs?type=runs").then(async (r) => (r.ok ? r.json() : [])).catch(() => []),
+      fetch("/metadata.json", { cache: "no-store" }).catch(() => null),
     ]);
-    const hourList = Array.isArray(hour) ? hour as Job[] : [];
+
+    if (!hourList.length && !todayList.length && !yesterdayList.length) {
+      setFeedFetchError("Could not load job feeds — try signing in again or refresh the page.");
+    } else {
+      setFeedFetchError("");
+    }
+
+    let metaUpdated: string | null = null;
+    if (metaRes?.ok) {
+      try {
+        const meta = await metaRes.json() as { last_updated?: string };
+        metaUpdated = meta.last_updated ?? null;
+        setFeedLastUpdated(metaUpdated);
+      } catch {
+        /* ignore */
+      }
+    }
+
     const nextSession = hourList[0]?.session_id ?? null;
     if (!opts.initial && nextSession && hourSessionRef.current && nextSession !== hourSessionRef.current) {
       const label = formatRunTime(hourList[0]?.batch_time || nextSession);
@@ -206,9 +257,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     }
     hourSessionRef.current = nextSession;
     setHourJobs(hourList);
-    setTodayJobs(Array.isArray(today) ? today : []);
-    setYesterdayJobs(Array.isArray(yesterday) ? yesterday : []);
-    setRunHistory(Array.isArray(runs) ? runs : []);
+    setTodayJobs(todayList);
+    setYesterdayJobs(yesterdayList);
+    setRunHistory(Array.isArray(runsRes) ? runsRes as RunEntry[] : []);
     return hourList;
   }, []);
 
@@ -247,8 +298,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       if (!j.session_id) return;
       hourOnlyCounts[j.session_id] = (hourOnlyCounts[j.session_id] || 0) + 1;
     });
+    // Prefer the larger count when a session appears in both hour + today files
+    // (pipeline sometimes writes different subsets to jobs.json vs today_jobs.json).
     for (const [sessionId, count] of Object.entries(hourOnlyCounts)) {
-      if (counts[sessionId] === undefined) counts[sessionId] = count;
+      counts[sessionId] = Math.max(counts[sessionId] ?? 0, count);
     }
     return counts;
   }, [hourJobs, todayJobs, yesterdayJobs]);
@@ -344,6 +397,38 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const visibleJobs = useMemo(() => {
     return feedJobsBeforeDismiss.filter((j) => !clickedKeySet.has(jobDismissKey(j)));
   }, [feedJobsBeforeDismiss, clickedKeySet]);
+
+  const clickedHiddenCount = useMemo(
+    () => feedJobsBeforeDismiss.length - visibleJobs.length,
+    [feedJobsBeforeDismiss, visibleJobs],
+  );
+
+  const feedIsStale = useMemo(() => {
+    const ts = toMs(feedLastUpdated);
+    return ts > 0 && Date.now() - ts > FEED_STALE_MS;
+  }, [feedLastUpdated]);
+
+  const handlePipelineRefresh = useCallback(async () => {
+    setPipelineRefreshing(true);
+    setPipelineRefreshMsg("");
+    try {
+      const resume = localStorage.getItem("atriveo_resume") || "";
+      const res = await fetch("/api/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resume }),
+      });
+      const data = await res.json() as { ok?: boolean; message?: string; error?: string };
+      setPipelineRefreshMsg(data.ok ? (data.message ?? "Pipeline triggered") : (data.error ?? "Failed"));
+      if (data.ok) {
+        window.setTimeout(() => { void refreshJobFeeds(); }, 65_000);
+      }
+    } catch {
+      setPipelineRefreshMsg("Network error");
+    } finally {
+      setPipelineRefreshing(false);
+    }
+  }, [refreshJobFeeds]);
 
   const handleSortColumn = useCallback((column: SortBy) => {
     if (sortBy === column) {
@@ -814,7 +899,11 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               <div className="board-metric">
                 <span className="board-metric-label">Active Matches</span>
                 <span className="board-metric-value">{displayedJobs.length}</span>
-                <span className="board-metric-sub">in current view</span>
+                <span className="board-metric-sub">
+                  {clickedHiddenCount > 0
+                    ? `${clickedHiddenCount} clicked away · ${rawJobs.length} in feed`
+                    : "in current view"}
+                </span>
               </div>
               <div className="board-metric board-metric--accent">
                 <span className="board-metric-label">Avg. Match Score</span>
@@ -852,6 +941,26 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               />
 
               {filtersOpen && filterBar}
+
+              {feedFetchError ? (
+                <div className="feed-stale-notice feed-stale-notice--error" role="alert">{feedFetchError}</div>
+              ) : null}
+
+              {feedIsStale && period === "hour" ? (
+                <div className="feed-stale-notice" role="status">
+                  Job data is from {formatRunTime(feedLastUpdated)} ET ({formatFeedAge(feedLastUpdated)}).
+                  The scraper may not have published a newer hour yet.
+                  <button
+                    type="button"
+                    className="feed-stale-notice-btn"
+                    disabled={pipelineRefreshing}
+                    onClick={() => void handlePipelineRefresh()}
+                  >
+                    {pipelineRefreshing ? "Triggering…" : "Refresh pipeline"}
+                  </button>
+                  {pipelineRefreshMsg ? <span className="feed-stale-notice-msg">{pipelineRefreshMsg}</span> : null}
+                </div>
+              ) : null}
 
               {feedRefreshNotice ? (
                 <div className="feed-refresh-notice" role="status">{feedRefreshNotice}</div>
