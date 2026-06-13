@@ -5,3 +5,6 @@ dist
 scripts/cloudflared-tailor.yml
 scripts/preview.html
 .dev.vars
+
+# Claude Code local settings (machine-specific)
+.claude/

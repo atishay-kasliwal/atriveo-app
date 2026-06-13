@@ -6,10 +6,10 @@ const RESUME_KEY = "atriveo_resume";
 const OLLAMA_BASE = "http://localhost:11434";
 
 const MODELS = [
-  { id: "gemma4:12b", label: "Gemma4 12B",  note: "Recommended · best quality" },
-  { id: "gemma3:12b", label: "Gemma3 12B",  note: "Fallback · also reliable" },
-  { id: "qwen3:8b",   label: "Qwen3 8B",    note: "Faster · may truncate" },
-  { id: "qwen3:4b",   label: "Qwen3 4B",    note: "Fastest · lighter" },
+  { id: "gemma3:12b", label: "Gemma3 12B",  note: "Recommended · best bullet quality" },
+  { id: "gemma4:12b", label: "Gemma4 12B",  note: "Alt · faster, weaker selections" },
+  { id: "qwen3:8b",   label: "Qwen3 8B",    note: "Fastest 12B-class · may repeat bullets" },
+  { id: "qwen3:4b",   label: "Qwen3 4B",    note: "Lightest · lower quality" },
 ];
 
 const SYSTEM_PROMPT = `You are an expert ATS resume optimizer and technical recruiter. Your output is a single valid JSON object — no markdown, no explanation, no text outside the JSON.
@@ -153,7 +153,7 @@ function extractJSON(raw: string): string {
 export default function ResumeOptimizer() {
   const [resumeText, setResumeText] = useState("");
   const [jdText, setJdText]         = useState("");
-  const [model, setModel]           = useState("gemma4:12b");
+  const [model, setModel]           = useState("gemma3:12b");
   const [loading, setLoading]       = useState(false);
   const [result, setResult]         = useState<OptimizeResult | null>(null);
   const [error, setError]           = useState<string | null>(null);

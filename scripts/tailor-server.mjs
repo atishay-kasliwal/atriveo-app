@@ -18,7 +18,8 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { spawnSync } from "node:child_process";
+import { spawnSync, spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { loadBullets, loadSafeClaims, loadBankNumbers, bulletNumbers } from "./tailor-bank.mjs";
 import {
   SYSTEM_PROMPT as DYN_SYSTEM, RESPONSE_SCHEMA as DYN_SCHEMA,
@@ -28,6 +29,33 @@ import {
 } from "./tailor-dynamic.mjs";
 
 // Load the engine bank once at startup.
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const RECOVER_SCRIPT = path.join(SCRIPT_DIR, "tailor-recover.mjs");
+function spawnRecover(reason) {
+  try {
+    const child = spawn(process.execPath, [RECOVER_SCRIPT, `--reason=${reason}`], {
+      detached: true,
+      stdio: "ignore",
+      cwd: path.join(SCRIPT_DIR, ".."),
+    });
+    child.unref();
+    log(`auto-recovery spawned · ${reason}`);
+  } catch (e) {
+    log(`auto-recovery spawn failed · ${e.message}`);
+  }
+}
+
+function isRecoverableServerError(message) {
+  const err = String(message || "").toLowerCase();
+  return (
+    err.includes("fetch failed")
+    || err.includes("disconnected")
+    || err.includes("ollama unreachable")
+    || err.includes("econnreset")
+    || err.includes("socket hang up")
+  );
+}
+
 const BANK = loadBullets();
 const SAFE_CLAIMS = loadSafeClaims(BANK);
 const BANK_NUMBERS = loadBankNumbers(BANK);
@@ -35,8 +63,7 @@ const BANK_NUMBERS = loadBankNumbers(BANK);
 // ─── Config ──────────────────────────────────────────────────────────────────
 const PORT = 8787;
 const TAILOR_TOKEN = process.env.TAILOR_TOKEN?.trim() || "";
-const OLLAMA = "http://localhost:11434/api/chat";
-const DEFAULT_MODEL = "gemma4:12b";
+const DEFAULT_MODEL = "gemma3:12b";
 const OUT_ROOT = "/Volumes/Kasliwal v2/tailored-resumes";
 const TEMPLATE =
   "/Users/atishaykasliwal/Desktop/June/Resume claude/tailored/2026-06-12/04-veryai-fullstack-engineer/resume.tex";
@@ -148,8 +175,121 @@ function norm(s) {
     .toLowerCase();
 }
 
+const OLLAMA_HOST = "127.0.0.1";
+const OLLAMA_PORT = 11434;
+const OLLAMA_TRANSIENT_RETRIES = 3;
+const MIN_FULL_JD_CHARS = 400;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTransientOllamaError(err) {
+  const msg = String(err?.message || err || "").toLowerCase();
+  return (
+    msg.includes("fetch failed")
+    || msg.includes("econnreset")
+    || msg.includes("etimedout")
+    || msg.includes("socket hang up")
+    || msg.includes("aborted")
+    || msg.includes("broken pipe")
+    || msg.includes("disconnected")
+  );
+}
+
+/** Node fetch() uses Undici's 300s body timeout — use http for long Ollama streams. */
+function ollamaHttpRequest(payload, stream = false) {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify({ keep_alive: "30m", ...payload });
+    const req = http.request(
+      {
+        hostname: OLLAMA_HOST,
+        port: OLLAMA_PORT,
+        path: "/api/chat",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(body),
+        },
+      },
+      (res) => {
+        res.socket?.setTimeout(0);
+        res.setTimeout(0);
+
+        if (res.statusCode >= 400) {
+          const chunks = [];
+          res.on("data", (c) => chunks.push(c));
+          res.on("end", () => {
+            reject(new Error(`Ollama HTTP ${res.statusCode}: ${Buffer.concat(chunks).toString().slice(0, 400)}`));
+          });
+          res.on("error", reject);
+          return;
+        }
+
+        if (!stream) {
+          const chunks = [];
+          res.on("data", (c) => chunks.push(c));
+          res.on("end", () => {
+            try {
+              resolve(JSON.parse(Buffer.concat(chunks).toString()));
+            } catch (e) {
+              reject(new Error(`Ollama invalid JSON: ${e.message}`));
+            }
+          });
+          res.on("error", reject);
+          return;
+        }
+
+        resolve(res);
+      },
+    );
+    req.on("error", reject);
+    req.setTimeout(0);
+    req.write(body);
+    req.end();
+  });
+}
+
+function readOllamaStream(res, handlers = {}) {
+  return new Promise((resolve, reject) => {
+    let buffer = "";
+    let content = "";
+    let thinkBuf = "";
+    let doneReason = null;
+    let evalCount = null;
+
+    const processLine = (line) => {
+      if (!line.trim()) return;
+      let chunk;
+      try { chunk = JSON.parse(line); } catch { return; }
+      if (chunk.message?.thinking) {
+        thinkBuf += chunk.message.thinking;
+        handlers.onThink?.(thinkBuf);
+      }
+      if (chunk.message?.content) {
+        content += chunk.message.content;
+        handlers.onContent?.(content, thinkBuf);
+      }
+      if (chunk.done_reason) doneReason = chunk.done_reason;
+      if (chunk.eval_count != null) evalCount = chunk.eval_count;
+    };
+
+    res.on("data", (raw) => {
+      buffer += raw.toString();
+      const parts = buffer.split("\n");
+      buffer = parts.pop() || "";
+      for (const line of parts) processLine(line);
+    });
+    res.on("end", () => {
+      if (buffer.trim()) processLine(buffer);
+      resolve({ content, thinkBuf, doneReason, evalCount });
+    });
+    res.on("error", reject);
+  });
+}
+
 async function callOllamaOnce(model, jd, resumeText, numPredict) {
-  const body = {
+  const payload = {
     model,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
@@ -160,13 +300,7 @@ async function callOllamaOnce(model, jd, resumeText, numPredict) {
     format: RESPONSE_SCHEMA,
     options: { temperature: 0.15, num_predict: numPredict },
   };
-  const res = await fetch(OLLAMA, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`Ollama ${res.status}: ${await res.text()}`);
-  const data = await res.json();
+  const data = await ollamaHttpRequest(payload, false);
   return { content: data.message.content, truncated: data.done_reason === "length" };
 }
 
@@ -196,47 +330,42 @@ async function chatJSON(model, system, user, schema, budgets = [6144, 9216], onL
 
   for (let attempt = 0; attempt < budgets.length; attempt++) {
     const budget = budgets[attempt];
-    onLog?.("step", `[Attempt ${attempt + 1}/${budgets.length}] POST Ollama /api/chat · model=${model} · max_output=${budget.toLocaleString()} tokens`);
+    let truncated = false;
 
-    const body = {
-      model,
-      messages: [{ role: "system", content: system }, { role: "user", content: user }],
-      stream: true,
-      think: false,
-      format: schema,
-      options: { temperature: 0.2, num_predict: budget, num_ctx: 16384 },
-    };
-    const t0 = Date.now();
-    let content = "";
-    let thinkBuf = "";
-    let thinkLineEmitted = 0;
-    let doneReason = null;
-    let evalCount = null;
-
-    // Interval keepalive: reader.read() can block for minutes during thinking with no
-    // Ollama chunks, which starves the NDJSON stream and trips proxy idle timeouts.
-    const ollamaKeepalive = onLog
-      ? setInterval(() => {
-          const elapsed = ((Date.now() - t0) / 1000).toFixed(0);
-          onLog(
-            "step",
-            `Ollama working… ${elapsed}s elapsed${content ? ` · JSON ${content.length.toLocaleString()} chars` : ""}${thinkBuf ? ` · thinking ${thinkBuf.length.toLocaleString()} chars` : ""}`,
-          );
-        }, STREAM_HEARTBEAT_MS)
-      : null;
-
-    let res;
-    try {
-      res = await fetch(OLLAMA, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      if (!res.ok) {
-        const errText = await res.text();
-        onLog?.("error", `Ollama HTTP ${res.status}: ${errText.slice(0, 200)}`);
-        throw new Error(`Ollama ${res.status}: ${errText}`);
+    for (let transientTry = 0; transientTry < OLLAMA_TRANSIENT_RETRIES; transientTry++) {
+      if (transientTry > 0) {
+        onLog?.("warn", `Ollama connection lost — retry ${transientTry + 1}/${OLLAMA_TRANSIENT_RETRIES} in 5s…`);
+        await sleep(5000);
+        await checkOllama(model, onLog);
       }
-      onLog?.("result", "Ollama stream opened — waiting for model response…");
 
-      const decoder = new TextDecoder();
-      let buffer = "";
+      const retrySuffix = transientTry > 0 ? ` · reconnect ${transientTry + 1}` : "";
+      onLog?.("step", `[Attempt ${attempt + 1}/${budgets.length}] POST Ollama /api/chat · model=${model} · max_output=${budget.toLocaleString()} tokens${retrySuffix}`);
+
+      const payload = {
+        model,
+        messages: [{ role: "system", content: system }, { role: "user", content: user }],
+        stream: true,
+        think: false,
+        format: schema,
+        options: { temperature: 0.2, num_predict: budget, num_ctx: 16384 },
+      };
+      const t0 = Date.now();
+      let content = "";
+      let thinkBuf = "";
+      let thinkLineEmitted = 0;
+      let doneReason = null;
+      let evalCount = null;
+
+      const ollamaKeepalive = onLog
+        ? setInterval(() => {
+            const elapsed = ((Date.now() - t0) / 1000).toFixed(0);
+            onLog(
+              "step",
+              `Ollama working… ${elapsed}s elapsed${content ? ` · JSON ${content.length.toLocaleString()} chars` : ""}${thinkBuf ? ` · thinking ${thinkBuf.length.toLocaleString()} chars` : ""}`,
+            );
+          }, STREAM_HEARTBEAT_MS)
+        : null;
 
       const emitThinkLines = () => {
         if (!onLog) return;
@@ -248,50 +377,65 @@ async function chatJSON(model, system, user, schema, budgets = [6144, 9216], onL
         }
       };
 
-      const reader = res.body.getReader();
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const parts = buffer.split("\n");
-        buffer = parts.pop() || "";
-        for (const line of parts) {
-          if (!line.trim()) continue;
-          let chunk;
-          try { chunk = JSON.parse(line); } catch { continue; }
-          if (chunk.message?.thinking) {
-            thinkBuf += chunk.message.thinking;
+      try {
+        const res = await ollamaHttpRequest(payload, true);
+        onLog?.("result", "Ollama stream opened — waiting for model response…");
+
+        const streamResult = await readOllamaStream(res, {
+          onThink: (buf) => {
+            thinkBuf = buf;
             emitThinkLines();
-          }
-          if (chunk.message?.content) content += chunk.message.content;
-          if (chunk.done_reason) doneReason = chunk.done_reason;
-          if (chunk.eval_count != null) evalCount = chunk.eval_count;
+          },
+          onContent: (nextContent, buf) => {
+            content = nextContent;
+            thinkBuf = buf;
+          },
+        });
+        content = streamResult.content;
+        thinkBuf = streamResult.thinkBuf;
+        doneReason = streamResult.doneReason;
+        evalCount = streamResult.evalCount;
+      } catch (e) {
+        const elapsedSec = ((Date.now() - t0) / 1000).toFixed(0);
+        if (isTransientOllamaError(e) && transientTry < OLLAMA_TRANSIENT_RETRIES - 1) {
+          onLog?.("error", `${e.message} (${elapsedSec}s elapsed)`);
+          continue;
         }
+        if (isTransientOllamaError(e)) {
+          throw new Error(
+            `Ollama disconnected after ${elapsedSec}s — restart Ollama (ollama serve) or try a smaller model`,
+          );
+        }
+        throw e;
+      } finally {
+        if (ollamaKeepalive) clearInterval(ollamaKeepalive);
       }
-    } finally {
-      if (ollamaKeepalive) clearInterval(ollamaKeepalive);
-    }
-    if (thinkBuf && thinkLineEmitted < thinkBuf.split("\n").length) {
-      const tail = thinkBuf.split("\n").slice(thinkLineEmitted).join("\n").trim();
-      if (tail) onLog?.("think", tail);
+
+      if (thinkBuf && thinkLineEmitted < thinkBuf.split("\n").length) {
+        const tail = thinkBuf.split("\n").slice(thinkLineEmitted).join("\n").trim();
+        if (tail) onLog?.("think", tail);
+      }
+
+      const elapsedSec = ((Date.now() - t0) / 1000).toFixed(1);
+      if (doneReason === "length") {
+        onLog?.("warn", `Truncated at ${budget} tokens after ${elapsedSec}s — retrying larger budget…`);
+        truncated = true;
+        break;
+      }
+
+      onLog?.("result", `Ollama finished in ${elapsedSec}s · JSON ${content.length.toLocaleString()} chars${evalCount != null ? ` · ~${evalCount} eval tokens` : ""}`);
+      onLog?.("step", "Parsing structured JSON response…");
+      try {
+        const parsed = JSON.parse(content);
+        onLog?.("result", "JSON parsed successfully");
+        return parsed;
+      } catch (e) {
+        onLog?.("error", `JSON parse failed: ${e.message} · preview: ${content.slice(0, 120)}…`);
+        throw new Error(`invalid JSON from model: ${e.message}`);
+      }
     }
 
-    const elapsedSec = ((Date.now() - t0) / 1000).toFixed(1);
-    if (doneReason === "length") {
-      onLog?.("warn", `Truncated at ${budget} tokens after ${elapsedSec}s — retrying larger budget…`);
-      continue;
-    }
-
-    onLog?.("result", `Ollama finished in ${elapsedSec}s · JSON ${content.length.toLocaleString()} chars${evalCount != null ? ` · ~${evalCount} eval tokens` : ""}`);
-    onLog?.("step", "Parsing structured JSON response…");
-    try {
-      const parsed = JSON.parse(content);
-      onLog?.("result", "JSON parsed successfully");
-      return parsed;
-    } catch (e) {
-      onLog?.("error", `JSON parse failed: ${e.message} · preview: ${content.slice(0, 120)}…`);
-      throw new Error(`invalid JSON from model: ${e.message}`);
-    }
+    if (truncated) continue;
   }
   throw new Error(`model output truncated even at ${budgets.at(-1)} tokens`);
 }
@@ -333,7 +477,7 @@ function createRunLogger(send) {
 }
 
 async function checkOllama(model, onLog) {
-  onLog?.("step", `Checking Ollama at ${OLLAMA.replace("/api/chat", "")}…`);
+  onLog?.("step", `Checking Ollama at http://${OLLAMA_HOST}:${OLLAMA_PORT}…`);
   try {
     const res = await fetch("http://localhost:11434/api/tags", { signal: AbortSignal.timeout(5000) });
     if (!res.ok) throw new Error(`Ollama tags HTTP ${res.status}`);
@@ -563,6 +707,13 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
   const signals = scanJdSignals(jd);
 
   onLog?.("step", `JD loaded · ${jdLen.toLocaleString()} chars`);
+  if (jdLen < MIN_FULL_JD_CHARS) {
+    onLog?.("warn", `JD too short (${jdLen} chars < ${MIN_FULL_JD_CHARS}) — full LinkedIn text missing; skipping to avoid bad output`);
+    result.status = "no-jd";
+    result.error = `JD too short (${jdLen} chars) — paste the full JD in Tailor Lab or wait for scrape`;
+    sendPhase("done", result);
+    return result;
+  }
   if (job.job_url) onLog?.("think", `Source URL · ${job.job_url}`);
   if (job.score_pct != null) onLog?.("think", `Feed match score · ${job.score_pct}%`);
   for (const sig of signals) onLog?.("think", `JD signal · ${sig}`);
@@ -689,12 +840,17 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
     result.status = "ai-failed";
     result.error = String(e.message || e);
     onLog?.("error", result.error);
+    if (isRecoverableServerError(result.error)) {
+      spawnRecover(result.error);
+    }
   }
   sendPhase("done", result);
   return result;
 }
 
 // ─── HTTP server ─────────────────────────────────────────────────────────────
+let tailorBusy = false;
+
 const server = http.createServer(async (req, res) => {
   // permissive CORS so the Vite dev origin can reach us
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -715,9 +871,20 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "POST" && pathname === "/tailor") {
+    if (tailorBusy) {
+      res.writeHead(503, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({
+        ok: false,
+        error: "Tailor busy — another job is still running on your Mac. Wait for it to finish.",
+      }));
+    }
     let raw = "";
     req.on("data", (c) => (raw += c));
+    req.on("close", () => {
+      if (!res.writableEnded) tailorBusy = false;
+    });
     req.on("end", async () => {
+      tailorBusy = true;
       // Stream newline-delimited JSON events so the frontend shows live, per-job
       // progress instead of waiting minutes for one big response.
       const send = makeNdjsonSender(res);
@@ -733,7 +900,7 @@ const server = http.createServer(async (req, res) => {
         const dateDir = path.join(OUT_ROOT, date);
 
         fs.mkdirSync(dateDir, { recursive: true });
-        const existing = fs.readdirSync(dateDir).filter((d) => /^\d\d-/.test(d));
+        const existing = fs.readdirSync(dateDir).filter((d) => /^\d+-/.test(d));
         let seq = existing.length;
 
         res.writeHead(200, {
@@ -779,6 +946,70 @@ const server = http.createServer(async (req, res) => {
         catch { res.writeHead(400, { "Content-Type": "application/json" }); res.end(JSON.stringify({ ok: false, error: String(e.message || e) })); }
       } finally {
         if (heartbeat) clearInterval(heartbeat);
+        tailorBusy = false;
+      }
+    });
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/recover") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      let reason = "manual";
+      try {
+        if (raw.trim()) reason = JSON.parse(raw).reason || reason;
+      } catch {
+        /* ignore */
+      }
+      spawnRecover(reason);
+      res.writeHead(202, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true, message: "Recovery started on Mac — check Queue log in ~30s" }));
+    });
+    return;
+  }
+
+  // Check if a job already completed on disk (used after stream drop/timeout).
+  // POST /check-job { company, title } → { ok, found, pdfPath, dir, folder, ats }
+  if (req.method === "POST" && pathname === "/check-job") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      try {
+        const { company, title } = JSON.parse(raw);
+        if (!company || !title) throw new Error("company and title required");
+        const date = new Date().toISOString().slice(0, 10);
+        const dateDir = path.join(OUT_ROOT, date);
+        if (!fs.existsSync(dateDir)) {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          return res.end(JSON.stringify({ ok: true, found: false }));
+        }
+        const compSlug = slug(company, 24);
+        const titleSlug = slug(title, 30);
+        const dirs = fs.readdirSync(dateDir).filter((d) => /^\d+-/.test(d));
+        // find the most recent folder matching company+title
+        let best = null;
+        for (const d of dirs.reverse()) {
+          if (d.includes(compSlug) && d.includes(titleSlug)) { best = d; break; }
+          if (d.includes(compSlug)) { best = d; break; }
+        }
+        if (!best) {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          return res.end(JSON.stringify({ ok: true, found: false }));
+        }
+        const dir = path.join(dateDir, best);
+        const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
+        const hasPdf = fs.existsSync(pdfPath);
+        let ats = null;
+        try {
+          const opt = JSON.parse(fs.readFileSync(path.join(dir, "optimizer.json"), "utf8"));
+          if (opt.ats_before != null && opt.ats_after != null) ats = `${opt.ats_before}→${opt.ats_after}`;
+        } catch { /* no optimizer.json yet */ }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: true, found: hasPdf, pdfPath: hasPdf ? pdfPath : null, dir, folder: best, ats }));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
       }
     });
     return;

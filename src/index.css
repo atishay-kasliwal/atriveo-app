@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import url('./styles/today-board.css');
+@import url('./styles/manual-tailor.css');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1598,7 +1599,7 @@ header {
 
 .tailor-thought-line {
   display: grid;
-  grid-template-columns: 88px 14px minmax(0, 1fr);
+  grid-template-columns: max-content 14px minmax(0, 1fr);
   gap: 6px;
   align-items: start;
   padding: 4px 0;
@@ -1607,11 +1608,23 @@ header {
 
 .tailor-thought-meta {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 6px;
   color: #94a3b8;
   font-size: 9.5px;
   line-height: 1.25;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.tailor-thought-time {
+  flex-shrink: 0;
+  min-width: 8ch;
+  display: inline-block;
+  font-weight: 600;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
 }
 
 .tailor-thought-step {
@@ -1664,7 +1677,7 @@ header {
 
 @media (max-width: 860px) {
   .tailor-thought-line {
-    grid-template-columns: 72px 14px minmax(0, 1fr);
+    grid-template-columns: max-content 14px minmax(0, 1fr);
   }
 }
 

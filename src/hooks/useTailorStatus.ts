@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "./useAuth";
-import type { TailorRecord, TailorRecordStatus } from "../types/tailorQueue";
+import type { TailorRecord, TailorRecordStatus, TailorQueueItem } from "../types/tailorQueue";
+import type { TailorStreamEvent } from "../types/tailor";
 import { jobDismissKey } from "../utils/jobCopy";
+import { mergeStreamIntoTailorRecord, reconcileTailorRecordsWithQueue } from "../utils/tailorSync";
+import { estDateKey, useEstDayKey } from "../utils/estDate";
 
 const KEY = (uid: string) => `atriveo_tailor_status_v1_${uid}`;
 
@@ -28,6 +31,7 @@ export function useTailorStatus() {
   const { user, loading } = useAuth();
   const uid = user?.email ?? "anon";
   const [records, setRecords] = useState<Record<string, TailorRecord>>({});
+  const estDayKey = useEstDayKey();
 
   useEffect(() => {
     if (loading) return;
@@ -77,8 +81,35 @@ export function useTailorStatus() {
         folder: patch.folder ?? existing?.folder,
         progressPct: patch.progressPct ?? existing?.progressPct,
         error: patch.error ?? existing?.error,
+        logs: patch.logs ?? existing?.logs,
+        durationMs: patch.durationMs ?? existing?.durationMs,
+        outcome: patch.outcome ?? existing?.outcome,
+        serverStatus: patch.serverStatus ?? existing?.serverStatus,
       };
       const next = { ...prev, [jobKey]: nextRecord };
+      persist(uid, next);
+      return next;
+    });
+  }, [uid]);
+
+  const applyStreamEvent = useCallback((
+    jobKey: string,
+    event: TailorStreamEvent,
+    base: Partial<TailorRecord> = {},
+  ) => {
+    setRecords((prev) => {
+      const merged = mergeStreamIntoTailorRecord(prev[jobKey], jobKey, event, base);
+      if (!merged) return prev;
+      const next = { ...prev, [jobKey]: merged };
+      persist(uid, next);
+      return next;
+    });
+  }, [uid]);
+
+  const reconcileWithQueue = useCallback((queue: TailorQueueItem[]) => {
+    setRecords((prev) => {
+      const next = reconcileTailorRecordsWithQueue(prev, queue);
+      if (next === prev) return prev;
       persist(uid, next);
       return next;
     });
@@ -91,17 +122,49 @@ export function useTailorStatus() {
     return records[key] ?? null;
   }, [records]);
 
+  const clearAllLogs = useCallback(() => {
+    setRecords((prev) => {
+      let changed = false;
+      const next: Record<string, TailorRecord> = {};
+      for (const [key, record] of Object.entries(prev)) {
+        if (record.logs?.length) {
+          next[key] = { ...record, logs: [] };
+          changed = true;
+        } else {
+          next[key] = record;
+        }
+      }
+      if (!changed) return prev;
+      persist(uid, next);
+      return next;
+    });
+  }, [uid]);
+
   const doneCount = useMemo(
     () => Object.values(records).filter((r) => r.status === "done").length,
     [records],
   );
 
+  const resumesCreatedTodayCount = useMemo(
+    () => Object.values(records).filter((record) => (
+      record.status === "done"
+      && Boolean(record.pdfPath)
+      && record.tailoredAt
+      && estDateKey(new Date(record.tailoredAt)) === estDayKey
+    )).length,
+    [records, estDayKey],
+  );
+
   return {
     records,
     doneCount,
+    resumesCreatedTodayCount,
     upsertRecord,
     markStatus,
+    applyStreamEvent,
+    reconcileWithQueue,
     getRecord,
     getRecordForJob,
+    clearAllLogs,
   };
 }

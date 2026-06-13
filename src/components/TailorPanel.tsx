@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { TailorJobState, TailorLogEntry, TailorLogKind, TailorRunState } from "../types/tailor";
+import { formatProcessLogTime24 } from "../utils/processLogTime";
 
 interface Props {
   run: TailorRunState | null;
@@ -24,9 +25,7 @@ const LOG_MARKER: Record<TailorLogKind, string> = {
 };
 
 function fmtLogTime(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+  return formatProcessLogTime24(iso);
 }
 
 function fmtElapsed(ms?: number): string {
@@ -173,7 +172,7 @@ function CollapsibleLogPanel({
           {logs.map((entry) => (
             <div key={entry.id} className={`tailor-thought-line is-${entry.kind}`}>
               <span className="tailor-thought-meta">
-                <time dateTime={entry.at}>{fmtLogTime(entry.at)}</time>
+                <time dateTime={entry.at} className="tailor-thought-time">{fmtLogTime(entry.at)}</time>
                 {entry.step != null && <span className="tailor-thought-step">#{entry.step}</span>}
                 {entry.elapsedMs != null && <span className="tailor-thought-elapsed">{fmtElapsed(entry.elapsedMs)}</span>}
               </span>

@@ -20,6 +20,7 @@ const SORT_OPTIONS: { key: SortBy; label: string }[] = [
   { key: "location", label: "Location" },
   { key: "comp", label: "Comp" },
   { key: "level", label: "Level" },
+  { key: "tailored", label: "Tailored" },
   { key: "ats", label: "ATS" },
   { key: "fit", label: "Fit" },
 ];

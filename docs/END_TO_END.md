@@ -125,7 +125,7 @@ also has copies today). Keep the drive plugged in for the canonical set.
 cd ~/job-pipeline
 .venv/bin/python -m job_pipeline.main --pipeline all
 ```
-Runs automatically at 8:00 daily via `com.atriveo.job-pipeline.plist`.
+Runs automatically every hour (12 AM – 11 PM local) via `com.atriveo.job-pipeline.plist`.
 Produces:
 - `output/jobs.json` — scored jobs
 - `output/descriptions.json` — **URL → full JD text** (this is the JD source)

@@ -24,6 +24,7 @@ const NAV: NavItem[] = [
   { href: "/skills",        label: "Skills",         match: (p) => p.startsWith("/skills") },
   { href: "/states",        label: "States",         match: (p) => p.startsWith("/states") },
   { href: "/emailfinder",   label: "Email Finder",   match: (p) => p.startsWith("/emailfinder") },
+  { href: "/manual-tailor", label: "Tailor Lab",   match: (p) => p.startsWith("/manual-tailor") },
   { href: "/optimizer",     label: "Optimizer",      match: (p) => p.startsWith("/optimizer") },
   { href: "/settings",      label: "Settings",       match: (p) => p.startsWith("/settings") },
 ];

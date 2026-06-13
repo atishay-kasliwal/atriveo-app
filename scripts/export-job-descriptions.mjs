@@ -91,7 +91,12 @@ async function main() {
     buckets: buckets.size,
   }, null, 2));
 
+  const ratio = urlList.length ? found / urlList.length : 1;
   console.log(`✓ Exported ${found}/${urlList.length} full job descriptions into ${buckets.size} buckets`);
+  if (ratio < 0.85) {
+    console.warn(`⚠ Only ${(ratio * 100).toFixed(0)}% of active jobs have a JD — jobs without one will fail as "no-jd" in the app. Re-run after the scraper finishes if this is unexpectedly low.`);
+  }
+  console.log(`  Reminder: run this AFTER every scrape, or the app serves stale JDs and resumes fail with "No full JD captured".`);
 }
 
 main().catch((error) => {

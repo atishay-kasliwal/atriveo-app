@@ -1,3 +1,6 @@
+import type { TailorLogEntry } from "./tailor";
+import type { Job } from "./index";
+
 export type TailorQueueSource = "hourly" | "manual";
 
 export type TailorQueueItemStatus = "pending" | "running" | "done" | "failed" | "skipped";
@@ -16,6 +19,8 @@ export interface TailorQueueItem {
   error?: string;
   startedAt?: string;
   durationMs?: number;
+  /** Frozen job payload so queue items work off-feed (manual tailor lab). */
+  jobSnapshot?: Job;
 }
 
 export interface TailorProcessLogEntry {
@@ -26,6 +31,21 @@ export interface TailorProcessLogEntry {
 }
 
 export type TailorRecordStatus = "none" | "queued" | "running" | "done" | "failed" | "no-go";
+
+/** Specific tailor result — used for table labels and tooltips. */
+export type TailorOutcomeKind =
+  | "done"
+  | "running"
+  | "queued"
+  | "skip"
+  | "compile"
+  | "ai"
+  | "no-jd"
+  | "no-resume"
+  | "offline"
+  | "timeout"
+  | "missing"
+  | "error";
 
 export interface TailorRecord {
   jobKey: string;
@@ -41,6 +61,12 @@ export interface TailorRecord {
   folder?: string;
   progressPct?: number;
   error?: string;
+  logs?: TailorLogEntry[];
+  durationMs?: number;
+  /** Specific result for UI labels (compile, skip, offline, etc.). */
+  outcome?: TailorOutcomeKind;
+  /** Raw server status: ok | no-go | tex-failed | ai-failed */
+  serverStatus?: string;
 }
 
 export const HOURLY_QUEUE_SIZE = 25;

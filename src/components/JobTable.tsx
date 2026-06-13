@@ -8,6 +8,7 @@ import { careerOpsRating, careerOpsStars, companyDomain, matchReasons } from "..
 import { groupJobsByCompany, type CompanyJobGroup } from "../utils/jobGrouping";
 import type { TailorRecord } from "../types/tailorQueue";
 import { tailorCellLabel, tailorFolderPath } from "../utils/tailorProgress";
+import TailorJobLogModal from "./TailorJobLogModal";
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -168,12 +169,12 @@ function ScoreCell({ job, board = false }: { job: Job; board?: boolean }) {
   );
 }
 
-function CompanyBandRow({ group }: { group: CompanyJobGroup }) {
+function CompanyBandRow({ group, solo = false }: { group: CompanyJobGroup; solo?: boolean }) {
   const domain = companyDomain(group.company);
   const openings = group.jobs.length;
 
   return (
-    <tr className="job-table-band">
+    <tr className={`job-table-band${solo ? " job-table-band--solo" : ""}`}>
       <td colSpan={11}>
         <div className="job-table-band-inner">
           <CompanyLogo company={group.company} size="sm" />
@@ -235,6 +236,7 @@ function JobTableRow({
 }: RowProps) {
   const [msgCopied, setMsgCopied] = useState(false);
   const [savedFeedback, setSavedFeedback] = useState<SavedJobSource | null>(null);
+  const [logOpen, setLogOpen] = useState(false);
   const co = job.company || "—";
   const title = job.title || "—";
   const careerOps = careerOpsRating(job);
@@ -257,6 +259,7 @@ function JobTableRow({
   const tailorRecord = getTailorRecord?.(job) ?? null;
   const tailor = tailorCellLabel(tailorRecord);
   const folderPath = tailorFolderPath(tailorRecord);
+  const showTailorLog = tailorRecord?.status === "done";
 
   function saveJob(source: SavedJobSource, e?: React.MouseEvent) {
     e?.stopPropagation();
@@ -365,24 +368,43 @@ function JobTableRow({
           <div className="job-table-tailored-inner">
             <span
               className={`job-table-tailored-pill job-table-tailored-pill--${tailor.tone}`}
-              title={tailorRecord?.ats ? `ATS ${tailorRecord.ats}` : tailorRecord?.error || "Tailor progress"}
+              title={tailor.tooltip}
             >
               {tailor.label}
             </span>
-            {folderPath && onOpenTailorPath ? (
-              <button
-                type="button"
-                className="job-table-tailored-folder"
-                title={tailorRecord?.folder || folderPath}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenTailorPath(folderPath);
-                }}
-              >
-                Folder
-              </button>
-            ) : null}
+            <div className="job-table-tailored-actions">
+              {folderPath && onOpenTailorPath ? (
+                <button
+                  type="button"
+                  className="job-table-tailored-folder"
+                  title={tailorRecord?.folder || folderPath}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenTailorPath(folderPath);
+                  }}
+                >
+                  Folder
+                </button>
+              ) : null}
+              {showTailorLog && tailorRecord ? (
+                <button
+                  type="button"
+                  className="job-table-tailored-log"
+                  title="View tailor log"
+                  aria-label={`View tailor log for ${co}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLogOpen(true);
+                  }}
+                >
+                  <span className="job-table-tailored-log-icon" aria-hidden>📋</span>
+                </button>
+              ) : null}
+            </div>
           </div>
+          {logOpen && tailorRecord ? (
+            <TailorJobLogModal record={tailorRecord} onClose={() => setLogOpen(false)} />
+          ) : null}
         </td>
       )}
       <td className="job-table-time">{fmtTime(job.batch_time || job.date_posted, job.scraped_date, board)}</td>
@@ -621,7 +643,6 @@ interface Props {
   onGroupSelectAll?: (jobs: Job[]) => void;
   isGroupFullySelected?: (jobs: Job[]) => boolean;
   groupByCompany?: boolean;
-  companyBandKeys?: Set<string>;
   getTailorRecord?: (job: Job) => TailorRecord | null;
   onQueueUrgent?: (job: Job) => void;
   onOpenTailorPath?: (path: string) => void;
@@ -643,7 +664,6 @@ export default function JobTable({
   onGroupSelectAll,
   isGroupFullySelected,
   groupByCompany = true,
-  companyBandKeys,
   getTailorRecord,
   onQueueUrgent,
   onOpenTailorPath,
@@ -654,8 +674,12 @@ export default function JobTable({
   onSortColumn,
 }: Props) {
   const groups = useMemo(
-    () => (groupByCompany ? groupJobsByCompany(jobs) : []),
-    [jobs, groupByCompany],
+    () => (
+      groupByCompany
+        ? groupJobsByCompany(jobs, sortBy, sortDir, getTailorRecord)
+        : []
+    ),
+    [jobs, groupByCompany, sortBy, sortDir, getTailorRecord],
   );
   const [expandedCompanies, setExpandedCompanies] = useState<Set<string>>(() => new Set());
 
@@ -701,7 +725,7 @@ export default function JobTable({
                 <SortableHeader label="Location" column="location" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Comp" column="comp" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Level" column="level" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
-                <th>Tailored</th>
+                <SortableHeader label="Tailored" column="tailored" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Posted" column="time" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
               </>
             ) : (
@@ -723,11 +747,11 @@ export default function JobTable({
           {groupByCompany ? (
             variant === "board" ? (
               groups.map((group, gi) => {
-                const showBand = companyBandKeys?.has(group.company) ?? group.jobs.length > 1;
+                const multiRole = group.jobs.length > 1;
                 const priorCount = groups.slice(0, gi).reduce((acc, g) => acc + g.jobs.length, 0);
                 return (
                   <Fragment key={group.company}>
-                    {showBand && <CompanyBandRow group={group} />}
+                    <CompanyBandRow group={group} solo={!multiRole} />
                     {group.jobs.map((job, j) => (
                       <JobTableRow
                         key={job.job_url || `${group.company}-${j}`}
@@ -743,7 +767,7 @@ export default function JobTable({
                         onQueueUrgent={onQueueUrgent}
                         onOpenTailorPath={onOpenTailorPath}
                         onDismissJob={onDismissJob}
-                        nested={showBand}
+                        nested={multiRole}
                         board
                       />
                     ))}

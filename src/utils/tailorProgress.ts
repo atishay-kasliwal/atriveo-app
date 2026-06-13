@@ -1,5 +1,6 @@
 import type { TailorPhase } from "../types/tailor";
 import type { TailorRecord } from "../types/tailorQueue";
+import { tailorCellDisplay } from "./tailorOutcome";
 
 export function tailorPhaseProgress(phase: TailorPhase): number {
   switch (phase) {
@@ -19,34 +20,29 @@ export function tailorFolderPath(record: TailorRecord | null | undefined): strin
   return null;
 }
 
-export function tailorCellLabel(record: TailorRecord | null | undefined): { label: string; tone: string } {
-  if (!record || record.status === "none") return { label: "—", tone: "none" };
-  switch (record.status) {
-    case "done":
-      return { label: "100%", tone: "done" };
-    case "running":
-      return { label: `${record.progressPct ?? 5}%`, tone: "running" };
-    case "queued":
-      return { label: "Queued", tone: "queued" };
-    case "no-go":
-      return { label: "Skip", tone: "skip" };
-    case "failed":
-      return { label: "Fail", tone: "failed" };
-    default:
-      return { label: "—", tone: "none" };
-  }
+export function tailorCellLabel(record: TailorRecord | null | undefined): { label: string; tone: string; tooltip: string } {
+  return tailorCellDisplay(record);
 }
 
-export function formatTailorDuration(ms: number): string {
+export function formatTailorDuration(ms: number, live = false): string {
   if (!Number.isFinite(ms) || ms < 0) return "—";
-  if (ms < 1000) return `${Math.max(1, Math.round(ms))}ms`;
-  const sec = Math.floor(ms / 1000);
-  if (sec < 60) return `${sec}s`;
-  const min = Math.floor(sec / 60);
-  const remSec = sec % 60;
-  if (min < 60) return remSec > 0 ? `${min}m ${remSec}s` : `${min}m`;
+  if (ms < 1000) {
+    return live ? `${Math.max(1, Math.round(ms / 1000))}s` : `${Math.max(1, Math.round(ms))}ms`;
+  }
+  const totalSec = Math.floor(ms / 1000);
+  const sec = totalSec % 60;
+  const min = Math.floor(totalSec / 60);
   const hr = Math.floor(min / 60);
   const remMin = min % 60;
+
+  if (live) {
+    if (hr > 0) return `${hr}h ${remMin}m ${sec}s`;
+    if (min > 0) return `${min}m ${sec}s`;
+    return `${sec}s`;
+  }
+
+  if (totalSec < 60) return `${totalSec}s`;
+  if (min < 60) return sec > 0 ? `${min}m ${sec}s` : `${min}m`;
   return remMin > 0 ? `${hr}h ${remMin}m` : `${hr}h`;
 }
 

@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { TailorLogEntry } from "../types/tailor";
 import type { TailorProcessLogEntry, TailorQueueItem } from "../types/tailorQueue";
 import { HOURLY_QUEUE_SIZE } from "../types/tailorQueue";
+import TailorLogStream from "./TailorLogStream";
 import { formatTailorDuration } from "../utils/tailorProgress";
+import { displayProcessLogAt, formatProcessLogTime } from "../utils/processLogTime";
 
 function formatSyncTime(ts: number): string {
   if (!ts) return "Never";
-  const date = new Date(ts);
-  return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  return formatProcessLogTime(new Date(ts));
 }
 
 function useElapsedMs(startedAt?: string, active = false): number | null {
@@ -45,11 +47,16 @@ interface Props {
   queueTiming: QueueTiming;
   processing: boolean;
   runningItem: TailorQueueItem | null;
+  runningLogs?: TailorLogEntry[];
+  lastFinishedLogs?: TailorLogEntry[];
+  lastFinishedLabel?: string;
   lastHourlySyncAt: number;
   syncMessage: string;
   onSyncNow: () => void;
   onProcessNow: () => void;
   onClearDone: () => void;
+  onClearTailor: () => void;
+  logsPanelCleared?: boolean;
   onBumpUrgent: (jobKey: string) => void;
   onRemoveFromQueue: (jobKey: string) => void;
   onReorderPending: (orderedKeys: string[]) => void;
@@ -66,17 +73,23 @@ export default function TailorQueueBar({
   queueTiming,
   processing,
   runningItem,
+  runningLogs = [],
+  lastFinishedLogs = [],
+  lastFinishedLabel,
   lastHourlySyncAt,
   syncMessage,
   onSyncNow,
   onProcessNow,
   onClearDone,
+  onClearTailor,
+  logsPanelCleared = false,
   onBumpUrgent,
   onRemoveFromQueue,
   onReorderPending,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [logsOpen, setLogsOpen] = useState(true);
+  const [streamOpen, setStreamOpen] = useState(true);
   const [dragKey, setDragKey] = useState<string | null>(null);
   const prevPendingRef = useRef(pendingCount);
 
@@ -102,6 +115,19 @@ export default function TailorQueueBar({
   const finishedCount = doneInQueue + failedInQueue;
   const showProgress = totalInQueue > 0 && (processing || finishedCount > 0 || pendingCount > 0);
   const runningElapsedMs = useElapsedMs(runningItem?.startedAt, processing && Boolean(runningItem));
+  const showProcessStream = !logsPanelCleared
+    && (processing || runningLogs.length > 0 || lastFinishedLogs.length > 0);
+  const showClearTailor = !logsPanelCleared && (
+    processing || processLogs.length > 0 || totalInQueue > 0 || showProcessStream
+  );
+  const streamLogs = processing ? runningLogs : lastFinishedLogs;
+  const streamLive = processing && Boolean(runningItem);
+  const streamTitle = streamLive
+    ? `Live · ${runningItem?.company ?? "Tailoring"}`
+    : lastFinishedLabel ?? "Last job";
+  const streamEmptyLabel = streamLive
+    ? "Connected — waiting for analyze / compile steps from your Mac…"
+    : "No detailed step log saved for the last job.";
 
   function handleDrop(targetKey: string) {
     if (!dragKey || dragKey === targetKey) {
@@ -185,7 +211,6 @@ export default function TailorQueueBar({
                 <span>
                   {finishedCount} finished · {pendingCount} waiting
                   {runningItem ? " · 1 running" : ""}
-                  {timingMeta ? ` · ${timingMeta}` : ""}
                 </span>
               </div>
             </div>
@@ -196,7 +221,7 @@ export default function TailorQueueBar({
               Tailoring <strong>{runningItem.company}</strong> · {runningItem.title}
               {runningElapsedMs != null ? (
                 <span className="tailor-queue-running-time">
-                  {formatTailorDuration(runningElapsedMs)} elapsed
+                  {formatTailorDuration(runningElapsedMs, true)} elapsed
                 </span>
               ) : null}
             </div>
@@ -237,10 +262,15 @@ export default function TailorQueueBar({
               Clear done
             </button>
           ) : null}
+          {showClearTailor ? (
+            <button type="button" className="tailor-queue-btn tailor-queue-btn--ghost" onClick={onClearTailor}>
+              Clear tailor
+            </button>
+          ) : null}
         </div>
       </div>
 
-      {processLogs.length > 0 ? (
+      {!logsPanelCleared && processLogs.length > 0 ? (
         <div className={`tailor-queue-logs${logsOpen ? " is-open" : ""}`}>
           <button type="button" className="tailor-queue-logs-toggle" onClick={() => setLogsOpen((v) => !v)}>
             {logsOpen ? "▾" : "▸"} Queue log · {processLogs.length} lines
@@ -249,7 +279,7 @@ export default function TailorQueueBar({
             <div className="tailor-queue-logs-body">
               {processLogs.map((entry) => (
                 <div key={entry.id} className="tailor-queue-log-line">
-                  <span className="tailor-queue-log-at">{entry.at}</span>
+                  <span className="tailor-queue-log-at">{displayProcessLogAt(entry.at)}</span>
                   <span className="tailor-queue-log-msg">{entry.message}</span>
                   {entry.durationMs != null ? (
                     <span className="tailor-queue-log-duration">
@@ -258,6 +288,25 @@ export default function TailorQueueBar({
                   ) : null}
                 </div>
               ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {showProcessStream ? (
+        <div className={`tailor-queue-stream${streamOpen ? " is-open" : ""}`}>
+          <button type="button" className="tailor-queue-logs-toggle" onClick={() => setStreamOpen((v) => !v)}>
+            {streamOpen ? "▾" : "▸"} Process log · {streamTitle}
+            {streamLogs.length > 0 ? ` · ${streamLogs.length} lines` : ""}
+            {streamLive ? <span className="tailor-queue-stream-live">Live</span> : null}
+          </button>
+          {streamOpen ? (
+            <div className="tailor-queue-stream-body">
+              <TailorLogStream
+                logs={streamLogs}
+                live={streamLive}
+                emptyLabel={streamEmptyLabel}
+              />
             </div>
           ) : null}
         </div>

@@ -23,9 +23,11 @@ import { careerOpsRating } from "../utils/jobPresentation";
 import type { Period, SortBy, SortDir } from "./Dashboard.types";
 import { defaultSortDir, sortJobs } from "../utils/jobSort";
 import { jobDismissKey } from "../utils/jobCopy";
-import { multiRoleCompanies } from "../utils/companyGrouping";
 import { runSingleTailorJob, openTailorPath } from "../utils/tailorRun";
+import { buildTailorStreamHandler } from "../utils/tailorStreamHandler";
+import { outcomeFromServerStatus } from "../utils/tailorOutcome";
 import { tailorPhaseProgress } from "../utils/tailorProgress";
+import { estDateKey } from "../utils/estDate";
 
 type LevelFilter = "all" | "New Grad" | "Entry" | "Mid";
 type RunCard = RunEntry & {
@@ -73,19 +75,23 @@ function toMs(iso?: string | null): number {
   return parseDateLike(iso)?.getTime() ?? 0;
 }
 
-function estDateKey(date = new Date()): string {
-  return date.toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10);
-}
-
-
 function formatRunTime(iso?: string | null): string {
   const date = parseDateLike(iso);
   if (!date) return "—";
-  const today = new Date();
-  if (date.toDateString() === today.toDateString()) {
-    return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const tz = "America/New_York";
+  const nowEt = new Date().toLocaleString("en-US", { timeZone: tz });
+  const dateEt = date.toLocaleString("en-US", { timeZone: tz });
+  const sameDay = nowEt.slice(0, 10) === dateEt.slice(0, 10);
+  if (sameDay) {
+    return date.toLocaleTimeString("en-US", { timeZone: tz, hour: "numeric", minute: "2-digit" });
   }
-  return date.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  return date.toLocaleString("en-US", {
+    timeZone: tz,
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 
@@ -93,6 +99,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const navigate = useNavigate();
   const { stats, recordClick, getRecord } = useApplyTracker();
   const { clickedKeySet, recordSavedJob } = useApplyClickLog();
+  const tailorStatus = useTailorStatus();
   const { isExcluded, excludeCompany } = useExclusions();
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
   const [todayJobs, setTodayJobs] = useState<Job[]>([]);
@@ -194,18 +201,29 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const baseJobs = selectedSession ? rawJobs.filter((j) => j.session_id === selectedSession) : rawJobs;
 
   const runCards = useMemo(() => {
-    const cards: RunCard[] = runHistory
-      .map((r) => ({
-        ...r,
-        count: sessionCounts[r.session_id] ?? r.total_jobs ?? 0,
-        targetPeriod: sessionPeriod[r.session_id] ?? null,
-        displayAt: r.run_at || r.session_id,
-        clickCount: sessionClickCounts[r.session_id] ?? 0,
-        progressPct: 0,
-        segmentsActive: 0,
-      }))
-      .filter((r) => r.count > 0 && r.targetPeriod)
-      .slice(0, 5);
+    const historyById = new Map(runHistory.map((r) => [r.session_id, r]));
+
+    const cards: RunCard[] = Object.entries(sessionCounts)
+      .flatMap(([sessionId, count]) => {
+        if (count <= 0) return [];
+        const targetPeriod = sessionPeriod[sessionId];
+        if (!targetPeriod || targetPeriod !== period) return [];
+
+        const history = historyById.get(sessionId);
+        return [{
+          session_id: sessionId,
+          run_at: history?.run_at || sessionId,
+          total_jobs: history?.total_jobs ?? count,
+          count,
+          targetPeriod,
+          displayAt: history?.run_at || sessionId,
+          clickCount: sessionClickCounts[sessionId] ?? 0,
+          progressPct: 0,
+          segmentsActive: 0,
+        }];
+      })
+      .sort((a, b) => toMs(b.displayAt) - toMs(a.displayAt));
+
     return cards.map((r) => {
       const progress = r.count > 0 ? r.clickCount / r.count : 0;
       return {
@@ -214,7 +232,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
         segmentsActive: Math.min(24, Math.max(0, Math.round(progress * 24))),
       };
     });
-  }, [runHistory, sessionCounts, sessionPeriod, sessionClickCounts]);
+  }, [runHistory, sessionCounts, sessionPeriod, sessionClickCounts, period]);
 
   const feedJobsBeforeDismiss = useMemo(() => {
     let jobs = [...baseJobs];
@@ -238,11 +256,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     return jobs;
   }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, activeView]);
 
-  const companyBandKeys = useMemo(
-    () => multiRoleCompanies(feedJobsBeforeDismiss),
-    [feedJobsBeforeDismiss],
-  );
-
   const visibleJobs = useMemo(() => {
     return feedJobsBeforeDismiss.filter((j) => !clickedKeySet.has(jobDismissKey(j)));
   }, [feedJobsBeforeDismiss, clickedKeySet]);
@@ -264,8 +277,8 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const filtered = useMemo(() => {
     let jobs = [...visibleJobs];
     if (levelFilter !== "all") jobs = jobs.filter((j) => j.level === levelFilter);
-    return sortJobs(jobs, sortBy, sortDir);
-  }, [visibleJobs, levelFilter, sortBy, sortDir]);
+    return sortJobs(jobs, sortBy, sortDir, tailorStatus.getRecordForJob);
+  }, [visibleJobs, levelFilter, sortBy, sortDir, tailorStatus.getRecordForJob, tailorStatus.records]);
 
   const searchTerms = useMemo(
     () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
@@ -326,31 +339,51 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   );
   const displayedJobs = isSplitView ? locationFiltered : filtered;
   const jobSelection = useJobSelection(displayedJobs);
-  const tailorStatus = useTailorStatus();
   const processQueueJob = useCallback(async (job: Job) => {
     const key = jobDismissKey(job);
     if (clickedKeySet.has(key)) {
       return { ok: false, error: "dismissed" };
     }
-    return runSingleTailorJob(job, (event) => {
-      if (clickedKeySet.has(key)) return;
-      if (event.type !== "job" || event.index !== 0) return;
-      const phase = event.phase;
-      if (!phase || phase === "done") return;
-      tailorStatus.markStatus(key, "running", {
-        jobUrl: job.job_url || "",
-        company: job.company || "Unknown",
-        title: job.title || "Untitled role",
-        score: job.score_pct,
-        progressPct: tailorPhaseProgress(phase),
-      });
+    const onEvent = buildTailorStreamHandler(tailorStatus, job, {
+      shouldSkip: () => clickedKeySet.has(key),
     });
+    return runSingleTailorJob(job, onEvent);
   }, [tailorStatus, clickedKeySet]);
   const tailorQueue = useTailorQueue(displayedJobs, {
     tailorStatus,
     dismissedKeys: clickedKeySet,
     onProcessJob: processQueueJob,
   });
+
+  const tailorQueueLogContext = useMemo(() => {
+    const runningKey = tailorQueue.runningItem?.jobKey;
+    const runningRecord = runningKey ? tailorStatus.getRecord(runningKey) : null;
+    const runningLogs = runningRecord?.logs ?? [];
+
+    let lastFinishedLogs: typeof runningLogs = [];
+    let lastFinishedLabel: string | undefined;
+    let bestAt = 0;
+
+    for (const item of tailorQueue.queue) {
+      if (item.status !== "done" && item.status !== "failed") continue;
+      if (item.jobKey === runningKey) continue;
+      const record = tailorStatus.getRecord(item.jobKey);
+      if (!record?.logs?.length) continue;
+      const at = Date.parse(record.tailoredAt || item.startedAt || "0");
+      if (at >= bestAt) {
+        bestAt = at;
+        lastFinishedLogs = record.logs;
+        lastFinishedLabel = `${record.company} · ${record.title}`;
+      }
+    }
+
+    return { runningLogs, lastFinishedLogs, lastFinishedLabel };
+  }, [
+    tailorQueue.runningItem,
+    tailorQueue.queue,
+    tailorStatus.records,
+    tailorStatus.getRecord,
+  ]);
 
   const handleSaveJobWithQueueCleanup = useCallback((job: Job, source: SavedJobSource) => {
     if (!job.job_url) return;
@@ -411,11 +444,27 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           folder: job.folder,
           progressPct: 100,
           tailoredAt: new Date().toISOString(),
+          logs: job.logs,
+          outcome: "done",
+          serverStatus: "ok",
         });
       } else if (job.status === "no-go") {
-        tailorStatus.markStatus(key, "no-go", { error: "no-go", dir: job.dir, folder: job.folder });
-      } else if (job.error) {
-        tailorStatus.markStatus(key, "failed", { error: job.error });
+        tailorStatus.markStatus(key, "no-go", {
+          error: job.error || "no-go",
+          dir: job.dir,
+          folder: job.folder,
+          logs: job.logs,
+          outcome: "skip",
+          serverStatus: "no-go",
+        });
+      } else if (job.error || job.status) {
+        const outcome = outcomeFromServerStatus(job.status, job.error);
+        tailorStatus.markStatus(key, outcome === "skip" ? "no-go" : "failed", {
+          error: job.error,
+          logs: job.logs,
+          outcome,
+          serverStatus: job.status,
+        });
       }
     }
   }, [jobSelection.tailorRun, displayedJobs, tailorStatus]);
@@ -604,7 +653,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           onGroupSelectAll={jobSelection.toggleGroupSelection}
           isGroupFullySelected={jobSelection.isGroupFullySelected}
           groupByCompany
-          companyBandKeys={companyBandKeys}
           getTailorRecord={tailorStatus.getRecordForJob}
           onQueueUrgent={(job) => tailorQueue.enqueueJob(job, "manual", true)}
           onOpenTailorPath={handleOpenTailorPath}
@@ -663,6 +711,11 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 <span className="board-metric-value">{todayApplicationRows.length}</span>
                 <span className="board-metric-sub">tracker activity</span>
               </div>
+              <div className="board-metric">
+                <span className="board-metric-label">Resumes Today</span>
+                <span className="board-metric-value">{tailorStatus.resumesCreatedTodayCount}</span>
+                <span className="board-metric-sub">resets midnight ET</span>
+              </div>
             </div>
 
             <div className="today-board-table-shell">
@@ -691,11 +744,16 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 queueTiming={tailorQueue.queueTiming}
                 processing={tailorQueue.processing}
                 runningItem={tailorQueue.runningItem}
+                runningLogs={tailorQueueLogContext.runningLogs}
+                lastFinishedLogs={tailorQueueLogContext.lastFinishedLogs}
+                lastFinishedLabel={tailorQueueLogContext.lastFinishedLabel}
                 lastHourlySyncAt={tailorQueue.lastHourlySyncAt}
                 syncMessage={tailorQueue.syncMessage}
                 onSyncNow={() => tailorQueue.runHourlySync(displayedJobs, true)}
                 onProcessNow={() => void tailorQueue.processQueue()}
                 onClearDone={tailorQueue.clearDone}
+                onClearTailor={tailorQueue.clearTailor}
+                logsPanelCleared={tailorQueue.logsPanelCleared}
                 onBumpUrgent={tailorQueue.bumpUrgent}
                 onRemoveFromQueue={tailorQueue.removeFromQueue}
                 onReorderPending={tailorQueue.reorderPending}

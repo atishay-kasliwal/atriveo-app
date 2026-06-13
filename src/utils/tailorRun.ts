@@ -1,7 +1,20 @@
 import type { Job } from "../types";
-import type { TailorStreamEvent } from "../types/tailor";
+import type { TailorLogEntry, TailorStreamEvent } from "../types/tailor";
+import type { TailorOutcomeKind } from "../types/tailorQueue";
+import { outcomeFromError, outcomeFromServerStatus } from "./tailorOutcome";
+import { captureTailorStreamEvent, resetTailorLogCapture, trimTailorLogs } from "./tailorLogCapture";
 import { loadJobDescriptions } from "./jobDescriptionBuckets";
 import { getTailorServerBase, isLocalTailorHost } from "./tailorServer";
+
+const MIN_FULL_JD_CHARS = 400;
+/** Ollama + compile can take several minutes; abort if the relay stream stalls longer. */
+const TAILOR_JOB_TIMEOUT_MS = 18 * 60 * 1000;
+
+let activeAbort: AbortController | null = null;
+
+export function abortActiveTailorJob(): void {
+  activeAbort?.abort();
+}
 
 function tailorUnavailableMessage(): string {
   if (!isLocalTailorHost()) {
@@ -10,33 +23,54 @@ function tailorUnavailableMessage(): string {
   return "Tailor server not running. Run: npm run tailor";
 }
 
+function isAbortError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const name = "name" in err ? String(err.name) : "";
+  return name === "AbortError" || name === "TimeoutError";
+}
+
 async function readTailorStream(
   body: ReadableStream<Uint8Array>,
   onEvent: (event: TailorStreamEvent) => void,
+  signal?: AbortSignal,
 ) {
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() || "";
-    for (const line of lines) {
-      if (!line.trim()) continue;
-      try {
-        onEvent(JSON.parse(line) as TailorStreamEvent);
-      } catch {
-        /* ignore */
+  try {
+    while (true) {
+      if (signal?.aborted) {
+        throw new DOMException("Tailor stream aborted", "AbortError");
       }
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          onEvent(JSON.parse(line) as TailorStreamEvent);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+  } finally {
+    try {
+      await reader.cancel();
+    } catch {
+      /* ignore */
     }
   }
 }
 
-async function assertTailorServerReady(): Promise<void> {
+async function assertTailorServerReady(signal?: AbortSignal): Promise<void> {
   const base = getTailorServerBase();
-  const res = await fetch(`${base}/health`, { signal: AbortSignal.timeout(8000), credentials: "include" });
+  const res = await fetch(`${base}/health`, {
+    signal: signal ?? AbortSignal.timeout(8000),
+    credentials: "include",
+  });
   if (!res.ok) throw new Error(tailorUnavailableMessage());
   const data = await res.json();
   if (!data.ok) throw new Error(tailorUnavailableMessage());
@@ -52,6 +86,26 @@ export interface SingleTailorResult {
   dir?: string;
   folder?: string;
   error?: string;
+  logs?: TailorLogEntry[];
+  serverStatus?: string;
+  outcome?: TailorOutcomeKind;
+}
+
+async function checkJobOnDisk(job: Job): Promise<{ found: boolean; pdfPath?: string; dir?: string; folder?: string; ats?: string }> {
+  try {
+    const res = await fetch(`${getTailorServerBase()}/check-job`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      signal: AbortSignal.timeout(8000),
+      body: JSON.stringify({ company: job.company || "", title: job.title || "" }),
+    });
+    if (!res.ok) return { found: false };
+    const data = await res.json();
+    return data.found ? { found: true, pdfPath: data.pdfPath, dir: data.dir, folder: data.folder, ats: data.ats } : { found: false };
+  } catch {
+    return { found: false };
+  }
 }
 
 export async function openTailorPath(targetPath: string): Promise<void> {
@@ -71,72 +125,160 @@ export async function runSingleTailorJob(
 ): Promise<SingleTailorResult> {
   const resumeText = localStorage.getItem("atriveo_resume") || "";
   if (resumeText.trim().length < 50) {
-    return { ok: false, error: "Save your resume in Settings first." };
+    return { ok: false, error: "Save your resume in Settings first.", outcome: "no-resume" };
   }
 
-  await assertTailorServerReady();
-  const descriptionsByUrl = await loadJobDescriptions([job]);
-  const jd = descriptionsByUrl[job.job_url] || job.summary || "";
-  if (jd.trim().length < 50) {
-    return { ok: false, error: "No full JD captured for this job." };
-  }
+  const controller = new AbortController();
+  activeAbort = controller;
+  const timeoutId = window.setTimeout(() => controller.abort(), TAILOR_JOB_TIMEOUT_MS);
 
-  let result: SingleTailorResult = { ok: false, error: "Tailor stream ended without result" };
-
-  const res = await fetch(`${getTailorServerBase()}/tailor`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({
-      resumeText,
-      jobs: [{
-        company: job.company,
-        title: job.title,
-        job_url: job.job_url,
-        score_pct: job.score_pct,
-        jd,
-      }],
-    }),
-  });
-
-  const contentType = res.headers.get("content-type") || "";
-  if (!res.ok && !contentType.includes("ndjson")) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    return { ok: false, error: err.error || "Tailor failed" };
-  }
-  if (!res.body) return { ok: false, error: "No response from tailor server" };
-
-  await readTailorStream(res.body, (event) => {
-    onEvent?.(event);
-    if (event.type === "fatal") {
-      result = { ok: false, error: event.error };
-      return;
+  try {
+    await assertTailorServerReady(controller.signal);
+    const descriptionsByUrl = await loadJobDescriptions([job]);
+    const bucketJd = job.job_url ? descriptionsByUrl[job.job_url] : undefined;
+    const jd = bucketJd || job.summary || "";
+    if (jd.trim().length < 50) {
+      return { ok: false, error: "No full JD captured for this job.", outcome: "no-jd" };
     }
-    if (event.type !== "job" || event.index !== 0) return;
-    if (event.phase !== "done") return;
-    if (event.status === "ok" && event.pdf) {
+    if (!bucketJd && jd.trim().length < MIN_FULL_JD_CHARS) {
+      return {
+        ok: false,
+        error: "Only a short job snippet is available — paste the full JD in Tailor Lab or wait for scrape.",
+        outcome: "no-jd",
+      };
+    }
+
+    let result: SingleTailorResult = {
+      ok: false,
+      error: "Connection dropped while tailoring — check your Mac output folder; the PDF may still have been created.",
+      outcome: "timeout",
+    };
+    resetTailorLogCapture();
+    let logs: TailorLogEntry[] = [];
+
+    const res = await fetch(`${getTailorServerBase()}/tailor`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      signal: controller.signal,
+      body: JSON.stringify({
+        resumeText,
+        jobs: [{
+          company: job.company,
+          title: job.title,
+          job_url: job.job_url,
+          score_pct: job.score_pct,
+          jd,
+        }],
+      }),
+    });
+
+    const contentType = res.headers.get("content-type") || "";
+    if (!res.ok && !contentType.includes("ndjson")) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      return { ok: false, error: err.error || "Tailor failed", outcome: outcomeFromError(err.error) };
+    }
+    if (!res.body) {
+      return { ok: false, error: "No response from tailor server", outcome: "offline" };
+    }
+
+    await readTailorStream(res.body, (event) => {
+      logs = captureTailorStreamEvent(logs, event, 0);
+      onEvent?.(event);
+      if (event.type === "fatal") {
+        const outcome = outcomeFromError(event.error);
+        result = { ok: false, error: event.error, logs: trimTailorLogs([...logs]), outcome };
+        return;
+      }
+      if (event.type !== "job" || event.index !== 0) return;
+      if (event.phase !== "done") return;
+      const serverStatus = event.status;
+      if (event.status === "ok" && event.pdf) {
+        result = {
+          ok: true,
+          ats: event.ats,
+          pdfPath: event.pdfPath,
+          dir: event.dir,
+          folder: event.folder,
+          logs: trimTailorLogs([...logs]),
+          serverStatus: "ok",
+          outcome: "done",
+        };
+        return;
+      }
+      if (event.status === "no-go") {
+        result = {
+          ok: false,
+          error: event.error || "no-go: not worth tailoring",
+          dir: event.dir,
+          folder: event.folder,
+          logs: trimTailorLogs([...logs]),
+          serverStatus: "no-go",
+          outcome: "skip",
+        };
+        return;
+      }
+      const outcome = outcomeFromServerStatus(serverStatus, event.error);
       result = {
-        ok: true,
+        ok: false,
+        error: event.error || `Tailor finished with status ${event.status || "unknown"}`,
         ats: event.ats,
         pdfPath: event.pdfPath,
         dir: event.dir,
         folder: event.folder,
+        logs: trimTailorLogs([...logs]),
+        serverStatus,
+        outcome,
       };
-      return;
-    }
-    if (event.status === "no-go") {
-      result = { ok: false, error: "no-go: not worth tailoring", dir: event.dir, folder: event.folder };
-      return;
-    }
-    result = {
-      ok: false,
-      error: event.error || `Tailor finished with status ${event.status || "unknown"}`,
-      ats: event.ats,
-      pdfPath: event.pdfPath,
-      dir: event.dir,
-      folder: event.folder,
-    };
-  });
+    }, controller.signal);
 
-  return result;
+    if (!result.logs?.length && logs.length) {
+      result = { ...result, logs: trimTailorLogs([...logs]) };
+    }
+
+    // If the stream ended without a "done" event (stream dropped mid-run), check
+    // whether the Mac actually finished the job and wrote a PDF to disk.
+    if (!result.ok && (result.outcome === "timeout" || result.outcome === "error" || result.outcome === "ai")) {
+      const check = await checkJobOnDisk(job);
+      if (check.found) {
+        return {
+          ok: true,
+          ats: check.ats,
+          pdfPath: check.pdfPath,
+          dir: check.dir,
+          folder: check.folder,
+          logs: result.logs,
+          serverStatus: "ok",
+          outcome: "done",
+        };
+      }
+    }
+
+    return result;
+  } catch (err) {
+    if (isAbortError(err)) {
+      const check = await checkJobOnDisk(job);
+      if (check.found) {
+        return {
+          ok: true,
+          ats: check.ats,
+          pdfPath: check.pdfPath,
+          dir: check.dir,
+          folder: check.folder,
+          serverStatus: "ok",
+          outcome: "done",
+        };
+      }
+      return {
+        ok: false,
+        error: "Connection dropped while tailoring — Ollama may still be running on your Mac. Check the output folder or wait and retry.",
+        outcome: "timeout",
+      };
+    }
+    const message = (err as Error).message || String(err);
+    return { ok: false, error: message, outcome: outcomeFromError(message) };
+  } finally {
+    window.clearTimeout(timeoutId);
+    if (activeAbort === controller) activeAbort = null;
+  }
 }

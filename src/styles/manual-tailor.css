@@ -1,0 +1,447 @@
+.manual-tailor-page {
+  min-height: 100vh;
+  background: var(--bg, #f6f5f2);
+}
+
+.manual-tailor-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 40px;
+}
+
+.manual-tailor-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 16px;
+  min-height: 620px;
+}
+
+.manual-tailor-sidebar {
+  background: #fff;
+  border: 1px solid #e8e4de;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: calc(100vh - 220px);
+}
+
+.manual-tailor-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.manual-tailor-sidebar-head h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.manual-tailor-sidebar-head span {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.manual-tailor-sidebar-empty {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+.manual-tailor-session-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.manual-tailor-session-btn {
+  width: 100%;
+  border: 1px solid transparent;
+  background: #faf9f7;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.manual-tailor-session-btn:hover,
+.manual-tailor-session-btn.is-active {
+  border-color: #e2553d;
+  background: #fff7f5;
+}
+
+.manual-tailor-session-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.manual-tailor-session-dot--done { background: #1f7a3f; }
+.manual-tailor-session-dot--running { background: #b45309; }
+.manual-tailor-session-dot--failed { background: #b91c1c; }
+.manual-tailor-session-dot--queued { background: #6366f1; }
+
+.manual-tailor-session-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.manual-tailor-session-copy strong {
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.manual-tailor-session-copy span {
+  font-size: 11px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.manual-tailor-chat {
+  background: #fff;
+  border: 1px solid #e8e4de;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  min-height: 620px;
+  max-height: calc(100vh - 220px);
+  overflow: hidden;
+}
+
+.manual-tailor-messages {
+  flex: 1;
+  overflow: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  background: linear-gradient(180deg, #fcfcfb 0%, #fff 120px);
+}
+
+.manual-tailor-empty-state {
+  margin: auto;
+  max-width: 520px;
+  text-align: center;
+  color: #4b5563;
+}
+
+.manual-tailor-empty-state h3 {
+  margin: 0 0 8px;
+  color: #111827;
+}
+
+.manual-tailor-empty-state p {
+  margin: 0;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.manual-tailor-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+}
+
+.manual-tailor-thread.is-active {
+  border-color: #f3d4cc;
+  background: #fffaf8;
+}
+
+.manual-tailor-bubble-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 6px;
+}
+
+.manual-tailor-user-bubble {
+  align-self: flex-end;
+  max-width: min(680px, 92%);
+  background: #111827;
+  color: #f9fafb;
+  border-radius: 16px 16px 4px 16px;
+  padding: 14px 16px;
+}
+
+.manual-tailor-user-title {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.manual-tailor-user-jd {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #d1d5db;
+  white-space: pre-wrap;
+}
+
+.manual-tailor-time {
+  display: block;
+  margin-top: 10px;
+  font-size: 10px;
+  color: #9ca3af;
+}
+
+.manual-tailor-assistant-wrap {
+  align-self: flex-start;
+  width: min(760px, 100%);
+}
+
+.manual-tailor-assistant {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px 16px 16px 4px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.manual-tailor-assistant--running {
+  border-color: #fcd34d;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.08);
+}
+
+.manual-tailor-assistant--done {
+  border-color: #bbf7d0;
+}
+
+.manual-tailor-assistant-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.manual-tailor-assistant-head strong {
+  display: block;
+  font-size: 14px;
+}
+
+.manual-tailor-assistant-head span {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.manual-tailor-assistant-status {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.manual-tailor-assistant-status--running { background: #fff7ed; color: #b45309; }
+.manual-tailor-assistant-status--done { background: #ecfdf3; color: #166534; }
+.manual-tailor-assistant-status--failed { background: #fef2f2; color: #b91c1c; }
+.manual-tailor-assistant-status--queued { background: #eef2ff; color: #4338ca; }
+
+.manual-tailor-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f59e0b;
+  animation: manual-tailor-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes manual-tailor-pulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.manual-tailor-assistant-meta {
+  margin: 0;
+  padding: 8px 14px 0;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.manual-tailor-assistant-stream {
+  max-height: 320px;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.manual-tailor-assistant-placeholder {
+  margin: 0;
+  padding: 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #6b7280;
+}
+
+.manual-tailor-assistant-foot {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.manual-tailor-foot-btn {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.manual-tailor-foot-btn--ghost {
+  background: transparent;
+}
+
+.manual-tailor-composer {
+  border-top: 1px solid #ece7df;
+  padding: 14px 16px 16px;
+  background: #faf9f7;
+}
+
+.manual-tailor-parse-preview {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.manual-tailor-parse-preview strong {
+  color: #111827;
+}
+
+.manual-tailor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.manual-tailor-field span {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.manual-tailor-field input,
+.manual-tailor-jd {
+  border: 1px solid #d8d2c8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  background: #fff;
+}
+
+.manual-tailor-field input:focus,
+.manual-tailor-jd:focus {
+  outline: none;
+  border-color: #e2553d;
+  box-shadow: 0 0 0 3px rgba(226, 85, 61, 0.12);
+}
+
+.manual-tailor-field--wide {
+  grid-column: 1 / -1;
+}
+
+.manual-tailor-field--jd {
+  margin-bottom: 8px;
+}
+
+.manual-tailor-jd {
+  resize: vertical;
+  min-height: 140px;
+  line-height: 1.55;
+}
+
+.manual-tailor-composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.manual-tailor-char-count {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.manual-tailor-submit {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: #e2553d;
+  cursor: pointer;
+}
+
+.manual-tailor-submit:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.manual-tailor-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.manual-tailor-error {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #b91c1c;
+}
+
+.manual-tailor-hint {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+@media (max-width: 960px) {
+  .manual-tailor-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .manual-tailor-sidebar {
+    max-height: none;
+  }
+
+  .manual-tailor-chat {
+    max-height: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .manual-tailor-user-bubble,
+  .manual-tailor-assistant-wrap {
+    max-width: 100%;
+  }
+}

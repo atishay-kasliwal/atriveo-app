@@ -12,6 +12,7 @@ import States from "./pages/States";
 import EmailFinder from "./pages/EmailFinder";
 import ClickedJobs from "./pages/ClickedJobs";
 import ResumeOptimizer from "./pages/ResumeOptimizer";
+import ManualTailor from "./pages/ManualTailor";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -113,6 +114,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ClickedJobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/manual-tailor"
+          element={
+            <ProtectedRoute>
+              <ManualTailor />
             </ProtectedRoute>
           }
         />

@@ -4,11 +4,31 @@ import type { TailorProcessLogEntry, TailorQueueItem, TailorQueueItemStatus } fr
 import { HOURLY_QUEUE_SIZE, HOURLY_SYNC_MS } from "../types/tailorQueue";
 import { careerOpsRating } from "../utils/jobPresentation";
 import { jobDismissKey } from "../utils/jobCopy";
+import { snapshotJobForQueue } from "../utils/manualJob";
+import { mapResultToRecordStatus, outcomeFromError } from "../utils/tailorOutcome";
+import { isRecoverableTailorFailure, requestTailorRecovery } from "../utils/tailorRecover";
+import {
+  getTailorTabId,
+  installProcessLockRelease,
+  isAnotherTabProcessing,
+  loadProcessLogs,
+  persistProcessLogs,
+  recoverProcessLock,
+  releaseProcessLockIfOwned,
+  touchProcessLock,
+  tryAcquireProcessLock,
+} from "../utils/tailorPersistence";
+import { resetTailorLogCapture } from "../utils/tailorLogCapture";
+import { abortActiveTailorJob } from "../utils/tailorRun";
 import { useAuth } from "./useAuth";
 import type { useTailorStatus } from "./useTailorStatus";
 
 const QUEUE_KEY = (uid: string) => `atriveo_tailor_queue_v1_${uid}`;
 const SYNC_KEY = (uid: string) => `atriveo_tailor_last_hourly_sync_v1_${uid}`;
+const LOGS_KEY = (uid: string) => `atriveo_tailor_process_logs_v1_${uid}`;
+/** Abort a stuck running job if the browser↔Mac stream drops but fetch never settles. */
+const RUNNING_STALE_MS = 3 * 60 * 1000;
+const RECOVER_RETRY_MS = 8_000;
 
 function hourBatchKey(date = new Date()): string {
   return date.toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 13);
@@ -111,6 +131,7 @@ function buildHourlyAdditions(
       hourBatch: batch,
       source: "hourly",
       status: "pending",
+      jobSnapshot: snapshotJobForQueue(job),
     });
     marks.push({
       key,
@@ -142,7 +163,7 @@ function purgeDismissedPending(items: TailorQueueItem[], dismissedKeys: Readonly
 
 type TailorStatusApi = Pick<
   ReturnType<typeof useTailorStatus>,
-  "getRecord" | "markStatus"
+  "getRecord" | "markStatus" | "reconcileWithQueue" | "clearAllLogs"
 >;
 
 interface Options {
@@ -155,6 +176,9 @@ interface Options {
     dir?: string;
     folder?: string;
     error?: string;
+    logs?: import("../types/tailor").TailorLogEntry[];
+    outcome?: import("../types/tailorQueue").TailorOutcomeKind;
+    serverStatus?: string;
   }>;
 }
 
@@ -169,18 +193,24 @@ export function useTailorQueue(jobs: Job[], options: Options) {
   const [lastHourlySyncAt, setLastHourlySyncAt] = useState(0);
   const [syncMessage, setSyncMessage] = useState("");
   const [processLogs, setProcessLogs] = useState<TailorProcessLogEntry[]>([]);
+  const [logsPanelCleared, setLogsPanelCleared] = useState(false);
   const processingRef = useRef(false);
   const logSeqRef = useRef(0);
+  const tabIdRef = useRef(getTailorTabId());
+  const heartbeatRef = useRef<number | null>(null);
+  const recoverTimerRef = useRef<number | null>(null);
   const queueRef = useRef<TailorQueueItem[]>([]);
   const jobsRef = useRef(jobs);
+  const lastSyncRef = useRef(0);
   const processQueueRef = useRef<(() => Promise<void>) | null>(null);
+  const runHourlySyncRef = useRef<(availableJobs: Job[], force?: boolean) => number>(() => 0);
 
   useEffect(() => {
     jobsRef.current = jobs;
   }, [jobs]);
 
   const pushLog = useCallback((message: string, durationMs?: number) => {
-    const at = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" });
+    const at = new Date().toISOString();
     logSeqRef.current += 1;
     const entry: TailorProcessLogEntry = {
       id: `${Date.now()}-${logSeqRef.current}`,
@@ -188,8 +218,12 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       message,
       durationMs,
     };
-    setProcessLogs((prev) => [entry, ...prev].slice(0, 40));
-  }, []);
+    setProcessLogs((prev) => {
+      const next = [entry, ...prev].slice(0, 80);
+      persistProcessLogs(uid, next);
+      return next;
+    });
+  }, [uid]);
 
   useEffect(() => {
     queueRef.current = queue;
@@ -201,8 +235,40 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     }, 0);
   }, []);
 
+  const forceReleaseProcessing = useCallback(() => {
+    abortActiveTailorJob();
+    if (recoverTimerRef.current) {
+      window.clearTimeout(recoverTimerRef.current);
+      recoverTimerRef.current = null;
+    }
+    if (heartbeatRef.current) {
+      window.clearInterval(heartbeatRef.current);
+      heartbeatRef.current = null;
+    }
+    releaseProcessLockIfOwned(uid, tabIdRef.current);
+    processingRef.current = false;
+    setProcessing(false);
+  }, [uid]);
+
   useEffect(() => {
     if (loading) return;
+    recoverProcessLock(uid, tabIdRef.current);
+
+    let loadedLogs = loadProcessLogs(uid);
+    if (uid !== "anon") {
+      try {
+        const anonLogs = loadProcessLogs("anon");
+        if (anonLogs.length) {
+          loadedLogs = [...anonLogs, ...loadedLogs].slice(0, 80);
+          persistProcessLogs(uid, loadedLogs);
+          localStorage.removeItem(LOGS_KEY("anon"));
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    setProcessLogs(loadedLogs);
+
     let loaded = loadQueue(uid);
     if (uid !== "anon") {
       try {
@@ -219,13 +285,49 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     const beforeLoad = loaded;
     loaded = resetStaleRunning(loaded);
     if (loaded !== beforeLoad) persistQueue(uid, loaded);
+    tailorStatus.reconcileWithQueue(loaded);
     queueRef.current = loaded;
     setQueue(loaded);
-    setLastHourlySyncAt(loadLastSync(uid));
-    if (loaded.some((item) => item.status === "pending")) {
+    const syncedAt = loadLastSync(uid);
+    lastSyncRef.current = syncedAt;
+    setLastHourlySyncAt(syncedAt);
+    const hasPending = loaded.some((item) => item.status === "pending");
+    const hadRunning = beforeLoad.some((item) => item.status === "running");
+    if (hasPending || hadRunning) {
+      if (hadRunning) pushLog("Recovered queue after refresh — resuming…");
       kickProcess();
     }
-  }, [loading, uid, kickProcess]);
+  }, [loading, uid, kickProcess, tailorStatus, pushLog]);
+
+  useEffect(() => {
+    const release = installProcessLockRelease(uid, tabIdRef.current);
+    return release;
+  }, [uid]);
+
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (!event.newValue) return;
+      if (event.key === QUEUE_KEY(uid)) {
+        try {
+          const loaded = JSON.parse(event.newValue) as TailorQueueItem[];
+          queueRef.current = loaded;
+          setQueue(loaded);
+          tailorStatus.reconcileWithQueue(loaded);
+        } catch {
+          /* ignore */
+        }
+      }
+      if (event.key === LOGS_KEY(uid)) {
+        try {
+          setProcessLogs(JSON.parse(event.newValue) as TailorProcessLogEntry[]);
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [uid, tailorStatus]);
 
   const commitQueue = useCallback((next: TailorQueueItem[]) => {
     const sorted = sortQueue(next);
@@ -248,6 +350,38 @@ export function useTailorQueue(jobs: Job[], options: Options) {
   const updateQueue = useCallback((updater: (prev: TailorQueueItem[]) => TailorQueueItem[]) => {
     return commitQueue(updater(queueRef.current));
   }, [commitQueue]);
+
+  const handleRecoverableFailure = useCallback((
+    jobKey: string,
+    error: string,
+    outcome?: import("../types/tailorQueue").TailorOutcomeKind,
+  ) => {
+    if (!isRecoverableTailorFailure(error, outcome)) return;
+    void requestTailorRecovery(error).then((started) => {
+      if (started) {
+        pushLog("Auto-recovery triggered on Mac — fixing Ollama / tunnel…");
+      }
+      if (recoverTimerRef.current) window.clearTimeout(recoverTimerRef.current);
+      recoverTimerRef.current = window.setTimeout(() => {
+        const item = queueRef.current.find((i) => i.jobKey === jobKey);
+        if (!item || (item.status !== "failed" && item.status !== "running")) return;
+        forceReleaseProcessing();
+        updateQueue((prev) => prev.map((entry) => (
+          entry.jobKey === jobKey && (entry.status === "failed" || entry.status === "running")
+            ? {
+                ...entry,
+                status: "pending" as const,
+                error: undefined,
+                startedAt: undefined,
+                durationMs: undefined,
+              }
+            : entry
+        )));
+        pushLog("Re-queued failed job after auto-recovery — retrying…");
+        kickProcess();
+      }, RECOVER_RETRY_MS);
+    });
+  }, [pushLog, updateQueue, kickProcess, forceReleaseProcessing]);
 
   const enqueueJob = useCallback((job: Job, source: TailorQueueItem["source"], urgent = false) => {
     const jobKey = jobDismissKey(job);
@@ -291,6 +425,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
         hourBatch: hourBatchKey(),
         source,
         status: "pending",
+        jobSnapshot: snapshotJobForQueue(job),
       };
       markPatch = {
         jobUrl: item.jobUrl,
@@ -316,7 +451,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
 
   const runHourlySync = useCallback((availableJobs: Job[], force = false) => {
     const now = Date.now();
-    if (!force && lastHourlySyncAt && now - lastHourlySyncAt < HOURLY_SYNC_MS) {
+    if (!force && lastSyncRef.current && now - lastSyncRef.current < HOURLY_SYNC_MS) {
       return 0;
     }
 
@@ -347,16 +482,23 @@ export function useTailorQueue(jobs: Job[], options: Options) {
 
     const added = marks.length;
     const ts = Date.now();
+    lastSyncRef.current = ts;
     setLastHourlySyncAt(ts);
     persistLastSync(uid, ts);
+
+    const hasPending = queueRef.current.some((item) => item.status === "pending");
     if (added > 0) {
       setSyncMessage(`Hourly sync added ${added} job${added === 1 ? "" : "s"} to the tailor queue`);
-      kickProcess();
     } else if (force) {
       setSyncMessage("Hourly sync: no new jobs to add");
     }
+
+    // Resume processing whenever sync runs and work is waiting — not only when new jobs were added.
+    if (added > 0 || hasPending) {
+      kickProcess();
+    }
     return added;
-  }, [lastHourlySyncAt, tailorStatus, uid, commitQueue, kickProcess]);
+  }, [tailorStatus, uid, commitQueue, kickProcess]);
 
   const bumpUrgent = useCallback((jobKey: string) => {
     updateQueue((prev) => prev.map((item) => (
@@ -403,6 +545,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
 
   const processQueue = useCallback(async () => {
     if (!onProcessJob || processingRef.current) return;
+    if (isAnotherTabProcessing(uid, tabIdRef.current)) return;
 
     const cleaned = purgeDismissedPending(queueRef.current, dismissedRef.current);
     if (cleaned.length !== queueRef.current.length) {
@@ -414,8 +557,20 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     );
     if (!nextItem) return;
 
+    if (!tryAcquireProcessLock(uid, tabIdRef.current, nextItem.jobKey)) return;
+
+    if (recoverTimerRef.current) {
+      window.clearTimeout(recoverTimerRef.current);
+      recoverTimerRef.current = null;
+    }
+
     processingRef.current = true;
     setProcessing(true);
+
+    if (heartbeatRef.current) window.clearInterval(heartbeatRef.current);
+    heartbeatRef.current = window.setInterval(() => {
+      touchProcessLock(uid, tabIdRef.current, nextItem.jobKey);
+    }, 15_000);
 
     const startedAt = new Date().toISOString();
     updateQueue((prev) => prev.map((item) => (
@@ -431,8 +586,9 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       progressPct: 5,
     });
     pushLog(`Started ${nextItem.company} · ${nextItem.title}`);
+    resetTailorLogCapture();
 
-    const job = jobsRef.current.find((j) => jobDismissKey(j) === nextItem.jobKey);
+    const job = jobsRef.current.find((j) => jobDismissKey(j) === nextItem.jobKey) ?? nextItem.jobSnapshot ?? null;
     if (!job) {
       const durationMs = Date.now() - Date.parse(startedAt);
       updateQueue((prev) => prev.map((item) => (
@@ -446,11 +602,17 @@ export function useTailorQueue(jobs: Job[], options: Options) {
           : item
       )));
       if (!dismissedRef.current.has(nextItem.jobKey)) {
-        tailorStatus.markStatus(nextItem.jobKey, "failed", { error: "Job no longer in feed" });
+        tailorStatus.markStatus(nextItem.jobKey, "failed", {
+          error: "Job no longer in feed",
+          outcome: "missing",
+        });
       } else {
         tailorStatus.markStatus(nextItem.jobKey, "none");
       }
       pushLog(`Skipped ${nextItem.company} · job no longer in feed`, durationMs);
+      if (heartbeatRef.current) window.clearInterval(heartbeatRef.current);
+      heartbeatRef.current = null;
+      releaseProcessLockIfOwned(uid, tabIdRef.current);
       processingRef.current = false;
       setProcessing(false);
       kickProcess();
@@ -475,9 +637,10 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       if (dismissed) {
         tailorStatus.markStatus(nextItem.jobKey, "none");
       } else {
+        const mapped = mapResultToRecordStatus(done, result.serverStatus, result.error);
         tailorStatus.markStatus(
           nextItem.jobKey,
-          done ? "done" : (result.error?.includes("no-go") ? "no-go" : "failed"),
+          mapped.status,
           {
             jobUrl: nextItem.jobUrl,
             company: nextItem.company,
@@ -490,6 +653,10 @@ export function useTailorQueue(jobs: Job[], options: Options) {
             progressPct: done ? 100 : undefined,
             tailoredAt: done ? new Date().toISOString() : undefined,
             error: result.error,
+            logs: result.logs,
+            durationMs,
+            outcome: result.outcome ?? mapped.outcome,
+            serverStatus: result.serverStatus,
           },
         );
       }
@@ -499,38 +666,117 @@ export function useTailorQueue(jobs: Job[], options: Options) {
           : `Failed ${nextItem.company} · ${result.error || "unknown error"}`,
         durationMs,
       );
+      if (!done) {
+        handleRecoverableFailure(
+          nextItem.jobKey,
+          result.error || "unknown error",
+          result.outcome ?? outcomeFromError(result.error),
+        );
+      }
     } catch (e) {
       const durationMs = Date.now() - Date.parse(startedAt);
       const error = (e as Error).message || String(e);
+      const failureOutcome = outcomeFromError(error);
       updateQueue((prev) => prev.map((item) => (
         item.jobKey === nextItem.jobKey
           ? { ...item, status: "failed" as const, error, durationMs }
           : item
       )));
-      tailorStatus.markStatus(nextItem.jobKey, "failed", { error });
+      tailorStatus.markStatus(nextItem.jobKey, "failed", {
+        error,
+        durationMs,
+        outcome: failureOutcome,
+      });
       pushLog(`Failed ${nextItem.company} · ${error}`, durationMs);
+      handleRecoverableFailure(nextItem.jobKey, error, failureOutcome);
     } finally {
+      if (recoverTimerRef.current) {
+        window.clearTimeout(recoverTimerRef.current);
+        recoverTimerRef.current = null;
+      }
+      if (heartbeatRef.current) window.clearInterval(heartbeatRef.current);
+      heartbeatRef.current = null;
+      releaseProcessLockIfOwned(uid, tabIdRef.current);
       processingRef.current = false;
       setProcessing(false);
       kickProcess();
     }
-  }, [onProcessJob, tailorStatus, updateQueue, pushLog, kickProcess, commitQueue]);
+  }, [onProcessJob, tailorStatus, updateQueue, pushLog, kickProcess, commitQueue, uid, handleRecoverableFailure]);
 
   processQueueRef.current = processQueue;
+  runHourlySyncRef.current = runHourlySync;
 
   useEffect(() => {
     if (processing || !onProcessJob) return;
-    const hasPending = queue.some((item) => item.status === "pending");
+    const hasPending = queue.some(
+      (item) => item.status === "pending" && !dismissedRef.current.has(item.jobKey),
+    );
     if (!hasPending) return;
     void processQueue();
   }, [queue, processing, onProcessJob, processQueue]);
 
+  // Stable hourly timer — do NOT depend on `jobs` or it resets every dismiss/filter change.
   useEffect(() => {
-    if (loading || !jobs.length) return;
-    runHourlySync(jobs);
-    const id = window.setInterval(() => runHourlySync(jobs), HOURLY_SYNC_MS);
+    if (loading) return;
+
+    const tick = (force = false) => {
+      runHourlySyncRef.current(jobsRef.current, force);
+    };
+
+    tick();
+    const id = window.setInterval(() => tick(), HOURLY_SYNC_MS);
     return () => window.clearInterval(id);
-  }, [jobs, loading, runHourlySync]);
+  }, [loading, uid]);
+
+  // Nudge idle queues + catch up after tab sleep/background throttling.
+  useEffect(() => {
+    const nudge = () => {
+      if (isAnotherTabProcessing(uid, tabIdRef.current)) return;
+      const hasPending = queueRef.current.some(
+        (item) => item.status === "pending" && !dismissedRef.current.has(item.jobKey),
+      );
+      if (!hasPending) return;
+      if (!processingRef.current) kickProcess();
+    };
+
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      runHourlySyncRef.current(jobsRef.current);
+      nudge();
+    };
+
+    const watchdogId = window.setInterval(nudge, 30_000);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(watchdogId);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [kickProcess, uid]);
+
+  // If the relay stream drops, fetch can hang until we abort — unstick the queue.
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const running = queueRef.current.find((item) => item.status === "running");
+      const hasPending = queueRef.current.some(
+        (item) => item.status === "pending" && !dismissedRef.current.has(item.jobKey),
+      );
+
+      // Deadlock: UI shows Processing but job was re-queued to pending.
+      if (processingRef.current && !running) {
+        pushLog("Resetting stuck processor — retrying queue…");
+        forceReleaseProcessing();
+        if (hasPending) kickProcess();
+        return;
+      }
+
+      if (!processingRef.current || !running?.startedAt) return;
+      const elapsed = Date.now() - Date.parse(running.startedAt);
+      if (elapsed < RUNNING_STALE_MS) return;
+      pushLog(`Aborting stale run after ${Math.round(elapsed / 60_000)}m — relay stream may have dropped`);
+      abortActiveTailorJob();
+    }, 30_000);
+    return () => window.clearInterval(id);
+  }, [pushLog, forceReleaseProcessing, kickProcess]);
 
   const pendingCount = useMemo(
     () => queue.filter((item) => item.status === "pending").length,
@@ -582,6 +828,22 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     setSyncMessage("Cleared finished queue items");
   }, [updateQueue]);
 
+  const clearTailor = useCallback(() => {
+    forceReleaseProcessing();
+    updateQueue(() => []);
+    setProcessLogs([]);
+    persistProcessLogs(uid, []);
+    tailorStatus.clearAllLogs();
+    setLogsPanelCleared(true);
+    setSyncMessage("");
+  }, [forceReleaseProcessing, updateQueue, uid, tailorStatus]);
+
+  useEffect(() => {
+    if (processing || pendingCount > 0) {
+      setLogsPanelCleared(false);
+    }
+  }, [processing, pendingCount]);
+
   return {
     queue,
     pendingCount,
@@ -601,6 +863,8 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     runHourlySync,
     processQueue,
     clearDone,
+    clearTailor,
+    logsPanelCleared,
     reorderPending,
   };
 }
