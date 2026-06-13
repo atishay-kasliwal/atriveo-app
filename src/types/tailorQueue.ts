@@ -28,6 +28,8 @@ export interface TailorProcessLogEntry {
   at: string;
   message: string;
   durationMs?: number;
+  /** Real result classification so the UI can label honestly (not just "Failed"). */
+  outcome?: TailorOutcomeKind;
 }
 
 export type TailorRecordStatus = "none" | "queued" | "running" | "done" | "failed" | "no-go";

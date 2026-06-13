@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { TailorLogEntry } from "../types/tailor";
-import type { TailorProcessLogEntry, TailorQueueItem } from "../types/tailorQueue";
+import type { TailorOutcomeKind, TailorProcessLogEntry, TailorQueueItem } from "../types/tailorQueue";
 import { HOURLY_QUEUE_SIZE } from "../types/tailorQueue";
 import TailorLogStream from "./TailorLogStream";
 import { formatTailorDuration } from "../utils/tailorProgress";
@@ -9,6 +9,41 @@ import { displayProcessLogAt, formatProcessLogTime } from "../utils/processLogTi
 function formatSyncTime(ts: number): string {
   if (!ts) return "Never";
   return formatProcessLogTime(new Date(ts));
+}
+
+// Honest, glanceable classification for a finished job line. "Failed" is
+// reserved for things that are genuinely broken and need YOU; retryable/expected
+// states (no JD yet, skipped, offline) get their own tone + a "what's happening"
+// note so the panel never lies about the pipeline state.
+type FinishedTone = "done" | "skip" | "retry" | "fail";
+interface FinishedDisplay { tone: FinishedTone; icon: string; note: string; }
+
+function classifyFinished(entry: TailorProcessLogEntry): FinishedDisplay {
+  const outcome: TailorOutcomeKind | undefined = entry.outcome;
+  // Prefer the explicit outcome; fall back to the message prefix for old entries.
+  if (outcome === "done" || (!outcome && entry.message.startsWith("Finished"))) {
+    return { tone: "done", icon: "✓", note: "" };
+  }
+  switch (outcome) {
+    case "skip":
+      return { tone: "skip", icon: "⏭", note: "Skipped — not worth tailoring" };
+    case "missing":
+      return { tone: "skip", icon: "⏭", note: "Job left the feed" };
+    case "no-jd":
+      return { tone: "retry", icon: "⏳", note: "No full JD yet — auto-retries after the next hourly scrape" };
+    case "no-resume":
+      return { tone: "retry", icon: "⏳", note: "Save your resume in Settings, then retry" };
+    case "offline":
+      return { tone: "retry", icon: "⏳", note: "Tailor server/relay offline — will resume when reachable" };
+    case "timeout":
+      return { tone: "retry", icon: "⏳", note: "Connection dropped — auto-recovers if the PDF was made" };
+    case "compile":
+      return { tone: "fail", icon: "✗", note: "PDF compile failed (LaTeX) — needs a look" };
+    case "ai":
+      return { tone: "fail", icon: "✗", note: "Model step failed (Ollama)" };
+    default:
+      return { tone: "fail", icon: "✗", note: "Failed — check the queue log" };
+  }
 }
 
 function useElapsedMs(startedAt?: string, active = false): number | null {
@@ -171,6 +206,11 @@ export default function TailorQueueBar({
             <span className="tailor-queue-stat">
               <strong>{doneInQueue}</strong> done
             </span>
+            {failedInQueue > 0 ? (
+              <span className="tailor-queue-stat tailor-queue-stat--failed">
+                <strong>{failedInQueue}</strong> failed/skipped
+              </span>
+            ) : null}
             {showProgress ? (
               <span className="tailor-queue-stat tailor-queue-stat--progress">
                 <strong>{overallProgressPct}%</strong> complete
@@ -229,17 +269,27 @@ export default function TailorQueueBar({
 
           {recentFinished.length > 0 ? (
             <ul className="tailor-queue-recent">
-              {recentFinished.map((entry) => (
-                <li
-                  key={entry.id}
-                  className={`tailor-queue-recent-item tailor-queue-recent-item--${entry.message.startsWith("Finished") ? "done" : "failed"}`}
-                >
-                  <span className="tailor-queue-recent-label">{entry.message}</span>
-                  <span className="tailor-queue-recent-time">
-                    {formatTailorDuration(entry.durationMs ?? 0)}
-                  </span>
-                </li>
-              ))}
+              {recentFinished.map((entry) => {
+                const d = classifyFinished(entry);
+                // Strip the redundant "Finished/Failed/Skipped " prefix — the
+                // icon + note already convey state, so show just company · detail.
+                const label = entry.message.replace(/^(Finished|Failed|Skipped)\s+/, "");
+                return (
+                  <li
+                    key={entry.id}
+                    className={`tailor-queue-recent-item tailor-queue-recent-item--${d.tone}`}
+                  >
+                    <span className="tailor-queue-recent-icon" aria-hidden>{d.icon}</span>
+                    <span className="tailor-queue-recent-main">
+                      <span className="tailor-queue-recent-label">{label}</span>
+                      {d.note ? <span className="tailor-queue-recent-note">{d.note}</span> : null}
+                    </span>
+                    <span className="tailor-queue-recent-time">
+                      {formatTailorDuration(entry.durationMs ?? 0)}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           ) : null}
 

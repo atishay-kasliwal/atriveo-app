@@ -1345,6 +1345,13 @@ body.is-today-board .nav-tab.active {
   color: var(--board-muted);
 }
 
+.tailor-queue-stat--failed {
+  color: #c2410c;
+}
+.tailor-queue-stat--failed strong {
+  color: #c2410c;
+}
+
 .tailor-queue-stat--progress {
   display: inline-flex;
   align-items: baseline;
@@ -1498,21 +1505,55 @@ body.is-today-board .nav-tab.active {
 
 .tailor-queue-recent-item {
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 7px;
   font-size: 10px;
   color: var(--board-muted);
 }
 
-.tailor-queue-recent-item--done .tailor-queue-recent-label {
-  color: #1f7a3f;
+.tailor-queue-recent-icon {
+  flex: 0 0 auto;
+  line-height: 1.4;
+  font-weight: 700;
 }
 
-.tailor-queue-recent-item--failed .tailor-queue-recent-label {
-  color: #b45309;
+.tailor-queue-recent-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
+
+.tailor-queue-recent-label {
+  font-weight: 600;
+  color: var(--board-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tailor-queue-recent-note {
+  font-size: 9px;
+  color: var(--board-muted);
+  line-height: 1.3;
+}
+
+/* Tones: done = green, skip = neutral grey, retry = amber (will self-heal),
+   fail = red (needs you). The icon + note carry the meaning at a glance. */
+.tailor-queue-recent-item--done .tailor-queue-recent-icon,
+.tailor-queue-recent-item--done .tailor-queue-recent-label { color: #1f7a3f; }
+
+.tailor-queue-recent-item--skip .tailor-queue-recent-icon { color: #6b7280; }
+
+.tailor-queue-recent-item--retry .tailor-queue-recent-icon,
+.tailor-queue-recent-item--retry .tailor-queue-recent-note { color: #b45309; }
+
+.tailor-queue-recent-item--fail .tailor-queue-recent-icon,
+.tailor-queue-recent-item--fail .tailor-queue-recent-label { color: #c2410c; }
+.tailor-queue-recent-item--fail .tailor-queue-recent-note { color: #c2410c; }
 
 .tailor-queue-recent-time {
+  flex: 0 0 auto;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;

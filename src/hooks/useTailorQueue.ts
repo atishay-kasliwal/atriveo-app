@@ -209,7 +209,11 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     jobsRef.current = jobs;
   }, [jobs]);
 
-  const pushLog = useCallback((message: string, durationMs?: number) => {
+  const pushLog = useCallback((
+    message: string,
+    durationMs?: number,
+    outcome?: import("../types/tailorQueue").TailorOutcomeKind,
+  ) => {
     const at = new Date().toISOString();
     logSeqRef.current += 1;
     const entry: TailorProcessLogEntry = {
@@ -217,6 +221,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       at,
       message,
       durationMs,
+      outcome,
     };
     setProcessLogs((prev) => {
       const next = [entry, ...prev].slice(0, 80);
@@ -609,7 +614,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       } else {
         tailorStatus.markStatus(nextItem.jobKey, "none");
       }
-      pushLog(`Skipped ${nextItem.company} · job no longer in feed`, durationMs);
+      pushLog(`Skipped ${nextItem.company} · job no longer in feed`, durationMs, "missing");
       if (heartbeatRef.current) window.clearInterval(heartbeatRef.current);
       heartbeatRef.current = null;
       releaseProcessLockIfOwned(uid, tabIdRef.current);
@@ -660,11 +665,15 @@ export function useTailorQueue(jobs: Job[], options: Options) {
           },
         );
       }
+      const finishOutcome = done
+        ? "done" as const
+        : (result.outcome ?? outcomeFromError(result.error));
       pushLog(
         done
           ? `Finished ${nextItem.company} · ${nextItem.title}${result.ats ? ` · ATS ${result.ats}` : ""}`
           : `Failed ${nextItem.company} · ${result.error || "unknown error"}`,
         durationMs,
+        finishOutcome,
       );
       if (!done) {
         handleRecoverableFailure(
@@ -687,7 +696,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
         durationMs,
         outcome: failureOutcome,
       });
-      pushLog(`Failed ${nextItem.company} · ${error}`, durationMs);
+      pushLog(`Failed ${nextItem.company} · ${error}`, durationMs, failureOutcome);
       handleRecoverableFailure(nextItem.jobKey, error, failureOutcome);
     } finally {
       if (recoverTimerRef.current) {
