@@ -266,18 +266,53 @@ function JobTableRow({
       <td className="job-table-time">{fmtTime(job.batch_time || job.date_posted, job.scraped_date, board)}</td>
       <td className={`job-table-actions${board ? " job-table-actions--board" : ""}`}>
         {board ? (
-          job.job_url ? (
-            <a
+          <div className="job-table-board-actions">
+            {job.job_url ? (
+              <a
+                className="job-table-board-apply job-table-board-apply--primary"
+                href={job.job_url}
+                target="_blank"
+                rel="noopener"
+                onClick={() => onApplyClick?.(job)}
+                title="Apply"
+              >
+                Apply
+              </a>
+            ) : null}
+            {job.job_url && onApplyClick && (
+              <button
+                type="button"
+                className="job-table-board-apply"
+                onClick={() => onApplyClick(job)}
+                title="Log an apply click"
+              >
+                Click
+              </button>
+            )}
+            <button
+              type="button"
               className="job-table-board-apply"
-              href={job.job_url}
-              target="_blank"
-              rel="noopener"
-              onClick={() => onApplyClick?.(job)}
-              title="Apply"
+              title="Copy referral message"
+              onClick={() => {
+                navigator.clipboard.writeText(buildReferralMessage(job)).then(() => {
+                  setMsgCopied(true);
+                  setTimeout(() => setMsgCopied(false), 1200);
+                });
+              }}
             >
-              Apply
-            </a>
-          ) : null
+              {msgCopied ? "Copied" : "Msg"}
+            </button>
+            {canSendToTracker && job.job_url && (
+              <button
+                type="button"
+                className="job-table-board-apply"
+                title="Add to Atriveo tracker"
+                onClick={() => onAddToTracker(job.job_url, title, co, { location: job.location || null })}
+              >
+                {trackerCopy}
+              </button>
+            )}
+          </div>
         ) : (
           <>
             {job.job_url ? (
