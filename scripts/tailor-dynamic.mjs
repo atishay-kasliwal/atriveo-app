@@ -34,10 +34,11 @@ export const PROJECT_META = {
 
 export const SYSTEM_PROMPT = `You are an elite technical recruiter and resume strategist. Goal: build the resume MOST LIKELY TO LAND AN INTERVIEW for this exact job. Output ONE valid JSON object only — no markdown, no prose.
 
-STRATEGY (aggressive but honest):
-- Select the roles, projects, and bullets from the bank that best match THIS JD. You do NOT have to use every role.
+STRATEGY (SELECT-FIRST — the bank bullets are already excellent, do NOT degrade them):
+- The bank bullets are pre-written, expert-rated 9+/10. Your PRIMARY job is SELECTION: pick the bullets from the bank that best match THIS JD. You do NOT have to use every role.
+- PRESERVE every concrete detail in the bullet you pick: named clients (e.g. "for Fidelity", "for BT Telecom"), every tool (e.g. "Spring Cloud"), and EVERY metric (some bullets carry two — keep both). Never drop a detail to make a bullet shorter.
+- TUNE, do not rewrite: only adjust wording lightly so the bullet mirrors the JD's exact keywords for tools the candidate already used. If a bullet already fits, copy it verbatim. Re-write substantially ONLY when a bullet is weak for this JD.
 - Order experience reverse-chronologically (most recent first).
-- Rewrite each selected bullet to hit the JD's exact keywords HARD — mirror the JD's wording for tools the candidate already used.
 - Front-load impact (metric/scale in first 8-12 words). Strong verbs: Built, Engineered, Architected, Automated, Optimized, Scaled, Shipped, Reduced, Owned, Deployed.
 
 TRUTH (non-negotiable — this is what survives the interview):
@@ -140,15 +141,16 @@ export function buildUserMessage(bank, jd) {
 export const CRITIQUE_SYSTEM = `You are a brutal senior hiring manager reviewing a resume draft for THIS job. Output ONE valid JSON object only — no markdown, no prose.
 
 For each bullet you are given, score it 1-10 on this bar:
-- Carries a concrete metric or named scale (no vague claims).
-- Shows architecture, a tradeoff, or a real outcome — not a tool dump.
+- Carries a concrete metric or named scale (the strongest bullets carry TWO metrics — reward that).
+- Names the client/system where real (e.g. "for Fidelity") and shows architecture or a real outcome — not a tool dump.
 - Reads as OWNING a system, not completing a task.
 - Distinct signal from the other bullets in its section.
-- Natural human cadence, varied structure, no AI-vocabulary, no semicolons/em-dashes.
+- Natural human cadence, varied structure, no AI-vocabulary, no semicolons/em-dashes, no hyphenated compounds.
 
 RULES for any rewrite:
 - Rewrite ONLY bullets scoring below 9. Leave 9-10 bullets unchanged (return them as-is).
-- NEVER add or change a number that is not already in the original bullet text. No inflation, no rounding.
+- NEVER add, change, round, or inflate a number that is not already in the original bullet text.
+- When rewriting, ADD BACK detail, do not strip it: keep every client name, every tool, and every metric already present. A bullet should get RICHER, never thinner.
 - Keep every JD keyword and tool that was already present. Do not weaken ATS signal.
 - Keep it one line, impact-forward, truthful.
 
@@ -205,17 +207,24 @@ export function filterSkillsLine(line, safeClaims) {
   const colon = line.indexOf(":");
   if (colon === -1) return { line, dropped: [] };
   const label = line.slice(0, colon);
-  const items = line.slice(colon + 1).split(",").map((s) => s.trim()).filter(Boolean);
+  // Flatten parenthetical sub-lists into flat comma items so we never split
+  // "AWS (Lambda, EC2)" into "AWS (Lambda" + "EC2)" and orphan a paren.
+  const flat = line.slice(colon + 1).replace(/[()]/g, ",");
+  const items = flat.split(",").map((s) => s.trim()).filter(Boolean);
   const norm = (s) => s.toLowerCase().replace(/[^a-z0-9+#.]/g, "");
   const safeNorm = new Set([...safeClaims].map(norm));
   const kept = [], dropped = [];
   for (const it of items) {
     const n = norm(it);
+    if (!n) continue;
     // keep if exact, or any safe term is a token of it / it is a token of a safe term
     const ok = safeNorm.has(n) || [...safeNorm].some((s) => s.length > 2 && (n.includes(s) || s.includes(n)));
     (ok ? kept : dropped).push(it);
   }
-  return { line: kept.length ? `${label}: ${kept.join(", ")}` : "", dropped };
+  // De-dupe (flattening "AWS (Lambda)" can surface "AWS" twice) preserving order.
+  const seen = new Set();
+  const finalKept = kept.filter((k) => { const n = norm(k); if (seen.has(n)) return false; seen.add(n); return true; });
+  return { line: finalKept.length ? `${label}: ${finalKept.join(", ")}` : "", dropped };
 }
 
 const BANNED = loadBannedPhrases();
