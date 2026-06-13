@@ -895,9 +895,20 @@ const server = http.createServer(async (req, res) => {
       }));
     }
     let raw = "";
+    let clientGone = false;
     req.on("data", (c) => (raw += c));
+    // Do NOT free tailorBusy on client disconnect. The tailoring work in the
+    // "end" handler keeps running (Ollama + compile finish on the Mac), and its
+    // own finally{} frees tailorBusy when truly done. Freeing it here on a page
+    // refresh would let a SECOND job start and fight the first for the GPU —
+    // which surfaced as "Connection dropped" failures. We just note the client
+    // is gone so streaming can stop early; the PDF still gets written, and the
+    // browser recovers it via /check-job.
     req.on("close", () => {
-      if (!res.writableEnded) tailorBusy = false;
+      if (!res.writableEnded) {
+        clientGone = true;
+        log("client disconnected mid-stream — job continues on the Mac, will finish + write PDF");
+      }
     });
     req.on("end", async () => {
       tailorBusy = true;
