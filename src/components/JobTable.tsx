@@ -191,6 +191,7 @@ function JobTableRow({
   board = false,
 }: RowProps) {
   const [msgCopied, setMsgCopied] = useState(false);
+  const [clickLogged, setClickLogged] = useState(false);
   const co = job.company || "—";
   const title = job.title || "—";
   const careerOps = careerOpsRating(job);
@@ -297,11 +298,15 @@ function JobTableRow({
             {job.job_url && onApplyClick && (
               <button
                 type="button"
-                className="job-table-board-apply"
-                onClick={() => onApplyClick(job)}
+                className={`job-table-board-apply${clickLogged ? " is-logged" : ""}`}
+                onClick={() => {
+                  onApplyClick(job);
+                  setClickLogged(true);
+                  setTimeout(() => setClickLogged(false), 1400);
+                }}
                 title="Log an apply click"
               >
-                Click
+                {clickLogged ? "Logged ✓" : "Click"}
               </button>
             )}
             <button

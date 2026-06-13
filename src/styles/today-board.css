@@ -541,19 +541,19 @@ body.is-today-board .nav-tab.active {
   font-size: 13px;
 }
 
-.job-table--board .col-check { width: 34px; }
-.job-table--board .col-num { width: 30px; }
-.job-table--board .col-score { width: 78px; }
+.job-table--board .col-check { width: 32px; }
+.job-table--board .col-num { width: 28px; }
+.job-table--board .col-score { width: 62px; }
 .job-table--board .col-role { width: auto; }
-.job-table--board .col-rating { width: 146px; }
-.job-table--board .col-loc { width: 132px; }
-.job-table--board .col-comp { width: 60px; }
-.job-table--board .col-level { width: 92px; }
-.job-table--board .col-posted { width: 78px; }
-.job-table--board .col-actions { width: 196px; }
+.job-table--board .col-rating { width: 124px; }
+.job-table--board .col-loc { width: 116px; }
+.job-table--board .col-comp { width: 52px; }
+.job-table--board .col-level { width: 72px; }
+.job-table--board .col-posted { width: 70px; }
+.job-table--board .col-actions { width: 190px; }
 
 .job-table--board thead th {
-  padding: 7px 14px;
+  padding: 7px 10px;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -570,7 +570,7 @@ body.is-today-board .nav-tab.active {
 }
 
 .job-table--board tbody td {
-  padding: 0 14px;
+  padding: 0 10px;
   height: 42px;
   border-bottom: 1px solid var(--board-line-soft);
   border-right: 1px solid var(--board-line-soft);
@@ -867,6 +867,14 @@ body.is-today-board .nav-tab.active {
   background: var(--board-accent-strong);
   border-color: var(--board-accent-strong);
   color: #fff;
+}
+
+/* Click → "Logged ✓" success confirmation */
+.job-table-board-apply.is-logged,
+.job-table-board-apply.is-logged:hover {
+  background: #e7f6ec;
+  border-color: #9fd6b1;
+  color: #15803d;
 }
 
 .bulk-copy-bar--board .bulk-copy-btn {
