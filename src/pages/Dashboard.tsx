@@ -31,6 +31,8 @@ const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 const DS_TERM_RE  = /data\s*sci/i;
 const DS_TITLE_RE = /data\s*sci/i;
 
+const TABLE_VIEW_ROWS = 20;
+
 const LOCATION_FILTERS = [
   { key: "New York", match: (loc: string) => loc.includes("new york") },
   { key: "Seattle",  match: (loc: string) => loc.includes("seattle") },
@@ -311,7 +313,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   }, [stats.appliedJobs]);
 
   const applyClickTableRows = useMemo(
-    () => applyClickRecords.slice(0, 40),
+    () => applyClickRecords.slice(0, TABLE_VIEW_ROWS),
     [applyClickRecords]
   );
 

@@ -3,6 +3,12 @@
  *
  * Usage:  npx tsx scripts/send-top-jobs.ts
  *
+ * Preview locally (no send):
+ *   PREVIEW=1 npx tsx scripts/send-top-jobs.ts
+ *
+ * Preview with screenshot-matched mock data (no MongoDB):
+ *   MOCK=1 PREVIEW=1 npx tsx scripts/send-top-jobs.ts
+ *
  * Required env vars (set in .env or environment):
  *   MONGO_URI        — MongoDB Atlas connection string
  *   RESEND_API_KEY   — Resend API key (re_xxxxxxxx)
@@ -23,6 +29,7 @@ const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL ?? "katishay@gmail.com";
 const RESEND_FROM  = process.env.RESEND_FROM  ?? "Atriveo Jobs <jobs@atriveo.com>";
 const DASHBOARD_URL = "https://atriveo-app.pages.dev";
 const NY_TZ = "America/New_York";
+const RANKED_ROLES_VISIBLE = 5;
 
 // 250 is the max possible raw score from the scoring rubric.
 const MAX_SCORE = 250;
@@ -117,21 +124,35 @@ function computePct(job: Job): number {
   return 0;
 }
 
-// Use rank-based colours so the digest always has meaningful visual hierarchy
-// regardless of the absolute score range in a given session.
-function scoreColor(rank: number): { bg: string; text: string } {
-  if (rank <= 3)  return { bg: "#dcfce7", text: "#166534" }; // top 3  — green
-  if (rank <= 7)  return { bg: "#fef9c3", text: "#854d0e" }; // mid 4  — amber
-  return            { bg: "#f1f5f9",  text: "#64748b" };      // rest   — slate
+function matchColor(pct: number): string {
+  if (pct >= 70) return "#10b981";
+  if (pct >= 50) return "#f59e0b";
+  return "#94a3b8";
 }
 
-function levelColor(level: string): { bg: string; text: string; border: string } {
-  switch (level) {
-    case "New Grad": return { bg: "#eef4ff", text: "#1d4ed8", border: "#c7d7fe" };
-    case "Entry":    return { bg: "#ecfeff", text: "#0e7490", border: "#a5f3fc" };
-    case "Mid":      return { bg: "#f0fdf4", text: "#15803d", border: "#bbf7d0" };
-    default:         return { bg: "#f1f5f9", text: "#475569", border: "#e2e8f0" };
+function companyInitials(company: string): string {
+  const clean = company.trim();
+  const words = clean.split(/\s+/).filter(Boolean);
+  if (words.length >= 2) {
+    if (words[0].length <= 3) return words[0].slice(0, 2).toUpperCase();
+    return (words[0][0] + words[1][0]).toUpperCase();
   }
+  const caps = clean.match(/[A-Z]/g);
+  if (caps && caps.length >= 2) return caps.slice(0, 2).join("");
+  return clean.slice(0, 2).toUpperCase();
+}
+
+function marketShortCode(name: string): string {
+  if (/new york/i.test(name)) return "NYC";
+  if (/seattle/i.test(name)) return "SEA";
+  if (/north carolina/i.test(name)) return "NC";
+  return name.slice(0, 3).toUpperCase();
+}
+
+function marketPreview(job: Job): string {
+  const title = truncate(job.title, 28);
+  const company = truncate(job.company, 18);
+  return `${title} — ${company}`;
 }
 
 function trendArrow(curr: number, prev: number | null): Trend {
@@ -143,13 +164,6 @@ function trendArrow(curr: number, prev: number | null): Trend {
   const color = delta > 0 ? "#15803d" : delta < 0 ? "#b91c1c" : "#64748b";
   const sign  = delta > 0 ? "+" : "";
   return { arrow, pct: Math.round(delta), color, sign, hasPrev: true };
-}
-
-function fmtHourLabel(d: Date): string {
-  return d
-    .toLocaleString("en-US", { timeZone: NY_TZ, hour: "numeric", hour12: true })
-    .replace(/\s/g, "")
-    .toLowerCase();
 }
 
 function truncate(s: string, max: number): string {
@@ -304,193 +318,82 @@ async function loadInsights(
 
 // ─── render: building blocks ──────────────────────────────────────────────────
 
-const COL = { rank: 44, level: 96, match: 76, apply: 88 };
+function sectionHeader(title: string): string {
+  const label = title.toUpperCase();
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:14px;">
+      <tr>
+        <td style="white-space:nowrap; padding-right:12px; vertical-align:middle;">
+          <span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.12em;">
+            ${escapeHtml(label)}
+          </span>
+        </td>
+        <td style="vertical-align:middle; width:100%;">
+          <div style="height:1px; background:#e2e8f0; line-height:0; font-size:0;">&nbsp;</div>
+        </td>
+      </tr>
+    </table>`;
+}
 
-function renderHeader(
-  sessionTime: string,
-  jobsCount: number,
-  avgMatch: number,
-  marketPulse: MarketPulse,
-): string {
-  const chip = (label: string, count: number, tint: string) => `
-    <span style="
-      display:inline-block;
-      border:1px solid ${tint};
-      background:rgba(255,255,255,0.08);
-      color:#dbeafe;
-      border-radius:999px;
-      padding:4px 9px;
-      font-size:10.5px;
-      font-weight:700;
-      letter-spacing:.02em;
-      margin-right:6px;
-      margin-top:8px;">
-      ${label} ${count}
-    </span>`;
-
+function renderHeader(sessionTime: string): string {
   return `
     <tr>
-      <td style="
-        background-color:#0f172a;
-        background-image:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#1e40af 100%);
-        border-radius:14px 14px 0 0; padding:30px 36px 26px;">
+      <td style="padding:28px 32px 0;">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
-            <td>
+            <td style="vertical-align:middle;">
               <table cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="
-                    width:38px; height:38px;
-                    background-color:#2563eb;
-                    background-image:linear-gradient(135deg,#2563eb,#0891b2);
-                    border-radius:10px; text-align:center; vertical-align:middle;">
-                    <span style="color:#fff; font-size:17px; font-weight:800; line-height:38px;">A</span>
+                    width:36px; height:36px;
+                    background:#0f172a;
+                    border-radius:10px;
+                    text-align:center; vertical-align:middle;">
+                    <table width="36" height="36" cellpadding="0" cellspacing="0">
+                      <tr><td align="center" valign="middle">
+                        <span style="
+                          display:inline-block; width:14px; height:14px;
+                          background:#10b981; border-radius:50;"></span>
+                      </td></tr>
+                    </table>
                   </td>
                   <td style="padding-left:12px; vertical-align:middle;">
-                    <div style="color:#fff; font-size:15px; font-weight:700; letter-spacing:-0.02em;">Atriveo</div>
-                    <div style="color:#94a3b8; font-size:11px; margin-top:1px;">Hourly Intelligence</div>
+                    <div style="color:#0f172a; font-size:15px; font-weight:800; letter-spacing:.04em;">ATRIVEO</div>
+                    <div style="color:#94a3b8; font-size:10px; font-weight:600; letter-spacing:.14em; margin-top:2px;">HOURLY INTELLIGENCE</div>
                   </td>
                 </tr>
               </table>
             </td>
             <td align="right" style="vertical-align:middle;">
               <span style="
-                display:inline-block; border-radius:999px;
-                border:1px solid rgba(34,197,94,.45);
-                color:#bbf7d0; font-size:11px; font-weight:600;
-                padding:5px 10px;">
+                display:inline-block; background:#fff;
+                border:1px solid #e2e8f0; border-radius:999px;
+                padding:6px 12px; font-size:11px; font-weight:600; color:#334155;">
                 <span style="
-                  display:inline-block; width:6px; height:6px; border-radius:50%;
-                  background:#22c55e; margin-right:5px; vertical-align:middle;"></span>
-                Live · ${escapeHtml(sessionTime)}
+                  display:inline-block; width:7px; height:7px;
+                  background:#22c55e; border-radius:50%;
+                  margin-right:6px; vertical-align:middle;"></span>
+                LIVE
+                <span style="color:#cbd5e1; margin:0 6px;">|</span>
+                ${escapeHtml(sessionTime)}
               </span>
             </td>
           </tr>
-          <tr><td colspan="2" style="padding-top:22px;">
-            <div style="color:#fff; font-size:26px; font-weight:800; letter-spacing:-0.03em; line-height:1.15;">
-              Top ${jobsCount} jobs this hour
-            </div>
-            <div style="color:#94a3b8; font-size:13px; margin-top:6px;">
-              Ranked by match score · avg fit ${avgMatch}% · scored against your resume
-            </div>
-            <div style="margin-top:6px;">
-              ${chip("NY", marketPulse.ny, "rgba(59,130,246,.65)")}
-              ${chip("NC", marketPulse.nc, "rgba(34,197,94,.55)")}
-              ${chip("SEA", marketPulse.sea, "rgba(8,145,178,.65)")}
-            </div>
-          </td></tr>
-        </table>
-      </td>
-    </tr>
-    <tr>
-      <td style="
-        height:3px;
-        background:#2563eb;
-        background-image:linear-gradient(90deg,#2563eb,#0891b2,#22c55e);
-        border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0;">
-      </td>
-    </tr>`;
-}
-
-function renderHeroStats(insights: Insights): string {
-  const tHour  = trendArrow(insights.thisHour, insights.lastHour);
-  const tToday = trendArrow(insights.todayTotal, insights.yesterdayTotal);
-  const tSame  = trendArrow(insights.thisHour, insights.yesterdaySameHour);
-
-  const trendInline = (t: Trend, label: string) => t.hasPrev
-    ? `<span style="color:${t.color}; font-weight:700;">${t.arrow} ${t.sign}${t.pct}%</span> <span style="color:#94a3b8;">${escapeHtml(label)}</span>`
-    : `<span style="color:#cbd5e1;">— ${escapeHtml(label)}</span>`;
-
-  const cell = (
-    label: string,
-    value: string,
-    sub: string,
-    accent: string = "#0f172a",
-  ) => `
-    <td width="25%" style="padding:0 8px; vertical-align:top;">
-      <div style="font-size:10.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.1em;">${escapeHtml(label)}</div>
-      <div style="font-size:34px; font-weight:800; color:${accent}; letter-spacing:-0.03em; line-height:1.05; margin-top:8px;">${value}</div>
-      <div style="font-size:11.5px; color:#64748b; margin-top:6px; line-height:1.5;">${sub}</div>
-    </td>`;
-
-  const yestCell = insights.yesterdayTotal != null
-    ? cell("Yesterday", fmtNumber(insights.yesterdayTotal), `full-day total · ${trendInline(tToday, "today vs yest")}`)
-    : cell("Yesterday", "—", "no data yet");
-
-  return `
-    <tr>
-      <td style="
-        background:#fff; border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0;
-        padding:24px 36px 22px;">
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <tr>
-            ${cell(
-              "This hour",
-              fmtNumber(insights.thisHour),
-              `${trendInline(tHour, "vs last hr")}<br>${trendInline(tSame, "vs yest same hr")}`,
-              "#1e40af",
-            )}
-            ${cell(
-              "Today",
-              fmtNumber(insights.todayTotal),
-              `total scraped today<br>${trendInline(tToday, "vs yesterday")}`,
-            )}
-            ${yestCell}
-            ${cell(
-              "Avg match",
-              `${insights.avgMatchThisHour}%`,
-              `<span style="color:#15803d; font-weight:700;">${insights.highMatchCount}</span> high-match (≥70%)<br><span style="color:#94a3b8;">this hour</span>`,
-            )}
-          </tr>
         </table>
       </td>
     </tr>`;
 }
 
-function renderTwelveHourChart(insights: Insights): string {
-  if (!insights.last12h.length) return "";
-  const max = Math.max(...insights.last12h.map((b) => b.jobs), 1);
-  const chartH = 72;
-
-  const bars = insights.last12h.map((b, i) => {
-    const isCurrent = i === insights.last12h.length - 1;
-    const h = b.jobs > 0 ? Math.max(4, Math.round((b.jobs / max) * chartH)) : 1;
-    const fillColor = isCurrent ? "#2563eb" : "#cbd5e1";
-    const fillImg = isCurrent
-      ? "linear-gradient(180deg,#2563eb,#0891b2)"
-      : "none";
-    return `
-      <td width="8.33%" style="vertical-align:bottom; padding:0 3px; height:${chartH}px;">
-        <div style="height:${h}px; background-color:${fillColor}; background-image:${fillImg}; border-radius:3px 3px 0 0;"></div>
-      </td>`;
-  }).join("");
-
-  const labels = insights.last12h.map((b, i) => {
-    const isCurrent = i === insights.last12h.length - 1;
-    const color = isCurrent ? "#0f172a" : "#94a3b8";
-    const weight = isCurrent ? "700" : "500";
-    return `<td width="8.33%" style="text-align:center; padding:6px 0 0; font-size:10px; color:${color}; font-weight:${weight};">${escapeHtml(fmtHourLabel(b.hour))}</td>`;
-  }).join("");
-
-  const counts = insights.last12h.map((b, i) => {
-    const isCurrent = i === insights.last12h.length - 1;
-    const color = isCurrent ? "#0f172a" : "#94a3b8";
-    const weight = isCurrent ? "700" : "500";
-    return `<td width="8.33%" style="text-align:center; padding:0 0 6px; font-size:10.5px; color:${color}; font-weight:${weight}; height:16px;">${b.jobs > 0 ? b.jobs : ""}</td>`;
-  }).join("");
-
+function renderTitleBlock(jobsCount: number, avgMatch: number): string {
   return `
     <tr>
-      <td style="background:#fff; border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0; padding:0 36px 24px;">
-        <div style="font-size:10.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.1em; margin-bottom:12px;">
-          Last 12 hours · jobs scraped per hour
+      <td style="padding:24px 32px 0;">
+        <div style="color:#0f172a; font-size:28px; font-weight:800; letter-spacing:-0.03em; line-height:1.15;">
+          Top ${jobsCount} jobs this hour
         </div>
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <tr>${counts}</tr>
-          <tr>${bars}</tr>
-          <tr><td colspan="12" style="border-top:1px solid #e2e8f0; height:1px; padding:0; line-height:0; font-size:0;">&nbsp;</td></tr>
-          <tr>${labels}</tr>
-        </table>
+        <div style="color:#64748b; font-size:13px; margin-top:8px;">
+          Ranked by match score · avg fit ${avgMatch}% · scored against your resume
+        </div>
       </td>
     </tr>`;
 }
@@ -500,37 +403,96 @@ function renderBestMatch(best: Job | null): string {
   const pct = computePct(best);
   return `
     <tr>
-      <td style="background:#fff; border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0; padding:0 36px 24px;">
+      <td style="padding:20px 32px 0;">
         <table width="100%" cellpadding="0" cellspacing="0" style="
-          background-color:#0f172a;
-          background-image:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#1e40af 100%);
-          border-radius:12px;">
+          background-color:#059669;
+          background-image:linear-gradient(135deg,#10b981 0%,#059669 55%,#047857 100%);
+          border-radius:14px;">
           <tr>
-            <td style="padding:22px 24px; vertical-align:middle;">
-              <div style="font-size:10.5px; font-weight:700; color:#7dd3fc; text-transform:uppercase; letter-spacing:.12em;">
-                ★ Best match this hour
-              </div>
+            <td style="padding:22px 24px 24px; vertical-align:top;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="vertical-align:top;">
+                    <span style="
+                      display:inline-block;
+                      background:rgba(255,255,255,0.18);
+                      color:#fff;
+                      border-radius:999px;
+                      padding:5px 12px;
+                      font-size:10px; font-weight:700;
+                      letter-spacing:.1em; text-transform:uppercase;">
+                      ★ BEST MATCH THIS HOUR
+                    </span>
+                  </td>
+                  <td align="right" style="vertical-align:top; white-space:nowrap;">
+                    <div style="font-size:42px; font-weight:800; color:#fff; letter-spacing:-0.04em; line-height:1;">
+                      ${pct}%
+                    </div>
+                    <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.75); letter-spacing:.12em; margin-top:2px;">MATCH</div>
+                  </td>
+                </tr>
+              </table>
               <a href="${safeUrl(best.job_url)}" style="
-                display:block; color:#fff; font-size:19px; font-weight:700;
-                letter-spacing:-0.01em; text-decoration:none; margin-top:8px; line-height:1.3;">
+                display:block; color:#fff; font-size:20px; font-weight:700;
+                letter-spacing:-0.02em; text-decoration:none; margin-top:16px; line-height:1.35;">
                 ${escapeHtml(best.title)}
               </a>
-              <div style="color:#cbd5e1; font-size:13px; margin-top:6px;">
-                ${escapeHtml(best.company)}${best.location ? " &middot; " + escapeHtml(best.location) : ""}${best.level ? " &middot; " + escapeHtml(best.level) : ""}
+              <div style="color:rgba(255,255,255,0.88); font-size:13px; font-weight:500; margin-top:8px;">
+                ${escapeHtml(best.company)}${best.location ? " · " + escapeHtml(best.location) : ""}${best.level ? " · " + escapeHtml(best.level) : ""}
               </div>
-            </td>
-            <td width="180" align="right" style="padding:22px 24px; vertical-align:middle; white-space:nowrap;">
-              <div style="font-size:36px; font-weight:800; color:#bbf7d0; letter-spacing:-0.03em; line-height:1;">
-                ${pct}%
-              </div>
-              <div style="font-size:10.5px; color:#94a3b8; margin:6px 0 12px; text-transform:uppercase; letter-spacing:.1em;">match</div>
               <a href="${safeUrl(best.job_url)}" style="
-                display:inline-block; background:#fff; color:#0f172a;
-                text-decoration:none; border-radius:8px;
-                padding:8px 18px; font-size:12.5px; font-weight:700;">
-                Apply →
+                display:inline-block; background:#fff; color:#047857;
+                text-decoration:none; border-radius:10px;
+                padding:10px 18px; font-size:13px; font-weight:700; margin-top:18px;">
+                Apply now →
               </a>
             </td>
+          </tr>
+        </table>
+      </td>
+    </tr>`;
+}
+
+function renderStatsCards(insights: Insights): string {
+  const tHour  = trendArrow(insights.thisHour, insights.lastHour);
+  const tToday = trendArrow(insights.todayTotal, insights.yesterdayTotal);
+
+  const trendText = (t: Trend) => t.hasPrev
+    ? `<span style="color:${t.color}; font-weight:700; font-size:12px;">${t.sign}${t.pct}%</span>`
+    : `<span style="color:#94a3b8; font-size:12px;">—</span>`;
+
+  const card = (label: string, value: string, sub: string) => `
+    <td width="25%" style="padding:0 5px; vertical-align:top;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="
+        background:#fff; border:1px solid #e2e8f0; border-radius:12px;">
+        <tr>
+          <td style="padding:16px 14px;">
+            <div style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.12em;">${escapeHtml(label)}</div>
+            <div style="font-size:30px; font-weight:800; color:#0f172a; letter-spacing:-0.03em; line-height:1.05; margin-top:10px;">${value}</div>
+            <div style="margin-top:8px; line-height:1.4;">${sub}</div>
+          </td>
+        </tr>
+      </table>
+    </td>`;
+
+  const yestValue = insights.yesterdayTotal != null ? fmtNumber(insights.yesterdayTotal) : "—";
+  const yestSub = insights.yesterdayTotal != null
+    ? `${trendText(tToday)} <span style="color:#94a3b8; font-size:12px;">vs y'day</span>`
+    : `<span style="color:#94a3b8; font-size:12px;">no data yet</span>`;
+
+  return `
+    <tr>
+      <td style="padding:20px 27px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            ${card("This hour", fmtNumber(insights.thisHour), trendText(tHour))}
+            ${card("Today", fmtNumber(insights.todayTotal), `<span style="color:#94a3b8; font-size:12px;">total</span>`)}
+            ${card("Yesterday", yestValue, yestSub)}
+            ${card(
+              "Avg match",
+              `${insights.avgMatchThisHour}%`,
+              `<span style="color:#10b981; font-weight:700; font-size:12px;">${insights.highMatchCount} ≥70%</span>`,
+            )}
           </tr>
         </table>
       </td>
@@ -538,281 +500,204 @@ function renderBestMatch(best: Job | null): string {
 }
 
 function renderTargetMarkets(insights: Insights): string {
-  const items = insights.targetMarkets;
-  const columns = items.map(i => {
-    const hasJobs = i.count > 0;
-    const color = hasJobs ? "#10b981" : "#94a3b8";
-    const bg = hasJobs ? "#ecfdf5" : "#f1f5f9";
-    const border = hasJobs ? "#a7f3d0" : "#e2e8f0";
-    const labelColor = hasJobs ? "#064e3b" : "#64748b";
-    const textWeight = hasJobs ? "800" : "700";
-
-    const jobsHtml = i.topJobs.map(j => `
-      <div style="margin-top:10px; background:#fff; border:1px solid ${border}; border-radius:6px; padding:8px; text-align:left;">
-        <a href="${safeUrl(j.job_url)}" style="display:block; font-size:11px; font-weight:700; color:#0f172a; text-decoration:none; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(j.title)}">
-          ${escapeHtml(j.title)}
-        </a>
-        <div style="font-size:10px; color:#64748b; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-          ${escapeHtml(j.company)}
-        </div>
-        <div style="margin-top:6px;">
-          <a href="${safeUrl(j.job_url)}" style="display:inline-block; font-size:10px; font-weight:700; color:#10b981; text-decoration:none;">Apply →</a>
-          <span style="float:right; font-size:10px; font-weight:700; color:#0f172a; background:#e2e8f0; border-radius:3px; padding:1px 4px;">${computePct(j)}%</span>
-        </div>
-      </div>
-    `).join("");
-
+  const cards = insights.targetMarkets.map((m) => {
+    const preview = m.topJobs[0] ? marketPreview(m.topJobs[0]) : "No roles this hour";
+    const code = marketShortCode(m.name);
     return `
-      <td width="33.33%" style="padding:16px 12px; background:${bg}; border:1px solid ${border}; border-radius:10px; text-align:center; vertical-align:top;">
-        <div style="font-size:11.5px; font-weight:700; color:${labelColor}; letter-spacing:0.02em;">${escapeHtml(i.name)}</div>
-        <div style="font-size:28px; font-weight:${textWeight}; color:${color}; line-height:1; margin-top:8px;">${i.count}</div>
-        <div style="font-size:11px; font-weight:600; color:${labelColor}; margin-top:4px; opacity:0.8;">jobs</div>
-        ${jobsHtml}
-      </td>`;
-  });
-
-  return `
-    <tr>
-      <td style="background:#fff; border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0; padding:0 36px 24px;">
-        <div style="font-size:10.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.1em; margin-bottom:12px;">
-          🎯 Target Markets This Hour
-        </div>
-        <table width="100%" cellpadding="0" cellspacing="0">
+      <td width="33.33%" style="padding:0 5px; vertical-align:top;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="
+          background:#fff; border:1px solid #e2e8f0; border-radius:12px;">
           <tr>
-            ${columns[0]}
-            <td width="12" style="padding:0;"></td>
-            ${columns[1]}
-            <td width="12" style="padding:0;"></td>
-            ${columns[2]}
+            <td style="padding:14px 14px 16px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="font-size:14px; font-weight:800; color:#0f172a;">${escapeHtml(code)}</td>
+                  <td align="right">
+                    <span style="
+                      display:inline-block; min-width:22px; text-align:center;
+                      background:#ecfdf5; color:#059669;
+                      border-radius:999px; padding:2px 8px;
+                      font-size:11px; font-weight:700;">${m.count}</span>
+                  </td>
+                </tr>
+              </table>
+              <div style="font-size:11px; color:#64748b; margin-top:10px; line-height:1.45;">
+                ${escapeHtml(preview)}
+              </div>
+            </td>
           </tr>
         </table>
-      </td>
-    </tr>`;
-}
+      </td>`;
+  }).join("");
 
-function renderHorizontalBar(label: string, count: number, max: number, color: string): string {
-  const pct = max > 0 ? Math.max(2, Math.round((count / max) * 100)) : 0;
   return `
     <tr>
-      <td width="78" style="padding:5px 0; font-size:11.5px; color:#475569; font-weight:600; vertical-align:middle;">${escapeHtml(label)}</td>
-      <td style="padding:5px 8px; vertical-align:middle;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9; border-radius:4px;">
-          <tr><td style="
-            background:${color}; height:8px; width:${pct}%;
-            border-radius:4px; line-height:0; font-size:0;">&nbsp;</td></tr>
-        </table>
+      <td style="padding:24px 27px 0;">
+        ${sectionHeader("Target markets")}
+        <table width="100%" cellpadding="0" cellspacing="0"><tr>${cards}</tr></table>
       </td>
-      <td width="32" align="right" style="padding:5px 0; font-size:12px; color:#0f172a; font-weight:700;">${count}</td>
     </tr>`;
 }
 
-function renderModuleCard(title: string, body: string): string {
+function renderRankedRoleCard(j: Job): string {
+  const pct = computePct(j);
+  const color = matchColor(pct);
+  const initials = companyInitials(j.company);
+  const meta = [
+    j.company,
+    j.location || null,
+    j.level || null,
+  ].filter(Boolean).map((s) => escapeHtml(String(s))).join(" · ");
+
   return `
     <table width="100%" cellpadding="0" cellspacing="0" style="
-      background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">
+      background:#fff; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:10px;">
       <tr>
-        <td style="padding:16px 18px;">
-          <div style="font-size:10.5px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.1em; margin-bottom:12px;">
-            ${escapeHtml(title)}
-          </div>
-          ${body}
+        <td style="padding:14px 16px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td width="44" style="vertical-align:middle; padding-right:12px;">
+                <span style="
+                  display:inline-block; width:38px; height:38px; line-height:38px;
+                  border-radius:50%; background:#f1f5f9; color:#64748b;
+                  font-size:12px; font-weight:700; text-align:center;">
+                  ${escapeHtml(initials)}
+                </span>
+              </td>
+              <td style="vertical-align:middle;">
+                <a href="${safeUrl(j.job_url)}" style="
+                  display:block; font-size:14px; font-weight:700; color:#0f172a;
+                  text-decoration:none; line-height:1.35;">
+                  ${escapeHtml(j.title)}
+                </a>
+                <div style="font-size:12px; color:#64748b; margin-top:3px;">${meta}</div>
+              </td>
+              <td width="72" align="center" style="vertical-align:middle; padding:0 12px;">
+                <div style="font-size:15px; font-weight:800; color:${color};">${pct}%</div>
+                <table width="56" cellpadding="0" cellspacing="0" align="center" style="margin-top:6px; background:#e2e8f0; border-radius:999px;">
+                  <tr>
+                    <td width="${Math.max(1, Math.round(56 * pct / 100))}" style="background:${color}; height:4px; line-height:0; font-size:0; border-radius:999px 0 0 999px;">&nbsp;</td>
+                    <td style="height:4px; line-height:0; font-size:0;">&nbsp;</td>
+                  </tr>
+                </table>
+              </td>
+              <td width="84" align="right" style="vertical-align:middle;">
+                <a href="${safeUrl(j.job_url)}" style="
+                  display:inline-block; background:#fff; color:#0f172a;
+                  border:1px solid #e2e8f0; text-decoration:none;
+                  border-radius:10px; padding:8px 14px;
+                  font-size:11px; font-weight:800; letter-spacing:.06em;">
+                  APPLY
+                </a>
+              </td>
+            </tr>
+          </table>
         </td>
       </tr>
     </table>`;
 }
 
-function renderLevelMixModule(insights: Insights): string {
-  if (!insights.levelMix.length) return renderModuleCard("Level mix", `<div style="color:#94a3b8; font-size:12px;">No data</div>`);
-  const max = Math.max(...insights.levelMix.map((l) => l.count));
-  const colors: Record<string, string> = {
-    "New Grad": "#3b82f6", "Entry": "#06b6d4", "Mid": "#22c55e", "Other": "#94a3b8",
-  };
-  const rows = insights.levelMix
-    .map((l) => renderHorizontalBar(l.name, l.count, max, colors[l.name] ?? "#64748b"))
-    .join("");
-  return renderModuleCard(
-    "Level mix",
-    `<table width="100%" cellpadding="0" cellspacing="0">${rows}</table>`,
-  );
-}
+function renderTopRankedRoles(jobs: Job[]): string {
+  const visible = jobs.slice(0, RANKED_ROLES_VISIBLE);
+  const remaining = jobs.length - visible.length;
+  const cards = visible.map((j) => renderRankedRoleCard(j)).join("");
+  const seeMore = remaining > 0
+    ? `
+      <div style="text-align:center; margin-top:6px; margin-bottom:4px;">
+        <a href="${DASHBOARD_URL}" style="
+          color:#64748b; font-size:11px; font-weight:700;
+          letter-spacing:.08em; text-transform:uppercase; text-decoration:none;">
+          See remaining ${remaining} →
+        </a>
+      </div>`
+    : "";
 
-function renderMatchDistModule(insights: Insights): string {
-  const items = [
-    { name: "≥70%",   count: insights.highMatchCount, color: "#22c55e" },
-    { name: "50–70%", count: insights.midMatchCount,  color: "#eab308" },
-    { name: "<50%",   count: insights.lowMatchCount,  color: "#cbd5e1" },
-  ];
-  const max = Math.max(...items.map((i) => i.count), 1);
-  const rows = items.map((i) => renderHorizontalBar(i.name, i.count, max, i.color)).join("");
-  return renderModuleCard(
-    "Match distribution",
-    `<table width="100%" cellpadding="0" cellspacing="0">${rows}</table>`,
-  );
-}
-
-function renderListModule(title: string, items: { name: string; count: number }[]): string {
-  if (!items.length) {
-    return renderModuleCard(title, `<div style="color:#94a3b8; font-size:12px;">No data</div>`);
-  }
-  const max = Math.max(...items.map((i) => i.count));
-  const rows = items.map((i) => `
-    <tr>
-      <td style="padding:5px 0; font-size:12.5px; color:#0f172a; font-weight:600; vertical-align:middle;">
-        ${escapeHtml(truncate(i.name, 28))}
-      </td>
-      <td width="44" align="right" style="padding:5px 0 5px 8px; vertical-align:middle;">
-        <span style="
-          display:inline-block; background:#e0f2fe; color:#0369a1;
-          border-radius:4px; padding:2px 8px; font-size:11px; font-weight:700;">
-          ×${i.count}
-        </span>
-      </td>
-    </tr>
-    <tr><td colspan="2" style="padding:0;">
-      <div style="height:2px; background:#e2e8f0; border-radius:2px; width:${Math.round((i.count / max) * 100)}%;"></div>
-    </td></tr>`).join("");
-  return renderModuleCard(
-    title,
-    `<table width="100%" cellpadding="0" cellspacing="0">${rows}</table>`,
-  );
-}
-
-function renderTwoColModules(left: string, right: string): string {
   return `
     <tr>
-      <td style="background:#fff; border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0; padding:0 36px 16px;">
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <tr>
-            <td width="50%" style="vertical-align:top; padding-right:8px;">${left}</td>
-            <td width="50%" style="vertical-align:top; padding-left:8px;">${right}</td>
-          </tr>
-        </table>
+      <td style="padding:24px 27px 0;">
+        ${sectionHeader("Top ranked roles")}
+        ${cards}
+        ${seeMore}
       </td>
     </tr>`;
 }
 
-function renderHotTitles(insights: Insights): string {
-  if (!insights.hotTitles.length) return "";
-  const items = insights.hotTitles.map((t) => `
+function renderScrapeVolume(insights: Insights, opts: { first?: boolean } = {}): string {
+  const padTop = opts.first ? "20px" : "24px";
+  const max = Math.max(...insights.last12h.map((b) => b.jobs), 1);
+  const chartH = 56;
+  const total12h = insights.last12h.reduce((s, b) => s + b.jobs, 0);
+
+  const bars = insights.last12h.map((b, i) => {
+    const isCurrent = i === insights.last12h.length - 1;
+    const h = b.jobs > 0 ? Math.max(4, Math.round((b.jobs / max) * chartH)) : 2;
+    const fill = isCurrent ? "#34d399" : "#10b981";
+    return `
+      <td style="vertical-align:bottom; padding:0 2px; height:${chartH}px;">
+        <div style="height:${h}px; background:${fill}; border-radius:3px 3px 0 0; opacity:${isCurrent ? "1" : "0.55"};"></div>
+      </td>`;
+  }).join("");
+
+  const companyRows = insights.topCompanies.slice(0, 5).map((c) => `
     <tr>
-      <td style="padding:8px 0; vertical-align:middle;">
-        <span style="
-          display:inline-block; background:#fef3c7; color:#854d0e;
-          border-radius:4px; padding:2px 8px; font-size:11px; font-weight:700; margin-right:10px;">
-          ×${t.count}
-        </span>
-        <span style="font-size:12.5px; color:#0f172a; font-weight:600;">${escapeHtml(truncate(t.title, 70))}</span>
+      <td style="padding:4px 0; font-size:12px; color:#e2e8f0; font-weight:500;">
+        ${escapeHtml(truncate(c.name, 24))}
+        <span style="color:#64748b; font-weight:600;"> ×${c.count}</span>
       </td>
     </tr>`).join("");
+
+  const repeatedRows = insights.hotTitles.slice(0, 5).map((t) => `
+    <tr>
+      <td style="padding:4px 0; font-size:12px; color:#e2e8f0; font-weight:500;">
+        ${escapeHtml(truncate(t.title, 28))}
+        <span style="color:#64748b; font-weight:600;"> ×${t.count}</span>
+      </td>
+    </tr>`).join("");
+
+  const repeatedFallback = repeatedRows || `
+    <tr><td style="padding:4px 0; font-size:12px; color:#64748b;">No repeated postings</td></tr>`;
+
   return `
     <tr>
-      <td style="background:#fff; border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0; padding:0 36px 20px;">
-        ${renderModuleCard(
-          "Repeated postings · likely the same role across cities",
-          `<table width="100%" cellpadding="0" cellspacing="0">${items}</table>`,
-        )}
-      </td>
-    </tr>`;
-}
-
-function renderJobTableRow(j: Job, i: number): string {
-  const rank = i + 1;
-  const pct = computePct(j);
-  const sc = scoreColor(rank);
-  const lc = levelColor(j.level);
-  const rankBg = rank <= 3 ? "#2563eb" : "#e2e8f0";
-  const rankImg = rank <= 3 ? "linear-gradient(135deg,#2563eb,#0891b2)" : "none";
-  const rankColor = rank <= 3 ? "#fff" : "#64748b";
-  const rowBg = rank % 2 === 0 ? "#f8fafc" : "#ffffff";
-  const barW = Math.max(6, Math.min(54, Math.round((pct / 100) * 54)));
-
-  return `
-    <tr style="background:${rowBg};">
-      <td width="${COL.rank}" style="padding:14px 0 14px 20px; vertical-align:middle;">
-        <span style="
-          display:inline-block; width:26px; height:26px; line-height:26px;
-          border-radius:50%; background-color:${rankBg}; background-image:${rankImg};
-          color:${rankColor}; font-size:11px; font-weight:700; text-align:center;">
-          ${rank}
-        </span>
-      </td>
-      <td style="padding:14px 12px; vertical-align:middle;">
-        <a href="${safeUrl(j.job_url)}" style="
-          font-size:13.5px; font-weight:600; color:#0f172a;
-          text-decoration:none; line-height:1.35; display:block;">
-          ${escapeHtml(j.title)}
-        </a>
-        <span style="font-size:11.5px; color:#64748b; margin-top:2px; display:block;">
-          ${escapeHtml(j.company)}${j.location ? " &middot; " + escapeHtml(j.location) : ""}
-        </span>
-      </td>
-      <td width="${COL.level}" style="padding:14px 8px; vertical-align:middle; text-align:center;">
-        <span style="
-          display:inline-block;
-          background:${lc.bg}; color:${lc.text};
-          border:1px solid ${lc.border};
-          border-radius:99px; padding:3px 10px;
-          font-size:11px; font-weight:600; white-space:nowrap;">
-          ${escapeHtml(j.level)}
-        </span>
-      </td>
-      <td width="${COL.match}" style="padding:14px 8px; vertical-align:middle; text-align:center;">
-        <span style="
-          display:inline-block;
-          background:${sc.bg}; color:${sc.text};
-          border-radius:6px; padding:4px 10px;
-          font-size:12px; font-weight:700; white-space:nowrap;">
-          ${pct}%
-        </span>
-        <div style="
-          width:54px; height:4px; border-radius:999px;
-          background:#e2e8f0; margin:6px auto 0;">
-          <div style="
-            width:${barW}px;
-            height:4px; border-radius:999px;
-            background-color:#2563eb;
-            background-image:linear-gradient(90deg,#2563eb,#0ea5e9);">
-          </div>
-        </div>
-      </td>
-      <td width="${COL.apply}" style="padding:14px 20px 14px 8px; vertical-align:middle; text-align:right;">
-        <a href="${safeUrl(j.job_url)}" style="
-          display:inline-block; background-color:#2563eb; color:#fff;
-          text-decoration:none; border-radius:6px;
-          padding:6px 14px; font-size:11px; font-weight:600; white-space:nowrap;">
-          Apply →
-        </a>
-      </td>
-    </tr>
-    <tr><td colspan="5" style="padding:0; line-height:0; font-size:0;">
-      <div style="height:1px; background:#e2e8f0;"></div>
-    </td></tr>`;
-}
-
-function renderJobTable(jobs: Job[]): string {
-  const rows = jobs.map((j, i) => renderJobTableRow(j, i)).join("");
-  return `
-    <tr>
-      <td style="background:#fff; border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0; border-top:1px solid #e2e8f0; padding:0;">
-        <div style="font-size:10.5px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.1em; padding:18px 36px 12px;">
-          Top ${jobs.length} ranked roles
-        </div>
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <colgroup>
-            <col width="${COL.rank}">
-            <col>
-            <col width="${COL.level}">
-            <col width="${COL.match}">
-            <col width="${COL.apply}">
-          </colgroup>
-          <tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">
-            <td width="${COL.rank}" style="padding:10px 0 10px 20px;"></td>
-            <td style="padding:10px 12px; font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em;">Role</td>
-            <td width="${COL.level}" style="padding:10px 8px; font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em; text-align:center;">Level</td>
-            <td width="${COL.match}" style="padding:10px 8px; font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em; text-align:center;">Match</td>
-            <td width="${COL.apply}" style="padding:10px 20px 10px 8px;"></td>
+      <td style="padding:${padTop} 27px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="
+          background:#0f172a; border-radius:14px;">
+          <tr>
+            <td style="padding:22px 22px 18px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="vertical-align:top;">
+                    <div style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.12em;">
+                      Scrape volume · last 12h
+                    </div>
+                    <div style="font-size:34px; font-weight:800; color:#fff; letter-spacing:-0.03em; margin-top:8px;">
+                      ${fmtNumber(total12h)}
+                    </div>
+                  </td>
+                  <td width="55%" style="vertical-align:bottom; padding-left:16px;">
+                    <table width="100%" cellpadding="0" cellspacing="0"><tr>${bars}</tr></table>
+                  </td>
+                </tr>
+              </table>
+              <div style="height:1px; background:#1e293b; margin:18px 0 16px;"></div>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="50%" style="vertical-align:top; padding-right:12px;">
+                    <div style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.12em; margin-bottom:8px;">
+                      Top companies
+                    </div>
+                    <table width="100%" cellpadding="0" cellspacing="0">${companyRows || `<tr><td style="color:#64748b; font-size:12px;">No data</td></tr>`}</table>
+                  </td>
+                  <td width="50%" style="vertical-align:top; padding-left:12px;">
+                    <div style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.12em; margin-bottom:8px;">
+                      Repeated postings
+                    </div>
+                    <table width="100%" cellpadding="0" cellspacing="0">${repeatedFallback}</table>
+                  </td>
+                </tr>
+              </table>
+            </td>
           </tr>
-          ${rows}
         </table>
       </td>
     </tr>`;
@@ -821,23 +706,22 @@ function renderJobTable(jobs: Job[]): string {
 function renderFooter(): string {
   return `
     <tr>
-      <td style="
-        background:#fff;
-        border:1px solid #e2e8f0; border-top:none;
-        border-radius:0 0 14px 14px;
-        padding:24px 36px 28px; text-align:center;">
+      <td style="padding:24px 32px 32px; text-align:center;">
         <a href="${DASHBOARD_URL}" style="
-          display:inline-block;
-          background-color:#2563eb;
-          background-image:linear-gradient(135deg,#2563eb,#0891b2);
-          color:#fff; text-decoration:none;
-          border-radius:8px; padding:12px 32px;
-          font-size:13.5px; font-weight:600;">
+          display:inline-block; background:#0f172a; color:#fff;
+          text-decoration:none; border-radius:12px;
+          padding:14px 28px; font-size:14px; font-weight:700;">
           Open dashboard →
         </a>
-        <div style="color:#94a3b8; font-size:11px; margin-top:18px; line-height:1.6;">
-          Atriveo &nbsp;&middot;&nbsp; sent automatically every hour<br>
-          <a href="${DASHBOARD_URL}" style="color:#94a3b8;">atriveo-app.pages.dev</a>
+        <div style="color:#94a3b8; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-top:22px;">
+          ATRIVEO · SENT AUTOMATICALLY EVERY HOUR
+        </div>
+        <div style="margin-top:10px; font-size:11px; line-height:1.8;">
+          <a href="${DASHBOARD_URL}" style="color:#64748b; text-decoration:underline;">atriveo-app.pages.dev</a>
+          &nbsp;·&nbsp;
+          <a href="${DASHBOARD_URL}/settings" style="color:#64748b; text-decoration:underline;">manage alerts</a>
+          &nbsp;·&nbsp;
+          <a href="${DASHBOARD_URL}/settings" style="color:#64748b; text-decoration:underline;">unsubscribe</a>
         </div>
       </td>
     </tr>`;
@@ -847,7 +731,8 @@ function renderFooter(): string {
 
 function renderEmail(insights: Insights, jobs: Job[], sessionTime: string): string {
   const marketPulse = getMarketPulse(insights);
-  const preheader = `${fmtNumber(insights.thisHour)} jobs this hour · NY ${marketPulse.ny} · NC ${marketPulse.nc} · SEA ${marketPulse.sea} · ${insights.highMatchCount} high-match`;
+  const total12h = insights.last12h.reduce((s, b) => s + b.jobs, 0);
+  const preheader = `${fmtNumber(total12h)} scraped in 12h · ${fmtNumber(insights.thisHour)} this hour · NY ${marketPulse.ny} · NC ${marketPulse.nc} · SEA ${marketPulse.sea}`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -862,19 +747,17 @@ function renderEmail(insights: Insights, jobs: Job[], sessionTime: string): stri
   </div>
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f6; padding:24px 12px;">
     <tr><td align="center">
-      <table width="880" cellpadding="0" cellspacing="0" style="max-width:880px; width:100%;">
-        ${renderHeader(sessionTime, jobs.length, insights.avgMatchThisHour, marketPulse)}
-        ${renderHeroStats(insights)}
-        ${renderTwelveHourChart(insights)}
+      <table width="640" cellpadding="0" cellspacing="0" style="
+        max-width:640px; width:100%;
+        background:#fff; border:1px solid #e2e8f0;
+        border-radius:16px; box-shadow:0 8px 24px rgba(15,23,42,0.06);">
+        ${renderHeader(sessionTime)}
+        ${renderScrapeVolume(insights, { first: true })}
+        ${renderTitleBlock(jobs.length, insights.avgMatchThisHour)}
         ${renderBestMatch(insights.bestMatch)}
+        ${renderStatsCards(insights)}
         ${renderTargetMarkets(insights)}
-        ${renderTwoColModules(renderLevelMixModule(insights), renderMatchDistModule(insights))}
-        ${renderTwoColModules(
-          renderListModule("Top companies hiring", insights.topCompanies),
-          renderListModule("Top locations", insights.topLocations),
-        )}
-        ${renderHotTitles(insights)}
-        ${renderJobTable(jobs)}
+        ${renderTopRankedRoles(jobs)}
         ${renderFooter()}
       </table>
     </td></tr>
@@ -891,7 +774,18 @@ function renderText(insights: Insights, jobs: Job[], sessionTime: string): strin
   const marketPulse = getMarketPulse(insights);
   const lines: string[] = [];
 
+  const total12h = insights.last12h.reduce((s, b) => s + b.jobs, 0);
   lines.push(`ATRIVEO · Top ${jobs.length} jobs · ${sessionTime}`);
+  lines.push("");
+  lines.push(`SCRAPE VOLUME · LAST 12H: ${fmtNumber(total12h)}`);
+  if (insights.topCompanies.length) {
+    lines.push("TOP COMPANIES");
+    for (const c of insights.topCompanies.slice(0, 5)) lines.push(`  ${c.name} ×${c.count}`);
+  }
+  if (insights.hotTitles.length) {
+    lines.push("REPEATED POSTINGS");
+    for (const t of insights.hotTitles.slice(0, 5)) lines.push(`  ${t.title} ×${t.count}`);
+  }
   lines.push("");
   lines.push("VOLUME");
   lines.push(`  This hour: ${fmtNumber(insights.thisHour)}${tHour.hasPrev ? `  (${tHour.arrow} ${tHour.sign}${tHour.pct}% vs last hour)` : ""}`);
@@ -939,11 +833,102 @@ function renderText(insights: Insights, jobs: Job[], sessionTime: string): strin
   return lines.join("\n");
 }
 
-// ─── main ─────────────────────────────────────────────────────────────────────
+// ─── mock data (MOCK=1 preview) ───────────────────────────────────────────────
+
+function mockJobs(): Job[] {
+  const mk = (title: string, company: string, location: string, level: string, pct: number): Job => ({
+    title, company, location, level, score_pct: pct,
+    job_url: "https://example.com/apply",
+  });
+
+  return [
+    mk("Artificial Intelligence & Machine Learning Engineer, Associate", "BlackRock", "New York, NY", "Entry", 99),
+    mk("Software Engineer, Analytics Platform", "Outreach", "Seattle, WA", "Entry", 80),
+    mk("Data Scientist", "Comcast", "New York, NY", "Entry", 69),
+    mk("Software Engineer II — ML, Marketplace", "Uber", "Seattle, WA", "Mid", 67),
+    mk("Machine Learning Engineer", "Lenovo", "North Carolina", "Entry", 65),
+    mk("Software Engineer", "IXL Learning", "Raleigh, NC", "Entry", 64),
+    mk("Full Stack Software Engineer", "Illumio", "San Jose, CA", "Entry", 59),
+    mk("AI Engineer III — Agentic AI", "American Express", "Phoenix, AZ", "Entry", 52),
+    mk("Data Scientist", "IBM", "Houston, TX", "Entry", 39),
+    mk("Associate AI Engineer", "Morningstar", "Chicago, IL", "Entry", 37),
+    mk("Java Software Engineer", "BeaconFire Inc.", "New York, NY", "Entry", 35),
+    mk("Backend Engineer", "Acme Corp", "Seattle, WA", "Mid", 33),
+    mk("Platform Engineer", "Stripe", "New York, NY", "Mid", 31),
+    mk("ML Engineer", "Meta", "Seattle, WA", "Mid", 29),
+    mk("Applied Scientist", "Amazon", "Seattle, WA", "Mid", 28),
+    mk("Research Engineer", "OpenAI", "San Francisco, CA", "Mid", 27),
+    mk("Data Engineer", "Snowflake", "Seattle, WA", "Mid", 26),
+    mk("Software Engineer", "Google", "New York, NY", "Mid", 25),
+    mk("AI Engineer", "Anthropic", "San Francisco, CA", "Entry", 24),
+    mk("Backend Developer", "Shopify", "Remote", "Mid", 23),
+  ];
+}
+
+function mockInsights(): Insights {
+  const now = new Date();
+  const last12h: HourBucket[] = [];
+  const counts = [210, 225, 198, 242, 218, 255, 231, 268, 252, 275, 261, 122];
+  for (let i = 11; i >= 0; i--) {
+    last12h.push({
+      hour: new Date(now.getTime() - i * 60 * 60 * 1000),
+      jobs: counts[11 - i] ?? 100,
+    });
+  }
+
+  const jobs = mockJobs();
+
+  return {
+    thisHour: 100,
+    lastHour: 233,
+    todayTotal: 3577,
+    yesterdaySameHour: 120,
+    yesterdayTotal: 4455,
+    last12h,
+    avgMatchThisHour: 18,
+    highMatchCount: 2,
+    midMatchCount: 6,
+    lowMatchCount: 92,
+    levelMix: [],
+    topCompanies: [
+      { name: "BeaconFire Inc.", count: 20 },
+      { name: "Pragmatike", count: 14 },
+      { name: "Amazon Science", count: 12 },
+      { name: "Google", count: 11 },
+      { name: "Recruiting from Scratch", count: 9 },
+    ],
+    topLocations: [],
+    hotTitles: [
+      { title: "Java Software Engineer", count: 11 },
+      { title: "Software Engineer", count: 9 },
+      { title: "Java Software Developer", count: 7 },
+      { title: "Backend Software Engineer", count: 6 },
+      { title: "Data Scientist", count: 5 },
+    ],
+    bestMatch: jobs[0],
+    targetMarkets: [
+      { name: "New York, NY", count: 13, topJobs: [jobs[0]] },
+      { name: "Seattle, WA", count: 4, topJobs: [jobs[1]] },
+      { name: "North Carolina", count: 4, topJobs: [jobs[4]] },
+    ],
+  };
+}
 
 async function main() {
   const dotenv = await import("dotenv");
   dotenv.config({ path: resolve(__dirname, "../.env") });
+
+  if (process.env.MOCK === "1") {
+    const insights = mockInsights();
+    const jobs = mockJobs();
+    const sessionTime = "Jun 12, 6:14 PM";
+    const html = renderEmail(insights, jobs, sessionTime);
+    const fs = await import("fs/promises");
+    const previewPath = resolve(__dirname, "preview.html");
+    await fs.writeFile(previewPath, html, "utf8");
+    console.log(`✓ Mock preview written: ${previewPath}`);
+    return;
+  }
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) throw new Error("RESEND_API_KEY not set");

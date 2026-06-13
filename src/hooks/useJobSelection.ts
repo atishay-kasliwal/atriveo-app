@@ -8,7 +8,7 @@ import { getTailorServerBase, isLocalTailorHost } from "../utils/tailorServer";
 
 function tailorUnavailableMessage(): string {
   if (!isLocalTailorHost()) {
-    return "Tailor relay unreachable. On your Mac run: npm run tailor && npm run tailor:tunnel (and set TAILOR_ORIGIN on Cloudflare Pages).";
+    return "Tailor relay unreachable. On your Mac: npm run tailor:install (or npm run tailor:prod). If DNS is missing, run once: cloudflared tunnel login && npm run tailor:dns";
   }
   return "Tailor server not running. In a second terminal run: cd ~/atriveo-app && npm run tailor";
 }

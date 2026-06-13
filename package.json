@@ -11,6 +11,7 @@
     "tailor:dns": "node scripts/tailor-dns.mjs",
     "tailor:prod": "node scripts/tailor-prod.mjs",
     "tailor:install": "node scripts/install-tailor-service.mjs",
+    "tailor:check": "node scripts/check-tailor-relay.mjs",
     "tailor:uninstall": "node scripts/uninstall-tailor-service.mjs",
     "dev:full": "wrangler pages dev dist --compatibility-date=2024-01-01",
     "sync:logos": "node scripts/sync-company-domains.mjs",

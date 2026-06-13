@@ -67,7 +67,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
       {
         ok: false,
         error:
-          "Could not reach your Mac tailor tunnel. Start cloudflared + npm run tailor on your machine.",
+          "Could not reach your Mac tailor relay. Ensure npm run tailor:prod is running and tailor-relay.atriveo.com resolves (npm run tailor:dns).",
       },
       { status: 502 },
     );
