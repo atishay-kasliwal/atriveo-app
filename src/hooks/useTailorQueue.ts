@@ -91,15 +91,15 @@ function buildHourlyAdditions(
   prev: TailorQueueItem[],
   ranked: Array<{ job: Job; score: number; key: string }>,
   batch: string,
+  dismissedKeys: ReadonlySet<string>,
 ): { next: TailorQueueItem[]; marks: HourlyMark[] } {
-  const activeKeys = new Set(
-    prev.filter((item) => isActiveStatus(item.status)).map((item) => item.jobKey),
-  );
+  const existingKeys = new Set(prev.map((item) => item.jobKey));
   const next = [...prev];
   const marks: HourlyMark[] = [];
   for (const { job, score, key } of ranked) {
     if (marks.length >= HOURLY_QUEUE_SIZE) break;
-    if (activeKeys.has(key)) continue;
+    if (dismissedKeys.has(key)) continue;
+    if (existingKeys.has(key)) continue;
     next.push({
       jobKey: key,
       jobUrl: job.job_url || "",
@@ -121,9 +121,23 @@ function buildHourlyAdditions(
         score,
       },
     });
-    activeKeys.add(key);
+    existingKeys.add(key);
   }
   return { next, marks };
+}
+
+function resetStaleRunning(items: TailorQueueItem[]): TailorQueueItem[] {
+  let changed = false;
+  const next = items.map((item) => {
+    if (item.status !== "running") return item;
+    changed = true;
+    return { ...item, status: "pending" as const, startedAt: undefined };
+  });
+  return changed ? next : items;
+}
+
+function purgeDismissedPending(items: TailorQueueItem[], dismissedKeys: ReadonlySet<string>): TailorQueueItem[] {
+  return items.filter((item) => !(item.status === "pending" && dismissedKeys.has(item.jobKey)));
 }
 
 type TailorStatusApi = Pick<
@@ -133,6 +147,7 @@ type TailorStatusApi = Pick<
 
 interface Options {
   tailorStatus: TailorStatusApi;
+  dismissedKeys?: ReadonlySet<string>;
   onProcessJob?: (job: Job) => Promise<{
     ok: boolean;
     ats?: string;
@@ -144,7 +159,9 @@ interface Options {
 }
 
 export function useTailorQueue(jobs: Job[], options: Options) {
-  const { tailorStatus, onProcessJob } = options;
+  const { tailorStatus, dismissedKeys, onProcessJob } = options;
+  const dismissedRef = useRef<ReadonlySet<string>>(dismissedKeys ?? new Set());
+  dismissedRef.current = dismissedKeys ?? dismissedRef.current;
   const { user, loading } = useAuth();
   const uid = user?.email ?? "anon";
   const [queue, setQueue] = useState<TailorQueueItem[]>([]);
@@ -155,7 +172,12 @@ export function useTailorQueue(jobs: Job[], options: Options) {
   const processingRef = useRef(false);
   const logSeqRef = useRef(0);
   const queueRef = useRef<TailorQueueItem[]>([]);
+  const jobsRef = useRef(jobs);
   const processQueueRef = useRef<(() => Promise<void>) | null>(null);
+
+  useEffect(() => {
+    jobsRef.current = jobs;
+  }, [jobs]);
 
   const pushLog = useCallback((message: string, durationMs?: number) => {
     const at = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" });
@@ -194,6 +216,9 @@ export function useTailorQueue(jobs: Job[], options: Options) {
         /* ignore */
       }
     }
+    const beforeLoad = loaded;
+    loaded = resetStaleRunning(loaded);
+    if (loaded !== beforeLoad) persistQueue(uid, loaded);
     queueRef.current = loaded;
     setQueue(loaded);
     setLastHourlySyncAt(loadLastSync(uid));
@@ -210,12 +235,23 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     return sorted;
   }, [uid]);
 
+  // Drop pending queue items for dismissed/clicked jobs whenever that set changes.
+  useEffect(() => {
+    if (!dismissedKeys?.size) return;
+    const purged = purgeDismissedPending(queueRef.current, dismissedKeys);
+    if (purged.length !== queueRef.current.length) {
+      commitQueue(purged);
+      kickProcess();
+    }
+  }, [dismissedKeys, commitQueue, kickProcess]);
+
   const updateQueue = useCallback((updater: (prev: TailorQueueItem[]) => TailorQueueItem[]) => {
     return commitQueue(updater(queueRef.current));
   }, [commitQueue]);
 
   const enqueueJob = useCallback((job: Job, source: TailorQueueItem["source"], urgent = false) => {
     const jobKey = jobDismissKey(job);
+    if (dismissedRef.current.has(jobKey)) return false;
     const score = careerOpsRating(job).score;
     const existing = tailorStatus.getRecord(jobKey);
     if (existing?.status === "done") {
@@ -289,13 +325,19 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       .map((job) => ({ job, score: careerOpsRating(job).score, key: jobDismissKey(job) }))
       .filter(({ key, job }) => {
         if (!job.job_url) return false;
+        if (dismissedRef.current.has(key)) return false;
         const status = tailorStatus.getRecord(key)?.status;
-        if (status === "done" || status === "running") return false;
+        if (status === "done" || status === "running" || status === "no-go") return false;
         return true;
       })
       .sort((a, b) => b.score - a.score);
 
-    const { next, marks } = buildHourlyAdditions(queueRef.current, ranked, batch);
+    const { next, marks } = buildHourlyAdditions(
+      queueRef.current,
+      ranked,
+      batch,
+      dismissedRef.current,
+    );
     if (marks.length > 0) {
       commitQueue(next);
       for (const mark of marks) {
@@ -345,16 +387,31 @@ export function useTailorQueue(jobs: Job[], options: Options) {
   }, [updateQueue]);
 
   const removeFromQueue = useCallback((jobKey: string) => {
-    updateQueue((prev) => prev.filter((item) => item.jobKey !== jobKey || item.status === "done"));
+    let removedActive = false;
+    updateQueue((prev) => prev.filter((item) => {
+      if (item.jobKey !== jobKey) return true;
+      if (item.status === "done" || item.status === "failed") return true;
+      removedActive = true;
+      return false;
+    }));
     const record = tailorStatus.getRecord(jobKey);
-    if (record?.status === "queued") {
+    if (record?.status === "queued" || record?.status === "running") {
       tailorStatus.markStatus(jobKey, "none");
     }
-  }, [tailorStatus, updateQueue]);
+    if (removedActive) kickProcess();
+  }, [tailorStatus, updateQueue, kickProcess]);
 
   const processQueue = useCallback(async () => {
     if (!onProcessJob || processingRef.current) return;
-    const nextItem = queueRef.current.find((item) => item.status === "pending");
+
+    const cleaned = purgeDismissedPending(queueRef.current, dismissedRef.current);
+    if (cleaned.length !== queueRef.current.length) {
+      commitQueue(cleaned);
+    }
+
+    const nextItem = queueRef.current.find(
+      (item) => item.status === "pending" && !dismissedRef.current.has(item.jobKey),
+    );
     if (!nextItem) return;
 
     processingRef.current = true;
@@ -375,7 +432,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     });
     pushLog(`Started ${nextItem.company} · ${nextItem.title}`);
 
-    const job = jobs.find((j) => jobDismissKey(j) === nextItem.jobKey);
+    const job = jobsRef.current.find((j) => jobDismissKey(j) === nextItem.jobKey);
     if (!job) {
       const durationMs = Date.now() - Date.parse(startedAt);
       updateQueue((prev) => prev.map((item) => (
@@ -388,7 +445,11 @@ export function useTailorQueue(jobs: Job[], options: Options) {
             }
           : item
       )));
-      tailorStatus.markStatus(nextItem.jobKey, "failed", { error: "Job no longer in feed" });
+      if (!dismissedRef.current.has(nextItem.jobKey)) {
+        tailorStatus.markStatus(nextItem.jobKey, "failed", { error: "Job no longer in feed" });
+      } else {
+        tailorStatus.markStatus(nextItem.jobKey, "none");
+      }
       pushLog(`Skipped ${nextItem.company} · job no longer in feed`, durationMs);
       processingRef.current = false;
       setProcessing(false);
@@ -400,6 +461,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       const result = await onProcessJob(job);
       const durationMs = Date.now() - Date.parse(startedAt);
       const done = result.ok;
+      const dismissed = dismissedRef.current.has(nextItem.jobKey);
       updateQueue((prev) => prev.map((item) => (
         item.jobKey === nextItem.jobKey
           ? {
@@ -410,23 +472,27 @@ export function useTailorQueue(jobs: Job[], options: Options) {
             }
           : item
       )));
-      tailorStatus.markStatus(
-        nextItem.jobKey,
-        done ? "done" : (result.error?.includes("no-go") ? "no-go" : "failed"),
-        {
-          jobUrl: nextItem.jobUrl,
-          company: nextItem.company,
-          title: nextItem.title,
-          score: nextItem.score,
-          ats: result.ats,
-          pdfPath: result.pdfPath,
-          dir: result.dir,
-          folder: result.folder,
-          progressPct: done ? 100 : undefined,
-          tailoredAt: done ? new Date().toISOString() : undefined,
-          error: result.error,
-        },
-      );
+      if (dismissed) {
+        tailorStatus.markStatus(nextItem.jobKey, "none");
+      } else {
+        tailorStatus.markStatus(
+          nextItem.jobKey,
+          done ? "done" : (result.error?.includes("no-go") ? "no-go" : "failed"),
+          {
+            jobUrl: nextItem.jobUrl,
+            company: nextItem.company,
+            title: nextItem.title,
+            score: nextItem.score,
+            ats: result.ats,
+            pdfPath: result.pdfPath,
+            dir: result.dir,
+            folder: result.folder,
+            progressPct: done ? 100 : undefined,
+            tailoredAt: done ? new Date().toISOString() : undefined,
+            error: result.error,
+          },
+        );
+      }
       pushLog(
         done
           ? `Finished ${nextItem.company} · ${nextItem.title}${result.ats ? ` · ATS ${result.ats}` : ""}`
@@ -448,7 +514,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       setProcessing(false);
       kickProcess();
     }
-  }, [jobs, onProcessJob, tailorStatus, updateQueue, pushLog, kickProcess]);
+  }, [onProcessJob, tailorStatus, updateQueue, pushLog, kickProcess, commitQueue]);
 
   processQueueRef.current = processQueue;
 

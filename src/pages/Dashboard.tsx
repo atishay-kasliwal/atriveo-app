@@ -261,16 +261,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     setSortDir(defaultSortDir(column));
   }, []);
 
-  const handleSaveJob = useCallback((job: Job, source: SavedJobSource) => {
-    if (!job.job_url) return;
-    recordSavedJob(job, source);
-    if (source === "add") {
-      recordClick(job.job_url, job.title || "Untitled role", job.company || "Unknown company", {
-        location: job.location || null,
-      });
-    }
-  }, [recordSavedJob, recordClick]);
-
   const filtered = useMemo(() => {
     let jobs = [...visibleJobs];
     if (levelFilter !== "all") jobs = jobs.filter((j) => j.level === levelFilter);
@@ -339,7 +329,11 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const tailorStatus = useTailorStatus();
   const processQueueJob = useCallback(async (job: Job) => {
     const key = jobDismissKey(job);
+    if (clickedKeySet.has(key)) {
+      return { ok: false, error: "dismissed" };
+    }
     return runSingleTailorJob(job, (event) => {
+      if (clickedKeySet.has(key)) return;
       if (event.type !== "job" || event.index !== 0) return;
       const phase = event.phase;
       if (!phase || phase === "done") return;
@@ -351,11 +345,24 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
         progressPct: tailorPhaseProgress(phase),
       });
     });
-  }, [tailorStatus]);
+  }, [tailorStatus, clickedKeySet]);
   const tailorQueue = useTailorQueue(displayedJobs, {
     tailorStatus,
+    dismissedKeys: clickedKeySet,
     onProcessJob: processQueueJob,
   });
+
+  const handleSaveJobWithQueueCleanup = useCallback((job: Job, source: SavedJobSource) => {
+    if (!job.job_url) return;
+    recordSavedJob(job, source);
+    tailorQueue.removeFromQueue(jobDismissKey(job));
+    if (source === "add") {
+      recordClick(job.job_url, job.title || "Untitled role", job.company || "Unknown company", {
+        location: job.location || null,
+      });
+    }
+  }, [recordSavedJob, recordClick, tailorQueue]);
+
   const handleOpenTailorPath = useCallback(async (path: string) => {
     try {
       await openTailorPath(path);
@@ -365,9 +372,8 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   }, []);
 
   const handleDismissJob = useCallback((job: Job) => {
-    handleSaveJob(job, "click");
-    tailorQueue.removeFromQueue(jobDismissKey(job));
-  }, [handleSaveJob, tailorQueue]);
+    handleSaveJobWithQueueCleanup(job, "click");
+  }, [handleSaveJobWithQueueCleanup]);
 
   useEffect(() => {
     const run = jobSelection.tailorRun;
@@ -591,7 +597,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           jobs={filtered}
           getRecord={getRecord}
           onAddToTracker={recordClick}
-          onSaveJob={handleSaveJob}
+          onSaveJob={handleSaveJobWithQueueCleanup}
           onExcludeCompany={excludeCompany}
           isJobSelected={jobSelection.isJobSelected}
           onSelectionToggle={jobSelection.toggleJobSelection}
@@ -945,7 +951,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                               index={i + 1}
                               applyRecord={job.job_url ? getRecord(job.job_url) : null}
                               onAddToTracker={recordClick}
-                              onSaveJob={handleSaveJob}
+                              onSaveJob={handleSaveJobWithQueueCleanup}
                               onExcludeCompany={excludeCompany}
                               isSelected={jobSelection.isJobSelected(job)}
                               onSelectionToggle={jobSelection.toggleJobSelection}

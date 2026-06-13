@@ -83,7 +83,27 @@ export function useApplyClickLog() {
 
   useEffect(() => {
     if (loading) return;
-    setRecords(load(uid));
+    let loaded = load(uid);
+    if (uid !== "anon") {
+      try {
+        const anonRaw = localStorage.getItem(KEY("anon"));
+        if (anonRaw) {
+          const anon = normalize(JSON.parse(anonRaw));
+          const byKey = new Map(loaded.map((record) => [record.jobKey, record]));
+          for (const record of anon) {
+            if (!byKey.has(record.jobKey)) byKey.set(record.jobKey, record);
+          }
+          loaded = [...byKey.values()].sort(
+            (a, b) => new Date(b.clickedAt).getTime() - new Date(a.clickedAt).getTime(),
+          );
+          persist(uid, loaded);
+          localStorage.removeItem(KEY("anon"));
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    setRecords(loaded);
   }, [loading, uid]);
 
   const recordSavedJob = useCallback((job: Job, source: SavedJobSource) => {

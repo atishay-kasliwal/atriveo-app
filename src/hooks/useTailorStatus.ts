@@ -31,7 +31,21 @@ export function useTailorStatus() {
 
   useEffect(() => {
     if (loading) return;
-    setRecords(load(uid));
+    let loaded = load(uid);
+    if (uid !== "anon") {
+      try {
+        const anonRaw = localStorage.getItem(KEY("anon"));
+        if (anonRaw) {
+          const anon = JSON.parse(anonRaw) as Record<string, TailorRecord>;
+          loaded = { ...anon, ...loaded };
+          persist(uid, loaded);
+          localStorage.removeItem(KEY("anon"));
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    setRecords(loaded);
   }, [loading, uid]);
 
   const upsertRecord = useCallback((record: TailorRecord) => {

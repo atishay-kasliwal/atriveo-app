@@ -269,7 +269,9 @@ function JobTableRow({
 
   function handleRowClick(e: React.MouseEvent<HTMLTableRowElement>) {
     if (!board || !onDismissJob) return;
-    if ((e.target as HTMLElement).closest("button, a, input, textarea, select, label")) return;
+    if ((e.target as HTMLElement).closest(
+      "button, a, input, textarea, select, label, .job-table-check, .job-table-actions, .job-table-tailored",
+    )) return;
     onDismissJob(job);
   }
 
