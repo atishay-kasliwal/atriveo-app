@@ -1357,14 +1357,21 @@ header {
 }
 
 .tailor-job-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid rgba(91, 88, 77, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.66);
+  overflow: hidden;
+}
+
+.tailor-job-row-top {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) auto;
   gap: 12px;
   align-items: center;
   padding: 10px 12px;
-  border: 1px solid rgba(91, 88, 77, 0.12);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.66);
 }
 
 .tailor-job-row.is-running,
@@ -1444,8 +1451,123 @@ header {
   flex-shrink: 0;
 }
 
+.tailor-thought-block {
+  margin-top: 10px;
+}
+
+.tailor-thought-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px 6px;
+  color: #64748b;
+  font-family: "Inter", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tailor-thought-head span:first-child {
+  flex: 1;
+}
+
+.tailor-thought-copy {
+  border: none;
+  background: transparent;
+  color: #6366f1;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.tailor-thought-stream {
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.03), rgba(15, 23, 42, 0.05));
+  padding: 8px 10px 10px;
+  max-height: 360px;
+  overflow-y: auto;
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  scroll-behavior: smooth;
+}
+
+.tailor-thought-line {
+  display: grid;
+  grid-template-columns: 88px 14px minmax(0, 1fr);
+  gap: 6px;
+  align-items: start;
+  padding: 4px 0;
+  color: #475569;
+}
+
+.tailor-thought-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  color: #94a3b8;
+  font-size: 9.5px;
+  line-height: 1.25;
+}
+
+.tailor-thought-step {
+  color: #6366f1;
+  font-weight: 700;
+}
+
+.tailor-thought-elapsed {
+  color: #64748b;
+}
+
+.tailor-thought-line.is-step {
+  color: #334155;
+  font-weight: 600;
+}
+
+.tailor-thought-line.is-think {
+  color: #64748b;
+}
+
+.tailor-thought-line.is-think .tailor-thought-text {
+  white-space: pre-wrap;
+}
+
+.tailor-thought-line.is-result {
+  color: #047857;
+  font-weight: 600;
+}
+
+.tailor-thought-line.is-warn {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.tailor-thought-line.is-error {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.tailor-thought-marker {
+  text-align: center;
+  opacity: 0.85;
+  padding-top: 1px;
+}
+
+.tailor-thought-text {
+  min-width: 0;
+  word-break: break-word;
+}
+
 @media (max-width: 860px) {
-  .tailor-job-row {
+  .tailor-thought-line {
+    grid-template-columns: 72px 14px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .tailor-job-row-top {
     grid-template-columns: 1fr;
     align-items: start;
   }

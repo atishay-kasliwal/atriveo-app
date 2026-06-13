@@ -61,6 +61,8 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
     const res = await fetch(target.toString(), init);
     const outHeaders = new Headers(res.headers);
     outHeaders.set("Access-Control-Allow-Origin", url.origin);
+    outHeaders.set("Cache-Control", "no-cache, no-transform");
+    outHeaders.set("X-Accel-Buffering", "no");
     return new Response(res.body, { status: res.status, headers: outHeaders });
   } catch {
     return Response.json(

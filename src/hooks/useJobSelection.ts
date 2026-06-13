@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Job } from "../types";
-import type { TailorRunState, TailorStreamEvent } from "../types/tailor";
+import type { TailorJobState, TailorLogEntry, TailorLogKind, TailorRunState, TailorStreamEvent } from "../types/tailor";
 import { analyzeSelectedJobs, type SelectedJobAnalysis } from "../utils/jobAnalysis";
 import { loadJobDescriptions } from "../utils/jobDescriptionBuckets";
 import { copyTextToClipboard, formatJobsForClipboard, jobCopyKey } from "../utils/jobCopy";
@@ -49,23 +49,80 @@ async function readTailorStream(
     buffer = lines.pop() || "";
     for (const line of lines) {
       if (!line.trim()) continue;
-      onEvent(JSON.parse(line) as TailorStreamEvent);
+      try {
+        onEvent(JSON.parse(line) as TailorStreamEvent);
+      } catch {
+        onEvent({ type: "log", index: -1, kind: "warn", text: `Stream parse skip · ${line.slice(0, 120)}` });
+      }
     }
   }
-  if (buffer.trim()) onEvent(JSON.parse(buffer) as TailorStreamEvent);
+  if (buffer.trim()) {
+    try {
+      onEvent(JSON.parse(buffer) as TailorStreamEvent);
+    } catch {
+      /* ignore trailing partial */
+    }
+  }
 }
 
+function emptyJob(index: number, company = "Unknown", role = "Role"): TailorJobState {
+  return { index, company, role, phase: "queued", logs: [] };
+}
+
+function appendLog(
+  logs: TailorLogEntry[] | undefined,
+  index: number,
+  kind: TailorLogKind,
+  text: string,
+  meta?: { step?: number; elapsedMs?: number; at?: string },
+): TailorLogEntry[] {
+  const base = logs ?? [];
+  return [
+    ...base,
+    {
+      id: `${index}-${base.length}-${Date.now()}`,
+      index,
+      kind,
+      text,
+      at: meta?.at || new Date().toISOString(),
+      step: meta?.step,
+      elapsedMs: meta?.elapsedMs,
+    },
+  ];
+}
+
+function appendRunLog(prev: TailorRunState, kind: TailorLogKind, text: string): TailorRunState {
+  return { ...prev, runLogs: appendLog(prev.runLogs ?? [], -1, kind, text) };
+}
+
+const PHASE_LOG: Record<TailorJobState["phase"], string> = {
+  queued: "Queued — waiting for server",
+  analyzing: "Phase 1/4 · Analyze — Ollama eligibility + bullet selection",
+  assembling: "Phase 3/4 · Assemble — building resume.tex",
+  compiling: "Phase 4/4 · Compile — Tectonic PDF",
+  done: "Finished this job",
+};
+
 function applyTailorEvent(prev: TailorRunState, event: TailorStreamEvent): TailorRunState {
+  const runLogs = prev.runLogs ?? [];
   if (event.type === "start") {
     return {
       ...prev,
       dateDir: event.dateDir,
       model: event.model,
       total: event.total ?? prev.total,
+      runLogs: appendLog(runLogs, -1, "result", `Run started · ${event.total ?? prev.total} job(s) · model ${event.model || "Ollama"}`, {
+        at: new Date().toISOString(),
+      }),
     };
   }
   if (event.type === "fatal") {
-    return { ...prev, active: false, fatalError: event.error };
+    return {
+      ...prev,
+      active: false,
+      fatalError: event.error,
+      runLogs: appendLog(runLogs, -1, "error", event.error),
+    };
   }
   if (event.type === "end") {
     const ok = prev.jobs.filter((j) => j.phase === "done" && j.status === "ok" && j.pdf).length;
@@ -74,22 +131,33 @@ function applyTailorEvent(prev: TailorRunState, event: TailorStreamEvent): Tailo
       active: false,
       completed: prev.total,
       summary: `Finished ${prev.total} job${prev.total === 1 ? "" : "s"} · ${ok} PDF${ok === 1 ? "" : "s"} saved to drive`,
+      runLogs: appendLog(runLogs, -1, "result", `Run complete · ${ok}/${prev.total} PDFs saved`),
     };
+  }
+  if (event.type === "log" && event.index !== undefined) {
+    const meta = { step: event.step, elapsedMs: event.elapsedMs, at: event.ts };
+    if (event.index < 0) {
+      return { ...prev, runLogs: appendLog(runLogs, -1, event.kind, event.text, meta) };
+    }
+    const jobs = [...prev.jobs];
+    const current = jobs[event.index] || emptyJob(event.index);
+    jobs[event.index] = { ...current, logs: appendLog(current.logs, event.index, event.kind, event.text, meta) };
+    return { ...prev, jobs };
   }
   if (event.type !== "job" || event.index === undefined) return prev;
 
   const jobs = [...prev.jobs];
-  const current = jobs[event.index] || {
-    index: event.index,
-    company: event.company || "Unknown",
-    role: event.role || "Role",
-    phase: "queued" as const,
-  };
+  const current = jobs[event.index] || emptyJob(event.index, event.company, event.role);
+  const nextPhase = event.phase || current.phase;
+  let logs = current.logs;
+  if (nextPhase !== current.phase) {
+    logs = appendLog(logs, event.index, "step", PHASE_LOG[nextPhase] || nextPhase);
+  }
   jobs[event.index] = {
     ...current,
     company: event.company || current.company,
     role: event.role || current.role,
-    phase: event.phase || current.phase,
+    phase: nextPhase,
     status: event.status ?? current.status,
     ats: event.ats ?? current.ats,
     folder: event.folder ?? current.folder,
@@ -98,6 +166,7 @@ function applyTailorEvent(prev: TailorRunState, event: TailorStreamEvent): Tailo
     pdf: event.pdf ?? current.pdf,
     error: event.error ?? current.error,
     headerTitle: event.headerTitle ?? current.headerTitle,
+    logs,
   };
   const completed = jobs.filter((j) => j.phase === "done").length;
   return { ...prev, jobs, completed };
@@ -214,15 +283,28 @@ export function useJobSelection(jobs: Job[]) {
         total: 0,
         completed: 0,
         jobs: [],
+        runLogs: [],
         fatalError: "Save your resume in Settings first.",
       });
       return;
     }
 
     setTailoring(true);
-    try {
-      await assertTailorServerReady();
+    const initialRun: TailorRunState = {
+      active: true,
+      total: 0,
+      completed: 0,
+      jobs: [],
+      runLogs: appendLog([], -1, "step", `Client · ${selectedJobs.length} job(s) selected — preparing run`),
+    };
+    setTailorRun(initialRun);
 
+    try {
+      setTailorRun((prev) => prev ? appendRunLog(prev, "step", `Client · checking tailor server at ${getTailorServerBase()}/health`) : prev);
+      await assertTailorServerReady();
+      setTailorRun((prev) => prev ? appendRunLog(prev, "result", "Client · tailor server healthy · external drive mounted") : prev);
+
+      setTailorRun((prev) => prev ? appendRunLog(prev, "step", "Client · loading full JD text from description buckets") : prev);
       const descriptionsByUrl = await loadJobDescriptions(selectedJobs);
       const jobsWithJd = selectedJobs
         .map((job) => ({
@@ -234,18 +316,21 @@ export function useJobSelection(jobs: Job[]) {
         }))
         .filter((j) => j.jd.trim().length > 50);
 
+      const skipped = selectedJobs.length - jobsWithJd.length;
       if (!jobsWithJd.length) {
-        setTailorRun({
+        setTailorRun((prev) => ({
           active: false,
           total: 0,
           completed: 0,
           jobs: [],
+          runLogs: appendLog(prev?.runLogs || [], -1, "error", "None of the selected jobs have a full JD captured."),
           fatalError: "None of the selected jobs have a full JD captured.",
-        });
+        }));
         return;
       }
 
-      const initialRun: TailorRunState = {
+      setTailorRun((prev) => ({
+        ...(prev || initialRun),
         active: true,
         total: jobsWithJd.length,
         completed: 0,
@@ -253,11 +338,13 @@ export function useJobSelection(jobs: Job[]) {
           index,
           company: job.company || "Unknown",
           role: job.title || "Role",
-          phase: "queued",
+          phase: "queued" as const,
+          logs: [],
         })),
-      };
-      setTailorRun(initialRun);
+        runLogs: appendLog(prev?.runLogs || [], -1, "result", `Client · ${jobsWithJd.length} job(s) ready${skipped ? ` · ${skipped} skipped (no JD)` : ""} · resume ${resumeText.length.toLocaleString()} chars`),
+      }));
 
+      setTailorRun((prev) => prev ? appendRunLog(prev, "step", "Client · POST /tailor — opening NDJSON stream") : prev);
       const res = await fetch(`${getTailorServerBase()}/tailor`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -272,17 +359,21 @@ export function useJobSelection(jobs: Job[]) {
       }
       if (!res.body) throw new Error("no response from tailor server");
 
+      setTailorRun((prev) => prev ? appendRunLog(prev, "result", "Client · stream connected — receiving live server logs") : prev);
+
       await readTailorStream(res.body, (event) => {
         setTailorRun((prev) => (prev ? applyTailorEvent(prev, event) : prev));
       });
     } catch (e) {
       const msg = (e as Error).message || String(e);
+      const fatal = msg.includes("Failed to fetch") ? tailorUnavailableMessage() : msg;
       setTailorRun((prev) => ({
         active: false,
         total: prev?.total ?? 0,
         completed: prev?.completed ?? 0,
         jobs: prev?.jobs ?? [],
-        fatalError: msg.includes("Failed to fetch") ? tailorUnavailableMessage() : msg,
+        runLogs: appendLog(prev?.runLogs || [], -1, "error", `Client · ${fatal}`),
+        fatalError: fatal,
       }));
     } finally {
       setTailoring(false);

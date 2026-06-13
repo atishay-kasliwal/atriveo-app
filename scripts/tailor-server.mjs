@@ -161,26 +161,232 @@ async function callOllama(model, jd, resumeText) {
   throw new Error(`model output truncated even at ${budgets.at(-1)} tokens — JD may be too long`);
 }
 
-// Generic chat call (system + user) with schema + truncation retry. Used by the
-// dynamic select-and-rewrite flow, which builds its own messages and schema.
-async function chatJSON(model, system, user, schema, budgets = [6144, 9216]) {
-  for (const budget of budgets) {
+// Generic chat call (system + user) with schema + truncation retry.
+async function chatJSON(model, system, user, schema, budgets = [6144, 9216], onLog = null) {
+  const sysChars = system.length;
+  const userChars = user.length;
+  onLog?.("step", `Prompt built · system ${sysChars.toLocaleString()} chars · user ${userChars.toLocaleString()} chars · ctx 16K`);
+  await checkOllama(model, onLog);
+
+  for (let attempt = 0; attempt < budgets.length; attempt++) {
+    const budget = budgets[attempt];
+    onLog?.("step", `[Attempt ${attempt + 1}/${budgets.length}] POST Ollama /api/chat · model=${model} · max_output=${budget.toLocaleString()} tokens`);
+
     const body = {
       model,
       messages: [{ role: "system", content: system }, { role: "user", content: user }],
-      stream: false, think: false, format: schema,
-      // num_ctx is CRITICAL: Ollama defaults to 4096, but our prompt (full
-      // 45-bullet bank) is ~4.4K tokens — it would overflow the window and the
-      // model could emit only 1 token. 16K gives ample room for prompt+output.
+      stream: true,
+      think: true,
+      format: schema,
       options: { temperature: 0.2, num_predict: budget, num_ctx: 16384 },
     };
+    const t0 = Date.now();
     const res = await fetch(OLLAMA, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    if (!res.ok) throw new Error(`Ollama ${res.status}: ${await res.text()}`);
-    const data = await res.json();
-    if (data.done_reason === "length") { log(`  retrying, truncated at ${budget} tokens`); continue; }
-    return JSON.parse(data.message.content);
+    if (!res.ok) {
+      const errText = await res.text();
+      onLog?.("error", `Ollama HTTP ${res.status}: ${errText.slice(0, 200)}`);
+      throw new Error(`Ollama ${res.status}: ${errText}`);
+    }
+    onLog?.("result", "Ollama stream opened — waiting for model response…");
+
+    let content = "";
+    let thinkBuf = "";
+    let thinkLineEmitted = 0;
+    let doneReason = null;
+    let evalCount = null;
+    let lastHeartbeat = Date.now();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    const emitThinkLines = () => {
+      if (!onLog) return;
+      const lines = thinkBuf.split("\n");
+      while (thinkLineEmitted < lines.length - 1) {
+        const line = lines[thinkLineEmitted].trim();
+        if (line) onLog("think", line);
+        thinkLineEmitted += 1;
+      }
+    };
+
+    const reader = res.body.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split("\n");
+      buffer = parts.pop() || "";
+      for (const line of parts) {
+        if (!line.trim()) continue;
+        let chunk;
+        try { chunk = JSON.parse(line); } catch { continue; }
+        if (chunk.message?.thinking) {
+          thinkBuf += chunk.message.thinking;
+          emitThinkLines();
+        }
+        if (chunk.message?.content) content += chunk.message.content;
+        if (chunk.done_reason) doneReason = chunk.done_reason;
+        if (chunk.eval_count != null) evalCount = chunk.eval_count;
+      }
+      const elapsed = ((Date.now() - t0) / 1000).toFixed(0);
+      if (onLog && Date.now() - lastHeartbeat > 8000) {
+        onLog("step", `Ollama generating… ${elapsed}s · JSON ${content.length.toLocaleString()} chars received${thinkBuf ? ` · thinking ${thinkBuf.length.toLocaleString()} chars` : ""}`);
+        lastHeartbeat = Date.now();
+      }
+    }
+    if (thinkBuf && thinkLineEmitted < thinkBuf.split("\n").length) {
+      const tail = thinkBuf.split("\n").slice(thinkLineEmitted).join("\n").trim();
+      if (tail) onLog?.("think", tail);
+    }
+
+    const elapsedSec = ((Date.now() - t0) / 1000).toFixed(1);
+    if (doneReason === "length") {
+      onLog?.("warn", `Truncated at ${budget} tokens after ${elapsedSec}s — retrying larger budget…`);
+      continue;
+    }
+
+    onLog?.("result", `Ollama finished in ${elapsedSec}s · JSON ${content.length.toLocaleString()} chars${evalCount != null ? ` · ~${evalCount} eval tokens` : ""}`);
+    onLog?.("step", "Parsing structured JSON response…");
+    try {
+      const parsed = JSON.parse(content);
+      onLog?.("result", "JSON parsed successfully");
+      return parsed;
+    } catch (e) {
+      onLog?.("error", `JSON parse failed: ${e.message} · preview: ${content.slice(0, 120)}…`);
+      throw new Error(`invalid JSON from model: ${e.message}`);
+    }
   }
   throw new Error(`model output truncated even at ${budgets.at(-1)} tokens`);
+}
+
+// ─── Structured run logging (streamed to frontend) ───────────────────────────
+function createJobLogger(index, send) {
+  const t0 = Date.now();
+  let step = 0;
+  const log = (kind, text) => {
+    step += 1;
+    send({
+      type: "log",
+      index,
+      kind,
+      text,
+      step,
+      elapsedMs: Date.now() - t0,
+      ts: new Date().toISOString(),
+    });
+  };
+  return { log, elapsedSec: () => ((Date.now() - t0) / 1000).toFixed(1) };
+}
+
+function createRunLogger(send) {
+  const t0 = Date.now();
+  let step = 0;
+  return (kind, text) => {
+    step += 1;
+    send({
+      type: "log",
+      index: -1,
+      kind,
+      text,
+      step,
+      elapsedMs: Date.now() - t0,
+      ts: new Date().toISOString(),
+    });
+  };
+}
+
+async function checkOllama(model, onLog) {
+  onLog?.("step", `Checking Ollama at ${OLLAMA.replace("/api/chat", "")}…`);
+  try {
+    const res = await fetch("http://localhost:11434/api/tags", { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) throw new Error(`Ollama tags HTTP ${res.status}`);
+    const data = await res.json();
+    const names = (data.models || []).map((m) => m.name);
+    const hasModel = names.some((n) => n === model || n.startsWith(`${model}:`));
+    onLog?.("result", `Ollama online · ${names.length} model(s) installed`);
+    if (hasModel) onLog?.("result", `Model available · ${model}`);
+    else onLog?.("warn", `Model "${model}" not in list — will try anyway (${names.slice(0, 4).join(", ")}${names.length > 4 ? "…" : ""})`);
+    return true;
+  } catch (e) {
+    onLog?.("error", `Ollama unreachable · ${e.message} · run: ollama serve`);
+    throw e;
+  }
+}
+
+function scanJdSignals(jd) {
+  const text = jd || "";
+  const signals = [];
+  if (/sponsorship|visa|h-?1b|work authorization|authorized to work|u\.?s\.? citizen|clearance|security clearance/i.test(text)) {
+    signals.push("work-auth / sponsorship / clearance language detected");
+  }
+  if (/\b(\d+)\+?\s*years?\s*(of\s*)?(experience|exp)/i.test(text)) {
+    const m = text.match(/\b(\d+)\+?\s*years?\s*(of\s*)?(experience|exp)/i);
+    signals.push(`years-of-experience requirement ~${m?.[1] || "?"}y`);
+  }
+  if (/machine learning|artificial intelligence|\bml\b|\bai\b|llm|deep learning/i.test(text)) {
+    signals.push("ML/AI keywords present");
+  }
+  if (/python|java|typescript|react|aws|kubernetes|spark/i.test(text)) {
+    signals.push("core stack keywords present");
+  }
+  return signals;
+}
+
+function bankStats(bank) {
+  const roleBullets = bank.roles.reduce((n, r) => n + r.bullets.length, 0);
+  const projectBullets = bank.projects.reduce((n, p) => n + p.bullets.length, 0);
+  return { roles: bank.roles.length, projects: bank.projects.length, bullets: roleBullets + projectBullets };
+}
+
+function logAssemblePlan(onLog, ai, bank) {
+  const byId = new Map((ai.experience || []).filter((e) => bank.roles[e.role_id]).map((e) => [e.role_id, e]));
+  const third = byId.has(1) ? 1 : byId.has(2) ? 2 : 1;
+  const thirdName = bank.roles[third]?.name || `role ${third}`;
+  onLog?.("step", "Enforcing fixed experience structure (SBU×4 + Accolite×4 + one of Wake/Shriffle×2)");
+  onLog?.("think", `Third experience slot → ${thirdName} (role_id ${third})`);
+  onLog?.("think", `Experience blocks: Stony Brook (4), Accolite (4), ${thirdName} (2)`);
+  onLog?.("think", `Projects selected: ${(ai.projects || []).length} · ${(ai.projects || []).map((p) => bank.projects[p.project_id]?.name || p.project_id).join(", ") || "none"}`);
+  const bulletCount =
+    (ai.experience || []).reduce((n, e) => n + (e.bullets?.length || 0), 0) +
+    (ai.projects || []).reduce((n, p) => n + (p.bullets?.length || 0), 0);
+  onLog?.("think", `Total rewritten bullets going into .tex: ${bulletCount}`);
+}
+
+function logAiPlan(onLog, ai, bank) {
+  if (!onLog) return;
+  if (ai.eligible === false) {
+    onLog("warn", `No-Go · ${ai.no_go_reason || "eligibility blocked — skipping PDF"}`);
+    return;
+  }
+  const delta = (ai.ats_after ?? 0) - (ai.ats_before ?? 0);
+  onLog("result", `Eligible · proceeding with one-page resume`);
+  onLog("think", `ATS fit estimate: ${ai.ats_before}% → ${ai.ats_after}% (${delta >= 0 ? "+" : ""}${delta})`);
+  if (ai.header_title) onLog("think", `Header title: ${ai.header_title}`);
+
+  for (const exp of ai.experience || []) {
+    const name = bank.roles[exp.role_id]?.name || `Role ${exp.role_id}`;
+    const ids = (exp.bullets || []).map((b) => b.id).join(", ");
+    onLog("think", `Experience · ${name} · ${exp.bullets?.length || 0} bullets [${ids}]`);
+    for (const bullet of exp.bullets || []) {
+      const preview = bullet.text.length > 100 ? `${bullet.text.slice(0, 100)}…` : bullet.text;
+      onLog("think", `  ${bullet.id}: ${preview}`);
+    }
+  }
+
+  for (const proj of ai.projects || []) {
+    const name = bank.projects[proj.project_id]?.name || `Project ${proj.project_id}`;
+    const ids = (proj.bullets || []).map((b) => b.id).join(", ");
+    onLog("think", `Project · ${name} · ${proj.bullets?.length || 0} bullets [${ids}]`);
+    for (const bullet of proj.bullets || []) {
+      const preview = bullet.text.length > 100 ? `${bullet.text.slice(0, 100)}…` : bullet.text;
+      onLog("think", `  ${bullet.id}: ${preview}`);
+    }
+  }
+
+  if (ai.skills?.length) {
+    onLog("think", `Skills stack (${ai.skills.length} lines) — JD-aligned, truth-filtered next`);
+    for (const line of ai.skills) onLog("think", `  ${line.slice(0, 140)}${line.length > 140 ? "…" : ""}`);
+  }
+  if (ai.notes) onLog("think", `Biggest gap (not claimable): ${ai.notes}`);
 }
 
 // Parse every real \resumeItem{...} bullet out of the template by brace-counting
@@ -274,74 +480,144 @@ function applyRewrites(tex, bullets, rewrites) {
   return { tex, applied: edits.length };
 }
 
-function compileTex(dir) {
+function compileTex(dir, onLog) {
+  const t0 = Date.now();
+  onLog?.("step", `Running: tectonic resume.tex (cwd: ${dir})`);
   const r = spawnSync("tectonic", ["resume.tex"], { cwd: dir, encoding: "utf8" });
-  if (r.status !== 0) return { ok: false, err: (r.stderr || r.stdout || "").slice(-400) };
-  // name the PDF after the candidate, matching the engine hook convention
+  const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+  if (r.status !== 0) {
+    const err = (r.stderr || r.stdout || "").trim();
+    const tail = err.slice(-500);
+    onLog?.("error", `Tectonic failed after ${elapsed}s (exit ${r.status})`);
+    for (const line of tail.split("\n").slice(-6).filter(Boolean)) onLog?.("error", `  ${line.slice(0, 200)}`);
+    return { ok: false, err: tail.slice(-400) };
+  }
+  onLog?.("result", `Tectonic succeeded in ${elapsed}s`);
   const pdf = path.join(dir, "resume.pdf");
   const named = path.join(dir, "Atishay Kasliwal.pdf");
-  if (fs.existsSync(pdf)) fs.renameSync(pdf, named);
+  if (fs.existsSync(pdf)) {
+    fs.renameSync(pdf, named);
+    onLog?.("result", `Renamed resume.pdf → Atishay Kasliwal.pdf`);
+  } else {
+    onLog?.("warn", "resume.pdf not found after compile — check tectonic output");
+  }
   return { ok: true, pdf: named };
 }
 
 // ─── Per-job tailor ──────────────────────────────────────────────────────────
-// `emit(phase, extra)` reports live progress: queued → analyzing → assembling →
-// compiling → done | error. Returns the final result object.
-async function tailorOne(job, resumeText, model, seq, dateDir, emit = () => {}) {
+// `ctx.sendPhase(phase, extra)` + `ctx.log(kind, text)` report live progress.
+async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
+  const { sendPhase, log: onLog } = ctx;
   const company = job.company || "unknown";
   const role = job.title || "role";
   const folder = `${String(seq).padStart(2, "0")}-${slug(company, 24)}-${slug(role, 30)}`;
   const dir = path.join(dateDir, folder);
-  fs.mkdirSync(dir, { recursive: true });
 
-  fs.writeFileSync(path.join(dir, "jd.txt"), job.jd || "");
-  fs.writeFileSync(path.join(dir, "meta.json"), JSON.stringify(
-    { company, role, url: job.job_url, score_pct: job.score_pct, tailored_at: new Date().toISOString(), model }, null, 2));
+  onLog?.("step", `━━━ Job ${seq} · ${company} · ${role} ━━━`);
+  onLog?.("step", `Creating output directory…`);
+  fs.mkdirSync(dir, { recursive: true });
+  onLog?.("result", `Directory ready · ${dir}`);
+
+  const jd = (job.jd || "").trim();
+  const jdLen = jd.length;
+  const stats = bankStats(BANK);
+  const signals = scanJdSignals(jd);
+
+  onLog?.("step", `JD loaded · ${jdLen.toLocaleString()} chars`);
+  if (job.job_url) onLog?.("think", `Source URL · ${job.job_url}`);
+  if (job.score_pct != null) onLog?.("think", `Feed match score · ${job.score_pct}%`);
+  for (const sig of signals) onLog?.("think", `JD signal · ${sig}`);
+  if (!signals.length) onLog?.("think", "JD signal · no hard eligibility keywords matched (model will still screen)");
+
+  onLog?.("step", `Loading engine bullet bank · ${stats.roles} roles · ${stats.projects} projects · ${stats.bullets} bullets`);
+  onLog?.("step", `Safe-claim allowlist · ${SAFE_CLAIMS.size.toLocaleString()} verified tokens`);
+
+  onLog?.("step", "Writing jd.txt…");
+  fs.writeFileSync(path.join(dir, "jd.txt"), jd);
+  onLog?.("result", "jd.txt saved");
+
+  const meta = { company, role, url: job.job_url, score_pct: job.score_pct, tailored_at: new Date().toISOString(), model };
+  onLog?.("step", "Writing meta.json…");
+  fs.writeFileSync(path.join(dir, "meta.json"), JSON.stringify(meta, null, 2));
+  onLog?.("result", "meta.json saved");
 
   const result = { folder, company, role, dir, status: "ok" };
   try {
-    emit("analyzing");   // calling the model to select + rewrite
-    const user = buildUserMessage(BANK, job.jd || "");
-    const ai = await chatJSON(model, DYN_SYSTEM, user, DYN_SCHEMA);
+    onLog?.("step", "Phase 1/4 · Analyze — eligibility screen + bullet selection + rewrites");
+    sendPhase("analyzing");
 
-    // Eligibility screen — hard No-Go stops here.
+    onLog?.("think", "Building user message: full bullet bank + JD…");
+    const user = buildUserMessage(BANK, jd);
+    onLog?.("think", "System prompt: dynamic select-and-rewrite rules (fixed 3-role structure, truth guard)");
+
+    const ai = await chatJSON(model, DYN_SYSTEM, user, DYN_SCHEMA, [6144, 9216], onLog);
+
+    onLog?.("step", "Phase 1 complete · reviewing model output");
     if (ai.eligible === false) {
+      logAiPlan(onLog, ai, BANK);
+      onLog?.("step", "Writing optimizer.json (No-Go record)…");
       fs.writeFileSync(path.join(dir, "optimizer.json"), JSON.stringify(ai, null, 2));
+      onLog?.("warn", "Skipping PDF generation due to eligibility block");
       result.status = "no-go";
       result.error = ai.no_go_reason || "eligibility blocked";
-      emit("done", result);
+      sendPhase("done", result);
       return result;
     }
 
-    // Truth guard: strip skills not backed by the safe-claim allowlist.
+    logAiPlan(onLog, ai, BANK);
+
+    onLog?.("step", "Phase 2/4 · Truth guard — filtering skills against safe-claim allowlist");
     const droppedSkills = [];
-    ai.skills = (ai.skills || []).map((line) => {
+    ai.skills = (ai.skills || []).map((line, i) => {
+      onLog?.("think", `Checking skills line ${i + 1}/${ai.skills.length}…`);
       const { line: kept, dropped } = filterSkillsLine(line, SAFE_CLAIMS);
       droppedSkills.push(...dropped);
+      if (dropped.length) onLog?.("warn", `  Dropped from line ${i + 1}: ${dropped.join(", ")}`);
       return kept;
     }).filter(Boolean);
-    if (droppedSkills.length) { ai._dropped_skills = droppedSkills; log(`  dropped fabricated skills: ${droppedSkills.join(", ")}`); }
+    if (droppedSkills.length) {
+      onLog?.("warn", `Truth guard total dropped: ${droppedSkills.join(", ")}`);
+      ai._dropped_skills = droppedSkills;
+      log(`  dropped fabricated skills: ${droppedSkills.join(", ")}`);
+    } else {
+      onLog?.("result", "Truth guard passed — every skill token verified against resume evidence");
+    }
 
+    onLog?.("step", "Writing optimizer.json…");
     fs.writeFileSync(path.join(dir, "optimizer.json"), JSON.stringify(ai, null, 2));
+    onLog?.("result", "optimizer.json saved");
     result.ats = `${ai.ats_before}→${ai.ats_after}`;
     result.headerTitle = ai.header_title || "";
 
-    emit("assembling");
+    onLog?.("step", "Phase 3/4 · Assemble — building one-page resume.tex");
+    sendPhase("assembling");
+    logAssemblePlan(onLog, ai, BANK);
+    onLog?.("think", "Applying LaTeX preamble + header + education (fixed blocks)…");
     const tex = assembleResume(ai, BANK);
-    const withJd = tex.replace(/\\end\{document\}/, `\\end{document}\n\n% ==== JD: ${company} — ${role} ====\n% ${(job.jd||"").replace(/\n/g, "\n% ").slice(0, 4000)}`);
+    onLog?.("think", `Base .tex size · ${tex.length.toLocaleString()} chars`);
+    const withJd = tex.replace(/\\end\{document\}/, `\\end{document}\n\n% ==== JD: ${company} — ${role} ====\n% ${jd.replace(/\n/g, "\n% ").slice(0, 4000)}`);
+    onLog?.("step", "Writing resume.tex (with JD appendix comment)…");
     fs.writeFileSync(path.join(dir, "resume.tex"), withJd);
+    onLog?.("result", `resume.tex saved · ${withJd.length.toLocaleString()} chars`);
 
-    emit("compiling");
-    const c = compileTex(dir);
+    onLog?.("step", "Phase 4/4 · Compile — Tectonic PDF");
+    sendPhase("compiling");
+    const c = compileTex(dir, onLog);
     result.pdf = c.ok;
     result.pdfPath = c.ok ? c.pdf : "";
     result.dropped = droppedSkills.length;
-    if (!c.ok) { result.status = "tex-failed"; result.error = c.err; }
+    if (!c.ok) {
+      result.status = "tex-failed";
+      result.error = c.err;
+    } else {
+      onLog?.("result", `✓ Complete · ATS ${result.ats} · ${c.pdf}`);
+    }
   } catch (e) {
     result.status = "ai-failed";
     result.error = String(e.message || e);
+    onLog?.("error", result.error);
   }
-  emit("done", result);
+  sendPhase("done", result);
   return result;
 }
 
@@ -381,24 +657,45 @@ const server = http.createServer(async (req, res) => {
         const useModel = model || DEFAULT_MODEL;
         const date = new Date().toISOString().slice(0, 10);
         const dateDir = path.join(OUT_ROOT, date);
+
         fs.mkdirSync(dateDir, { recursive: true });
         const existing = fs.readdirSync(dateDir).filter((d) => /^\d\d-/.test(d));
         let seq = existing.length;
 
-        res.writeHead(200, { "Content-Type": "application/x-ndjson", "Cache-Control": "no-cache" });
+        res.writeHead(200, {
+          "Content-Type": "application/x-ndjson",
+          "Cache-Control": "no-cache, no-transform",
+          "Connection": "keep-alive",
+          "X-Accel-Buffering": "no",
+        });
+        if (typeof res.flushHeaders === "function") res.flushHeaders();
+        const runLog = createRunLogger(send);
+
+        runLog("step", `Server · POST /tailor received · ${jobs.length} job(s)`);
+        runLog("think", `Resume text · ${resumeText.trim().length.toLocaleString()} chars from Settings`);
+        runLog("result", `External drive mounted · ${path.dirname(OUT_ROOT)}`);
+        runLog("think", `Output date folder · ${dateDir} · ${existing.length} existing run(s) today`);
         send({ type: "start", total: jobs.length, dateDir, model: useModel });
+        runLog("result", `Stream started · model=${useModel}`);
         log(`tailoring ${jobs.length} job(s) with ${useModel} → ${dateDir}`);
 
         for (let i = 0; i < jobs.length; i++) {
           const job = jobs[i];
           seq += 1;
           const index = i;
+          runLog("step", `Queue · job ${i + 1}/${jobs.length} · ${job.company} · ${job.title}`);
           send({ type: "job", index, phase: "queued", company: job.company, role: job.title });
-          const r = await tailorOne(job, resumeText, useModel, seq, dateDir, (phase, extra) => {
-            send({ type: "job", index, phase, company: job.company, role: job.title, ...(extra || {}) });
+          const { log: jobLog } = createJobLogger(index, send);
+          const r = await tailorOne(job, resumeText, useModel, seq, dateDir, {
+            sendPhase: (phase, extra) => {
+              send({ type: "job", index, phase, company: job.company, role: job.title, ...(extra || {}) });
+            },
+            log: jobLog,
           });
+          runLog("result", `Job ${i + 1} finished · ${r.status}${r.ats ? ` · ATS ${r.ats}` : ""}${r.error ? ` · ${r.error.slice(0, 80)}` : ""}`);
           log(`  ${r.folder}: ${r.status}${r.ats ? ` (ATS ${r.ats}, ${r.dropped} dropped, pdf=${r.pdf})` : r.error ? ` — ${r.error}` : ""}`);
         }
+        runLog("result", "All jobs processed · closing stream");
         send({ type: "end" });
         res.end();
       } catch (e) {

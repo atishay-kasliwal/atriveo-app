@@ -1,3 +1,15 @@
+export type TailorLogKind = "step" | "think" | "result" | "warn" | "error";
+
+export interface TailorLogEntry {
+  id: string;
+  index: number;
+  kind: TailorLogKind;
+  text: string;
+  at: string;
+  step?: number;
+  elapsedMs?: number;
+}
+
 export type TailorPhase = "queued" | "analyzing" | "assembling" | "compiling" | "done";
 
 export interface TailorJobState {
@@ -13,6 +25,7 @@ export interface TailorJobState {
   pdf?: boolean;
   error?: string;
   headerTitle?: string;
+  logs: TailorLogEntry[];
 }
 
 export interface TailorRunState {
@@ -22,6 +35,7 @@ export interface TailorRunState {
   dateDir?: string;
   model?: string;
   jobs: TailorJobState[];
+  runLogs: TailorLogEntry[];
   summary?: string;
   fatalError?: string;
 }
@@ -29,5 +43,6 @@ export interface TailorRunState {
 export type TailorStreamEvent =
   | { type: "start"; total: number; dateDir?: string; model?: string }
   | { type: "job"; index: number; phase: TailorPhase; company?: string; role?: string; status?: string; ats?: string; folder?: string; dir?: string; pdfPath?: string; pdf?: boolean; error?: string; headerTitle?: string }
+  | { type: "log"; index: number; kind: TailorLogKind; text: string; step?: number; elapsedMs?: number; ts?: string }
   | { type: "end" }
   | { type: "fatal"; error: string };
