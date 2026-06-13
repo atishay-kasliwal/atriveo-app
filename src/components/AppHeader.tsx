@@ -20,6 +20,7 @@ const NAV: NavItem[] = [
   { href: "/weekly",        label: "Weekly",         match: (p) => p.startsWith("/weekly") },
   { href: "/unclicked-100", label: "100+ Unclicked", match: (p) => p.startsWith("/unclicked-100") },
   { href: "/cart",          label: "Cart",           match: (p) => p.startsWith("/cart") },
+  { href: "/clickedjobs",   label: "Clicked Jobs",   match: (p) => p.startsWith("/clickedjobs") },
   { href: "/skills",        label: "Skills",         match: (p) => p.startsWith("/skills") },
   { href: "/states",        label: "States",         match: (p) => p.startsWith("/states") },
   { href: "/emailfinder",   label: "Email Finder",   match: (p) => p.startsWith("/emailfinder") },

@@ -1,6 +1,7 @@
 import { Fragment, useMemo, useState } from "react";
 import type { Job } from "../types";
 import type { SortBy, SortDir } from "../pages/Dashboard.types";
+import type { SavedJobSource } from "../hooks/useApplyClickLog";
 import type { ApplyMetadata, ApplyRecord } from "../hooks/useApplyTracker";
 import CompanyLogo from "./CompanyLogo";
 import { careerOpsRating, careerOpsStars, companyDomain, matchReasons } from "../utils/jobPresentation";
@@ -200,7 +201,7 @@ interface RowProps {
   index: number;
   applyRecord: ApplyRecord | null;
   onAddToTracker: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
-  onApplyClick?: (job: Job) => void;
+  onSaveJob?: (job: Job, source: SavedJobSource) => void;
   isSelected?: boolean;
   onSelectionToggle?: (job: Job) => void;
   onExcludeCompany?: (company: string) => void;
@@ -214,7 +215,7 @@ function JobTableRow({
   index,
   applyRecord,
   onAddToTracker,
-  onApplyClick,
+  onSaveJob,
   isSelected = false,
   onSelectionToggle,
   onExcludeCompany,
@@ -223,7 +224,7 @@ function JobTableRow({
   board = false,
 }: RowProps) {
   const [msgCopied, setMsgCopied] = useState(false);
-  const [clickLogged, setClickLogged] = useState(false);
+  const [savedFeedback, setSavedFeedback] = useState<SavedJobSource | null>(null);
   const co = job.company || "—";
   const title = job.title || "—";
   const careerOps = careerOpsRating(job);
@@ -243,6 +244,13 @@ function JobTableRow({
         : trackerSyncStatus === "error" || trackerSyncStatus === "not_configured"
           ? "Retry"
           : "Sync";
+
+  function saveJob(source: SavedJobSource) {
+    if (!onSaveJob) return;
+    onSaveJob(job, source);
+    setSavedFeedback(source);
+    setTimeout(() => setSavedFeedback(null), 1400);
+  }
 
   return (
     <tr
@@ -321,24 +329,20 @@ function JobTableRow({
                 href={job.job_url}
                 target="_blank"
                 rel="noopener"
-                onClick={() => onApplyClick?.(job)}
                 title="Apply"
+                onClick={() => onSaveJob?.(job, "apply")}
               >
-                Apply
+                {savedFeedback === "apply" ? "Moved ✓" : "Apply"}
               </a>
             ) : null}
-            {job.job_url && onApplyClick && (
+            {job.job_url && onSaveJob && (
               <button
                 type="button"
-                className={`job-table-board-apply${clickLogged ? " is-logged" : ""}`}
-                onClick={() => {
-                  onApplyClick(job);
-                  setClickLogged(true);
-                  setTimeout(() => setClickLogged(false), 1400);
-                }}
-                title="Log an apply click"
+                className={`job-table-board-apply${savedFeedback === "click" ? " is-logged" : ""}`}
+                onClick={() => saveJob("click")}
+                title="Move this posting to Clicked Jobs"
               >
-                {clickLogged ? "Logged ✓" : "Click"}
+                {savedFeedback === "click" ? "Moved ✓" : "Click"}
               </button>
             )}
             <button
@@ -357,11 +361,14 @@ function JobTableRow({
             {canSendToTracker && job.job_url && (
               <button
                 type="button"
-                className="job-table-board-apply"
-                title="Add to Atriveo tracker"
-                onClick={() => onAddToTracker(job.job_url, title, co, { location: job.location || null })}
+                className={`job-table-board-apply${savedFeedback === "add" ? " is-logged" : ""}`}
+                title="Add to Atriveo tracker and move to Clicked Jobs"
+                onClick={() => {
+                  if (onSaveJob) saveJob("add");
+                  else onAddToTracker(job.job_url, title, co, { location: job.location || null });
+                }}
               >
-                {trackerCopy}
+                {savedFeedback === "add" ? "Moved ✓" : trackerCopy}
               </button>
             )}
           </div>
@@ -373,13 +380,13 @@ function JobTableRow({
                 href={job.job_url}
                 target="_blank"
                 rel="noopener"
-                onClick={() => onApplyClick?.(job)}
+                onClick={() => onSaveJob?.(job, "apply")}
               >
                 Apply
               </a>
             ) : null}
-            {job.job_url && onApplyClick && (
-              <button type="button" className="job-table-action" onClick={() => onApplyClick(job)}>Click</button>
+            {job.job_url && onSaveJob && (
+              <button type="button" className="job-table-action" onClick={() => saveJob("click")}>Click</button>
             )}
             <button
               type="button"
@@ -397,7 +404,10 @@ function JobTableRow({
               <button
                 type="button"
                 className="job-table-action"
-                onClick={() => onAddToTracker(job.job_url, title, co, { location: job.location || null })}
+                onClick={() => {
+                  if (onSaveJob) saveJob("add");
+                  else onAddToTracker(job.job_url, title, co, { location: job.location || null });
+                }}
               >
                 {trackerCopy}
               </button>
@@ -517,7 +527,7 @@ interface Props {
   jobs: Job[];
   getRecord: (jobUrl: string) => ApplyRecord | null;
   onAddToTracker: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
-  onApplyClick?: (job: Job) => void;
+  onSaveJob?: (job: Job, source: SavedJobSource) => void;
   onExcludeCompany?: (company: string) => void;
   isJobSelected?: (job: Job) => boolean;
   onSelectionToggle?: (job: Job) => void;
@@ -534,7 +544,7 @@ export default function JobTable({
   jobs,
   getRecord,
   onAddToTracker,
-  onApplyClick,
+  onSaveJob,
   onExcludeCompany,
   isJobSelected,
   onSelectionToggle,
@@ -625,7 +635,7 @@ export default function JobTable({
                         index={priorCount + j + 1}
                         applyRecord={job.job_url ? getRecord(job.job_url) : null}
                         onAddToTracker={onAddToTracker}
-                        onApplyClick={onApplyClick}
+                        onSaveJob={onSaveJob}
                         isSelected={isJobSelected?.(job)}
                         onSelectionToggle={onSelectionToggle}
                         onExcludeCompany={onExcludeCompany}
@@ -648,7 +658,7 @@ export default function JobTable({
                       index={rowIndex}
                       applyRecord={job.job_url ? getRecord(job.job_url) : null}
                       onAddToTracker={onAddToTracker}
-                      onApplyClick={onApplyClick}
+                      onSaveJob={onSaveJob}
                       isSelected={isJobSelected?.(job)}
                       onSelectionToggle={onSelectionToggle}
                       onExcludeCompany={onExcludeCompany}
@@ -677,7 +687,7 @@ export default function JobTable({
                           index={rowIndex}
                           applyRecord={job.job_url ? getRecord(job.job_url) : null}
                           onAddToTracker={onAddToTracker}
-                          onApplyClick={onApplyClick}
+                          onSaveJob={onSaveJob}
                           isSelected={isJobSelected?.(job)}
                           onSelectionToggle={onSelectionToggle}
                           nested
@@ -696,7 +706,7 @@ export default function JobTable({
                 index={i + 1}
                 applyRecord={job.job_url ? getRecord(job.job_url) : null}
                 onAddToTracker={onAddToTracker}
-                onApplyClick={onApplyClick}
+                onSaveJob={onSaveJob}
                 isSelected={isJobSelected?.(job)}
                 onSelectionToggle={onSelectionToggle}
                 showCompany

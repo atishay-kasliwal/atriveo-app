@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import type { Job } from "../types";
 import type { ApplyMetadata, ApplyRecord } from "../hooks/useApplyTracker";
+import type { SavedJobSource } from "../hooks/useApplyClickLog";
 import CompanyLogo from "./CompanyLogo";
 import { careerOpsRating, careerOpsStars, jobBoardLabel, matchReasons, rankBadge } from "../utils/jobPresentation";
 
@@ -74,7 +75,7 @@ interface Props {
   index?: number;
   applyRecord: ApplyRecord | null;
   onAddToTracker: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
-  onApplyClick?: (job: Job) => void;
+  onSaveJob?: (job: Job, source: SavedJobSource) => void;
   onExcludeCompany?: (company: string) => void;
   isSelected?: boolean;
   onSelectionToggle?: (job: Job) => void;
@@ -85,7 +86,7 @@ export default function JobCard({
   index,
   applyRecord,
   onAddToTracker,
-  onApplyClick,
+  onSaveJob,
   onExcludeCompany,
   isSelected = false,
   onSelectionToggle,
@@ -156,7 +157,14 @@ export default function JobCard({
 
   function handleTrackerClick(e: React.MouseEvent) {
     e.preventDefault();
-    if (job.job_url) onAddToTracker(job.job_url, title, co, { location: job.location || null });
+    if (!job.job_url) return;
+    if (onSaveJob) onSaveJob(job, "add");
+    else onAddToTracker(job.job_url, title, co, { location: job.location || null });
+  }
+
+  function handleSaveClick(e: React.MouseEvent, source: SavedJobSource) {
+    e.preventDefault();
+    onSaveJob?.(job, source);
   }
 
   function handleSelectionClick(e: React.MouseEvent) {
@@ -248,15 +256,12 @@ export default function JobCard({
 
       <div className="job-tile-actions">
         <div className="job-tile-secondary-actions">
-          {job.job_url && onApplyClick && (
+          {job.job_url && onSaveJob && (
             <button
               type="button"
               className="job-tile-action job-tile-action--click"
-              onClick={(e) => {
-                e.preventDefault();
-                onApplyClick(job);
-              }}
-              title="Log to Apply table without opening"
+              onClick={(e) => handleSaveClick(e, "click")}
+              title="Move this posting to Clicked Jobs"
             >
               Click
             </button>
@@ -292,7 +297,7 @@ export default function JobCard({
             href={job.job_url}
             target="_blank"
             rel="noopener"
-            onClick={() => onApplyClick?.(job)}
+            onClick={() => onSaveJob?.(job, "apply")}
           >
             Apply
           </a>

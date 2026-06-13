@@ -10,6 +10,7 @@ import Unclicked100 from "./pages/Unclicked100";
 import Cart from "./pages/Cart";
 import States from "./pages/States";
 import EmailFinder from "./pages/EmailFinder";
+import ClickedJobs from "./pages/ClickedJobs";
 import ResumeOptimizer from "./pages/ResumeOptimizer";
 import "./index.css";
 
@@ -104,6 +105,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <EmailFinder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/clickedjobs"
+          element={
+            <ProtectedRoute>
+              <ClickedJobs />
             </ProtectedRoute>
           }
         />

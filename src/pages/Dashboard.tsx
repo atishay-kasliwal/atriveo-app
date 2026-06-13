@@ -13,9 +13,10 @@ import { useExclusions } from "../hooks/useExclusions";
 import { useJobSelection } from "../hooks/useJobSelection";
 import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
+import type { SavedJobSource } from "../hooks/useApplyClickLog";
 import JobTable from "../components/JobTable";
 import JobCard from "../components/JobCard";
-import { careerOpsRating, jobBoardLabel } from "../utils/jobPresentation";
+import { careerOpsRating } from "../utils/jobPresentation";
 import type { Period, SortBy, SortDir } from "./Dashboard.types";
 import { defaultSortDir, sortJobs } from "../utils/jobSort";
 
@@ -33,8 +34,6 @@ const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
 const DS_TERM_RE  = /data\s*sci/i;
 const DS_TITLE_RE = /data\s*sci/i;
-
-const TABLE_VIEW_ROWS = 20;
 
 const LOCATION_FILTERS = [
   { key: "New York", match: (loc: string) => loc.includes("new york") },
@@ -86,7 +85,7 @@ function formatRunTime(iso?: string | null): string {
 export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const navigate = useNavigate();
   const { stats, recordClick, getRecord } = useApplyTracker();
-  const { records: applyClickRecords, todayRecords: todayApplyClicks, recordApplyClick } = useApplyClickLog();
+  const { clickedUrlSet, recordSavedJob } = useApplyClickLog();
   const { isExcluded, excludeCompany } = useExclusions();
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
   const [todayJobs, setTodayJobs] = useState<Job[]>([]);
@@ -226,14 +225,12 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       );
     }
     jobs = jobs.filter((j) => !isExcluded(j));
-    // NOTE: previously we also removed any job already in the apply-click log,
-    // which made rows vanish from the table the moment you hit Apply/Click.
-    // Clicking now just logs quietly and the row stays put (marked is-applied).
+    jobs = jobs.filter((j) => !j.job_url || !clickedUrlSet.has(j.job_url));
     if (activeView === "high-match") {
       jobs = jobs.filter((j) => careerOpsRating(j).score >= 75);
     }
     return jobs;
-  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, activeView]);
+  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, activeView, clickedUrlSet]);
 
   const handleSortColumn = useCallback((column: SortBy) => {
     if (sortBy === column) {
@@ -248,6 +245,16 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     setSortBy(column);
     setSortDir(defaultSortDir(column));
   }, []);
+
+  const handleSaveJob = useCallback((job: Job, source: SavedJobSource) => {
+    if (!job.job_url) return;
+    recordSavedJob(job, source);
+    if (source === "add") {
+      recordClick(job.job_url, job.title || "Untitled role", job.company || "Unknown company", {
+        location: job.location || null,
+      });
+    }
+  }, [recordSavedJob, recordClick]);
 
   const filtered = useMemo(() => {
     let jobs = [...visibleJobs];
@@ -339,11 +346,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       .sort((a, b) => toMs(b.appliedAt) - toMs(a.appliedAt));
   }, [stats.appliedJobs]);
 
-  const applyClickTableRows = useMemo(
-    () => applyClickRecords.slice(0, TABLE_VIEW_ROWS),
-    [applyClickRecords]
-  );
-
   const activeFilterCount = [
     selectedSession,
     query.trim(),
@@ -382,9 +384,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const catalogJobs = useMemo(() => {
     let jobs = [...baseJobs];
     jobs = jobs.filter((j) => !isExcluded(j));
-    // Apply-clicked jobs stay in the catalog too (counts no longer drop on click).
+    jobs = jobs.filter((j) => !j.job_url || !clickedUrlSet.has(j.job_url));
     return jobs;
-  }, [baseJobs, isExcluded]);
+  }, [baseJobs, isExcluded, clickedUrlSet]);
 
   const viewCounts = useMemo(
     () => ({
@@ -497,7 +499,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           jobs={filtered}
           getRecord={getRecord}
           onAddToTracker={recordClick}
-          onApplyClick={recordApplyClick}
+          onSaveJob={handleSaveJob}
           onExcludeCompany={excludeCompany}
           isJobSelected={jobSelection.isJobSelected}
           onSelectionToggle={jobSelection.toggleJobSelection}
@@ -509,86 +511,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           sortDir={sortDir}
           onSortColumn={isTodayBoard ? handleSortColumn : undefined}
         />
-      )}
-      {applyClickTableRows.length > 0 && (
-        <section
-          className={`apply-click-log${isTodayBoard ? " apply-click-log--board" : ""}`}
-          aria-label="Apply button click log"
-        >
-          <div className="apply-click-log-head">
-            <div>
-              <span className="apply-click-log-kicker">Apply Log</span>
-              <h2>Opened from Apply</h2>
-              <p>Review opened jobs and add the strong ones to Atriveo tracker.</p>
-            </div>
-            <strong>{todayApplyClicks.length} today</strong>
-          </div>
-          <div className="apply-click-table-wrap">
-            <table className="apply-click-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Time</th>
-                  <th>Company</th>
-                  <th>Role</th>
-                  <th>Board</th>
-                  <th>Clicks</th>
-                  <th>Tracker</th>
-                  <th>Link</th>
-                </tr>
-              </thead>
-              <tbody>
-                {applyClickTableRows.map((record, index) => {
-                  const trackerRecord = getRecord(record.jobUrl);
-                  const trackerStatus = trackerRecord?.trackerSyncStatus ?? null;
-                  const isSynced = trackerStatus === "synced" || trackerStatus === "duplicate";
-                  const isSending = trackerStatus === "pending";
-                  const isRetryable = trackerStatus === "error" || trackerStatus === "not_configured" || trackerStatus === "skipped";
-                  const trackerCopy = isSending
-                    ? "Sending…"
-                    : isSynced
-                      ? "Synced"
-                      : isRetryable
-                        ? "Retry"
-                        : trackerRecord
-                          ? "Sync"
-                          : "Tracker +";
-                  const trackerTone = isSending
-                    ? " pending"
-                    : isSynced
-                      ? " synced"
-                      : isRetryable
-                        ? " retry"
-                        : "";
-                  return (
-                    <tr key={record.jobUrl}>
-                      <td className="apply-click-index">{index + 1}</td>
-                      <td>{formatRunTime(record.clickedAt)}</td>
-                      <td>{record.company}</td>
-                      <td>{record.title}</td>
-                      <td>{jobBoardLabel(record.site, record.jobUrl)}</td>
-                      <td>{record.clicks}</td>
-                      <td>
-                        <button
-                          type="button"
-                          className={`apply-click-tracker-btn${trackerTone}`}
-                          disabled={isSending || isSynced}
-                          title={trackerRecord?.trackerSyncMessage || "Add this job to Atriveo tracker"}
-                          onClick={() => recordClick(record.jobUrl, record.title, record.company, { location: record.location })}
-                        >
-                          {trackerCopy}
-                        </button>
-                      </td>
-                      <td>
-                        <a href={record.jobUrl} target="_blank" rel="noopener">Open ↗</a>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
       )}
     </>
   );
@@ -906,7 +828,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                               index={i + 1}
                               applyRecord={job.job_url ? getRecord(job.job_url) : null}
                               onAddToTracker={recordClick}
-                              onApplyClick={recordApplyClick}
+                              onSaveJob={handleSaveJob}
                               onExcludeCompany={excludeCompany}
                               isSelected={jobSelection.isJobSelected(job)}
                               onSelectionToggle={jobSelection.toggleJobSelection}

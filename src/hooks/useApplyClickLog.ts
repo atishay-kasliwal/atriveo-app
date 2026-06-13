@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "./useAuth";
 import type { Job } from "../types";
+import { careerOpsRating } from "../utils/jobPresentation";
 
 const KEY = (uid: string) => `atriveo_apply_click_log_v1_${uid}`;
+
+export type SavedJobSource = "apply" | "click" | "add";
 
 export interface ApplyClickRecord {
   jobUrl: string;
@@ -12,6 +15,9 @@ export interface ApplyClickRecord {
   site: string | null;
   clickedAt: string;
   clicks: number;
+  level: string | null;
+  score: number | null;
+  source: SavedJobSource;
 }
 
 function todayEst(): string {
@@ -41,6 +47,9 @@ function normalize(raw: unknown): ApplyClickRecord[] {
         site: record.site ? String(record.site) : null,
         clickedAt,
         clicks: Math.max(1, Math.floor(Number(record.clicks) || 1)),
+        level: record.level ? String(record.level) : null,
+        score: record.score == null ? null : Math.round(Number(record.score)),
+        source: record.source === "apply" || record.source === "add" ? record.source : "click",
       };
     })
     .filter((record): record is ApplyClickRecord => Boolean(record));
@@ -73,7 +82,7 @@ export function useApplyClickLog() {
     setRecords(load(uid));
   }, [loading, uid]);
 
-  const recordApplyClick = useCallback((job: Job) => {
+  const recordSavedJob = useCallback((job: Job, source: SavedJobSource) => {
     if (!job.job_url) return;
     setRecords((prev) => {
       const nowIso = new Date().toISOString();
@@ -86,6 +95,9 @@ export function useApplyClickLog() {
         site: job.site || null,
         clickedAt: nowIso,
         clicks: (existing?.clicks || 0) + 1,
+        level: job.level || null,
+        score: careerOpsRating(job).score,
+        source,
       };
       const next = [nextRecord, ...prev.filter((record) => record.jobUrl !== job.job_url)];
       persist(uid, next);
@@ -93,10 +105,24 @@ export function useApplyClickLog() {
     });
   }, [uid]);
 
+  const removeApplyClick = useCallback((jobUrl: string) => {
+    if (!jobUrl) return;
+    setRecords((prev) => {
+      const next = prev.filter((record) => record.jobUrl !== jobUrl);
+      persist(uid, next);
+      return next;
+    });
+  }, [uid]);
+
+  const clickedUrlSet = useMemo(
+    () => new Set(records.map((record) => record.jobUrl)),
+    [records],
+  );
+
   const todayRecords = useMemo(() => {
     const today = todayEst();
     return records.filter((record) => estDateKey(record.clickedAt) === today);
   }, [records]);
 
-  return { records, todayRecords, recordApplyClick };
+  return { records, todayRecords, clickedUrlSet, recordSavedJob, removeApplyClick };
 }
