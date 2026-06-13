@@ -1380,3 +1380,119 @@ body.is-today-board .nav-tab.active {
   border-color: #c4b5fd;
   color: #5b21b6;
 }
+
+.tailor-queue-panel {
+  margin-bottom: 8px;
+}
+
+.tailor-queue-expand {
+  border: none;
+  background: none;
+  color: var(--board-accent-strong);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.tailor-queue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--board-line);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  background: #fff;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.tailor-queue-item {
+  display: grid;
+  grid-template-columns: 20px 24px 36px 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--board-line-soft);
+  cursor: grab;
+}
+
+.tailor-queue-item:last-child {
+  border-bottom: none;
+}
+
+.tailor-queue-item.is-dragging {
+  opacity: 0.55;
+  background: var(--board-accent-soft);
+}
+
+.tailor-queue-drag {
+  color: var(--board-muted);
+  font-size: 12px;
+  letter-spacing: -2px;
+}
+
+.tailor-queue-rank {
+  font-size: 11px;
+  color: var(--board-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tailor-queue-score {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--board-accent-strong);
+}
+
+.tailor-queue-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tailor-queue-copy strong {
+  font-size: 11px;
+  color: var(--board-ink);
+}
+
+.tailor-queue-copy span {
+  font-size: 11px;
+  color: var(--board-sub);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tailor-queue-source {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--board-muted);
+}
+
+.tailor-queue-source--manual {
+  color: #5b21b6;
+}
+
+.tailor-queue-item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.tailor-queue-mini-btn {
+  border: 1px solid var(--board-line);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--board-sub);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 7px;
+  cursor: pointer;
+}
+
+.tailor-queue-mini-btn--ghost {
+  background: transparent;
+}

@@ -625,6 +625,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               {filtersOpen && filterBar}
 
               <TailorQueueBar
+                queue={tailorQueue.queue}
                 pendingCount={tailorQueue.pendingCount}
                 doneInQueue={tailorQueue.doneInQueue}
                 processing={tailorQueue.processing}
@@ -634,6 +635,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 onSyncNow={() => tailorQueue.runHourlySync(displayedJobs, true)}
                 onProcessNow={() => void tailorQueue.processQueue()}
                 onClearDone={tailorQueue.clearDone}
+                onBumpUrgent={tailorQueue.bumpUrgent}
+                onRemoveFromQueue={tailorQueue.removeFromQueue}
+                onReorderPending={tailorQueue.reorderPending}
               />
               <BulkJobCopyBar
                 variant="board"

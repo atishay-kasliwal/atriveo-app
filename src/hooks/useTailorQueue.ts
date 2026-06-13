@@ -224,6 +224,24 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     setSyncMessage("Moved to front of queue");
   }, [tailorStatus, updateQueue]);
 
+  const reorderPending = useCallback((orderedKeys: string[]) => {
+    updateQueue((prev) => {
+      const pending = prev.filter((item) => item.status === "pending");
+      const rest = prev.filter((item) => item.status !== "pending");
+      const byKey = new Map(pending.map((item) => [item.jobKey, item]));
+      const reordered = orderedKeys
+        .map((key, index) => {
+          const item = byKey.get(key);
+          if (!item) return null;
+          return { ...item, priority: 3000 - index };
+        })
+        .filter((item): item is TailorQueueItem => Boolean(item));
+      const leftover = pending.filter((item) => !orderedKeys.includes(item.jobKey));
+      return [...reordered, ...leftover, ...rest];
+    });
+    setSyncMessage("Queue order updated");
+  }, [updateQueue]);
+
   const removeFromQueue = useCallback((jobKey: string) => {
     updateQueue((prev) => prev.filter((item) => item.jobKey !== jobKey || item.status === "done"));
     const record = tailorStatus.getRecord(jobKey);
@@ -347,5 +365,6 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     runHourlySync,
     processQueue,
     clearDone,
+    reorderPending,
   };
 }
