@@ -1,6 +1,14 @@
 import type { Job } from "../types";
 
-const BUCKET_CACHE = new Map<string, Promise<Record<string, string>>>();
+// Cache buckets only briefly. A SESSION-LONG cache was the "No JD for all" bug:
+// once a bucket was fetched (even empty, or before the hourly data deployed), it
+// was never re-fetched, so the feed kept matching jobs against stale/empty
+// buckets. A short TTL lets a later poll pick up freshly-published JDs, and an
+// empty result is never cached at all (so it retries next time).
+const BUCKET_TTL_MS = 5 * 60 * 1000;
+interface CachedBucket { at: number; data: Record<string, string>; }
+const BUCKET_CACHE = new Map<string, CachedBucket>();
+const BUCKET_INFLIGHT = new Map<string, Promise<Record<string, string>>>();
 
 export function jobDescriptionBucket(jobUrl: string): string {
   let hash = 0;
@@ -11,14 +19,30 @@ export function jobDescriptionBucket(jobUrl: string): string {
 }
 
 async function loadBucket(bucket: string): Promise<Record<string, string>> {
-  if (!BUCKET_CACHE.has(bucket)) {
-    BUCKET_CACHE.set(bucket, fetch(`/api/job-description-bucket?bucket=${encodeURIComponent(bucket)}`).then(async (response) => {
-      if (!response.ok) return {};
-      const data = await response.json();
-      return data && typeof data === "object" ? data as Record<string, string> : {};
-    }).catch(() => ({})));
+  const cached = BUCKET_CACHE.get(bucket);
+  if (cached && Date.now() - cached.at < BUCKET_TTL_MS && Object.keys(cached.data).length > 0) {
+    return cached.data;
   }
-  return BUCKET_CACHE.get(bucket)!;
+  // de-dupe concurrent fetches of the same bucket
+  const existing = BUCKET_INFLIGHT.get(bucket);
+  if (existing) return existing;
+
+  const promise = fetch(
+    `/api/job-description-bucket?bucket=${encodeURIComponent(bucket)}&t=${Date.now()}`,
+    { cache: "no-store" },
+  ).then(async (response) => {
+    if (!response.ok) return {};
+    const data = await response.json();
+    const result = data && typeof data === "object" ? data as Record<string, string> : {};
+    // Only cache non-empty results so a transient empty never sticks.
+    if (Object.keys(result).length > 0) BUCKET_CACHE.set(bucket, { at: Date.now(), data: result });
+    return result;
+  }).catch(() => ({})).finally(() => {
+    BUCKET_INFLIGHT.delete(bucket);
+  });
+
+  BUCKET_INFLIGHT.set(bucket, promise);
+  return promise;
 }
 
 export async function loadJobDescriptions(jobs: Job[]): Promise<Record<string, string>> {
