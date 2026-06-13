@@ -11,6 +11,29 @@ function formatSyncTime(ts: number): string {
   return formatProcessLogTime(new Date(ts));
 }
 
+// Collapse consecutive identical log messages into a single row with a ×N count
+// and the time span, so a repeating message (e.g. retries/recovery) shows as one
+// clean line instead of flooding the log. Entries are newest-first.
+interface CollapsedLog {
+  entry: TailorProcessLogEntry;
+  count: number;
+  firstAt: string; // oldest time in the run
+  lastAt: string;  // newest time in the run
+}
+function collapseLogs(logs: TailorProcessLogEntry[]): CollapsedLog[] {
+  const out: CollapsedLog[] = [];
+  for (const entry of logs) {
+    const prev = out[out.length - 1];
+    if (prev && prev.entry.message === entry.message && prev.entry.durationMs == null && entry.durationMs == null) {
+      prev.count += 1;
+      prev.firstAt = entry.at; // logs are newest-first, so each next is older
+    } else {
+      out.push({ entry, count: 1, firstAt: entry.at, lastAt: entry.at });
+    }
+  }
+  return out;
+}
+
 // Honest, glanceable classification for a finished job line. "Failed" is
 // reserved for things that are genuinely broken and need YOU; retryable/expected
 // states (no JD yet, skipped, offline) get their own tone + a "what's happening"
@@ -164,6 +187,8 @@ export default function TailorQueueBar({
       .slice(0, 5),
     [processLogs],
   );
+
+  const collapsedLogs = useMemo(() => collapseLogs(processLogs), [processLogs]);
 
   const finishedCount = doneInQueue + failedInQueue;
   const showProgress = totalInQueue > 0 && (processing || finishedCount > 0 || pendingCount > 0);
@@ -369,21 +394,36 @@ export default function TailorQueueBar({
       {!logsPanelCleared && processLogs.length > 0 ? (
         <div className={`tailor-queue-logs${logsOpen ? " is-open" : ""}`}>
           <button type="button" className="tailor-queue-logs-toggle" onClick={() => setLogsOpen((v) => !v)}>
-            {logsOpen ? "▾" : "▸"} Queue log · {processLogs.length} lines
+            {logsOpen ? "▾" : "▸"} Queue log · {collapsedLogs.length} lines
+            {collapsedLogs.length !== processLogs.length ? (
+              <span className="tailor-queue-log-collapsed-note"> ({processLogs.length} total)</span>
+            ) : null}
           </button>
           {logsOpen ? (
             <div className="tailor-queue-logs-body">
-              {processLogs.map((entry) => (
-                <div key={entry.id} className="tailor-queue-log-line">
-                  <span className="tailor-queue-log-at">{displayProcessLogAt(entry.at)}</span>
-                  <span className="tailor-queue-log-msg">{entry.message}</span>
-                  {entry.durationMs != null ? (
-                    <span className="tailor-queue-log-duration">
-                      {formatTailorDuration(entry.durationMs)}
+              {collapsedLogs.map((row) => {
+                const spanMs = row.count > 1
+                  ? Math.max(0, Date.parse(row.lastAt) - Date.parse(row.firstAt))
+                  : 0;
+                return (
+                  <div key={row.entry.id} className="tailor-queue-log-line">
+                    <span className="tailor-queue-log-at">{displayProcessLogAt(row.entry.at)}</span>
+                    <span className="tailor-queue-log-msg">
+                      {row.entry.message}
+                      {row.count > 1 ? (
+                        <span className="tailor-queue-log-repeat">
+                          {" "}×{row.count}{spanMs > 1000 ? ` over ${formatTailorDuration(spanMs)}` : ""}
+                        </span>
+                      ) : null}
                     </span>
-                  ) : null}
-                </div>
-              ))}
+                    {row.entry.durationMs != null ? (
+                      <span className="tailor-queue-log-duration">
+                        {formatTailorDuration(row.entry.durationMs)}
+                      </span>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           ) : null}
         </div>

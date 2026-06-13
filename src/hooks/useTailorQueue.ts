@@ -208,6 +208,10 @@ export function useTailorQueue(jobs: Job[], options: Options) {
   const queueRef = useRef<TailorQueueItem[]>([]);
   const jobsRef = useRef(jobs);
   const lastSyncRef = useRef(0);
+  // Guard so the "Recovered queue after refresh" line logs at most once per
+  // mount — the load effect can re-run (callback deps change identity) and was
+  // spamming the same line every second.
+  const recoveredLoggedRef = useRef(false);
   const processQueueRef = useRef<(() => Promise<void>) | null>(null);
   const runHourlySyncRef = useRef<(availableJobs: Job[], force?: boolean) => number>(() => 0);
 
@@ -305,7 +309,10 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     const hasPending = loaded.some((item) => item.status === "pending");
     const hadRunning = beforeLoad.some((item) => item.status === "running");
     if (hasPending || hadRunning) {
-      if (hadRunning) pushLog("Recovered queue after refresh — resuming…");
+      if (hadRunning && !recoveredLoggedRef.current) {
+        recoveredLoggedRef.current = true;
+        pushLog("Recovered queue after refresh — resuming…");
+      }
       kickProcess();
     }
   }, [loading, uid, kickProcess, tailorStatus, pushLog]);

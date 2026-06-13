@@ -1664,6 +1664,24 @@ body.is-today-board .nav-tab.active {
   min-width: 0;
 }
 
+/* "×N over Xs" badge when consecutive identical lines are collapsed. */
+.tailor-queue-log-repeat {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: rgba(28, 27, 25, 0.07);
+  color: var(--board-sub);
+  font-size: 9px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tailor-queue-log-collapsed-note {
+  color: var(--board-muted);
+  font-weight: 400;
+}
+
 .tailor-queue-log-duration {
   font-weight: 600;
   color: #4338ca;
