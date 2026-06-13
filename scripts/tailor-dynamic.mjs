@@ -73,6 +73,7 @@ Return ONLY:
   "experience": [ { "role_id": <int index into roles>, "bullets": [ { "id": "R<r>.<b>", "text": "<rewritten>" } ] } ],
   "projects": [ { "project_id": <int index into projects>, "bullets": [ { "id": "P<p>.<b>", "text": "<rewritten>" } ] } ],
   "skills": [ "Languages: ...", "Backend: ...", "Frontend: ...", "Data and AI: ...", "Cloud and Delivery: ..." ],
+  "selection_reason": "<1 sentence: why these roles/bullets fit this JD>",
   "notes": "<1 sentence: biggest gap not claimable>"
 }`;
 
@@ -113,6 +114,7 @@ export const RESPONSE_SCHEMA = {
       },
     },
     skills: { type: "array", maxItems: 5, items: { type: "string" } },
+    selection_reason: { type: "string" },
     notes: { type: "string" },
   },
   required: ["eligible", "header_title", "ats_before", "ats_after", "experience", "projects", "skills"],

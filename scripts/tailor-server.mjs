@@ -199,7 +199,7 @@ async function chatJSON(model, system, user, schema, budgets = [6144, 9216], onL
       model,
       messages: [{ role: "system", content: system }, { role: "user", content: user }],
       stream: true,
-      think: true,
+      think: false,
       format: schema,
       options: { temperature: 0.2, num_predict: budget, num_ctx: 16384 },
     };
@@ -394,6 +394,7 @@ function logAiPlan(onLog, ai, bank) {
   }
   const delta = (ai.ats_after ?? 0) - (ai.ats_before ?? 0);
   onLog("result", `Eligible · proceeding with one-page resume`);
+  if (ai.selection_reason) onLog("result", `Why these bullets: ${ai.selection_reason}`);
   onLog("think", `ATS fit estimate: ${ai.ats_before}% → ${ai.ats_after}% (${delta >= 0 ? "+" : ""}${delta})`);
   if (ai.header_title) onLog("think", `Header title: ${ai.header_title}`);
 
