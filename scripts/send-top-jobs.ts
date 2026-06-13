@@ -92,6 +92,67 @@ interface MarketPulse {
   sea: number;
 }
 
+/** Warm palette aligned with the Atriveo board UI */
+const EMAIL = {
+  bg: "#f5f3ee",
+  card: "#ffffff",
+  ink: "#1a1814",
+  sub: "#4a463d",
+  muted: "#8a8478",
+  line: "#e8e4dc",
+  accent: "#c45c4a",
+  accentDark: "#a84838",
+  accentSoft: "#fdeee9",
+  accentGrad: "linear-gradient(135deg,#d46b58 0%,#c45c4a 55%,#a84838 100%)",
+  dark: "#1a1814",
+  darkGrad: "linear-gradient(135deg,#2a2720 0%,#1a1814 100%)",
+  success: "#15803d",
+  successSoft: "#e7f6ec",
+} as const;
+
+function motivationalCopy(insights: Insights, jobsCount: number): { headline: string; sub: string; kicker: string } {
+  const strong = insights.highMatchCount;
+  const bestPct = insights.bestMatch ? computePct(insights.bestMatch) : 0;
+
+  if (strong >= 3) {
+    return {
+      kicker: "Strong matches on the board",
+      headline: `${strong} roles worth your time this hour`,
+      sub: `We ranked ${fmtNumber(insights.thisHour)} fresh postings down to your top ${jobsCount}. Avg match ${insights.avgMatchThisHour} — pick one and send it today.`,
+    };
+  }
+  if (bestPct >= 80 && insights.bestMatch) {
+    return {
+      kicker: "Top pick locked in",
+      headline: `${bestPct}% match at ${insights.bestMatch.company}`,
+      sub: `${truncate(insights.bestMatch.title, 52)} looks like a real fit. Open it before the listing gets buried.`,
+    };
+  }
+  if (insights.thisHour >= 40) {
+    return {
+      kicker: "Active hour in the pipeline",
+      headline: `${fmtNumber(insights.thisHour)} new roles — your shortlist is ready`,
+      sub: `Don't scroll the whole feed. Start with these ${jobsCount} ranked matches and apply with intention.`,
+    };
+  }
+  return {
+    kicker: "Your hourly briefing",
+    headline: `${jobsCount} curated matches, ranked for you`,
+    sub: `One strong application beats ten rushed ones. Here's where to focus this hour.`,
+  };
+}
+
+function emailSubject(insights: Insights, jobsCount: number, sessionTime: string): string {
+  const strong = insights.highMatchCount;
+  if (strong >= 1) {
+    return `${strong} strong fit${strong === 1 ? "" : "s"} · ${insights.thisHour} new jobs · ${sessionTime}`;
+  }
+  if (insights.bestMatch) {
+    return `Top match ${computePct(insights.bestMatch)}% · ${insights.bestMatch.company} · ${sessionTime}`;
+  }
+  return `Your top ${jobsCount} matches · ${sessionTime}`;
+}
+
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
 function escapeHtml(s: string | undefined | null): string {
@@ -397,12 +458,12 @@ function sectionHeader(title: string): string {
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:14px;">
       <tr>
         <td style="white-space:nowrap; padding-right:12px; vertical-align:middle;">
-          <span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.12em;">
+          <span style="font-size:11px; font-weight:700; color:${EMAIL.muted}; text-transform:uppercase; letter-spacing:.12em;">
             ${escapeHtml(label)}
           </span>
         </td>
         <td style="vertical-align:middle; width:100%;">
-          <div style="height:1px; background:#e2e8f0; line-height:0; font-size:0;">&nbsp;</div>
+          <div style="height:1px; background:${EMAIL.line}; line-height:0; font-size:0;">&nbsp;</div>
         </td>
       </tr>
     </table>`;
@@ -418,38 +479,74 @@ function renderHeader(sessionTime: string): string {
               <table cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="
-                    width:36px; height:36px;
-                    background:#0f172a;
-                    border-radius:10px;
+                    width:40px; height:40px;
+                    background:${EMAIL.darkGrad};
+                    border-radius:12px;
                     text-align:center; vertical-align:middle;">
-                    <table width="36" height="36" cellpadding="0" cellspacing="0">
-                      <tr><td align="center" valign="middle">
-                        <span style="
-                          display:inline-block; width:14px; height:14px;
-                          background:#10b981; border-radius:50;"></span>
-                      </td></tr>
-                    </table>
+                    <span style="color:#fff; font-size:18px; font-weight:800; line-height:40px;">A</span>
                   </td>
                   <td style="padding-left:12px; vertical-align:middle;">
-                    <div style="color:#0f172a; font-size:15px; font-weight:800; letter-spacing:.04em;">ATRIVEO</div>
-                    <div style="color:#94a3b8; font-size:10px; font-weight:600; letter-spacing:.14em; margin-top:2px;">HOURLY INTELLIGENCE</div>
+                    <div style="color:${EMAIL.ink}; font-size:16px; font-weight:800; letter-spacing:.02em;">Atriveo</div>
+                    <div style="color:${EMAIL.muted}; font-size:10px; font-weight:600; letter-spacing:.12em; margin-top:2px;">YOUR JOB HUNT, ON AUTOPILOT</div>
                   </td>
                 </tr>
               </table>
             </td>
             <td align="right" style="vertical-align:middle;">
               <span style="
-                display:inline-block; background:#fff;
-                border:1px solid #e2e8f0; border-radius:999px;
-                padding:6px 12px; font-size:11px; font-weight:600; color:#334155;">
+                display:inline-block; background:${EMAIL.accentSoft};
+                border:1px solid #f0d4cc; border-radius:999px;
+                padding:6px 12px; font-size:11px; font-weight:700; color:${EMAIL.accentDark};">
                 <span style="
                   display:inline-block; width:7px; height:7px;
-                  background:#22c55e; border-radius:50%;
+                  background:${EMAIL.accent}; border-radius:50%;
                   margin-right:6px; vertical-align:middle;"></span>
-                LIVE
-                <span style="color:#cbd5e1; margin:0 6px;">|</span>
-                ${escapeHtml(sessionTime)}
+                LIVE · ${escapeHtml(sessionTime)}
               </span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>`;
+}
+
+function renderMotivationHero(insights: Insights, jobsCount: number): string {
+  const copy = motivationalCopy(insights, jobsCount);
+  const marketPulse = getMarketPulse(insights);
+  const chip = (label: string, value: string) => `
+    <td style="padding:0 4px 0 0; vertical-align:top;">
+      <span style="
+        display:inline-block; background:#fff; border:1px solid ${EMAIL.line};
+        border-radius:999px; padding:6px 12px;
+        font-size:11px; font-weight:700; color:${EMAIL.sub}; white-space:nowrap;">
+        ${escapeHtml(label)} <span style="color:${EMAIL.accent};">${escapeHtml(value)}</span>
+      </span>
+    </td>`;
+
+  return `
+    <tr>
+      <td style="padding:22px 32px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="
+          background:${EMAIL.accentSoft};
+          border:1px solid #f0d4cc;
+          border-radius:16px;">
+          <tr>
+            <td style="padding:24px 24px 20px;">
+              <div style="font-size:10px; font-weight:800; color:${EMAIL.accentDark}; text-transform:uppercase; letter-spacing:.14em;">
+                ${escapeHtml(copy.kicker)}
+              </div>
+              <div style="color:${EMAIL.ink}; font-size:26px; font-weight:800; letter-spacing:-0.03em; line-height:1.2; margin-top:10px;">
+                ${escapeHtml(copy.headline)}
+              </div>
+              <div style="color:${EMAIL.sub}; font-size:14px; line-height:1.55; margin-top:10px; max-width:520px;">
+                ${escapeHtml(copy.sub)}
+              </div>
+              <table cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr>
+                ${chip("Strong fits", String(insights.highMatchCount))}
+                ${chip("This hour", fmtNumber(insights.thisHour))}
+                ${chip("NYC", String(marketPulse.ny))}
+                ${chip("SEA", String(marketPulse.sea))}
+              </tr></table>
             </td>
           </tr>
         </table>
@@ -460,12 +557,12 @@ function renderHeader(sessionTime: string): string {
 function renderTitleBlock(jobsCount: number, avgMatch: number): string {
   return `
     <tr>
-      <td style="padding:24px 32px 0;">
-        <div style="color:#0f172a; font-size:28px; font-weight:800; letter-spacing:-0.03em; line-height:1.15;">
-          Top ${jobsCount} jobs this hour
+      <td style="padding:22px 32px 0;">
+        <div style="color:${EMAIL.ink}; font-size:18px; font-weight:800; letter-spacing:-0.02em;">
+          Your top ${jobsCount} ranked roles
         </div>
-        <div style="color:#64748b; font-size:13px; margin-top:8px;">
-          Ranked by CareerOps score · avg ${avgMatch} · same scoring as your dashboard
+        <div style="color:${EMAIL.muted}; font-size:13px; margin-top:6px;">
+          CareerOps avg ${avgMatch} · same scoring as your dashboard
         </div>
       </td>
     </tr>`;
@@ -478,46 +575,50 @@ function renderBestMatch(best: Job | null): string {
     <tr>
       <td style="padding:20px 32px 0;">
         <table width="100%" cellpadding="0" cellspacing="0" style="
-          background-color:#059669;
-          background-image:linear-gradient(135deg,#10b981 0%,#059669 55%,#047857 100%);
-          border-radius:14px;">
+          background-color:${EMAIL.accentDark};
+          background-image:${EMAIL.accentGrad};
+          border-radius:16px;">
           <tr>
-            <td style="padding:22px 24px 24px; vertical-align:top;">
+            <td style="padding:24px 24px 26px; vertical-align:top;">
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="vertical-align:top;">
                     <span style="
                       display:inline-block;
-                      background:rgba(255,255,255,0.18);
+                      background:rgba(255,255,255,0.22);
                       color:#fff;
                       border-radius:999px;
                       padding:5px 12px;
-                      font-size:10px; font-weight:700;
+                      font-size:10px; font-weight:800;
                       letter-spacing:.1em; text-transform:uppercase;">
-                      ★ BEST MATCH THIS HOUR
+                      ★ Start here — best match
                     </span>
                   </td>
                   <td align="right" style="vertical-align:top; white-space:nowrap;">
-                    <div style="font-size:42px; font-weight:800; color:#fff; letter-spacing:-0.04em; line-height:1;">
+                    <div style="font-size:44px; font-weight:800; color:#fff; letter-spacing:-0.04em; line-height:1;">
                       ${pct}%
                     </div>
-                    <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.75); letter-spacing:.12em; margin-top:2px;">MATCH</div>
+                    <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.8); letter-spacing:.12em; margin-top:2px;">CAREEROPS MATCH</div>
                   </td>
                 </tr>
               </table>
+              <div style="color:rgba(255,255,255,0.92); font-size:13px; font-weight:600; margin-top:14px; line-height:1.45;">
+                This is the role we'd apply to first if we were in your shoes.
+              </div>
               <a href="${safeUrl(best.job_url)}" style="
-                display:block; color:#fff; font-size:20px; font-weight:700;
-                letter-spacing:-0.02em; text-decoration:none; margin-top:16px; line-height:1.35;">
+                display:block; color:#fff; font-size:20px; font-weight:800;
+                letter-spacing:-0.02em; text-decoration:none; margin-top:14px; line-height:1.35;">
                 ${escapeHtml(best.title)}
               </a>
-              <div style="color:rgba(255,255,255,0.88); font-size:13px; font-weight:500; margin-top:8px;">
+              <div style="color:rgba(255,255,255,0.9); font-size:13px; font-weight:500; margin-top:8px;">
                 ${escapeHtml(best.company)}${best.location ? " · " + escapeHtml(best.location) : ""}${best.level ? " · " + escapeHtml(best.level) : ""}
               </div>
               <a href="${safeUrl(best.job_url)}" style="
-                display:inline-block; background:#fff; color:#047857;
-                text-decoration:none; border-radius:10px;
-                padding:10px 18px; font-size:13px; font-weight:700; margin-top:18px;">
-                Apply now →
+                display:inline-block; background:#fff; color:${EMAIL.accentDark};
+                text-decoration:none; border-radius:12px;
+                padding:12px 22px; font-size:14px; font-weight:800; margin-top:18px;
+                box-shadow:0 4px 14px rgba(0,0,0,0.12);">
+                Apply to this one →
               </a>
             </td>
           </tr>
@@ -537,11 +638,11 @@ function renderStatsCards(insights: Insights): string {
   const card = (label: string, value: string, sub: string) => `
     <td width="25%" style="padding:0 5px; vertical-align:top;">
       <table width="100%" cellpadding="0" cellspacing="0" style="
-        background:#fff; border:1px solid #e2e8f0; border-radius:12px;">
+        background:#fff; border:1px solid ${EMAIL.line}; border-radius:14px;">
         <tr>
           <td style="padding:16px 14px;">
-            <div style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.12em;">${escapeHtml(label)}</div>
-            <div style="font-size:30px; font-weight:800; color:#0f172a; letter-spacing:-0.03em; line-height:1.05; margin-top:10px;">${value}</div>
+            <div style="font-size:10px; font-weight:700; color:${EMAIL.muted}; text-transform:uppercase; letter-spacing:.12em;">${escapeHtml(label)}</div>
+            <div style="font-size:30px; font-weight:800; color:${EMAIL.ink}; letter-spacing:-0.03em; line-height:1.05; margin-top:10px;">${value}</div>
             <div style="margin-top:8px; line-height:1.4;">${sub}</div>
           </td>
         </tr>
@@ -564,7 +665,7 @@ function renderStatsCards(insights: Insights): string {
             ${card(
               "Avg match",
               `${insights.avgMatchThisHour}`,
-              `<span style="color:#10b981; font-weight:700; font-size:12px;">${insights.highMatchCount} strong fit${insights.highMatchCount === 1 ? "" : "s"}</span>`,
+              `<span style="color:${EMAIL.success}; font-weight:700; font-size:12px;">${insights.highMatchCount} strong fit${insights.highMatchCount === 1 ? "" : "s"} ready</span>`,
             )}
           </tr>
         </table>
@@ -579,22 +680,22 @@ function renderTargetMarkets(insights: Insights): string {
     return `
       <td width="33.33%" style="padding:0 5px; vertical-align:top;">
         <table width="100%" cellpadding="0" cellspacing="0" style="
-          background:#fff; border:1px solid #e2e8f0; border-radius:12px;">
+          background:#fff; border:1px solid ${EMAIL.line}; border-radius:14px;">
           <tr>
             <td style="padding:14px 14px 16px;">
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="font-size:14px; font-weight:800; color:#0f172a;">${escapeHtml(code)}</td>
+                  <td style="font-size:14px; font-weight:800; color:${EMAIL.ink};">${escapeHtml(code)}</td>
                   <td align="right">
                     <span style="
                       display:inline-block; min-width:22px; text-align:center;
-                      background:#ecfdf5; color:#059669;
+                      background:${EMAIL.accentSoft}; color:${EMAIL.accentDark};
                       border-radius:999px; padding:2px 8px;
-                      font-size:11px; font-weight:700;">${m.count}</span>
+                      font-size:11px; font-weight:800;">${m.count}</span>
                   </td>
                 </tr>
               </table>
-              <div style="font-size:11px; color:#64748b; margin-top:10px; line-height:1.45;">
+              <div style="font-size:11px; color:${EMAIL.sub}; margin-top:10px; line-height:1.45;">
                 ${escapeHtml(preview)}
               </div>
             </td>
@@ -606,7 +707,7 @@ function renderTargetMarkets(insights: Insights): string {
   return `
     <tr>
       <td style="padding:24px 27px 0;">
-        ${sectionHeader("Target markets")}
+        ${sectionHeader("Where to hunt")}
         <table width="100%" cellpadding="0" cellspacing="0"><tr>${cards}</tr></table>
       </td>
     </tr>`;
@@ -624,7 +725,7 @@ function renderRankedRoleCard(j: Job): string {
 
   return `
     <table width="100%" cellpadding="0" cellspacing="0" style="
-      background:#fff; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:10px;">
+      background:#fff; border:1px solid ${EMAIL.line}; border-radius:14px; margin-bottom:10px;">
       <tr>
         <td style="padding:14px 16px;">
           <table width="100%" cellpadding="0" cellspacing="0">
@@ -632,35 +733,35 @@ function renderRankedRoleCard(j: Job): string {
               <td width="44" style="vertical-align:middle; padding-right:12px;">
                 <span style="
                   display:inline-block; width:38px; height:38px; line-height:38px;
-                  border-radius:50%; background:#f1f5f9; color:#64748b;
-                  font-size:12px; font-weight:700; text-align:center;">
+                  border-radius:50%; background:${EMAIL.accentSoft}; color:${EMAIL.accentDark};
+                  font-size:12px; font-weight:800; text-align:center;">
                   ${escapeHtml(initials)}
                 </span>
               </td>
               <td style="vertical-align:middle;">
                 <a href="${safeUrl(j.job_url)}" style="
-                  display:block; font-size:14px; font-weight:700; color:#0f172a;
+                  display:block; font-size:14px; font-weight:700; color:${EMAIL.ink};
                   text-decoration:none; line-height:1.35;">
                   ${escapeHtml(j.title)}
                 </a>
-                <div style="font-size:12px; color:#64748b; margin-top:3px;">${meta}</div>
+                <div style="font-size:12px; color:${EMAIL.muted}; margin-top:3px;">${meta}</div>
               </td>
               <td width="72" align="center" style="vertical-align:middle; padding:0 12px;">
                 <div style="font-size:15px; font-weight:800; color:${color};">${pct}%</div>
-                <table width="56" cellpadding="0" cellspacing="0" align="center" style="margin-top:6px; background:#e2e8f0; border-radius:999px;">
+                <table width="56" cellpadding="0" cellspacing="0" align="center" style="margin-top:6px; background:${EMAIL.line}; border-radius:999px;">
                   <tr>
                     <td width="${Math.max(1, Math.round(56 * pct / 100))}" style="background:${color}; height:4px; line-height:0; font-size:0; border-radius:999px 0 0 999px;">&nbsp;</td>
                     <td style="height:4px; line-height:0; font-size:0;">&nbsp;</td>
                   </tr>
                 </table>
               </td>
-              <td width="84" align="right" style="vertical-align:middle;">
+              <td width="96" align="right" style="vertical-align:middle;">
                 <a href="${safeUrl(j.job_url)}" style="
-                  display:inline-block; background:#fff; color:#0f172a;
-                  border:1px solid #e2e8f0; text-decoration:none;
-                  border-radius:10px; padding:8px 14px;
-                  font-size:11px; font-weight:800; letter-spacing:.06em;">
-                  APPLY
+                  display:inline-block; background:${EMAIL.accent}; color:#fff;
+                  border:1px solid ${EMAIL.accentDark}; text-decoration:none;
+                  border-radius:10px; padding:9px 16px;
+                  font-size:11px; font-weight:800; letter-spacing:.04em;">
+                  Apply →
                 </a>
               </td>
             </tr>
@@ -676,11 +777,12 @@ function renderTopRankedRoles(jobs: Job[]): string {
   const cards = visible.map((j) => renderRankedRoleCard(j)).join("");
   const seeMore = remaining > 0
     ? `
-      <div style="text-align:center; margin-top:6px; margin-bottom:4px;">
+      <div style="text-align:center; margin-top:8px; margin-bottom:4px;">
         <a href="${DASHBOARD_URL}" style="
-          color:#64748b; font-size:11px; font-weight:700;
-          letter-spacing:.08em; text-transform:uppercase; text-decoration:none;">
-          See remaining ${remaining} →
+          display:inline-block; background:${EMAIL.dark}; color:#fff;
+          text-decoration:none; border-radius:12px;
+          padding:12px 22px; font-size:13px; font-weight:800;">
+          See all ${jobs.length} matches on your dashboard →
         </a>
       </div>`
     : "";
@@ -688,7 +790,7 @@ function renderTopRankedRoles(jobs: Job[]): string {
   return `
     <tr>
       <td style="padding:24px 27px 0;">
-        ${sectionHeader("Top ranked roles")}
+        ${sectionHeader("Your shortlist")}
         ${cards}
         ${seeMore}
       </td>
@@ -740,8 +842,8 @@ function renderScrapeVolume(insights: Insights, opts: { first?: boolean } = {}):
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="vertical-align:top;">
-                    <div style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.12em;">
-                      Scrape volume · last 12h
+                    <div style="font-size:10px; font-weight:700; color:#8a8478; text-transform:uppercase; letter-spacing:.12em;">
+                      Pipeline pulse · last 12h
                     </div>
                     <div style="font-size:34px; font-weight:800; color:#fff; letter-spacing:-0.03em; margin-top:8px;">
                       ${fmtNumber(total12h)}
@@ -779,22 +881,29 @@ function renderScrapeVolume(insights: Insights, opts: { first?: boolean } = {}):
 function renderFooter(): string {
   return `
     <tr>
-      <td style="padding:24px 32px 32px; text-align:center;">
+      <td style="padding:28px 32px 36px; text-align:center;">
+        <div style="color:${EMAIL.ink}; font-size:16px; font-weight:800; letter-spacing:-0.02em; margin-bottom:8px;">
+          Momentum beats perfection.
+        </div>
+        <div style="color:${EMAIL.sub}; font-size:13px; line-height:1.55; max-width:420px; margin:0 auto 20px;">
+          Pick one role from this list, tailor your resume, and hit apply. That's how offers happen.
+        </div>
         <a href="${DASHBOARD_URL}" style="
-          display:inline-block; background:#0f172a; color:#fff;
-          text-decoration:none; border-radius:12px;
-          padding:14px 28px; font-size:14px; font-weight:700;">
-          Open dashboard →
+          display:inline-block; background:${EMAIL.accent}; color:#fff;
+          text-decoration:none; border-radius:14px;
+          padding:15px 32px; font-size:15px; font-weight:800;
+          box-shadow:0 6px 20px rgba(196,92,74,0.35);">
+          Open your dashboard →
         </a>
-        <div style="color:#94a3b8; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-top:22px;">
-          ATRIVEO · SENT AUTOMATICALLY EVERY HOUR
+        <div style="color:${EMAIL.muted}; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-top:24px;">
+          Atriveo · Hourly job intelligence
         </div>
         <div style="margin-top:10px; font-size:11px; line-height:1.8;">
-          <a href="${DASHBOARD_URL}" style="color:#64748b; text-decoration:underline;">atriveo-app.pages.dev</a>
+          <a href="${DASHBOARD_URL}" style="color:${EMAIL.muted}; text-decoration:underline;">Live feed</a>
           &nbsp;·&nbsp;
-          <a href="${DASHBOARD_URL}/settings" style="color:#64748b; text-decoration:underline;">manage alerts</a>
+          <a href="${DASHBOARD_URL}/clickedjobs" style="color:${EMAIL.muted}; text-decoration:underline;">Clicked jobs</a>
           &nbsp;·&nbsp;
-          <a href="${DASHBOARD_URL}/settings" style="color:#64748b; text-decoration:underline;">unsubscribe</a>
+          <a href="${DASHBOARD_URL}/settings" style="color:${EMAIL.muted}; text-decoration:underline;">Manage alerts</a>
         </div>
       </td>
     </tr>`;
@@ -804,33 +913,34 @@ function renderFooter(): string {
 
 function renderEmail(insights: Insights, jobs: Job[], sessionTime: string): string {
   const marketPulse = getMarketPulse(insights);
-  const total12h = insights.last12h.reduce((s, b) => s + b.jobs, 0);
-  const preheader = `${fmtNumber(total12h)} scraped in 12h · ${fmtNumber(insights.thisHour)} this hour · NY ${marketPulse.ny} · NC ${marketPulse.nc} · SEA ${marketPulse.sea}`;
+  const copy = motivationalCopy(insights, jobs.length);
+  const preheader = `${copy.headline} · ${fmtNumber(insights.thisHour)} this hour · ${insights.highMatchCount} strong fits · NYC ${marketPulse.ny} · SEA ${marketPulse.sea}`;
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Atriveo · Top ${jobs.length} jobs</title>
+  <title>Atriveo · Your top ${jobs.length} matches</title>
 </head>
-<body style="margin:0;padding:0;background:#eef1f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+<body style="margin:0;padding:0;background:${EMAIL.bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
   <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; visibility:hidden; opacity:0; color:transparent; height:0; width:0;">
     ${escapeHtml(preheader)}
   </div>
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f6; padding:24px 12px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:${EMAIL.bg}; padding:28px 12px;">
     <tr><td align="center">
       <table width="640" cellpadding="0" cellspacing="0" style="
         max-width:640px; width:100%;
-        background:#fff; border:1px solid #e2e8f0;
-        border-radius:16px; box-shadow:0 8px 24px rgba(15,23,42,0.06);">
+        background:${EMAIL.card}; border:1px solid ${EMAIL.line};
+        border-radius:20px; box-shadow:0 12px 40px rgba(26,24,20,0.08);">
         ${renderHeader(sessionTime)}
-        ${renderScrapeVolume(insights, { first: true })}
-        ${renderTitleBlock(jobs.length, insights.avgMatchThisHour)}
+        ${renderMotivationHero(insights, jobs.length)}
         ${renderBestMatch(insights.bestMatch)}
         ${renderStatsCards(insights)}
-        ${renderTargetMarkets(insights)}
+        ${renderTitleBlock(jobs.length, insights.avgMatchThisHour)}
         ${renderTopRankedRoles(jobs)}
+        ${renderTargetMarkets(insights)}
+        ${renderScrapeVolume(insights)}
         ${renderFooter()}
       </table>
     </td></tr>
@@ -847,8 +957,11 @@ function renderText(insights: Insights, jobs: Job[], sessionTime: string): strin
   const marketPulse = getMarketPulse(insights);
   const lines: string[] = [];
 
+  const copy = motivationalCopy(insights, jobs.length);
   const total12h = insights.last12h.reduce((s, b) => s + b.jobs, 0);
-  lines.push(`ATRIVEO · Top ${jobs.length} jobs · ${sessionTime}`);
+  lines.push(`ATRIVEO · ${copy.headline}`);
+  lines.push(copy.sub);
+  lines.push(`Live · ${sessionTime}`);
   lines.push("");
   lines.push(`SCRAPE VOLUME · LAST 12H: ${fmtNumber(total12h)}`);
   if (insights.topCompanies.length) {
@@ -901,6 +1014,7 @@ function renderText(insights: Insights, jobs: Job[], sessionTime: string): strin
     lines.push(`      ${j.job_url}`);
   });
   lines.push("");
+  lines.push("Momentum beats perfection — pick one role and apply today.");
   lines.push(`Open dashboard: ${DASHBOARD_URL}`);
 
   return lines.join("\n");
@@ -1084,8 +1198,7 @@ async function main() {
     .slice(0, 20);
 
   // 4. Render and send (or preview locally with PREVIEW=1)
-  const marketPulse = getMarketPulse(insights);
-  const subject = `Atriveo · ${insights.thisHour} jobs · NY ${marketPulse.ny} · NC ${marketPulse.nc} · SEA ${marketPulse.sea}`;
+  const subject = emailSubject(insights, jobs.length, sessionTime);
   const html    = renderEmail(insights, jobs, sessionTime);
   const text    = renderText(insights, jobs, sessionTime);
 
