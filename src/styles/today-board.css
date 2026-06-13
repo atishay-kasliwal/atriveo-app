@@ -633,6 +633,18 @@ body.is-today-board .nav-tab.active {
   border-right: none;
 }
 
+.job-table--board .job-table-row--board {
+  cursor: default;
+}
+
+.job-table--board .job-table-row--clickable {
+  cursor: pointer;
+}
+
+.job-table--board .job-table-row--clickable:hover td {
+  background: #faf6f1;
+}
+
 .job-table--board .job-table-row--board:hover td {
   background: #faf9f6;
 }

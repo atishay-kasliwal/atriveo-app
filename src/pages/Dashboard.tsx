@@ -364,6 +364,11 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     }
   }, []);
 
+  const handleDismissJob = useCallback((job: Job) => {
+    handleSaveJob(job, "click");
+    tailorQueue.removeFromQueue(jobDismissKey(job));
+  }, [handleSaveJob, tailorQueue]);
+
   useEffect(() => {
     const run = jobSelection.tailorRun;
     if (!run) return;
@@ -597,6 +602,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           getTailorRecord={tailorStatus.getRecordForJob}
           onQueueUrgent={(job) => tailorQueue.enqueueJob(job, "manual", true)}
           onOpenTailorPath={handleOpenTailorPath}
+          onDismissJob={isTodayBoard ? handleDismissJob : undefined}
           variant={isTodayBoard ? "board" : "default"}
           sortBy={sortBy}
           sortDir={sortDir}

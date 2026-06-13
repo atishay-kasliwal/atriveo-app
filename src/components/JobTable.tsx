@@ -210,6 +210,7 @@ interface RowProps {
   getTailorRecord?: (job: Job) => TailorRecord | null;
   onQueueUrgent?: (job: Job) => void;
   onOpenTailorPath?: (path: string) => void;
+  onDismissJob?: (job: Job) => void;
   nested?: boolean;
   showCompany?: boolean;
   board?: boolean;
@@ -227,6 +228,7 @@ function JobTableRow({
   getTailorRecord,
   onQueueUrgent,
   onOpenTailorPath,
+  onDismissJob,
   nested = false,
   showCompany = true,
   board = false,
@@ -265,17 +267,27 @@ function JobTableRow({
     setTimeout(() => setSavedFeedback(null), 1400);
   }
 
+  function handleRowClick(e: React.MouseEvent<HTMLTableRowElement>) {
+    if (!board || !onDismissJob) return;
+    if ((e.target as HTMLElement).closest("button, a, input, textarea, select, label")) return;
+    onDismissJob(job);
+  }
+
   return (
     <tr
-      className={`job-table-row job-table-row--${careerOps.key}${isApplied ? " is-applied" : ""}${isSelected ? " is-selected" : ""}${nested ? " is-nested" : ""}${board ? " job-table-row--board" : ""}`}
+      className={`job-table-row job-table-row--${careerOps.key}${isApplied ? " is-applied" : ""}${isSelected ? " is-selected" : ""}${nested ? " is-nested" : ""}${board ? " job-table-row--board job-table-row--clickable" : ""}`}
       title={reasons.join(" · ") || careerOps.tooltip}
+      onClick={board ? handleRowClick : undefined}
     >
       <td className="job-table-check">
         {onSelectionToggle && (
           <button
             type="button"
             className={`job-table-select${isSelected ? " is-selected" : ""}`}
-            onClick={() => onSelectionToggle(job)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectionToggle(job);
+            }}
             aria-pressed={isSelected}
             title={isSelected ? "Deselect" : "Select for bulk actions"}
           >
@@ -611,6 +623,7 @@ interface Props {
   getTailorRecord?: (job: Job) => TailorRecord | null;
   onQueueUrgent?: (job: Job) => void;
   onOpenTailorPath?: (path: string) => void;
+  onDismissJob?: (job: Job) => void;
   variant?: "default" | "board";
   sortBy?: SortBy;
   sortDir?: SortDir;
@@ -632,6 +645,7 @@ export default function JobTable({
   getTailorRecord,
   onQueueUrgent,
   onOpenTailorPath,
+  onDismissJob,
   variant = "default",
   sortBy,
   sortDir,
@@ -726,6 +740,7 @@ export default function JobTable({
                         getTailorRecord={getTailorRecord}
                         onQueueUrgent={onQueueUrgent}
                         onOpenTailorPath={onOpenTailorPath}
+                        onDismissJob={onDismissJob}
                         nested={showBand}
                         board
                       />
