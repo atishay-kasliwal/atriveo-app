@@ -219,7 +219,7 @@ function JobTableRow({
           </button>
         )}
       </td>
-      <td className="job-table-num">{nested ? "" : index}</td>
+      <td className="job-table-num">{board || !nested ? index : ""}</td>
       <td className="job-table-score">
         <ScoreCell job={job} board={board} />
       </td>

@@ -244,11 +244,11 @@ body.is-today-board .nav-tab.active {
 
 .board-metric {
   position: relative;
-  padding: 20px 24px 18px;
+  padding: 14px 24px 12px;
   border-right: 1px solid var(--board-line);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
 }
 
 .board-metric:last-child {
@@ -265,7 +265,7 @@ body.is-today-board .nav-tab.active {
 }
 
 .board-metric-value {
-  font-size: 36px;
+  font-size: 30px;
   font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -310,7 +310,7 @@ body.is-today-board .nav-tab.active {
 .today-board-table-shell .feed-table-toolbar {
   flex-shrink: 0;
   border-bottom: 1px solid var(--board-line);
-  padding: 8px 16px;
+  padding: 6px 16px;
   background: var(--board-surface);
 }
 
@@ -322,13 +322,13 @@ body.is-today-board .nav-tab.active {
   border-radius: 0;
   background: var(--board-canvas);
   box-shadow: none;
-  padding: 7px 16px;
+  padding: 5px 16px;
 }
 
 .today-board-table-shell .bulk-copy-bar--board .bulk-copy-copy strong {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
-  color: var(--board-sub);
+  color: var(--board-muted);
 }
 
 .today-board-table-shell .filter-bar {
@@ -541,19 +541,19 @@ body.is-today-board .nav-tab.active {
   font-size: 13px;
 }
 
-.job-table--board .col-check { width: 40px; }
-.job-table--board .col-num { width: 36px; }
-.job-table--board .col-score { width: 72px; }
+.job-table--board .col-check { width: 34px; }
+.job-table--board .col-num { width: 30px; }
+.job-table--board .col-score { width: 78px; }
 .job-table--board .col-role { width: auto; }
-.job-table--board .col-rating { width: 150px; }
-.job-table--board .col-loc { width: 120px; }
-.job-table--board .col-comp { width: 64px; }
-.job-table--board .col-level { width: 72px; }
-.job-table--board .col-posted { width: 72px; }
-.job-table--board .col-actions { width: 188px; }
+.job-table--board .col-rating { width: 146px; }
+.job-table--board .col-loc { width: 132px; }
+.job-table--board .col-comp { width: 60px; }
+.job-table--board .col-level { width: 92px; }
+.job-table--board .col-posted { width: 78px; }
+.job-table--board .col-actions { width: 196px; }
 
 .job-table--board thead th {
-  padding: 10px 14px;
+  padding: 7px 14px;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -571,7 +571,7 @@ body.is-today-board .nav-tab.active {
 
 .job-table--board tbody td {
   padding: 0 14px;
-  height: 52px;
+  height: 42px;
   border-bottom: 1px solid var(--board-line-soft);
   border-right: 1px solid var(--board-line-soft);
   vertical-align: middle;
@@ -750,17 +750,18 @@ body.is-today-board .nav-tab.active {
 /* Rating */
 .job-table--board .job-table-match {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .job-table--board .job-table-stars {
   display: inline-block;
   font-size: 11px;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   line-height: 1;
   color: var(--board-star);
+  flex-shrink: 0;
 }
 
 .job-table-rating-pill {
@@ -826,8 +827,8 @@ body.is-today-board .nav-tab.active {
 .job-table-board-apply {
   display: inline-flex;
   align-items: center;
-  padding: 4px 9px;
-  border-radius: 6px;
+  padding: 3px 8px;
+  border-radius: 5px;
   background: #fff;
   border: 1px solid var(--board-line);
   color: var(--board-sub);
@@ -837,14 +838,7 @@ body.is-today-board .nav-tab.active {
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.12s, background 0.1s, border-color 0.1s, color 0.1s;
-}
-
-.job-table-row--board:hover .job-table-board-apply,
-.job-table-row--board.is-selected .job-table-board-apply,
-.job-table-board-apply:focus-visible {
-  opacity: 1;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
 }
 
 .job-table-board-apply:hover {
@@ -866,23 +860,36 @@ body.is-today-board .nav-tab.active {
 }
 
 .bulk-copy-bar--board .bulk-copy-btn {
-  height: 28px;
+  height: 24px;
+  padding: 0 9px;
   font-size: 11px;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: 5px;
   border-color: var(--board-line);
+  background: #fff;
+  color: var(--board-sub);
+}
+
+.bulk-copy-bar--board .bulk-copy-btn:hover:not(:disabled) {
+  border-color: var(--board-accent-border);
+  color: var(--board-accent-strong);
 }
 
 .bulk-copy-bar--board .bulk-copy-btn.primary {
   background: var(--board-accent);
   border-color: var(--board-accent);
   color: #fff;
-  border-radius: 6px;
+  border-radius: 5px;
 }
 
-.bulk-copy-bar--board .bulk-copy-btn.primary:hover {
+.bulk-copy-bar--board .bulk-copy-btn.primary:hover:not(:disabled) {
   background: var(--board-accent-strong);
   border-color: var(--board-accent-strong);
+  color: #fff;
+}
+
+.bulk-copy-bar--board .bulk-copy-btn:disabled {
+  opacity: 0.5;
 }
 
 /* ── Footer status bar ─────────────────────────────────────────────────── */
