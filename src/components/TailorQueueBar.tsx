@@ -1,11 +1,37 @@
-import { useMemo, useState } from "react";
-import type { TailorQueueItem } from "../types/tailorQueue";
+import { useEffect, useMemo, useState } from "react";
+import type { TailorProcessLogEntry, TailorQueueItem } from "../types/tailorQueue";
 import { HOURLY_QUEUE_SIZE } from "../types/tailorQueue";
+import { formatTailorDuration } from "../utils/tailorProgress";
 
 function formatSyncTime(ts: number): string {
   if (!ts) return "Never";
   const date = new Date(ts);
   return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
+function useElapsedMs(startedAt?: string, active = false): number | null {
+  const [elapsedMs, setElapsedMs] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!active || !startedAt) {
+      setElapsedMs(null);
+      return;
+    }
+    const start = Date.parse(startedAt);
+    const tick = () => setElapsedMs(Math.max(0, Date.now() - start));
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [active, startedAt]);
+
+  return elapsedMs;
+}
+
+interface QueueTiming {
+  avgDurationMs: number | null;
+  totalDurationMs: number;
+  etaMs: number | null;
+  finishedCount: number;
 }
 
 interface Props {
@@ -15,7 +41,8 @@ interface Props {
   failedInQueue: number;
   totalInQueue: number;
   overallProgressPct: number;
-  processLogs: string[];
+  processLogs: TailorProcessLogEntry[];
+  queueTiming: QueueTiming;
   processing: boolean;
   runningItem: TailorQueueItem | null;
   lastHourlySyncAt: number;
@@ -36,6 +63,7 @@ export default function TailorQueueBar({
   totalInQueue,
   overallProgressPct,
   processLogs,
+  queueTiming,
   processing,
   runningItem,
   lastHourlySyncAt,
@@ -56,8 +84,16 @@ export default function TailorQueueBar({
     [queue],
   );
 
+  const recentFinished = useMemo(
+    () => processLogs
+      .filter((entry) => entry.durationMs != null && /^(Finished|Failed|Skipped)/.test(entry.message))
+      .slice(0, 5),
+    [processLogs],
+  );
+
   const finishedCount = doneInQueue + failedInQueue;
   const showProgress = totalInQueue > 0 && (processing || finishedCount > 0 || pendingCount > 0);
+  const runningElapsedMs = useElapsedMs(runningItem?.startedAt, processing && Boolean(runningItem));
 
   function handleDrop(targetKey: string) {
     if (!dragKey || dragKey === targetKey) {
@@ -78,6 +114,18 @@ export default function TailorQueueBar({
     setDragKey(null);
   }
 
+  const timingMeta = [
+    queueTiming.totalDurationMs > 0
+      ? `${formatTailorDuration(queueTiming.totalDurationMs)} spent`
+      : null,
+    queueTiming.avgDurationMs != null
+      ? `avg ${formatTailorDuration(queueTiming.avgDurationMs)}`
+      : null,
+    queueTiming.etaMs != null && pendingCount + (runningItem ? 1 : 0) > 0
+      ? `~${formatTailorDuration(queueTiming.etaMs)} left`
+      : null,
+  ].filter(Boolean).join(" · ");
+
   return (
     <div className="tailor-queue-panel" aria-label="Tailor queue">
       <div className="tailor-queue-bar">
@@ -95,6 +143,11 @@ export default function TailorQueueBar({
                 <span className="tailor-queue-stat-sub">
                   {finishedCount + (runningItem ? 1 : 0)}/{totalInQueue}
                 </span>
+              </span>
+            ) : null}
+            {timingMeta ? (
+              <span className="tailor-queue-stat tailor-queue-stat--timing">
+                {timingMeta}
               </span>
             ) : null}
             <span className="tailor-queue-stat tailor-queue-stat--muted">
@@ -121,7 +174,11 @@ export default function TailorQueueBar({
               </div>
               <div className="tailor-queue-progress-meta">
                 <span>{overallProgressPct}% done</span>
-                <span>{finishedCount} finished · {pendingCount} waiting{runningItem ? " · 1 running" : ""}</span>
+                <span>
+                  {finishedCount} finished · {pendingCount} waiting
+                  {runningItem ? " · 1 running" : ""}
+                  {timingMeta ? ` · ${timingMeta}` : ""}
+                </span>
               </div>
             </div>
           ) : null}
@@ -129,8 +186,30 @@ export default function TailorQueueBar({
           {processing && runningItem ? (
             <div className="tailor-queue-running">
               Tailoring <strong>{runningItem.company}</strong> · {runningItem.title}
+              {runningElapsedMs != null ? (
+                <span className="tailor-queue-running-time">
+                  {formatTailorDuration(runningElapsedMs)} elapsed
+                </span>
+              ) : null}
             </div>
           ) : null}
+
+          {recentFinished.length > 0 ? (
+            <ul className="tailor-queue-recent">
+              {recentFinished.map((entry) => (
+                <li
+                  key={entry.id}
+                  className={`tailor-queue-recent-item tailor-queue-recent-item--${entry.message.startsWith("Finished") ? "done" : "failed"}`}
+                >
+                  <span className="tailor-queue-recent-label">{entry.message}</span>
+                  <span className="tailor-queue-recent-time">
+                    {formatTailorDuration(entry.durationMs ?? 0)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
           {syncMessage ? <div className="tailor-queue-message">{syncMessage}</div> : null}
         </div>
         <div className="tailor-queue-bar-actions">
@@ -160,8 +239,16 @@ export default function TailorQueueBar({
           </button>
           {logsOpen ? (
             <div className="tailor-queue-logs-body">
-              {processLogs.map((line) => (
-                <div key={line} className="tailor-queue-log-line">{line}</div>
+              {processLogs.map((entry) => (
+                <div key={entry.id} className="tailor-queue-log-line">
+                  <span className="tailor-queue-log-at">{entry.at}</span>
+                  <span className="tailor-queue-log-msg">{entry.message}</span>
+                  {entry.durationMs != null ? (
+                    <span className="tailor-queue-log-duration">
+                      {formatTailorDuration(entry.durationMs)}
+                    </span>
+                  ) : null}
+                </div>
               ))}
             </div>
           ) : null}

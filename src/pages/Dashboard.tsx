@@ -676,6 +676,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 totalInQueue={tailorQueue.totalInQueue}
                 overallProgressPct={tailorQueue.overallProgressPct}
                 processLogs={tailorQueue.processLogs}
+                queueTiming={tailorQueue.queueTiming}
                 processing={tailorQueue.processing}
                 runningItem={tailorQueue.runningItem}
                 lastHourlySyncAt={tailorQueue.lastHourlySyncAt}

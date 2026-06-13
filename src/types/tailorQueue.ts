@@ -14,6 +14,15 @@ export interface TailorQueueItem {
   source: TailorQueueSource;
   status: TailorQueueItemStatus;
   error?: string;
+  startedAt?: string;
+  durationMs?: number;
+}
+
+export interface TailorProcessLogEntry {
+  id: string;
+  at: string;
+  message: string;
+  durationMs?: number;
 }
 
 export type TailorRecordStatus = "none" | "queued" | "running" | "done" | "failed" | "no-go";

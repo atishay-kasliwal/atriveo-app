@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Job } from "../types";
-import type { TailorQueueItem, TailorQueueItemStatus } from "../types/tailorQueue";
+import type { TailorProcessLogEntry, TailorQueueItem, TailorQueueItemStatus } from "../types/tailorQueue";
 import { HOURLY_QUEUE_SIZE, HOURLY_SYNC_MS } from "../types/tailorQueue";
 import { careerOpsRating } from "../utils/jobPresentation";
 import { jobDismissKey } from "../utils/jobCopy";
@@ -94,12 +94,20 @@ export function useTailorQueue(jobs: Job[], options: Options) {
   const [processing, setProcessing] = useState(false);
   const [lastHourlySyncAt, setLastHourlySyncAt] = useState(0);
   const [syncMessage, setSyncMessage] = useState("");
-  const [processLogs, setProcessLogs] = useState<string[]>([]);
+  const [processLogs, setProcessLogs] = useState<TailorProcessLogEntry[]>([]);
   const processingRef = useRef(false);
+  const logSeqRef = useRef(0);
 
-  const pushLog = useCallback((line: string) => {
-    const stamp = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" });
-    setProcessLogs((prev) => [`${stamp} · ${line}`, ...prev].slice(0, 40));
+  const pushLog = useCallback((message: string, durationMs?: number) => {
+    const at = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" });
+    logSeqRef.current += 1;
+    const entry: TailorProcessLogEntry = {
+      id: `${Date.now()}-${logSeqRef.current}`,
+      at,
+      message,
+      durationMs,
+    };
+    setProcessLogs((prev) => [entry, ...prev].slice(0, 40));
   }, []);
 
   useEffect(() => {
@@ -271,8 +279,11 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     processingRef.current = true;
     setProcessing(true);
 
+    const startedAt = new Date().toISOString();
     updateQueue((prev) => prev.map((item) => (
-      item.jobKey === nextItem.jobKey ? { ...item, status: "running" as const } : item
+      item.jobKey === nextItem.jobKey
+        ? { ...item, status: "running" as const, startedAt }
+        : item
     )));
     tailorStatus.markStatus(nextItem.jobKey, "running", {
       jobUrl: nextItem.jobUrl,
@@ -285,12 +296,19 @@ export function useTailorQueue(jobs: Job[], options: Options) {
 
     const job = jobs.find((j) => jobDismissKey(j) === nextItem.jobKey);
     if (!job) {
+      const durationMs = Date.now() - Date.parse(startedAt);
       updateQueue((prev) => prev.map((item) => (
         item.jobKey === nextItem.jobKey
-          ? { ...item, status: "skipped" as const, error: "Job no longer in feed" }
+          ? {
+              ...item,
+              status: "skipped" as const,
+              error: "Job no longer in feed",
+              durationMs,
+            }
           : item
       )));
       tailorStatus.markStatus(nextItem.jobKey, "failed", { error: "Job no longer in feed" });
+      pushLog(`Skipped ${nextItem.company} · job no longer in feed`, durationMs);
       processingRef.current = false;
       setProcessing(false);
       return;
@@ -298,6 +316,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
 
     try {
       const result = await onProcessJob(job);
+      const durationMs = Date.now() - Date.parse(startedAt);
       const done = result.ok;
       updateQueue((prev) => prev.map((item) => (
         item.jobKey === nextItem.jobKey
@@ -305,6 +324,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
               ...item,
               status: done ? "done" as const : "failed" as const,
               error: result.error,
+              durationMs,
             }
           : item
       )));
@@ -325,15 +345,22 @@ export function useTailorQueue(jobs: Job[], options: Options) {
           error: result.error,
         },
       );
-      pushLog(done
-        ? `Finished ${nextItem.company} · ${nextItem.title}${result.ats ? ` · ATS ${result.ats}` : ""}`
-        : `Failed ${nextItem.company} · ${result.error || "unknown error"}`);
+      pushLog(
+        done
+          ? `Finished ${nextItem.company} · ${nextItem.title}${result.ats ? ` · ATS ${result.ats}` : ""}`
+          : `Failed ${nextItem.company} · ${result.error || "unknown error"}`,
+        durationMs,
+      );
     } catch (e) {
+      const durationMs = Date.now() - Date.parse(startedAt);
       const error = (e as Error).message || String(e);
       updateQueue((prev) => prev.map((item) => (
-        item.jobKey === nextItem.jobKey ? { ...item, status: "failed" as const, error } : item
+        item.jobKey === nextItem.jobKey
+          ? { ...item, status: "failed" as const, error, durationMs }
+          : item
       )));
       tailorStatus.markStatus(nextItem.jobKey, "failed", { error });
+      pushLog(`Failed ${nextItem.company} · ${error}`, durationMs);
     } finally {
       processingRef.current = false;
       setProcessing(false);
@@ -374,6 +401,22 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     () => queue.filter((item) => item.status !== "skipped").length,
     [queue],
   );
+  const queueTiming = useMemo(() => {
+    const finished = queue.filter(
+      (item) => (item.status === "done" || item.status === "failed" || item.status === "skipped")
+        && typeof item.durationMs === "number",
+    );
+    const durations = finished.map((item) => item.durationMs as number);
+    const avgDurationMs = durations.length
+      ? Math.round(durations.reduce((sum, ms) => sum + ms, 0) / durations.length)
+      : null;
+    const totalDurationMs = durations.reduce((sum, ms) => sum + ms, 0);
+    const etaMs = avgDurationMs != null
+      ? avgDurationMs * (pendingCount + (runningItem ? 1 : 0))
+      : null;
+    return { avgDurationMs, totalDurationMs, etaMs, finishedCount: durations.length };
+  }, [queue, pendingCount, runningItem]);
+
   const overallProgressPct = useMemo(() => {
     const total = Math.max(1, pendingCount + (runningItem ? 1 : 0) + doneInQueue + failedInQueue);
     const doneWeight = doneInQueue + failedInQueue;
@@ -397,6 +440,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     totalInQueue,
     overallProgressPct,
     processLogs,
+    queueTiming,
     processing,
     lastHourlySyncAt,
     syncMessage,

@@ -1360,6 +1360,79 @@ body.is-today-board .nav-tab.active {
   color: #374151;
 }
 
+.tailor-queue-stat--timing {
+  color: #6b7280;
+  font-size: 11px;
+}
+
+.tailor-queue-running {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.tailor-queue-running-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: #b45309;
+  font-variant-numeric: tabular-nums;
+}
+
+.tailor-queue-recent {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tailor-queue-recent-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 10px;
+  color: var(--board-muted);
+}
+
+.tailor-queue-recent-item--done .tailor-queue-recent-label {
+  color: #1f7a3f;
+}
+
+.tailor-queue-recent-item--failed .tailor-queue-recent-label {
+  color: #b45309;
+}
+
+.tailor-queue-recent-time {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tailor-queue-log-line {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.tailor-queue-log-at {
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.tailor-queue-log-msg {
+  min-width: 0;
+}
+
+.tailor-queue-log-duration {
+  font-weight: 600;
+  color: #4338ca;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .tailor-queue-log-line + .tailor-queue-log-line {
   margin-top: 2px;
 }
