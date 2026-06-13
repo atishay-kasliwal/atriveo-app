@@ -20,12 +20,21 @@ function buildReferralMessage(job: Job): string {
   return `Hi Kavish,\nI hope you're doing well! I'm a former SDE2 at Bounteous, currently pursuing my MS in Data Science at Stony Brook. I came across the ${title} role (Job ID: ${jobId}) at ${company}, and would appreciate it if you could review my resume or consider referring me.\nThanks!`;
 }
 
-function fmtTime(iso?: string | null, scrapedDate?: string): string {
+function fmtTime(iso?: string | null, scrapedDate?: string, relative = false): string {
   if (iso && iso !== "null") {
     const normalized = TZ_SUFFIX_RE.test(iso) ? iso : `${iso}Z`;
     const d = new Date(normalized);
     if (!Number.isNaN(d.getTime())) {
+      const now = new Date();
       const today = new Date();
+      if (relative && d.toDateString() === today.toDateString()) {
+        const diffMs = now.getTime() - d.getTime();
+        const diffM = Math.floor(diffMs / 60000);
+        if (diffM < 1) return "Just now";
+        if (diffM < 60) return `${diffM}m ago`;
+        const diffH = Math.floor(diffM / 60);
+        if (diffH < 24) return `${diffH}h ago`;
+      }
       if (d.toDateString() === today.toDateString()) {
         return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
       }
@@ -123,7 +132,7 @@ function CompanyBandRow({ group }: { group: CompanyJobGroup }) {
       <td colSpan={10}>
         <div className="job-table-band-inner">
           <CompanyLogo company={group.company} size="sm" />
-          <span className="job-table-band-name">{group.company}</span>
+          <span className="job-table-band-name">{group.company.toUpperCase()}</span>
           <span className="job-table-band-openings">
             {openings} opening{openings !== 1 ? "s" : ""}
           </span>
@@ -220,7 +229,7 @@ function JobTableRow({
             <CompanyLogo company={co} size="sm" />
             <div className="job-table-role-copy">
               <div className="job-table-role-title" title={title}>{title}</div>
-              <div className="job-table-role-company" title={co}>{co}</div>
+              <div className="job-table-role-company" title={co}>{co.toUpperCase()}</div>
             </div>
             {onExcludeCompany && (
               <button type="button" className="job-table-exclude" onClick={() => onExcludeCompany(co)} title={`Block ${co}`}>⊘</button>
@@ -254,54 +263,60 @@ function JobTableRow({
         {compLabel(job.competition_score)}
       </td>
       <td className="job-table-level">{job.level || "—"}</td>
-      <td className="job-table-time">{fmtTime(job.batch_time || job.date_posted, job.scraped_date)}</td>
+      <td className="job-table-time">{fmtTime(job.batch_time || job.date_posted, job.scraped_date, board)}</td>
       <td className={`job-table-actions${board ? " job-table-actions--board" : ""}`}>
-        {!board && job.job_url ? (
-          <a
-            className="job-table-action job-table-action--apply"
-            href={job.job_url}
-            target="_blank"
-            rel="noopener"
-            onClick={() => onApplyClick?.(job)}
-          >
-            Apply
-          </a>
-        ) : null}
-        {!board && job.job_url && onApplyClick && (
-          <button type="button" className="job-table-action" onClick={() => onApplyClick(job)}>Click</button>
+        {board ? (
+          job.job_url ? (
+            <a
+              className="job-table-board-apply"
+              href={job.job_url}
+              target="_blank"
+              rel="noopener"
+              onClick={() => onApplyClick?.(job)}
+              title="Apply"
+            >
+              Apply
+            </a>
+          ) : null
+        ) : (
+          <>
+            {job.job_url ? (
+              <a
+                className="job-table-action job-table-action--apply"
+                href={job.job_url}
+                target="_blank"
+                rel="noopener"
+                onClick={() => onApplyClick?.(job)}
+              >
+                Apply
+              </a>
+            ) : null}
+            {job.job_url && onApplyClick && (
+              <button type="button" className="job-table-action" onClick={() => onApplyClick(job)}>Click</button>
+            )}
+            <button
+              type="button"
+              className="job-table-action"
+              onClick={() => {
+                navigator.clipboard.writeText(buildReferralMessage(job)).then(() => {
+                  setMsgCopied(true);
+                  setTimeout(() => setMsgCopied(false), 1200);
+                });
+              }}
+            >
+              {msgCopied ? "Copied" : "Msg"}
+            </button>
+            {canSendToTracker && job.job_url && (
+              <button
+                type="button"
+                className="job-table-action"
+                onClick={() => onAddToTracker(job.job_url, title, co, { location: job.location || null })}
+              >
+                {trackerCopy}
+              </button>
+            )}
+          </>
         )}
-        <button
-          type="button"
-          className="job-table-action"
-          onClick={() => {
-            navigator.clipboard.writeText(buildReferralMessage(job)).then(() => {
-              setMsgCopied(true);
-              setTimeout(() => setMsgCopied(false), 1200);
-            });
-          }}
-        >
-          {msgCopied ? "Copied" : board ? "Msg" : "Msg"}
-        </button>
-        {canSendToTracker && job.job_url && (
-          <button
-            type="button"
-            className="job-table-action"
-            onClick={() => onAddToTracker(job.job_url, title, co, { location: job.location || null })}
-          >
-            {trackerCopy}
-          </button>
-        )}
-        {board && job.job_url ? (
-          <a
-            className="job-table-action job-table-action--apply"
-            href={job.job_url}
-            target="_blank"
-            rel="noopener"
-            onClick={() => onApplyClick?.(job)}
-          >
-            Apply
-          </a>
-        ) : null}
       </td>
     </tr>
   );
@@ -459,6 +474,20 @@ export default function JobTable({
   return (
     <div className={wrapClass}>
       <table className={tableClass}>
+        {variant === "board" && (
+          <colgroup>
+            <col className="col-check" />
+            <col className="col-num" />
+            <col className="col-score" />
+            <col className="col-role" />
+            <col className="col-rating" />
+            <col className="col-loc" />
+            <col className="col-comp" />
+            <col className="col-level" />
+            <col className="col-posted" />
+            <col className="col-actions" />
+          </colgroup>
+        )}
         <thead>
           <tr>
             <th aria-label="Select" />
@@ -470,7 +499,7 @@ export default function JobTable({
             <th>Comp</th>
             <th>Level</th>
             <th>{variant === "board" ? "Posted" : "Time"}</th>
-            <th>Actions</th>
+            <th>{variant === "board" ? "Actions" : "Actions"}</th>
           </tr>
         </thead>
         <tbody>

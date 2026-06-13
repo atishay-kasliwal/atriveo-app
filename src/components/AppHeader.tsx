@@ -27,13 +27,14 @@ const NAV: NavItem[] = [
   { href: "/settings",      label: "Settings",       match: (p) => p.startsWith("/settings") },
 ];
 
-export default function AppHeader() {
+export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) {
   const { user, logout } = useAuth();
   const path = typeof window !== "undefined" ? window.location.pathname : "/";
 
   return (
     <header>
-      <div className="wrapper header-inner">
+      <div className={`wrapper header-inner${hideLogo ? " header-inner--board" : ""}`}>
+        {!hideLogo && (
         <a href="/" className="logo">
           <div className="logo-icon">A</div>
           <div>
@@ -41,6 +42,7 @@ export default function AppHeader() {
             <div className="logo-sub">Job Platform</div>
           </div>
         </a>
+        )}
 
         <div className="header-right">
           <nav className="nav-tabs">

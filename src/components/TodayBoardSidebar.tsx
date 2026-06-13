@@ -47,11 +47,7 @@ export default function TodayBoardSidebar({
   return (
     <aside className="today-board-sidebar" aria-label="Views and pipeline">
       <div className="today-board-brand">
-        <span className="today-board-brand-mark">A</span>
-        <div>
-          <strong>Atriveo</strong>
-          <span>Job Platform</span>
-        </div>
+        <span className="today-board-brand-title">Atriveo DB</span>
       </div>
 
       <section className="today-board-nav-section">

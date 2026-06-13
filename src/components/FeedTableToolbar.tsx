@@ -21,7 +21,6 @@ const SORT_OPTIONS: { key: SortBy; label: string }[] = [
 ];
 
 export default function FeedTableToolbar({
-  jobCount,
   sortBy,
   onSortChange,
   query,
@@ -29,14 +28,11 @@ export default function FeedTableToolbar({
   onFilterToggle,
   filtersOpen,
   onShare,
-  shareMessage,
 }: Props) {
   return (
     <div className="feed-table-toolbar">
       <div className="feed-table-toolbar-start">
-        <button type="button" className="feed-table-tool is-active" aria-current="true">
-          Views
-        </button>
+        <span className="feed-table-views-label">Views</span>
         <button type="button" className="feed-table-tool" disabled title="Coming soon">
           Hide fields
         </button>
@@ -50,6 +46,7 @@ export default function FeedTableToolbar({
         </button>
         <span className="feed-table-tool feed-table-tool--pill is-active">
           Grouped by Company
+          <span className="feed-table-pill-x" aria-hidden>×</span>
         </span>
         <label className="feed-table-sort">
           <span className="feed-table-sort-label">Sort</span>
@@ -79,9 +76,10 @@ export default function FeedTableToolbar({
             onChange={(e) => onQueryChange(e.target.value)}
             aria-label="Search jobs"
           />
+          <kbd className="feed-table-search-kbd">⌘K</kbd>
         </div>
         <button type="button" className="feed-table-tool feed-table-tool--share-dark" onClick={onShare}>
-          {shareMessage || `Share ${jobCount} roles`}
+          Share
         </button>
       </div>
     </div>

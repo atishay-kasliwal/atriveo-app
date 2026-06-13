@@ -6,6 +6,7 @@ import BulkJobCopyBar from "../components/BulkJobCopyBar";
 import FeedTableToolbar from "../components/FeedTableToolbar";
 import TailorPanel from "../components/TailorPanel";
 import TodayBoardSidebar, { type ViewKey } from "../components/TodayBoardSidebar";
+import TodayBoardFooter from "../components/TodayBoardFooter";
 import { useApplyClickLog } from "../hooks/useApplyClickLog";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
@@ -382,15 +383,22 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     [catalogJobs],
   );
 
-  const uniqueCompanies = useMemo(
-    () => new Set(displayedJobs.map((j) => j.company).filter(Boolean)).size,
-    [displayedJobs],
-  );
-
   const highMatchCount = useMemo(
     () => displayedJobs.filter((j) => careerOpsRating(j).score >= 75).length,
     [displayedJobs],
   );
+
+  const avgMatchScore = useMemo(() => {
+    if (!displayedJobs.length) return 0;
+    const sum = displayedJobs.reduce((acc, j) => acc + careerOpsRating(j).score, 0);
+    return Math.round(sum / displayedJobs.length);
+  }, [displayedJobs]);
+
+  useEffect(() => {
+    if (!isTodayBoard) return;
+    document.body.classList.add("is-today-board");
+    return () => document.body.classList.remove("is-today-board");
+  }, [isTodayBoard]);
 
   const handleShare = () => {
     const url = `${window.location.origin}/today`;
@@ -485,7 +493,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           variant={isTodayBoard ? "board" : "default"}
         />
       )}
-      {applyClickTableRows.length > 0 && (
+      {applyClickTableRows.length > 0 && !isTodayBoard && (
         <section className="apply-click-log" aria-label="Apply button click log">
           <div className="apply-click-log-head">
             <div>
@@ -566,59 +574,53 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   );
 
   return (
-    <div>
-      <AppHeader />
+    <div className={isTodayBoard ? "today-board-root" : undefined}>
+      <AppHeader hideLogo={isTodayBoard} />
 
       {isTodayBoard ? (
-        <div className="wrapper page-shell page-shell-wide today-board-page">
-          <div className="today-board-shell">
-            <TodayBoardSidebar
-              activeView={activeView}
-              onViewChange={applyView}
-              viewCounts={viewCounts}
-              period={period}
-              onPeriodChange={(p) => {
-                handlePeriodChange(p);
-                setTermFilter("all");
-                setSelectedSession(null);
-              }}
-              periodCounts={{ hour: hourJobs.length, today: todayJobs.length, yesterday: yesterdayJobs.length }}
-              runCards={runCards}
-              selectedSession={selectedSession}
-              onSessionSelect={handleSessionSelect}
-              formatRunTime={formatRunTime}
-            />
+        <div className="today-board-viewport">
+          <TodayBoardSidebar
+            activeView={activeView}
+            onViewChange={applyView}
+            viewCounts={viewCounts}
+            period={period}
+            onPeriodChange={(p) => {
+              handlePeriodChange(p);
+              setTermFilter("all");
+              setSelectedSession(null);
+            }}
+            periodCounts={{ hour: hourJobs.length, today: todayJobs.length, yesterday: yesterdayJobs.length }}
+            runCards={runCards}
+            selectedSession={selectedSession}
+            onSessionSelect={handleSessionSelect}
+            formatRunTime={formatRunTime}
+          />
 
-            <div className="today-board-main">
-              <div className="board-metrics">
-                <div className="board-metric">
-                  <span className="board-metric-label">Total Roles</span>
-                  <span className="board-metric-value">{displayedJobs.length}</span>
-                  <span className="board-metric-sub">matching current view</span>
-                </div>
-                <div className="board-metric">
-                  <span className="board-metric-label">Companies</span>
-                  <span className="board-metric-value">{uniqueCompanies}</span>
-                  <span className="board-metric-sub">unique employers</span>
-                </div>
-                <div className="board-metric board-metric--accent">
-                  <span className="board-metric-label">High Match</span>
-                  <span className="board-metric-value">{highMatchCount}</span>
-                  <span className="board-metric-sub">CareerOps 75+</span>
-                </div>
-                <div className="board-metric">
-                  <span className="board-metric-label">New Grad</span>
-                  <span className="board-metric-value">{ngCount}</span>
-                  <span className="board-metric-sub">entry-level roles</span>
-                </div>
-                <div className="board-metric">
-                  <span className="board-metric-label">Applied Today</span>
-                  <span className="board-metric-value">{todayApplicationRows.length}</span>
-                  <span className="board-metric-sub">tracker activity</span>
-                </div>
+          <div className="today-board-main">
+            <div className="board-metrics">
+              <div className="board-metric">
+                <span className="board-metric-label">Active Matches</span>
+                <span className="board-metric-value">{displayedJobs.length}</span>
+                <span className="board-metric-sub">in current view</span>
               </div>
+              <div className="board-metric board-metric--accent">
+                <span className="board-metric-label">Avg. Match Score</span>
+                <span className="board-metric-value">{avgMatchScore || "—"}</span>
+                <span className="board-metric-sub">CareerOps average</span>
+              </div>
+              <div className="board-metric">
+                <span className="board-metric-label">Strong Fits</span>
+                <span className="board-metric-value">{highMatchCount}</span>
+                <span className="board-metric-sub">of {displayedJobs.length || 0}</span>
+              </div>
+              <div className="board-metric">
+                <span className="board-metric-label">Applied Today</span>
+                <span className="board-metric-value">{todayApplicationRows.length}</span>
+                <span className="board-metric-sub">tracker activity</span>
+              </div>
+            </div>
 
-              <div className="today-board-table-shell">
+            <div className="today-board-table-shell">
               <FeedTableToolbar
                 jobCount={displayedJobs.length}
                 sortBy={sortBy}
@@ -653,8 +655,14 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               />
               <BulkJobAnalysisPanel analysis={jobSelection.analysis} />
 
-              {jobListContent}
+              <div className="today-board-table-body">
+                {jobListContent}
               </div>
+
+              <TodayBoardFooter
+                matchCount={displayedJobs.length}
+                selectedCount={jobSelection.selectedCount}
+              />
             </div>
           </div>
         </div>
