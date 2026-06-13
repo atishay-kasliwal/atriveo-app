@@ -206,8 +206,11 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     const cards: RunCard[] = Object.entries(sessionCounts)
       .flatMap(([sessionId, count]) => {
         if (count <= 0) return [];
+        // Include sessions from ALL periods (hour/today/yesterday) so the sidebar
+        // can show the 10 most recent regardless of which period tab is selected.
+        // Each card keeps its own targetPeriod for correct click-through nav.
         const targetPeriod = sessionPeriod[sessionId];
-        if (!targetPeriod || targetPeriod !== period) return [];
+        if (!targetPeriod) return [];
 
         const history = historyById.get(sessionId);
         return [{
@@ -232,7 +235,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
         segmentsActive: Math.min(24, Math.max(0, Math.round(progress * 24))),
       };
     });
-  }, [runHistory, sessionCounts, sessionPeriod, sessionClickCounts, period]);
+  }, [runHistory, sessionCounts, sessionPeriod, sessionClickCounts]);
 
   const feedJobsBeforeDismiss = useMemo(() => {
     let jobs = [...baseJobs];
@@ -883,11 +886,11 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               <div className="run-strip-head">
                 <span className="run-strip-label">Session History</span>
                 <span className="run-strip-status">
-                  {selectedRun ? `Viewing ${formatRunTime(selectedRun.displayAt)}` : `${runCards.length} recent runs`}
+                  {selectedRun ? `Viewing ${formatRunTime(selectedRun.displayAt)}` : `${Math.min(10, runCards.length)} recent runs`}
                 </span>
               </div>
               <div className="run-strip">
-              {runCards.map((r) => {
+              {runCards.slice(0, 10).map((r) => {
                 const isActive = selectedSession === r.session_id;
                 return (
                   <button
