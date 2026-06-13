@@ -97,7 +97,7 @@ export default function TodayBoardSidebar({
         <section className="today-board-nav-section today-board-sessions">
           <h2 className="today-board-nav-label">Sessions</h2>
           <ul className="today-board-nav-list">
-            {runCards.map((r) => {
+            {runCards.slice(0, 10).map((r, index) => {
               const isActive = selectedSession === r.session_id;
               return (
                 <li key={r.session_id}>
@@ -106,9 +106,12 @@ export default function TodayBoardSidebar({
                     className={`today-board-nav-item today-board-session-item${isActive ? " is-active" : ""}`}
                     onClick={() => onSessionSelect(isActive ? null : r.session_id, r.targetPeriod)}
                   >
-                    <span className="today-board-session-time">{formatRunTime(r.displayAt)}</span>
-                    <span className="today-board-session-meta">
-                      {r.progressPct}% · {r.count} jobs
+                    <span className="today-board-session-index">{index + 1}</span>
+                    <span className="today-board-session-body">
+                      <span className="today-board-session-time">{formatRunTime(r.displayAt)}</span>
+                      <span className="today-board-session-meta">
+                        {r.progressPct}% · {r.count} jobs
+                      </span>
                     </span>
                   </button>
                 </li>
