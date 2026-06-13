@@ -16,10 +16,16 @@
  * Optional env vars:
  *   NOTIFY_EMAIL     — recipient address  (default: katishay@gmail.com)
  *   RESEND_FROM      — sender address     (default: Atriveo Jobs <jobs@atriveo.com>)
+ *   JOBS_BASE_URL    — site origin        (default: https://atriveo-app.pages.dev)
+ *   JWT_SECRET       — sign a short-lived session for /api/jobs (live feed parity)
+ *   MAILER_EMAIL     — email claim for that token (default: NOTIFY_EMAIL)
+ *   MAILER_PASSWORD  — alternative: login instead of JWT_SECRET
  */
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import type { Db } from "mongodb";
+import { careerOpsRating } from "../src/utils/jobPresentation.ts";
+import type { Job as DashboardJob } from "../src/types.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -39,19 +45,9 @@ const JOBS_BASE_URL = process.env.JOBS_BASE_URL ?? DASHBOARD_URL;
 
 // ─── types ────────────────────────────────────────────────────────────────────
 
-interface Job {
-  title: string;
-  company: string;
-  location: string;
-  level: string;
+interface Job extends DashboardJob {
   keyword_score?: number;
   score_pct?: number;
-  ats_score?: number;
-  /** raw pipeline score (0–250), primary CareerOps input */
-  score?: number;
-  /** resume fit, 0–100 or 0–10 (auto-normalized) */
-  fit_score?: number;
-  job_url: string;
 }
 
 interface HourBucket {
@@ -61,9 +57,7 @@ interface HourBucket {
 
 interface Insights {
   thisHour: number;
-  lastHour: number | null;
   todayTotal: number;
-  yesterdaySameHour: number | null;
   yesterdayTotal: number | null;
   last12h: HourBucket[];
   avgMatchThisHour: number;
@@ -176,45 +170,13 @@ function fmtNumber(n: number): string {
   return n.toLocaleString("en-US");
 }
 
-// ── CareerOps score (mirrors src/utils/jobPresentation.ts) ──────────────────
-// The Today page ranks and scores every job with this exact weighted formula.
-// We replicate it verbatim so the email's percentages, "strong fit" counts, and
-// averages line up 1:1 with the dashboard. Keep these in sync if the page changes.
-
-const MAX_RAW_SCORE = 250;
 // A CareerOps score at/above this is a "Strong match" on the Today page.
 const STRONG_FIT_THRESHOLD = 75;
+const MAX_RAW_SCORE = 250;
 
-function clampPct(value: number): number {
-  if (!Number.isFinite(value)) return 0;
-  return Math.max(0, Math.min(100, Math.round(value)));
-}
-
-function normalizeFitScore(value: number | null | undefined): number | null {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) return null;
-  // fit_score may arrive on a 0–10 or 0–100 scale; lift the small scale to %.
-  return clampPct(numeric <= 10 ? numeric * 10 : numeric);
-}
-
-/** CareerOps 0–100 score — identical weighting to the Today page. */
-function careerOpsScore(job: Job): number {
-  const rawPct = clampPct(((Number(job.score) || 0) / MAX_RAW_SCORE) * 100);
-  const atsRaw = Number(job.ats_score ?? job.score_pct);
-  const atsPct = Number.isFinite(atsRaw) ? clampPct(atsRaw) : null;
-  const fitPct = normalizeFitScore(job.fit_score);
-  const weightedParts = [
-    { value: rawPct, weight: 0.7 },
-    ...(atsPct == null ? [] : [{ value: atsPct, weight: 0.2 }]),
-    ...(fitPct == null ? [] : [{ value: fitPct, weight: 0.1 }]),
-  ];
-  const totalWeight = weightedParts.reduce((s, p) => s + p.weight, 0) || 1;
-  return clampPct(weightedParts.reduce((s, p) => s + p.value * p.weight, 0) / totalWeight);
-}
-
-/** Email % shown for a job = its CareerOps score (same number as the dashboard). */
+/** Email % = dashboard CareerOps score (single source of truth). */
 function computePct(job: Job): number {
-  return careerOpsScore(job);
+  return careerOpsRating(job).score;
 }
 
 // Tier colors mirror the Today page CareerOps tiers (75 / 50 / 25 cutoffs).
@@ -278,34 +240,101 @@ function getMarketPulse(insights: Insights): MarketPulse {
 
 // ─── data loaders ─────────────────────────────────────────────────────────────
 
-/**
- * Load the published jobs feed the Today page reads. Tries the deployed URL
- * first (the live asset), then the local public/ build. Returns the raw job
- * objects with their full score fields intact.
- */
-async function loadFeedJobs(type: "hour" | "today"): Promise<Job[]> {
-  const file = type === "today" ? "today_jobs.json" : "jobs.json";
+function parseJobFeed(data: unknown): Job[] {
+  const arr = Array.isArray(data) ? data : (data as { jobs?: unknown })?.jobs ?? [];
+  return Array.isArray(arr) ? (arr as Job[]) : [];
+}
 
-  // 1. Try the deployed asset over HTTP.
-  try {
-    const res = await fetch(`${JOBS_BASE_URL}/${file}`, { redirect: "follow" });
-    if (res.ok) {
-      const data = await res.json();
-      const arr = Array.isArray(data) ? data : (data?.jobs ?? []);
-      if (Array.isArray(arr) && arr.length) return arr as Job[];
-    }
-  } catch {
-    /* fall through to local file */
+/** Auth cookie so the mailer can hit /api/jobs (static JSON redirects to login). */
+async function getMailerAuthCookie(): Promise<string | null> {
+  const email = process.env.MAILER_EMAIL ?? NOTIFY_EMAIL;
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (jwtSecret) {
+    const { SignJWT } = await import("jose");
+    const token = await new SignJWT({ email, name: "Mailer" })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("1h")
+      .sign(new TextEncoder().encode(jwtSecret));
+    return `atriveo_token=${token}`;
   }
 
-  // 2. Fall back to the local public/ build.
+  const password = process.env.MAILER_PASSWORD;
+  if (!password) return null;
+
+  try {
+    const res = await fetch(`${JOBS_BASE_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) return null;
+    const setCookie = res.headers.get("set-cookie") ?? "";
+    const match = setCookie.match(/atriveo_token=([^;]+)/);
+    return match ? `atriveo_token=${match[1]}` : null;
+  } catch {
+    return null;
+  }
+}
+
+let mailerAuthCookiePromise: Promise<string | null> | undefined;
+
+async function mailerCookie(): Promise<string | null> {
+  if (!mailerAuthCookiePromise) {
+    mailerAuthCookiePromise = getMailerAuthCookie().then((cookie) => {
+      if (!cookie) {
+        console.warn(
+          "No JWT_SECRET or MAILER_PASSWORD — using local public/ feeds. " +
+          "Set JWT_SECRET in .env for live dashboard parity.",
+        );
+      }
+      return cookie;
+    });
+  }
+  return mailerAuthCookiePromise;
+}
+
+/**
+ * Load the published jobs feed the Today page reads. Prefers the authenticated
+ * /api/jobs endpoint (same JSON the dashboard fetches), then local public/.
+ */
+async function loadFeedJobs(type: "hour" | "today" | "yesterday"): Promise<Job[]> {
+  const file = type === "today"
+    ? "today_jobs.json"
+    : type === "yesterday"
+      ? "yesterday_jobs.json"
+      : "jobs.json";
+
+  const cookie = await mailerCookie();
+  if (cookie) {
+    try {
+      const res = await fetch(`${JOBS_BASE_URL}/api/jobs?type=${type}`, {
+        headers: { Cookie: cookie },
+      });
+      const contentType = res.headers.get("content-type") ?? "";
+      if (res.ok && contentType.includes("application/json")) {
+        const jobs = parseJobFeed(await res.json());
+        if (jobs.length) {
+          console.log(`Feed · api/${type}: ${jobs.length} jobs`);
+          return jobs;
+        }
+      }
+    } catch {
+      /* fall through to local file */
+    }
+  }
+
+  // Local public/ build (updated by deploy / chore commits).
   try {
     const fs = await import("fs/promises");
     const localPath = resolve(__dirname, "../public", file);
     const raw = await fs.readFile(localPath, "utf8");
-    const data = JSON.parse(raw);
-    const arr = Array.isArray(data) ? data : (data?.jobs ?? []);
-    if (Array.isArray(arr)) return arr as Job[];
+    const jobs = parseJobFeed(JSON.parse(raw));
+    if (jobs.length) {
+      console.log(`Feed · local/${file}: ${jobs.length} jobs`);
+      return jobs;
+    }
   } catch {
     /* no local file either */
   }
@@ -317,37 +346,14 @@ async function loadInsights(
   db: Db | null,
   hourStart: Date,
   hourEnd: Date,
-  jobsAll: Job[],
+  jobsHour: Job[],
+  feedCounts: { today: number; yesterday: number | null },
 ): Promise<Insights> {
   const sessionsCol = db?.collection("sessions") ?? null;
+  const twelveHoursAgo = new Date(hourStart.getTime() - 11 * 60 * 60 * 1000);
 
-  const lastHourStart        = new Date(hourStart.getTime() - 60 * 60 * 1000);
-  const todayStart           = new Date(hourStart);
-  todayStart.setUTCHours(0, 0, 0, 0);
-  const yesterdayStart       = new Date(todayStart.getTime() - 24 * 60 * 60 * 1000);
-  const yesterdaySameHourStart = new Date(hourStart.getTime() - 24 * 60 * 60 * 1000);
-  const yesterdaySameHourEnd   = new Date(yesterdaySameHourStart.getTime() + 60 * 60 * 1000);
-  const twelveHoursAgo       = new Date(hourStart.getTime() - 11 * 60 * 60 * 1000);
-
-  // run_at is stored as a BSON Date (datetime in Python) — pass Date objects, not ISO strings.
-  // Returns 0 when Mongo isn't available (volume trends are best-effort only).
-  const sumJobs = async (gte: Date, lt: Date): Promise<number> => {
-    if (!sessionsCol) return 0;
-    const docs = await sessionsCol
-      .find({ run_at: { $gte: gte, $lt: lt } }, { projection: { job_count: 1 } })
-      .toArray();
-    return docs.reduce((s, d) => s + (Number(d.job_count) || 0), 0);
-  };
-
-  const [thisHour, lastHour, todayTotal, yesterdaySameHour, yesterdayTotal] = await Promise.all([
-    sumJobs(hourStart, hourEnd),
-    sumJobs(lastHourStart, hourStart),
-    sumJobs(todayStart, hourEnd),
-    sumJobs(yesterdaySameHourStart, yesterdaySameHourEnd),
-    sumJobs(yesterdayStart, todayStart),
-  ]);
-
-  // Last 12 hours bucketed: pull all sessions in the window, then bin by hour.
+  // Mongo is used ONLY for the 12h scrape pipeline chart — not for job counts
+  // shown next to dashboard metrics (those come from the published JSON feeds).
   const recentSessions = sessionsCol
     ? await sessionsCol
         .find(
@@ -370,7 +376,10 @@ async function loadInsights(
     last12h.push({ hour: bucketStart, jobs: total });
   }
 
-  // Per-job aggregates across the current session.
+  const jobsAll = jobsHour;
+  const thisHour = jobsAll.length;
+  const todayTotal = feedCounts.today;
+  const yesterdayTotal = feedCounts.yesterday;
   const pcts = jobsAll.map(computePct);
   const avgMatchThisHour = pcts.length
     ? Math.round(pcts.reduce((s, p) => s + p, 0) / pcts.length)
@@ -439,9 +448,9 @@ async function loadInsights(
   });
 
   return {
-    thisHour, lastHour: lastHour || null, todayTotal,
-    yesterdaySameHour: yesterdaySameHour || null,
-    yesterdayTotal: yesterdayTotal || null,
+    thisHour,
+    todayTotal,
+    yesterdayTotal,
     last12h,
     avgMatchThisHour,
     highMatchCount, midMatchCount, lowMatchCount,
@@ -628,7 +637,6 @@ function renderBestMatch(best: Job | null): string {
 }
 
 function renderStatsCards(insights: Insights): string {
-  const tHour  = trendArrow(insights.thisHour, insights.lastHour);
   const tToday = trendArrow(insights.todayTotal, insights.yesterdayTotal);
 
   const trendText = (t: Trend) => t.hasPrev
@@ -650,18 +658,15 @@ function renderStatsCards(insights: Insights): string {
     </td>`;
 
   const yestValue = insights.yesterdayTotal != null ? fmtNumber(insights.yesterdayTotal) : "—";
-  const yestSub = insights.yesterdayTotal != null
-    ? `${trendText(tToday)} <span style="color:#94a3b8; font-size:12px;">vs y'day</span>`
-    : `<span style="color:#94a3b8; font-size:12px;">no data yet</span>`;
 
   return `
     <tr>
       <td style="padding:20px 27px 0;">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
-            ${card("This hour", fmtNumber(insights.thisHour), trendText(tHour))}
-            ${card("Today", fmtNumber(insights.todayTotal), `<span style="color:#94a3b8; font-size:12px;">total</span>`)}
-            ${card("Yesterday", yestValue, yestSub)}
+            ${card("This hour", fmtNumber(insights.thisHour), `<span style="color:${EMAIL.muted}; font-size:12px;">live feed</span>`)}
+            ${card("Today", fmtNumber(insights.todayTotal), `${trendText(tToday)} <span style="color:${EMAIL.muted}; font-size:12px;">vs yesterday feed</span>`)}
+            ${card("Yesterday", yestValue, `<span style="color:${EMAIL.muted}; font-size:12px;">previous day feed</span>`)}
             ${card(
               "Avg match",
               `${insights.avgMatchThisHour}`,
@@ -843,7 +848,10 @@ function renderScrapeVolume(insights: Insights, opts: { first?: boolean } = {}):
                 <tr>
                   <td style="vertical-align:top;">
                     <div style="font-size:10px; font-weight:700; color:#8a8478; text-transform:uppercase; letter-spacing:.12em;">
-                      Pipeline pulse · last 12h
+                      Scraper pipeline · last 12h
+                    </div>
+                    <div style="font-size:12px; color:#8a8478; margin-top:6px; line-height:1.4;">
+                      Raw jobs ingested by the scraper (not the same as live-feed match counts above).
                     </div>
                     <div style="font-size:34px; font-weight:800; color:#fff; letter-spacing:-0.03em; margin-top:8px;">
                       ${fmtNumber(total12h)}
@@ -952,7 +960,6 @@ function renderEmail(insights: Insights, jobs: Job[], sessionTime: string): stri
 // ─── render: plain-text alternative ───────────────────────────────────────────
 
 function renderText(insights: Insights, jobs: Job[], sessionTime: string): string {
-  const tHour  = trendArrow(insights.thisHour, insights.lastHour);
   const tToday = trendArrow(insights.todayTotal, insights.yesterdayTotal);
   const marketPulse = getMarketPulse(insights);
   const lines: string[] = [];
@@ -973,9 +980,9 @@ function renderText(insights: Insights, jobs: Job[], sessionTime: string): strin
     for (const t of insights.hotTitles.slice(0, 5)) lines.push(`  ${t.title} ×${t.count}`);
   }
   lines.push("");
-  lines.push("VOLUME");
-  lines.push(`  This hour: ${fmtNumber(insights.thisHour)}${tHour.hasPrev ? `  (${tHour.arrow} ${tHour.sign}${tHour.pct}% vs last hour)` : ""}`);
-  lines.push(`  Today:     ${fmtNumber(insights.todayTotal)}${tToday.hasPrev ? `  (${tToday.arrow} ${tToday.sign}${tToday.pct}% vs yesterday)` : ""}`);
+  lines.push("VOLUME (published feeds — same as dashboard)");
+  lines.push(`  This hour: ${fmtNumber(insights.thisHour)} live feed jobs`);
+  lines.push(`  Today:     ${fmtNumber(insights.todayTotal)}${tToday.hasPrev ? `  (${tToday.arrow} ${tToday.sign}${tToday.pct}% vs yesterday feed)` : ""}`);
   if (insights.yesterdayTotal != null) {
     lines.push(`  Yesterday: ${fmtNumber(insights.yesterdayTotal)} full-day total`);
   }
@@ -1081,9 +1088,7 @@ function mockInsights(): Insights {
 
   return {
     thisHour: jobs.length,
-    lastHour: 233,
     todayTotal: 3577,
-    yesterdaySameHour: 120,
     yesterdayTotal: 4455,
     last12h,
     avgMatchThisHour,
@@ -1141,17 +1146,18 @@ async function main() {
   const hourEnd = new Date(hourStart);
   hourEnd.setHours(hourEnd.getHours() + 1);
 
-  // 1. Jobs come from the SAME published feed the Today page reads (carries
-  //    score/ats_score/fit_score), so CareerOps scoring matches the dashboard.
-  const jobsAll = await loadFeedJobs("hour");
+  // 1. Load the same published JSON feeds the dashboard API serves.
+  const [jobsAll, jobsToday, jobsYesterday] = await Promise.all([
+    loadFeedJobs("hour"),
+    loadFeedJobs("today"),
+    loadFeedJobs("yesterday"),
+  ]);
   if (jobsAll.length === 0) {
     console.log("Hour feed is empty — nothing to send.");
     return;
   }
 
-  // 2. MongoDB is used ONLY for volume trends (session run_at + job_count).
-  //    It's optional: if unavailable, trends fall back to empty and the digest
-  //    still sends with page-accurate job data.
+  // 2. MongoDB is used ONLY for the 12h scrape pipeline chart.
   const mongoUri = process.env.MONGO_URI;
   let db: Db | null = null;
   let client: import("mongodb").MongoClient | null = null;
@@ -1186,12 +1192,18 @@ async function main() {
     }
   }
 
-  // 3. Build insights. Per-job aggregates use the page's feed jobs; volume
-  //    trends use Mongo when present. "This hour" = the feed's job count.
-  const rawInsights = await loadInsights(db, hourStart, hourEnd, jobsAll);
-  const insights: Insights = { ...rawInsights, thisHour: jobsAll.length };
+  // 3. Build insights from feed data (counts + CareerOps) and Mongo (12h chart only).
+  const insights = await loadInsights(db, hourStart, hourEnd, jobsAll, {
+    today: jobsToday.length,
+    yesterday: jobsYesterday.length > 0 ? jobsYesterday.length : null,
+  });
 
   if (client) await client.close();
+
+  console.log(
+    `Feed parity · hour=${insights.thisHour} today=${insights.todayTotal} yesterday=${insights.yesterdayTotal ?? "—"} ` +
+    `avg=${insights.avgMatchThisHour} strong=${insights.highMatchCount}`,
+  );
 
   const jobs = jobsAll
     .sort((a, b) => computePct(b) - computePct(a))
