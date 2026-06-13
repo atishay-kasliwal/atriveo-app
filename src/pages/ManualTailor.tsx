@@ -54,36 +54,6 @@ export default function ManualTailor() {
     onProcessJob: processQueueJob,
   });
 
-  const tailorQueueLogContext = useMemo(() => {
-    const runningKey = tailorQueue.runningItem?.jobKey;
-    const runningRecord = runningKey ? tailorStatus.getRecord(runningKey) : null;
-    const runningLogs = runningRecord?.logs ?? [];
-
-    let lastFinishedLogs: typeof runningLogs = [];
-    let lastFinishedLabel: string | undefined;
-    let bestAt = 0;
-
-    for (const item of tailorQueue.queue) {
-      if (item.status !== "done" && item.status !== "failed") continue;
-      if (item.jobKey === runningKey) continue;
-      const record = tailorStatus.getRecord(item.jobKey);
-      if (!record?.logs?.length) continue;
-      const at = Date.parse(record.tailoredAt || item.startedAt || "0");
-      if (at >= bestAt) {
-        bestAt = at;
-        lastFinishedLogs = record.logs;
-        lastFinishedLabel = `${record.company} · ${record.title}`;
-      }
-    }
-
-    return { runningLogs, lastFinishedLogs, lastFinishedLabel };
-  }, [
-    tailorQueue.runningItem,
-    tailorQueue.queue,
-    tailorStatus.records,
-    tailorStatus.getRecord,
-  ]);
-
   const activeSession = useMemo(
     () => sessions.find((session) => session.id === activeSessionId) ?? sessions[0] ?? null,
     [sessions, activeSessionId],
@@ -201,9 +171,11 @@ export default function ManualTailor() {
             queueTiming={tailorQueue.queueTiming}
             processing={tailorQueue.processing}
             runningItem={tailorQueue.runningItem}
-            runningLogs={tailorQueueLogContext.runningLogs}
-            lastFinishedLogs={tailorQueueLogContext.lastFinishedLogs}
-            lastFinishedLabel={tailorQueueLogContext.lastFinishedLabel}
+            runningProgressPct={
+              tailorQueue.runningItem
+                ? tailorStatus.getRecord(tailorQueue.runningItem.jobKey)?.progressPct ?? 12
+                : undefined
+            }
             lastHourlySyncAt={tailorQueue.lastHourlySyncAt}
             syncMessage={tailorQueue.syncMessage}
             onSyncNow={() => tailorQueue.runHourlySync(manualJobs, true)}

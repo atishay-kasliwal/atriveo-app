@@ -71,6 +71,7 @@ function load(uid: string): ApplyClickRecord[] {
 function persist(uid: string, records: ApplyClickRecord[]) {
   try {
     localStorage.setItem(KEY(uid), JSON.stringify(records.slice(0, 250)));
+    window.dispatchEvent(new CustomEvent("atriveo:apply-click-log", { detail: { uid } }));
   } catch {
     /* ignore */
   }
@@ -105,6 +106,23 @@ export function useApplyClickLog() {
     }
     setRecords(loaded);
   }, [loading, uid]);
+
+  useEffect(() => {
+    const reload = () => setRecords(load(uid));
+    const onCustom = (e: Event) => {
+      const detail = (e as CustomEvent<{ uid?: string }>).detail;
+      if (!detail?.uid || detail.uid === uid) reload();
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === KEY(uid)) reload();
+    };
+    window.addEventListener("atriveo:apply-click-log", onCustom);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("atriveo:apply-click-log", onCustom);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [uid]);
 
   const recordSavedJob = useCallback((job: Job, source: SavedJobSource) => {
     const jobKey = jobDismissKey(job);

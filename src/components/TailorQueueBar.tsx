@@ -1,72 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { TailorLogEntry } from "../types/tailor";
-import type { TailorOutcomeKind, TailorProcessLogEntry, TailorQueueItem } from "../types/tailorQueue";
+import type { TailorProcessLogEntry, TailorQueueItem } from "../types/tailorQueue";
 import { HOURLY_QUEUE_SIZE } from "../types/tailorQueue";
-import TailorLogStream from "./TailorLogStream";
 import { formatTailorDuration } from "../utils/tailorProgress";
-import { displayProcessLogAt, formatProcessLogTime } from "../utils/processLogTime";
+import { formatProcessLogTime } from "../utils/processLogTime";
+
+const NEXT_VISIBLE = 3;
 
 function formatSyncTime(ts: number): string {
-  if (!ts) return "Never";
+  if (!ts) return "never";
   return formatProcessLogTime(new Date(ts));
-}
-
-// Collapse consecutive identical log messages into a single row with a ×N count
-// and the time span, so a repeating message (e.g. retries/recovery) shows as one
-// clean line instead of flooding the log. Entries are newest-first.
-interface CollapsedLog {
-  entry: TailorProcessLogEntry;
-  count: number;
-  firstAt: string; // oldest time in the run
-  lastAt: string;  // newest time in the run
-}
-function collapseLogs(logs: TailorProcessLogEntry[]): CollapsedLog[] {
-  const out: CollapsedLog[] = [];
-  for (const entry of logs) {
-    const prev = out[out.length - 1];
-    if (prev && prev.entry.message === entry.message && prev.entry.durationMs == null && entry.durationMs == null) {
-      prev.count += 1;
-      prev.firstAt = entry.at; // logs are newest-first, so each next is older
-    } else {
-      out.push({ entry, count: 1, firstAt: entry.at, lastAt: entry.at });
-    }
-  }
-  return out;
-}
-
-// Honest, glanceable classification for a finished job line. "Failed" is
-// reserved for things that are genuinely broken and need YOU; retryable/expected
-// states (no JD yet, skipped, offline) get their own tone + a "what's happening"
-// note so the panel never lies about the pipeline state.
-type FinishedTone = "done" | "skip" | "retry" | "fail";
-interface FinishedDisplay { tone: FinishedTone; icon: string; note: string; }
-
-function classifyFinished(entry: TailorProcessLogEntry): FinishedDisplay {
-  const outcome: TailorOutcomeKind | undefined = entry.outcome;
-  // Prefer the explicit outcome; fall back to the message prefix for old entries.
-  if (outcome === "done" || (!outcome && entry.message.startsWith("Finished"))) {
-    return { tone: "done", icon: "✓", note: "" };
-  }
-  switch (outcome) {
-    case "skip":
-      return { tone: "skip", icon: "⏭", note: "Skipped — not worth tailoring" };
-    case "missing":
-      return { tone: "skip", icon: "⏭", note: "Job left the feed" };
-    case "no-jd":
-      return { tone: "retry", icon: "⏳", note: "No full JD yet — auto-retries after the next hourly scrape" };
-    case "no-resume":
-      return { tone: "retry", icon: "⏳", note: "Save your resume in Settings, then retry" };
-    case "offline":
-      return { tone: "retry", icon: "⏳", note: "Tailor server/relay offline — will resume when reachable" };
-    case "timeout":
-      return { tone: "retry", icon: "⏳", note: "Connection dropped — auto-recovers if the PDF was made" };
-    case "compile":
-      return { tone: "fail", icon: "✗", note: "PDF compile failed (LaTeX) — needs a look" };
-    case "ai":
-      return { tone: "fail", icon: "✗", note: "Model step failed (Ollama)" };
-    default:
-      return { tone: "fail", icon: "✗", note: "Failed — check the queue log" };
-  }
 }
 
 function useElapsedMs(startedAt?: string, active = false): number | null {
@@ -105,8 +47,9 @@ interface Props {
   queueTiming: QueueTiming;
   processing: boolean;
   runningItem: TailorQueueItem | null;
-  runningLogs?: TailorLogEntry[];
-  lastFinishedLogs?: TailorLogEntry[];
+  runningProgressPct?: number;
+  runningLogs?: unknown[];
+  lastFinishedLogs?: unknown[];
   lastFinishedLabel?: string;
   lastHourlySyncAt: number;
   syncMessage: string;
@@ -120,115 +63,58 @@ interface Props {
   onReorderPending: (orderedKeys: string[]) => void;
 }
 
+function lastFinishedEntry(logs: TailorProcessLogEntry[]) {
+  return logs.find(
+    (entry) => entry.durationMs != null && /^(Finished|Failed|Skipped)/.test(entry.message),
+  ) ?? null;
+}
+
 export default function TailorQueueBar({
   queue,
   pendingCount,
   doneInQueue,
   failedInQueue,
-  totalInQueue,
-  overallProgressPct,
   processLogs,
   queueTiming,
   processing,
   runningItem,
-  runningLogs = [],
-  lastFinishedLogs = [],
-  lastFinishedLabel,
+  runningProgressPct,
   lastHourlySyncAt,
   syncMessage,
   onSyncNow,
   onProcessNow,
   onClearDone,
   onClearTailor,
-  logsPanelCleared = false,
   onBumpUrgent,
   onRemoveFromQueue,
   onReorderPending,
 }: Props) {
-  const [expanded, setExpanded] = useState(false);
-  const [logsOpen, setLogsOpen] = useState(true);
-  const [streamOpen, setStreamOpen] = useState(true);
+  const [manageOpen, setManageOpen] = useState(false);
   const [dragKey, setDragKey] = useState<string | null>(null);
   const prevPendingRef = useRef(pendingCount);
-  const frozenStreamRef = useRef<TailorLogEntry[]>([]);
-  const [streamFrozenUntil, setStreamFrozenUntil] = useState(0);
 
   useEffect(() => {
-    if (pendingCount > prevPendingRef.current) {
-      setLogsOpen(true);
-      setStreamOpen(true);
-    }
+    if (pendingCount > prevPendingRef.current) setManageOpen(false);
     prevPendingRef.current = pendingCount;
   }, [pendingCount]);
-
-  useEffect(() => {
-    if (processing) {
-      if (runningLogs.length) frozenStreamRef.current = runningLogs;
-      return;
-    }
-    if (!frozenStreamRef.current.length) return;
-    setStreamFrozenUntil(Date.now() + 45_000);
-    const remaining = 45_000;
-    const id = window.setTimeout(() => {
-      setStreamFrozenUntil(0);
-      frozenStreamRef.current = [];
-    }, remaining);
-    return () => window.clearTimeout(id);
-  }, [processing, runningLogs]);
 
   const pendingItems = useMemo(
     () => queue.filter((item) => item.status === "pending"),
     [queue],
   );
 
-  const recentFinished = useMemo(
-    () => processLogs
-      .filter((entry) => entry.durationMs != null && /^(Finished|Failed|Skipped)/.test(entry.message))
-      .slice(0, 5),
-    [processLogs],
-  );
+  const lastDone = useMemo(() => lastFinishedEntry(processLogs), [processLogs]);
 
-  const collapsedLogs = useMemo(() => collapseLogs(processLogs), [processLogs]);
-
-  const finishedCount = doneInQueue + failedInQueue;
-  const showProgress = totalInQueue > 0 && (processing || finishedCount > 0 || pendingCount > 0);
   const runningElapsedMs = useElapsedMs(runningItem?.startedAt, processing && Boolean(runningItem));
-  const showProcessStream = !logsPanelCleared
-    && (processing || runningLogs.length > 0 || lastFinishedLogs.length > 0);
-  const showClearTailor = !logsPanelCleared && (
-    processing || processLogs.length > 0 || totalInQueue > 0 || showProcessStream
-  );
-  const frozenStreamActive = !processing && streamFrozenUntil > Date.now() && frozenStreamRef.current.length > 0;
-  const streamLogs = processing
-    ? runningLogs
-    : (frozenStreamActive ? frozenStreamRef.current : lastFinishedLogs);
-  const streamLive = processing && Boolean(runningItem);
-  const streamTitle = streamLive
-    ? `Live · ${runningItem?.company ?? "Tailoring"}`
-    : frozenStreamActive
-      ? `Finished · ${runningItem?.company ?? lastFinishedLabel ?? "Last job"}`
-      : lastFinishedLabel ?? "Last job";
-  const streamEmptyLabel = streamLive
-    ? "Connected — waiting for analyze / compile steps from your Mac…"
-    : "No detailed step log saved for the last job.";
+  const jobProgress = Math.min(100, Math.max(0, runningProgressPct ?? (processing ? 12 : 0)));
+  const showRunning = processing && Boolean(runningItem);
+  const showLastDone = !showRunning && lastDone != null;
+  const nextItems = pendingItems.slice(0, NEXT_VISIBLE);
+  const moreCount = Math.max(0, pendingItems.length - NEXT_VISIBLE);
 
-  // One honest line that always says what the pipeline is doing right now, so
-  // you never have to decode the logs to know the state.
-  const waitingForMac = recentFinished.some(
-    (e) => e.outcome === "queued" || /Mac still finishing/.test(e.message),
-  ) && !processing;
-  const statusNow: { tone: "live" | "wait" | "idle" | "queued" | "done"; text: string } = processing && runningItem
-    ? { tone: "live", text: `Building resume for ${runningItem.company} — ${runningItem.title}. This takes ~2-4 min.` }
-    : waitingForMac
-      ? { tone: "wait", text: "Your Mac is finishing a resume started earlier — the next job starts automatically when it frees up." }
-      : recentFinished[0]?.outcome === "done"
-        ? {
-            tone: "done",
-            text: `Resume ready — ${recentFinished[0].message.replace(/^Finished\s+/, "")}. Check the Tailored column for 100% / folder link.`,
-          }
-        : pendingCount > 0
-          ? { tone: "queued", text: `${pendingCount} job${pendingCount === 1 ? "" : "s"} waiting — press Process queue or wait for the hourly batch.` }
-          : { tone: "idle", text: "Idle — no jobs running. Select jobs and Tailor, or wait for the hourly sync." };
+  const queueEta = queueTiming.etaMs != null && pendingCount > 0
+    ? formatTailorDuration(queueTiming.etaMs)
+    : null;
 
   function handleDrop(targetKey: string) {
     if (!dragKey || dragKey === targetKey) {
@@ -249,232 +135,149 @@ export default function TailorQueueBar({
     setDragKey(null);
   }
 
-  const timingMeta = [
-    queueTiming.totalDurationMs > 0
-      ? `${formatTailorDuration(queueTiming.totalDurationMs)} spent`
-      : null,
-    queueTiming.avgDurationMs != null
-      ? `avg ${formatTailorDuration(queueTiming.avgDurationMs)}`
-      : null,
-    queueTiming.etaMs != null && pendingCount + (runningItem ? 1 : 0) > 0
-      ? `~${formatTailorDuration(queueTiming.etaMs)} left`
-      : null,
-  ].filter(Boolean).join(" · ");
+  const lastDoneLabel = lastDone
+    ? lastDone.message.replace(/^(Finished|Failed|Skipped)\s+/, "")
+    : "";
+  const lastDoneTone = lastDone?.outcome === "done" || lastDone?.message.startsWith("Finished")
+    ? "done"
+    : lastDone?.outcome === "skip" || lastDone?.message.startsWith("Skipped")
+      ? "skip"
+      : "fail";
 
   return (
-    <div className="tailor-queue-panel" aria-label="Tailor queue">
-      <div className="tailor-queue-bar">
-        <div className="tailor-queue-bar-main">
-          <div className="tailor-queue-bar-stats">
-            <span className="tailor-queue-stat">
-              <strong>{pendingCount}</strong> queued
-            </span>
-            <span className="tailor-queue-stat">
-              <strong>{doneInQueue}</strong> done
-            </span>
-            {failedInQueue > 0 ? (
-              <span className="tailor-queue-stat tailor-queue-stat--failed">
-                <strong>{failedInQueue}</strong> failed/skipped
-              </span>
-            ) : null}
-            {showProgress ? (
-              <span className="tailor-queue-stat tailor-queue-stat--progress">
-                <strong>{overallProgressPct}%</strong> complete
-                <span className="tailor-queue-stat-sub">
-                  {finishedCount + (runningItem ? 1 : 0)}/{totalInQueue}
-                </span>
-              </span>
-            ) : null}
-            {timingMeta ? (
-              <span className="tailor-queue-stat tailor-queue-stat--timing">
-                {timingMeta}
-              </span>
-            ) : null}
-            <span className="tailor-queue-stat tailor-queue-stat--muted">
-              Hourly batch: top {HOURLY_QUEUE_SIZE} by score
-            </span>
-            <span className="tailor-queue-stat tailor-queue-stat--muted">
-              Last sync {formatSyncTime(lastHourlySyncAt)}
-            </span>
-            {pendingCount > 0 ? (
-              <button
-                type="button"
-                className="tailor-queue-expand"
-                onClick={() => setExpanded((v) => !v)}
-              >
-                {expanded ? "Hide queue" : "Reorder queue"}
-              </button>
-            ) : null}
-          </div>
-
-          {showProgress ? (
-            <div className="tailor-queue-progress" aria-label="Queue progress">
-              <div className="tailor-queue-progress-track">
-                <span style={{ width: `${overallProgressPct}%` }} />
-              </div>
-              <div className="tailor-queue-progress-meta">
-                <span>{overallProgressPct}% done</span>
-                <span>
-                  {finishedCount} finished · {pendingCount} waiting
-                  {runningItem ? " · 1 running" : ""}
-                </span>
-              </div>
-            </div>
-          ) : null}
-
-          <div className={`tailor-queue-status tailor-queue-status--${statusNow.tone}`}>
-            <span className="tailor-queue-status-dot" aria-hidden />
-            <span className="tailor-queue-status-text">{statusNow.text}</span>
-          </div>
-
-          {processing && runningItem ? (
-            <div className="tailor-queue-running">
-              Tailoring <strong>{runningItem.company}</strong> · {runningItem.title}
-              {runningElapsedMs != null ? (
-                <span className="tailor-queue-running-time">
-                  {formatTailorDuration(runningElapsedMs, true)} elapsed
-                </span>
-              ) : null}
-            </div>
-          ) : null}
-
-          {recentFinished.length > 0 ? (
-            <ul className="tailor-queue-recent">
-              {recentFinished.map((entry) => {
-                const d = classifyFinished(entry);
-                // Strip the redundant "Finished/Failed/Skipped " prefix — the
-                // icon + note already convey state, so show just company · detail.
-                const label = entry.message.replace(/^(Finished|Failed|Skipped)\s+/, "");
-                return (
-                  <li
-                    key={entry.id}
-                    className={`tailor-queue-recent-item tailor-queue-recent-item--${d.tone}`}
-                  >
-                    <span className="tailor-queue-recent-icon" aria-hidden>{d.icon}</span>
-                    <span className="tailor-queue-recent-main">
-                      <span className="tailor-queue-recent-label">{label}</span>
-                      {d.note ? <span className="tailor-queue-recent-note">{d.note}</span> : null}
-                    </span>
-                    <span className="tailor-queue-recent-time">
-                      {formatTailorDuration(entry.durationMs ?? 0)}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : null}
-
-          {syncMessage ? <div className="tailor-queue-message">{syncMessage}</div> : null}
+    <div className="tq-panel" aria-label="Tailor queue">
+      <header className="tq-header">
+        <div className="tq-header-copy">
+          <span className="tq-kicker">Tailor queue</span>
+          <span className="tq-meta">
+            {pendingCount} waiting
+            {doneInQueue > 0 ? ` · ${doneInQueue} done` : ""}
+            {failedInQueue > 0 ? ` · ${failedInQueue} skipped` : ""}
+            <span className="tq-meta-dot" aria-hidden>·</span>
+            sync {formatSyncTime(lastHourlySyncAt)}
+            <span className="tq-meta-dot" aria-hidden>·</span>
+            top {HOURLY_QUEUE_SIZE}/hr
+          </span>
         </div>
-        <div className="tailor-queue-bar-actions">
-          <button type="button" className="tailor-queue-btn" onClick={onSyncNow}>
-            Sync now
+        <div className="tq-header-actions">
+          {pendingCount > 0 ? (
+            <button
+              type="button"
+              className="tq-btn tq-btn--ghost"
+              onClick={() => setManageOpen((v) => !v)}
+            >
+              {manageOpen ? "Done" : "Reorder"}
+            </button>
+          ) : null}
+          <button type="button" className="tq-btn tq-btn--ghost" onClick={onSyncNow}>
+            Sync
           </button>
           <button
             type="button"
-            className="tailor-queue-btn tailor-queue-btn--primary"
+            className="tq-btn tq-btn--primary"
             onClick={onProcessNow}
             disabled={processing || pendingCount === 0}
           >
-            {processing ? "Processing…" : "Process queue"}
+            {processing ? "Running…" : "Process"}
           </button>
           {doneInQueue > 0 ? (
-            <button type="button" className="tailor-queue-btn tailor-queue-btn--ghost" onClick={onClearDone}>
-              Clear done
+            <button type="button" className="tq-btn tq-btn--ghost" onClick={onClearDone}>
+              Clear
             </button>
           ) : null}
-          {showClearTailor ? (
-            <button type="button" className="tailor-queue-btn tailor-queue-btn--ghost" onClick={onClearTailor}>
-              Clear tailor
-            </button>
-          ) : null}
+          <button type="button" className="tq-btn tq-btn--ghost" onClick={onClearTailor}>
+            Reset
+          </button>
         </div>
-      </div>
+      </header>
 
-      {!logsPanelCleared && processLogs.length > 0 ? (
-        <div className={`tailor-queue-logs${logsOpen ? " is-open" : ""}`}>
-          <button type="button" className="tailor-queue-logs-toggle" onClick={() => setLogsOpen((v) => !v)}>
-            {logsOpen ? "▾" : "▸"} Queue log · {collapsedLogs.length} lines
-            {collapsedLogs.length !== processLogs.length ? (
-              <span className="tailor-queue-log-collapsed-note"> ({processLogs.length} total)</span>
+      {syncMessage ? <p className="tq-sync-msg">{syncMessage}</p> : null}
+
+      {showRunning && runningItem ? (
+        <section className="tq-now" aria-live="polite">
+          <div className="tq-now-head">
+            <span className="tq-live-pill">
+              <span className="tq-live-dot" aria-hidden />
+              Now tailoring
+            </span>
+            {runningElapsedMs != null ? (
+              <span className="tq-now-elapsed">{formatTailorDuration(runningElapsedMs, true)}</span>
             ) : null}
-          </button>
-          {logsOpen ? (
-            <div className="tailor-queue-logs-body">
-              {collapsedLogs.map((row) => {
-                const spanMs = row.count > 1
-                  ? Math.max(0, Date.parse(row.lastAt) - Date.parse(row.firstAt))
-                  : 0;
-                return (
-                  <div key={row.entry.id} className="tailor-queue-log-line">
-                    <span className="tailor-queue-log-at">{displayProcessLogAt(row.entry.at)}</span>
-                    <span className="tailor-queue-log-msg">
-                      {row.entry.message}
-                      {row.count > 1 ? (
-                        <span className="tailor-queue-log-repeat">
-                          {" "}×{row.count}{spanMs > 1000 ? ` over ${formatTailorDuration(spanMs)}` : ""}
-                        </span>
-                      ) : null}
-                    </span>
-                    {row.entry.durationMs != null ? (
-                      <span className="tailor-queue-log-duration">
-                        {formatTailorDuration(row.entry.durationMs)}
-                      </span>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      {showProcessStream ? (
-        <div className={`tailor-queue-stream${streamOpen ? " is-open" : ""}`}>
-          <button type="button" className="tailor-queue-logs-toggle" onClick={() => setStreamOpen((v) => !v)}>
-            {streamOpen ? "▾" : "▸"} Process log · {streamTitle}
-            {streamLogs.length > 0 ? ` · ${streamLogs.length} lines` : ""}
-            {streamLive ? <span className="tailor-queue-stream-live">Live</span> : null}
-          </button>
-          {streamOpen ? (
-            <div className="tailor-queue-stream-body">
-              <TailorLogStream
-                logs={streamLogs}
-                live={streamLive}
-                emptyLabel={streamEmptyLabel}
+          </div>
+          <div className="tq-now-job">
+            <span className="tq-now-company">{runningItem.company}</span>
+            <span className="tq-now-title">{runningItem.title}</span>
+          </div>
+          <div className="tq-progress-wrap">
+            <div className="tq-progress-track" aria-hidden>
+              <span
+                className="tq-progress-fill is-live"
+                style={{ width: `${jobProgress}%` }}
               />
             </div>
-          ) : null}
-        </div>
+            <div className="tq-progress-labels">
+              <span className="tq-progress-pct">{jobProgress}%</span>
+              {queueEta ? <span className="tq-progress-eta">~{queueEta} for queue</span> : null}
+            </div>
+          </div>
+        </section>
+      ) : showLastDone && lastDone ? (
+        <section className={`tq-finished tq-finished--${lastDoneTone}`} aria-live="polite">
+          <span className="tq-finished-icon" aria-hidden>
+            {lastDoneTone === "done" ? "✓" : lastDoneTone === "skip" ? "–" : "!"}
+          </span>
+          <span className="tq-finished-copy">{lastDoneLabel}</span>
+          <span className="tq-finished-time">{formatTailorDuration(lastDone.durationMs ?? 0)}</span>
+        </section>
+      ) : pendingCount === 0 && !processing ? (
+        <p className="tq-idle">No jobs queued. Select roles to tailor or wait for the hourly batch.</p>
       ) : null}
 
-      {expanded && pendingItems.length > 0 ? (
-        <ul className="tailor-queue-list">
+      {pendingItems.length > 0 && !manageOpen ? (
+        <section className="tq-next">
+          <h3 className="tq-next-label">Up next</h3>
+          <ol className="tq-next-list">
+            {nextItems.map((item, index) => (
+              <li key={item.jobKey} className="tq-next-item">
+                <span className="tq-next-rank">{index + 1}</span>
+                <span className="tq-next-copy">
+                  <strong>{item.company}</strong>
+                  <span>{item.title}</span>
+                </span>
+                <span className="tq-next-score">{item.score}</span>
+              </li>
+            ))}
+          </ol>
+          {moreCount > 0 ? (
+            <p className="tq-next-more">+{moreCount} more in queue</p>
+          ) : null}
+        </section>
+      ) : null}
+
+      {manageOpen && pendingItems.length > 0 ? (
+        <ul className="tq-manage-list">
           {pendingItems.map((item, index) => (
             <li
               key={item.jobKey}
-              className={`tailor-queue-item${dragKey === item.jobKey ? " is-dragging" : ""}`}
+              className={`tq-manage-item${dragKey === item.jobKey ? " is-dragging" : ""}`}
               draggable
               onDragStart={() => setDragKey(item.jobKey)}
               onDragEnd={() => setDragKey(null)}
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => handleDrop(item.jobKey)}
             >
-              <span className="tailor-queue-drag" aria-hidden title="Drag to reorder">⋮⋮</span>
-              <span className="tailor-queue-rank">{index + 1}</span>
-              <span className="tailor-queue-score">{item.score}</span>
-              <span className="tailor-queue-copy">
+              <span className="tq-manage-drag" aria-hidden title="Drag to reorder">⋮⋮</span>
+              <span className="tq-manage-rank">{index + 1}</span>
+              <span className="tq-manage-copy">
                 <strong>{item.company}</strong>
                 <span>{item.title}</span>
               </span>
-              <span className={`tailor-queue-source tailor-queue-source--${item.source}`}>
-                {item.source === "manual" ? "Urgent" : "Hourly"}
-              </span>
-              <div className="tailor-queue-item-actions">
-                <button type="button" className="tailor-queue-mini-btn" onClick={() => onBumpUrgent(item.jobKey)}>
+              <span className="tq-manage-score">{item.score}</span>
+              <div className="tq-manage-actions">
+                <button type="button" className="tq-manage-btn" onClick={() => onBumpUrgent(item.jobKey)}>
                   Top
                 </button>
-                <button type="button" className="tailor-queue-mini-btn tailor-queue-mini-btn--ghost" onClick={() => onRemoveFromQueue(item.jobKey)}>
+                <button type="button" className="tq-manage-btn" onClick={() => onRemoveFromQueue(item.jobKey)}>
                   Remove
                 </button>
               </div>

@@ -173,7 +173,7 @@ function formatRunTime(iso?: string | null): string {
 export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const navigate = useNavigate();
   const { stats, recordClick, getRecord } = useApplyTracker();
-  const { clickedKeySet, recordSavedJob } = useApplyClickLog();
+  const { clickedKeySet, recordSavedJob, records: clickRecords } = useApplyClickLog();
   const tailorStatus = useTailorStatus();
   const { isExcluded, excludeCompany } = useExclusions();
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
@@ -288,23 +288,63 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     };
   }, [refreshJobFeeds]);
 
+  const isJobInFeed = useCallback(
+    (job: Job) => !isExcluded(job) && !clickedKeySet.has(jobDismissKey(job)),
+    [isExcluded, clickedKeySet],
+  );
+
+  const sessionJobMap = useMemo(() => {
+    const bySession = new Map<string, Map<string, Job>>();
+    for (const job of [...hourJobs, ...todayJobs, ...yesterdayJobs]) {
+      if (!job.session_id) continue;
+      const key = jobDismissKey(job);
+      let bucket = bySession.get(job.session_id);
+      if (!bucket) {
+        bucket = new Map();
+        bySession.set(job.session_id, bucket);
+      }
+      bucket.set(key, job);
+    }
+    return bySession;
+  }, [hourJobs, todayJobs, yesterdayJobs]);
+
   const sessionCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    const hourOnlyCounts: Record<string, number> = {};
-    [...todayJobs, ...yesterdayJobs].forEach((j) => {
-      if (j.session_id) counts[j.session_id] = (counts[j.session_id] || 0) + 1;
-    });
-    hourJobs.forEach((j) => {
-      if (!j.session_id) return;
-      hourOnlyCounts[j.session_id] = (hourOnlyCounts[j.session_id] || 0) + 1;
-    });
-    // Prefer the larger count when a session appears in both hour + today files
-    // (pipeline sometimes writes different subsets to jobs.json vs today_jobs.json).
-    for (const [sessionId, count] of Object.entries(hourOnlyCounts)) {
-      counts[sessionId] = Math.max(counts[sessionId] ?? 0, count);
+    for (const [sessionId, jobs] of sessionJobMap) {
+      counts[sessionId] = [...jobs.values()].filter(isJobInFeed).length;
     }
     return counts;
-  }, [hourJobs, todayJobs, yesterdayJobs]);
+  }, [sessionJobMap, isJobInFeed]);
+
+  const sessionTotals = useMemo(() => {
+    const totals: Record<string, number> = {};
+    for (const [sessionId, jobs] of sessionJobMap) {
+      totals[sessionId] = jobs.size;
+    }
+    return totals;
+  }, [sessionJobMap]);
+
+  const periodCounts = useMemo(
+    () => ({
+      hour: hourJobs.filter(isJobInFeed).length,
+      today: todayJobs.filter(isJobInFeed).length,
+      yesterday: yesterdayJobs.filter(isJobInFeed).length,
+    }),
+    [hourJobs, todayJobs, yesterdayJobs, isJobInFeed],
+  );
+
+  const periodClickedCounts = useMemo(() => {
+    const clickedIn = (jobs: Job[]) => {
+      const keys = new Set(jobs.map((j) => jobDismissKey(j)));
+      return clickRecords.filter((r) => keys.has(r.jobKey)).length;
+    };
+    return {
+      hour: clickedIn(hourJobs),
+      today: clickedIn(todayJobs),
+      yesterday: clickedIn(yesterdayJobs),
+      total: clickRecords.length,
+    };
+  }, [clickRecords, hourJobs, todayJobs, yesterdayJobs]);
 
   const sessionPeriod = useMemo(() => {
     const map: Record<string, Period> = {};
@@ -314,23 +354,33 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     return map;
   }, [hourJobs, todayJobs, yesterdayJobs]);
 
+  const jobKeySessionMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const [sessionId, jobs] of sessionJobMap) {
+      for (const key of jobs.keys()) map[key] = sessionId;
+    }
+    return map;
+  }, [sessionJobMap]);
+
   const jobSessionMap = useMemo(() => {
     const map: Record<string, string> = {};
-    [...hourJobs, ...todayJobs, ...yesterdayJobs].forEach((job) => {
-      if (job.job_url && job.session_id) map[job.job_url] = job.session_id;
-    });
+    for (const [sessionId, jobs] of sessionJobMap) {
+      for (const job of jobs.values()) {
+        if (job.job_url) map[job.job_url] = sessionId;
+      }
+    }
     return map;
-  }, [hourJobs, todayJobs, yesterdayJobs]);
+  }, [sessionJobMap]);
 
   const sessionClickCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    Object.entries(stats.appliedJobs).forEach(([jobUrl, record]) => {
-      const sessionId = jobSessionMap[jobUrl];
-      if (!sessionId) return;
-      counts[sessionId] = (counts[sessionId] || 0) + (record.clicks || 0);
-    });
+    for (const record of clickRecords) {
+      const sessionId = jobKeySessionMap[record.jobKey] || jobSessionMap[record.jobUrl];
+      if (!sessionId) continue;
+      counts[sessionId] = (counts[sessionId] || 0) + 1;
+    }
     return counts;
-  }, [jobSessionMap, stats.appliedJobs]);
+  }, [jobKeySessionMap, jobSessionMap, clickRecords]);
 
   const rawJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : yesterdayJobs;
   const baseJobs = selectedSession ? rawJobs.filter((j) => j.session_id === selectedSession) : rawJobs;
@@ -340,7 +390,8 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
 
     const cards: RunCard[] = Object.entries(sessionCounts)
       .flatMap(([sessionId, count]) => {
-        if (count <= 0) return [];
+        const clickCount = sessionClickCounts[sessionId] ?? 0;
+        if (count <= 0 && clickCount <= 0) return [];
         // Include sessions from ALL periods (hour/today/yesterday) so the sidebar
         // can show the 10 most recent regardless of which period tab is selected.
         // Each card keeps its own targetPeriod for correct click-through nav.
@@ -348,14 +399,15 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
         if (!targetPeriod) return [];
 
         const history = historyById.get(sessionId);
+        const totalJobs = sessionTotals[sessionId] ?? history?.total_jobs ?? count + clickCount;
         return [{
           session_id: sessionId,
           run_at: history?.run_at || sessionId,
-          total_jobs: history?.total_jobs ?? count,
+          total_jobs: history?.total_jobs ?? totalJobs,
           count,
           targetPeriod,
           displayAt: history?.run_at || sessionId,
-          clickCount: sessionClickCounts[sessionId] ?? 0,
+          clickCount,
           progressPct: 0,
           segmentsActive: 0,
         }];
@@ -363,14 +415,15 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       .sort((a, b) => toMs(b.displayAt) - toMs(a.displayAt));
 
     return cards.map((r) => {
-      const progress = r.count > 0 ? r.clickCount / r.count : 0;
+      const total = Math.max(r.total_jobs, r.count + r.clickCount);
+      const progress = total > 0 ? r.clickCount / total : 0;
       return {
         ...r,
         progressPct: Math.min(100, Math.round(progress * 100)),
         segmentsActive: Math.min(24, Math.max(0, Math.round(progress * 24))),
       };
     });
-  }, [runHistory, sessionCounts, sessionPeriod, sessionClickCounts]);
+  }, [runHistory, sessionCounts, sessionPeriod, sessionClickCounts, sessionTotals]);
 
   const feedJobsBeforeDismiss = useMemo(() => {
     let jobs = [...baseJobs];
@@ -542,36 +595,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     onProcessJob: processQueueJob,
   });
 
-  const tailorQueueLogContext = useMemo(() => {
-    const runningKey = tailorQueue.runningItem?.jobKey;
-    const runningRecord = runningKey ? tailorStatus.getRecord(runningKey) : null;
-    const runningLogs = runningRecord?.logs ?? [];
-
-    let lastFinishedLogs: typeof runningLogs = [];
-    let lastFinishedLabel: string | undefined;
-    let bestAt = 0;
-
-    for (const item of tailorQueue.queue) {
-      if (item.status !== "done" && item.status !== "failed") continue;
-      if (item.jobKey === runningKey) continue;
-      const record = tailorStatus.getRecord(item.jobKey);
-      if (!record?.logs?.length) continue;
-      const at = Date.parse(record.tailoredAt || item.startedAt || "0");
-      if (at >= bestAt) {
-        bestAt = at;
-        lastFinishedLogs = record.logs;
-        lastFinishedLabel = `${record.company} · ${record.title}`;
-      }
-    }
-
-    return { runningLogs, lastFinishedLogs, lastFinishedLabel };
-  }, [
-    tailorQueue.runningItem,
-    tailorQueue.queue,
-    tailorStatus.records,
-    tailorStatus.getRecord,
-  ]);
-
   const handleSaveJobWithQueueCleanup = useCallback((job: Job, source: SavedJobSource) => {
     if (!job.job_url) return;
     recordSavedJob(job, source);
@@ -718,12 +741,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   // Yesterday) so the Live Feed and Today page share one consistent design.
   const isTodayBoard = true;
 
-  const catalogJobs = useMemo(() => {
-    let jobs = [...baseJobs];
-    jobs = jobs.filter((j) => !isExcluded(j));
-    jobs = jobs.filter((j) => !clickedKeySet.has(jobDismissKey(j)));
-    return jobs;
-  }, [baseJobs, isExcluded, clickedKeySet]);
+  const catalogJobs = useMemo(
+    () => baseJobs.filter(isJobInFeed),
+    [baseJobs, isJobInFeed],
+  );
 
   const viewCounts = useMemo(
     () => ({
@@ -887,7 +908,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               setTermFilter("all");
               setSelectedSession(null);
             }}
-            periodCounts={{ hour: hourJobs.length, today: todayJobs.length, yesterday: yesterdayJobs.length }}
+            periodCounts={periodCounts}
+            periodClickedCounts={periodClickedCounts}
+            clickedTotal={clickRecords.length}
             runCards={runCards}
             selectedSession={selectedSession}
             onSessionSelect={handleSessionSelect}
@@ -976,10 +999,12 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 processLogs={tailorQueue.processLogs}
                 queueTiming={tailorQueue.queueTiming}
                 processing={tailorQueue.processing}
-                runningItem={tailorQueue.runningItem}
-                runningLogs={tailorQueueLogContext.runningLogs}
-                lastFinishedLogs={tailorQueueLogContext.lastFinishedLogs}
-                lastFinishedLabel={tailorQueueLogContext.lastFinishedLabel}
+            runningItem={tailorQueue.runningItem}
+            runningProgressPct={
+              tailorQueue.runningItem
+                ? tailorStatus.getRecord(tailorQueue.runningItem.jobKey)?.progressPct ?? 12
+                : undefined
+            }
                 lastHourlySyncAt={tailorQueue.lastHourlySyncAt}
                 syncMessage={tailorQueue.syncMessage}
                 onSyncNow={() => tailorQueue.runHourlySync(displayedJobs, true)}
@@ -1088,7 +1113,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                   >
                     {p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}
                     <span className="count">
-                      {p === "hour" ? hourJobs.length : p === "today" ? todayJobs.length : yesterdayJobs.length}
+                      {p === "hour" ? periodCounts.hour : p === "today" ? periodCounts.today : periodCounts.yesterday}
                     </span>
                   </button>
                 ))}

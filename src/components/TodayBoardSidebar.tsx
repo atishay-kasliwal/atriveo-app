@@ -18,6 +18,8 @@ interface Props {
   period: Period;
   onPeriodChange: (period: Period) => void;
   periodCounts: { hour: number; today: number; yesterday: number };
+  periodClickedCounts: { hour: number; today: number; yesterday: number; total: number };
+  clickedTotal: number;
   runCards: RunCard[];
   selectedSession: string | null;
   onSessionSelect: (sessionId: string | null, targetPeriod?: Period | null) => void;
@@ -39,6 +41,8 @@ export default function TodayBoardSidebar({
   period,
   onPeriodChange,
   periodCounts,
+  periodClickedCounts,
+  clickedTotal,
   runCards,
   selectedSession,
   onSessionSelect,
@@ -71,7 +75,10 @@ export default function TodayBoardSidebar({
       <section className="today-board-nav-section">
         <h2 className="today-board-nav-label">Pipeline</h2>
         <ul className="today-board-nav-list">
-          {(["hour", "today", "yesterday"] as Period[]).map((p) => (
+          {(["hour", "today", "yesterday"] as Period[]).map((p) => {
+            const count = p === "hour" ? periodCounts.hour : p === "today" ? periodCounts.today : periodCounts.yesterday;
+            const clicked = p === "hour" ? periodClickedCounts.hour : p === "today" ? periodClickedCounts.today : periodClickedCounts.yesterday;
+            return (
             <li key={p}>
               <button
                 type="button"
@@ -79,15 +86,27 @@ export default function TodayBoardSidebar({
                 onClick={() => onPeriodChange(p)}
               >
                 <span>{p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}</span>
-                <span className="today-board-nav-count">
-                  {p === "hour" ? periodCounts.hour : p === "today" ? periodCounts.today : periodCounts.yesterday}
+                <span className="today-board-nav-counts">
+                  <span className="today-board-nav-count">{count}</span>
+                  {clicked > 0 ? (
+                    <span className="today-board-nav-clicked" title={`${clicked} saved from this period`}>
+                      {clicked} clicked
+                    </span>
+                  ) : null}
                 </span>
               </button>
             </li>
-          ))}
+            );
+          })}
           <li>
             <a href="/weekly" className="today-board-nav-item today-board-nav-link">
               <span>7 Days</span>
+            </a>
+          </li>
+          <li>
+            <a href="/clickedjobs" className="today-board-nav-item today-board-nav-link">
+              <span>Clicked</span>
+              <span className="today-board-nav-count">{clickedTotal}</span>
             </a>
           </li>
         </ul>
@@ -106,12 +125,21 @@ export default function TodayBoardSidebar({
                     className={`today-board-nav-item today-board-session-item${isActive ? " is-active" : ""}`}
                     onClick={() => onSessionSelect(isActive ? null : r.session_id, r.targetPeriod)}
                   >
-                    <span className="today-board-session-index">{index + 1}</span>
-                    <span className="today-board-session-body">
-                      <span className="today-board-session-time">{formatRunTime(r.displayAt)}</span>
-                      <span className="today-board-session-meta">
-                        {r.progressPct}% · {r.count} jobs
+                    <span className="today-board-session-leading">
+                      <span className="today-board-session-index">{index + 1}</span>
+                      <span className="today-board-session-body">
+                        <span className="today-board-session-time">{formatRunTime(r.displayAt)}</span>
+                        <span className="today-board-session-meta">
+                          {r.clickCount > 0 ? `${r.clickCount} clicked` : "no clicks yet"}
+                          {r.progressPct > 0 ? ` · ${r.progressPct}%` : ""}
+                        </span>
                       </span>
+                    </span>
+                    <span className="today-board-nav-counts">
+                      <span className="today-board-nav-count">{r.count}</span>
+                      {r.clickCount > 0 ? (
+                        <span className="today-board-nav-clicked">{r.clickCount} clicked</span>
+                      ) : null}
                     </span>
                   </button>
                 </li>
