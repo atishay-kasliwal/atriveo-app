@@ -24,8 +24,11 @@ const OUT_ROOT = path.join(DRIVE_ROOT, "tailored-resumes");
 const OLLAMA = "http://127.0.0.1:11434";
 const SIDECAR = "http://127.0.0.1:8787";
 const DEFAULT_MODEL = "gemma3:12b";
-// Buckets older than this are suspicious — the scraper runs daily at 08:00.
-const JD_STALE_HOURS = 18;
+// Buckets older than this are suspicious. The scraper + auto-export run hourly
+// (com.atriveo.job-pipeline → run-pipeline-and-export.sh), so anything older
+// than ~2h means the auto-export after the last scrape failed — check
+// /tmp/atriveo_pipeline.log.
+const JD_STALE_HOURS = 2;
 
 const C = { red: "\x1b[31m", green: "\x1b[32m", yellow: "\x1b[33m", dim: "\x1b[2m", bold: "\x1b[1m", reset: "\x1b[0m" };
 let failures = 0;
