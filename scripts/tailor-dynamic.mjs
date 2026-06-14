@@ -213,6 +213,94 @@ export function applyCritique(ai, critique) {
   return ai;
 }
 
+// Deterministically guarantee a UNIQUE leading action verb per bullet across the
+// whole resume — the model often repeats "Built/Developed/Engineered". When a
+// verb repeats, swap the later bullet's first word for an unused synonym that
+// preserves meaning. Truth is unaffected (only the verb changes).
+const VERB_SYNONYMS = {
+  built: ["Engineered", "Developed", "Created", "Implemented", "Assembled"],
+  developed: ["Built", "Engineered", "Created", "Implemented", "Produced"],
+  engineered: ["Built", "Architected", "Developed", "Designed", "Constructed"],
+  architected: ["Designed", "Engineered", "Structured", "Built"],
+  designed: ["Architected", "Engineered", "Modeled", "Built"],
+  optimized: ["Tuned", "Streamlined", "Accelerated", "Improved", "Refined"],
+  reduced: ["Cut", "Lowered", "Trimmed", "Slashed", "Decreased"],
+  automated: ["Streamlined", "Orchestrated", "Scripted", "Mechanized"],
+  delivered: ["Shipped", "Launched", "Released", "Produced"],
+  scaled: ["Grew", "Expanded", "Extended"],
+  deployed: ["Shipped", "Released", "Launched", "Rolled out"],
+  led: ["Drove", "Directed", "Spearheaded", "Headed"],
+  created: ["Built", "Developed", "Produced", "Established"],
+  implemented: ["Built", "Developed", "Deployed", "Integrated"],
+  provisioned: ["Configured", "Set up", "Established"],
+  generated: ["Produced", "Created", "Compiled"],
+  owned: ["Drove", "Directed", "Managed"],
+};
+
+export function dedupeVerbs(ai) {
+  const used = new Set();
+  const firstWord = (t) => (String(t).trim().match(/^([A-Za-z]+)/) || [])[1] || "";
+  const swap = (text) => {
+    const w = firstWord(text);
+    if (!w) return text;
+    const lower = w.toLowerCase();
+    if (!used.has(lower)) { used.add(lower); return text; }
+    // find an unused synonym
+    const opts = VERB_SYNONYMS[lower] || [];
+    for (const alt of opts) {
+      if (!used.has(alt.toLowerCase())) {
+        used.add(alt.toLowerCase());
+        return alt + text.slice(w.length);
+      }
+    }
+    // no synonym free — keep original but mark used (best effort)
+    return text;
+  };
+  for (const exp of ai.experience || []) for (const b of exp.bullets || []) b.text = swap(b.text);
+  for (const proj of ai.projects || []) for (const b of proj.bullets || []) b.text = swap(b.text);
+  return ai;
+}
+
+// De-duplicate skill items across all skills lines (case-insensitive), and drop
+// redundant aliases (e.g. "Google Cloud Platform" + "GCP" → keep one). Keeps the
+// first occurrence; removes the rest so no skill shows twice.
+const SKILL_ALIASES = [
+  ["google cloud platform", "gcp"],
+  ["amazon web services", "aws"],
+  ["postgresql", "postgres"],
+  ["javascript", "js"],
+  ["typescript", "ts"],
+  ["rest api", "rest apis", "restful apis", "rest"],
+  ["ci/cd", "cicd"],
+  ["large language models", "llms", "llm"],
+];
+function canonicalSkill(s) {
+  const n = s.toLowerCase().replace(/[^a-z0-9+#.]/g, "");
+  for (const group of SKILL_ALIASES) {
+    const norm = group.map((g) => g.replace(/[^a-z0-9+#.]/g, ""));
+    if (norm.includes(n)) return norm[0];
+  }
+  return n;
+}
+
+export function dedupeSkills(skillsLines) {
+  const seen = new Set();
+  return (skillsLines || []).map((line) => {
+    const colon = line.indexOf(":");
+    if (colon === -1) return line;
+    const label = line.slice(0, colon);
+    const items = line.slice(colon + 1).split(",").map((s) => s.trim()).filter(Boolean);
+    const kept = [];
+    for (const it of items) {
+      const key = canonicalSkill(it);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      kept.push(it);
+    }
+    return kept.length ? `${label}: ${kept.join(", ")}` : "";
+  }).filter(Boolean);
+}
+
 // ─── Truth guard: strip skills not backed by the safe-claim allowlist ────────
 // Applied to the skills lines. A skill token survives only if some allowlist
 // entry matches it (case-insensitive, ignoring punctuation/spacing).

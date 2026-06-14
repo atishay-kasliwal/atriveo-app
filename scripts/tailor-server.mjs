@@ -27,6 +27,7 @@ import {
   CRITIQUE_SYSTEM, CRITIQUE_SCHEMA,
   buildUserMessage, assembleResume, filterSkillsLine,
   collectDraftBullets, buildCritiqueMessage, applyCritique,
+  dedupeVerbs, dedupeSkills,
 } from "./tailor-dynamic.mjs";
 
 // Load the engine bank once at startup.
@@ -833,6 +834,10 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
       onLog?.("warn", `Critique pass skipped (${e.message}) — using first-draft bullets`);
     }
 
+    // ── Unique action verbs (deterministic — models repeat them) ──
+    dedupeVerbs(ai);
+    onLog?.("result", "Unique-verb pass — every bullet starts with a distinct action verb");
+
     // ── Metric lock (rule 28): flag any number not present in the bank ──
     const invented = [];
     const checkBullet = (b) => {
@@ -866,6 +871,10 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
     } else {
       onLog?.("result", "Truth guard passed — every skill token verified against resume evidence");
     }
+
+    // De-dupe skills across lines (e.g. "Google Cloud Platform" + "GCP", or a tool
+    // listed in two categories) so no skill shows twice.
+    ai.skills = dedupeSkills(ai.skills);
 
     onLog?.("step", "Writing optimizer.json…");
     fs.writeFileSync(path.join(dir, "optimizer.json"), JSON.stringify(ai, null, 2));
