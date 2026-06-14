@@ -11,6 +11,7 @@ import Cart from "./pages/Cart";
 import States from "./pages/States";
 import EmailFinder from "./pages/EmailFinder";
 import ClickedJobs from "./pages/ClickedJobs";
+import Tailored from "./pages/Tailored";
 import ResumeOptimizer from "./pages/ResumeOptimizer";
 import ManualTailor from "./pages/ManualTailor";
 import "./index.css";
@@ -114,6 +115,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ClickedJobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tailored"
+          element={
+            <ProtectedRoute>
+              <Tailored />
             </ProtectedRoute>
           }
         />

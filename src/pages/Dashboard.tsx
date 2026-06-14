@@ -19,7 +19,6 @@ import type { TailorRecord } from "../types/tailorQueue";
 import type { SavedJobSource } from "../hooks/useApplyClickLog";
 import JobTable from "../components/JobTable";
 import JobCard from "../components/JobCard";
-import TailorQueueBar from "../components/TailorQueueBar";
 import { careerOpsRating } from "../utils/jobPresentation";
 import type { Period, SortBy, SortDir } from "./Dashboard.types";
 import { defaultSortDir, sortJobs } from "../utils/jobSort";
@@ -989,33 +988,8 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 <div className="feed-refresh-notice" role="status">{feedRefreshNotice}</div>
               ) : null}
 
-              <TailorQueueBar
-                queue={tailorQueue.queue}
-                pendingCount={tailorQueue.pendingCount}
-                doneInQueue={tailorQueue.doneInQueue}
-                failedInQueue={tailorQueue.failedInQueue}
-                totalInQueue={tailorQueue.totalInQueue}
-                overallProgressPct={tailorQueue.overallProgressPct}
-                processLogs={tailorQueue.processLogs}
-                queueTiming={tailorQueue.queueTiming}
-                processing={tailorQueue.processing}
-            runningItem={tailorQueue.runningItem}
-            runningProgressPct={
-              tailorQueue.runningItem
-                ? tailorStatus.getRecord(tailorQueue.runningItem.jobKey)?.progressPct ?? 12
-                : undefined
-            }
-                lastHourlySyncAt={tailorQueue.lastHourlySyncAt}
-                syncMessage={tailorQueue.syncMessage}
-                onSyncNow={() => tailorQueue.runHourlySync(displayedJobs, true)}
-                onProcessNow={() => void tailorQueue.processQueue()}
-                onClearDone={tailorQueue.clearDone}
-                onClearTailor={tailorQueue.clearTailor}
-                logsPanelCleared={tailorQueue.logsPanelCleared}
-                onBumpUrgent={tailorQueue.bumpUrgent}
-                onRemoveFromQueue={tailorQueue.removeFromQueue}
-                onReorderPending={tailorQueue.reorderPending}
-              />
+              {/* Tailor Queue bar removed from the feed — queue still runs in the
+                  background; view created resumes on the /tailored page. */}
               <BulkJobCopyBar
                 variant="board"
                 selectedCount={jobSelection.selectedCount}
