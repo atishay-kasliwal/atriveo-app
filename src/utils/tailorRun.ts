@@ -108,6 +108,35 @@ export async function checkJobOnDisk(job: Job): Promise<{ found: boolean; pdfPat
   }
 }
 
+export interface TailoredResumeOnDisk {
+  folder: string;
+  dateDir: string;
+  dir: string;
+  pdfPath: string;
+  company: string;
+  title: string;
+  jobUrl: string;
+  score: number | null;
+  ats: string | null;
+  tailoredAt: string | null;
+}
+
+/** Source-of-truth list of created resumes, read from the Mac drive (not localStorage). */
+export async function listTailoredResumes(): Promise<TailoredResumeOnDisk[]> {
+  try {
+    const res = await fetch(`${getTailorServerBase()}/list-tailored?t=${Date.now()}`, {
+      cache: "no-store",
+      credentials: "include",
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data.resumes) ? data.resumes as TailoredResumeOnDisk[] : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function openTailorPath(targetPath: string): Promise<void> {
   const res = await fetch(`${getTailorServerBase()}/open`, {
     method: "POST",

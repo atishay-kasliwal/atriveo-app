@@ -1045,6 +1045,60 @@ const server = http.createServer(async (req, res) => {
 
   // Check if a job already completed on disk (used after stream drop/timeout).
   // POST /check-job { company, title } → { ok, found, pdfPath, dir, folder, ats }
+  // List ALL tailored resumes that exist on disk (source of truth, independent
+  // of the browser's localStorage). Scans the last few date folders so the
+  // UTC/EST date boundary never hides today's runs. GET /list-tailored
+  if (req.method === "GET" && pathname === "/list-tailored") {
+    try {
+      const out = [];
+      if (fs.existsSync(OUT_ROOT)) {
+        // newest date dirs first, scan up to 5 days back
+        const dateDirs = fs.readdirSync(OUT_ROOT)
+          .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
+          .sort()
+          .reverse()
+          .slice(0, 5);
+        for (const dd of dateDirs) {
+          const dateDir = path.join(OUT_ROOT, dd);
+          let folders;
+          try { folders = fs.readdirSync(dateDir).filter((d) => /^\d+-/.test(d)); }
+          catch { continue; }
+          for (const folder of folders) {
+            const dir = path.join(dateDir, folder);
+            const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
+            if (!fs.existsSync(pdfPath)) continue; // only finished resumes
+            let meta = {};
+            try { meta = JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8")); } catch { /* none */ }
+            let ats = null;
+            try {
+              const opt = JSON.parse(fs.readFileSync(path.join(dir, "optimizer.json"), "utf8"));
+              if (opt.ats_before != null && opt.ats_after != null) ats = `${opt.ats_before}→${opt.ats_after}`;
+            } catch { /* none */ }
+            out.push({
+              folder,
+              dateDir: dd,
+              dir,
+              pdfPath,
+              company: meta.company || folder,
+              title: meta.role || "",
+              jobUrl: meta.url || "",
+              score: meta.score_pct ?? null,
+              ats,
+              tailoredAt: meta.tailored_at || null,
+            });
+          }
+        }
+      }
+      // newest first by tailoredAt
+      out.sort((a, b) => new Date(b.tailoredAt || 0) - new Date(a.tailoredAt || 0));
+      res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+      return res.end(JSON.stringify({ ok: true, resumes: out }));
+    } catch (e) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+    }
+  }
+
   if (req.method === "POST" && pathname === "/check-job") {
     let raw = "";
     req.on("data", (c) => (raw += c));
