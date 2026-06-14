@@ -270,7 +270,7 @@
     "summary": "TITLE: Software Engineer II EMPLOYER: Amergis Healthcare Staffing, Inc.",
     "title": "Software Engineer II",
     "ats_score": 44,
-    "fit_score": 10
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4428194836",
@@ -6189,7 +6189,7 @@
     "site": "linkedin",
     "title": "Software Engineer",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4425334809",
@@ -6981,7 +6981,7 @@
     "summary": "What you'll do...We are seeking a Distinguished Software Engineer to define and drive the technical architecture for Walmart\u2019s next\\-generation omni\\-channel Ad Experiences platform.",
     "title": "Distinguished, Software Engineer",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4426324341",
@@ -13542,7 +13542,7 @@
     "summary": "**About The Company** SynergisticIT is a leading technology training and placement organization dedicated to bridging the gap between aspiring tech professionals and top\\-tier employers.",
     "title": "Backend Developer",
     "ats_score": 50,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-06-13T20:10:43Z",
@@ -15246,7 +15246,7 @@
     "summary": "**Struggling to Get Interviews or Offers by Companies?** **Get Hired with a Process which is definite\\-When you want Surety not a Maybe** Many job seekers feel stuck because the tech market has becom\u2026",
     "title": "entry level software developer/AI engineer",
     "ats_score": 50,
-    "fit_score": 3
+    "fit_score": 5
   },
   {
     "session_id": "2026-06-14T02:06:53Z",
@@ -15898,5 +15898,89 @@
     "title": "Python Backend Engineer - Remote",
     "ats_score": 38,
     "fit_score": 7
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4427413066",
+    "session_id": "2026-06-14T03:05:08Z",
+    "batch_time": "2026-06-14T03:05:04Z",
+    "company": "Jack & Jill",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "New York, NY",
+    "max_exp": 3.0,
+    "min_exp": 1.0,
+    "pipeline": "standard",
+    "score": 133,
+    "score_pct": 53,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
+    "title": "Forward Deployed Software Engineer ($120K - $150K + $400k Equity) at Arzana",
+    "ats_score": 25,
+    "fit_score": 3
+  },
+  {
+    "session_id": "2026-06-14T03:05:08Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4427410168",
+    "batch_time": "2026-06-14T03:05:04Z",
+    "company": "SynergisticIT",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Philadelphia, PA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 50,
+    "score_pct": 20,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**Your Degree Was Only the Beginning \u2014 Now It\u2019s Time to Get Hired** **\\- Get Hired with a Process which Works !** A CS degree gives you a foundation, but employers want more \u2014 they want proof you can\u2026",
+    "title": "junior data scientist/java backend developer",
+    "ats_score": 75,
+    "fit_score": 6
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4428398461",
+    "session_id": "2026-06-14T03:05:08Z",
+    "batch_time": "2026-06-14T03:05:04Z",
+    "company": "Capex Funds",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 42,
+    "score_pct": 17,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "In this full\\-time remote role, you will collaborate with senior engineers to implement back\\-end services, integrate APIs, and improve system performance and reliability.",
+    "title": "Software Engineer Intern",
+    "ats_score": 50,
+    "fit_score": 6
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4427403870",
+    "session_id": "2026-06-14T03:05:08Z",
+    "batch_time": "2026-06-14T03:05:04Z",
+    "company": "Jack & Jill",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
+    "title": "Machine Learning Engineer ($175K \u2013 $250K + Equity) at CTGT, Inc.",
+    "ats_score": 20,
+    "fit_score": 2
   }
 ]
