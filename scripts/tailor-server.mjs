@@ -29,6 +29,7 @@ import {
   collectDraftBullets, buildCritiqueMessage, applyCritique,
   dedupeVerbs, dedupeSkills,
 } from "./tailor-dynamic.mjs";
+import { buildSkillsLines, capSkillsLineToOnePhysicalLine } from "./skills-library.mjs";
 
 // Load the engine bank once at startup.
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -855,26 +856,45 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
       onLog?.("result", "Metric lock passed — every number traces to a real bank bullet");
     }
 
-    onLog?.("step", "Phase 2/4 · Truth guard — filtering skills against safe-claim allowlist");
-    const droppedSkills = [];
-    ai.skills = (ai.skills || []).map((line, i) => {
-      onLog?.("think", `Checking skills line ${i + 1}/${ai.skills.length}…`);
-      const { line: kept, dropped } = filterSkillsLine(line, SAFE_CLAIMS);
-      droppedSkills.push(...dropped);
-      if (dropped.length) onLog?.("warn", `  Dropped from line ${i + 1}: ${dropped.join(", ")}`);
-      return kept;
-    }).filter(Boolean);
-    if (droppedSkills.length) {
-      onLog?.("warn", `Truth guard total dropped: ${droppedSkills.join(", ")}`);
-      ai._dropped_skills = droppedSkills;
-      log(`  dropped fabricated skills: ${droppedSkills.join(", ")}`);
+    // Skills come from the curated library, SELECTED against this JD — not from
+    // the model's free-form guess. The library is truthful + canonically named,
+    // so it never invents a skill, never duplicates an alias, and (capped here)
+    // always fits one physical line. The model's filtered skills are a fallback.
+    onLog?.("step", "Phase 2/4 · Skills — selecting from curated library against the JD");
+    const libSkills = buildSkillsLines(jd);
+    if (libSkills.length >= 4) {
+      ai.skills = libSkills;
+      onLog?.("result", `Library selected ${libSkills.length} JD-aligned lines (truthful, one line each)`);
+      for (const line of libSkills) onLog?.("think", `  ${line}`);
     } else {
-      onLog?.("result", "Truth guard passed — every skill token verified against resume evidence");
+      onLog?.("warn", "Library produced too few lines — falling back to model skills + truth guard");
+      const droppedSkills = [];
+      ai.skills = (ai.skills || []).map((line, i) => {
+        const { line: kept, dropped } = filterSkillsLine(line, SAFE_CLAIMS);
+        droppedSkills.push(...dropped);
+        if (dropped.length) onLog?.("warn", `  Dropped from line ${i + 1}: ${dropped.join(", ")}`);
+        return kept;
+      }).filter(Boolean);
+      if (droppedSkills.length) {
+        ai._dropped_skills = droppedSkills;
+        log(`  dropped fabricated skills: ${droppedSkills.join(", ")}`);
+      }
+      ai.skills = dedupeSkills(ai.skills);
     }
 
-    // De-dupe skills across lines (e.g. "Google Cloud Platform" + "GCP", or a tool
-    // listed in two categories) so no skill shows twice.
-    ai.skills = dedupeSkills(ai.skills);
+    // Final one-physical-line guard on every line, regardless of source — trim
+    // the least-relevant items from the END until the rendered line never wraps.
+    ai.skills = (ai.skills || []).map((line) => {
+      const colon = line.indexOf(":");
+      if (colon === -1) return line;
+      const label = line.slice(0, colon);
+      const items = line.slice(colon + 1).split(",").map((s) => s.trim()).filter(Boolean);
+      const capped = capSkillsLineToOnePhysicalLine(label, items);
+      if (capped.length < items.length) {
+        onLog?.("think", `  Trimmed "${label}" to fit one line: ${items.length}→${capped.length} items`);
+      }
+      return `${label}: ${capped.join(", ")}`;
+    }).filter(Boolean);
 
     onLog?.("step", "Writing optimizer.json…");
     fs.writeFileSync(path.join(dir, "optimizer.json"), JSON.stringify(ai, null, 2));
