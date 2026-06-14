@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-06-14T01:30:40.241178+00:00",
-  "total_analyzed": 30867,
+  "generated_at": "2026-06-14T02:32:55.872140+00:00",
+  "total_analyzed": 30900,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 17880,
-        "Java": 8967,
+        "Python": 17903,
+        "Java": 8989,
         "SQL": 8035,
-        "JavaScript": 5920,
-        "TypeScript": 4706,
+        "JavaScript": 5940,
+        "TypeScript": 4730,
         "Kotlin": 1855,
         "HTML/CSS": 1847,
-        "Swift": 1650,
-        ".NET": 1230,
+        "Swift": 1652,
+        ".NET": 1250,
         "Rust": 1171,
         "Go": 786,
         "Bash/Shell": 752,
         "Scala": 609,
-        "Ruby": 568,
-        "PHP": 253,
+        "Ruby": 589,
+        "PHP": 273,
         "C++": 9,
         "C#": 4
       }
@@ -27,12 +27,12 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 5262,
-        "PyTorch": 3103,
+        "React": 5286,
+        "PyTorch": 3104,
         "TensorFlow": 2449,
-        "Node.js": 1703,
+        "Node.js": 1725,
         "LangChain": 1667,
-        "Angular": 1592,
+        "Angular": 1612,
         "Spring": 1537,
         "Scikit-learn": 1485,
         "Pandas": 1483,
@@ -40,23 +40,23 @@
         "GraphQL": 908,
         "Spring Boot": 885,
         "Express": 798,
-        "FastAPI": 792,
-        "Next.js": 751,
+        "FastAPI": 793,
+        "Next.js": 771,
         "Django": 707,
         "Flask": 620,
-        "Vue": 503,
+        "Vue": 523,
         "Selenium": 357,
-        "Rails": 294,
+        "Rails": 295,
         "Playwright": 214,
-        "NestJS": 119
+        "NestJS": 120
       }
     },
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 8430,
-        "Azure": 4839,
-        "GCP": 4315,
+        "AWS": 8452,
+        "Azure": 4859,
+        "GCP": 4336,
         "S3": 913,
         "Lambda": 806,
         "Serverless": 591,
@@ -75,9 +75,9 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 11752,
+        "Scalability": 11773,
+        "Distributed Systems": 4277,
         "REST API": 4276,
-        "Distributed Systems": 4276,
         "Microservices": 2509,
         "System Design": 2456,
         "Event-Driven": 1376,
@@ -94,7 +94,7 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 6023,
+        "CI/CD": 6043,
         "Kubernetes": 3752,
         "Docker": 3539,
         "Git": 3355,
@@ -114,9 +114,9 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 4258,
+        "ETL/ELT": 4259,
         "PostgreSQL": 2223,
-        "Spark": 2017,
+        "Spark": 2018,
         "Vector DB": 1543,
         "Kafka": 1343,
         "MySQL": 1196,
@@ -136,21 +136,21 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 9397,
-        "LLM": 5798,
-        "Agents": 5596,
-        "GenAI": 3975,
-        "PyTorch": 3103,
-        "RAG": 2750,
+        "Machine Learning": 9399,
+        "LLM": 5800,
+        "Agents": 5605,
+        "GenAI": 3976,
+        "PyTorch": 3104,
+        "RAG": 2751,
         "TensorFlow": 2449,
         "NLP": 2427,
-        "Prompt Eng": 1865,
+        "Prompt Eng": 1866,
         "Deep Learning": 1854,
         "LangChain": 1667,
-        "OpenAI": 1598,
+        "OpenAI": 1599,
         "Fine-tuning": 1563,
         "Embeddings": 810,
-        "Hugging Face": 747,
+        "Hugging Face": 748,
         "SageMaker": 553,
         "Vertex AI": 462,
         "MLflow": 437
@@ -173,11 +173,11 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 7634,
+        "Cross-functional": 7636,
         "Code Review": 5899,
-        "Mentorship": 5631,
+        "Mentorship": 5652,
         "Agile/Scrum": 4550,
-        "Leadership": 1730,
+        "Leadership": 1732,
         "On-call": 1589
       }
     }
