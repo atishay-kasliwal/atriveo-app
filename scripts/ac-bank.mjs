@@ -66,18 +66,30 @@ function score(acCaps, jdVec, themeWeights = {}) {
   for (const [concept, jdVal] of Object.entries(jdVec)) {
     const acVal = acCaps[concept] ?? 0;
     const w = themeWeights[concept] ?? 1;
-    dot += (jdVal / 100) * (acVal / 100) * w;
+    // Steepen: square the AC capability so a strong-fit bullet (cap 90) clearly
+    // beats a weak-fit one (cap 30) on a JD-emphasized concept, instead of both
+    // scoring "some". This is what makes selection actually JD-driven.
+    dot += (jdVal / 100) * Math.pow(acVal / 100, 2) * w;
   }
   return dot;
 }
 
 // ── Theme pick: which theme's weights best match the JD vector ────────────────
 export function pickTheme(jdVec, themes) {
+  // Cosine similarity between the JD vector and each theme's weight vector, so a
+  // theme with larger total weights can't always win on raw sum. This stops
+  // ml-engineering/ai-llm (heavy profiles) from swallowing cloud/data JDs.
+  const jdNorm = Math.sqrt(Object.values(jdVec).reduce((s, v) => s + (v / 100) ** 2, 0)) || 1;
   let best = null, bestScore = -1;
   for (const [name, t] of Object.entries(themes || {})) {
-    let s = 0;
-    for (const [c, w] of Object.entries(t.weights || {})) s += (jdVec[c] ?? 0) / 100 * w;
-    if (s > bestScore) { bestScore = s; best = { name, ...t }; }
+    const w = t.weights || {};
+    let dot = 0, wNorm = 0;
+    for (const [c, wv] of Object.entries(w)) {
+      dot += (jdVec[c] ?? 0) / 100 * wv;
+      wNorm += wv ** 2;
+    }
+    const sim = dot / (jdNorm * (Math.sqrt(wNorm) || 1));
+    if (sim > bestScore) { bestScore = sim; best = { name, ...t }; }
   }
   return best;
 }
@@ -113,7 +125,9 @@ export function compose(jd, bank) {
   const tw = theme?.weights || {};
 
   const byRole = (r) => acs.filter((a) => a.slot_kind === "experience" && a.role === r && (a.visibility?.default !== false));
-  const scoreAc = (a) => score(a.capabilities || {}, jdVec, tw) + (a.strength?.recruiter || 9) / 50;
+  // JD fit DOMINATES; strength is only a small tiebreaker (was /50, too heavy —
+  // it flattened selection so every strong bullet appeared on every resume).
+  const scoreAc = (a) => score(a.capabilities || {}, jdVec, tw) + (a.strength?.recruiter || 9) / 500;
 
   const conceptCount = {}; // for max_ai_bullets etc.
   const tagCount = {};     // for max_per_resume (transformer_models, rag_bullets)
