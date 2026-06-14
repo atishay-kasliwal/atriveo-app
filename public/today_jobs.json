@@ -519,7 +519,7 @@
     "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
     "title": "AI Engineer ($170k\u2013$220k + Equity) at Withshepherd",
     "ats_score": 12,
-    "fit_score": 3
+    "fit_score": 2
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4428394695",
@@ -1107,7 +1107,7 @@
     "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
     "title": "AI Engineer ($170k\u2013$220k + Equity) at Withshepherd",
     "ats_score": 12,
-    "fit_score": 3
+    "fit_score": 2
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4427424354",
@@ -1192,5 +1192,26 @@
     "title": "Founding AI Engineer ($160k-$220k + Equity) at Alcor Labs",
     "ats_score": 0,
     "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4407240172",
+    "session_id": "2026-06-14T09:04:04Z",
+    "batch_time": "2026-06-14T09:04:02Z",
+    "company": "DoorDash",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Seattle, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 176,
+    "score_pct": 70,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**About The Team** Join us in building the world's most reliable on\\-demand logistics engine for delivery!",
+    "title": "Machine Learning Engineer - ETA Team",
+    "ats_score": 37,
+    "fit_score": 6
   }
 ]
