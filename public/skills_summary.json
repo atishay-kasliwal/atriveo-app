@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-06-14T09:30:22.748850+00:00",
-  "total_analyzed": 30925,
+  "generated_at": "2026-06-14T10:31:30.430732+00:00",
+  "total_analyzed": 30928,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 17913,
-        "Java": 8992,
-        "SQL": 8040,
+        "Python": 17914,
+        "Java": 8993,
+        "SQL": 8041,
         "JavaScript": 5941,
         "TypeScript": 4735,
         "Kotlin": 1855,
@@ -55,7 +55,7 @@
       "color": "#f59e0b",
       "skills": {
         "AWS": 8455,
-        "Azure": 4859,
+        "Azure": 4860,
         "GCP": 4336,
         "S3": 914,
         "Lambda": 806,
@@ -136,7 +136,7 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 9405,
+        "Machine Learning": 9406,
         "LLM": 5809,
         "Agents": 5622,
         "GenAI": 3980,
@@ -173,10 +173,10 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 7641,
+        "Cross-functional": 7642,
         "Code Review": 5901,
         "Mentorship": 5654,
-        "Agile/Scrum": 4552,
+        "Agile/Scrum": 4553,
         "Leadership": 1734,
         "On-call": 1589
       }
