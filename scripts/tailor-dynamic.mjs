@@ -57,6 +57,9 @@ STYLE (humanize — must not read AI-generated):
 - No rule-of-three padding ("X, Y, and Z" stacking). No synonym-cycling. One bullet = one concrete win with a number or named tool.
 
 QUALITY BAR (this is why a resume gets the interview — enforce all):
+- XYZ FORMAT (mandatory shape): every bullet = "Accomplished [X measurable result] by doing [Y] using [Z tools]". It MUST contain a quantified result (a number, scale, latency, throughput, %, count, time, or $). A bullet with NO number is INVALID — either add the real metric from the bank bullet, or replace it with a bullet that has one. Example weak→strong: "Designed KPI analytics to track application volume and referral share to prioritize workflows" (NO metric, vague) → "Cut recommendation latency to under 200ms by building a KPI analytics pipeline over 3K+ daily application events".
+- UNIQUE ACTION VERBS: every bullet across the WHOLE resume must start with a DIFFERENT strong verb. Never reuse a verb (no two "Built", no two "Architected"). Rotate across: Architected, Engineered, Built, Designed, Automated, Reduced, Scaled, Shipped, Optimized, Deployed, Migrated, Instrumented, Accelerated, Streamlined, Orchestrated, Productionized, Owned, Stabilized.
+- KILL WEAK BULLETS: if a candidate bullet has no number and no concrete outcome, do NOT include it — pick a stronger bank bullet instead. Vague verbs banned: "Worked on", "Helped", "Assisted", "Responsible for", "Involved in".
 - STRONG OPENER: the FIRST bullet of the first role (Stony Brook) must carry the single strongest metric AND a clear architecture/system-design signal AND the tightest match to this JD's domain. It alone should earn a callback. When the JD is health/AI/backend-infra, lead with the bullet that best signals that lane (the profile's primary lane is Health AI / backend systems / production agentic AI).
 - METRIC CREDIBILITY: NEVER invent, round, or inflate a number. Use ONLY numbers that already appear in the candidate's bank bullet you are rewriting. Prefer concrete before→after with context ("from 11 min to 90s", "from 4h to under 2h") over bare percentages. Avoid dramatic round numbers; do NOT stack round percentages (90%, 40%, 99.9%) back to back — if two adjacent bullets both end in a round %, reword one to a before→after or scale figure.
 - DEPTH, NOT LISTING: every bullet must show HOW something was built or WHY it mattered — architecture, a tradeoff, or a concrete outcome. Never "Built X with Python, Kafka, Redis" as a tool dump. Each tool named must be shown in use.
@@ -76,6 +79,9 @@ EXPERIENCE STRUCTURE (FIXED — do not deviate):
 PROJECTS: choose the 2 projects that best fit the JD, 2 bullets each.
 HEADER: mirror the JD's role title.
 SKILLS: exactly 5 lines (category + comma list), ONLY skills the candidate has, prioritized by JD relevance.
+- Make each line FULL: 6-8 items per line (the resume has space — do not leave thin 3-4 item lines). Draw from every tool in the candidate's bank bullets/tags, not just the few in the selected bullets.
+- Lead each line with the items the JD asks for, then fill with the candidate's other real, relevant tools so the section reads complete.
+- Keep each line to ONE physical line (cap ~8 items); never invent a tool not in the candidate's evidence.
 
 Reference each selected bullet by its id (e.g. "R0.2", "P0.1") AND provide the rewritten text.
 
@@ -146,9 +152,11 @@ export function buildUserMessage(bank, jd) {
 export const CRITIQUE_SYSTEM = `You are a brutal senior hiring manager reviewing a resume draft for THIS job. Output ONE valid JSON object only — no markdown, no prose.
 
 For each bullet you are given, score it 1-10 on this bar:
+- XYZ shape: "[measurable result] by [action] using [tools]". A bullet with NO number/scale/latency/%/count scores 5 or below — it MUST be quantified.
 - Carries a concrete metric or named scale (the strongest bullets carry TWO metrics — reward that).
+- Starts with a strong, UNIQUE action verb (no verb repeats across the set you are given — if two share a verb, one scores lower until reworded).
 - Names the client/system where real (e.g. "for Fidelity") and shows architecture or a real outcome — not a tool dump.
-- Reads as OWNING a system, not completing a task.
+- Reads as OWNING a system, not completing a task. Vague verbs ("Worked on", "Helped", "Designed ... to ...") with no metric score 4 or below.
 - Distinct signal from the other bullets in its section.
 - Natural human cadence, varied structure, no AI-vocabulary, no semicolons/em-dashes, no hyphenated compounds.
 
