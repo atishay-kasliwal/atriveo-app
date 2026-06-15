@@ -351,15 +351,22 @@
     "summary": "Reality Labs focuses on delivering Meta's vision through Augmented Reality (AR) and Smart Devices.",
     "title": "Design Verification Engineer - Machine Learning Accelerators",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "5d4b8cfc6807fbcf08d3cc83d24298fa9e0ed4543b35ef9c00160df3cb0ef3bd",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-15T16:13:14.695Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-15T18:52:55.167Z",
       "error": null,
       "company": "Meta",
-      "title": "Design Verification Engineer - Machine Learning Accelerators"
+      "title": "Design Verification Engineer - Machine Learning Accelerators",
+      "batch_time": "2026-06-14T05:04:32Z",
+      "cached": false,
+      "folder": "01_meta-design-verification-engineer-m",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-14/01/01_meta-design-verification-engineer-m/Atishay Kasliwal.pdf",
+      "resume_slot": 1,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-14/01/01_meta-design-verification-engineer-m",
+      "session_hour": "01"
     },
     "ats_score": 50,
     "fit_score": 3
@@ -7039,15 +7046,22 @@
     "summary": "**Responsibilities** About the Team The USDS JV AI Infra SRE team works with engineering and product teams to build and run large\\-scale, globally distributed, observable, fault\\-tolerant systems for\u2026",
     "title": "Software Engineer, AI Infrastructure - USDS",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "54a7e7fb6cd8d3fe9f5b153600ccd04f768ecc66ec5beed754cdba2aa693647c",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-15T08:27:48.660Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-15T19:03:40.117Z",
       "error": null,
       "company": "TikTok USDS Joint Venture",
-      "title": "Software Engineer, AI Infrastructure - USDS"
+      "title": "Software Engineer, AI Infrastructure - USDS",
+      "batch_time": "2026-06-14T19:08:00Z",
+      "cached": true,
+      "folder": "01_tiktok-usds-joint-ventur-software-engineer-ai-infrastru",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-14/15/01_tiktok-usds-joint-ventur-software-engineer-ai-infrastru/Atishay Kasliwal.pdf",
+      "resume_slot": 1,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-14/15/01_tiktok-usds-joint-ventur-software-engineer-ai-infrastru",
+      "session_hour": "15"
     },
     "ats_score": 41,
     "fit_score": 6
@@ -7165,7 +7179,7 @@
     "summary": "**Who We Are:** Building36, a subsidiary of Alarm.com, has a mission to strengthen contractor and homeowner relationships by designing technology specific to HVAC needs.",
     "title": "Software Engineer II",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4428656486",
@@ -10183,7 +10197,7 @@
       "title": "Software Engineer"
     },
     "ats_score": 50,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4427443560",
@@ -10215,7 +10229,7 @@
       "title": "Data scientist"
     },
     "ats_score": 58,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4418022010",
