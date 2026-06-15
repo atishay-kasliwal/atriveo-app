@@ -1,0 +1,19 @@
+AI Engineer — Production LLM Systems
+
+We are hiring an AI Engineer to design, build, and operate production-grade LLM applications on AWS.
+
+Responsibilities:
+- Build multi-agent LLM workflows and orchestration for customer-facing products
+- Develop FastAPI services for inference, retrieval, and tool-use APIs
+- Implement RAG pipelines with vector search, chunking, and evaluation
+- Deploy and monitor models in production on AWS (ECS/Lambda, S3, CloudWatch)
+- Partner with product and platform teams on reliability, latency, and cost
+
+Requirements:
+- Strong Python and FastAPI experience
+- Hands-on with LangChain or similar agent frameworks
+- Production RAG and embedding/search systems
+- AWS deployment and observability in real workloads
+- Experience shipping AI features to end users, not just notebooks
+
+Nice to have: CI/CD for ML services, guardrails, A/B testing for prompts, and security review for LLM endpoints.

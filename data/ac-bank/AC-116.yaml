@@ -1,0 +1,31 @@
+id: AC-116
+role: mri-research
+slot_kind: project
+achievement_theme: xai
+display_order: 4
+wow_score: 0.89
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Python
+  - SHAP
+fact: Integrated explainable AI with SHAP, LIME, and permutation importance across multimodal prediction models.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - SHAP
+facets:
+  default:
+    phrase: explainable-ai
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Integrated Python SHAP and LIME explainability with permutation importance across multimodal radiomics models on
+      255 samples in production.

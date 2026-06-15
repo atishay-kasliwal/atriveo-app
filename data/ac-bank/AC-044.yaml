@@ -1,0 +1,33 @@
+id: AC-044
+role: wake-forest
+slot_kind: experience
+achievement_theme: radiomics
+display_order: 5
+wow_score: 0.72
+metrics_claimed: [200plus_features]
+concepts_claimed: [radiomics, biomarkers, features]
+signature_technologies: [PyRadiomics]
+fact: PyRadiomics extraction of 200+ quantitative biomarkers from segmented brain tumors.
+capabilities:
+  ml: 90
+  data: 82
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - PyRadiomics
+  - radiomics
+  - feature engineering
+  - MRI
+  - biomarker
+facets:
+  ml:
+    phrase: radiomic biomarkers
+    keywords: [radiomic, pyradiomic, biomarker, feature, tumor]
+variants:
+  - facet: ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Developed a PyRadiomics feature extraction pipeline that generated 200+ quantitative
+      biomarkers for prognosis modeling and clinical research.

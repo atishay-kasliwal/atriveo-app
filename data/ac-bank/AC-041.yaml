@@ -1,0 +1,23 @@
+id: AC-041
+role: atriveo
+slot_kind: project
+visibility:
+  default: false
+fact: RETIRED — wrong AWS Lambda stack; superseded by AC-057 Cloudflare deployment.
+capabilities:
+  cloud: 85
+strength:
+  recruiter: 6
+ats_keywords:
+  - AWS
+facets:
+  cloud-serverless:
+    phrase: serverless AI workflow
+    keywords: [aws]
+variants:
+  - facet: cloud-serverless
+    emphasis: cloud-serverless
+    strength: 6
+    text: >-
+      Launched serverless AI workflow automation on AWS Lambda and S3,
+      reducing manual processing time by 40% for production users.

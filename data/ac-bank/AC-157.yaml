@@ -1,0 +1,31 @@
+id: AC-157
+role: user-data-platform
+slot_kind: project
+achievement_theme: consent
+display_order: 5
+wow_score: 0.89
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - FastAPI
+fact: >-
+  Engineered a consent-first developer flow from scope discovery through approval polling to client-side export
+  decryption
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - FastAPI
+facets:
+  default:
+    phrase: consent-flow
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Engineered FastAPI a consent-first /api/v1 flow from scope discovery through approval polling to client-side
+      AES-GCM decryption.

@@ -1,0 +1,42 @@
+id: AC-086
+role: job-pipeline
+slot_kind: project
+achievement_theme: h1b-pipeline
+display_order: 4
+wow_score: 0.92
+metrics_claimed:
+  - h1b_sponsors_1388
+concepts_claimed:
+  - h1b
+  - sponsorship
+  - pipeline
+  - filtering
+signature_technologies:
+  - Python
+fact: H1B 2026 pipeline — 1,388 verified sponsors in curated CSV filter.
+capabilities:
+  backend: 82
+  data: 90
+strength:
+  recruiter: 10
+ats_keywords:
+  - Python
+  - H1B
+  - sponsorship
+  - filtering
+  - pipeline
+facets:
+  domain:
+    phrase: H1B sponsorship pipeline
+    keywords:
+      - h1b
+      - sponsor
+      - visa
+      - pipeline
+variants:
+  - facet: domain
+    emphasis: domain
+    strength: 10
+    text: >-
+      Shipped Python an H1B-aware pipeline matching listings against 1,388 verified 2026 sponsors for
+      sponsorship-focused early-career job search.

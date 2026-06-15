@@ -1,0 +1,42 @@
+id: AC-100
+role: bayesian-mmm
+slot_kind: project
+achievement_theme: budget-optimization
+display_order: 8
+wow_score: 0.9
+metrics_claimed:
+  - channels_5
+concepts_claimed:
+  - budget
+  - optimization
+  - scenario
+  - allocation
+signature_technologies:
+  - Python
+fact: ROAS-weighted budget optimization + 4 scenario plans (shift-to-digital, cuts, etc.).
+capabilities:
+  data: 88
+  ai: 74
+strength:
+  recruiter: 9
+ats_keywords:
+  - budget optimization
+  - scenario planning
+  - ROAS
+  - marketing analytics
+  - Python
+facets:
+  optimization:
+    phrase: budget optimization
+    keywords:
+      - budget
+      - optimization
+      - scenario
+      - allocation
+variants:
+  - facet: optimization
+    emphasis: optimization
+    strength: 9
+    text: >-
+      Built Python ROAS-weighted budget optimization and scenario planning shifting spend from TV to high-ROI digital
+      channels across 5 media mixes.

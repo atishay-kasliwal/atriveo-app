@@ -1,0 +1,23 @@
+{
+  "version": "experimental",
+  "name": "beam-retrieval",
+  "description": "Beam + RCS + embedding retrieval + tier enforcement",
+  "objective": "maximize_resume_confidence_score",
+  "beam_search": true,
+  "enforce_tiers": true,
+  "narrative_first": true,
+  "allow_sparse_slots": true,
+  "min_bullet_quality": 0.52,
+  "apply_delete_test": true,
+  "skills_evidence_only": true,
+  "plan_priority_weight": 8,
+  "strength_divisor": 600,
+  "retrieval_top_k": 18,
+  "retrieval_hard_filter": true,
+  "always_include_roles": ["stony-brook", "accolite"],
+  "use_case_memory": true,
+  "concept_caps": {
+    "ai": 2,
+    "backend": 4
+  }
+}

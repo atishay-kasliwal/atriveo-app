@@ -1,0 +1,56 @@
+id: AC-198
+role: accolite
+slot_kind: experience
+engineering_identity: scope
+client_context: cross
+achievement_theme: career-scope
+display_order: 0
+wow_score: 0.96
+metrics_claimed:
+  - tenure_3y
+  - fortune_500_clients
+concepts_claimed:
+  - scope
+signature_technologies:
+  - Java
+  - AWS
+fact: >-
+  Accolite scope thesis — 3 years owning Fortune 500 delivery across secure insurance exchange, telecom commerce, and
+  Oracle CRM replacement for 3,000 employees.
+capabilities:
+  backend: 88
+  frontend: 85
+  cloud: 86
+  data: 80
+  leadership: 82
+strength:
+  recruiter: 10
+ats_keywords:
+  - Java
+  - React
+  - Angular
+  - AWS
+  - Azure
+  - GCP
+  - Spring Boot
+  - Python
+  - MySQL
+  - MongoDB
+facets:
+  default:
+    phrase: career-scope
+    keywords:
+      - enterprise
+      - fortune 500
+      - full stack
+      - java
+      - react
+      - angular
+      - aws
+variants:
+  - facet: default
+    emphasis: default
+    strength: 10
+    text: >-
+      Delivered 3 years of Fortune 500 platforms for Fidelity, British Telecom and T-Mobile with Java backend services
+      and React/Angular on AWS Azure GCP spanning secure insurance exchange for 3,000 employees.

@@ -1,0 +1,30 @@
+id: AC-125
+role: medledger
+slot_kind: project
+achievement_theme: authorization
+display_order: 3
+wow_score: 0.85
+metrics_claimed:
+  - roles_3
+concepts_claimed: []
+signature_technologies:
+  - Express.js
+fact: Designed role-based access control separating Admin, Doctor, and Patient permissions across protected API routes.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Express.js
+facets:
+  default:
+    phrase: rbac
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built Express.js role-based access control separating Admin, Doctor, and Patient permissions across 3 protected
+      API route groups in production.

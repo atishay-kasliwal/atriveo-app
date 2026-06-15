@@ -1,0 +1,41 @@
+id: AC-001
+role: stony-brook
+slot_kind: experience
+engineering_identity: platform
+achievement_theme: fomc-pipeline
+display_order: 1
+wow_score: 0.94
+metrics_claimed:
+  - 3d_20m
+  - accuracy_677
+concepts_claimed:
+  - platform
+signature_technologies:
+  - FastAPI
+  - AWS
+fact: Event-driven FastAPI FOMC pipeline on AWS — 3+ days to under 20 minutes at 67.7% accuracy.
+capabilities:
+  ai: 85
+  backend: 92
+  frontend: 65
+  data: 80
+  cloud: 88
+  ml: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - FastAPI
+  - AWS
+facets:
+  default:
+    phrase: fomc-pipeline
+    keywords:
+      - fastapi
+      - aws
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Engineered an event-driven FastAPI pipeline on AWS over 7 years of FOMC data cutting macro analysis from 3 days to
+      under 20 minutes at 67.7% accuracy.

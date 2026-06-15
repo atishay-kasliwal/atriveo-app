@@ -1,0 +1,31 @@
+id: AC-122
+role: mri-research
+slot_kind: project
+achievement_theme: validation
+display_order: 10
+wow_score: 0.83
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Python
+  - scikit-learn
+fact: Implemented cross-validation and feature engineering pipelines with XGBoost and scikit-learn classifiers.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - scikit-learn
+facets:
+  default:
+    phrase: ml-validation
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Implemented Python cross-validation pipelines with XGBoost and scikit-learn on 255-sample radiomics research
+      cohorts.

@@ -1,0 +1,41 @@
+id: AC-173
+role: accolite
+slot_kind: experience
+engineering_identity: fullstack
+client_context: bt
+achievement_theme: device-bundling
+display_order: 11
+wow_score: 0.88
+metrics_claimed:
+  - device_bundle
+  - iphone_purchases_5k
+concepts_claimed:
+  - fullstack
+signature_technologies:
+  - Java
+  - Angular
+fact: British Telecom device-and-service bundling where customers onboard iPhone purchases through integrated payment flows.
+capabilities:
+  backend: 78
+  frontend: 88
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - Java
+  - Angular
+facets:
+  default:
+    phrase: device-bundling
+    keywords:
+      - java
+      - angular
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Engineered device-and-service bundling on British Telecom with Java and Angular onboarding 5K+ iPhone purchases
+      through integrated payment flows in production.

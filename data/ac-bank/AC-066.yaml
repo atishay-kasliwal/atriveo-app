@@ -1,0 +1,32 @@
+id: AC-066
+role: insurance-platform
+slot_kind: project
+achievement_theme: elastic-read-model
+display_order: 4
+wow_score: 0.87
+metrics_claimed: [elastic_3_node]
+concepts_claimed: [elasticsearch, read-model, indexing, consumer]
+signature_technologies: [Elasticsearch, Kafka]
+fact: Kafka consumer indexes events into 3-node Elasticsearch cluster for policy search.
+capabilities:
+  backend: 84
+  data: 90
+strength:
+  recruiter: 9
+ats_keywords:
+  - Elasticsearch
+  - Kafka
+  - indexing
+  - consumer
+  - search
+facets:
+  data-pipeline:
+    phrase: Elasticsearch read model
+    keywords: [elastic, kafka, index, consumer, search]
+variants:
+  - facet: data-pipeline
+    emphasis: data-pipeline
+    strength: 9
+    text: >-
+      Engineered a Kafka consumer service indexing insurance events into a 3-node Elasticsearch
+      cluster for low-latency policy search and retrieval.

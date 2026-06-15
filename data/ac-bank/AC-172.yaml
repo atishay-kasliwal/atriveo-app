@@ -1,0 +1,41 @@
+id: AC-172
+role: accolite
+slot_kind: experience
+engineering_identity: fullstack
+client_context: bt
+achievement_theme: checkout-flow
+display_order: 10
+wow_score: 0.89
+metrics_claimed:
+  - checkout
+  - orders_10k_monthly
+concepts_claimed:
+  - fullstack
+signature_technologies:
+  - Java
+  - Angular
+fact: British Telecom end-to-end telecom checkout and payment pages for e-commerce.
+capabilities:
+  backend: 78
+  frontend: 88
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - Java
+  - Angular
+facets:
+  default:
+    phrase: checkout-flow
+    keywords:
+      - java
+      - angular
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Reduced checkout friction for British Telecom e-commerce on Java and Angular converting 10K+ monthly service and
+      device bundle orders in production.

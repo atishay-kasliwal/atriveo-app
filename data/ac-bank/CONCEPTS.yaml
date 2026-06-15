@@ -1,0 +1,15 @@
+ai:
+  core: [ai, llm, agent, agents, rag, langchain, generative, machine learning]
+  stack: [pytorch, transformers, langgraph, mcp]
+backend:
+  core: [fastapi, api, microservice, backend, rest, graphql]
+  stack: [kafka, redis, docker, spring]
+data:
+  core: [pipeline, etl, streaming, data engineer, warehouse]
+  stack: [spark, postgres, mongodb, elastic]
+cloud:
+  core: [aws, cloud, deploy, production, lambda, ecs]
+frontend:
+  core: [react, typescript, ui, dashboard, full stack]
+ml:
+  core: [machine learning, pytorch, model, nlp, predictive, radiomic, segmentation, survival analysis, mri, medical imaging]

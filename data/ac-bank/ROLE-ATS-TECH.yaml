@@ -1,0 +1,87 @@
+# Verified ATS anchor technologies per role — must appear somewhere in that role's bullet bank.
+# Lint: npm run ac:bullet-lint -- --role <role-id>
+
+stony-brook:
+  - Python
+  - FastAPI
+  - AWS
+  - Kafka
+  - React
+
+wake-forest:
+  - Python
+  - GCP
+  - SimpleITK
+  - PyRadiomics
+  - Apache Airflow
+  - React
+
+accolite:
+  - Java
+  - Python
+  - Spring Boot
+  - React
+  - Angular
+  - AWS
+  - Azure
+  - GCP
+  - MySQL
+  - MongoDB
+  - FastAPI
+  - Docker
+  - Kubernetes
+  - Redis
+  - Elasticsearch
+
+atriveo:
+  - React
+  - TypeScript
+  - FastAPI
+  - Python
+  - PostgreSQL
+  - LangChain
+  - Cloudflare
+
+insurance-platform:
+  - Java
+  - Spring Boot
+  - Kafka
+  - Elasticsearch
+  - Docker
+
+insureraft:
+  - C++
+  - Raft
+  - NuRaft
+  - CMake
+
+job-pipeline:
+  - Python
+  - MongoDB
+  - JobSpy
+  - JavaScript
+
+bayesian-mmm:
+  - Python
+  - scikit-learn
+  - pandas
+  - SciPy
+
+mri-research:
+  - Python
+  - scikit-learn
+  - XGBoost
+  - pandas
+
+medledger:
+  - Node.js
+  - Express.js
+  - MongoDB
+  - JWT
+  - EJS
+
+user-data-platform:
+  - FastAPI
+  - Python
+  - X25519
+  - AES-GCM

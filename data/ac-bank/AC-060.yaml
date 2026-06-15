@@ -1,0 +1,33 @@
+id: AC-060
+role: atriveo
+slot_kind: project
+achievement_theme: bulk-tailor
+display_order: 10
+wow_score: 0.80
+metrics_claimed: []
+concepts_claimed: [bulk, queue, tailor, frontend]
+signature_technologies: [React]
+fact: React bulk tailor queue with streaming progress for multi-job resume generation via local AC pipeline.
+capabilities:
+  frontend: 86
+  backend: 78
+  ai: 74
+strength:
+  recruiter: 8
+ats_keywords:
+  - React
+  - TypeScript
+  - queue
+  - automation
+  - frontend
+facets:
+  frontend:
+    phrase: bulk tailor queue
+    keywords: [bulk, queue, tailor, streaming, react]
+variants:
+  - facet: frontend
+    emphasis: frontend
+    strength: 8
+    text: >-
+      Built a React bulk tailoring queue with streaming progress feedback, enabling concurrent
+      resume generation across multiple job applications.

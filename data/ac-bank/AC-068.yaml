@@ -1,0 +1,47 @@
+id: AC-068
+role: insurance-platform
+slot_kind: project
+achievement_theme: api-gateway-security
+display_order: 6
+wow_score: 0.89
+metrics_claimed:
+  - rate_limit_5rps
+concepts_claimed:
+  - gateway
+  - jwt
+  - security
+  - rate-limit
+  - circuit-breaker
+signature_technologies:
+  - Spring Cloud
+  - Redis
+fact: Spring Cloud Gateway — JWT auth, Redis token-bucket 5 req/s (burst 10), Resilience4j circuit breaker.
+capabilities:
+  backend: 90
+  cloud: 82
+strength:
+  recruiter: 9
+ats_keywords:
+  - Spring Cloud Gateway
+  - JWT
+  - Redis
+  - rate limiting
+  - circuit breaker
+  - Resilience4j
+  - Spring Cloud
+facets:
+  security:
+    phrase: API gateway security
+    keywords:
+      - gateway
+      - jwt
+      - redis
+      - rate limit
+      - circuit breaker
+variants:
+  - facet: security
+    emphasis: security
+    strength: 9
+    text: >-
+      Built a Spring Cloud API Gateway securing the platform with JWT authentication, Redis token-bucket rate limiting
+      at 5 req/s, and Resilience4j circuit breakers.

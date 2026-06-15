@@ -1,0 +1,42 @@
+id: AC-088
+role: job-pipeline
+slot_kind: project
+achievement_theme: multi-pipeline
+display_order: 6
+wow_score: 0.87
+metrics_claimed:
+  - pipelines_5
+  - top500_521
+concepts_claimed:
+  - pipelines
+  - tiers
+  - companies
+  - curation
+signature_technologies:
+  - Python
+fact: 5 pipelines — Standard, Priority (~112 cos), Top 500 (521), H1B 2026, Keywords.
+capabilities:
+  backend: 84
+  data: 88
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - pipeline
+  - ETL
+  - data engineering
+facets:
+  orchestration:
+    phrase: multi-pipeline orchestration
+    keywords:
+      - pipeline
+      - orchestration
+      - tier
+      - company
+variants:
+  - facet: orchestration
+    emphasis: orchestration
+    strength: 9
+    text: >-
+      Built Python 5 curated pipelines covering 521 Top 500 tech firms, priority company tiers, and keyword-ranked roles
+      for targeted early-career job search.

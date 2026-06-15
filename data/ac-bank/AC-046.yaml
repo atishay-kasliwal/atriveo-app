@@ -1,0 +1,44 @@
+id: AC-046
+role: wake-forest
+slot_kind: experience
+achievement_theme: survival-analysis
+display_order: 7
+wow_score: 0.78
+metrics_claimed: []
+concepts_claimed:
+  - survival
+  - prognosis
+  - clinical_decision
+fact: Radiomics-driven survival analysis surfacing prognosis insights to speed clinical decision-making.
+capabilities:
+  ml: 86
+  data: 84
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - survival analysis
+  - radiomics
+  - statistics
+  - machine learning
+  - prognosis
+  - clinical
+facets:
+  ml:
+    phrase: survival analysis
+    keywords:
+      - survival
+      - prognosis
+      - cohort
+      - radiomic
+      - predictive
+      - clinical
+variants:
+  - facet: ml
+    emphasis: ml
+    strength: 8
+    text: >-
+      Integrated Python radiomics-driven survival models that surfaced prognosis insights at review, accelerating
+      clinical decision-making for treating physicians.
+signature_technologies:
+  - Python

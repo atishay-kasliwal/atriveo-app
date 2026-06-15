@@ -1,0 +1,48 @@
+id: AC-073
+role: insureraft
+slot_kind: project
+achievement_theme: platform-ownership
+display_order: 1
+wow_score: 0.94
+metrics_claimed:
+  - raft_nodes_3
+concepts_claimed:
+  - raft
+  - consensus
+  - insurance
+  - distributed
+  - replication
+signature_technologies:
+  - C++
+  - NuRaft
+fact: >-
+  InsureRaft — C++/NuRaft platform replicating insurance data across carriers, brokers, reinsurers, regulators on 3-node
+  cluster.
+capabilities:
+  backend: 92
+  data: 80
+strength:
+  recruiter: 10
+ats_keywords:
+  - C++
+  - Raft
+  - NuRaft
+  - distributed systems
+  - consensus
+  - insurance
+facets:
+  platform:
+    phrase: Raft insurance platform
+    keywords:
+      - raft
+      - consensus
+      - insurance
+      - distributed
+      - replication
+variants:
+  - facet: platform
+    emphasis: platform
+    strength: 10
+    text: >-
+      Built InsureRaft, a C++ and NuRaft platform replicating insurance data on a 3-node cluster for distributed
+      carriers and regulators in production.

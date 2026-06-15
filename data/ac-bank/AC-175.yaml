@@ -1,0 +1,41 @@
+id: AC-175
+role: accolite
+slot_kind: experience
+engineering_identity: backend
+client_context: bt
+achievement_theme: order-processing
+display_order: 13
+wow_score: 0.85
+metrics_claimed:
+  - order_api
+  - purchases_10k
+concepts_claimed:
+  - backend
+signature_technologies:
+  - Java
+  - MySQL
+fact: British Telecom Java order-processing APIs on MySQL for service purchases and device checkout.
+capabilities:
+  backend: 90
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 7
+ats_keywords:
+  - Java
+  - MySQL
+facets:
+  default:
+    phrase: order-processing
+    keywords:
+      - java
+      - mysql
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Automated British Telecom order fulfillment on Java and MySQL powering 10K+ monthly service purchases and bundled
+      device checkout in production.

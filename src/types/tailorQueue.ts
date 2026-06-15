@@ -1,6 +1,8 @@
 import type { TailorLogEntry } from "./tailor";
 import type { Job } from "./index";
 
+import type { TailorExplainSummary } from "./tailorExplain";
+
 export type TailorQueueSource = "hourly" | "manual";
 
 export type TailorQueueItemStatus = "pending" | "running" | "done" | "failed" | "skipped";
@@ -47,6 +49,8 @@ export type TailorOutcomeKind =
   | "offline"
   | "timeout"
   | "missing"
+  | "unsupported"
+  | "borderline"
   | "error";
 
 export interface TailorRecord {
@@ -67,8 +71,14 @@ export interface TailorRecord {
   durationMs?: number;
   /** Specific result for UI labels (compile, skip, offline, etc.). */
   outcome?: TailorOutcomeKind;
-  /** Raw server status: ok | no-go | tex-failed | ai-failed */
+  /** Raw server status: ok | no-go | unsupported-jd | tex-failed | ai-failed */
   serverStatus?: string;
+  /** Evidence compiler explain artifact (identity, swaps, IG). */
+  explain?: TailorExplainSummary;
+  borderline?: boolean;
+  /** Mongo compile stage (GATED, COMPOSED, …) when worker-owned. */
+  compileStage?: string;
+  workerId?: string;
 }
 
 export const HOURLY_QUEUE_SIZE = 25;

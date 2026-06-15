@@ -1,0 +1,26 @@
+id: AC-016
+role: atriveo
+slot_kind: project
+visibility:
+  default: false
+fact: RETIRED — unverified LLM engagement lift; superseded by AC-054.
+capabilities:
+  ai: 90
+  backend: 72
+strength:
+  recruiter: 8
+ats_keywords:
+  - LLM
+  - AI
+  - Python
+facets:
+  llm-ai:
+    phrase: LLM-powered personalization
+    keywords: [llm, ai, recommendation]
+variants:
+  - facet: llm-ai
+    emphasis: llm-ai
+    strength: 8
+    text: >-
+      Built LLM-powered personalization features in Python, increasing user engagement
+      with production inference APIs and evaluation benchmarks.

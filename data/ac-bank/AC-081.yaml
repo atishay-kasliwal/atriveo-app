@@ -1,0 +1,43 @@
+id: AC-081
+role: insureraft
+slot_kind: project
+achievement_theme: insurance-workflows
+display_order: 9
+wow_score: 0.88
+metrics_claimed:
+  - event_types_8
+concepts_claimed:
+  - policy
+  - claims
+  - payments
+  - workflow
+signature_technologies:
+  - C++
+fact: 8 event types — policy CRUD, claims file/approve/deny, payments, endorsements.
+capabilities:
+  backend: 86
+  data: 78
+strength:
+  recruiter: 9
+ats_keywords:
+  - insurance
+  - claims processing
+  - policy management
+  - payments
+  - workflow
+  - C++
+facets:
+  domain:
+    phrase: insurance workflows
+    keywords:
+      - policy
+      - claim
+      - payment
+      - endorsement
+variants:
+  - facet: domain
+    emphasis: domain
+    strength: 9
+    text: >-
+      Built C++ end-to-end insurance workflows across 8 event types from policy creation through claim approval and
+      payment settlement on the replicated log.

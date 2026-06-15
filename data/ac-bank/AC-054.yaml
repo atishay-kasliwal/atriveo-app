@@ -1,0 +1,34 @@
+id: AC-054
+role: atriveo
+slot_kind: project
+achievement_theme: rag-search
+display_order: 5
+wow_score: 0.86
+metrics_claimed: [daily_2k_queries]
+concepts_claimed: [rag, search, recommendations, ai]
+signature_technologies: [LangChain]
+fact: LangChain RAG pipeline for contextual job search — 2K+ daily queries.
+capabilities:
+  ai: 92
+  backend: 78
+  data: 74
+strength:
+  recruiter: 9
+ats_keywords:
+  - LangChain
+  - RAG
+  - Python
+  - search
+  - recommendations
+  - NLP
+facets:
+  ai:
+    phrase: RAG job search
+    keywords: [langchain, rag, search, recommendation, contextual]
+variants:
+  - facet: ai
+    emphasis: ai
+    strength: 9
+    text: >-
+      Built a LangChain RAG pipeline handling 2K+ daily queries to power contextual job search
+      across indexed applications.

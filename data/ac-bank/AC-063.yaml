@@ -1,0 +1,34 @@
+id: AC-063
+role: insurance-platform
+slot_kind: project
+achievement_theme: platform-ownership
+display_order: 1
+wow_score: 0.92
+metrics_claimed: [services_8]
+concepts_claimed: [platform, microservices, insurance, event-driven, gateway]
+signature_technologies: [Java, Kafka]
+fact: Event-driven insurance platform — 8 Spring Boot microservices, Kafka, third-party providers to payment gateway.
+capabilities:
+  backend: 90
+  data: 82
+  cloud: 78
+strength:
+  recruiter: 10
+ats_keywords:
+  - Java
+  - Kafka
+  - microservices
+  - Spring Boot
+  - insurance
+  - event-driven
+facets:
+  platform:
+    phrase: insurance microservices platform
+    keywords: [platform, microservice, insurance, kafka, event]
+variants:
+  - facet: platform
+    emphasis: platform
+    strength: 10
+    text: >-
+      Architected an event-driven insurance microservices platform on Java and Kafka,
+      transferring policy data from third-party providers to a payment gateway across 8 services.

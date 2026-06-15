@@ -10,10 +10,10 @@ import Unclicked100 from "./pages/Unclicked100";
 import Cart from "./pages/Cart";
 import States from "./pages/States";
 import EmailFinder from "./pages/EmailFinder";
-import ClickedJobs from "./pages/ClickedJobs";
-import Tailored from "./pages/Tailored";
-import ResumeOptimizer from "./pages/ResumeOptimizer";
+import Resumes from "./pages/Resumes";
+import Activity from "./pages/Activity";
 import ManualTailor from "./pages/ManualTailor";
+import ResumeOptimizer from "./pages/ResumeOptimizer";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -111,21 +111,23 @@ export default function App() {
           }
         />
         <Route
-          path="/clickedjobs"
+          path="/resumes"
           element={
             <ProtectedRoute>
-              <ClickedJobs />
+              <Resumes />
             </ProtectedRoute>
           }
         />
+        <Route path="/tailored" element={<Navigate to="/resumes" replace />} />
         <Route
-          path="/tailored"
+          path="/activity"
           element={
             <ProtectedRoute>
-              <Tailored />
+              <Activity />
             </ProtectedRoute>
           }
         />
+        <Route path="/clickedjobs" element={<Navigate to="/activity" replace />} />
         <Route
           path="/manual-tailor"
           element={

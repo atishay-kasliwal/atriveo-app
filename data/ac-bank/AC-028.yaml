@@ -1,0 +1,28 @@
+id: AC-028
+role: accolite
+slot_kind: experience
+visibility:
+  default: false
+fact: RETIRED — superseded by AC-189 (serverless platform) in Accolite bank v43.
+capabilities:
+  backend: 82
+  cloud: 85
+  data: 75
+strength:
+  recruiter: 7
+ats_keywords:
+  - AWS
+  - Lambda
+  - Python
+  - REST
+facets:
+  serverless:
+    phrase: serverless data platform
+    keywords: [aws, lambda, serverless, api]
+variants:
+  - facet: serverless
+    emphasis: serverless
+    strength: 7
+    text: >-
+      Built a serverless data platform in Python, AWS Lambda, and Firebase,
+      automating async workflows and processing behavioral data for 3K+ users via REST API integrations.

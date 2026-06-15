@@ -1,0 +1,32 @@
+id: AC-061
+role: atriveo
+slot_kind: project
+achievement_theme: tracker-sync
+display_order: 11
+wow_score: 0.77
+metrics_claimed: []
+concepts_claimed: [postgres, sync, integration, api]
+signature_technologies: [FastAPI, PostgreSQL]
+fact: PostgreSQL schemas and FastAPI endpoints syncing application tracking with external tracker APIs.
+capabilities:
+  backend: 88
+  data: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - FastAPI
+  - PostgreSQL
+  - API integration
+  - authentication
+  - backend
+facets:
+  backend:
+    phrase: tracker API sync
+    keywords: [postgresql, fastapi, sync, integration, tracker]
+variants:
+  - facet: backend
+    emphasis: backend
+    strength: 8
+    text: >-
+      Designed PostgreSQL schemas and FastAPI APIs that synchronized centralized application
+      tracking with external job tracker integrations.

@@ -1,0 +1,41 @@
+id: AC-022
+role: stony-brook
+slot_kind: experience
+engineering_identity: frontend
+achievement_theme: research-ui
+display_order: 7
+wow_score: 0.89
+metrics_claimed:
+  - researchers_5
+  - llm_api
+concepts_claimed:
+  - frontend
+signature_technologies:
+  - React
+  - Python
+fact: React and Python LLM analytics APIs for financial research team.
+capabilities:
+  ai: 88
+  backend: 78
+  frontend: 82
+  data: 65
+  cloud: 65
+  ml: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - React
+  - Python
+facets:
+  default:
+    phrase: research-ui
+    keywords:
+      - react
+      - python
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built a React and Python LLM analytics interface across financial news and transcripts with schema validation
+      delivering production APIs used daily by 5 researchers.

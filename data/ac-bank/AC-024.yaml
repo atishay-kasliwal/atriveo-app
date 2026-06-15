@@ -1,0 +1,41 @@
+id: AC-024
+role: stony-brook
+slot_kind: experience
+engineering_identity: ai
+achievement_theme: mcp-orchestration
+display_order: 9
+wow_score: 0.84
+metrics_claimed:
+  - tools_3
+  - mcp
+concepts_claimed:
+  - ai
+signature_technologies:
+  - MCP
+  - Python
+fact: MCP agent orchestration for multi-step financial tool-use workflows.
+capabilities:
+  ai: 88
+  backend: 76
+  frontend: 65
+  data: 65
+  cloud: 65
+  ml: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - MCP
+  - Python
+facets:
+  default:
+    phrase: mcp-orchestration
+    keywords:
+      - mcp
+      - python
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Implemented MCP-based agent orchestration in Python across 3+ financial tool-use workflows connecting LLM agents
+      to external APIs with structured evaluation benchmarks.

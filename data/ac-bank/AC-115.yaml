@@ -1,0 +1,31 @@
+id: AC-115
+role: mri-research
+slot_kind: project
+achievement_theme: signature
+display_order: 3
+wow_score: 0.9
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Python
+  - scikit-learn
+fact: Built radiomics signature development with LASSO feature selection, nomograms, and risk stratification.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - scikit-learn
+facets:
+  default:
+    phrase: signature-dev
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built Python and scikit-learn LASSO radiomics signature development with nomograms and risk stratification across
+      255-sample research cohorts.

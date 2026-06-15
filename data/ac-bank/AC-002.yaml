@@ -1,0 +1,41 @@
+id: AC-002
+role: stony-brook
+slot_kind: experience
+engineering_identity: backend
+achievement_theme: kafka-trading
+display_order: 2
+wow_score: 0.93
+metrics_claimed:
+  - records_200k
+  - return_27pct
+concepts_claimed:
+  - backend
+signature_technologies:
+  - Python
+  - Kafka
+fact: Python NLP + Kafka pipeline on 200K+ financial records with trading backtest metrics.
+capabilities:
+  ai: 70
+  backend: 90
+  frontend: 65
+  data: 88
+  cloud: 65
+  ml: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - Kafka
+facets:
+  default:
+    phrase: kafka-trading
+    keywords:
+      - python
+      - kafka
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Engineered a Python and Kafka NLP pipeline on AWS processing 200K+ financial records in real time delivering 27%
+      portfolio return and $2.6K backtesting profit.

@@ -1,0 +1,16 @@
+node_modules
+dist
+.output
+.git
+.github
+*.log
+.env
+.env.*
+public/job_descriptions
+output
+functions
+src
+docs
+*.md
+!README.md
+.DS_Store

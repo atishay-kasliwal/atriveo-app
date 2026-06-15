@@ -1,0 +1,40 @@
+id: AC-011
+role: stony-brook
+slot_kind: experience
+engineering_identity: ai
+achievement_theme: retrieval-eval
+display_order: 12
+wow_score: 0.82
+metrics_claimed:
+  - retrieval_eval
+concepts_claimed:
+  - ai
+signature_technologies:
+  - Python
+  - LangChain
+fact: Vector retrieval evaluation for financial document semantic search.
+capabilities:
+  ai: 86
+  backend: 70
+  frontend: 65
+  data: 78
+  cloud: 65
+  ml: 65
+strength:
+  recruiter: 7
+ats_keywords:
+  - Python
+  - LangChain
+facets:
+  default:
+    phrase: retrieval-eval
+    keywords:
+      - python
+      - langchain
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Implemented Python and LangChain vector retrieval evaluation measuring semantic search quality across 200K+
+      financial document corpora for production RAG tuning.

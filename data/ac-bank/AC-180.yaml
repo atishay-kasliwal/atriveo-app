@@ -1,0 +1,41 @@
+id: AC-180
+role: accolite
+slot_kind: experience
+engineering_identity: fullstack
+client_context: tmobile
+achievement_theme: payment-flow
+display_order: 18
+wow_score: 0.84
+metrics_claimed:
+  - payment
+  - transactions_10k
+concepts_claimed:
+  - fullstack
+signature_technologies:
+  - Java
+  - MySQL
+fact: T-Mobile payment integration for bundled telecom checkout on MySQL.
+capabilities:
+  backend: 78
+  frontend: 88
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 7
+ats_keywords:
+  - Java
+  - MySQL
+facets:
+  default:
+    phrase: payment-flow
+    keywords:
+      - java
+      - mysql
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Processed 10K+ T-Mobile bundled checkout transactions monthly on Java and MySQL payment flows supporting telecom
+      service revenue in production.

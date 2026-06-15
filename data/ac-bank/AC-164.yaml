@@ -1,0 +1,41 @@
+id: AC-164
+role: accolite
+slot_kind: experience
+engineering_identity: backend
+client_context: fidelity
+achievement_theme: contract-gating
+display_order: 2
+wow_score: 0.92
+metrics_claimed:
+  - consent_gate
+  - exports_blocked_100pct
+concepts_claimed:
+  - backend
+signature_technologies:
+  - Java
+  - MySQL
+fact: Fidelity contract-gated controls blocking data until both parties sign consent.
+capabilities:
+  backend: 90
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - Java
+  - MySQL
+facets:
+  default:
+    phrase: contract-gating
+    keywords:
+      - java
+      - mysql
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Engineered contract-gated export controls on Java and MySQL blocking 100% of unauthorized insurance transfers
+      until both parties signed consent in production.

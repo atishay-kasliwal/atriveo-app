@@ -1,0 +1,151 @@
+# Insurance Microservices Platform | Canonical achievement bank (review file)
+# Bank v50
+# Lint: npm run ac:bullet-lint -- --role insurance-platform
+
+role:
+  id: insurance-platform
+  employer: Insurance Microservices Platform
+  title: Full Stack Engineer
+  location: ""
+  dates: ""
+  slot_kind: project
+  resume_pick_count: 2
+  github: https://github.com/atishay-kasliwal/insurance-microservices-platform
+
+# ── Product story (source of truth — from README) ───────────────────────────
+
+product:
+  name: Event-driven insurance data transfer platform
+  problem: >
+    Third-party insurance providers need fault-tolerant, scalable transfer of policy data
+    to a payment gateway without brittle point-to-point integrations.
+  solution: >
+    8 Spring Boot microservices on Java 11 with CQRS and event sourcing: ingestion publishes
+    Avro events to a 3-broker Kafka cluster; consumers index into 3-node Elasticsearch;
+    Kafka Streams powers real-time policy analytics; Spring Cloud Gateway handles JWT auth,
+    Redis rate limiting, and circuit breaking; Netflix Eureka + Config Server; full
+    Prometheus/Grafana/Zipkin/ELK observability via Docker Compose.
+  stack:
+    languages: [Java 11]
+    frameworks: [Spring Boot 2.6, Spring Cloud 2021]
+    messaging: [Apache Kafka, Avro, Confluent Schema Registry, Kafka Streams]
+    search: [Elasticsearch 7.15]
+    security: [JWT, Spring Security, Redis rate limiter, Resilience4j]
+    infra: [Docker Compose, Netflix Eureka, Spring Cloud Config]
+    observability: [Prometheus, Grafana, Zipkin, ELK]
+
+# ── Verified metrics (do not invent beyond this list) ───────────────────────
+
+metrics:
+  architecture:
+    microservices: 8
+    kafka_brokers: 3
+    elasticsearch_nodes: 3
+  security:
+    rate_limit: "5 req/s (burst 10)"
+    jwt_algorithm: HS512
+    jwt_expiry: "24h"
+  patterns:
+    cqrs: true
+    event_sourcing: true
+  deployment:
+    orchestration: Docker Compose
+  in_progress:
+    postgres_analytics: planned (not shipped — do not claim)
+    oauth2_keycloak: planned (not shipped — do not claim)
+
+# ── Retired (wrong stack) ───────────────────────────────────────────────────
+
+retired:
+  - id: AC-017
+    reason: Claimed FastAPI, PostgreSQL, AWS, millions of records — not in repo
+  - id: AC-018
+    reason: Claimed FastAPI/AWS — actual stack is Java/Spring/Kafka
+
+# ── Canonical achievements (10 bullets) ─────────────────────────────────────
+
+achievements:
+  - id: AC-063
+    theme: platform-ownership
+    resume_bullet: >-
+      Architected an event-driven insurance microservices platform on Java and Kafka,
+      transferring policy data from third-party providers to a payment gateway across 8
+      services.
+  - id: AC-064
+    theme: kafka-ingestion
+    resume_bullet: >-
+      Built a Kafka ingestion pipeline with Avro serialization and Confluent Schema
+      Registry, publishing insurance policy events to a 3-broker cluster.
+  - id: AC-065
+    theme: cqrs-events
+    resume_bullet: >-
+      Implemented CQRS and event sourcing where write-side services publish insurance
+      domain events to Kafka across 8 loosely coupled microservices.
+  - id: AC-066
+    theme: elastic-read-model
+    resume_bullet: >-
+      Engineered a Kafka consumer service indexing insurance events into a 3-node
+      Elasticsearch cluster for low-latency policy search and retrieval.
+  - id: AC-067
+    theme: kafka-streams-analytics
+    resume_bullet: >-
+      Built Kafka Streams topologies with persistent state stores on a 3-broker cluster,
+      powering real-time insurance policy analytics and interactive query APIs.
+  - id: AC-068
+    theme: api-gateway-security
+    resume_bullet: >-
+      Built a Spring Cloud API Gateway securing the platform with JWT authentication,
+      Redis token-bucket rate limiting at 5 req/s, and Resilience4j circuit breakers.
+  - id: AC-069
+    theme: service-discovery-config
+    resume_bullet: >-
+      Deployed Netflix Eureka service discovery and a Spring Cloud Config Server with
+      encrypted secrets across 8 Docker Compose microservices.
+  - id: AC-070
+    theme: observability
+    resume_bullet: >-
+      Integrated a Prometheus and Grafana observability stack with Zipkin tracing and
+      ELK logging across all 8 microservices via Spring Actuator metrics.
+  - id: AC-071
+    theme: query-api
+    resume_bullet: >-
+      Shipped Spring Boot a v1 REST query API with HATEOAS and OpenAPI for production
+      insurance policy search over Elasticsearch-backed documents.
+  - id: AC-072
+    theme: docker-orchestration
+    resume_bullet: >-
+      Deployed 8 microservices with Docker Compose spanning 3-broker Kafka,
+      Elasticsearch, and Redis-backed monitoring stacks.
+# ── JD selection guide (which 2 tend to win) ────────────────────────────────
+
+selection_examples:
+  kafka_jd:
+    typical_pick: [AC-064, AC-067]
+    package: streaming
+  backend_jd:
+    typical_pick: [AC-063, AC-064]
+    package: platform
+  security_jd:
+    typical_pick: [AC-068, AC-069]
+    package: security
+  data_jd:
+    typical_pick: [AC-066, AC-067]
+    package: data
+  devops_jd:
+    typical_pick: [AC-070, AC-072]
+    package: observability
+  api_jd:
+    typical_pick: [AC-071, AC-066]
+    package: api
+
+review_scores:
+  ats: "9/10 — Java, Kafka, Elasticsearch, Spring Cloud spread across bullets"
+  recruiter: "9/10 — clear distributed systems story; no fake FastAPI/AWS claims"
+  interview_risk: "Do not claim FastAPI, PostgreSQL production store, AWS, or millions of records. Postgres analytics is in-progress only."
+
+# ── Related repo (separate project slot if needed later) ────────────────────
+
+related:
+  insureraft:
+    github: https://github.com/atishay-kasliwal/InsureRaft
+    note: Raft consensus for insurance data replication — not merged into this bank yet

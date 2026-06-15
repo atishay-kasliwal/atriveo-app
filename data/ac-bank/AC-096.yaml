@@ -1,0 +1,42 @@
+id: AC-096
+role: bayesian-mmm
+slot_kind: project
+achievement_theme: channel-insight
+display_order: 4
+wow_score: 0.91
+metrics_claimed:
+  - email_roas_025
+concepts_claimed:
+  - roas
+  - roi
+  - reallocation
+  - insight
+signature_technologies:
+  - Python
+fact: Email top channel — 0.250 ROAS, +1,152% ROI vs TV -11.9% ROI.
+capabilities:
+  data: 88
+  ai: 76
+strength:
+  recruiter: 10
+ats_keywords:
+  - ROAS
+  - ROI
+  - marketing analytics
+  - budget
+  - Python
+facets:
+  insight:
+    phrase: channel ROI insight
+    keywords:
+      - roas
+      - roi
+      - email
+      - reallocation
+variants:
+  - facet: insight
+    emphasis: insight
+    strength: 10
+    text: >-
+      Built Python channel ROI analysis ranking Email at 0.250 ROAS and +1,152% ROI, surfacing budget reallocation
+      opportunities from underperforming TV spend.

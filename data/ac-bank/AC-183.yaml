@@ -1,0 +1,41 @@
+id: AC-183
+role: accolite
+slot_kind: experience
+engineering_identity: enterprise
+client_context: inhouse
+achievement_theme: oracle-replacement
+display_order: 21
+wow_score: 0.95
+metrics_claimed:
+  - employees_3000
+  - oracle_replacement
+concepts_claimed:
+  - enterprise
+signature_technologies:
+  - MongoDB
+  - React
+fact: In-house ERP replacing Oracle CRM for 3,000 employees with onboarding timesheets and reviews.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 72
+  data: 82
+  leadership: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - MongoDB
+  - React
+facets:
+  default:
+    phrase: oracle-replacement
+    keywords:
+      - mongodb
+      - react
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Replaced Oracle CRM with an in-house operations platform on React and MongoDB serving onboarding timesheets and
+      reviews for 3,000 employees in production.

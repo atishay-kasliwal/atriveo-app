@@ -1,0 +1,96 @@
+# Bayesian Marketing Mix Model | Canonical achievement bank
+# Bank v50
+# Lint: npm run ac:bullet-lint -- --role bayesian-mmm
+
+role:
+  id: bayesian-mmm
+  employer: Bayesian Marketing Mix Model
+  title: Data Scientist
+  location: ""
+  dates: ""
+  slot_kind: project
+  resume_pick_count: 2
+  github: https://github.com/atishay-kasliwal/bayesian-marketing-mix-model
+
+product:
+  name: End-to-end Marketing Mix Model
+  problem: >
+    Marketing teams need to quantify channel ROI, model diminishing returns, and reallocate
+    budget with statistical confidence — not gut feel.
+  solution: >
+    Python MMM pipeline: synthetic 156-week dataset, adstock + Hill saturation transforms,
+    Ridge regression, channel ROAS/ROI decomposition, A/B holdout validation, 1,000-run Monte
+    Carlo, 5-fold time-series CV, budget optimization, Tableau CSV exports.
+  stack:
+    modeling: [Python, scikit-learn Ridge, SciPy]
+    data: [pandas, NumPy]
+    viz: [Matplotlib, Seaborn, Plotly]
+    optional: [PyMC-Marketing]
+    validation: [A/B holdout, Monte Carlo, TimeSeriesSplit]
+
+metrics:
+  model_performance:
+    r_squared: 0.9489
+    mape: "2.74%"
+    rmse: 28.67
+  dataset:
+    weeks: 156
+    years: 3
+    channels: 5
+    total_spend: "$55,946K"
+  top_channel:
+    name: Email
+    roas: 0.250
+    roi: "+1,152%"
+  validation:
+    monte_carlo_runs: 1000
+    cv_folds: 5
+    ci_coverage: "90%"
+
+achievements:
+  - id: AC-093
+    resume_bullet: >-
+      Built a Python and scikit-learn Marketing Mix Model analyzing 5 media channels
+      across 156 weeks at R² 0.9489 and 2.74% MAPE in production.
+  - id: AC-094
+    resume_bullet: >-
+      Engineered Python geometric adstock decay and Hill saturation transforms capturing
+      lagged ad effects and diminishing returns across 5 marketing channels.
+  - id: AC-095
+    resume_bullet: >-
+      Built Python and scikit-learn a Ridge regression MMM decomposing weekly sales into
+      channel contributions with ROAS and ROI estimation across 5 media channels.
+  - id: AC-096
+    resume_bullet: >-
+      Built Python channel ROI analysis ranking Email at 0.250 ROAS and +1,152% ROI,
+      surfacing budget reallocation opportunities from underperforming TV spend.
+  - id: AC-097
+    resume_bullet: >-
+      Implemented Python and SciPy simulated geo holdout A/B testing across 5 channels
+      with t-tests confirming statistically significant lift in production marketing
+      forecasts.
+  - id: AC-098
+    resume_bullet: >-
+      Built Python 1,000-run Monte Carlo simulation producing 90% confidence interval
+      coverage for probabilistic sales forecast uncertainty.
+  - id: AC-099
+    resume_bullet: >-
+      Implemented 5-fold time-series cross-validation in Python and scikit-learn
+      reporting R² and MAPE per fold across 156 weeks of marketing spend data.
+  - id: AC-100
+    resume_bullet: >-
+      Built Python ROAS-weighted budget optimization and scenario planning shifting
+      spend from TV to high-ROI digital channels across 5 media mixes.
+  - id: AC-101
+    resume_bullet: >-
+      Built Python and pandas Tableau-ready CSVs consolidating 156 weeks of MMM
+      predictions and channel ROAS metrics for production marketing analytics
+      dashboards.
+  - id: AC-102
+    resume_bullet: >-
+      Built a Python and pandas 4-notebook workflow from synthetic data generation
+      through EDA and modeling to validation across 156 weeks in production.
+review_scores:
+  ats: "9.5/10 — Python, scikit-learn, statistics, ROAS, data science spread"
+  recruiter: "9.5/10 — hard metrics (R², MAPE, ROI) recruiters trust for analytics roles"
+  interview_risk: "Data is synthetic (generate_data.py) — say simulated 156-week dataset. Primary model is Ridge, not full PyMC Bayesian unless you implemented it."

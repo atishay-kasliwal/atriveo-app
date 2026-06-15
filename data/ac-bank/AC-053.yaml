@@ -1,0 +1,32 @@
+id: AC-053
+role: atriveo
+slot_kind: project
+achievement_theme: backend-api
+display_order: 4
+wow_score: 0.82
+metrics_claimed: []
+concepts_claimed: [backend, api, postgres, tracker, sync]
+signature_technologies: [FastAPI, PostgreSQL]
+fact: FastAPI and PostgreSQL backend for application tracking, search APIs, and production data sync.
+capabilities:
+  backend: 90
+  data: 78
+strength:
+  recruiter: 9
+ats_keywords:
+  - FastAPI
+  - PostgreSQL
+  - Python
+  - REST API
+  - backend
+facets:
+  backend:
+    phrase: FastAPI backend
+    keywords: [fastapi, postgresql, api, backend, tracker]
+variants:
+  - facet: backend
+    emphasis: backend
+    strength: 9
+    text: >-
+      Engineered FastAPI and PostgreSQL services powering application tracking, search APIs,
+      and production data synchronization across the platform.

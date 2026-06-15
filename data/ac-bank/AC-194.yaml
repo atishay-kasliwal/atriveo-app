@@ -1,0 +1,41 @@
+id: AC-194
+role: accolite
+slot_kind: experience
+engineering_identity: leadership
+client_context: leadership
+achievement_theme: intern-mentorship
+display_order: 32
+wow_score: 0.9
+metrics_claimed:
+  - intern_fte
+  - conversions_10
+concepts_claimed:
+  - leadership
+signature_technologies:
+  - Java
+  - React
+fact: Mentored interns to full-time conversion on client and in-house deliverables.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 92
+strength:
+  recruiter: 8
+ats_keywords:
+  - Java
+  - React
+facets:
+  default:
+    phrase: intern-mentorship
+    keywords:
+      - java
+      - react
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Converted 10+ intern cohort members to full-time engineers through mentorship on Fortune 500 client deliverables
+      using Java and React production modules.

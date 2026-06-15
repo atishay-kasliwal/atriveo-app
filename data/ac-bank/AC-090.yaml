@@ -1,0 +1,42 @@
+id: AC-090
+role: job-pipeline
+slot_kind: project
+achievement_theme: cron-automation
+display_order: 8
+wow_score: 0.85
+metrics_claimed:
+  - runs_daily_20
+  - runtime_sub_15m
+concepts_claimed:
+  - cron
+  - automation
+  - scheduling
+  - reliability
+signature_technologies:
+  - Python
+fact: macOS cron ~20 runs/day, sub-15-minute scrape-to-deploy runtime.
+capabilities:
+  backend: 84
+  cloud: 78
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - cron
+  - automation
+  - scheduling
+facets:
+  automation:
+    phrase: cron automation
+    keywords:
+      - cron
+      - schedule
+      - automated
+      - hourly
+variants:
+  - facet: automation
+    emphasis: automation
+    strength: 8
+    text: >-
+      Automated Python ~20 daily macOS cron runs completing full scrape-to-deploy in under 15 minutes for production job
+      intelligence delivery.

@@ -1,0 +1,33 @@
+id: AC-052
+role: atriveo
+slot_kind: project
+achievement_theme: application-dashboard
+display_order: 3
+wow_score: 0.84
+metrics_claimed: [users_daily_1k]
+concepts_claimed: [dashboard, analytics, tracking, frontend]
+signature_technologies: [React, TypeScript]
+fact: React and TypeScript dashboard centralizing application tracking, analytics, and timelines for 1K+ daily users.
+capabilities:
+  frontend: 90
+  backend: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - React
+  - TypeScript
+  - dashboard
+  - Tailwind CSS
+  - frontend
+  - analytics
+facets:
+  frontend:
+    phrase: application dashboard
+    keywords: [react, typescript, dashboard, tracking, analytics]
+variants:
+  - facet: frontend
+    emphasis: frontend
+    strength: 9
+    text: >-
+      Built a React and TypeScript dashboard that centralized application tracking, pipeline
+      analytics, and job timelines for 1K+ daily users.

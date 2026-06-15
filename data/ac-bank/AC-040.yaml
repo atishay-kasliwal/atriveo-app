@@ -1,0 +1,23 @@
+id: AC-040
+role: atriveo
+slot_kind: project
+visibility:
+  default: false
+fact: RETIRED — superseded by AC-050/052; inflated 1K+ user count.
+capabilities:
+  frontend: 82
+strength:
+  recruiter: 6
+ats_keywords:
+  - React
+facets:
+  frontend:
+    phrase: React dashboard
+    keywords: [react]
+variants:
+  - facet: frontend
+    emphasis: frontend
+    strength: 6
+    text: >-
+      Built a full-stack AI product with React dashboard and FastAPI backend on AWS,
+      shipping production features to 1K+ users.

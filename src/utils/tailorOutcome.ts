@@ -18,6 +18,8 @@ const OUTCOME_DISPLAY: Record<TailorOutcomeKind, Omit<TailorCellDisplay, "toolti
   offline: { label: "Offline", tone: "offline", tooltip: "Tailor server or relay unreachable" },
   timeout: { label: "Timeout", tone: "timeout", tooltip: "Connection dropped while tailoring" },
   missing: { label: "Missing", tone: "warn", tooltip: "Job no longer in feed" },
+  unsupported: { label: "N/A JD", tone: "warn", tooltip: "Not an engineering job description — tailoring skipped" },
+  borderline: { label: "Warn", tone: "warn", tooltip: "Borderline JD — PDF created with low-confidence warning" },
   error: { label: "Error", tone: "error", tooltip: "Tailor run failed" },
 };
 
@@ -28,6 +30,7 @@ export function outcomeFromError(error?: string | null): TailorOutcomeKind {
   if (err.includes("tectonic") || err.includes("tex-failed") || err.includes("compile")) return "compile";
   if (err.includes("ai-failed") || err.includes("ollama") || err.includes("model step")) return "ai";
   if (err.includes("no full jd") || err.includes("job description") || err.includes("jd captured")) return "no-jd";
+  if (err.includes("unsupported jd") || err.includes("not an engineering") || err.includes("non-engineering")) return "unsupported";
   if (err.includes("save your resume") || (err.includes("resume") && err.includes("settings"))) return "no-resume";
   if (
     err.includes("relay unreachable")
@@ -60,6 +63,8 @@ export function outcomeFromServerStatus(status?: string | null, error?: string |
       return "ai";
     case "no-jd":
       return "no-jd";
+    case "unsupported-jd":
+      return "unsupported";
     default:
       return outcomeFromError(error);
   }
@@ -68,6 +73,7 @@ export function outcomeFromServerStatus(status?: string | null, error?: string |
 export function resolveTailorOutcome(record: TailorRecord | null | undefined): TailorOutcomeKind {
   if (!record || record.status === "none") return "error";
   if (record.outcome) return record.outcome;
+  if (record.status === "done" && record.borderline) return "borderline";
   if (record.status === "done") return "done";
   if (record.status === "running") return "running";
   if (record.status === "queued") return "queued";
@@ -117,6 +123,8 @@ export function tailorSortRank(record: TailorRecord | null | undefined): number 
     case "no-jd":
     case "no-resume":
     case "missing":
+    case "unsupported":
+    case "borderline":
       return 28;
     case "error":
     default:
@@ -128,9 +136,11 @@ export function mapResultToRecordStatus(
   ok: boolean,
   serverStatus?: string | null,
   error?: string | null,
+  borderline?: boolean,
 ): { status: TailorRecord["status"]; outcome: TailorOutcomeKind } {
-  if (ok) return { status: "done", outcome: "done" };
+  if (ok) return { status: "done", outcome: borderline ? "borderline" : "done" };
   const outcome = outcomeFromServerStatus(serverStatus, error);
   if (outcome === "skip") return { status: "no-go", outcome: "skip" };
+  if (outcome === "unsupported") return { status: "failed", outcome: "unsupported" };
   return { status: "failed", outcome };
 }

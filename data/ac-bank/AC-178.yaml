@@ -1,0 +1,41 @@
+id: AC-178
+role: accolite
+slot_kind: experience
+engineering_identity: fullstack
+client_context: tmobile
+achievement_theme: customer-onboarding
+display_order: 16
+wow_score: 0.86
+metrics_claimed:
+  - onboarding
+  - signups_10k
+concepts_claimed:
+  - fullstack
+signature_technologies:
+  - Java
+  - React
+fact: T-Mobile customer onboarding workflows with service provisioning and payment pages.
+capabilities:
+  backend: 78
+  frontend: 88
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - Java
+  - React
+facets:
+  default:
+    phrase: customer-onboarding
+    keywords:
+      - java
+      - react
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Accelerated T-Mobile customer acquisition with Java and React onboarding flows connecting provisioning to payment
+      for 10K+ production commerce signups.

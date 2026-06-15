@@ -1,0 +1,41 @@
+id: AC-019
+role: stony-brook
+slot_kind: experience
+engineering_identity: platform
+achievement_theme: performance
+display_order: 16
+wow_score: 0.87
+metrics_claimed:
+  - 3d_20m
+  - performance
+concepts_claimed:
+  - platform
+signature_technologies:
+  - Python
+  - AWS
+fact: Performance tuning — FOMC pipeline 3 days to under 20 minutes.
+capabilities:
+  ai: 78
+  backend: 90
+  frontend: 65
+  data: 65
+  cloud: 82
+  ml: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - AWS
+facets:
+  default:
+    phrase: performance
+    keywords:
+      - python
+      - aws
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Reduced FOMC pipeline runtime from 3 days to under 20 minutes through Python performance tuning and AWS inference
+      optimization in production.

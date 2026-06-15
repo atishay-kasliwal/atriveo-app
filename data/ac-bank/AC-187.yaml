@@ -1,0 +1,41 @@
+id: AC-187
+role: accolite
+slot_kind: experience
+engineering_identity: cloud
+client_context: inhouse
+achievement_theme: timesheet-automation
+display_order: 25
+wow_score: 0.88
+metrics_claimed:
+  - lambda_sqs
+  - employees_3000
+concepts_claimed:
+  - cloud
+signature_technologies:
+  - AWS Lambda
+  - SQS
+fact: Timesheet automation via AWS Lambda SQS SNS for 3,000 employees.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 90
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - AWS Lambda
+  - SQS
+facets:
+  default:
+    phrase: timesheet-automation
+    keywords:
+      - aws lambda
+      - sqs
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Automated timesheet submission on AWS Lambda and SQS for 3,000 employees eliminating manual weekly filing across
+      production operations.

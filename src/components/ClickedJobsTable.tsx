@@ -1,6 +1,8 @@
 import type { ApplyClickRecord, SavedJobSource } from "../hooks/useApplyClickLog";
-import type { ApplyRecord } from "../hooks/useApplyTracker";
+import type { ApplyRecord, OfferStatus } from "../hooks/useApplyTracker";
+import JobPipelineTimeline from "./JobPipelineTimeline";
 import { jobBoardLabel } from "../utils/jobPresentation";
+import type { TailoredResumeOnDisk } from "../utils/tailorRun";
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -27,7 +29,9 @@ function sourceLabel(source: SavedJobSource): string {
 interface Props {
   records: ApplyClickRecord[];
   getRecord: (jobUrl: string) => ApplyRecord | null;
+  getCompiled?: (jobUrl: string) => TailoredResumeOnDisk | null;
   onAddToTracker: (jobUrl: string, title: string, company: string, metadata?: { location: string | null }) => void;
+  onUpdatePipeline?: (jobUrl: string, patch: { interviewAt?: string | null; offerStatus?: OfferStatus }) => void;
   onRestore?: (jobKey: string) => void;
   emptyMessage?: string;
 }
@@ -35,7 +39,9 @@ interface Props {
 export default function ClickedJobsTable({
   records,
   getRecord,
+  getCompiled,
   onAddToTracker,
+  onUpdatePipeline,
   onRestore,
   emptyMessage = "No saved jobs yet. Use Apply, Click, or Add on the live feed to send a posting here.",
 }: Props) {
@@ -50,6 +56,7 @@ export default function ClickedJobsTable({
           <tr>
             <th>#</th>
             <th>Saved</th>
+            <th>Pipeline</th>
             <th>Via</th>
             <th>Score</th>
             <th>Company</th>
@@ -64,6 +71,7 @@ export default function ClickedJobsTable({
         <tbody>
           {records.map((record, index) => {
             const trackerRecord = getRecord(record.jobUrl);
+            const compiled = getCompiled?.(record.jobUrl) ?? null;
             const trackerStatus = trackerRecord?.trackerSyncStatus ?? null;
             const isSynced = trackerStatus === "synced" || trackerStatus === "duplicate";
             const isSending = trackerStatus === "pending";
@@ -89,6 +97,53 @@ export default function ClickedJobsTable({
               <tr key={record.jobKey}>
                 <td className="clicked-jobs-index">{index + 1}</td>
                 <td>{formatRunTime(record.clickedAt)}</td>
+                <td className="clicked-jobs-pipeline">
+                  <JobPipelineTimeline
+                    compiledAt={compiled?.tailoredAt}
+                    appliedAt={trackerRecord?.lastAppliedAt}
+                    interviewAt={trackerRecord?.interviewAt}
+                    offerStatus={trackerRecord?.offerStatus ?? null}
+                  />
+                  {onUpdatePipeline && trackerRecord ? (
+                    <div className="pipeline-stage-actions">
+                      {!trackerRecord.interviewAt ? (
+                        <button
+                          type="button"
+                          className="pipeline-stage-btn"
+                          onClick={() => onUpdatePipeline(record.jobUrl, { interviewAt: new Date().toISOString() })}
+                        >
+                          + Interview
+                        </button>
+                      ) : null}
+                      {!trackerRecord.offerStatus ? (
+                        <button
+                          type="button"
+                          className="pipeline-stage-btn"
+                          onClick={() => onUpdatePipeline(record.jobUrl, { offerStatus: "pending" })}
+                        >
+                          + Offer
+                        </button>
+                      ) : trackerRecord.offerStatus === "pending" ? (
+                        <>
+                          <button
+                            type="button"
+                            className="pipeline-stage-btn pipeline-stage-btn--yes"
+                            onClick={() => onUpdatePipeline(record.jobUrl, { offerStatus: "accepted" })}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            type="button"
+                            className="pipeline-stage-btn"
+                            onClick={() => onUpdatePipeline(record.jobUrl, { offerStatus: "declined" })}
+                          >
+                            Decline
+                          </button>
+                        </>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </td>
                 <td>{sourceLabel(record.source)}</td>
                 <td>{record.score ?? "—"}</td>
                 <td>{record.company}</td>

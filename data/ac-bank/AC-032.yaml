@@ -1,0 +1,35 @@
+id: AC-032
+role: wake-forest
+slot_kind: experience
+achievement_theme: mri-preprocessing
+display_order: 2
+wow_score: 0.92
+metrics_claimed: [5_modalities]
+concepts_claimed: [preprocessing, simpleitk, multimodal, registration]
+signature_technologies: [Python, SimpleITK]
+fact: SimpleITK pipelines standardizing 5 MRI modalities from 10+ scan types, powering automated segmentation and AI inference.
+capabilities:
+  backend: 90
+  data: 85
+  ml: 74
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - SimpleITK
+  - MRI
+  - preprocessing
+  - FLAIR
+  - T1
+  - T2
+facets:
+  pipeline:
+    phrase: MRI preprocessing pipeline
+    keywords: [simpleitk, register, normalize, denoise, preprocessing, modality]
+variants:
+  - facet: pipeline
+    emphasis: pipeline
+    strength: 9
+    text: >-
+      Standardized 5 MRI modalities using Python and SimpleITK, enabling automated brain
+      tumor segmentation across heterogeneous clinical scans.

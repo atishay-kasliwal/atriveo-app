@@ -1,0 +1,29 @@
+id: AC-015
+role: atriveo
+slot_kind: project
+visibility:
+  default: false
+fact: RETIRED — superseded by AC-050. Was unverified 1K+ users / AWS stack.
+capabilities:
+  ai: 82
+  backend: 78
+  frontend: 70
+  cloud: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - AWS
+  - production
+  - React
+  - FastAPI
+facets:
+  cloud-serverless:
+    phrase: production AI product
+    keywords: [aws, production, users, deploy]
+variants:
+  - facet: cloud-serverless
+    emphasis: cloud-serverless
+    strength: 9
+    text: >-
+      Shipped a production AI recommendation platform on AWS with FastAPI and React,
+      serving 1K+ users with automated deployment pipelines.

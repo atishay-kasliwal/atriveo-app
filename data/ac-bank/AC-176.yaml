@@ -1,0 +1,41 @@
+id: AC-176
+role: accolite
+slot_kind: experience
+engineering_identity: fullstack
+client_context: bt
+achievement_theme: commerce-delivery
+display_order: 14
+wow_score: 0.87
+metrics_claimed:
+  - fullstack_bt
+  - launches_20
+concepts_claimed:
+  - fullstack
+signature_technologies:
+  - Angular
+  - Java
+fact: Full-stack British Telecom feature ownership from APIs to Angular payment UX.
+capabilities:
+  backend: 78
+  frontend: 88
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - Angular
+  - Java
+facets:
+  default:
+    phrase: commerce-delivery
+    keywords:
+      - angular
+      - java
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Owned 20+ British Telecom telecom service launches end-to-end from Java APIs through Angular payment experiences
+      reaching production commerce customers.

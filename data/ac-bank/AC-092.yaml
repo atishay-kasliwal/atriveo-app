@@ -1,0 +1,42 @@
+id: AC-092
+role: job-pipeline
+slot_kind: project
+achievement_theme: ats-gap-analysis
+display_order: 10
+wow_score: 0.83
+metrics_claimed:
+  - keywords_30
+concepts_claimed:
+  - ats
+  - resume
+  - gap-analysis
+  - matching
+signature_technologies:
+  - Python
+fact: Optional --ats flag scores top jobs against stored resume for gap analysis.
+capabilities:
+  backend: 80
+  ai: 74
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - ATS
+  - resume
+  - matching
+  - analysis
+facets:
+  ats:
+    phrase: ATS gap analysis
+    keywords:
+      - ats
+      - resume
+      - gap
+      - match
+variants:
+  - facet: ats
+    emphasis: ats
+    strength: 8
+    text: >-
+      Integrated Python ATS resume gap analysis scoring top-ranked jobs against a stored profile with 30+ keyword checks
+      to surface gaps before applications.

@@ -1,0 +1,42 @@
+id: AC-026
+role: stony-brook
+slot_kind: experience
+engineering_identity: scope
+achievement_theme: career-scope
+display_order: 0
+wow_score: 0.96
+metrics_claimed:
+  - tenure_7y
+  - fomc_scope
+  - 3d_20m
+concepts_claimed:
+  - scope
+signature_technologies:
+  - Python
+fact: >-
+  SBU scope thesis — AI-powered financial intelligence over 7 years FOMC history combining pipelines agents and
+  retrieval.
+capabilities:
+  ai: 90
+  backend: 88
+  frontend: 65
+  data: 85
+  cloud: 82
+  ml: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+facets:
+  default:
+    phrase: career-scope
+    keywords:
+      - python
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Architected Python AI-powered financial intelligence platforms over 7 years of macroeconomic research combining
+      production backend systems multi-agent reasoning and retrieval to accelerate analysis from 3 days to under 20
+      minutes.

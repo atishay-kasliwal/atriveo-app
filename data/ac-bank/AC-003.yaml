@@ -1,0 +1,41 @@
+id: AC-003
+role: stony-brook
+slot_kind: experience
+engineering_identity: backend
+achievement_theme: ingestion-apis
+display_order: 3
+wow_score: 0.87
+metrics_claimed:
+  - records_200k
+  - ingestion
+concepts_claimed:
+  - backend
+signature_technologies:
+  - FastAPI
+  - AWS
+fact: FastAPI ingestion APIs loading financial records into research pipelines on AWS.
+capabilities:
+  ai: 70
+  backend: 88
+  frontend: 65
+  data: 82
+  cloud: 78
+  ml: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - FastAPI
+  - AWS
+facets:
+  default:
+    phrase: ingestion-apis
+    keywords:
+      - fastapi
+      - aws
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Built FastAPI ingestion APIs on AWS loading 200K+ financial records into macro research pipelines with validated
+      schemas for downstream NLP and forecasting.

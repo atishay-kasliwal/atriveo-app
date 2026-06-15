@@ -1,0 +1,5 @@
+max_ai_bullets: 3
+max_backend_bullets: 5
+max_per_resume:
+  rag_bullets: 2
+  transformer_models: 2

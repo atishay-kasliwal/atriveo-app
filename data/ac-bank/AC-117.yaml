@@ -1,0 +1,29 @@
+id: AC-117
+role: mri-research
+slot_kind: project
+achievement_theme: radiogenomics
+display_order: 5
+wow_score: 0.88
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Python
+fact: Built radiogenomics analysis correlating radiomics features with genomics data and mutation outcome patterns.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+facets:
+  default:
+    phrase: radiogenomics
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built Python radiogenomics analysis correlating radiomics and genomics features with mutation outcomes on
+      73-patient cohorts in production.

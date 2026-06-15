@@ -6,6 +6,7 @@ import { careerOpsRating } from "../utils/jobPresentation";
 import { jobDismissKey } from "../utils/jobCopy";
 import { snapshotJobForQueue } from "../utils/manualJob";
 import { mapResultToRecordStatus, outcomeFromError } from "../utils/tailorOutcome";
+import type { SingleTailorResult } from "../utils/tailorRun";
 import { isRecoverableTailorFailure, isTailorBusy, requestTailorRecovery } from "../utils/tailorRecover";
 import {
   getTailorTabId,
@@ -175,17 +176,7 @@ type TailorStatusApi = Pick<
 interface Options {
   tailorStatus: TailorStatusApi;
   dismissedKeys?: ReadonlySet<string>;
-  onProcessJob?: (job: Job) => Promise<{
-    ok: boolean;
-    ats?: string;
-    pdfPath?: string;
-    dir?: string;
-    folder?: string;
-    error?: string;
-    logs?: import("../types/tailor").TailorLogEntry[];
-    outcome?: import("../types/tailorQueue").TailorOutcomeKind;
-    serverStatus?: string;
-  }>;
+  onProcessJob?: (job: Job) => Promise<SingleTailorResult>;
 }
 
 export function useTailorQueue(jobs: Job[], options: Options) {
@@ -705,7 +696,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       if (dismissed) {
         tailorStatus.markStatus(nextItem.jobKey, "none");
       } else {
-        const mapped = mapResultToRecordStatus(done, result.serverStatus, result.error);
+        const mapped = mapResultToRecordStatus(done, result.serverStatus, result.error, result.borderline);
         tailorStatus.markStatus(
           nextItem.jobKey,
           mapped.status,
@@ -725,6 +716,8 @@ export function useTailorQueue(jobs: Job[], options: Options) {
             durationMs,
             outcome: result.outcome ?? mapped.outcome,
             serverStatus: result.serverStatus,
+            explain: result.explain,
+            borderline: result.borderline,
           },
         );
       }

@@ -1,0 +1,2333 @@
+{
+  "generated_at": "2026-06-14T17:10:52.022Z",
+  "source": {
+    "week_jobs": "public/week_jobs.json",
+    "job_descriptions": "public/job_descriptions",
+    "candidate_jobs_with_full_jd": 5139,
+    "top_pool_size": 150,
+    "seed": "2026-06-14",
+    "count": 10
+  },
+  "rubric": {
+    "score": "65% exact selected-keyword presence in bullet text + 35% selected coverage of claimable JD keywords from the AC bank.",
+    "human_review": "Fill selection_fit and reads_human after blind review. Keep notes about false positives, missing but claimable terms, and weak bullet order."
+  },
+  "aggregate": {
+    "average_score": 71,
+    "average_exact_keyword_coverage": 0.659,
+    "average_bank_keyword_coverage": 0.798
+  },
+  "jobs": [
+    {
+      "sample_id": 1,
+      "company": "Tata Consultancy Services",
+      "title": "AI/ML Engineer",
+      "location": "Charlotte, NC",
+      "score_pct": 100,
+      "pipeline_score": 230,
+      "ats_score": 43,
+      "fit_score": 10,
+      "batch_time": "2026-06-08T17:15:22Z",
+      "job_url": "https://www.linkedin.com/jobs/view/4425280035",
+      "jd_excerpt": "**Job Description** Must Have Technical/Functional Skills Primary: AI/ML engineering, LLM experience, MLflow, Azure ML Secondary: SageMaker, Kubeflow, NLP, Agile tools Experience: 5\\+ Roles \\& Responsibilities Position Summary The AI Agent \\& Data/ML Engineer will design, develop, and operationalize AI agents, large\\-scale data pipelines, and machine learning solutions to support enterprise automation and analytics initiatives. This role requires strong engineering skills, expertise in LLM and agentic architectures, and the ability t",
+      "evaluation": {
+        "score": 80,
+        "exact_keyword_coverage": 0.8,
+        "bank_keyword_coverage": 0.8,
+        "jd_bank_keywords": [
+          "Python",
+          "AWS",
+          "financial",
+          "NLP",
+          "PyTorch",
+          "machine learning",
+          "microservices",
+          "Kafka",
+          "Redis",
+          "performance",
+          "AI",
+          "healthcare",
+          "cloud",
+          "RAG",
+          "LLM",
+          "LangChain",
+          "agents",
+          "scikit-learn",
+          "analytics",
+          "Docker",
+          "CI/CD",
+          "deployment",
+          "AI agents",
+          "automation",
+          "compliance"
+        ],
+        "selected_jd_keywords": [
+          "Python",
+          "LLM",
+          "AI agents",
+          "financial",
+          "machine learning",
+          "AI",
+          "NLP",
+          "analytics",
+          "cloud",
+          "AWS",
+          "automation",
+          "microservices",
+          "Kafka",
+          "PyTorch",
+          "healthcare",
+          "performance",
+          "RAG",
+          "scikit-learn",
+          "LangChain",
+          "agents"
+        ],
+        "exact_keywords_in_text": [
+          "Python",
+          "LLM",
+          "AI agents",
+          "financial",
+          "machine learning",
+          "AI",
+          "analytics",
+          "cloud",
+          "AWS",
+          "microservices",
+          "Kafka",
+          "PyTorch",
+          "RAG",
+          "scikit-learn",
+          "LangChain",
+          "agents"
+        ],
+        "injected_keywords": [
+          "AI agents",
+          "machine learning",
+          "NLP",
+          "Python",
+          "LLM",
+          "automation",
+          "microservices",
+          "healthcare",
+          "scikit-learn"
+        ]
+      },
+      "composition": {
+        "theme": "ai-llm",
+        "matched_concepts": {
+          "backend": [
+            "microservices"
+          ],
+          "cloud": [
+            "aws",
+            "gcp",
+            "azure",
+            "docker",
+            "kubernetes",
+            "ci/cd"
+          ],
+          "data": [
+            "kafka",
+            "streaming",
+            "redis",
+            "sql",
+            "analytics"
+          ],
+          "ai": [
+            "llm",
+            "rag",
+            "prompt",
+            "agents",
+            "langchain",
+            "ai",
+            "nlp"
+          ],
+          "ml": [
+            "pytorch",
+            "tensorflow",
+            "machine learning"
+          ],
+          "business": [
+            "growth"
+          ]
+        },
+        "experience": [
+          {
+            "role": "stony-brook",
+            "bullets": [
+              {
+                "ac_id": "AC-023",
+                "emphasis": "llm",
+                "injected_keywords": [
+                  "AI agents",
+                  "machine learning"
+                ],
+                "text": "Developed a 3 agent LLM debate framework in Python where Fundamental, Sentiment, and Valuation agents collaborate via RL to forecast S&P 500 movements, reaching 60% directional accuracy with AI agents and machine learning."
+              },
+              {
+                "ac_id": "AC-025",
+                "emphasis": "llm",
+                "injected_keywords": [
+                  "NLP"
+                ],
+                "text": "Built an LLM powered attribute extraction service in Python using Gemini to infer user preferences from conversations, driving personalized agent behavior across finance, health, and lifestyle domains for 1K+ production users with NLP."
+              },
+              {
+                "ac_id": "AC-022",
+                "emphasis": "llm",
+                "injected_keywords": [
+                  "NLP"
+                ],
+                "text": "Built LLM driven analytics workflows in Python across financial news and transcripts with structured schema validation, delivering production APIs and dashboards used daily by 5 researchers with NLP."
+              },
+              {
+                "ac_id": "AC-024",
+                "emphasis": "mcp-agents",
+                "injected_keywords": [
+                  "Python",
+                  "LLM"
+                ],
+                "text": "Developed an MCP server enabling Claude and external agents to securely access user data with consent enforcement, supporting 12 personalized agent behavior configurations across finance, health, and lifestyle domains for 1K+ early production users with Python and LLM."
+              }
+            ]
+          },
+          {
+            "role": "accolite",
+            "bullets": [
+              {
+                "ac_id": "AC-028",
+                "emphasis": "serverless",
+                "injected_keywords": [],
+                "text": "Built a serverless data platform in Python, AWS Lambda, and Firebase, automating async workflows and processing behavioral data for 3K+ users via REST API integrations."
+              },
+              {
+                "ac_id": "AC-030",
+                "emphasis": "platform",
+                "injected_keywords": [
+                  "automation"
+                ],
+                "text": "Built an internal payroll and operations platform in Node.js, Python, TypeScript, React, and Firebase, automating payslip generation and financial workflows for 3,000 employees with automation."
+              },
+              {
+                "ac_id": "AC-027",
+                "emphasis": "security",
+                "injected_keywords": [],
+                "text": "Secured 10+ Fidelity microservices using Spring Security, OAuth2, and JWT, implementing client credentials and authorization code flows for internal data transfer with 99.9% uptime."
+              },
+              {
+                "ac_id": "AC-007",
+                "emphasis": "architecture",
+                "injected_keywords": [
+                  "microservices"
+                ],
+                "text": "Architected an event driven ETL system for Fidelity in Kafka, Java, Spring Boot, and Spring Cloud, ingesting financial events across 10+ enterprise integrations at 99% uptime and 100% test coverage with microservices."
+              }
+            ]
+          },
+          {
+            "role": "wake-forest",
+            "bullets": [
+              {
+                "ac_id": "AC-011",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "machine learning",
+                  "healthcare"
+                ],
+                "text": "Engineered a scalable Python and PyTorch deep learning pipeline on GCP, reducing clinical processing from 20+ minutes to under 5 minutes at 90% accuracy across 1,250+ cases with machine learning and healthcare."
+              },
+              {
+                "ac_id": "AC-013",
+                "emphasis": "llm-rag",
+                "injected_keywords": [
+                  "LLM",
+                  "healthcare"
+                ],
+                "text": "Built a RAG pipeline in Python using embedding based retrieval across 1,250+ clinical cases for contextual inference in a production diagnostic system with LLM and healthcare."
+              }
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "role": "bayesian-mmm",
+            "bullets": [
+              {
+                "ac_id": "AC-042",
+                "emphasis": "ml",
+                "injected_keywords": [
+                  "scikit-learn",
+                  "machine learning"
+                ],
+                "text": "Built an end to end Bayesian marketing mix model across 5 channels and 156 weeks in Python and PyMC, applying adstock and saturation feature engineering to achieve R2 0.9489 and 2.74% MAPE with scikit-learn and machine learning."
+              },
+              {
+                "ac_id": "AC-019",
+                "emphasis": "statistics",
+                "injected_keywords": [
+                  "scikit-learn",
+                  "machine learning"
+                ],
+                "text": "Built a Bayesian marketing mix model in Python and PyMC over 5 channels and 156 weeks, reaching R2 0.9489 and 2.74% MAPE with adstock and saturation modeling with scikit-learn and machine learning."
+              }
+            ]
+          },
+          {
+            "role": "atriveo",
+            "bullets": [
+              {
+                "ac_id": "AC-016",
+                "emphasis": "llm-ai",
+                "injected_keywords": [
+                  "Python",
+                  "LLM"
+                ],
+                "text": "Engineered AI powered recommendation services using LangGraph, LangChain, and RAG to rank job postings across 6 search streams and remove 75% noise for personalized matching with Python and LLM."
+              },
+              {
+                "ac_id": "AC-015",
+                "emphasis": "cloud-serverless",
+                "injected_keywords": [],
+                "text": "Launched Atriveo on a Cloudflare serverless edge in Python FastAPI and PostgreSQL with MongoDB Atlas, sustaining 2K+ daily queries at 99.9% uptime for 641 active users."
+              }
+            ]
+          }
+        ]
+      },
+      "human_review": {
+        "selection_fit_1_to_10": null,
+        "reads_human_1_to_10": null,
+        "missing_claimable_keywords": [],
+        "notes": ""
+      }
+    },
+    {
+      "sample_id": 2,
+      "company": "Google",
+      "title": "Software Engineer, Mobile (Android), Search",
+      "location": "New York, NY",
+      "score_pct": 100,
+      "pipeline_score": 178,
+      "ats_score": 0,
+      "fit_score": 4,
+      "batch_time": "2026-06-12T14:12:25Z",
+      "job_url": "https://www.linkedin.com/jobs/view/4417130664",
+      "jd_excerpt": "**Minimum qualifications:** * Bachelor’s degree or equivalent practical experience. * 2 years of experience with software development in one or more programming languages, or 1 year of experience with an advanced degree. * 2 years of experience with Android application development. * Experience in Kotlin programming language. **Preferred qualifications:** * Master's degree or PhD in Computer Science or related technical fields. * 2 years of experience with data structures or algorithms. * Experience with performance optimization, mobile image management (e.g., Glide, Bitmaps). * Experience b",
+      "evaluation": {
+        "score": 56,
+        "exact_keyword_coverage": 0.5,
+        "bank_keyword_coverage": 0.667,
+        "jd_bank_keywords": [
+          "performance",
+          "security",
+          "infrastructure",
+          "retrieval",
+          "full stack",
+          "UI"
+        ],
+        "selected_jd_keywords": [
+          "performance",
+          "optimization",
+          "full-stack",
+          "UI"
+        ],
+        "exact_keywords_in_text": [
+          "performance",
+          "full-stack"
+        ],
+        "injected_keywords": [
+          "performance",
+          "optimization",
+          "full-stack",
+          "UI"
+        ]
+      },
+      "composition": {
+        "theme": "full-stack",
+        "matched_concepts": {
+          "frontend": [
+            "ui"
+          ]
+        },
+        "experience": [
+          {
+            "role": "stony-brook",
+            "bullets": [
+              {
+                "ac_id": "AC-022",
+                "emphasis": "llm",
+                "injected_keywords": [],
+                "text": "Built LLM driven analytics workflows in Python across financial news and transcripts with structured schema validation, delivering production APIs and dashboards used daily by 5 researchers."
+              },
+              {
+                "ac_id": "AC-001",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "performance",
+                  "optimization"
+                ],
+                "text": "Optimized an event driven FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis time from 3+ days to under 20 minutes at 67.7% signal accuracy with performance and optimization."
+              },
+              {
+                "ac_id": "AC-002",
+                "emphasis": "nlp-ai",
+                "injected_keywords": [],
+                "text": "Engineered a Python NLP pipeline on AWS processing 200K+ financial records in real time, applying event driven architecture to deliver 27% portfolio return and $2.6K profit."
+              },
+              {
+                "ac_id": "AC-023",
+                "emphasis": "ai-agents",
+                "injected_keywords": [],
+                "text": "Achieved 60% directional accuracy across 30 S&P 500 stocks by building a 3 agent RL debate system in Python with Fundamental, Sentiment, and Valuation agents trained on 7d/30d/90d forecasting windows."
+              }
+            ]
+          },
+          {
+            "role": "accolite",
+            "bullets": [
+              {
+                "ac_id": "AC-029",
+                "emphasis": "frontend",
+                "injected_keywords": [
+                  "full-stack",
+                  "UI"
+                ],
+                "text": "Developed React based product surfaces connected to Spring Boot services, reducing page load time by 35% for 5K+ users with full-stack and UI."
+              },
+              {
+                "ac_id": "AC-030",
+                "emphasis": "platform",
+                "injected_keywords": [
+                  "full-stack"
+                ],
+                "text": "Built an internal payroll and operations platform in Node.js, Python, TypeScript, React, and Firebase, automating payslip generation and financial workflows for 3,000 employees with full-stack."
+              },
+              {
+                "ac_id": "AC-028",
+                "emphasis": "serverless",
+                "injected_keywords": [],
+                "text": "Built a serverless data platform in Python, AWS Lambda, and Firebase, automating async workflows and processing behavioral data for 3K+ users via REST API integrations."
+              },
+              {
+                "ac_id": "AC-008",
+                "emphasis": "backend-api",
+                "injected_keywords": [],
+                "text": "Delivered production REST and GraphQL APIs in Java, Spring Boot, and Spring MVC for BT Telecom, implementing Resilience4j circuit breaking across 10K+ daily transactions at 200ms P99 with 99% uptime."
+              }
+            ]
+          },
+          {
+            "role": "wake-forest",
+            "bullets": [
+              {
+                "ac_id": "AC-031",
+                "emphasis": "dashboard",
+                "injected_keywords": [],
+                "text": "Delivered interactive R Shiny dashboards across 50K+ patient scans, used by non technical clinical teams for real time diagnostic exploration."
+              },
+              {
+                "ac_id": "AC-011",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "performance"
+                ],
+                "text": "Engineered a scalable Python and PyTorch deep learning pipeline on GCP, reducing clinical processing from 20+ minutes to under 5 minutes at 90% accuracy across 1,250+ cases with performance."
+              }
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "role": "atriveo",
+            "bullets": [
+              {
+                "ac_id": "AC-040",
+                "emphasis": "full-stack",
+                "injected_keywords": [],
+                "text": "Delivered full stack analytics and tooling for Atriveo: PostgreSQL KPI tracking for application volume and referral trends, and a 5.0 star Chrome extension enabling one click job logging across all job boards."
+              },
+              {
+                "ac_id": "AC-015",
+                "emphasis": "backend",
+                "injected_keywords": [
+                  "full stack"
+                ],
+                "text": "Built Atriveo, a production job intelligence platform in Python FastAPI, TypeScript, and PostgreSQL with MongoDB Atlas persistence on a Cloudflare serverless edge, serving 641 active users at 2K+ daily queries with 99.9% uptime with full stack."
+              }
+            ]
+          },
+          {
+            "role": "bayesian-mmm",
+            "bullets": [
+              {
+                "ac_id": "AC-043",
+                "emphasis": "simulation",
+                "injected_keywords": [],
+                "text": "Validated budget allocation with 1,000 run Monte Carlo simulation and holdout testing, then published Tableau outputs where Email reached 0.250 ROAS and +1,152% ROI on 3,056K spend."
+              },
+              {
+                "ac_id": "AC-020",
+                "emphasis": "business-impact",
+                "injected_keywords": [],
+                "text": "Validated budget allocation with 1,000 run Monte Carlo simulation and holdout testing, then published Tableau outputs where Email reached 0.250 ROAS and +1,152% ROI on 3,056K spend."
+              }
+            ]
+          }
+        ]
+      },
+      "human_review": {
+        "selection_fit_1_to_10": null,
+        "reads_human_1_to_10": null,
+        "missing_claimable_keywords": [],
+        "notes": ""
+      }
+    },
+    {
+      "sample_id": 3,
+      "company": "Anthropic",
+      "title": "Software Engineer, Safeguards Evals",
+      "location": "New York, NY",
+      "score_pct": 100,
+      "pipeline_score": 194,
+      "ats_score": 33,
+      "fit_score": 4,
+      "batch_time": "2026-06-09T20:15:47Z",
+      "job_url": "https://www.linkedin.com/jobs/view/4425888247",
+      "jd_excerpt": "**About Anthropic** Anthropic’s mission is to create reliable, interpretable, and steerable AI systems. We want AI to be safe and beneficial for our users and for society as a whole. Our team is a quickly growing group of committed researchers, engineers, policy experts, and business leaders working together to build beneficial AI systems. **About The Role** How do we know our safety systems actually catch misuse? Anthropic increasingly uses AI to investigate potential misuse of Claude — analyzing real\\-world traffic to surface bad actors, policy violations, and emerging threats. It",
+      "evaluation": {
+        "score": 74,
+        "exact_keyword_coverage": 0.714,
+        "bank_keyword_coverage": 0.778,
+        "jd_bank_keywords": [
+          "Python",
+          "distributed systems",
+          "monitoring",
+          "performance",
+          "AI",
+          "infrastructure",
+          "LLM",
+          "Claude",
+          "production"
+        ],
+        "selected_jd_keywords": [
+          "Python",
+          "LLM",
+          "AI",
+          "production",
+          "Claude",
+          "performance",
+          "distributed systems"
+        ],
+        "exact_keywords_in_text": [
+          "Python",
+          "LLM",
+          "AI",
+          "production",
+          "Claude"
+        ],
+        "injected_keywords": [
+          "Python",
+          "LLM",
+          "performance",
+          "distributed systems"
+        ]
+      },
+      "composition": {
+        "theme": "ai-llm",
+        "matched_concepts": {
+          "backend": [
+            "distributed systems"
+          ],
+          "cloud": [
+            "monitoring"
+          ],
+          "ai": [
+            "llm",
+            "prompt",
+            "ai"
+          ],
+          "ml": [
+            "evaluation"
+          ]
+        },
+        "experience": [
+          {
+            "role": "stony-brook",
+            "bullets": [
+              {
+                "ac_id": "AC-023",
+                "emphasis": "llm",
+                "injected_keywords": [],
+                "text": "Developed a 3 agent LLM debate framework in Python where Fundamental, Sentiment, and Valuation agents collaborate via RL to forecast S&P 500 movements, reaching 60% directional accuracy."
+              },
+              {
+                "ac_id": "AC-025",
+                "emphasis": "llm",
+                "injected_keywords": [],
+                "text": "Built an LLM powered attribute extraction service in Python using Gemini to infer user preferences from conversations, driving personalized agent behavior across finance, health, and lifestyle domains for 1K+ production users."
+              },
+              {
+                "ac_id": "AC-022",
+                "emphasis": "llm",
+                "injected_keywords": [],
+                "text": "Built LLM driven analytics workflows in Python across financial news and transcripts with structured schema validation, delivering production APIs and dashboards used daily by 5 researchers."
+              },
+              {
+                "ac_id": "AC-024",
+                "emphasis": "mcp-agents",
+                "injected_keywords": [
+                  "Python",
+                  "LLM"
+                ],
+                "text": "Developed an MCP server enabling Claude and external agents to securely access user data with consent enforcement, supporting 12 personalized agent behavior configurations across finance, health, and lifestyle domains for 1K+ early production users with Python and LLM."
+              }
+            ]
+          },
+          {
+            "role": "accolite",
+            "bullets": [
+              {
+                "ac_id": "AC-028",
+                "emphasis": "serverless",
+                "injected_keywords": [],
+                "text": "Built a serverless data platform in Python, AWS Lambda, and Firebase, automating async workflows and processing behavioral data for 3K+ users via REST API integrations."
+              },
+              {
+                "ac_id": "AC-008",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "performance"
+                ],
+                "text": "Built high throughput REST and GraphQL services for BT Telecom in Java and Spring Boot, handling 10K+ daily transactions at 200ms P99 with Resilience4j circuit breaking with performance."
+              },
+              {
+                "ac_id": "AC-007",
+                "emphasis": "architecture",
+                "injected_keywords": [
+                  "distributed systems"
+                ],
+                "text": "Architected an event driven ETL system for Fidelity in Kafka, Java, Spring Boot, and Spring Cloud, ingesting financial events across 10+ enterprise integrations at 99% uptime and 100% test coverage with distributed systems."
+              },
+              {
+                "ac_id": "AC-027",
+                "emphasis": "security",
+                "injected_keywords": [],
+                "text": "Secured 10+ Fidelity microservices using Spring Security, OAuth2, and JWT, implementing client credentials and authorization code flows for internal data transfer with 99.9% uptime."
+              }
+            ]
+          },
+          {
+            "role": "wake-forest",
+            "bullets": [
+              {
+                "ac_id": "AC-011",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "performance"
+                ],
+                "text": "Engineered a scalable Python and PyTorch deep learning pipeline on GCP, reducing clinical processing from 20+ minutes to under 5 minutes at 90% accuracy across 1,250+ cases with performance."
+              },
+              {
+                "ac_id": "AC-013",
+                "emphasis": "llm-rag",
+                "injected_keywords": [
+                  "LLM"
+                ],
+                "text": "Built a RAG pipeline in Python using embedding based retrieval across 1,250+ clinical cases for contextual inference in a production diagnostic system with LLM."
+              }
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "role": "atriveo",
+            "bullets": [
+              {
+                "ac_id": "AC-016",
+                "emphasis": "llm-ai",
+                "injected_keywords": [
+                  "Python",
+                  "LLM"
+                ],
+                "text": "Engineered AI powered recommendation services using LangGraph, LangChain, and RAG to rank job postings across 6 search streams and remove 75% noise for personalized matching with Python and LLM."
+              },
+              {
+                "ac_id": "AC-015",
+                "emphasis": "backend",
+                "injected_keywords": [],
+                "text": "Built Atriveo, a production job intelligence platform in Python FastAPI, TypeScript, and PostgreSQL with MongoDB Atlas persistence on a Cloudflare serverless edge, serving 641 active users at 2K+ daily queries with 99.9% uptime."
+              }
+            ]
+          },
+          {
+            "role": "bayesian-mmm",
+            "bullets": [
+              {
+                "ac_id": "AC-042",
+                "emphasis": "ml",
+                "injected_keywords": [],
+                "text": "Built an end to end Bayesian marketing mix model across 5 channels and 156 weeks in Python and PyMC, applying adstock and saturation feature engineering to achieve R2 0.9489 and 2.74% MAPE."
+              },
+              {
+                "ac_id": "AC-019",
+                "emphasis": "ml-modeling",
+                "injected_keywords": [],
+                "text": "Developed a Bayesian marketing mix model in Python, PyMC, and scikit-learn across 5 channels and 156 weeks, achieving R2 0.9489 with 2.74% MAPE through adstock and saturation features."
+              }
+            ]
+          }
+        ]
+      },
+      "human_review": {
+        "selection_fit_1_to_10": null,
+        "reads_human_1_to_10": null,
+        "missing_claimable_keywords": [],
+        "notes": ""
+      }
+    },
+    {
+      "sample_id": 4,
+      "company": "Amazon",
+      "title": "Software Development Engineer - Cybersecurity, SBS Core Engineering",
+      "location": "New York, NY",
+      "score_pct": 100,
+      "pipeline_score": 179,
+      "ats_score": 66,
+      "fit_score": 4,
+      "batch_time": "2026-06-11T15:14:01Z",
+      "job_url": "https://www.linkedin.com/jobs/view/4417429179",
+      "jd_excerpt": "**Description** Amazon’s Specialized Business Services Security team is seeking an innovative Software Development Engineer to join our Core Engineering Automation team. In this position, you will focus on developing and maintaining solutions that improve the effectiveness and efficiency of risk and vulnerability management initiatives. You will work with a diverse set of security professionals across Amazon to support our automation capabilities. You will develop solutions to drive prioritization and remediation of vulnerabilities and risk reduction to help deliver secure products",
+      "evaluation": {
+        "score": 64,
+        "exact_keyword_coverage": 0.571,
+        "bank_keyword_coverage": 0.778,
+        "jd_bank_keywords": [
+          "reliability",
+          "Java",
+          "performance",
+          "latency",
+          "security",
+          "healthcare",
+          "cloud",
+          "payments",
+          "automation"
+        ],
+        "selected_jd_keywords": [
+          "security",
+          "Java",
+          "reliability",
+          "performance",
+          "latency",
+          "payments",
+          "cloud"
+        ],
+        "exact_keywords_in_text": [
+          "security",
+          "Java",
+          "latency",
+          "cloud"
+        ],
+        "injected_keywords": [
+          "reliability",
+          "Java",
+          "performance",
+          "payments"
+        ]
+      },
+      "composition": {
+        "theme": "full-stack",
+        "matched_concepts": {
+          "backend": [
+            "latency"
+          ],
+          "business": [
+            "growth"
+          ]
+        },
+        "experience": [
+          {
+            "role": "stony-brook",
+            "bullets": [
+              {
+                "ac_id": "AC-001",
+                "emphasis": "quant-impact",
+                "injected_keywords": [],
+                "text": "Built a Python FastAPI platform on AWS over 7 years of FOMC data, delivering 67.7% signal accuracy and +27% portfolio return while cutting analysis from 3+ days to under 20 minutes."
+              },
+              {
+                "ac_id": "AC-024",
+                "emphasis": "mcp-agents",
+                "injected_keywords": [],
+                "text": "Developed an MCP server enabling Claude and external agents to securely access user data with consent enforcement, supporting 12 personalized agent behavior configurations across finance, health, and lifestyle domains for 1K+ early production users."
+              },
+              {
+                "ac_id": "AC-026",
+                "emphasis": "security",
+                "injected_keywords": [],
+                "text": "Built an MCP server in Python and FastAPI exposing scoped consent tokens and client side X25519 and AES-256-GCM encrypted exports, enabling external agents to securely read user data without server side key access."
+              },
+              {
+                "ac_id": "AC-022",
+                "emphasis": "llm",
+                "injected_keywords": [],
+                "text": "Built LLM driven analytics workflows in Python across financial news and transcripts with structured schema validation, delivering production APIs and dashboards used daily by 5 researchers."
+              }
+            ]
+          },
+          {
+            "role": "accolite",
+            "bullets": [
+              {
+                "ac_id": "AC-008",
+                "emphasis": "backend-api",
+                "injected_keywords": [
+                  "reliability"
+                ],
+                "text": "Delivered production REST and GraphQL APIs in Java, Spring Boot, and Spring MVC for BT Telecom, implementing Resilience4j circuit breaking across 10K+ daily transactions at 200ms P99 with 99% uptime with reliability."
+              },
+              {
+                "ac_id": "AC-009",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "Java",
+                  "performance"
+                ],
+                "text": "Optimized distributed microservices with Kafka event processing and Redis caching, reducing P99 latency by 40% and eliminating Sev1 incidents for 100K+ users with Java and performance."
+              },
+              {
+                "ac_id": "AC-007",
+                "emphasis": "architecture",
+                "injected_keywords": [],
+                "text": "Architected an event driven ETL system for Fidelity in Kafka, Java, Spring Boot, and Spring Cloud, ingesting financial events across 10+ enterprise integrations at 99% uptime and 100% test coverage."
+              },
+              {
+                "ac_id": "AC-027",
+                "emphasis": "security",
+                "injected_keywords": [
+                  "Java"
+                ],
+                "text": "Secured 10+ Fidelity microservices using Spring Security, OAuth2, and JWT, implementing client credentials and authorization code flows for internal data transfer with 99.9% uptime with Java."
+              }
+            ]
+          },
+          {
+            "role": "shriffle",
+            "bullets": [
+              {
+                "ac_id": "AC-014",
+                "emphasis": "business-impact",
+                "injected_keywords": [
+                  "payments"
+                ],
+                "text": "Engineered Java Spring Boot billing microservices for invoices, reconciliation, subscriptions, tax, and refunds, processing 10K+ transactions and generating $50K+ revenue through reliable payment and account workflows with payments."
+              },
+              {
+                "ac_id": "AC-035",
+                "emphasis": "cloud-security",
+                "injected_keywords": [],
+                "text": "Deployed a centralized secrets management microservice in Java and Spring Boot on AWS MongoDB, enforcing OAuth and JWT service identity across 8+ microservices."
+              }
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "role": "atriveo",
+            "bullets": [
+              {
+                "ac_id": "AC-041",
+                "emphasis": "api",
+                "injected_keywords": [
+                  "performance"
+                ],
+                "text": "Built and owned Atriveo's complete backend in Python FastAPI and PostgreSQL, covering auth, REST APIs, schema, queue, and caching, sustaining 2K+ daily queries at under 200ms and 99.9% uptime with performance."
+              },
+              {
+                "ac_id": "AC-015",
+                "emphasis": "cloud-serverless",
+                "injected_keywords": [],
+                "text": "Launched Atriveo on a Cloudflare serverless edge in Python FastAPI and PostgreSQL with MongoDB Atlas, sustaining 2K+ daily queries at 99.9% uptime for 641 active users."
+              }
+            ]
+          },
+          {
+            "role": "bayesian-mmm",
+            "bullets": [
+              {
+                "ac_id": "AC-043",
+                "emphasis": "simulation",
+                "injected_keywords": [],
+                "text": "Validated budget allocation with 1,000 run Monte Carlo simulation and holdout testing, then published Tableau outputs where Email reached 0.250 ROAS and +1,152% ROI on 3,056K spend."
+              },
+              {
+                "ac_id": "AC-020",
+                "emphasis": "business-impact",
+                "injected_keywords": [],
+                "text": "Validated budget allocation with 1,000 run Monte Carlo simulation and holdout testing, then published Tableau outputs where Email reached 0.250 ROAS and +1,152% ROI on 3,056K spend."
+              }
+            ]
+          }
+        ]
+      },
+      "human_review": {
+        "selection_fit_1_to_10": null,
+        "reads_human_1_to_10": null,
+        "missing_claimable_keywords": [],
+        "notes": ""
+      }
+    },
+    {
+      "sample_id": 5,
+      "company": "Cockroach Labs",
+      "title": "Software Engineer (Backend), GTM Tooling",
+      "location": "New York, NY",
+      "score_pct": 100,
+      "pipeline_score": 215,
+      "ats_score": 47,
+      "fit_score": 7,
+      "batch_time": "2026-06-11T12:11:54Z",
+      "job_url": "https://www.linkedin.com/jobs/view/4415937910",
+      "jd_excerpt": "**Category\\-defining tech. Career\\-defining work.** The next era of software won’t operate at human scale. Applications will create applications. Systems will coordinate with systems. Data and decisions will move faster than teams can react to them. The infrastructure powering that world cannot be fragile, reactive, or limited by the assumptions of the past. Cockroach Labs exists to build what comes next — before the world requires it. We created CockroachDB to survive failures, scale without compromise, and adapt to changing conditions automatically. Now we’re helping define a futu",
+      "evaluation": {
+        "score": 81,
+        "exact_keyword_coverage": 0.727,
+        "bank_keyword_coverage": 0.957,
+        "jd_bank_keywords": [
+          "AWS",
+          "backend",
+          "REST",
+          "distributed systems",
+          "observability",
+          "monitoring",
+          "reliability",
+          "performance",
+          "GCP",
+          "AI",
+          "cloud",
+          "Terraform",
+          "infrastructure",
+          "revenue",
+          "agents",
+          "Docker",
+          "CI/CD",
+          "DevOps",
+          "deployment",
+          "Git",
+          "AI agents",
+          "production",
+          "React"
+        ],
+        "selected_jd_keywords": [
+          "AWS",
+          "backend",
+          "performance",
+          "optimization",
+          "Docker",
+          "CI/CD",
+          "DevOps",
+          "deployment",
+          "observability",
+          "Git",
+          "cloud",
+          "monitoring",
+          "distributed systems",
+          "reliability",
+          "AI agents",
+          "production",
+          "React",
+          "GCP",
+          "Terraform",
+          "infrastructure",
+          "REST",
+          "AI"
+        ],
+        "exact_keywords_in_text": [
+          "AWS",
+          "backend",
+          "performance",
+          "Docker",
+          "CI/CD",
+          "deployment",
+          "observability",
+          "cloud",
+          "monitoring",
+          "production",
+          "React",
+          "GCP",
+          "Terraform",
+          "infrastructure",
+          "REST",
+          "AI"
+        ],
+        "injected_keywords": [
+          "performance",
+          "optimization",
+          "CI/CD",
+          "observability",
+          "monitoring",
+          "AI agents",
+          "distributed systems",
+          "REST",
+          "reliability"
+        ]
+      },
+      "composition": {
+        "theme": "cloud-platform",
+        "matched_concepts": {
+          "backend": [
+            "rest",
+            "distributed systems"
+          ],
+          "cloud": [
+            "aws",
+            "gcp",
+            "azure",
+            "docker",
+            "kubernetes",
+            "terraform",
+            "ci/cd",
+            "monitoring",
+            "observability"
+          ],
+          "ai": [
+            "agents",
+            "ai"
+          ],
+          "frontend": [
+            "react"
+          ],
+          "business": [
+            "revenue",
+            "growth"
+          ]
+        },
+        "experience": [
+          {
+            "role": "stony-brook",
+            "bullets": [
+              {
+                "ac_id": "AC-001",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "performance",
+                  "optimization"
+                ],
+                "text": "Optimized an event driven FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis time from 3+ days to under 20 minutes at 67.7% signal accuracy with performance and optimization."
+              },
+              {
+                "ac_id": "AC-021",
+                "emphasis": "cloud",
+                "injected_keywords": [
+                  "CI/CD",
+                  "observability"
+                ],
+                "text": "Automated cloud deployments on AWS with Docker containerized Jenkins pipelines, reducing deployment time by 97% and maintaining 99.9% uptime via Prometheus and CloudWatch monitoring with CI/CD and observability."
+              },
+              {
+                "ac_id": "AC-006",
+                "emphasis": "cloud",
+                "injected_keywords": [
+                  "observability",
+                  "monitoring"
+                ],
+                "text": "Monitored AWS distributed services with CloudWatch and Prometheus, halving MTTR from 4+ hours to under 2 hours while holding 99.9% uptime with observability and monitoring."
+              },
+              {
+                "ac_id": "AC-024",
+                "emphasis": "mcp-agents",
+                "injected_keywords": [
+                  "AI agents"
+                ],
+                "text": "Developed an MCP server enabling Claude and external agents to securely access user data with consent enforcement, supporting 12 personalized agent behavior configurations across finance, health, and lifestyle domains for 1K+ early production users with AI agents."
+              }
+            ]
+          },
+          {
+            "role": "accolite",
+            "bullets": [
+              {
+                "ac_id": "AC-028",
+                "emphasis": "cloud",
+                "injected_keywords": [],
+                "text": "Deployed a Python and AWS Lambda serverless platform on Firebase, processing behavioral data for 3K+ users through async event driven workflows and REST API integrations."
+              },
+              {
+                "ac_id": "AC-030",
+                "emphasis": "platform",
+                "injected_keywords": [],
+                "text": "Built an internal payroll and operations platform in Node.js, Python, TypeScript, React, and Firebase, automating payslip generation and financial workflows for 3,000 employees."
+              },
+              {
+                "ac_id": "AC-027",
+                "emphasis": "backend-security",
+                "injected_keywords": [],
+                "text": "Built Spring Security and OAuth2 authorization layers across 10+ Fidelity Java microservices, enforcing client credentials and authorization code flows at 99.9% uptime for secure internal data transfer."
+              },
+              {
+                "ac_id": "AC-007",
+                "emphasis": "distributed-systems",
+                "injected_keywords": [
+                  "distributed systems"
+                ],
+                "text": "Engineered a distributed event driven system for Fidelity in Kafka, Java, Spring Boot, and Spring Cloud, processing financial events across 10+ enterprise integrations at 99% uptime with distributed systems."
+              }
+            ]
+          },
+          {
+            "role": "wake-forest",
+            "bullets": [
+              {
+                "ac_id": "AC-012",
+                "emphasis": "cloud",
+                "injected_keywords": [
+                  "REST"
+                ],
+                "text": "Provisioned backend infrastructure on GCP using Terraform and Firebase, processing 50K+ scans (10TB+) with RESTful APIs and reliable real time inference at scale with REST."
+              },
+              {
+                "ac_id": "AC-011",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "performance"
+                ],
+                "text": "Engineered a scalable Python and PyTorch deep learning pipeline on GCP, reducing clinical processing from 20+ minutes to under 5 minutes at 90% accuracy across 1,250+ cases with performance."
+              }
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "role": "atriveo",
+            "bullets": [
+              {
+                "ac_id": "AC-015",
+                "emphasis": "full-stack",
+                "injected_keywords": [],
+                "text": "Shipped Atriveo, a full stack job intelligence platform in Python FastAPI, TypeScript, React, and PostgreSQL on a Cloudflare serverless edge, serving 641 active users at 2K+ daily queries."
+              },
+              {
+                "ac_id": "AC-041",
+                "emphasis": "cloud",
+                "injected_keywords": [],
+                "text": "Deployed Atriveo's Python FastAPI backend on a Cloudflare serverless edge with PostgreSQL and MongoDB Atlas, handling 2K+ daily queries under 200ms with auth, queue, and caching owned end to end."
+              }
+            ]
+          },
+          {
+            "role": "insurance-platform",
+            "bullets": [
+              {
+                "ac_id": "AC-018",
+                "emphasis": "reliability",
+                "injected_keywords": [
+                  "REST",
+                  "reliability"
+                ],
+                "text": "Hardened a Spring Cloud API Gateway with Redis token bucket rate limiting at 5 req/s, Resilience4j circuit breaking, and JWT auth across all platform services with REST and reliability."
+              },
+              {
+                "ac_id": "AC-017",
+                "emphasis": "distributed-systems",
+                "injected_keywords": [
+                  "distributed systems"
+                ],
+                "text": "Architected an 8 service event driven insurance platform in Java, Spring Boot, and Spring Cloud, streaming policy events through a 3 broker Kafka cluster with Avro and Confluent Schema Registry into Elasticsearch using CQRS and event sourcing with distributed systems."
+              }
+            ]
+          }
+        ]
+      },
+      "human_review": {
+        "selection_fit_1_to_10": null,
+        "reads_human_1_to_10": null,
+        "missing_claimable_keywords": [],
+        "notes": ""
+      }
+    },
+    {
+      "sample_id": 6,
+      "company": "Versant Media",
+      "title": "Software Engineer, Video Platforms",
+      "location": "New York, NY",
+      "score_pct": 100,
+      "pipeline_score": 179,
+      "ats_score": 48,
+      "fit_score": 9,
+      "batch_time": "2026-06-10T12:11:57Z",
+      "job_url": "https://www.linkedin.com/jobs/view/4364418399",
+      "jd_excerpt": "**Company Description** VERSANT is a leading force in news, sports and entertainment \\- home to iconic and trusted brands that inspire, inform, and delight audiences. Our unique combination of content, technology and services enriches the cultural fabric, igniting passions, sparking conversations, and connecting people to what they love most. As an independent, publicly traded company, VERSANT brings together powerhouse cable networks \\- including USA Network, CNBC, MS NOW (formerly MSNBC), Oxygen, E!, SYFY, and Golf Channel \\- with dynamic digital and direct\\-to\\-consumer brands su",
+      "evaluation": {
+        "score": 90,
+        "exact_keyword_coverage": 0.842,
+        "bank_keyword_coverage": 1,
+        "jd_bank_keywords": [
+          "Python",
+          "AWS",
+          "event-driven",
+          "backend",
+          "microservices",
+          "Prometheus",
+          "monitoring",
+          "Java",
+          "cloud",
+          "Terraform",
+          "infrastructure",
+          "serverless",
+          "full stack",
+          "Jenkins",
+          "CI/CD",
+          "DevOps",
+          "Git",
+          "React",
+          "Node.js"
+        ],
+        "selected_jd_keywords": [
+          "Python",
+          "AWS",
+          "event-driven",
+          "backend",
+          "cloud",
+          "Jenkins",
+          "CI/CD",
+          "Prometheus",
+          "DevOps",
+          "Git",
+          "monitoring",
+          "serverless",
+          "Node.js",
+          "React",
+          "full-stack",
+          "Java",
+          "microservices",
+          "Terraform",
+          "infrastructure"
+        ],
+        "exact_keywords_in_text": [
+          "Python",
+          "AWS",
+          "event-driven",
+          "backend",
+          "cloud",
+          "Jenkins",
+          "CI/CD",
+          "Prometheus",
+          "monitoring",
+          "serverless",
+          "Node.js",
+          "React",
+          "Java",
+          "microservices",
+          "Terraform",
+          "infrastructure"
+        ],
+        "injected_keywords": [
+          "Python",
+          "CI/CD",
+          "Git",
+          "monitoring",
+          "full-stack",
+          "microservices",
+          "Java"
+        ]
+      },
+      "composition": {
+        "theme": "cloud-platform",
+        "matched_concepts": {
+          "backend": [
+            "restful",
+            "microservices"
+          ],
+          "cloud": [
+            "aws",
+            "azure",
+            "terraform",
+            "ci/cd",
+            "jenkins",
+            "github actions",
+            "prometheus",
+            "monitoring"
+          ],
+          "frontend": [
+            "react"
+          ],
+          "leadership": [
+            "mentorship"
+          ]
+        },
+        "experience": [
+          {
+            "role": "stony-brook",
+            "bullets": [
+              {
+                "ac_id": "AC-001",
+                "emphasis": "cloud",
+                "injected_keywords": [
+                  "Python"
+                ],
+                "text": "Built a cloud native FastAPI platform on AWS processing 7 years of FOMC data through an event driven pipeline, reaching 67.7% signal accuracy at production scale with Python."
+              },
+              {
+                "ac_id": "AC-021",
+                "emphasis": "cloud",
+                "injected_keywords": [
+                  "CI/CD",
+                  "Git"
+                ],
+                "text": "Automated cloud deployments on AWS with Docker containerized Jenkins pipelines, reducing deployment time by 97% and maintaining 99.9% uptime via Prometheus and CloudWatch monitoring with CI/CD and Git."
+              },
+              {
+                "ac_id": "AC-006",
+                "emphasis": "cloud",
+                "injected_keywords": [
+                  "monitoring"
+                ],
+                "text": "Monitored AWS distributed services with CloudWatch and Prometheus, halving MTTR from 4+ hours to under 2 hours while holding 99.9% uptime with monitoring."
+              },
+              {
+                "ac_id": "AC-024",
+                "emphasis": "mcp-agents",
+                "injected_keywords": [
+                  "Python"
+                ],
+                "text": "Developed an MCP server enabling Claude and external agents to securely access user data with consent enforcement, supporting 12 personalized agent behavior configurations across finance, health, and lifestyle domains for 1K+ early production users with Python."
+              }
+            ]
+          },
+          {
+            "role": "accolite",
+            "bullets": [
+              {
+                "ac_id": "AC-028",
+                "emphasis": "cloud",
+                "injected_keywords": [],
+                "text": "Deployed a Python and AWS Lambda serverless platform on Firebase, processing behavioral data for 3K+ users through async event driven workflows and REST API integrations."
+              },
+              {
+                "ac_id": "AC-030",
+                "emphasis": "platform",
+                "injected_keywords": [
+                  "full-stack"
+                ],
+                "text": "Built an internal payroll and operations platform in Node.js, Python, TypeScript, React, and Firebase, automating payslip generation and financial workflows for 3,000 employees with full-stack."
+              },
+              {
+                "ac_id": "AC-027",
+                "emphasis": "backend-security",
+                "injected_keywords": [],
+                "text": "Built Spring Security and OAuth2 authorization layers across 10+ Fidelity Java microservices, enforcing client credentials and authorization code flows at 99.9% uptime for secure internal data transfer."
+              },
+              {
+                "ac_id": "AC-007",
+                "emphasis": "distributed-systems",
+                "injected_keywords": [
+                  "microservices"
+                ],
+                "text": "Engineered a distributed event driven system for Fidelity in Kafka, Java, Spring Boot, and Spring Cloud, processing financial events across 10+ enterprise integrations at 99% uptime with microservices."
+              }
+            ]
+          },
+          {
+            "role": "wake-forest",
+            "bullets": [
+              {
+                "ac_id": "AC-012",
+                "emphasis": "cloud",
+                "injected_keywords": [],
+                "text": "Provisioned backend infrastructure on GCP using Terraform and Firebase, processing 50K+ scans (10TB+) with RESTful APIs and reliable real time inference at scale."
+              },
+              {
+                "ac_id": "AC-011",
+                "emphasis": "cloud",
+                "injected_keywords": [],
+                "text": "Built a GCP deep learning pipeline in Python and PyTorch processing 1,250+ patient cases, achieving 90% accuracy and cutting processing time from 20+ minutes to under 5 minutes."
+              }
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "role": "atriveo",
+            "bullets": [
+              {
+                "ac_id": "AC-015",
+                "emphasis": "cloud-serverless",
+                "injected_keywords": [
+                  "full stack"
+                ],
+                "text": "Launched Atriveo on a Cloudflare serverless edge in Python FastAPI and PostgreSQL with MongoDB Atlas, sustaining 2K+ daily queries at 99.9% uptime for 641 active users with full stack."
+              },
+              {
+                "ac_id": "AC-041",
+                "emphasis": "cloud",
+                "injected_keywords": [],
+                "text": "Deployed Atriveo's Python FastAPI backend on a Cloudflare serverless edge with PostgreSQL and MongoDB Atlas, handling 2K+ daily queries under 200ms with auth, queue, and caching owned end to end."
+              }
+            ]
+          },
+          {
+            "role": "insurance-platform",
+            "bullets": [
+              {
+                "ac_id": "AC-018",
+                "emphasis": "security",
+                "injected_keywords": [
+                  "Java",
+                  "microservices"
+                ],
+                "text": "Secured a Spring Cloud API Gateway with JWT auth, Redis token bucket rate limiting at 5 req/s, and Resilience4j circuit breaking, exposing HATEOAS REST APIs with Swagger and OpenAPI docs and Netflix Eureka service discovery across all services with Java and microservices."
+              },
+              {
+                "ac_id": "AC-017",
+                "emphasis": "distributed-systems",
+                "injected_keywords": [
+                  "microservices"
+                ],
+                "text": "Architected an 8 service event driven insurance platform in Java, Spring Boot, and Spring Cloud, streaming policy events through a 3 broker Kafka cluster with Avro and Confluent Schema Registry into Elasticsearch using CQRS and event sourcing with microservices."
+              }
+            ]
+          }
+        ]
+      },
+      "human_review": {
+        "selection_fit_1_to_10": null,
+        "reads_human_1_to_10": null,
+        "missing_claimable_keywords": [],
+        "notes": ""
+      }
+    },
+    {
+      "sample_id": 7,
+      "company": "Adobe",
+      "title": "Machine Learning Engineer, Firefly Services",
+      "location": "Seattle, WA",
+      "score_pct": 100,
+      "pipeline_score": 187,
+      "ats_score": 40,
+      "fit_score": 3,
+      "batch_time": "2026-06-12T13:14:22Z",
+      "job_url": "https://www.linkedin.com/jobs/view/4407079162",
+      "jd_excerpt": "**Job Description** Adobe Firefly’s **Generative AI Services** team is seeking **Senior** **Machine Learning Engineers** for our GenAI Services area. In this high\\-impact role, you will work with a team of talented engineers in building scalable, high\\-performance generative AI systems—powering features across Adobe products like Firefly, Photoshop, Illustrator, Express, Stock, and Premiere. You will design and develop efficient inference pipelines, optimize models for latency and through at inference, and build APIs and ecosystems that integrate both Adobe’s first\\-party and third\\-pa",
+      "evaluation": {
+        "score": 65,
+        "exact_keyword_coverage": 0.5,
+        "bank_keyword_coverage": 0.923,
+        "jd_bank_keywords": [
+          "PyTorch",
+          "transformers",
+          "machine learning",
+          "distributed systems",
+          "performance",
+          "scalability",
+          "latency",
+          "AI",
+          "model training",
+          "cloud",
+          "generative AI",
+          "production",
+          "compliance"
+        ],
+        "selected_jd_keywords": [
+          "machine learning",
+          "AI",
+          "generative AI",
+          "production",
+          "performance",
+          "cloud",
+          "distributed systems",
+          "scalability",
+          "latency",
+          "PyTorch",
+          "model training",
+          "research"
+        ],
+        "exact_keywords_in_text": [
+          "machine learning",
+          "AI",
+          "production",
+          "distributed systems",
+          "latency",
+          "PyTorch"
+        ],
+        "injected_keywords": [
+          "machine learning",
+          "generative AI",
+          "performance",
+          "distributed systems",
+          "model training",
+          "research"
+        ]
+      },
+      "composition": {
+        "theme": "ml-engineering",
+        "matched_concepts": {
+          "backend": [
+            "distributed systems",
+            "scalability",
+            "latency"
+          ],
+          "cloud": [
+            "kubernetes"
+          ],
+          "ai": [
+            "ai",
+            "generative ai",
+            "transformers"
+          ],
+          "ml": [
+            "pytorch",
+            "machine learning",
+            "model training",
+            "model serving",
+            "mlops",
+            "inference"
+          ],
+          "business": [
+            "growth"
+          ],
+          "leadership": [
+            "defined"
+          ]
+        },
+        "experience": [
+          {
+            "role": "stony-brook",
+            "bullets": [
+              {
+                "ac_id": "AC-023",
+                "emphasis": "ai-agents",
+                "injected_keywords": [
+                  "machine learning"
+                ],
+                "text": "Achieved 60% directional accuracy across 30 S&P 500 stocks by building a 3 agent RL debate system in Python with Fundamental, Sentiment, and Valuation agents trained on 7d/30d/90d forecasting windows with machine learning."
+              },
+              {
+                "ac_id": "AC-025",
+                "emphasis": "llm",
+                "injected_keywords": [
+                  "generative AI"
+                ],
+                "text": "Built an LLM powered attribute extraction service in Python using Gemini to infer user preferences from conversations, driving personalized agent behavior across finance, health, and lifestyle domains for 1K+ production users with generative AI."
+              },
+              {
+                "ac_id": "AC-022",
+                "emphasis": "llm",
+                "injected_keywords": [
+                  "generative AI"
+                ],
+                "text": "Built LLM driven analytics workflows in Python across financial news and transcripts with structured schema validation, delivering production APIs and dashboards used daily by 5 researchers with generative AI."
+              },
+              {
+                "ac_id": "AC-024",
+                "emphasis": "mcp-agents",
+                "injected_keywords": [],
+                "text": "Developed an MCP server enabling Claude and external agents to securely access user data with consent enforcement, supporting 12 personalized agent behavior configurations across finance, health, and lifestyle domains for 1K+ early production users."
+              }
+            ]
+          },
+          {
+            "role": "accolite",
+            "bullets": [
+              {
+                "ac_id": "AC-008",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "performance"
+                ],
+                "text": "Built high throughput REST and GraphQL services for BT Telecom in Java and Spring Boot, handling 10K+ daily transactions at 200ms P99 with Resilience4j circuit breaking with performance."
+              },
+              {
+                "ac_id": "AC-028",
+                "emphasis": "data-pipeline",
+                "injected_keywords": [],
+                "text": "Developed a serverless behavioral data pipeline in Python using AWS Lambda and Firebase, automating async REST API workflows for 3K+ active users."
+              },
+              {
+                "ac_id": "AC-007",
+                "emphasis": "data-pipeline",
+                "injected_keywords": [
+                  "distributed systems"
+                ],
+                "text": "Built an event driven ETL pipeline in Kafka, Java, and Spring Boot ingesting Fidelity financial events across 10+ enterprise integrations, sustaining 99% uptime with 100% test coverage with distributed systems."
+              },
+              {
+                "ac_id": "AC-009",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "distributed systems",
+                  "performance"
+                ],
+                "text": "Optimized distributed microservices with Kafka event processing and Redis caching, reducing P99 latency by 40% and eliminating Sev1 incidents for 100K+ users with distributed systems and performance."
+              }
+            ]
+          },
+          {
+            "role": "wake-forest",
+            "bullets": [
+              {
+                "ac_id": "AC-011",
+                "emphasis": "ml-modeling",
+                "injected_keywords": [
+                  "machine learning",
+                  "model training"
+                ],
+                "text": "Developed a scalable deep learning pipeline using Python, PyTorch, and GCP, achieving 90% accuracy and reducing clinical processing time from 20+ minutes to under 5 minutes across 1,250+ patient cases with machine learning and model training."
+              },
+              {
+                "ac_id": "AC-032",
+                "emphasis": "research",
+                "injected_keywords": [
+                  "machine learning",
+                  "research"
+                ],
+                "text": "Ran a controlled A/B study across 30 MRI scans in Python and PyTorch comparing heatmap vs. top five scan feature selection, confirming heatmap inclusion improved downstream risk model quality with machine learning and research."
+              }
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "role": "bayesian-mmm",
+            "bullets": [
+              {
+                "ac_id": "AC-019",
+                "emphasis": "ml-modeling",
+                "injected_keywords": [
+                  "machine learning"
+                ],
+                "text": "Developed a Bayesian marketing mix model in Python, PyMC, and scikit-learn across 5 channels and 156 weeks, achieving R2 0.9489 with 2.74% MAPE through adstock and saturation features with machine learning."
+              },
+              {
+                "ac_id": "AC-042",
+                "emphasis": "ml",
+                "injected_keywords": [
+                  "machine learning"
+                ],
+                "text": "Built an end to end Bayesian marketing mix model across 5 channels and 156 weeks in Python and PyMC, applying adstock and saturation feature engineering to achieve R2 0.9489 and 2.74% MAPE with machine learning."
+              }
+            ]
+          },
+          {
+            "role": "radiomics-pipeline",
+            "bullets": [
+              {
+                "ac_id": "AC-038",
+                "emphasis": "data-pipeline",
+                "injected_keywords": [],
+                "text": "Engineered an advanced radiomics pipeline with 10 modules spanning machine learning, survival analysis, explainable AI, and clustering, integrating 30+ radiomics features with 15+ genomic features across 200+ patients."
+              },
+              {
+                "ac_id": "AC-039",
+                "emphasis": "ml",
+                "injected_keywords": [
+                  "machine learning"
+                ],
+                "text": "Applied SHAP, LIME, and Cox survival models in Python across 1,250+ patient cases with cross validated evaluation across 2020 to 2022 cohorts, producing interpretable risk stratification outputs and PDF reports with machine learning."
+              }
+            ]
+          }
+        ]
+      },
+      "human_review": {
+        "selection_fit_1_to_10": null,
+        "reads_human_1_to_10": null,
+        "missing_claimable_keywords": [],
+        "notes": ""
+      }
+    },
+    {
+      "sample_id": 8,
+      "company": "DoorDash",
+      "title": "Software Engineer, Data Platform (All Teams)",
+      "location": "Seattle, WA",
+      "score_pct": 100,
+      "pipeline_score": 174,
+      "ats_score": 28,
+      "fit_score": 7,
+      "batch_time": "2026-06-08T13:11:42Z",
+      "job_url": "https://www.linkedin.com/jobs/view/4356638099",
+      "jd_excerpt": "**About The Team** DoorDash is a data driven organization and relies on timely, accurate and reliable data to drive many business and product decisions. The Core Data Platform organization owns all the infrastructure necessary to run an operationally efficient analytical data stack. **About The Roles** The Data Platform team spans data mobility frameworks, ingestion, infrastructure, tools, and governance. Together, they design and operate scalable compute and ingestion frameworks using technologies such as Spark, Flink, Kafka, Airflow, and modern lakehouse solutions, while also buil",
+      "evaluation": {
+        "score": 69,
+        "exact_keyword_coverage": 0.636,
+        "bank_keyword_coverage": 0.786,
+        "jd_bank_keywords": [
+          "real-time",
+          "monitoring",
+          "reliability",
+          "Kafka",
+          "scalability",
+          "AI",
+          "healthcare",
+          "infrastructure",
+          "analytics",
+          "Claude",
+          "personalization",
+          "audit",
+          "compliance",
+          "data analytics"
+        ],
+        "selected_jd_keywords": [
+          "real-time",
+          "scalability",
+          "Claude",
+          "personalization",
+          "analytics",
+          "AI",
+          "reliability",
+          "Kafka",
+          "infrastructure",
+          "healthcare",
+          "streaming"
+        ],
+        "exact_keywords_in_text": [
+          "real-time",
+          "scalability",
+          "Claude",
+          "Kafka",
+          "infrastructure",
+          "healthcare",
+          "streaming"
+        ],
+        "injected_keywords": [
+          "real-time",
+          "scalability",
+          "Claude",
+          "personalization",
+          "analytics",
+          "reliability",
+          "healthcare"
+        ]
+      },
+      "composition": {
+        "theme": "data-engineering",
+        "matched_concepts": {
+          "backend": [
+            "scalability"
+          ],
+          "cloud": [
+            "monitoring"
+          ],
+          "data": [
+            "ingestion",
+            "kafka",
+            "streaming",
+            "airflow",
+            "batch",
+            "analytics"
+          ],
+          "ai": [
+            "ai"
+          ]
+        },
+        "experience": [
+          {
+            "role": "stony-brook",
+            "bullets": [
+              {
+                "ac_id": "AC-001",
+                "emphasis": "distributed-systems",
+                "injected_keywords": [
+                  "real-time",
+                  "scalability"
+                ],
+                "text": "Designed an event driven distributed system in Python, FastAPI, and AWS to process 7 years of FOMC data, cutting end-to-end analysis from 3+ days to under 20 minutes with real-time and scalability."
+              },
+              {
+                "ac_id": "AC-024",
+                "emphasis": "ai-agents",
+                "injected_keywords": [
+                  "Claude",
+                  "personalization"
+                ],
+                "text": "Built an MCP server in Python enabling LLM agents to read scoped user data under consent enforcement, shipping 12 behavior configurations across finance, health, and lifestyle for 1K+ production users with Claude and personalization."
+              },
+              {
+                "ac_id": "AC-021",
+                "emphasis": "cicd",
+                "injected_keywords": [],
+                "text": "Implemented Docker based CI/CD pipelines with Jenkins and Git on AWS, reducing deployment time by 97% with production observability through Prometheus and CloudWatch."
+              },
+              {
+                "ac_id": "AC-022",
+                "emphasis": "product-delivery",
+                "injected_keywords": [
+                  "analytics"
+                ],
+                "text": "Delivered production APIs and dashboards for 5 researchers by building Python LLM workflows over financial news and transcripts with structured schema validation for consistent, reliable outputs with analytics."
+              }
+            ]
+          },
+          {
+            "role": "accolite",
+            "bullets": [
+              {
+                "ac_id": "AC-028",
+                "emphasis": "data-pipeline",
+                "injected_keywords": [],
+                "text": "Developed a serverless behavioral data pipeline in Python using AWS Lambda and Firebase, automating async REST API workflows for 3K+ active users."
+              },
+              {
+                "ac_id": "AC-008",
+                "emphasis": "backend-api",
+                "injected_keywords": [
+                  "reliability"
+                ],
+                "text": "Delivered production REST and GraphQL APIs in Java, Spring Boot, and Spring MVC for BT Telecom, implementing Resilience4j circuit breaking across 10K+ daily transactions at 200ms P99 with 99% uptime with reliability."
+              },
+              {
+                "ac_id": "AC-027",
+                "emphasis": "security",
+                "injected_keywords": [],
+                "text": "Secured 10+ Fidelity microservices using Spring Security, OAuth2, and JWT, implementing client credentials and authorization code flows for internal data transfer with 99.9% uptime."
+              },
+              {
+                "ac_id": "AC-007",
+                "emphasis": "data-pipeline",
+                "injected_keywords": [],
+                "text": "Built an event driven ETL pipeline in Kafka, Java, and Spring Boot ingesting Fidelity financial events across 10+ enterprise integrations, sustaining 99% uptime with 100% test coverage."
+              }
+            ]
+          },
+          {
+            "role": "wake-forest",
+            "bullets": [
+              {
+                "ac_id": "AC-012",
+                "emphasis": "cloud",
+                "injected_keywords": [
+                  "scalability",
+                  "healthcare"
+                ],
+                "text": "Provisioned backend infrastructure on GCP using Terraform and Firebase, processing 50K+ scans (10TB+) with RESTful APIs and reliable real time inference at scale with scalability and healthcare."
+              },
+              {
+                "ac_id": "AC-011",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "healthcare",
+                  "scalability"
+                ],
+                "text": "Engineered a scalable Python and PyTorch deep learning pipeline on GCP, reducing clinical processing from 20+ minutes to under 5 minutes at 90% accuracy across 1,250+ cases with healthcare and scalability."
+              }
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "role": "atriveo",
+            "bullets": [
+              {
+                "ac_id": "AC-015",
+                "emphasis": "backend",
+                "injected_keywords": [],
+                "text": "Built Atriveo, a production job intelligence platform in Python FastAPI, TypeScript, and PostgreSQL with MongoDB Atlas persistence on a Cloudflare serverless edge, serving 641 active users at 2K+ daily queries with 99.9% uptime."
+              },
+              {
+                "ac_id": "AC-041",
+                "emphasis": "scale",
+                "injected_keywords": [
+                  "scalability"
+                ],
+                "text": "Scaled Atriveo's Python FastAPI backend to 2K+ daily queries under 200ms and 99.9% uptime, owning authentication, REST API design, database schema, queue processing, and caching end to end with scalability."
+              }
+            ]
+          },
+          {
+            "role": "insurance-platform",
+            "bullets": [
+              {
+                "ac_id": "AC-018",
+                "emphasis": "reliability",
+                "injected_keywords": [
+                  "reliability"
+                ],
+                "text": "Hardened a Spring Cloud API Gateway with Redis token bucket rate limiting at 5 req/s, Resilience4j circuit breaking, and JWT auth across all platform services with reliability."
+              },
+              {
+                "ac_id": "AC-017",
+                "emphasis": "data-pipeline",
+                "injected_keywords": [],
+                "text": "Engineered a Kafka streaming backbone for an 8 service insurance platform, moving policy events through a 3 broker cluster with Avro and Schema Registry into Elasticsearch."
+              }
+            ]
+          }
+        ]
+      },
+      "human_review": {
+        "selection_fit_1_to_10": null,
+        "reads_human_1_to_10": null,
+        "missing_claimable_keywords": [],
+        "notes": ""
+      }
+    },
+    {
+      "sample_id": 9,
+      "company": "Ramp",
+      "title": "Software Engineer, AI DevX",
+      "location": "New York, NY",
+      "score_pct": 100,
+      "pipeline_score": 206,
+      "ats_score": 75,
+      "fit_score": 4,
+      "batch_time": "2026-06-12T14:12:25Z",
+      "job_url": "https://www.linkedin.com/jobs/view/4387606016",
+      "jd_excerpt": "**About Ramp** Ramp is building the smart infrastructure for finance teams, embedded in the transaction flow of every dollar a business spends. We automate how over $100B in annualized spend flows in and out of 50,000\\+ companies: authorizing payments, flagging risk, categorizing spend, and closing books. The problems are high\\-stakes, data\\-dense, and unforgiving. We hire people with high agency and high urgency. We look for slope over intercept. We care less about where you trained and more about what you’ve built. At Ramp, everyone is a builder who owns problems end to",
+      "evaluation": {
+        "score": 55,
+        "exact_keyword_coverage": 0.6,
+        "bank_keyword_coverage": 0.455,
+        "jd_bank_keywords": [
+          "Python",
+          "backend",
+          "AI",
+          "Terraform",
+          "infrastructure",
+          "payments",
+          "revenue",
+          "agents",
+          "Docker",
+          "frontend",
+          "automation"
+        ],
+        "selected_jd_keywords": [
+          "Python",
+          "AI",
+          "backend",
+          "automation",
+          "agents"
+        ],
+        "exact_keywords_in_text": [
+          "Python",
+          "AI",
+          "agents"
+        ],
+        "injected_keywords": [
+          "Python",
+          "automation",
+          "agents"
+        ]
+      },
+      "composition": {
+        "theme": "ai-llm",
+        "matched_concepts": {
+          "cloud": [
+            "docker",
+            "terraform"
+          ],
+          "ai": [
+            "agents",
+            "ai"
+          ],
+          "frontend": [
+            "frontend"
+          ],
+          "business": [
+            "revenue"
+          ],
+          "leadership": [
+            "ownership"
+          ]
+        },
+        "experience": [
+          {
+            "role": "stony-brook",
+            "bullets": [
+              {
+                "ac_id": "AC-023",
+                "emphasis": "llm",
+                "injected_keywords": [],
+                "text": "Developed a 3 agent LLM debate framework in Python where Fundamental, Sentiment, and Valuation agents collaborate via RL to forecast S&P 500 movements, reaching 60% directional accuracy."
+              },
+              {
+                "ac_id": "AC-025",
+                "emphasis": "llm",
+                "injected_keywords": [],
+                "text": "Built an LLM powered attribute extraction service in Python using Gemini to infer user preferences from conversations, driving personalized agent behavior across finance, health, and lifestyle domains for 1K+ production users."
+              },
+              {
+                "ac_id": "AC-022",
+                "emphasis": "llm",
+                "injected_keywords": [],
+                "text": "Built LLM driven analytics workflows in Python across financial news and transcripts with structured schema validation, delivering production APIs and dashboards used daily by 5 researchers."
+              },
+              {
+                "ac_id": "AC-024",
+                "emphasis": "mcp-agents",
+                "injected_keywords": [
+                  "Python"
+                ],
+                "text": "Developed an MCP server enabling Claude and external agents to securely access user data with consent enforcement, supporting 12 personalized agent behavior configurations across finance, health, and lifestyle domains for 1K+ early production users with Python."
+              }
+            ]
+          },
+          {
+            "role": "accolite",
+            "bullets": [
+              {
+                "ac_id": "AC-028",
+                "emphasis": "serverless",
+                "injected_keywords": [],
+                "text": "Built a serverless data platform in Python, AWS Lambda, and Firebase, automating async workflows and processing behavioral data for 3K+ users via REST API integrations."
+              },
+              {
+                "ac_id": "AC-030",
+                "emphasis": "platform",
+                "injected_keywords": [
+                  "automation"
+                ],
+                "text": "Built an internal payroll and operations platform in Node.js, Python, TypeScript, React, and Firebase, automating payslip generation and financial workflows for 3,000 employees with automation."
+              },
+              {
+                "ac_id": "AC-027",
+                "emphasis": "backend-security",
+                "injected_keywords": [],
+                "text": "Built Spring Security and OAuth2 authorization layers across 10+ Fidelity Java microservices, enforcing client credentials and authorization code flows at 99.9% uptime for secure internal data transfer."
+              },
+              {
+                "ac_id": "AC-007",
+                "emphasis": "architecture",
+                "injected_keywords": [],
+                "text": "Architected an event driven ETL system for Fidelity in Kafka, Java, Spring Boot, and Spring Cloud, ingesting financial events across 10+ enterprise integrations at 99% uptime and 100% test coverage."
+              }
+            ]
+          },
+          {
+            "role": "wake-forest",
+            "bullets": [
+              {
+                "ac_id": "AC-011",
+                "emphasis": "ml-modeling",
+                "injected_keywords": [],
+                "text": "Developed a scalable deep learning pipeline using Python, PyTorch, and GCP, achieving 90% accuracy and reducing clinical processing time from 20+ minutes to under 5 minutes across 1,250+ patient cases."
+              },
+              {
+                "ac_id": "AC-013",
+                "emphasis": "llm-rag",
+                "injected_keywords": [],
+                "text": "Built a RAG pipeline in Python using embedding based retrieval across 1,250+ clinical cases for contextual inference in a production diagnostic system."
+              }
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "role": "atriveo",
+            "bullets": [
+              {
+                "ac_id": "AC-016",
+                "emphasis": "llm-ai",
+                "injected_keywords": [
+                  "Python",
+                  "agents"
+                ],
+                "text": "Engineered AI powered recommendation services using LangGraph, LangChain, and RAG to rank job postings across 6 search streams and remove 75% noise for personalized matching with Python and agents."
+              },
+              {
+                "ac_id": "AC-015",
+                "emphasis": "backend",
+                "injected_keywords": [],
+                "text": "Built Atriveo, a production job intelligence platform in Python FastAPI, TypeScript, and PostgreSQL with MongoDB Atlas persistence on a Cloudflare serverless edge, serving 641 active users at 2K+ daily queries with 99.9% uptime."
+              }
+            ]
+          },
+          {
+            "role": "bayesian-mmm",
+            "bullets": [
+              {
+                "ac_id": "AC-042",
+                "emphasis": "ml",
+                "injected_keywords": [],
+                "text": "Built an end to end Bayesian marketing mix model across 5 channels and 156 weeks in Python and PyMC, applying adstock and saturation feature engineering to achieve R2 0.9489 and 2.74% MAPE."
+              },
+              {
+                "ac_id": "AC-019",
+                "emphasis": "ml-modeling",
+                "injected_keywords": [],
+                "text": "Developed a Bayesian marketing mix model in Python, PyMC, and scikit-learn across 5 channels and 156 weeks, achieving R2 0.9489 with 2.74% MAPE through adstock and saturation features."
+              }
+            ]
+          }
+        ]
+      },
+      "human_review": {
+        "selection_fit_1_to_10": null,
+        "reads_human_1_to_10": null,
+        "missing_claimable_keywords": [],
+        "notes": ""
+      }
+    },
+    {
+      "sample_id": 10,
+      "company": "Capgemini",
+      "title": "Data Scientist with Python expertise in New York",
+      "location": "New York, NY",
+      "score_pct": 100,
+      "pipeline_score": 189,
+      "ats_score": 16,
+      "fit_score": 4,
+      "batch_time": "2026-06-09T22:13:34Z",
+      "job_url": "https://www.linkedin.com/jobs/view/4398158970",
+      "jd_excerpt": "Choosing Capgemini means choosing a company where you will be empowered to shape your career in the way you’d like, where you’ll be supported and inspired by a collaborative community of colleagues around the world, and where you’ll be able to reimagine what’s possible. Join us and help the world’s leading organizations unlock the value of technology and build a more sustainable, more inclusive world. **Onsite : New York** **Key Responsibilities** **Attribution \\& Measurement Modeling** • Build and maintain multi\\-touch attribution (MTA) models \\- touch\\-or",
+      "evaluation": {
+        "score": 75,
+        "exact_keyword_coverage": 0.7,
+        "bank_keyword_coverage": 0.833,
+        "jd_bank_keywords": [
+          "Python",
+          "financial",
+          "API",
+          "deep learning",
+          "performance",
+          "AI",
+          "healthcare",
+          "cloud",
+          "LLM",
+          "ranking",
+          "scikit-learn",
+          "Bayesian",
+          "modeling",
+          "marketing",
+          "data science",
+          "analytics",
+          "generative AI",
+          "production",
+          "behavioral data",
+          "UI",
+          "model evaluation",
+          "compliance",
+          "survival analysis",
+          "SHAP"
+        ],
+        "selected_jd_keywords": [
+          "Python",
+          "LLM",
+          "financial",
+          "deep learning",
+          "AI",
+          "generative AI",
+          "production",
+          "analytics",
+          "API",
+          "performance",
+          "healthcare",
+          "cloud",
+          "model evaluation",
+          "scikit-learn",
+          "Bayesian",
+          "modeling",
+          "marketing",
+          "data science",
+          "SHAP",
+          "survival analysis"
+        ],
+        "exact_keywords_in_text": [
+          "Python",
+          "LLM",
+          "financial",
+          "deep learning",
+          "AI",
+          "production",
+          "analytics",
+          "healthcare",
+          "scikit-learn",
+          "Bayesian",
+          "modeling",
+          "marketing",
+          "SHAP",
+          "survival analysis"
+        ],
+        "injected_keywords": [
+          "LLM",
+          "deep learning",
+          "generative AI",
+          "Python",
+          "performance",
+          "healthcare",
+          "modeling",
+          "data science",
+          "scikit-learn",
+          "analytics",
+          "survival analysis"
+        ]
+      },
+      "composition": {
+        "theme": "ml-engineering",
+        "matched_concepts": {
+          "data": [
+            "sql",
+            "analytics"
+          ],
+          "ai": [
+            "llm",
+            "ai",
+            "generative ai"
+          ],
+          "ml": [
+            "deep learning",
+            "inference",
+            "evaluation"
+          ],
+          "frontend": [
+            "ui"
+          ],
+          "leadership": [
+            "defined"
+          ]
+        },
+        "experience": [
+          {
+            "role": "stony-brook",
+            "bullets": [
+              {
+                "ac_id": "AC-023",
+                "emphasis": "ai-agents",
+                "injected_keywords": [
+                  "LLM",
+                  "deep learning"
+                ],
+                "text": "Achieved 60% directional accuracy across 30 S&P 500 stocks by building a 3 agent RL debate system in Python with Fundamental, Sentiment, and Valuation agents trained on 7d/30d/90d forecasting windows with LLM and deep learning."
+              },
+              {
+                "ac_id": "AC-025",
+                "emphasis": "ai-application",
+                "injected_keywords": [
+                  "LLM",
+                  "generative AI"
+                ],
+                "text": "Engineered a Gemini powered service in Python to extract user preferences from conversation history, personalizing AI agent behavior across 3 domains for 1K+ active production users with LLM and generative AI."
+              },
+              {
+                "ac_id": "AC-022",
+                "emphasis": "ai-application",
+                "injected_keywords": [
+                  "LLM",
+                  "generative AI"
+                ],
+                "text": "Developed AI powered financial analytics in Python using LLMs over news and transcripts, enforcing structured schema validation and shipping production APIs and dashboards for 5 active research users with LLM and generative AI."
+              },
+              {
+                "ac_id": "AC-024",
+                "emphasis": "mcp-agents",
+                "injected_keywords": [
+                  "Python",
+                  "LLM"
+                ],
+                "text": "Developed an MCP server enabling Claude and external agents to securely access user data with consent enforcement, supporting 12 personalized agent behavior configurations across finance, health, and lifestyle domains for 1K+ early production users with Python and LLM."
+              }
+            ]
+          },
+          {
+            "role": "accolite",
+            "bullets": [
+              {
+                "ac_id": "AC-009",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "performance"
+                ],
+                "text": "Optimized distributed microservices with Kafka event processing and Redis caching, reducing P99 latency by 40% and eliminating Sev1 incidents for 100K+ users with performance."
+              },
+              {
+                "ac_id": "AC-007",
+                "emphasis": "data-pipeline",
+                "injected_keywords": [],
+                "text": "Built an event driven ETL pipeline in Kafka, Java, and Spring Boot ingesting Fidelity financial events across 10+ enterprise integrations, sustaining 99% uptime with 100% test coverage."
+              },
+              {
+                "ac_id": "AC-030",
+                "emphasis": "platform",
+                "injected_keywords": [],
+                "text": "Built an internal payroll and operations platform in Node.js, Python, TypeScript, React, and Firebase, automating payslip generation and financial workflows for 3,000 employees."
+              },
+              {
+                "ac_id": "AC-008",
+                "emphasis": "performance",
+                "injected_keywords": [
+                  "performance"
+                ],
+                "text": "Built high throughput REST and GraphQL services for BT Telecom in Java and Spring Boot, handling 10K+ daily transactions at 200ms P99 with Resilience4j circuit breaking with performance."
+              }
+            ]
+          },
+          {
+            "role": "wake-forest",
+            "bullets": [
+              {
+                "ac_id": "AC-011",
+                "emphasis": "ml-modeling",
+                "injected_keywords": [
+                  "healthcare"
+                ],
+                "text": "Developed a scalable deep learning pipeline using Python, PyTorch, and GCP, achieving 90% accuracy and reducing clinical processing time from 20+ minutes to under 5 minutes across 1,250+ patient cases with healthcare."
+              },
+              {
+                "ac_id": "AC-032",
+                "emphasis": "ab-testing",
+                "injected_keywords": [
+                  "healthcare",
+                  "deep learning"
+                ],
+                "text": "Evaluated 30 MRI scans in Python and PyTorch with A/B testing and found heatmap inclusion outperformed top five scan selection, then updated feature selection for downstream risk modeling with healthcare and deep learning."
+              }
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "role": "bayesian-mmm",
+            "bullets": [
+              {
+                "ac_id": "AC-019",
+                "emphasis": "ml-modeling",
+                "injected_keywords": [
+                  "modeling",
+                  "data science"
+                ],
+                "text": "Developed a Bayesian marketing mix model in Python, PyMC, and scikit-learn across 5 channels and 156 weeks, achieving R2 0.9489 with 2.74% MAPE through adstock and saturation features with modeling and data science."
+              },
+              {
+                "ac_id": "AC-042",
+                "emphasis": "ml",
+                "injected_keywords": [
+                  "scikit-learn",
+                  "analytics"
+                ],
+                "text": "Built an end to end Bayesian marketing mix model across 5 channels and 156 weeks in Python and PyMC, applying adstock and saturation feature engineering to achieve R2 0.9489 and 2.74% MAPE with scikit-learn and analytics."
+              }
+            ]
+          },
+          {
+            "role": "radiomics-pipeline",
+            "bullets": [
+              {
+                "ac_id": "AC-039",
+                "emphasis": "ml",
+                "injected_keywords": [
+                  "scikit-learn",
+                  "survival analysis"
+                ],
+                "text": "Applied SHAP, LIME, and Cox survival models in Python across 1,250+ patient cases with cross validated evaluation across 2020 to 2022 cohorts, producing interpretable risk stratification outputs and PDF reports with scikit-learn and survival analysis."
+              },
+              {
+                "ac_id": "AC-038",
+                "emphasis": "data-pipeline",
+                "injected_keywords": [
+                  "Python",
+                  "scikit-learn"
+                ],
+                "text": "Engineered an advanced radiomics pipeline with 10 modules spanning machine learning, survival analysis, explainable AI, and clustering, integrating 30+ radiomics features with 15+ genomic features across 200+ patients with Python and scikit-learn."
+              }
+            ]
+          }
+        ]
+      },
+      "human_review": {
+        "selection_fit_1_to_10": null,
+        "reads_human_1_to_10": null,
+        "missing_claimable_keywords": [],
+        "notes": ""
+      }
+    }
+  ]
+}

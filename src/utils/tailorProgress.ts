@@ -5,8 +5,9 @@ import { tailorCellDisplay } from "./tailorOutcome";
 export function tailorPhaseProgress(phase: TailorPhase): number {
   switch (phase) {
     case "done": return 100;
-    case "compiling": return 88;
-    case "assembling": return 62;
+    case "reviewing": return 94; // legacy — Gemma disabled
+    case "compiling": return 94;
+    case "assembling": return 55;
     case "analyzing": return 28;
     case "queued": return 5;
     default: return 0;

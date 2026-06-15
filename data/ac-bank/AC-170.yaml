@@ -1,0 +1,41 @@
+id: AC-170
+role: accolite
+slot_kind: experience
+engineering_identity: enterprise
+client_context: fidelity
+achievement_theme: pipeline-observability
+display_order: 8
+wow_score: 0.85
+metrics_claimed:
+  - audit_trails
+  - events_100pct
+concepts_claimed:
+  - enterprise
+signature_technologies:
+  - Java
+  - AWS
+fact: Fidelity pipeline monitoring and audit trails for encrypted insurance transfer compliance.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 72
+  data: 82
+  leadership: 65
+strength:
+  recruiter: 7
+ats_keywords:
+  - Java
+  - AWS
+facets:
+  default:
+    phrase: pipeline-observability
+    keywords:
+      - java
+      - aws
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Deployed compliance-grade audit trails on Java and AWS covering 100% of Fidelity encrypted sister-company transfer
+      events for regulatory review in production.

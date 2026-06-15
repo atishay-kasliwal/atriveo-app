@@ -1,0 +1,34 @@
+id: AC-154
+role: user-data-platform
+slot_kind: project
+achievement_theme: cryptography
+display_order: 2
+wow_score: 0.92
+metrics_claimed:
+  - decrypt_ms_13
+concepts_claimed: []
+signature_technologies:
+  - X25519
+  - AES-GCM
+fact: >-
+  Implemented wire-correct scoped-export decryption validating ECDH key unwrap and AES-GCM decrypt in 1.3 ms warm
+  latency.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - X25519
+  - AES-GCM
+facets:
+  default:
+    phrase: crypto-decrypt
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Implemented X25519 and AES-GCM scoped-export decryption validating ECDH unwrap in 1.3 ms warm latency for
+      production Hushh wire contracts.

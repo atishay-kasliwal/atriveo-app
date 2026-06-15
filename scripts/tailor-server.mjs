@@ -5,9 +5,9 @@
  * A browser cannot write to disk or reliably reach localhost services across
  * origins, and Cloudflare Pages Functions run in the cloud, not on this Mac.
  * This tiny Node server bridges that gap. It runs ALONGSIDE `npm run dev`,
- * accepts selected JDs from the feed, calls local Ollama, applies the bullet
- * rewrites to a real resume.tex template, compiles with tectonic, and writes
- * everything to the external drive.
+ * accepts selected JDs from the feed, runs the AC evidence pipeline (beam + RCS),
+ * compiles with tectonic, and writes everything to the external drive.
+ * Set TAILOR_LEGACY=1 to use the old Gemma bullet-rewrite path.
  *
  * Run:  npm run tailor
  * Then: in the app, select jobs → "Tailor selected".
@@ -19,6 +19,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import zlib from "node:zlib";
+import dotenv from "dotenv";
 import { spawnSync, spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadBullets, loadSafeClaims, loadBankNumbers, bulletNumbers } from "./tailor-bank.mjs";
@@ -29,9 +30,22 @@ import {
   collectDraftBullets, buildCritiqueMessage, applyCritique,
   dedupeVerbs, dedupeSkills,
 } from "./tailor-dynamic.mjs";
+import { buildSkillsLines, capSkillsLineToOnePhysicalLine } from "./skills-library.mjs";
+import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
+import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
+import { withMongo, closeMongo } from "./mongo-client.mjs";
+import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, cancelCompileJob, enqueueJobs } from "./resume-queue.mjs";
+import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
+import { listActiveWorkers } from "./worker-registry.mjs";
+
+dotenv.config();
+
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.join(SCRIPT_DIR, "..");
+dotenv.config({ path: path.join(ROOT, ".env") });
+dotenv.config({ path: path.join(ROOT, ".env.tailor") });
 
 // Load the engine bank once at startup.
-const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const RECOVER_SCRIPT = path.join(SCRIPT_DIR, "tailor-recover.mjs");
 function spawnRecover(reason) {
   try {
@@ -66,6 +80,9 @@ const BANK_NUMBERS = loadBankNumbers(BANK);
 const PORT = 8787;
 const TAILOR_TOKEN = process.env.TAILOR_TOKEN?.trim() || "";
 const DEFAULT_MODEL = "gemma4:12b";
+const USE_LEGACY = process.env.TAILOR_LEGACY === "1";
+const AC_PLANNER = process.env.TAILOR_PLANNER?.trim() || "v2";
+const AC_LEARN = process.env.TAILOR_LEARN === "1";
 const OUT_ROOT = "/Volumes/Kasliwal v2/tailored-resumes";
 const TEMPLATE =
   "/Users/atishaykasliwal/Desktop/June/Resume claude/tailored/2026-06-12/04-veryai-fullstack-engineer/resume.tex";
@@ -746,6 +763,10 @@ function compileTex(dir, onLog) {
 // ─── Per-job tailor ──────────────────────────────────────────────────────────
 // `ctx.sendPhase(phase, extra)` + `ctx.log(kind, text)` report live progress.
 async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
+  if (!USE_LEGACY) {
+    return tailorOneAc(job, seq, dateDir, ctx, { planner: AC_PLANNER, learn: AC_LEARN });
+  }
+
   const { sendPhase, log: onLog } = ctx;
   const company = job.company || "unknown";
   const role = job.title || "role";
@@ -855,26 +876,45 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
       onLog?.("result", "Metric lock passed — every number traces to a real bank bullet");
     }
 
-    onLog?.("step", "Phase 2/4 · Truth guard — filtering skills against safe-claim allowlist");
-    const droppedSkills = [];
-    ai.skills = (ai.skills || []).map((line, i) => {
-      onLog?.("think", `Checking skills line ${i + 1}/${ai.skills.length}…`);
-      const { line: kept, dropped } = filterSkillsLine(line, SAFE_CLAIMS);
-      droppedSkills.push(...dropped);
-      if (dropped.length) onLog?.("warn", `  Dropped from line ${i + 1}: ${dropped.join(", ")}`);
-      return kept;
-    }).filter(Boolean);
-    if (droppedSkills.length) {
-      onLog?.("warn", `Truth guard total dropped: ${droppedSkills.join(", ")}`);
-      ai._dropped_skills = droppedSkills;
-      log(`  dropped fabricated skills: ${droppedSkills.join(", ")}`);
+    // Skills come from the curated library, SELECTED against this JD — not from
+    // the model's free-form guess. The library is truthful + canonically named,
+    // so it never invents a skill, never duplicates an alias, and (capped here)
+    // always fits one physical line. The model's filtered skills are a fallback.
+    onLog?.("step", "Phase 2/4 · Skills — selecting from curated library against the JD");
+    const libSkills = buildSkillsLines(jd);
+    if (libSkills.length >= 4) {
+      ai.skills = libSkills;
+      onLog?.("result", `Library selected ${libSkills.length} JD-aligned lines (truthful, one line each)`);
+      for (const line of libSkills) onLog?.("think", `  ${line}`);
     } else {
-      onLog?.("result", "Truth guard passed — every skill token verified against resume evidence");
+      onLog?.("warn", "Library produced too few lines — falling back to model skills + truth guard");
+      const droppedSkills = [];
+      ai.skills = (ai.skills || []).map((line, i) => {
+        const { line: kept, dropped } = filterSkillsLine(line, SAFE_CLAIMS);
+        droppedSkills.push(...dropped);
+        if (dropped.length) onLog?.("warn", `  Dropped from line ${i + 1}: ${dropped.join(", ")}`);
+        return kept;
+      }).filter(Boolean);
+      if (droppedSkills.length) {
+        ai._dropped_skills = droppedSkills;
+        log(`  dropped fabricated skills: ${droppedSkills.join(", ")}`);
+      }
+      ai.skills = dedupeSkills(ai.skills);
     }
 
-    // De-dupe skills across lines (e.g. "Google Cloud Platform" + "GCP", or a tool
-    // listed in two categories) so no skill shows twice.
-    ai.skills = dedupeSkills(ai.skills);
+    // Final one-physical-line guard on every line, regardless of source — trim
+    // the least-relevant items from the END until the rendered line never wraps.
+    ai.skills = (ai.skills || []).map((line) => {
+      const colon = line.indexOf(":");
+      if (colon === -1) return line;
+      const label = line.slice(0, colon);
+      const items = line.slice(colon + 1).split(",").map((s) => s.trim()).filter(Boolean);
+      const capped = capSkillsLineToOnePhysicalLine(label, items);
+      if (capped.length < items.length) {
+        onLog?.("think", `  Trimmed "${label}" to fit one line: ${items.length}→${capped.length} items`);
+      }
+      return `${label}: ${capped.join(", ")}`;
+    }).filter(Boolean);
 
     onLog?.("step", "Writing optimizer.json…");
     fs.writeFileSync(path.join(dir, "optimizer.json"), JSON.stringify(ai, null, 2));
@@ -927,10 +967,11 @@ const server = http.createServer(async (req, res) => {
   // permissive CORS so the Vite dev origin can reach us
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Tailor-Token");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS,DELETE");
   if (req.method === "OPTIONS") { res.writeHead(204); return res.end(); }
 
-  const pathname = (req.url || "/").split("?")[0];
+  const reqUrl = new URL(req.url || "/", "http://127.0.0.1");
+  const pathname = reqUrl.pathname;
   if (TAILOR_TOKEN && req.headers["x-tailor-token"] !== TAILOR_TOKEN) {
     res.writeHead(401, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({ ok: false, error: "Unauthorized" }));
@@ -939,7 +980,15 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && pathname === "/health") {
     const driveOk = fs.existsSync(path.dirname(OUT_ROOT));
     res.writeHead(200, { "Content-Type": "application/json" });
-    return res.end(JSON.stringify({ ok: true, driveMounted: driveOk, outRoot: OUT_ROOT }));
+    return res.end(JSON.stringify({
+      ok: true,
+      driveMounted: driveOk,
+      outRoot: OUT_ROOT,
+      artifactsRoot: getArtifactsRoot(),
+      mongo: Boolean(process.env.MONGO_URI),
+      pipeline: USE_LEGACY ? "legacy" : "ac",
+      planner: USE_LEGACY ? null : AC_PLANNER,
+    }));
   }
 
   if (req.method === "POST" && pathname === "/tailor") {
@@ -975,7 +1024,9 @@ const server = http.createServer(async (req, res) => {
       try {
         const { jobs, resumeText, model } = JSON.parse(raw);
         if (!Array.isArray(jobs) || !jobs.length) throw new Error("no jobs");
-        if (!resumeText || resumeText.trim().length < 50) throw new Error("resume text missing — save it in Settings first");
+        if (USE_LEGACY && (!resumeText || resumeText.trim().length < 50)) {
+          throw new Error("resume text missing — save it in Settings first");
+        }
         if (!fs.existsSync(path.dirname(OUT_ROOT))) throw new Error(`external drive not mounted: ${path.dirname(OUT_ROOT)}`);
 
         const useModel = model || DEFAULT_MODEL;
@@ -996,13 +1047,17 @@ const server = http.createServer(async (req, res) => {
         const runLog = createRunLogger(send);
 
         runLog("step", `Server · POST /tailor received · ${jobs.length} job(s)`);
-        runLog("think", `Resume text · ${resumeText.trim().length.toLocaleString()} chars from Settings`);
+        if (USE_LEGACY) {
+          runLog("think", `Resume text · ${resumeText.trim().length.toLocaleString()} chars from Settings`);
+        } else {
+          runLog("think", `AC pipeline · planner=${AC_PLANNER} · evidence bank (no Gemma rewrites)`);
+        }
         runLog("result", `External drive mounted · ${path.dirname(OUT_ROOT)}`);
         runLog("think", `Output date folder · ${dateDir} · ${existing.length} existing run(s) today`);
-        send({ type: "start", total: jobs.length, dateDir, model: useModel });
-        runLog("result", `Stream started · model=${useModel}`);
+        send({ type: "start", total: jobs.length, dateDir, model: USE_LEGACY ? useModel : `ac:${AC_PLANNER}` });
+        runLog("result", USE_LEGACY ? `Stream started · model=${useModel}` : `Stream started · AC pipeline v2`);
         heartbeat = startStreamHeartbeat(send);
-        log(`tailoring ${jobs.length} job(s) with ${useModel} → ${dateDir}`);
+        log(`tailoring ${jobs.length} job(s) ${USE_LEGACY ? `with ${useModel}` : `via AC/${AC_PLANNER}`} → ${dateDir}`);
 
         for (let i = 0; i < jobs.length; i++) {
           const job = jobs[i];
@@ -1078,11 +1133,9 @@ const server = http.createServer(async (req, res) => {
             if (!fs.existsSync(pdfPath)) continue; // only finished resumes
             let meta = {};
             try { meta = JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8")); } catch { /* none */ }
-            let ats = null;
-            try {
-              const opt = JSON.parse(fs.readFileSync(path.join(dir, "optimizer.json"), "utf8"));
-              if (opt.ats_before != null && opt.ats_after != null) ats = `${opt.ats_before}→${opt.ats_after}`;
-            } catch { /* none */ }
+            const ats = readAtsFromDir(dir);
+            let explain = null;
+            try { explain = JSON.parse(fs.readFileSync(path.join(dir, "explain.json"), "utf8")); } catch { /* none */ }
             out.push({
               folder,
               dateDir: dd,
@@ -1094,6 +1147,9 @@ const server = http.createServer(async (req, res) => {
               score: meta.score_pct ?? null,
               ats,
               tailoredAt: meta.tailored_at || null,
+              identity: explain?.engineering_identity?.primary || null,
+              informationGain: explain?.information_gain ?? null,
+              borderline: Boolean(explain?.borderline),
             });
           }
         }
@@ -1137,11 +1193,7 @@ const server = http.createServer(async (req, res) => {
         const dir = path.join(dateDir, best);
         const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
         const hasPdf = fs.existsSync(pdfPath);
-        let ats = null;
-        try {
-          const opt = JSON.parse(fs.readFileSync(path.join(dir, "optimizer.json"), "utf8"));
-          if (opt.ats_before != null && opt.ats_after != null) ats = `${opt.ats_before}→${opt.ats_after}`;
-        } catch { /* no optimizer.json yet */ }
+        const ats = readAtsFromDir(dir);
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ ok: true, found: hasPdf, pdfPath: hasPdf ? pdfPath : null, dir, folder: best, ats }));
       } catch (e) {
@@ -1149,6 +1201,230 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
       }
     });
+    return;
+  }
+
+  // Read composition + explain artifacts for diff / explain UI. GET /resume-artifacts?dir=...
+  if (req.method === "GET" && pathname === "/resume-artifacts") {
+    try {
+      const rawDir = reqUrl.searchParams.get("dir");
+      if (!rawDir) throw new Error("dir required");
+      const dir = path.resolve(rawDir);
+      const root = path.resolve(OUT_ROOT);
+      if (!dir.startsWith(root + path.sep)) throw new Error("invalid path");
+      if (!fs.existsSync(dir)) throw new Error("not found");
+
+      let explain = null;
+      let composition = null;
+      try { explain = JSON.parse(fs.readFileSync(path.join(dir, "explain.json"), "utf8")); } catch { /* none */ }
+      try { composition = JSON.parse(fs.readFileSync(path.join(dir, "composition.json"), "utf8")); } catch { /* none */ }
+
+      const selectedAcs = composition?.selected_acs
+        || composition?.gate?.metrics?.selected_acs
+        || [];
+      const inner = composition?.composition || {};
+      const coverage = inner.coverage || composition?.coverage || null;
+      const graphCoverage = composition?.global_optimize?.after?.profile?.graph_coverage
+        || composition?.global_optimize?.profile?.graph_coverage
+        || null;
+      const hiringManager = composition?.hiring_manager_test
+        || composition?.quality?.hiring_manager_test
+        || inner?.quality?.hiring_manager_test
+        || null;
+      res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+      return res.end(JSON.stringify({
+        ok: true,
+        dir,
+        selectedAcs: Array.isArray(selectedAcs) ? selectedAcs : [],
+        explain,
+        identity: explain?.engineering_identity?.primary || null,
+        informationGain: explain?.information_gain ?? null,
+        borderline: Boolean(explain?.borderline),
+        coverage,
+        graphCoverage,
+        hiringManager,
+      }));
+    } catch (e) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+    }
+  }
+
+  // GET /compile-workers — active worker fleet (heartbeats)
+  if (req.method === "GET" && pathname === "/compile-workers") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const workers = await withMongo((db) => listActiveWorkers(db), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify({ ok: true, workers }));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
+  }
+
+  // GET /compile-queue/stream — SSE live updates via Mongo change stream
+  if (req.method === "GET" && pathname === "/compile-queue/stream") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const limit = Math.min(Number(reqUrl.searchParams.get("limit") || 120), 200);
+        await serveCompileQueueStream(req, res, { limit });
+      } catch (e) {
+        if (!res.headersSent) {
+          res.writeHead(503, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+        }
+      }
+    })();
+    return;
+  }
+
+  // GET /compile-queue?status=queued — Mongo-backed compile queue (observe-only)
+  if (req.method === "GET" && pathname === "/compile-queue") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const status = reqUrl.searchParams.get("status") || undefined;
+        const limit = Math.min(Number(reqUrl.searchParams.get("limit") || 50), 200);
+        const jobs = await withMongo((db) => listCompileJobs(db, { status, limit }), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify({ ok: true, jobs }));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
+  }
+
+  // POST /compile-enqueue — queue one job { job_url, company, title, score_pct?, force? }
+  if (req.method === "POST" && pathname === "/compile-enqueue") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      (async () => {
+        try {
+          if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+          const body = JSON.parse(raw || "{}");
+          if (!body.job_url) throw new Error("job_url required");
+          const result = await withMongo(
+            (db) => enqueueJob(db, body, { force: body.force === true }),
+            { appName: "AtriveoTailorServer" },
+          );
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true, ...result }));
+        } catch (e) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+        }
+      })();
+    });
+    return;
+  }
+
+  // POST /compile-enqueue-top { limit?, min_score? } — hourly top jobs
+  if (req.method === "POST" && pathname === "/compile-enqueue-top") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      (async () => {
+        try {
+          if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+          const body = JSON.parse(raw || "{}");
+          const rawLimit = body.limit != null ? Number(body.limit) : null;
+          const limit = rawLimit != null && rawLimit > 0 ? rawLimit : null;
+          const minScore = Number(body.min_score || 0);
+          const results = await withMongo(
+            (db) => enqueueTopJobs(db, { limit, minScore }),
+            { appName: "AtriveoTailorServer" },
+          );
+          const enqueued = results.filter((r) => !r.skipped).length;
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true, enqueued, skipped: results.length - enqueued, results }));
+        } catch (e) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+        }
+      })();
+    });
+    return;
+  }
+
+  // POST /compile-enqueue-batch { jobs: [{ job_url, company, title, score_pct }] }
+  if (req.method === "POST" && pathname === "/compile-enqueue-batch") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      (async () => {
+        try {
+          if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+          const body = JSON.parse(raw || "{}");
+          const jobs = Array.isArray(body.jobs) ? body.jobs : [];
+          if (!jobs.length) throw new Error("jobs array required");
+          const results = await withMongo(
+            (db) => enqueueJobs(db, jobs.slice(0, 50), { force: body.force === true }),
+            { appName: "AtriveoTailorServer" },
+          );
+          const enqueued = results.filter((r) => !r.skipped).length;
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true, enqueued, results }));
+        } catch (e) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+        }
+      })();
+    });
+    return;
+  }
+
+  // POST /compile-cancel { job_url } — remove queued job (worker-owned running jobs are not cancelled)
+  if (req.method === "POST" && pathname === "/compile-cancel") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      (async () => {
+        try {
+          if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+          const body = JSON.parse(raw || "{}");
+          if (!body.job_url) throw new Error("job_url required");
+          const cancelled = await withMongo(
+            (db) => cancelCompileJob(db, body.job_url),
+            { appName: "AtriveoTailorServer" },
+          );
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true, cancelled }));
+        } catch (e) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+        }
+      })();
+    });
+    return;
+  }
+
+  // GET /resume/:fingerprint — manifest + job metadata for a compile
+  const resumeFpMatch = pathname.match(/^\/resume\/([a-f0-9]{64})$/);
+  if (req.method === "GET" && resumeFpMatch) {
+    (async () => {
+      try {
+        const fingerprint = resumeFpMatch[1];
+        const manifest = readManifest(fingerprint);
+        if (!manifest) throw new Error("manifest not found");
+        let job = null;
+        if (process.env.MONGO_URI) {
+          job = await withMongo((db) => findJobByFingerprint(db, fingerprint), { appName: "AtriveoTailorServer" });
+        }
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify({ ok: true, fingerprint, manifest, artifacts_root: getArtifactsRoot(), job }));
+      } catch (e) {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
     return;
   }
 
@@ -1180,7 +1456,8 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, "127.0.0.1", () => {
   log(`listening on http://localhost:${PORT}`);
   log(`output → ${OUT_ROOT}`);
-  log(`template → ${TEMPLATE}`);
+  log(`pipeline → ${USE_LEGACY ? `legacy (gemma ${DEFAULT_MODEL})` : `ac (planner ${AC_PLANNER})`}`);
+  if (USE_LEGACY) log(`template → ${TEMPLATE}`);
   log(`drive mounted: ${fs.existsSync(path.dirname(OUT_ROOT)) ? "YES" : "NO — plug in 'Kasliwal v2'"}`);
   void os; // reserved
 });

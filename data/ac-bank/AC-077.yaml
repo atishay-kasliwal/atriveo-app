@@ -1,0 +1,32 @@
+id: AC-077
+role: insureraft
+slot_kind: project
+achievement_theme: audit-log
+display_order: 5
+wow_score: 0.90
+metrics_claimed: [raft_nodes_3]
+concepts_claimed: [audit, compliance, immutable, ordered-log]
+signature_technologies: [Raft]
+fact: Raft log is immutable ordered audit trail for regulatory compliance.
+capabilities:
+  backend: 86
+  data: 84
+strength:
+  recruiter: 9
+ats_keywords:
+  - audit trail
+  - compliance
+  - immutable log
+  - Raft
+  - insurance
+facets:
+  compliance:
+    phrase: regulatory audit log
+    keywords: [audit, compliance, immutable, regulator]
+variants:
+  - facet: compliance
+    emphasis: compliance
+    strength: 9
+    text: >-
+      Built an immutable Raft audit log on a 3-node cluster serving as a tamper-evident
+      production compliance record for insurance regulators.

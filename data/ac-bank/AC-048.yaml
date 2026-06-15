@@ -1,0 +1,44 @@
+id: AC-048
+role: wake-forest
+slot_kind: experience
+achievement_theme: human-in-the-loop
+display_order: 9
+wow_score: 0.82
+metrics_claimed:
+  - human_in_the_loop
+concepts_claimed:
+  - human_in_the_loop
+  - validation
+  - clinical_trust
+fact: Human-in-the-loop mask correction preserving 90%+ automation while letting physicians fix edge cases.
+capabilities:
+  ml: 78
+  frontend: 80
+  backend: 72
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - human-in-the-loop
+  - segmentation
+  - clinician
+  - AI
+  - product
+facets:
+  product:
+    phrase: human-in-the-loop workflow
+    keywords:
+      - human-in-the-loop
+      - correction
+      - oversight
+      - validation
+      - physician
+variants:
+  - facet: product
+    emphasis: product
+    strength: 9
+    text: >-
+      Implemented Python human-in-the-loop mask review so physicians could correct AI segmentations on edge cases
+      improving clinical trust in production workflows.
+signature_technologies:
+  - Python

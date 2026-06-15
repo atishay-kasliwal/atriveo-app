@@ -1,0 +1,30 @@
+id: AC-121
+role: mri-research
+slot_kind: project
+achievement_theme: reporting
+display_order: 9
+wow_score: 0.84
+metrics_claimed:
+  - modules_10
+concepts_claimed: []
+signature_technologies:
+  - Python
+fact: Generated comprehensive PDF research reports with executive summaries and module-specific visualizations.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+facets:
+  default:
+    phrase: pdf-reports
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built Python PDF research reports with executive summaries across 10 module visualizations for clinical research
+      publication workflows.

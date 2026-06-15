@@ -1,0 +1,29 @@
+id: AC-156
+role: user-data-platform
+slot_kind: project
+achievement_theme: mcp-demo
+display_order: 4
+wow_score: 0.86
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - MCP
+fact: Built a Claude Desktop MCP integration demo connecting consented Hushh vault reads into a live agent workflow.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - MCP
+facets:
+  default:
+    phrase: claude-mcp
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built a Claude Desktop MCP demo connecting consented Hushh vault reads into a live production
+      agent workflow over /api/v1.

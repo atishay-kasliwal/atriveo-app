@@ -1,0 +1,40 @@
+id: AC-076
+role: insureraft
+slot_kind: project
+achievement_theme: exactly-once
+display_order: 4
+wow_score: 0.89
+metrics_claimed:
+  - event_types_8
+concepts_claimed:
+  - exactly-once
+  - deduplication
+  - event-id
+signature_technologies:
+  - C++
+fact: event_id deduplicated in state machine before commit — exactly-once delivery.
+capabilities:
+  backend: 88
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - exactly-once
+  - idempotency
+  - deduplication
+  - distributed systems
+  - C++
+facets:
+  reliability:
+    phrase: exactly-once delivery
+    keywords:
+      - exactly-once
+      - idempotency
+      - dedup
+variants:
+  - facet: reliability
+    emphasis: reliability
+    strength: 9
+    text: >-
+      Implemented C++ exactly-once delivery across 8 event types by deduplicating event_id values before committing
+      insurance transactions to the Raft log.

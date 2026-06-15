@@ -1,0 +1,41 @@
+id: AC-168
+role: accolite
+slot_kind: experience
+engineering_identity: fullstack
+client_context: fidelity
+achievement_theme: transfer-dashboard
+display_order: 6
+wow_score: 0.87
+metrics_claimed:
+  - transfer_ui
+  - daily_transfers_500
+concepts_claimed:
+  - fullstack
+signature_technologies:
+  - Angular
+  - Java
+fact: Fidelity Angular dashboard for encrypted transfer visibility across sister-company pipelines.
+capabilities:
+  backend: 78
+  frontend: 88
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 7
+ats_keywords:
+  - Angular
+  - Java
+facets:
+  default:
+    phrase: transfer-dashboard
+    keywords:
+      - angular
+      - java
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Shipped an Angular and Java operations console giving Fidelity compliance teams visibility into 500+ daily
+      encrypted sister-company transfer events in production.

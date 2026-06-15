@@ -1,0 +1,41 @@
+id: AC-025
+role: stony-brook
+slot_kind: experience
+engineering_identity: ai
+achievement_theme: production-rag
+display_order: 10
+wow_score: 0.91
+metrics_claimed:
+  - rag_lift_18
+  - production
+concepts_claimed:
+  - ai
+signature_technologies:
+  - LangChain
+  - Python
+fact: Production RAG with LangChain and AWS — 18% accuracy lift in evaluations.
+capabilities:
+  ai: 90
+  backend: 78
+  frontend: 65
+  data: 65
+  cloud: 75
+  ml: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - LangChain
+  - Python
+facets:
+  default:
+    phrase: production-rag
+    keywords:
+      - langchain
+      - python
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built a production Python RAG pipeline with LangChain vector retrieval and AWS inference APIs delivering 18%
+      accuracy lift in macro research evaluations.

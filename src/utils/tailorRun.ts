@@ -1,12 +1,15 @@
 import type { Job } from "../types";
 import type { TailorLogEntry, TailorStreamEvent } from "../types/tailor";
 import type { TailorOutcomeKind } from "../types/tailorQueue";
+import type { TailorExplainSummary } from "../types/tailorExplain";
+import type { ResumeArtifacts } from "./resumeDiff";
 import { outcomeFromError, outcomeFromServerStatus } from "./tailorOutcome";
 import { captureTailorStreamEvent, resetTailorLogCapture, trimTailorLogs } from "./tailorLogCapture";
 import { loadJobDescriptions } from "./jobDescriptionBuckets";
 import { getTailorServerBase, isLocalTailorHost } from "./tailorServer";
 
-const MIN_FULL_JD_CHARS = 400;
+const MIN_JD_HARD_CHARS = 200;
+const MIN_JD_IDEAL_CHARS = 400;
 /** Ollama + compile can take several minutes; abort if the relay stream stalls longer. */
 const TAILOR_JOB_TIMEOUT_MS = 18 * 60 * 1000;
 
@@ -65,7 +68,7 @@ async function readTailorStream(
   }
 }
 
-async function assertTailorServerReady(signal?: AbortSignal): Promise<void> {
+export async function assertTailorServerReady(signal?: AbortSignal): Promise<void> {
   const base = getTailorServerBase();
   const res = await fetch(`${base}/health`, {
     signal: signal ?? AbortSignal.timeout(8000),
@@ -89,6 +92,8 @@ export interface SingleTailorResult {
   logs?: TailorLogEntry[];
   serverStatus?: string;
   outcome?: TailorOutcomeKind;
+  explain?: TailorExplainSummary;
+  borderline?: boolean;
 }
 
 export async function checkJobOnDisk(job: Job): Promise<{ found: boolean; pdfPath?: string; dir?: string; folder?: string; ats?: string }> {
@@ -119,6 +124,35 @@ export interface TailoredResumeOnDisk {
   score: number | null;
   ats: string | null;
   tailoredAt: string | null;
+  identity?: string | null;
+  informationGain?: number | null;
+  borderline?: boolean;
+}
+
+/** Full composition + explain payload for diff / detail views. */
+export async function fetchResumeArtifacts(dir: string): Promise<ResumeArtifacts | null> {
+  try {
+    const res = await fetch(
+      `${getTailorServerBase()}/resume-artifacts?dir=${encodeURIComponent(dir)}&t=${Date.now()}`,
+      { cache: "no-store", credentials: "include", signal: AbortSignal.timeout(15000) },
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data?.ok) return null;
+    return {
+      dir: String(data.dir || dir),
+      selectedAcs: Array.isArray(data.selectedAcs) ? data.selectedAcs as string[] : [],
+      explain: data.explain ?? null,
+      identity: data.identity ?? null,
+      informationGain: data.informationGain ?? null,
+      borderline: Boolean(data.borderline),
+      coverage: data.coverage ?? null,
+      graphCoverage: data.graphCoverage ?? null,
+      hiringManager: data.hiringManager ?? null,
+    };
+  } catch {
+    return null;
+  }
 }
 
 /** Source-of-truth list of created resumes, read from the Mac drive (not localStorage). */
@@ -153,9 +187,6 @@ export async function runSingleTailorJob(
   onEvent?: (event: TailorStreamEvent) => void,
 ): Promise<SingleTailorResult> {
   const resumeText = localStorage.getItem("atriveo_resume") || "";
-  if (resumeText.trim().length < 50) {
-    return { ok: false, error: "Save your resume in Settings first.", outcome: "no-resume" };
-  }
 
   const controller = new AbortController();
   activeAbort = controller;
@@ -166,10 +197,10 @@ export async function runSingleTailorJob(
     const descriptionsByUrl = await loadJobDescriptions([job]);
     const bucketJd = job.job_url ? descriptionsByUrl[job.job_url] : undefined;
     const jd = bucketJd || job.summary || "";
-    if (jd.trim().length < 50) {
-      return { ok: false, error: "No full JD captured for this job.", outcome: "no-jd" };
+    if (jd.trim().length < MIN_JD_HARD_CHARS) {
+      return { ok: false, error: "Job description is too short — paste the full posting (200+ characters).", outcome: "no-jd" };
     }
-    if (!bucketJd && jd.trim().length < MIN_FULL_JD_CHARS) {
+    if (!bucketJd && jd.trim().length < MIN_JD_IDEAL_CHARS) {
       return {
         ok: false,
         error: "Only a short job snippet is available — paste the full JD in Tailor Lab or wait for scrape.",
@@ -223,6 +254,7 @@ export async function runSingleTailorJob(
       if (event.phase !== "done") return;
       const serverStatus = event.status;
       if (event.status === "ok" && event.pdf) {
+        const borderline = event.borderline === true || event.explain?.borderline === true;
         result = {
           ok: true,
           ats: event.ats,
@@ -231,7 +263,9 @@ export async function runSingleTailorJob(
           folder: event.folder,
           logs: trimTailorLogs([...logs]),
           serverStatus: "ok",
-          outcome: "done",
+          outcome: borderline ? "borderline" : "done",
+          explain: event.explain,
+          borderline,
         };
         return;
       }
@@ -244,6 +278,18 @@ export async function runSingleTailorJob(
           logs: trimTailorLogs([...logs]),
           serverStatus: "no-go",
           outcome: "skip",
+        };
+        return;
+      }
+      if (event.status === "unsupported-jd") {
+        result = {
+          ok: false,
+          error: event.error || "Unsupported job description — not an engineering role.",
+          dir: event.dir,
+          folder: event.folder,
+          logs: trimTailorLogs([...logs]),
+          serverStatus: "unsupported-jd",
+          outcome: "unsupported",
         };
         return;
       }

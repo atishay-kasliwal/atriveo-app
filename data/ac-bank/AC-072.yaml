@@ -1,0 +1,33 @@
+id: AC-072
+role: insurance-platform
+slot_kind: project
+achievement_theme: docker-orchestration
+display_order: 10
+wow_score: 0.84
+metrics_claimed: [services_8, kafka_3_broker, elastic_3_node]
+concepts_claimed: [docker, compose, orchestration, infrastructure]
+signature_technologies: [Docker, Kafka]
+fact: Docker Compose orchestrates 8 microservices plus Kafka, Elasticsearch, Redis, and monitoring stacks.
+capabilities:
+  backend: 80
+  cloud: 90
+strength:
+  recruiter: 8
+ats_keywords:
+  - Docker
+  - Docker Compose
+  - Kafka
+  - Elasticsearch
+  - Redis
+  - infrastructure
+facets:
+  infra:
+    phrase: Docker orchestration
+    keywords: [docker, compose, cluster, orchestration]
+variants:
+  - facet: infra
+    emphasis: infra
+    strength: 8
+    text: >-
+      Deployed 8 microservices with Docker Compose spanning 3-broker Kafka, Elasticsearch,
+      and Redis-backed monitoring stacks.

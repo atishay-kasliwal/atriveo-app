@@ -1,0 +1,30 @@
+id: AC-113
+role: mri-research
+slot_kind: project
+achievement_theme: platform-ownership
+display_order: 1
+wow_score: 0.92
+metrics_claimed:
+  - modules_10
+concepts_claimed: []
+signature_technologies:
+  - Python
+fact: Built a modular radiomics research pipeline in Python spanning 10 analysis modules with publication-ready PDF reports.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+facets:
+  default:
+    phrase: radiomics-pipeline
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built a modular Python radiomics research pipeline spanning 10 analysis modules with publication-ready PDF
+      reports.

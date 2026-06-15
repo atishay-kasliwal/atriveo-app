@@ -1,0 +1,41 @@
+id: AC-174
+role: accolite
+slot_kind: experience
+engineering_identity: cloud
+client_context: bt
+achievement_theme: multi-cloud
+display_order: 12
+wow_score: 0.86
+metrics_claimed:
+  - multi_cloud_3
+  - enterprise_sales
+concepts_claimed:
+  - cloud
+signature_technologies:
+  - AWS
+  - Azure
+fact: British Telecom commerce deployed across AWS Azure and GCP.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 90
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 7
+ats_keywords:
+  - AWS
+  - Azure
+facets:
+  default:
+    phrase: multi-cloud
+    keywords:
+      - aws
+      - azure
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Deployed British Telecom commerce on AWS and Azure across 3 enterprise regions sustaining telecom sales without
+      regional production downtime.

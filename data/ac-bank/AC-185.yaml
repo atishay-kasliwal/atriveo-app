@@ -1,0 +1,41 @@
+id: AC-185
+role: accolite
+slot_kind: experience
+engineering_identity: enterprise
+client_context: inhouse
+achievement_theme: hierarchy-views
+display_order: 23
+wow_score: 0.9
+metrics_claimed:
+  - reports_10
+  - hierarchy_views
+concepts_claimed:
+  - enterprise
+signature_technologies:
+  - React
+  - MongoDB
+fact: Hierarchical org views letting managers operate across 10 direct reports for reviews and approvals.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 72
+  data: 82
+  leadership: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - React
+  - MongoDB
+facets:
+  default:
+    phrase: hierarchy-views
+    keywords:
+      - react
+      - mongodb
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Engineered hierarchical org views on React and MongoDB letting managers approve reviews and timesheets across 10
+      direct reports in production.

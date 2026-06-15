@@ -1,0 +1,29 @@
+id: AC-129
+role: medledger
+slot_kind: project
+achievement_theme: security
+display_order: 7
+wow_score: 0.84
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Helmet
+fact: Integrated Helmet and CORS hardening with CSRF middleware protecting clinic management routes.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Helmet
+facets:
+  default:
+    phrase: security-hardening
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Integrated Helmet and CORS hardening with CSRF middleware protecting 3 role-based clinic management routes in
+      production.

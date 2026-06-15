@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { TailorRecord } from "../types/tailorQueue";
 import { formatTailorDuration } from "../utils/tailorProgress";
+import TrustReportPanel from "./TrustReportPanel";
 import {
   fmtTailorLogElapsed,
   fmtTailorLogTime,
@@ -84,6 +85,18 @@ export default function TailorJobLogModal({ record, onClose }: Props) {
               <li key={line}>{line}</li>
             ))}
           </ul>
+        ) : null}
+
+        {record.explain || record.dir || record.folder ? (
+          <TrustReportPanel explain={record.explain} dir={record.dir || record.folder} compact />
+        ) : (
+          <p className="tailor-log-modal-empty">Trust report loads after compile artifacts are on disk.</p>
+        )}
+
+        {record.status === "failed" && record.outcome === "unsupported" && record.error ? (
+          <p className="tailor-explain-banner tailor-explain-banner--blocked" role="status">
+            {record.error}
+          </p>
         ) : null}
 
         {logs.length > 0 ? (

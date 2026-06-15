@@ -1,0 +1,48 @@
+id: AC-083
+role: job-pipeline
+slot_kind: project
+achievement_theme: platform-ownership
+display_order: 1
+wow_score: 0.91
+metrics_claimed:
+  - runs_daily_20
+  - search_terms_6
+concepts_claimed:
+  - pipeline
+  - scraping
+  - automation
+  - dashboard
+  - jobs
+signature_technologies:
+  - Python
+  - JobSpy
+fact: Job intelligence pipeline — JobSpy LinkedIn scrape, 6 search terms, ~20 runs/day, live dashboard.
+capabilities:
+  backend: 88
+  data: 90
+  ai: 70
+strength:
+  recruiter: 10
+ats_keywords:
+  - Python
+  - JobSpy
+  - LinkedIn
+  - scraping
+  - pipeline
+  - automation
+facets:
+  platform:
+    phrase: job intelligence pipeline
+    keywords:
+      - pipeline
+      - scrape
+      - filter
+      - dashboard
+      - jobs
+variants:
+  - facet: platform
+    emphasis: platform
+    strength: 10
+    text: >-
+      Built a Python automated job intelligence pipeline scraping LinkedIn via JobSpy across 6 search terms with ~20
+      daily runs serving a live production dashboard.

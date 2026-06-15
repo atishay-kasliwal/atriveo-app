@@ -1,0 +1,41 @@
+id: AC-021
+role: stony-brook
+slot_kind: experience
+engineering_identity: backend
+achievement_theme: schema-validation
+display_order: 18
+wow_score: 0.79
+metrics_claimed:
+  - schema
+  - validation
+concepts_claimed:
+  - backend
+signature_technologies:
+  - Python
+  - FastAPI
+fact: Schema validation for financial transcripts and FOMC document feeds.
+capabilities:
+  ai: 72
+  backend: 84
+  frontend: 65
+  data: 80
+  cloud: 65
+  ml: 65
+strength:
+  recruiter: 7
+ats_keywords:
+  - Python
+  - FastAPI
+facets:
+  default:
+    phrase: schema-validation
+    keywords:
+      - python
+      - fastapi
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Built Python and FastAPI schema validation across 200K+ financial transcripts ensuring structured LLM inputs for
+      news and FOMC document feeds in production pipelines.

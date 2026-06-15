@@ -1,0 +1,41 @@
+id: AC-189
+role: accolite
+slot_kind: experience
+engineering_identity: cloud
+client_context: inhouse
+achievement_theme: serverless-platform
+display_order: 27
+wow_score: 0.9
+metrics_claimed:
+  - latency_350_80
+  - users_3k
+concepts_claimed:
+  - cloud
+signature_technologies:
+  - AWS Lambda
+  - Python
+fact: Serverless Python Lambda Firebase platform for 3K+ users; API latency 350ms to 80ms.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 90
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - AWS Lambda
+  - Python
+facets:
+  default:
+    phrase: serverless-platform
+    keywords:
+      - aws lambda
+      - python
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Reduced ERP API latency from 350ms to 80ms on a Python and AWS Lambda serverless platform serving 3K+ daily
+      production users.

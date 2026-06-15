@@ -1,0 +1,42 @@
+id: AC-099
+role: bayesian-mmm
+slot_kind: project
+achievement_theme: time-series-cv
+display_order: 7
+wow_score: 0.86
+metrics_claimed:
+  - weeks_156
+  - mape_274
+concepts_claimed:
+  - cross-validation
+  - timeseries
+  - mape
+signature_technologies:
+  - Python
+  - scikit-learn
+fact: 5-fold TimeSeriesSplit with R² and MAPE per fold on 156 weeks.
+capabilities:
+  data: 90
+  ai: 76
+strength:
+  recruiter: 8
+ats_keywords:
+  - cross-validation
+  - time series
+  - scikit-learn
+  - MAPE
+  - Python
+facets:
+  validation:
+    phrase: time-series cross-validation
+    keywords:
+      - cross validation
+      - timeseries
+      - mape
+variants:
+  - facet: validation
+    emphasis: validation
+    strength: 8
+    text: >-
+      Implemented 5-fold time-series cross-validation in Python and scikit-learn reporting R² and MAPE per fold across
+      156 weeks of marketing spend data.

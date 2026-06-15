@@ -1,0 +1,26 @@
+id: AC-008
+role: accolite
+slot_kind: experience
+visibility:
+  default: false
+fact: RETIRED — superseded by AC-171 (British Telecom APIs) in Accolite bank v43.
+capabilities:
+  backend: 88
+strength:
+  recruiter: 8
+ats_keywords:
+  - REST
+  - GraphQL
+  - Java
+  - Spring Boot
+facets:
+  backend-api:
+    phrase: REST and GraphQL APIs
+    keywords: [rest, graphql, api, spring]
+variants:
+  - facet: backend-api
+    emphasis: backend-api
+    strength: 8
+    text: >-
+      Delivered production REST and GraphQL APIs in Java, Spring Boot, and Spring MVC for BT Telecom,
+      implementing Resilience4j circuit breaking across 10K+ daily transactions at 200ms P99 with 99% uptime.

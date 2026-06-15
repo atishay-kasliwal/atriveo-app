@@ -1,0 +1,43 @@
+id: AC-101
+role: bayesian-mmm
+slot_kind: project
+achievement_theme: tableau-export
+display_order: 9
+wow_score: 0.84
+metrics_claimed:
+  - weeks_156
+concepts_claimed:
+  - tableau
+  - export
+  - dashboard
+  - csv
+signature_technologies:
+  - Python
+  - pandas
+fact: Tableau-ready CSVs — 156-row mmm_results, channel_metrics, scenario_results.
+capabilities:
+  data: 86
+  frontend: 70
+strength:
+  recruiter: 8
+ats_keywords:
+  - Tableau
+  - pandas
+  - Python
+  - dashboard
+  - CSV
+facets:
+  analytics:
+    phrase: Tableau dashboard export
+    keywords:
+      - tableau
+      - export
+      - dashboard
+      - csv
+variants:
+  - facet: analytics
+    emphasis: analytics
+    strength: 8
+    text: >-
+      Built Python and pandas Tableau-ready CSVs consolidating 156 weeks of MMM predictions and channel ROAS metrics for
+      production marketing analytics dashboards.

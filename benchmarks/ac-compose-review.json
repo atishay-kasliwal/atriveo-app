@@ -1,0 +1,2539 @@
+{
+  "generated_at": "2026-06-14T21:38:23.599Z",
+  "pipeline_version": "2.0.0",
+  "pipeline_steps": [
+    "load_bank",
+    "keyword_planner",
+    "thesis_selection",
+    "proof_template",
+    "beam_search",
+    "rcs_scoring",
+    "contribution_prune",
+    "delete_test",
+    "skills_evidence",
+    "invariant_check",
+    "artifact_assembly"
+  ],
+  "planner": "v2",
+  "beam": {
+    "width": 7,
+    "winner": "default",
+    "candidates": [
+      {
+        "variant_id": "default",
+        "resume_confidence_score": 77.8,
+        "selected_acs": [
+          "AC-023",
+          "AC-001",
+          "AC-025",
+          "AC-002",
+          "AC-028",
+          "AC-007",
+          "AC-029",
+          "AC-041",
+          "AC-040",
+          "AC-017"
+        ],
+        "diversity": 6
+      },
+      {
+        "variant_id": "quality-strict",
+        "resume_confidence_score": 77.8,
+        "selected_acs": [
+          "AC-023",
+          "AC-001",
+          "AC-025",
+          "AC-002",
+          "AC-028",
+          "AC-007",
+          "AC-029",
+          "AC-041",
+          "AC-040",
+          "AC-017"
+        ],
+        "diversity": 6
+      },
+      {
+        "variant_id": "quality-balanced",
+        "resume_confidence_score": 77.8,
+        "selected_acs": [
+          "AC-023",
+          "AC-001",
+          "AC-025",
+          "AC-002",
+          "AC-028",
+          "AC-007",
+          "AC-029",
+          "AC-041",
+          "AC-040",
+          "AC-017"
+        ],
+        "diversity": 6
+      },
+      {
+        "variant_id": "tier-focused",
+        "resume_confidence_score": 77.8,
+        "selected_acs": [
+          "AC-023",
+          "AC-001",
+          "AC-025",
+          "AC-002",
+          "AC-028",
+          "AC-007",
+          "AC-029",
+          "AC-041",
+          "AC-040",
+          "AC-017"
+        ],
+        "diversity": 6
+      },
+      {
+        "variant_id": "plan-heavy",
+        "resume_confidence_score": 77.8,
+        "selected_acs": [
+          "AC-023",
+          "AC-001",
+          "AC-025",
+          "AC-002",
+          "AC-028",
+          "AC-007",
+          "AC-029",
+          "AC-041",
+          "AC-040",
+          "AC-017"
+        ],
+        "diversity": 6
+      },
+      {
+        "variant_id": "strength-first",
+        "resume_confidence_score": 77.8,
+        "selected_acs": [
+          "AC-023",
+          "AC-001",
+          "AC-025",
+          "AC-002",
+          "AC-028",
+          "AC-007",
+          "AC-029",
+          "AC-041",
+          "AC-040",
+          "AC-017"
+        ],
+        "diversity": 6
+      },
+      {
+        "variant_id": "diverse-verbs",
+        "resume_confidence_score": 77.8,
+        "selected_acs": [
+          "AC-023",
+          "AC-001",
+          "AC-025",
+          "AC-002",
+          "AC-028",
+          "AC-007",
+          "AC-029",
+          "AC-041",
+          "AC-040",
+          "AC-017"
+        ],
+        "diversity": 6
+      }
+    ]
+  },
+  "resume_confidence_score": 29.8,
+  "model": "gemma4:12b",
+  "composition": {
+    "theme": "ai-llm",
+    "plan": {
+      "jd_terms": [
+        "fastapi",
+        "aws",
+        "python",
+        "apis",
+        "security",
+        "reliability",
+        "production",
+        "users",
+        "deploy",
+        "ai",
+        "llm",
+        "aws.",
+        "rag",
+        "langchain",
+        "agent",
+        "orchestration",
+        "retrieval",
+        "ml",
+        "s3",
+        "search",
+        "vector",
+        "ci/cd",
+        "observability",
+        "performance",
+        "optimization",
+        "event",
+        "api",
+        "microservice",
+        "backend",
+        "nlp",
+        "pipeline",
+        "docker",
+        "redis",
+        "gateway",
+        "auth",
+        "recommendation",
+        "agents",
+        "accuracy",
+        "debate",
+        "predictive",
+        "mcp",
+        "lambda",
+        "serverless",
+        "react",
+        "node",
+        "firebase",
+        "automation",
+        "retrieval augmented"
+      ],
+      "routes": {
+        "fastapi": {
+          "keyword": "fastapi",
+          "route": "bullet",
+          "source": "AC-001.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-001",
+          "facet": null
+        },
+        "aws": {
+          "keyword": "aws",
+          "route": "bullet",
+          "source": "AC-025.variant.llm",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-025",
+          "facet": "llm"
+        },
+        "python": {
+          "keyword": "python",
+          "route": "bullet",
+          "source": "AC-022.variant.llm",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-022",
+          "facet": "llm"
+        },
+        "apis": {
+          "keyword": "apis",
+          "route": "bullet",
+          "source": "AC-022.variant.llm",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-022",
+          "facet": "llm"
+        },
+        "security": {
+          "keyword": "security",
+          "route": "bullet",
+          "source": "AC-010.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-010",
+          "facet": null
+        },
+        "reliability": {
+          "keyword": "reliability",
+          "route": "bullet",
+          "source": "AC-010.aliases",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-010",
+          "facet": null
+        },
+        "production": {
+          "keyword": "production",
+          "route": "bullet",
+          "source": "AC-015.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-015",
+          "facet": null
+        },
+        "users": {
+          "keyword": "users",
+          "route": "bullet",
+          "source": "AC-015.aliases",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-015",
+          "facet": null
+        },
+        "deploy": {
+          "keyword": "deploy",
+          "route": "bullet",
+          "source": "AC-015.aliases",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-015",
+          "facet": null
+        },
+        "ai": {
+          "keyword": "ai",
+          "route": "bullet",
+          "source": "AC-015.variant.cloud-serverless",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-015",
+          "facet": "cloud-serverless"
+        },
+        "llm": {
+          "keyword": "llm",
+          "route": "bullet",
+          "source": "AC-016.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-016",
+          "facet": null
+        },
+        "aws.": {
+          "keyword": "aws.",
+          "route": "bullet",
+          "source": "AC-017.variant.data-pipeline",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-017",
+          "facet": "data-pipeline"
+        },
+        "rag": {
+          "keyword": "rag",
+          "route": "bullet",
+          "source": "AC-025.variant.llm",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-025",
+          "facet": "llm"
+        },
+        "langchain": {
+          "keyword": "langchain",
+          "route": "bullet",
+          "source": "AC-025.variant.llm",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-025",
+          "facet": "llm"
+        },
+        "agent": {
+          "keyword": "agent",
+          "route": "bullet",
+          "source": "AC-023.llm_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-023",
+          "facet": "llm"
+        },
+        "orchestration": {
+          "keyword": "orchestration",
+          "route": "bullet",
+          "source": "AC-024.mcp-agents_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-024",
+          "facet": "mcp-agents"
+        },
+        "retrieval": {
+          "keyword": "retrieval",
+          "route": "bullet",
+          "source": "AC-025.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-025",
+          "facet": null
+        },
+        "ml": {
+          "keyword": "ml",
+          "route": "bullet",
+          "source": "AC-031.variant.data",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-031",
+          "facet": "data"
+        },
+        "s3": {
+          "keyword": "s3",
+          "route": "bullet",
+          "source": "AC-041.variant.cloud-serverless",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-041",
+          "facet": "cloud-serverless"
+        },
+        "search": {
+          "keyword": "search",
+          "route": "skills",
+          "source": "skills_library",
+          "location": "skills",
+          "confidence": "direct",
+          "ac_id": null,
+          "facet": null
+        },
+        "vector": {
+          "keyword": "vector",
+          "route": "skills",
+          "source": "skills_library",
+          "location": "skills",
+          "confidence": "direct",
+          "ac_id": null,
+          "facet": null
+        },
+        "ci/cd": {
+          "keyword": "ci/cd",
+          "route": "skills",
+          "source": "skills_library",
+          "location": "skills",
+          "confidence": "direct",
+          "ac_id": null,
+          "facet": null
+        },
+        "observability": {
+          "keyword": "observability",
+          "route": "skills",
+          "source": "skills_library",
+          "location": "skills",
+          "confidence": "direct",
+          "ac_id": null,
+          "facet": null
+        },
+        "performance": {
+          "keyword": "performance",
+          "route": "bullet",
+          "source": "AC-001.ats_keywords",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-001",
+          "facet": null
+        },
+        "optimization": {
+          "keyword": "optimization",
+          "route": "bullet",
+          "source": "AC-001.aliases",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-001",
+          "facet": null
+        },
+        "event": {
+          "keyword": "event",
+          "route": "bullet",
+          "source": "AC-001.aliases",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-001",
+          "facet": null
+        },
+        "api": {
+          "keyword": "api",
+          "route": "bullet",
+          "source": "AC-010.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-010",
+          "facet": null
+        },
+        "microservice": {
+          "keyword": "microservice",
+          "route": "skills",
+          "source": "skills_library",
+          "location": "skills",
+          "confidence": "direct",
+          "ac_id": null,
+          "facet": null
+        },
+        "backend": {
+          "keyword": "backend",
+          "route": "bullet",
+          "source": "AC-001.aliases",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-001",
+          "facet": null
+        },
+        "nlp": {
+          "keyword": "nlp",
+          "route": "bullet",
+          "source": "AC-002.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-002",
+          "facet": null
+        },
+        "pipeline": {
+          "keyword": "pipeline",
+          "route": "bullet",
+          "source": "AC-017.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-017",
+          "facet": null
+        },
+        "docker": {
+          "keyword": "docker",
+          "route": "bullet",
+          "source": "AC-007.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-007",
+          "facet": null
+        },
+        "redis": {
+          "keyword": "redis",
+          "route": "bullet",
+          "source": "AC-007.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-007",
+          "facet": null
+        },
+        "gateway": {
+          "keyword": "gateway",
+          "route": "bullet",
+          "source": "AC-010.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-010",
+          "facet": null
+        },
+        "auth": {
+          "keyword": "auth",
+          "route": "bullet",
+          "source": "AC-010.aliases",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-010",
+          "facet": null
+        },
+        "recommendation": {
+          "keyword": "recommendation",
+          "route": "bullet",
+          "source": "AC-016.aliases",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-016",
+          "facet": null
+        },
+        "agents": {
+          "keyword": "agents",
+          "route": "bullet",
+          "source": "AC-023.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-023",
+          "facet": null
+        },
+        "accuracy": {
+          "keyword": "accuracy",
+          "route": "bullet",
+          "source": "AC-023.llm_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-023",
+          "facet": "llm"
+        },
+        "debate": {
+          "keyword": "debate",
+          "route": "bullet",
+          "source": "AC-023.mcp-agents_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-023",
+          "facet": "mcp-agents"
+        },
+        "predictive": {
+          "keyword": "predictive",
+          "route": "bullet",
+          "source": "AC-023.mcp-agents_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-023",
+          "facet": "mcp-agents"
+        },
+        "mcp": {
+          "keyword": "mcp",
+          "route": "bullet",
+          "source": "AC-024.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-024",
+          "facet": null
+        },
+        "lambda": {
+          "keyword": "lambda",
+          "route": "bullet",
+          "source": "AC-028.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-028",
+          "facet": null
+        },
+        "serverless": {
+          "keyword": "serverless",
+          "route": "bullet",
+          "source": "AC-028.aliases",
+          "location": "bullet",
+          "confidence": "contextual",
+          "ac_id": "AC-028",
+          "facet": null
+        },
+        "react": {
+          "keyword": "react",
+          "route": "bullet",
+          "source": "AC-015.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-015",
+          "facet": null
+        },
+        "node": {
+          "keyword": "node",
+          "route": "skills",
+          "source": "skills_library",
+          "location": "skills",
+          "confidence": "direct",
+          "ac_id": null,
+          "facet": null
+        },
+        "firebase": {
+          "keyword": "firebase",
+          "route": "bullet",
+          "source": "AC-028.variant.serverless",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-028",
+          "facet": "serverless"
+        },
+        "automation": {
+          "keyword": "automation",
+          "route": "bullet",
+          "source": "AC-041.ats_keywords",
+          "location": "bullet",
+          "confidence": "direct",
+          "ac_id": "AC-041",
+          "facet": null
+        },
+        "retrieval augmented": {
+          "keyword": "retrieval augmented",
+          "route": "skills",
+          "source": "skills_library",
+          "location": "skills",
+          "confidence": "direct",
+          "ac_id": null,
+          "facet": null
+        }
+      },
+      "ac_priority": {
+        "AC-001": 16,
+        "AC-025": 16,
+        "AC-022": 8,
+        "AC-010": 18,
+        "AC-015": 18,
+        "AC-016": 7,
+        "AC-017": 8,
+        "AC-023": 16,
+        "AC-024": 7,
+        "AC-031": 4,
+        "AC-041": 8,
+        "AC-002": 4,
+        "AC-007": 8,
+        "AC-028": 11
+      },
+      "facet_priority": {
+        "AC-025:llm": 3,
+        "AC-022:llm": 2,
+        "AC-015:cloud-serverless": 1,
+        "AC-017:data-pipeline": 1,
+        "AC-023:llm": 2,
+        "AC-024:mcp-agents": 1,
+        "AC-031:data": 1,
+        "AC-041:cloud-serverless": 1,
+        "AC-023:mcp-agents": 2,
+        "AC-028:serverless": 1
+      },
+      "semantic_groups": [
+        [
+          "fastapi",
+          "aws",
+          "performance",
+          "optimization",
+          "event"
+        ],
+        [
+          "fastapi",
+          "api",
+          "microservice",
+          "backend"
+        ],
+        [
+          "python",
+          "nlp",
+          "aws",
+          "pipeline"
+        ],
+        [
+          "event",
+          "streaming",
+          "pipeline"
+        ],
+        [
+          "fastapi",
+          "docker",
+          "redis",
+          "api"
+        ],
+        [
+          "rest",
+          "graphql",
+          "api",
+          "spring"
+        ],
+        [
+          "gateway",
+          "auth",
+          "security",
+          "reliability"
+        ],
+        [
+          "aws",
+          "production",
+          "users",
+          "deploy"
+        ],
+        [
+          "llm",
+          "ai",
+          "recommendation"
+        ],
+        [
+          "kafka",
+          "postgres",
+          "pipeline",
+          "streaming"
+        ],
+        [
+          "llm",
+          "python",
+          "rag",
+          "api"
+        ],
+        [
+          "agent",
+          "agents",
+          "llm",
+          "accuracy"
+        ],
+        [
+          "agent",
+          "debate",
+          "predictive"
+        ],
+        [
+          "mcp",
+          "agent",
+          "orchestration"
+        ],
+        [
+          "rag",
+          "retrieval",
+          "llm",
+          "langchain"
+        ],
+        [
+          "aws",
+          "lambda",
+          "serverless",
+          "api"
+        ],
+        [
+          "react",
+          "ui",
+          "typescript"
+        ],
+        [
+          "react",
+          "node",
+          "python",
+          "firebase"
+        ],
+        [
+          "pipeline",
+          "healthcare",
+          "data"
+        ],
+        [
+          "java",
+          "rest",
+          "api"
+        ],
+        [
+          "react",
+          "dashboard",
+          "ui"
+        ],
+        [
+          "aws",
+          "automation",
+          "ai",
+          "production"
+        ],
+        [
+          "predictive analytics",
+          "machine learning",
+          "machine learning models",
+          "ml models"
+        ],
+        [
+          "vector db",
+          "vector database",
+          "vector databases",
+          "rag",
+          "retrieval augmented"
+        ],
+        [
+          "etl",
+          "data pipeline",
+          "data pipelines",
+          "pipeline"
+        ]
+      ]
+    },
+    "narrative": {
+      "id": "ai-engineer",
+      "title": "AI Engineer",
+      "thesis": "Engineer who builds production AI systems with measurable business impact.",
+      "pillars": [
+        {
+          "id": "llm-evaluation",
+          "label": "LLM Evaluation",
+          "keywords": [
+            "evaluation",
+            "benchmark",
+            "accuracy",
+            "rag",
+            "llm"
+          ],
+          "ac_ids": [
+            "AC-022",
+            "AC-023",
+            "AC-025"
+          ],
+          "facets": [
+            "llm"
+          ],
+          "weight": 2.05
+        },
+        {
+          "id": "production",
+          "label": "Production Deployment",
+          "keywords": [
+            "production",
+            "deploy",
+            "users",
+            "uptime",
+            "cloud"
+          ],
+          "ac_ids": [
+            "AC-015",
+            "AC-001",
+            "AC-007"
+          ],
+          "facets": [
+            "cloud",
+            "reliability"
+          ],
+          "weight": 2.05
+        },
+        {
+          "id": "multi-agent",
+          "label": "Multi-Agent Systems",
+          "keywords": [
+            "agent",
+            "agents",
+            "mcp",
+            "langgraph",
+            "orchestr"
+          ],
+          "ac_ids": [
+            "AC-023",
+            "AC-024",
+            "AC-025",
+            "AC-016"
+          ],
+          "facets": [
+            "llm",
+            "mcp-agents",
+            "ai"
+          ],
+          "weight": 1.35
+        },
+        {
+          "id": "backend-infra",
+          "label": "Backend Infrastructure",
+          "keywords": [
+            "fastapi",
+            "api",
+            "microservice",
+            "backend"
+          ],
+          "ac_ids": [
+            "AC-001",
+            "AC-002",
+            "AC-017",
+            "AC-018"
+          ],
+          "facets": [
+            "backend",
+            "performance"
+          ],
+          "weight": 1.35
+        },
+        {
+          "id": "performance",
+          "label": "Performance Optimization",
+          "keywords": [
+            "performance",
+            "latency",
+            "optimization",
+            "throughput"
+          ],
+          "ac_ids": [
+            "AC-001",
+            "AC-002",
+            "AC-018"
+          ],
+          "facets": [
+            "performance"
+          ],
+          "weight": 1.35
+        }
+      ],
+      "proof_candidates": [
+        "AC-001",
+        "AC-023",
+        "AC-024",
+        "AC-025",
+        "AC-002",
+        "AC-007"
+      ],
+      "jd_signals": [
+        "ai engineer",
+        "llm",
+        "agent",
+        "machine learning",
+        "rag",
+        "generative"
+      ],
+      "header_title": "AI Engineer",
+      "proof_template": "ai-result-how-depth-scale",
+      "proof_template_steps": [
+        {
+          "id": "result",
+          "label": "Big result",
+          "signals": [
+            {}
+          ],
+          "ac_ids": [
+            "AC-001",
+            "AC-023",
+            "AC-019"
+          ]
+        },
+        {
+          "id": "how",
+          "label": "How",
+          "signals": [
+            {}
+          ],
+          "ac_ids": [
+            "AC-001",
+            "AC-002",
+            "AC-007",
+            "AC-017"
+          ]
+        },
+        {
+          "id": "depth",
+          "label": "AI depth",
+          "signals": [
+            {}
+          ],
+          "ac_ids": [
+            "AC-023",
+            "AC-024",
+            "AC-025",
+            "AC-022"
+          ]
+        },
+        {
+          "id": "scale",
+          "label": "Scale",
+          "signals": [
+            {}
+          ],
+          "ac_ids": [
+            "AC-001",
+            "AC-007",
+            "AC-015",
+            "AC-002"
+          ]
+        }
+      ],
+      "proof_chain": [
+        {
+          "step": "result",
+          "label": "Big result",
+          "ac_id": "AC-023",
+          "score": 5.5,
+          "preview": "Achieved 60% directional accuracy across 30 S&P 500 stocks by building a 3-agent RL debate system in Python with Fundame"
+        },
+        {
+          "step": "how",
+          "label": "How",
+          "ac_id": "AC-001",
+          "score": 5,
+          "preview": "Optimized an event-driven FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis time from 3+ days to under"
+        },
+        {
+          "step": "depth",
+          "label": "AI depth",
+          "ac_id": "AC-025",
+          "score": 5.5,
+          "preview": "Built a production RAG pipeline with LangChain, vector retrieval, and evaluation benchmarks, deploying inference APIs on"
+        },
+        {
+          "step": "scale",
+          "label": "Scale",
+          "ac_id": "AC-002",
+          "score": 4.75,
+          "preview": "Engineered a Python NLP pipeline on AWS processing 200K+ financial records in real time, applying event-driven architect"
+        }
+      ],
+      "objective": "maximize_resume_confidence_score"
+    },
+    "quality": {
+      "proof_chain": [
+        {
+          "step": "result",
+          "label": "Big result",
+          "ac_id": "AC-023",
+          "score": 5.5,
+          "preview": "Achieved 60% directional accuracy across 30 S&P 500 stocks by building a 3-agent RL debate system in Python with Fundame"
+        },
+        {
+          "step": "how",
+          "label": "How",
+          "ac_id": "AC-001",
+          "score": 5,
+          "preview": "Optimized an event-driven FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis time from 3+ days to under"
+        },
+        {
+          "step": "depth",
+          "label": "AI depth",
+          "ac_id": "AC-025",
+          "score": 5.5,
+          "preview": "Built a production RAG pipeline with LangChain, vector retrieval, and evaluation benchmarks, deploying inference APIs on"
+        },
+        {
+          "step": "scale",
+          "label": "Scale",
+          "ac_id": "AC-002",
+          "score": 4.75,
+          "preview": "Engineered a Python NLP pipeline on AWS processing 200K+ financial records in real time, applying event-driven architect"
+        }
+      ],
+      "delete_test": {
+        "baseline_score": 9.856,
+        "bullets": [
+          {
+            "ac_id": "AC-001",
+            "role": "stony-brook",
+            "replaceable": false,
+            "delta": 0.777,
+            "verdict": "Story weakens without it.",
+            "density": 8.2
+          },
+          {
+            "ac_id": "AC-023",
+            "role": "stony-brook",
+            "replaceable": false,
+            "delta": 0.796,
+            "verdict": "Story weakens without it.",
+            "density": 8.7
+          },
+          {
+            "ac_id": "AC-025",
+            "role": "stony-brook",
+            "replaceable": false,
+            "delta": 0.738,
+            "verdict": "Story weakens without it.",
+            "density": 7.2
+          },
+          {
+            "ac_id": "AC-002",
+            "role": "stony-brook",
+            "replaceable": false,
+            "delta": 0.19,
+            "verdict": "Story weakens without it.",
+            "density": 9.2
+          },
+          {
+            "ac_id": "AC-028",
+            "role": "accolite",
+            "replaceable": false,
+            "delta": 0.144,
+            "verdict": "Story weakens without it.",
+            "density": 8
+          },
+          {
+            "ac_id": "AC-007",
+            "role": "accolite",
+            "replaceable": false,
+            "delta": 0.788,
+            "verdict": "Story weakens without it.",
+            "density": 8.5
+          },
+          {
+            "ac_id": "AC-029",
+            "role": "accolite",
+            "replaceable": false,
+            "delta": 0.155,
+            "verdict": "Story weakens without it.",
+            "density": 8.3
+          },
+          {
+            "ac_id": "AC-041",
+            "role": "atriveo",
+            "section": "project",
+            "replaceable": false,
+            "delta": 0.097,
+            "verdict": "Story weakens without it.",
+            "density": 6.8
+          },
+          {
+            "ac_id": "AC-040",
+            "role": "atriveo",
+            "section": "project",
+            "replaceable": false,
+            "delta": 0.163,
+            "verdict": "Story weakens without it.",
+            "density": 8.5
+          },
+          {
+            "ac_id": "AC-017",
+            "role": "insurance-platform",
+            "section": "project",
+            "replaceable": false,
+            "delta": 0.152,
+            "verdict": "Story weakens without it.",
+            "density": 8.2
+          }
+        ],
+        "deletable": [],
+        "passes": true
+      },
+      "information_density": {
+        "bullets": [
+          {
+            "ac_id": "AC-023",
+            "role": "stony-brook",
+            "section": "experience",
+            "score": 8.7,
+            "metrics": 7,
+            "technologies": [
+              "python"
+            ],
+            "strong_verb": true,
+            "weak_verb": false,
+            "filler_hits": 0,
+            "words_before_impact": 0,
+            "word_count": 29
+          },
+          {
+            "ac_id": "AC-001",
+            "role": "stony-brook",
+            "section": "experience",
+            "score": 8.2,
+            "metrics": 5,
+            "technologies": [
+              "fastapi",
+              "aws"
+            ],
+            "strong_verb": true,
+            "weak_verb": false,
+            "filler_hits": 0,
+            "words_before_impact": 8,
+            "word_count": 27
+          },
+          {
+            "ac_id": "AC-025",
+            "role": "stony-brook",
+            "section": "experience",
+            "score": 7.2,
+            "metrics": 0,
+            "technologies": [
+              "aws",
+              "langchain"
+            ],
+            "strong_verb": true,
+            "weak_verb": false,
+            "filler_hits": 0,
+            "words_before_impact": 0,
+            "word_count": 21
+          },
+          {
+            "ac_id": "AC-002",
+            "role": "stony-brook",
+            "section": "experience",
+            "score": 9.2,
+            "metrics": 4,
+            "technologies": [
+              "aws",
+              "python"
+            ],
+            "strong_verb": true,
+            "weak_verb": false,
+            "filler_hits": 0,
+            "words_before_impact": 0,
+            "word_count": 25
+          },
+          {
+            "ac_id": "AC-028",
+            "role": "accolite",
+            "section": "experience",
+            "score": 8,
+            "metrics": 1,
+            "technologies": [
+              "aws",
+              "python"
+            ],
+            "strong_verb": true,
+            "weak_verb": false,
+            "filler_hits": 0,
+            "words_before_impact": 0,
+            "word_count": 25
+          },
+          {
+            "ac_id": "AC-007",
+            "role": "accolite",
+            "section": "experience",
+            "score": 8.5,
+            "metrics": 1,
+            "technologies": [
+              "fastapi",
+              "docker",
+              "redis"
+            ],
+            "strong_verb": true,
+            "weak_verb": false,
+            "filler_hits": 0,
+            "words_before_impact": 0,
+            "word_count": 18
+          },
+          {
+            "ac_id": "AC-029",
+            "role": "accolite",
+            "section": "experience",
+            "score": 8.3,
+            "metrics": 2,
+            "technologies": [
+              "react"
+            ],
+            "strong_verb": true,
+            "weak_verb": false,
+            "filler_hits": 0,
+            "words_before_impact": 0,
+            "word_count": 18
+          },
+          {
+            "ac_id": "AC-041",
+            "role": "atriveo",
+            "section": "project",
+            "score": 6.8,
+            "metrics": 2,
+            "technologies": [
+              "aws"
+            ],
+            "strong_verb": true,
+            "weak_verb": false,
+            "filler_hits": 0,
+            "words_before_impact": 10,
+            "word_count": 19
+          },
+          {
+            "ac_id": "AC-040",
+            "role": "atriveo",
+            "section": "project",
+            "score": 8.5,
+            "metrics": 1,
+            "technologies": [
+              "fastapi",
+              "aws",
+              "react"
+            ],
+            "strong_verb": true,
+            "weak_verb": false,
+            "filler_hits": 0,
+            "words_before_impact": 0,
+            "word_count": 19
+          },
+          {
+            "ac_id": "AC-017",
+            "role": "insurance-platform",
+            "section": "project",
+            "score": 8.2,
+            "metrics": 0,
+            "technologies": [
+              "fastapi",
+              "aws",
+              "kafka",
+              "postgresql"
+            ],
+            "strong_verb": true,
+            "weak_verb": false,
+            "filler_hits": 0,
+            "words_before_impact": 0,
+            "word_count": 20
+          }
+        ],
+        "aggregate": {
+          "avg_density": 8.16,
+          "avg_metrics_per_bullet": 2.3,
+          "avg_technologies_per_bullet": 2.1,
+          "avg_words_before_impact": 1.8,
+          "low_density_ac_ids": [],
+          "filler_ac_ids": []
+        },
+        "passes": true,
+        "diagnosis": "Every line packs evidence and impact."
+      },
+      "hiring_manager_test": {
+        "objective": "optimize_hiring_decision",
+        "thesis": "Engineer who builds production AI systems with measurable business impact.",
+        "technical_confidence": 10,
+        "business_impact": 9.2,
+        "execution_confidence": 9.6,
+        "uniqueness": 8.5,
+        "risk_of_overclaiming": 0,
+        "would_interview": true,
+        "because": [
+          "Exceptional quantified impact",
+          "Strong technical depth with named systems",
+          "Clear business and research impact",
+          "Production delivery signals",
+          "Proof chain builds confidence step by step",
+          "Every bullet earns its place",
+          "High information density"
+        ],
+        "concerns": [
+          "No CI/CD evidence",
+          "No Prometheus evidence"
+        ],
+        "composite": 9.4,
+        "questions": {
+          "can_do_job": true,
+          "solves_problems": true,
+          "would_interview": true
+        },
+        "diagnosis": "A hiring manager would likely advance this candidate to interview."
+      }
+    },
+    "skills_audit": [
+      {
+        "skill": "AWS",
+        "category": "Cloud and Delivery",
+        "covered": true,
+        "evidence": "AC-001, AC-025, AC-002, AC-028, Project, AC-041, AC-040, AC-017",
+        "jd_relevant": true,
+        "display": "✓"
+      },
+      {
+        "skill": "Docker",
+        "category": "Cloud and Delivery",
+        "covered": true,
+        "evidence": "AC-007",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "Elasticsearch",
+        "category": "Data and AI",
+        "covered": true,
+        "evidence": "AC-001, AC-002, AC-028, AC-007, AC-029, Project",
+        "jd_relevant": true,
+        "display": "✓"
+      },
+      {
+        "skill": "ETL Pipelines",
+        "category": "Data and AI",
+        "covered": true,
+        "evidence": "AC-001, AC-025, AC-002, Project",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "FastAPI",
+        "category": "Backend",
+        "covered": true,
+        "evidence": "AC-001, AC-007, Project, AC-040",
+        "jd_relevant": true,
+        "display": "✓"
+      },
+      {
+        "skill": "Firebase",
+        "category": "Cloud and Delivery",
+        "covered": true,
+        "evidence": "AC-028",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "Kafka",
+        "category": "Backend",
+        "covered": true,
+        "evidence": "AC-001, AC-002, Project, AC-017",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "LangChain",
+        "category": "Data and AI",
+        "covered": true,
+        "evidence": "AC-023, AC-025",
+        "jd_relevant": true,
+        "display": "✓"
+      },
+      {
+        "skill": "LLMs",
+        "category": "Data and AI",
+        "covered": true,
+        "evidence": null,
+        "jd_relevant": true,
+        "display": "✓"
+      },
+      {
+        "skill": "Microservices",
+        "category": "Backend",
+        "covered": true,
+        "evidence": "AC-007",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "PostgreSQL",
+        "category": "Data and AI",
+        "covered": true,
+        "evidence": "Project, AC-017",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "Python",
+        "category": "Languages",
+        "covered": true,
+        "evidence": "AC-023, AC-001, AC-002, AC-028, AC-007",
+        "jd_relevant": true,
+        "display": "✓"
+      },
+      {
+        "skill": "RAG",
+        "category": "Data and AI",
+        "covered": true,
+        "evidence": "AC-025",
+        "jd_relevant": true,
+        "display": "✓"
+      },
+      {
+        "skill": "React",
+        "category": "Frontend",
+        "covered": true,
+        "evidence": "AC-029, Project, AC-040",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "Redis",
+        "category": "Data and AI",
+        "covered": true,
+        "evidence": "AC-007",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "REST APIs",
+        "category": "Backend",
+        "covered": true,
+        "evidence": "AC-001, AC-025, AC-028, AC-007, Project",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "Spring Boot",
+        "category": "Backend",
+        "covered": true,
+        "evidence": "AC-029",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "SQL",
+        "category": "Languages",
+        "covered": true,
+        "evidence": "Project",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "TypeScript",
+        "category": "Languages",
+        "covered": true,
+        "evidence": "AC-023, AC-025, AC-029",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "TypeScript",
+        "category": "Frontend",
+        "covered": true,
+        "evidence": "AC-023, AC-025, AC-029",
+        "jd_relevant": false,
+        "display": "✓"
+      },
+      {
+        "skill": "C++",
+        "category": "Languages",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "Chrome Extensions",
+        "category": "Frontend",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "CI/CD",
+        "category": "Cloud and Delivery",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": true,
+        "display": "✗"
+      },
+      {
+        "skill": "DynamoDB",
+        "category": "Data and AI",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "GCP",
+        "category": "Cloud and Delivery",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "GraphQL",
+        "category": "Backend",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "HTML/CSS",
+        "category": "Frontend",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "Java",
+        "category": "Languages",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "JavaScript",
+        "category": "Languages",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "JavaScript",
+        "category": "Frontend",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "Kubernetes",
+        "category": "Cloud and Delivery",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "LangGraph",
+        "category": "Data and AI",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "MCP",
+        "category": "Data and AI",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "MongoDB",
+        "category": "Data and AI",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "NestJS",
+        "category": "Backend",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "Node.js",
+        "category": "Backend",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "Prometheus",
+        "category": "Cloud and Delivery",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": true,
+        "display": "✗"
+      },
+      {
+        "skill": "PyTorch",
+        "category": "Data and AI",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "Terraform",
+        "category": "Cloud and Delivery",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      },
+      {
+        "skill": "Vite",
+        "category": "Frontend",
+        "covered": false,
+        "evidence": null,
+        "jd_relevant": false,
+        "display": "✗"
+      }
+    ],
+    "skills": [
+      "Languages: Python, TypeScript, SQL",
+      "Backend: FastAPI, Spring Boot, REST APIs, Microservices, Kafka",
+      "Frontend: React",
+      "Data and AI: PostgreSQL, Redis, Elasticsearch, LLMs, RAG, LangChain, ETL Pipelines",
+      "Cloud and Delivery: AWS, Docker, Firebase"
+    ],
+    "coverage": {
+      "audit": {
+        "fastapi": {
+          "source": "AC-001.performance_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "fastapi",
+          "planned_route": "bullet",
+          "ac_id": "AC-001",
+          "facet": null
+        },
+        "aws": {
+          "source": "AC-001.performance_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "aws",
+          "planned_route": "bullet",
+          "ac_id": "AC-025",
+          "facet": "llm"
+        },
+        "python": {
+          "source": "AC-023.llm_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "python",
+          "planned_route": "bullet",
+          "ac_id": "AC-022",
+          "facet": "llm"
+        },
+        "apis": {
+          "source": "AC-025.llm_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "apis",
+          "planned_route": "bullet",
+          "ac_id": "AC-022",
+          "facet": "llm"
+        },
+        "security": {
+          "source": "AC-010.ats_keywords",
+          "location": "none",
+          "confidence": "direct",
+          "status": "planned_not_emitted",
+          "match_type": "missing",
+          "match_weight": 0,
+          "matched_text": null,
+          "planned_route": "bullet",
+          "ac_id": "AC-010",
+          "facet": null
+        },
+        "reliability": {
+          "source": "AC-010.aliases",
+          "location": "none",
+          "confidence": "contextual",
+          "status": "planned_not_emitted",
+          "match_type": "missing",
+          "match_weight": 0,
+          "matched_text": null,
+          "planned_route": "bullet",
+          "ac_id": "AC-010",
+          "facet": null
+        },
+        "production": {
+          "source": "AC-025.llm_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "production",
+          "planned_route": "bullet",
+          "ac_id": "AC-015",
+          "facet": null
+        },
+        "users": {
+          "source": "AC-028.serverless_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "users",
+          "planned_route": "bullet",
+          "ac_id": "AC-015",
+          "facet": null
+        },
+        "deploy": {
+          "source": "AC-001.performance_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "semantic",
+          "match_weight": 0.8,
+          "matched_text": "aws",
+          "planned_route": "bullet",
+          "ac_id": "AC-015",
+          "facet": null
+        },
+        "ai": {
+          "source": "AC-041.cloud-serverless_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "ai",
+          "planned_route": "bullet",
+          "ac_id": "AC-015",
+          "facet": "cloud-serverless"
+        },
+        "llm": {
+          "source": "AC-041.cloud-serverless_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "semantic",
+          "match_weight": 0.8,
+          "matched_text": "ai",
+          "planned_route": "bullet",
+          "ac_id": "AC-016",
+          "facet": null
+        },
+        "aws.": {
+          "source": "AC-017.data-pipeline_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "aws.",
+          "planned_route": "bullet",
+          "ac_id": "AC-017",
+          "facet": "data-pipeline"
+        },
+        "rag": {
+          "source": "AC-025.llm_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "rag",
+          "planned_route": "bullet",
+          "ac_id": "AC-025",
+          "facet": "llm"
+        },
+        "langchain": {
+          "source": "AC-025.llm_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "langchain",
+          "planned_route": "bullet",
+          "ac_id": "AC-025",
+          "facet": "llm"
+        },
+        "agent": {
+          "source": "AC-023.llm_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "agent",
+          "planned_route": "bullet",
+          "ac_id": "AC-023",
+          "facet": "llm"
+        },
+        "orchestration": {
+          "source": "AC-023.llm_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "semantic",
+          "match_weight": 0.8,
+          "matched_text": "agent",
+          "planned_route": "bullet",
+          "ac_id": "AC-024",
+          "facet": "mcp-agents"
+        },
+        "retrieval": {
+          "source": "AC-025.llm_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "retrieval",
+          "planned_route": "bullet",
+          "ac_id": "AC-025",
+          "facet": null
+        },
+        "ml": {
+          "source": "AC-031.variant.data",
+          "location": "none",
+          "confidence": "direct",
+          "status": "planned_not_emitted",
+          "match_type": "missing",
+          "match_weight": 0,
+          "matched_text": null,
+          "planned_route": "bullet",
+          "ac_id": "AC-031",
+          "facet": "data"
+        },
+        "s3": {
+          "source": "AC-041.cloud-serverless_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "s3",
+          "planned_route": "bullet",
+          "ac_id": "AC-041",
+          "facet": "cloud-serverless"
+        },
+        "search": {
+          "source": "skills_library",
+          "location": "none",
+          "confidence": "direct",
+          "status": "planned_not_emitted",
+          "match_type": "missing",
+          "match_weight": 0,
+          "matched_text": null,
+          "planned_route": "skills",
+          "ac_id": null,
+          "facet": null
+        },
+        "vector": {
+          "source": "AC-025.llm_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "vector",
+          "planned_route": "skills",
+          "ac_id": null,
+          "facet": null
+        },
+        "ci/cd": {
+          "source": "skills_library",
+          "location": "none",
+          "confidence": "direct",
+          "status": "planned_not_emitted",
+          "match_type": "missing",
+          "match_weight": 0,
+          "matched_text": null,
+          "planned_route": "skills",
+          "ac_id": null,
+          "facet": null
+        },
+        "observability": {
+          "source": "skills_library",
+          "location": "none",
+          "confidence": "direct",
+          "status": "planned_not_emitted",
+          "match_type": "missing",
+          "match_weight": 0,
+          "matched_text": null,
+          "planned_route": "skills",
+          "ac_id": null,
+          "facet": null
+        },
+        "performance": {
+          "source": "AC-001.performance_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "semantic",
+          "match_weight": 0.8,
+          "matched_text": "fastapi",
+          "planned_route": "bullet",
+          "ac_id": "AC-001",
+          "facet": null
+        },
+        "optimization": {
+          "source": "AC-001.performance_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "semantic",
+          "match_weight": 0.8,
+          "matched_text": "fastapi",
+          "planned_route": "bullet",
+          "ac_id": "AC-001",
+          "facet": null
+        },
+        "event": {
+          "source": "AC-001.performance_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "event",
+          "planned_route": "bullet",
+          "ac_id": "AC-001",
+          "facet": null
+        },
+        "api": {
+          "source": "AC-028.serverless_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "api",
+          "planned_route": "bullet",
+          "ac_id": "AC-010",
+          "facet": null
+        },
+        "microservice": {
+          "source": "AC-007.backend_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "alias",
+          "match_weight": 0.9,
+          "matched_text": "Microservices",
+          "planned_route": "skills",
+          "ac_id": null,
+          "facet": null
+        },
+        "backend": {
+          "source": "AC-040.frontend_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "backend",
+          "planned_route": "bullet",
+          "ac_id": "AC-001",
+          "facet": null
+        },
+        "nlp": {
+          "source": "AC-002.nlp-ai_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "nlp",
+          "planned_route": "bullet",
+          "ac_id": "AC-002",
+          "facet": null
+        },
+        "pipeline": {
+          "source": "AC-001.performance_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "pipeline",
+          "planned_route": "bullet",
+          "ac_id": "AC-017",
+          "facet": null
+        },
+        "docker": {
+          "source": "AC-007.backend_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "docker",
+          "planned_route": "bullet",
+          "ac_id": "AC-007",
+          "facet": null
+        },
+        "redis": {
+          "source": "AC-007.backend_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "redis",
+          "planned_route": "bullet",
+          "ac_id": "AC-007",
+          "facet": null
+        },
+        "gateway": {
+          "source": "AC-010.ats_keywords",
+          "location": "none",
+          "confidence": "direct",
+          "status": "planned_not_emitted",
+          "match_type": "missing",
+          "match_weight": 0,
+          "matched_text": null,
+          "planned_route": "bullet",
+          "ac_id": "AC-010",
+          "facet": null
+        },
+        "auth": {
+          "source": "AC-010.aliases",
+          "location": "none",
+          "confidence": "contextual",
+          "status": "planned_not_emitted",
+          "match_type": "missing",
+          "match_weight": 0,
+          "matched_text": null,
+          "planned_route": "bullet",
+          "ac_id": "AC-010",
+          "facet": null
+        },
+        "recommendation": {
+          "source": "AC-041.cloud-serverless_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "semantic",
+          "match_weight": 0.8,
+          "matched_text": "ai",
+          "planned_route": "bullet",
+          "ac_id": "AC-016",
+          "facet": null
+        },
+        "agents": {
+          "source": "AC-023.llm_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "agents",
+          "planned_route": "bullet",
+          "ac_id": "AC-023",
+          "facet": null
+        },
+        "accuracy": {
+          "source": "AC-023.llm_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "accuracy",
+          "planned_route": "bullet",
+          "ac_id": "AC-023",
+          "facet": "llm"
+        },
+        "debate": {
+          "source": "AC-023.llm_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "debate",
+          "planned_route": "bullet",
+          "ac_id": "AC-023",
+          "facet": "mcp-agents"
+        },
+        "predictive": {
+          "source": "AC-023.llm_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "semantic",
+          "match_weight": 0.8,
+          "matched_text": "agent",
+          "planned_route": "bullet",
+          "ac_id": "AC-023",
+          "facet": "mcp-agents"
+        },
+        "mcp": {
+          "source": "AC-023.llm_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "semantic",
+          "match_weight": 0.8,
+          "matched_text": "agent",
+          "planned_route": "bullet",
+          "ac_id": "AC-024",
+          "facet": null
+        },
+        "lambda": {
+          "source": "AC-028.serverless_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "lambda",
+          "planned_route": "bullet",
+          "ac_id": "AC-028",
+          "facet": null
+        },
+        "serverless": {
+          "source": "AC-028.serverless_facet",
+          "location": "bullet",
+          "confidence": "contextual",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "serverless",
+          "planned_route": "bullet",
+          "ac_id": "AC-028",
+          "facet": null
+        },
+        "react": {
+          "source": "AC-029.frontend_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "react",
+          "planned_route": "bullet",
+          "ac_id": "AC-015",
+          "facet": null
+        },
+        "node": {
+          "source": "AC-029.frontend_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "semantic",
+          "match_weight": 0.8,
+          "matched_text": "react",
+          "planned_route": "skills",
+          "ac_id": null,
+          "facet": null
+        },
+        "firebase": {
+          "source": "AC-028.serverless_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "firebase",
+          "planned_route": "bullet",
+          "ac_id": "AC-028",
+          "facet": "serverless"
+        },
+        "automation": {
+          "source": "AC-041.cloud-serverless_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "exact",
+          "match_weight": 1,
+          "matched_text": "automation",
+          "planned_route": "bullet",
+          "ac_id": "AC-041",
+          "facet": null
+        },
+        "retrieval augmented": {
+          "source": "AC-025.llm_facet",
+          "location": "bullet",
+          "confidence": "direct",
+          "status": "satisfied",
+          "match_type": "alias",
+          "match_weight": 0.9,
+          "matched_text": "RAG",
+          "planned_route": "skills",
+          "ac_id": null,
+          "facet": null
+        }
+      },
+      "weighted_coverage": 0.792,
+      "missing_claimable": [],
+      "unclaimable": [],
+      "skills_lines": [
+        "Languages: Python, TypeScript, SQL",
+        "Backend: FastAPI, Spring Boot, REST APIs, Microservices, Kafka",
+        "Frontend: React",
+        "Data and AI: PostgreSQL, Redis, Elasticsearch, LLMs, RAG, LangChain, ETL Pipelines",
+        "Cloud and Delivery: AWS, Docker, Firebase"
+      ]
+    },
+    "planner_config": {
+      "version": "v2",
+      "name": "beam-rcs",
+      "objective": "maximize_resume_confidence_score"
+    },
+    "selection_trace": {
+      "selected": [
+        {
+          "ac_id": "AC-001",
+          "role": "stony-brook",
+          "score": 6.4098,
+          "narrative_pillar": "production",
+          "quality": 0.874,
+          "proof_chain": true
+        },
+        {
+          "ac_id": "AC-023",
+          "role": "stony-brook",
+          "score": 6.0158,
+          "narrative_pillar": "llm-evaluation",
+          "quality": 0.8965,
+          "proof_chain": true
+        },
+        {
+          "ac_id": "AC-025",
+          "role": "stony-brook",
+          "score": 5.8143,
+          "narrative_pillar": "llm-evaluation",
+          "quality": 0.804,
+          "proof_chain": true
+        },
+        {
+          "ac_id": "AC-002",
+          "role": "stony-brook",
+          "score": 2.9749,
+          "narrative_pillar": "backend-infra",
+          "quality": 0.894,
+          "proof_chain": false
+        },
+        {
+          "ac_id": "AC-010",
+          "role": "accolite",
+          "score": 4.144,
+          "narrative_pillar": "production",
+          "quality": 0.484,
+          "proof_chain": false
+        },
+        {
+          "ac_id": "AC-028",
+          "role": "accolite",
+          "score": 3.0909,
+          "narrative_pillar": "production",
+          "quality": 0.7,
+          "proof_chain": false
+        },
+        {
+          "ac_id": "AC-007",
+          "role": "accolite",
+          "score": 2.6363,
+          "narrative_pillar": "production",
+          "quality": 0.8375,
+          "proof_chain": true
+        },
+        {
+          "ac_id": "AC-029",
+          "role": "accolite",
+          "score": 0.5683,
+          "narrative_pillar": "production",
+          "quality": 0.7135,
+          "proof_chain": false
+        },
+        {
+          "ac_id": "AC-031",
+          "role": "wake-forest",
+          "score": 0.9246,
+          "narrative_pillar": null,
+          "quality": 0.584,
+          "proof_chain": false
+        }
+      ],
+      "rejected": [
+        {
+          "ac_id": "AC-022",
+          "role": "stony-brook",
+          "score": 4.5952,
+          "reason": "exceeded_ai_budget"
+        },
+        {
+          "ac_id": "AC-024",
+          "role": "stony-brook",
+          "score": 4.1013,
+          "reason": "exceeded_ai_budget"
+        },
+        {
+          "ac_id": "AC-022",
+          "role": "stony-brook",
+          "score": 4.5952,
+          "quality": 0.8175,
+          "reason": "lower_ranked"
+        },
+        {
+          "ac_id": "AC-024",
+          "role": "stony-brook",
+          "score": 4.1013,
+          "quality": 0.5877,
+          "reason": "lower_ranked"
+        },
+        {
+          "ac_id": "AC-008",
+          "role": "accolite",
+          "score": 0.663,
+          "reason": "exceeded_backend_budget"
+        },
+        {
+          "ac_id": "AC-008",
+          "role": "accolite",
+          "score": 0.663,
+          "quality": 0.599,
+          "reason": "lower_ranked"
+        },
+        {
+          "ac_id": "AC-030",
+          "role": "accolite",
+          "score": 0.3053,
+          "quality": 0.721,
+          "reason": "lower_ranked"
+        }
+      ]
+    },
+    "experience": [
+      {
+        "role": "stony-brook",
+        "bullets": [
+          {
+            "ac_id": "AC-002",
+            "facet": "nlp-ai",
+            "text": "Engineered a Python NLP pipeline on AWS processing 200K+ financial records in real time, applying event-driven architecture to deliver 27% portfolio return and $2.6K profit."
+          }
+        ]
+      },
+      {
+        "role": "accolite",
+        "bullets": [
+          {
+            "ac_id": "AC-028",
+            "facet": "serverless",
+            "text": "Built a serverless data platform in Python, AWS Lambda, and Firebase, automating async workflows and processing behavioral data for 3K+ users via REST API integrations."
+          },
+          {
+            "ac_id": "AC-029",
+            "facet": "frontend",
+            "text": "Developed React-based product surfaces connected to Spring Boot services, reducing page load time by 35% for 5K+ users."
+          }
+        ]
+      },
+      {
+        "role": "wake-forest",
+        "bullets": []
+      }
+    ],
+    "projects": [
+      {
+        "role": "atriveo",
+        "bullets": [
+          {
+            "ac_id": "AC-041",
+            "facet": "cloud-serverless",
+            "text": "Launched serverless AI workflow automation on AWS Lambda and S3, reducing manual processing time by 40% for production users."
+          },
+          {
+            "ac_id": "AC-040",
+            "facet": "frontend",
+            "text": "Built a full-stack AI product with React dashboard and FastAPI backend on AWS, shipping production features to 1K+ users."
+          }
+        ]
+      },
+      {
+        "role": "insurance-platform",
+        "bullets": [
+          {
+            "ac_id": "AC-017",
+            "facet": "data-pipeline",
+            "text": "Built an event-driven insurance data pipeline on Kafka and PostgreSQL, processing millions of records with FastAPI ingestion services on AWS."
+          }
+        ]
+      }
+    ]
+  },
+  "ac_contribution": {
+    "baseline_score": 29.8,
+    "contributions": [
+      {
+        "ac_id": "AC-002",
+        "contribution": 0.8,
+        "verdict": "keep"
+      },
+      {
+        "ac_id": "AC-029",
+        "contribution": 0.2,
+        "verdict": "weak"
+      },
+      {
+        "ac_id": "AC-041",
+        "contribution": 0.2,
+        "verdict": "weak"
+      },
+      {
+        "ac_id": "AC-040",
+        "contribution": -1.6,
+        "verdict": "omit_candidate"
+      },
+      {
+        "ac_id": "AC-017",
+        "contribution": -1.7,
+        "verdict": "omit_candidate"
+      },
+      {
+        "ac_id": "AC-028",
+        "contribution": -2.8,
+        "verdict": "omit_candidate"
+      }
+    ],
+    "omit_candidates": [
+      "AC-040",
+      "AC-017",
+      "AC-028"
+    ]
+  },
+  "contribution_pruned": [
+    "AC-001",
+    "AC-007",
+    "AC-025",
+    "AC-023"
+  ],
+  "hiring_manager_test": {
+    "objective": "optimize_hiring_decision",
+    "thesis": "Engineer who builds production AI systems with measurable business impact.",
+    "technical_confidence": 10,
+    "business_impact": 9.2,
+    "execution_confidence": 9.6,
+    "uniqueness": 8.5,
+    "risk_of_overclaiming": 0,
+    "would_interview": true,
+    "because": [
+      "Exceptional quantified impact",
+      "Strong technical depth with named systems",
+      "Clear business and research impact",
+      "Production delivery signals",
+      "Proof chain builds confidence step by step",
+      "Every bullet earns its place",
+      "High information density"
+    ],
+    "concerns": [
+      "No CI/CD evidence",
+      "No Prometheus evidence"
+    ],
+    "composite": 9.4,
+    "questions": {
+      "can_do_job": true,
+      "solves_problems": true,
+      "would_interview": true
+    },
+    "diagnosis": "A hiring manager would likely advance this candidate to interview."
+  },
+  "score_components": {
+    "hiring_manager": 94,
+    "information_density": 81.60000000000001,
+    "evidence_compression": 90.49999999999999,
+    "proof_chain": 90,
+    "diversity": 46.7,
+    "ats": 71.43
+  },
+  "analyst": null
+}

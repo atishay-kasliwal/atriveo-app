@@ -1,0 +1,31 @@
+id: AC-127
+role: medledger
+slot_kind: project
+achievement_theme: scheduling
+display_order: 5
+wow_score: 0.83
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Node.js
+  - EJS
+fact: Engineered appointment scheduling workflows with EJS views for clinic staff and patient booking.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Node.js
+  - EJS
+facets:
+  default:
+    phrase: appointments
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Engineered Node.js and EJS appointment scheduling workflows enabling clinic staff and patients to manage 3
+      role-based booking flows in production.

@@ -1,0 +1,27 @@
+id: AC-007
+role: accolite
+slot_kind: experience
+visibility:
+  default: false
+fact: RETIRED — superseded by Accolite bank AC-163–AC-197 (v43). Was FastAPI microservices bullet.
+capabilities:
+  backend: 90
+  cloud: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - FastAPI
+  - Docker
+  - Redis
+  - Python
+facets:
+  backend:
+    phrase: FastAPI microservices
+    keywords: [fastapi, docker, redis, api]
+variants:
+  - facet: backend
+    emphasis: backend
+    strength: 8
+    text: >-
+      Built production FastAPI microservices with Docker and Redis, serving REST APIs
+      with sub-200ms latency for enterprise telecom integrations.

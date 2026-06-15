@@ -1,0 +1,24 @@
+id: AC-034
+role: shriffle
+slot_kind: experience
+visibility:
+  default: false
+fact: Built telecom backend integrations with Java and REST APIs.
+capabilities:
+  backend: 78
+strength:
+  recruiter: 6
+ats_keywords:
+  - Java
+  - REST
+  - API
+facets:
+  backend:
+    phrase: telecom backend integrations
+    keywords: [java, rest, api]
+variants:
+  - facet: backend
+    emphasis: backend
+    strength: 6
+    text: >-
+      Built telecom backend integrations with Java and REST APIs for client provisioning workflows.

@@ -1,0 +1,41 @@
+id: AC-184
+role: accolite
+slot_kind: experience
+engineering_identity: enterprise
+client_context: inhouse
+achievement_theme: employee-onboarding
+display_order: 22
+wow_score: 0.88
+metrics_claimed:
+  - onboarding_erp
+  - users_3000
+concepts_claimed:
+  - enterprise
+signature_technologies:
+  - React
+  - MongoDB
+fact: Employee onboarding module in in-house ERP for 3,000 users with tags timesheets and hierarchy setup.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 72
+  data: 82
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - React
+  - MongoDB
+facets:
+  default:
+    phrase: employee-onboarding
+    keywords:
+      - react
+      - mongodb
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Cut new-hire ramp time with React and MongoDB onboarding workflows guiding 3,000 employees through hierarchy setup
+      and timesheet compliance in production.

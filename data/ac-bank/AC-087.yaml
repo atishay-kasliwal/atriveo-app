@@ -1,0 +1,44 @@
+id: AC-087
+role: job-pipeline
+slot_kind: project
+achievement_theme: mongodb-storage
+display_order: 5
+wow_score: 0.88
+metrics_claimed:
+  - jd_stored_15k
+  - mongo_collections_4
+concepts_claimed:
+  - mongodb
+  - storage
+  - snapshots
+  - history
+signature_technologies:
+  - MongoDB
+  - Python
+fact: MongoDB Atlas — 15K+ JDs, 4 collections, run_history.json snapshots.
+capabilities:
+  backend: 86
+  data: 92
+strength:
+  recruiter: 9
+ats_keywords:
+  - MongoDB
+  - MongoDB Atlas
+  - Python
+  - storage
+  - pipeline
+facets:
+  storage:
+    phrase: MongoDB storage
+    keywords:
+      - mongodb
+      - atlas
+      - storage
+      - snapshot
+variants:
+  - facet: storage
+    emphasis: storage
+    strength: 9
+    text: >-
+      Built Python and MongoDB Atlas storage for 15K+ job descriptions across 4 collections with run history and per-run
+      JSON snapshots for production analytics.

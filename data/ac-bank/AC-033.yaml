@@ -1,0 +1,43 @@
+id: AC-033
+role: wake-forest
+slot_kind: experience
+achievement_theme: tumor-segmentation
+display_order: 3
+wow_score: 0.86
+metrics_claimed:
+  - accuracy_90
+concepts_claimed:
+  - segmentation
+  - computer_vision
+  - tumor
+fact: Brain tumor segmentation model at 90%+ mask accuracy across 10K+ multimodal clinical MRI studies.
+capabilities:
+  ml: 92
+  backend: 70
+strength:
+  recruiter: 10
+ats_keywords:
+  - Python
+  - segmentation
+  - MRI
+  - computer vision
+  - brain tumor
+  - machine learning
+facets:
+  ml:
+    phrase: tumor segmentation
+    keywords:
+      - segmentation
+      - mask
+      - tumor
+      - accuracy
+      - annotation
+variants:
+  - facet: ml
+    emphasis: ml
+    strength: 10
+    text: >-
+      Developed a Python brain tumor segmentation model achieving 90%+ mask accuracy replacing manual tumor outlining
+      for treating clinicians in production.
+signature_technologies:
+  - Python

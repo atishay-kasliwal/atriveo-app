@@ -1,0 +1,43 @@
+id: AC-085
+role: job-pipeline
+slot_kind: project
+achievement_theme: keyword-scoring
+display_order: 3
+wow_score: 0.89
+metrics_claimed:
+  - keywords_30
+concepts_claimed:
+  - scoring
+  - keywords
+  - ranking
+  - stack-fit
+signature_technologies:
+  - Python
+fact: 30+ weighted tech keywords — Spring Boot, FastAPI, Kafka, K8s, AWS, Python, Java.
+capabilities:
+  backend: 84
+  data: 88
+  ai: 72
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - pandas
+  - scoring
+  - keywords
+  - ranking
+facets:
+  scoring:
+    phrase: keyword scoring engine
+    keywords:
+      - scoring
+      - keyword
+      - rank
+      - stack
+variants:
+  - facet: scoring
+    emphasis: scoring
+    strength: 9
+    text: >-
+      Built Python a keyword scoring engine with 30+ weighted tech terms ranking jobs by stack fit for backend, ML, and
+      data science roles.

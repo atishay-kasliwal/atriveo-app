@@ -1,0 +1,46 @@
+id: AC-071
+role: insurance-platform
+slot_kind: project
+achievement_theme: query-api
+display_order: 9
+wow_score: 0.86
+metrics_claimed: []
+concepts_claimed:
+  - rest
+  - hateoas
+  - openapi
+  - versioning
+  - query
+signature_technologies:
+  - Spring Boot
+  - Elasticsearch
+fact: REST query API with HATEOAS, OpenAPI/Swagger, header-based versioning over Elasticsearch.
+capabilities:
+  backend: 86
+  data: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - REST
+  - HATEOAS
+  - OpenAPI
+  - Swagger
+  - API versioning
+  - Elasticsearch
+  - Spring Boot
+facets:
+  api:
+    phrase: REST query API
+    keywords:
+      - rest
+      - hateoas
+      - swagger
+      - openapi
+      - versioning
+variants:
+  - facet: api
+    emphasis: api
+    strength: 8
+    text: >-
+      Shipped Spring Boot a v1 REST query API with HATEOAS and OpenAPI for production insurance policy search over
+      Elasticsearch-backed documents.

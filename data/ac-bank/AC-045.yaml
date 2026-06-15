@@ -1,0 +1,43 @@
+id: AC-045
+role: wake-forest
+slot_kind: experience
+achievement_theme: patient-similarity
+display_order: 6
+wow_score: 0.95
+metrics_claimed:
+  - 5_10_years
+concepts_claimed:
+  - similarity
+  - retrieval
+  - historical
+fact: Patient similarity engine over 5–10 years and 10K+ historical MRI cases for treating physicians.
+capabilities:
+  ml: 88
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - similarity
+  - retrieval
+  - MRI
+  - machine learning
+  - analytics
+facets:
+  ml:
+    phrase: patient similarity engine
+    keywords:
+      - similarity
+      - retrieval
+      - historical
+      - pattern
+      - matching
+variants:
+  - facet: ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Built Python a patient similarity retrieval engine over 5 to 10 years of historical MRI data, helping physicians
+      compare disease patterns and treatment outcomes.
+signature_technologies:
+  - Python

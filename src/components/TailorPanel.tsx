@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { TailorJobState, TailorLogEntry, TailorLogKind, TailorRunState } from "../types/tailor";
 import { formatProcessLogTime24 } from "../utils/processLogTime";
+import TailorExplainPanel from "./TailorExplainPanel";
 
 interface Props {
   run: TailorRunState | null;
@@ -10,9 +11,10 @@ interface Props {
 
 const PHASE_LABEL: Record<TailorJobState["phase"], string> = {
   queued: "Queued",
-  analyzing: "Phase 1/4 · Analyze",
-  assembling: "Phase 3/4 · Assemble",
-  compiling: "Phase 4/4 · Compile",
+  analyzing: "Phase 1/3 · Compose",
+  assembling: "Phase 2/3 · Assemble",
+  compiling: "Phase 3/3 · Compile",
+  reviewing: "Phase 3/3 · Compile", // legacy phase id — Gemma review disabled
   done: "Complete",
 };
 
@@ -37,8 +39,9 @@ function fmtElapsed(ms?: number): string {
 function jobPhaseWeight(phase: TailorJobState["phase"]): number {
   switch (phase) {
     case "done": return 1;
-    case "compiling": return 0.88;
-    case "assembling": return 0.62;
+    case "reviewing": return 0.94; // legacy — Gemma disabled
+    case "compiling": return 0.94;
+    case "assembling": return 0.55;
     case "analyzing": return 0.28;
     case "queued": return 0.05;
     default: return 0;
@@ -84,15 +87,21 @@ function latestLogLine(logs: TailorLogEntry[]): string | null {
 
 function statusTone(job: TailorJobState): string {
   if (job.phase !== "done") return job.phase === "queued" ? "queued" : "running";
-  if (job.status === "ok" && job.pdf) return "success";
+  if (job.status === "ok" && job.pdf) return job.borderline ? "success-warn" : "success";
   if (job.status === "no-go") return "blocked";
+  if (job.status === "unsupported-jd") return "blocked";
   return "error";
 }
 
 function statusCopy(job: TailorJobState): string {
   if (job.phase !== "done") return PHASE_LABEL[job.phase];
-  if (job.status === "ok" && job.pdf) return job.ats ? `PDF ready · ATS ${job.ats}` : "PDF ready";
+  if (job.status === "ok" && job.pdf) {
+    return job.borderline
+      ? (job.ats ? `PDF ready · ATS ${job.ats} · borderline JD` : "PDF ready · borderline JD")
+      : (job.ats ? `PDF ready · ATS ${job.ats}` : "PDF ready");
+  }
   if (job.status === "no-go") return job.error || "No-Go · eligibility blocked";
+  if (job.status === "unsupported-jd") return job.error || "Unsupported JD · not an engineering role";
   if (job.status === "tex-failed") return job.error ? `Compile failed · ${job.error.slice(0, 80)}` : "Compile failed";
   if (job.status === "ai-failed") return job.error ? `AI failed · ${job.error.slice(0, 80)}` : "AI failed";
   return job.error || "Finished with issues";
@@ -316,6 +325,9 @@ export default function TailorPanel({ run, onOpenPath, onDismiss }: Props) {
                     </div>
                   )}
                 </div>
+                {job.phase === "done" && job.explain ? (
+                  <TailorExplainPanel explain={job.explain} compact />
+                ) : null}
                 {jobLogs.length > 0 && (
                   <CollapsibleLogPanel
                     logs={jobLogs}

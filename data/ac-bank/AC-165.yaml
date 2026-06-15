@@ -1,0 +1,41 @@
+id: AC-165
+role: accolite
+slot_kind: experience
+engineering_identity: enterprise
+client_context: fidelity
+achievement_theme: central-node
+display_order: 3
+wow_score: 0.91
+metrics_claimed:
+  - central_hub
+  - transfers_audited_100pct
+concepts_claimed:
+  - enterprise
+signature_technologies:
+  - Java
+  - AWS
+fact: Fidelity as central node with visibility into all sister-company transfers even when parties communicate directly.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 72
+  data: 82
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - Java
+  - AWS
+facets:
+  default:
+    phrase: central-node
+    keywords:
+      - java
+      - aws
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Architected Fidelity's central audit hub on Java and AWS with visibility into 100% of sister-company insurance
+      transfers even on direct production exchanges.

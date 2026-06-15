@@ -1,0 +1,31 @@
+id: AC-162
+role: user-data-platform
+slot_kind: project
+achievement_theme: verification
+display_order: 10
+wow_score: 0.85
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Python
+fact: >-
+  Delivered verified mock smoke tests documenting end-to-end X25519-AES256-GCM decryption against the Hushh wire
+  contract.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+facets:
+  default:
+    phrase: verified-run
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built Python verified mock smoke tests documenting end-to-end X25519-AES256-GCM decryption against the Hushh wire
+      contract in production.

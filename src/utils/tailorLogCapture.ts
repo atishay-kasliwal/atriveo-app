@@ -5,9 +5,10 @@ const MAX_PERSISTED_LOGS = 300;
 
 const PHASE_LOG: Record<TailorPhase, string> = {
   queued: "Queued — waiting for server",
-  analyzing: "Phase 1/4 · Analyze — Ollama eligibility + bullet selection",
-  assembling: "Phase 3/4 · Assemble — building resume.tex",
-  compiling: "Phase 4/4 · Compile — Tectonic PDF",
+  analyzing: "Phase 1/3 · Compose — AC pipeline (beam + RCS)",
+  assembling: "Phase 2/3 · Assemble — writing resume.tex",
+  compiling: "Phase 3/3 · Compile — Tectonic PDF",
+  reviewing: "Phase 3/3 · Compile — Tectonic PDF", // legacy — Gemma disabled
   done: "Finished this job",
 };
 

@@ -1,0 +1,73 @@
+# SBU golden routing tests — run: npm run ac:routing-golden
+# Validates story package + bullet order for canonical JD fixtures.
+
+fixtures:
+  - id: openai-ai
+    description: Top AI lab — systems-first ai package
+    jd: |
+      OpenAI is hiring an AI Engineer to build production LLM systems.
+      You will design multi-agent workflows, retrieval pipelines, and ship
+      Python backends at scale. Experience with LangChain, RAG, and AWS required.
+    expected:
+      role: stony-brook
+      package: ai
+      bullets:
+        - AC-026
+        - AC-001
+        - AC-023
+        - AC-025
+
+  - id: kafka-backend
+    description: Backend JD must surface Kafka trading bullet
+    jd: |
+      Software Engineer — Backend. Build distributed event-driven systems with
+      Python, FastAPI, Kafka, and AWS microservices. Streaming pipelines and
+      high-throughput APIs in production. Own on-call rotation, code review,
+      and CI/CD for services serving millions of requests daily.
+    expected:
+      role: stony-brook
+      package: backend
+      must_include:
+        - AC-002
+      bullets:
+        - AC-026
+        - AC-001
+        - AC-002
+        - AC-003
+
+  - id: mcp-agents
+    description: MCP JD surfaces agents package with AC-024
+    jd: |
+      AI Engineer — build MCP-based agent orchestration and tool calling
+      workflows in Python on AWS. Model Context Protocol, multi-agent frameworks,
+      protocol design, and production API integration. Ship reliable backend
+      services with observability, testing, and deployment automation.
+    expected:
+      role: stony-brook
+      package: agents
+      must_include:
+        - AC-024
+
+  - id: data-engineer
+    description: Data engineer JD should prefer data package
+    jd: |
+      Data Engineer — design ETL pipelines, Kafka streaming ingestion, and
+      warehouse loads. Python pandas Spark data pipelines at scale. Build
+      reliable batch and streaming jobs with monitoring, schema evolution,
+      and production data quality checks across cloud infrastructure.
+    expected:
+      role: stony-brook
+      package: data
+      must_include:
+        - AC-002
+
+  - id: rn-residency-unsupported
+    description: Non-engineering JD must be rejected
+    jd: |
+      Registered Nurse Residency at Cleveland Clinic. Provide patient care on
+      the medical unit. Nursing documentation and clinical residency program.
+      Supervise LPN staff during hospital floor rounds, medication administration,
+      and patient assessment per nursing protocols and clinical standards.
+    expected:
+      unsupported_jd: true
+      max_confidence: 0.54

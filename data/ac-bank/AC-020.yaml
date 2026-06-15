@@ -1,0 +1,41 @@
+id: AC-020
+role: stony-brook
+slot_kind: experience
+engineering_identity: cloud
+achievement_theme: inference-deploy
+display_order: 17
+wow_score: 0.8
+metrics_claimed:
+  - inference
+  - researchers_5
+concepts_claimed:
+  - cloud
+signature_technologies:
+  - AWS
+  - Python
+fact: Production LLM inference on AWS for research APIs.
+capabilities:
+  ai: 82
+  backend: 74
+  frontend: 65
+  data: 65
+  cloud: 85
+  ml: 65
+strength:
+  recruiter: 7
+ats_keywords:
+  - AWS
+  - Python
+facets:
+  default:
+    phrase: inference-deploy
+    keywords:
+      - aws
+      - python
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Deployed Python LLM inference on AWS serving macro research APIs with sub-minute latency for 5 daily financial
+      research users.

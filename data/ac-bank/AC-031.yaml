@@ -1,0 +1,36 @@
+id: AC-031
+role: wake-forest
+slot_kind: experience
+achievement_theme: product-ownership
+display_order: 1
+wow_score: 0.88
+metrics_claimed: [10k_studies, time_3h_2min]
+concepts_claimed: [platform, segmentation, radiomics, upload, clinical]
+signature_technologies: [Python, GCP]
+fact: AI clinical decision support platform — 10K+ MRIs, 3h→2min segmentation at 90%+, 2min upload-to-insight, 20-person clinical team.
+capabilities:
+  ml: 90
+  backend: 84
+  frontend: 72
+  cloud: 82
+strength:
+  recruiter: 10
+ats_keywords:
+  - Python
+  - MRI
+  - clinical
+  - platform
+  - brain tumor
+  - decision support
+  - GCP
+facets:
+  platform:
+    phrase: clinical decision support platform
+    keywords: [platform, clinical, decision, radiology, end-to-end]
+variants:
+  - facet: platform
+    emphasis: platform
+    strength: 10
+    text: >-
+      Architected a Python and GCP-based AI radiology platform that processed 10K+ brain
+      MRI studies and reduced tumor segmentation from 3 hours to 2 minutes.

@@ -5,6 +5,7 @@ dist
 scripts/cloudflared-tailor.yml
 scripts/preview.html
 .dev.vars
+migration-output/
 
 # Claude Code local settings (machine-specific)
 .claude/

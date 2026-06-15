@@ -1,0 +1,31 @@
+id: AC-114
+role: mri-research
+slot_kind: project
+achievement_theme: survival
+display_order: 2
+wow_score: 0.91
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Python
+  - lifelines
+fact: Engineered survival analysis with Kaplan-Meier curves and Cox proportional hazards models using lifelines.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - lifelines
+facets:
+  default:
+    phrase: survival-analysis
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Engineered Python Kaplan-Meier and Cox survival models using lifelines on 73-patient clinical research cohorts
+      from 2020–2022.

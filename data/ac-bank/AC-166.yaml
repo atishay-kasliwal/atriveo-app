@@ -1,0 +1,41 @@
+id: AC-166
+role: accolite
+slot_kind: experience
+engineering_identity: backend
+client_context: fidelity
+achievement_theme: java-pipeline
+display_order: 4
+wow_score: 0.9
+metrics_claimed:
+  - java_pipeline
+  - policy_exchanges_10k
+concepts_claimed:
+  - backend
+signature_technologies:
+  - Java
+  - MySQL
+fact: Fidelity Java pipeline on MySQL and AWS for encrypted policy exchange.
+capabilities:
+  backend: 90
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - Java
+  - MySQL
+facets:
+  default:
+    phrase: java-pipeline
+    keywords:
+      - java
+      - mysql
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built Fidelity's primary insurance integration path on Java and MySQL enabling 10K+ encrypted policy exchanges
+      across sister-company production networks.

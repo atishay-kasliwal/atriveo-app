@@ -1,0 +1,41 @@
+id: AC-006
+role: stony-brook
+slot_kind: experience
+engineering_identity: backend
+achievement_theme: streaming
+display_order: 6
+wow_score: 0.85
+metrics_claimed:
+  - streaming
+  - realtime
+concepts_claimed:
+  - backend
+signature_technologies:
+  - Kafka
+  - Python
+fact: Kafka streaming consumers for live market feeds and NLP feature extraction.
+capabilities:
+  ai: 70
+  backend: 88
+  frontend: 65
+  data: 86
+  cloud: 65
+  ml: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - Kafka
+  - Python
+facets:
+  default:
+    phrase: streaming
+    keywords:
+      - kafka
+      - python
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Engineered Kafka streaming consumers processing live market feeds into Python NLP feature extraction serving 5
+      real-time macro research workflows in production.
