@@ -276,6 +276,12 @@ function JobTableRow({
   const tailorRecord = getTailorRecord?.(job) ?? null;
   const tailor = tailorCellLabel(tailorRecord);
   const folderPath = tailorFolderPath(tailorRecord);
+  const isResumeActive = tailorRecord?.status === "queued" || tailorRecord?.status === "running";
+  const canQueueResume = Boolean(
+    onQueueUrgent
+    && job.job_url
+    && (!tailorRecord || tailorRecord.status === "none" || tailorRecord.status === "failed"),
+  );
   const sessionMeta = job.job_url ? sessionResumeByUrl?.get(job.job_url) : undefined;
   const displaySlot = resolveResumeSlot(tailorRecord, sessionMeta?.slot ?? index);
   const displayHour = resolveSessionHour(tailorRecord, sessionMeta?.hour);
@@ -328,7 +334,7 @@ function JobTableRow({
 
   return (
     <tr
-      className={`job-table-row job-table-row--${careerOps.key}${isApplied ? " is-applied" : ""}${isSelected ? " is-selected" : ""}${nested ? " is-nested" : ""}${board ? " job-table-row--board job-table-row--clickable" : ""}`}
+      className={`job-table-row job-table-row--${careerOps.key}${isApplied ? " is-applied" : ""}${isSelected ? " is-selected" : ""}${isResumeActive ? " is-compiling" : ""}${nested ? " is-nested" : ""}${board ? " job-table-row--board job-table-row--clickable" : ""}`}
       title={reasons.join(" · ") || careerOps.tooltip}
       onClick={board ? handleRowClick : undefined}
     >
@@ -523,17 +529,17 @@ function JobTableRow({
                 {savedFeedback === "add" ? "Moved ✓" : trackerCopy}
               </button>
             )}
-            {onQueueUrgent && tailorRecord?.status !== "done" && (
+            {canQueueResume && (
               <button
                 type="button"
                 className="job-table-board-apply job-table-board-apply--urgent"
-                title="Add to tailor queue (urgent)"
+                title="Queue resume compile"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onQueueUrgent(job, displaySlot);
+                  onQueueUrgent!(job, displaySlot);
                 }}
               >
-                Queue
+                Resume
               </button>
             )}
           </div>

@@ -1,6 +1,6 @@
 #!/bin/bash
-# Resume queue sync — enqueue top jobs for the compile worker (Mongo).
-# Independent of job feed / dashboard deploy. Safe to run manually: npm run resume:sync
+# Resume queue sync — enqueue fresh hourly JDs only (latest scrape session).
+# Manual portal requests use compile-enqueue with force. npm run resume:sync
 
 set -uo pipefail
 
@@ -11,7 +11,7 @@ source "$SCRIPT_DIR/lib/pipeline-utils.sh"
 APP_DIR="${ATRIVEO_APP_DIR:-/Users/atishaykasliwal/atriveo-app}"
 LOG="/tmp/atriveo_resume_sync.log"
 LOCK="/tmp/atriveo_resume_sync.lock"
-LIMIT="${RESUME_SYNC_LIMIT:-25}"
+LIMIT="${RESUME_SYNC_LIMIT:-all}"
 NODE_BIN="$(resolve_node_bin)"
 
 if ! acquire_lock "$LOCK"; then

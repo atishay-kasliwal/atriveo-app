@@ -102,7 +102,7 @@ function installJobPipelineAgent() {
   spawnSync("launchctl", ["kickstart", `gui/${uid}/${PIPELINE_LABEL}`], { stdio: "pipe" });
 
   console.log("\n✓ com.atriveo.job-pipeline installed");
-  console.log("  Hourly :00 — scrape → MongoDB → jd:export → feed-sync (async)");
+  console.log("  Hourly :00 — scrape → MongoDB → jd:export (feed at :20)");
   console.log("  Log:    /tmp/atriveo_pipeline.log");
 }
 
@@ -122,7 +122,7 @@ function installResumeSyncAgent() {
     __ATRIVEO_APP_DIR__: ROOT,
   });
   console.log("\n✓ com.atriveo.resume-sync installed");
-  console.log("  Hourly :35 — enqueue top 25 resumes for worker");
+  console.log("  Hourly :35 — enqueue fresh JDs from latest scrape (priority queue)");
   console.log("  Log:    /tmp/atriveo_resume_sync.log");
   console.log("  Manual: npm run resume:sync");
 }

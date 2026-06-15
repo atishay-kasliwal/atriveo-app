@@ -18,7 +18,7 @@
         <key>ATRIVEO_APP_DIR</key>
         <string>__ATRIVEO_APP_DIR__</string>
         <key>RESUME_SYNC_LIMIT</key>
-        <string>25</string>
+        <string>all</string>
     </dict>
     <key>StartCalendarInterval</key>
     <array>

@@ -62,6 +62,10 @@ export async function fetchCompileQueue(limit = 100): Promise<CompileQueueJob[]>
   return Array.isArray(data.jobs) ? data.jobs as CompileQueueJob[] : [];
 }
 
+export async function fetchCompileQueueStats(): Promise<{ queued: number; running: number; active: number }> {
+  return sidecarFetch("/compile-queue/stats");
+}
+
 export async function fetchCompileWorkers(): Promise<CompileWorker[]> {
   const data = await sidecarFetch(`/compile-workers?t=${Date.now()}`);
   return Array.isArray(data.workers) ? data.workers as CompileWorker[] : [];
@@ -84,11 +88,11 @@ export async function enqueueCompileJob(job: {
   });
 }
 
-export async function enqueueCompileTop(limit = 25, minScore = 0): Promise<{ enqueued: number }> {
+export async function enqueueCompileTop(limit: number | null = null, minScore = 0): Promise<{ enqueued: number }> {
   return sidecarFetch("/compile-enqueue-top", {
     method: "POST",
     headers: tailorHeaders(),
-    body: JSON.stringify({ limit, min_score: minScore }),
+    body: JSON.stringify({ limit: limit == null ? "all" : limit, min_score: minScore }),
   });
 }
 

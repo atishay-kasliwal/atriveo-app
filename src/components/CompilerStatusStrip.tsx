@@ -3,7 +3,7 @@ import type { TailorQueueItem } from "../types/tailorQueue";
 import type { useTailorStatus } from "../hooks/useTailorStatus";
 import { buildJobResumeView } from "../utils/jobResumeView";
 import { assertTailorServerReady } from "../utils/tailorRun";
-import { fetchCompileWorkers, type CompileWorker } from "../utils/compileQueueApi";
+import { fetchCompileWorkers, fetchCompileQueueStats, type CompileWorker } from "../utils/compileQueueApi";
 import TrustReportPanel from "./TrustReportPanel";
 
 interface BucketManifest {
@@ -47,6 +47,7 @@ export default function CompilerStatusStrip({
   const [bucketStale, setBucketStale] = useState(false);
   const [sidecarOk, setSidecarOk] = useState<boolean | null>(null);
   const [workers, setWorkers] = useState<CompileWorker[]>([]);
+  const [queueStats, setQueueStats] = useState<{ queued: number; running: number; active: number } | null>(null);
 
   useEffect(() => {
     fetch("/job_descriptions/manifest.json", { cache: "no-store" })
@@ -73,11 +74,12 @@ export default function CompilerStatusStrip({
     if (!workerMode) return;
     const refresh = () => {
       void fetchCompileWorkers().then(setWorkers).catch(() => setWorkers([]));
+      void fetchCompileQueueStats().then(setQueueStats).catch(() => setQueueStats(null));
     };
     refresh();
     const id = window.setInterval(refresh, 45_000);
     return () => window.clearInterval(id);
-  }, [workerMode]);
+  }, [workerMode, processing, runningItem?.jobKey]);
 
   const workerSummary = useMemo(() => {
     if (!workers.length) return null;
@@ -85,13 +87,7 @@ export default function CompilerStatusStrip({
     return { total: workers.length, busy };
   }, [workers]);
 
-  const compilingCount = useMemo(() => {
-    const fromQueue = queue.filter((q) => q.status === "running" || q.status === "pending").length;
-    const fromRecords = Object.values(tailorStatus.records).filter(
-      (r) => r.status === "running" || r.status === "queued",
-    ).length;
-    return Math.max(fromQueue, fromRecords, processing ? 1 : 0);
-  }, [queue, tailorStatus.records, processing]);
+  const backlogCount = queueStats?.active ?? queue.filter((q) => q.status === "running" || q.status === "pending").length;
 
   const activeView = useMemo(() => {
     if (!runningItem) return null;
@@ -116,8 +112,8 @@ export default function CompilerStatusStrip({
         </span>
         {sidecarOk === false ? (
           <span className="compiler-strip-chip is-error">Sidecar offline</span>
-        ) : compilingCount > 0 ? (
-          <span className="compiler-strip-chip is-running">● Compiling ({compilingCount})</span>
+        ) : backlogCount > 0 ? (
+          <span className="compiler-strip-chip is-running">● Queued ({backlogCount})</span>
         ) : sidecarOk ? (
           <span className="compiler-strip-chip">✓ Sidecar</span>
         ) : null}
@@ -160,7 +156,7 @@ export default function CompilerStatusStrip({
           ) : (
             <p className="compiler-strip-idle">
               {workerMode
-                ? "Worker idle — hourly pipeline enqueues top jobs; compiles run without this tab open."
+                ? "Worker idle — hourly resume-sync enqueues today's latest scrape only; pick jobs manually with Compile selected."
                 : "Queue idle — hourly sync adds top jobs while this tab is open."}
               {syncMessage ? ` ${syncMessage}` : ""}
             </p>

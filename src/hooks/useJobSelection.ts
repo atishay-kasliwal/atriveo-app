@@ -199,7 +199,12 @@ function applyTailorEvent(prev: TailorRunState, event: TailorStreamEvent): Tailo
   return { ...prev, jobs, completed };
 }
 
-export function useJobSelection(jobs: Job[]) {
+export interface JobSelectionOptions {
+  /** When set, "Tailor selected" enqueues Mongo compile jobs instead of the legacy /tailor stream. */
+  onCompileSelected?: (jobs: Job[]) => void | Promise<void>;
+}
+
+export function useJobSelection(jobs: Job[], options?: JobSelectionOptions) {
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
   const [copyMessage, setCopyMessage] = useState("");
   const [analysisMessage, setAnalysisMessage] = useState("");
@@ -303,6 +308,21 @@ export function useJobSelection(jobs: Job[]) {
   // emits live NDJSON progress: queued → analyzing → assembling → compiling → done.
   const tailorSelectedJobs = async () => {
     if (!selectedJobs.length || tailoring) return;
+
+    if (options?.onCompileSelected) {
+      setTailoring(true);
+      setAnalysisMessage("");
+      try {
+        await options.onCompileSelected(selectedJobs);
+        setAnalysisMessage(`Queued ${selectedJobs.length} job${selectedJobs.length === 1 ? "" : "s"} for compile`);
+        setSelectedKeys(new Set());
+      } catch (e) {
+        setAnalysisMessage(`Compile queue failed: ${(e as Error).message}`);
+      } finally {
+        setTailoring(false);
+      }
+      return;
+    }
 
     setTailoring(true);
     const initialRun: TailorRunState = {

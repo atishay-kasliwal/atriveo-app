@@ -23,7 +23,7 @@ import { closeMongo, withMongo } from "./mongo-client.mjs";
 import {
   claimNextJob,
   ensureResumeIndex,
-  enqueueTopJobs,
+  enqueueFreshSessionJobs,
   fetchDescription,
   renewJobLease,
   updateResumeState,
@@ -214,7 +214,7 @@ async function main() {
     if (ENQUEUE) {
       const rawLimit = process.env.WORKER_ENQUEUE_LIMIT?.trim();
       const limit = rawLimit ? Number(rawLimit) : null;
-      const results = await enqueueTopJobs(db, { limit: limit && limit > 0 ? limit : null });
+      const results = await enqueueFreshSessionJobs(db, { limit: limit && limit > 0 ? limit : null });
       log("enqueue", `${results.filter((r) => !r.skipped).length} jobs queued`);
     }
   }, { appName: "AtriveoTailorWorker" });

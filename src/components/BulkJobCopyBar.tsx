@@ -49,7 +49,7 @@ export default function BulkJobCopyBar({
         )}
         {onTailor && (
           <button type="button" className="bulk-copy-btn primary" onClick={onTailor} disabled={!selectedCount || tailoring}>
-            {tailoring ? "Tailoring…" : "Tailor selected"}
+            {tailoring ? "Compiling…" : "Compile selected"}
           </button>
         )}
         <button type="button" className="bulk-copy-btn" onClick={onCopy} disabled={!selectedCount}>

@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Job } from "../types";
 import type { TailorProcessLogEntry, TailorQueueItem } from "../types/tailorQueue";
-import { HOURLY_QUEUE_SIZE, HOURLY_SYNC_MS } from "../types/tailorQueue";
+import { HOURLY_SYNC_MS } from "../types/tailorQueue";
 import { careerOpsRating } from "../utils/jobPresentation";
 import { jobDismissKey } from "../utils/jobCopy";
 import {
   cancelCompileJob,
-  enqueueCompileBatch,
   enqueueCompileJob,
   fetchCompileQueue,
   isMongoCompileAvailable,
@@ -132,6 +131,21 @@ export function useMongoCompileQueue(jobs: Job[], options: Options) {
       setSyncMessage(`${job.company || "Job"} already compiled`);
       return false;
     }
+    if (existing?.status === "queued" || existing?.status === "running") {
+      setSyncMessage(`${job.title || "Role"} already in compile queue`);
+      return false;
+    }
+
+    markStatus(jobKey, "queued", {
+      jobUrl: job.job_url,
+      company: job.company || "Unknown",
+      title: job.title || "Role",
+      score: careerOpsRating(job).score,
+      resumeSlot: slot,
+      sessionHour,
+      progressPct: 5,
+      outcome: "queued",
+    });
 
     void enqueueCompileJob({
       job_url: job.job_url,
@@ -165,17 +179,10 @@ export function useMongoCompileQueue(jobs: Job[], options: Options) {
       } else {
         setSyncMessage(urgent ? `Queued urgent: ${job.title || "role"}` : `Queued: ${job.title || "role"}`);
         pushLog(`Enqueued ${job.company} · ${job.title}`);
-        markStatus(jobKey, "queued", {
-          jobUrl: job.job_url,
-          company: job.company || "Unknown",
-          title: job.title || "Role",
-          score: careerOpsRating(job).score,
-          resumeSlot: slot,
-          sessionHour,
-        });
       }
       if (!streamLiveRef.current) void refreshFromMongo();
     }).catch((e) => {
+      markStatus(jobKey, "none");
       setSyncMessage(`Enqueue failed: ${(e as Error).message}`);
     });
 
@@ -187,42 +194,15 @@ export function useMongoCompileQueue(jobs: Job[], options: Options) {
     if (!force && lastSyncRef.current && now - lastSyncRef.current < HOURLY_SYNC_MS) {
       return 0;
     }
-
-    const slotMap = buildSessionResumeSlots(jobsRef.current);
-    void enqueueCompileBatch(
-      jobsRef.current
-        .filter((job) => job.job_url)
-        .slice(0, HOURLY_QUEUE_SIZE)
-        .map((job) => {
-          const meta = slotMap.get(job.job_url!);
-          return {
-            job_url: job.job_url!,
-            company: job.company || undefined,
-            title: job.title || undefined,
-            score_pct: careerOpsRating(job).score,
-            resume_slot: meta?.slot,
-            session_hour: meta?.hour,
-            batch_time: job.batch_time || undefined,
-          };
-        }),
-    ).then((result) => {
-      const added = result.enqueued ?? 0;
-      const ts = Date.now();
-      lastSyncRef.current = ts;
-      setLastHourlySyncAt(ts);
-      if (added > 0) {
-        setSyncMessage(`Hourly sync queued ${added} job${added === 1 ? "" : "s"} in Mongo`);
-        pushLog(`Hourly sync · ${added} jobs queued for worker`);
-      } else if (force) {
-        setSyncMessage("Hourly sync: no new jobs to queue");
-      }
-      if (!streamLiveRef.current) void refreshFromMongo();
-    }).catch((e) => {
-      setSyncMessage(`Hourly sync failed: ${(e as Error).message}`);
-    });
-
+    const ts = Date.now();
+    lastSyncRef.current = ts;
+    setLastHourlySyncAt(ts);
+    if (force) {
+      setSyncMessage("Hourly resume queue runs on Mac (resume-sync at :35)");
+    }
+    if (!streamLiveRef.current) void refreshFromMongo();
     return 0;
-  }, [refreshFromMongo, pushLog]);
+  }, [refreshFromMongo]);
 
   useEffect(() => {
     runHourlySync(jobsRef.current);

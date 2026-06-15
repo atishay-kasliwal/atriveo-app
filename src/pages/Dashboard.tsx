@@ -585,10 +585,16 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     () => buildSessionResumeSlots(displayedJobs),
     [displayedJobs],
   );
-  const jobSelection = useJobSelection(displayedJobs);
   const tailorQueue = useMongoCompileQueue(displayedJobs, {
     tailorStatus,
     dismissedKeys: clickedKeySet,
+  });
+  const jobSelection = useJobSelection(displayedJobs, {
+    onCompileSelected: (selected) => {
+      for (const job of selected) {
+        tailorQueue.enqueueJob(job, "manual", true);
+      }
+    },
   });
 
   const handleSaveJobWithQueueCleanup = useCallback((job: Job, source: SavedJobSource) => {

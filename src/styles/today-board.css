@@ -766,6 +766,14 @@ body.is-today-board .nav-tab.active {
   background: var(--board-accent-soft);
 }
 
+.job-table--board .job-table-row.is-compiling td {
+  background: #fff8ef;
+}
+
+.job-table--board .job-table-row.is-selected.is-compiling td {
+  background: #fff3e4;
+}
+
 .job-table--board .job-table-check {
   text-align: left;
 }
@@ -1041,17 +1049,21 @@ body.is-today-board .nav-tab.active {
 .job-table-board-apply {
   display: inline-flex;
   align-items: center;
-  padding: 3px 8px;
-  border-radius: 5px;
+  justify-content: center;
+  min-height: 28px;
+  padding: 6px 10px;
+  border-radius: 6px;
   background: #fff;
   border: 1px solid var(--board-line);
   color: var(--board-sub);
   font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 600;
+  line-height: 1.2;
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
+  box-sizing: border-box;
   transition: background 0.1s, border-color 0.1s, color 0.1s;
 }
 

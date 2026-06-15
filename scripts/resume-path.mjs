@@ -29,6 +29,13 @@ export function hourEtFromBatch(batchTime) {
   return etParts(batchTime)?.hour ?? null;
 }
 
+/** Calendar date YYYY-MM-DD in America/New_York. */
+export function etDateKey(iso = new Date()) {
+  const d = iso instanceof Date ? iso : new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleString("sv-SE", { timeZone: TZ }).slice(0, 10);
+}
+
 export function parseSessionHour(raw) {
   if (raw == null || raw === "") return null;
   const n = Number(raw);

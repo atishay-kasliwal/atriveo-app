@@ -34,7 +34,7 @@ import { buildSkillsLines, capSkillsLineToOnePhysicalLine } from "./skills-libra
 import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
-import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, cancelCompileJob, enqueueJobs } from "./resume-queue.mjs";
+import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs } from "./resume-queue.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
 import { listActiveWorkers } from "./worker-registry.mjs";
 
@@ -1283,6 +1283,22 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // GET /compile-queue/stats — active queued + running counts (Mongo)
+  if (req.method === "GET" && pathname === "/compile-queue/stats") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const stats = await withMongo((db) => countActiveCompileJobs(db), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify({ ok: true, ...stats }));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
+  }
+
   // GET /compile-queue?status=queued — Mongo-backed compile queue (observe-only)
   if (req.method === "GET" && pathname === "/compile-queue") {
     (async () => {
@@ -1312,7 +1328,11 @@ const server = http.createServer(async (req, res) => {
           const body = JSON.parse(raw || "{}");
           if (!body.job_url) throw new Error("job_url required");
           const result = await withMongo(
-            (db) => enqueueJob(db, body, { force: body.force === true }),
+            (db) => enqueueJob(db, {
+              ...body,
+              priority: body.force ? undefined : body.priority,
+              source: body.force ? "manual" : body.source,
+            }, { force: body.force === true }),
             { appName: "AtriveoTailorServer" },
           );
           res.writeHead(200, { "Content-Type": "application/json" });
@@ -1326,7 +1346,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // POST /compile-enqueue-top { limit?, min_score? } — hourly top jobs
+  // POST /compile-enqueue-top { limit?, min_score? } — hourly fresh session jobs only
   if (req.method === "POST" && pathname === "/compile-enqueue-top") {
     let raw = "";
     req.on("data", (c) => (raw += c));
@@ -1335,11 +1355,13 @@ const server = http.createServer(async (req, res) => {
         try {
           if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
           const body = JSON.parse(raw || "{}");
-          const rawLimit = body.limit != null ? Number(body.limit) : null;
-          const limit = rawLimit != null && rawLimit > 0 ? rawLimit : null;
+          const rawLimit = body.limit;
+          const limit = rawLimit == null || rawLimit === "all" || rawLimit === 0
+            ? null
+            : (Number.isFinite(Number(rawLimit)) && Number(rawLimit) > 0 ? Number(rawLimit) : null);
           const minScore = Number(body.min_score || 0);
           const results = await withMongo(
-            (db) => enqueueTopJobs(db, { limit, minScore }),
+            (db) => enqueueFreshSessionJobs(db, { limit, minScore }),
             { appName: "AtriveoTailorServer" },
           );
           const enqueued = results.filter((r) => !r.skipped).length;

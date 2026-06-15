@@ -2,13 +2,21 @@
 
 import { COMPILE_STAGES, resolveCachedCompile } from "./ac-artifact-store.mjs";
 import { loadBank } from "./ac-bank.mjs";
-import { hourEtFromBatch, parseSessionHour } from "./resume-path.mjs";
+import { hourEtFromBatch, parseSessionHour, etDateKey } from "./resume-path.mjs";
 
 export { COMPILE_STAGES };
 
-export const RESUME_STATUSES = ["queued", "running", "success", "failed", "skipped"];
+const RESUME_ELIGIBLE_OR = [
+  { resume: { $exists: false } },
+  { resume: null },
+  { "resume.status": { $in: [null, "failed", "skipped"] } },
+];
 
 const DEFAULT_PLANNER = process.env.TAILOR_PLANNER?.trim() || "v2";
+
+/** Hourly fresh JDs — claimed before manual portal requests. */
+export const PRIORITY_FRESH = 1000;
+export const PRIORITY_MANUAL = 500;
 
 function parseResumeSlot(raw) {
   const n = Number(raw);
@@ -19,6 +27,8 @@ function parseResumeSlot(raw) {
 export async function ensureResumeIndex(db) {
   await db.collection("jobs").createIndex({ "resume.status": 1, "resume.lease_until": 1 });
   await db.collection("jobs").createIndex({ "resume.fingerprint": 1 }, { sparse: true });
+  await db.collection("jobs").createIndex({ "resume.priority": -1, score_pct: -1 }, { sparse: true });
+  await db.collection("sessions").createIndex({ run_at: -1 });
 
   const indexes = await db.collection("jobs").indexes();
   const hasJobUrlIndex = indexes.some((idx) => idx.key?.job_url === 1);
@@ -80,13 +90,16 @@ export async function enqueueJob(db, job, { force = false, planner = DEFAULT_PLA
 
   const existing = await db.collection("jobs").findOne(
     { job_url: jobUrl },
-    { projection: { resume: 1, batch_time: 1, session_id: 1 } },
+    { projection: { resume: 1, batch_time: 1, session_id: 1, company: 1, title: 1 } },
   );
   if (!force && existing?.resume?.status === "success") {
     return { jobUrl, skipped: true, reason: "already_success" };
   }
   if (!force && existing?.resume?.status === "running") {
     return { jobUrl, skipped: true, reason: "already_running" };
+  }
+  if (!force && existing?.resume?.status === "queued") {
+    return { jobUrl, skipped: true, reason: "already_queued" };
   }
 
   const cacheHit = await applyManifestCacheHit(db, jobUrl, { force, planner });
@@ -108,6 +121,11 @@ export async function enqueueJob(db, job, { force = false, planner = DEFAULT_PLA
   const sessionHour = parseSessionHour(job.session_hour)
     ?? parseSessionHour(existing?.resume?.session_hour)
     ?? hourEtFromBatch(batchTime);
+  const source = job.source || (force ? "manual" : "hourly");
+  const incomingPriority = Number(job.priority);
+  const priority = force
+    ? (Number.isFinite(incomingPriority) ? incomingPriority : PRIORITY_MANUAL)
+    : (Number.isFinite(incomingPriority) ? incomingPriority : PRIORITY_FRESH);
   await db.collection("jobs").updateOne(
     { job_url: jobUrl },
     {
@@ -125,6 +143,9 @@ export async function enqueueJob(db, job, { force = false, planner = DEFAULT_PLA
           resume_slot: resumeSlot,
           session_hour: sessionHour,
           batch_time: batchTime,
+          session_id: job.session_id || existing?.session_id || null,
+          priority,
+          source,
         },
       },
     },
@@ -143,10 +164,7 @@ export async function enqueueTopJobs(db, { limit = null, minScore = 0 } = {}) {
   const cursor = db.collection("jobs").find(
     {
       score_pct: { $gte: minScore },
-      $or: [
-        { resume: { $exists: false } },
-        { "resume.status": { $in: [null, "failed", "skipped"] } },
-      ],
+      $or: RESUME_ELIGIBLE_OR,
     },
     findOptions,
   );
@@ -154,6 +172,101 @@ export async function enqueueTopJobs(db, { limit = null, minScore = 0 } = {}) {
   const results = [];
   for await (const job of cursor) {
     results.push(await enqueueJob(db, job));
+  }
+  return results;
+}
+
+/** Latest scrape session for today (ET) only — single session_id. */
+export async function resolveLatestSession(db) {
+  const latest = await db.collection("sessions").findOne(
+    { archived: { $ne: true } },
+    { sort: { run_at: -1 }, projection: { session_id: 1, run_at: 1 } },
+  );
+  if (!latest?.session_id || !latest?.run_at) return null;
+
+  const today = etDateKey(new Date());
+  const runDay = etDateKey(latest.run_at);
+  if (!today || runDay !== today) return null;
+
+  return { sessionId: latest.session_id, runAt: latest.run_at };
+}
+
+/** @deprecated use resolveLatestSession — kept for logging */
+export async function resolveFreshSessionIds(db) {
+  const latest = await resolveLatestSession(db);
+  return latest ? [latest.sessionId] : [];
+}
+
+/** Drop bulk legacy queue + stale hourly queue. Keeps manual user selections. */
+export async function purgeStaleQueuedJobs(db) {
+  const latest = await resolveLatestSession(db);
+  const latestId = latest?.sessionId ?? null;
+  const staleClauses = [
+    { "resume.source": { $exists: false } },
+    { "resume.source": null },
+  ];
+  if (latestId) {
+    staleClauses.push({ "resume.source": "hourly", session_id: { $ne: latestId } });
+  } else {
+    staleClauses.push({ "resume.source": "hourly" });
+  }
+
+  const result = await db.collection("jobs").updateMany(
+    { "resume.status": "queued", $or: staleClauses },
+    { $unset: { resume: "" } },
+  );
+  return result.modifiedCount;
+}
+
+/** Hourly auto-queue: only jobs from today's latest scrape session. */
+export async function enqueueFreshSessionJobs(db, { limit = null, minScore = 0, planner = DEFAULT_PLANNER } = {}) {
+  const latest = await resolveLatestSession(db);
+  if (!latest) {
+    return [{ skipped: true, reason: "no_fresh_session_today" }];
+  }
+
+  const findOptions = {
+    projection: {
+      _id: 0,
+      job_url: 1,
+      company: 1,
+      title: 1,
+      score_pct: 1,
+      batch_time: 1,
+      session_id: 1,
+    },
+    sort: { score_pct: -1 },
+  };
+  if (limit != null && limit > 0) findOptions.limit = limit;
+
+  const scoreFilter = minScore > 0
+    ? { score_pct: { $gte: minScore } }
+    : {
+      $or: [
+        { score_pct: { $gte: 0 } },
+        { score_pct: { $exists: false } },
+        { score_pct: null },
+      ],
+    };
+
+  const jobs = await db.collection("jobs").find(
+    {
+      session_id: latest.sessionId,
+      ...scoreFilter,
+      $or: RESUME_ELIGIBLE_OR,
+    },
+    findOptions,
+  ).toArray();
+
+  const results = [];
+  for (let i = 0; i < jobs.length; i += 1) {
+    const job = jobs[i];
+    results.push(await enqueueJob(db, {
+      ...job,
+      resume_slot: i + 1,
+      priority: PRIORITY_FRESH,
+      source: "hourly",
+    }, { planner }));
   }
   return results;
 }
@@ -180,7 +293,7 @@ export async function claimNextJob(db, workerId, leaseSec = 900) {
         "resume.error": null,
       },
     },
-    { sort: { score_pct: -1 }, returnDocument: "after" },
+    { sort: { "resume.priority": -1, score_pct: -1 }, returnDocument: "after" },
   );
 
   return result?.value ?? result ?? null;
@@ -213,6 +326,14 @@ export async function updateResumeState(db, jobUrl, patch) {
   }
   set["resume.updated_at"] = new Date().toISOString();
   await db.collection("jobs").updateOne({ job_url: jobUrl }, { $set: set });
+}
+
+export async function countActiveCompileJobs(db) {
+  const [queued, running] = await Promise.all([
+    db.collection("jobs").countDocuments({ "resume.status": "queued" }),
+    db.collection("jobs").countDocuments({ "resume.status": "running" }),
+  ]);
+  return { queued, running, active: queued + running };
 }
 
 export async function listCompileJobs(db, { status, limit = 50 } = {}) {

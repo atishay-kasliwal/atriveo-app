@@ -1,6 +1,6 @@
 #!/bin/bash
 # Job feed sync — Mongo → public/*.json → Cloudflare Pages.
-# Independent of resume compile queue. Safe to run manually: npm run feed:sync
+# Hourly :20 (LaunchAgent). EXPORT_QUICK=1 skips slow week re-export.
 
 set -uo pipefail
 
@@ -13,16 +13,25 @@ APP_DIR="${ATRIVEO_APP_DIR:-/Users/atishaykasliwal/atriveo-app}"
 LOG="/tmp/atriveo_feed_sync.log"
 LOCK="/tmp/atriveo_feed_sync.lock"
 NODE_BIN="$(resolve_node_bin)"
+PYTHON_BIN="$(resolve_pipeline_python)"
+FEED_SYNC_TIMEOUT="${FEED_SYNC_TIMEOUT:-1800}"
 
 if ! acquire_lock "$LOCK"; then
   echo "[$(ts)] feed-sync already running — skip" >> "$LOG"
   exit 0
 fi
 
-echo "[$(ts)] === feed-sync start ===" >> "$LOG"
+echo "[$(ts)] === feed-sync start (timeout=${FEED_SYNC_TIMEOUT}s quick=${EXPORT_QUICK:-1}) ===" >> "$LOG"
 
 cd "$PIPELINE_DIR" || { echo "[$(ts)] ERROR: cannot cd $PIPELINE_DIR" >> "$LOG"; exit 1; }
-run_with_timeout 900 "$PIPELINE_DIR/.venv/bin/python3" -m job_pipeline.export_static >> "$LOG" 2>&1
+
+if ! "$PYTHON_BIN" -c "import pandas" 2>/dev/null; then
+  echo "[$(ts)] WARN: pandas missing in venv — installing" >> "$LOG"
+  "$PIPELINE_DIR/.venv/bin/pip" install -q pandas >> "$LOG" 2>&1 || true
+fi
+
+export EXPORT_QUICK="${EXPORT_QUICK:-1}"
+run_with_timeout "$FEED_SYNC_TIMEOUT" "$PYTHON_BIN" -m job_pipeline.export_static >> "$LOG" 2>&1
 EXPORT_STATUS=$?
 echo "[$(ts)] export_static exit=$EXPORT_STATUS" >> "$LOG"
 

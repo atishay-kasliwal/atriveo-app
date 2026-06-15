@@ -2,6 +2,16 @@
 
 ts() { date "+%Y-%m-%dT%H:%M:%S%z"; }
 
+# Global lock path — trap must reference this (not a function-local variable).
+_ATRIVEO_LOCK_PATH=""
+
+release_lock() {
+  if [ -n "${_ATRIVEO_LOCK_PATH:-}" ] && [ -f "$_ATRIVEO_LOCK_PATH" ]; then
+    rm -f "$_ATRIVEO_LOCK_PATH"
+  fi
+  _ATRIVEO_LOCK_PATH=""
+}
+
 resolve_node_bin() {
   for candidate in /opt/homebrew/bin/node /usr/local/bin/node "$(command -v node 2>/dev/null)"; do
     if [ -n "$candidate" ] && [ -x "$candidate" ]; then
@@ -10,6 +20,16 @@ resolve_node_bin() {
     fi
   done
   echo "node"
+}
+
+resolve_pipeline_python() {
+  local pipeline_dir="${JOB_PIPELINE_DIR:-/Users/atishaykasliwal/job-pipeline}"
+  local py="$pipeline_dir/.venv/bin/python3"
+  if [ -x "$py" ]; then
+    echo "$py"
+    return 0
+  fi
+  echo "python3"
 }
 
 run_with_timeout() {
@@ -45,8 +65,10 @@ acquire_lock() {
     if [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null; then
       return 1
     fi
+    rm -f "$lock_file"
   fi
   echo $$ > "$lock_file"
-  trap 'rm -f "$lock_file"' EXIT
+  _ATRIVEO_LOCK_PATH="$lock_file"
+  trap release_lock EXIT INT TERM
   return 0
 }

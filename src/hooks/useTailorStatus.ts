@@ -116,6 +116,10 @@ export function useTailorStatus() {
         serverStatus: patch.serverStatus ?? existing?.serverStatus,
         explain: patch.explain ?? existing?.explain,
         borderline: patch.borderline ?? existing?.borderline,
+        compileStage: patch.compileStage ?? existing?.compileStage,
+        workerId: patch.workerId ?? existing?.workerId,
+        resumeSlot: patch.resumeSlot ?? existing?.resumeSlot,
+        sessionHour: patch.sessionHour ?? existing?.sessionHour,
       };
       if (!tailorRecordChanged(existing, nextRecord)) return prev;
       const next = { ...prev, [jobKey]: nextRecord };
