@@ -1,0 +1,41 @@
+id: AC-188
+role: accolite
+slot_kind: experience
+engineering_identity: cloud
+client_context: inhouse
+achievement_theme: slack-bot
+display_order: 26
+wow_score: 0.89
+metrics_claimed:
+  - slack_bot
+  - hours_saved_500
+concepts_claimed:
+  - cloud
+signature_technologies:
+  - Python
+  - AWS Lambda
+fact: Slack bots auto-create ERP timesheets from natural-language weekly submissions for 3,000 employees.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 90
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - AWS Lambda
+facets:
+  default:
+    phrase: slack-bot
+    keywords:
+      - python
+      - aws lambda
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Eliminated 500+ annual hours of manual timesheet entry with Python and AWS Lambda Slack bots auto-creating ERP
+      records for 3,000 employees in production.

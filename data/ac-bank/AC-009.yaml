@@ -1,0 +1,41 @@
+id: AC-009
+role: stony-brook
+slot_kind: experience
+engineering_identity: ai
+achievement_theme: llm-evaluation
+display_order: 11
+wow_score: 0.83
+metrics_claimed:
+  - eval_benchmark
+  - stocks_30
+concepts_claimed:
+  - ai
+signature_technologies:
+  - Python
+  - LangChain
+fact: LLM evaluation benchmarks for retrieval and agent outputs on equity forecasting.
+capabilities:
+  ai: 88
+  backend: 70
+  frontend: 65
+  data: 80
+  cloud: 65
+  ml: 65
+strength:
+  recruiter: 7
+ats_keywords:
+  - Python
+  - LangChain
+facets:
+  default:
+    phrase: llm-evaluation
+    keywords:
+      - python
+      - langchain
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Built Python and LangChain LLM evaluation benchmarks comparing retrieval and agent outputs across 30-stock
+      forecasting tasks with reproducible accuracy scoring in production.

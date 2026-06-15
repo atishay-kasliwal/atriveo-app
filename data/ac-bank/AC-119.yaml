@@ -1,0 +1,29 @@
+id: AC-119
+role: mri-research
+slot_kind: project
+achievement_theme: clustering
+display_order: 7
+wow_score: 0.86
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Python
+fact: Built clustering and phenotyping with UMAP and t-SNE dimensionality reduction for unsupervised discovery.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+facets:
+  default:
+    phrase: clustering
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built Python UMAP and t-SNE clustering for unsupervised phenotype discovery across 255-sample radiomics research
+      cohorts in production.

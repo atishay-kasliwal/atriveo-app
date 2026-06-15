@@ -1,0 +1,31 @@
+id: AC-130
+role: medledger
+slot_kind: project
+achievement_theme: doctor-api
+display_order: 8
+wow_score: 0.82
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - MongoDB
+  - Express.js
+fact: Built doctor profile management with CRUD operations and role-scoped access controls.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - MongoDB
+  - Express.js
+facets:
+  default:
+    phrase: doctor-mgmt
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built MongoDB and Express.js doctor profile CRUD APIs with Mongoose models and role-scoped access for 3 clinic
+      roles managing production patient workflows.

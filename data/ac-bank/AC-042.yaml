@@ -1,0 +1,34 @@
+id: AC-042
+role: atriveo
+slot_kind: project
+achievement_theme: resume-compiler
+display_order: 2
+wow_score: 0.96
+metrics_claimed: [jd_5k_weekly, pdf_one_page]
+concepts_claimed: [resume, compiler, beam, rcs, pdf, planner]
+signature_technologies: [Python]
+fact: Python resume compiler — beam search, RCS scoring, one-page PDFs; indexes 5K+ weekly JDs.
+capabilities:
+  ai: 94
+  backend: 90
+  data: 78
+strength:
+  recruiter: 10
+ats_keywords:
+  - Python
+  - FastAPI
+  - automation
+  - PDF
+  - planner
+  - beam search
+facets:
+  ai-product:
+    phrase: resume compiler
+    keywords: [resume, pdf, planner, beam, rcs, evidence]
+variants:
+  - facet: ai-product
+    emphasis: ai-product
+    strength: 10
+    text: >-
+      Built a Python resume compiler with planner-driven beam search and RCS scoring,
+      auto-generating one-page tailored PDFs from indexed job descriptions.

@@ -1,0 +1,32 @@
+id: AC-057
+role: atriveo
+slot_kind: project
+achievement_theme: cloud-deployment
+display_order: 7
+wow_score: 0.81
+metrics_claimed: [uptime_999, daily_2k_queries]
+concepts_claimed: [cloudflare, deployment, docker, uptime]
+signature_technologies: [Cloudflare]
+fact: Cloudflare Pages and Workers deployment with Docker — 99.9% uptime, 2K+ daily queries.
+capabilities:
+  cloud: 90
+  backend: 76
+strength:
+  recruiter: 8
+ats_keywords:
+  - Cloudflare
+  - Docker
+  - serverless
+  - deployment
+  - DevOps
+facets:
+  cloud:
+    phrase: Cloudflare deployment
+    keywords: [cloudflare, workers, pages, docker, deploy]
+variants:
+  - facet: cloud
+    emphasis: cloud
+    strength: 8
+    text: >-
+      Deployed the platform on Cloudflare Pages and Workers with Docker, maintaining
+      99.9% uptime across 2K+ daily production queries.

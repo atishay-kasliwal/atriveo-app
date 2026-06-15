@@ -1,0 +1,41 @@
+id: AC-190
+role: accolite
+slot_kind: experience
+engineering_identity: cloud
+client_context: inhouse
+achievement_theme: cache-search
+display_order: 28
+wow_score: 0.92
+metrics_claimed:
+  - users_100k
+  - p99_40
+concepts_claimed:
+  - cloud
+signature_technologies:
+  - Redis
+  - Elasticsearch
+fact: Redis and Elasticsearch rearchitecture for 100K+ users; P99 latency down 40%; Sev1 recurrence eliminated.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 90
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - Redis
+  - Elasticsearch
+facets:
+  default:
+    phrase: cache-search
+    keywords:
+      - redis
+      - elasticsearch
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Eliminated recurring production incidents for 100K+ users by rearchitecting on Redis and Elasticsearch cutting P99
+      latency 40% after deployment.

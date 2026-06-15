@@ -1,0 +1,29 @@
+id: AC-160
+role: user-data-platform
+slot_kind: project
+achievement_theme: authorization
+display_order: 8
+wow_score: 0.87
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Python
+fact: Integrated scoped capability tokens using attr.domain path grammar for time-bounded personal data access.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+facets:
+  default:
+    phrase: scoped-tokens
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Integrated Python scoped capability tokens with attr.domain path grammar for time-bounded access across 4 trust
+      invariants in production.

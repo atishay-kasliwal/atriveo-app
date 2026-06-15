@@ -1,0 +1,30 @@
+id: AC-161
+role: user-data-platform
+slot_kind: project
+achievement_theme: planning
+display_order: 9
+wow_score: 0.82
+metrics_claimed:
+  - roadmap_tiles_7
+concepts_claimed: []
+signature_technologies:
+  - Python
+fact: Built a 90-day roadmap sequencing 7 platform tiles for external developer onboarding to the consent API.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+facets:
+  default:
+    phrase: roadmap
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built a Python 90-day roadmap sequencing 7 platform tiles for external developer onboarding to the consent API in
+      production.

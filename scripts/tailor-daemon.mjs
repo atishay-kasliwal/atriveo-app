@@ -7,10 +7,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import dotenv from "dotenv";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
 const envPath = path.join(ROOT, ".env.tailor");
+const mongoEnvPath = path.join(ROOT, ".env");
+
+dotenv.config({ path: mongoEnvPath });
+dotenv.config({ path: envPath });
 
 if (!fs.existsSync(envPath)) {
   console.error("Missing .env.tailor — run: npm run tailor:setup");
@@ -46,7 +51,11 @@ function run(label, cmd, args) {
   return child;
 }
 
-const tailor = run("tailor", process.execPath, ["--env-file=.env.tailor", "scripts/tailor-server.mjs"]);
+const tailor = run("tailor", process.execPath, [
+  "--env-file=.env.tailor",
+  "--env-file=.env",
+  "scripts/tailor-server.mjs",
+]);
 const tunnel = run("tunnel", "cloudflared", ["tunnel", "--no-autoupdate", "run", "--token", tunnelToken]);
 
 function shutdown() {

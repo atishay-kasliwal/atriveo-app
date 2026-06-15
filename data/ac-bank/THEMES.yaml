@@ -1,0 +1,12 @@
+ai-llm:
+  weights: { ai: 3, backend: 1.5, ml: 2, cloud: 1 }
+  prefer_faces: [llm, ai, mcp-agents]
+backend:
+  weights: { backend: 3, cloud: 1.5, data: 1.5, ai: 0.5 }
+  prefer_faces: [backend, performance, data-pipeline]
+data-engineering:
+  weights: { data: 3, backend: 2, ml: 1, cloud: 1 }
+  prefer_faces: [data, data-pipeline]
+full-stack:
+  weights: { frontend: 2.5, backend: 2, cloud: 1, ai: 1 }
+  prefer_faces: [frontend, backend, cloud-serverless]

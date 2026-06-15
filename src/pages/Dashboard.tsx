@@ -11,7 +11,7 @@ import { useApplyClickLog } from "../hooks/useApplyClickLog";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
 import { useJobSelection } from "../hooks/useJobSelection";
-import { useTailorQueue } from "../hooks/useTailorQueue";
+import { useMongoCompileQueue } from "../hooks/useMongoCompileQueue";
 import { useTailorStatus } from "../hooks/useTailorStatus";
 import { isTop500 } from "../data/top500";
 import type { Job, RunEntry } from "../types";
@@ -23,11 +23,12 @@ import { careerOpsRating } from "../utils/jobPresentation";
 import type { Period, SortBy, SortDir } from "./Dashboard.types";
 import { defaultSortDir, sortJobs } from "../utils/jobSort";
 import { jobDismissKey } from "../utils/jobCopy";
-import { runSingleTailorJob, openTailorPath } from "../utils/tailorRun";
-import { buildTailorStreamHandler } from "../utils/tailorStreamHandler";
+import { openTailorPath } from "../utils/tailorRun";
 import { outcomeFromServerStatus, resolveTailorOutcome } from "../utils/tailorOutcome";
 import { tailorPhaseProgress } from "../utils/tailorProgress";
 import { estDateKey } from "../utils/estDate";
+import CompilerStatusStrip from "../components/CompilerStatusStrip";
+import { buildJobResumeView } from "../utils/jobResumeView";
 
 type LevelFilter = "all" | "New Grad" | "Entry" | "Mid";
 type RunCard = RunEntry & {
@@ -578,20 +579,9 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   );
   const displayedJobs = isSplitView ? locationFiltered : filtered;
   const jobSelection = useJobSelection(displayedJobs);
-  const processQueueJob = useCallback(async (job: Job) => {
-    const key = jobDismissKey(job);
-    if (clickedKeySet.has(key)) {
-      return { ok: false, error: "dismissed" };
-    }
-    const onEvent = buildTailorStreamHandler(tailorStatus, job, {
-      shouldSkip: () => clickedKeySet.has(key),
-    });
-    return runSingleTailorJob(job, onEvent);
-  }, [tailorStatus, clickedKeySet]);
-  const tailorQueue = useTailorQueue(displayedJobs, {
+  const tailorQueue = useMongoCompileQueue(displayedJobs, {
     tailorStatus,
     dismissedKeys: clickedKeySet,
-    onProcessJob: processQueueJob,
   });
 
   const handleSaveJobWithQueueCleanup = useCallback((job: Job, source: SavedJobSource) => {
@@ -612,6 +602,25 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       console.error(e);
     }
   }, []);
+
+  const handleOpenPdf = handleOpenTailorPath;
+
+  const getResumeView = useCallback((job: Job) => {
+    const key = jobDismissKey(job);
+    const record = tailorStatus.getRecordForJob(job);
+    const queueItem = tailorQueue.queue.find((item) => item.jobKey === key) ?? null;
+    const apply = job.job_url ? getRecord(job.job_url) : null;
+    return buildJobResumeView(record, queueItem, apply);
+  }, [tailorStatus, tailorQueue.queue, getRecord]);
+
+  const failedTodayCount = useMemo(() => {
+    const today = estDateKey(new Date());
+    return Object.values(tailorStatus.records).filter((r) => {
+      if (!r.tailoredAt || estDateKey(new Date(r.tailoredAt)) !== today) return false;
+      const o = resolveTailorOutcome(r);
+      return o !== "done" && o !== "borderline" && o !== "running" && o !== "queued";
+    }).length;
+  }, [tailorStatus.records]);
 
   const handleDismissJob = useCallback((job: Job) => {
     handleSaveJobWithQueueCleanup(job, "click");
@@ -654,8 +663,19 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           progressPct: 100,
           tailoredAt: new Date().toISOString(),
           logs: job.logs,
-          outcome: "done",
+          outcome: job.borderline ? "borderline" : "done",
           serverStatus: "ok",
+          explain: job.explain,
+          borderline: job.borderline,
+        });
+      } else if (job.status === "unsupported-jd") {
+        tailorStatus.markStatus(key, "failed", {
+          error: job.error || "Unsupported job description",
+          dir: job.dir,
+          folder: job.folder,
+          logs: job.logs,
+          outcome: "unsupported",
+          serverStatus: "unsupported-jd",
         });
       } else if (job.status === "no-go") {
         tailorStatus.markStatus(key, "no-go", {
@@ -879,6 +899,8 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           isGroupFullySelected={jobSelection.isGroupFullySelected}
           groupByCompany
           getTailorRecord={tailorStatus.getRecordForJob}
+          getResumeView={getResumeView}
+          onOpenPdf={handleOpenPdf}
           onQueueUrgent={(job) => tailorQueue.enqueueJob(job, "manual", true)}
           onOpenTailorPath={handleOpenTailorPath}
           onDismissJob={isTodayBoard ? handleDismissJob : undefined}
@@ -988,8 +1010,18 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 <div className="feed-refresh-notice" role="status">{feedRefreshNotice}</div>
               ) : null}
 
-              {/* Tailor Queue bar removed from the feed — queue still runs in the
-                  background; view created resumes on the /tailored page. */}
+              <CompilerStatusStrip
+                queue={tailorQueue.queue}
+                processing={tailorQueue.processing}
+                runningItem={tailorQueue.runningItem}
+                doneToday={tailorStatus.resumesCreatedTodayCount}
+                failedToday={failedTodayCount}
+                tailorStatus={tailorStatus}
+                workerMode={tailorQueue.mongoAvailable !== false}
+                streamLive={tailorQueue.streamLive}
+                syncMessage={tailorQueue.syncMessage}
+              />
+
               <BulkJobCopyBar
                 variant="board"
                 selectedCount={jobSelection.selectedCount}
@@ -1168,6 +1200,17 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
             {feedRefreshNotice ? (
               <div className="feed-refresh-notice" role="status">{feedRefreshNotice}</div>
             ) : null}
+            <CompilerStatusStrip
+              queue={tailorQueue.queue}
+              processing={tailorQueue.processing}
+              runningItem={tailorQueue.runningItem}
+              doneToday={tailorStatus.resumesCreatedTodayCount}
+              failedToday={failedTodayCount}
+              tailorStatus={tailorStatus}
+              workerMode={tailorQueue.mongoAvailable !== false}
+              streamLive={tailorQueue.streamLive}
+              syncMessage={tailorQueue.syncMessage}
+            />
             {filterBar}
 
             <BulkJobCopyBar

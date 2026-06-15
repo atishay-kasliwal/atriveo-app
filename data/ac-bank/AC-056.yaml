@@ -1,0 +1,45 @@
+id: AC-056
+role: atriveo
+slot_kind: project
+achievement_theme: tailor-integration
+display_order: 6
+wow_score: 0.83
+metrics_claimed:
+  - jd_5k_weekly
+concepts_claimed:
+  - tailor
+  - pipeline
+  - batch
+  - selection
+  - evidence
+signature_technologies:
+  - Python
+fact: Evidence-based tailoring pipeline — role-specific resumes from 5K+ weekly JDs with automated bullet selection.
+capabilities:
+  ai: 86
+  backend: 84
+  frontend: 70
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - automation
+  - resume
+  - pipeline
+  - FastAPI
+facets:
+  product:
+    phrase: tailor pipeline integration
+    keywords:
+      - tailor
+      - batch
+      - resume
+      - pipeline
+      - integration
+variants:
+  - facet: product
+    emphasis: product
+    strength: 9
+    text: >-
+      Integrated Python an evidence-based tailoring pipeline that generated role-specific resumes from 5K+ weekly job
+      descriptions with automated bullet selection.

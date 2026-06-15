@@ -1,0 +1,32 @@
+id: AC-059
+role: atriveo
+slot_kind: project
+achievement_theme: jd-indexing
+display_order: 9
+wow_score: 0.79
+metrics_claimed: [jd_5k_weekly]
+concepts_claimed: [etl, indexing, linkedin, ats, ingestion]
+signature_technologies: [Python]
+fact: Python indexing pipeline processing 5K+ LinkedIn job descriptions each week for tailoring and ATS matching.
+capabilities:
+  data: 88
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - ETL
+  - MongoDB
+  - data engineering
+  - job descriptions
+facets:
+  data:
+    phrase: JD indexing pipeline
+    keywords: [export, index, job description, bucket, linkedin]
+variants:
+  - facet: data
+    emphasis: data
+    strength: 8
+    text: >-
+      Built a Python indexing pipeline that processed 5K+ LinkedIn job descriptions each week
+      for offline resume tailoring and ATS matching.

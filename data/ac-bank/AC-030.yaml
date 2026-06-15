@@ -1,0 +1,27 @@
+id: AC-030
+role: accolite
+slot_kind: experience
+visibility:
+  default: false
+fact: RETIRED — superseded by AC-183 (Oracle replacement ERP) in Accolite bank v43.
+capabilities:
+  frontend: 80
+  backend: 82
+strength:
+  recruiter: 7
+ats_keywords:
+  - React
+  - Node.js
+  - Python
+  - Firebase
+facets:
+  platform:
+    phrase: internal operations platform
+    keywords: [react, node, python, firebase]
+variants:
+  - facet: platform
+    emphasis: platform
+    strength: 7
+    text: >-
+      Built an internal payroll and operations platform in Node.js, Python, TypeScript, React, and Firebase,
+      automating payslip generation and financial workflows for 3,000 employees.

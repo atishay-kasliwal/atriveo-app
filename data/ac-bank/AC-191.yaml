@@ -1,0 +1,41 @@
+id: AC-191
+role: accolite
+slot_kind: experience
+engineering_identity: cloud
+client_context: inhouse
+achievement_theme: cicd
+display_order: 29
+wow_score: 0.91
+metrics_claimed:
+  - deploy_6h_90s
+  - releases_20
+concepts_claimed:
+  - cloud
+signature_technologies:
+  - Docker
+  - Kubernetes
+fact: Jenkins Docker Kubernetes CI/CD for 20 engineers; deploy 6h to 90s; 20+ releases/month.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 90
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - Docker
+  - Kubernetes
+facets:
+  default:
+    phrase: cicd
+    keywords:
+      - docker
+      - kubernetes
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Deployed Jenkins Docker and Kubernetes CI/CD across 20 engineers cutting release cycles from 6 hours to 90 seconds
+      with 20+ monthly production releases.

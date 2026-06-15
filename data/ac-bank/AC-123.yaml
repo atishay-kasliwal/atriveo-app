@@ -1,0 +1,36 @@
+id: AC-123
+role: medledger
+slot_kind: project
+achievement_theme: platform-ownership
+display_order: 1
+wow_score: 0.88
+metrics_claimed:
+  - platform
+  - auth
+  - mongodb
+concepts_claimed: []
+signature_technologies:
+  - Node.js
+  - MongoDB
+fact: >-
+  Built a medical clinic management system on Node.js and Express with MongoDB managing patients, doctors, and
+  appointment
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Node.js
+  - MongoDB
+facets:
+  default:
+    phrase: clinic-platform
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built a medical clinic management system on Node.js and Express with MongoDB managing patient, doctor, and
+      appointment records for 3 user roles.

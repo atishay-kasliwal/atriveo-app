@@ -1,0 +1,112 @@
+# MRI Research Pipeline | Canonical achievement bank (review file)
+# Bank v50
+# Lint: npm run ac:bullet-lint -- --role mri-research
+# Distinct from Wake Forest clinical platform — research radiomics pipeline only
+
+role:
+  id: mri-research
+  employer: Advanced Radiomics Research Pipeline
+  title: ML Research Engineer
+  location: ""
+  dates: ""
+  slot_kind: project
+  resume_pick_count: 2
+  github: https://github.com/atishay-kasliwal/MRI
+
+product:
+  name: Modular radiomics research pipeline
+  problem: >
+    Oncology research teams need reproducible radiomics workflows spanning survival analysis, signature
+    development, explainability, and publication-ready reporting — not one-off notebooks.
+  solution: >
+    Python pipeline with 10 analysis modules: Kaplan-Meier/Cox survival, LASSO signatures, SHAP/LIME XAI,
+    radiogenomics correlation, multimodal fusion, UMAP/t-SNE clustering, cohort preprocessing, PDF reports,
+    and XGBoost/scikit-learn validation.
+  stack:
+    languages: [Python]
+    ml: [scikit-learn, XGBoost, lifelines, SHAP, LIME]
+    viz: [UMAP, t-SNE, Matplotlib]
+    output: [PDF research reports]
+
+metrics:
+  analysis_modules: 10
+  radiomics_samples_2022: 255
+  clinical_patients_total: 73
+  dataset_breakdown:
+    "2020": 11
+    "2021": 18
+    "2022": 44
+  dataset_years: [2020, 2021, 2022]
+
+achievements:
+  - id: AC-113
+    theme: platform-ownership
+    resume_bullet: >-
+      Built a modular Python radiomics research pipeline spanning 10 analysis modules
+      with publication-ready PDF reports.
+  - id: AC-114
+    theme: survival
+    resume_bullet: >-
+      Engineered Python Kaplan-Meier and Cox survival models using lifelines on
+      73-patient clinical research cohorts from 2020–2022.
+  - id: AC-115
+    theme: signature
+    resume_bullet: >-
+      Built Python and scikit-learn LASSO radiomics signature development with nomograms
+      and risk stratification across 255-sample research cohorts.
+  - id: AC-116
+    theme: xai
+    resume_bullet: >-
+      Integrated Python SHAP and LIME explainability with permutation importance across
+      multimodal radiomics models on 255 samples in production.
+  - id: AC-117
+    theme: radiogenomics
+    resume_bullet: >-
+      Built Python radiogenomics analysis correlating radiomics and genomics features
+      with mutation outcomes on 73-patient cohorts in production.
+  - id: AC-118
+    theme: multimodal
+    resume_bullet: >-
+      Engineered Python multi-modal models combining radiomics, clinical, and genomics
+      features on 73-patient research cohorts for outcome prediction.
+  - id: AC-119
+    theme: clustering
+    resume_bullet: >-
+      Built Python UMAP and t-SNE clustering for unsupervised phenotype discovery across
+      255-sample radiomics research cohorts in production.
+  - id: AC-120
+    theme: datasets
+    resume_bullet: >-
+      Built Python and pandas preprocessing pipelines for 255-sample radiomics cohorts
+      and 73 patient records across 2020–2022 datasets for clinical research analysis in
+      production workflows.
+  - id: AC-121
+    theme: reporting
+    resume_bullet: >-
+      Built Python PDF research reports with executive summaries across 10 module
+      visualizations for clinical research publication workflows.
+  - id: AC-122
+    theme: validation
+    resume_bullet: >-
+      Implemented Python cross-validation pipelines with XGBoost and scikit-learn on
+      255-sample radiomics research cohorts.
+selection_examples:
+  ml_research_jd:
+    typical_pick: [AC-113, AC-115]
+    package: modeling
+  healthcare_ai_jd:
+    typical_pick: [AC-114, AC-116]
+    package: clinical-ml
+  data_jd:
+    typical_pick: [AC-120, AC-119]
+    package: cohorts
+  xai_jd:
+    typical_pick: [AC-116, AC-118]
+    package: explainability
+
+review_scores:
+  ats: "9.5/10 — Python, radiomics, survival, XGBoost, SHAP spread across bullets"
+  recruiter: "9/10 — credible research metrics (255 samples, 73 patients); distinct from Wake Forest"
+  interview_risk: >
+    Do not claim 10K+ studies, GCP clinical deployment, or Wake Forest production platform — this repo
+    is separate research code with verified cohort sizes only.

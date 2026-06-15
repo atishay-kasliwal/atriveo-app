@@ -1,0 +1,41 @@
+id: AC-186
+role: accolite
+slot_kind: experience
+engineering_identity: enterprise
+client_context: inhouse
+achievement_theme: performance-reviews
+display_order: 24
+wow_score: 0.86
+metrics_claimed:
+  - reviews
+  - teams_10
+concepts_claimed:
+  - enterprise
+signature_technologies:
+  - React
+  - MongoDB
+fact: Yearly performance review workflows in in-house ERP across hierarchical teams.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 72
+  data: 82
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - React
+  - MongoDB
+facets:
+  default:
+    phrase: performance-reviews
+    keywords:
+      - react
+      - mongodb
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Standardized yearly performance reviews on React and MongoDB across 10+ manager teams replacing manual evaluation
+      workflows for 3,000 employees in production.

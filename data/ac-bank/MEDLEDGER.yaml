@@ -1,0 +1,102 @@
+# MedLedger | Canonical achievement bank (review file)
+# Bank v50
+# Lint: npm run ac:bullet-lint -- --role medledger
+
+role:
+  id: medledger
+  employer: MedLedger
+  title: Full Stack Engineer
+  location: ""
+  dates: ""
+  slot_kind: project
+  resume_pick_count: 2
+  github: https://github.com/atishay-kasliwal/MedLedger
+
+product:
+  name: Medical clinic management system
+  problem: >
+    Small clinics need a single system to manage patients, doctors, appointments, and role-specific
+    workflows without siloed spreadsheets or ad hoc tools.
+  solution: >
+    Node.js and Express REST API with MongoDB/Mongoose, JWT + bcrypt auth, RBAC for Admin/Doctor/Patient,
+    EJS dashboards, Swagger OpenAPI docs, and Helmet/CORS/CSRF security middleware.
+  stack:
+    backend: [Node.js, Express.js, MongoDB, Mongoose]
+    auth: [JWT, bcrypt, RBAC]
+    frontend: [EJS, JavaScript]
+    security: [Helmet, CORS, CSRF]
+    docs: [Swagger OpenAPI]
+
+metrics:
+  roles: 3
+  note: No production user counts or scale metrics in README — do not invent
+
+achievements:
+  - id: AC-123
+    theme: platform-ownership
+    resume_bullet: >-
+      Built a medical clinic management system on Node.js and Express with MongoDB
+      managing patient, doctor, and appointment records for 3 user roles.
+  - id: AC-124
+    theme: authentication
+    resume_bullet: >-
+      Implemented JWT authentication with bcrypt hashing securing registration and login
+      for 3 clinic user roles in production.
+  - id: AC-125
+    theme: authorization
+    resume_bullet: >-
+      Built Express.js role-based access control separating Admin, Doctor, and Patient
+      permissions across 3 protected API route groups in production.
+  - id: AC-126
+    theme: patient-api
+    resume_bullet: >-
+      Built REST CRUD APIs for patient records with Mongoose schemas and validation
+      supporting 3 clinic user roles with MongoDB in production.
+  - id: AC-127
+    theme: scheduling
+    resume_bullet: >-
+      Engineered Node.js and EJS appointment scheduling workflows enabling clinic staff
+      and patients to manage 3 role-based booking flows in production.
+  - id: AC-128
+    theme: api-docs
+    resume_bullet: >-
+      Built Swagger OpenAPI docs on Express.js for auth and patient REST endpoints on
+      the clinic API serving 3 user roles in production.
+  - id: AC-129
+    theme: security
+    resume_bullet: >-
+      Integrated Helmet and CORS hardening with CSRF middleware protecting 3 role-based
+      clinic management routes in production.
+  - id: AC-130
+    theme: doctor-api
+    resume_bullet: >-
+      Built MongoDB and Express.js doctor profile CRUD APIs with Mongoose models and
+      role-scoped access for 3 clinic roles managing production patient workflows.
+  - id: AC-131
+    theme: frontend
+    resume_bullet: >-
+      Shipped responsive EJS dashboards for managing appointments and patient records
+      for 3 clinic roles with JavaScript in production.
+  - id: AC-132
+    theme: middleware
+    resume_bullet: >-
+      Implemented centralized error handling and JWT auth middleware across Express
+      layers securing the clinic API for 3 roles with Express.js in production.
+selection_examples:
+  fullstack_jd:
+    typical_pick: [AC-123, AC-131]
+    package: platform
+  backend_jd:
+    typical_pick: [AC-123, AC-126]
+    package: api
+  security_jd:
+    typical_pick: [AC-124, AC-129]
+    package: security
+  api_jd:
+    typical_pick: [AC-128, AC-126]
+    package: docs
+
+review_scores:
+  ats: "9.5/10 — Node.js, Express, MongoDB, JWT, RBAC spread across bullets"
+  recruiter: "9/10 — clear full-stack clinic story; honest scope without fake scale"
+  interview_risk: "No user/transaction counts in repo — do not invent clinic size or production deployment claims."

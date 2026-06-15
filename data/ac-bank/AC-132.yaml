@@ -1,0 +1,29 @@
+id: AC-132
+role: medledger
+slot_kind: project
+achievement_theme: middleware
+display_order: 10
+wow_score: 0.81
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Express.js
+fact: Implemented centralized error handling and auth middleware across Express route layers.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Express.js
+facets:
+  default:
+    phrase: error-handling
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Implemented centralized error handling and JWT auth middleware across Express layers securing the clinic API for 3
+      roles with Express.js in production.

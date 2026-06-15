@@ -1,0 +1,41 @@
+id: AC-181
+role: accolite
+slot_kind: experience
+engineering_identity: fullstack
+client_context: tmobile
+achievement_theme: feature-ownership
+display_order: 19
+wow_score: 0.83
+metrics_claimed:
+  - e2e_tmobile
+  - users_10k
+concepts_claimed:
+  - fullstack
+signature_technologies:
+  - React
+  - Java
+fact: End-to-end T-Mobile commerce feature ownership from backend APIs through customer purchase flows.
+capabilities:
+  backend: 78
+  frontend: 88
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 7
+ats_keywords:
+  - React
+  - Java
+facets:
+  default:
+    phrase: feature-ownership
+    keywords:
+      - react
+      - java
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Owned end-to-end T-Mobile commerce features on React and Java from backend APIs through customer purchase flows
+      serving 10K+ production users.

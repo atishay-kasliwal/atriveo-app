@@ -1,0 +1,32 @@
+id: AC-074
+role: insureraft
+slot_kind: project
+achievement_theme: raft-consensus
+display_order: 2
+wow_score: 0.93
+metrics_claimed: [raft_nodes_3]
+concepts_claimed: [quorum, replication, leader, commit]
+signature_technologies: [NuRaft, Raft]
+fact: NuRaft quorum writes — majority persist before ack across 3-node cluster.
+capabilities:
+  backend: 94
+  data: 78
+strength:
+  recruiter: 10
+ats_keywords:
+  - Raft
+  - NuRaft
+  - quorum
+  - consensus
+  - replication
+facets:
+  consensus:
+    phrase: Raft consensus
+    keywords: [raft, quorum, leader, replication]
+variants:
+  - facet: consensus
+    emphasis: consensus
+    strength: 10
+    text: >-
+      Implemented Raft consensus with NuRaft quorum writes, replicating policy and claim events
+      across 3 nodes before acknowledgment.

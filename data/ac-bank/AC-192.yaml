@@ -1,0 +1,41 @@
+id: AC-192
+role: accolite
+slot_kind: experience
+engineering_identity: backend
+client_context: cross
+achievement_theme: fastapi-microservices
+display_order: 30
+wow_score: 0.88
+metrics_claimed:
+  - latency_sub200
+  - integrations_10k
+concepts_claimed:
+  - backend
+signature_technologies:
+  - FastAPI
+  - Redis
+fact: FastAPI microservices with Docker Redis; sub-200ms REST for enterprise telecom integrations.
+capabilities:
+  backend: 90
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - FastAPI
+  - Redis
+facets:
+  default:
+    phrase: fastapi-microservices
+    keywords:
+      - fastapi
+      - redis
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Accelerated enterprise telecom partner integrations with FastAPI and Redis microservices delivering sub-200ms REST
+      responses across 10K+ production API calls.

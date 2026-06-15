@@ -1,0 +1,42 @@
+id: AC-078
+role: insureraft
+slot_kind: project
+achievement_theme: ha-failover
+display_order: 6
+wow_score: 0.88
+metrics_claimed:
+  - raft_nodes_3
+concepts_claimed:
+  - leader-election
+  - failover
+  - ha
+  - quorum
+signature_technologies:
+  - NuRaft
+fact: NuRaft leader election — cluster survives minority failure without data loss.
+capabilities:
+  backend: 90
+  cloud: 76
+strength:
+  recruiter: 9
+ats_keywords:
+  - leader election
+  - failover
+  - high availability
+  - NuRaft
+  - fault tolerance
+facets:
+  reliability:
+    phrase: HA failover
+    keywords:
+      - failover
+      - leader
+      - ha
+      - fault tolerant
+variants:
+  - facet: reliability
+    emphasis: reliability
+    strength: 9
+    text: >-
+      Implemented NuRaft automatic leader election and failover on a 3-node cluster, surviving minority node failures
+      without data loss.

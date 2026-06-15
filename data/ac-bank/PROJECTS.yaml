@@ -1,0 +1,152 @@
+# GitHub project catalog — reference only for archived repo banks
+# Status: pending | in_progress | done | skip | archive
+#
+# RESUME SCOPE (fixed): Experience SBU·Wake·Accolite + Projects Atriveo·Insurance (15 bullets)
+# Alternate project banks below are archived — YAML kept for facts, not composed on resume.
+# FOMC / macro narrative lives in SBU (AC-001, AC-026, etc.), not a separate project slot.
+
+github_user: atishay-kasliwal
+
+resume_layout:
+  experience:
+    - stony-brook
+    - wake-forest
+    - accolite
+  projects:
+    - atriveo
+    - insurance-platform
+  total_bullets: 15
+
+experience_banks:
+  accolite:
+    ac_ids: [AC-198, AC-163, AC-164, AC-165, AC-166, AC-167, AC-168, AC-169, AC-170, AC-171, AC-172, AC-173, AC-174, AC-175, AC-176, AC-177, AC-178, AC-179, AC-180, AC-181, AC-182, AC-183, AC-184, AC-185, AC-186, AC-187, AC-188, AC-189, AC-190, AC-191, AC-192, AC-193, AC-194, AC-195, AC-196, AC-197]
+    scope_ac_id: AC-198
+    bank: data/ac-bank/ACCOLITE.yaml
+    resume_pick_count: 4
+    resume_structure: "1 scope thesis + 3 JD evidence bullets"
+    status: done
+
+ac_id_ranges:
+  atriveo: [AC-042, AC-050, AC-051, AC-052, AC-053, AC-054, AC-056, AC-057, AC-058, AC-059, AC-060, AC-061, AC-062]
+  insurance-platform: [AC-063, AC-064, AC-065, AC-066, AC-067, AC-068, AC-069, AC-070, AC-071, AC-072]
+  insureraft: [AC-073, AC-074, AC-075, AC-076, AC-077, AC-078, AC-079, AC-080, AC-081, AC-082]
+  job-pipeline: [AC-083, AC-084, AC-085, AC-086, AC-087, AC-088, AC-089, AC-090, AC-091, AC-092]
+  bayesian-mmm: [AC-093, AC-094, AC-095, AC-096, AC-097, AC-098, AC-099, AC-100, AC-101, AC-102]
+  portfolio: [AC-103, AC-104, AC-105, AC-106, AC-107, AC-108, AC-109, AC-110, AC-111, AC-112]
+  mri-research: [AC-113, AC-114, AC-115, AC-116, AC-117, AC-118, AC-119, AC-120, AC-121, AC-122]
+  medledger: [AC-123, AC-124, AC-125, AC-126, AC-127, AC-128, AC-129, AC-130, AC-131, AC-132]
+  encryption-app: [AC-133, AC-134, AC-135, AC-136, AC-137, AC-138, AC-139, AC-140, AC-141, AC-142]
+  fomc-intelligence: [AC-143, AC-144, AC-145, AC-146, AC-147, AC-148, AC-149, AC-150, AC-151, AC-152]
+  user-data-platform: [AC-153, AC-154, AC-155, AC-156, AC-157, AC-158, AC-159, AC-160, AC-161, AC-162]
+
+projects:
+  - order: 1
+    role: atriveo
+    repo: atishay-kasliwal/atriveo-app
+    status: done
+    on_resume: true
+    bank: data/ac-bank/ATRIVEO.yaml
+    bullets: 13
+
+  - order: 2
+    role: insurance-platform
+    repo: atishay-kasliwal/insurance-microservices-platform
+    status: done
+    on_resume: true
+    bank: data/ac-bank/INSURANCE-PLATFORM.yaml
+    bullets: 10
+
+  - order: 3
+    role: insureraft
+    repo: atishay-kasliwal/InsureRaft
+    status: archive
+    on_resume: false
+    bank: data/ac-bank/INSURERAFT.yaml
+    bullets: 10
+    note: Archived — insurance story covered by insurance-platform slot
+
+  - order: 4
+    role: job-pipeline
+    repo: atishay-kasliwal/job-pipeline
+    status: archive
+    on_resume: false
+    bank: data/ac-bank/JOB-PIPELINE.yaml
+    bullets: 10
+    note: Archived — atriveo-app slot covers job search product
+
+  - order: 5
+    role: bayesian-mmm
+    repo: atishay-kasliwal/bayesian-marketing-mix-model
+    status: archive
+    on_resume: false
+    bank: data/ac-bank/BAYESIAN-MMM.yaml
+    bullets: 10
+
+  - order: 6
+    role: portfolio
+    repo: atishay-kasliwal/atishaykasliwal.com
+    status: archive
+    on_resume: false
+    bullets: 10
+    note: Archived — not building AC-103–112 bank; personal site not a resume slot
+
+  - order: 7
+    role: mri-research
+    repo: atishay-kasliwal/MRI
+    status: archive
+    on_resume: false
+    bank: data/ac-bank/MRI-RESEARCH.yaml
+    bullets: 10
+    note: Archived — Wake Forest slot covers clinical MRI
+
+  - order: 8
+    role: medledger
+    repo: atishay-kasliwal/MedLedger
+    status: archive
+    on_resume: false
+    bank: data/ac-bank/MEDLEDGER.yaml
+    bullets: 10
+
+  - order: 9
+    role: encryption-app
+    repo: atishay-kasliwal/encryption-decryption-app
+    status: archive
+    on_resume: false
+    bullets: 10
+    note: Archived — no AC-133–142 bank planned
+
+  - order: 10
+    role: fomc-intelligence
+    repo: atishay-kasliwal/fedtalk-openai-analysis-main
+    status: archive
+    on_resume: false
+    bullets: 10
+    note: Archived — FOMC narrative in SBU experience (AC-001, AC-026), not project slot
+
+  - order: 11
+    role: user-data-platform
+    repo: atishay-kasliwal/user-data-platform
+    status: archive
+    on_resume: false
+    bank: data/ac-bank/USER-DATA-PLATFORM.yaml
+    bullets: 10
+
+skipped:
+  - repo: atishay-kasliwal/Atriveo
+    reason: Superseded by atriveo-app
+  - repo: atishay-kasliwal/hushh-research
+    reason: Fork of hushh-labs — not original work
+  - repo: atishay-kasliwal/atishay-kasliwal
+    reason: GitHub profile README only
+  - repo: atishay-kasliwal/resumeclaude
+    reason: Resume tooling meta-project
+  - repo: atishay-kasliwal/resume-latex-compiler
+    reason: LaTeX tooling meta-project
+  - repo: atishay-kasliwal/kraven
+    reason: Private — revisit if made public
+  - repo: private course / homework repos
+    reason: Intel-Image-Classification, Walmart-Sales, Twitter-Sentiment, cohorts, FMOC, etc.
+
+next_up: null
+experience_next: done
+projects_next: null

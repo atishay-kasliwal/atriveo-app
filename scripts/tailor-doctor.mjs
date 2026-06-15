@@ -105,20 +105,44 @@ function checkJdBuckets() {
   }
 }
 
-// ── 2. Ollama + model ────────────────────────────────────────────────────────
-async function checkOllama() {
-  section("Ollama (local AI)");
+// ── 2. AC evidence bank (default tailor path) ───────────────────────────────
+function checkAcBank() {
+  section("AC evidence bank (default resume pipeline)");
+  const bankDir = path.join(ROOT, "data", "ac-bank");
+  const versionPath = path.join(bankDir, "BANK_VERSION.yaml");
+  if (!fs.existsSync(bankDir)) {
+    bad("AC bank missing", bankDir, "sync accomplishments into data/ac-bank");
+    return;
+  }
+  const acFiles = fs.readdirSync(bankDir).filter((f) => /^AC-\d+\.yaml$/.test(f));
+  ok("AC bank present", `${acFiles.length} accomplishment file(s)`);
+  if (acFiles.length < 30) {
+    warn("Seed bank only", `${acFiles.length} ACs — sync full library for better beam diversity`, "copy ACs from Desktop/June/Resume claude/Memory/ACCOMPLISHMENTS");
+  }
+  if (fs.existsSync(versionPath)) ok("Bank version file", path.relative(ROOT, versionPath));
+}
+
+// ── 3. Ollama + model (legacy tailor only) ─────────────────────────────────
+async function checkOllama(legacyOnly = false) {
+  section(legacyOnly ? "Ollama (legacy tailor — TAILOR_LEGACY=1)" : "Ollama (optional — legacy tailor only)");
   let tags;
   try { tags = await fetchJson(`${OLLAMA}/api/tags`); }
-  catch (e) { bad("Ollama unreachable", e.message, "open Ollama app or run: ollama serve"); return; }
+  catch (e) {
+    if (legacyOnly) bad("Ollama unreachable", e.message, "open Ollama app or run: ollama serve");
+    else warn("Ollama unreachable", e.message, "not needed for AC pipeline — only for TAILOR_LEGACY=1");
+    return;
+  }
   const names = (tags.models || []).map((m) => m.name);
   ok("Ollama responding", `${names.length} model(s)`);
 
   if (names.some((n) => n === DEFAULT_MODEL || n.startsWith(`${DEFAULT_MODEL.split(":")[0]}:`))) {
     ok(`Default model installed`, DEFAULT_MODEL);
-  } else {
+  } else if (legacyOnly) {
     bad(`Default model "${DEFAULT_MODEL}" not installed`, names.slice(0, 4).join(", "),
         `ollama pull ${DEFAULT_MODEL}`);
+  } else {
+    warn(`Default model "${DEFAULT_MODEL}" not installed`, names.slice(0, 4).join(", "),
+        `only needed for TAILOR_LEGACY=1`);
   }
 
   // What's currently loaded (a stuck model is a common hang cause)
@@ -129,20 +153,27 @@ async function checkOllama() {
   } catch { /* ps optional */ }
 }
 
-// ── 3. Tailor sidecar ────────────────────────────────────────────────────────
+// ── 4. Tailor sidecar ────────────────────────────────────────────────────────
 async function checkSidecar() {
   section("Tailor sidecar (the local server that builds resumes)");
   const token = loadEnvToken();
+  let legacy = false;
   try {
     const h = await fetchJson(`${SIDECAR}/health`, token ? { headers: { "X-Tailor-Token": token } } : {});
-    if (h.ok) ok("Sidecar healthy", `drive ${h.driveMounted ? "mounted" : "NOT mounted"}`);
+    if (h.ok) {
+      const mode = h.pipeline === "legacy" ? "legacy (Gemma rewrites)" : `ac (planner ${h.planner || "v2"})`;
+      ok("Sidecar healthy", `${mode} · drive ${h.driveMounted ? "mounted" : "NOT mounted"}`);
+      legacy = h.pipeline === "legacy";
+    }
     if (!h.driveMounted) bad("External drive not mounted", DRIVE_ROOT, "plug in 'Kasliwal v2'");
+    return legacy;
   } catch (e) {
     bad("Sidecar not running", e.message, "npm run tailor   (or: launchctl kickstart -k gui/$(id -u)/com.atriveo.tailor)");
+    return false;
   }
 }
 
-// ── 4. Output drive ──────────────────────────────────────────────────────────
+// ── 5. Output drive ──────────────────────────────────────────────────────────
 function checkDrive() {
   section("Output drive");
   if (!fs.existsSync(DRIVE_ROOT)) { bad("Drive not mounted", DRIVE_ROOT, "plug in 'Kasliwal v2'"); return; }
@@ -164,8 +195,9 @@ function checkDrive() {
 (async function main() {
   console.log(`${C.bold}Tailor pipeline doctor${C.reset} ${C.dim}· ${new Date().toLocaleString()}${C.reset}`);
   checkJdBuckets();
-  await checkOllama();
-  await checkSidecar();
+  checkAcBank();
+  const legacy = await checkSidecar();
+  await checkOllama(legacy);
   checkDrive();
 
   console.log();

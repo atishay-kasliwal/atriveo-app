@@ -1,0 +1,33 @@
+id: AC-070
+role: insurance-platform
+slot_kind: project
+achievement_theme: observability
+display_order: 8
+wow_score: 0.88
+metrics_claimed: [services_8]
+concepts_claimed: [observability, prometheus, grafana, tracing, logging]
+signature_technologies: [Prometheus, Grafana]
+fact: Prometheus + Grafana + Zipkin + ELK observability across all microservices via Actuator.
+capabilities:
+  backend: 82
+  cloud: 88
+strength:
+  recruiter: 9
+ats_keywords:
+  - Prometheus
+  - Grafana
+  - Zipkin
+  - ELK
+  - observability
+  - Spring Actuator
+facets:
+  observability:
+    phrase: observability stack
+    keywords: [prometheus, grafana, zipkin, elk, metrics]
+variants:
+  - facet: observability
+    emphasis: observability
+    strength: 9
+    text: >-
+      Integrated a Prometheus and Grafana observability stack with Zipkin tracing and ELK
+      logging across all 8 microservices via Spring Actuator metrics.

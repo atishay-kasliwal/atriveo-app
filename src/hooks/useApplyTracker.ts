@@ -4,6 +4,7 @@ import { useAuth } from "./useAuth";
 const KEY = (uid: string) => `atriveo_apply_stats_v1_${uid}`;
 
 export type TrackerStatus = "applied" | "rejected" | null;
+export type OfferStatus = "pending" | "accepted" | "declined" | null;
 
 export interface ApplyMetadata {
   location?: string | null;
@@ -33,6 +34,8 @@ export interface ApplyRecord {
   trackerSyncStatus: JobTrackerSyncStatus;
   trackerSyncMessage: string | null;
   trackerSyncedAt: string | null;
+  interviewAt: string | null;
+  offerStatus: OfferStatus;
 }
 
 interface ApplyStats {
@@ -65,6 +68,10 @@ function normalizeJobs(raw: unknown): Record<string, ApplyRecord> {
     const clicks = Number.isFinite(rawClicks) && rawClicks > 0 ? Math.floor(rawClicks) : lastAppliedAt ? 1 : 0;
     if (!clicks || !lastAppliedAt) continue;
     const ts = r.trackerStatus === "applied" || r.trackerStatus === "rejected" ? r.trackerStatus : null;
+    const offerRaw = r.offerStatus;
+    const offerStatus: OfferStatus = offerRaw === "pending" || offerRaw === "accepted" || offerRaw === "declined"
+      ? offerRaw
+      : null;
     result[url] = {
       clicks,
       lastAppliedAt,
@@ -76,6 +83,8 @@ function normalizeJobs(raw: unknown): Record<string, ApplyRecord> {
       trackerSyncStatus: normalizeTrackerSyncStatus(r.trackerSyncStatus),
       trackerSyncMessage: r.trackerSyncMessage ? String(r.trackerSyncMessage) : null,
       trackerSyncedAt: r.trackerSyncedAt ? String(r.trackerSyncedAt) : null,
+      interviewAt: r.interviewAt ? String(r.interviewAt) : null,
+      offerStatus,
     };
   }
   return result;
@@ -427,6 +436,8 @@ export function useApplyTracker() {
             trackerSyncStatus: "pending",
             trackerSyncMessage: "Sending to Atriveo tracker…",
             trackerSyncedAt: existing?.trackerSyncedAt ?? null,
+            interviewAt: existing?.interviewAt ?? null,
+            offerStatus: existing?.offerStatus ?? null,
           },
         },
       };
@@ -457,10 +468,33 @@ export function useApplyTracker() {
     });
   }, [syncSnapshot, uid]);
 
+  const updatePipelineStage = useCallback((
+    jobUrl: string,
+    patch: { interviewAt?: string | null; offerStatus?: OfferStatus },
+  ) => {
+    setStats((prev) => {
+      const existing = prev.appliedJobs[jobUrl];
+      if (!existing) return prev;
+      const next: ApplyStats = {
+        ...prev,
+        appliedJobs: {
+          ...prev.appliedJobs,
+          [jobUrl]: {
+            ...existing,
+            interviewAt: patch.interviewAt !== undefined ? patch.interviewAt : existing.interviewAt,
+            offerStatus: patch.offerStatus !== undefined ? patch.offerStatus : existing.offerStatus,
+          },
+        },
+      };
+      persist(uid, next);
+      return next;
+    });
+  }, [uid]);
+
   const syncNow = useCallback((scope: ApplySyncScope = "today") => {
     persist(uid, stats);
     return syncSnapshot(stats, scope);
   }, [stats, syncSnapshot, uid]);
 
-  return { stats, recordClick, getRecord, setTrackerStatus, syncState, syncNow };
+  return { stats, recordClick, getRecord, setTrackerStatus, updatePipelineStage, syncState, syncNow };
 }

@@ -1,0 +1,44 @@
+id: AC-097
+role: bayesian-mmm
+slot_kind: project
+achievement_theme: holdout-validation
+display_order: 5
+wow_score: 0.88
+metrics_claimed:
+  - channels_5
+concepts_claimed:
+  - holdout
+  - ab-test
+  - significance
+  - validation
+signature_technologies:
+  - Python
+  - SciPy
+fact: Simulated geo A/B holdout with t-test, effect size, and lift percentage.
+capabilities:
+  data: 90
+  ai: 74
+strength:
+  recruiter: 9
+ats_keywords:
+  - A/B testing
+  - hypothesis testing
+  - SciPy
+  - validation
+  - statistics
+  - Python
+facets:
+  validation:
+    phrase: A/B holdout validation
+    keywords:
+      - holdout
+      - ab test
+      - significance
+      - t-test
+variants:
+  - facet: validation
+    emphasis: validation
+    strength: 9
+    text: >-
+      Implemented Python and SciPy simulated geo holdout A/B testing across 5 channels with t-tests confirming
+      statistically significant lift in production marketing forecasts.

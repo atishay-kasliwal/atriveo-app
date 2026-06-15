@@ -279,6 +279,10 @@ export default function ResumeOptimizer() {
   return (
     <div>
       <AppHeader />
+      <div className="legacy-tool-banner wrapper">
+        <strong>Legacy Optimizer</strong> — Gemma rewrite playground. Does not use the evidence compiler.
+        Use <a href="/">Feed</a> for production PDFs.
+      </div>
 
       <div className="wrapper page-shell page-shell-narrow">
         <PageIntro

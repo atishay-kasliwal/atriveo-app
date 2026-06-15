@@ -1,0 +1,41 @@
+id: AC-004
+role: stony-brook
+slot_kind: experience
+engineering_identity: backend
+achievement_theme: event-pipeline
+display_order: 4
+wow_score: 0.86
+metrics_claimed:
+  - event_pipeline
+  - fomc
+concepts_claimed:
+  - backend
+signature_technologies:
+  - Kafka
+  - Python
+fact: Event-driven Kafka pipelines moving FOMC releases to inference within minutes.
+capabilities:
+  ai: 70
+  backend: 86
+  frontend: 65
+  data: 84
+  cloud: 65
+  ml: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - Kafka
+  - Python
+facets:
+  default:
+    phrase: event-pipeline
+    keywords:
+      - kafka
+      - python
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Standardized event-driven Kafka pipelines moving FOMC releases to Python inference workflows within minutes
+      instead of multi-day manual analysis cycles.

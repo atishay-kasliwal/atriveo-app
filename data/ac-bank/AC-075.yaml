@@ -1,0 +1,42 @@
+id: AC-075
+role: insureraft
+slot_kind: project
+achievement_theme: state-machine
+display_order: 3
+wow_score: 0.91
+metrics_claimed:
+  - event_types_8
+concepts_claimed:
+  - state-machine
+  - domain-events
+  - idempotency
+  - log-index
+signature_technologies:
+  - C++
+fact: InsuranceStateMachine — 8 typed events, idempotency validation, committed log index.
+capabilities:
+  backend: 90
+  data: 82
+strength:
+  recruiter: 9
+ats_keywords:
+  - state machine
+  - domain events
+  - C++
+  - insurance
+  - idempotency
+facets:
+  architecture:
+    phrase: insurance state machine
+    keywords:
+      - state machine
+      - events
+      - policy
+      - claims
+variants:
+  - facet: architecture
+    emphasis: architecture
+    strength: 9
+    text: >-
+      Built a C++ insurance state machine applying 8 typed domain events with idempotency keys and monotonic committed
+      log indices in production.

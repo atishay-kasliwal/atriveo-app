@@ -1,0 +1,31 @@
+id: AC-124
+role: medledger
+slot_kind: project
+achievement_theme: authentication
+display_order: 2
+wow_score: 0.86
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - JWT
+  - bcrypt
+fact: Implemented JWT authentication with bcrypt password hashing securing clinic user registration and login flows.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - JWT
+  - bcrypt
+facets:
+  default:
+    phrase: jwt-auth
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Implemented JWT authentication with bcrypt hashing securing registration and login for 3 clinic user roles in
+      production.

@@ -1,0 +1,41 @@
+id: AC-179
+role: accolite
+slot_kind: experience
+engineering_identity: fullstack
+client_context: tmobile
+achievement_theme: service-provisioning
+display_order: 17
+wow_score: 0.85
+metrics_claimed:
+  - provisioning
+  - activations_5k
+concepts_claimed:
+  - fullstack
+signature_technologies:
+  - Java
+  - MySQL
+fact: T-Mobile service provisioning APIs and activation flows for bundled telecom product purchases.
+capabilities:
+  backend: 78
+  frontend: 88
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 7
+ats_keywords:
+  - Java
+  - MySQL
+facets:
+  default:
+    phrase: service-provisioning
+    keywords:
+      - java
+      - mysql
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Reduced T-Mobile activation delays with Java and MySQL provisioning APIs enabling same-day service for 5K+ bundled
+      product purchases monthly in production.

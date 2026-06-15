@@ -1,0 +1,41 @@
+id: AC-196
+role: accolite
+slot_kind: experience
+engineering_identity: leadership
+client_context: leadership
+achievement_theme: intern-onboarding
+display_order: 34
+wow_score: 0.85
+metrics_claimed:
+  - intern_onboard
+  - hires_20
+concepts_claimed:
+  - leadership
+signature_technologies:
+  - Java
+  - React
+fact: Intern onboarding curricula pairing hires with client and ERP projects.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 92
+strength:
+  recruiter: 7
+ats_keywords:
+  - Java
+  - React
+facets:
+  default:
+    phrase: intern-onboarding
+    keywords:
+      - java
+      - react
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Enabled 20+ new hires to reach production client contribution faster through Java and React onboarding curricula
+      across ERP and telecom modules.

@@ -1,0 +1,40 @@
+id: AC-098
+role: bayesian-mmm
+slot_kind: project
+achievement_theme: monte-carlo
+display_order: 6
+wow_score: 0.87
+metrics_claimed:
+  - monte_carlo_1000
+concepts_claimed:
+  - monte-carlo
+  - uncertainty
+  - confidence-interval
+signature_technologies:
+  - Python
+fact: 1,000-run Monte Carlo simulation with 90% CI coverage check.
+capabilities:
+  data: 88
+  ai: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Monte Carlo
+  - simulation
+  - uncertainty
+  - forecasting
+  - Python
+facets:
+  forecasting:
+    phrase: Monte Carlo uncertainty
+    keywords:
+      - monte carlo
+      - uncertainty
+      - confidence
+variants:
+  - facet: forecasting
+    emphasis: forecasting
+    strength: 9
+    text: >-
+      Built Python 1,000-run Monte Carlo simulation producing 90% confidence interval coverage for probabilistic sales
+      forecast uncertainty.

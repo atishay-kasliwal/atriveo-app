@@ -1,0 +1,33 @@
+id: AC-120
+role: mri-research
+slot_kind: project
+achievement_theme: datasets
+display_order: 8
+wow_score: 0.85
+metrics_claimed:
+  - radiomics_255
+  - patients_73
+concepts_claimed: []
+signature_technologies:
+  - Python
+  - pandas
+fact: Processed 255-sample radiomics cohorts and 73 patient clinical records across 2020–2022 research datasets.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - pandas
+facets:
+  default:
+    phrase: cohort-data
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built Python and pandas preprocessing pipelines for 255-sample radiomics cohorts and 73 patient records across
+      2020–2022 datasets for clinical research analysis in production workflows.

@@ -1,0 +1,44 @@
+id: AC-095
+role: bayesian-mmm
+slot_kind: project
+achievement_theme: channel-decomposition
+display_order: 3
+wow_score: 0.89
+metrics_claimed:
+  - channels_5
+concepts_claimed:
+  - ridge
+  - roas
+  - roi
+  - contribution
+signature_technologies:
+  - Python
+  - scikit-learn
+fact: Ridge MMM — channel contribution decomposition, ROAS and ROI per channel.
+capabilities:
+  data: 90
+  ai: 78
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - Ridge regression
+  - ROAS
+  - ROI
+  - attribution
+  - scikit-learn
+facets:
+  modeling:
+    phrase: channel decomposition
+    keywords:
+      - ridge
+      - roas
+      - roi
+      - contribution
+variants:
+  - facet: modeling
+    emphasis: modeling
+    strength: 9
+    text: >-
+      Built Python and scikit-learn a Ridge regression MMM decomposing weekly sales into channel contributions with ROAS
+      and ROI estimation across 5 media channels.

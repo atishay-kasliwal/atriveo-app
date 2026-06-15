@@ -1,0 +1,30 @@
+id: AC-155
+role: user-data-platform
+slot_kind: project
+achievement_theme: principles
+display_order: 3
+wow_score: 0.88
+metrics_claimed:
+  - invariants_4
+concepts_claimed: []
+signature_technologies:
+  - Python
+fact: Documented 4 trust invariants covering BYOK key boundaries, scoped consent tokens, and append-only audit receipts.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+facets:
+  default:
+    phrase: trust-invariants
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built Python documentation of 4 trust invariants covering BYOK key boundaries, scoped consent tokens, and
+      append-only audit receipts.

@@ -1,0 +1,33 @@
+id: AC-064
+role: insurance-platform
+slot_kind: project
+achievement_theme: kafka-ingestion
+display_order: 2
+wow_score: 0.90
+metrics_claimed: [kafka_3_broker]
+concepts_claimed: [kafka, ingestion, avro, schema, streaming]
+signature_technologies: [Kafka, Avro]
+fact: Kafka ingestion with Avro + Confluent Schema Registry on 3-broker cluster.
+capabilities:
+  backend: 88
+  data: 92
+strength:
+  recruiter: 9
+ats_keywords:
+  - Kafka
+  - Avro
+  - Confluent
+  - Schema Registry
+  - streaming
+  - ingestion
+facets:
+  data-pipeline:
+    phrase: Kafka ingestion pipeline
+    keywords: [kafka, avro, ingestion, schema, broker]
+variants:
+  - facet: data-pipeline
+    emphasis: data-pipeline
+    strength: 9
+    text: >-
+      Built a Kafka ingestion pipeline with Avro serialization and Confluent Schema Registry,
+      publishing insurance policy events to a 3-broker cluster.

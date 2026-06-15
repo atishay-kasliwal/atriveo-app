@@ -7,8 +7,8 @@ import CompanyLogo from "./CompanyLogo";
 import { careerOpsRating, careerOpsStars, companyDomain, matchReasons } from "../utils/jobPresentation";
 import { groupJobsByCompany, type CompanyJobGroup } from "../utils/jobGrouping";
 import type { TailorRecord } from "../types/tailorQueue";
-import { tailorCellLabel, tailorFolderPath } from "../utils/tailorProgress";
-import TailorJobLogModal from "./TailorJobLogModal";
+import type { JobResumeView } from "../types/jobResumeView";
+import JobResumeCell from "./JobResumeCell";
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -218,6 +218,8 @@ interface RowProps {
   onSelectionToggle?: (job: Job) => void;
   onExcludeCompany?: (company: string) => void;
   getTailorRecord?: (job: Job) => TailorRecord | null;
+  getResumeView?: (job: Job) => JobResumeView;
+  onOpenPdf?: (path: string) => void;
   onQueueUrgent?: (job: Job) => void;
   onOpenTailorPath?: (path: string) => void;
   onDismissJob?: (job: Job) => void;
@@ -236,6 +238,8 @@ function JobTableRow({
   onSelectionToggle,
   onExcludeCompany,
   getTailorRecord,
+  getResumeView,
+  onOpenPdf,
   onQueueUrgent,
   onOpenTailorPath,
   onDismissJob,
@@ -245,7 +249,6 @@ function JobTableRow({
 }: RowProps) {
   const [msgCopied, setMsgCopied] = useState(false);
   const [savedFeedback, setSavedFeedback] = useState<SavedJobSource | null>(null);
-  const [logOpen, setLogOpen] = useState(false);
   const co = job.company || "—";
   const title = job.title || "—";
   const careerOps = careerOpsRating(job);
@@ -266,9 +269,8 @@ function JobTableRow({
           ? "Retry"
           : "Sync";
   const tailorRecord = getTailorRecord?.(job) ?? null;
-  const tailor = tailorCellLabel(tailorRecord);
-  const folderPath = tailorFolderPath(tailorRecord);
-  const showTailorLog = tailorRecord?.status === "done";
+  const resumeView = getResumeView?.(job);
+  const folderPath = tailorRecord?.dir || tailorRecord?.folder || tailorRecord?.pdfPath?.replace(/\/[^/]+$/, "") || null;
 
   function saveJob(source: SavedJobSource, e?: React.MouseEvent) {
     e?.stopPropagation();
@@ -374,46 +376,19 @@ function JobTableRow({
       <td className="job-table-level">{job.level || "—"}</td>
       {board && (
         <td className="job-table-tailored">
-          <div className="job-table-tailored-inner">
-            <span
-              className={`job-table-tailored-pill job-table-tailored-pill--${tailor.tone}`}
-              title={tailor.tooltip}
-            >
-              {tailor.label}
-            </span>
-            <div className="job-table-tailored-actions">
-              {folderPath && onOpenTailorPath ? (
-                <button
-                  type="button"
-                  className="job-table-tailored-folder"
-                  title={tailorRecord?.folder || folderPath}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenTailorPath(folderPath);
-                  }}
-                >
-                  Folder
-                </button>
-              ) : null}
-              {showTailorLog && tailorRecord ? (
-                <button
-                  type="button"
-                  className="job-table-tailored-log"
-                  title="View tailor log"
-                  aria-label={`View tailor log for ${co}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setLogOpen(true);
-                  }}
-                >
-                  <span className="job-table-tailored-log-icon" aria-hidden>📋</span>
-                </button>
-              ) : null}
-            </div>
-          </div>
-          {logOpen && tailorRecord ? (
-            <TailorJobLogModal record={tailorRecord} onClose={() => setLogOpen(false)} />
-          ) : null}
+          {resumeView ? (
+            <JobResumeCell
+              view={resumeView}
+              tailorRecord={tailorRecord}
+              applyRecord={applyRecord}
+              compact
+              onGenerate={onQueueUrgent ? () => onQueueUrgent(job) : undefined}
+              onOpenPdf={tailorRecord?.pdfPath && onOpenPdf ? () => onOpenPdf(tailorRecord.pdfPath!) : undefined}
+              onOpenFolder={folderPath && onOpenTailorPath ? () => onOpenTailorPath(folderPath) : undefined}
+            />
+          ) : (
+            <span className="job-resume-status job-resume-status--muted">—</span>
+          )}
         </td>
       )}
       <td className="job-table-time">{fmtTime(job.batch_time || job.date_posted, job.scraped_date, board)}</td>
@@ -653,6 +628,8 @@ interface Props {
   isGroupFullySelected?: (jobs: Job[]) => boolean;
   groupByCompany?: boolean;
   getTailorRecord?: (job: Job) => TailorRecord | null;
+  getResumeView?: (job: Job) => JobResumeView;
+  onOpenPdf?: (path: string) => void;
   onQueueUrgent?: (job: Job) => void;
   onOpenTailorPath?: (path: string) => void;
   onDismissJob?: (job: Job) => void;
@@ -674,6 +651,8 @@ export default function JobTable({
   isGroupFullySelected,
   groupByCompany = true,
   getTailorRecord,
+  getResumeView,
+  onOpenPdf,
   onQueueUrgent,
   onOpenTailorPath,
   onDismissJob,
@@ -734,7 +713,7 @@ export default function JobTable({
                 <SortableHeader label="Location" column="location" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Comp" column="comp" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Level" column="level" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
-                <SortableHeader label="Tailored" column="tailored" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Resume" column="tailored" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Posted" column="time" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
               </>
             ) : (
@@ -745,7 +724,7 @@ export default function JobTable({
                 <th>Location</th>
                 <th>Comp</th>
                 <th>Level</th>
-                {variant === "board" ? <th>Tailored</th> : null}
+                {variant === "board" ? <th>Resume</th> : null}
                 <th>{variant === "board" ? "Posted" : "Time"}</th>
               </>
             )}
@@ -773,6 +752,8 @@ export default function JobTable({
                         onSelectionToggle={onSelectionToggle}
                         onExcludeCompany={onExcludeCompany}
                         getTailorRecord={getTailorRecord}
+                        getResumeView={getResumeView}
+                        onOpenPdf={onOpenPdf}
                         onQueueUrgent={onQueueUrgent}
                         onOpenTailorPath={onOpenTailorPath}
                         onDismissJob={onDismissJob}

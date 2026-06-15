@@ -1,0 +1,42 @@
+id: AC-080
+role: insureraft
+slot_kind: project
+achievement_theme: log-persistence
+display_order: 8
+wow_score: 0.87
+metrics_claimed:
+  - raft_nodes_3
+concepts_claimed:
+  - persistence
+  - recovery
+  - snapshot
+  - replay
+signature_technologies:
+  - C++
+fact: File-backed per-entry log store; replay from snapshot on restart.
+capabilities:
+  backend: 90
+  data: 82
+strength:
+  recruiter: 9
+ats_keywords:
+  - persistence
+  - log storage
+  - recovery
+  - snapshot
+  - C++
+facets:
+  storage:
+    phrase: log persistence
+    keywords:
+      - persistence
+      - replay
+      - snapshot
+      - recovery
+variants:
+  - facet: storage
+    emphasis: storage
+    strength: 9
+    text: >-
+      Engineered C++ file-backed per-entry log persistence on 3 nodes with automatic replay and snapshot recovery when
+      servers restart and rejoin the cluster.

@@ -1,0 +1,29 @@
+id: AC-118
+role: mri-research
+slot_kind: project
+achievement_theme: multimodal
+display_order: 6
+wow_score: 0.87
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Python
+fact: Engineered multi-modal integration combining radiomics, clinical, and genomics features for combined models.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+facets:
+  default:
+    phrase: multimodal
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Engineered Python multi-modal models combining radiomics, clinical, and genomics features on 73-patient research
+      cohorts for outcome prediction.

@@ -1,0 +1,32 @@
+id: AC-058
+role: atriveo
+slot_kind: project
+achievement_theme: pipeline-analytics
+display_order: 8
+wow_score: 0.76
+metrics_claimed: []
+concepts_claimed: [analytics, pipeline, insights, product]
+signature_technologies: []
+fact: Application pipeline analytics — response rates and stage bottlenecks for job seekers.
+capabilities:
+  frontend: 78
+  data: 82
+  backend: 70
+strength:
+  recruiter: 8
+ats_keywords:
+  - analytics
+  - dashboard
+  - data visualization
+  - product
+facets:
+  product:
+    phrase: pipeline analytics
+    keywords: [analytics, pipeline, response rate, insights]
+variants:
+  - facet: product
+    emphasis: product
+    strength: 8
+    text: >-
+      Built pipeline analytics exposing response rates and hiring stage bottlenecks, helping
+      users prioritize follow-ups across tracked applications.

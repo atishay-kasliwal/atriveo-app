@@ -1,0 +1,65 @@
+[
+  {
+    "id": "adv-backend-pure",
+    "lane": "backend",
+    "title": "Backend Engineer",
+    "company": "Synthetic Corp",
+    "jd": "We need a backend engineer with strong FastAPI, Redis, Kafka, PostgreSQL, and Docker experience. Build event-driven microservices and REST APIs. No machine learning or AI required.",
+    "expect": {
+      "fit": "high",
+      "theme_hint": "backend",
+      "should_include": ["FastAPI", "Redis", "Kafka"],
+      "should_not_force": ["LLM", "RAG", "agents"],
+      "max_ai_bullets": 2
+    }
+  },
+  {
+    "id": "adv-android-pure",
+    "lane": "mobile",
+    "title": "Android Engineer",
+    "company": "Synthetic Mobile",
+    "jd": "Pure Android role. Requirements: Kotlin, Jetpack Compose, Android SDK, performance optimization, mobile image management. 2+ years Android application development.",
+    "expect": {
+      "fit": "low",
+      "should_be_unclaimable": ["Kotlin", "Jetpack", "Compose", "Android"],
+      "should_not_force": ["LLM", "FastAPI", "Kafka"]
+    }
+  },
+  {
+    "id": "adv-finance-hft",
+    "lane": "finance",
+    "title": "Low Latency Engineer",
+    "company": "Synthetic Capital",
+    "jd": "Finance engineering role. FIX protocol, Bloomberg terminal integration, low latency C++, order book systems, microsecond tick data. No web frameworks.",
+    "expect": {
+      "fit": "low",
+      "should_be_unclaimable": ["FIX", "Bloomberg", "low latency"],
+      "may_include": ["financial", "Python"]
+    }
+  },
+  {
+    "id": "adv-ai-agentic",
+    "lane": "ai-llm",
+    "title": "Agentic AI Engineer",
+    "company": "Synthetic AI",
+    "jd": "Build agentic AI systems with LangChain, LangGraph, MCP, RAG, vector databases, LLM evaluation pipelines, and multi-agent orchestration. Python required.",
+    "expect": {
+      "fit": "high",
+      "theme_hint": "ai-llm",
+      "should_include": ["LLM", "RAG", "LangChain", "agents"],
+      "max_ai_bullets": 4
+    }
+  },
+  {
+    "id": "adv-devops-cloud",
+    "lane": "devops",
+    "title": "Platform Engineer",
+    "company": "Synthetic Cloud",
+    "jd": "Kubernetes, Terraform, Helm, AWS, CI/CD, observability with Prometheus and Grafana. Infrastructure as code. No application feature development.",
+    "expect": {
+      "fit": "medium",
+      "should_be_unclaimable": ["Kubernetes", "Helm", "Terraform"],
+      "may_include": ["AWS", "Docker", "CI/CD"]
+    }
+  }
+]

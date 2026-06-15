@@ -1,0 +1,46 @@
+id: AC-093
+role: bayesian-mmm
+slot_kind: project
+achievement_theme: mmm-platform
+display_order: 1
+wow_score: 0.93
+metrics_claimed:
+  - r2_09489
+  - mape_274
+  - weeks_156
+concepts_claimed:
+  - mmm
+  - marketing
+  - channels
+  - forecasting
+signature_technologies:
+  - Python
+  - scikit-learn
+fact: End-to-end MMM — 5 channels, 156 weeks, R² 0.9489, MAPE 2.74%.
+capabilities:
+  data: 94
+  ai: 82
+  backend: 70
+strength:
+  recruiter: 10
+ats_keywords:
+  - Python
+  - marketing mix model
+  - MMM
+  - scikit-learn
+  - forecasting
+facets:
+  platform:
+    phrase: marketing mix model
+    keywords:
+      - mmm
+      - marketing
+      - channel
+      - forecast
+variants:
+  - facet: platform
+    emphasis: platform
+    strength: 10
+    text: >-
+      Built a Python and scikit-learn Marketing Mix Model analyzing 5 media channels across 156 weeks at R² 0.9489 and
+      2.74% MAPE in production.

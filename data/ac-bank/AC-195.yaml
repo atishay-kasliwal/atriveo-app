@@ -1,0 +1,41 @@
+id: AC-195
+role: accolite
+slot_kind: experience
+engineering_identity: leadership
+client_context: leadership
+achievement_theme: hiring-rubrics
+display_order: 33
+wow_score: 0.87
+metrics_claimed:
+  - eval_rubrics
+  - screens_500
+concepts_claimed:
+  - leadership
+signature_technologies:
+  - Java
+  - Python
+fact: Technical evaluation rubrics and interview loops for 500+ screens.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 92
+strength:
+  recruiter: 8
+ats_keywords:
+  - Java
+  - Python
+facets:
+  default:
+    phrase: hiring-rubrics
+    keywords:
+      - java
+      - python
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Standardized technical evaluation rubrics used across 500+ candidate screens aligning Java Python and cloud hiring
+      loops with production team needs.

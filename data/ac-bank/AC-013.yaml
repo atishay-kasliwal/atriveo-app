@@ -1,0 +1,41 @@
+id: AC-013
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: nlp-extraction
+display_order: 14
+wow_score: 0.81
+metrics_claimed:
+  - records_200k
+  - nlp
+concepts_claimed:
+  - data
+signature_technologies:
+  - Python
+  - AWS
+fact: NLP entity extraction on 200K+ financial news records.
+capabilities:
+  ai: 80
+  backend: 72
+  frontend: 65
+  data: 88
+  cloud: 65
+  ml: 65
+strength:
+  recruiter: 7
+ats_keywords:
+  - Python
+  - AWS
+facets:
+  default:
+    phrase: nlp-extraction
+    keywords:
+      - python
+      - aws
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Built Python NLP entity extraction on AWS across financial news identifying firms and macro themes in 200K+
+      records powering downstream forecasting features.

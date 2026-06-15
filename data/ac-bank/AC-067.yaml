@@ -1,0 +1,32 @@
+id: AC-067
+role: insurance-platform
+slot_kind: project
+achievement_theme: kafka-streams-analytics
+display_order: 5
+wow_score: 0.91
+metrics_claimed: [kafka_3_broker]
+concepts_claimed: [kafka-streams, analytics, state-store, realtime]
+signature_technologies: [Kafka Streams]
+fact: Kafka Streams state stores with interactive queries for real-time policy analytics.
+capabilities:
+  backend: 88
+  data: 92
+strength:
+  recruiter: 10
+ats_keywords:
+  - Kafka Streams
+  - state store
+  - analytics
+  - streaming
+  - real-time
+facets:
+  streaming:
+    phrase: Kafka Streams analytics
+    keywords: [kafka streams, state store, analytics, interactive]
+variants:
+  - facet: streaming
+    emphasis: streaming
+    strength: 10
+    text: >-
+      Built Kafka Streams topologies with persistent state stores on a 3-broker cluster,
+      powering real-time insurance policy analytics and interactive query APIs.

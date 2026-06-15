@@ -1,0 +1,41 @@
+id: AC-171
+role: accolite
+slot_kind: experience
+engineering_identity: backend
+client_context: bt
+achievement_theme: api-reliability
+display_order: 9
+wow_score: 0.93
+metrics_claimed:
+  - tx_10k_daily
+  - p99_200ms
+concepts_claimed:
+  - backend
+signature_technologies:
+  - Java
+  - Spring Boot
+fact: British Telecom REST and GraphQL APIs with Resilience4j; 10K+ daily transactions; 200ms P99; 99% uptime.
+capabilities:
+  backend: 90
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - Java
+  - Spring Boot
+facets:
+  default:
+    phrase: api-reliability
+    keywords:
+      - java
+      - spring boot
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Sustained British Telecom commerce at 10K+ daily transactions on Java and Spring Boot with 200ms P99 latency
+      across production REST and GraphQL APIs.

@@ -1,0 +1,32 @@
+id: AC-069
+role: insurance-platform
+slot_kind: project
+achievement_theme: service-discovery-config
+display_order: 7
+wow_score: 0.85
+metrics_claimed: [services_8]
+concepts_claimed: [eureka, config-server, discovery, docker]
+signature_technologies: [Netflix Eureka, Docker]
+fact: Netflix Eureka discovery + Spring Cloud Config Server with encrypted secrets; Docker Compose deployment.
+capabilities:
+  backend: 84
+  cloud: 86
+strength:
+  recruiter: 8
+ats_keywords:
+  - Netflix Eureka
+  - Spring Cloud Config
+  - Docker
+  - service discovery
+  - microservices
+facets:
+  infra:
+    phrase: service discovery and config
+    keywords: [eureka, config server, docker, discovery]
+variants:
+  - facet: infra
+    emphasis: infra
+    strength: 8
+    text: >-
+      Deployed Netflix Eureka service discovery and a Spring Cloud Config Server with encrypted
+      secrets across 8 Docker Compose microservices.

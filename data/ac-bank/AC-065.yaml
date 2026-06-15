@@ -1,0 +1,32 @@
+id: AC-065
+role: insurance-platform
+slot_kind: project
+achievement_theme: cqrs-events
+display_order: 3
+wow_score: 0.88
+metrics_claimed: [services_8]
+concepts_claimed: [cqrs, event-sourcing, domain-events, write-model]
+signature_technologies: [Kafka]
+fact: CQRS and event sourcing — write-side publishes domain events to Kafka for read models.
+capabilities:
+  backend: 86
+  data: 84
+strength:
+  recruiter: 9
+ats_keywords:
+  - CQRS
+  - event sourcing
+  - Kafka
+  - domain events
+  - microservices
+facets:
+  architecture:
+    phrase: CQRS event sourcing
+    keywords: [cqrs, event, sourcing, domain, kafka]
+variants:
+  - facet: architecture
+    emphasis: architecture
+    strength: 9
+    text: >-
+      Implemented CQRS and event sourcing where write-side services publish insurance domain
+      events to Kafka across 8 loosely coupled microservices.

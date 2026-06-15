@@ -1,0 +1,133 @@
+# ATS coverage matrix — per composed resume (15 bullets + skills).
+# Goal: spread keywords in context; penalize missing AND over-repetition.
+# Lint bank bullets: npm run ac:bullet-lint
+# Audit a composition: npm run ac:ats-matrix -- path/to/composition.json
+
+keywords:
+  Python:
+    min: 2
+    max: 4
+  Java:
+    min: 1
+    max: 3
+  TypeScript:
+    min: 0
+    max: 2
+  JavaScript:
+    min: 0
+    max: 2
+  SQL:
+    min: 0
+    max: 2
+
+  React:
+    min: 1
+    max: 2
+  Angular:
+    min: 0
+    max: 2
+
+  FastAPI:
+    min: 1
+    max: 2
+  "Spring Boot":
+    min: 1
+    max: 2
+  PostgreSQL:
+    min: 1
+    max: 2
+  MySQL:
+    min: 0
+    max: 2
+  MongoDB:
+    min: 0
+    max: 2
+
+  LangChain:
+    min: 1
+    max: 2
+  RAG:
+    min: 1
+    max: 2
+    synonyms: [retrieval, vector search, semantic search]
+  LLM:
+    min: 0
+    max: 2
+    synonyms: [large language model]
+  NLP:
+    min: 0
+    max: 2
+
+  AWS:
+    min: 1
+    max: 3
+  GCP:
+    min: 1
+    max: 2
+  Azure:
+    min: 0
+    max: 2
+  Cloudflare:
+    min: 0
+    max: 2
+  Docker:
+    min: 1
+    max: 2
+  Kubernetes:
+    min: 0
+    max: 2
+
+  Kafka:
+    min: 1
+    max: 2
+    synonyms: [event-driven, messaging, streaming, asynchronous]
+  Elasticsearch:
+    min: 0
+    max: 2
+  Redis:
+    min: 0
+    max: 2
+
+  microservices:
+    min: 0
+    max: 2
+    synonyms: [microservice]
+  CI/CD:
+    min: 0
+    max: 2
+    synonyms: [ci/cd, continuous integration]
+  ETL:
+    min: 0
+    max: 2
+    synonyms: [data pipeline, data pipelines]
+
+# Bullets that list 4+ bare tech tokens in a row fail recruiter readability (not ATS).
+stuffing:
+  max_bare_tech_run: 3
+  bare_tech_tokens:
+    - Python
+    - Java
+    - JavaScript
+    - TypeScript
+    - React
+    - Angular
+    - FastAPI
+    - PostgreSQL
+    - MySQL
+    - MongoDB
+    - AWS
+    - GCP
+    - Azure
+    - Docker
+    - Kubernetes
+    - Kafka
+    - LangChain
+    - Redis
+    - Elasticsearch
+    - Node.js
+    - Spring Boot
+
+scoring:
+  missing_penalty: 8
+  over_penalty: 5
+  stuffing_penalty: 6

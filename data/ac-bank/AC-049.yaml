@@ -1,0 +1,36 @@
+id: AC-049
+role: wake-forest
+slot_kind: experience
+achievement_theme: cloud-deployment
+display_order: 10
+wow_score: 0.80
+metrics_claimed: [latency_2min, clinical_production]
+concepts_claimed: [gcp, cloud, automation, deployment]
+signature_technologies: [GCP]
+fact: GCP clinical pipeline delivering clinician-ready MRI insights within 2 minutes of upload.
+capabilities:
+  cloud: 92
+  backend: 85
+  data: 75
+strength:
+  recruiter: 9
+ats_keywords:
+  - GCP
+  - Python
+  - cloud
+  - pipeline
+  - automation
+  - DevOps
+  - MRI
+  - clinical
+facets:
+  cloud:
+    phrase: GCP imaging pipeline
+    keywords: [gcp, cloud, deploy, automation, ingestion, orchestration, clinical]
+variants:
+  - facet: cloud
+    emphasis: cloud
+    strength: 9
+    text: >-
+      Deployed the imaging pipeline on GCP in clinical production, delivering clinician-ready
+      insights within 2 minutes of MRI upload.

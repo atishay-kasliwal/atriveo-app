@@ -1,0 +1,230 @@
+# Wake Forest – CAIR | Canonical achievement bank (review file)
+# Bank v50
+# Lint: npm run ac:bullet-lint -- --role wake-forest
+
+role:
+  id: wake-forest
+  employer: Wake Forest – CAIR
+  title: Software Engineer
+  location: Winston-Salem, NC
+  dates: May 2025 -- August 2025
+  slot_kind: experience
+  resume_pick_count: 3
+
+# ── Product story (source of truth) ─────────────────────────────────────────
+
+product:
+  name: AI-powered brain MRI radiology platform
+  problem: >
+    Brain tumor evaluation required radiologists to manually review multiple MRI scan
+    types with inconsistent slice counts, clarity, and dimensions. Preprocessing,
+    alignment, and tumor marking were slow and error-prone.
+  solution: >
+    End-to-end platform on GCP: MRI upload triggers automated preprocessing
+    (registration, denoising, alignment to a unified plane), AI tumor segmentation,
+    PyRadiomics feature extraction, patient similarity search, survival analysis,
+    and a clinician dashboard for review and mask correction.
+  users: Treating physicians and researchers (20-person team)
+  deployment: Clinical production use
+  stack:
+    languages: [Python]
+    imaging: [SimpleITK, PyRadiomics]
+    cloud: [GCP]
+    orchestration: [Apache Airflow]
+    frontend: [React, TypeScript, Redux]
+    domain: [MRI, brain tumor, radiomics, survival analysis, medical imaging]
+
+# ── Verified metrics (do not invent beyond this list) ───────────────────────
+
+metrics:
+  volume:
+    mri_studies_processed: "10K+"
+    historical_data_span: "5 to 10 years"
+  speed:
+    segmentation_per_scan: "3 hours → 2 minutes"
+    upload_to_clinician_insight: "2 minutes after scan enters system"
+  accuracy:
+    tumor_mask_accuracy: "90%+"
+  automation:
+    manual_tumor_marking: "3 hours → 2 minutes per scan (physicians refine edge cases via dashboard)"
+  modalities:
+    scan_types_available: "10+"
+    standardized_for_pipeline: 5
+    standardized_list: [T1, T2, DWI, heatmap, FLAIR]
+  radiomics:
+    feature_count: "200+"
+  users:
+    team_size: 20
+    description: physician-research team on dashboard
+  impact:
+    clinical_decision_making: easier / faster for treating physicians
+
+# ── Canonical achievements (immutable resume bullets) ───────────────────────
+
+achievements:
+
+  - id: AC-031
+    display_order: 1
+    theme: product-ownership
+    skills: [Full stack, architecture, leadership, clinical AI product]
+    fact: End-to-end AI radiology platform in clinical use processing 10K+ brain MRI studies for a 20-person physician-research team.
+    metrics_used: [10K+ studies, 3h→2min, 90%+ accuracy, 2min latency, clinical deployment]
+    resume_bullet: >-
+      Architected a Python and GCP-based AI radiology platform that processed 10K+ brain
+      MRI studies and reduced tumor segmentation from 3 hours to 2 minutes.
+    review_notes: |
+      Pinned first on every Wake Forest resume (headline bullet). Impossible-to-ignore summary
+      — recruiter gets the full story in one scan. Say "Architected" only if you owned system design.
+
+  - id: AC-032
+    display_order: 2
+    theme: mri-preprocessing
+    skills: [Python, backend, image processing, SimpleITK]
+    fact: SimpleITK pipelines standardizing 5 MRI modalities (T1, T2, DWI, heatmap, FLAIR) from 10+ scan types.
+    metrics_used: [5 modalities, 10+ scan types]
+    resume_bullet: >-
+      Standardized 5 MRI modalities using Python and SimpleITK, enabling automated brain
+      tumor segmentation across heterogeneous clinical scans.
+    review_notes: |
+      Backend / data-engineering pick. Ends with outcome (segmentation + inference), not just infra.
+
+  - id: AC-033
+    display_order: 3
+    theme: tumor-segmentation
+    skills: [ML, computer vision, segmentation]
+    fact: Brain tumor segmentation model at 90%+ mask accuracy across 10K+ multimodal clinical MRI studies.
+    metrics_used: [90%+ accuracy, 10K+ studies]
+    resume_bullet: >-
+      Developed a Python brain tumor segmentation model achieving 90%+ mask accuracy
+      replacing manual tumor outlining for treating clinicians in production.
+    review_notes: |
+      Does not repeat 3h→2min (that lives in pinned AC-031). Compatible with AC-048 human-in-the-loop.
+
+  - id: AC-043
+    display_order: 4
+    theme: data-etl
+    skills: [Data engineering, Python, Apache Airflow, ETL]
+    fact: Apache Airflow ETL workflows processing 10+ heterogeneous MRI scan types into research-ready datasets.
+    metrics_used: [10+ scan types]
+    resume_bullet: >-
+      Built Apache Airflow ETL pipelines integrating 10+ heterogeneous MRI scan types
+      into reproducible research-ready cohorts for brain tumor studies.
+    review_notes: |
+      Data-engineering pick. Airflow is the signature orchestration anchor for ETL JDs.
+
+  - id: AC-044
+    display_order: 5
+    theme: radiomics
+    skills: [AI, feature engineering, PyRadiomics]
+    fact: PyRadiomics extraction of 200+ quantitative biomarkers from segmented brain tumors.
+    metrics_used: [200+ features]
+    resume_bullet: >-
+      Developed a PyRadiomics feature extraction pipeline that generated 200+
+      quantitative biomarkers for prognosis modeling and clinical research.
+    review_notes: |
+      ML / research JD pick. Pairs well with AC-033 or AC-046.
+
+  - id: AC-045
+    display_order: 6
+    theme: patient-similarity
+    skills: [ML, retrieval, analytics]
+    fact: Patient similarity engine over 5–10 years and 10K+ historical MRI cases for treating physicians.
+    metrics_used: [5–10 years, 10K+ cases]
+    resume_bullet: >-
+      Built Python a patient similarity retrieval engine over 5 to 10 years of
+      historical MRI data, helping physicians compare disease patterns and treatment
+      outcomes.
+    review_notes: |
+      Retrieval / recommendation story. Distinct from radiomics and survival.
+
+  - id: AC-046
+    display_order: 7
+    theme: survival-analysis
+    skills: [Statistics, AI, research, clinical decision support]
+    fact: Radiomics-driven survival analysis surfacing prognosis insights to speed clinical decision-making.
+    metrics_used: [clinical decision-making impact — qualitative]
+    resume_bullet: >-
+      Integrated Python radiomics-driven survival models that surfaced prognosis
+      insights at review, accelerating clinical decision-making for treating physicians.
+    review_notes: |
+      No hard time-saved metric yet. Add if you have one (e.g. "cut prognosis review from X to Y").
+
+  - id: AC-047
+    display_order: 8
+    theme: clinician-dashboard
+    skills: [React, TypeScript, Redux, Frontend, UX, full stack]
+    fact: React and TypeScript clinician dashboard with Redux for a 20-person team reviewing MRIs and AI segmentations.
+    metrics_used: [team of 20]
+    resume_bullet: >-
+      Built a React and TypeScript clinician dashboard for a 20-person research team to
+      review MRIs, prior studies, and AI segmentations with interactive mask refinement.
+    review_notes: |
+      Frontend / full-stack pick. React + TypeScript in bullet; Redux in ATS keywords and stack.
+
+  - id: AC-048
+    display_order: 9
+    theme: human-in-the-loop
+    skills: [Product thinking, AI deployment, clinical reliability]
+    fact: Human-in-the-loop mask correction preserving 90%+ automation while letting physicians fix edge cases.
+    metrics_used: [2-minute segmentation, expert oversight]
+    resume_bullet: >-
+      Implemented Python human-in-the-loop mask review so physicians could correct AI
+      segmentations on edge cases improving clinical trust in production workflows.
+    review_notes: |
+      Production AI story — not just a model. Overlaps AC-047; composer treats as separate theme.
+
+  - id: AC-049
+    display_order: 10
+    theme: cloud-deployment
+    skills: [GCP, backend, DevOps, automation]
+    fact: GCP clinical pipeline delivering clinician-ready MRI insights within 2 minutes of upload.
+    metrics_used: [2 min latency, clinical production, GCP]
+    resume_bullet: >-
+      Deployed the imaging pipeline on GCP in clinical production, delivering
+      clinician-ready insights within 2 minutes of MRI upload.
+    review_notes: |
+      Cloud / infra pick. Strong for backend and platform JDs.
+
+# ── JD selection guide (which 3 tend to win) ────────────────────────────────
+
+selection_examples:
+  ml_ai_jd:
+    typical_pick: [AC-031, AC-033, AC-044]
+    themes: [product-ownership, tumor-segmentation, radiomics]
+  backend_jd:
+    typical_pick: [AC-031, AC-032, AC-043]
+    themes: [product-ownership, mri-preprocessing, data-etl]
+  platform_cloud_jd:
+    suggested_pick: [AC-031, AC-032, AC-049]
+    themes: [product-ownership, mri-preprocessing, cloud-deployment]
+  frontend_jd:
+    suggested_pick: [AC-031, AC-047, AC-048]
+    themes: [product-ownership, clinician-dashboard, human-in-the-loop]
+    note: Product package requires frontend-primary JD (title or strong UI/UX signals). Incidental React in a Java/backend JD routes to backend (032+049).
+
+# ── ATS tech coverage (verified stack only — spread across bullets) ─────────
+
+ats_tech_coverage:
+  Python: [AC-031, AC-032]
+  GCP: [AC-031, AC-049]
+  SimpleITK: [AC-032]
+  PyRadiomics: [AC-044]
+  Apache Airflow: [AC-043]
+  React: [AC-047]
+  TypeScript: [AC-047]
+  Redux: [AC-047 ats_keywords]
+  not_invented: [Kafka, Docker, Kubernetes, LLM]
+
+# ── Open items for your review ─────────────────────────────────────────────
+
+open_questions:
+  - Add survival-analysis time metric for AC-046 if available
+  - Confirm "heatmap" modality label (vs perfusion / ADC map / other clinical name)
+  - Confirm "Architected" vs "Led development of" for AC-031 if work was collaborative
+  - Any preferred employer line: "Wake Forest – CAIR" vs "Wake Forest School of Medicine"
+
+review_scores:
+  ats: "9.5/10 — Python, GCP, SimpleITK, PyRadiomics, Airflow, React, TypeScript, Redux coverage"
+  recruiter: "9/10 — signature tech anchors platform, preprocessing, ETL, radiomics, and cloud"
+  engineering_manager: "9.8/10 — end-to-end system ownership reads clearly"
+  interview_risk: "Avoid overstating sole ownership; human-in-the-loop (AC-048) defends segmentation claims"

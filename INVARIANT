@@ -1,0 +1,26 @@
+INVARIANT — Evidence-only resume generation
+============================================
+
+No generated word may appear in the PDF unless it can be traced to:
+
+  1. AC fact          (YAML fact field on a selected accomplishment)
+  2. AC variant       (pre-authored variant text on a selected AC)
+  3. AC facet         (facet phrase/keywords on a selected AC)
+  4. Skills evidence  (skill listed in skills_audit with covered: true)
+  5. Profile metadata (name, contact, education, role titles, dates, locations)
+
+Forbidden:
+
+  - LLM rewrite of bullets at PDF generation time
+  - Suffix injection ("with X and Y" appended to bullets)
+  - Skills not backed by selected AC or project evidence
+  - Invented metrics, technologies, or employers
+
+Enforcement:
+
+  scripts/ac-invariant.mjs     — traces every emitted token to evidence
+  scripts/ac-resume-score.mjs    — Resume Confidence Score (north star)
+  scripts/ac-beam.mjs            — generates candidates; gate picks best
+
+Beam search disqualifies INVARIANT violations. The gate scores; it does not kill the build.
+Ship the highest-scoring candidate that passes INVARIANT.

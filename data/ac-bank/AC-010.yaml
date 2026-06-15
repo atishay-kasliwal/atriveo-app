@@ -1,0 +1,26 @@
+id: AC-010
+role: accolite
+slot_kind: experience
+visibility:
+  default: false
+fact: RETIRED — superseded by AC-164/AC-177 (contract-gating/resilience) in Accolite bank v43.
+capabilities:
+  backend: 85
+  cloud: 75
+strength:
+  recruiter: 7
+ats_keywords:
+  - security
+  - API
+  - gateway
+facets:
+  reliability:
+    phrase: API gateway
+    keywords: [gateway, auth, security, reliability]
+variants:
+  - facet: reliability
+    emphasis: reliability
+    strength: 7
+    text: >-
+      Implemented API gateway authentication and rate limiting for microservices,
+      improving reliability and security across production deployments.

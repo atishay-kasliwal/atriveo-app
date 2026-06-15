@@ -1,0 +1,324 @@
+{
+  "version": "v2",
+  "name": "beam-rcs-visual",
+  "description": "Fixed 15-bullet layout: SBU 4 · Wake 3 · Accolite 4 · Atriveo 2 · Insurance 2",
+  "objective": "maximize_resume_confidence_score",
+  "beam_search": true,
+  "enforce_tiers": true,
+  "min_s_tier": 2,
+  "max_c_tier": 1,
+  "narrative_first": true,
+  "allow_sparse_slots": false,
+  "min_bullet_quality": 0.35,
+  "min_bullets_per_role": {
+    "stony-brook": 4,
+    "wake-forest": 3,
+    "accolite": 4
+  },
+  "min_project_bullets": 2,
+  "fixed_project_roles": ["atriveo", "insurance-platform"],
+  "apply_delete_test": false,
+  "global_optimize": true,
+  "skills_evidence_only": true,
+  "lead_ac_ids": {
+    "stony-brook": ["AC-026"],
+    "accolite": ["AC-198"]
+  },
+  "pinned_ac_ids": {
+    "wake-forest": ["AC-031"],
+    "accolite": ["AC-198"],
+    "stony-brook": ["AC-026"]
+  },
+  "story_weights": {
+    "jd_match": 1.0,
+    "wow": 0.85,
+    "recruiter": 1.0,
+    "story_completion": 0.45,
+    "metric_overlap": 0.25,
+    "concept_overlap": 0.3,
+    "capability": 0.35
+  },
+  "canonical_pools": {
+    "stony-brook": {
+      "pick": 4,
+      "pinned": ["AC-026"],
+      "scope_ac_id": "AC-026",
+      "packages_only": true,
+      "preserve_package_order": true,
+      "story_weights": {
+        "jd_match": 0.4,
+        "story_completion": 1.0,
+        "wow": 0.9,
+        "recruiter": 1.0,
+        "capability": 0.5
+      },
+      "ac_ids": [
+        "AC-026", "AC-001", "AC-002", "AC-003", "AC-004", "AC-005", "AC-006",
+        "AC-022", "AC-023", "AC-024", "AC-025", "AC-009", "AC-011", "AC-012",
+        "AC-013", "AC-014", "AC-019", "AC-020", "AC-021"
+      ],
+      "story_packages": [
+        {
+          "name": "ai",
+          "ids": ["AC-001", "AC-023", "AC-025"],
+          "jd_signals": ["ai engineer", "machine learning", "llm", "agent", "rag", "generative", "openai", "anthropic", "xai", "deepmind", "databricks", "applied scientist", "research scientist", "nlp", "ai systems", "improving ai"]
+        },
+        {
+          "name": "ai-systems",
+          "ids": ["AC-002", "AC-023", "AC-025"],
+          "jd_signals": ["ai engineer", "machine learning", "llm", "distributed", "kafka", "streaming", "scale", "production systems", "openai", "anthropic", "databricks", "infrastructure"]
+        },
+        {
+          "name": "backend",
+          "ids": ["AC-001", "AC-002", "AC-003"],
+          "jd_signals": ["backend", "fastapi", "kafka", "api", "microservice", "event", "streaming", "pipeline", "software engineer", "software developer", "distributed"]
+        },
+        {
+          "name": "data",
+          "ids": ["AC-002", "AC-004", "AC-006"],
+          "jd_signals": ["data engineer", "etl", "pipeline", "streaming", "kafka", "ingestion", "warehouse", "spark", "pandas"]
+        },
+        {
+          "name": "research",
+          "ids": ["AC-001", "AC-005", "AC-012"],
+          "jd_signals": ["research", "quant", "financial", "forecast", "macro", "economics", "fomc", "equity", "prediction"]
+        },
+        {
+          "name": "platform",
+          "ids": ["AC-001", "AC-004", "AC-019"],
+          "jd_signals": ["platform", "performance", "latency", "optimization", "throughput", "scale", "production"]
+        },
+        {
+          "name": "agents",
+          "ids": ["AC-023", "AC-024", "AC-001"],
+          "jd_signals": ["mcp", "model context protocol", "tool calling", "tool use", "agent framework", "protocol design", "orchestration"]
+        }
+      ]
+    },
+    "wake-forest": {
+      "pick": 3,
+      "pinned": ["AC-031"],
+      "ac_ids": ["AC-031", "AC-032", "AC-033", "AC-043", "AC-044", "AC-045", "AC-046", "AC-047", "AC-048", "AC-049"],
+      "story_packages": [
+        {
+          "name": "backend",
+          "ids": ["AC-031", "AC-032", "AC-049"],
+          "jd_signals": ["backend", "distributed", "pipeline", "cloud", "infra", "platform", "microservice", "api", "java", "spring", "software developer", "software engineer", "scalable"]
+        },
+        {
+          "name": "ai-ml",
+          "ids": ["AC-031", "AC-033", "AC-044"],
+          "jd_signals": ["machine learning", "ml", "ai", "computer vision", "model", "deep learning", "research scientist"]
+        },
+        {
+          "name": "product",
+          "ids": ["AC-031", "AC-047", "AC-048"],
+          "jd_signals": ["frontend", "dashboard", "product manager", "full stack", "ux", "ui engineer", "frontend engineer", "react developer"]
+        },
+        {
+          "name": "research",
+          "ids": ["AC-031", "AC-045", "AC-046"],
+          "jd_signals": ["research", "survival", "analytics", "data science", "statistics", "clinical", "prognosis"]
+        }
+      ]
+    },
+    "atriveo": {
+      "pick": 2,
+      "pinned": [],
+      "dynamic_anchors": true,
+      "packages_only": true,
+      "story_weights": {
+        "jd_match": 0.25,
+        "story_completion": 1.1,
+        "wow": 0.9,
+        "recruiter": 1.0
+      },
+      "ac_ids": ["AC-050", "AC-051", "AC-052", "AC-053", "AC-054", "AC-042", "AC-056", "AC-057", "AC-058", "AC-059", "AC-060", "AC-061", "AC-062"],
+      "story_packages": [
+        {
+          "name": "fullstack",
+          "anchor": "AC-050",
+          "ids": ["AC-050", "AC-052"],
+          "jd_signals": ["full stack", "react", "typescript", "frontend", "dashboard", "software engineer"]
+        },
+        {
+          "name": "backend",
+          "anchor": "AC-053",
+          "ids": ["AC-053", "AC-057"],
+          "jd_signals": ["backend", "fastapi", "postgresql", "api", "microservice", "rest", "sync"]
+        },
+        {
+          "name": "ai-product",
+          "anchor": "AC-042",
+          "ids": ["AC-042", "AC-054"],
+          "jd_signals": ["machine learning", "ai", "llm", "rag", "langchain", "nlp", "recommendation", "openai", "anthropic"]
+        },
+        {
+          "name": "infra",
+          "anchor": "AC-057",
+          "ids": ["AC-057", "AC-062"],
+          "jd_signals": ["cloudflare", "docker", "devops", "deployment", "serverless", "ci/cd", "infrastructure", "regression"]
+        },
+        {
+          "name": "data",
+          "anchor": "AC-059",
+          "ids": ["AC-059", "AC-056"],
+          "jd_signals": ["data engineering", "etl", "pipeline", "index", "mongodb", "export", "ingestion"]
+        },
+        {
+          "name": "product",
+          "anchor": "AC-050",
+          "ids": ["AC-050", "AC-051"],
+          "jd_signals": ["product", "chrome extension", "open source", "github", "users", "growth"]
+        }
+      ]
+    },
+    "insurance-platform": {
+      "pick": 2,
+      "pinned": [],
+      "dynamic_anchors": true,
+      "packages_only": true,
+      "story_weights": {
+        "jd_match": 0.25,
+        "story_completion": 1.1,
+        "wow": 0.9,
+        "recruiter": 1.0
+      },
+      "ac_ids": ["AC-063", "AC-064", "AC-065", "AC-066", "AC-067", "AC-068", "AC-069", "AC-070", "AC-071", "AC-072"],
+      "story_packages": [
+        {
+          "name": "platform",
+          "anchor": "AC-063",
+          "ids": ["AC-063", "AC-064"],
+          "jd_signals": ["microservice", "platform", "distributed", "insurance", "spring", "java", "software engineer"]
+        },
+        {
+          "name": "streaming",
+          "anchor": "AC-064",
+          "ids": ["AC-064", "AC-067"],
+          "jd_signals": ["kafka", "streaming", "event-driven", "avro", "real-time", "pipeline"]
+        },
+        {
+          "name": "data",
+          "anchor": "AC-066",
+          "ids": ["AC-066", "AC-067"],
+          "jd_signals": ["elasticsearch", "data engineering", "etl", "index", "search", "analytics"]
+        },
+        {
+          "name": "security",
+          "anchor": "AC-068",
+          "ids": ["AC-068", "AC-069"],
+          "jd_signals": ["security", "jwt", "authentication", "gateway", "rate limit", "circuit breaker"]
+        },
+        {
+          "name": "observability",
+          "anchor": "AC-070",
+          "ids": ["AC-070", "AC-072"],
+          "jd_signals": ["prometheus", "grafana", "observability", "devops", "docker", "monitoring", "zipkin"]
+        },
+        {
+          "name": "api",
+          "anchor": "AC-071",
+          "ids": ["AC-071", "AC-066"],
+          "jd_signals": ["rest", "api", "openapi", "swagger", "hateoas", "backend engineer"]
+        }
+      ]
+    },
+    "accolite": {
+      "pick": 4,
+      "pinned": ["AC-198"],
+      "scope_ac_id": "AC-198",
+      "packages_only": true,
+      "story_weights": {
+        "jd_match": 0.35,
+        "story_completion": 1.0,
+        "wow": 0.9,
+        "recruiter": 1.0
+      },
+      "ac_ids": [
+        "AC-198",
+        "AC-163", "AC-164", "AC-165", "AC-166", "AC-167", "AC-168", "AC-169", "AC-170",
+        "AC-171", "AC-172", "AC-173", "AC-174", "AC-175", "AC-176", "AC-177", "AC-178",
+        "AC-179", "AC-180", "AC-181", "AC-182", "AC-183", "AC-184", "AC-185", "AC-186",
+        "AC-187", "AC-188", "AC-189", "AC-190", "AC-191", "AC-192", "AC-193", "AC-194",
+        "AC-195", "AC-196", "AC-197"
+      ],
+      "story_packages": [
+        {
+          "name": "backend",
+          "ids": ["AC-163", "AC-166", "AC-171"],
+          "jd_signals": ["java", "backend", "spring", "spring boot", "api", "microservice", "distributed", "software engineer", "software developer"]
+        },
+        {
+          "name": "python-backend",
+          "ids": ["AC-167", "AC-189", "AC-192"],
+          "jd_signals": ["python", "fastapi", "backend", "lambda", "serverless", "data engineer", "pipeline"]
+        },
+        {
+          "name": "security",
+          "ids": ["AC-163", "AC-164", "AC-165"],
+          "jd_signals": ["security", "encryption", "encrypted", "auth", "compliance", "consent", "trust"]
+        },
+        {
+          "name": "commerce",
+          "ids": ["AC-172", "AC-173", "AC-176"],
+          "jd_signals": ["e-commerce", "ecommerce", "checkout", "payment", "commerce", "telecom", "retail"]
+        },
+        {
+          "name": "fullstack-erp",
+          "ids": ["AC-183", "AC-185", "AC-188"],
+          "jd_signals": ["full stack", "fullstack", "react", "typescript", "erp", "internal tools", "hr", "operations"]
+        },
+        {
+          "name": "cloud",
+          "ids": ["AC-189", "AC-190", "AC-191"],
+          "jd_signals": ["aws", "azure", "gcp", "cloud", "devops", "kubernetes", "docker", "ci/cd", "infrastructure", "lambda"]
+        },
+        {
+          "name": "enterprise",
+          "ids": ["AC-183", "AC-186", "AC-187"],
+          "jd_signals": ["enterprise", "platform", "workflow", "oracle", "crm", "rbac", "permissions", "timesheet"]
+        },
+        {
+          "name": "leadership",
+          "ids": ["AC-193", "AC-194", "AC-195"],
+          "jd_signals": ["engineering manager", "lead", "mentor", "mentorship", "hiring", "interview", "team lead", "people manager"]
+        },
+        {
+          "name": "angular",
+          "ids": ["AC-168", "AC-172", "AC-176"],
+          "jd_signals": ["angular", "frontend engineer", "front-end", "ui engineer", "typescript"]
+        },
+        {
+          "name": "fidelity-java",
+          "ids": ["AC-163", "AC-166", "AC-169"],
+          "jd_signals": ["financial services", "insurance", "fidelity", "banking", "encrypted", "mysql"]
+        }
+      ]
+    }
+  },
+  "minimum_visual_targets": {
+    "experience": {
+      "stony-brook": { "preferred": 4, "minimum": 4 },
+      "wake-forest": { "preferred": 3, "minimum": 3 },
+      "accolite": { "preferred": 4, "minimum": 4 }
+    },
+    "projects": {
+      "default": { "preferred": 2, "minimum": 2 },
+      "atriveo": { "preferred": 2, "minimum": 2 },
+      "insurance-platform": { "preferred": 2, "minimum": 2 }
+    },
+    "skills": {
+      "max_categories": 5,
+      "single_line_only": true,
+      "use_selected_ac_corpus": true
+    }
+  },
+  "plan_priority_weight": 6,
+  "strength_divisor": 800,
+  "retrieval_top_k": 24,
+  "use_case_memory": true,
+  "concept_caps": {
+    "ai": 4
+  }
+}

@@ -10,6 +10,7 @@ import {
 } from "../utils/tailorLogCapture";
 import type { ManualTailorSession } from "../utils/manualJob";
 import { tailorCellDisplay } from "../utils/tailorOutcome";
+import TailorExplainPanel from "./TailorExplainPanel";
 
 interface Props {
   session: ManualTailorSession;
@@ -23,7 +24,12 @@ function statusLabel(record: TailorRecord | null, queueItem: TailorQueueItem | n
   if (record) {
     const cell = tailorCellDisplay(record);
     if (record.status === "running") return `${cell.label} · tailoring`;
-    if (record.status === "done") return record.ats ? `Done · ATS ${record.ats}` : "Done · PDF ready";
+    if (record.status === "done") {
+      if (record.borderline || record.outcome === "borderline") {
+        return record.ats ? `Done · ATS ${record.ats} · borderline JD` : "Done · borderline JD warning";
+      }
+      return record.ats ? `Done · ATS ${record.ats}` : "Done · PDF ready";
+    }
     if (record.status === "failed" || record.status === "no-go") return cell.tooltip;
   }
   if (record?.status === "queued" || queueItem?.status === "pending") {
@@ -82,6 +88,16 @@ export default function ManualTailorAssistantCard({
       {record?.durationMs != null ? (
         <p className="manual-tailor-assistant-meta">
           Completed in {formatTailorDuration(record.durationMs)}
+        </p>
+      ) : null}
+
+      {record?.explain ? (
+        <TailorExplainPanel explain={record.explain} />
+      ) : null}
+
+      {record?.status === "failed" && record.outcome === "unsupported" && record.error ? (
+        <p className="tailor-explain-banner tailor-explain-banner--blocked" role="status">
+          {record.error}
         </p>
       ) : null}
 

@@ -1,0 +1,34 @@
+id: AC-043
+role: wake-forest
+slot_kind: experience
+achievement_theme: data-etl
+display_order: 4
+wow_score: 0.35
+metrics_claimed: [10plus_scan_types]
+concepts_claimed: [etl, airflow, metadata, datasets]
+signature_technologies: [Apache Airflow]
+fact: Apache Airflow ETL workflows integrating 10+ heterogeneous MRI scan types into research-ready datasets.
+capabilities:
+  data: 90
+  backend: 78
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - Apache Airflow
+  - ETL
+  - pipeline
+  - MRI
+  - data engineering
+  - metadata
+facets:
+  data:
+    phrase: MRI ETL workflows
+    keywords: [etl, airflow, dataset, metadata, reproducible, research]
+variants:
+  - facet: data
+    emphasis: data
+    strength: 8
+    text: >-
+      Built Apache Airflow ETL pipelines integrating 10+ heterogeneous MRI scan types into
+      reproducible research-ready cohorts for brain tumor studies.

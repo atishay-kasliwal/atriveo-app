@@ -1,0 +1,45 @@
+id: AC-062
+role: atriveo
+slot_kind: project
+achievement_theme: pdf-quality-gate
+display_order: 12
+wow_score: 0.85
+metrics_claimed:
+  - pdf_one_page
+concepts_claimed:
+  - pdf
+  - quality
+  - regression
+  - invariants
+  - testing
+signature_technologies:
+  - Python
+fact: Automated PDF regression testing enforcing one-page layout invariants across generated resumes.
+capabilities:
+  backend: 88
+  ai: 80
+  data: 72
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - PDF
+  - testing
+  - CI
+  - automation
+facets:
+  backend:
+    phrase: PDF quality gate
+    keywords:
+      - pdf
+      - gate
+      - golden
+      - regression
+      - invariant
+variants:
+  - facet: backend
+    emphasis: backend
+    strength: 9
+    text: >-
+      Implemented automated PDF regression testing that enforced one-page layout invariants across generated resumes,
+      preventing formatting drift with Python in production.

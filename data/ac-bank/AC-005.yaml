@@ -1,0 +1,41 @@
+id: AC-005
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: backtesting
+display_order: 5
+wow_score: 0.88
+metrics_claimed:
+  - stocks_30
+  - backtest
+concepts_claimed:
+  - data
+signature_technologies:
+  - Python
+  - AWS
+fact: Quantitative backtesting engine across 30 S&P 500 names on multi-horizon windows.
+capabilities:
+  ai: 70
+  backend: 75
+  frontend: 65
+  data: 90
+  cloud: 65
+  ml: 82
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - AWS
+facets:
+  default:
+    phrase: backtesting
+    keywords:
+      - python
+      - aws
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Built a Python quantitative backtesting engine on AWS evaluating trading signals across 30 S&P 500 stocks on 7d
+      and 30d forecasting windows in production.

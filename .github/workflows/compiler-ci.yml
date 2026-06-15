@@ -1,0 +1,60 @@
+name: Compiler CI
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "data/ac-bank/**"
+      - "scripts/**"
+      - "package.json"
+      - "package-lock.json"
+      - "Dockerfile"
+      - ".github/workflows/compiler-ci.yml"
+  pull_request:
+    paths:
+      - "data/ac-bank/**"
+      - "scripts/**"
+      - "package.json"
+      - "package-lock.json"
+      - "Dockerfile"
+      - ".github/workflows/compiler-ci.yml"
+
+jobs:
+  verify:
+    name: Routing + soak + PDF
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install Tectonic
+        run: |
+          curl -fsSL https://drop-sh.fullyjustified.net | sh -s -- -t "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          tectonic --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compiler CI verification
+        run: npm run ac:ci
+
+  docker:
+    name: Docker portable compiler
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build compiler image
+        run: docker buildx build --platform linux/amd64 --load -t atriveo-compiler:ci .
+
+      - name: Run verification in container
+        run: docker run --rm --platform linux/amd64 atriveo-compiler:ci

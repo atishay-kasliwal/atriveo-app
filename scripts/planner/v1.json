@@ -1,0 +1,11 @@
+{
+  "version": "v1",
+  "name": "baseline",
+  "description": "Keyword-first greedy planner (legacy comparison baseline)",
+  "narrative_first": false,
+  "plan_priority_weight": 10,
+  "strength_divisor": 500,
+  "retrieval_top_k": null,
+  "use_case_memory": false,
+  "concept_caps": {}
+}

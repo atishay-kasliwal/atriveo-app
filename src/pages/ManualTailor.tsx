@@ -20,6 +20,8 @@ import { nextManualSlot, parseManualJd } from "../utils/parseManualJd";
 import { openTailorPath, runSingleTailorJob } from "../utils/tailorRun";
 import { buildTailorStreamHandler } from "../utils/tailorStreamHandler";
 
+const MIN_JD_CHARS = 200;
+
 export default function ManualTailor() {
   const { user, loading: authLoading } = useAuth();
   const uid = user?.email ?? "anon";
@@ -70,7 +72,7 @@ export default function ManualTailor() {
     return text.trim().length >= 50;
   }, []);
 
-  const canSubmit = description.trim().length >= 50 && resumeSaved;
+  const canSubmit = description.trim().length >= MIN_JD_CHARS;
 
   useEffect(() => {
     const jd = description.trim();
@@ -86,12 +88,8 @@ export default function ManualTailor() {
   const handleSubmit = () => {
     setFormError("");
     const jd = description.trim();
-    if (jd.length < 50) {
-      setFormError("Paste at least 50 characters of job description.");
-      return;
-    }
-    if (!resumeSaved) {
-      setFormError("Save your resume in Settings before tailoring.");
+    if (jd.length < MIN_JD_CHARS) {
+      setFormError(`Paste at least ${MIN_JD_CHARS} characters of job description.`);
       return;
     }
 
@@ -155,7 +153,7 @@ export default function ManualTailor() {
           stats={[
             { label: "Queue", value: tailorQueue.pendingCount, tone: "orange" },
             { label: "Done today", value: tailorStatus.resumesCreatedTodayCount, tone: "green" },
-            { label: "Resume", value: resumeSaved ? "Ready" : "Missing", tone: resumeSaved ? "green" : "red" },
+            { label: "Resume", value: resumeSaved ? "Ready" : "Optional", tone: resumeSaved ? "green" : "slate" },
           ]}
         />
 
@@ -304,16 +302,10 @@ export default function ManualTailor() {
               ) : null}
 
               {formError ? <p className="manual-tailor-error">{formError}</p> : null}
-              {!resumeSaved ? (
-                <p className="manual-tailor-hint">
-                  Add your resume in <a href="/settings">Settings</a> before tailoring.
-                </p>
-              ) : null}
-
               <div className="manual-tailor-composer-actions">
                 <span className="manual-tailor-char-count">
                   {description.trim().length} chars
-                  {description.trim().length > 0 && description.trim().length < 50 ? " · need 50+" : ""}
+                  {description.trim().length > 0 && description.trim().length < MIN_JD_CHARS ? ` · need ${MIN_JD_CHARS}+` : ""}
                 </span>
                 <button
                   type="button"

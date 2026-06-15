@@ -1,0 +1,29 @@
+id: AC-158
+role: user-data-platform
+slot_kind: project
+achievement_theme: architecture
+display_order: 6
+wow_score: 0.84
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - Python
+fact: Mapped gap analysis between an always-on platform design and the production Hushh consent protocol.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+facets:
+  default:
+    phrase: gap-analysis
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built Python gap analysis mapping an always-on platform design to the production Hushh consent protocol across 4
+      invariants.

@@ -1,0 +1,41 @@
+id: AC-182
+role: accolite
+slot_kind: experience
+engineering_identity: fullstack
+client_context: tmobile
+achievement_theme: commerce-e2e
+display_order: 20
+wow_score: 0.82
+metrics_claimed:
+  - e2e_commerce
+  - purchases_5k_monthly
+concepts_claimed:
+  - fullstack
+signature_technologies:
+  - React
+  - Java
+fact: T-Mobile e2e commerce spanning onboarding provisioning and payment for telecom bundles.
+capabilities:
+  backend: 78
+  frontend: 88
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - React
+  - Java
+facets:
+  default:
+    phrase: commerce-e2e
+    keywords:
+      - react
+      - java
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Shipped unified T-Mobile bundle commerce on React and Java spanning onboarding provisioning and payment for 5K+
+      monthly production purchases.

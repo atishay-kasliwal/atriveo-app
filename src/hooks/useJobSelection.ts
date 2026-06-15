@@ -120,9 +120,10 @@ function appendRunLog(prev: TailorRunState, kind: TailorLogKind, text: string): 
 
 const PHASE_LOG: Record<TailorJobState["phase"], string> = {
   queued: "Queued — waiting for server",
-  analyzing: "Phase 1/4 · Analyze — Ollama eligibility + bullet selection",
-  assembling: "Phase 3/4 · Assemble — building resume.tex",
-  compiling: "Phase 4/4 · Compile — Tectonic PDF",
+  analyzing: "Phase 1/3 · Compose — AC pipeline (beam + RCS)",
+  assembling: "Phase 2/3 · Assemble — writing resume.tex",
+  compiling: "Phase 3/3 · Compile — Tectonic PDF",
+  reviewing: "Phase 3/3 · Compile — Tectonic PDF", // legacy — Gemma disabled
   done: "Finished this job",
 };
 
@@ -190,6 +191,8 @@ function applyTailorEvent(prev: TailorRunState, event: TailorStreamEvent): Tailo
     pdf: event.pdf ?? current.pdf,
     error: event.error ?? current.error,
     headerTitle: event.headerTitle ?? current.headerTitle,
+    explain: event.explain ?? current.explain,
+    borderline: event.borderline ?? current.borderline,
     logs,
   };
   const completed = jobs.filter((j) => j.phase === "done").length;
@@ -300,18 +303,6 @@ export function useJobSelection(jobs: Job[]) {
   // emits live NDJSON progress: queued → analyzing → assembling → compiling → done.
   const tailorSelectedJobs = async () => {
     if (!selectedJobs.length || tailoring) return;
-    const resumeText = localStorage.getItem("atriveo_resume") || "";
-    if (resumeText.trim().length < 50) {
-      setTailorRun({
-        active: false,
-        total: 0,
-        completed: 0,
-        jobs: [],
-        runLogs: [],
-        fatalError: "Save your resume in Settings first.",
-      });
-      return;
-    }
 
     setTailoring(true);
     const initialRun: TailorRunState = {
@@ -341,6 +332,7 @@ export function useJobSelection(jobs: Job[]) {
         .filter((j) => j.jd.trim().length > 50);
 
       const skipped = selectedJobs.length - jobsWithJd.length;
+      const resumeText = localStorage.getItem("atriveo_resume") || "";
       if (!jobsWithJd.length) {
         setTailorRun((prev) => ({
           active: false,

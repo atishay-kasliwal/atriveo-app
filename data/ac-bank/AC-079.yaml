@@ -1,0 +1,42 @@
+id: AC-079
+role: insureraft
+slot_kind: project
+achievement_theme: cluster-membership
+display_order: 7
+wow_score: 0.86
+metrics_claimed:
+  - raft_nodes_3
+concepts_claimed:
+  - membership
+  - configuration
+  - learner
+  - snapshot
+signature_technologies:
+  - Raft
+fact: Dynamic cluster membership via Raft config changes; learner nodes with snapshot catch-up.
+capabilities:
+  backend: 88
+  cloud: 74
+strength:
+  recruiter: 8
+ats_keywords:
+  - cluster membership
+  - Raft configuration
+  - learner node
+  - snapshot
+  - Raft
+facets:
+  distributed:
+    phrase: cluster membership
+    keywords:
+      - membership
+      - learner
+      - snapshot
+      - config change
+variants:
+  - facet: distributed
+    emphasis: distributed
+    strength: 8
+    text: >-
+      Built dynamic cluster membership on a 3-node Raft cluster with configuration updates and learner-node snapshot
+      catch-up for zero-downtime onboarding.

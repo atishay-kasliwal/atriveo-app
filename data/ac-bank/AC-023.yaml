@@ -1,0 +1,41 @@
+id: AC-023
+role: stony-brook
+slot_kind: experience
+engineering_identity: ai
+achievement_theme: multi-agent
+display_order: 8
+wow_score: 0.95
+metrics_claimed:
+  - accuracy_60
+  - stocks_30
+concepts_claimed:
+  - ai
+signature_technologies:
+  - Python
+  - LangChain
+fact: 3-agent RL debate system — 60% directional accuracy on 30 S&P stocks.
+capabilities:
+  ai: 95
+  backend: 72
+  frontend: 65
+  data: 65
+  cloud: 65
+  ml: 90
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - LangChain
+facets:
+  default:
+    phrase: multi-agent
+    keywords:
+      - python
+      - langchain
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built a Python and LangChain 3-agent RL debate system achieving 60% directional accuracy across 30 S&P 500 stocks
+      on 7d 30d and 90d forecasting windows in production.

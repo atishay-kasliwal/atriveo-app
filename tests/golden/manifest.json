@@ -1,0 +1,9 @@
+{
+  "goldens": [
+    { "id": "openai-ai", "company": "openai", "title": "AI Engineer", "planner": "v2", "jd": "openai-ai.txt" },
+    { "id": "google-backend", "company": "google", "title": "Backend Engineer", "planner": "v2", "jd": "google-backend.txt" },
+    { "id": "anthropic-ml", "company": "anthropic", "title": "Machine Learning Engineer", "planner": "v2", "jd": "anthropic-ml.txt" },
+    { "id": "stripe-backend", "company": "stripe", "title": "Backend Engineer", "planner": "v2", "jd": "stripe-backend.txt" },
+    { "id": "databricks-data", "company": "databricks", "title": "Data Engineer", "planner": "v2", "jd": "databricks-data.txt" }
+  ]
+}

@@ -1,0 +1,43 @@
+id: AC-102
+role: bayesian-mmm
+slot_kind: project
+achievement_theme: end-to-end-workflow
+display_order: 10
+wow_score: 0.85
+metrics_claimed:
+  - weeks_156
+concepts_claimed:
+  - eda
+  - workflow
+  - notebooks
+  - pipeline
+signature_technologies:
+  - Python
+  - pandas
+fact: 4-notebook workflow — EDA, modeling, holdout validation, budget optimization.
+capabilities:
+  data: 88
+  ai: 72
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - Jupyter
+  - pandas
+  - EDA
+  - data science
+facets:
+  workflow:
+    phrase: end-to-end DS workflow
+    keywords:
+      - eda
+      - notebook
+      - workflow
+      - pipeline
+variants:
+  - facet: workflow
+    emphasis: workflow
+    strength: 8
+    text: >-
+      Built a Python and pandas 4-notebook workflow from synthetic data generation through EDA and modeling to
+      validation across 156 weeks in production.

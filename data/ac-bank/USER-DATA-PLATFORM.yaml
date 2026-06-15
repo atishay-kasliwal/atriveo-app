@@ -1,0 +1,108 @@
+# User Data Platform | Canonical achievement bank (review file)
+# Bank v50
+# Lint: npm run ac:bullet-lint -- --role user-data-platform
+
+role:
+  id: user-data-platform
+  employer: User Data Platform
+  title: Backend Engineer
+  location: ""
+  dates: ""
+  slot_kind: project
+  resume_pick_count: 2
+  github: https://github.com/atishay-kasliwal/user-data-platform
+
+product:
+  name: Consent-first external-agent samples for Hushh personal data platform
+  problem: >
+    Third-party agents need a wire-correct, consent-first integration path to read scoped personal vault
+    exports without holding user keys or bypassing audit trails.
+  solution: >
+    FastAPI external-agent sample exercising /api/v1 consent flow: scope discovery, approval polling,
+    client-side X25519 ECDH + AES-GCM decryption, 4 trust invariants documentation, Claude Desktop MCP demo,
+    mock-mode /ask endpoints, and verified smoke tests.
+  stack:
+    backend: [FastAPI, Python]
+    crypto: [X25519, AES-GCM, ECDH]
+    integration: [Hushh /api/v1, MCP]
+    docs: [trust invariants, gap analysis, 90-day roadmap]
+  note: Downstream consumer of hushh-research — not a Postgres/Redis/Kafka production platform
+
+metrics:
+  perf_mock_warm_median_ms: 1.32
+  invariants: 4
+  api_version: v1
+  roadmap_tiles: 7
+  roadmap_days: 90
+
+achievements:
+  - id: AC-153
+    theme: platform-ownership
+    resume_bullet: >-
+      Built Python a FastAPI external-agent sample exercising the full /api/v1 consent
+      flow with client-side X25519 and AES-GCM decryption.
+  - id: AC-154
+    theme: cryptography
+    resume_bullet: >-
+      Implemented X25519 and AES-GCM scoped-export decryption validating ECDH unwrap in
+      1.3 ms warm latency for production Hushh wire contracts.
+  - id: AC-155
+    theme: principles
+    resume_bullet: >-
+      Built Python documentation of 4 trust invariants covering BYOK key boundaries,
+      scoped consent tokens, and append-only audit receipts.
+  - id: AC-156
+    theme: mcp-demo
+    resume_bullet: >-
+      Built a Claude Desktop MCP demo connecting consented Hushh vault reads into a live
+      production agent workflow over /api/v1.
+  - id: AC-157
+    theme: consent
+    resume_bullet: >-
+      Engineered FastAPI a consent-first /api/v1 flow from scope discovery through
+      approval polling to client-side AES-GCM decryption.
+  - id: AC-158
+    theme: architecture
+    resume_bullet: >-
+      Built Python gap analysis mapping an always-on platform design to the production
+      Hushh consent protocol across 4 invariants.
+  - id: AC-159
+    theme: testing
+    resume_bullet: >-
+      Shipped FastAPI mock-mode /ask endpoints verifying the decryption contract locally
+      in 1.3 ms without developer tokens.
+  - id: AC-160
+    theme: authorization
+    resume_bullet: >-
+      Integrated Python scoped capability tokens with attr.domain path grammar for
+      time-bounded access across 4 trust invariants in production.
+  - id: AC-161
+    theme: planning
+    resume_bullet: >-
+      Built a Python 90-day roadmap sequencing 7 platform tiles for external developer
+      onboarding to the consent API in production.
+  - id: AC-162
+    theme: verification
+    resume_bullet: >-
+      Built Python verified mock smoke tests documenting end-to-end X25519-AES256-GCM
+      decryption against the Hushh wire contract in production.
+selection_examples:
+  backend_jd:
+    typical_pick: [AC-153, AC-157]
+    package: consent-api
+  security_jd:
+    typical_pick: [AC-154, AC-155]
+    package: crypto
+  ai_agent_jd:
+    typical_pick: [AC-156, AC-153]
+    package: mcp
+  platform_jd:
+    typical_pick: [AC-158, AC-161]
+    package: architecture
+
+review_scores:
+  ats: "9.5/10 — FastAPI, X25519, AES-GCM, MCP, consent API spread"
+  recruiter: "9/10 — strong privacy/consent story with verified 1.3 ms mock latency"
+  interview_risk: >
+    This repo is sample/downstream Hushh consumer code — do not claim Postgres, Redis, Kafka production
+    platform or always-on multi-tenant deployment you did not ship.

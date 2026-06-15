@@ -1,0 +1,48 @@
+# Market demand priors for skill ranking (subset from JD corpus scan).
+# Used by skills-library.mjs — not for forcing skills onto resumes.
+# Full regeneration: mine public/job_descriptions → canonicalize → review → promote.
+
+version: 1
+updated_at: "2026-06-14"
+source: "manual_seed_from_corpus_top_terms"
+total_jds: 31106
+
+top_terms:
+  Python: 18017
+  Scalability: 11848
+  "Machine Learning": 9453
+  Java: 9040
+  AWS: 8483
+  SQL: 7500
+  "CI/CD": 6062
+  React: 5200
+  Docker: 5200
+  "Spring Boot": 4800
+  LLMs: 9453
+  "REST APIs": 4297
+  Kubernetes: 4100
+  TypeScript: 4200
+  JavaScript: 4100
+  Kafka: 2200
+  PostgreSQL: 3800
+  Redis: 2600
+  GCP: 4354
+  Azure: 4879
+
+# Skills with high demand but no bank AC yet — authoring backlog
+gaps:
+  - skill: "CI/CD"
+    demand: 6062
+    status: partial  # deploy keywords in AC-015; no dedicated AC
+  - skill: Azure
+    demand: 4879
+    status: missing
+  - skill: GCP
+    demand: 4354
+    status: missing
+  - skill: Kubernetes
+    demand: 4100
+    status: partial  # docker evidence; no k8s AC
+  - skill: Prometheus
+    demand: 4000
+    status: missing

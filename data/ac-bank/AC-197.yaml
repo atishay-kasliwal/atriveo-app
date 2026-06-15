@@ -1,0 +1,41 @@
+id: AC-197
+role: accolite
+slot_kind: experience
+engineering_identity: leadership
+client_context: leadership
+achievement_theme: knowledge-transfer
+display_order: 35
+wow_score: 0.84
+metrics_claimed:
+  - kt_sessions
+  - architectures_4
+concepts_claimed:
+  - leadership
+signature_technologies:
+  - Java
+  - Python
+fact: Knowledge transfer across Fidelity BT T-Mobile and in-house architectures.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 92
+strength:
+  recruiter: 7
+ats_keywords:
+  - Java
+  - Python
+facets:
+  default:
+    phrase: knowledge-transfer
+    keywords:
+      - java
+      - python
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Built Java and Python playbooks documenting 4 enterprise pipeline architectures plus ERP workflows preserving team
+      continuity across Fidelity production systems.

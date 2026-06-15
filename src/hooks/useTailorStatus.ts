@@ -101,6 +101,8 @@ export function useTailorStatus() {
         durationMs: patch.durationMs ?? existing?.durationMs,
         outcome: patch.outcome ?? existing?.outcome,
         serverStatus: patch.serverStatus ?? existing?.serverStatus,
+        explain: patch.explain ?? existing?.explain,
+        borderline: patch.borderline ?? existing?.borderline,
       };
       const next = { ...prev, [jobKey]: nextRecord };
       persist(uid, next);

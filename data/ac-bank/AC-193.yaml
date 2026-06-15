@@ -1,0 +1,41 @@
+id: AC-193
+role: accolite
+slot_kind: experience
+engineering_identity: leadership
+client_context: leadership
+achievement_theme: interviews
+display_order: 31
+wow_score: 0.93
+metrics_claimed:
+  - interviews_500
+  - years_3
+concepts_claimed:
+  - leadership
+signature_technologies:
+  - Java
+  - Python
+fact: Conducted 500+ technical interviews over 3 years at Accolite Digital.
+capabilities:
+  backend: 78
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 92
+strength:
+  recruiter: 9
+ats_keywords:
+  - Java
+  - Python
+facets:
+  default:
+    phrase: interviews
+    keywords:
+      - java
+      - python
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Standardized technical interview programs covering 500+ candidate screens over 3 years improving hire quality for
+      Java Python and cloud production teams.

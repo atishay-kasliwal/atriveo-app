@@ -1,0 +1,31 @@
+id: AC-126
+role: medledger
+slot_kind: project
+achievement_theme: patient-api
+display_order: 4
+wow_score: 0.84
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - MongoDB
+  - Mongoose
+fact: Built REST CRUD APIs for patient records with Mongoose schemas and server-side data validation.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - MongoDB
+  - Mongoose
+facets:
+  default:
+    phrase: patient-crud
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built REST CRUD APIs for patient records with Mongoose schemas and validation supporting 3 clinic user roles with
+      MongoDB in production.

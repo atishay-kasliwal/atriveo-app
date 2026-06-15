@@ -445,3 +445,83 @@
     max-width: 100%;
   }
 }
+
+/* Evidence explain panel (Manual Tailor + shared) */
+.tailor-explain {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.tailor-explain--compact {
+  padding: 8px 10px;
+}
+
+.tailor-explain-banner {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.tailor-explain-banner--warn {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.tailor-explain-banner--blocked {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.tailor-explain-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.tailor-explain-label {
+  flex: 0 0 88px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.tailor-explain-value {
+  color: #0f172a;
+}
+
+.tailor-explain-details {
+  margin-top: 8px;
+}
+
+.tailor-explain-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #334155;
+}
+
+.tailor-explain-list {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.tailor-explain-list li {
+  margin-bottom: 4px;
+}
+
+.tailor-explain-muted {
+  color: #64748b;
+}
+
+.tailor-explain code {
+  font-size: 11px;
+  background: #e2e8f0;
+  padding: 1px 4px;
+  border-radius: 4px;
+}

@@ -1,0 +1,40 @@
+id: AC-091
+role: job-pipeline
+slot_kind: project
+achievement_theme: admin-analytics
+display_order: 9
+wow_score: 0.84
+metrics_claimed: []
+concepts_claimed:
+  - analytics
+  - dashboard
+  - trends
+  - heatmap
+signature_technologies:
+  - JavaScript
+fact: Admin analytics — hourly heatmap, 7/14/30-day trends, pipeline breakdown, last 50 runs.
+capabilities:
+  frontend: 80
+  data: 82
+strength:
+  recruiter: 8
+ats_keywords:
+  - JavaScript
+  - analytics
+  - dashboard
+  - visualization
+facets:
+  analytics:
+    phrase: admin analytics dashboard
+    keywords:
+      - analytics
+      - heatmap
+      - trend
+      - dashboard
+variants:
+  - facet: analytics
+    emphasis: analytics
+    strength: 8
+    text: >-
+      Built JavaScript admin analytics with hourly heatmaps and 7/14/30-day trend charts tracking pipeline breakdown and
+      the last 50 production runs.

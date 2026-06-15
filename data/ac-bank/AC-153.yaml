@@ -1,0 +1,33 @@
+id: AC-153
+role: user-data-platform
+slot_kind: project
+achievement_theme: platform-ownership
+display_order: 1
+wow_score: 0.9
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - FastAPI
+  - Python
+fact: >-
+  Built a FastAPI external-agent sample exercising the full /api/v1 consent flow with client-side X25519 and AES-GCM
+  decry
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - FastAPI
+  - Python
+facets:
+  default:
+    phrase: consent-agent
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Built Python a FastAPI external-agent sample exercising the full /api/v1 consent flow with client-side X25519 and
+      AES-GCM decryption.

@@ -1,0 +1,42 @@
+id: AC-089
+role: job-pipeline
+slot_kind: project
+achievement_theme: github-deploy
+display_order: 7
+wow_score: 0.86
+metrics_claimed:
+  - runs_daily_20
+concepts_claimed:
+  - deploy
+  - github
+  - pages
+  - dashboard
+signature_technologies:
+  - Python
+fact: GitHub Contents API deploy to Pages — hourly dashboard updates without CI runners.
+capabilities:
+  backend: 82
+  cloud: 84
+strength:
+  recruiter: 8
+ats_keywords:
+  - GitHub
+  - GitHub Pages
+  - Python
+  - deployment
+  - API
+facets:
+  deploy:
+    phrase: GitHub Pages deploy
+    keywords:
+      - github
+      - pages
+      - deploy
+      - contents api
+variants:
+  - facet: deploy
+    emphasis: deploy
+    strength: 8
+    text: >-
+      Deployed Python ~20 daily production dashboard updates via the GitHub Contents API to GitHub Pages without CI
+      runners for zero-downtime releases.

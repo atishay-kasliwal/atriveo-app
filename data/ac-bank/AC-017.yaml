@@ -1,0 +1,28 @@
+id: AC-017
+role: insurance-platform
+slot_kind: project
+visibility:
+  default: false
+fact: RETIRED — wrong stack (FastAPI, PostgreSQL, AWS, millions of records). Superseded by AC-063–072 from GitHub.
+capabilities:
+  backend: 88
+  data: 90
+  cloud: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Kafka
+  - PostgreSQL
+  - pipeline
+  - AWS
+facets:
+  data-pipeline:
+    phrase: event-driven data pipeline
+    keywords: [kafka, postgres, pipeline, streaming]
+variants:
+  - facet: data-pipeline
+    emphasis: data-pipeline
+    strength: 9
+    text: >-
+      Built an event-driven insurance data pipeline on Kafka and PostgreSQL,
+      processing millions of records with FastAPI ingestion services on AWS.

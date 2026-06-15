@@ -1,0 +1,41 @@
+id: AC-163
+role: accolite
+slot_kind: experience
+engineering_identity: backend
+client_context: fidelity
+achievement_theme: encrypted-exchange
+display_order: 1
+wow_score: 0.94
+metrics_claimed:
+  - policy_records_10k
+  - contract_gated
+concepts_claimed:
+  - backend
+signature_technologies:
+  - Java
+  - AWS
+fact: Fidelity end-to-end encrypted insurance data exchange; transfers only after signed contracts between sister companies.
+capabilities:
+  backend: 90
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - Java
+  - AWS
+facets:
+  default:
+    phrase: encrypted-exchange
+    keywords:
+      - java
+      - aws
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Architected encrypted sister-company insurance exchange at Fidelity on Java and AWS moving 10K+ policy records
+      only after signed contracts in production.

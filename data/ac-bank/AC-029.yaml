@@ -1,0 +1,26 @@
+id: AC-029
+role: accolite
+slot_kind: experience
+visibility:
+  default: false
+fact: RETIRED — superseded by AC-188/AC-176 (React ERP/commerce) in Accolite bank v43.
+capabilities:
+  frontend: 85
+  backend: 75
+strength:
+  recruiter: 7
+ats_keywords:
+  - React
+  - TypeScript
+  - UI
+facets:
+  frontend:
+    phrase: React product surfaces
+    keywords: [react, ui, typescript]
+variants:
+  - facet: frontend
+    emphasis: frontend
+    strength: 7
+    text: >-
+      Developed React-based product surfaces connected to Spring Boot services,
+      reducing page load time by 35% for 5K+ users.

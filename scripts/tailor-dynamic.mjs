@@ -73,7 +73,7 @@ ELIGIBILITY: read the JD for work-authorization / sponsorship / security-clearan
 EXPERIENCE STRUCTURE (FIXED — do not deviate):
 - Stony Brook University (role_id 0): ALWAYS include, exactly 4 bullets.
 - Accolite Digital (role_id 3): ALWAYS include, exactly 4 bullets.
-- THIRD role: choose Wake Forest (role_id 1) OR Shriffle (role_id 2) — whichever fits the JD better — with exactly 2 bullets. Pick exactly ONE of them, never both, never neither.
+- THIRD role: Wake Forest – CAIR with exactly 3 bullets (Shriffle is retired from the resume).
 - So "experience" has EXACTLY 3 entries: role_id 0, role_id 3, and ONE of (1 or 2).
 
 PROJECTS: choose the 2 projects that best fit the JD, 2 bullets each.

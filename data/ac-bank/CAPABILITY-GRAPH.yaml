@@ -1,0 +1,194 @@
+# Capability DAG — proving a child partially satisfies ancestors.
+# coverage(node) = direct proof + sum(parent coverage × ancestor_decay)
+
+ancestor_decay: 0.45
+
+# Root → branch structure (each node may list children; parents are inferred)
+graph:
+  ai:
+    label: AI Systems
+    children: [rag, agents, evaluation, ml_systems]
+  ml_systems:
+    label: Machine Learning
+    parents: [ai]
+    children: [forecasting, nlp]
+  rag:
+    label: RAG
+    parents: [ai]
+    children: [retrieval, vector_search]
+  retrieval:
+    label: Retrieval
+    parents: [rag, ai]
+  vector_search:
+    label: Vector Search
+    parents: [rag, retrieval]
+  agents:
+    label: Agents
+    parents: [ai]
+    children: [multi_agent, mcp, tool_calling]
+  multi_agent:
+    label: Multi-Agent
+    parents: [agents, ai]
+  mcp:
+    label: MCP
+    parents: [agents, tool_calling]
+  tool_calling:
+    label: Tool Calling
+    parents: [agents]
+  evaluation:
+    label: Evaluation
+    parents: [ai]
+  forecasting:
+    label: Forecasting
+    parents: [ml_systems, ai]
+  nlp:
+    label: NLP
+    parents: [ml_systems, ai]
+
+  backend:
+    label: Backend
+    children: [api_design, microservices, performance]
+  api_design:
+    label: API Design
+    parents: [backend]
+  microservices:
+    label: Microservices
+    parents: [backend, distributed]
+  performance:
+    label: Performance
+    parents: [backend]
+
+  distributed:
+    label: Distributed Systems
+    children: [streaming, event_pipeline]
+  streaming:
+    label: Streaming
+    parents: [distributed, data]
+  event_pipeline:
+    label: Event Pipeline
+    parents: [distributed, backend]
+
+  data:
+    label: Data Engineering
+    children: [etl, quantitative]
+  etl:
+    label: ETL
+    parents: [data]
+  quantitative:
+    label: Quantitative
+    parents: [data, finance]
+
+  cloud:
+    label: Cloud
+    parents: [backend]
+  frontend:
+    label: Frontend
+  platform:
+    label: Platform
+    children: [backend, frontend, ai]
+  compiler:
+    label: Compiler
+    parents: [backend, ai]
+  beam_search:
+    label: Beam Search
+    parents: [compiler, optimization]
+  optimization:
+    label: Optimization
+    parents: [compiler, ai]
+  leadership:
+    label: Leadership
+  research:
+    label: Research
+    parents: [ml_systems]
+  clinical:
+    label: Clinical
+    parents: [ml_systems, platform]
+  finance:
+    label: Finance
+  macro_intelligence:
+    label: Macro Intelligence
+    parents: [finance, ai]
+  reliability:
+    label: Reliability
+    parents: [backend]
+
+# Map fine-grained theme tags → graph node ids
+capability_aliases:
+  reinforcement_learning: multi_agent
+  langchain: agents
+  llm: ai
+  ml: ml_systems
+  data_engineering: data
+  api: api_design
+  kafka: streaming
+  fastapi: api_design
+  aws: cloud
+  gcp: cloud
+  react: frontend
+  insurance: microservices
+
+# Recruiter identity labels from dominant graph roots
+identity_roots:
+  ai: AI Systems Engineer
+  backend: Backend Engineer
+  platform: Platform Engineer
+  data: Data Engineer
+  ml_systems: ML Engineer
+  frontend: Full-Stack Engineer
+  distributed: Distributed Systems Engineer
+  compiler: Systems / Tooling Engineer
+
+# Adjacent bullet flow — good transitions (previous → allowed next themes)
+story_flow:
+  platform: [backend, ai, ml_systems, distributed, evaluation, cloud]
+  backend: [distributed, data, performance, cloud, microservices]
+  ai: [evaluation, retrieval, agents, rag, ml_systems]
+  rag: [retrieval, evaluation, agents]
+  agents: [evaluation, backend, mcp, multi_agent]
+  distributed: [streaming, data, backend, performance]
+  data: [streaming, etl, backend, quantitative]
+  ml_systems: [evaluation, clinical, research, backend]
+  frontend: [platform, backend, research]
+  compiler: [optimization, ai, backend, beam_search]
+  finance: [quantitative, streaming, macro_intelligence]
+  leadership: [platform, backend, ai]
+  research: [ml_systems, evaluation, frontend]
+
+# Technology market weight — broader skills satisfy more JDs
+technology_weights:
+  python: 10
+  java: 10
+  javascript: 9
+  typescript: 9
+  aws: 8
+  gcp: 8
+  azure: 7
+  kafka: 8
+  kubernetes: 7
+  docker: 7
+  postgresql: 7
+  sql: 8
+  react: 7
+  fastapi: 5
+  spring: 6
+  langchain: 5
+  pytorch: 6
+  spark: 6
+  redis: 5
+  lambda: 5
+  mcp: 2
+  chromadb: 2
+  starlette: 1
+
+# Negative evidence — exceeding these counts actively hurts breadth score
+breadth_limits:
+  ai: 4
+  backend: 5
+  ml_systems: 3
+  evaluation: 3
+  langchain: 2
+
+breadth_penalty_per_excess: 5
+
+# Identity confidence threshold — below this triggers another optimize pass
+identity_confidence_min: 0.55

@@ -1,0 +1,41 @@
+id: AC-177
+role: accolite
+slot_kind: experience
+engineering_identity: backend
+client_context: bt
+achievement_theme: resilience-patterns
+display_order: 15
+wow_score: 0.84
+metrics_claimed:
+  - uptime_99pct
+  - tx_10k_daily
+concepts_claimed:
+  - backend
+signature_technologies:
+  - Java
+  - Spring Boot
+fact: British Telecom Resilience4j circuit breakers and retries sustaining 99% uptime on order APIs.
+capabilities:
+  backend: 90
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - Java
+  - Spring Boot
+facets:
+  default:
+    phrase: resilience-patterns
+    keywords:
+      - java
+      - spring boot
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Sustained 99% uptime on British Telecom order APIs across 10K+ daily transactions with Java and Spring Boot
+      fault-tolerance patterns in production.

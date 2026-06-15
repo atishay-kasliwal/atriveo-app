@@ -1,0 +1,42 @@
+id: AC-094
+role: bayesian-mmm
+slot_kind: project
+achievement_theme: adstock-saturation
+display_order: 2
+wow_score: 0.9
+metrics_claimed:
+  - channels_5
+concepts_claimed:
+  - adstock
+  - saturation
+  - hill
+  - decay
+signature_technologies:
+  - Python
+fact: Geometric adstock decay + Hill saturation curves for all 5 channels.
+capabilities:
+  data: 92
+  ai: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - adstock
+  - saturation
+  - diminishing returns
+  - MMM
+facets:
+  modeling:
+    phrase: adstock and saturation
+    keywords:
+      - adstock
+      - saturation
+      - hill
+      - decay
+variants:
+  - facet: modeling
+    emphasis: modeling
+    strength: 9
+    text: >-
+      Engineered Python geometric adstock decay and Hill saturation transforms capturing lagged ad effects and
+      diminishing returns across 5 marketing channels.

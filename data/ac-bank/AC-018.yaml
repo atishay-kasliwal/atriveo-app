@@ -1,0 +1,28 @@
+id: AC-018
+role: insurance-platform
+slot_kind: project
+visibility:
+  default: false
+fact: RETIRED — wrong stack (FastAPI, AWS). Superseded by AC-063–072 from GitHub.
+capabilities:
+  backend: 86
+  data: 84
+  cloud: 78
+strength:
+  recruiter: 8
+ats_keywords:
+  - microservices
+  - Kafka
+  - FastAPI
+  - AWS
+facets:
+  architecture:
+    phrase: asynchronous microservices
+    keywords: [microservice, async, event, scalable]
+variants:
+  - facet: architecture
+    emphasis: architecture
+    strength: 8
+    text: >-
+      Designed asynchronous microservices and resilient event processing workflows,
+      improving scalability and enabling high-throughput insurance data ingestion on AWS.

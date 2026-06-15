@@ -1,0 +1,208 @@
+{
+  "id": "openai-ai",
+  "updated_at": "2026-06-14T22:19:36.824Z",
+  "pipeline_version": "2.0.0",
+  "metrics": {
+    "resume_confidence_score": 64.4,
+    "oracle_score": 85.03,
+    "hiring_manager_composite": 7.9,
+    "would_interview": true,
+    "proof_chain_steps": 4,
+    "avg_density": 6.08,
+    "diversity": 0,
+    "evidence_compression": 0.249,
+    "beam_winner": "default",
+    "selected_acs": [
+      "AC-001",
+      "AC-023",
+      "AC-025",
+      "AC-024",
+      "AC-007",
+      "AC-028",
+      "AC-010",
+      "AC-008",
+      "AC-033",
+      "AC-031",
+      "AC-032",
+      "AC-041",
+      "AC-042",
+      "AC-017",
+      "AC-018"
+    ],
+    "visual": {
+      "page_count": 1,
+      "line_count": 13,
+      "resume_item_count": 15,
+      "experience_blocks": 5,
+      "project_blocks": 2,
+      "vertical_whitespace_markers": 14,
+      "section_balance": 3.75,
+      "bullet_distribution": {
+        "experience": 11,
+        "projects": 4,
+        "ratio": 2.75
+      }
+    },
+    "contribution_pruned": []
+  },
+  "beam": {
+    "width": 7,
+    "winner": "default",
+    "candidates": [
+      {
+        "variant_id": "default",
+        "resume_confidence_score": 64.4,
+        "selected_acs": [
+          "AC-001",
+          "AC-023",
+          "AC-025",
+          "AC-024",
+          "AC-007",
+          "AC-028",
+          "AC-010",
+          "AC-008",
+          "AC-033",
+          "AC-031",
+          "AC-032",
+          "AC-041",
+          "AC-042",
+          "AC-017",
+          "AC-018"
+        ],
+        "diversity": 0
+      },
+      {
+        "variant_id": "quality-strict",
+        "resume_confidence_score": 64.4,
+        "selected_acs": [
+          "AC-001",
+          "AC-023",
+          "AC-025",
+          "AC-024",
+          "AC-007",
+          "AC-028",
+          "AC-010",
+          "AC-008",
+          "AC-033",
+          "AC-031",
+          "AC-032",
+          "AC-041",
+          "AC-042",
+          "AC-017",
+          "AC-018"
+        ],
+        "diversity": 0
+      },
+      {
+        "variant_id": "quality-balanced",
+        "resume_confidence_score": 64.4,
+        "selected_acs": [
+          "AC-001",
+          "AC-023",
+          "AC-025",
+          "AC-024",
+          "AC-007",
+          "AC-028",
+          "AC-010",
+          "AC-008",
+          "AC-033",
+          "AC-031",
+          "AC-032",
+          "AC-041",
+          "AC-042",
+          "AC-017",
+          "AC-018"
+        ],
+        "diversity": 0
+      },
+      {
+        "variant_id": "tier-focused",
+        "resume_confidence_score": 64.4,
+        "selected_acs": [
+          "AC-001",
+          "AC-023",
+          "AC-025",
+          "AC-024",
+          "AC-007",
+          "AC-028",
+          "AC-010",
+          "AC-008",
+          "AC-033",
+          "AC-031",
+          "AC-032",
+          "AC-041",
+          "AC-042",
+          "AC-017",
+          "AC-018"
+        ],
+        "diversity": 0
+      },
+      {
+        "variant_id": "plan-heavy",
+        "resume_confidence_score": 64.4,
+        "selected_acs": [
+          "AC-001",
+          "AC-023",
+          "AC-025",
+          "AC-024",
+          "AC-007",
+          "AC-028",
+          "AC-010",
+          "AC-008",
+          "AC-033",
+          "AC-031",
+          "AC-032",
+          "AC-041",
+          "AC-042",
+          "AC-017",
+          "AC-018"
+        ],
+        "diversity": 0
+      },
+      {
+        "variant_id": "strength-first",
+        "resume_confidence_score": 64.4,
+        "selected_acs": [
+          "AC-001",
+          "AC-023",
+          "AC-025",
+          "AC-024",
+          "AC-007",
+          "AC-028",
+          "AC-010",
+          "AC-008",
+          "AC-033",
+          "AC-031",
+          "AC-032",
+          "AC-041",
+          "AC-042",
+          "AC-017",
+          "AC-018"
+        ],
+        "diversity": 0
+      },
+      {
+        "variant_id": "diverse-verbs",
+        "resume_confidence_score": 64.4,
+        "selected_acs": [
+          "AC-023",
+          "AC-001",
+          "AC-025",
+          "AC-024",
+          "AC-007",
+          "AC-028",
+          "AC-010",
+          "AC-008",
+          "AC-033",
+          "AC-031",
+          "AC-032",
+          "AC-041",
+          "AC-042",
+          "AC-017",
+          "AC-018"
+        ],
+        "diversity": 0
+      }
+    ]
+  }
+}

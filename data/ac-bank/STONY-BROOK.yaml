@@ -1,0 +1,264 @@
+# Stony Brook University | Canonical achievement bank (review file)
+# Bank v50
+# Scope bullet: AC-026 (always resume bullet 1) · Evidence: AC-001–AC-025 + AC-009–AC-021
+# Lint: npm run ac:bullet-lint -- --role stony-brook
+
+role:
+  id: stony-brook
+  employer: Stony Brook University
+  title: Software Engineer
+  location: Stony Brook, NY
+  dates: November 2024 -- May 2026
+  slot_kind: experience
+  resume_pick_count: 4
+  resume_structure: 1 scope thesis (AC-026) + 3 JD evidence bullets from story packages
+
+scope_ac:
+  id: AC-026
+  theme: career-scope
+  always_first: true
+  resume_bullet: >-
+    Architected AI-powered financial intelligence systems over 7 years of FOMC history
+    combining event-driven Python pipelines multi-agent reasoning and retrieval to
+    reduce macroeconomic analysis from 3 days to under 20 minutes.
+  recruiter_takeaway: >-
+    Built AI-powered financial intelligence combining event-driven backend engineering,
+    retrieval, multi-agent reasoning, and quantitative evaluation to transform macroeconomic analysis.
+
+product:
+  summary: >-
+    AI-powered financial intelligence platform spanning 7 years of FOMC history — event-driven
+    pipelines, Kafka streaming, multi-agent equity forecasting, production RAG, and researcher UI.
+  platform: FastAPI on AWS; event-driven FOMC ingestion; 3+ days to under 20 minutes at 67.7% accuracy.
+  backend: Python and Kafka NLP on 200K+ records; trading backtesting; streaming consumers.
+  ai: 3-agent RL debate (60% on 30 S&P stocks); MCP orchestration; production RAG (+18% lift).
+  frontend: React researcher dashboard and LLM analytics APIs for 5 daily users.
+  research: Macro analysis, equity forecasting, RL agents, evaluation benchmarks.
+
+metrics:
+  fomc_history_years: 7
+  pipeline_speed: 3 days → under 20 minutes
+  fomc_accuracy: 67.7%
+  financial_records: 200K+
+  portfolio_return: 27%
+  backtest_profit: $2.6K
+  sp500_stocks: 30
+  agent_accuracy: 60%
+  rag_lift: 18%
+  daily_researchers: 5
+  mcp_workflows: 3+
+
+routing:
+  pinned: AC-026
+  packages_only: true
+  preferred_ai_block: [AC-026, AC-001, AC-023, AC-025]
+  ai_systems_variant: [AC-026, AC-002, AC-023, AC-025]
+  mcp_gated: AC-024
+  deprioritized_on_ai: [AC-009, AC-011, AC-014, AC-024]
+  story_packages:
+    ai:
+      ids: [AC-001, AC-023, AC-025]
+      signals: [ai engineer, llm, openai, anthropic, applied scientist]
+    ai-systems:
+      ids: [AC-002, AC-023, AC-025]
+      signals: [ai engineer, kafka, distributed, databricks, scale]
+    backend:
+      ids: [AC-001, AC-002, AC-003]
+      signals: [backend, fastapi, kafka, software engineer]
+    data:
+      ids: [AC-002, AC-004, AC-006]
+      signals: [data engineer, etl, streaming, kafka]
+    research:
+      ids: [AC-001, AC-005, AC-012]
+      signals: [research, quant, macro, fomc]
+    platform:
+      ids: [AC-001, AC-004, AC-019]
+      signals: [platform, performance, latency]
+    agents:
+      ids: [AC-023, AC-024, AC-001]
+      signals: [mcp, tool calling, agent framework, protocol design]
+
+review_scores:
+  ats: 9.5/10 — Python FastAPI AWS Kafka React spread; compose-time ATS penalties v51
+  recruiter: 9.5/10 — systems-first AI block; identity bullet AC-026
+  narrative: 9.5/10 — package order preserved; proof chain does not override packages
+  interview_risk: Be ready to deep-dive FOMC pipeline, Kafka NLP, 3-agent RL debate, production RAG eval
+
+routing_examples:
+  ai_lab_jd:
+    typical_pick: [AC-026, AC-001, AC-023, AC-025]
+    package: ai
+  distributed_ai_jd:
+    typical_pick: [AC-026, AC-002, AC-023, AC-025]
+    package: ai-systems
+  backend_jd:
+    typical_pick: [AC-026, AC-001, AC-002, AC-003]
+    package: backend
+  data_jd:
+    typical_pick: [AC-026, AC-002, AC-004, AC-006]
+    package: data
+  mcp_jd:
+    typical_pick: [AC-026, AC-023, AC-024, AC-001]
+    package: agents
+
+retired:
+  - id: AC-009
+    reason: Legacy evaluation overlap — use AC-025
+  - id: AC-011
+    reason: Legacy retrieval eval — use AC-025
+  - id: AC-014
+    reason: Legacy agent eval — use AC-023
+
+ats_coverage:
+  anchors: [Python, FastAPI, AWS, Kafka, React]
+  spread: context over stacking; min/max via ATS_COVERAGE_MATRIX.yaml
+
+review_notes: |
+  Identity after 15 seconds: built AI-powered financial intelligence combining event-driven backend,
+  retrieval, multi-agent reasoning, and quantitative evaluation.
+  Preferred AI block (top labs): AC-026 + AC-001 + AC-023 + AC-025 — systems first, not LLM tutorial.
+  ai-systems variant swaps AC-002 for AC-001 when JD emphasizes distributed/Kafka/scale.
+  AC-024 (MCP) only when JD mentions MCP, tool calling, or agent frameworks.
+  Deprioritize AC-009, AC-011, AC-014 on AI resumes — overlap with AC-023/AC-025.
+
+achievements:
+  - id: AC-026
+    engineering_identity: scope
+    theme: career-scope
+    tier: S
+    resume_bullet: >-
+      Architected AI-powered financial intelligence systems over 7 years of FOMC history combining
+      event-driven Python pipelines multi-agent reasoning and retrieval to reduce macroeconomic
+      analysis from 3 days to under 20 minutes.
+
+  - id: AC-001
+    engineering_identity: platform
+    theme: fomc-pipeline
+    tier: S
+    resume_bullet: >-
+      Engineered an event-driven FastAPI pipeline on AWS over 7 years of FOMC data
+      cutting macro analysis from 3 days to under 20 minutes at 67.7% accuracy.
+  - id: AC-002
+    engineering_identity: backend
+    theme: kafka-trading
+    tier: S
+    resume_bullet: >-
+      Engineered a Python and Kafka NLP pipeline on AWS processing 200K+ financial
+      records in real time delivering 27% portfolio return and $2.6K backtesting profit.
+  - id: AC-003
+    engineering_identity: backend
+    theme: ingestion-apis
+    tier: A
+    resume_bullet: >-
+      Built FastAPI ingestion APIs on AWS loading 200K+ financial records into macro
+      research pipelines with validated schemas for downstream NLP and forecasting.
+  - id: AC-004
+    engineering_identity: backend
+    theme: event-pipeline
+    tier: A
+    resume_bullet: >-
+      Standardized event-driven Kafka pipelines moving FOMC releases to Python inference
+      workflows within minutes instead of multi-day manual analysis cycles.
+  - id: AC-005
+    engineering_identity: data
+    theme: backtesting
+    tier: A
+    resume_bullet: >-
+      Built a Python quantitative backtesting engine on AWS evaluating trading signals
+      across 30 S&P 500 stocks on 7d and 30d forecasting windows in production.
+  - id: AC-006
+    engineering_identity: backend
+    theme: streaming
+    tier: A
+    resume_bullet: >-
+      Engineered Kafka streaming consumers processing live market feeds into Python NLP
+      feature extraction serving 5 real-time macro research workflows in production.
+  - id: AC-022
+    engineering_identity: frontend
+    theme: research-ui
+    tier: S
+    resume_bullet: >-
+      Built a React and Python LLM analytics interface across financial news and
+      transcripts with schema validation delivering production APIs used daily by 5
+      researchers.
+  - id: AC-023
+    engineering_identity: ai
+    theme: multi-agent
+    tier: S
+    resume_bullet: >-
+      Built a Python and LangChain 3-agent RL debate system achieving 60% directional
+      accuracy across 30 S&P 500 stocks on 7d 30d and 90d forecasting windows in
+      production.
+  - id: AC-024
+    engineering_identity: ai
+    theme: mcp-orchestration
+    tier: A
+    resume_bullet: >-
+      Implemented MCP-based agent orchestration in Python across 3+ financial tool-use
+      workflows connecting LLM agents to external APIs with structured evaluation
+      benchmarks.
+  - id: AC-025
+    engineering_identity: ai
+    theme: production-rag
+    tier: S
+    resume_bullet: >-
+      Built a production Python RAG pipeline with LangChain vector retrieval and AWS
+      inference APIs delivering 18% accuracy lift in macro research evaluations.
+  - id: AC-009
+    engineering_identity: ai
+    theme: llm-evaluation
+    tier: B
+    resume_bullet: >-
+      Built Python and LangChain LLM evaluation benchmarks comparing retrieval and agent
+      outputs across 30-stock forecasting tasks with reproducible accuracy scoring in
+      production.
+  - id: AC-011
+    engineering_identity: ai
+    theme: retrieval-eval
+    tier: B
+    resume_bullet: >-
+      Implemented Python and LangChain vector retrieval evaluation measuring semantic
+      search quality across 200K+ financial document corpora for production RAG tuning.
+  - id: AC-012
+    engineering_identity: frontend
+    theme: researcher-dashboard
+    tier: A
+    resume_bullet: >-
+      Shipped a React and Python researcher dashboard surfacing macro analysis and
+      multi-agent outputs to 5 daily financial research users in production.
+  - id: AC-013
+    engineering_identity: data
+    theme: nlp-extraction
+    tier: B
+    resume_bullet: >-
+      Built Python NLP entity extraction on AWS across financial news identifying firms
+      and macro themes in 200K+ records powering downstream forecasting features.
+  - id: AC-014
+    engineering_identity: ai
+    theme: agent-evaluation
+    tier: B
+    resume_bullet: >-
+      Standardized Python and LangChain multi-agent debate evaluation scoring
+      directional accuracy across 30 equity forecasts in production.
+  - id: AC-019
+    engineering_identity: platform
+    theme: performance
+    tier: A
+    resume_bullet: >-
+      Reduced FOMC pipeline runtime from 3 days to under 20 minutes through Python
+      performance tuning and AWS inference optimization in production.
+  - id: AC-020
+    engineering_identity: cloud
+    theme: inference-deploy
+    tier: B
+    resume_bullet: >-
+      Deployed Python LLM inference on AWS serving macro research APIs with sub-minute
+      latency for 5 daily financial research users.
+  - id: AC-021
+    engineering_identity: backend
+    theme: schema-validation
+    tier: B
+    resume_bullet: >-
+      Built Python and FastAPI schema validation across 200K+ financial transcripts
+      ensuring structured LLM inputs for news and FOMC document feeds in production
+      pipelines.

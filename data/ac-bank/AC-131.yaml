@@ -1,0 +1,31 @@
+id: AC-131
+role: medledger
+slot_kind: project
+achievement_theme: frontend
+display_order: 9
+wow_score: 0.8
+metrics_claimed: []
+concepts_claimed: []
+signature_technologies:
+  - EJS
+  - JavaScript
+fact: Shipped responsive EJS dashboards for managing appointments and patient records in the browser.
+capabilities:
+  backend: 85
+  data: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - EJS
+  - JavaScript
+facets:
+  default:
+    phrase: ejs-dashboard
+    keywords: []
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Shipped responsive EJS dashboards for managing appointments and patient records for 3 clinic roles with JavaScript
+      in production.

@@ -1,0 +1,41 @@
+id: AC-014
+role: stony-brook
+slot_kind: experience
+engineering_identity: ai
+achievement_theme: agent-evaluation
+display_order: 15
+wow_score: 0.83
+metrics_claimed:
+  - agent_eval
+  - debate
+concepts_claimed:
+  - ai
+signature_technologies:
+  - Python
+  - LangChain
+fact: Multi-agent debate evaluation across Fundamental Sentiment and Valuation agents.
+capabilities:
+  ai: 90
+  backend: 70
+  frontend: 65
+  data: 65
+  cloud: 65
+  ml: 85
+strength:
+  recruiter: 7
+ats_keywords:
+  - Python
+  - LangChain
+facets:
+  default:
+    phrase: agent-evaluation
+    keywords:
+      - python
+      - langchain
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Standardized Python and LangChain multi-agent debate evaluation scoring directional accuracy across 30 equity
+      forecasts in production.

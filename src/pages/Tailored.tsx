@@ -1,21 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import PageIntro from "../components/PageIntro";
+import ResumeHistoryCard from "../components/ResumeHistoryCard";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { openTailorPath, listTailoredResumes, type TailoredResumeOnDisk } from "../utils/tailorRun";
 import { loadJobDescriptions } from "../utils/jobDescriptionBuckets";
 
 const TZ = "America/New_York";
 
-function fmtWhen(iso?: string | null): string {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  const now = new Date();
-  const sameDay = now.toLocaleDateString("en-US", { timeZone: TZ }) === d.toLocaleDateString("en-US", { timeZone: TZ });
-  return sameDay
-    ? d.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" })
-    : d.toLocaleString("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+type GroupMode = "flat" | "company";
+
+function companyKey(r: TailoredResumeOnDisk): string {
+  return r.company.trim().toLowerCase() || r.dir;
+}
+
+function findPreviousCompile(list: TailoredResumeOnDisk[], index: number): TailoredResumeOnDisk | null {
+  const key = companyKey(list[index]);
+  for (let i = index + 1; i < list.length; i++) {
+    if (companyKey(list[i]) === key) return list[i];
+  }
+  return null;
 }
 
 export default function Tailored() {
@@ -24,6 +28,7 @@ export default function Tailored() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
+  const [groupMode, setGroupMode] = useState<GroupMode>("flat");
   const [openJd, setOpenJd] = useState<string | null>(null);
   const [jdText, setJdText] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState<string | null>(null);
@@ -38,7 +43,6 @@ export default function Tailored() {
 
   useEffect(() => {
     void refresh();
-    // light auto-refresh so new resumes appear as the queue finishes them
     const id = window.setInterval(() => { void refresh(); }, 60_000);
     return () => window.clearInterval(id);
   }, [refresh]);
@@ -49,7 +53,33 @@ export default function Tailored() {
     return resumes.filter((r) => r.company.toLowerCase().includes(q) || r.title.toLowerCase().includes(q));
   }, [resumes, query]);
 
-  // Lazy-load JD text for the expanded job (by URL → bucket).
+  const displayList = useMemo(() => {
+    if (groupMode === "flat") return filtered;
+    const byCompany = new Map<string, TailoredResumeOnDisk[]>();
+    for (const r of filtered) {
+      const k = companyKey(r);
+      const arr = byCompany.get(k) || [];
+      arr.push(r);
+      byCompany.set(k, arr);
+    }
+    return [...byCompany.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .flatMap(([, items]) => items.sort((a, b) => new Date(b.tailoredAt || 0).getTime() - new Date(a.tailoredAt || 0).getTime()));
+  }, [filtered, groupMode]);
+
+  const firstInGroup = useMemo(() => {
+    const set = new Set<string>();
+    const map = new Map<string, boolean>();
+    for (const r of displayList) {
+      const k = companyKey(r);
+      if (!set.has(k)) {
+        set.add(k);
+        map.set(r.dir, true);
+      }
+    }
+    return map;
+  }, [displayList]);
+
   useEffect(() => {
     if (!openJd) return;
     const rec = resumes.find((r) => r.dir === openJd);
@@ -89,11 +119,11 @@ export default function Tailored() {
       <div className="wrapper page-shell page-shell-wide tailored-page">
         <PageIntro
           compact
-          kicker="Tailored"
-          title="Jobs with a resume already created"
-          description="Read straight from your Mac — every job whose tailored PDF exists. Open the resume, read the JD, and apply. New resumes appear automatically as the queue finishes them."
+          kicker="Resumes"
+          title="Compile history"
+          description="Git-style log of every PDF the evidence compiler created. Compare compiles with Diff, review Explain artifacts, track identity and information gain per run."
           stats={[
-            { label: "Tailored", value: resumes.length, tone: "green" },
+            { label: "Compiled", value: resumes.length, tone: "green" },
             { label: "Today", value: todayCount, tone: "blue" },
             { label: "Visible", value: filtered.length, tone: "orange" },
           ]}
@@ -105,89 +135,46 @@ export default function Tailored() {
             <input
               className="search-input"
               type="search"
-              placeholder="Search tailored jobs…"
+              placeholder="Search compiles…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
+          <button
+            type="button"
+            className={`sort-btn${groupMode === "company" ? " is-active" : ""}`}
+            onClick={() => setGroupMode((m) => (m === "flat" ? "company" : "flat"))}
+          >
+            {groupMode === "company" ? "Grouped" : "Group by company"}
+          </button>
           <button type="button" className="sort-btn" onClick={() => void refresh()}>↻ Refresh</button>
-          <a href="/" className="sort-btn">← Back to Live Feed</a>
+          <a href="/" className="sort-btn">← Feed</a>
         </div>
 
         {loading && resumes.length === 0 ? (
-          <div className="tailored-empty">Loading tailored resumes from your Mac…</div>
-        ) : filtered.length === 0 ? (
-          <div className="tailored-empty">{error || "No tailored jobs match your search."}</div>
+          <div className="tailored-empty">Loading compiles from your Mac…</div>
+        ) : displayList.length === 0 ? (
+          <div className="tailored-empty">{error || "No compiles match your search."}</div>
         ) : (
-          <ul className="tailored-list" aria-label="Tailored resumes">
-            {filtered.map((r) => {
-              const applied = r.jobUrl ? getRecord(r.jobUrl) : null;
-              const isOpen = openJd === r.dir;
-              const jd = jdText[r.dir];
-              return (
-                <li key={r.dir} className={`tailored-card${isOpen ? " is-open" : ""}`}>
-                  <div className="tailored-card-main">
-                    <div className="tailored-card-info">
-                      <div className="tailored-card-title">
-                        <strong>{r.company}</strong>
-                        <span className="tailored-card-role">{r.title}</span>
-                      </div>
-                      <div className="tailored-card-meta">
-                        {r.ats ? <span className="tailored-tag tailored-tag--ats">ATS {r.ats}</span> : null}
-                        <span className="tailored-card-when">Tailored {fmtWhen(r.tailoredAt)}</span>
-                        {applied ? <span className="tailored-tag tailored-tag--applied">Applied{applied.clicks > 1 ? ` ×${applied.clicks}` : ""}</span> : null}
-                      </div>
-                    </div>
-                    <div className="tailored-card-actions">
-                      <button
-                        type="button"
-                        className="tailored-btn"
-                        onClick={() => setOpenJd(isOpen ? null : r.dir)}
-                        disabled={!r.jobUrl}
-                      >
-                        {isOpen ? "Hide JD" : "View JD"}
-                      </button>
-                      <button
-                        type="button"
-                        className="tailored-btn"
-                        onClick={() => { void openTailorPath(r.pdfPath); }}
-                        title="Reveal the PDF in Finder"
-                      >
-                        Open resume
-                      </button>
-                      {r.jobUrl ? (
-                        <button
-                          type="button"
-                          className="tailored-btn tailored-btn--primary"
-                          onClick={() => handleApply(r)}
-                        >
-                          Apply ↗
-                        </button>
-                      ) : null}
-                    </div>
-                  </div>
-                  {isOpen ? (
-                    <div className="tailored-jd">
-                      {jd == null ? (
-                        <div className="tailored-jd-loading">Loading job description…</div>
-                      ) : jd ? (
-                        <>
-                          <div className="tailored-jd-bar">
-                            <span>{jd.length.toLocaleString()} chars</span>
-                            <button type="button" className="tailored-btn tailored-btn--small" onClick={() => handleCopyJd(r.dir)}>
-                              {copied === r.dir ? "Copied ✓" : "Copy JD"}
-                            </button>
-                          </div>
-                          <pre className="tailored-jd-text">{jd}</pre>
-                        </>
-                      ) : (
-                        <div className="tailored-jd-loading">No full JD captured for this job.</div>
-                      )}
-                    </div>
-                  ) : null}
-                </li>
-              );
-            })}
+          <ul className="resume-history-list" aria-label="Compile history">
+            {displayList.map((r, index) => (
+              <ResumeHistoryCard
+                key={r.dir}
+                resume={r}
+                previous={findPreviousCompile(displayList, index)}
+                applied={r.jobUrl ? getRecord(r.jobUrl) : null}
+                isFirstInGroup={firstInGroup.get(r.dir)}
+                showCompanyHeader={groupMode === "company"}
+                onOpenPdf={() => { void openTailorPath(r.pdfPath); }}
+                onApply={() => handleApply(r)}
+                onToggleJd={() => setOpenJd(openJd === r.dir ? null : r.dir)}
+                jdOpen={openJd === r.dir}
+                jdContent={jdText[r.dir]}
+                jdLoading={openJd === r.dir && jdText[r.dir] == null && Boolean(r.jobUrl)}
+                onCopyJd={() => { void handleCopyJd(r.dir); }}
+                copied={copied === r.dir}
+              />
+            ))}
           </ul>
         )}
       </div>

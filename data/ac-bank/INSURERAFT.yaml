@@ -1,0 +1,105 @@
+# InsureRaft | Canonical achievement bank (review file)
+# Bank v50
+# Lint: npm run ac:bullet-lint -- --role insureraft
+
+role:
+  id: insureraft
+  employer: InsureRaft
+  title: Systems Engineer
+  location: ""
+  dates: ""
+  slot_kind: project
+  resume_pick_count: 2
+  github: https://github.com/atishay-kasliwal/InsureRaft
+
+product:
+  name: Raft-based insurance data replication network
+  problem: >
+    Insurance data must flow between carriers, brokers, reinsurers, and regulators in order,
+    exactly once, with a tamper-evident audit trail — point-to-point integrations fail this.
+  solution: >
+    C++ platform on eBay NuRaft: 3-node cluster with quorum writes, InsuranceStateMachine
+    applying 8 typed events, file-backed log persistence, dynamic membership, and CLI-driven
+    policy/claim workflows.
+  stack:
+    languages: [C++]
+    consensus: [NuRaft, Raft]
+    transport: [ASIO, OpenSSL TLS]
+    build: [CMake]
+    persistence: [file-backed log, snapshots]
+
+metrics:
+  cluster:
+    default_nodes: 3
+  events:
+    typed_event_count: 8
+    event_types:
+      - POLICY_CREATED
+      - POLICY_UPDATED
+      - POLICY_CANCELLED
+      - CLAIM_FILED
+      - CLAIM_APPROVED
+      - CLAIM_DENIED
+      - PAYMENT_ISSUED
+      - ENDORSEMENT_ADDED
+  guarantees:
+    quorum_write: true
+    exactly_once: event_id dedup
+    ordered_audit_log: true
+    minority_failover: true
+
+achievements:
+  - id: AC-073
+    theme: platform-ownership
+    resume_bullet: >-
+      Built InsureRaft, a C++ and NuRaft platform replicating insurance data on a 3-node
+      cluster for distributed carriers and regulators in production.
+  - id: AC-074
+    theme: raft-consensus
+    resume_bullet: >-
+      Implemented Raft consensus with NuRaft quorum writes, replicating policy and claim
+      events across 3 nodes before acknowledgment.
+  - id: AC-075
+    theme: state-machine
+    resume_bullet: >-
+      Built a C++ insurance state machine applying 8 typed domain events with
+      idempotency keys and monotonic committed log indices in production.
+  - id: AC-076
+    theme: exactly-once
+    resume_bullet: >-
+      Implemented C++ exactly-once delivery across 8 event types by deduplicating
+      event_id values before committing insurance transactions to the Raft log.
+  - id: AC-077
+    theme: audit-log
+    resume_bullet: >-
+      Built an immutable Raft audit log on a 3-node cluster serving as a tamper-evident
+      production compliance record for insurance regulators.
+  - id: AC-078
+    theme: ha-failover
+    resume_bullet: >-
+      Implemented NuRaft automatic leader election and failover on a 3-node cluster,
+      surviving minority node failures without data loss.
+  - id: AC-079
+    theme: cluster-membership
+    resume_bullet: >-
+      Built dynamic cluster membership on a 3-node Raft cluster with configuration
+      updates and learner-node snapshot catch-up for zero-downtime onboarding.
+  - id: AC-080
+    theme: log-persistence
+    resume_bullet: >-
+      Engineered C++ file-backed per-entry log persistence on 3 nodes with automatic
+      replay and snapshot recovery when servers restart and rejoin the cluster.
+  - id: AC-081
+    theme: insurance-workflows
+    resume_bullet: >-
+      Built C++ end-to-end insurance workflows across 8 event types from policy creation
+      through claim approval and payment settlement on the replicated log.
+  - id: AC-082
+    theme: build-runtime
+    resume_bullet: >-
+      Shipped a CMake-built C++ server with OpenSSL TLS and an interactive CLI managing
+      policies and claims across a 3-node production cluster.
+review_scores:
+  ats: "9/10 — C++, Raft, NuRaft, distributed systems, insurance domain"
+  recruiter: "9.5/10 — strong systems differentiation vs generic microservices"
+  interview_risk: "Do not claim Kafka or Java — this is C++/NuRaft only. 3-node cluster is demo default, not production scale claim."

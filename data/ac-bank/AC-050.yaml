@@ -1,0 +1,36 @@
+id: AC-050
+role: atriveo
+slot_kind: project
+achievement_theme: product-ownership
+display_order: 1
+wow_score: 0.90
+metrics_claimed: [users_daily_1k, uptime_999]
+concepts_claimed: [platform, extension, dashboard, tailoring, tracker, production]
+signature_technologies: [React, FastAPI]
+fact: Job search automation platform — Chrome extension, tracking, resume tailoring; 1K+ daily users, 99.9% uptime.
+capabilities:
+  frontend: 88
+  backend: 86
+  cloud: 80
+  ai: 72
+strength:
+  recruiter: 10
+ats_keywords:
+  - React
+  - FastAPI
+  - Chrome extension
+  - job search
+  - dashboard
+  - PostgreSQL
+  - production
+facets:
+  platform:
+    phrase: job search platform
+    keywords: [platform, job search, extension, dashboard, full stack]
+variants:
+  - facet: platform
+    emphasis: platform
+    strength: 10
+    text: >-
+      Architected a React and FastAPI job search platform with an integrated Chrome extension,
+      serving 1K+ daily users while automating application tracking and resume tailoring at 99.9% uptime.

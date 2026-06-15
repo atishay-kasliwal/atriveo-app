@@ -1,0 +1,41 @@
+id: AC-169
+role: accolite
+slot_kind: experience
+engineering_identity: backend
+client_context: fidelity
+achievement_theme: mysql-aws-integration
+display_order: 7
+wow_score: 0.86
+metrics_claimed:
+  - mysql_aws
+  - records_10k
+concepts_claimed:
+  - backend
+signature_technologies:
+  - MySQL
+  - AWS
+fact: Fidelity insurance pipeline persistence on MySQL with AWS deployment for sister-company data exchange.
+capabilities:
+  backend: 90
+  frontend: 70
+  cloud: 72
+  data: 70
+  leadership: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - MySQL
+  - AWS
+facets:
+  default:
+    phrase: mysql-aws-integration
+    keywords:
+      - mysql
+      - aws
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Standardized auditable data integrity for Fidelity insurance exchanges on MySQL and AWS spanning 10K+ encrypted
+      sister-company records in production.

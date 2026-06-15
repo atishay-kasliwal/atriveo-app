@@ -1,0 +1,41 @@
+id: AC-012
+role: stony-brook
+slot_kind: experience
+engineering_identity: frontend
+achievement_theme: researcher-dashboard
+display_order: 13
+wow_score: 0.86
+metrics_claimed:
+  - researchers_5
+  - dashboard
+concepts_claimed:
+  - frontend
+signature_technologies:
+  - React
+  - Python
+fact: React researcher dashboard for macro analysis and agent outputs.
+capabilities:
+  ai: 75
+  backend: 70
+  frontend: 85
+  data: 65
+  cloud: 65
+  ml: 65
+strength:
+  recruiter: 8
+ats_keywords:
+  - React
+  - Python
+facets:
+  default:
+    phrase: researcher-dashboard
+    keywords:
+      - react
+      - python
+variants:
+  - facet: default
+    emphasis: default
+    strength: 8
+    text: >-
+      Shipped a React and Python researcher dashboard surfacing macro analysis and multi-agent outputs to 5 daily
+      financial research users in production.

@@ -1,0 +1,43 @@
+id: AC-084
+role: job-pipeline
+slot_kind: project
+achievement_theme: filter-cascade
+display_order: 2
+wow_score: 0.9
+metrics_claimed:
+  - filter_rate_75
+  - jobs_survive_109
+concepts_claimed:
+  - filter
+  - cascade
+  - dedup
+  - relevance
+signature_technologies:
+  - Python
+fact: 5-stage filter cascade — ~75% removed, ~109 high-signal roles per run from ~480 raw.
+capabilities:
+  backend: 86
+  data: 92
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - filtering
+  - NLP
+  - pipeline
+  - data engineering
+facets:
+  data-pipeline:
+    phrase: filter cascade
+    keywords:
+      - filter
+      - cascade
+      - dedup
+      - relevance
+variants:
+  - facet: data-pipeline
+    emphasis: data-pipeline
+    strength: 9
+    text: >-
+      Engineered Python a 5-stage filter cascade removing ~75% of irrelevant listings and surfacing ~109 high-signal
+      early-career roles from ~480 raw jobs per run.

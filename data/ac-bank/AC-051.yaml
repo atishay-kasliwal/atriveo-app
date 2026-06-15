@@ -1,0 +1,43 @@
+id: AC-051
+role: atriveo
+slot_kind: project
+achievement_theme: chrome-extension
+display_order: 2
+wow_score: 0.88
+metrics_claimed:
+  - chrome_5_stars
+concepts_claimed:
+  - extension
+  - capture
+  - linkedin
+  - indeed
+signature_technologies:
+  - JavaScript
+fact: Open-source Chrome extension — 5.0 stars; one-click capture from LinkedIn and Indeed.
+capabilities:
+  frontend: 82
+  backend: 68
+strength:
+  recruiter: 9
+ats_keywords:
+  - Chrome extension
+  - LinkedIn
+  - Indeed
+  - JavaScript
+  - open source
+facets:
+  extension:
+    phrase: Chrome extension
+    keywords:
+      - chrome
+      - extension
+      - linkedin
+      - indeed
+      - capture
+variants:
+  - facet: extension
+    emphasis: extension
+    strength: 9
+    text: >-
+      Shipped a JavaScript Chrome extension rated 5.0 stars on the Chrome Web Store capturing LinkedIn and Indeed job
+      postings in one click for production users.

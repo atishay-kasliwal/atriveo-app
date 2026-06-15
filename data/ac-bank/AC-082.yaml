@@ -1,0 +1,44 @@
+id: AC-082
+role: insureraft
+slot_kind: project
+achievement_theme: build-runtime
+display_order: 10
+wow_score: 0.84
+metrics_claimed:
+  - raft_nodes_3
+concepts_claimed:
+  - cmake
+  - tls
+  - cli
+  - server
+signature_technologies:
+  - C++
+  - CMake
+fact: CMake-built C++ server, OpenSSL TLS via NuRaft, interactive CLI for policies and cluster ops.
+capabilities:
+  backend: 88
+  cloud: 72
+strength:
+  recruiter: 8
+ats_keywords:
+  - C++
+  - CMake
+  - OpenSSL
+  - TLS
+  - CLI
+facets:
+  infra:
+    phrase: C++ server runtime
+    keywords:
+      - cmake
+      - openssl
+      - tls
+      - cli
+      - server
+variants:
+  - facet: infra
+    emphasis: infra
+    strength: 8
+    text: >-
+      Shipped a CMake-built C++ server with OpenSSL TLS and an interactive CLI managing policies and claims across a
+      3-node production cluster.

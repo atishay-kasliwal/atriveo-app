@@ -1,0 +1,88 @@
+# Canonical evidence taxonomy — maps AC metadata to optimizer-facing tags.
+# Fine-grained capabilities are derived from achievement_theme + concepts_claimed.
+
+capability_areas:
+  - ai
+  - backend
+  - distributed
+  - data
+  - ml
+  - cloud
+  - frontend
+  - evaluation
+  - performance
+  - leadership
+  - research
+  - platform
+
+# achievement_theme → fine-grained capabilities (information gain units)
+theme_capabilities:
+  fomc-pipeline: [macro_intelligence, event_pipeline, performance, backend, cloud]
+  kafka-trading: [distributed, streaming, backend, finance]
+  ingestion-apis: [backend, data, api_design]
+  event-pipeline: [distributed, backend, data]
+  backtesting: [quantitative, evaluation, finance]
+  streaming: [distributed, streaming, data]
+  multi-agent: [multi_agent, reinforcement_learning, forecasting, evaluation]
+  mcp-orchestration: [multi_agent, tool_calling, backend, cloud]
+  production-rag: [retrieval, evaluation, backend, ai]
+  llm-evaluation: [evaluation, ai]
+  retrieval-eval: [retrieval, evaluation, ai]
+  agent-evaluation: [evaluation, multi_agent, ai]
+  nlp-extraction: [nlp, data, ai]
+  researcher-dashboard: [frontend, research, platform]
+  research-ui: [frontend, research]
+  career-scope: [platform, ai, leadership]
+  product-ownership: [platform, ml, leadership, clinical]
+  resume-compiler: [compiler, beam_search, optimization, ai, backend]
+  insurance-microservices: [microservices, kafka, backend, cloud]
+  schema-validation: [backend, data, reliability]
+  inference-deploy: [ml, performance, cloud]
+
+# Themes that teach essentially the same recruiter lesson — novelty penalty within cluster
+novelty_clusters:
+  evaluation: [llm-evaluation, retrieval-eval, agent-evaluation, backtesting]
+  retrieval: [production-rag, retrieval-eval]
+  langchain_proof: [multi-agent, mcp-orchestration, production-rag]
+
+# Signature differentiators — "could I tell you apart?"
+differentiator_themes:
+  - fomc-pipeline
+  - multi-agent
+  - product-ownership
+  - resume-compiler
+  - kafka-trading
+  - insurance-microservices
+
+# Production vs research proof strength
+proof_levels:
+  production:
+    themes: [fomc-pipeline, kafka-trading, production-rag, multi-agent, mcp-orchestration, resume-compiler, insurance-microservices, inference-deploy]
+    weight: 1.0
+  shipped:
+    themes: [ingestion-apis, event-pipeline, streaming, schema-validation]
+    weight: 0.85
+  research:
+    themes: [research-ui, researcher-dashboard, backtesting, nlp-extraction]
+    weight: 0.7
+
+# Recruiter skim — position index 1..15 (document order)
+position_weights:
+  - 2.5
+  - 2.5
+  - 2.0
+  - 2.0
+  - 2.0
+  - 2.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  - 0.5
+  - 0.5
+  - 0.5
+  - 0.5
+
+# Diminishing returns for repeated tags (1st, 2nd, 3rd+ occurrence)
+diminishing_returns: [1.0, 0.4, 0.1]

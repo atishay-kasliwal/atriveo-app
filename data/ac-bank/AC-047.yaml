@@ -1,0 +1,37 @@
+id: AC-047
+role: wake-forest
+slot_kind: experience
+achievement_theme: clinician-dashboard
+display_order: 8
+wow_score: 0.74
+metrics_claimed: [team_20]
+concepts_claimed: [dashboard, visualization, frontend, react, redux]
+signature_technologies: [React, TypeScript]
+fact: React and TypeScript clinician dashboard with Redux state management for a 20-person team reviewing MRIs and AI segmentations.
+capabilities:
+  frontend: 88
+  ml: 65
+  backend: 68
+strength:
+  recruiter: 9
+ats_keywords:
+  - React
+  - TypeScript
+  - Redux
+  - dashboard
+  - frontend
+  - MRI
+  - visualization
+  - full stack
+  - clinical
+facets:
+  frontend:
+    phrase: React clinician dashboard
+    keywords: [react, typescript, redux, dashboard, visualization, clinician, interactive, frontend]
+variants:
+  - facet: frontend
+    emphasis: frontend
+    strength: 9
+    text: >-
+      Built a React and TypeScript clinician dashboard for a 20-person research team to review
+      MRIs, prior studies, and AI segmentations with interactive mask refinement.
