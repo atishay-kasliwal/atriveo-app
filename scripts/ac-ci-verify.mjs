@@ -33,12 +33,30 @@ function runStep(label, scriptPath, args = []) {
   }
 }
 
+function resolveTectonicBin() {
+  const candidates = [
+    process.env.TECTONIC_BIN,
+    "/usr/local/bin/tectonic",
+    path.join(process.env.HOME || "", ".local/bin/tectonic"),
+    "tectonic",
+  ].filter(Boolean);
+  for (const bin of candidates) {
+    if (bin.includes("/") && fs.existsSync(bin)) return bin;
+  }
+  return "tectonic";
+}
+
 function verifyPdfCompile() {
   console.log("\n── PDF compile (Tectonic) ──");
 
-  const tectonic = spawnSync("tectonic", ["--version"], { encoding: "utf8" });
-  if (tectonic.status !== 0) {
+  const tectonicBin = resolveTectonicBin();
+  const tectonic = spawnSync(tectonicBin, ["--version"], { encoding: "utf8" });
+  if (tectonic.error?.code === "ENOENT") {
     throw new Error("tectonic not found — install Tectonic or pass --skip-pdf");
+  }
+  if (tectonic.status !== 0) {
+    const detail = (tectonic.stderr || tectonic.stdout || "").trim().slice(0, 400);
+    throw new Error(`tectonic --version failed (exit ${tectonic.status})${detail ? `: ${detail}` : ""}`);
   }
   console.log(`Tectonic · ${(tectonic.stdout || tectonic.stderr || "").trim().split("\n")[0]}`);
 
@@ -63,7 +81,7 @@ function verifyPdfCompile() {
   const texPath = path.join(outDir, "resume.tex");
   fs.writeFileSync(texPath, pipeline.result.tex);
 
-  const compile = spawnSync("tectonic", ["resume.tex"], { cwd: outDir, encoding: "utf8" });
+  const compile = spawnSync(tectonicBin, ["resume.tex"], { cwd: outDir, encoding: "utf8" });
   if (compile.status !== 0) {
     const tail = (compile.stderr || compile.stdout || "").trim().slice(-800);
     throw new Error(`Tectonic failed:\n${tail}`);

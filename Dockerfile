@@ -14,10 +14,12 @@ RUN apt-get update \
   && curl -fsSL -o /tmp/tectonic.tgz \
     "https://github.com/tectonic-typesetting/tectonic/releases/download/tectonic%400.16.9/tectonic-0.16.9-x86_64-unknown-linux-gnu.tar.gz" \
   && tar -xzf /tmp/tectonic.tgz -C /usr/local/bin \
+  && chmod +x /usr/local/bin/tectonic \
   && rm /tmp/tectonic.tgz \
   && apt-get purge -y curl \
   && apt-get autoremove -y \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* \
+  && tectonic --version
 
 WORKDIR /app
 
