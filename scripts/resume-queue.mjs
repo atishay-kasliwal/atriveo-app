@@ -12,7 +12,27 @@ const DEFAULT_PLANNER = process.env.TAILOR_PLANNER?.trim() || "v2";
 export async function ensureResumeIndex(db) {
   await db.collection("jobs").createIndex({ "resume.status": 1, "resume.lease_until": 1 });
   await db.collection("jobs").createIndex({ "resume.fingerprint": 1 }, { sparse: true });
-  await db.collection("jobs").createIndex({ job_url: 1 }, { unique: true });
+
+  const indexes = await db.collection("jobs").indexes();
+  const hasJobUrlIndex = indexes.some((idx) => idx.key?.job_url === 1);
+  if (hasJobUrlIndex) return;
+
+  try {
+    await db.collection("jobs").createIndex({ job_url: 1 }, { unique: true });
+  } catch (e) {
+    const msg = String(e.message || e);
+    if (msg.includes("E11000") || msg.includes("duplicate key")) {
+      await db.collection("jobs").createIndex({ job_url: 1 });
+    } else if (
+      msg.includes("already exists")
+      || msg.includes("same name")
+      || msg.includes("IndexOptionsConflict")
+    ) {
+      // Index present under a different definition — safe to continue.
+    } else {
+      throw e;
+    }
+  }
 }
 
 export async function fetchDescription(db, jobUrl) {
@@ -96,22 +116,22 @@ export async function enqueueJob(db, job, { force = false, planner = DEFAULT_PLA
   return { jobUrl, skipped: false };
 }
 
-export async function enqueueTopJobs(db, { limit = 25, minScore = 0 } = {}) {
-  const todayUtc = new Date().toISOString().slice(0, 10);
+export async function enqueueTopJobs(db, { limit = null, minScore = 0 } = {}) {
+  const findOptions = {
+    projection: { _id: 0, job_url: 1, company: 1, title: 1, score_pct: 1 },
+    sort: { score_pct: -1 },
+  };
+  if (limit != null && limit > 0) findOptions.limit = limit;
+
   const cursor = db.collection("jobs").find(
     {
-      batch_time: { $gte: todayUtc },
       score_pct: { $gte: minScore },
       $or: [
         { resume: { $exists: false } },
         { "resume.status": { $in: [null, "failed", "skipped"] } },
       ],
     },
-    {
-      projection: { _id: 0, job_url: 1, company: 1, title: 1, score_pct: 1 },
-      sort: { score_pct: -1 },
-      limit,
-    },
+    findOptions,
   );
 
   const results = [];

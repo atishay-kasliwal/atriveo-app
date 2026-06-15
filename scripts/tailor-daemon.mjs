@@ -42,7 +42,7 @@ if (!tunnelToken) {
 function run(label, cmd, args) {
   const child = spawn(cmd, args, {
     cwd: ROOT,
-    env: { ...process.env, ...env },
+    env: { ...process.env, ...env, MONGO_URI: process.env.MONGO_URI || env.MONGO_URI },
     stdio: "inherit",
   });
   child.on("exit", (code, signal) => {

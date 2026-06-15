@@ -2058,3 +2058,125 @@ body.is-today-board .nav-tab.active {
   border-color: #c4b5fd;
   color: #5b21b6;
 }
+
+/* ── Apply queue mode ─────────────────────────────────────────────────── */
+
+.today-board-nav-item--apply .today-board-nav-count {
+  background: var(--board-accent-soft);
+  color: var(--board-accent-strong);
+  font-weight: 600;
+}
+
+.today-board-nav-item--apply.is-active {
+  border-left-color: var(--board-accent);
+}
+
+.apply-mode-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin: 0 0 12px;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, rgba(226, 85, 61, 0.08), rgba(226, 85, 61, 0.02));
+  border: 1px solid var(--board-accent-border);
+  border-radius: 10px;
+}
+
+.apply-mode-banner-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--board-accent-strong);
+}
+
+.apply-mode-banner-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.apply-mode-banner-stat {
+  font-size: 13px;
+  color: var(--board-sub);
+}
+
+.apply-mode-banner-stat strong {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--board-ink);
+  margin-right: 4px;
+}
+
+.apply-mode-banner-stat--ready strong {
+  color: var(--board-accent-strong);
+}
+
+.apply-mode-banner-stat--live strong {
+  color: #059669;
+}
+
+.apply-mode-banner-hint {
+  flex: 1 1 220px;
+  margin: 0;
+  font-size: 12px;
+  color: var(--board-sub);
+}
+
+.apply-mode-toggle {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--board-line);
+  background: #fff;
+  color: var(--board-sub);
+  cursor: pointer;
+}
+
+.apply-mode-toggle.is-active {
+  border-color: var(--board-accent-border);
+  background: var(--board-accent-soft);
+  color: var(--board-accent-strong);
+}
+
+.job-table-row--apply-ready {
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.job-table-row--apply-ready:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.job-table-row--apply-done {
+  opacity: 0.72;
+}
+
+.job-table-board-actions--apply {
+  justify-content: flex-end;
+}
+
+.job-table-board-apply--apply-main {
+  min-width: 96px;
+  font-weight: 700;
+}
+
+.job-table-apply-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #059669;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.job-resume-cell--apply-focus .job-resume-btn--apply-step {
+  font-weight: 700;
+  min-width: 72px;
+}
+
+.job-resume-cell--apply-focus.job-resume-cell--ready {
+  border-left: 3px solid #10b981;
+  padding-left: 8px;
+}

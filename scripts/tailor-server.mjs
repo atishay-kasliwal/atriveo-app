@@ -40,8 +40,12 @@ import { listActiveWorkers } from "./worker-registry.mjs";
 
 dotenv.config();
 
-// Load the engine bank once at startup.
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.join(SCRIPT_DIR, "..");
+dotenv.config({ path: path.join(ROOT, ".env") });
+dotenv.config({ path: path.join(ROOT, ".env.tailor") });
+
+// Load the engine bank once at startup.
 const RECOVER_SCRIPT = path.join(SCRIPT_DIR, "tailor-recover.mjs");
 function spawnRecover(reason) {
   try {
@@ -1331,7 +1335,8 @@ const server = http.createServer(async (req, res) => {
         try {
           if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
           const body = JSON.parse(raw || "{}");
-          const limit = Math.min(Number(body.limit || 25), 100);
+          const rawLimit = body.limit != null ? Number(body.limit) : null;
+          const limit = rawLimit != null && rawLimit > 0 ? rawLimit : null;
           const minScore = Number(body.min_score || 0);
           const results = await withMongo(
             (db) => enqueueTopJobs(db, { limit, minScore }),

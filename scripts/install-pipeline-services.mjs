@@ -59,6 +59,7 @@ function installJobPipelineAgent() {
   let plist = fs.readFileSync(PLIST_TEMPLATE, "utf8");
   plist = plist
     .replaceAll("__JOB_PIPELINE_DIR__", JOB_PIPELINE_DIR)
+    .replaceAll("__ATRIVEO_APP_DIR__", ROOT)
     .replace("__GITHUB_TOKEN__", token);
 
   fs.mkdirSync(path.dirname(PLIST_DEST), { recursive: true });

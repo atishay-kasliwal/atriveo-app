@@ -28,7 +28,9 @@ import { outcomeFromServerStatus, resolveTailorOutcome } from "../utils/tailorOu
 import { tailorPhaseProgress } from "../utils/tailorProgress";
 import { estDateKey } from "../utils/estDate";
 import CompilerStatusStrip from "../components/CompilerStatusStrip";
+import ApplyModeBanner from "../components/ApplyModeBanner";
 import { buildJobResumeView } from "../utils/jobResumeView";
+import { countReadyToApply, countAppliedToday, isResumeReady } from "../utils/applyQueue";
 
 type LevelFilter = "all" | "New Grad" | "Entry" | "Mid";
 type RunCard = RunEntry & {
@@ -185,7 +187,15 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const [sortBy, setSortBy] = useState<SortBy>(initialSort);
   const [sortDir, setSortDir] = useState<SortDir>(() => defaultSortDir(initialSort));
   const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
-  const [tailorFilter, setTailorFilter] = useState<TailorFilter>("all");
+  const [tailorFilter, setTailorFilterState] = useState<TailorFilter>(() => {
+    if (typeof window === "undefined") return "done";
+    const saved = localStorage.getItem("atriveo_tailor_filter");
+    return (saved as TailorFilter) || "done";
+  });
+  const setTailorFilter = useCallback((key: TailorFilter) => {
+    setTailorFilterState(key);
+    try { localStorage.setItem("atriveo_tailor_filter", key); } catch { /* ignore */ }
+  }, []);
   const [h1bFilter, setH1bFilter] = useState(false);
   const [top500Filter, setTop500Filter] = useState(false);
   const [termFilter, setTermFilter] = useState("all");
@@ -194,7 +204,12 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [locationFilter, setLocationFilter] = useState<string>("all");
   const [showTodayApplications, setShowTodayApplications] = useState(false);
-  const [activeView, setActiveView] = useState<ViewKey>("all");
+  const [activeView, setActiveView] = useState<ViewKey>(() => {
+    if (typeof window === "undefined") return "ready-to-apply";
+    const saved = localStorage.getItem("atriveo_board_view");
+    return (saved as ViewKey) || "ready-to-apply";
+  });
+  const [hideAppliedInApplyMode, setHideAppliedInApplyMode] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
   const [feedRefreshNotice, setFeedRefreshNotice] = useState("");
@@ -206,10 +221,17 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
 
   const applyView = useCallback((view: ViewKey) => {
     setActiveView(view);
+    try { localStorage.setItem("atriveo_board_view", view); } catch { /* ignore */ }
+    if (view === "ready-to-apply") {
+      setTailorFilter("done");
+      setSortBy("score");
+      setSortDir("desc");
+      setHideAppliedInApplyMode(true);
+    }
     setLevelFilter(view === "new-grad" ? "New Grad" : "all");
     setH1bFilter(view === "h1b");
     setTop500Filter(view === "top500");
-  }, []);
+  }, [setTailorFilter]);
 
   const handlePeriodChange = (nextPeriod: Period, syncPath = true) => {
     setPeriod(nextPeriod);
@@ -500,13 +522,20 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const filtered = useMemo(() => {
     let jobs = [...visibleJobs];
     if (levelFilter !== "all") jobs = jobs.filter((j) => j.level === levelFilter);
-    if (tailorFilter !== "all") {
+    if (activeView === "ready-to-apply") {
+      jobs = jobs.filter((j) => {
+        const record = tailorStatus.getRecordForJob(j);
+        if (!isResumeReady(record)) return false;
+        if (hideAppliedInApplyMode && j.job_url && getRecord(j.job_url)?.lastAppliedAt) return false;
+        return true;
+      });
+    } else if (tailorFilter !== "all") {
       jobs = jobs.filter(
         (j) => tailorFilterBucket(tailorStatus.getRecordForJob(j)) === tailorFilter,
       );
     }
     return sortJobs(jobs, sortBy, sortDir, tailorStatus.getRecordForJob);
-  }, [visibleJobs, levelFilter, tailorFilter, sortBy, sortDir, tailorStatus.getRecordForJob, tailorStatus.records]);
+  }, [visibleJobs, levelFilter, tailorFilter, activeView, hideAppliedInApplyMode, sortBy, sortDir, tailorStatus.getRecordForJob, tailorStatus.records, getRecord]);
 
   // Counts per tailor-status bucket for the filter chips.
   const tailorCounts = useMemo(() => {
@@ -524,6 +553,37 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
     [rawJobs]
   );
+
+  const isApplyMode = activeView === "ready-to-apply";
+
+  const readyToApplyCount = useMemo(
+    () => countReadyToApply(
+      visibleJobs,
+      (j) => tailorStatus.getRecordForJob(j),
+      (url) => getRecord(url),
+    ),
+    [visibleJobs, tailorStatus.getRecordForJob, tailorStatus.records, getRecord],
+  );
+
+  const appliedTodayInFeed = useMemo(
+    () => countAppliedToday(visibleJobs, getRecord, estDateKey()),
+    [visibleJobs, getRecord, stats.appliedJobs],
+  );
+
+  const appliedReadyHiddenCount = useMemo(() => {
+    if (!isApplyMode) return 0;
+    return visibleJobs.filter((j) => {
+      const record = tailorStatus.getRecordForJob(j);
+      return isResumeReady(record) && j.job_url && getRecord(j.job_url)?.lastAppliedAt;
+    }).length;
+  }, [isApplyMode, visibleJobs, tailorStatus.getRecordForJob, tailorStatus.records, getRecord]);
+
+  const compilingCount = useMemo(() => {
+    return visibleJobs.filter((j) => {
+      const r = tailorStatus.getRecordForJob(j);
+      return r?.status === "running" || r?.status === "queued";
+    }).length;
+  }, [visibleJobs, tailorStatus.getRecordForJob, tailorStatus.records]);
 
   const isSplitView = false;
 
@@ -588,7 +648,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     if (!job.job_url) return;
     recordSavedJob(job, source);
     tailorQueue.removeFromQueue(jobDismissKey(job));
-    if (source === "add") {
+    if (source === "add" || source === "apply") {
       recordClick(job.job_url, job.title || "Untitled role", job.company || "Unknown company", {
         location: job.location || null,
       });
@@ -748,12 +808,14 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     setSelectedSession(null);
     setQuery("");
     setLevelFilter("all");
-    setTailorFilter("all");
+    setTailorFilter("done");
     setH1bFilter(false);
     setTop500Filter(false);
     setTermFilter("all");
     setLocationFilter("all");
-    setActiveView("all");
+    setActiveView("ready-to-apply");
+    setHideAppliedInApplyMode(true);
+    try { localStorage.setItem("atriveo_board_view", "ready-to-apply"); } catch { /* ignore */ }
   };
 
   // Unified warm Matchflow board is used for ALL periods (This Hour / Today /
@@ -767,13 +829,14 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
 
   const viewCounts = useMemo(
     () => ({
+      "ready-to-apply": readyToApplyCount,
       all: catalogJobs.length,
       "high-match": catalogJobs.filter((j) => careerOpsRating(j).score >= 75).length,
       "new-grad": catalogJobs.filter((j) => j.level === "New Grad").length,
       h1b: catalogJobs.filter((j) => (j.ats_score ?? j.score_pct ?? 0) >= 60).length,
       top500: catalogJobs.filter((j) => isTop500(j.company || "")).length,
     }),
-    [catalogJobs],
+    [catalogJobs, readyToApplyCount],
   );
 
   const highMatchCount = useMemo(
@@ -885,7 +948,14 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       {loading ? (
         <div className="state-msg"><div className="icon">⏳</div>Loading…</div>
       ) : filtered.length === 0 ? (
-        <div className="state-msg"><div className="icon">🔍</div>No jobs found</div>
+        <div className="state-msg">
+          <div className="icon">{isApplyMode ? "✓" : "🔍"}</div>
+          {isApplyMode
+            ? (hideAppliedInApplyMode && appliedReadyHiddenCount > 0
+              ? `All ${appliedReadyHiddenCount} ready jobs applied — toggle to review`
+              : "No compiled resumes in this period yet — worker runs hourly")
+            : "No jobs found"}
+        </div>
       ) : (
         <JobTable
           jobs={filtered}
@@ -908,6 +978,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           sortBy={sortBy}
           sortDir={sortDir}
           onSortColumn={isTodayBoard ? handleSortColumn : undefined}
+          applyMode={isApplyMode}
         />
       )}
     </>
@@ -940,35 +1011,67 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
 
           <div className="today-board-main">
             <div className="board-metrics">
-              <div className="board-metric">
-                <span className="board-metric-label">Active Matches</span>
-                <span className="board-metric-value">{displayedJobs.length}</span>
-                <span className="board-metric-sub">
-                  {clickedHiddenCount > 0
-                    ? `${clickedHiddenCount} clicked away · ${rawJobs.length} in feed`
-                    : "in current view"}
-                </span>
-              </div>
-              <div className="board-metric board-metric--accent">
-                <span className="board-metric-label">Avg. Match Score</span>
-                <span className="board-metric-value">{avgMatchScore || "—"}</span>
-                <span className="board-metric-sub">CareerOps average</span>
-              </div>
-              <div className="board-metric">
-                <span className="board-metric-label">Strong Fits</span>
-                <span className="board-metric-value">{highMatchCount}</span>
-                <span className="board-metric-sub">of {displayedJobs.length || 0}</span>
-              </div>
-              <div className="board-metric">
-                <span className="board-metric-label">Applied Today</span>
-                <span className="board-metric-value">{todayApplicationRows.length}</span>
-                <span className="board-metric-sub">tracker activity</span>
-              </div>
-              <div className="board-metric">
-                <span className="board-metric-label">Resumes Today</span>
-                <span className="board-metric-value">{tailorStatus.resumesCreatedTodayCount}</span>
-                <span className="board-metric-sub">resets midnight ET</span>
-              </div>
+              {isApplyMode ? (
+                <>
+                  <div className="board-metric board-metric--accent">
+                    <span className="board-metric-label">Ready to Apply</span>
+                    <span className="board-metric-value">{readyToApplyCount}</span>
+                    <span className="board-metric-sub">PDF compiled · not applied</span>
+                  </div>
+                  <div className="board-metric">
+                    <span className="board-metric-label">In This View</span>
+                    <span className="board-metric-value">{displayedJobs.length}</span>
+                    <span className="board-metric-sub">{filtered.length} showing</span>
+                  </div>
+                  <div className="board-metric">
+                    <span className="board-metric-label">Applied Today</span>
+                    <span className="board-metric-value">{appliedTodayInFeed}</span>
+                    <span className="board-metric-sub">in current period</span>
+                  </div>
+                  <div className="board-metric">
+                    <span className="board-metric-label">Compiling</span>
+                    <span className="board-metric-value">{compilingCount || "—"}</span>
+                    <span className="board-metric-sub">worker queue</span>
+                  </div>
+                  <div className="board-metric">
+                    <span className="board-metric-label">Resumes Today</span>
+                    <span className="board-metric-value">{tailorStatus.resumesCreatedTodayCount}</span>
+                    <span className="board-metric-sub">resets midnight ET</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="board-metric">
+                    <span className="board-metric-label">Active Matches</span>
+                    <span className="board-metric-value">{displayedJobs.length}</span>
+                    <span className="board-metric-sub">
+                      {clickedHiddenCount > 0
+                        ? `${clickedHiddenCount} clicked away · ${rawJobs.length} in feed`
+                        : "in current view"}
+                    </span>
+                  </div>
+                  <div className="board-metric board-metric--accent">
+                    <span className="board-metric-label">Avg. Match Score</span>
+                    <span className="board-metric-value">{avgMatchScore || "—"}</span>
+                    <span className="board-metric-sub">CareerOps average</span>
+                  </div>
+                  <div className="board-metric">
+                    <span className="board-metric-label">Strong Fits</span>
+                    <span className="board-metric-value">{highMatchCount}</span>
+                    <span className="board-metric-sub">of {displayedJobs.length || 0}</span>
+                  </div>
+                  <div className="board-metric">
+                    <span className="board-metric-label">Applied Today</span>
+                    <span className="board-metric-value">{todayApplicationRows.length}</span>
+                    <span className="board-metric-sub">tracker activity</span>
+                  </div>
+                  <div className="board-metric">
+                    <span className="board-metric-label">Resumes Today</span>
+                    <span className="board-metric-value">{tailorStatus.resumesCreatedTodayCount}</span>
+                    <span className="board-metric-sub">resets midnight ET</span>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="today-board-table-shell">
@@ -1008,6 +1111,17 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
 
               {feedRefreshNotice ? (
                 <div className="feed-refresh-notice" role="status">{feedRefreshNotice}</div>
+              ) : null}
+
+              {isApplyMode ? (
+                <ApplyModeBanner
+                  readyCount={readyToApplyCount}
+                  appliedToday={appliedTodayInFeed}
+                  compilingCount={compilingCount}
+                  hideApplied={hideAppliedInApplyMode}
+                  onToggleHideApplied={() => setHideAppliedInApplyMode((v) => !v)}
+                  showApplied={appliedReadyHiddenCount}
+                />
               ) : null}
 
               <CompilerStatusStrip

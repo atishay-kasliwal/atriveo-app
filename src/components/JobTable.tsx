@@ -226,6 +226,7 @@ interface RowProps {
   nested?: boolean;
   showCompany?: boolean;
   board?: boolean;
+  applyMode?: boolean;
 }
 
 function JobTableRow({
@@ -246,6 +247,7 @@ function JobTableRow({
   nested = false,
   showCompany = true,
   board = false,
+  applyMode = false,
 }: RowProps) {
   const [msgCopied, setMsgCopied] = useState(false);
   const [savedFeedback, setSavedFeedback] = useState<SavedJobSource | null>(null);
@@ -272,6 +274,8 @@ function JobTableRow({
   const resumeView = getResumeView?.(job);
   const folderPath = tailorRecord?.dir || tailorRecord?.folder || tailorRecord?.pdfPath?.replace(/\/[^/]+$/, "") || null;
 
+  const resumeReady = resumeView?.status === "ready" || resumeView?.status === "borderline";
+
   function saveJob(source: SavedJobSource, e?: React.MouseEvent) {
     e?.stopPropagation();
     e?.preventDefault();
@@ -291,7 +295,7 @@ function JobTableRow({
 
   return (
     <tr
-      className={`job-table-row job-table-row--${careerOps.key}${isApplied ? " is-applied" : ""}${isSelected ? " is-selected" : ""}${nested ? " is-nested" : ""}${board ? " job-table-row--board job-table-row--clickable" : ""}`}
+      className={`job-table-row job-table-row--${careerOps.key}${isApplied ? " is-applied" : ""}${isSelected ? " is-selected" : ""}${nested ? " is-nested" : ""}${board ? " job-table-row--board job-table-row--clickable" : ""}${applyMode && resumeReady && !isApplied ? " job-table-row--apply-ready" : ""}${applyMode && isApplied ? " job-table-row--apply-done" : ""}`}
       title={reasons.join(" · ") || careerOps.tooltip}
       onClick={board ? handleRowClick : undefined}
     >
@@ -382,6 +386,7 @@ function JobTableRow({
               tailorRecord={tailorRecord}
               applyRecord={applyRecord}
               compact
+              applyFocus={applyMode}
               onGenerate={onQueueUrgent ? () => onQueueUrgent(job) : undefined}
               onOpenPdf={tailorRecord?.pdfPath && onOpenPdf ? () => onOpenPdf(tailorRecord.pdfPath!) : undefined}
               onOpenFolder={folderPath && onOpenTailorPath ? () => onOpenTailorPath(folderPath) : undefined}
@@ -394,7 +399,30 @@ function JobTableRow({
       <td className="job-table-time">{fmtTime(job.batch_time || job.date_posted, job.scraped_date, board)}</td>
       <td className={`job-table-actions${board ? " job-table-actions--board" : ""}`}>
         {board ? (
-          <div className="job-table-board-actions">
+          <div className={`job-table-board-actions${applyMode ? " job-table-board-actions--apply" : ""}`}>
+            {applyMode ? (
+              <>
+                {job.job_url && resumeReady ? (
+                  <a
+                    className="job-table-board-apply job-table-board-apply--primary job-table-board-apply--apply-main"
+                    href={job.job_url}
+                    target="_blank"
+                    rel="noopener"
+                    title="Open LinkedIn and sync tracker"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSaveJob?.(job, "apply");
+                    }}
+                  >
+                    {savedFeedback === "apply" ? "Applied ✓" : isApplied ? "Open ↗" : "2 · Apply ↗"}
+                  </a>
+                ) : null}
+                {isApplied ? (
+                  <span className="job-table-apply-badge">Tracked</span>
+                ) : null}
+              </>
+            ) : (
+              <>
             {job.job_url ? (
               <a
                 className="job-table-board-apply job-table-board-apply--primary"
@@ -459,6 +487,8 @@ function JobTableRow({
               >
                 Queue
               </button>
+            )}
+              </>
             )}
           </div>
         ) : (
@@ -637,6 +667,7 @@ interface Props {
   sortBy?: SortBy;
   sortDir?: SortDir;
   onSortColumn?: (column: SortBy) => void;
+  applyMode?: boolean;
 }
 
 export default function JobTable({
@@ -660,6 +691,7 @@ export default function JobTable({
   sortBy,
   sortDir,
   onSortColumn,
+  applyMode = false,
 }: Props) {
   const groups = useMemo(
     () => (
@@ -759,6 +791,7 @@ export default function JobTable({
                         onDismissJob={onDismissJob}
                         nested={multiRole}
                         board
+                        applyMode={applyMode}
                       />
                     ))}
                   </Fragment>

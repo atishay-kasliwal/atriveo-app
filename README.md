@@ -157,7 +157,7 @@ Three folders matter. Only **one** is the product.
 │    2. backfill_descriptions.py (recover ~10% missed JDs)                 │
 │    3. trigger GitHub deploy (optional)                                    │
 │    4. cd ~/atriveo-app && npm run jd:export                             │
-│    5. cd ~/atriveo-app && npm run resume:enqueue  (top 25 → Mongo queue)  │
+│    5. cd ~/atriveo-app && npm run resume:enqueue  (all eligible → Mongo queue)  │
 └───────────────────────────────┬─────────────────────────────────────────┘
                                 ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -248,10 +248,20 @@ JOB_PIPELINE_DIR=~/job-pipeline npm run pipeline:install
 
 ## Daily operations
 
-### Your part (minimal)
-1. Mac is on (or wakes for LaunchAgents)
-2. External drive mounted
-3. Dashboard optional for feed auto-compile (worker runs headless)
+### Tonight (before apply day)
+
+```bash
+cd ~/atriveo-app
+npm run pipeline:ready    # sync JDs, enqueue compiles, build UI, restart services
+npm run pipeline:status   # all green?
+```
+
+Keep Mac awake overnight and **Kasliwal v2** mounted. Hourly scrape → enqueue → worker compiles PDFs without opening the browser.
+
+### Your part (apply day)
+1. Open **Dashboard** → filter **Tailored: Done**
+2. **PDF** opens the resume on your Mac · **Apply** opens LinkedIn (tracker syncs automatically)
+3. Mac sidecar + worker must be running (LaunchAgents handle this after `pipeline:install`)
 
 ### Automatic (no action)
 - Hourly LinkedIn scrape
@@ -343,10 +353,11 @@ Legacy path: set `TAILOR_LEGACY=1` for Gemma bullet rewrites (not recommended).
 | Script | Purpose |
 |--------|---------|
 | `pipeline:install` | Install scrape + sidecar + worker LaunchAgents |
+| `pipeline:ready` | Tonight prep: sync + enqueue + build + restart services |
 | `pipeline:status` | Scrape log, JD freshness, sidecar health |
 | `pipeline:sync` | Mongo → `public/job_descriptions/` |
 | `jd:export` | Same as `pipeline:sync` |
-| `resume:enqueue` | Enqueue top-scoring jobs to Mongo compile queue |
+| `resume:enqueue` | Enqueue all eligible jobs to Mongo compile queue (optional `--limit=N`) |
 | `tailor:doctor` | Full chain health check |
 | `tailor:install` | Tailor LaunchAgent only |
 | `tailor:prod` | Foreground sidecar + tunnel |

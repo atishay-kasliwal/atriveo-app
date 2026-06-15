@@ -13,7 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
 const envPath = path.join(ROOT, ".env");
 
-dotenv.config({ path: envPath });
+dotenv.config({ path: envPath, override: true });
 
 if (!process.env.MONGO_URI?.trim()) {
   console.error("Missing MONGO_URI in .env — worker cannot start.");
@@ -26,10 +26,11 @@ let child = null;
 let stopping = false;
 
 function startWorker() {
-  child = spawn(process.execPath, ["--env-file=.env", workerScript], {
+  child = spawn(process.execPath, [`--env-file=${envPath}`, workerScript], {
     cwd: ROOT,
     env: {
       ...process.env,
+      MONGO_URI: process.env.MONGO_URI,
       PATH: `/opt/homebrew/bin:/usr/local/bin:${process.env.PATH || ""}`,
     },
     stdio: "inherit",

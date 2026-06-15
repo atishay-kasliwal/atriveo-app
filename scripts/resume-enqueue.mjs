@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * Enqueue today's top-scoring jobs for Mongo-backed compile (worker drain).
+ * Enqueue all jobs that still need a compile (worker drain).
+ * Default: all eligible jobs (no cap). Optional: --limit=N
  *
  * Usage:
- *   node scripts/resume-enqueue.mjs [--limit=25] [--min-score=0]
+ *   node scripts/resume-enqueue.mjs [--limit=N] [--min-score=0]
  */
 
 import dotenv from "dotenv";
@@ -19,8 +20,15 @@ function parseArg(name, fallback) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function parseOptionalLimit() {
+  const hit = process.argv.find((a) => a.startsWith("--limit="));
+  if (!hit) return null;
+  const n = Number(hit.split("=")[1]);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 async function main() {
-  const limit = parseArg("limit", 25);
+  const limit = parseOptionalLimit();
   const minScore = parseArg("min-score", 0);
 
   const results = await withMongo(async (db) => {
@@ -30,7 +38,7 @@ async function main() {
 
   const enqueued = results.filter((r) => !r.skipped).length;
   const skipped = results.length - enqueued;
-  console.log(`Enqueue complete · ${enqueued} queued · ${skipped} skipped · limit ${limit}`);
+  console.log(`Enqueue complete · ${enqueued} queued · ${skipped} skipped · limit ${limit ?? "all"}`);
   for (const r of results.filter((x) => !x.skipped)) {
     console.log(`  + ${r.jobUrl}`);
   }

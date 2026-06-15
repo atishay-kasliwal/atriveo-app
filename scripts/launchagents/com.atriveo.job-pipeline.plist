@@ -17,6 +17,10 @@
         <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
         <key>GITHUB_TOKEN</key>
         <string>__GITHUB_TOKEN__</string>
+        <key>ATRIVEO_APP_DIR</key>
+        <string>__ATRIVEO_APP_DIR__</string>
+        <key>JOB_PIPELINE_DIR</key>
+        <string>__JOB_PIPELINE_DIR__</string>
     </dict>
     <key>StartCalendarInterval</key>
     <array>

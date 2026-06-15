@@ -200,8 +200,9 @@ async function main() {
     await ensureWorkerIndex(db);
     await heartbeatWorker(db, WORKER_ID, workerProfile());
     if (ENQUEUE) {
-      const limit = Number(process.env.WORKER_ENQUEUE_LIMIT || 25);
-      const results = await enqueueTopJobs(db, { limit });
+      const rawLimit = process.env.WORKER_ENQUEUE_LIMIT?.trim();
+      const limit = rawLimit ? Number(rawLimit) : null;
+      const results = await enqueueTopJobs(db, { limit: limit && limit > 0 ? limit : null });
       log("enqueue", `${results.filter((r) => !r.skipped).length} jobs queued`);
     }
   }, { appName: "AtriveoTailorWorker" });

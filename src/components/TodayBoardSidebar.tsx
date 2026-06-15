@@ -1,6 +1,6 @@
 import type { Period } from "../pages/Dashboard.types";
 
-type ViewKey = "all" | "high-match" | "new-grad" | "h1b" | "top500";
+type ViewKey = "ready-to-apply" | "all" | "high-match" | "new-grad" | "h1b" | "top500";
 
 interface RunCard {
   session_id: string;
@@ -26,7 +26,8 @@ interface Props {
   formatRunTime: (iso?: string | null) => string;
 }
 
-const VIEWS: { key: ViewKey; label: string }[] = [
+const VIEWS: { key: ViewKey; label: string; accent?: boolean }[] = [
+  { key: "ready-to-apply", label: "Ready to Apply", accent: true },
   { key: "all", label: "All Jobs" },
   { key: "high-match", label: "High Match" },
   { key: "new-grad", label: "New Grad" },
@@ -57,11 +58,11 @@ export default function TodayBoardSidebar({
       <section className="today-board-nav-section">
         <h2 className="today-board-nav-label">Views</h2>
         <ul className="today-board-nav-list">
-          {VIEWS.map(({ key, label }) => (
+          {VIEWS.map(({ key, label, accent }) => (
             <li key={key}>
               <button
                 type="button"
-                className={`today-board-nav-item${activeView === key ? " is-active" : ""}`}
+                className={`today-board-nav-item${activeView === key ? " is-active" : ""}${accent ? " today-board-nav-item--apply" : ""}`}
                 onClick={() => onViewChange(key)}
               >
                 <span>{label}</span>
