@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /**
  * Install permanent macOS LaunchAgents for the full pipeline:
- *   com.atriveo.job-pipeline  — hourly LinkedIn scrape + jd:export + resume:enqueue
+ *   com.atriveo.job-pipeline  — hourly scrape + jd:export
+ *   com.atriveo.feed-sync     — job feed → Cloudflare Pages
+ *   com.atriveo.resume-sync   — enqueue top resumes for worker
  *   com.atriveo.tailor        — tailor sidecar + cloudflared (login + survive reboot)
  *   com.atriveo.tailor-worker — Mongo compile worker (no browser tab)
  *
@@ -20,8 +22,33 @@ const JOB_PIPELINE_DIR = process.env.JOB_PIPELINE_DIR || path.join(HOME, "job-pi
 const PLIST_TEMPLATE = path.join(__dirname, "launchagents", "com.atriveo.job-pipeline.plist");
 const PLIST_DEST = path.join(HOME, "Library/LaunchAgents", "com.atriveo.job-pipeline.plist");
 const PIPELINE_LABEL = "com.atriveo.job-pipeline";
+const FEED_SYNC_LABEL = "com.atriveo.feed-sync";
+const RESUME_SYNC_LABEL = "com.atriveo.resume-sync";
 const TAILOR_LABEL = "com.atriveo.tailor";
 const WORKER_LABEL = "com.atriveo.tailor-worker";
+
+function installLaunchAgent(label, templateName, replacements) {
+  const templatePath = path.join(__dirname, "launchagents", templateName);
+  const dest = path.join(HOME, "Library/LaunchAgents", templateName);
+  if (!fs.existsSync(templatePath)) {
+    console.warn(`\n⚠ Missing ${templatePath} — skip ${label}`);
+    return;
+  }
+  let plist = fs.readFileSync(templatePath, "utf8");
+  for (const [key, value] of Object.entries(replacements)) {
+    plist = plist.replaceAll(key, value);
+  }
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.writeFileSync(dest, plist);
+  const uid = os.userInfo().uid;
+  spawnSync("launchctl", ["bootout", `gui/${uid}/${label}`], { stdio: "pipe" });
+  const boot = spawnSync("launchctl", ["bootstrap", `gui/${uid}`, dest], { encoding: "utf8" });
+  if (boot.status !== 0 && !String(boot.stderr || boot.stdout).includes("already")) {
+    console.warn(`launchctl bootstrap note: ${(boot.stderr || boot.stdout || "").trim()}`);
+  }
+  spawnSync("launchctl", ["enable", `gui/${uid}/${label}`], { stdio: "pipe" });
+  spawnSync("launchctl", ["kickstart", `gui/${uid}/${label}`], { stdio: "pipe" });
+}
 
 function run(cmd, args, opts = {}) {
   const r = spawnSync(cmd, args, { stdio: "inherit", ...opts });
@@ -75,8 +102,29 @@ function installJobPipelineAgent() {
   spawnSync("launchctl", ["kickstart", `gui/${uid}/${PIPELINE_LABEL}`], { stdio: "pipe" });
 
   console.log("\n✓ com.atriveo.job-pipeline installed");
-  console.log("  Hourly: scrape → MongoDB → npm run jd:export");
+  console.log("  Hourly :00 — scrape → MongoDB → jd:export → feed-sync (async)");
   console.log("  Log:    /tmp/atriveo_pipeline.log");
+}
+
+function installFeedSyncAgent() {
+  installLaunchAgent(FEED_SYNC_LABEL, "com.atriveo.feed-sync.plist", {
+    __ATRIVEO_APP_DIR__: ROOT,
+    __JOB_PIPELINE_DIR__: JOB_PIPELINE_DIR,
+  });
+  console.log("\n✓ com.atriveo.feed-sync installed");
+  console.log("  Hourly :20 — job feed → Cloudflare Pages (also runs after scrape)");
+  console.log("  Log:    /tmp/atriveo_feed_sync.log");
+  console.log("  Manual: npm run feed:sync");
+}
+
+function installResumeSyncAgent() {
+  installLaunchAgent(RESUME_SYNC_LABEL, "com.atriveo.resume-sync.plist", {
+    __ATRIVEO_APP_DIR__: ROOT,
+  });
+  console.log("\n✓ com.atriveo.resume-sync installed");
+  console.log("  Hourly :35 — enqueue top 25 resumes for worker");
+  console.log("  Log:    /tmp/atriveo_resume_sync.log");
+  console.log("  Manual: npm run resume:sync");
 }
 
 function tailorLoaded() {
@@ -122,6 +170,8 @@ function installTailorWorkerAgent() {
 function main() {
   console.log("Atriveo — permanent pipeline install\n");
   installJobPipelineAgent();
+  installFeedSyncAgent();
+  installResumeSyncAgent();
   installTailorAgent();
   installTailorWorkerAgent();
   console.log("\n→ Verifying …\n");
@@ -130,7 +180,7 @@ function main() {
     cwd: ROOT,
   });
   console.log("\nPermanent services installed. After login or reboot:");
-  console.log("  • Scraper + JD export + resume enqueue run every hour automatically");
+  console.log("  • :00 scrape + JD buckets  |  :20 feed deploy  |  :35 resume queue");
   console.log("  • Tailor sidecar restarts automatically (KeepAlive)");
   console.log("  • Compile worker drains Mongo queue — Dashboard tab optional");
   process.exit(status.status ?? 0);

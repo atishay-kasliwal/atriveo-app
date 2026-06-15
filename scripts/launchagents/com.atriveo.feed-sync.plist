@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.atriveo.feed-sync</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__ATRIVEO_APP_DIR__/scripts/sync-job-feed.sh</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>__ATRIVEO_APP_DIR__</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>ATRIVEO_APP_DIR</key>
+        <string>__ATRIVEO_APP_DIR__</string>
+        <key>JOB_PIPELINE_DIR</key>
+        <string>__JOB_PIPELINE_DIR__</string>
+    </dict>
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Minute</key><integer>20</integer></dict>
+    </array>
+    <key>StandardOutPath</key>
+    <string>/tmp/atriveo_feed_sync.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/atriveo_feed_sync.log</string>
+</dict>
+</plist>

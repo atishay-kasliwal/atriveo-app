@@ -17,6 +17,8 @@ const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 dotenv.config({ path: path.join(ROOT, ".env") });
 const JD_DIR = path.join(ROOT, "public", "job_descriptions");
 const PIPELINE_LOG = "/tmp/atriveo_pipeline.log";
+const FEED_SYNC_LOG = "/tmp/atriveo_feed_sync.log";
+const RESUME_SYNC_LOG = "/tmp/atriveo_resume_sync.log";
 const TAILOR_LOG = path.join(os.homedir(), "Library/Logs/atriveo-tailor.log");
 const WORKER_LOG = path.join(os.homedir(), "Library/Logs/atriveo-tailor-worker.log");
 const SIDECAR = "http://127.0.0.1:8787";
@@ -82,14 +84,16 @@ function loadEnvToken() {
 
 function checkLaunchAgents() {
   section("Automation (Mac LaunchAgents)");
-  for (const label of ["com.atriveo.job-pipeline", "com.atriveo.tailor", "com.atriveo.tailor-worker"]) {
+  const agents = [
+    { label: "com.atriveo.job-pipeline", fix: "npm run pipeline:install", detail: "hourly scrape + jd:export" },
+    { label: "com.atriveo.feed-sync", fix: "npm run pipeline:install", detail: "job feed → Cloudflare" },
+    { label: "com.atriveo.resume-sync", fix: "npm run pipeline:install", detail: "enqueue top resumes" },
+    { label: "com.atriveo.tailor", fix: "npm run tailor:install", detail: null },
+    { label: "com.atriveo.tailor-worker", fix: "npm run tailor:worker:install", detail: null },
+  ];
+  for (const { label, fix, detail } of agents) {
     const st = launchAgentLoaded(label);
     if (!st?.loaded) {
-      const fix = label === "com.atriveo.job-pipeline"
-        ? "npm run pipeline:install"
-        : label === "com.atriveo.tailor-worker"
-          ? "npm run tailor:worker:install"
-          : "npm run tailor:install";
       bad(`${label} not loaded`, "automation won't run unattended", fix);
       continue;
     }
@@ -100,7 +104,7 @@ function checkLaunchAgents() {
           ? "npm run tailor:worker:restart"
           : "launchctl kickstart -k gui/$(id -u)/com.atriveo.tailor");
     } else {
-      ok("com.atriveo.job-pipeline loaded", "hourly scrape + jd:export + resume:enqueue");
+      ok(label, detail || "loaded");
     }
   }
 }
@@ -114,7 +118,6 @@ function checkPipelineLog() {
   }
   for (const line of lines) console.log(`  ${C.dim}${line}${C.reset}`);
   const lastExport = [...lines].reverse().find((l) => l.includes("jd:export exit="));
-  const lastEnqueue = [...lines].reverse().find((l) => l.includes("resume:enqueue exit="));
   const lastScrape = [...lines].reverse().find((l) => l.includes("scraper exit="));
   if (lastScrape) {
     const exit = lastScrape.match(/scraper exit=(\d+)/)?.[1];
@@ -128,12 +131,43 @@ function checkPipelineLog() {
   } else {
     warn("No jd:export line in recent log", "buckets may be stale", "npm run pipeline:sync");
   }
+}
+
+function checkFeedSyncLog() {
+  section("Job feed sync (dashboard sessions)");
+  const lines = tailLines(FEED_SYNC_LOG, 6);
+  if (!lines.length) {
+    warn("No feed-sync log yet", FEED_SYNC_LOG, "npm run feed:sync");
+    return;
+  }
+  for (const line of lines) console.log(`  ${C.dim}${line}${C.reset}`);
+  const lastDone = [...lines].reverse().find((l) => l.includes("feed-sync done"));
+  const lastDeploy = [...lines].reverse().find((l) => l.includes("pages deploy exit="));
+  if (lastDone) ok("Last feed-sync", "completed");
+  else if (lastDeploy) {
+    const exit = lastDeploy.match(/pages deploy exit=(\d+)/)?.[1];
+    if (exit === "0") ok("Last Pages deploy", "exit 0");
+    else warn("Last Pages deploy failed", `exit ${exit}`, "npm run feed:sync");
+  } else {
+    warn("Feed-sync may still be running", FEED_SYNC_LOG, "npm run feed:sync");
+  }
+}
+
+function checkResumeSyncLog() {
+  section("Resume queue sync (compile worker)");
+  const lines = tailLines(RESUME_SYNC_LOG, 6);
+  if (!lines.length) {
+    warn("No resume-sync log yet", RESUME_SYNC_LOG, "npm run resume:sync");
+    return;
+  }
+  for (const line of lines) console.log(`  ${C.dim}${line}${C.reset}`);
+  const lastEnqueue = [...lines].reverse().find((l) => l.includes("resume:enqueue exit="));
   if (lastEnqueue) {
     const exit = lastEnqueue.match(/resume:enqueue exit=(\d+)/)?.[1];
-    if (exit === "0") ok("Last resume:enqueue", "exit 0");
-    else warn("Last resume:enqueue failed", `exit ${exit}`, "npm run resume:enqueue");
+    if (exit === "0") ok("Last resume-sync", "exit 0");
+    else warn("Last resume-sync failed", `exit ${exit}`, "npm run resume:sync");
   } else {
-    warn("No resume:enqueue in recent log", "worker queue may be empty", "npm run resume:enqueue");
+    warn("No resume:enqueue in recent log", RESUME_SYNC_LOG, "npm run resume:sync");
   }
 }
 
@@ -212,7 +246,9 @@ function printNextSteps() {
   console.log(`  ${C.dim}1.${C.reset} Scrape:  cd ~/job-pipeline && .venv/bin/python -m job_pipeline.main --pipeline all --deploy`);
   console.log(`  ${C.dim}2.${C.reset} Sync JD: npm run pipeline:sync`);
   console.log(`  ${C.dim}3.${C.reset} Worker:  npm run tailor:worker:install  (or via pipeline:install)`);
-  console.log(`  ${C.dim}4.${C.reset} Enqueue: npm run resume:enqueue   (hourly via pipeline)`);
+  console.log(`  ${C.dim}Feed:${C.reset}   npm run feed:sync     (dashboard sessions → Cloudflare)`);
+  console.log(`  ${C.dim}Resume:${C.reset} npm run resume:sync   (enqueue top 25 for worker)`);
+  console.log(`  ${C.dim}Both:${C.reset}   npm run sync:all      (run feed + resume in parallel)`);
   console.log(`  ${C.dim}5.${C.reset} App:     open Dashboard — optional; worker compiles without tab`);
   console.log(`  ${C.dim}6.${C.reset} Deep:    npm run tailor:doctor`);
 }
@@ -221,6 +257,8 @@ function printNextSteps() {
   console.log(`${C.bold}Atriveo pipeline status${C.reset} ${C.dim}· ${new Date().toLocaleString()}${C.reset}`);
   checkLaunchAgents();
   checkPipelineLog();
+  checkFeedSyncLog();
+  checkResumeSyncLog();
   checkJdBuckets();
   await checkSidecar();
   checkWorkerLog();
