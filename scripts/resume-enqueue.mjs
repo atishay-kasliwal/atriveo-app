@@ -20,11 +20,15 @@ function parseArg(name, fallback) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+const DEFAULT_LIMIT = 25;
+
 function parseOptionalLimit() {
   const hit = process.argv.find((a) => a.startsWith("--limit="));
-  if (!hit) return null;
-  const n = Number(hit.split("=")[1]);
-  return Number.isFinite(n) && n > 0 ? n : null;
+  if (!hit) return DEFAULT_LIMIT;
+  const raw = hit.split("=")[1];
+  if (raw === "all" || raw === "0") return null;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_LIMIT;
 }
 
 async function main() {

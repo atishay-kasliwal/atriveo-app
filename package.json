@@ -53,6 +53,8 @@
     "pipeline:status": "node scripts/pipeline-status.mjs",
     "pipeline:install": "node scripts/install-pipeline-services.mjs",
     "pipeline:ready": "node scripts/pipeline-ready.mjs",
+    "deploy:pages": "npm run build && wrangler pages deploy dist --project-name atriveo-app",
+    "data:deploy": "bash scripts/post-pipeline-deploy.sh",
     "dev:full": "wrangler pages dev dist --compatibility-date=2024-01-01",
     "sync:logos": "node scripts/sync-company-domains.mjs",
     "build": "tsc -b && vite build",
