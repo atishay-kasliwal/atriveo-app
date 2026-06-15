@@ -1,5 +1,6 @@
 import type { Job } from "../types";
 import { careerOpsRating, jobBoardLabel, matchReasons } from "./jobPresentation";
+import { loadJobDescriptions } from "./jobDescriptionBuckets";
 
 function value(text?: string | number | null): string {
   if (text === null || text === undefined || text === "") return "—";
@@ -106,4 +107,22 @@ export async function copyTextToClipboard(text: string): Promise<void> {
   textarea.select();
   document.execCommand("copy");
   document.body.removeChild(textarea);
+}
+
+/** Copy full JD from description buckets, or fall back to scraped summary. */
+export async function copyJobDescription(
+  job: Job,
+): Promise<"full" | "summary" | "missing"> {
+  const descriptionsByUrl = await loadJobDescriptions([job]);
+  const full = job.job_url ? descriptionsByUrl[job.job_url] : undefined;
+  if (full?.trim()) {
+    await copyTextToClipboard(normalizeBody(full));
+    return "full";
+  }
+  const summary = (job.summary || "").trim();
+  if (summary) {
+    await copyTextToClipboard(normalizeBody(summary));
+    return "summary";
+  }
+  return "missing";
 }
