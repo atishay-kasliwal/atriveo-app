@@ -22,14 +22,13 @@ import JobCard from "../components/JobCard";
 import { careerOpsRating } from "../utils/jobPresentation";
 import type { Period, SortBy, SortDir } from "./Dashboard.types";
 import { defaultSortDir, sortJobs } from "../utils/jobSort";
+import { buildSessionResumeSlots } from "../utils/sessionResume";
 import { jobDismissKey } from "../utils/jobCopy";
 import { openTailorPath } from "../utils/tailorRun";
 import { outcomeFromServerStatus, resolveTailorOutcome } from "../utils/tailorOutcome";
 import { tailorPhaseProgress } from "../utils/tailorProgress";
 import { estDateKey } from "../utils/estDate";
 import CompilerStatusStrip from "../components/CompilerStatusStrip";
-import { buildJobResumeView } from "../utils/jobResumeView";
-
 type LevelFilter = "all" | "New Grad" | "Entry" | "Mid";
 type RunCard = RunEntry & {
   count: number;
@@ -175,6 +174,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const { stats, recordClick, getRecord } = useApplyTracker();
   const { clickedKeySet, recordSavedJob, records: clickRecords } = useApplyClickLog();
   const tailorStatus = useTailorStatus();
+  const {
+    markStatus: markTailorStatus,
+    getRecordForJob: getTailorRecordForJob,
+  } = tailorStatus;
   const { isExcluded, excludeCompany } = useExclusions();
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
   const [todayJobs, setTodayJobs] = useState<Job[]>([]);
@@ -578,6 +581,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     [visibleJobs]
   );
   const displayedJobs = isSplitView ? locationFiltered : filtered;
+  const sessionResumeByUrl = useMemo(
+    () => buildSessionResumeSlots(displayedJobs),
+    [displayedJobs],
+  );
   const jobSelection = useJobSelection(displayedJobs);
   const tailorQueue = useMongoCompileQueue(displayedJobs, {
     tailorStatus,
@@ -603,16 +610,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     }
   }, []);
 
-  const handleOpenPdf = handleOpenTailorPath;
-
-  const getResumeView = useCallback((job: Job) => {
-    const key = jobDismissKey(job);
-    const record = tailorStatus.getRecordForJob(job);
-    const queueItem = tailorQueue.queue.find((item) => item.jobKey === key) ?? null;
-    const apply = job.job_url ? getRecord(job.job_url) : null;
-    return buildJobResumeView(record, queueItem, apply);
-  }, [tailorStatus, tailorQueue.queue, getRecord]);
-
   const failedTodayCount = useMemo(() => {
     const today = estDateKey(new Date());
     return Object.values(tailorStatus.records).filter((r) => {
@@ -636,11 +633,14 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
         const match = displayedJobs.find((j) => j.company === job.company && j.title === job.role);
         if (!match) continue;
         const key = jobDismissKey(match);
-        tailorStatus.markStatus(key, "running", {
+        const progressPct = tailorPhaseProgress(job.phase);
+        const existing = getTailorRecordForJob(match);
+        if (existing?.status === "running" && existing.progressPct === progressPct) continue;
+        markTailorStatus(key, "running", {
           jobUrl: match.job_url || "",
           company: job.company,
           title: job.role,
-          progressPct: tailorPhaseProgress(job.phase),
+          progressPct,
         });
       }
       return;
@@ -651,8 +651,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       const match = displayedJobs.find((j) => j.company === job.company && j.title === job.role);
       if (!match) continue;
       const key = jobDismissKey(match);
+      const existing = getTailorRecordForJob(match);
       if (job.status === "ok" && job.pdf) {
-        tailorStatus.markStatus(key, "done", {
+        if (existing?.status === "done" && existing.pdfPath === job.pdfPath) continue;
+        markTailorStatus(key, "done", {
           jobUrl: match.job_url || "",
           company: job.company,
           title: job.role,
@@ -661,7 +663,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           dir: job.dir,
           folder: job.folder,
           progressPct: 100,
-          tailoredAt: new Date().toISOString(),
+          tailoredAt: existing?.tailoredAt || new Date().toISOString(),
           logs: job.logs,
           outcome: job.borderline ? "borderline" : "done",
           serverStatus: "ok",
@@ -669,7 +671,8 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           borderline: job.borderline,
         });
       } else if (job.status === "unsupported-jd") {
-        tailorStatus.markStatus(key, "failed", {
+        if (existing?.serverStatus === "unsupported-jd") continue;
+        markTailorStatus(key, "failed", {
           error: job.error || "Unsupported job description",
           dir: job.dir,
           folder: job.folder,
@@ -678,7 +681,8 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           serverStatus: "unsupported-jd",
         });
       } else if (job.status === "no-go") {
-        tailorStatus.markStatus(key, "no-go", {
+        if (existing?.serverStatus === "no-go") continue;
+        markTailorStatus(key, "no-go", {
           error: job.error || "no-go",
           dir: job.dir,
           folder: job.folder,
@@ -688,15 +692,17 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
         });
       } else if (job.error || job.status) {
         const outcome = outcomeFromServerStatus(job.status, job.error);
-        tailorStatus.markStatus(key, outcome === "skip" ? "no-go" : "failed", {
+        const serverStatus = job.status;
+        if (existing?.serverStatus === serverStatus && existing?.error === job.error) continue;
+        markTailorStatus(key, outcome === "skip" ? "no-go" : "failed", {
           error: job.error,
           logs: job.logs,
           outcome,
-          serverStatus: job.status,
+          serverStatus,
         });
       }
     }
-  }, [jobSelection.tailorRun, displayedJobs, tailorStatus]);
+  }, [jobSelection.tailorRun, displayedJobs, markTailorStatus, getTailorRecordForJob]);
   const ngCount = displayedJobs.filter((j) => j.level === "New Grad").length;
   const selectedRun = useMemo(
     () => runCards.find((r) => r.session_id === selectedSession) || null,
@@ -899,15 +905,15 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           isGroupFullySelected={jobSelection.isGroupFullySelected}
           groupByCompany
           getTailorRecord={tailorStatus.getRecordForJob}
-          getResumeView={getResumeView}
-          onOpenPdf={handleOpenPdf}
-          onQueueUrgent={(job) => tailorQueue.enqueueJob(job, "manual", true)}
+          onQueueUrgent={(job, resumeSlot) => tailorQueue.enqueueJob(job, "manual", true, resumeSlot)}
           onOpenTailorPath={handleOpenTailorPath}
           onDismissJob={isTodayBoard ? handleDismissJob : undefined}
           variant={isTodayBoard ? "board" : "default"}
           sortBy={sortBy}
           sortDir={sortDir}
           onSortColumn={isTodayBoard ? handleSortColumn : undefined}
+          sessionResumeByUrl={sessionResumeByUrl}
+          resumeIdCompact={Boolean(selectedSession)}
         />
       )}
     </>

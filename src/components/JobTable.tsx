@@ -6,9 +6,12 @@ import type { ApplyMetadata, ApplyRecord } from "../hooks/useApplyTracker";
 import CompanyLogo from "./CompanyLogo";
 import { careerOpsRating, careerOpsStars, companyDomain, matchReasons } from "../utils/jobPresentation";
 import { groupJobsByCompany, type CompanyJobGroup } from "../utils/jobGrouping";
+import { copyJobDescription } from "../utils/jobCopy";
 import type { TailorRecord } from "../types/tailorQueue";
-import type { JobResumeView } from "../types/jobResumeView";
-import JobResumeCell from "./JobResumeCell";
+import { tailorCellLabel, tailorFolderPath } from "../utils/tailorProgress";
+import { formatResumeSlot, resolveResumeSlot, resolveSessionHour } from "../utils/resumeSlot";
+import { formatResumeId, type SessionResumeMeta } from "../utils/sessionResume";
+import TailorJobLogModal from "./TailorJobLogModal";
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -218,14 +221,14 @@ interface RowProps {
   onSelectionToggle?: (job: Job) => void;
   onExcludeCompany?: (company: string) => void;
   getTailorRecord?: (job: Job) => TailorRecord | null;
-  getResumeView?: (job: Job) => JobResumeView;
-  onOpenPdf?: (path: string) => void;
-  onQueueUrgent?: (job: Job) => void;
+  onQueueUrgent?: (job: Job, resumeSlot: number) => void;
   onOpenTailorPath?: (path: string) => void;
   onDismissJob?: (job: Job) => void;
   nested?: boolean;
   showCompany?: boolean;
   board?: boolean;
+  sessionResumeByUrl?: Map<string, SessionResumeMeta>;
+  resumeIdCompact?: boolean;
 }
 
 function JobTableRow({
@@ -238,17 +241,19 @@ function JobTableRow({
   onSelectionToggle,
   onExcludeCompany,
   getTailorRecord,
-  getResumeView,
-  onOpenPdf,
   onQueueUrgent,
   onOpenTailorPath,
   onDismissJob,
   nested = false,
   showCompany = true,
   board = false,
+  sessionResumeByUrl,
+  resumeIdCompact = false,
 }: RowProps) {
   const [msgCopied, setMsgCopied] = useState(false);
+  const [jdCopyState, setJdCopyState] = useState<"" | "loading" | "copied" | "summary" | "missing">("");
   const [savedFeedback, setSavedFeedback] = useState<SavedJobSource | null>(null);
+  const [logOpen, setLogOpen] = useState(false);
   const co = job.company || "—";
   const title = job.title || "—";
   const careerOps = careerOpsRating(job);
@@ -269,8 +274,16 @@ function JobTableRow({
           ? "Retry"
           : "Sync";
   const tailorRecord = getTailorRecord?.(job) ?? null;
-  const resumeView = getResumeView?.(job);
-  const folderPath = tailorRecord?.dir || tailorRecord?.folder || tailorRecord?.pdfPath?.replace(/\/[^/]+$/, "") || null;
+  const tailor = tailorCellLabel(tailorRecord);
+  const folderPath = tailorFolderPath(tailorRecord);
+  const sessionMeta = job.job_url ? sessionResumeByUrl?.get(job.job_url) : undefined;
+  const displaySlot = resolveResumeSlot(tailorRecord, sessionMeta?.slot ?? index);
+  const displayHour = resolveSessionHour(tailorRecord, sessionMeta?.hour);
+  const displayId = resumeIdCompact
+    ? formatResumeSlot(displaySlot)
+    : formatResumeId(displayHour, displaySlot);
+  const resumePathHint = `${displayHour}h · #${formatResumeSlot(displaySlot)}`;
+  const showTailorLog = tailorRecord?.status === "done";
 
   function saveJob(source: SavedJobSource, e?: React.MouseEvent) {
     e?.stopPropagation();
@@ -280,6 +293,30 @@ function JobTableRow({
     setSavedFeedback(source);
     setTimeout(() => setSavedFeedback(null), 1400);
   }
+
+  async function handleCopyJd(e?: React.MouseEvent) {
+    e?.stopPropagation();
+    if (jdCopyState === "loading") return;
+    setJdCopyState("loading");
+    try {
+      const result = await copyJobDescription(job);
+      setJdCopyState(result === "missing" ? "missing" : result === "summary" ? "summary" : "copied");
+      window.setTimeout(() => setJdCopyState(""), 1400);
+    } catch {
+      setJdCopyState("missing");
+      window.setTimeout(() => setJdCopyState(""), 1400);
+    }
+  }
+
+  const jdCopyLabel = jdCopyState === "loading"
+    ? "…"
+    : jdCopyState === "copied"
+      ? "Copied"
+      : jdCopyState === "summary"
+        ? "Snippet"
+        : jdCopyState === "missing"
+          ? "No JD"
+          : "Copy JD";
 
   function handleRowClick(e: React.MouseEvent<HTMLTableRowElement>) {
     if (!board || !onDismissJob) return;
@@ -311,7 +348,9 @@ function JobTableRow({
           </button>
         )}
       </td>
-      <td className="job-table-num">{board || !nested ? index : ""}</td>
+      <td className="job-table-num" title={resumePathHint}>
+        {board || !nested ? displayId : ""}
+      </td>
       <td className="job-table-score">
         <ScoreCell job={job} board={board} />
       </td>
@@ -376,19 +415,46 @@ function JobTableRow({
       <td className="job-table-level">{job.level || "—"}</td>
       {board && (
         <td className="job-table-tailored">
-          {resumeView ? (
-            <JobResumeCell
-              view={resumeView}
-              tailorRecord={tailorRecord}
-              applyRecord={applyRecord}
-              compact
-              onGenerate={onQueueUrgent ? () => onQueueUrgent(job) : undefined}
-              onOpenPdf={tailorRecord?.pdfPath && onOpenPdf ? () => onOpenPdf(tailorRecord.pdfPath!) : undefined}
-              onOpenFolder={folderPath && onOpenTailorPath ? () => onOpenTailorPath(folderPath) : undefined}
-            />
-          ) : (
-            <span className="job-resume-status job-resume-status--muted">—</span>
-          )}
+          <div className="job-table-tailored-inner">
+            <span
+              className={`job-table-tailored-pill job-table-tailored-pill--${tailor.tone}`}
+              title={tailor.tooltip}
+            >
+              {tailor.label}
+            </span>
+            <div className="job-table-tailored-actions">
+              {folderPath && onOpenTailorPath ? (
+                <button
+                  type="button"
+                  className="job-table-tailored-folder"
+                  title={tailorRecord?.folder || folderPath}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenTailorPath(folderPath);
+                  }}
+                >
+                  #{formatResumeSlot(displaySlot)}
+                </button>
+              ) : null}
+              {showTailorLog && tailorRecord ? (
+                <button
+                  type="button"
+                  className="job-table-tailored-log"
+                  title="View tailor log"
+                  aria-label={`View tailor log for ${co}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLogOpen(true);
+                  }}
+                >
+                  <span className="job-table-tailored-log-icon" aria-hidden>📋</span>
+                </button>
+              ) : null}
+            </div>
+          </div>
+          {logOpen && tailorRecord ? (
+            <TailorJobLogModal record={tailorRecord} onClose={() => setLogOpen(false)} />
+          ) : null}
         </td>
       )}
       <td className="job-table-time">{fmtTime(job.batch_time || job.date_posted, job.scraped_date, board)}</td>
@@ -424,7 +490,8 @@ function JobTableRow({
               type="button"
               className="job-table-board-apply"
               title="Copy referral message"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 navigator.clipboard.writeText(buildReferralMessage(job)).then(() => {
                   setMsgCopied(true);
                   setTimeout(() => setMsgCopied(false), 1200);
@@ -432,6 +499,15 @@ function JobTableRow({
               }}
             >
               {msgCopied ? "Copied" : "Msg"}
+            </button>
+            <button
+              type="button"
+              className={`job-table-board-apply${jdCopyState === "copied" || jdCopyState === "summary" ? " is-logged" : ""}${jdCopyState === "missing" ? " is-warn" : ""}`}
+              title="Copy full job description"
+              disabled={jdCopyState === "loading"}
+              onClick={handleCopyJd}
+            >
+              {jdCopyLabel}
             </button>
             {canSendToTracker && job.job_url && (
               <button
@@ -454,7 +530,7 @@ function JobTableRow({
                 title="Add to tailor queue (urgent)"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onQueueUrgent(job);
+                  onQueueUrgent(job, displaySlot);
                 }}
               >
                 Queue
@@ -483,7 +559,8 @@ function JobTableRow({
             <button
               type="button"
               className="job-table-action"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 navigator.clipboard.writeText(buildReferralMessage(job)).then(() => {
                   setMsgCopied(true);
                   setTimeout(() => setMsgCopied(false), 1200);
@@ -491,6 +568,15 @@ function JobTableRow({
               }}
             >
               {msgCopied ? "Copied" : "Msg"}
+            </button>
+            <button
+              type="button"
+              className="job-table-action"
+              title="Copy full job description"
+              disabled={jdCopyState === "loading"}
+              onClick={handleCopyJd}
+            >
+              {jdCopyLabel}
             </button>
             {canSendToTracker && job.job_url && (
               <button
@@ -628,15 +714,15 @@ interface Props {
   isGroupFullySelected?: (jobs: Job[]) => boolean;
   groupByCompany?: boolean;
   getTailorRecord?: (job: Job) => TailorRecord | null;
-  getResumeView?: (job: Job) => JobResumeView;
-  onOpenPdf?: (path: string) => void;
-  onQueueUrgent?: (job: Job) => void;
+  onQueueUrgent?: (job: Job, resumeSlot: number) => void;
   onOpenTailorPath?: (path: string) => void;
   onDismissJob?: (job: Job) => void;
   variant?: "default" | "board";
   sortBy?: SortBy;
   sortDir?: SortDir;
   onSortColumn?: (column: SortBy) => void;
+  sessionResumeByUrl?: Map<string, SessionResumeMeta>;
+  resumeIdCompact?: boolean;
 }
 
 export default function JobTable({
@@ -651,8 +737,6 @@ export default function JobTable({
   isGroupFullySelected,
   groupByCompany = true,
   getTailorRecord,
-  getResumeView,
-  onOpenPdf,
   onQueueUrgent,
   onOpenTailorPath,
   onDismissJob,
@@ -660,6 +744,8 @@ export default function JobTable({
   sortBy,
   sortDir,
   onSortColumn,
+  sessionResumeByUrl,
+  resumeIdCompact = false,
 }: Props) {
   const groups = useMemo(
     () => (
@@ -752,13 +838,13 @@ export default function JobTable({
                         onSelectionToggle={onSelectionToggle}
                         onExcludeCompany={onExcludeCompany}
                         getTailorRecord={getTailorRecord}
-                        getResumeView={getResumeView}
-                        onOpenPdf={onOpenPdf}
                         onQueueUrgent={onQueueUrgent}
                         onOpenTailorPath={onOpenTailorPath}
                         onDismissJob={onDismissJob}
                         nested={multiRole}
                         board
+                        sessionResumeByUrl={sessionResumeByUrl}
+                        resumeIdCompact={resumeIdCompact}
                       />
                     ))}
                   </Fragment>

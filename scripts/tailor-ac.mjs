@@ -151,7 +151,7 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
   const { sendPhase, log: onLog } = ctx;
   const company = job.company || "unknown";
   const role = job.title || "role";
-  const folder = `${String(seq).padStart(2, "0")}-${slug(company, 24)}-${slug(role, 30)}`;
+  const folder = `${String(seq).padStart(2, "0")}_${slug(company, 24)}-${slug(role, 30)}`;
   const dir = path.join(dateDir, folder);
 
   const result = { folder, company, role, dir, status: "ok" };

@@ -2,12 +2,19 @@
 
 import { COMPILE_STAGES, resolveCachedCompile } from "./ac-artifact-store.mjs";
 import { loadBank } from "./ac-bank.mjs";
+import { hourEtFromBatch, parseSessionHour } from "./resume-path.mjs";
 
 export { COMPILE_STAGES };
 
 export const RESUME_STATUSES = ["queued", "running", "success", "failed", "skipped"];
 
 const DEFAULT_PLANNER = process.env.TAILOR_PLANNER?.trim() || "v2";
+
+function parseResumeSlot(raw) {
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 1 || n > 99_999) return null;
+  return n;
+}
 
 export async function ensureResumeIndex(db) {
   await db.collection("jobs").createIndex({ "resume.status": 1, "resume.lease_until": 1 });
@@ -73,7 +80,7 @@ export async function enqueueJob(db, job, { force = false, planner = DEFAULT_PLA
 
   const existing = await db.collection("jobs").findOne(
     { job_url: jobUrl },
-    { projection: { resume: 1 } },
+    { projection: { resume: 1, batch_time: 1, session_id: 1 } },
   );
   if (!force && existing?.resume?.status === "success") {
     return { jobUrl, skipped: true, reason: "already_success" };
@@ -94,6 +101,13 @@ export async function enqueueJob(db, job, { force = false, planner = DEFAULT_PLA
   }
 
   const now = new Date().toISOString();
+  const incomingSlot = parseResumeSlot(job.resume_slot);
+  const existingSlot = parseResumeSlot(existing?.resume?.resume_slot);
+  const resumeSlot = incomingSlot ?? existingSlot ?? null;
+  const batchTime = job.batch_time || existing?.batch_time || null;
+  const sessionHour = parseSessionHour(job.session_hour)
+    ?? parseSessionHour(existing?.resume?.session_hour)
+    ?? hourEtFromBatch(batchTime);
   await db.collection("jobs").updateOne(
     { job_url: jobUrl },
     {
@@ -108,6 +122,9 @@ export async function enqueueJob(db, job, { force = false, planner = DEFAULT_PLA
           error: null,
           company: job.company || existing?.company || null,
           title: job.title || existing?.title || null,
+          resume_slot: resumeSlot,
+          session_hour: sessionHour,
+          batch_time: batchTime,
         },
       },
     },

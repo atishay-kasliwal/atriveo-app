@@ -12,6 +12,10 @@ export interface MongoResumeState {
   title?: string | null;
   pdf_path?: string | null;
   run_dir?: string | null;
+  resume_slot?: number | null;
+  session_hour?: string | null;
+  batch_time?: string | null;
+  folder?: string | null;
 }
 
 export interface CompileQueueJob {
@@ -68,6 +72,9 @@ export async function enqueueCompileJob(job: {
   company?: string;
   title?: string;
   score_pct?: number | null;
+  resume_slot?: number | null;
+  session_hour?: string | null;
+  batch_time?: string | null;
   force?: boolean;
 }): Promise<{ skipped?: boolean; reason?: string; fingerprint?: string; pdf_path?: string }> {
   return sidecarFetch("/compile-enqueue", {
@@ -83,6 +90,26 @@ export async function enqueueCompileTop(limit = 25, minScore = 0): Promise<{ enq
     headers: tailorHeaders(),
     body: JSON.stringify({ limit, min_score: minScore }),
   });
+}
+
+export async function enqueueCompileBatch(
+  jobs: Array<{
+    job_url: string;
+    company?: string;
+    title?: string;
+    score_pct?: number | null;
+    resume_slot?: number | null;
+    session_hour?: string | null;
+    batch_time?: string | null;
+  }>,
+  force = false,
+): Promise<{ enqueued: number }> {
+  const data = await sidecarFetch("/compile-enqueue-batch", {
+    method: "POST",
+    headers: tailorHeaders(),
+    body: JSON.stringify({ jobs, force }),
+  });
+  return { enqueued: data.enqueued ?? 0 };
 }
 
 export async function cancelCompileJob(jobUrl: string): Promise<{ cancelled: boolean }> {

@@ -79,6 +79,10 @@ export interface TailorRecord {
   /** Mongo compile stage (GATED, COMPOSED, …) when worker-owned. */
   compileStage?: string;
   workerId?: string;
+  /** Matches folder prefix `NN-company-role` and table # column. */
+  resumeSlot?: number;
+  /** ET hour folder segment (matches sidebar session time). */
+  sessionHour?: string;
 }
 
 export const HOURLY_QUEUE_SIZE = 25;

@@ -2,6 +2,7 @@ import type { Job } from "../types";
 import type { TailorQueueItem, TailorRecord, TailorRecordStatus } from "../types/tailorQueue";
 import type { CompileQueueJob } from "./compileQueueApi";
 import { careerOpsRating } from "./jobPresentation";
+import { parseFolderSlot, parseSessionHourFromPath } from "./resumeSlot";
 
 export function jobKeyFromCompileJob(job: CompileQueueJob): string {
   return job.job_url || `${job.company || ""}::${job.title || ""}`;
@@ -75,6 +76,14 @@ export function compileJobToTailorRecord(job: CompileQueueJob, feedJob?: Job | n
     : resume.status === "running"
       ? stageToProgress(resume.stage)
       : undefined;
+  const folder = resume.folder
+    || (resume.run_dir ? resume.run_dir.split("/").filter(Boolean).pop() : undefined);
+  const resumeSlot = resume.resume_slot
+    ?? parseFolderSlot(folder || resume.run_dir || resume.pdf_path)
+    ?? undefined;
+  const sessionHour = resume.session_hour
+    ?? parseSessionHourFromPath(resume.run_dir || resume.pdf_path)
+    ?? undefined;
 
   return {
     jobKey,
@@ -86,6 +95,9 @@ export function compileJobToTailorRecord(job: CompileQueueJob, feedJob?: Job | n
     tailoredAt: resume.status === "success" ? resume.updated_at || undefined : undefined,
     pdfPath: resume.pdf_path || undefined,
     dir: resume.run_dir || undefined,
+    folder,
+    resumeSlot,
+    sessionHour,
     progressPct,
     error: resume.error || undefined,
     compileStage: resume.stage || undefined,

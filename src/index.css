@@ -1794,10 +1794,11 @@ header {
 }
 
 .job-table-num {
-  width: 32px;
+  width: 36px;
   color: #94a3b8;
   font-variant-numeric: tabular-nums;
   font-size: 11px;
+  font-weight: 600;
   text-align: right;
 }
 

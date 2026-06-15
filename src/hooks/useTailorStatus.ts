@@ -27,6 +27,19 @@ function persist(uid: string, records: Record<string, TailorRecord>) {
   }
 }
 
+function tailorRecordChanged(before: TailorRecord | undefined, after: TailorRecord): boolean {
+  if (!before) return true;
+  const keys: (keyof TailorRecord)[] = [
+    "status", "progressPct", "error", "pdfPath", "dir", "folder", "resumeSlot", "sessionHour", "ats",
+    "outcome", "serverStatus", "borderline", "tailoredAt", "jobUrl", "company", "title", "score",
+  ];
+  for (const key of keys) {
+    if (before[key] !== after[key]) return true;
+  }
+  if ((before.logs?.length ?? 0) !== (after.logs?.length ?? 0)) return true;
+  return false;
+}
+
 export function useTailorStatus() {
   const { user, loading } = useAuth();
   const uid = user?.email ?? "anon";
@@ -104,6 +117,7 @@ export function useTailorStatus() {
         explain: patch.explain ?? existing?.explain,
         borderline: patch.borderline ?? existing?.borderline,
       };
+      if (!tailorRecordChanged(existing, nextRecord)) return prev;
       const next = { ...prev, [jobKey]: nextRecord };
       persist(uid, next);
       return next;
@@ -173,7 +187,7 @@ export function useTailorStatus() {
     [records, estDayKey],
   );
 
-  return {
+  return useMemo(() => ({
     records,
     doneCount,
     resumesCreatedTodayCount,
@@ -184,5 +198,16 @@ export function useTailorStatus() {
     getRecord,
     getRecordForJob,
     clearAllLogs,
-  };
+  }), [
+    records,
+    doneCount,
+    resumesCreatedTodayCount,
+    upsertRecord,
+    markStatus,
+    applyStreamEvent,
+    reconcileWithQueue,
+    getRecord,
+    getRecordForJob,
+    clearAllLogs,
+  ]);
 }

@@ -28,6 +28,7 @@ import {
   renewJobLease,
   updateResumeState,
 } from "./resume-queue.mjs";
+import { resolveResumeSessionDir } from "./resume-path.mjs";
 import { tailorOneAc } from "./tailor-ac.mjs";
 import { getArtifactsRoot, readManifest } from "./ac-artifact-store.mjs";
 import { getWorkerId } from "./worker-id.mjs";
@@ -80,7 +81,7 @@ function workerProfile(status = "idle", currentJobUrl = null) {
 
 function nextSeq(dateDir) {
   if (!fs.existsSync(dateDir)) return 1;
-  const existing = fs.readdirSync(dateDir).filter((d) => /^\d+-/.test(d));
+  const existing = fs.readdirSync(dateDir).filter((d) => /^\d+[_-]/.test(d));
   return existing.length + 1;
 }
 
@@ -124,10 +125,17 @@ async function processOneJob(db) {
     throw new Error(`External drive not mounted: ${path.dirname(OUT_ROOT)}`);
   }
 
-  const date = new Date().toISOString().slice(0, 10);
-  const dateDir = path.join(OUT_ROOT, date);
-  fs.mkdirSync(dateDir, { recursive: true });
-  const seq = nextSeq(dateDir);
+  const batchTime = jobDoc.batch_time || jobDoc.resume?.batch_time || null;
+  const { dateDir, hour } = resolveResumeSessionDir(
+    OUT_ROOT,
+    batchTime,
+    jobDoc.resume?.session_hour,
+  );
+  const storedSlot = Number(jobDoc.resume?.resume_slot);
+  const seq = Number.isInteger(storedSlot) && storedSlot > 0
+    ? storedSlot
+    : nextSeq(dateDir);
+  log("path", `${hour}h · slot ${seq} · ${dateDir}`);
 
   const ctx = {
     sendPhase: () => {},
@@ -175,6 +183,10 @@ async function processOneJob(db) {
       error: success ? null : (result.error || result.status),
       run_dir: result.dir || null,
       pdf_path: result.pdfPath || null,
+      folder: result.folder || null,
+      resume_slot: seq,
+      session_hour: hour,
+      batch_time: batchTime,
       cached: Boolean(result.cached),
     });
 

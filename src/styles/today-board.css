@@ -773,8 +773,9 @@ body.is-today-board .nav-tab.active {
 .job-table--board .job-table-num {
   color: #c9c5bd;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   text-align: left;
+  font-variant-numeric: tabular-nums;
 }
 
 .job-table--board .job-table-select {
