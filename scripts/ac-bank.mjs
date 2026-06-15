@@ -28,6 +28,12 @@ import { buildSkillsFromComposition, buildSkillsEvidenceAudit } from "./ac-skill
 import { selectStoryTriple } from "./ac-story-select.mjs";
 import { auditAtsMatrix, keywordCountsFromTexts, bulletTextsFromAcs } from "./ac-ats-matrix.mjs";
 import { assessJdGate } from "./ac-jd-gate.mjs";
+import { RULEBOOK_PROJECT_COUNT } from "./ac-rulebook.mjs";
+import {
+  loadResumeProjectPool,
+  pickResumeProjectRoles,
+  sortProjectsByRecency,
+} from "./ac-role-meta.mjs";
 
 const APP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -1080,9 +1086,23 @@ export function compose(jd, bank, plannerConfig = {}) {
   const projAcs = acs.filter((a) => a.slot_kind === "project");
   const groups = {};
   for (const a of projAcs) (groups[a.role] ||= []).push(a);
-  const projectSlots = cfg.fixed_project_roles?.length
-    ? cfg.fixed_project_roles.map((role) => ({ role, list: groups[role] || [] }))
-    : SLOTS.projects.map((slot) => ({ role: slot.role, list: groups[slot.role] || [] }));
+
+  const poolRoles = cfg.resume_project_pool?.length
+    ? cfg.resume_project_pool
+    : cfg.fixed_project_roles?.length
+      ? cfg.fixed_project_roles
+      : loadResumeProjectPool(bank.bank_dir)
+        || SLOTS.projects.map((slot) => slot.role);
+  const eligibleRoles = poolRoles.filter((role) => (groups[role] || []).length > 0);
+  const maxProjects = cfg.max_resume_projects ?? RULEBOOK_PROJECT_COUNT ?? 2;
+  const pickedRoles = pickResumeProjectRoles(
+    eligibleRoles,
+    jd,
+    cfg,
+    maxProjects,
+    bank.bank_dir,
+  );
+  const projectSlots = pickedRoles.map((role) => ({ role, list: groups[role] || [] }));
 
   const allowSparse = cfg.allow_sparse_slots === true;
   const minProjQuality = allowSparse ? (cfg.min_bullet_quality ?? 0.5) : 0;
@@ -1146,6 +1166,8 @@ export function compose(jd, bank, plannerConfig = {}) {
     };
   });
 
+  const orderedProjects = sortProjectsByRecency(projects, bank.bank_dir);
+
   let composition = {
     theme: theme?.name,
     jdVec,
@@ -1153,7 +1175,12 @@ export function compose(jd, bank, plannerConfig = {}) {
     plan,
     narrative,
     experience,
-    projects,
+    projects: orderedProjects,
+    project_pick: {
+      pool: poolRoles,
+      picked: pickedRoles,
+      rule: "latest_first_then_jd_fit",
+    },
   };
 
   if (narrative && cfg.apply_delete_test !== false) {

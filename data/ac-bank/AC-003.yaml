@@ -13,7 +13,7 @@ concepts_claimed:
 signature_technologies:
   - FastAPI
   - AWS
-fact: FastAPI ingestion APIs loading financial records into research pipelines on AWS.
+fact: FastAPI ingestion APIs loading financial records into analytics pipelines on AWS.
 capabilities:
   ai: 70
   backend: 88
@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Built FastAPI ingestion APIs on AWS loading 200K+ financial records into macro research pipelines with validated
+      Built FastAPI ingestion APIs on AWS loading 200K+ financial records into macro analytics pipelines with validated
       schemas for downstream NLP and forecasting.

@@ -13,7 +13,7 @@ concepts_claimed:
 signature_technologies:
   - React
   - Python
-fact: React researcher dashboard for macro analysis and agent outputs.
+fact: React analytics dashboard for macro analysis and agent outputs.
 capabilities:
   ai: 75
   backend: 70
@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Shipped a React and Python researcher dashboard surfacing macro analysis and multi-agent outputs to 5 daily
-      financial research users in production.
+      Shipped a React and Python analytics dashboard surfacing macro analysis and multi-agent outputs to 5 daily
+      financial analysts in production.

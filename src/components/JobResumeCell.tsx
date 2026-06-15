@@ -14,7 +14,6 @@ interface Props {
   onOpenFolder?: () => void;
   onGenerate?: () => void;
   compact?: boolean;
-  applyFocus?: boolean;
 }
 
 const TONE: Record<JobResumeView["status"], string> = {
@@ -37,14 +36,13 @@ export default function JobResumeCell({
   onOpenFolder,
   onGenerate,
   compact = true,
-  applyFocus = false,
 }: Props) {
   const [logOpen, setLogOpen] = useState(false);
   const tone = TONE[view.status];
   const canTrust = Boolean(tailorRecord?.explain || tailorRecord?.dir || tailorRecord?.folder);
 
   return (
-    <div className={`job-resume-cell job-resume-cell--${tone}${applyFocus ? " job-resume-cell--apply-focus" : ""}`}>
+    <div className={`job-resume-cell job-resume-cell--${tone}`}>
       <div className="job-resume-cell-main">
         <span className={`job-resume-status job-resume-status--${tone}`}>{view.statusLine}</span>
         {view.subLine ? <span className="job-resume-sub">{view.subLine}</span> : null}
@@ -73,8 +71,8 @@ export default function JobResumeCell({
           </button>
         ) : null}
         {(view.status === "ready" || view.status === "borderline") && onOpenPdf && view.pdfPath ? (
-          <button type="button" className={`job-resume-btn job-resume-btn--primary${applyFocus ? " job-resume-btn--apply-step" : ""}`} onClick={(e) => { e.stopPropagation(); onOpenPdf(); }}>
-            {applyFocus ? "1 · PDF" : "PDF"}
+          <button type="button" className="job-resume-btn job-resume-btn--primary" onClick={(e) => { e.stopPropagation(); onOpenPdf(); }}>
+            PDF
           </button>
         ) : null}
         {onOpenFolder && view.folderPath ? (

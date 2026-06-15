@@ -18,9 +18,8 @@ scope_ac:
   theme: career-scope
   always_first: true
   resume_bullet: >-
-    Architected AI-powered financial intelligence systems over 7 years of FOMC history
-    combining event-driven Python pipelines multi-agent reasoning and retrieval to
-    reduce macroeconomic analysis from 3 days to under 20 minutes.
+    Architected AI-powered financial intelligence over 7 years of FOMC history combining Python pipelines
+    multi-agent reasoning and retrieval to cut macro analysis from 3 days to under 20 minutes.
   recruiter_takeaway: >-
     Built AI-powered financial intelligence combining event-driven backend engineering,
     retrieval, multi-agent reasoning, and quantitative evaluation to transform macroeconomic analysis.
@@ -32,7 +31,7 @@ product:
   platform: FastAPI on AWS; event-driven FOMC ingestion; 3+ days to under 20 minutes at 67.7% accuracy.
   backend: Python and Kafka NLP on 200K+ records; trading backtesting; streaming consumers.
   ai: 3-agent RL debate (60% on 30 S&P stocks); MCP orchestration; production RAG (+18% lift).
-  frontend: React researcher dashboard and LLM analytics APIs for 5 daily users.
+  frontend: React analytics dashboard and LLM analytics APIs for 5 daily users.
   research: Macro analysis, equity forecasting, RL agents, evaluation benchmarks.
 
 metrics:
@@ -127,9 +126,8 @@ achievements:
     theme: career-scope
     tier: S
     resume_bullet: >-
-      Architected AI-powered financial intelligence systems over 7 years of FOMC history combining
-      event-driven Python pipelines multi-agent reasoning and retrieval to reduce macroeconomic
-      analysis from 3 days to under 20 minutes.
+      Architected AI-powered financial intelligence over 7 years of FOMC history combining Python pipelines
+      multi-agent reasoning and retrieval to cut macro analysis from 3 days to under 20 minutes.
 
   - id: AC-001
     engineering_identity: platform
@@ -151,7 +149,7 @@ achievements:
     tier: A
     resume_bullet: >-
       Built FastAPI ingestion APIs on AWS loading 200K+ financial records into macro
-      research pipelines with validated schemas for downstream NLP and forecasting.
+      analytics pipelines with validated schemas for downstream NLP and forecasting.
   - id: AC-004
     engineering_identity: backend
     theme: event-pipeline
@@ -172,7 +170,7 @@ achievements:
     tier: A
     resume_bullet: >-
       Engineered Kafka streaming consumers processing live market feeds into Python NLP
-      feature extraction serving 5 real-time macro research workflows in production.
+      feature extraction serving 5 real-time macro analysis workflows in production.
   - id: AC-022
     engineering_identity: frontend
     theme: research-ui
@@ -180,7 +178,7 @@ achievements:
     resume_bullet: >-
       Built a React and Python LLM analytics interface across financial news and
       transcripts with schema validation delivering production APIs used daily by 5
-      researchers.
+      analysts.
   - id: AC-023
     engineering_identity: ai
     theme: multi-agent
@@ -203,7 +201,7 @@ achievements:
     tier: S
     resume_bullet: >-
       Built a production Python RAG pipeline with LangChain vector retrieval and AWS
-      inference APIs delivering 18% accuracy lift in macro research evaluations.
+      inference APIs delivering 18% accuracy lift in macro analysis evaluations.
   - id: AC-009
     engineering_identity: ai
     theme: llm-evaluation
@@ -224,8 +222,8 @@ achievements:
     theme: researcher-dashboard
     tier: A
     resume_bullet: >-
-      Shipped a React and Python researcher dashboard surfacing macro analysis and
-      multi-agent outputs to 5 daily financial research users in production.
+      Shipped a React and Python analytics dashboard surfacing macro analysis and
+      multi-agent outputs to 5 daily financial analysts in production.
   - id: AC-013
     engineering_identity: data
     theme: nlp-extraction
@@ -252,8 +250,8 @@ achievements:
     theme: inference-deploy
     tier: B
     resume_bullet: >-
-      Deployed Python LLM inference on AWS serving macro research APIs with sub-minute
-      latency for 5 daily financial research users.
+      Deployed Python LLM inference on AWS serving macro analysis APIs with sub-minute
+      latency for 5 daily financial analysts.
   - id: AC-021
     engineering_identity: backend
     theme: schema-validation

@@ -221,7 +221,7 @@ open_questions:
   - Add survival-analysis time metric for AC-046 if available
   - Confirm "heatmap" modality label (vs perfusion / ADC map / other clinical name)
   - Confirm "Architected" vs "Led development of" for AC-031 if work was collaborative
-  - Any preferred employer line: "Wake Forest – CAIR" vs "Wake Forest School of Medicine"
+  - 'Any preferred employer line: "Wake Forest – CAIR" vs "Wake Forest School of Medicine"'
 
 review_scores:
   ats: "9.5/10 — Python, GCP, SimpleITK, PyRadiomics, Airflow, React, TypeScript, Redux coverage"

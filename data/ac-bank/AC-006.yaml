@@ -38,4 +38,4 @@ variants:
     strength: 8
     text: >-
       Engineered Kafka streaming consumers processing live market feeds into Python NLP feature extraction serving 5
-      real-time macro research workflows in production.
+      real-time macro analysis workflows in production.

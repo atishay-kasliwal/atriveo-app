@@ -7,7 +7,7 @@
     "display_order": 0,
     "wow_score": 0.96,
     "fact": "SBU scope thesis — AI-powered financial intelligence over 7 years FOMC history combining pipelines agents and retrieval.",
-    "text": "Architected Python AI-powered financial intelligence platforms over 7 years of macroeconomic research combining production backend systems multi-agent reasoning and retrieval to accelerate analysis from 3 days to under 20 minutes.",
+    "text": "Architected AI-powered financial intelligence over 7 years of FOMC history combining Python pipelines multi-agent reasoning and retrieval to cut macro analysis from 3 days to under 20 minutes.",
     "signature_technologies": ["Python"],
     "metrics_claimed": ["tenure_7y", "fomc_scope", "3d_20m"],
     "capabilities": { "ai": 90, "backend": 88, "data": 85, "cloud": 82 }
@@ -45,8 +45,8 @@
     "tier": "A",
     "display_order": 3,
     "wow_score": 0.87,
-    "fact": "FastAPI ingestion APIs loading financial records into research pipelines on AWS.",
-    "text": "Built FastAPI ingestion APIs on AWS loading 200K+ financial records into macro research pipelines with validated schemas for downstream NLP and forecasting.",
+    "fact": "FastAPI ingestion APIs loading financial records into analytics pipelines on AWS.",
+    "text": "Built FastAPI ingestion APIs on AWS loading 200K+ financial records into macro analytics pipelines with validated schemas for downstream NLP and forecasting.",
     "signature_technologies": ["FastAPI", "AWS"],
     "metrics_claimed": ["records_200k", "ingestion"],
     "capabilities": { "backend": 88, "data": 82, "cloud": 78 }
@@ -85,7 +85,7 @@
     "display_order": 6,
     "wow_score": 0.85,
     "fact": "Kafka streaming consumers for live market feeds and NLP feature extraction.",
-    "text": "Engineered Kafka streaming consumers processing live market feeds into Python NLP feature extraction serving 5 real-time macro research workflows in production.",
+    "text": "Engineered Kafka streaming consumers processing live market feeds into Python NLP feature extraction serving 5 real-time macro analysis workflows in production.",
     "signature_technologies": ["Kafka", "Python"],
     "metrics_claimed": ["streaming", "realtime"],
     "capabilities": { "backend": 88, "data": 86 }
@@ -97,8 +97,8 @@
     "tier": "S",
     "display_order": 7,
     "wow_score": 0.89,
-    "fact": "React and Python LLM analytics APIs for financial research team.",
-    "text": "Built a React and Python LLM analytics interface across financial news and transcripts with schema validation delivering production APIs used daily by 5 researchers.",
+    "fact": "React and Python LLM analytics APIs for financial analytics team.",
+    "text": "Built a React and Python LLM analytics interface across financial news and transcripts with schema validation delivering production APIs used daily by 5 analysts.",
     "signature_technologies": ["React", "Python"],
     "metrics_claimed": ["researchers_5", "llm_api"],
     "capabilities": { "ai": 88, "frontend": 82, "backend": 78 }
@@ -137,7 +137,7 @@
     "display_order": 10,
     "wow_score": 0.91,
     "fact": "Production RAG with LangChain and AWS — 18% accuracy lift in evaluations.",
-    "text": "Built a production Python RAG pipeline with LangChain vector retrieval and AWS inference APIs delivering 18% accuracy lift in macro research evaluations.",
+    "text": "Built a production Python RAG pipeline with LangChain vector retrieval and AWS inference APIs delivering 18% accuracy lift in macro analysis evaluations.",
     "signature_technologies": ["LangChain", "Python"],
     "metrics_claimed": ["rag_lift_18", "production"],
     "capabilities": { "ai": 90, "backend": 78, "cloud": 75 }
@@ -175,8 +175,8 @@
     "tier": "A",
     "display_order": 13,
     "wow_score": 0.86,
-    "fact": "React researcher dashboard for macro analysis and agent outputs.",
-    "text": "Shipped a React and Python researcher dashboard surfacing macro analysis and multi-agent outputs to 5 daily financial research users in production.",
+    "fact": "React analytics dashboard for macro analysis and agent outputs.",
+    "text": "Shipped a React and Python analytics dashboard surfacing macro analysis and multi-agent outputs to 5 daily financial analysts in production.",
     "signature_technologies": ["React", "Python"],
     "metrics_claimed": ["researchers_5", "dashboard"],
     "capabilities": { "frontend": 85, "ai": 75 }
@@ -227,8 +227,8 @@
     "tier": "B",
     "display_order": 17,
     "wow_score": 0.8,
-    "fact": "Production LLM inference on AWS for research APIs.",
-    "text": "Deployed Python LLM inference on AWS serving macro research APIs with sub-minute latency for 5 daily financial research users.",
+    "fact": "Production LLM inference on AWS for macro analysis APIs.",
+    "text": "Deployed Python LLM inference on AWS serving macro analysis APIs with sub-minute latency for 5 daily financial analysts.",
     "signature_technologies": ["AWS", "Python"],
     "metrics_claimed": ["inference", "researchers_5"],
     "capabilities": { "cloud": 85, "ai": 82, "backend": 74 }

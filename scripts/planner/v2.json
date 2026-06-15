@@ -16,6 +16,8 @@
     "accolite": 4
   },
   "min_project_bullets": 2,
+  "max_resume_projects": 2,
+  "resume_project_pool": ["atriveo", "insurance-platform"],
   "fixed_project_roles": ["atriveo", "insurance-platform"],
   "apply_delete_test": false,
   "global_optimize": true,

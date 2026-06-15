@@ -13,7 +13,7 @@ concepts_claimed:
 signature_technologies:
   - React
   - Python
-fact: React and Python LLM analytics APIs for financial research team.
+fact: React and Python LLM analytics APIs for financial analytics team.
 capabilities:
   ai: 88
   backend: 78
@@ -38,4 +38,4 @@ variants:
     strength: 9
     text: >-
       Built a React and Python LLM analytics interface across financial news and transcripts with schema validation
-      delivering production APIs used daily by 5 researchers.
+      delivering production APIs used daily by 5 analysts.

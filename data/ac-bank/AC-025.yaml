@@ -38,4 +38,4 @@ variants:
     strength: 9
     text: >-
       Built a production Python RAG pipeline with LangChain vector retrieval and AWS inference APIs delivering 18%
-      accuracy lift in macro research evaluations.
+      accuracy lift in macro analysis evaluations.

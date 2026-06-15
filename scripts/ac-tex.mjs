@@ -5,8 +5,17 @@ import {
   PROJECT_META,
   stripBanned,
 } from "./tailor-dynamic.mjs";
+import {
+  ROLE_SLUG_TO_NAME,
+  PROJECT_SLUG_TO_NAME,
+  resolveExperienceMeta,
+  resolveProjectMeta,
+  projectRecencyMs,
+  sortProjectsByRecency,
+} from "./ac-role-meta.mjs";
 import { buildSkillsFromComposition } from "./ac-skills.mjs";
 import { SKILLS_MAX_CATEGORIES } from "./skills-library.mjs";
+import { resolveBankDir } from "./ac-bank.mjs";
 
 const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 \\usepackage{latexsym}\\usepackage[empty]{fullpage}\\usepackage{titlesec}
@@ -32,27 +41,6 @@ const EDUCATION = `\\section{Education}
     \\resumeSubheading{Stony Brook University}{Stony Brook, New York}{Master of Science in Data Science}{Aug. 2024 -- May 2026}
     \\resumeSubheading{Symbiosis University of Applied Sciences}{Indore, Madhya Pradesh}{Bachelor of Technology in Computer Science and Information Technology}{Aug. 2018 -- May 2022}
   \\resumeSubHeadingListEnd`;
-
-const ROLE_SLUG_TO_NAME = {
-  "stony-brook": "Stony Brook University",
-  "wake-forest": "Wake Forest – CAIR",
-  shriffle: "Shriffle",
-  accolite: "Accolite Digital",
-};
-
-const PROJECT_SLUG_TO_NAME = {
-  atriveo: "Atriveo",
-  "insurance-platform": "Insurance Microservices Platform",
-  insureraft: "InsureRaft",
-  "job-pipeline": "Atriveo Job Intelligence Pipeline",
-  "bayesian-mmm": "Bayesian Marketing Mix Model",
-  "mri-research": "Advanced Radiomics Research Pipeline",
-  medledger: "MedLedger",
-  "user-data-platform": "User Data Platform",
-  "radiomics-pipeline": "Advanced Radiomics Research Pipeline",
-  "cpp-encryption": "Encryption and Decryption Application",
-  "fomc-dashboard": "FOMC Intelligence Dashboard",
-};
 
 const ROLE_STACK_DEFAULTS = {
   "wake-forest": ["Python", "GCP", "SimpleITK", "React", "TypeScript", "Apache Airflow"],
@@ -135,6 +123,7 @@ export function deriveHeaderTitle(jd, composition) {
 }
 
 export function assembleAcResume(composition, { headerTitle, skillsLines, bank } = {}) {
+  const bankDir = bank?.bank_dir || resolveBankDir();
   const title = stripBanned(headerTitle || "Software Engineer");
   const header = `\\begin{center}
     \\textbf{\\Huge \\scshape Atishay Kasliwal} \\\\ \\vspace{1pt}
@@ -152,7 +141,7 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank }
     .filter((role) => (role.bullets || []).length > 0)
     .map((role) => {
       const name = ROLE_SLUG_TO_NAME[role.role] || role.role;
-      const meta = ROLE_META[name] || { title: "Software Engineer", loc: "", dates: "", order: 0 };
+      const meta = resolveExperienceMeta(role.role, bankDir);
       const bullets = (role.bullets || []).map((b) => ({
         text: bulletText(b),
         ac_id: b.ac_id,
@@ -169,21 +158,18 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank }
     .map((b) => b.tex)
     .join("\n\n");
 
-  const projBlocks = (composition.projects || [])
-    .filter((project) => (project.bullets || []).length > 0)
+  const projBlocks = sortProjectsByRecency(
+    (composition.projects || []).filter((project) => (project.bullets || []).length > 0),
+    bankDir,
+  )
     .map((project) => {
       const name = PROJECT_SLUG_TO_NAME[project.role] || project.role;
-      const meta = PROJECT_META[name] || { dates: "", order: 0 };
+      const meta = resolveProjectMeta(project.role, bankDir);
       const bullets = (project.bullets || []).map((b) => ({ text: bulletText(b) }));
       const stack = toolsFromBullets(bullets, project.role);
       const items = bullets.map((b) => `      \\resumeItem{${esc(b.text)}}`).join("\n");
-      return {
-        order: meta.order || 0,
-        tex: `    \\resumeProjectHeading{\\textbf{${esc(name)}}${stack.length ? " $|$ \\emph{" + esc(stack.join(", ")) + "}" : ""}}{${meta.dates}}\n    \\resumeItemListStart\n${items}\n    \\resumeItemListEnd`,
-      };
+      return `    \\resumeProjectHeading{\\textbf{${esc(name)}}${stack.length ? " $|$ \\emph{" + esc(stack.join(", ")) + "}" : ""}}{${meta.dates}}\n    \\resumeItemListStart\n${items}\n    \\resumeItemListEnd`;
     })
-    .sort((a, b) => b.order - a.order)
-    .map((b) => b.tex)
     .join("\n\n");
 
   const skillsTex = skills.filter(Boolean)

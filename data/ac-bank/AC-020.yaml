@@ -13,7 +13,7 @@ concepts_claimed:
 signature_technologies:
   - AWS
   - Python
-fact: Production LLM inference on AWS for research APIs.
+fact: Production LLM inference on AWS for macro analysis APIs.
 capabilities:
   ai: 82
   backend: 74
@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Deployed Python LLM inference on AWS serving macro research APIs with sub-minute latency for 5 daily financial
-      research users.
+      Deployed Python LLM inference on AWS serving macro analysis APIs with sub-minute latency for 5 daily financial
+      analysts.

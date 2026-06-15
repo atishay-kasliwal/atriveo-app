@@ -19,6 +19,7 @@ const MAX_COMMAS = 2;
 const MAX_SIGNATURE_TECH = 2;
 
 const BANNED_PUFFERY = /\b(modern|advanced|innovative|cutting-edge|cloud-native|cloud native)\b/i;
+const BANNED_RESEARCH_STONY = /\bresearch\w*\b/i;
 
 function loadRoleAtsTech() {
   try {
@@ -62,6 +63,9 @@ function lintBullet(ac, text) {
   if (WEAK_VERBS.test(text.trim())) issues.push("weak opening verb");
   if (!STRONG_VERBS.test(firstWord)) issues.push(`verb "${firstWord}" not in strong list`);
   if (BANNED_PUFFERY.test(text)) issues.push("banned puffery (modern/advanced/innovative/cloud-native)");
+  if (ac.role === "stony-brook" && BANNED_RESEARCH_STONY.test(text)) {
+    issues.push('banned word "research" on Stony Brook bullets — use analysis, analytics, or analysts');
+  }
 
   const declared = ac.signature_technologies || [];
   if (declared.length > MAX_SIGNATURE_TECH) {
@@ -90,7 +94,7 @@ function lintBullet(ac, text) {
   const hasMetric = /\d|\b10K\+|\b90%|\b100\+|\b2K\+|\b99\.9%|\b5\.0|\b5K\+|\bhours\b|\bminutes\b|\byears\b|\bone-page\b/i.test(text);
   if (!hasMetric && !["AC-046", "AC-048", "AC-053", "AC-058", "AC-060", "AC-061"].includes(ac.id)) score -= 1;
 
-  const hasSoWhat = /\b(clinician|physician|research|clinical|decision|trust|outcomes|segmentation|production|physicians|team)\b/i.test(text);
+  const hasSoWhat = /\b(clinician|physician|research|clinical|decision|trust|outcomes|segmentation|production|physicians|team|analysts|users)\b/i.test(text);
   if (!hasSoWhat) score -= 0.5;
 
   return { issues, score: Number(Math.max(0, score).toFixed(1)) };

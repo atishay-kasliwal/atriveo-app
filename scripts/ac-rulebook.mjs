@@ -1,4 +1,8 @@
-// Rulebook slot contract — visual completeness audit.
+import {
+  projectRecencyMs,
+  resolveProjectMeta,
+  resolveBankDir,
+} from "./ac-role-meta.mjs";
 
 export const RULEBOOK_EXPERIENCE_SLOTS = {
   "stony-brook": 4,
@@ -68,6 +72,21 @@ export function countCompositionBullets(composition) {
   };
 }
 
+export function auditProjectRecencyOrder(composition, bankDir = resolveBankDir()) {
+  const projects = composition.projects || [];
+  for (let i = 1; i < projects.length; i += 1) {
+    const prevMs = projectRecencyMs(resolveProjectMeta(projects[i - 1].role, bankDir).dates);
+    const curMs = projectRecencyMs(resolveProjectMeta(projects[i].role, bankDir).dates);
+    if (curMs > prevMs) {
+      return {
+        ok: false,
+        message: `project order: ${projects[i].role} is newer than ${projects[i - 1].role} (latest project must be first)`,
+      };
+    }
+  }
+  return { ok: true };
+}
+
 export function auditRulebookCompleteness(composition) {
   const counts = countCompositionBullets(composition);
   const targets = resolveVisualTargets(composition);
@@ -87,6 +106,9 @@ export function auditRulebookCompleteness(composition) {
     const actual = (project.bullets || []).length;
     if (actual < expected) gaps.push(`${project.role}: ${actual}/${expected} bullets`);
   }
+
+  const orderAudit = auditProjectRecencyOrder(composition);
+  if (!orderAudit.ok) gaps.push(orderAudit.message);
 
   return {
     complete: gaps.length === 0,

@@ -25,11 +25,15 @@ export const ROLE_META = {
 };
 export const PROJECT_META = {
   "Atriveo":                         { dates: "September 2025 -- Present", order: 6 },
-  "Insurance Microservices Platform":{ dates: "June 2025 -- August 2025", order: 5 },
-  "InsureRaft":                      { dates: "2025", order: 4 },
-  "Bayesian Marketing Mix Model":    { dates: "March 2025 -- May 2025", order: 3 },
-  "Advanced Radiomics Research Pipeline": { dates: "2025", order: 2 },
-  "Encryption and Decryption Application": { dates: "2024", order: 1 },
+  "Atriveo Job Intelligence Pipeline": { dates: "September 2025 -- Present", order: 6 },
+  "Insurance Microservices Platform":  { dates: "June 2025 -- August 2025", order: 5 },
+  "InsureRaft":                        { dates: "January 2025 -- May 2025", order: 4 },
+  "Bayesian Marketing Mix Model":      { dates: "March 2025 -- May 2025", order: 3 },
+  "Advanced Radiomics Research Pipeline": { dates: "January 2025 -- April 2025", order: 2 },
+  "Encryption and Decryption Application": { dates: "August 2024 -- December 2024", order: 1 },
+  "MedLedger":                         { dates: "June 2024 -- August 2024", order: 1 },
+  "User Data Platform":                { dates: "February 2025 -- April 2025", order: 2 },
+  "FOMC Intelligence Dashboard":       { dates: "November 2024 -- May 2026", order: 3 },
 };
 
 export const SYSTEM_PROMPT = `You are an elite technical recruiter and resume strategist. Goal: build the resume MOST LIKELY TO LAND AN INTERVIEW for this exact job. Output ONE valid JSON object only — no markdown, no prose.
