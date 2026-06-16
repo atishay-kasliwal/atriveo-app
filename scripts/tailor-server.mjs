@@ -34,7 +34,7 @@ import { buildSkillsLines, capSkillsLineToOnePhysicalLine } from "./skills-libra
 import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
-import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs } from "./resume-queue.mjs";
+import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis } from "./resume-queue.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
 import { listActiveWorkers } from "./worker-registry.mjs";
 
@@ -1278,6 +1278,22 @@ const server = http.createServer(async (req, res) => {
           res.writeHead(503, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
         }
+      }
+    })();
+    return;
+  }
+
+  // GET /compile-queue/kpis — postings vs resumes (Mongo, ET today + latest hour)
+  if (req.method === "GET" && pathname === "/compile-queue/kpis") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const kpis = await withMongo((db) => countPipelineKpis(db), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify({ ok: true, ...kpis }));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
       }
     })();
     return;

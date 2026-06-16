@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type { Job } from "../types";
 import type { SortBy, SortDir } from "../pages/Dashboard.types";
 import type { SavedJobSource } from "../hooks/useApplyClickLog";
@@ -88,11 +88,28 @@ function scoreDelta(careerOps: ReturnType<typeof careerOpsRating>): number | nul
   return Math.abs(Math.round(fitPct - atsPct));
 }
 
-function compLabel(value: number | null | undefined): string {
-  const score = Number(value);
-  if (!Number.isFinite(score) || score <= 0) return "Low";
-  if (score <= 3) return "Med";
-  return "High";
+function parseRunDateFromPath(path?: string | null): string | null {
+  if (!path) return null;
+  const match = path.match(/(\d{4}-\d{2}-\d{2})/);
+  return match ? match[1] : null;
+}
+
+function parseFolderFromPath(path?: string | null): string | null {
+  if (!path) return null;
+  const parts = path.split("/").filter(Boolean);
+  if (!parts.length) return null;
+  return parts[parts.length - 1] || null;
+}
+
+function resumeLocationLabel(
+  record: TailorRecord | null | undefined,
+  displayHour: string,
+  displaySlot: number,
+): string {
+  const sourcePath = record?.dir || record?.pdfPath || "";
+  const date = parseRunDateFromPath(sourcePath) || "unknown-date";
+  const folder = record?.folder || parseFolderFromPath(record?.dir) || displayHour;
+  return `${date}/${folder}/#${formatResumeSlot(displaySlot)}`;
 }
 
 // Short, single-word pill label for the dense board rating column.
@@ -103,6 +120,40 @@ function ratingPillLabel(key: string): string {
     case "yellow": return "Review";
     default: return "Low";
   }
+}
+
+function JobTableSelectCheckbox({
+  checked,
+  indeterminate = false,
+  onChange,
+  title,
+  className = "",
+}: {
+  checked: boolean;
+  indeterminate?: boolean;
+  onChange: () => void;
+  title?: string;
+  className?: string;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (ref.current) ref.current.indeterminate = indeterminate;
+  }, [indeterminate]);
+  return (
+    <input
+      ref={ref}
+      type="checkbox"
+      className={`job-table-checkbox${className ? ` ${className}` : ""}`}
+      checked={checked}
+      onChange={(e) => {
+        e.stopPropagation();
+        onChange();
+      }}
+      onClick={(e) => e.stopPropagation()}
+      title={title}
+      aria-label={title}
+    />
+  );
 }
 
 interface SortableHeaderProps {
@@ -181,13 +232,34 @@ function ScoreCell({ job, board = false }: { job: Job; board?: boolean }) {
   );
 }
 
-function CompanyBandRow({ group, solo = false }: { group: CompanyJobGroup; solo?: boolean }) {
+function CompanyBandRow({
+  group,
+  solo = false,
+  onGroupSelectAll,
+  isGroupFullySelected,
+}: {
+  group: CompanyJobGroup;
+  solo?: boolean;
+  onGroupSelectAll?: (jobs: Job[]) => void;
+  isGroupFullySelected?: (jobs: Job[]) => boolean;
+}) {
   const domain = companyDomain(group.company);
   const openings = group.jobs.length;
+  const allSelected = isGroupFullySelected?.(group.jobs) ?? false;
 
   return (
     <tr className={`job-table-band${solo ? " job-table-band--solo" : ""}`}>
-      <td colSpan={11}>
+      <td className="job-table-check" onClick={(e) => e.stopPropagation()}>
+        {onGroupSelectAll ? (
+          <JobTableSelectCheckbox
+            checked={allSelected}
+            onChange={() => onGroupSelectAll(group.jobs)}
+            title={allSelected ? `Deselect all ${group.company} roles` : `Select all ${group.company} roles`}
+            className="job-table-checkbox--band"
+          />
+        ) : null}
+      </td>
+      <td colSpan={10}>
         <div className="job-table-band-inner">
           <CompanyLogo company={group.company} size="sm" />
           <span className="job-table-band-name">{group.company.toUpperCase()}</span>
@@ -263,16 +335,16 @@ function JobTableRow({
   const trackerSyncStatus = applyRecord?.trackerSyncStatus ?? null;
   const isTrackerSynced = trackerSyncStatus === "synced" || trackerSyncStatus === "duplicate";
   const isTrackerPending = trackerSyncStatus === "pending";
-  const canSendToTracker = Boolean(job.job_url && (!isApplied || (!isTrackerSynced && !isTrackerPending)));
-  const trackerCopy = !isApplied
-    ? "Add"
-    : isTrackerSynced
-      ? "Synced"
-      : isTrackerPending
-        ? "…"
-        : trackerSyncStatus === "error" || trackerSyncStatus === "not_configured"
-          ? "Retry"
-          : "Sync";
+  const canRetryTracker = Boolean(
+    job.job_url
+    && isApplied
+    && !isTrackerSynced
+    && !isTrackerPending,
+  );
+  const trackerCopy = trackerSyncStatus === "error" || trackerSyncStatus === "not_configured"
+    ? "Retry"
+    : "Sync";
+  const sessionMeta = job.job_url ? sessionResumeByUrl?.get(job.job_url) : undefined;
   const tailorRecord = getTailorRecord?.(job) ?? null;
   const tailor = tailorCellLabel(tailorRecord);
   const folderPath = tailorFolderPath(tailorRecord);
@@ -282,13 +354,12 @@ function JobTableRow({
     && job.job_url
     && (!tailorRecord || tailorRecord.status === "none" || tailorRecord.status === "failed"),
   );
-  const sessionMeta = job.job_url ? sessionResumeByUrl?.get(job.job_url) : undefined;
   const displaySlot = resolveResumeSlot(tailorRecord, sessionMeta?.slot ?? index);
   const displayHour = resolveSessionHour(tailorRecord, sessionMeta?.hour);
   const displayId = resumeIdCompact
     ? formatResumeSlot(displaySlot)
     : formatResumeId(displayHour, displaySlot);
-  const resumePathHint = `${displayHour}h · #${formatResumeSlot(displaySlot)}`;
+  const resumePathHint = resumeLocationLabel(tailorRecord, displayHour, displaySlot);
   const showTailorLog = tailorRecord?.status === "done";
 
   function saveJob(source: SavedJobSource, e?: React.MouseEvent) {
@@ -322,7 +393,9 @@ function JobTableRow({
         ? "Snippet"
         : jdCopyState === "missing"
           ? "No JD"
-          : "Copy JD";
+          : board
+            ? "JD"
+            : "Copy JD";
 
   function handleRowClick(e: React.MouseEvent<HTMLTableRowElement>) {
     if (!board || !onDismissJob) return;
@@ -340,18 +413,11 @@ function JobTableRow({
     >
       <td className="job-table-check">
         {onSelectionToggle && (
-          <button
-            type="button"
-            className={`job-table-select${isSelected ? " is-selected" : ""}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelectionToggle(job);
-            }}
-            aria-pressed={isSelected}
+          <JobTableSelectCheckbox
+            checked={isSelected}
+            onChange={() => onSelectionToggle(job)}
             title={isSelected ? "Deselect" : "Select for bulk actions"}
-          >
-            {isSelected ? "✓" : ""}
-          </button>
+          />
         )}
       </td>
       <td className="job-table-num" title={resumePathHint}>
@@ -415,16 +481,13 @@ function JobTableRow({
         )}
       </td>
       <td className="job-table-loc" title={job.location}>{locationShort(job.location)}</td>
-      <td className="job-table-comp" title={`Competition score: ${job.competition_score ?? 0}`}>
-        {compLabel(job.competition_score)}
-      </td>
       <td className="job-table-level">{job.level || "—"}</td>
       {board && (
         <td className="job-table-tailored">
           <div className="job-table-tailored-inner">
             <span
               className={`job-table-tailored-pill job-table-tailored-pill--${tailor.tone}`}
-              title={tailor.tooltip}
+              title={`${tailor.tooltip} · ${resumePathHint}`}
             >
               {tailor.label}
             </span>
@@ -457,6 +520,11 @@ function JobTableRow({
                 </button>
               ) : null}
             </div>
+            {folderPath ? (
+              <span className="job-table-tailored-path" title={resumePathHint}>
+                {resumePathHint}
+              </span>
+            ) : null}
           </div>
           {logOpen && tailorRecord ? (
             <TailorJobLogModal record={tailorRecord} onClose={() => setLogOpen(false)} />
@@ -473,13 +541,10 @@ function JobTableRow({
                 href={job.job_url}
                 target="_blank"
                 rel="noopener"
-                title="Apply"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSaveJob?.(job, "apply");
-                }}
+                title="Open job posting"
+                onClick={(e) => e.stopPropagation()}
               >
-                {savedFeedback === "apply" ? "Moved ✓" : "Apply"}
+                Apply
               </a>
             ) : null}
             {job.job_url && onSaveJob && (
@@ -487,7 +552,7 @@ function JobTableRow({
                 type="button"
                 className={`job-table-board-apply${savedFeedback === "click" ? " is-logged" : ""}`}
                 onClick={(e) => saveJob("click", e)}
-                title="Move this posting to Clicked Jobs"
+                title="Log application and send to tracker"
               >
                 {savedFeedback === "click" ? "Moved ✓" : "Click"}
               </button>
@@ -515,18 +580,17 @@ function JobTableRow({
             >
               {jdCopyLabel}
             </button>
-            {canSendToTracker && job.job_url && (
+            {canRetryTracker && (
               <button
                 type="button"
-                className={`job-table-board-apply${savedFeedback === "add" ? " is-logged" : ""}`}
-                title="Add to Atriveo tracker and move to Clicked Jobs"
+                className="job-table-board-apply"
+                title="Retry sending to Atriveo tracker"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (onSaveJob) saveJob("add", e);
-                  else onAddToTracker(job.job_url, title, co, { location: job.location || null });
+                  onAddToTracker(job.job_url, title, co, { location: job.location || null });
                 }}
               >
-                {savedFeedback === "add" ? "Moved ✓" : trackerCopy}
+                {trackerCopy}
               </button>
             )}
             {canQueueResume && (
@@ -551,10 +615,7 @@ function JobTableRow({
                 href={job.job_url}
                 target="_blank"
                 rel="noopener"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSaveJob?.(job, "apply");
-                }}
+                onClick={(e) => e.stopPropagation()}
               >
                 Apply
               </a>
@@ -584,13 +645,13 @@ function JobTableRow({
             >
               {jdCopyLabel}
             </button>
-            {canSendToTracker && job.job_url && (
+            {canRetryTracker && (
               <button
                 type="button"
                 className="job-table-action"
-                onClick={() => {
-                  if (onSaveJob) saveJob("add");
-                  else onAddToTracker(job.job_url, title, co, { location: job.location || null });
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToTracker(job.job_url, title, co, { location: job.location || null });
                 }}
               >
                 {trackerCopy}
@@ -643,15 +704,11 @@ function CompanyGroupRow({
     >
       <td className="job-table-check" onClick={(e) => e.stopPropagation()}>
         {onGroupSelectAll && (
-          <button
-            type="button"
-            className={`job-table-select${allSelected ? " is-selected" : ""}`}
-            onClick={() => onGroupSelectAll(group.jobs)}
-            aria-pressed={allSelected}
+          <JobTableSelectCheckbox
+            checked={allSelected}
+            onChange={() => onGroupSelectAll(group.jobs)}
             title={allSelected ? "Deselect all roles" : "Select all roles"}
-          >
-            {allSelected ? "✓" : ""}
-          </button>
+          />
         )}
       </td>
       <td className="job-table-num">{index}</td>
@@ -679,9 +736,6 @@ function CompanyGroupRow({
         <span className={`job-table-match-label job-table-match-label--${topOps.key}`}>{topOps.label}</span>
       </td>
       <td className="job-table-loc" title={top.location}>{locationShort(top.location)}</td>
-      <td className="job-table-comp" title={`Competition score: ${top.competition_score ?? 0}`}>
-        {compLabel(top.competition_score)}
-      </td>
       <td className="job-table-level">{top.level || "—"}</td>
       <td className="job-table-tailored" />
       <td className="job-table-time">{fmtTime(top.batch_time || top.date_posted, top.scraped_date)}</td>
@@ -775,6 +829,18 @@ export default function JobTable({
   const wrapClass = variant === "board" ? "job-table-wrap job-table-wrap--board" : "job-table-wrap";
   const tableClass = variant === "board" ? "job-table job-table--board" : "job-table";
 
+  const visibleSelection = useMemo(() => {
+    if (!isJobSelected || !jobs.length) {
+      return { all: false, some: false, count: 0 };
+    }
+    const count = jobs.filter((job) => isJobSelected(job)).length;
+    return {
+      all: count === jobs.length,
+      some: count > 0 && count < jobs.length,
+      count,
+    };
+  }, [jobs, isJobSelected]);
+
   return (
     <div className={wrapClass}>
       <table className={tableClass}>
@@ -786,7 +852,6 @@ export default function JobTable({
             <col className="col-role" />
             <col className="col-rating" />
             <col className="col-loc" />
-            <col className="col-comp" />
             <col className="col-level" />
             <col className="col-tailored" />
             <col className="col-posted" />
@@ -795,7 +860,17 @@ export default function JobTable({
         )}
         <thead>
           <tr>
-            <th aria-label="Select" />
+            <th className="job-table-check job-table-check--head">
+              {onSelectionToggle && onGroupSelectAll ? (
+                <JobTableSelectCheckbox
+                  checked={visibleSelection.all}
+                  indeterminate={visibleSelection.some}
+                  onChange={() => onGroupSelectAll(jobs)}
+                  title={visibleSelection.all ? "Deselect all visible jobs" : "Select all visible jobs"}
+                  className="job-table-checkbox--head"
+                />
+              ) : null}
+            </th>
             <th>#</th>
             {variant === "board" && onSortColumn ? (
               <>
@@ -803,7 +878,6 @@ export default function JobTable({
                 <SortableHeader label="Role & Company" column="company" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Rating" column="rating" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Location" column="location" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
-                <SortableHeader label="Comp" column="comp" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Level" column="level" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Resume" column="tailored" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Posted" column="time" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
@@ -814,7 +888,6 @@ export default function JobTable({
                 <th>{variant === "board" ? "Role & Company" : "Job"}</th>
                 <th>{variant === "board" ? "Rating" : "Match"}</th>
                 <th>Location</th>
-                <th>Comp</th>
                 <th>Level</th>
                 {variant === "board" ? <th>Resume</th> : null}
                 <th>{variant === "board" ? "Posted" : "Time"}</th>
@@ -831,7 +904,12 @@ export default function JobTable({
                 const priorCount = groups.slice(0, gi).reduce((acc, g) => acc + g.jobs.length, 0);
                 return (
                   <Fragment key={group.company}>
-                    <CompanyBandRow group={group} solo={!multiRole} />
+                    <CompanyBandRow
+                      group={group}
+                      solo={!multiRole}
+                      onGroupSelectAll={onGroupSelectAll}
+                      isGroupFullySelected={isGroupFullySelected}
+                    />
                     {group.jobs.map((job, j) => (
                       <JobTableRow
                         key={job.job_url || `${group.company}-${j}`}

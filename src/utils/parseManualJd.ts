@@ -29,6 +29,33 @@ export function nextManualSlot(sessions: ManualTailorSession[]): number {
   return max + 1;
 }
 
+function looksLikeRole(line: string): boolean {
+  return /\b(engineer|manager|designer|analyst|developer|lead|director|specialist|intern|product|software|senior|staff|principal|architect|coordinator|associate|scientist|consultant)\b/i.test(line);
+}
+
+function looksLikeCompanyName(line: string): boolean {
+  const plain = cleanField(line);
+  if (!plain || plain.length > 48) return false;
+  if (looksLikeRole(plain)) return false;
+  const words = plain.split(/\s+/);
+  return words.length <= 4 && /^[A-Z0-9]/.test(plain);
+}
+
+/** Apply optional user overrides; fall back to parsed or unknown slot. */
+export function applyManualOverrides(
+  parsed: ParsedManualJd,
+  overrides: { company?: string; title?: string },
+  slot: number,
+): ParsedManualJd {
+  const companyRaw = overrides.company?.trim() || parsed.company;
+  const titleRaw = overrides.title?.trim() || parsed.title;
+  let company = cleanField(companyRaw);
+  let title = cleanField(titleRaw);
+  if (!company || /^unknown\d*$/i.test(company)) company = `unknown${slot}`;
+  if (!title || /^unknown-role-\d+$/i.test(title)) title = `unknown-role-${slot}`;
+  return { ...parsed, company, title };
+}
+
 /** Pull company, role, and URL out of a pasted JD blob. */
 export function parseManualJd(raw: string, slot: number): ParsedManualJd {
   const description = raw.trim();
@@ -67,10 +94,33 @@ export function parseManualJd(raw: string, slot: number): ParsedManualJd {
     }
   }
 
+  // Company on line 1, role on line 2 (e.g. "Heron" / "Platform Engineer")
+  if (!company && !title && lines.length >= 2) {
+    const first = cleanField(stripUrlFromLine(lines[0]));
+    const second = cleanField(stripUrlFromLine(lines[1]));
+    if (looksLikeCompanyName(first) && looksLikeRole(second)) {
+      company = first;
+      title = second;
+    }
+  }
+
   if (!title && lines[0]) {
     const first = stripUrlFromLine(lines[0]);
-    if (first.length > 0 && first.length <= 120 && !/^https?:\/\//i.test(first)) {
+    if (
+      first.length > 0
+      && first.length <= 120
+      && !/^https?:\/\//i.test(first)
+      && !(looksLikeCompanyName(first) && lines.length >= 2 && looksLikeRole(cleanField(stripUrlFromLine(lines[1]))))
+    ) {
       title = first;
+    }
+  }
+
+  if (!company && lines[0] && looksLikeCompanyName(lines[0])) {
+    company = cleanField(stripUrlFromLine(lines[0]));
+    if (!title && lines.length >= 2) {
+      const second = cleanField(stripUrlFromLine(lines[1]));
+      if (second.length >= 5 && second.length <= 120) title = second;
     }
   }
 
@@ -92,6 +142,33 @@ export function parseManualJd(raw: string, slot: number): ParsedManualJd {
 
   title = cleanField(title);
   company = cleanField(company);
+
+  // Company on line 1, title on line 2 (common paste format)
+  if (company && !title && lines.length >= 2) {
+    const first = cleanField(stripUrlFromLine(lines[0]));
+    if (first.toLowerCase() === company.toLowerCase() || first.includes(company)) {
+      const candidate = cleanField(stripUrlFromLine(lines[1]));
+      if (candidate.length >= 5 && candidate.length <= 120 && !/^https?:\/\//i.test(candidate)) {
+        title = candidate;
+      }
+    }
+  }
+
+  // Company known but title still missing — scan for role-like lines
+  if (company && !title) {
+    for (const line of lines.slice(0, 20)) {
+      const plain = cleanField(stripUrlFromLine(line));
+      if (!plain || plain === company || plain.toLowerCase() === company.toLowerCase()) continue;
+      if (
+        plain.length >= 8
+        && plain.length <= 100
+        && /\b(engineer|manager|designer|analyst|developer|lead|director|specialist|intern|product|software|senior|staff|principal|architect|coordinator|associate)\b/i.test(plain)
+      ) {
+        title = plain;
+        break;
+      }
+    }
+  }
 
   if (!company) company = `unknown${slot}`;
   if (!title) title = `unknown-role-${slot}`;

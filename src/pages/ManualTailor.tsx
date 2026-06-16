@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import AppHeader from "../components/AppHeader";
-import PageIntro from "../components/PageIntro";
 import TailorQueueBar from "../components/TailorQueueBar";
 import ManualTailorAssistantCard from "../components/ManualTailorAssistantCard";
 import { useAuth } from "../hooks/useAuth";
@@ -16,11 +16,21 @@ import {
   upsertManualJob,
   type ManualTailorSession,
 } from "../utils/manualJob";
-import { nextManualSlot, parseManualJd } from "../utils/parseManualJd";
-import { openTailorPath, runSingleTailorJob } from "../utils/tailorRun";
+import { nextManualSlot, parseManualJd, applyManualOverrides } from "../utils/parseManualJd";
+import { assertTailorServerReady, openTailorPath, runSingleTailorJob } from "../utils/tailorRun";
 import { buildTailorStreamHandler } from "../utils/tailorStreamHandler";
+import { jobDismissKey } from "../utils/jobCopy";
 
 const MIN_JD_CHARS = 200;
+
+function displayTitle(title: string): string {
+  if (/^unknown-role-\d+$/i.test(title)) return "Role not detected";
+  return title;
+}
+
+function isUnknownCompany(company: string): boolean {
+  return /^unknown\d+$/i.test(company);
+}
 
 export default function ManualTailor() {
   const { user, loading: authLoading } = useAuth();
@@ -29,10 +39,29 @@ export default function ManualTailor() {
   const [sessions, setSessions] = useState<ManualTailorSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [description, setDescription] = useState("");
+  const [companyOverride, setCompanyOverride] = useState("");
+  const [titleOverride, setTitleOverride] = useState("");
   const [formError, setFormError] = useState("");
-  const [parsedPreview, setParsedPreview] = useState<{ company: string; title: string } | null>(null);
   const [hydrated, setHydrated] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const [macStatus, setMacStatus] = useState<"checking" | "ready" | "offline">("checking");
+  const [macStatusDetail, setMacStatusDetail] = useState("");
+  const requeueGuardRef = useRef<string | null>(null);
+
+  const resolvedFields = useMemo(() => {
+    const jd = description.trim();
+    if (jd.length < 20) return null;
+    const slot = nextManualSlot(sessions);
+    const parsed = parseManualJd(jd, slot);
+    return applyManualOverrides(parsed, {
+      company: companyOverride,
+      title: titleOverride,
+    }, slot);
+  }, [description, sessions, companyOverride, titleOverride]);
+
+  useEffect(() => {
+    document.body.classList.add("is-today-board");
+    return () => document.body.classList.remove("is-today-board");
+  }, []);
 
   useEffect(() => {
     if (authLoading) return;
@@ -61,6 +90,61 @@ export default function ManualTailor() {
     [sessions, activeSessionId],
   );
 
+  const findJobForSession = useCallback((session: ManualTailorSession): Job | null => {
+    return manualJobs.find((job) => jobDismissKey(job) === session.jobKey) ?? null;
+  }, [manualJobs]);
+
+  useEffect(() => {
+    if (!hydrated || !tailorQueue.queueLoaded) return;
+    const healed = tailorQueue.healOrphanedQueuedJobs(manualJobs);
+    if (healed === 0 && tailorQueue.pendingCount > 0 && !tailorQueue.processing) {
+      void tailorQueue.processQueue();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- heal once when queue is ready
+  }, [hydrated, tailorQueue.queueLoaded, manualJobs.length]);
+
+  // Auto-heal stuck "Queued" cards that never made it to the pending queue.
+  useEffect(() => {
+    if (!activeSession || !tailorQueue.queueLoaded) return;
+    const record = tailorStatus.getRecord(activeSession.jobKey);
+    if (record?.status !== "queued") {
+      requeueGuardRef.current = null;
+      return;
+    }
+    const queueItem = tailorQueue.queue.find((item) => item.jobKey === activeSession.jobKey);
+    if (queueItem?.status === "pending" || queueItem?.status === "running") return;
+    if (requeueGuardRef.current === activeSession.jobKey) return;
+    const job = findJobForSession(activeSession);
+    if (!job) return;
+    requeueGuardRef.current = activeSession.jobKey;
+    tailorQueue.requeueJob(job);
+  }, [activeSession, tailorQueue.queueLoaded, tailorQueue.queue, tailorStatus, findJobForSession, tailorQueue]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const checkMac = async () => {
+      setMacStatus("checking");
+      try {
+        await assertTailorServerReady();
+        if (!cancelled) {
+          setMacStatus("ready");
+          setMacStatusDetail("Mac tailor is online and drive is mounted.");
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setMacStatus("offline");
+          setMacStatusDetail((e as Error).message || "Mac tailor unreachable");
+        }
+      }
+    };
+    void checkMac();
+    const id = window.setInterval(() => void checkMac(), 60_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
+
   const queuePositionFor = useCallback((jobKey: string) => {
     const pending = tailorQueue.queue.filter((item) => item.status === "pending");
     const idx = pending.findIndex((item) => item.jobKey === jobKey);
@@ -74,17 +158,6 @@ export default function ManualTailor() {
 
   const canSubmit = description.trim().length >= MIN_JD_CHARS;
 
-  useEffect(() => {
-    const jd = description.trim();
-    if (jd.length < 20) {
-      setParsedPreview(null);
-      return;
-    }
-    const slot = nextManualSlot(sessions);
-    const parsed = parseManualJd(jd, slot);
-    setParsedPreview({ company: parsed.company, title: parsed.title });
-  }, [description, sessions]);
-
   const handleSubmit = () => {
     setFormError("");
     const jd = description.trim();
@@ -95,11 +168,15 @@ export default function ManualTailor() {
 
     const slot = nextManualSlot(sessions);
     const parsed = parseManualJd(jd, slot);
+    const resolved = applyManualOverrides(parsed, {
+      company: companyOverride,
+      title: titleOverride,
+    }, slot);
     const job = createManualJob({
-      company: parsed.company,
-      title: parsed.title,
-      jobUrl: parsed.jobUrl,
-      description: parsed.description,
+      company: resolved.company,
+      title: resolved.title,
+      jobUrl: resolved.jobUrl,
+      description: resolved.description,
     });
     const nextJobs = upsertManualJob(uid, job);
     setManualJobs(nextJobs);
@@ -116,9 +193,19 @@ export default function ManualTailor() {
     persistManualTailorSessions(uid, nextSessions);
     setActiveSessionId(session.id);
     setDescription("");
-    setParsedPreview(null);
-    window.setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 80);
+    setCompanyOverride("");
+    setTitleOverride("");
+    requeueGuardRef.current = null;
+    void tailorQueue.processQueue();
   };
+
+  const handleRetrySession = useCallback(() => {
+    if (!activeSession) return;
+    const job = findJobForSession(activeSession);
+    if (!job) return;
+    requeueGuardRef.current = null;
+    tailorQueue.requeueJob(job);
+  }, [activeSession, findJobForSession, tailorQueue]);
 
   const handleOpenFolder = useCallback(async (path: string) => {
     try {
@@ -128,37 +215,75 @@ export default function ManualTailor() {
     }
   }, []);
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [sessions.length, tailorStatus.records]);
-
   if (!hydrated) {
     return (
-      <div>
-        <AppHeader />
+      <div className="manual-tailor-root">
+        <AppHeader hideLogo />
         <div className="content-loading"><div className="spin" /></div>
       </div>
     );
   }
 
-  return (
-    <div className="manual-tailor-page">
-      <AppHeader />
-      <div className="wrapper page-shell page-shell-wide manual-tailor-shell">
-        <PageIntro
-          compact
-          kicker="Tailor lab"
-          title="Manual Tailor"
-          description="Paste a full job description — company, role, and URL are extracted automatically. Same shared tailor queue as Live Feed."
-          stats={[
-            { label: "Queue", value: tailorQueue.pendingCount, tone: "orange" },
-            { label: "Done today", value: tailorStatus.resumesCreatedTodayCount, tone: "green" },
-            { label: "Resume", value: resumeSaved ? "Ready" : "Optional", tone: resumeSaved ? "green" : "slate" },
-          ]}
-        />
+  const activeRecord = activeSession ? tailorStatus.getRecord(activeSession.jobKey) : null;
+  const activeQueueItem = activeSession
+    ? tailorQueue.queue.find((item) => item.jobKey === activeSession.jobKey) ?? null
+    : null;
+  const activeQueuePosition = activeSession ? queuePositionFor(activeSession.jobKey) : null;
+  const isStuckQueued = Boolean(
+    activeRecord?.status === "queued"
+    && activeQueueItem?.status !== "pending"
+    && activeQueueItem?.status !== "running"
+    && tailorQueue.pendingCount === 0,
+  );
 
-        {(tailorQueue.totalInQueue > 0 || tailorQueue.processing) ? (
+  return (
+    <div className="manual-tailor-root">
+      <AppHeader hideLogo />
+      <div className="manual-tailor-viewport">
+        <header className="mt-hero">
+          <div className="mt-hero-main">
+            <Link to="/today" className="mt-back">← Live Feed</Link>
+            <h1>Paste JD → Tailor</h1>
+            <p>
+              Paste any job posting. We extract company and role, then run the same Mac tailor as Live Feed.
+            </p>
+          </div>
+          <dl className="mt-metrics">
+            <div>
+              <dt>Queue</dt>
+              <dd>{tailorQueue.pendingCount}</dd>
+            </div>
+            <div>
+              <dt>Done today</dt>
+              <dd>{tailorStatus.resumesCreatedTodayCount}</dd>
+            </div>
+            <div>
+              <dt>Resume</dt>
+              <dd className={resumeSaved ? "mt-metric-ok" : ""}>
+                {resumeSaved ? "Ready" : "Optional"}
+              </dd>
+            </div>
+          </dl>
+        </header>
+
+        <div
+          className={`mt-mac-status mt-mac-status--${macStatus}`}
+          role="status"
+        >
+          {macStatus === "checking" ? "Checking Mac tailor connection…" : null}
+          {macStatus === "ready" ? `Mac connected · ${macStatusDetail}` : null}
+          {macStatus === "offline" ? (
+            <>
+              Mac not reachable — {macStatusDetail}
+              {" · "}
+              Ensure <code>com.atriveo.tailor</code> is running and the Cloudflare tunnel is up.
+            </>
+          ) : null}
+        </div>
+
+        <div className="mt-queue-slot">
           <TailorQueueBar
+            variant="manual"
             queue={tailorQueue.queue}
             pendingCount={tailorQueue.pendingCount}
             doneInQueue={tailorQueue.doneInQueue}
@@ -185,18 +310,18 @@ export default function ManualTailor() {
             onRemoveFromQueue={tailorQueue.removeFromQueue}
             onReorderPending={tailorQueue.reorderPending}
           />
-        ) : null}
+        </div>
 
-        <div className="manual-tailor-layout">
-          <aside className="manual-tailor-sidebar" aria-label="Past manual jobs">
-            <div className="manual-tailor-sidebar-head">
-              <h2>Sessions</h2>
-              <span>{sessions.length}</span>
+        <div className="mt-workbench">
+          <aside className="mt-sessions" aria-label="Manual tailor sessions">
+            <div className="mt-sessions-head">
+              <p className="mt-sessions-label">Sessions</p>
+              <span className="mt-sessions-count">{sessions.length}</span>
             </div>
             {sessions.length === 0 ? (
-              <p className="manual-tailor-sidebar-empty">No manual jobs yet. Paste a JD below to start.</p>
+              <p className="mt-sessions-empty">No jobs yet. Paste a JD below to start.</p>
             ) : (
-              <ul className="manual-tailor-session-list">
+              <ul className="mt-session-list">
                 {sessions.map((session) => {
                   const record = tailorStatus.getRecord(session.jobKey);
                   const tone = record?.status === "done"
@@ -210,13 +335,13 @@ export default function ManualTailor() {
                     <li key={session.id}>
                       <button
                         type="button"
-                        className={`manual-tailor-session-btn${activeSession?.id === session.id ? " is-active" : ""}`}
+                        className={`mt-session-btn${activeSession?.id === session.id ? " is-active" : ""}`}
                         onClick={() => setActiveSessionId(session.id)}
                       >
-                        <span className={`manual-tailor-session-dot manual-tailor-session-dot--${tone}`} aria-hidden />
-                        <span className="manual-tailor-session-copy">
-                          <strong>{session.company}</strong>
-                          <span>{session.title}</span>
+                        <span className={`mt-session-dot mt-session-dot--${tone}`} aria-hidden />
+                        <span className="mt-session-copy">
+                          <strong>{isUnknownCompany(session.company) ? "Company not detected" : session.company}</strong>
+                          <span>{displayTitle(session.title)}</span>
                         </span>
                       </button>
                     </li>
@@ -226,98 +351,130 @@ export default function ManualTailor() {
             )}
           </aside>
 
-          <section className="manual-tailor-chat" aria-label="Tailor conversation">
-            <div className="manual-tailor-messages">
-              {sessions.length === 0 ? (
-                <div className="manual-tailor-empty-state">
-                  <h3>Paste a job description to tailor</h3>
-                  <p>
-                    Paste the full JD below. Company, role, and URL are picked up automatically
-                    (falls back to unknown1, unknown2, … when missing).
-                  </p>
+          <main className="mt-main">
+            {activeSession ? (
+              <section className="mt-detail" aria-label="Selected job">
+                <div className="mt-detail-head">
+                  <div>
+                    <h2>
+                      {isUnknownCompany(activeSession.company) ? "Company not detected" : activeSession.company}
+                    </h2>
+                    <p className="mt-detail-title">{displayTitle(activeSession.title)}</p>
+                  </div>
+                  <time className="mt-detail-time" dateTime={activeSession.submittedAt}>
+                    {new Date(activeSession.submittedAt).toLocaleString()}
+                  </time>
                 </div>
-              ) : (
-                [...sessions].reverse().map((session) => {
-                  const record = tailorStatus.getRecord(session.jobKey);
-                  const queueItem = tailorQueue.queue.find((item) => item.jobKey === session.jobKey) ?? null;
-                  const queuePosition = queuePositionFor(session.jobKey);
-                  const isActive = activeSession?.id === session.id;
-
-                  return (
-                    <div
-                      key={session.id}
-                      className={`manual-tailor-thread${isActive ? " is-active" : ""}`}
-                      onClick={() => setActiveSessionId(session.id)}
-                    >
-                      <div className="manual-tailor-user-bubble">
-                        <div className="manual-tailor-bubble-label">You</div>
-                        <p className="manual-tailor-user-title">
-                          Tailor <strong>{session.company}</strong> · {session.title}
-                        </p>
-                        <p className="manual-tailor-user-jd">{session.jdPreview}</p>
-                        <time className="manual-tailor-time" dateTime={session.submittedAt}>
-                          {new Date(session.submittedAt).toLocaleString()}
-                        </time>
-                      </div>
-
-                      <div className="manual-tailor-assistant-wrap">
-                        <div className="manual-tailor-bubble-label">Tailor</div>
-                        <ManualTailorAssistantCard
-                          session={session}
-                          record={record}
-                          queueItem={queueItem}
-                          queuePosition={queuePosition}
-                          onOpenFolder={handleOpenFolder}
-                        />
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-              <div ref={chatEndRef} />
-            </div>
-
-            <div className="manual-tailor-composer">
-              <label className="manual-tailor-field manual-tailor-field--jd">
-                <span>Job description</span>
-                <textarea
-                  className="manual-tailor-jd"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder={"Paste the entire job posting here — title, company, LinkedIn URL, full JD…"}
-                  rows={10}
-                  onKeyDown={(e) => {
-                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && canSubmit) {
-                      e.preventDefault();
-                      handleSubmit();
-                    }
-                  }}
+                <details className="mt-jd-preview">
+                  <summary>Pasted job description</summary>
+                  <p>{activeSession.jdPreview}</p>
+                </details>
+                <ManualTailorAssistantCard
+                  session={activeSession}
+                  record={activeRecord}
+                  queueItem={activeQueueItem}
+                  queuePosition={activeQueuePosition}
+                  onOpenFolder={handleOpenFolder}
+                  onRetry={isStuckQueued ? handleRetrySession : undefined}
+                  stuckQueued={isStuckQueued}
                 />
-              </label>
+              </section>
+            ) : (
+              <section className="mt-welcome" aria-label="Getting started">
+                <h2>How it works</h2>
+                <ol className="mt-steps">
+                  <li>
+                    <strong>Paste the full job posting</strong>
+                    <span>Include title, company, URL, and the complete description.</span>
+                  </li>
+                  <li>
+                    <strong>We parse company &amp; role</strong>
+                    <span>LinkedIn-style posts work best. Missing fields fall back to unknown1, unknown-role-1, etc.</span>
+                  </li>
+                  <li>
+                    <strong>Mac tailor runs automatically</strong>
+                    <span>Jobs join the shared queue. PDFs land in your tailored-resumes folder when done.</span>
+                  </li>
+                </ol>
+              </section>
+            )}
 
-              {parsedPreview ? (
-                <p className="manual-tailor-parse-preview">
-                  Detected: <strong>{parsedPreview.company}</strong> · {parsedPreview.title}
-                </p>
+            <section className="mt-compose" aria-label="Paste job description">
+              <div className="mt-compose-head">
+                <h2>{activeSession ? "Tailor another job" : "Paste job description"}</h2>
+                <span className="mt-compose-hint">⌘/Ctrl + Enter to submit</span>
+              </div>
+              <div className="mt-compose-fields">
+                <label className="mt-field">
+                  <span>Company</span>
+                  <input
+                    type="text"
+                    className="mt-field-input"
+                    value={companyOverride}
+                    onChange={(e) => setCompanyOverride(e.target.value)}
+                    placeholder="e.g. Heron — leave blank to auto-detect"
+                  />
+                </label>
+                <label className="mt-field">
+                  <span>Role</span>
+                  <input
+                    type="text"
+                    className="mt-field-input"
+                    value={titleOverride}
+                    onChange={(e) => setTitleOverride(e.target.value)}
+                    placeholder="e.g. Platform Engineer — leave blank to auto-detect"
+                  />
+                </label>
+              </div>
+
+              <textarea
+                className="mt-jd-input"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={"Paste the entire job posting here — title, company, LinkedIn URL, full JD…"}
+                rows={8}
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && canSubmit) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
+                }}
+              />
+
+              {resolvedFields ? (
+                <div className={`mt-parse-preview${isUnknownCompany(resolvedFields.company) || /^unknown-role/i.test(resolvedFields.title) ? " mt-parse-preview--warn" : ""}`}>
+                  <span className="mt-parse-label">Will use</span>
+                  <span>
+                    <strong>{resolvedFields.company}</strong>
+                    {" · "}
+                    {resolvedFields.title}
+                  </span>
+                  {(isUnknownCompany(resolvedFields.company) || /^unknown-role/i.test(resolvedFields.title)) && !companyOverride && !titleOverride ? (
+                    <span className="mt-parse-tip">Fill in Company and Role above, or we&apos;ll use unknown names.</span>
+                  ) : null}
+                </div>
               ) : null}
 
-              {formError ? <p className="manual-tailor-error">{formError}</p> : null}
-              <div className="manual-tailor-composer-actions">
-                <span className="manual-tailor-char-count">
+              {formError ? <p className="mt-error">{formError}</p> : null}
+
+              <div className="mt-compose-foot">
+                <span className="mt-char-count">
                   {description.trim().length} chars
-                  {description.trim().length > 0 && description.trim().length < MIN_JD_CHARS ? ` · need ${MIN_JD_CHARS}+` : ""}
+                  {description.trim().length > 0 && description.trim().length < MIN_JD_CHARS
+                    ? ` · need ${MIN_JD_CHARS}+`
+                    : ""}
                 </span>
                 <button
                   type="button"
-                  className="manual-tailor-submit"
+                  className="mt-submit"
                   disabled={!canSubmit || tailorQueue.processing}
                   onClick={handleSubmit}
                 >
                   Add to queue
                 </button>
               </div>
-            </div>
-          </section>
+            </section>
+          </main>
         </div>
       </div>
     </div>

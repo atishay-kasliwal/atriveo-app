@@ -2,7 +2,7 @@
 
 import { COMPILE_STAGES, resolveCachedCompile } from "./ac-artifact-store.mjs";
 import { loadBank } from "./ac-bank.mjs";
-import { hourEtFromBatch, parseSessionHour, etDateKey } from "./resume-path.mjs";
+import { hourEtFromBatch, parseSessionHour, etDateKey, etDayBoundsUtc } from "./resume-path.mjs";
 
 export { COMPILE_STAGES };
 
@@ -195,6 +195,83 @@ export async function resolveLatestSession(db) {
 export async function resolveFreshSessionIds(db) {
   const latest = await resolveLatestSession(db);
   return latest ? [latest.sessionId] : [];
+}
+
+/** Latest standard scrape session (matches jobs.json / This Hour feed). */
+export async function resolveLatestStandardSession(db) {
+  const latest = await db.collection("sessions").findOne(
+    { pipeline: "standard", archived: { $ne: true } },
+    { sort: { run_at: -1 }, projection: { session_id: 1, run_at: 1 } },
+  );
+  if (!latest?.session_id) return null;
+  return { sessionId: latest.session_id, runAt: latest.run_at };
+}
+
+/** Standard-pipeline session ids scraped today (ET). Matches today_jobs.json export. */
+export async function resolveTodayStandardSessionIds(db) {
+  const { start, end } = etDayBoundsUtc(0);
+  const sessions = await db.collection("sessions").find(
+    {
+      pipeline: "standard",
+      archived: { $ne: true },
+      run_at: { $gte: start, $lt: end },
+    },
+    { projection: { session_id: 1 } },
+  ).toArray();
+  return [...new Set(sessions.map((s) => s.session_id).filter(Boolean))];
+}
+
+async function countUniquePostings(db, sessionIds) {
+  if (!sessionIds.length) return 0;
+  const urls = await db.collection("jobs").distinct("job_url", {
+    session_id: { $in: sessionIds },
+    job_url: { $exists: true, $ne: null },
+  });
+  return urls.length;
+}
+
+async function countSuccessResumes(db, sessionIds) {
+  if (!sessionIds.length) return 0;
+  return db.collection("jobs").countDocuments({
+    session_id: { $in: sessionIds },
+    "resume.status": "success",
+  });
+}
+
+/** Mongo source-of-truth: scraped postings vs compiled resumes (session-scoped). */
+export async function countPipelineKpis(db) {
+  const [latestStandard, todaySessionIds] = await Promise.all([
+    resolveLatestStandardSession(db),
+    resolveTodayStandardSessionIds(db),
+  ]);
+
+  const hourSessionIds = latestStandard?.sessionId ? [latestStandard.sessionId] : [];
+
+  const [hourPostings, hourResumes, todayPostings, todayResumes] = await Promise.all([
+    countUniquePostings(db, hourSessionIds),
+    countSuccessResumes(db, hourSessionIds),
+    countUniquePostings(db, todaySessionIds),
+    countSuccessResumes(db, todaySessionIds),
+  ]);
+
+  const hourLabel = latestStandard?.runAt
+    ? new Date(latestStandard.runAt).toLocaleString("en-US", {
+      timeZone: "America/New_York",
+      hour: "numeric",
+      hour12: true,
+    })
+    : null;
+
+  return {
+    today: { postings: todayPostings, resumes: todayResumes },
+    hour: {
+      postings: hourPostings,
+      resumes: hourResumes,
+      hourLabel,
+      sessionId: latestStandard?.sessionId ?? null,
+      runAt: latestStandard?.runAt ?? null,
+    },
+  };
 }
 
 /** Drop bulk legacy queue + stale hourly queue. Keeps manual user selections. */

@@ -39,8 +39,15 @@ export default function BulkJobCopyBar({
 
       <div className="bulk-copy-actions">
         {(copyMessage || analysisMessage) && <span className="bulk-copy-status">{analysisMessage || copyMessage}</span>}
-        <button type="button" className="bulk-copy-btn" onClick={onSelectVisible}>
-          Select visible
+        <button
+          type="button"
+          className="bulk-copy-btn"
+          onClick={() => {
+            if (selectedCount > 0 && selectedCount === visibleCount) onClear();
+            else onSelectVisible();
+          }}
+        >
+          {selectedCount > 0 && selectedCount === visibleCount ? "Deselect all" : "Select all"}
         </button>
         {onAnalyze && (
           <button type="button" className="bulk-copy-btn" onClick={onAnalyze} disabled={!selectedCount}>

@@ -12,19 +12,41 @@ export function reconcileTailorRecordsWithQueue(
   const next: Record<string, TailorRecord> = { ...records };
 
   for (const [key, record] of Object.entries(records)) {
-    if (record.status !== "running") continue;
     const item = queueByKey.get(key);
-    if (item?.status === "running") continue;
-    next[key] = {
-      ...record,
-      status: item?.status === "done" ? "done" : item?.status === "failed" ? "failed" : "queued",
-      progressPct: item?.status === "done"
-        ? 100
-        : item?.status === "failed"
-          ? record.progressPct
-          : 5,
-    };
-    changed = true;
+
+    if (record.status === "running") {
+      if (item?.status === "running") continue;
+      next[key] = {
+        ...record,
+        status: item?.status === "done" ? "done" : item?.status === "failed" ? "failed" : "queued",
+        progressPct: item?.status === "done"
+          ? 100
+          : item?.status === "failed"
+            ? record.progressPct
+            : 5,
+      };
+      changed = true;
+      continue;
+    }
+
+    if (record.status !== "queued") continue;
+
+    if (!item) continue;
+
+    if (item.status === "done") {
+      next[key] = { ...record, status: "done", progressPct: 100 };
+      changed = true;
+    } else if (item.status === "failed" || item.status === "skipped") {
+      next[key] = {
+        ...record,
+        status: "failed",
+        error: item.error || record.error || "Tailor skipped or failed",
+      };
+      changed = true;
+    } else if (item.status === "running") {
+      next[key] = { ...record, status: "running", progressPct: record.progressPct ?? 5 };
+      changed = true;
+    }
   }
 
   return changed ? next : records;

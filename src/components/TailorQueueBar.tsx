@@ -61,6 +61,8 @@ interface Props {
   onBumpUrgent: (jobKey: string) => void;
   onRemoveFromQueue: (jobKey: string) => void;
   onReorderPending: (orderedKeys: string[]) => void;
+  /** Live Feed shows hourly sync; manual page hides feed-only controls. */
+  variant?: "feed" | "manual";
 }
 
 function lastFinishedEntry(logs: TailorProcessLogEntry[]) {
@@ -88,7 +90,9 @@ export default function TailorQueueBar({
   onBumpUrgent,
   onRemoveFromQueue,
   onReorderPending,
+  variant = "feed",
 }: Props) {
+  const isManual = variant === "manual";
   const [manageOpen, setManageOpen] = useState(false);
   const [dragKey, setDragKey] = useState<string | null>(null);
   const prevPendingRef = useRef(pendingCount);
@@ -144,8 +148,19 @@ export default function TailorQueueBar({
       ? "skip"
       : "fail";
 
+  const manualStatusLine = useMemo(() => {
+    if (syncMessage) return syncMessage;
+    if (showRunning && runningItem) {
+      return `Tailoring ${runningItem.company} · ${runningItem.title} · ${jobProgress}%`;
+    }
+    if (showLastDone && lastDone) return lastDoneLabel;
+    if (processing) return "Processing…";
+    if (pendingCount > 0) return `${pendingCount} job${pendingCount === 1 ? "" : "s"} waiting`;
+    return "";
+  }, [syncMessage, showRunning, runningItem, jobProgress, showLastDone, lastDone, lastDoneLabel, processing, pendingCount]);
+
   return (
-    <div className="tq-panel" aria-label="Tailor queue">
+    <div className={`tq-panel${isManual ? " tq-panel--manual" : ""}`} aria-label="Tailor queue">
       <header className="tq-header">
         <div className="tq-header-copy">
           <span className="tq-kicker">Tailor queue</span>
@@ -153,14 +168,18 @@ export default function TailorQueueBar({
             {pendingCount} waiting
             {doneInQueue > 0 ? ` · ${doneInQueue} done` : ""}
             {failedInQueue > 0 ? ` · ${failedInQueue} skipped` : ""}
-            <span className="tq-meta-dot" aria-hidden>·</span>
-            sync {formatSyncTime(lastHourlySyncAt)}
-            <span className="tq-meta-dot" aria-hidden>·</span>
-            top {HOURLY_QUEUE_SIZE}/hr
+            {!isManual ? (
+              <>
+                <span className="tq-meta-dot" aria-hidden>·</span>
+                sync {formatSyncTime(lastHourlySyncAt)}
+                <span className="tq-meta-dot" aria-hidden>·</span>
+                top {HOURLY_QUEUE_SIZE}/hr
+              </>
+            ) : null}
           </span>
         </div>
-        <div className="tq-header-actions">
-          {pendingCount > 0 ? (
+        <div className={`tq-header-actions${isManual ? " tq-header-actions--manual" : ""}`}>
+          {!isManual && pendingCount > 0 ? (
             <button
               type="button"
               className="tq-btn tq-btn--ghost"
@@ -169,9 +188,11 @@ export default function TailorQueueBar({
               {manageOpen ? "Done" : "Reorder"}
             </button>
           ) : null}
-          <button type="button" className="tq-btn tq-btn--ghost" onClick={onSyncNow}>
-            Sync
-          </button>
+          {!isManual ? (
+            <button type="button" className="tq-btn tq-btn--ghost" onClick={onSyncNow}>
+              Sync
+            </button>
+          ) : null}
           <button
             type="button"
             className="tq-btn tq-btn--primary"
@@ -180,8 +201,15 @@ export default function TailorQueueBar({
           >
             {processing ? "Running…" : "Process"}
           </button>
-          {doneInQueue > 0 ? (
-            <button type="button" className="tq-btn tq-btn--ghost" onClick={onClearDone}>
+          {isManual || doneInQueue > 0 ? (
+            <button
+              type="button"
+              className={`tq-btn tq-btn--ghost${isManual && doneInQueue === 0 ? " tq-btn--hidden" : ""}`}
+              onClick={onClearDone}
+              disabled={doneInQueue === 0}
+              aria-hidden={isManual && doneInQueue === 0}
+              tabIndex={isManual && doneInQueue === 0 ? -1 : 0}
+            >
               Clear
             </button>
           ) : null}
@@ -191,6 +219,15 @@ export default function TailorQueueBar({
         </div>
       </header>
 
+      {isManual ? (
+        <div
+          className={`tq-status-slot tq-status-slot--manual${showLastDone && lastDone ? ` tq-status-slot--${lastDoneTone}` : showRunning ? " tq-status-slot--running" : ""}`}
+          aria-live="polite"
+        >
+          <span className="tq-status-slot-text">{manualStatusLine || "\u00a0"}</span>
+        </div>
+      ) : (
+        <>
       {syncMessage ? <p className="tq-sync-msg">{syncMessage}</p> : null}
 
       {showRunning && runningItem ? (
@@ -230,7 +267,11 @@ export default function TailorQueueBar({
           <span className="tq-finished-time">{formatTailorDuration(lastDone.durationMs ?? 0)}</span>
         </section>
       ) : pendingCount === 0 && !processing ? (
-        <p className="tq-idle">No jobs queued. Select roles to tailor or wait for the hourly batch.</p>
+        <p className="tq-idle">
+          {isManual
+            ? "Queue is idle. Paste a job description below to add one."
+            : "No jobs queued. Select roles to tailor or wait for the hourly batch."}
+        </p>
       ) : null}
 
       {pendingItems.length > 0 && !manageOpen ? (
@@ -285,6 +326,8 @@ export default function TailorQueueBar({
           ))}
         </ul>
       ) : null}
+        </>
+      )}
     </div>
   );
 }

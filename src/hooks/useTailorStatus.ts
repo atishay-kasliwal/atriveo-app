@@ -4,7 +4,7 @@ import type { TailorRecord, TailorRecordStatus, TailorQueueItem } from "../types
 import type { TailorStreamEvent } from "../types/tailor";
 import { jobDismissKey } from "../utils/jobCopy";
 import { mergeStreamIntoTailorRecord, reconcileTailorRecordsWithQueue } from "../utils/tailorSync";
-import { estDateKey, useEstDayKey } from "../utils/estDate";
+import { estDateKey, useEstDayKey, estHourKey } from "../utils/estDate";
 
 const KEY = (uid: string) => `atriveo_tailor_status_v1_${uid}`;
 
@@ -176,6 +176,29 @@ export function useTailorStatus() {
     });
   }, [uid]);
 
+  /** Clear queued/running pipeline state (e.g. Reset tailor). Keeps done history. */
+  const resetPipelineRecords = useCallback(() => {
+    setRecords((prev) => {
+      let changed = false;
+      const next: Record<string, TailorRecord> = { ...prev };
+      for (const [key, record] of Object.entries(prev)) {
+        if (record.status === "queued" || record.status === "running") {
+          next[key] = {
+            ...record,
+            status: "none",
+            progressPct: undefined,
+            error: undefined,
+            logs: [],
+          };
+          changed = true;
+        }
+      }
+      if (!changed) return prev;
+      persist(uid, next);
+      return next;
+    });
+  }, [uid]);
+
   const doneCount = useMemo(
     () => Object.values(records).filter((r) => r.status === "done").length,
     [records],
@@ -191,10 +214,21 @@ export function useTailorStatus() {
     [records, estDayKey],
   );
 
+  const resumesCreatedThisHourCount = useMemo(() => {
+    const hourKey = estHourKey(new Date());
+    return Object.values(records).filter((record) => (
+      record.status === "done"
+      && Boolean(record.pdfPath)
+      && record.tailoredAt
+      && estHourKey(new Date(record.tailoredAt)) === hourKey
+    )).length;
+  }, [records]);
+
   return useMemo(() => ({
     records,
     doneCount,
     resumesCreatedTodayCount,
+    resumesCreatedThisHourCount,
     upsertRecord,
     markStatus,
     applyStreamEvent,
@@ -202,10 +236,12 @@ export function useTailorStatus() {
     getRecord,
     getRecordForJob,
     clearAllLogs,
+    resetPipelineRecords,
   }), [
     records,
     doneCount,
     resumesCreatedTodayCount,
+    resumesCreatedThisHourCount,
     upsertRecord,
     markStatus,
     applyStreamEvent,
@@ -213,5 +249,6 @@ export function useTailorStatus() {
     getRecord,
     getRecordForJob,
     clearAllLogs,
+    resetPipelineRecords,
   ]);
 }

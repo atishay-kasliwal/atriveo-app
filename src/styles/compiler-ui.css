@@ -3,6 +3,9 @@
 .nav-tools-wrap {
   position: relative;
   display: inline-flex;
+  flex-shrink: 0;
+  overflow: visible;
+  z-index: 1;
 }
 
 .nav-tab--tools {
@@ -20,13 +23,26 @@
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  min-width: 220px;
-  background: var(--bean-milk);
-  border: 1px solid var(--bean-taupe);
+  min-width: 240px;
+  max-height: min(70vh, 420px);
+  overflow-y: auto;
+  background: var(--bean-milk, #fff);
+  border: 1px solid var(--bean-taupe, rgba(15, 23, 42, 0.12));
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  z-index: 200;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+  z-index: 500;
   padding: 6px;
+}
+
+/* Parent nav-tabs uses overflow-x:auto for scroll — must not clip the dropdown */
+.nav-tabs--tools-open,
+.header-right--tools-open {
+  overflow: visible !important;
+}
+
+header.header--tools-open {
+  overflow: visible;
+  z-index: 120;
 }
 
 .nav-tools-item {

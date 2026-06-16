@@ -66,6 +66,15 @@ export async function fetchCompileQueueStats(): Promise<{ queued: number; runnin
   return sidecarFetch("/compile-queue/stats");
 }
 
+export interface PipelineKpis {
+  today: { postings: number; resumes: number };
+  hour: { postings: number; resumes: number; hourLabel: string | null; sessionId: string | null; runAt: string | null };
+}
+
+export async function fetchPipelineKpis(): Promise<PipelineKpis> {
+  return sidecarFetch("/compile-queue/kpis");
+}
+
 export async function fetchCompileWorkers(): Promise<CompileWorker[]> {
   const data = await sidecarFetch(`/compile-workers?t=${Date.now()}`);
   return Array.isArray(data.workers) ? data.workers as CompileWorker[] : [];

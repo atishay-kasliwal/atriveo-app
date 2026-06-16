@@ -196,11 +196,12 @@ export async function runSingleTailorJob(
     await assertTailorServerReady(controller.signal);
     const descriptionsByUrl = await loadJobDescriptions([job]);
     const bucketJd = job.job_url ? descriptionsByUrl[job.job_url] : undefined;
+    const isManualJob = job.site === "manual" || (job.job_url || "").startsWith("manual://");
     const jd = bucketJd || job.summary || "";
     if (jd.trim().length < MIN_JD_HARD_CHARS) {
       return { ok: false, error: "Job description is too short — paste the full posting (200+ characters).", outcome: "no-jd" };
     }
-    if (!bucketJd && jd.trim().length < MIN_JD_IDEAL_CHARS) {
+    if (!bucketJd && !isManualJob && jd.trim().length < MIN_JD_IDEAL_CHARS) {
       return {
         ok: false,
         error: "Only a short job snippet is available — paste the full JD in Tailor Lab or wait for scrape.",

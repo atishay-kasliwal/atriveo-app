@@ -27,7 +27,8 @@ import { jobDismissKey } from "../utils/jobCopy";
 import { openTailorPath } from "../utils/tailorRun";
 import { outcomeFromServerStatus, resolveTailorOutcome } from "../utils/tailorOutcome";
 import { tailorPhaseProgress } from "../utils/tailorProgress";
-import { estDateKey } from "../utils/estDate";
+import { estDateKey, estHourLabel } from "../utils/estDate";
+import { fetchPipelineKpis, type PipelineKpis } from "../utils/compileQueueApi";
 import CompilerStatusStrip from "../components/CompilerStatusStrip";
 type LevelFilter = "all" | "New Grad" | "Entry" | "Mid";
 type RunCard = RunEntry & {
@@ -205,6 +206,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const [feedFetchError, setFeedFetchError] = useState("");
   const [pipelineRefreshing, setPipelineRefreshing] = useState(false);
   const [pipelineRefreshMsg, setPipelineRefreshMsg] = useState("");
+  const [pipelineKpis, setPipelineKpis] = useState<PipelineKpis | null>(null);
   const hourSessionRef = useRef<string | null>(null);
 
   const applyView = useCallback((view: ViewKey) => {
@@ -267,6 +269,15 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   }, []);
 
   useEffect(() => {
+    const refreshKpis = () => {
+      void fetchPipelineKpis().then(setPipelineKpis).catch(() => setPipelineKpis(null));
+    };
+    refreshKpis();
+    const id = window.setInterval(refreshKpis, 45_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
@@ -277,7 +288,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     return () => { cancelled = true; };
   }, [refreshJobFeeds]);
 
-  // Poll for new hourly batches — pipeline publishes ~12–18 min past each ET hour.
   useEffect(() => {
     const pollMs = 3 * 60 * 1000;
     const id = window.setInterval(() => { void refreshJobFeeds(); }, pollMs);
@@ -598,14 +608,12 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   });
 
   const handleSaveJobWithQueueCleanup = useCallback((job: Job, source: SavedJobSource) => {
-    if (!job.job_url) return;
+    if (!job.job_url || source !== "click") return;
     recordSavedJob(job, source);
     tailorQueue.removeFromQueue(jobDismissKey(job));
-    if (source === "add") {
-      recordClick(job.job_url, job.title || "Untitled role", job.company || "Unknown company", {
-        location: job.location || null,
-      });
-    }
+    recordClick(job.job_url, job.title || "Untitled role", job.company || "Unknown company", {
+      location: job.location || null,
+    });
   }, [recordSavedJob, recordClick, tailorQueue]);
 
   const handleOpenTailorPath = useCallback(async (path: string) => {
@@ -709,11 +717,17 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       }
     }
   }, [jobSelection.tailorRun, displayedJobs, markTailorStatus, getTailorRecordForJob]);
+
   const ngCount = displayedJobs.filter((j) => j.level === "New Grad").length;
   const selectedRun = useMemo(
     () => runCards.find((r) => r.session_id === selectedSession) || null,
-    [runCards, selectedSession]
+    [runCards, selectedSession],
   );
+  const todayPostingsCount = pipelineKpis?.today.postings ?? todayJobs.length;
+  const todayResumesCount = pipelineKpis?.today.resumes ?? 0;
+  const hourPostingsCount = pipelineKpis?.hour.postings ?? hourJobs.length;
+  const hourResumesCount = pipelineKpis?.hour.resumes ?? 0;
+  const hourLabel = pipelineKpis?.hour.hourLabel ?? estHourLabel();
 
   const todayApplicationRows = useMemo(() => {
     const todayKey = estDateKey();
@@ -977,9 +991,22 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 <span className="board-metric-sub">tracker activity</span>
               </div>
               <div className="board-metric">
-                <span className="board-metric-label">Resumes Today</span>
-                <span className="board-metric-value">{tailorStatus.resumesCreatedTodayCount}</span>
-                <span className="board-metric-sub">resets midnight ET</span>
+                <span className="board-metric-label">Today</span>
+                <div className="board-metric-dual" aria-label={`${todayPostingsCount} postings, ${todayResumesCount} resumes compiled for today's scrapes`}>
+                  <span className="board-metric-value">{todayPostingsCount}</span>
+                  <span className="board-metric-dual-sep">/</span>
+                  <span className="board-metric-value">{todayResumesCount}</span>
+                </div>
+                <span className="board-metric-sub">postings · resumes made</span>
+              </div>
+              <div className="board-metric">
+                <span className="board-metric-label">This hour · {hourLabel} ET</span>
+                <div className="board-metric-dual" aria-label={`${hourPostingsCount} postings, ${hourResumesCount} resumes compiled for this hour's batch`}>
+                  <span className="board-metric-value">{hourPostingsCount}</span>
+                  <span className="board-metric-dual-sep">/</span>
+                  <span className="board-metric-value">{hourResumesCount}</span>
+                </div>
+                <span className="board-metric-sub">postings · resumes made</span>
               </div>
             </div>
 
@@ -1026,7 +1053,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
                 queue={tailorQueue.queue}
                 processing={tailorQueue.processing}
                 runningItem={tailorQueue.runningItem}
-                doneToday={tailorStatus.resumesCreatedTodayCount}
+                doneToday={todayResumesCount}
                 failedToday={failedTodayCount}
                 tailorStatus={tailorStatus}
                 workerMode={tailorQueue.mongoAvailable !== false}
@@ -1216,7 +1243,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
               queue={tailorQueue.queue}
               processing={tailorQueue.processing}
               runningItem={tailorQueue.runningItem}
-              doneToday={tailorStatus.resumesCreatedTodayCount}
+              doneToday={todayResumesCount}
               failedToday={failedTodayCount}
               tailorStatus={tailorStatus}
               workerMode={tailorQueue.mongoAvailable !== false}

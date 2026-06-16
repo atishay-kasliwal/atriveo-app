@@ -2,6 +2,22 @@
 
 @import url('./job-feed.css');
 
+/* Shared board tokens (Live Feed + Paste JD + queue bar) */
+:root {
+  --board-accent: #e2553d;
+  --board-accent-strong: #d8482f;
+  --board-accent-soft: rgba(226, 85, 61, 0.10);
+  --board-accent-border: rgba(226, 85, 61, 0.28);
+  --board-canvas: #f6f5f2;
+  --board-surface: #ffffff;
+  --board-line: #ece9e4;
+  --board-line-soft: #f1eee9;
+  --board-ink: #1c1b19;
+  --board-muted: #8a8780;
+  --board-sub: #6b6862;
+  --board-star: #e8943a;
+}
+
 /* Warm Matchflow palette
    --board-accent      coral/red used for hero numbers, STRONG tags, score bars
    --board-canvas      warm off-white app background
@@ -55,6 +71,15 @@ body.is-today-board .header-inner--board .nav-tabs {
   border: none;
   padding: 0;
   gap: 2px;
+}
+
+body.is-today-board .nav-tabs--tools-open {
+  overflow: visible !important;
+}
+
+body.is-today-board header.header--tools-open {
+  z-index: 120;
+  overflow: visible;
 }
 
 body.is-today-board .nav-tab {
@@ -294,11 +319,11 @@ body.is-today-board .nav-tab.active {
   overflow-y: auto;
 }
 
-/* ── Metric strip (5 cols) ─────────────────────────────────────────────── */
+/* ── Metric strip (6 cols) ─────────────────────────────────────────────── */
 
 .board-metrics {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   border-bottom: 1px solid var(--board-line);
   background: var(--board-surface);
   flex-shrink: 0;
@@ -334,6 +359,21 @@ body.is-today-board .nav-tab.active {
   color: var(--board-ink);
   font-family: "Inter", sans-serif;
   font-variant-numeric: tabular-nums;
+}
+
+.board-metric-dual {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.board-metric-dual-sep {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--board-muted);
+  line-height: 1;
+  user-select: none;
 }
 
 .board-metric--accent .board-metric-value {
@@ -384,7 +424,7 @@ body.is-today-board .nav-tab.active {
   border-radius: 0;
   background: var(--board-canvas);
   box-shadow: none;
-  padding: 5px 16px;
+  padding: 10px 16px;
 }
 
 .today-board-table-shell .bulk-copy-bar--board .bulk-copy-copy strong {
@@ -653,18 +693,26 @@ body.is-today-board .nav-tab.active {
   table-layout: fixed;
   min-width: 100%;
   font-size: 13px;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
-.job-table--board .col-check { width: 32px; }
-.job-table--board .col-num { width: 40px; }
+.job-table--board thead {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.job-table--board .col-check { width: 36px; }
+.job-table--board .col-num { width: 44px; }
 .job-table--board .col-score { width: 78px; }
-.job-table--board .col-role { width: 28%; }
-.job-table--board .col-rating { width: 150px; }
-.job-table--board .col-loc { width: 116px; }
-.job-table--board .col-comp { width: 52px; }
-.job-table--board .col-level { width: 72px; }
-.job-table--board .col-posted { width: 90px; }
-.job-table--board .col-actions { width: 224px; }
+.job-table--board .col-role { width: 22%; }
+.job-table--board .col-rating { width: 128px; }
+.job-table--board .col-loc { width: 96px; }
+.job-table--board .col-level { width: 64px; }
+.job-table--board .col-tailored { width: 112px; }
+.job-table--board .col-posted { width: 80px; }
+.job-table--board .col-actions { width: 330px; }
 
 .job-table--board thead th {
   padding: 7px 10px;
@@ -678,10 +726,38 @@ body.is-today-board .nav-tab.active {
   border-bottom: 1px solid var(--board-line);
   border-right: 1px solid var(--board-line-soft);
   font-family: "Inter", sans-serif;
+  box-shadow: 0 1px 0 var(--board-line);
 }
 
-.job-table--board thead th:last-child {
-  border-right: none;
+.job-table-checkbox {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--board-accent);
+  vertical-align: middle;
+}
+
+.job-table-checkbox--head {
+  width: 16px;
+  height: 16px;
+}
+
+.job-table-checkbox--band {
+  opacity: 0.85;
+}
+
+.job-table--board .job-table-check {
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px 6px;
+  width: 36px;
+}
+
+.job-table--board .job-table-check--head {
+  padding: 7px 6px;
+  vertical-align: middle;
+  text-align: center;
 }
 
 .job-table--board .job-table-sort-th {
@@ -732,14 +808,20 @@ body.is-today-board .nav-tab.active {
 }
 
 .job-table--board tbody td {
-  padding: 0 10px;
-  height: 42px;
+  padding: 8px 10px;
+  min-height: 50px;
+  height: auto;
   border-bottom: 1px solid var(--board-line-soft);
   border-right: 1px solid var(--board-line-soft);
   vertical-align: middle;
   text-align: left;
   color: var(--board-ink);
   font-size: 13px;
+  line-height: 1.35;
+}
+
+.job-table--board tbody td.job-table-actions--board {
+  padding: 8px 8px 8px 10px;
 }
 
 .job-table--board tbody td:last-child {
@@ -774,8 +856,8 @@ body.is-today-board .nav-tab.active {
   background: #fff3e4;
 }
 
-.job-table--board .job-table-check {
-  text-align: left;
+.job-table--board thead th:last-child {
+  border-right: none;
 }
 
 .job-table--board .job-table-num {
@@ -783,21 +865,9 @@ body.is-today-board .nav-tab.active {
   font-size: 12px;
   font-weight: 600;
   text-align: left;
+  vertical-align: middle;
   font-variant-numeric: tabular-nums;
-}
-
-.job-table--board .job-table-select {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  border-color: #d4d0c7;
-  font-size: 10px;
-}
-
-.job-table--board .job-table-select.is-selected {
-  background: var(--board-accent);
-  border-color: var(--board-accent);
-  color: #fff;
+  padding-left: 4px;
 }
 
 /* Company band */
@@ -1043,7 +1113,10 @@ body.is-today-board .nav-tab.active {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 5px;
+  flex-wrap: nowrap;
+  gap: 6px;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .job-table-board-apply {
@@ -1052,19 +1125,27 @@ body.is-today-board .nav-tab.active {
   justify-content: center;
   min-height: 28px;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 7px;
   background: #fff;
   border: 1px solid var(--board-line);
   color: var(--board-sub);
   font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1;
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
   box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
   transition: background 0.1s, border-color 0.1s, color 0.1s;
+  flex: 0 0 auto;
+}
+
+.job-table-board-apply--primary {
+  min-width: 52px;
+  padding: 6px 12px;
 }
 
 .job-table-board-apply:hover {
@@ -1094,14 +1175,19 @@ body.is-today-board .nav-tab.active {
 }
 
 .bulk-copy-bar--board .bulk-copy-btn {
-  height: 24px;
-  padding: 0 9px;
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 8px 14px;
+  font-size: 12px;
   font-weight: 600;
-  border-radius: 5px;
-  border-color: var(--board-line);
+  line-height: 1;
+  border-radius: 7px;
+  border: 1px solid var(--board-line);
   background: #fff;
   color: var(--board-sub);
+  box-sizing: border-box;
 }
 
 .bulk-copy-bar--board .bulk-copy-btn:hover:not(:disabled) {
@@ -1202,19 +1288,15 @@ body.is-today-board .nav-tab.active {
 
 @media (max-width: 1100px) {
   .board-metrics {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 
-  .board-metric:nth-child(1),
-  .board-metric:nth-child(2),
-  .board-metric:nth-child(3),
-  .board-metric:nth-child(4) {
-    border-bottom: 1px solid var(--board-line);
-  }
-
-  .board-metric:nth-child(2),
-  .board-metric:nth-child(4) {
+  .board-metric:nth-child(3n) {
     border-right: none;
+  }
+
+  .board-metric:nth-child(-n+3) {
+    border-bottom: 1px solid var(--board-line);
   }
 
   .today-board-footer-center {
@@ -1253,6 +1335,19 @@ body.is-today-board .nav-tab.active {
 @media (max-width: 680px) {
   .board-metrics {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .board-metric:nth-child(2n) {
+    border-right: none;
+  }
+
+  .board-metric:nth-child(-n+4) {
+    border-bottom: 1px solid var(--board-line);
+  }
+
+  .board-metric:nth-child(5),
+  .board-metric:nth-child(6) {
+    border-bottom: none;
   }
 
   .feed-table-toolbar {
@@ -1402,12 +1497,10 @@ body.is-today-board .nav-tab.active {
 /* ── Tailor queue (premium) ─────────────────────────────────────── */
 .tq-panel {
   margin-bottom: 10px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 14px;
-  background: linear-gradient(180deg, #ffffff 0%, #faf9fc 100%);
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 8px 24px rgba(91, 33, 182, 0.06);
+  border: 1px solid var(--board-line);
+  border-radius: 12px;
+  background: var(--board-surface);
+  box-shadow: 0 1px 3px rgba(28, 27, 25, 0.04);
   overflow: hidden;
 }
 
@@ -1432,7 +1525,7 @@ body.is-today-board .nav-tab.active {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #5b21b6;
+  color: var(--board-accent-strong);
 }
 
 .tq-meta {
@@ -1454,6 +1547,15 @@ body.is-today-board .nav-tab.active {
   flex-shrink: 0;
 }
 
+.tq-header-actions--manual {
+  min-width: 220px;
+}
+
+.tq-btn--hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .tq-btn {
   border: 1px solid rgba(15, 23, 42, 0.1);
   border-radius: 999px;
@@ -1467,15 +1569,15 @@ body.is-today-board .nav-tab.active {
 }
 
 .tq-btn:hover:not(:disabled) {
-  border-color: rgba(91, 33, 182, 0.25);
-  color: #5b21b6;
+  border-color: var(--board-accent-border);
+  color: var(--board-accent-strong);
 }
 
 .tq-btn--primary {
   border-color: transparent;
-  background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, var(--board-accent-strong) 0%, var(--board-accent) 100%);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(91, 33, 182, 0.28);
+  box-shadow: 0 2px 8px rgba(226, 85, 61, 0.28);
 }
 
 .tq-btn--primary:hover:not(:disabled) {
@@ -1496,7 +1598,7 @@ body.is-today-board .nav-tab.active {
   margin: 0;
   padding: 6px 16px 0;
   font-size: 11px;
-  color: #5b21b6;
+  color: var(--board-accent-strong);
 }
 
 .tq-now {
@@ -1577,7 +1679,7 @@ body.is-today-board .nav-tab.active {
 .tq-progress-track {
   height: 8px;
   border-radius: 999px;
-  background: rgba(91, 33, 182, 0.1);
+  background: var(--board-accent-soft);
   overflow: hidden;
 }
 
@@ -1585,18 +1687,18 @@ body.is-today-board .nav-tab.active {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #5b21b6, #8b5cf6);
+  background: linear-gradient(90deg, var(--board-accent-strong), var(--board-accent));
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tq-progress-fill.is-live {
   background: linear-gradient(
     90deg,
-    #5b21b6 0%,
-    #7c3aed 35%,
-    #a78bfa 50%,
-    #7c3aed 65%,
-    #5b21b6 100%
+    var(--board-accent-strong) 0%,
+    var(--board-accent) 35%,
+    #f4a89a 50%,
+    var(--board-accent) 65%,
+    var(--board-accent-strong) 100%
   );
   background-size: 220% 100%;
   animation: tq-shimmer 2.4s ease infinite;
@@ -1619,7 +1721,7 @@ body.is-today-board .nav-tab.active {
 
 .tq-progress-pct {
   font-weight: 700;
-  color: #5b21b6;
+  color: var(--board-accent-strong);
 }
 
 .tq-finished {
@@ -1670,6 +1772,67 @@ body.is-today-board .nav-tab.active {
   font-size: 12px;
   color: var(--board-muted);
   border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+}
+
+/* Manual Paste JD — compact, fixed-height status (no layout jump) */
+.tq-panel--manual .tq-header {
+  border-bottom: none;
+  padding-bottom: 8px;
+}
+
+.tq-status-slot {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px 10px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+}
+
+.tq-status-slot--manual {
+  background: var(--board-canvas);
+}
+
+.tq-status-slot--running {
+  background: rgba(34, 197, 94, 0.06);
+}
+
+.tq-status-slot--done {
+  background: rgba(34, 197, 94, 0.06);
+  color: #166534;
+}
+
+.tq-status-slot--fail {
+  background: rgba(239, 68, 68, 0.06);
+  color: #b91c1c;
+}
+
+.tq-status-slot--skip {
+  background: rgba(107, 114, 128, 0.06);
+  color: #4b5563;
+}
+
+.tq-status-slot-text {
+  font-size: 12px;
+  line-height: 1.4;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.tq-panel--manual .tq-status-slot-text {
+  color: var(--board-sub);
+}
+
+.tq-panel--manual .tq-status-slot--running .tq-status-slot-text {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.tq-panel--manual .tq-status-slot--fail .tq-status-slot-text {
+  color: #b91c1c;
+  font-weight: 500;
 }
 
 .tq-next {
@@ -1740,8 +1903,8 @@ body.is-today-board .nav-tab.active {
 .tq-next-score {
   font-size: 11px;
   font-weight: 700;
-  color: #5b21b6;
-  background: rgba(91, 33, 182, 0.08);
+  color: var(--board-accent-strong);
+  background: var(--board-accent-soft);
   border-radius: 999px;
   padding: 2px 8px;
   font-variant-numeric: tabular-nums;
@@ -1815,7 +1978,7 @@ body.is-today-board .nav-tab.active {
 .tq-manage-score {
   font-size: 11px;
   font-weight: 700;
-  color: #5b21b6;
+  color: var(--board-accent-strong);
 }
 
 .tq-manage-actions {
@@ -1835,9 +1998,6 @@ body.is-today-board .nav-tab.active {
 }
 
 /* Tailored column */
-.job-table--board .col-tailored {
-  width: 108px;
-}
 
 .job-table-tailored {
   text-align: left;
@@ -1845,15 +2005,27 @@ body.is-today-board .nav-tab.active {
 
 .job-table-tailored-inner {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 6px;
 }
 
 .job-table-tailored-actions {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.job-table-tailored-path {
+  display: block;
+  max-width: 100%;
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--board-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .job-table-tailored-log {
@@ -1976,13 +2148,19 @@ body.is-today-board .nav-tab.active {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  padding: 2px 8px;
+  min-width: 40px;
+  max-width: 100%;
+  min-height: 22px;
+  padding: 3px 8px;
   border-radius: 999px;
   font-size: 10px;
   font-weight: 700;
+  line-height: 1.2;
   letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .job-table-tailored-pill--done,
@@ -2006,12 +2184,14 @@ body.is-today-board .nav-tab.active {
 .job-table-tailored-folder {
   border: none;
   background: none;
-  padding: 0;
-  font-size: 9px;
+  padding: 2px 0;
+  font-size: 10px;
   font-weight: 600;
+  line-height: 1.2;
   color: var(--board-accent-strong);
   cursor: pointer;
   text-decoration: underline;
+  white-space: nowrap;
 }
 
 .job-table-tailored-pill--done {

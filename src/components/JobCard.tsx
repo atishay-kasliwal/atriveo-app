@@ -107,12 +107,15 @@ export default function JobCard({
   const trackerSyncStatus = applyRecord?.trackerSyncStatus ?? null;
   const isTrackerSynced = trackerSyncStatus === "synced" || trackerSyncStatus === "duplicate";
   const isTrackerPending = trackerSyncStatus === "pending";
-  const canSendToTracker = Boolean(job.job_url && (!isApplied || (!isTrackerSynced && !isTrackerPending)));
-  const trackerActionCopy = !isApplied
-    ? "Add to tracker"
-    : trackerSyncStatus === "error" || trackerSyncStatus === "not_configured"
-      ? "Retry tracker"
-      : "Sync tracker";
+  const canRetryTracker = Boolean(
+    job.job_url
+    && isApplied
+    && !isTrackerSynced
+    && !isTrackerPending,
+  );
+  const trackerActionCopy = trackerSyncStatus === "error" || trackerSyncStatus === "not_configured"
+    ? "Retry tracker"
+    : "Sync tracker";
   const trackerStatusCopy =
     !isApplied
       ? ""
@@ -157,9 +160,9 @@ export default function JobCard({
 
   function handleTrackerClick(e: React.MouseEvent) {
     e.preventDefault();
+    e.stopPropagation();
     if (!job.job_url) return;
-    if (onSaveJob) onSaveJob(job, "add");
-    else onAddToTracker(job.job_url, title, co, { location: job.location || null });
+    onAddToTracker(job.job_url, title, co, { location: job.location || null });
   }
 
   function handleSaveClick(e: React.MouseEvent, source: SavedJobSource) {
@@ -261,7 +264,7 @@ export default function JobCard({
               type="button"
               className="job-tile-action job-tile-action--click"
               onClick={(e) => handleSaveClick(e, "click")}
-              title="Move this posting to Clicked Jobs"
+              title="Log application and send to tracker"
             >
               Click
             </button>
@@ -279,15 +282,15 @@ export default function JobCard({
               </>
             )}
           </button>
-          {canSendToTracker && (
+          {canRetryTracker && (
             <button
               type="button"
               className="job-tile-action job-tile-action--tracker"
               onClick={handleTrackerClick}
-              title="Add to Atriveo tracker"
+              title="Retry sending to Atriveo tracker"
             >
               <span className="job-tile-action-label-full">{trackerActionCopy}</span>
-              <span className="job-tile-action-label-short">{isApplied ? "Retry" : "Tracker +"}</span>
+              <span className="job-tile-action-label-short">Retry</span>
             </button>
           )}
         </div>
@@ -297,7 +300,6 @@ export default function JobCard({
             href={job.job_url}
             target="_blank"
             rel="noopener"
-            onClick={() => onSaveJob?.(job, "apply")}
           >
             Apply
           </a>

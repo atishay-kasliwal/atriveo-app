@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 
 const TOOLS_LINKS = [
-  { href: "/manual-tailor", label: "Manual Tailor", note: "Paste JD debug" },
+  { href: "/manual-tailor", label: "Paste JD → Tailor", note: "Paste any job description & generate resume" },
   { href: "/optimizer", label: "Legacy Optimizer", note: "Gemma rewrites — not AC compiler" },
   { href: "/skills", label: "Skills gap" },
   { href: "/weekly", label: "Weekly feed" },
@@ -40,12 +40,19 @@ export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) 
     const onDoc = (e: MouseEvent) => {
       if (toolsRef.current && !toolsRef.current.contains(e.target as Node)) setToolsOpen(false);
     };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setToolsOpen(false);
+    };
     document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [toolsOpen]);
 
   return (
-    <header>
+    <header className={toolsOpen ? "header--tools-open" : undefined}>
       <div className={`wrapper header-inner${hideLogo ? " header-inner--board" : ""}`}>
         {!hideLogo && (
           <a href="/" className="logo">
@@ -57,8 +64,8 @@ export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) 
           </a>
         )}
 
-        <div className="header-right">
-          <nav className="nav-tabs">
+        <div className={`header-right${toolsOpen ? " header-right--tools-open" : ""}`}>
+          <nav className={`nav-tabs${toolsOpen ? " nav-tabs--tools-open" : ""}`}>
             {PRIMARY.map((n) => (
               <a key={n.href} href={n.href} className={`nav-tab${n.match(path) ? " active" : ""}`}>
                 {n.label}

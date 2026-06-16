@@ -14,10 +14,12 @@ import {
   isAnotherTabProcessing,
   loadProcessLogs,
   persistProcessLogs,
+  readProcessLock,
   recoverProcessLock,
   releaseProcessLockIfOwned,
   touchProcessLock,
   tryAcquireProcessLock,
+  isProcessLockFresh,
 } from "../utils/tailorPersistence";
 import { resetTailorLogCapture } from "../utils/tailorLogCapture";
 import { abortActiveTailorJob, checkJobOnDisk } from "../utils/tailorRun";
@@ -170,7 +172,7 @@ function purgeDismissedPending(items: TailorQueueItem[], dismissedKeys: Readonly
 
 type TailorStatusApi = Pick<
   ReturnType<typeof useTailorStatus>,
-  "getRecord" | "markStatus" | "reconcileWithQueue" | "clearAllLogs"
+  "getRecord" | "markStatus" | "reconcileWithQueue" | "clearAllLogs" | "resetPipelineRecords"
 >;
 
 interface Options {
@@ -191,6 +193,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
   const [syncMessage, setSyncMessage] = useState("");
   const [processLogs, setProcessLogs] = useState<TailorProcessLogEntry[]>([]);
   const [logsPanelCleared, setLogsPanelCleared] = useState(false);
+  const [queueLoaded, setQueueLoaded] = useState(false);
   const processingRef = useRef(false);
   const logSeqRef = useRef(0);
   const tabIdRef = useRef(getTailorTabId());
@@ -237,9 +240,18 @@ export function useTailorQueue(jobs: Job[], options: Options) {
 
   const kickProcess = useCallback((delayMs = 0) => {
     window.setTimeout(() => {
+      const hasPending = queueRef.current.some(
+        (item) => item.status === "pending" && !dismissedRef.current.has(item.jobKey),
+      );
+      if (hasPending && isAnotherTabProcessing(uid, tabIdRef.current)) {
+        const lock = readProcessLock(uid);
+        if (lock && !isProcessLockFresh(lock)) {
+          recoverProcessLock(uid, tabIdRef.current);
+        }
+      }
       void processQueueRef.current?.();
     }, delayMs);
-  }, []);
+  }, [uid]);
 
   const forceReleaseProcessing = useCallback(() => {
     abortActiveTailorJob();
@@ -306,6 +318,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       }
       kickProcess();
     }
+    setQueueLoaded(true);
   }, [loading, uid, kickProcess, tailorStatus, pushLog]);
 
   useEffect(() => {
@@ -454,9 +467,11 @@ export function useTailorQueue(jobs: Job[], options: Options) {
       tailorStatus.markStatus(jobKey, "queued");
     }
     setSyncMessage(urgent ? `Queued urgent: ${job.title || "role"}` : `Queued: ${job.title || "role"}`);
-    kickProcess();
+    recoverProcessLock(uid, tabIdRef.current);
+    kickProcess(0);
+    window.setTimeout(() => void processQueueRef.current?.(), 120);
     return true;
-  }, [tailorStatus, updateQueue, kickProcess]);
+  }, [tailorStatus, updateQueue, kickProcess, uid]);
 
   const runHourlySync = useCallback((availableJobs: Job[], force = false) => {
     const now = Date.now();
@@ -903,9 +918,84 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     setProcessLogs([]);
     persistProcessLogs(uid, []);
     tailorStatus.clearAllLogs();
+    tailorStatus.resetPipelineRecords();
     setLogsPanelCleared(true);
     setSyncMessage("");
   }, [forceReleaseProcessing, updateQueue, uid, tailorStatus]);
+
+  /** Re-add jobs marked queued in status but missing from the pending/running queue. */
+  const healOrphanedQueuedJobs = useCallback((availableJobs: Job[]) => {
+    let healed = 0;
+    for (const job of availableJobs) {
+      const jobKey = jobDismissKey(job);
+      if (dismissedRef.current.has(jobKey)) continue;
+      const record = tailorStatus.getRecord(jobKey);
+      if (record?.status !== "queued") continue;
+      const item = queueRef.current.find((entry) => entry.jobKey === jobKey);
+      if (item?.status === "pending" || item?.status === "running") continue;
+      const score = careerOpsRating(job).score;
+      updateQueue((prev) => {
+        const withoutStale = prev.filter((entry) => entry.jobKey !== jobKey || (entry.status !== "done" && entry.status !== "failed" && entry.status !== "skipped"));
+        return [{
+          jobKey,
+          jobUrl: job.job_url || "",
+          title: job.title || "Untitled role",
+          company: job.company || "Unknown",
+          score,
+          priority: 1500 + score,
+          enqueuedAt: new Date().toISOString(),
+          hourBatch: hourBatchKey(),
+          source: "manual" as const,
+          status: "pending" as const,
+          jobSnapshot: snapshotJobForQueue(job),
+        }, ...withoutStale];
+      });
+      healed += 1;
+    }
+    if (healed > 0) {
+      setSyncMessage(`Re-queued ${healed} job${healed === 1 ? "" : "s"} — sending to Mac…`);
+      recoverProcessLock(uid, tabIdRef.current);
+      kickProcess();
+    }
+    return healed;
+  }, [tailorStatus, updateQueue, kickProcess, uid]);
+
+  /** Force a single job back into the pending queue and start processing. */
+  const requeueJob = useCallback((job: Job) => {
+    const jobKey = jobDismissKey(job);
+    if (dismissedRef.current.has(jobKey)) return false;
+    const score = careerOpsRating(job).score;
+    updateQueue((prev) => {
+      const withoutStale = prev.filter((entry) => entry.jobKey !== jobKey || (entry.status !== "done" && entry.status !== "failed" && entry.status !== "skipped"));
+      return [{
+        jobKey,
+        jobUrl: job.job_url || "",
+        title: job.title || "Untitled role",
+        company: job.company || "Unknown",
+        score,
+        priority: 2500 + score,
+        enqueuedAt: new Date().toISOString(),
+        hourBatch: hourBatchKey(),
+        source: "manual" as const,
+        status: "pending" as const,
+        jobSnapshot: snapshotJobForQueue(job),
+      }, ...withoutStale];
+    });
+    tailorStatus.markStatus(jobKey, "queued", {
+      jobUrl: job.job_url || "",
+      company: job.company || "Unknown",
+      title: job.title || "Untitled role",
+      score,
+      error: undefined,
+      progressPct: 5,
+    });
+    setSyncMessage(`Re-queued ${job.company || "job"} — sending to Mac…`);
+    recoverProcessLock(uid, tabIdRef.current);
+    forceReleaseProcessing();
+    kickProcess(0);
+    window.setTimeout(() => void processQueueRef.current?.(), 120);
+    return true;
+  }, [tailorStatus, updateQueue, kickProcess, uid, forceReleaseProcessing]);
 
   useEffect(() => {
     if (processing || pendingCount > 0) {
@@ -926,6 +1016,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     processing,
     lastHourlySyncAt,
     syncMessage,
+    queueLoaded,
     enqueueJob,
     bumpUrgent,
     removeFromQueue,
@@ -935,5 +1026,7 @@ export function useTailorQueue(jobs: Job[], options: Options) {
     clearTailor,
     logsPanelCleared,
     reorderPending,
+    healOrphanedQueuedJobs,
+    requeueJob,
   };
 }

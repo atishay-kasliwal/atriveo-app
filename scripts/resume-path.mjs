@@ -36,6 +36,29 @@ export function etDateKey(iso = new Date()) {
   return d.toLocaleString("sv-SE", { timeZone: TZ }).slice(0, 10);
 }
 
+/** UTC bounds [start, end) for an ET calendar day (0 = today). Matches job-pipeline export. */
+export function etDayBoundsUtc(daysAgo = 0) {
+  const dateKey = etDateKey(new Date(Date.now() - daysAgo * 86_400_000));
+  const [y, m, d] = dateKey.split("-").map(Number);
+  const probeBase = Date.UTC(y, m - 1, d, 5, 0, 0);
+
+  let start = null;
+  for (let delta = -12; delta <= 12; delta += 1) {
+    const cand = new Date(probeBase + delta * 3_600_000);
+    const parts = etParts(cand.toISOString());
+    if (parts?.date === dateKey && parts.hour === "00") {
+      start = cand;
+      break;
+    }
+  }
+
+  return {
+    dateKey,
+    start,
+    end: start ? new Date(start.getTime() + 86_400_000) : null,
+  };
+}
+
 export function parseSessionHour(raw) {
   if (raw == null || raw === "") return null;
   const n = Number(raw);

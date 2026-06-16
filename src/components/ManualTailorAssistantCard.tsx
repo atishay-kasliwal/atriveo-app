@@ -18,6 +18,8 @@ interface Props {
   queueItem: TailorQueueItem | null;
   queuePosition: number | null;
   onOpenFolder?: (path: string) => void;
+  onRetry?: () => void;
+  stuckQueued?: boolean;
 }
 
 function statusLabel(record: TailorRecord | null, queueItem: TailorQueueItem | null, queuePosition: number | null): string {
@@ -54,8 +56,11 @@ export default function ManualTailorAssistantCard({
   queueItem,
   queuePosition,
   onOpenFolder,
+  onRetry,
+  stuckQueued = false,
 }: Props) {
   const endRef = useRef<HTMLDivElement>(null);
+  const streamRef = useRef<HTMLDivElement>(null);
   const logs = record?.logs ?? [];
   const folderPath = tailorFolderPath(record);
   const tone = statusTone(record, queueItem);
@@ -63,7 +68,8 @@ export default function ManualTailorAssistantCard({
   const isLive = record?.status === "running" || queueItem?.status === "running";
 
   useEffect(() => {
-    if (isLive) endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (!isLive || !streamRef.current) return;
+    streamRef.current.scrollTop = streamRef.current.scrollHeight;
   }, [logs.length, isLive]);
 
   const copyLogs = () => {
@@ -85,62 +91,80 @@ export default function ManualTailorAssistantCard({
         </span>
       </header>
 
-      {record?.durationMs != null ? (
-        <p className="manual-tailor-assistant-meta">
-          Completed in {formatTailorDuration(record.durationMs)}
-        </p>
-      ) : null}
+      <div className="manual-tailor-assistant-body">
+        {record?.durationMs != null ? (
+          <p className="manual-tailor-assistant-meta">
+            Completed in {formatTailorDuration(record.durationMs)}
+          </p>
+        ) : (
+          <p className="manual-tailor-assistant-meta manual-tailor-assistant-meta--spacer" aria-hidden>
+            &nbsp;
+          </p>
+        )}
 
-      {record?.explain ? (
-        <TailorExplainPanel explain={record.explain} />
-      ) : null}
+        {record?.explain ? (
+          <TailorExplainPanel explain={record.explain} />
+        ) : null}
 
-      {record?.status === "failed" && record.outcome === "unsupported" && record.error ? (
-        <p className="tailor-explain-banner tailor-explain-banner--blocked" role="status">
-          {record.error}
-        </p>
-      ) : null}
+        {record?.status === "failed" && record.outcome === "unsupported" && record.error ? (
+          <p className="tailor-explain-banner tailor-explain-banner--blocked" role="status">
+            {record.error}
+          </p>
+        ) : null}
 
-      {logs.length > 0 ? (
-        <div className="manual-tailor-assistant-stream tailor-thought-stream">
-          {logs.map((entry) => (
-            <div key={entry.id} className={`tailor-thought-line is-${entry.kind}`}>
-              <span className="tailor-thought-meta">
-                <time dateTime={entry.at}>{fmtTailorLogTime(entry.at)}</time>
-                {entry.step != null ? <span className="tailor-thought-step">#{entry.step}</span> : null}
-                {entry.elapsedMs != null ? (
-                  <span className="tailor-thought-elapsed">{fmtTailorLogElapsed(entry.elapsedMs)}</span>
-                ) : null}
-              </span>
-              <span className="tailor-thought-marker" aria-hidden="true">
-                {TAILOR_LOG_MARKER[entry.kind]}
-              </span>
-              <span className="tailor-thought-text">{entry.text}</span>
-            </div>
-          ))}
+        <div
+          ref={streamRef}
+          className={`manual-tailor-assistant-stream tailor-thought-stream${logs.length > 0 ? " has-logs" : ""}`}
+        >
+          {logs.length > 0 ? (
+            logs.map((entry) => (
+              <div key={entry.id} className={`tailor-thought-line is-${entry.kind}`}>
+                <span className="tailor-thought-meta">
+                  <time dateTime={entry.at}>{fmtTailorLogTime(entry.at)}</time>
+                  {entry.step != null ? <span className="tailor-thought-step">#{entry.step}</span> : null}
+                  {entry.elapsedMs != null ? (
+                    <span className="tailor-thought-elapsed">{fmtTailorLogElapsed(entry.elapsedMs)}</span>
+                  ) : null}
+                </span>
+                <span className="tailor-thought-marker" aria-hidden="true">
+                  {TAILOR_LOG_MARKER[entry.kind]}
+                </span>
+                <span className="tailor-thought-text">{entry.text}</span>
+              </div>
+            ))
+          ) : (
+            <p className="manual-tailor-assistant-placeholder">
+              {stuckQueued
+                ? "Queued in the app but not sent to the Mac yet. Click Send to Mac below."
+                : isLive
+                  ? "Tailor is running — logs will stream here as phases complete."
+                  : record?.status === "queued" || queueItem?.status === "pending"
+                    ? "Added to the shared tailor queue. Processing starts automatically when earlier jobs finish."
+                    : "Submit a job description to start tailoring."}
+            </p>
+          )}
           <div ref={endRef} />
         </div>
-      ) : (
-        <p className="manual-tailor-assistant-placeholder">
-          {isLive
-            ? "Tailor is running — logs will stream here as phases complete."
-            : record?.status === "queued" || queueItem?.status === "pending"
-              ? "Added to the shared tailor queue. Processing starts automatically when earlier jobs finish."
-              : "Submit a job description to start tailoring."}
-        </p>
-      )}
+      </div>
 
       <footer className="manual-tailor-assistant-foot">
-        {folderPath && onOpenFolder ? (
-          <button type="button" className="manual-tailor-foot-btn" onClick={() => onOpenFolder(folderPath)}>
-            Open folder
-          </button>
-        ) : null}
-        {(logs.length > 0 || record?.status === "done") ? (
-          <button type="button" className="manual-tailor-foot-btn manual-tailor-foot-btn--ghost" onClick={copyLogs}>
-            Copy log
-          </button>
-        ) : null}
+        <div className="manual-tailor-assistant-foot-actions">
+          {onRetry ? (
+            <button type="button" className="manual-tailor-foot-btn manual-tailor-foot-btn--primary" onClick={onRetry}>
+              Send to Mac
+            </button>
+          ) : null}
+          {folderPath && onOpenFolder ? (
+            <button type="button" className="manual-tailor-foot-btn" onClick={() => onOpenFolder(folderPath)}>
+              Open folder
+            </button>
+          ) : null}
+          {(logs.length > 0 || record?.status === "done") ? (
+            <button type="button" className="manual-tailor-foot-btn manual-tailor-foot-btn--ghost" onClick={copyLogs}>
+              Copy log
+            </button>
+          ) : null}
+        </div>
       </footer>
     </article>
   );
