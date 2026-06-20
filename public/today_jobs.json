@@ -2282,7 +2282,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/04/02_dataeconomy-genai-agentic-ai-engineer"
     },
     "ats_score": 38,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-06-20T08:06:53Z",
@@ -3981,7 +3981,7 @@
     "summary": "Our Infrastructure Engineering teams are at the heart of that mission \\-\\-\\- building the platforms and tooling that let every engineer ship with speed and confidence.",
     "title": "Software Engineer - Delivery Platform",
     "ats_score": 61,
-    "fit_score": 12
+    "fit_score": 11
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4403124459",
@@ -4779,7 +4779,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/07/31_zoox-machine-learning-engineer-sema"
     },
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4211913542",
@@ -5073,7 +5073,7 @@
     "summary": "**About Plaud Inc.** Plaud is building the world's most trusted AI work companion for professionals to elevate productivity and performance through note\\-taking solutions, loved by over 1,500,000 use\u2026",
     "title": "Software Engineer (Platform)- San Francisco",
     "ats_score": 20,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4421200650",
@@ -5729,20 +5729,20 @@
       "fingerprint": null,
       "lease_until": null,
       "worker_id": "atishays-mini-b516d43c",
-      "updated_at": "2026-06-20T14:36:01.403Z",
+      "updated_at": "2026-06-20T15:35:27.859Z",
       "error": "Unsupported JD \u2014 engineering confidence 0.396 (need \u2265 0.45).",
       "company": "Twenty",
       "title": "Backend Engineer",
-      "resume_slot": 61,
+      "resume_slot": 44,
       "session_hour": "08",
       "batch_time": "2026-06-20T12:12:17Z",
-      "session_id": "2026-06-20T14:10:58Z",
+      "session_id": "2026-06-20T15:11:08Z",
       "priority": 1000,
       "source": "hourly",
       "cached": false,
-      "folder": "61_twenty-backend-engineer",
+      "folder": "44_twenty-backend-engineer",
       "pdf_path": null,
-      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/08/61_twenty-backend-engineer"
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/08/44_twenty-backend-engineer"
     },
     "ats_score": 85,
     "fit_score": 18
@@ -6390,20 +6390,20 @@
       "fingerprint": null,
       "lease_until": null,
       "worker_id": "atishays-mini-b516d43c",
-      "updated_at": "2026-06-20T13:35:34.259Z",
+      "updated_at": "2026-06-20T15:35:08.387Z",
       "error": "Unsupported JD \u2014 engineering confidence 0.442 (need \u2265 0.45).",
       "company": "Butler Labs",
       "title": "Software Engineer, New Grad",
-      "resume_slot": 18,
+      "resume_slot": 13,
       "session_hour": "09",
       "batch_time": "2026-06-20T13:13:10Z",
-      "session_id": "2026-06-20T13:13:21Z",
+      "session_id": "2026-06-20T15:11:08Z",
       "priority": 1000,
       "source": "hourly",
       "cached": false,
-      "folder": "18_butler-labs-software-engineer-new-grad",
+      "folder": "13_butler-labs-software-engineer-new-grad",
       "pdf_path": null,
-      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/09/18_butler-labs-software-engineer-new-grad"
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/09/13_butler-labs-software-engineer-new-grad"
     },
     "ats_score": 45,
     "fit_score": 4
@@ -7062,20 +7062,20 @@
       "fingerprint": null,
       "lease_until": null,
       "worker_id": "atishays-mini-b516d43c",
-      "updated_at": "2026-06-20T13:35:58.678Z",
+      "updated_at": "2026-06-20T15:35:36.625Z",
       "error": "Unsupported JD \u2014 engineering confidence 0.419 (need \u2265 0.45).",
       "company": "Amazon Web Services (AWS)",
       "title": "Software Development Engineer \u2013 Big Data, AWS Elastic MapReduce (EMR), EMR EKS",
-      "resume_slot": 20,
+      "resume_slot": 15,
       "session_hour": "09",
       "batch_time": "2026-06-20T13:13:10Z",
-      "session_id": "2026-06-20T13:13:21Z",
+      "session_id": "2026-06-20T15:11:08Z",
       "priority": 1000,
       "source": "hourly",
       "cached": false,
-      "folder": "20_amazon-web-services-aws-software-development-engineer-",
+      "folder": "15_amazon-web-services-aws-software-development-engineer-",
       "pdf_path": null,
-      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/09/20_amazon-web-services-aws-software-development-engineer-"
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/09/15_amazon-web-services-aws-software-development-engineer-"
     },
     "ats_score": 28,
     "fit_score": 7
@@ -8168,6 +8168,27 @@
     "site": "linkedin",
     "summary": "If you\u2019re passionate about building a better future for individuals, communities, and our country\u2014and you\u2019re committed to working hard to play your part in building that future\u2014consider WGU as the ne\u2026",
     "title": "Software Engineer II",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "348fdad203b5f7fdca177b1605a0f10e2938372c65ac16ffb4bd32fc56010eb9",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-20T15:35:20.712Z",
+      "error": null,
+      "company": "Western Governors University",
+      "title": "Software Engineer II",
+      "resume_slot": 40,
+      "session_hour": "11",
+      "batch_time": "2026-06-20T15:10:56Z",
+      "session_id": "2026-06-20T15:11:08Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "40_western-governors-univer-software-engineer-ii",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/11/40_western-governors-univer-software-engineer-ii/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/11/40_western-governors-univer-software-engineer-ii"
+    },
     "ats_score": 60,
     "fit_score": 14
   },
@@ -8273,6 +8294,27 @@
     "site": "linkedin",
     "summary": "You'll work alongside the founding team to drive the product roadmap, develop new features, and scale the platform.",
     "title": "Founding Backend Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "d6362433088eccc8b3f6da2b7e62d2cc31e7d8a3fc98b782ad7d97189d70dcdd",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-20T15:35:27.169Z",
+      "error": null,
+      "company": "Kubbly",
+      "title": "Founding Backend Engineer",
+      "resume_slot": 28,
+      "session_hour": "11",
+      "batch_time": "2026-06-20T15:10:56Z",
+      "session_id": "2026-06-20T15:11:08Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "28_kubbly-founding-backend-engineer",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/11/28_kubbly-founding-backend-engineer/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/11/28_kubbly-founding-backend-engineer"
+    },
     "ats_score": 51,
     "fit_score": 15
   },
@@ -8336,6 +8378,16 @@
     "site": "linkedin",
     "summary": "This role involves designing, developing, and maintaining scalable backend services and APIs that power the training and evaluation of next\\-generation AI systems.",
     "title": "Backend Developer (Remote)",
+    "resume": {
+      "cached": true,
+      "error": null,
+      "fingerprint": "285009bbb611ff676df3e94c9127c8e28f8ea49a13e0da151ce6dac74e2f2e2a",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-19/10/60_hire-feed-backend-developer-remote/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-19/10/60_hire-feed-backend-developer-remote",
+      "stage": "SUCCESS",
+      "status": "success",
+      "updated_at": "2026-06-20T15:35:09.998Z"
+    },
     "ats_score": 66,
     "fit_score": 11
   },
@@ -8420,6 +8472,16 @@
     "site": "linkedin",
     "summary": "**What You Will Do** * Design, develop, and maintain high\\-performance Python\\-based APIs (REST, GraphQL, or gRPC) that serve as the foundation for LlamaCloud and LlamaParse.",
     "title": "Backend Engineer (+ Equity) at LlamaIndex",
+    "resume": {
+      "cached": true,
+      "error": null,
+      "fingerprint": "b40d24379df569a9afd1fd5288e1fddbd72193246166b890d3072cb4057467a0",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-16/05/05_jack-jill-backend-engineer-equity-at-lla/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-16/05/05_jack-jill-backend-engineer-equity-at-lla",
+      "stage": "SUCCESS",
+      "status": "success",
+      "updated_at": "2026-06-20T15:35:10.407Z"
+    },
     "ats_score": 66,
     "fit_score": 6
   },
@@ -8546,6 +8608,27 @@
     "site": "linkedin",
     "summary": "In this role, you will be responsible for designing, developing, and deploying machine learning models and AI\\-driven solutions that support business objectives and enhance product capabilities.",
     "title": "Machine Learning Enginee",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "b6e23ef5486db7ac4f6791ab1145b828a66478cf1230e5aecf6518a00d4590f5",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-20T15:35:32.342Z",
+      "error": null,
+      "company": "World Conference on Transport Research Society (WCTRS)",
+      "title": "Machine Learning Enginee",
+      "resume_slot": 52,
+      "session_hour": "11",
+      "batch_time": "2026-06-20T15:10:56Z",
+      "session_id": "2026-06-20T15:11:08Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "52_world-conference-on-tran-machine-learning-enginee",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/11/52_world-conference-on-tran-machine-learning-enginee/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/11/52_world-conference-on-tran-machine-learning-enginee"
+    },
     "ats_score": 56,
     "fit_score": 6
   },
@@ -8588,6 +8671,16 @@
     "site": "linkedin",
     "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
     "title": "Backend Engineer at Tavus",
+    "resume": {
+      "cached": true,
+      "error": null,
+      "fingerprint": "8697c0a782d2954f7139862ff1f5ac6e8c2ab80250b1ef98e52deefafd47e56b",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-15/23/25_jack-jill-backend-engineer-at-tavus/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-15/23/25_jack-jill-backend-engineer-at-tavus",
+      "stage": "SUCCESS",
+      "status": "success",
+      "updated_at": "2026-06-20T15:35:07.424Z"
+    },
     "ats_score": 42,
     "fit_score": 5
   },
@@ -8735,6 +8828,16 @@
     "site": "linkedin",
     "summary": "* Design new systems and abstractions that improve developer productivity, reliability, and performance by handling entire classes of problems up\\-front for product engineers.",
     "title": "Software Engineer, Product Infrastructure",
+    "resume": {
+      "cached": true,
+      "error": null,
+      "fingerprint": "810651da85a91e1446a13500fb4a4fddf616d42105ab58fb61c384a83bd66166",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-19/20/16_hack-chicago-software-engineer-product-infr/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-19/20/16_hack-chicago-software-engineer-product-infr",
+      "stage": "SUCCESS",
+      "status": "success",
+      "updated_at": "2026-06-20T15:35:09.274Z"
+    },
     "ats_score": 50,
     "fit_score": 4
   },
@@ -8883,7 +8986,7 @@
     "summary": "Our client is seeking a **Software Developer / Integration Specialist** with strong experience designing, developing, and supporting enterprise integrations across business systems.",
     "title": "Software Developer",
     "ats_score": 66,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-06-20T15:11:06Z",
@@ -9008,6 +9111,27 @@
     "site": "linkedin",
     "summary": "\"\\>\"\\>\"\\>\"\\>\"\\> Pricing * Solutions + Developer\\-defined Infrastructure + Cloud Native Deployments by Diagram + Kubernetes Multi\\-cluster Operation + Collaborative GitOps + GitOps with Cloud Native I\u2026",
     "title": "Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "df986f34c3ddc403e1ae5b25032f71a0aa34554d5b8bf24bc3480d47b4a5657b",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-20T15:35:41.273Z",
+      "error": null,
+      "company": "Layer5",
+      "title": "Software Engineer",
+      "resume_slot": 4,
+      "session_hour": "11",
+      "batch_time": "2026-06-20T15:10:56Z",
+      "session_id": "2026-06-20T15:11:08Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "04_layer5-software-engineer",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/11/04_layer5-software-engineer/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/11/04_layer5-software-engineer"
+    },
     "ats_score": 40,
     "fit_score": 5
   },
@@ -9197,6 +9321,27 @@
     "site": "linkedin",
     "summary": "Search jobs 88 Explore companies 18 Join talent network Talent Software Engineer \\| Various Levels Forage Software Engineering San Francisco, CA, USA * Remote USD 125k\\-225k / year \\+ Equity Posted o\u2026",
     "title": "Software Engineer | Various Levels",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "fa7cfd73274bb307c1e609cbf28d05adcd58f72bd3975da590998962d8a5c890",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-20T15:35:47.006Z",
+      "error": null,
+      "company": "Equal Opportunity Ventures",
+      "title": "Software Engineer | Various Levels",
+      "resume_slot": 37,
+      "session_hour": "11",
+      "batch_time": "2026-06-20T15:10:56Z",
+      "session_id": "2026-06-20T15:11:08Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "37_equal-opportunity-ventur-software-engineer-various-leve",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/11/37_equal-opportunity-ventur-software-engineer-various-leve/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/11/37_equal-opportunity-ventur-software-engineer-various-leve"
+    },
     "ats_score": 46,
     "fit_score": 9
   },
@@ -9302,6 +9447,16 @@
     "site": "linkedin",
     "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
     "title": "Software Engineer, Infrastructure ($140K\u2013$215K + Equity) at Opal Security",
+    "resume": {
+      "cached": true,
+      "error": null,
+      "fingerprint": "a2d071aef0ee32d8d5fde18434f3deedbf791693cb889a1bddb101bf477c579b",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-16/04/22_jack-jill-software-engineer-infrastructu/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-16/04/22_jack-jill-software-engineer-infrastructu",
+      "stage": "SUCCESS",
+      "status": "success",
+      "updated_at": "2026-06-20T15:35:11.285Z"
+    },
     "ats_score": 60,
     "fit_score": 4
   },
