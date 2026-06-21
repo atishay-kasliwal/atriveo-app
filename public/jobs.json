@@ -80,6 +80,27 @@
     "site": "linkedin",
     "summary": "**Software Engineer \\*\\*On Site: New York, NY\\*\\*** **Company Profil** e AppCard builds software used by millions of shoppers every day.",
     "title": "Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "458c27a406758546de648ff6a9ee64853caf03b5af7ad8fd9f422ccd1c5f5d3b",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-20T19:36:12.871Z",
+      "error": null,
+      "company": "AppCard, Inc.",
+      "title": "Software Engineer",
+      "resume_slot": 48,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:54Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "48_appcard-inc-software-engineer",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/48_appcard-inc-software-engineer/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/48_appcard-inc-software-engineer"
+    },
     "ats_score": 71,
     "fit_score": 8
   },
@@ -101,8 +122,29 @@
     "site": "linkedin",
     "summary": "**Company Description** Civoren is building the central election infrastructure layer for the United States.",
     "title": "Software Engineer Intern",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-21T03:35:31.486Z",
+      "error": "Intern role \u2014 senior experience profile; skip unless targeting internships",
+      "company": "Civoren",
+      "title": "Software Engineer Intern",
+      "resume_slot": 25,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:54Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "25_civoren-software-engineer-intern",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/25_civoren-software-engineer-intern"
+    },
     "ats_score": 25,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -227,6 +269,27 @@
     "site": "linkedin",
     "summary": "Software Engineer, AI \\& Private Equity Operations Build Companies, Not Features We're hiring a Software Engineer who wants to sit at the intersection of private equity, acquisitions, operations, AI,\u2026",
     "title": "Software Engineer, Private Equity Operations",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "378f40cbe38d83150c2f0a47f43420ccdf66af3ab6ad0f5d3bdb43d369aaedea",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-20T19:37:22.955Z",
+      "error": null,
+      "company": "S&P Ventures",
+      "title": "Software Engineer, Private Equity Operations",
+      "resume_slot": 19,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:54Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "19_s-p-ventures-software-engineer-private-equi",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/19_s-p-ventures-software-engineer-private-equi/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/19_s-p-ventures-software-engineer-private-equi"
+    },
     "ats_score": 83,
     "fit_score": 8
   },
@@ -311,8 +374,29 @@
     "site": "linkedin",
     "summary": "Together, we power the platforms, AI\\-driven tools, live services, and infrastructure that ensure global scale, secure player experiences, and unlock bold new possibilities.",
     "title": "Software Engineer II - Commerce",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "94fad15aee68632ff334b06fe4554b31a16d8d788653987361d2d9710d132295",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-20T19:37:53.902Z",
+      "error": null,
+      "company": "Electronic Arts (EA)",
+      "title": "Software Engineer II - Commerce",
+      "resume_slot": 30,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:54Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "30_electronic-arts-ea-software-engineer-ii-commerce",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/30_electronic-arts-ea-software-engineer-ii-commerce/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/30_electronic-arts-ea-software-engineer-ii-commerce"
+    },
     "ats_score": 90,
-    "fit_score": 9
+    "fit_score": 10
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -605,8 +689,29 @@
     "site": "linkedin",
     "summary": "(This role is US based remote and all candidates must be able to work in the US now and in the future without restriction) What we believe Technology is no longer just an enabler of business strategy.",
     "title": "Full Stack Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "36372d6033e80b80e9ae386cd85abec4ad3d8048295302b8c6634db4794b2f74",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-20T19:38:23.396Z",
+      "error": null,
+      "company": "Crosslake Technologies",
+      "title": "Full Stack Software Engineer",
+      "resume_slot": 9,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:54Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "09_crosslake-technologies-full-stack-software-engineer",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/09_crosslake-technologies-full-stack-software-engineer/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/09_crosslake-technologies-full-stack-software-engineer"
+    },
     "ats_score": 25,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -732,7 +837,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391901985",
@@ -753,7 +858,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -774,7 +879,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Clinical Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -795,7 +900,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Clinical Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -816,7 +921,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391913568",
@@ -837,7 +942,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -858,7 +963,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -879,7 +984,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391910661",
@@ -900,7 +1005,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391909679",
@@ -921,7 +1026,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391908774",
@@ -942,7 +1047,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1110,7 +1215,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Clinical Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1215,7 +1320,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1236,7 +1341,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Clinical Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391915650",
@@ -1257,7 +1362,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Clinical Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1278,7 +1383,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391900971",
@@ -1299,7 +1404,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1320,7 +1425,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1341,7 +1446,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391904927",
@@ -1362,7 +1467,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391902967",
@@ -1383,7 +1488,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391913554",
@@ -1404,7 +1509,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Machine Learning Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1425,7 +1530,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4309801110",
@@ -1467,6 +1572,6 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Machine Learning Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   }
 ]
