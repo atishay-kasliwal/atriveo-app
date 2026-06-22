@@ -128,20 +128,20 @@
       "fingerprint": null,
       "lease_until": null,
       "worker_id": "atishays-mini-b516d43c",
-      "updated_at": "2026-06-21T03:35:31.486Z",
+      "updated_at": "2026-06-22T14:41:18.209Z",
       "error": "Intern role \u2014 senior experience profile; skip unless targeting internships",
       "company": "Civoren",
       "title": "Software Engineer Intern",
-      "resume_slot": 25,
+      "resume_slot": 4,
       "session_hour": "15",
       "batch_time": "2026-06-20T19:12:40Z",
-      "session_id": "2026-06-20T19:12:54Z",
-      "priority": 1000,
-      "source": "hourly",
+      "session_id": "2026-06-20T19:12:51Z",
+      "priority": 500,
+      "source": "manual",
       "cached": false,
-      "folder": "25_civoren-software-engineer-intern",
+      "folder": "04_civoren-software-engineer-intern",
       "pdf_path": null,
-      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/25_civoren-software-engineer-intern"
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/04_civoren-software-engineer-intern"
     },
     "ats_score": 25,
     "fit_score": 7
@@ -164,6 +164,27 @@
     "site": "linkedin",
     "summary": "We are hiring a Distinguished AI Engineer to lead the design, development, and deployment of these systems across our platform.",
     "title": "Distinguished AI Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "a18906574f79756964a2b3f0a0fe6297f02b99482c9da1049e140d26dfe155de",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-21T19:31:29.716Z",
+      "error": null,
+      "company": "Charlie Health",
+      "title": "Distinguished AI Engineer",
+      "resume_slot": 13,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:51Z",
+      "priority": 500,
+      "source": "manual",
+      "cached": false,
+      "folder": "13_charlie-health-distinguished-ai-engineer",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/13_charlie-health-distinguished-ai-engineer/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/13_charlie-health-distinguished-ai-engineer"
+    },
     "ats_score": 0,
     "fit_score": 6
   },
@@ -185,6 +206,27 @@
     "site": "linkedin",
     "summary": "**Find your calling at Mercy!** **Position Details** **Mercy Rogers New\\-Graduate Nurse Residency** Mercy Northwest Arkansas offers a transition\\-to\\-practice nurse residency program designed to supp\u2026",
     "title": "Mercy NWA/Rogers Fall 2026 New Grad Residency",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-22T14:41:18.886Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0 (need \u2265 0.45).",
+      "company": "Mercy",
+      "title": "Mercy NWA/Rogers Fall 2026 New Grad Residency",
+      "resume_slot": 14,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:51Z",
+      "priority": 500,
+      "source": "manual",
+      "cached": false,
+      "folder": "14_mercy-mercy-nwa-rogers-fall-2026-new",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/14_mercy-mercy-nwa-rogers-fall-2026-new"
+    },
     "ats_score": 0,
     "fit_score": 2
   },
@@ -228,7 +270,7 @@
     "summary": "**Description** As an SDE in Amazon's Simple Storage Service (S3\\), you will solve exciting problems at incomparable scale.",
     "title": "Software Development Engineer, Amazon S3, Amazon S3",
     "ats_score": 60,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -249,7 +291,7 @@
     "summary": "**Overview** The Remote Payment and Presentment System team is seeking a Software Engineer II to help advance our customer experience strategy through continuous innovation and problem\\-solving.",
     "title": "Software Engineer II",
     "ats_score": 66,
-    "fit_score": 13
+    "fit_score": 12
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4431330872",
@@ -312,7 +354,7 @@
     "summary": "At Render, we\u2019re building the modern cloud platform for developers creating AI\\-native, full\\-stack, multi\\-service applications.",
     "title": "Software Engineer, Product (all levels)",
     "ats_score": 70,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -396,7 +438,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/30_electronic-arts-ea-software-engineer-ii-commerce"
     },
     "ats_score": 90,
-    "fit_score": 10
+    "fit_score": 9
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -627,7 +669,7 @@
     "summary": "As the team behind Next.js, v0, and AI SDK, we create products that help builders move from idea to production with speed, security, and exceptional developer experience.",
     "title": "Software Engineer, Growth",
     "ats_score": 25,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -711,7 +753,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/09_crosslake-technologies-full-stack-software-engineer"
     },
     "ats_score": 25,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -731,6 +773,27 @@
     "site": "linkedin",
     "summary": "* Role: Typescript Software Engineer (Remote) * **Location** : Remote (Work from Anywhere) * **Payout** : $30 \\- $100 per hour **Role Overview:** We are hiring for one of our clients, seeking a Types\u2026",
     "title": "Typescript Software Engineer (Remote)",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "f995ab36d772289005438586bb80a3c030288608a1d4c711f2886e19be7fb0e5",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-21T19:32:10.046Z",
+      "error": null,
+      "company": "Hire Feed",
+      "title": "Typescript Software Engineer (Remote)",
+      "resume_slot": 21,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:51Z",
+      "priority": 500,
+      "source": "manual",
+      "cached": false,
+      "folder": "21_hire-feed-typescript-software-engineer-r",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/21_hire-feed-typescript-software-engineer-r/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/21_hire-feed-typescript-software-engineer-r"
+    },
     "ats_score": 50,
     "fit_score": 5
   },
@@ -837,7 +900,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391901985",
@@ -858,7 +921,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -879,7 +942,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Clinical Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -900,7 +963,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Clinical Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -921,7 +984,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391913568",
@@ -942,7 +1005,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -963,7 +1026,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -984,7 +1047,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391910661",
@@ -1005,7 +1068,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391909679",
@@ -1026,7 +1089,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391908774",
@@ -1047,7 +1110,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1067,6 +1130,27 @@
     "site": "linkedin",
     "summary": "**Job No:** 539287 **Work Type:** Full Time **Location:** Main Campus (Gainesville, FL) **Categories:** Health Care Administration/Support **Department:** 57720000 \\- INSTITUTE\\-CHILD HEALTH POLICY *\u2026",
     "title": "Data Scientist IV",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-22T14:41:19.239Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.304 (need \u2265 0.45).",
+      "company": "Inside Higher Ed",
+      "title": "Data Scientist IV",
+      "resume_slot": 22,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:51Z",
+      "priority": 500,
+      "source": "manual",
+      "cached": false,
+      "folder": "22_inside-higher-ed-data-scientist-iv",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/22_inside-higher-ed-data-scientist-iv"
+    },
     "ats_score": 66,
     "fit_score": 6
   },
@@ -1109,6 +1193,27 @@
     "site": "linkedin",
     "summary": "* Design, build, implement, and maintain databases, scripts, views, functions, and procedures individually or as a part of a team to support application software.",
     "title": "Software Developer",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-22T14:41:19.950Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.12 (need \u2265 0.45).",
+      "company": "Arvin Acme Technologies Inc",
+      "title": "Software Developer",
+      "resume_slot": 26,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:51Z",
+      "priority": 500,
+      "source": "manual",
+      "cached": false,
+      "folder": "26_arvin-acme-technologies--software-developer",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/26_arvin-acme-technologies--software-developer"
+    },
     "ats_score": 0,
     "fit_score": 4
   },
@@ -1130,6 +1235,27 @@
     "site": "linkedin",
     "summary": "* Perform responsibilities to transform the requirements into complete and detailed system design specifications.",
     "title": "Software Engineer",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-22T14:41:20.238Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.189 (need \u2265 0.45).",
+      "company": "Arvin Acme Technologies Inc",
+      "title": "Software Engineer",
+      "resume_slot": 24,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:51Z",
+      "priority": 500,
+      "source": "manual",
+      "cached": false,
+      "folder": "24_arvin-acme-technologies--software-engineer",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/24_arvin-acme-technologies--software-engineer"
+    },
     "ats_score": 33,
     "fit_score": 6
   },
@@ -1151,6 +1277,27 @@
     "site": "linkedin",
     "summary": "**Job Requirements** * Bachelor Degree in Marketing, Business, Communications, Economics or Health Care OR 4 years health care/customer service experience involving independent work and judgment.",
     "title": "University New Grad Sales Associate",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-22T14:41:20.533Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.12 (need \u2265 0.45).",
+      "company": "Health Care Service Corporation",
+      "title": "University New Grad Sales Associate",
+      "resume_slot": 29,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:51Z",
+      "priority": 500,
+      "source": "manual",
+      "cached": false,
+      "folder": "29_health-care-service-corp-university-new-grad-sales-asso",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/29_health-care-service-corp-university-new-grad-sales-asso"
+    },
     "ats_score": 0,
     "fit_score": 2
   },
@@ -1172,6 +1319,27 @@
     "site": "linkedin",
     "summary": "* Design, build, implement, and maintain databases, scripts, views, functions, and procedures individually or as a part of a team to support application software.",
     "title": "Software Developer",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-22T14:41:20.823Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.12 (need \u2265 0.45).",
+      "company": "Arvin Acme Technologies Inc",
+      "title": "Software Developer",
+      "resume_slot": 27,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:51Z",
+      "priority": 500,
+      "source": "manual",
+      "cached": false,
+      "folder": "27_arvin-acme-technologies--software-developer",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/27_arvin-acme-technologies--software-developer"
+    },
     "ats_score": 0,
     "fit_score": 4
   },
@@ -1193,6 +1361,27 @@
     "site": "linkedin",
     "summary": "* Design, build, implement, and maintain databases, scripts, views, functions, and procedures individually or as a part of a team to support application software.",
     "title": "Software Developer",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-22T14:41:21.170Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.212 (need \u2265 0.45).",
+      "company": "Arvin Acme Technologies Inc",
+      "title": "Software Developer",
+      "resume_slot": 19,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:51Z",
+      "priority": 500,
+      "source": "manual",
+      "cached": false,
+      "folder": "19_arvin-acme-technologies--software-developer",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/19_arvin-acme-technologies--software-developer"
+    },
     "ats_score": 100,
     "fit_score": 6
   },
@@ -1215,7 +1404,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Clinical Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1235,6 +1424,27 @@
     "site": "linkedin",
     "summary": "**Description** Amazon Analytics offers fully managed cloud data warehouse and data lake capabilities.",
     "title": "Software Development Engineer, Query Processing AWS Analytics",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "a1e5a077b0135379e869d10d46a78201605ecc92523d31418d9ac33ddba969c8",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-21T19:32:35.721Z",
+      "error": null,
+      "company": "Amazon Web Services (AWS)",
+      "title": "Software Development Engineer, Query Processing AWS Analytics",
+      "resume_slot": 23,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:51Z",
+      "priority": 500,
+      "source": "manual",
+      "cached": false,
+      "folder": "23_amazon-web-services-aws-software-development-engineer-",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/23_amazon-web-services-aws-software-development-engineer-/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/23_amazon-web-services-aws-software-development-engineer-"
+    },
     "ats_score": 40,
     "fit_score": 7
   },
@@ -1277,6 +1487,27 @@
     "site": "linkedin",
     "summary": "* Design, build, implement, and maintain databases, scripts, views, functions, and procedures individually or as a part of a team to support application software.",
     "title": "Software Developer",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-22T14:41:21.460Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.12 (need \u2265 0.45).",
+      "company": "Arvin Acme Technologies Inc",
+      "title": "Software Developer",
+      "resume_slot": 28,
+      "session_hour": "15",
+      "batch_time": "2026-06-20T19:12:40Z",
+      "session_id": "2026-06-20T19:12:51Z",
+      "priority": 500,
+      "source": "manual",
+      "cached": false,
+      "folder": "28_arvin-acme-technologies--software-developer",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-20/15/28_arvin-acme-technologies--software-developer"
+    },
     "ats_score": 0,
     "fit_score": 4
   },
@@ -1320,7 +1551,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1341,7 +1572,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Clinical Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391915650",
@@ -1362,7 +1593,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Clinical Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1383,7 +1614,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391900971",
@@ -1404,7 +1635,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Marketing Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1425,7 +1656,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1446,7 +1677,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391904927",
@@ -1467,7 +1698,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391902967",
@@ -1488,7 +1719,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4391913554",
@@ -1509,7 +1740,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Machine Learning Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-06-20T19:12:51Z",
@@ -1530,7 +1761,7 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Research Data Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4309801110",
@@ -1572,6 +1803,6 @@
     "summary": "**About The Job** We are looking for existing quantitative professionals to help train AI models.",
     "title": "Machine Learning Scientist - AI Trainer",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 3
   }
 ]
