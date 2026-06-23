@@ -243,7 +243,10 @@ export default function ManualTailor() {
         <header className="mt-hero">
           <div className="mt-hero-main">
             <Link to="/today" className="mt-back">← Live Feed</Link>
-            <h1>Paste JD → Tailor</h1>
+            <div className="mt-hero-title">
+              <span className="mt-hero-badge" aria-hidden>✦</span>
+              <h1>Paste JD → Tailor</h1>
+            </div>
             <p>
               Paste any job posting. We extract company and role, then run the same Mac tailor as Live Feed.
             </p>
@@ -470,7 +473,7 @@ export default function ManualTailor() {
                   disabled={!canSubmit || tailorQueue.processing}
                   onClick={handleSubmit}
                 >
-                  Add to queue
+                  Add to queue <span aria-hidden>→</span>
                 </button>
               </div>
             </section>

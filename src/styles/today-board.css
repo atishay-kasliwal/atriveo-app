@@ -51,10 +51,14 @@ body.is-today-board::after {
 }
 
 body.is-today-board header {
-  background: #fff;
-  border-bottom: 1px solid #ece9e4;
-  box-shadow: none;
-  backdrop-filter: none;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.78);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid rgba(28, 27, 25, 0.07);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 6px 20px -16px rgba(28, 27, 25, 0.4);
 }
 
 body.is-today-board header .wrapper {
@@ -85,15 +89,27 @@ body.is-today-board header.header--tools-open {
 body.is-today-board .nav-tab {
   font-size: 12px;
   font-weight: 500;
-  padding: 5px 10px;
-  border-radius: 6px;
+  padding: 5px 11px;
+  border-radius: 8px;
   color: var(--board-sub);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+body.is-today-board .nav-tab:hover {
+  background: rgba(28, 27, 25, 0.05);
+  color: var(--board-ink);
 }
 
 body.is-today-board .nav-tab.active {
   background: rgba(226, 85, 61, 0.10);
   color: #d8482f;
-  box-shadow: none;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(226, 85, 61, 0.18);
+}
+
+body.is-today-board .nav-tab.active:hover {
+  background: rgba(226, 85, 61, 0.14);
+  color: #d8482f;
 }
 
 /* ── Root viewport ─────────────────────────────────────────────────────── */

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 
 const TOOLS_LINKS = [
-  { href: "/manual-tailor", label: "Paste JD → Tailor", note: "Paste any job description & generate resume" },
   { href: "/optimizer", label: "Legacy Optimizer", note: "Gemma rewrites — not AC compiler" },
   { href: "/skills", label: "Skills gap" },
   { href: "/weekly", label: "Weekly feed" },
@@ -21,6 +20,7 @@ interface NavItem {
 
 const PRIMARY: NavItem[] = [
   { href: "/", label: "Feed", match: (p) => p === "/" || p.startsWith("/dashboard") || p.startsWith("/today") },
+  { href: "/manual-tailor", label: "Tailor", match: (p) => p.startsWith("/manual-tailor") },
   { href: "/resumes", label: "Resumes", match: (p) => p.startsWith("/resumes") || p.startsWith("/tailored") },
   { href: "/activity", label: "Activity", match: (p) => p.startsWith("/activity") || p.startsWith("/clickedjobs") },
 ];
