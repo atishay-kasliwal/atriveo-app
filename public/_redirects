@@ -1,0 +1,7 @@
+# Visitors to the root see the landing page
+/           /landing/index.html    200
+
+# React SPA — all other paths served by index.html (except /landing/)
+/landing/*  /landing/:splat        200
+/api/*      /api/:splat            200
+/*          /index.html            200
