@@ -112,16 +112,6 @@ function resumeLocationLabel(
   return `${date}/${folder}/#${formatResumeSlot(displaySlot)}`;
 }
 
-// Short, single-word pill label for the dense board rating column.
-function ratingPillLabel(key: string): string {
-  switch (key) {
-    case "green": return "Strong";
-    case "blue":  return "Good";
-    case "yellow": return "Review";
-    default: return "Low";
-  }
-}
-
 function JobTableSelectCheckbox({
   checked,
   indeterminate = false,

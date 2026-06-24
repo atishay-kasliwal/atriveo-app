@@ -31,13 +31,11 @@ const WORKBENCH: NavItem[] = [
   { href: "/activity", label: "Activity", match: (p) => p.startsWith("/activity") || p.startsWith("/clickedjobs") },
 ];
 
-const PRIMARY: NavItem[] = [...DAILY, ...WORKBENCH];
-
 function toolsActive(path: string): boolean {
   return TOOLS_LINKS.some((t) => path.startsWith(t.href)) || path.startsWith("/tools");
 }
 
-export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) {
+export default function AppHeader({ hideLogo: _hideLogo = false }: { hideLogo?: boolean }) {
   const { user, logout } = useAuth();
   const path = typeof window !== "undefined" ? window.location.pathname : "/";
   const [toolsOpen, setToolsOpen] = useState(false);
