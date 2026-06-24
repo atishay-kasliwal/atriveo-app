@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import AtriveoLogo from "./AtriveoLogo";
 
 const TOOLS_LINKS = [
   { href: "/optimizer", label: "Legacy Optimizer", note: "Gemma rewrites — not AC compiler" },
@@ -18,12 +19,19 @@ interface NavItem {
   match: (path: string) => boolean;
 }
 
-const PRIMARY: NavItem[] = [
-  { href: "/", label: "Feed", match: (p) => p === "/" || p.startsWith("/dashboard") || p.startsWith("/today") },
-  { href: "/manual-tailor", label: "Tailor", match: (p) => p.startsWith("/manual-tailor") },
+const DAILY: NavItem[] = [
+  { href: "/", label: "Signal", match: (p) => p === "/" || p.startsWith("/dashboard") || p.startsWith("/today") },
+];
+
+const WORKBENCH: NavItem[] = [
+  { href: "/manual-tailor", label: "Loadout", match: (p) => p.startsWith("/manual-tailor") },
   { href: "/resumes", label: "Resumes", match: (p) => p.startsWith("/resumes") || p.startsWith("/tailored") },
+  { href: "/skills", label: "Arsenal", match: (p) => p.startsWith("/skills") },
+  { href: "/emailfinder", label: "Recon", match: (p) => p.startsWith("/emailfinder") },
   { href: "/activity", label: "Activity", match: (p) => p.startsWith("/activity") || p.startsWith("/clickedjobs") },
 ];
+
+const PRIMARY: NavItem[] = [...DAILY, ...WORKBENCH];
 
 function toolsActive(path: string): boolean {
   return TOOLS_LINKS.some((t) => path.startsWith(t.href)) || path.startsWith("/tools");
@@ -53,24 +61,34 @@ export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) 
 
   return (
     <header className={toolsOpen ? "header--tools-open" : undefined}>
-      <div className={`wrapper header-inner${hideLogo ? " header-inner--board" : ""}`}>
-        {!hideLogo && (
-          <a href="/" className="logo">
-            <div className="logo-icon">A</div>
-            <div>
-              <div className="logo-name">Atriveo</div>
-              <div className="logo-sub">Evidence compiler</div>
-            </div>
-          </a>
-        )}
+      <div className="header-inner">
+        {/* Brand mark */}
+        <a href="/" className="logo" aria-label="Atriveo home">
+          <div className="logo-icon">
+            <AtriveoLogo size={18} fill="var(--primary-foreground)" />
+          </div>
+          <span className="logo-status-dot" />
+        </a>
 
+        {/* Nav */}
         <div className={`header-right${toolsOpen ? " header-right--tools-open" : ""}`}>
           <nav className={`nav-tabs${toolsOpen ? " nav-tabs--tools-open" : ""}`}>
-            {PRIMARY.map((n) => (
+            <span className="nav-group-label">DAILY</span>
+            {DAILY.map((n) => (
               <a key={n.href} href={n.href} className={`nav-tab${n.match(path) ? " active" : ""}`}>
                 {n.label}
               </a>
             ))}
+
+            <span className="nav-separator" aria-hidden />
+
+            <span className="nav-group-label">WORKBENCH</span>
+            {WORKBENCH.map((n) => (
+              <a key={n.href} href={n.href} className={`nav-tab${n.match(path) ? " active" : ""}`}>
+                {n.label}
+              </a>
+            ))}
+
             <div className="nav-tools-wrap" ref={toolsRef}>
               <button
                 type="button"
@@ -92,8 +110,17 @@ export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) 
               ) : null}
             </div>
           </nav>
-          <span className="header-user">{user ? `Hi, ${user.name}` : " "}</span>
-          <button className="logout-btn" type="button" onClick={logout}>Sign out</button>
+
+          {/* Right cluster */}
+          <div className="nav-right-cluster">
+            {user && (
+              <span className="nav-user-pill">
+                <span className="nav-user-avatar">{user.name?.[0]?.toUpperCase() ?? "A"}</span>
+                <span className="nav-user-name">{user.name}</span>
+              </span>
+            )}
+            <button className="logout-btn" type="button" onClick={logout}>Sign out</button>
+          </div>
         </div>
       </div>
     </header>

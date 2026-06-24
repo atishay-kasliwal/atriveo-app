@@ -155,9 +155,11 @@ export default function CompilerStatusStrip({
             </div>
           ) : (
             <p className="compiler-strip-idle">
-              {workerMode
-                ? "Worker idle — hourly resume-sync enqueues today's latest scrape only; pick jobs manually with Compile selected."
-                : "Queue idle — hourly sync adds top jobs while this tab is open."}
+              {sidecarOk === false
+                ? "Sidecar offline — compile queue needs your Mac (npm run tailor:prod). Hourly enqueue still runs locally via resume-sync."
+                : workerMode
+                  ? "Worker idle — hourly resume-sync enqueues today's latest scrape only; pick jobs manually with Compile selected."
+                  : "Queue idle — reconnecting to compile queue…"}
               {syncMessage ? ` ${syncMessage}` : ""}
             </p>
           )}

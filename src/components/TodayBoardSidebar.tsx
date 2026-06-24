@@ -1,4 +1,5 @@
 import type { Period } from "../pages/Dashboard.types";
+import AtriveoLogo from "./AtriveoLogo";
 
 type ViewKey = "all" | "high-match" | "new-grad" | "h1b" | "top500";
 
@@ -51,6 +52,7 @@ export default function TodayBoardSidebar({
   return (
     <aside className="today-board-sidebar" aria-label="Views and pipeline">
       <div className="today-board-brand">
+        <span className="today-board-brand-mark"><AtriveoLogo size={16} fill="var(--primary-foreground)" /></span>
         <span className="today-board-brand-title">Atriveo DB</span>
       </div>
 

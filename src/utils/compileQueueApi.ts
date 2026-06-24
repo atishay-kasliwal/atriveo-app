@@ -1,4 +1,4 @@
-import { getTailorServerBase } from "./tailorServer";
+import { getTailorServerBase, tailorSidecarErrorMessage } from "./tailorServer";
 
 export interface MongoResumeState {
   status?: "queued" | "running" | "success" | "failed" | "skipped" | null;
@@ -52,7 +52,7 @@ async function sidecarFetch(path: string, init?: RequestInit) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data?.ok === false) {
-    throw new Error(typeof data?.error === "string" ? data.error : `HTTP ${res.status}`);
+    throw new Error(tailorSidecarErrorMessage(res.status, data?.error));
   }
   return data;
 }
@@ -160,7 +160,7 @@ async function consumeCompileQueueSse(
   const res = await fetch(url, { credentials: "include", cache: "no-store", signal });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(typeof data?.error === "string" ? data.error : `HTTP ${res.status}`);
+    throw new Error(typeof data?.error === "string" ? data.error : tailorSidecarErrorMessage(res.status));
   }
   if (!res.body) throw new Error("No stream body");
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AtriveoLogo from "../components/AtriveoLogo";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -36,7 +37,7 @@ export default function Login() {
     <div className="login-wrap">
       <div className="login-card">
         <div className="login-logo">
-          <div className="logo-icon">A</div>
+          <div className="logo-icon"><AtriveoLogo size={20} fill="var(--primary-foreground)" /></div>
           <div>
             <div className="logo-name">Atriveo</div>
             <div className="logo-sub">Job Feed</div>

@@ -923,7 +923,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
           onSelectionToggle={jobSelection.toggleJobSelection}
           onGroupSelectAll={jobSelection.toggleGroupSelection}
           isGroupFullySelected={jobSelection.isGroupFullySelected}
-          groupByCompany
+          groupByCompany={false}
           getTailorRecord={tailorStatus.getRecordForJob}
           onQueueUrgent={(job, resumeSlot) => tailorQueue.enqueueJob(job, "manual", true, resumeSlot)}
           onOpenTailorPath={handleOpenTailorPath}

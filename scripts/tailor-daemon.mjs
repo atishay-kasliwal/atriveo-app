@@ -39,28 +39,43 @@ if (!tunnelToken) {
   process.exit(1);
 }
 
-function run(label, cmd, args) {
-  const child = spawn(cmd, args, {
-    cwd: ROOT,
-    env: { ...process.env, ...env, MONGO_URI: process.env.MONGO_URI || env.MONGO_URI },
-    stdio: "inherit",
-  });
-  child.on("exit", (code, signal) => {
-    if (code) console.error(`[${label}] exited ${code}${signal ? ` (${signal})` : ""}`);
-  });
-  return child;
+let shuttingDown = false;
+const children = new Map();
+
+function runSupervised(label, cmd, args) {
+  let restartMs = 2000;
+
+  const start = () => {
+    if (shuttingDown) return;
+    const child = spawn(cmd, args, {
+      cwd: ROOT,
+      env: { ...process.env, ...env, MONGO_URI: process.env.MONGO_URI || env.MONGO_URI },
+      stdio: "inherit",
+    });
+    children.set(label, child);
+
+    child.on("exit", (code, signal) => {
+      children.delete(label);
+      if (shuttingDown) return;
+      console.error(`[${label}] exited ${code ?? 0}${signal ? ` (${signal})` : ""} — restarting in ${restartMs}ms`);
+      setTimeout(start, restartMs);
+      restartMs = Math.min(restartMs * 2, 60_000);
+    });
+  };
+
+  start();
 }
 
-const tailor = run("tailor", process.execPath, [
+runSupervised("tailor", process.execPath, [
   "--env-file=.env.tailor",
   "--env-file=.env",
   "scripts/tailor-server.mjs",
 ]);
-const tunnel = run("tunnel", "cloudflared", ["tunnel", "--no-autoupdate", "run", "--token", tunnelToken]);
+runSupervised("tunnel", "cloudflared", ["tunnel", "--no-autoupdate", "run", "--token", tunnelToken]);
 
 function shutdown() {
-  tailor.kill("SIGTERM");
-  tunnel.kill("SIGTERM");
+  shuttingDown = true;
+  for (const child of children.values()) child.kill("SIGTERM");
   setTimeout(() => process.exit(0), 500);
 }
 process.on("SIGINT", shutdown);

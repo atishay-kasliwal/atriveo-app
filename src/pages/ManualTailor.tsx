@@ -58,10 +58,6 @@ export default function ManualTailor() {
     }, slot);
   }, [description, sessions, companyOverride, titleOverride]);
 
-  useEffect(() => {
-    document.body.classList.add("is-today-board");
-    return () => document.body.classList.remove("is-today-board");
-  }, []);
 
   useEffect(() => {
     if (authLoading) return;
@@ -240,128 +236,90 @@ export default function ManualTailor() {
     <div className="manual-tailor-root">
       <AppHeader hideLogo />
       <div className="manual-tailor-viewport">
-        <header className="mt-hero">
-          <div className="mt-hero-main">
-            <Link to="/today" className="mt-back">← Live Feed</Link>
-            <div className="mt-hero-title">
-              <span className="mt-hero-badge" aria-hidden>✦</span>
-              <h1>Paste JD → Tailor</h1>
-            </div>
-            <p>
-              Paste any job posting. We extract company and role, then run the same Mac tailor as Live Feed.
-            </p>
-          </div>
-          <dl className="mt-metrics">
-            <div>
-              <dt>Queue</dt>
-              <dd>{tailorQueue.pendingCount}</dd>
-            </div>
-            <div>
-              <dt>Done today</dt>
-              <dd>{tailorStatus.resumesCreatedTodayCount}</dd>
-            </div>
-            <div>
-              <dt>Resume</dt>
-              <dd className={resumeSaved ? "mt-metric-ok" : ""}>
-                {resumeSaved ? "Ready" : "Optional"}
-              </dd>
-            </div>
-          </dl>
-        </header>
 
-        <div
-          className={`mt-mac-status mt-mac-status--${macStatus}`}
-          role="status"
-        >
+        {/* Hero card — grid overlay + stats */}
+        <section className="mt-hero-card">
+          <div className="mt-hero-grid" aria-hidden />
+          <div className="mt-hero-content">
+            <div className="mt-hero-left">
+              <div className="mt-hero-eyebrow">LOADOUT · TAILOR ENGINE</div>
+              <h1 className="mt-hero-title">
+                Three steps —{" "}
+                <span className="mt-hero-accent">paste, diff, export.</span>
+              </h1>
+              <p className="mt-hero-sub">
+                Paste any job posting. We extract company and role, then run the Mac tailor. Review before exporting so you ship a resume you trust.
+              </p>
+            </div>
+            <dl className="mt-metrics">
+              <div>
+                <dt>Queue</dt>
+                <dd>{tailorQueue.pendingCount}</dd>
+              </div>
+              <div>
+                <dt>Done Today</dt>
+                <dd>{tailorStatus.resumesCreatedTodayCount}</dd>
+              </div>
+              <div>
+                <dt>Resume</dt>
+                <dd className={resumeSaved ? "mt-metric-ok" : "mt-metric-dim"}>
+                  {resumeSaved ? "Ready" : "Opt"}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </section>
+
+        {/* Mac status */}
+        <div className={`mt-mac-status mt-mac-status--${macStatus}`} role="status">
           {macStatus === "checking" ? "Checking Mac tailor connection…" : null}
           {macStatus === "ready" ? `Mac connected · ${macStatusDetail}` : null}
           {macStatus === "offline" ? (
-            <>
-              Mac not reachable — {macStatusDetail}
-              {" · "}
-              Ensure <code>com.atriveo.tailor</code> is running and the Cloudflare tunnel is up.
-            </>
+            <>Mac not reachable — {macStatusDetail} · Ensure <code>com.atriveo.tailor</code> is running and the Cloudflare tunnel is up.</>
           ) : null}
         </div>
 
-        <div className="mt-queue-slot">
-          <TailorQueueBar
-            variant="manual"
-            queue={tailorQueue.queue}
-            pendingCount={tailorQueue.pendingCount}
-            doneInQueue={tailorQueue.doneInQueue}
-            failedInQueue={tailorQueue.failedInQueue}
-            totalInQueue={tailorQueue.totalInQueue}
-            overallProgressPct={tailorQueue.overallProgressPct}
-            processLogs={tailorQueue.processLogs}
-            queueTiming={tailorQueue.queueTiming}
-            processing={tailorQueue.processing}
-            runningItem={tailorQueue.runningItem}
-            runningProgressPct={
-              tailorQueue.runningItem
-                ? tailorStatus.getRecord(tailorQueue.runningItem.jobKey)?.progressPct ?? 12
-                : undefined
-            }
-            lastHourlySyncAt={tailorQueue.lastHourlySyncAt}
-            syncMessage={tailorQueue.syncMessage}
-            onSyncNow={() => tailorQueue.runHourlySync(manualJobs, true)}
-            onProcessNow={() => void tailorQueue.processQueue()}
-            onClearDone={() => tailorQueue.clearDone()}
-            onClearTailor={() => tailorQueue.clearTailor()}
-            logsPanelCleared={tailorQueue.logsPanelCleared}
-            onBumpUrgent={tailorQueue.bumpUrgent}
-            onRemoveFromQueue={tailorQueue.removeFromQueue}
-            onReorderPending={tailorQueue.reorderPending}
-          />
-        </div>
-
-        <div className="mt-workbench">
-          <aside className="mt-sessions" aria-label="Manual tailor sessions">
-            <div className="mt-sessions-head">
-              <p className="mt-sessions-label">Sessions</p>
-              <span className="mt-sessions-count">{sessions.length}</span>
-            </div>
-            {sessions.length === 0 ? (
-              <p className="mt-sessions-empty">No jobs yet. Paste a JD below to start.</p>
-            ) : (
-              <ul className="mt-session-list">
-                {sessions.map((session) => {
-                  const record = tailorStatus.getRecord(session.jobKey);
-                  const tone = record?.status === "done"
-                    ? "done"
-                    : record?.status === "running"
-                      ? "running"
-                      : record?.status === "failed"
-                        ? "failed"
-                        : "queued";
-                  return (
-                    <li key={session.id}>
-                      <button
-                        type="button"
-                        className={`mt-session-btn${activeSession?.id === session.id ? " is-active" : ""}`}
-                        onClick={() => setActiveSessionId(session.id)}
-                      >
-                        <span className={`mt-session-dot mt-session-dot--${tone}`} aria-hidden />
-                        <span className="mt-session-copy">
-                          <strong>{isUnknownCompany(session.company) ? "Company not detected" : session.company}</strong>
-                          <span>{displayTitle(session.title)}</span>
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </aside>
-
+        {/* Body: main + right rail */}
+        <div className="mt-body">
           <main className="mt-main">
-            {activeSession ? (
+            {/* Queue bar */}
+            <div className="mt-queue-slot">
+              <TailorQueueBar
+                variant="manual"
+                queue={tailorQueue.queue}
+                pendingCount={tailorQueue.pendingCount}
+                doneInQueue={tailorQueue.doneInQueue}
+                failedInQueue={tailorQueue.failedInQueue}
+                totalInQueue={tailorQueue.totalInQueue}
+                overallProgressPct={tailorQueue.overallProgressPct}
+                processLogs={tailorQueue.processLogs}
+                queueTiming={tailorQueue.queueTiming}
+                processing={tailorQueue.processing}
+                runningItem={tailorQueue.runningItem}
+                runningProgressPct={
+                  tailorQueue.runningItem
+                    ? tailorStatus.getRecord(tailorQueue.runningItem.jobKey)?.progressPct ?? 12
+                    : undefined
+                }
+                lastHourlySyncAt={tailorQueue.lastHourlySyncAt}
+                syncMessage={tailorQueue.syncMessage}
+                onSyncNow={() => tailorQueue.runHourlySync(manualJobs, true)}
+                onProcessNow={() => void tailorQueue.processQueue()}
+                onClearDone={() => tailorQueue.clearDone()}
+                onClearTailor={() => tailorQueue.clearTailor()}
+                logsPanelCleared={tailorQueue.logsPanelCleared}
+                onBumpUrgent={tailorQueue.bumpUrgent}
+                onRemoveFromQueue={tailorQueue.removeFromQueue}
+                onReorderPending={tailorQueue.reorderPending}
+              />
+            </div>
+
+            {/* Active session detail */}
+            {activeSession && (
               <section className="mt-detail" aria-label="Selected job">
                 <div className="mt-detail-head">
                   <div>
-                    <h2>
-                      {isUnknownCompany(activeSession.company) ? "Company not detected" : activeSession.company}
-                    </h2>
+                    <h2>{isUnknownCompany(activeSession.company) ? "Company not detected" : activeSession.company}</h2>
                     <p className="mt-detail-title">{displayTitle(activeSession.title)}</p>
                   </div>
                   <time className="mt-detail-time" dateTime={activeSession.submittedAt}>
@@ -382,29 +340,15 @@ export default function ManualTailor() {
                   stuckQueued={isStuckQueued}
                 />
               </section>
-            ) : (
-              <section className="mt-welcome" aria-label="Getting started">
-                <h2>How it works</h2>
-                <ol className="mt-steps">
-                  <li>
-                    <strong>Paste the full job posting</strong>
-                    <span>Include title, company, URL, and the complete description.</span>
-                  </li>
-                  <li>
-                    <strong>We parse company &amp; role</strong>
-                    <span>LinkedIn-style posts work best. Missing fields fall back to unknown1, unknown-role-1, etc.</span>
-                  </li>
-                  <li>
-                    <strong>Mac tailor runs automatically</strong>
-                    <span>Jobs join the shared queue. PDFs land in your tailored-resumes folder when done.</span>
-                  </li>
-                </ol>
-              </section>
             )}
 
+            {/* Compose card */}
             <section className="mt-compose" aria-label="Paste job description">
               <div className="mt-compose-head">
-                <h2>{activeSession ? "Tailor another job" : "Paste job description"}</h2>
+                <div>
+                  <h2>{activeSession ? "Tailor another job" : "Paste the job description"}</h2>
+                  <p className="mt-compose-sub">Title, company, URL, full JD — anything. We'll parse what we need.</p>
+                </div>
                 <span className="mt-compose-hint">⌘/Ctrl + Enter to submit</span>
               </div>
               <div className="mt-compose-fields">
@@ -415,7 +359,7 @@ export default function ManualTailor() {
                     className="mt-field-input"
                     value={companyOverride}
                     onChange={(e) => setCompanyOverride(e.target.value)}
-                    placeholder="e.g. Heron — leave blank to auto-detect"
+                    placeholder="Heron — auto-detect if blank"
                   />
                 </label>
                 <label className="mt-field">
@@ -425,17 +369,16 @@ export default function ManualTailor() {
                     className="mt-field-input"
                     value={titleOverride}
                     onChange={(e) => setTitleOverride(e.target.value)}
-                    placeholder="e.g. Platform Engineer — leave blank to auto-detect"
+                    placeholder="Platform Engineer — auto-detect"
                   />
                 </label>
               </div>
-
               <textarea
                 className="mt-jd-input"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder={"Paste the entire job posting here — title, company, LinkedIn URL, full JD…"}
-                rows={8}
+                placeholder="Paste the entire job posting here — title, company, LinkedIn URL, full JD…"
+                rows={10}
                 onKeyDown={(e) => {
                   if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && canSubmit) {
                     e.preventDefault();
@@ -443,29 +386,20 @@ export default function ManualTailor() {
                   }
                 }}
               />
-
               {resolvedFields ? (
                 <div className={`mt-parse-preview${isUnknownCompany(resolvedFields.company) || /^unknown-role/i.test(resolvedFields.title) ? " mt-parse-preview--warn" : ""}`}>
                   <span className="mt-parse-label">Will use</span>
-                  <span>
-                    <strong>{resolvedFields.company}</strong>
-                    {" · "}
-                    {resolvedFields.title}
-                  </span>
-                  {(isUnknownCompany(resolvedFields.company) || /^unknown-role/i.test(resolvedFields.title)) && !companyOverride && !titleOverride ? (
-                    <span className="mt-parse-tip">Fill in Company and Role above, or we&apos;ll use unknown names.</span>
-                  ) : null}
+                  <span><strong>{resolvedFields.company}</strong>{" · "}{resolvedFields.title}</span>
+                  {(isUnknownCompany(resolvedFields.company) || /^unknown-role/i.test(resolvedFields.title)) && !companyOverride && !titleOverride
+                    ? <span className="mt-parse-tip">Fill in Company and Role above, or we'll use unknown names.</span>
+                    : null}
                 </div>
               ) : null}
-
               {formError ? <p className="mt-error">{formError}</p> : null}
-
               <div className="mt-compose-foot">
                 <span className="mt-char-count">
                   {description.trim().length} chars
-                  {description.trim().length > 0 && description.trim().length < MIN_JD_CHARS
-                    ? ` · need ${MIN_JD_CHARS}+`
-                    : ""}
+                  {description.trim().length > 0 && description.trim().length < MIN_JD_CHARS ? ` · need ${MIN_JD_CHARS}+` : ""}
                 </span>
                 <button
                   type="button"
@@ -478,6 +412,79 @@ export default function ManualTailor() {
               </div>
             </section>
           </main>
+
+          {/* Right rail */}
+          <aside className="mt-rail" aria-label="Queue and sessions">
+            {/* Sessions */}
+            <div className="mt-rail-card">
+              <div className="mt-rail-head">
+                <span className="mt-rail-label">Sessions</span>
+                <span className="mt-rail-count">{sessions.length}</span>
+              </div>
+              {sessions.length === 0 ? (
+                <p className="mt-sessions-empty">No tailor runs yet. Drop a JD to start.</p>
+              ) : (
+                <ul className="mt-session-list">
+                  {sessions.map((session) => {
+                    const record = tailorStatus.getRecord(session.jobKey);
+                    const tone = record?.status === "done" ? "done"
+                      : record?.status === "running" ? "running"
+                      : record?.status === "failed" ? "failed"
+                      : "queued";
+                    return (
+                      <li key={session.id}>
+                        <button
+                          type="button"
+                          className={`mt-session-btn${activeSession?.id === session.id ? " is-active" : ""}`}
+                          onClick={() => setActiveSessionId(session.id)}
+                        >
+                          <span className={`mt-session-dot mt-session-dot--${tone}`} aria-hidden />
+                          <span className="mt-session-copy">
+                            <strong>{isUnknownCompany(session.company) ? "Company not detected" : session.company}</strong>
+                            <span>{displayTitle(session.title)}</span>
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+
+            {/* Shortcuts */}
+            <div className="mt-rail-card">
+              <div className="mt-rail-head">
+                <span className="mt-rail-label">Shortcuts</span>
+              </div>
+              <ul className="mt-shortcuts">
+                <li><span>Submit JD</span><kbd>⌘ ↵</kbd></li>
+                <li><span>Clear form</span><kbd>⌘ ⌫</kbd></li>
+              </ul>
+            </div>
+
+            {/* How it works — shown only when no sessions */}
+            {sessions.length === 0 && (
+              <div className="mt-rail-card">
+                <div className="mt-rail-head">
+                  <span className="mt-rail-label">How it works</span>
+                </div>
+                <ol className="mt-steps">
+                  <li>
+                    <strong>Paste the full job posting</strong>
+                    <span>Include title, company, URL, and the complete description.</span>
+                  </li>
+                  <li>
+                    <strong>We parse company &amp; role</strong>
+                    <span>LinkedIn posts work best. Missing fields fall back to unknown names.</span>
+                  </li>
+                  <li>
+                    <strong>Mac tailor runs automatically</strong>
+                    <span>PDFs land in your tailored-resumes folder when done.</span>
+                  </li>
+                </ol>
+              </div>
+            )}
+          </aside>
         </div>
       </div>
     </div>
