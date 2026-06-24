@@ -13,7 +13,6 @@ APP_DIR="${ATRIVEO_APP_DIR:-/Users/atishaykasliwal/atriveo-app}"
 LOG="/tmp/atriveo_feed_sync.log"
 LOCK="/tmp/atriveo_feed_sync.lock"
 NODE_BIN="$(resolve_node_bin)"
-PYTHON_BIN="$(resolve_pipeline_python)"
 FEED_SYNC_TIMEOUT="${FEED_SYNC_TIMEOUT:-1800}"
 
 if ! acquire_lock "$LOCK"; then
@@ -25,9 +24,12 @@ echo "[$(ts)] === feed-sync start (timeout=${FEED_SYNC_TIMEOUT}s quick=${EXPORT_
 
 cd "$PIPELINE_DIR" || { echo "[$(ts)] ERROR: cannot cd $PIPELINE_DIR" >> "$LOG"; exit 1; }
 
+# Heal a dead/missing venv (e.g. after a Homebrew python upgrade removed the
+# interpreter the venv was built against), then ensure pandas is present.
+PYTHON_BIN="$(ensure_pipeline_venv)"
 if ! "$PYTHON_BIN" -c "import pandas" 2>/dev/null; then
   echo "[$(ts)] WARN: pandas missing in venv — installing" >> "$LOG"
-  "$PIPELINE_DIR/.venv/bin/pip" install -q pandas >> "$LOG" 2>&1 || true
+  "$PYTHON_BIN" -m pip install -q -r requirements.txt >> "$LOG" 2>&1 || true
 fi
 
 export EXPORT_QUICK="${EXPORT_QUICK:-1}"

@@ -22,10 +22,71 @@ resolve_node_bin() {
   echo "node"
 }
 
+# Pick a usable system python to (re)build a venv with. Prefers a stable,
+# widely-supported minor; avoids brand-new releases that deps may lag behind.
+resolve_base_python() {
+  for candidate in \
+    /opt/homebrew/bin/python3.12 /usr/local/bin/python3.12 \
+    /opt/homebrew/bin/python3.11 /usr/local/bin/python3.11 \
+    /opt/homebrew/bin/python3 /usr/local/bin/python3 \
+    "$(command -v python3 2>/dev/null)"; do
+    if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+  echo "python3"
+}
+
+# Ensure the pipeline venv exists AND its interpreter actually runs. A Homebrew
+# python upgrade can delete the interpreter the venv was built against, leaving a
+# dangling symlink (pip/python fail with "bad interpreter"). When that happens we
+# rebuild the venv from scratch and reinstall requirements. Echoes the path to a
+# working venv python on stdout; logs to $LOG if set. Returns non-zero only if a
+# working venv could not be produced.
+ensure_pipeline_venv() {
+  local pipeline_dir="${JOB_PIPELINE_DIR:-/Users/atishaykasliwal/job-pipeline}"
+  local venv="$pipeline_dir/.venv"
+  local py="$venv/bin/python3"
+  local log="${LOG:-/dev/null}"
+
+  # Healthy if the interpreter exists and can actually execute.
+  if [ -x "$py" ] && "$py" -c "import sys" >/dev/null 2>&1; then
+    echo "$py"
+    return 0
+  fi
+
+  echo "[$(ts)] WARN: pipeline venv missing/dead — rebuilding" >> "$log"
+  local base_py
+  base_py="$(resolve_base_python)"
+  if [ -d "$venv" ]; then
+    mv "$venv" "${venv}.broken-$(date +%Y%m%d-%H%M%S)" 2>>"$log" || rm -rf "$venv"
+  fi
+  if ! "$base_py" -m venv "$venv" >>"$log" 2>&1; then
+    echo "[$(ts)] ERROR: venv rebuild failed (base=$base_py)" >> "$log"
+    return 1
+  fi
+  "$py" -m pip install -q --upgrade pip >>"$log" 2>&1 || true
+  if [ -f "$pipeline_dir/requirements.txt" ]; then
+    "$py" -m pip install -q -r "$pipeline_dir/requirements.txt" >>"$log" 2>&1 || true
+  fi
+
+  if [ -x "$py" ] && "$py" -c "import sys" >/dev/null 2>&1; then
+    echo "[$(ts)] venv rebuilt OK (base=$base_py)" >> "$log"
+    echo "$py"
+    return 0
+  fi
+  echo "[$(ts)] ERROR: venv still unusable after rebuild" >> "$log"
+  echo "$py"
+  return 1
+}
+
 resolve_pipeline_python() {
   local pipeline_dir="${JOB_PIPELINE_DIR:-/Users/atishaykasliwal/job-pipeline}"
   local py="$pipeline_dir/.venv/bin/python3"
-  if [ -x "$py" ]; then
+  # Only treat as usable if the interpreter actually executes (not a dangling
+  # symlink to a removed Homebrew python).
+  if [ -x "$py" ] && "$py" -c "import sys" >/dev/null 2>&1; then
     echo "$py"
     return 0
   fi
