@@ -15,11 +15,14 @@ export const onRequest: PagesFunction<Env> = async ({ request, env, next }) => {
   const url = new URL(request.url);
   const path = url.pathname;
 
-  // Allow assets and auth endpoints through untouched.
+  // Allow assets, auth endpoints, landing page, and login through untouched.
   if (ASSET_RE.test(path)) {
     return next();
   }
   if (PUBLIC_API_PATHS.some((p) => path.startsWith(p))) {
+    return next();
+  }
+  if (path === "/login" || path.startsWith("/landing")) {
     return next();
   }
 
@@ -27,24 +30,11 @@ export const onRequest: PagesFunction<Env> = async ({ request, env, next }) => {
   const token = cookie.match(/atriveo_token=([^;]+)/)?.[1];
   const indexUrl = new URL("/index.html", request.url);
 
-  if (path === "/login") {
-    if (!token) {
-      return env.ASSETS.fetch(indexUrl);
-    }
-    try {
-      const secret = new TextEncoder().encode(env.JWT_SECRET);
-      await jwtVerify(token, secret);
-      return Response.redirect(new URL("/", request.url).toString(), 302);
-    } catch {
-      return env.ASSETS.fetch(indexUrl);
-    }
-  }
-
   if (!token) {
     if (isJsonRoute(path)) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return Response.redirect(new URL("/login", request.url).toString(), 302);
+    return Response.redirect(new URL("/landing/index.html", request.url).toString(), 302);
   }
 
   try {
