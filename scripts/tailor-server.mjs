@@ -85,7 +85,7 @@ const AC_PLANNER = process.env.TAILOR_PLANNER?.trim() || "v2";
 const AC_LEARN = process.env.TAILOR_LEARN === "1";
 const OUT_ROOT = "/Volumes/Kasliwal v2/tailored-resumes";
 const TEMPLATE =
-  "/Users/atishaykasliwal/Desktop/June/Resume claude/tailored/2026-06-12/04-veryai-fullstack-engineer/resume.tex";
+  "/Users/atishaykasliwal/atriveo-app/resume-engine/tailored/2026-06-12/04-veryai-fullstack-engineer/resume.tex";
 
 // IMPORTANT: keep the output SMALL. gemma3:12b under a JSON schema will generate
 // unbounded text (filling keyword arrays + rewriting every bullet verbosely) and

@@ -14,3 +14,6 @@ migration-output/
 Dark Mode Magic/
 Dark Mode Magic.zip
 .DS_Store
+
+# Resume engine (local only — binary PDFs, .tex, personal data)
+resume-engine/

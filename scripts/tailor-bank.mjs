@@ -11,7 +11,7 @@
  */
 import fs from "node:fs";
 
-const ENGINE = "/Users/atishaykasliwal/Desktop/June/Resume claude/Memory";
+const ENGINE = "/Users/atishaykasliwal/atriveo-app/resume-engine/Memory";
 
 // ─── Bullet bank (experience.md) ─────────────────────────────────────────────
 // Lines look like:  `1. ` + "`[py,aws | DATA,FIN | ★]`" + " Architected a ..."
