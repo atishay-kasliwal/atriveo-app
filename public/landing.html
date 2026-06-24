@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atriveo — Self-hosted job search intelligence platform</title>
+  <meta name="description" content="Scrape. Score. Tailor. Apply. A self-hosted, local-first job search platform powered by your own LLM. Open source." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           oklch(0.10 0.005 260);
+      --bg-raised:    oklch(0.13 0.005 260);
+      --card:         oklch(0.17 0.006 260);
+      --card-hi:      oklch(0.20 0.007 260);
+      --border:       oklch(0.24 0.006 260);
+      --border-hi:    oklch(0.32 0.008 260);
+      --fg:           oklch(0.98 0.003 250);
+      --muted:        oklch(0.62 0.008 260);
+      --accent:       oklch(0.66 0.19 255);
+      --accent-soft:  oklch(0.66 0.19 255 / 0.12);
+      --accent-glow:  oklch(0.66 0.19 255 / 0.25);
+      --accent-line:  oklch(0.66 0.19 255 / 0.50);
+      --green:        oklch(0.72 0.17 145);
+      --green-soft:   oklch(0.72 0.17 145 / 0.12);
+      --amber:        oklch(0.78 0.16 75);
+      --radius:       12px;
+      --font: "Inter", system-ui, sans-serif;
+      --mono: "JetBrains Mono", monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Scrollbar ── */
+    * { scrollbar-width: thin; scrollbar-color: oklch(0.32 0.006 260) transparent; }
+    *::-webkit-scrollbar { width: 5px; }
+    *::-webkit-scrollbar-track { background: transparent; }
+    *::-webkit-scrollbar-thumb { background: oklch(0.32 0.006 260); border-radius: 99px; }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      border-bottom: 1px solid var(--border);
+      background: oklch(0.10 0.005 260 / 0.85);
+      backdrop-filter: blur(16px);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 56px; max-width: 1100px; margin: 0 auto; padding: 0 24px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--fg);
+      font-weight: 700; font-size: 17px; letter-spacing: -0.3px;
+    }
+    .nav-logo svg { flex-shrink: 0; }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-link {
+      color: var(--muted); text-decoration: none; font-size: 14px;
+      padding: 6px 12px; border-radius: 8px; transition: color 0.15s, background 0.15s;
+    }
+    .nav-link:hover { color: var(--fg); background: var(--card); }
+    .nav-gh {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--fg); text-decoration: none; font-size: 13px; font-weight: 500;
+      padding: 6px 14px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--card);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .nav-gh:hover { border-color: var(--border-hi); background: var(--card-hi); }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 120px 24px 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 800px; border-radius: 50%;
+      background: radial-gradient(circle, oklch(0.66 0.19 255 / 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 12px; font-weight: 500;
+      color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase;
+      background: var(--accent-soft); border: 1px solid var(--accent-line);
+      padding: 5px 14px; border-radius: 99px; margin-bottom: 28px;
+    }
+    .hero-eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
+    .hero h1 {
+      font-size: clamp(40px, 7vw, 76px); font-weight: 800;
+      letter-spacing: -2.5px; line-height: 1.05;
+      margin-bottom: 24px; max-width: 820px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--accent) 0%, oklch(0.75 0.15 280) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 18px; color: var(--muted); max-width: 560px;
+      line-height: 1.65; margin-bottom: 44px;
+    }
+    .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent); color: oklch(0.99 0 0);
+      font-size: 14px; font-weight: 600; padding: 12px 24px;
+      border-radius: 10px; text-decoration: none; border: none;
+      transition: filter 0.15s, transform 0.1s;
+    }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--card); color: var(--fg);
+      font-size: 14px; font-weight: 500; padding: 12px 24px;
+      border-radius: 10px; text-decoration: none;
+      border: 1px solid var(--border);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .btn-secondary:hover { border-color: var(--border-hi); background: var(--card-hi); }
+
+    /* ── Pipeline strip ── */
+    .pipeline {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; flex-wrap: wrap; margin-top: 64px;
+    }
+    .pipeline-step {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 8px; padding: 16px 24px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      min-width: 120px; text-align: center;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .pipeline-step:hover { border-color: var(--accent-line); color: var(--fg); }
+    .pipeline-step .icon { font-size: 22px; }
+    .pipeline-step .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .pipeline-arrow {
+      color: var(--border-hi); font-size: 18px; padding: 0 4px;
+      flex-shrink: 0;
+    }
+
+    /* ── Section ── */
+    section { padding: 100px 0; }
+    .section-label {
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 44px); font-weight: 800;
+      letter-spacing: -1.2px; line-height: 1.1; margin-bottom: 16px;
+    }
+    .section-sub { font-size: 17px; color: var(--muted); max-width: 520px; line-height: 1.65; }
+
+    /* ── Features grid ── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px; margin-top: 56px;
+    }
+    .feature-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px;
+      transition: border-color 0.2s, transform 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .feature-card:hover { border-color: var(--border-hi); transform: translateY(-2px); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--accent-soft); border: 1px solid var(--accent-line);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; margin-bottom: 16px;
+    }
+    .feature-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.2px; }
+    .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ── How it works ── */
+    .how-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 80px; align-items: center; margin-top: 56px;
+    }
+    @media(max-width: 768px) { .how-grid { grid-template-columns: 1fr; gap: 40px; } }
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: flex; gap: 20px; position: relative;
+      padding-bottom: 32px;
+    }
+    .step:last-child { padding-bottom: 0; }
+    .step-line {
+      position: absolute; left: 15px; top: 36px; bottom: 0;
+      width: 1px; background: var(--border);
+    }
+    .step:last-child .step-line { display: none; }
+    .step-num {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      background: var(--accent-soft); border: 1px solid var(--accent-line);
+      color: var(--accent); font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1;
+    }
+    .step-content h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; margin-top: 4px; }
+    .step-content p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+    .terminal {
+      background: oklch(0.11 0.004 260); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      box-shadow: 0 24px 64px oklch(0 0 0 / 0.4);
+    }
+    .terminal-bar {
+      display: flex; align-items: center; gap: 6px;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      background: var(--card);
+    }
+    .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .terminal-dot.red { background: #ff5f57; }
+    .terminal-dot.yellow { background: #febc2e; }
+    .terminal-dot.green { background: #28c840; }
+    .terminal-title { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-left: 8px; }
+    .terminal-body { padding: 20px; font-family: var(--mono); font-size: 13px; line-height: 1.8; }
+    .t-prompt { color: var(--accent); }
+    .t-cmd { color: var(--fg); }
+    .t-out { color: var(--muted); }
+    .t-ok { color: var(--green); }
+    .t-warn { color: var(--amber); }
+
+    /* ── Stack section ── */
+    .stack-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px; margin-top: 48px;
+    }
+    .stack-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px;
+      font-size: 14px; font-weight: 500;
+      transition: border-color 0.15s;
+    }
+    .stack-item:hover { border-color: var(--border-hi); }
+    .stack-item .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .stack-item .sub { font-size: 12px; color: var(--muted); font-weight: 400; display: block; margin-top: 2px; }
+
+    /* ── Deploy paths ── */
+    .deploy-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 48px; }
+    @media(max-width: 720px) { .deploy-grid { grid-template-columns: 1fr; } }
+    .deploy-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .deploy-card h3 { font-size: 15px; font-weight: 600; }
+    .deploy-card p { font-size: 13px; color: var(--muted); line-height: 1.6; flex: 1; }
+    .deploy-tag {
+      display: inline-block; font-family: var(--mono); font-size: 11px;
+      padding: 3px 10px; border-radius: 6px; font-weight: 500;
+    }
+    .deploy-tag.easy { background: var(--green-soft); color: var(--green); }
+    .deploy-tag.medium { background: oklch(0.78 0.16 75 / 0.12); color: var(--amber); }
+    .deploy-tag.advanced { background: oklch(0.62 0.22 25 / 0.12); color: oklch(0.72 0.2 25); }
+
+    /* ── CTA banner ── */
+    .cta-banner {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 64px 48px;
+      text-align: center; position: relative; overflow: hidden;
+      margin: 0 0 100px;
+    }
+    .cta-banner::before {
+      content: ""; position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
+      width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-banner h2 { font-size: clamp(24px, 4vw, 40px); font-weight: 800; letter-spacing: -1px; margin-bottom: 14px; }
+    .cta-banner p { font-size: 16px; color: var(--muted); margin-bottom: 32px; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+    }
+    .footer-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-logo {
+      display: flex; align-items: center; gap: 8px;
+      color: var(--muted); font-size: 14px;
+      text-decoration: none;
+      cursor: pointer; transition: color 0.15s;
+      user-select: none;
+    }
+    .footer-logo:hover { color: var(--fg); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a {
+      color: var(--muted); text-decoration: none; font-size: 13px;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--fg); }
+    .footer-copy { color: var(--muted); font-size: 13px; }
+
+    /* ── Divider ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+    /* ── Responsive ── */
+    @media(max-width: 640px) {
+      .nav-links { display: none; }
+      .hero h1 { letter-spacing: -1.5px; }
+      .pipeline { flex-direction: column; align-items: stretch; }
+      .pipeline-arrow { transform: rotate(90deg); align-self: center; }
+      .hero-ctas { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
+        <path d="M50 12L88 88H76L50 38L24 88H12L50 12Z" fill="oklch(0.66 0.19 255)"/>
+        <path d="M43 65L50 56L57 65L50 61L43 65Z" fill="oklch(0.66 0.19 255)"/>
+      </svg>
+      Atriveo
+    </a>
+    <div class="nav-links">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#how" class="nav-link">How it works</a>
+      <a href="#deploy" class="nav-link">Deploy</a>
+      <a href="#stack" class="nav-link">Stack</a>
+    </div>
+    <a href="https://github.com/atishay-kasliwal/Atriveo-JD-Extractor" target="_blank" class="nav-gh">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+      GitHub
+    </a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span></span>
+    Open Source · Self-hosted · Local-first
+  </div>
+  <h1>A self-hosted job search<br /><em>intelligence platform.</em></h1>
+  <p class="hero-sub">
+    Scrape job postings from Greenhouse, Lever, and LinkedIn. Score them against your profile.
+    Auto-tailor resumes with a local LLM. Track your entire pipeline — all on your machine.
+  </p>
+  <div class="hero-ctas">
+    <a href="https://github.com/atishay-kasliwal/Atriveo-JD-Extractor" class="btn-primary" target="_blank">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+      View on GitHub
+    </a>
+    <a href="#how" class="btn-secondary">
+      See how it works
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </a>
+  </div>
+
+  <!-- Pipeline strip -->
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="icon">🔍</div>
+      <div class="label">Scrape</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step">
+      <div class="icon">📊</div>
+      <div class="label">Score</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step">
+      <div class="icon">📋</div>
+      <div class="label">Review</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step">
+      <div class="icon">✍️</div>
+      <div class="label">Tailor</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step">
+      <div class="icon">📄</div>
+      <div class="label">Compile</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step">
+      <div class="icon">🚀</div>
+      <div class="label">Apply</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── Features ── -->
+<section id="features">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything your job search needs.<br />Nothing you don't.</h2>
+    <p class="section-sub">Built for engineers who want signal over noise, and their data staying local.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>Multi-source Job Scraper</h3>
+        <p>Pulls from Greenhouse, Lever, and LinkedIn on a configurable schedule. Deduplicates across sources, scores every posting 0–10 against your profile.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Ranked Live Feed</h3>
+        <p>A real-time dashboard showing jobs ranked by relevance. Filter by tier, company, location, or remote. Never scroll through noise again.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✍️</div>
+        <h3>LLM Resume Tailoring</h3>
+        <p>Paste a JD and the local LLM selects your best bullets from your personal bank, assembles a one-page LaTeX resume, and compiles to PDF. Zero API cost.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3>Truth-first Bullet Bank</h3>
+        <p>You write your bullets once, tagged by tech and theme. The LLM selects — it can't hallucinate a skill that isn't in your allowlist.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📡</div>
+        <h3>Recon + Email Finder</h3>
+        <p>Find recruiter emails via Hunter.io. Save contacts, manage outreach templates, compose emails directly from the dashboard.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3>Full Pipeline Tracking</h3>
+        <p>Track every job from discovery → applied → interviewing → offer. Activity feed, weekly archive, applied-but-unclicked audit. Nothing falls through.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚔️</div>
+        <h3>Arsenal (Skills Gap)</h3>
+        <p>Analyzes what the market is asking for vs. what's on your resume. Identifies which skills are appearing in top jobs and missing from your profile.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Local-first by Design</h3>
+        <p>Your resume data, job history, and LLM inference never leave your machine. Cloudflare (optional) stores only job metadata — never personal content.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">☁️</div>
+        <h3>Flexible Deployment</h3>
+        <p>Deploy to Cloudflare Pages in 10 minutes for free. Or self-host entirely on OpenShift / Docker Compose. Your call.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── How it works ── -->
+<section id="how">
+  <div class="container">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">From job posting to PDF resume<br />in one pipeline.</h2>
+
+    <div class="how-grid">
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-line"></div>
+          <div class="step-content">
+            <h4>Scraper runs hourly</h4>
+            <p>A Python scraper polls Greenhouse and Lever's public APIs (no auth needed). Optionally LinkedIn with your credentials. Results are scored and pushed to your server.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-line"></div>
+          <div class="step-content">
+            <h4>Dashboard shows ranked feed</h4>
+            <p>Jobs scored by keyword match, location preference, recency, and source quality. You see the best fits at the top, every time you open the app.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-line"></div>
+          <div class="step-content">
+            <h4>Click Tailor on any job</h4>
+            <p>The local sidecar sends the JD + your bullet bank to Ollama. The LLM selects the best 8–10 bullets, writes a <code style="font-family:var(--mono);font-size:12px;color:var(--accent)">.tex</code> file, and tectonic compiles a PDF in seconds.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-line"></div>
+          <div class="step-content">
+            <h4>Apply and track</h4>
+            <p>Mark the job applied. The activity feed tracks every stage. The Recon page helps you find the hiring manager's email. Templates let you send outreach in one click.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-line"></div>
+          <div class="step-content">
+            <h4>Weekly review + Arsenal</h4>
+            <p>The Weekly page shows jobs you missed. Arsenal analyzes skill trends across every JD you've seen — so you know exactly what to learn next.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+          <div class="terminal-title">atriveo — pipeline:status</div>
+        </div>
+        <div class="terminal-body">
+          <div><span class="t-prompt">$</span> <span class="t-cmd">npm run pipeline:status</span></div>
+          <br />
+          <div><span class="t-out">Atriveo — Service Status</span></div>
+          <br />
+          <div><span class="t-out">Resume Sidecar (localhost:8787)</span></div>
+          <div><span class="t-ok">  ✓  Responding on :8787</span></div>
+          <br />
+          <div><span class="t-out">Ollama</span></div>
+          <div><span class="t-ok">  ✓  Running — 2 models loaded</span></div>
+          <div><span class="t-ok">  ✓  gemma3:12b is available</span></div>
+          <br />
+          <div><span class="t-out">LaunchAgents (macOS)</span></div>
+          <div><span class="t-ok">  ✓  com.atriveo.scraper</span></div>
+          <div><span class="t-ok">  ✓  com.atriveo.feed-sync</span></div>
+          <div><span class="t-ok">  ✓  com.atriveo.tailor</span></div>
+          <br />
+          <div><span class="t-out">Resume Engine</span></div>
+          <div><span class="t-ok">  ✓  experience.md found</span></div>
+          <div><span class="t-ok">  ✓  QUESTION_ANSWERS.md found</span></div>
+          <br />
+          <div><span class="t-prompt">$</span> <span class="t-cmd">python -m scraper.main --dry-run</span></div>
+          <br />
+          <div><span class="t-out">[scraper] Greenhouse: 143 jobs</span></div>
+          <div><span class="t-out">[scraper] Lever: 89 jobs</span></div>
+          <div><span class="t-out">[scraper] Total after dedup: 218 jobs</span></div>
+          <br />
+          <div><span class="t-out">Top 5 (dry run):</span></div>
+          <div><span class="t-ok">  9.5  Senior SWE @ Anthropic [greenhouse]</span></div>
+          <div><span class="t-ok">  9.0  Staff Engineer @ Linear [greenhouse]</span></div>
+          <div><span class="t-ok">  8.5  Backend SWE @ Vercel [greenhouse]</span></div>
+          <div><span class="t-warn">  7.5  SWE II @ Cloudflare [lever]</span></div>
+          <div><span class="t-warn">  7.0  Platform Eng @ Discord [lever]</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── Stack ── -->
+<section id="stack">
+  <div class="container">
+    <div class="section-label">Stack</div>
+    <h2 class="section-title">Built on tools you already know.</h2>
+    <p class="section-sub">No proprietary runtimes, no vendor lock-in. Every component is replaceable.</p>
+
+    <div class="stack-grid">
+      <div class="stack-item">
+        <div class="dot" style="background:oklch(0.66 0.19 255)"></div>
+        <div>React + TypeScript <span class="sub">Dashboard UI</span></div>
+      </div>
+      <div class="stack-item">
+        <div class="dot" style="background:oklch(0.72 0.17 145)"></div>
+        <div>Node.js / Express <span class="sub">API server</span></div>
+      </div>
+      <div class="stack-item">
+        <div class="dot" style="background:oklch(0.78 0.16 75)"></div>
+        <div>Python 3.11 <span class="sub">Job scraper</span></div>
+      </div>
+      <div class="stack-item">
+        <div class="dot" style="background:oklch(0.66 0.19 255)"></div>
+        <div>Ollama + gemma3:12b <span class="sub">Local LLM inference</span></div>
+      </div>
+      <div class="stack-item">
+        <div class="dot" style="background:oklch(0.72 0.17 145)"></div>
+        <div>tectonic <span class="sub">LaTeX → PDF compiler</span></div>
+      </div>
+      <div class="stack-item">
+        <div class="dot" style="background:oklch(0.62 0.22 25)"></div>
+        <div>SQLite / PostgreSQL / MongoDB <span class="sub">DB adapter layer</span></div>
+      </div>
+      <div class="stack-item">
+        <div class="dot" style="background:oklch(0.66 0.19 255)"></div>
+        <div>Cloudflare Pages + D1 <span class="sub">Optional hosting</span></div>
+      </div>
+      <div class="stack-item">
+        <div class="dot" style="background:oklch(0.72 0.17 145)"></div>
+        <div>Docker / OpenShift <span class="sub">Self-hosted deploy</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── Deploy ── -->
+<section id="deploy">
+  <div class="container">
+    <div class="section-label">Deploy</div>
+    <h2 class="section-title">Three ways to run Atriveo.</h2>
+    <p class="section-sub">Pick the path that fits your setup. You can migrate between them at any time.</p>
+
+    <div class="deploy-grid">
+      <div class="deploy-card">
+        <span class="deploy-tag easy">Easiest</span>
+        <h3>Cloudflare Pages</h3>
+        <p>Dashboard hosted on Cloudflare's global CDN. D1 SQLite for storage. API runs as Pages Functions. Scraper and sidecar run locally on your Mac or Linux machine.</p>
+        <a href="https://github.com/atishay-kasliwal/Atriveo-JD-Extractor/blob/main/docs/cloudflare-setup.md" class="btn-secondary" style="font-size:13px;padding:8px 14px;" target="_blank">Setup guide →</a>
+      </div>
+      <div class="deploy-card">
+        <span class="deploy-tag medium">Self-hosted</span>
+        <h3>Docker Compose</h3>
+        <p>Full local stack in one command: <code style="font-family:var(--mono);font-size:11px;color:var(--accent)">docker compose up</code>. App, Postgres, Ollama, scraper, and sidecar all containerized. Works on any machine with Docker.</p>
+        <a href="https://github.com/atishay-kasliwal/Atriveo-JD-Extractor/blob/main/deploy/docker-compose.yml" class="btn-secondary" style="font-size:13px;padding:8px 14px;" target="_blank">View compose →</a>
+      </div>
+      <div class="deploy-card">
+        <span class="deploy-tag advanced">Enterprise</span>
+        <h3>OpenShift / Kubernetes</h3>
+        <p>Full K8s manifests included. App Deployment, hourly scraper CronJob, PostgreSQL StatefulSet, Ollama pod with PVC. One script deploys everything.</p>
+        <a href="https://github.com/atishay-kasliwal/Atriveo-JD-Extractor/blob/main/docs/openshift-setup.md" class="btn-secondary" style="font-size:13px;padding:8px 14px;" target="_blank">Setup guide →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── CTA ── -->
+<section style="padding: 80px 0 0;">
+  <div class="container">
+    <div class="cta-banner">
+      <h2>Your job search.<br />Your machine. Your data.</h2>
+      <p>Clone the repo, run setup, and have a fully automated job search pipeline in under an hour.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="https://github.com/atishay-kasliwal/Atriveo-JD-Extractor" class="btn-primary" target="_blank">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          Get started on GitHub
+        </a>
+        <a href="#how" class="btn-secondary">How it works</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <!-- Hidden login — clicking the logo navigates to /login -->
+      <a class="footer-logo" onclick="window.location.href='/login'" title="Atriveo">
+        <svg width="18" height="18" viewBox="0 0 100 100" fill="none">
+          <path d="M50 12L88 88H76L50 38L24 88H12L50 12Z" fill="currentColor"/>
+          <path d="M43 65L50 56L57 65L50 61L43 65Z" fill="currentColor"/>
+        </svg>
+        Atriveo
+      </a>
+      <div class="footer-links">
+        <a href="https://github.com/atishay-kasliwal/Atriveo-JD-Extractor" target="_blank">GitHub</a>
+        <a href="https://github.com/atishay-kasliwal/Atriveo-JD-Extractor/blob/main/docs/cloudflare-setup.md" target="_blank">Docs</a>
+        <a href="https://github.com/atishay-kasliwal/Atriveo-JD-Extractor/blob/main/CONTRIBUTING.md" target="_blank">Contributing</a>
+        <a href="https://github.com/atishay-kasliwal/Atriveo-JD-Extractor/issues" target="_blank">Issues</a>
+      </div>
+      <span class="footer-copy">MIT License · Open source</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

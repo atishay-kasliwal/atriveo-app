@@ -29,7 +29,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) {
+    // Send unauthenticated visitors to the landing page, not login
+    window.location.replace("/landing/index.html");
+    return null;
+  }
   return <>{children}</>;
 }
 

@@ -1,7 +1,9 @@
-# Visitors to the root see the landing page
-/           /landing/index.html    200
+# Landing page — served as static HTML, takes priority over SPA
+/landing    /landing/index.html    200
+/landing/   /landing/index.html    200
 
-# React SPA — all other paths served by index.html (except /landing/)
-/landing/*  /landing/:splat        200
+# API — pass through to Cloudflare Functions
 /api/*      /api/:splat            200
+
+# React SPA catch-all
 /*          /index.html            200
