@@ -9,3 +9,8 @@ migration-output/
 
 # Claude Code local settings (machine-specific)
 .claude/
+
+# Lovable reference export (local only — not part of the app build)
+Dark Mode Magic/
+Dark Mode Magic.zip
+.DS_Store
