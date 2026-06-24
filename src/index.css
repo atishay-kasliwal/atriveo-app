@@ -5,6 +5,16 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Global dark scrollbar ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.32 0.006 260) transparent;
+}
+*::-webkit-scrollbar { width: 5px; height: 5px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: oklch(0.32 0.006 260); border-radius: 99px; }
+*::-webkit-scrollbar-thumb:hover { background: oklch(0.42 0.008 260); }
+
 /*
  * Atriveo dark theme — ported verbatim from the Lovable "Dark Mode Magic"
  * redesign (Dark Mode Magic/src/styles.css). Color tokens are kept in their
