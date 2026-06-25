@@ -1,4 +1,4 @@
-// Resume output paths: OUT_ROOT/YYYY-MM-DD/HH/NN_company-role
+// Resume output paths: OUT_ROOT/YYYY-MM-DD/company-slug/HH-MM_NN_role-slug
 
 import fs from "node:fs";
 import path from "node:path";
@@ -66,12 +66,16 @@ export function parseSessionHour(raw) {
   return String(n).padStart(2, "0");
 }
 
-/** Ensure OUT_ROOT/date/hour exists; return that hour directory. */
+/**
+ * Return OUT_ROOT/YYYY-MM-DD using TODAY's date (ET), regardless of when the
+ * job was scraped. batchTime is kept for backward-compat but no longer drives
+ * the date folder — only the hour label (used for logging).
+ */
 export function resolveResumeSessionDir(outRoot, batchTime, sessionHourOverride = null) {
-  const parts = etParts(batchTime);
-  const date = parts?.date || new Date().toISOString().slice(0, 10);
-  const hour = parseSessionHour(sessionHourOverride) || parts?.hour || "00";
-  const dateDir = path.join(outRoot, date, hour);
+  const today = etDateKey(new Date()) || new Date().toISOString().slice(0, 10);
+  const batchParts = etParts(batchTime);
+  const hour = parseSessionHour(sessionHourOverride) || batchParts?.hour || "00";
+  const dateDir = path.join(outRoot, today);
   fs.mkdirSync(dateDir, { recursive: true });
-  return { dateDir, date, hour };
+  return { dateDir, date: today, hour };
 }

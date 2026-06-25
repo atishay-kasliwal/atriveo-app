@@ -81,8 +81,15 @@ function workerProfile(status = "idle", currentJobUrl = null) {
 
 function nextSeq(dateDir) {
   if (!fs.existsSync(dateDir)) return 1;
-  const existing = fs.readdirSync(dateDir).filter((d) => /^\d+[_-]/.test(d));
-  return existing.length + 1;
+  // Structure: dateDir/company-slug/HH-MM_NN_role — count all run dirs across companies
+  let total = 0;
+  for (const entry of fs.readdirSync(dateDir)) {
+    const coPath = path.join(dateDir, entry);
+    try {
+      if (fs.statSync(coPath).isDirectory()) total += fs.readdirSync(coPath).length;
+    } catch { /* skip */ }
+  }
+  return total + 1;
 }
 
 async function processOneJob(db) {
