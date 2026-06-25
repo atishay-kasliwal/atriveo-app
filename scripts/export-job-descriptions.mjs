@@ -31,7 +31,9 @@ function activeJobUrls() {
   for (const file of DATA_FILES) {
     const path = resolve(PUBLIC_DIR, file);
     if (!existsSync(path)) continue;
-    const rows = JSON.parse(readFileSync(path, "utf8"));
+    let rows;
+    try { rows = JSON.parse(readFileSync(path, "utf8")); }
+    catch { console.warn(`[export] skipping corrupt file: ${file}`); continue; }
     for (const row of rows) {
       if (row?.job_url) urls.add(row.job_url);
     }

@@ -9,8 +9,10 @@ database_id = "c80daf92-78af-4216-b552-d435ee9ab323"
 migrations_dir = "migrations"
 
 # Secrets (set via Cloudflare Pages dashboard → Settings → Environment Variables):
-# JWT_SECRET  — random 32+ char string for signing session tokens
-# TRACKER_API_URL — Atriveo tracker API base URL, e.g. https://job-tracker-api.katishay.workers.dev
-# TRACKER_API_TOKEN — Bearer token for /integrations/atriveo/applications; server secret only
-# TAILOR_ORIGIN — cloudflared public URL → localhost:8787, e.g. https://tailor-relay.atriveo.com
-# TAILOR_TOKEN  — shared secret (same value on Mac as TAILOR_TOKEN env when running npm run tailor)
+# JWT_SECRET           — random 32+ char string for signing session tokens
+# GOOGLE_CLIENT_ID     — from Google Cloud Console → OAuth 2.0 Client IDs
+# GOOGLE_CLIENT_SECRET — from Google Cloud Console → OAuth 2.0 Client IDs
+# TRACKER_API_URL      — Atriveo tracker API base URL, e.g. https://job-tracker-api.katishay.workers.dev
+# TRACKER_API_TOKEN    — Bearer token for /integrations/atriveo/applications; server secret only
+# TAILOR_ORIGIN        — cloudflared public URL → localhost:8787, e.g. https://tailor-relay.atriveo.com
+# TAILOR_TOKEN         — shared secret (same value on Mac as TAILOR_TOKEN env when running npm run tailor)

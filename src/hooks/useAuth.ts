@@ -18,6 +18,7 @@ export function useAuth() {
       await fetch("/api/auth/logout", { method: "POST" });
     } catch { /* ignore — always clear local state */ }
     setUser(null);
+    window.location.href = "/landing/index.html";
   }
 
   return { user, loading, logout };

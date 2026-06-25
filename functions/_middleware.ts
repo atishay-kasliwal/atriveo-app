@@ -4,7 +4,7 @@ interface Env {
   JWT_SECRET: string;
 }
 
-const PUBLIC_API_PATHS = ["/api/auth/login", "/api/auth/logout"];
+const PUBLIC_API_PATHS = ["/api/auth/login", "/api/auth/logout", "/api/auth/google", "/api/auth/callback", "/api/auth/signup"];
 const ASSET_RE = /\.(js|css|ico|svg|png|jpe?g|gif|webp|avif|woff2?|map)$/i;
 
 function isJsonRoute(path: string): boolean {
@@ -22,7 +22,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, env, next }) => {
   if (PUBLIC_API_PATHS.some((p) => path.startsWith(p))) {
     return next();
   }
-  if (path === "/login" || path.startsWith("/landing")) {
+  if (path === "/login" || path === "/onboarding" || path.startsWith("/landing")) {
     return next();
   }
 

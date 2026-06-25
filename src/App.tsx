@@ -14,6 +14,7 @@ import Resumes from "./pages/Resumes";
 import Activity from "./pages/Activity";
 import ManualTailor from "./pages/ManualTailor";
 import ResumeOptimizer from "./pages/ResumeOptimizer";
+import Onboarding from "./pages/Onboarding";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -42,6 +43,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/" element={
           <ProtectedRoute>
             <Dashboard />

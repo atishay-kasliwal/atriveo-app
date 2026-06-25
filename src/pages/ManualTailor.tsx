@@ -281,71 +281,24 @@ export default function ManualTailor() {
         {/* Body: main + right rail */}
         <div className="mt-body">
           <main className="mt-main">
-            {/* Queue bar */}
-            <div className="mt-queue-slot">
-              <TailorQueueBar
-                variant="manual"
-                queue={tailorQueue.queue}
-                pendingCount={tailorQueue.pendingCount}
-                doneInQueue={tailorQueue.doneInQueue}
-                failedInQueue={tailorQueue.failedInQueue}
-                totalInQueue={tailorQueue.totalInQueue}
-                overallProgressPct={tailorQueue.overallProgressPct}
-                processLogs={tailorQueue.processLogs}
-                queueTiming={tailorQueue.queueTiming}
-                processing={tailorQueue.processing}
-                runningItem={tailorQueue.runningItem}
-                runningProgressPct={
-                  tailorQueue.runningItem
-                    ? tailorStatus.getRecord(tailorQueue.runningItem.jobKey)?.progressPct ?? 12
-                    : undefined
-                }
-                lastHourlySyncAt={tailorQueue.lastHourlySyncAt}
-                syncMessage={tailorQueue.syncMessage}
-                onSyncNow={() => tailorQueue.runHourlySync(manualJobs, true)}
-                onProcessNow={() => void tailorQueue.processQueue()}
-                onClearDone={() => tailorQueue.clearDone()}
-                onClearTailor={() => tailorQueue.clearTailor()}
-                logsPanelCleared={tailorQueue.logsPanelCleared}
-                onBumpUrgent={tailorQueue.bumpUrgent}
-                onRemoveFromQueue={tailorQueue.removeFromQueue}
-                onReorderPending={tailorQueue.reorderPending}
-              />
-            </div>
-
-            {/* Active session detail */}
+            {/* Active session status bar — always at top */}
             {activeSession && (
-              <section className="mt-detail" aria-label="Selected job">
-                <div className="mt-detail-head">
-                  <div>
-                    <h2>{isUnknownCompany(activeSession.company) ? "Company not detected" : activeSession.company}</h2>
-                    <p className="mt-detail-title">{displayTitle(activeSession.title)}</p>
-                  </div>
-                  <time className="mt-detail-time" dateTime={activeSession.submittedAt}>
-                    {new Date(activeSession.submittedAt).toLocaleString()}
-                  </time>
-                </div>
-                <details className="mt-jd-preview">
-                  <summary>Pasted job description</summary>
-                  <p>{activeSession.jdPreview}</p>
-                </details>
-                <ManualTailorAssistantCard
-                  session={activeSession}
-                  record={activeRecord}
-                  queueItem={activeQueueItem}
-                  queuePosition={activeQueuePosition}
-                  onOpenFolder={handleOpenFolder}
-                  onRetry={isStuckQueued ? handleRetrySession : undefined}
-                  stuckQueued={isStuckQueued}
-                />
-              </section>
+              <ManualTailorAssistantCard
+                session={activeSession}
+                record={activeRecord}
+                queueItem={activeQueueItem}
+                queuePosition={activeQueuePosition}
+                onOpenFolder={handleOpenFolder}
+                onRetry={isStuckQueued ? handleRetrySession : undefined}
+                stuckQueued={isStuckQueued}
+              />
             )}
 
             {/* Compose card */}
             <section className="mt-compose" aria-label="Paste job description">
               <div className="mt-compose-head">
                 <div>
-                  <h2>{activeSession ? "Tailor another job" : "Paste the job description"}</h2>
+                  <h2>Tailor a job</h2>
                   <p className="mt-compose-sub">Title, company, URL, full JD — anything. We'll parse what we need.</p>
                 </div>
                 <span className="mt-compose-hint">⌘/Ctrl + Enter to submit</span>
@@ -414,6 +367,17 @@ export default function ManualTailor() {
 
           {/* Right rail */}
           <aside className="mt-rail" aria-label="Queue and sessions">
+            {/* Shortcuts */}
+            <div className="mt-rail-card">
+              <div className="mt-rail-head">
+                <span className="mt-rail-label">Shortcuts</span>
+              </div>
+              <ul className="mt-shortcuts">
+                <li><span>Submit JD</span><kbd>⌘ ↵</kbd></li>
+                <li><span>Clear form</span><kbd>⌘ ⌫</kbd></li>
+              </ul>
+            </div>
+
             {/* Sessions */}
             <div className="mt-rail-card">
               <div className="mt-rail-head">
@@ -450,39 +414,37 @@ export default function ManualTailor() {
               )}
             </div>
 
-            {/* Shortcuts */}
-            <div className="mt-rail-card">
-              <div className="mt-rail-head">
-                <span className="mt-rail-label">Shortcuts</span>
-              </div>
-              <ul className="mt-shortcuts">
-                <li><span>Submit JD</span><kbd>⌘ ↵</kbd></li>
-                <li><span>Clear form</span><kbd>⌘ ⌫</kbd></li>
-              </ul>
+            {/* Tailor Queue */}
+            <div className="mt-rail-card mt-rail-card--queue">
+              <TailorQueueBar
+                variant="manual"
+                queue={tailorQueue.queue}
+                pendingCount={tailorQueue.pendingCount}
+                doneInQueue={tailorQueue.doneInQueue}
+                failedInQueue={tailorQueue.failedInQueue}
+                totalInQueue={tailorQueue.totalInQueue}
+                overallProgressPct={tailorQueue.overallProgressPct}
+                processLogs={tailorQueue.processLogs}
+                queueTiming={tailorQueue.queueTiming}
+                processing={tailorQueue.processing}
+                runningItem={tailorQueue.runningItem}
+                runningProgressPct={
+                  tailorQueue.runningItem
+                    ? tailorStatus.getRecord(tailorQueue.runningItem.jobKey)?.progressPct ?? 12
+                    : undefined
+                }
+                lastHourlySyncAt={tailorQueue.lastHourlySyncAt}
+                syncMessage={tailorQueue.syncMessage}
+                onSyncNow={() => tailorQueue.runHourlySync(manualJobs, true)}
+                onProcessNow={() => void tailorQueue.processQueue()}
+                onClearDone={() => tailorQueue.clearDone()}
+                onClearTailor={() => tailorQueue.clearTailor()}
+                logsPanelCleared={tailorQueue.logsPanelCleared}
+                onBumpUrgent={tailorQueue.bumpUrgent}
+                onRemoveFromQueue={tailorQueue.removeFromQueue}
+                onReorderPending={tailorQueue.reorderPending}
+              />
             </div>
-
-            {/* How it works — shown only when no sessions */}
-            {sessions.length === 0 && (
-              <div className="mt-rail-card">
-                <div className="mt-rail-head">
-                  <span className="mt-rail-label">How it works</span>
-                </div>
-                <ol className="mt-steps">
-                  <li>
-                    <strong>Paste the full job posting</strong>
-                    <span>Include title, company, URL, and the complete description.</span>
-                  </li>
-                  <li>
-                    <strong>We parse company &amp; role</strong>
-                    <span>LinkedIn posts work best. Missing fields fall back to unknown names.</span>
-                  </li>
-                  <li>
-                    <strong>Mac tailor runs automatically</strong>
-                    <span>PDFs land in your tailored-resumes folder when done.</span>
-                  </li>
-                </ol>
-              </div>
-            )}
           </aside>
         </div>
       </div>

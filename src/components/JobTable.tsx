@@ -413,14 +413,8 @@ function JobTableRow({
       <td className="job-table-num" title={resumePathHint}>
         {board || !nested ? displayId : ""}
       </td>
-      <td className="job-table-score">
-        <ScoreCell job={job} board={board} />
-      </td>
       {board ? (
         <>
-          <td className="job-table-job job-table-job--role">
-            <div className="job-table-role-title" title={title}>{title}</div>
-          </td>
           <td className="job-table-job job-table-job--company">
             <div className="job-table-company-cell">
               <CompanyLogo company={co} size="sm" />
@@ -437,37 +431,46 @@ function JobTableRow({
               )}
             </div>
           </td>
+          <td className="job-table-job job-table-job--role">
+            <div className="job-table-role-title" title={title}>{title}</div>
+          </td>
+          <td className="job-table-score">
+            <ScoreCell job={job} board={board} />
+          </td>
         </>
       ) : (
-        <td className="job-table-job">
-          {showCompany ? (
-            <div className="job-table-role-cell">
-              <CompanyLogo company={co} size="sm" />
-              <div className="job-table-role-copy">
-                <div className="job-table-role-title" title={title}>{title}</div>
-                <div className="job-table-role-company" title={co}>{co.toUpperCase()}</div>
+        <>
+          <td className="job-table-job">
+            {showCompany ? (
+              <div className="job-table-role-cell">
+                <CompanyLogo company={co} size="sm" />
+                <div className="job-table-role-copy">
+                  <div className="job-table-role-title" title={title}>{title}</div>
+                  <div className="job-table-role-company" title={co}>{co.toUpperCase()}</div>
+                </div>
+                {onExcludeCompany && (
+                  <button
+                    type="button"
+                    className="job-table-exclude"
+                    onClick={(e) => { e.stopPropagation(); onExcludeCompany(co); }}
+                    title={`Block ${co}`}
+                  >
+                    ⊘
+                  </button>
+                )}
               </div>
-              {onExcludeCompany && (
-                <button
-                  type="button"
-                  className="job-table-exclude"
-                  onClick={(e) => { e.stopPropagation(); onExcludeCompany(co); }}
-                  title={`Block ${co}`}
-                >
-                  ⊘
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="job-table-job-title job-table-job-title--nested" title={title}>{title}</div>
-          )}
-        </td>
-      )}
-      {!board && (
-        <td className="job-table-match">
-          <span className="job-table-stars" aria-label={`Rating ${stars.replace(/☆/g, "").length} of 5`}>{stars}</span>
-          <span className={`job-table-match-label job-table-match-label--${careerOps.key}`}>{careerOps.label}</span>
-        </td>
+            ) : (
+              <div className="job-table-job-title job-table-job-title--nested" title={title}>{title}</div>
+            )}
+          </td>
+          <td className="job-table-score">
+            <ScoreCell job={job} board={board} />
+          </td>
+          <td className="job-table-match">
+            <span className="job-table-stars" aria-label={`Rating ${stars.replace(/☆/g, "").length} of 5`}>{stars}</span>
+            <span className={`job-table-match-label job-table-match-label--${careerOps.key}`}>{careerOps.label}</span>
+          </td>
+        </>
       )}
       <td className="job-table-loc" title={job.location}>{locationShort(job.location)}</td>
       <td className="job-table-level">{job.level || "—"}</td>
@@ -837,9 +840,9 @@ export default function JobTable({
           <colgroup>
             <col className="col-check" />
             <col className="col-num" />
-            <col className="col-score" />
-            <col className="col-role" />
             <col className="col-company" />
+            <col className="col-role" />
+            <col className="col-score" />
             <col className="col-loc" />
             <col className="col-level" />
             <col className="col-tailored" />
@@ -863,9 +866,9 @@ export default function JobTable({
             <th>#</th>
             {variant === "board" && onSortColumn ? (
               <>
-                <SortableHeader label="Score" column="score" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
-                <SortableHeader label="Role" column="company" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Company" column="company" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Role" column="company" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Score" column="score" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Location" column="location" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Level" column="level" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Resume" column="tailored" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
@@ -873,9 +876,9 @@ export default function JobTable({
               </>
             ) : (
               <>
+                <th>{variant === "board" ? "Company" : "Job"}</th>
+                {variant === "board" ? <th>Role</th> : null}
                 <th>Score</th>
-                <th>{variant === "board" ? "Role" : "Job"}</th>
-                {variant === "board" ? <th>Company</th> : null}
                 <th>Location</th>
                 <th>Level</th>
                 {variant === "board" ? <th>Resume</th> : null}

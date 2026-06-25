@@ -770,8 +770,11 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
   const { sendPhase, log: onLog } = ctx;
   const company = job.company || "unknown";
   const role = job.title || "role";
-  const folder = `${String(seq).padStart(2, "0")}-${slug(company, 24)}-${slug(role, 30)}`;
-  const dir = path.join(dateDir, folder);
+  // dateDir is OUT_ROOT/YYYY-MM-DD; company dirs live inside it
+  const companyDir = path.join(dateDir, slug(company, 32));
+  const ts = new Date().toISOString().slice(11, 16).replace(":", "-"); // HH-MM
+  const folder = `${ts}_${String(seq).padStart(2, "0")}_${slug(role, 40)}`;
+  const dir = path.join(companyDir, folder);
 
   onLog?.("step", `━━━ Job ${seq} · ${company} · ${role} ━━━`);
   onLog?.("step", `Creating output directory…`);
@@ -1031,11 +1034,18 @@ const server = http.createServer(async (req, res) => {
 
         const useModel = model || DEFAULT_MODEL;
         const date = new Date().toISOString().slice(0, 10);
+        // Structure: OUT_ROOT/YYYY-MM-DD/company-slug/HH-MM_NN_role-slug/
         const dateDir = path.join(OUT_ROOT, date);
-
         fs.mkdirSync(dateDir, { recursive: true });
-        const existing = fs.readdirSync(dateDir).filter((d) => /^\d+-/.test(d));
-        let seq = existing.length;
+        let existingToday = 0;
+        try {
+          for (const co of fs.readdirSync(dateDir)) {
+            const coPath = path.join(dateDir, co);
+            if (!fs.statSync(coPath).isDirectory()) continue;
+            existingToday += fs.readdirSync(coPath).length;
+          }
+        } catch { /* dateDir may be empty */ }
+        let seq = existingToday;
 
         res.writeHead(200, {
           "Content-Type": "application/x-ndjson",
@@ -1053,7 +1063,7 @@ const server = http.createServer(async (req, res) => {
           runLog("think", `AC pipeline · planner=${AC_PLANNER} · evidence bank (no Gemma rewrites)`);
         }
         runLog("result", `External drive mounted · ${path.dirname(OUT_ROOT)}`);
-        runLog("think", `Output date folder · ${dateDir} · ${existing.length} existing run(s) today`);
+        runLog("think", `Output date folder · ${dateDir} · ${existingToday} run(s) today`);
         send({ type: "start", total: jobs.length, dateDir, model: USE_LEGACY ? useModel : `ac:${AC_PLANNER}` });
         runLog("result", USE_LEGACY ? `Stream started · model=${useModel}` : `Stream started · AC pipeline v2`);
         heartbeat = startStreamHeartbeat(send);
@@ -1116,41 +1126,46 @@ const server = http.createServer(async (req, res) => {
     try {
       const out = [];
       if (fs.existsSync(OUT_ROOT)) {
-        // newest date dirs first, scan up to 5 days back
+        // Structure: OUT_ROOT/YYYY-MM-DD/company-slug/HH-MM_NN_role/
         const dateDirs = fs.readdirSync(OUT_ROOT)
           .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
-          .sort()
-          .reverse()
-          .slice(0, 5);
+          .sort().reverse().slice(0, 7);
         for (const dd of dateDirs) {
           const dateDir = path.join(OUT_ROOT, dd);
-          let folders;
-          try { folders = fs.readdirSync(dateDir).filter((d) => /^\d+-/.test(d)); }
+          let companyDirs;
+          try { companyDirs = fs.readdirSync(dateDir).filter((d) => !d.startsWith(".")); }
           catch { continue; }
-          for (const folder of folders) {
-            const dir = path.join(dateDir, folder);
-            const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
-            if (!fs.existsSync(pdfPath)) continue; // only finished resumes
-            let meta = {};
-            try { meta = JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8")); } catch { /* none */ }
-            const ats = readAtsFromDir(dir);
-            let explain = null;
-            try { explain = JSON.parse(fs.readFileSync(path.join(dir, "explain.json"), "utf8")); } catch { /* none */ }
-            out.push({
-              folder,
-              dateDir: dd,
-              dir,
-              pdfPath,
-              company: meta.company || folder,
-              title: meta.role || "",
-              jobUrl: meta.url || "",
-              score: meta.score_pct ?? null,
-              ats,
-              tailoredAt: meta.tailored_at || null,
-              identity: explain?.engineering_identity?.primary || null,
-              informationGain: explain?.information_gain ?? null,
-              borderline: Boolean(explain?.borderline),
-            });
+          for (const co of companyDirs) {
+            const coDir = path.join(dateDir, co);
+            if (!fs.statSync(coDir).isDirectory()) continue;
+            let folders;
+            try { folders = fs.readdirSync(coDir); }
+            catch { continue; }
+            for (const folder of folders) {
+              const dir = path.join(coDir, folder);
+              const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
+              if (!fs.existsSync(pdfPath)) continue;
+              let meta = {};
+              try { meta = JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8")); } catch { /* none */ }
+              const ats = readAtsFromDir(dir);
+              let explain = null;
+              try { explain = JSON.parse(fs.readFileSync(path.join(dir, "explain.json"), "utf8")); } catch { /* none */ }
+              out.push({
+                folder,
+                dateDir: dd,
+                dir,
+                pdfPath,
+                company: meta.company || co,
+                title: meta.role || "",
+                jobUrl: meta.url || "",
+                score: meta.score_pct ?? null,
+                ats,
+                tailoredAt: meta.tailored_at || null,
+                identity: explain?.engineering_identity?.primary || null,
+                informationGain: explain?.information_gain ?? null,
+                borderline: Boolean(explain?.borderline),
+              });
+            }
           }
         }
       }
@@ -1171,26 +1186,28 @@ const server = http.createServer(async (req, res) => {
       try {
         const { company, title } = JSON.parse(raw);
         if (!company || !title) throw new Error("company and title required");
-        const date = new Date().toISOString().slice(0, 10);
-        const dateDir = path.join(OUT_ROOT, date);
-        if (!fs.existsSync(dateDir)) {
-          res.writeHead(200, { "Content-Type": "application/json" });
-          return res.end(JSON.stringify({ ok: true, found: false }));
-        }
-        const compSlug = slug(company, 24);
-        const titleSlug = slug(title, 30);
-        const dirs = fs.readdirSync(dateDir).filter((d) => /^\d+-/.test(d));
-        // find the most recent folder matching company+title
-        let best = null;
-        for (const d of dirs.reverse()) {
-          if (d.includes(compSlug) && d.includes(titleSlug)) { best = d; break; }
-          if (d.includes(compSlug)) { best = d; break; }
+        const compSlug = slug(company, 32);
+        const titleSlug = slug(title, 40);
+        // Scan last 3 date dirs for this company
+        const dateDirs = fs.existsSync(OUT_ROOT)
+          ? fs.readdirSync(OUT_ROOT).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort().reverse().slice(0, 3)
+          : [];
+        let best = null; let bestDir = null;
+        for (const dd of dateDirs) {
+          const coDir = path.join(OUT_ROOT, dd, compSlug);
+          if (!fs.existsSync(coDir)) continue;
+          const runs = fs.readdirSync(coDir).sort().reverse();
+          for (const d of runs) {
+            if (d.includes(titleSlug)) { best = d; bestDir = coDir; break; }
+          }
+          if (!best && runs.length) { best = runs[0]; bestDir = coDir; }
+          if (best) break;
         }
         if (!best) {
           res.writeHead(200, { "Content-Type": "application/json" });
           return res.end(JSON.stringify({ ok: true, found: false }));
         }
-        const dir = path.join(dateDir, best);
+        const dir = path.join(bestDir, best);
         const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
         const hasPdf = fs.existsSync(pdfPath);
         const ats = readAtsFromDir(dir);

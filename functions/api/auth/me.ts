@@ -15,7 +15,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   try {
     const secret = new TextEncoder().encode(env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
-    return Response.json({ user: { email: payload.email, name: payload.name } });
+    return Response.json({ user: { email: payload.email, name: payload.name, avatar: payload.avatar ?? null } });
   } catch {
     return Response.json({ user: null }, { status: 401 });
   }
