@@ -869,7 +869,7 @@
     "summary": "**Overview** **Who we are** Collaborative.",
     "title": "Software Engineer",
     "ats_score": 63,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4432517656",
@@ -890,7 +890,7 @@
     "summary": "* Collaborate with engineering teams to deploy production\\-ready solutions.",
     "title": "Data Scientist - ML Specialist",
     "ats_score": 33,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4432499791",
@@ -1404,7 +1404,7 @@
     "summary": "As an AI / Infrastructure Engineer focused on LLM systems, you will help design and operate the production backbone for deploying and scaling large language models.",
     "title": "AI/Backend Engineer | San Francisco | $250k + equity",
     "ats_score": 60,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "session_id": "2026-06-24T05:06:50Z",
@@ -1467,7 +1467,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/08_bae-systems-inc-software-engineer"
     },
     "ats_score": 41,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4432502027",
@@ -1876,7 +1876,7 @@
     "summary": "**Department** Provost Research Computing Center ****About The Department**** The University of Chicago Research Computing Center (RCC), a unit within the Office of Research, provides advanced resear\u2026",
     "title": "Computational Scientist \u2013 AI/ML Engineer for Climate Science",
     "ats_score": 36,
-    "fit_score": 10
+    "fit_score": 11
   },
   {
     "session_id": "2026-06-24T05:06:50Z",
@@ -2464,21 +2464,25 @@
     "summary": "This role has been designed as \u2018\u2019Onsite\u2019 with an expectation that you will primarily work from an HPE office.",
     "title": "Software Engineer I -Embedded System",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "failed",
+      "stage": "PDF",
       "fingerprint": null,
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:09.812Z",
-      "error": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:20:21.746Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.235 (need \u2265 0.45).",
       "company": "Hewlett Packard Enterprise",
       "title": "Software Engineer I -Embedded System",
       "resume_slot": 13,
       "session_hour": "01",
-      "batch_time": "2026-06-25T05:47:33Z",
+      "batch_time": "2026-06-24T07:06:08Z",
       "session_id": "2026-06-24T07:06:11Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": false,
+      "folder": "13_hewlett-packard-enterpri-software-engineer-i-embedded-s",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/13_hewlett-packard-enterpri-software-engineer-i-embedded-s"
     },
     "ats_score": 33,
     "fit_score": 2
@@ -3415,7 +3419,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/05/01_ebay-backend-engineer-iii-ebay-live"
     },
     "ats_score": 68,
-    "fit_score": 16
+    "fit_score": 15
   },
   {
     "session_id": "2026-06-24T09:07:16Z",
@@ -5021,7 +5025,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/07/35_fanatics-android-software-engineer"
     },
     "ats_score": 50,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-06-24T11:09:40Z",
@@ -5115,7 +5119,7 @@
     "summary": "Join us in building the future of finance.",
     "title": "Software Engineer",
     "ats_score": 16,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-06-24T11:09:40Z",
@@ -5262,7 +5266,7 @@
     "summary": "**Job Description** We have an exciting and rewarding opportunity for you to take your software engineering career to the next level.",
     "title": "Software Engineer III - AI/ML, Java/Python",
     "ats_score": 52,
-    "fit_score": 11
+    "fit_score": 12
   },
   {
     "session_id": "2026-06-24T11:09:40Z",
@@ -5587,13 +5591,13 @@
     "summary": "*A great experience starts with you!* Join our team to help create and develop the future of live entertainment and sports in Orange County!",
     "title": "Data Scientist",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "failed",
+      "stage": "PDF",
       "fingerprint": null,
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:14.796Z",
-      "error": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:23:47.635Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.419 (need \u2265 0.45).",
       "company": "OC Sports & Entertainment",
       "title": "Data Scientist",
       "resume_slot": 24,
@@ -5601,7 +5605,11 @@
       "batch_time": "2026-06-24T11:09:33Z",
       "session_id": "2026-06-24T11:09:40Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": false,
+      "folder": "24_oc-sports-entertainment-data-scientist",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/24_oc-sports-entertainment-data-scientist"
     },
     "ats_score": 50,
     "fit_score": 4
@@ -6633,7 +6641,7 @@
     "summary": "*To get the best candidate experience, please consider applying for a maximum of 3 roles within 12 months to ensure you are not duplicating efforts.* Job Category Software Engineering Job Details **A\u2026",
     "title": "Software Engineering SMTS - LLM Gateway",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-06-24T13:12:19Z",
@@ -7619,21 +7627,25 @@
     "summary": "**Key Responsibilities** * Develop and implement control algorithms using MATLAB/Simulink and Model\\-Based Design methodologies. * Develop and maintain Simulink subsystem architectures.",
     "title": "Embedded Software Engineer",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "9d66fbb56c61984b28e59aea464bc67f6d674933ab6519caabaeb930dbf9d70e",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:17.715Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:27:01.817Z",
       "error": null,
       "company": "Veridian Tech Solutions, Inc.",
       "title": "Embedded Software Engineer",
       "resume_slot": 58,
       "session_hour": "08",
-      "batch_time": "2026-06-25T12:55:33Z",
+      "batch_time": "2026-06-24T13:12:15Z",
       "session_id": "2026-06-24T13:12:19Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": false,
+      "folder": "58_veridian-tech-solutions--embedded-software-engineer",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/08/58_veridian-tech-solutions--embedded-software-engineer/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/08/58_veridian-tech-solutions--embedded-software-engineer"
     },
     "ats_score": 0,
     "fit_score": 5
@@ -9522,21 +9534,25 @@
     "summary": "Software engineers in this role manage project priorities, deadlines, and deliverables while designing, developing, testing, deploying, maintaining, and enhancing software solutions.",
     "title": "Software Engineer",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "failed",
+      "stage": "PDF",
       "fingerprint": null,
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:12.707Z",
-      "error": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:23:20.162Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.396 (need \u2265 0.45).",
       "company": "Underdog.io -Apply to top tech jobs in 60 seconds. A place where companies apply to you",
       "title": "Software Engineer",
       "resume_slot": 36,
       "session_hour": "08",
-      "batch_time": "2026-06-25T12:55:33Z",
+      "batch_time": "2026-06-24T15:10:17Z",
       "session_id": "2026-06-24T15:10:22Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": false,
+      "folder": "36_underdog-io-apply-to-top-software-engineer",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/08/36_underdog-io-apply-to-top-software-engineer"
     },
     "ats_score": 35,
     "fit_score": 5
@@ -9769,7 +9785,7 @@
       "updated_at": "2026-06-24T15:35:11.672Z"
     },
     "ats_score": 25,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-06-24T15:10:22Z",
@@ -10189,21 +10205,25 @@
     "summary": "**What You'll Be Doing** * Design, provision, and maintain scalable lab environments on\\-premises and on cloud platforms using Infrastructure as Code tools.",
     "title": "Software Engineer",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "2842f21dd4a2a2b5eecfa071588b64b1ad91ec1a2391b5172d2dd987f72d8730",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:13.771Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:27:02.113Z",
       "error": null,
       "company": "Hyra",
       "title": "Software Engineer",
       "resume_slot": 65,
       "session_hour": "15",
-      "batch_time": "2026-06-25T19:41:37Z",
+      "batch_time": "2026-06-24T15:10:17Z",
       "session_id": "2026-06-24T15:10:22Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "65_hyra-software-engineer",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/15/65_hyra-software-engineer/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/15/65_hyra-software-engineer"
     },
     "ats_score": 62,
     "fit_score": 7
@@ -14151,21 +14171,25 @@
     "summary": "Req184423 **Position Purpose** The Software Engineer is responsible for assisting in developing and designing a product that Home Depot customers and associates will love.",
     "title": "Software Engineer (Remote)",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "b9cc3155681eed8d8ff27e3835751406692318547d2f1930efa6a9b13f065169",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:12.855Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:25:42.960Z",
       "error": null,
       "company": "The Home Depot",
       "title": "Software Engineer (Remote)",
       "resume_slot": 49,
       "session_hour": "14",
-      "batch_time": "2026-06-25T18:26:46Z",
+      "batch_time": "2026-06-24T18:11:30Z",
       "session_id": "2026-06-24T18:11:33Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": false,
+      "folder": "49_the-home-depot-software-engineer-remote",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/14/49_the-home-depot-software-engineer-remote/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/14/49_the-home-depot-software-engineer-remote"
     },
     "ats_score": 50,
     "fit_score": 6
@@ -16751,7 +16775,7 @@
     "summary": "* Strong experience building scalable backend systems using Java, Spring Boot, and AWS cloud technologies.",
     "title": "Software Engineer III",
     "ats_score": 42,
-    "fit_score": 15
+    "fit_score": 14
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4432853726",
@@ -17150,7 +17174,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/16/18_reflow-junior-software-engineer-latin"
     },
     "ats_score": 50,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4431886394",
@@ -18915,7 +18939,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/17/35_quantifind-applied-ai-engineer"
     },
     "ats_score": 28,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4410359310",
@@ -22421,12 +22445,12 @@
     "summary": "**Description** Our team is involved with pre\\-silicon design verification for custom IP.",
     "title": "Applied Scientist, Machine Learning Accelerator - Annapurna Labs",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "e2f3f311df967e4e6bcdaa1cd356276a61bf1c5b97a0a77813ee759dd5c7c9d5",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:14.709Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:27:02.561Z",
       "error": null,
       "company": "Amazon Web Services (AWS)",
       "title": "Applied Scientist, Machine Learning Accelerator - Annapurna Labs",
@@ -22435,7 +22459,11 @@
       "batch_time": "2026-06-25T00:33:08Z",
       "session_id": "2026-06-25T00:33:11Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "20_amazon-web-services-aws-applied-scientist-machine-lear",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/20_amazon-web-services-aws-applied-scientist-machine-lear/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/20_amazon-web-services-aws-applied-scientist-machine-lear"
     },
     "ats_score": 57,
     "fit_score": 5
@@ -22501,13 +22529,13 @@
     "summary": "**About Harbinger** Harbinger is an American commercial electric vehicle (EV) company on a mission to transform an industry starving for innovation.",
     "title": "Software Integration Engineer, ADAS",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "failed",
+      "stage": "PDF",
       "fingerprint": null,
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:15.783Z",
-      "error": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:27:02.765Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.442 (need \u2265 0.45).",
       "company": "Harbinger",
       "title": "Software Integration Engineer, ADAS",
       "resume_slot": 34,
@@ -22515,7 +22543,11 @@
       "batch_time": "2026-06-25T00:33:08Z",
       "session_id": "2026-06-25T00:33:11Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": false,
+      "folder": "34_harbinger-software-integration-engineer-",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/34_harbinger-software-integration-engineer-"
     },
     "ats_score": 33,
     "fit_score": 4
@@ -22885,12 +22917,12 @@
     "summary": "**Description** MULTIPLE POSITIONS AVAILABLE Employer: Amazon Studios LLC Offered Position: Software Dev Engineer II \u2013 AMZ010452 Job Location: Culver City, CA Position Responsibilities: Design, devel\u2026",
     "title": "SoftwareDev Eng II \u2013 AMZ010452",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "59483f9749d7fcb0a5c90608adf487f65be4d961892dbed521acd7dc03a8f3ac",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:15.714Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:20:22.067Z",
       "error": null,
       "company": "Amazon",
       "title": "SoftwareDev Eng II \u2013 AMZ010452",
@@ -22899,7 +22931,11 @@
       "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "28_amazon-softwaredev-eng-ii-amz010452",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/28_amazon-softwaredev-eng-ii-amz010452/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/28_amazon-softwaredev-eng-ii-amz010452"
     },
     "ats_score": 50,
     "fit_score": 2
@@ -22923,12 +22959,12 @@
     "summary": "**Company Description** **Who we are** **Moveworks is the Agentic AI Assistant platform that empowers the entire workforce.** **Our platform enables employees to converse with all of their business s\u2026",
     "title": "Machine Learning Engineer, Agentic AI Systems - Moveworks",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "d86583c0a0c3bd6331b63a8285d384ffe39aeaf338ec65111786c8a378251285",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:16.719Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:20:46.064Z",
       "error": null,
       "company": "ServiceNow",
       "title": "Machine Learning Engineer, Agentic AI Systems - Moveworks",
@@ -22937,7 +22973,11 @@
       "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "36_servicenow-machine-learning-engineer-agen",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/36_servicenow-machine-learning-engineer-agen/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/36_servicenow-machine-learning-engineer-agen"
     },
     "ats_score": 20,
     "fit_score": 6
@@ -23150,7 +23190,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/21/16_loft-orbital-ground-software-solutions-engi"
     },
     "ats_score": 71,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4427793068",
@@ -23297,13 +23337,13 @@
     "summary": "**Who We Are** Nuro believes self\\-driving vehicles are the most immediate and profound opportunity for AI to drive positive change in the physical world.",
     "title": "Data Scientist Intern",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "failed",
+      "stage": "PDF",
       "fingerprint": null,
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:13.708Z",
-      "error": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:23:47.839Z",
+      "error": "Intern role \u2014 senior experience profile; skip unless targeting internships",
       "company": "Nuro",
       "title": "Data Scientist Intern",
       "resume_slot": 15,
@@ -23311,7 +23351,11 @@
       "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": false,
+      "folder": "15_nuro-data-scientist-intern",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/15_nuro-data-scientist-intern"
     },
     "ats_score": 75,
     "fit_score": 7
@@ -23398,12 +23442,12 @@
     "summary": "**About The Role** What if your Python expertise could directly shape the infrastructure powering the world's most advanced AI systems?",
     "title": "Data Platform Engineer (Python)",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "0d0e88e2387d54ef4c1853d315d95fda93dbebe9485629ca3553f40c521eef85",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:12.712Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:24:19.175Z",
       "error": null,
       "company": "Alignerr",
       "title": "Data Platform Engineer (Python)",
@@ -23412,7 +23456,11 @@
       "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "11_alignerr-data-platform-engineer-python",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/11_alignerr-data-platform-engineer-python/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/11_alignerr-data-platform-engineer-python"
     },
     "ats_score": 75,
     "fit_score": 7
@@ -23478,21 +23526,25 @@
     "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
     "title": "Software Engineer, Platform ($200k-$250k + Equity) at Duckbill",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "faf118f627b51a0248f10d431ae0525bbe6bf12d796fd0edaba453f80597e7fb",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:11.724Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:24:19.579Z",
       "error": null,
       "company": "Jack & Jill",
       "title": "Software Engineer, Platform ($200k-$250k + Equity) at Duckbill",
       "resume_slot": 15,
       "session_hour": "01",
-      "batch_time": "2026-06-25T05:47:33Z",
+      "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "15_jack-jill-software-engineer-platform-200",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/15_jack-jill-software-engineer-platform-200/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/15_jack-jill-software-engineer-platform-200"
     },
     "ats_score": 50,
     "fit_score": 8
@@ -23516,21 +23568,25 @@
     "summary": "* Collaborate directly with therapists to observe their workflows, translating user needs into autonomous AI agents and seamless product experiences.",
     "title": "Founding Software Engineer ($160k-$210k + Equity) at Origin Therapy",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "01c594ff9470a8dd5259333f35bfcad586182e0bf8750eb233e5088eabbf8a68",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:14.708Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:25:04.635Z",
       "error": null,
       "company": "Jack & Jill",
       "title": "Founding Software Engineer ($160k-$210k + Equity) at Origin Therapy",
       "resume_slot": 23,
       "session_hour": "01",
-      "batch_time": "2026-06-25T05:47:33Z",
+      "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "23_jack-jill-founding-software-engineer-160",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/23_jack-jill-founding-software-engineer-160/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/23_jack-jill-founding-software-engineer-160"
     },
     "ats_score": 25,
     "fit_score": 4
@@ -23596,21 +23652,25 @@
     "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
     "title": "Machine Learning Engineer: LLM Interpretability & Systems ($175K \u2013 $250K + Equity) at CTGT, Inc.",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "d484785872f685bb22ac96a7248a8c88eb53b37ebefa379a90fda6991d9b5b18",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:14.716Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:25:43.326Z",
       "error": null,
       "company": "Jack & Jill",
       "title": "Machine Learning Engineer: LLM Interpretability & Systems ($175K \u2013 $250K + Equity) at CTGT, Inc.",
       "resume_slot": 24,
       "session_hour": "01",
-      "batch_time": "2026-06-25T05:47:33Z",
+      "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "24_jack-jill-machine-learning-engineer-llm-",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/24_jack-jill-machine-learning-engineer-llm-/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/24_jack-jill-machine-learning-engineer-llm-"
     },
     "ats_score": 33,
     "fit_score": 4
@@ -23634,21 +23694,25 @@
     "summary": "**Job Description** As the Founding AI Engineer at Tyle, you will architect and scale the core computer vision system from day zero.",
     "title": "Founding AI Engineer ($170k \u2013 $225k + Equity) at Tyle",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "45b7e194e063b7c68c2fd5f254aed1935a2729dbfa0f704ebcc6fb8d22ec3910",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:16.711Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:25:43.688Z",
       "error": null,
       "company": "Jack & Jill",
       "title": "Founding AI Engineer ($170k \u2013 $225k + Equity) at Tyle",
       "resume_slot": 30,
       "session_hour": "01",
-      "batch_time": "2026-06-25T05:47:33Z",
+      "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "30_jack-jill-founding-ai-engineer-170k-225k",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/30_jack-jill-founding-ai-engineer-170k-225k/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/30_jack-jill-founding-ai-engineer-170k-225k"
     },
     "ats_score": 0,
     "fit_score": 3
@@ -23756,12 +23820,12 @@
     "summary": "NOIRLab's Data Management and Software division is seeking a Software Development Engineer II who will integrate and optimize backend technologies, observatory control systems and infrastructure engi\u2026",
     "title": "Software Engineer II",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "acd234a8e3fe0bcd6bb6b6337698564f3db0511fdf4f07dd9956fdab657c0ec3",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:15.712Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:27:03.062Z",
       "error": null,
       "company": "Association of Universities for Research in Astronomy",
       "title": "Software Engineer II",
@@ -23770,7 +23834,11 @@
       "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "29_association-of-universit-software-engineer-ii",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/29_association-of-universit-software-engineer-ii/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/29_association-of-universit-software-engineer-ii"
     },
     "ats_score": 58,
     "fit_score": 12
@@ -23794,21 +23862,25 @@
     "summary": "**Key Projects and Responsibilities** The position will contribute to two primary workstreams: * Development and maintenance of Java\\-based data processing systems and distributed caching pipelines.",
     "title": "Software Engineer (III)- #26-14817",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "failed",
+      "stage": "PDF",
       "fingerprint": null,
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:13.710Z",
-      "error": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:27:03.288Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.327 (need \u2265 0.45).",
       "company": "US Tech Solutions",
       "title": "Software Engineer (III)- #26-14817",
       "resume_slot": 19,
       "session_hour": "01",
-      "batch_time": "2026-06-25T05:47:33Z",
+      "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": false,
+      "folder": "19_us-tech-solutions-software-engineer-iii-26-14817",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/19_us-tech-solutions-software-engineer-iii-26-14817"
     },
     "ats_score": 75,
     "fit_score": 5
@@ -23832,12 +23904,12 @@
     "summary": "**Job Responsibilities** * Design and develop guided diagnostic procedures for heavy\u2011duty commercial vehicle electronic systems within an off\u2011board diagnostics platform.",
     "title": "Diagnostic Software Engineer",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "d2aa76f733afc68a5dc575d6b4ac449771dd9a05362349e76a0800044fb803c4",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:15.711Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:27:03.642Z",
       "error": null,
       "company": "PACCAR",
       "title": "Diagnostic Software Engineer",
@@ -23846,7 +23918,11 @@
       "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "31_paccar-diagnostic-software-engineer",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/31_paccar-diagnostic-software-engineer/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/31_paccar-diagnostic-software-engineer"
     },
     "ats_score": 37,
     "fit_score": 6
@@ -23870,21 +23946,25 @@
     "summary": "**Machine Learning Engineer (AI Data Trainer)** **About The Role** What if your machine learning expertise could directly shape how AI reasons through complex problems \u2014 at a foundational level, befo\u2026",
     "title": "Machine Learning Engineer",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "failed",
+      "stage": "PDF",
       "fingerprint": null,
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:17.715Z",
-      "error": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:27:03.831Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.373 (need \u2265 0.45).",
       "company": "Alignerr",
       "title": "Machine Learning Engineer",
       "resume_slot": 33,
       "session_hour": "01",
-      "batch_time": "2026-06-25T05:47:33Z",
+      "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": false,
+      "folder": "33_alignerr-machine-learning-engineer",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/33_alignerr-machine-learning-engineer"
     },
     "ats_score": 0,
     "fit_score": 3
@@ -23908,21 +23988,25 @@
     "summary": "**Machine Learning Engineer \\- AI Data Trainer** * Location: Remote **About The Job** At Alignerr, we partner with the world\u2019s leading AI research teams and labs to build and train cutting\\-edge AI m\u2026",
     "title": "Machine Learning Engineer",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "failed",
+      "stage": "PDF",
       "fingerprint": null,
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:17.717Z",
-      "error": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:27:04.043Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.373 (need \u2265 0.45).",
       "company": "Alignerr",
       "title": "Machine Learning Engineer",
       "resume_slot": 32,
       "session_hour": "01",
-      "batch_time": "2026-06-25T05:47:33Z",
+      "batch_time": "2026-06-25T01:44:09Z",
       "session_id": "2026-06-25T01:44:12Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": false,
+      "folder": "32_alignerr-machine-learning-engineer",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/32_alignerr-machine-learning-engineer"
     },
     "ats_score": 0,
     "fit_score": 3
@@ -24271,21 +24355,25 @@
     "summary": "This contract role builds and maintains the organization\u2019s digital customer and associate experiences in a hybrid AWS environment.",
     "title": "Full Stack Software Engineer III",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "ac715599712fc0869dbf2edf0ce707561789bc270afeda66bc91afcf982e1cde",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:10.735Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:21:46.033Z",
       "error": null,
       "company": "The Ash Group",
       "title": "Full Stack Software Engineer III",
       "resume_slot": 14,
       "session_hour": "01",
-      "batch_time": "2026-06-25T05:47:33Z",
+      "batch_time": "2026-06-25T02:55:34Z",
       "session_id": "2026-06-25T02:55:37Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "14_the-ash-group-full-stack-software-engineer-i",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/14_the-ash-group-full-stack-software-engineer-i/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/14_the-ash-group-full-stack-software-engineer-i"
     },
     "ats_score": 42,
     "fit_score": 11
@@ -24351,12 +24439,12 @@
     "summary": "The Data Scientist performs analysis of multiple data sources using statistical analysis and computer science to solve business problems.",
     "title": "Data Scientist",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "4d2d6587675c180fe23fc8913e3e15574f6607f078f081bbdff634b64724bf47",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:15.712Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:22:42.954Z",
       "error": null,
       "company": "Inspire",
       "title": "Data Scientist",
@@ -24365,7 +24453,11 @@
       "batch_time": "2026-06-25T02:55:34Z",
       "session_id": "2026-06-25T02:55:37Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "26_inspire-data-scientist",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/26_inspire-data-scientist/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/26_inspire-data-scientist"
     },
     "ats_score": 50,
     "fit_score": 4
@@ -24410,12 +24502,12 @@
     "summary": "* Design, build, test, scale, monitor, and maintain secure, cost\\-efficient infrastructure in a multi\\-cloud environment (AWS and Azure).",
     "title": "Software Engineer II - Cloud Infrastructure Engineer",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "e15a42828a59f72885a665124bf4e8aeb949e873e07e963b522b8fc3fc563fae",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:14.712Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:22:50.424Z",
       "error": null,
       "company": "Abnormal AI",
       "title": "Software Engineer II - Cloud Infrastructure Engineer",
@@ -24424,7 +24516,11 @@
       "batch_time": "2026-06-25T02:55:34Z",
       "session_id": "2026-06-25T02:55:37Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "21_abnormal-ai-software-engineer-ii-cloud-inf",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/21_abnormal-ai-software-engineer-ii-cloud-inf/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/21_abnormal-ai-software-engineer-ii-cloud-inf"
     },
     "ats_score": 41,
     "fit_score": 7
@@ -24448,12 +24544,12 @@
     "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
     "title": "Founding Backend Engineer ($130k\u2013$180k + Equity) at Jarmin",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "e2459aeba9fc6886b2460b89eb217fc16402424f5a719f2b14236489843942a4",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:15.748Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:23:37.114Z",
       "error": null,
       "company": "Jack & Jill",
       "title": "Founding Backend Engineer ($130k\u2013$180k + Equity) at Jarmin",
@@ -24462,7 +24558,11 @@
       "batch_time": "2026-06-25T02:55:34Z",
       "session_id": "2026-06-25T02:55:37Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "33_jack-jill-founding-backend-engineer-130k",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/33_jack-jill-founding-backend-engineer-130k/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/33_jack-jill-founding-backend-engineer-130k"
     },
     "ats_score": 50,
     "fit_score": 2
@@ -24486,13 +24586,13 @@
     "summary": "Position Description We are expanding the M365 Solutions Team to strengthen our ability to design, build, and support enterprise grade applications across the CGI Federal M365 ecosystem.",
     "title": "Software Engineer",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "failed",
+      "stage": "PDF",
       "fingerprint": null,
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:16.711Z",
-      "error": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:23:48.038Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.35 (need \u2265 0.45).",
       "company": "CGI",
       "title": "Software Engineer",
       "resume_slot": 37,
@@ -24500,7 +24600,11 @@
       "batch_time": "2026-06-25T02:55:34Z",
       "session_id": "2026-06-25T02:55:37Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": false,
+      "folder": "37_cgi-software-engineer",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/37_cgi-software-engineer"
     },
     "ats_score": 25,
     "fit_score": 4
@@ -24524,12 +24628,12 @@
     "summary": "Bright Vision Technologies is a forward\\-thinking software development company dedicated to building innovative solutions that help businesses automate and optimize their operations.",
     "title": "Semiconductor Software Engineer",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "1fe205969c5905f2698f10a46177bb148e29b2b95798f4701a309cff8e374478",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:13.918Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:24:19.868Z",
       "error": null,
       "company": "Bright Vision Technologies",
       "title": "Semiconductor Software Engineer",
@@ -24538,7 +24642,11 @@
       "batch_time": "2026-06-25T02:55:34Z",
       "session_id": "2026-06-25T02:55:37Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "18_bright-vision-technologi-semiconductor-software-enginee",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/18_bright-vision-technologi-semiconductor-software-enginee/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/18_bright-vision-technologi-semiconductor-software-enginee"
     },
     "ats_score": 60,
     "fit_score": 5
@@ -24604,21 +24712,25 @@
     "summary": "**Job Description** As an early Software Engineer at Altara, you will architect the core foundations of a platform designed to solve the data challenges of the physical sciences.",
     "title": "Software Engineer ($150k-$250k + Equity) at Altara",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "3b29ff48f3295fa57166d6253322f86110b13d32a9dcc9e84a680327e76a4816",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:14.713Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:25:47.675Z",
       "error": null,
       "company": "Jack & Jill",
       "title": "Software Engineer ($150k-$250k + Equity) at Altara",
       "resume_slot": 25,
       "session_hour": "01",
-      "batch_time": "2026-06-25T05:47:33Z",
+      "batch_time": "2026-06-25T02:55:34Z",
       "session_id": "2026-06-25T02:55:37Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": false,
+      "folder": "25_jack-jill-software-engineer-150k-250k-eq",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/25_jack-jill-software-engineer-150k-250k-eq/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/01/25_jack-jill-software-engineer-150k-250k-eq"
     },
     "ats_score": 40,
     "fit_score": 3
@@ -24705,12 +24817,12 @@
     "summary": "You\u2019ll play an instrumental role in defining and building out the product and platform with the co\\-founders and engineering team as we scale our customer base.",
     "title": "Software Engineer (Fullstack)",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "success",
+      "stage": "SUCCESS",
       "fingerprint": "11821d3c13e0183ac5c52a4136fa78c59a69ca69c712f9e06feecb49f543f5d3",
       "lease_until": null,
-      "worker_id": null,
-      "updated_at": "2026-06-25T21:11:15.710Z",
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-25T21:27:04.360Z",
       "error": null,
       "company": "OneCrew",
       "title": "Software Engineer (Fullstack)",
@@ -24719,7 +24831,11 @@
       "batch_time": "2026-06-25T02:55:34Z",
       "session_id": "2026-06-25T02:55:37Z",
       "priority": 500,
-      "source": "manual"
+      "source": "manual",
+      "cached": true,
+      "folder": "27_onecrew-software-engineer-fullstack",
+      "pdf_path": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/27_onecrew-software-engineer-fullstack/Atishay Kasliwal.pdf",
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-24/00/27_onecrew-software-engineer-fullstack"
     },
     "ats_score": 40,
     "fit_score": 6
