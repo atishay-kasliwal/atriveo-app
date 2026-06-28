@@ -1,7 +1,7 @@
 [
   {
     "job_url": "https://www.linkedin.com/jobs/view/4054555980",
-    "session_id": "2026-06-28T19:31:50Z",
+    "session_id": "2026-06-28T20:48:51Z",
     "company": "Palantir Technologies",
     "date_posted": null,
     "level": "Entry",
@@ -18,8 +18,8 @@
     "fit_score": 7
   },
   {
+    "session_id": "2026-06-28T20:48:51Z",
     "job_url": "https://www.linkedin.com/jobs/view/4415855865",
-    "session_id": "2026-06-28T19:31:50Z",
     "company": "Microsoft",
     "date_posted": null,
     "level": "Entry",
@@ -36,8 +36,8 @@
     "fit_score": 3
   },
   {
-    "session_id": "2026-06-28T19:31:50Z",
     "job_url": "https://www.linkedin.com/jobs/view/4415141314",
+    "session_id": "2026-06-28T20:48:51Z",
     "company": "NVIDIA",
     "date_posted": null,
     "level": "Mid",
@@ -54,8 +54,62 @@
     "fit_score": 3
   },
   {
+    "session_id": "2026-06-28T20:48:51Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4434292840",
+    "company": "Airbnb",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 75,
+    "score_pct": 30,
+    "site": "linkedin",
+    "summary": "Airbnb was born in 2007 when two hosts welcomed three guests to their San Francisco home, and has since grown to over 5 million hosts who have welcomed over 2 billion guest arrivals in almost every c\u2026",
+    "title": "Data Scientist - Inference, Community Support",
+    "ats_score": 66,
+    "fit_score": 4
+  },
+  {
+    "session_id": "2026-06-28T20:48:51Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4434291898",
+    "company": "Airbnb",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 75,
+    "score_pct": 30,
+    "site": "linkedin",
+    "summary": "Airbnb was born in 2007 when two hosts welcomed three guests to their San Francisco home, and has since grown to over 5 million hosts who have welcomed over 2 billion guest arrivals in almost every c\u2026",
+    "title": "Data Scientist - Algorithms, Community Support",
+    "ats_score": 60,
+    "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4425144207",
+    "session_id": "2026-06-28T20:48:51Z",
+    "company": "BlackRock",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "New York, NY",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "top500",
+    "priority_score": 278,
+    "score_pct": 100,
+    "site": "linkedin",
+    "summary": "* Build and maintain microservices and event\\-driven systems to process and distribute large\\-scale financial data.",
+    "title": "Backend Java Engineer - Post Trade Accounting, Associate",
+    "ats_score": 64,
+    "fit_score": 16
+  },
+  {
+    "session_id": "2026-06-28T20:48:51Z",
     "job_url": "https://www.linkedin.com/jobs/view/4373079780",
-    "session_id": "2026-06-28T19:31:50Z",
     "company": "Goldman Sachs",
     "date_posted": null,
     "level": "Entry",
