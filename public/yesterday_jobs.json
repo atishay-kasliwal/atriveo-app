@@ -2839,7 +2839,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-27/uber/09-35_06_software-engineer-ii"
     },
     "ats_score": 60,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "session_id": "2026-06-27T08:46:53Z",
@@ -5526,7 +5526,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-27/pnc/13-35_27_software-engineer-net-developer-applicat"
     },
     "ats_score": 57,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-06-27T12:35:25Z",
@@ -13103,7 +13103,7 @@
     "summary": "**Key Responsibilities** * Develop and implement control algorithms using MATLAB/Simulink and Model\\-Based Design methodologies. * Develop and maintain Simulink subsystem architectures.",
     "title": "Embedded Software Engineer",
     "ats_score": 0,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4304468198",
@@ -16814,6 +16814,27 @@
     "site": "linkedin",
     "summary": "San Francisco \u2014 World App ****About The Company:**** Tools for Humanity (TFH) designs and builds technology behind World.",
     "title": "Software Engineer, Crypto Platform",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-28T05:35:36.230Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.327 (need \u2265 0.45).",
+      "company": "Inflection (Angel List Syndicate)",
+      "title": "Software Engineer, Crypto Platform",
+      "resume_slot": 11,
+      "session_hour": "23",
+      "batch_time": "2026-06-28T03:41:38Z",
+      "session_id": "2026-06-28T04:57:19Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "05-35_11_software-engineer-crypto-platform",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-28/inflection-angel-list-syndicate/05-35_11_software-engineer-crypto-platform"
+    },
     "ats_score": 28,
     "fit_score": 10
   },
@@ -16856,6 +16877,23 @@
     "site": "linkedin",
     "summary": "$55k \u2013 $65k * 0\\.0% \u2013 0\\.1% * Full Time * Remote possible * Dallas * New York City * Software Engineer * Python * HTML * MongoDB * Docker * AWS * NodeJS * DocumentDB",
     "title": "Junior Software Engineer",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-28T05:35:36.415Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Hacware - Consulting",
+      "title": "Junior Software Engineer",
+      "resume_slot": 12,
+      "session_hour": "23",
+      "batch_time": "2026-06-28T03:41:38Z",
+      "session_id": "2026-06-28T04:57:19Z",
+      "priority": 1000,
+      "source": "hourly"
+    },
     "ats_score": 50,
     "fit_score": 12
   }

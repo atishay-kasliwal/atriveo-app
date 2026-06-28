@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-06-28T05:29:22.446531+00:00",
-  "total_analyzed": 37471,
+  "generated_at": "2026-06-28T06:38:04.550191+00:00",
+  "total_analyzed": 37476,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 21435,
-        "Java": 10617,
-        "SQL": 9615,
-        "JavaScript": 6781,
+        "Python": 21437,
+        "Java": 10619,
+        "SQL": 9616,
+        "JavaScript": 6782,
         "TypeScript": 5654,
         "HTML/CSS": 2154,
         "Kotlin": 2002,
@@ -30,14 +30,14 @@
         "React": 6260,
         "PyTorch": 3722,
         "TensorFlow": 2928,
-        "Node.js": 2210,
+        "Node.js": 2211,
         "LangChain": 2018,
         "Angular": 1961,
         "Spring": 1851,
         "Scikit-learn": 1776,
         "Pandas": 1697,
         "NumPy": 1375,
-        "GraphQL": 1163,
+        "GraphQL": 1164,
         "Spring Boot": 1105,
         "FastAPI": 1022,
         "Express": 989,
@@ -75,8 +75,8 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 14437,
-        "REST API": 5393,
+        "Scalability": 14439,
+        "REST API": 5394,
         "Distributed Systems": 5276,
         "Microservices": 3090,
         "System Design": 2915,
@@ -97,7 +97,7 @@
         "CI/CD": 7466,
         "Kubernetes": 4673,
         "Docker": 4401,
-        "Git": 4172,
+        "Git": 4174,
         "Linux": 3245,
         "Terraform": 1908,
         "Jenkins": 1311,
@@ -136,7 +136,7 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 11152,
+        "Machine Learning": 11153,
         "Agents": 7218,
         "LLM": 6995,
         "GenAI": 4874,
@@ -173,9 +173,9 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 9505,
-        "Code Review": 7392,
-        "Mentorship": 6942,
+        "Cross-functional": 9507,
+        "Code Review": 7394,
+        "Mentorship": 6944,
         "Agile/Scrum": 5723,
         "Leadership": 2149,
         "On-call": 1905
