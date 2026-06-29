@@ -18,7 +18,7 @@ const OUTCOME_DISPLAY: Record<TailorOutcomeKind, Omit<TailorCellDisplay, "toolti
   offline: { label: "Offline", tone: "offline", tooltip: "Tailor server or relay unreachable" },
   timeout: { label: "Timeout", tone: "timeout", tooltip: "Connection dropped while tailoring" },
   missing: { label: "Missing", tone: "warn", tooltip: "Job no longer in feed" },
-  unsupported: { label: "N/A JD", tone: "warn", tooltip: "Not an engineering job description — tailoring skipped" },
+  unsupported: { label: "Not Matching", tone: "warn", tooltip: "Not an engineering job description — tailoring skipped" },
   borderline: { label: "Warn", tone: "warn", tooltip: "Borderline JD — PDF created with low-confidence warning" },
   error: { label: "Error", tone: "error", tooltip: "Tailor run failed" },
 };
