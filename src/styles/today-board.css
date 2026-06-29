@@ -2395,3 +2395,47 @@ body.is-today-board .nav-tab.active:hover {
   background: var(--board-muted);
   opacity: 0.6;
 }
+
+/* ── Session Top 500 / Others breakdown ────────────────────────────────── */
+
+.today-board-session-breakdown {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.session-t5-count,
+.session-others-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.session-t5-count {
+  color: oklch(0.68 0.14 255);
+}
+
+.session-others-count {
+  color: var(--board-muted);
+}
+
+.session-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.session-dot--t5 {
+  background: oklch(0.62 0.16 255);
+}
+
+.session-dot--others {
+  background: var(--board-muted);
+  opacity: 0.7;
+}

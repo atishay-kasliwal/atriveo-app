@@ -137,6 +137,11 @@ export default function TodayBoardSidebar({
           <ul className="today-board-nav-list">
             {runCards.slice(0, 10).map((r, index) => {
               const isSessionActive = selectedSession === r.session_id;
+              const sessionJobs = jobsForPeriod(r.targetPeriod ?? "hour").filter(
+                (j) => j.session_id === r.session_id,
+              );
+              const t5 = sessionJobs.filter((j) => isTop500(j.company ?? "")).length;
+              const others = sessionJobs.length - t5;
               return (
                 <li key={r.session_id}>
                   <button
@@ -148,18 +153,21 @@ export default function TodayBoardSidebar({
                       <span className="today-board-session-index">{index + 1}</span>
                       <span className="today-board-session-body">
                         <span className="today-board-session-time">{formatRunTime(r.displayAt)}</span>
-                        <span className="today-board-session-meta">
-                          {r.clickCount > 0 ? `${r.clickCount} clicked` : "no clicks yet"}
-                          {r.progressPct > 0 ? ` · ${r.progressPct}%` : ""}
+                        <span className="today-board-session-breakdown">
+                          {t5 > 0 && (
+                            <span className="session-t5-count">
+                              <span className="session-dot session-dot--t5" />{t5}
+                            </span>
+                          )}
+                          {others > 0 && (
+                            <span className="session-others-count">
+                              <span className="session-dot session-dot--others" />{others}
+                            </span>
+                          )}
                         </span>
                       </span>
                     </span>
-                    <span className="today-board-nav-counts">
-                      <span className="today-board-nav-count">{r.count}</span>
-                      {r.clickCount > 0 ? (
-                        <span className="today-board-nav-clicked">{r.clickCount} clicked</span>
-                      ) : null}
-                    </span>
+                    <span className="today-board-nav-count">{r.count}</span>
                   </button>
                 </li>
               );
