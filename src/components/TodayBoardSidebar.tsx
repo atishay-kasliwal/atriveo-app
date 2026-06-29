@@ -135,7 +135,7 @@ export default function TodayBoardSidebar({
         <section className="today-board-nav-section today-board-sessions">
           <h2 className="today-board-nav-label">Sessions</h2>
           <ul className="today-board-nav-list">
-            {runCards.slice(0, 10).map((r, index) => {
+            {runCards.slice(0, 15).map((r, index) => {
               const isSessionActive = selectedSession === r.session_id;
               const sessionJobs = jobsForPeriod(r.targetPeriod ?? "hour").filter(
                 (j) => j.session_id === r.session_id,
