@@ -98,19 +98,41 @@ export interface SingleTailorResult {
 
 export async function checkJobOnDisk(job: Job): Promise<{ found: boolean; pdfPath?: string; dir?: string; folder?: string; ats?: string }> {
   try {
+    const jobUrl = job.job_url || "";
     const res = await fetch(`${getTailorServerBase()}/check-job`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       signal: AbortSignal.timeout(8000),
-      body: JSON.stringify({ company: job.company || "", title: job.title || "" }),
+      body: JSON.stringify({ company: job.company || "", title: job.title || "", job_url: jobUrl }),
     });
-    if (!res.ok) return { found: false };
-    const data = await res.json();
-    return data.found ? { found: true, pdfPath: data.pdfPath, dir: data.dir, folder: data.folder, ats: data.ats } : { found: false };
+    if (res.ok) {
+      const data = await res.json();
+      if (data.found) {
+        return { found: true, pdfPath: data.pdfPath, dir: data.dir, folder: data.folder, ats: data.ats };
+      }
+    }
   } catch {
-    return { found: false };
+    /* fall through to the artifact index */
   }
+
+  try {
+    const resumes = await listTailoredResumes();
+    const match = findTailoredResumeMatch(job, resumes);
+    if (match) {
+      return {
+        found: true,
+        pdfPath: match.pdfPath,
+        dir: match.dir,
+        folder: match.folder,
+        ats: match.ats ?? undefined,
+      };
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return { found: false };
 }
 
 export interface TailoredResumeOnDisk {
@@ -127,6 +149,41 @@ export interface TailoredResumeOnDisk {
   identity?: string | null;
   informationGain?: number | null;
   borderline?: boolean;
+}
+
+function normalizeTailorMatch(value: string | null | undefined): string {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function findTailoredResumeMatch(job: Job, resumes: TailoredResumeOnDisk[]): TailoredResumeOnDisk | null {
+  const jobUrl = job.job_url?.trim() || "";
+  if (jobUrl) {
+    const exactUrl = resumes.find((resume) => resume.jobUrl === jobUrl);
+    if (exactUrl) return exactUrl;
+  }
+
+  const company = normalizeTailorMatch(job.company);
+  const title = normalizeTailorMatch(job.title);
+  if (!company || !title) return null;
+
+  const exactMatch = resumes.find((resume) => (
+    normalizeTailorMatch(resume.company) === company
+    && normalizeTailorMatch(resume.title) === title
+  ));
+  if (exactMatch) return exactMatch;
+
+  return resumes.find((resume) => (
+    normalizeTailorMatch(resume.company) === company
+    && (
+      normalizeTailorMatch(resume.title).includes(title)
+      || title.includes(normalizeTailorMatch(resume.title))
+    )
+  )) ?? null;
 }
 
 /** Full composition + explain payload for diff / detail views. */
@@ -314,7 +371,7 @@ export async function runSingleTailorJob(
 
     // If the stream ended without a "done" event (stream dropped mid-run), check
     // whether the Mac actually finished the job and wrote a PDF to disk.
-    if (!result.ok && (result.outcome === "timeout" || result.outcome === "error" || result.outcome === "ai")) {
+    if (!result.ok && (result.outcome === "timeout" || result.outcome === "error" || result.outcome === "ai" || result.outcome === "compile")) {
       for (let attempt = 0; attempt < 4; attempt += 1) {
         const check = await checkJobOnDisk(job);
         if (check.found) {

@@ -1118,7 +1118,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Check if a job already completed on disk (used after stream drop/timeout).
-  // POST /check-job { company, title } → { ok, found, pdfPath, dir, folder, ats }
+  // POST /check-job { company, title, job_url? } → { ok, found, pdfPath, dir, folder, ats }
   // List ALL tailored resumes that exist on disk (source of truth, independent
   // of the browser's localStorage). Scans the last few date folders so the
   // UTC/EST date boundary never hides today's runs. GET /list-tailored
@@ -1184,23 +1184,56 @@ const server = http.createServer(async (req, res) => {
     req.on("data", (c) => (raw += c));
     req.on("end", () => {
       try {
-        const { company, title } = JSON.parse(raw);
+        const { company, title, job_url: jobUrlRaw } = JSON.parse(raw);
         if (!company || !title) throw new Error("company and title required");
         const compSlug = slug(company, 32);
         const titleSlug = slug(title, 40);
-        // Scan last 3 date dirs for this company
+        const jobUrl = typeof jobUrlRaw === "string" ? jobUrlRaw.trim() : "";
+        // Scan all date dirs so a valid artifact isn't missed just because it
+        // landed outside the last few days or the folder name drifted.
         const dateDirs = fs.existsSync(OUT_ROOT)
-          ? fs.readdirSync(OUT_ROOT).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort().reverse().slice(0, 3)
+          ? fs.readdirSync(OUT_ROOT).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort().reverse()
           : [];
         let best = null; let bestDir = null;
         for (const dd of dateDirs) {
-          const coDir = path.join(OUT_ROOT, dd, compSlug);
-          if (!fs.existsSync(coDir)) continue;
-          const runs = fs.readdirSync(coDir).sort().reverse();
-          for (const d of runs) {
-            if (d.includes(titleSlug)) { best = d; bestDir = coDir; break; }
+          const dateDir = path.join(OUT_ROOT, dd);
+          let companyDirs;
+          try { companyDirs = fs.readdirSync(dateDir).filter((d) => !d.startsWith(".")); }
+          catch { continue; }
+          for (const co of companyDirs) {
+            const coDir = path.join(dateDir, co);
+            if (!fs.existsSync(coDir) || !fs.statSync(coDir).isDirectory()) continue;
+            const runs = fs.readdirSync(coDir).sort().reverse();
+            for (const folder of runs) {
+              const dir = path.join(coDir, folder);
+              const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
+              if (!fs.existsSync(pdfPath)) continue;
+              let meta = {};
+              try { meta = JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8")); } catch { /* none */ }
+
+              if (jobUrl && meta.url === jobUrl) {
+                const ats = readAtsFromDir(dir);
+                res.writeHead(200, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ ok: true, found: true, pdfPath, dir, folder, ats }));
+              }
+
+              const folderTitleSlug = slug(meta.role || folder, 40);
+              const folderCompanySlug = slug(meta.company || co, 32);
+              const companyMatch = folderCompanySlug === compSlug || co === compSlug;
+              const titleMatch = folderTitleSlug.includes(titleSlug) || folder.includes(titleSlug);
+
+              if (companyMatch && titleMatch) {
+                best = folder;
+                bestDir = coDir;
+                break;
+              }
+              if (!best && companyMatch) {
+                best = folder;
+                bestDir = coDir;
+              }
+            }
+            if (best) break;
           }
-          if (!best && runs.length) { best = runs[0]; bestDir = coDir; }
           if (best) break;
         }
         if (!best) {
