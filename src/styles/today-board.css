@@ -1078,7 +1078,7 @@ body.is-today-board .nav-tab.active:hover {
 
 .job-table--board .job-table-job--role .job-table-role-title {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--board-ink);
   line-height: 1.3;
   overflow: hidden;
@@ -1120,7 +1120,7 @@ body.is-today-board .nav-tab.active:hover {
 
 .job-table-role-title {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--board-ink);
   line-height: 1.3;
   overflow: hidden;
