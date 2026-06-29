@@ -340,13 +340,18 @@ export default function Dashboard() {
     return totals;
   }, [sessionJobMap]);
 
+  const feedHourJobs      = useMemo(() => hourJobs.filter(isJobInFeed),      [hourJobs, isJobInFeed]);
+  const feedTodayJobs     = useMemo(() => todayJobs.filter(isJobInFeed),     [todayJobs, isJobInFeed]);
+  const feedYesterdayJobs = useMemo(() => yesterdayJobs.filter(isJobInFeed), [yesterdayJobs, isJobInFeed]);
+  const feedWeekJobs      = useMemo(() => weekJobs.filter(isJobInFeed),      [weekJobs, isJobInFeed]);
+
   const periodCounts = useMemo(
     () => ({
-      hour: hourJobs.filter(isJobInFeed).length,
-      today: todayJobs.filter(isJobInFeed).length,
-      yesterday: yesterdayJobs.filter(isJobInFeed).length,
+      hour:      feedHourJobs.length,
+      today:     feedTodayJobs.length,
+      yesterday: feedYesterdayJobs.length,
     }),
-    [hourJobs, todayJobs, yesterdayJobs, isJobInFeed],
+    [feedHourJobs, feedTodayJobs, feedYesterdayJobs],
   );
 
   const periodClickedCounts = useMemo(() => {
@@ -902,10 +907,10 @@ export default function Dashboard() {
             selectedSession={selectedSession}
             onSessionSelect={handleSessionSelect}
             formatRunTime={formatRunTime}
-            hourJobs={hourJobs}
-            todayJobs={todayJobs}
-            yesterdayJobs={yesterdayJobs}
-            weekJobs={weekJobs}
+            hourJobs={feedHourJobs}
+            todayJobs={feedTodayJobs}
+            yesterdayJobs={feedYesterdayJobs}
+            weekJobs={feedWeekJobs}
             isTop500={isTop500}
           />
 
