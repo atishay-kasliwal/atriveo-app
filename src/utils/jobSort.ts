@@ -32,6 +32,7 @@ function toMs(iso?: string | null): number {
 export function defaultSortDir(column: SortBy): SortDir {
   switch (column) {
     case "company":
+    case "title":
     case "location":
     case "level":
       return "asc";
@@ -53,6 +54,8 @@ export function compareJobs(
     case "score":
     case "rating":
       return mul * (careerOpsRating(a).score - careerOpsRating(b).score);
+    case "title":
+      return mul * (a.title || "").localeCompare(b.title || "", undefined, { sensitivity: "base" });
     case "company": {
       const byCompany = (a.company || "").localeCompare(b.company || "", undefined, { sensitivity: "base" });
       if (byCompany !== 0) return mul * byCompany;

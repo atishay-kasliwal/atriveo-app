@@ -867,7 +867,7 @@ export default function JobTable({
             {variant === "board" && onSortColumn ? (
               <>
                 <SortableHeader label="Company" column="company" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
-                <SortableHeader label="Role" column="company" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Role" column="title" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Score" column="score" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Location" column="location" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Level" column="level" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
