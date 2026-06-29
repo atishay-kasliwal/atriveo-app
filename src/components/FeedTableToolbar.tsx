@@ -84,7 +84,7 @@ export default function FeedTableToolbar({
           <kbd className="feed-table-search-kbd">⌘K</kbd>
         </div>
         <button type="button" className="feed-table-tool feed-table-tool--share-dark" onClick={onShare}>
-          Share
+          {shareMessage || "Share"}
         </button>
       </div>
     </div>
