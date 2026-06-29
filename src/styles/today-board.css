@@ -372,40 +372,79 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .board-metric {
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 12px;
   flex: 1;
   min-width: 130px;
-  padding: 12px 16px;
+  padding: 12px 14px 12px 14px;
   border-radius: 10px;
-  background: oklch(0.15 0.006 260);
+  background:
+    radial-gradient(ellipse at 100% 0%, var(--metric-glow, oklch(0.62 0.19 255 / 0.06)) 0%, transparent 60%),
+    oklch(0.15 0.006 260);
   border: 1px solid oklch(0.22 0.005 260);
-  box-shadow: 0 1px 3px oklch(0 0 0 / 0.3);
-  transition: border-color 0.15s;
+  box-shadow: 0 1px 4px oklch(0 0 0 / 0.35);
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+/* Dot-grid texture */
+.board-metric::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, oklch(1 0 0 / 0.04) 1px, transparent 1px);
+  background-size: 14px 14px;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Bottom accent line */
+.board-metric::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: var(--metric-accent, oklch(0.62 0.19 255 / 0.4));
+  border-radius: 2px 2px 0 0;
+  pointer-events: none;
 }
 
 .board-metric:hover {
   border-color: oklch(0.30 0.008 260);
+  box-shadow: 0 2px 8px oklch(0 0 0 / 0.4), 0 0 0 1px var(--metric-accent, oklch(0.62 0.19 255 / 0.15));
 }
+
+/* Per-card color tokens */
+.board-metric:has(.board-metric-icon--blue)   { --metric-glow: oklch(0.62 0.19 255 / 0.07); --metric-accent: oklch(0.62 0.19 255 / 0.45); }
+.board-metric:has(.board-metric-icon--purple) { --metric-glow: oklch(0.55 0.22 290 / 0.07); --metric-accent: oklch(0.65 0.22 290 / 0.45); }
+.board-metric:has(.board-metric-icon--green)  { --metric-glow: oklch(0.72 0.18 145 / 0.07); --metric-accent: oklch(0.72 0.18 145 / 0.45); }
+.board-metric:has(.board-metric-icon--amber)  { --metric-glow: oklch(0.78 0.14 80  / 0.07); --metric-accent: oklch(0.78 0.14 80  / 0.50); }
+.board-metric:has(.board-metric-icon--indigo) { --metric-glow: oklch(0.58 0.20 270 / 0.07); --metric-accent: oklch(0.65 0.18 270 / 0.45); }
+.board-metric:has(.board-metric-icon--cyan)   { --metric-glow: oklch(0.70 0.15 200 / 0.07); --metric-accent: oklch(0.72 0.14 200 / 0.45); }
 
 .board-metric-icon {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: 17px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
-.board-metric-icon--blue   { background: oklch(0.62 0.19 255 / 0.15); color: oklch(0.72 0.18 255); }
-.board-metric-icon--purple { background: oklch(0.55 0.22 290 / 0.15); color: oklch(0.72 0.20 290); }
-.board-metric-icon--green  { background: oklch(0.72 0.18 145 / 0.15); color: oklch(0.75 0.18 145); }
-.board-metric-icon--amber  { background: oklch(0.78 0.14 80  / 0.15); color: oklch(0.80 0.16 80);  }
-.board-metric-icon--indigo { background: oklch(0.58 0.20 270 / 0.15); color: oklch(0.70 0.18 270); }
-.board-metric-icon--cyan   { background: oklch(0.70 0.15 200 / 0.15); color: oklch(0.75 0.14 200); }
+.board-metric-icon--blue   { background: oklch(0.62 0.19 255 / 0.18); color: oklch(0.74 0.18 255); box-shadow: 0 0 14px oklch(0.62 0.19 255 / 0.25); }
+.board-metric-icon--purple { background: oklch(0.55 0.22 290 / 0.18); color: oklch(0.74 0.20 290); box-shadow: 0 0 14px oklch(0.55 0.22 290 / 0.25); }
+.board-metric-icon--green  { background: oklch(0.72 0.18 145 / 0.18); color: oklch(0.76 0.18 145); box-shadow: 0 0 14px oklch(0.72 0.18 145 / 0.25); }
+.board-metric-icon--amber  { background: oklch(0.78 0.14 80  / 0.18); color: oklch(0.82 0.16 80);  box-shadow: 0 0 14px oklch(0.78 0.14 80  / 0.25); }
+.board-metric-icon--indigo { background: oklch(0.58 0.20 270 / 0.18); color: oklch(0.72 0.18 270); box-shadow: 0 0 14px oklch(0.58 0.20 270 / 0.25); }
+.board-metric-icon--cyan   { background: oklch(0.70 0.15 200 / 0.18); color: oklch(0.76 0.14 200); box-shadow: 0 0 14px oklch(0.70 0.15 200 / 0.25); }
 
 .board-metric-body {
   display: flex;
