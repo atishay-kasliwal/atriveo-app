@@ -44,7 +44,14 @@ export default function Tailored() {
   useEffect(() => {
     void refresh();
     const id = window.setInterval(() => { void refresh(); }, 60_000);
-    return () => window.clearInterval(id);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [refresh]);
 
   const filtered = useMemo(() => {

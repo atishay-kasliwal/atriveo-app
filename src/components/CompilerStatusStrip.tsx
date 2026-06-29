@@ -50,18 +50,22 @@ export default function CompilerStatusStrip({
   const [queueStats, setQueueStats] = useState<{ queued: number; running: number; active: number } | null>(null);
 
   useEffect(() => {
-    fetch("/job_descriptions/manifest.json", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((m: BucketManifest) => {
-        const age = fmtAge(m.generated_at);
-        setBucketAge(age);
-        const hours = m.generated_at ? (Date.now() - Date.parse(m.generated_at)) / 3_600_000 : 999;
-        setBucketStale(hours > 2);
-      })
-      .catch(() => {
-        setBucketAge("?");
-        setBucketStale(true);
-      });
+    const checkBucket = () => {
+      fetch("/job_descriptions/manifest.json", { cache: "no-store" })
+        .then((r) => r.json())
+        .then((m: BucketManifest) => {
+          setBucketAge(fmtAge(m.generated_at));
+          const hours = m.generated_at ? (Date.now() - Date.parse(m.generated_at)) / 3_600_000 : 999;
+          setBucketStale(hours > 2);
+        })
+        .catch(() => {
+          setBucketAge("?");
+          setBucketStale(true);
+        });
+    };
+    checkBucket();
+    const id = window.setInterval(checkBucket, 5 * 60_000);
+    return () => window.clearInterval(id);
   }, []);
 
   useEffect(() => {
