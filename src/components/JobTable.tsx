@@ -532,7 +532,7 @@ function JobTableRow({
                 className="job-table-board-apply job-table-board-apply--primary"
                 href={job.job_url}
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
                 title="Open job posting"
                 onClick={(e) => e.stopPropagation()}
               >
@@ -606,7 +606,7 @@ function JobTableRow({
                 className="job-table-action job-table-action--apply"
                 href={job.job_url}
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
               >
                 Apply

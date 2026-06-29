@@ -48,7 +48,7 @@ export default function ManualTailor() {
 
   const resolvedFields = useMemo(() => {
     const jd = description.trim();
-    if (jd.length < 20) return null;
+    if (jd.length < MIN_JD_CHARS) return null;
     const slot = nextManualSlot(sessions);
     const parsed = parseManualJd(jd, slot);
     return applyManualOverrides(parsed, {

@@ -106,7 +106,7 @@ export default function TodayBoardSidebar({
             </a>
           </li>
           <li>
-            <a href="/clickedjobs" className="today-board-nav-item today-board-nav-link">
+            <a href="/activity" className="today-board-nav-item today-board-nav-link">
               <span>Clicked</span>
               <span className="today-board-nav-count">{clickedTotal}</span>
             </a>
