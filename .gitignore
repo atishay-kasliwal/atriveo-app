@@ -17,3 +17,8 @@ Dark Mode Magic.zip
 
 # Resume engine (local only — binary PDFs, .tex, personal data)
 resume-engine/
+
+# Large binaries / generated files that should never be committed
+*.dmg
+*.pdf
+"Atishay Kasliwal.pdf"
