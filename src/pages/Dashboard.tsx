@@ -3,7 +3,6 @@ import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import AppHeader from "../components/AppHeader";
 import BulkJobAnalysisPanel from "../components/BulkJobAnalysisPanel";
 import BulkJobCopyBar from "../components/BulkJobCopyBar";
-import FeedTableToolbar from "../components/FeedTableToolbar";
 import TailorPanel from "../components/TailorPanel";
 import TodayBoardSidebar from "../components/TodayBoardSidebar";
 import TodayBoardFooter from "../components/TodayBoardFooter";
@@ -29,7 +28,6 @@ import { outcomeFromServerStatus, resolveTailorOutcome } from "../utils/tailorOu
 import { tailorPhaseProgress } from "../utils/tailorProgress";
 import { estDateKey, estHourLabel } from "../utils/estDate";
 import { fetchPipelineKpis, type PipelineKpis } from "../utils/compileQueueApi";
-import CompilerStatusStrip from "../components/CompilerStatusStrip";
 type LevelFilter = "all" | "New Grad" | "Entry" | "Mid";
 type RunCard = RunEntry & {
   count: number;
@@ -42,19 +40,7 @@ type RunCard = RunEntry & {
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
-const LEVEL_FILTERS: LevelFilter[] = ["all", "New Grad", "Entry", "Mid"];
-
-// Filter the feed by tailor outcome. The many TailorOutcomeKind values are
-// grouped into a few user-friendly buckets that match what the table shows.
 type TailorFilter = "all" | "done" | "error" | "skip" | "no-jd" | "untailored";
-const TAILOR_FILTERS: { key: TailorFilter; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "done", label: "Done" },
-  { key: "error", label: "Error" },
-  { key: "skip", label: "Skip" },
-  { key: "no-jd", label: "No JD" },
-  { key: "untailored", label: "Not tailored" },
-];
 
 // Map a resolved outcome (+ whether a record exists) to a filter bucket.
 function tailorFilterBucket(record: TailorRecord | null): TailorFilter {
@@ -183,15 +169,13 @@ export default function Dashboard() {
   const [sortBy, setSortBy] = useState<SortBy>(period === "hour" ? "time" : "score");
   const [sortDir, setSortDir] = useState<SortDir>(defaultSortDir(period === "hour" ? "time" : "score"));
   const prevPeriodRef = useRef<Period>(period);
-  const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
-  const [tailorFilter, setTailorFilter] = useState<TailorFilter>("all");
-  const [h1bFilter, setH1bFilter] = useState(false);
-  const [top500Filter, setTop500Filter] = useState(false);
+  const levelFilter: LevelFilter = "all";
+  const tailorFilter: TailorFilter = "all";
+  const h1bFilter = false;
+  const top500Filter = false;
   const [termFilter, setTermFilter] = useState("all");
-  const [query, setQuery] = useState("");
+  const query = "";
   const [loading, setLoading] = useState(true);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [shareMessage, setShareMessage] = useState("");
   const [feedRefreshNotice, setFeedRefreshNotice] = useState("");
   const [feedLastUpdated, setFeedLastUpdated] = useState<string | null>(null);
   const [feedFetchError, setFeedFetchError] = useState("");
@@ -519,10 +503,6 @@ export default function Dashboard() {
     setSortDir(defaultSortDir(column));
   }, [sortBy]);
 
-  const handleToolbarSortChange = useCallback((column: SortBy) => {
-    setSortBy(column);
-    setSortDir(defaultSortDir(column));
-  }, []);
 
   const filtered = useMemo(() => {
     let jobs = [...visibleJobs];
@@ -535,32 +515,6 @@ export default function Dashboard() {
     return sortJobs(jobs, sortBy, sortDir, tailorStatus.getRecordForJob);
   }, [visibleJobs, levelFilter, tailorFilter, sortBy, sortDir, tailorStatus.getRecordForJob, tailorStatus.records]);
 
-  // Counts per tailor-status bucket for the filter chips.
-  const tailorCounts = useMemo(() => {
-    const counts: Record<TailorFilter, number> = {
-      all: visibleJobs.length, done: 0, error: 0, skip: 0, "no-jd": 0, untailored: 0,
-    };
-    for (const job of visibleJobs) {
-      const bucket = tailorFilterBucket(tailorStatus.getRecordForJob(job));
-      counts[bucket] += 1;
-    }
-    return counts;
-  }, [visibleJobs, tailorStatus.getRecordForJob, tailorStatus.records]);
-
-  const searchTerms = useMemo(
-    () => [...new Set(rawJobs.map((j) => j.search_term).filter(Boolean))],
-    [rawJobs]
-  );
-
-  const levelCounts = useMemo(
-    () => ({
-      all: visibleJobs.length,
-      "New Grad": visibleJobs.filter((j) => j.level === "New Grad").length,
-      Entry: visibleJobs.filter((j) => j.level === "Entry").length,
-      Mid: visibleJobs.filter((j) => j.level === "Mid").length,
-    }),
-    [visibleJobs]
-  );
   const displayedJobs = filtered;
   const sessionResumeByUrl = useMemo(
     () => buildSessionResumeSlots(displayedJobs),
@@ -597,14 +551,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  const failedTodayCount = useMemo(() => {
-    const today = estDateKey(new Date());
-    return Object.values(tailorStatus.records).filter((r) => {
-      if (!r.tailoredAt || estDateKey(new Date(r.tailoredAt)) !== today) return false;
-      const o = resolveTailorOutcome(r);
-      return o !== "done" && o !== "borderline" && o !== "running" && o !== "queued";
-    }).length;
-  }, [tailorStatus.records]);
 
   const handleDismissJob = useCallback((job: Job) => {
     handleSaveJobWithQueueCleanup(job, "click");
@@ -717,35 +663,6 @@ export default function Dashboard() {
       .sort((a, b) => toMs(b.appliedAt) - toMs(a.appliedAt));
   }, [stats.appliedJobs]);
 
-  const activeFilterCount = [
-    selectedSession,
-    query.trim(),
-    levelFilter !== "all",
-    tailorFilter !== "all",
-    h1bFilter,
-    top500Filter,
-    termFilter !== "all",
-  ].filter(Boolean).length;
-
-  const hasActiveFilters = Boolean(
-    selectedSession ||
-    query ||
-    levelFilter !== "all" ||
-    tailorFilter !== "all" ||
-    h1bFilter ||
-    top500Filter ||
-    termFilter !== "all"
-  );
-
-  const clearFilters = () => {
-    setSearchParams((p) => { const n = new URLSearchParams(p); n.delete("session"); return n; }, { replace: true });
-    setQuery("");
-    setLevelFilter("all");
-    setTailorFilter("all");
-    setH1bFilter(false);
-    setTop500Filter(false);
-    setTermFilter("all");
-  };
 
 
   const highMatchCount = useMemo(
@@ -764,13 +681,6 @@ export default function Dashboard() {
     return () => document.body.classList.remove("is-today-board");
   }, []);
 
-  const handleShare = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => {
-      setShareMessage("Copied!");
-      setTimeout(() => setShareMessage(""), 1500);
-    });
-  };
 
   const handleSessionSelect = (sessionId: string | null, targetPeriod?: Period | null) => {
     setSearchParams((prev) => {
@@ -782,74 +692,6 @@ export default function Dashboard() {
     if (sessionId) setTermFilter("all");
   };
 
-  const filterBar = (
-    <div className="filter-bar">
-      <div className="search-wrap">
-        <span className="search-icon">⌕</span>
-        <input
-          className="search-input"
-          type="search"
-          placeholder="Search jobs, companies, locations…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </div>
-      <div className="level-chips">
-        {LEVEL_FILTERS.map((l) => (
-          <button
-            key={l}
-            className={`chip${levelFilter === l ? " active" : ""}`}
-            onClick={() => setLevelFilter(l)}
-          >
-            <span>{l === "all" ? "All" : l}</span>
-            <span className="chip-count">{levelCounts[l]}</span>
-          </button>
-        ))}
-        <button
-          className={`chip-toggle${h1bFilter ? " active" : ""}`}
-          onClick={() => setH1bFilter((v) => !v)}
-        >
-          ATS 60+
-        </button>
-        <button
-          className={`chip-toggle chip-toggle-purple${top500Filter ? " active" : ""}`}
-          onClick={() => setTop500Filter((v) => !v)}
-        >
-          Top 500
-        </button>
-      </div>
-      <div className="level-chips tailor-status-chips" aria-label="Filter by tailor status">
-        <span className="tailor-status-chips-label">Tailored:</span>
-        {TAILOR_FILTERS.map((f) => (
-          (f.key === "all" || tailorCounts[f.key] > 0) ? (
-            <button
-              key={f.key}
-              className={`chip chip-tailor chip-tailor--${f.key}${tailorFilter === f.key ? " active" : ""}`}
-              onClick={() => setTailorFilter(f.key)}
-            >
-              <span>{f.label}</span>
-              <span className="chip-count">{tailorCounts[f.key]}</span>
-            </button>
-          ) : null
-        ))}
-      </div>
-      <select
-        className="term-select"
-        value={termFilter}
-        onChange={(e) => setTermFilter(e.target.value)}
-      >
-        <option value="all">All search terms</option>
-        {searchTerms.map((t) => (
-          <option key={t} value={t}>{t}</option>
-        ))}
-      </select>
-      {hasActiveFilters && (
-        <button className="clear-filters-btn" onClick={clearFilters}>
-          Clear {activeFilterCount} filter{activeFilterCount !== 1 ? "s" : ""}
-        </button>
-      )}
-    </div>
-  );
 
   const jobListContent = (
     <>
@@ -956,20 +798,6 @@ export default function Dashboard() {
             </div>
 
             <div className="today-board-table-shell">
-              <FeedTableToolbar
-                jobCount={displayedJobs.length}
-                sortBy={sortBy}
-                onSortChange={handleToolbarSortChange}
-                query={query}
-                onQueryChange={setQuery}
-                onFilterToggle={() => setFiltersOpen((v) => !v)}
-                filtersOpen={filtersOpen}
-                onShare={handleShare}
-                shareMessage={shareMessage}
-              />
-
-              {filtersOpen && filterBar}
-
               {feedFetchError ? (
                 <div className="feed-stale-notice feed-stale-notice--error" role="alert">{feedFetchError}</div>
               ) : null}
@@ -993,18 +821,6 @@ export default function Dashboard() {
               {feedRefreshNotice ? (
                 <div className="feed-refresh-notice" role="status">{feedRefreshNotice}</div>
               ) : null}
-
-              <CompilerStatusStrip
-                queue={tailorQueue.queue}
-                processing={tailorQueue.processing}
-                runningItem={tailorQueue.runningItem}
-                doneToday={todayResumesCount}
-                failedToday={failedTodayCount}
-                tailorStatus={tailorStatus}
-                workerMode={tailorQueue.mongoAvailable !== false}
-                streamLive={tailorQueue.streamLive}
-                syncMessage={tailorQueue.syncMessage}
-              />
 
               <BulkJobCopyBar
                 selectedCount={jobSelection.selectedCount}
