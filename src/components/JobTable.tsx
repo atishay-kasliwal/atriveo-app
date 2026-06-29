@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import type { Job } from "../types";
 import type { SortBy, SortDir } from "../pages/Dashboard.types";
 import type { SavedJobSource } from "../hooks/useApplyClickLog";
@@ -754,6 +755,156 @@ function CompanyGroupRow({
   );
 }
 
+// ── Virtualized board-mode table ──────────────────────────────────────────────
+// Used only when variant="board" and groupByCompany=false (the Dashboard default).
+// .job-table-wrap--board already has overflow:auto + flex:1 from CSS, so it's
+// the natural scroll container for the virtualizer.
+
+interface BoardProps {
+  jobs: Job[];
+  getRecord: (jobUrl: string) => ApplyRecord | null;
+  onAddToTracker: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
+  onSaveJob?: (job: Job, source: SavedJobSource) => void;
+  onExcludeCompany?: (company: string) => void;
+  isJobSelected?: (job: Job) => boolean;
+  onSelectionToggle?: (job: Job) => void;
+  onGroupSelectAll?: (jobs: Job[]) => void;
+  getTailorRecord?: (job: Job) => TailorRecord | null;
+  onQueueUrgent?: (job: Job, resumeSlot: number) => void;
+  onOpenTailorPath?: (path: string) => void;
+  onDismissJob?: (job: Job) => void;
+  sortBy?: SortBy;
+  sortDir?: SortDir;
+  onSortColumn?: (column: SortBy) => void;
+  sessionResumeByUrl?: Map<string, SessionResumeMeta>;
+  resumeIdCompact?: boolean;
+  visibleSelection: { all: boolean; some: boolean; count: number };
+}
+
+function JobTableBoard({
+  jobs,
+  getRecord,
+  onAddToTracker,
+  onSaveJob,
+  onExcludeCompany,
+  isJobSelected,
+  onSelectionToggle,
+  onGroupSelectAll,
+  getTailorRecord,
+  onQueueUrgent,
+  onOpenTailorPath,
+  onDismissJob,
+  sortBy,
+  sortDir,
+  onSortColumn,
+  sessionResumeByUrl,
+  resumeIdCompact,
+  visibleSelection,
+}: BoardProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: jobs.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 52,
+    overscan: 6,
+  });
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+  const paddingTop = virtualItems.length > 0 ? virtualItems[0].start : 0;
+  const paddingBottom =
+    virtualItems.length > 0 ? totalSize - virtualItems[virtualItems.length - 1].end : totalSize;
+
+  return (
+    <div ref={scrollRef} className="job-table-wrap job-table-wrap--board">
+      <table className="job-table job-table--board">
+        <colgroup>
+          <col className="col-check" />
+          <col className="col-num" />
+          <col className="col-company" />
+          <col className="col-role" />
+          <col className="col-score" />
+          <col className="col-loc" />
+          <col className="col-level" />
+          <col className="col-tailored" />
+          <col className="col-posted" />
+          <col className="col-actions" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th className="job-table-check job-table-check--head">
+              {onSelectionToggle && onGroupSelectAll ? (
+                <JobTableSelectCheckbox
+                  checked={visibleSelection.all}
+                  indeterminate={visibleSelection.some}
+                  onChange={() => onGroupSelectAll(jobs)}
+                  title={visibleSelection.all ? "Deselect all visible jobs" : "Select all visible jobs"}
+                  className="job-table-checkbox--head"
+                />
+              ) : null}
+            </th>
+            <th>#</th>
+            {onSortColumn ? (
+              <>
+                <SortableHeader label="Company" column="company" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Role" column="title" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Score" column="score" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Location" column="location" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Level" column="level" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Resume" column="tailored" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+                <SortableHeader label="Posted" column="time" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
+              </>
+            ) : (
+              <>
+                <th>Company</th><th>Role</th><th>Score</th>
+                <th>Location</th><th>Level</th><th>Resume</th><th>Posted</th>
+              </>
+            )}
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {paddingTop > 0 && (
+            <tr aria-hidden="true">
+              <td colSpan={10} style={{ height: paddingTop, padding: 0 }} />
+            </tr>
+          )}
+          {virtualItems.map((vRow) => {
+            const job = jobs[vRow.index];
+            return (
+              <JobTableRow
+                key={job.job_url || vRow.index}
+                job={job}
+                index={vRow.index + 1}
+                applyRecord={job.job_url ? getRecord(job.job_url) : null}
+                onAddToTracker={onAddToTracker}
+                onSaveJob={onSaveJob}
+                isSelected={isJobSelected?.(job)}
+                onSelectionToggle={onSelectionToggle}
+                onExcludeCompany={onExcludeCompany}
+                getTailorRecord={getTailorRecord}
+                onQueueUrgent={onQueueUrgent}
+                onOpenTailorPath={onOpenTailorPath}
+                onDismissJob={onDismissJob}
+                sessionResumeByUrl={sessionResumeByUrl}
+                resumeIdCompact={resumeIdCompact}
+                showCompany
+                board
+              />
+            );
+          })}
+          {paddingBottom > 0 && (
+            <tr aria-hidden="true">
+              <td colSpan={10} style={{ height: paddingBottom, padding: 0 }} />
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 interface Props {
   jobs: Job[];
   getRecord: (jobUrl: string) => ApplyRecord | null;
@@ -832,6 +983,32 @@ export default function JobTable({
       count,
     };
   }, [jobs, isJobSelected]);
+
+  // Board + flat = virtualized path (Dashboard's primary rendering mode)
+  if (variant === "board" && !groupByCompany) {
+    return (
+      <JobTableBoard
+        jobs={jobs}
+        getRecord={getRecord}
+        onAddToTracker={onAddToTracker}
+        onSaveJob={onSaveJob}
+        onExcludeCompany={onExcludeCompany}
+        isJobSelected={isJobSelected}
+        onSelectionToggle={onSelectionToggle}
+        onGroupSelectAll={onGroupSelectAll}
+        getTailorRecord={getTailorRecord}
+        onQueueUrgent={onQueueUrgent}
+        onOpenTailorPath={onOpenTailorPath}
+        onDismissJob={onDismissJob}
+        sortBy={sortBy}
+        sortDir={sortDir}
+        onSortColumn={onSortColumn}
+        sessionResumeByUrl={sessionResumeByUrl}
+        resumeIdCompact={resumeIdCompact}
+        visibleSelection={visibleSelection}
+      />
+    );
+  }
 
   return (
     <div className={wrapClass}>

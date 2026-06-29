@@ -65,6 +65,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-virtual": "^3.14.4",
     "@types/react-router-dom": "^5.3.3",
     "jose": "^6.2.2",
     "js-yaml": "^4.1.1",
