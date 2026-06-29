@@ -33,11 +33,16 @@ export default function BulkJobCopyBar({
 
   return (
     <div className={`bulk-copy-bar${selectedCount ? " has-selection" : ""}${compact ? " bulk-copy-bar--board" : ""}`}>
-      <div className="bulk-copy-copy">
-        {!compact && <span>Bulk copy</span>}
-        <strong>{selectedCount ? `${selectedCount} selected` : "Select jobs to copy full JDs"}</strong>
-        {!compact && <small>Copies title, company, scores, link, tags, and full JD when exported.</small>}
-      </div>
+      {!compact && (
+        <div className="bulk-copy-copy">
+          <span>Bulk copy</span>
+          <strong>{selectedCount ? `${selectedCount} selected` : "Select jobs to copy full JDs"}</strong>
+          <small>Copies title, company, scores, link, tags, and full JD when exported.</small>
+        </div>
+      )}
+      {compact && selectedCount > 0 && (
+        <span className="bulk-copy-count">{selectedCount} selected</span>
+      )}
 
       <div className="bulk-copy-actions">
         {(copyMessage || analysisMessage) && <span className="bulk-copy-status">{analysisMessage || copyMessage}</span>}
@@ -58,11 +63,11 @@ export default function BulkJobCopyBar({
         )}
         {onTailor && (
           <button type="button" className="bulk-copy-btn primary" onClick={onTailor} disabled={!selectedCount || tailoring}>
-            {tailoring ? "Compiling…" : "Compile selected"}
+            {tailoring ? "Compiling…" : "Compile"}
           </button>
         )}
         <button type="button" className="bulk-copy-btn" onClick={onCopy} disabled={!selectedCount}>
-          Copy selected
+          Copy
         </button>
         {selectedCount > 0 && (
           <button type="button" className="bulk-copy-btn subtle" onClick={onClear}>

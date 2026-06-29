@@ -468,7 +468,10 @@ body.is-today-board .nav-tab.active:hover {
   border-radius: 0;
   background: var(--board-canvas);
   box-shadow: none;
-  padding: 10px 16px;
+  padding: 5px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .today-board-table-shell .bulk-copy-bar--board .bulk-copy-copy strong {
@@ -1290,16 +1293,24 @@ body.is-today-board .nav-tab.active:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 32px;
-  padding: 8px 14px;
-  font-size: 12px;
-  font-weight: 600;
+  min-height: 24px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
   line-height: 1;
-  border-radius: 7px;
+  border-radius: 5px;
   border: 1px solid var(--board-line);
   background: var(--card-bg);
   color: var(--board-sub);
   box-sizing: border-box;
+  cursor: pointer;
+}
+
+.bulk-copy-count {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--board-muted);
+  margin-right: 4px;
 }
 
 .bulk-copy-bar--board .bulk-copy-btn:hover:not(:disabled) {
@@ -1311,7 +1322,6 @@ body.is-today-board .nav-tab.active:hover {
   background: var(--board-accent);
   border-color: var(--board-accent);
   color: #fff;
-  border-radius: 5px;
 }
 
 .bulk-copy-bar--board .bulk-copy-btn.primary:hover:not(:disabled) {
