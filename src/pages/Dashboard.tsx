@@ -839,6 +839,7 @@ export default function Dashboard() {
               ) : null}
 
               <BulkJobCopyBar
+                variant="board"
                 selectedCount={jobSelection.selectedCount}
                 visibleCount={displayedJobs.length}
                 copyMessage={jobSelection.copyMessage}
