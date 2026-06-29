@@ -65,10 +65,15 @@ export default function CompilerStatusStrip({
   }, []);
 
   useEffect(() => {
-    assertTailorServerReady()
-      .then(() => setSidecarOk(true))
-      .catch(() => setSidecarOk(false));
-  }, [processing, runningItem?.jobKey]);
+    const check = () => {
+      assertTailorServerReady()
+        .then(() => setSidecarOk(true))
+        .catch(() => setSidecarOk(false));
+    };
+    check();
+    const id = window.setInterval(check, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   useEffect(() => {
     if (!workerMode) return;
