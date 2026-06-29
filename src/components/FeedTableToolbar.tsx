@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { SortBy } from "../pages/Dashboard.types";
 
 interface Props {
@@ -15,8 +16,9 @@ interface Props {
 const SORT_OPTIONS: { key: SortBy; label: string }[] = [
   { key: "score", label: "Score" },
   { key: "rating", label: "Rating" },
+  { key: "title", label: "Role" },
   { key: "time", label: "Posted" },
-  { key: "company", label: "Role & Company" },
+  { key: "company", label: "Company" },
   { key: "location", label: "Location" },
   { key: "comp", label: "Comp" },
   { key: "level", label: "Level" },
@@ -26,6 +28,7 @@ const SORT_OPTIONS: { key: SortBy; label: string }[] = [
 ];
 
 export default function FeedTableToolbar({
+  jobCount,
   sortBy,
   onSortChange,
   query,
@@ -35,13 +38,23 @@ export default function FeedTableToolbar({
   onShare,
   shareMessage,
 }: Props) {
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
   return (
     <div className="feed-table-toolbar">
       <div className="feed-table-toolbar-start">
-        <span className="feed-table-views-label">Views</span>
-        <button type="button" className="feed-table-tool" disabled title="Coming soon">
-          Hide fields
-        </button>
+        <span className="feed-table-views-label">{jobCount} jobs</span>
         <button
           type="button"
           className={`feed-table-tool${filtersOpen ? " is-active" : ""}`}
@@ -52,7 +65,6 @@ export default function FeedTableToolbar({
         </button>
         <span className="feed-table-tool feed-table-tool--pill is-active">
           Grouped by Company
-          <span className="feed-table-pill-x" aria-hidden>×</span>
         </span>
         <label className="feed-table-sort">
           <span className="feed-table-sort-label">Sort</span>
@@ -66,15 +78,13 @@ export default function FeedTableToolbar({
             ))}
           </select>
         </label>
-        <button type="button" className="feed-table-tool" disabled title="Score colors active">
-          Color
-        </button>
       </div>
 
       <div className="feed-table-toolbar-end">
         <div className="feed-table-search">
           <span className="feed-table-search-icon" aria-hidden>⌕</span>
           <input
+            ref={searchRef}
             type="search"
             className="feed-table-search-input"
             placeholder="Search jobs, companies, skills…"
