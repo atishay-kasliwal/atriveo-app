@@ -18,7 +18,6 @@ import type { Job, RunEntry } from "../types";
 import type { TailorRecord } from "../types/tailorQueue";
 import type { SavedJobSource } from "../hooks/useApplyClickLog";
 import JobTable from "../components/JobTable";
-import JobCard from "../components/JobCard";
 import { careerOpsRating } from "../utils/jobPresentation";
 import type { Period, SortBy, SortDir } from "./Dashboard.types";
 import { defaultSortDir, sortJobs } from "../utils/jobSort";
@@ -42,14 +41,6 @@ type RunCard = RunEntry & {
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
-const DS_TERM_RE  = /data\s*sci/i;
-const DS_TITLE_RE = /data\s*sci/i;
-
-const LOCATION_FILTERS = [
-  { key: "New York", match: (loc: string) => loc.includes("new york") },
-  { key: "Seattle",  match: (loc: string) => loc.includes("seattle") },
-  { key: "NC",       match: (loc: string) => loc.includes(", nc") || loc.includes("north carolina") },
-];
 const LEVEL_FILTERS: LevelFilter[] = ["all", "New Grad", "Entry", "Mid"];
 
 // Filter the feed by tailor outcome. The many TailorOutcomeKind values are
@@ -93,13 +84,6 @@ function tailorFilterBucket(record: TailorRecord | null): TailorFilter {
 
 interface DashboardProps {
   initialPeriod?: Period;
-}
-
-function isDataScientist(job: Job): boolean {
-  return (
-    DS_TERM_RE.test(job.search_term || "") ||
-    DS_TITLE_RE.test(job.title || "")
-  );
 }
 
 function parseDateLike(iso?: string | null): Date | null {
@@ -196,7 +180,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
-  const [locationFilter, setLocationFilter] = useState<string>("all");
   const [showTodayApplications, setShowTodayApplications] = useState(false);
   const [activeView, setActiveView] = useState<ViewKey>("all");
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -221,7 +204,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     const nextSort = nextPeriod === "hour" ? "time" : "score";
     setSortBy(nextSort);
     setSortDir(defaultSortDir(nextSort));
-    setLocationFilter("all");
     if (syncPath) {
       const nextPath = nextPeriod === "today" ? "/today" : "/";
       if (window.location.pathname !== nextPath) navigate(nextPath);
@@ -538,49 +520,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     [rawJobs]
   );
 
-  const isSplitView = false;
-
-  const locationRows = useMemo(() =>
-    LOCATION_FILTERS.map(({ key, match }) => {
-      const jobs = filtered.filter((j) => match(j.location?.toLowerCase() || ""));
-      return {
-        key,
-        jobs,
-        dsJobs: jobs.filter(isDataScientist),
-        otherJobs: jobs.filter((j) => !isDataScientist(j)),
-      };
-    }),
-  [filtered]);
-
-  const locationFiltered = useMemo(() => {
-    if (locationFilter === "all") return filtered;
-    const lf = LOCATION_FILTERS.find(f => f.key === locationFilter);
-    return lf ? filtered.filter(j => lf.match(j.location?.toLowerCase() || "")) : filtered;
-  }, [filtered, locationFilter]);
-
-  const locationPanels = useMemo(
-    () => [
-      {
-        key: "all",
-        label: "All",
-        total: filtered.length,
-        ds: filtered.filter(isDataScientist).length,
-        other: filtered.filter((j) => !isDataScientist(j)).length,
-      },
-      ...locationRows.map(({ key, jobs, dsJobs, otherJobs }) => ({
-        key,
-        label: key,
-        total: jobs.length,
-        ds: dsJobs.length,
-        other: otherJobs.length,
-      })),
-    ],
-    [filtered, locationRows]
-  );
-
-  const dsJobs    = useMemo(() => isSplitView ? locationFiltered.filter(isDataScientist)    : [], [locationFiltered, isSplitView]);
-  const otherJobs = useMemo(() => isSplitView ? locationFiltered.filter(j => !isDataScientist(j)) : [], [locationFiltered, isSplitView]);
-
   const levelCounts = useMemo(
     () => ({
       all: visibleJobs.length,
@@ -590,7 +529,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     }),
     [visibleJobs]
   );
-  const displayedJobs = isSplitView ? locationFiltered : filtered;
+  const displayedJobs = filtered;
   const sessionResumeByUrl = useMemo(
     () => buildSessionResumeSlots(displayedJobs),
     [displayedJobs],
@@ -756,7 +695,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     h1bFilter,
     top500Filter,
     termFilter !== "all",
-    locationFilter !== "all",
   ].filter(Boolean).length;
 
   const hasActiveFilters = Boolean(
@@ -766,8 +704,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     tailorFilter !== "all" ||
     h1bFilter ||
     top500Filter ||
-    termFilter !== "all" ||
-    locationFilter !== "all"
+    termFilter !== "all"
   );
 
   const clearFilters = () => {
@@ -778,7 +715,6 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     setH1bFilter(false);
     setTop500Filter(false);
     setTermFilter("all");
-    setLocationFilter("all");
     setActiveView("all");
   };
 
@@ -1271,76 +1207,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
             />
             <BulkJobAnalysisPanel analysis={jobSelection.analysis} />
 
-            {/* Location filter cards — shown in Today split view */}
-            {isSplitView && (
-              <div className="location-panel-grid">
-                {locationPanels.map((panel) => (
-                  <button
-                    key={panel.key}
-                    className={`location-panel-card${locationFilter === panel.key ? " active" : ""}`}
-                    onClick={() => setLocationFilter(panel.key)}
-                  >
-                    <div className="location-panel-head">
-                      <span className="location-panel-name">{panel.label}</span>
-                      <span className="location-panel-total">{panel.total}</span>
-                    </div>
-                    <div className="location-panel-meta">
-                      <span>Data Sci {panel.ds}</span>
-                      <span>Other {panel.other}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Job list — split (Today) or single */}
-            {isSplitView ? (
-              <div className="today-split">
-                {[
-                  { label: "Data Scientist", jobs: dsJobs },
-                  { label: "Everything Else", jobs: otherJobs },
-                ].map(({ label, jobs }, idx) => (
-                  <div key={label}>
-                    {idx > 0 && (
-                      <div className="split-section-divider" role="separator" aria-label={`Start of ${label} section`}>
-                        <span className="split-section-divider-line" />
-                        <span className="split-section-divider-label">Next Section: {label}</span>
-                        <span className="split-section-divider-line" />
-                      </div>
-                    )}
-                  <div className="split-panel">
-                    <div className="split-panel-header">
-                      <span className="split-panel-title">{label}</span>
-                      <span className="split-panel-count">{jobs.length} jobs{jobs.filter(j => j.level === "New Grad").length ? ` · ${jobs.filter(j => j.level === "New Grad").length} NG` : ""}</span>
-                    </div>
-                    {loading ? (
-                        <div className="state-msg"><div className="spin" style={{ margin: "0 auto" }} /></div>
-                      ) : jobs.length === 0 ? (
-                        <div className="state-msg" style={{ fontSize: 13 }}>No jobs found</div>
-                      ) : (
-                        <div className="card-grid">
-                          {jobs.map((job, i) => (
-                            <JobCard
-                              key={job.job_url || i}
-                              job={job}
-                              index={i + 1}
-                              applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                              onAddToTracker={recordClick}
-                              onSaveJob={handleSaveJobWithQueueCleanup}
-                              onExcludeCompany={excludeCompany}
-                              isSelected={jobSelection.isJobSelected(job)}
-                              onSelectionToggle={jobSelection.toggleJobSelection}
-                            />
-                          ))}
-                        </div>
-                      )}
-                  </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              jobListContent
-            )}
+            {jobListContent}
           </div>
         </div>
       </div>

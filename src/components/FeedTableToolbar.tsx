@@ -33,6 +33,7 @@ export default function FeedTableToolbar({
   onFilterToggle,
   filtersOpen,
   onShare,
+  shareMessage,
 }: Props) {
   return (
     <div className="feed-table-toolbar">
