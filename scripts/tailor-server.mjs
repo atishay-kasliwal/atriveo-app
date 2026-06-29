@@ -1538,6 +1538,35 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // GET /serve-pdf?path=...           → inline (browser preview)
+  // GET /serve-pdf?path=...&dl=1      → attachment (download)
+  if (req.method === "GET" && pathname === "/serve-pdf") {
+    const pdfPath = url.searchParams.get("path");
+    if (!pdfPath || !pdfPath.startsWith(OUT_ROOT)) {
+      res.writeHead(400); res.end("invalid path");
+      return;
+    }
+    if (!fs.existsSync(pdfPath)) {
+      res.writeHead(404); res.end("not found");
+      return;
+    }
+    try {
+      const data = fs.readFileSync(pdfPath);
+      const isDownload = url.searchParams.get("dl") === "1";
+      res.writeHead(200, {
+        "Content-Type": "application/pdf",
+        "Content-Length": data.length,
+        "Content-Disposition": isDownload
+          ? 'attachment; filename="Atishay Kasliwal.pdf"'
+          : 'inline; filename="Atishay Kasliwal.pdf"',
+      });
+      res.end(data);
+    } catch (e) {
+      res.writeHead(500); res.end(String(e.message || e));
+    }
+    return;
+  }
+
   res.writeHead(404); res.end("not found");
 });
 

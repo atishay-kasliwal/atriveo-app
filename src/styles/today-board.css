@@ -719,12 +719,11 @@ body.is-today-board .nav-tab.active:hover {
 .job-table--board .col-check   { width: 32px; }
 .job-table--board .col-num     { width: 48px; }
 .job-table--board .col-score   { width: 68px; }
-.job-table--board .col-role    { width: 28%; min-width: 200px; }
-.job-table--board .col-company { width: 14%; min-width: 110px; }
+.job-table--board .col-role    { width: 32%; min-width: 220px; }
+.job-table--board .col-company { width: 15%; min-width: 110px; }
 .job-table--board .col-rating  { width: 120px; }
-.job-table--board .col-loc     { width: 110px; }
 .job-table--board .col-level   { width: 56px; }
-.job-table--board .col-tailored{ width: 90px; }
+.job-table--board .col-tailored{ width: 110px; }
 .job-table--board .col-posted  { width: 76px; }
 .job-table--board .col-actions { width: 240px; }
 
@@ -2082,6 +2081,112 @@ body.is-today-board .nav-tab.active:hover {
 
 .job-table-tailored-log-icon {
   font-size: 11px;
+}
+
+/* ─── PDF Preview Modal ───────────────────────────────────── */
+.pdf-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: oklch(0% 0 0 / 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.pdf-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 860px;
+  height: 90vh;
+  background: var(--board-surface, #1a1a24);
+  border: 1px solid var(--board-border, oklch(100% 0 0 / 0.08));
+  border-radius: 10px;
+  overflow: hidden;
+}
+.pdf-modal-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--board-border, oklch(100% 0 0 / 0.08));
+  flex-shrink: 0;
+}
+.pdf-modal-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--board-text, oklch(92% 0.01 260));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pdf-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.pdf-modal-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--board-action-bg, oklch(100% 0 0 / 0.07));
+  color: var(--board-text, oklch(92% 0.01 260));
+  text-decoration: none;
+  border: 1px solid var(--board-border, oklch(100% 0 0 / 0.08));
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.pdf-modal-btn:hover {
+  background: var(--board-action-bg-hover, oklch(100% 0 0 / 0.13));
+}
+.pdf-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 13px;
+  background: transparent;
+  color: var(--board-muted, oklch(65% 0.01 260));
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.pdf-modal-close:hover {
+  background: oklch(100% 0 0 / 0.07);
+  color: var(--board-text, oklch(92% 0.01 260));
+}
+.pdf-modal-frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #fff;
+}
+
+/* PDF preview button in resume cell */
+.job-table-tailored-pdf {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  background: oklch(55% 0.18 260 / 0.15);
+  color: oklch(72% 0.16 260);
+  border: 1px solid oklch(55% 0.18 260 / 0.25);
+  cursor: pointer;
+  transition: background 0.1s;
+  white-space: nowrap;
+}
+.job-table-tailored-pdf:hover {
+  background: oklch(55% 0.18 260 / 0.28);
 }
 
 .tailor-log-modal-backdrop {

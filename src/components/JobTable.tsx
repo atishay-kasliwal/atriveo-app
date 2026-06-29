@@ -13,6 +13,7 @@ import { tailorCellLabel, tailorFolderPath } from "../utils/tailorProgress";
 import { formatResumeSlot, resolveResumeSlot, resolveSessionHour } from "../utils/resumeSlot";
 import { formatResumeId, type SessionResumeMeta } from "../utils/sessionResume";
 import TailorJobLogModal from "./TailorJobLogModal";
+import PdfPreviewModal from "./PdfPreviewModal";
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -68,12 +69,6 @@ function fmtTime(iso?: string | null, scrapedDate?: string, relative = false, bo
   return "—";
 }
 
-function locationShort(loc?: string | null): string {
-  if (!loc) return "—";
-  if (loc.toLowerCase().includes("remote")) return "Remote";
-  const parts = loc.split(",");
-  return parts.length >= 2 ? parts.slice(-2).join(",").trim() : loc;
-}
 
 function scoreTrend(careerOps: ReturnType<typeof careerOpsRating>): "up" | "down" | "flat" {
   const { atsPct, fitPct } = careerOps;
@@ -317,6 +312,7 @@ function JobTableRow({
   const [jdCopyState, setJdCopyState] = useState<"" | "loading" | "copied" | "summary" | "missing">("");
   const [savedFeedback, setSavedFeedback] = useState<SavedJobSource | null>(null);
   const [logOpen, setLogOpen] = useState(false);
+  const [pdfOpen, setPdfOpen] = useState(false);
   const co = job.company || "—";
   const title = job.title || "—";
   const careerOps = careerOpsRating(job);
@@ -473,7 +469,6 @@ function JobTableRow({
           </td>
         </>
       )}
-      <td className="job-table-loc" title={job.location}>{locationShort(job.location)}</td>
       <td className="job-table-level">{job.level || "—"}</td>
       {board && (
         <td className="job-table-tailored">
@@ -485,7 +480,19 @@ function JobTableRow({
               {tailor.label}
             </span>
             <div className="job-table-tailored-actions">
-              {folderPath && onOpenTailorPath ? (
+              {tailorRecord?.pdfPath ? (
+                <button
+                  type="button"
+                  className="job-table-tailored-pdf"
+                  title="Preview PDF"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPdfOpen(true);
+                  }}
+                >
+                  PDF
+                </button>
+              ) : (folderPath && onOpenTailorPath) ? (
                 <button
                   type="button"
                   className="job-table-tailored-folder"
@@ -521,6 +528,9 @@ function JobTableRow({
           </div>
           {logOpen && tailorRecord ? (
             <TailorJobLogModal record={tailorRecord} onClose={() => setLogOpen(false)} />
+          ) : null}
+          {pdfOpen && tailorRecord?.pdfPath ? (
+            <PdfPreviewModal pdfPath={tailorRecord.pdfPath} onClose={() => setPdfOpen(false)} />
           ) : null}
         </td>
       )}
@@ -728,7 +738,6 @@ function CompanyGroupRow({
         <span className="job-table-stars">{careerOpsStars(topOps.score)}</span>
         <span className={`job-table-match-label job-table-match-label--${topOps.key}`}>{topOps.label}</span>
       </td>
-      <td className="job-table-loc" title={top.location}>{locationShort(top.location)}</td>
       <td className="job-table-level">{top.level || "—"}</td>
       <td className="job-table-tailored" />
       <td className="job-table-time">{fmtTime(top.batch_time || top.date_posted, top.scraped_date)}</td>
@@ -825,7 +834,6 @@ function JobTableBoard({
           <col className="col-company" />
           <col className="col-role" />
           <col className="col-score" />
-          <col className="col-loc" />
           <col className="col-level" />
           <col className="col-tailored" />
           <col className="col-posted" />
@@ -850,7 +858,6 @@ function JobTableBoard({
                 <SortableHeader label="Company" column="company" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Role" column="title" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Score" column="score" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
-                <SortableHeader label="Location" column="location" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Level" column="level" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Resume" column="tailored" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Posted" column="time" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
@@ -858,7 +865,7 @@ function JobTableBoard({
             ) : (
               <>
                 <th>Company</th><th>Role</th><th>Score</th>
-                <th>Location</th><th>Level</th><th>Resume</th><th>Posted</th>
+                <th>Level</th><th>Resume</th><th>Posted</th>
               </>
             )}
             <th>Actions</th>
@@ -1020,7 +1027,6 @@ export default function JobTable({
             <col className="col-company" />
             <col className="col-role" />
             <col className="col-score" />
-            <col className="col-loc" />
             <col className="col-level" />
             <col className="col-tailored" />
             <col className="col-posted" />
@@ -1046,7 +1052,6 @@ export default function JobTable({
                 <SortableHeader label="Company" column="company" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Role" column="title" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Score" column="score" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
-                <SortableHeader label="Location" column="location" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Level" column="level" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Resume" column="tailored" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Posted" column="time" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
@@ -1056,13 +1061,12 @@ export default function JobTable({
                 <th>{variant === "board" ? "Company" : "Job"}</th>
                 {variant === "board" ? <th>Role</th> : null}
                 <th>Score</th>
-                <th>Location</th>
                 <th>Level</th>
                 {variant === "board" ? <th>Resume</th> : null}
                 <th>{variant === "board" ? "Posted" : "Time"}</th>
               </>
             )}
-            <th>{variant === "board" ? "Actions" : "Actions"}</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
