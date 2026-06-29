@@ -167,7 +167,7 @@ export default function TodayBoardSidebar({
                         </span>
                       </span>
                     </span>
-                    <span className="today-board-nav-count">{r.count}</span>
+                    <span className="today-board-session-count">{r.count}</span>
                   </button>
                 </li>
               );

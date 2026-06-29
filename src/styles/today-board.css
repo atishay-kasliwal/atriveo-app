@@ -145,56 +145,59 @@ body.is-today-board .nav-tab.active:hover {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px 10px 24px 12px;
-  background: oklch(0.11 0.005 260);
-  border-right: 1px solid var(--board-line);
+  gap: 0;
+  padding: 0 0 24px;
+  background: oklch(0.10 0.006 260);
+  border-right: 1px solid oklch(0.17 0.005 260);
   box-shadow: none;
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.22 0.005 260) transparent;
 }
 
 .today-board-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 2px 6px 8px;
-  border-bottom: 1px solid oklch(0.20 0.004 260);
-  margin-bottom: 2px;
+  gap: 9px;
+  padding: 14px 14px 13px;
+  border-bottom: 1px solid oklch(0.16 0.005 260);
+  flex-shrink: 0;
 }
 
 .today-board-brand-mark {
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   background: linear-gradient(135deg, var(--primary) 0%, color-mix(in oklch, var(--primary) 60%, transparent) 100%);
   flex-shrink: 0;
-  box-shadow: 0 3px 10px var(--primary-glow);
+  box-shadow: 0 0 12px var(--primary-glow);
 }
 
 .today-board-brand-title {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--board-ink);
+  color: oklch(0.82 0.006 260);
   font-family: "Inter", sans-serif;
 }
 
 .today-board-nav-section {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 0;
+  padding: 10px 8px 4px;
 }
 
 .today-board-nav-label {
   margin: 0;
-  padding: 0 6px 4px;
+  padding: 0 6px 6px;
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: oklch(0.40 0.006 260);
+  color: oklch(0.34 0.006 260);
   font-family: "Inter", sans-serif;
 }
 
@@ -204,7 +207,7 @@ body.is-today-board .nav-tab.active:hover {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 1px;
 }
 
 .today-board-nav-item {
@@ -215,11 +218,11 @@ body.is-today-board .nav-tab.active:hover {
   width: 100%;
   padding: 6px 8px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   background: transparent;
-  color: oklch(0.52 0.008 260);
+  color: oklch(0.48 0.007 260);
   font-family: "Inter", sans-serif;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -228,20 +231,20 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .today-board-nav-item:hover {
-  background: oklch(0.16 0.006 260);
-  color: var(--board-ink);
+  background: oklch(0.15 0.006 260);
+  color: oklch(0.72 0.006 260);
 }
 
 .today-board-nav-item.is-active {
-  background: oklch(0.62 0.19 255 / 0.12);
-  color: oklch(0.72 0.15 255);
+  background: oklch(0.60 0.19 255 / 0.13);
+  color: oklch(0.74 0.16 255);
   font-weight: 600;
 }
 
 .today-board-nav-count {
   flex-shrink: 0;
-  color: oklch(0.36 0.005 260);
-  font-size: 11.5px;
+  color: oklch(0.32 0.004 260);
+  font-size: 11px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
@@ -268,7 +271,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .today-board-nav-item.is-active .today-board-nav-count {
-  color: oklch(0.72 0.15 255);
+  color: oklch(0.64 0.14 255);
 }
 
 .today-board-session-item {
@@ -276,47 +279,65 @@ body.is-today-board .nav-tab.active:hover {
   align-items: center;
   gap: 8px;
   justify-content: space-between;
+  padding: 7px 8px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+}
+
+.today-board-session-item:hover {
+  background: oklch(0.15 0.006 260) !important;
+  border-color: oklch(0.20 0.005 260);
+}
+
+.today-board-session-item.is-active {
+  background: oklch(0.60 0.19 255 / 0.10) !important;
+  border-color: oklch(0.60 0.19 255 / 0.20) !important;
 }
 
 .today-board-session-leading {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   min-width: 0;
   flex: 1;
 }
 
 .today-board-session-index {
   flex: 0 0 auto;
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  color: var(--board-muted);
-  background: var(--board-line);
+  color: oklch(0.38 0.005 260);
+  background: oklch(0.18 0.005 260);
   border-radius: 50%;
 }
 
 .today-board-session-item.is-active .today-board-session-index {
-  color: var(--primary-foreground);
-  background: var(--primary);
+  color: oklch(0.74 0.16 255);
+  background: oklch(0.60 0.19 255 / 0.20);
 }
 
 .today-board-session-body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
 }
 
 .today-board-session-time {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
-  color: var(--board-ink);
+  color: oklch(0.68 0.006 260);
+  letter-spacing: -0.01em;
+}
+
+.today-board-session-item.is-active .today-board-session-time {
+  color: oklch(0.80 0.12 255);
 }
 
 .today-board-session-meta {
@@ -325,13 +346,16 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .today-board-sessions {
-  padding-top: 12px;
-  border-top: 1px solid var(--board-line);
+  padding-top: 0;
+  border-top: 1px solid oklch(0.16 0.005 260);
+  margin-top: 8px;
 }
 
 .today-board-sessions .today-board-nav-list {
-  max-height: 280px;
+  max-height: 320px;
   overflow-y: auto;
+  gap: 2px;
+  padding: 0 2px;
 }
 
 /* ── Metric strip (6 cols) ─────────────────────────────────────────────── */
@@ -2620,32 +2644,32 @@ body.is-today-board .nav-tab.active:hover {
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  padding: 6px 8px;
+  padding: 5px 8px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   background: transparent;
-  color: oklch(0.52 0.008 260);
+  color: oklch(0.56 0.007 260);
   font-family: "Inter", sans-serif;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   text-align: left;
   cursor: pointer;
-  transition: background 0.1s, color 0.1s;
+  transition: background 0.12s, color 0.12s;
 }
 
 .today-board-group-label:hover {
-  background: oklch(0.16 0.006 260);
-  color: var(--board-ink);
+  background: oklch(0.15 0.006 260);
+  color: oklch(0.75 0.006 260);
 }
 
 .today-board-group-label.is-active {
-  background: oklch(0.62 0.19 255 / 0.12);
-  color: oklch(0.72 0.15 255);
+  background: oklch(0.60 0.19 255 / 0.13);
+  color: oklch(0.74 0.16 255);
   font-weight: 600;
 }
 
 .today-board-group-label.is-active .today-board-nav-count {
-  color: oklch(0.72 0.15 255);
+  color: oklch(0.64 0.14 255);
 }
 
 /* Sub-links (Top 500 / Others) */
@@ -2653,7 +2677,7 @@ body.is-today-board .nav-tab.active:hover {
 .today-board-sub-list {
   list-style: none;
   margin: 0;
-  padding: 0 0 2px 16px;
+  padding: 0 0 4px 12px;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -2662,15 +2686,15 @@ body.is-today-board .nav-tab.active:hover {
 .today-board-sub-item {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   width: 100%;
-  padding: 4px 8px 4px 6px;
+  padding: 3px 8px 3px 6px;
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: oklch(0.44 0.006 260);
+  color: oklch(0.38 0.005 260);
   font-family: "Inter", sans-serif;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 400;
   text-align: left;
   cursor: pointer;
@@ -2678,29 +2702,31 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .today-board-sub-item:hover {
-  background: oklch(0.16 0.006 260);
-  color: oklch(0.60 0.008 260);
+  background: oklch(0.15 0.005 260);
+  color: oklch(0.56 0.007 260);
 }
 
 .today-board-sub-item.is-active {
-  color: oklch(0.72 0.15 255);
+  color: oklch(0.68 0.14 255);
   font-weight: 500;
 }
 
 .today-board-sub-item.is-active .today-board-nav-count {
-  color: oklch(0.72 0.15 255);
+  color: oklch(0.60 0.12 255);
 }
 
 .today-board-sub-item .today-board-nav-count {
   margin-left: auto;
+  font-size: 10.5px;
 }
 
 .today-board-sub-dot {
   display: inline-block;
-  width: 7px;
-  height: 7px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   flex-shrink: 0;
+  opacity: 0.7;
 }
 
 .today-board-sub-dot--top500 {
@@ -2708,8 +2734,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .today-board-sub-dot--others {
-  background: var(--board-muted);
-  opacity: 0.6;
+  background: oklch(0.45 0.005 260);
 }
 
 /* ── Session Top 500 / Others breakdown ────────────────────────────────── */
@@ -2752,8 +2777,26 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .session-dot--others {
-  background: var(--board-muted);
-  opacity: 0.7;
+  background: oklch(0.42 0.005 260);
+  opacity: 0.8;
+}
+
+.today-board-session-count {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: oklch(0.32 0.004 260);
+  background: oklch(0.17 0.005 260);
+  padding: 2px 6px;
+  border-radius: 20px;
+  min-width: 28px;
+  text-align: center;
+}
+
+.today-board-session-item.is-active .today-board-session-count {
+  background: oklch(0.60 0.19 255 / 0.18);
+  color: oklch(0.72 0.16 255);
 }
 
 /* ═══════════════════════════════════════════════
