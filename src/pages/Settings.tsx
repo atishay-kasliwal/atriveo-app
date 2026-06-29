@@ -4,6 +4,7 @@ import AppHeader from "../components/AppHeader";
 import PageIntro from "../components/PageIntro";
 import { useExclusions } from "../hooks/useExclusions";
 import { assertTailorServerReady, listTailoredResumes } from "../utils/tailorRun";
+import { useNotifications } from "../hooks/useNotifications";
 
 const RESUME_KEY = "atriveo_resume";
 const BANK_VERSION = 51;
@@ -12,6 +13,7 @@ const PLANNER = "v2";
 export default function Settings() {
   const { user } = useAuth();
   const { exclusions, excludeCompany, excludeKeyword, removeExclusion } = useExclusions();
+  const { supported: notifSupported, permission: notifPerm, requestPermission, notify } = useNotifications();
 
   const [companyInput, setCompanyInput] = useState("");
   const [keywordInput, setKeywordInput] = useState("");
@@ -184,6 +186,40 @@ export default function Settings() {
                 </span>
               ))}
             </div>
+          )}
+        </div>
+
+        <div className="settings-section">
+          <div className="settings-section-header">
+            <div>
+              <div className="settings-section-title">Batch notifications</div>
+              <div className="settings-section-sub">
+                Get a browser notification when a new hourly job batch lands — even if the tab is in the background.
+              </div>
+            </div>
+            {notifPerm === "granted" && (
+              <span className="settings-count" style={{ color: "oklch(72% 0.18 145)" }}>On</span>
+            )}
+          </div>
+          {!notifSupported ? (
+            <div className="settings-empty">Browser notifications not supported in this browser.</div>
+          ) : notifPerm === "denied" ? (
+            <div className="settings-empty">Notifications blocked — allow them in your browser site settings, then refresh.</div>
+          ) : notifPerm === "granted" ? (
+            <div className="settings-notif-row">
+              <span className="settings-notif-status">Notifications enabled</span>
+              <button
+                type="button"
+                className="settings-btn settings-btn--ghost"
+                onClick={() => notify("Atriveo", "Test — notifications are working!")}
+              >
+                Send test
+              </button>
+            </div>
+          ) : (
+            <button type="button" className="settings-btn" onClick={requestPermission}>
+              Enable batch notifications
+            </button>
           )}
         </div>
 

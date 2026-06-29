@@ -4637,6 +4637,35 @@ footer a:hover { color: var(--blue); }
   color: var(--muted);
   font-style: italic;
 }
+.settings-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  background: oklch(55% 0.18 260);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.settings-btn:hover { background: oklch(50% 0.18 260); }
+.settings-btn--ghost {
+  background: oklch(100% 0 0 / 0.07);
+  color: var(--text);
+  border: 1px solid oklch(100% 0 0 / 0.1);
+}
+.settings-btn--ghost:hover { background: oklch(100% 0 0 / 0.12); }
+.settings-notif-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.settings-notif-status {
+  font-size: 13px;
+  color: oklch(72% 0.18 145);
+}
 
 /* ── Skills page ──────────────────────────────────────────────────────── */
 /* ── Recon (EmailFinder) page ─────────────────────────────────────── */

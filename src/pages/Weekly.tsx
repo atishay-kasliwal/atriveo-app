@@ -4,11 +4,15 @@ import BulkJobAnalysisPanel from "../components/BulkJobAnalysisPanel";
 import BulkJobCopyBar from "../components/BulkJobCopyBar";
 import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
+import { useApplyClickLog } from "../hooks/useApplyClickLog";
 import { useExclusions } from "../hooks/useExclusions";
 import { useJobSelection } from "../hooks/useJobSelection";
 import { useTop500 } from "../context/Top500Context";
+import { useTailorStatus } from "../hooks/useTailorStatus";
 import type { Job } from "../types";
-import JobCard from "../components/JobCard";
+import JobTable from "../components/JobTable";
+import type { SortBy, SortDir } from "./Dashboard.types";
+import { defaultSortDir, sortJobs } from "../utils/jobSort";
 
 type WeekJob = Job & { scraped_date?: string };
 
@@ -29,14 +33,18 @@ function dayLabel(dateStr: string): string {
 
 export default function Weekly() {
   const { stats, recordClick, getRecord } = useApplyTracker();
+  const { recordSavedJob } = useApplyClickLog();
   const { isExcluded, excludeCompany } = useExclusions();
   const { isTop500 } = useTop500();
+  const tailorStatus = useTailorStatus();
   const [weekJobs, setWeekJobs] = useState<WeekJob[]>([]);
   const [activeDay, setActiveDay] = useState("All");
   const [levelFilter, setLevelFilter] = useState("all");
   const [top500Filter, setTop500Filter] = useState(false);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<SortBy>("score");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   useEffect(() => {
     fetch("/api/jobs?type=week")
@@ -63,6 +71,8 @@ export default function Weekly() {
     return map;
   }, [weekJobs]);
 
+  const appliedSet = useMemo(() => new Set(Object.keys(stats.appliedJobs)), [stats.appliedJobs]);
+
   const filtered = useMemo(() => {
     let jobs: WeekJob[] =
       activeDay === "All" ? weekJobs : weekJobs.filter((j) => j.scraped_date === activeDay);
@@ -75,14 +85,12 @@ export default function Weekly() {
     }
     jobs = jobs.filter((j) => !isExcluded(j));
     if (top500Filter) jobs = jobs.filter((j) => isTop500(j.company || ""));
-    jobs = [...jobs].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-    // Push applied jobs to the bottom so unapplied stay front-and-centre
-    const appliedSet = new Set(Object.keys(stats.appliedJobs));
+    const sorted = sortJobs(jobs, sortBy, sortDir);
     return [
-      ...jobs.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
-      ...jobs.filter((j) => j.job_url  &&  appliedSet.has(j.job_url)),
+      ...sorted.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
+      ...sorted.filter((j) => j.job_url && appliedSet.has(j.job_url)),
     ];
-  }, [weekJobs, activeDay, levelFilter, top500Filter, query, stats.appliedJobs, isExcluded]);
+  }, [weekJobs, activeDay, levelFilter, top500Filter, query, sortBy, sortDir, appliedSet, isExcluded, isTop500]);
 
   const uniqueCompanies = useMemo(
     () => new Set(weekJobs.map((j) => j.company).filter(Boolean)).size,
@@ -92,9 +100,17 @@ export default function Weekly() {
     () => weekJobs.reduce((m, j) => Math.max(m, j.score ?? 0), 0),
     [weekJobs]
   );
-  const ngCount = filtered.filter((j) => j.level === "New Grad").length;
   const todayCount = weekJobs.filter((j) => j.scraped_date === todayLocal()).length;
   const jobSelection = useJobSelection(filtered);
+
+  function handleSort(col: SortBy) {
+    if (col === sortBy) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(col);
+      setSortDir(defaultSortDir(col));
+    }
+  }
 
   return (
     <div>
@@ -105,7 +121,7 @@ export default function Weekly() {
           compact
           kicker="Weekly View"
           title="A seven-day job archive that stays readable"
-          description="Browse the week at a glance with day chips, scoring filters, and applied jobs pushed to the bottom so the useful stuff stays up top."
+          description="Browse the week at a glance with day chips, scoring filters, and applied jobs pushed to the bottom."
           stats={[
             { label: "This week", value: weekJobs.length, tone: "blue" },
             { label: "Companies", value: uniqueCompanies, tone: "green" },
@@ -113,7 +129,6 @@ export default function Weekly() {
           ]}
         />
 
-        {/* KPIs */}
         <div className="kpi-row">
           <div className="kpi-card blue">
             <div className="kpi-value">{weekJobs.length}</div>
@@ -142,7 +157,6 @@ export default function Weekly() {
           </div>
         </div>
 
-        {/* Day chips */}
         <div className="week-day-strip">
           {days.map((d) => (
             <button
@@ -156,7 +170,6 @@ export default function Weekly() {
           ))}
         </div>
 
-        {/* Filters */}
         <div className="filter-bar">
           <div className="search-wrap">
             <span className="search-icon">⌕</span>
@@ -189,7 +202,6 @@ export default function Weekly() {
 
         <div className="result-meta">
           {filtered.length} job{filtered.length !== 1 ? "s" : ""}
-          {ngCount ? ` · ${ngCount} New Grad` : ""}
           {activeDay !== "All" ? ` · ${dayLabel(activeDay)}` : " · last 7 days"}
         </div>
 
@@ -205,25 +217,28 @@ export default function Weekly() {
         />
         <BulkJobAnalysisPanel analysis={jobSelection.analysis} />
 
-        {/* Job list */}
         {loading ? (
           <div className="state-msg"><div className="icon">⏳</div>Loading…</div>
         ) : filtered.length === 0 ? (
           <div className="state-msg"><div className="icon">🔍</div>No jobs found</div>
         ) : (
-          <div className="card-grid">
-            {filtered.map((job, i) => (
-              <JobCard
-                key={job.job_url || i}
-                job={job}
-                applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                onAddToTracker={recordClick}
-                onExcludeCompany={excludeCompany}
-                isSelected={jobSelection.isJobSelected(job)}
-                onSelectionToggle={jobSelection.toggleJobSelection}
-              />
-            ))}
-          </div>
+          <JobTable
+            jobs={filtered}
+            variant="board"
+            groupByCompany={false}
+            getRecord={getRecord}
+            onAddToTracker={recordClick}
+            onSaveJob={(job, source) => recordSavedJob(job, source)}
+            onExcludeCompany={excludeCompany}
+            isJobSelected={jobSelection.isJobSelected}
+            onSelectionToggle={jobSelection.toggleJobSelection}
+            onGroupSelectAll={jobSelection.toggleGroupSelection}
+            isGroupFullySelected={jobSelection.isGroupFullySelected}
+            getTailorRecord={tailorStatus.getRecordForJob}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            onSortColumn={handleSort}
+          />
         )}
       </div>
 

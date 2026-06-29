@@ -8,12 +8,14 @@ import CompanyLogo from "./CompanyLogo";
 import { careerOpsRating, careerOpsStars, companyDomain, matchReasons } from "../utils/jobPresentation";
 import { groupJobsByCompany, type CompanyJobGroup } from "../utils/jobGrouping";
 import { copyJobDescription } from "../utils/jobCopy";
+import { extractComp } from "../utils/compExtract";
 import type { TailorRecord } from "../types/tailorQueue";
 import { tailorCellLabel, tailorFolderPath } from "../utils/tailorProgress";
 import { formatResumeSlot, resolveResumeSlot, resolveSessionHour } from "../utils/resumeSlot";
 import { formatResumeId, type SessionResumeMeta } from "../utils/sessionResume";
 import TailorJobLogModal from "./TailorJobLogModal";
 import PdfPreviewModal from "./PdfPreviewModal";
+import JdDrawer from "./JdDrawer";
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -178,6 +180,7 @@ function ScoreCell({ job, board = false }: { job: Job; board?: boolean }) {
   const trend = scoreTrend(careerOps);
   const delta = scoreDelta(careerOps);
   const trendSymbol = trend === "up" ? "▲" : trend === "down" ? "▼" : "→";
+  const comp = board ? extractComp(job.summary) : null;
 
   if (board) {
     return (
@@ -196,6 +199,7 @@ function ScoreCell({ job, board = false }: { job: Job; board?: boolean }) {
             style={{ width: `${careerOps.score}%` }}
           />
         </div>
+        {comp && <span className="job-table-comp-pill">{comp}</span>}
       </div>
     );
   }
@@ -313,6 +317,7 @@ function JobTableRow({
   const [savedFeedback, setSavedFeedback] = useState<SavedJobSource | null>(null);
   const [logOpen, setLogOpen] = useState(false);
   const [pdfOpen, setPdfOpen] = useState(false);
+  const [jdOpen, setJdOpen] = useState(false);
   const co = job.company || "—";
   const title = job.title || "—";
   const careerOps = careerOpsRating(job);
@@ -576,13 +581,15 @@ function JobTableRow({
             </button>
             <button
               type="button"
-              className={`job-table-board-apply${jdCopyState === "copied" || jdCopyState === "summary" ? " is-logged" : ""}${jdCopyState === "missing" ? " is-warn" : ""}`}
-              title="Copy full job description"
-              disabled={jdCopyState === "loading"}
-              onClick={handleCopyJd}
+              className="job-table-board-apply"
+              title="View full job description"
+              onClick={(e) => { e.stopPropagation(); setJdOpen(true); }}
             >
-              {jdCopyLabel}
+              JD
             </button>
+            {jdOpen && (
+              <JdDrawer job={job} onClose={() => setJdOpen(false)} />
+            )}
             {canRetryTracker && (
               <button
                 type="button"

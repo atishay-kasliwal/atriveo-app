@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import AppHeader from "../components/AppHeader";
 import BulkJobAnalysisPanel from "../components/BulkJobAnalysisPanel";
 import BulkJobCopyBar from "../components/BulkJobCopyBar";
@@ -13,6 +13,7 @@ import { useExclusions } from "../hooks/useExclusions";
 import { useJobSelection } from "../hooks/useJobSelection";
 import { useMongoCompileQueue } from "../hooks/useMongoCompileQueue";
 import { useTailorStatus } from "../hooks/useTailorStatus";
+import { useNotifications } from "../hooks/useNotifications";
 import { useTop500 } from "../context/Top500Context";
 import type { Job, RunEntry } from "../types";
 import type { TailorRecord } from "../types/tailorQueue";
@@ -161,7 +162,10 @@ function formatRunTime(iso?: string | null): string {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { notify } = useNotifications();
   const { period, scope } = parseDashboardPath(pathname);
+  const selectedSession = searchParams.get("session");
   const { isTop500 } = useTop500();
   const { stats, recordClick, getRecord } = useApplyTracker();
   const { clickedKeySet, recordSavedJob, records: clickRecords } = useApplyClickLog();
@@ -186,7 +190,6 @@ export default function Dashboard() {
   const [termFilter, setTermFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [showTodayApplications, setShowTodayApplications] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
@@ -211,14 +214,15 @@ export default function Dashboard() {
     if (window.location.pathname !== nextPath) navigate(nextPath);
   };
 
-  // Reset sort when period changes (URL-driven)
+  // Reset sort + clear session filter when period changes (URL-driven)
   useEffect(() => {
     if (prevPeriodRef.current === period) return;
     prevPeriodRef.current = period;
     const nextSort: SortBy = period === "hour" ? "time" : "score";
     setSortBy(nextSort);
     setSortDir(defaultSortDir(nextSort));
-  }, [period]);
+    setSearchParams((p) => { const n = new URLSearchParams(p); n.delete("session"); return n; }, { replace: true });
+  }, [period, setSearchParams]);
 
   const refreshJobFeeds = useCallback(async (opts: { initial?: boolean } = {}) => {
     const [hourList, todayList, yesterdayList, weekList, runsRes, metaRes] = await Promise.all([
@@ -250,8 +254,10 @@ export default function Dashboard() {
     const nextSession = hourList[0]?.session_id ?? null;
     if (!opts.initial && nextSession && hourSessionRef.current && nextSession !== hourSessionRef.current) {
       const label = formatRunTime(hourList[0]?.batch_time || nextSession);
-      setFeedRefreshNotice(`New hourly batch loaded (${label} ET) — ${hourList.length} jobs`);
+      const msg = `New hourly batch loaded (${label} ET) — ${hourList.length} jobs`;
+      setFeedRefreshNotice(msg);
       window.setTimeout(() => setFeedRefreshNotice(""), 12_000);
+      notify("Atriveo — new batch", msg);
     }
     hourSessionRef.current = nextSession;
     setHourJobs(hourList);
@@ -729,7 +735,7 @@ export default function Dashboard() {
   );
 
   const clearFilters = () => {
-    setSelectedSession(null);
+    setSearchParams((p) => { const n = new URLSearchParams(p); n.delete("session"); return n; }, { replace: true });
     setQuery("");
     setLevelFilter("all");
     setTailorFilter("all");
@@ -768,13 +774,13 @@ export default function Dashboard() {
   };
 
   const handleSessionSelect = (sessionId: string | null, targetPeriod?: Period | null) => {
-    if (!sessionId) {
-      setSelectedSession(null);
-      return;
-    }
-    setSelectedSession(sessionId);
-    if (targetPeriod) handlePeriodChange(targetPeriod);
-    setTermFilter("all");
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (sessionId) next.set("session", sessionId); else next.delete("session");
+      return next;
+    }, { replace: true });
+    if (sessionId && targetPeriod) handlePeriodChange(targetPeriod);
+    if (sessionId) setTermFilter("all");
   };
 
   const filterBar = (
@@ -891,7 +897,7 @@ export default function Dashboard() {
             onNavigate={(p, s) => {
               handlePeriodChange(p, s);
               setTermFilter("all");
-              setSelectedSession(null);
+              setSearchParams((p) => { const n = new URLSearchParams(p); n.delete("session"); return n; }, { replace: true });
             }}
             periodCounts={periodCounts}
             periodClickedCounts={periodClickedCounts}
@@ -1074,7 +1080,7 @@ export default function Dashboard() {
                   className="today-apps-feed-button"
                   onClick={() => {
                     handlePeriodChange("today");
-                    setSelectedSession(null);
+                    setSearchParams((p) => { const n = new URLSearchParams(p); n.delete("session"); return n; }, { replace: true });
                     setTermFilter("all");
                     setShowTodayApplications(false);
                   }}
@@ -1096,7 +1102,7 @@ export default function Dashboard() {
                     onClick={() => {
                       handlePeriodChange(p);
                       setTermFilter("all");
-                      setSelectedSession(null);
+                      setSearchParams((p) => { const n = new URLSearchParams(p); n.delete("session"); return n; }, { replace: true });
                     }}
                   >
                     {p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}
@@ -1143,9 +1149,9 @@ export default function Dashboard() {
                     aria-pressed={isActive}
                     onClick={() => {
                       if (isActive) {
-                        setSelectedSession(null);
+                        setSearchParams((p) => { const n = new URLSearchParams(p); n.delete("session"); return n; }, { replace: true });
                       } else {
-                        setSelectedSession(r.session_id);
+                        setSearchParams((p) => { const n = new URLSearchParams(p); n.set("session", r.session_id); return n; }, { replace: true });
                         if (r.targetPeriod) handlePeriodChange(r.targetPeriod);
                         setTermFilter("all");
                       }
