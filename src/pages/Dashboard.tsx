@@ -925,12 +925,12 @@ export default function Dashboard() {
                 <span className="board-metric-value">{avgMatchScore || "—"}</span>
                 <span className="board-metric-sub">CareerOps average</span>
               </div>
-              <div className="board-metric">
+              <div className="board-metric board-metric--green">
                 <span className="board-metric-label">Strong Fits</span>
                 <span className="board-metric-value">{highMatchCount}</span>
-                <span className="board-metric-sub">of {displayedJobs.length || 0}</span>
+                <span className="board-metric-sub">score ≥ 75 in view</span>
               </div>
-              <div className="board-metric">
+              <div className="board-metric board-metric--amber">
                 <span className="board-metric-label">Applied Today</span>
                 <span className="board-metric-value">{todayApplicationRows.length}</span>
                 <span className="board-metric-sub">tracker activity</span>

@@ -145,10 +145,10 @@ body.is-today-board .nav-tab.active:hover {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 20px 12px 24px 16px;
-  background: var(--board-canvas);
-  border: none;
+  gap: 16px;
+  padding: 16px 10px 24px 12px;
+  background: oklch(0.11 0.005 260);
+  border-right: 1px solid var(--board-line);
   box-shadow: none;
 }
 
@@ -156,24 +156,26 @@ body.is-today-board .nav-tab.active:hover {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 6px 4px;
+  padding: 2px 6px 8px;
+  border-bottom: 1px solid oklch(0.20 0.004 260);
+  margin-bottom: 2px;
 }
 
 .today-board-brand-mark {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
   background: linear-gradient(135deg, var(--primary) 0%, color-mix(in oklch, var(--primary) 60%, transparent) 100%);
   flex-shrink: 0;
-  box-shadow: 0 4px 14px var(--primary-glow);
+  box-shadow: 0 3px 10px var(--primary-glow);
 }
 
 .today-board-brand-title {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--board-ink);
   font-family: "Inter", sans-serif;
@@ -182,17 +184,17 @@ body.is-today-board .nav-tab.active:hover {
 .today-board-nav-section {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .today-board-nav-label {
   margin: 0;
-  padding: 0 8px 6px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  padding: 0 6px 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--board-muted);
+  color: oklch(0.40 0.006 260);
   font-family: "Inter", sans-serif;
 }
 
@@ -211,13 +213,13 @@ body.is-today-board .nav-tab.active:hover {
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  padding: 7px 8px;
+  padding: 6px 8px;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   background: transparent;
-  color: var(--board-sub);
+  color: oklch(0.52 0.008 260);
   font-family: "Inter", sans-serif;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -226,20 +228,20 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .today-board-nav-item:hover {
-  background: rgba(255,255,255,0.05);
+  background: oklch(0.16 0.006 260);
   color: var(--board-ink);
 }
 
 .today-board-nav-item.is-active {
-  background: var(--board-accent-soft);
-  color: var(--board-accent-strong);
+  background: oklch(0.62 0.19 255 / 0.12);
+  color: oklch(0.72 0.15 255);
   font-weight: 600;
 }
 
 .today-board-nav-count {
   flex-shrink: 0;
-  color: var(--board-muted);
-  font-size: 12px;
+  color: oklch(0.36 0.005 260);
+  font-size: 11.5px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
@@ -266,7 +268,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .today-board-nav-item.is-active .today-board-nav-count {
-  color: var(--board-accent);
+  color: oklch(0.72 0.15 255);
 }
 
 .today-board-session-item {
@@ -338,17 +340,28 @@ body.is-today-board .nav-tab.active:hover {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   border-bottom: 1px solid var(--board-line);
-  background: var(--board-surface);
+  background: var(--board-canvas);
   flex-shrink: 0;
 }
 
 .board-metric {
   position: relative;
-  padding: 14px 24px 12px;
+  padding: 16px 20px 14px;
   border-right: 1px solid var(--board-line);
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
+  transition: background 0.12s;
+}
+
+.board-metric::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: transparent;
+  border-radius: 0 0 2px 2px;
+  transition: background 0.15s;
 }
 
 .board-metric:last-child {
@@ -358,14 +371,14 @@ body.is-today-board .nav-tab.active:hover {
 .board-metric-label {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--board-muted);
   font-family: "Inter", sans-serif;
 }
 
 .board-metric-value {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -377,26 +390,44 @@ body.is-today-board .nav-tab.active:hover {
 .board-metric-dual {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
 .board-metric-dual-sep {
-  font-size: 22px;
-  font-weight: 500;
-  color: var(--board-muted);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--board-line);
   line-height: 1;
   user-select: none;
 }
 
 .board-metric--accent .board-metric-value {
-  color: var(--board-accent);
+  color: oklch(0.66 0.19 255);
+}
+.board-metric--accent::before {
+  background: oklch(0.66 0.19 255);
+}
+
+.board-metric--green .board-metric-value {
+  color: oklch(0.72 0.18 145);
+}
+.board-metric--green::before {
+  background: oklch(0.72 0.18 145);
+}
+
+.board-metric--amber .board-metric-value {
+  color: oklch(0.78 0.14 80);
+}
+.board-metric--amber::before {
+  background: oklch(0.78 0.14 80);
 }
 
 .board-metric-sub {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 400;
-  color: var(--board-sub);
+  color: var(--board-muted);
+  margin-top: 2px;
 }
 
 /* ── Table shell ───────────────────────────────────────────────────────── */
@@ -848,6 +879,36 @@ body.is-today-board .nav-tab.active:hover {
 
 .job-table--board .job-table-row--board:hover td {
   background: var(--card-bg);
+}
+
+/* ── Score-tier row accents ─────────────────────────────────────────────── */
+.job-table--board .job-table-row--board.job-table-row--green td:first-child {
+  box-shadow: inset 3px 0 0 oklch(0.72 0.18 145);
+}
+.job-table--board .job-table-row--board.job-table-row--blue td:first-child {
+  box-shadow: inset 3px 0 0 oklch(0.62 0.16 255);
+}
+.job-table--board .job-table-row--board.job-table-row--yellow td:first-child {
+  box-shadow: inset 3px 0 0 oklch(0.78 0.14 80);
+}
+
+/* Score number color per tier */
+.job-table-row--green .job-table-score-cell--board .job-table-score-num {
+  color: oklch(0.72 0.18 145);
+}
+.job-table-row--blue .job-table-score-cell--board .job-table-score-num {
+  color: oklch(0.66 0.19 255);
+}
+.job-table-row--yellow .job-table-score-cell--board .job-table-score-num {
+  color: oklch(0.78 0.14 80);
+}
+
+/* Applied row — subtle green wash */
+.job-table--board .job-table-row.is-applied td {
+  background: oklch(0.72 0.18 145 / 0.04);
+}
+.job-table--board .job-table-row.is-applied td:first-child {
+  box-shadow: inset 3px 0 0 oklch(0.72 0.18 145 / 0.5);
 }
 
 .job-table--board .job-table-row.is-selected td {
@@ -2506,6 +2567,21 @@ body.is-today-board .nav-tab.active:hover {
   color: #b45309;
 }
 
+/* Inline error hint — board mode only, shown below pill for error/failed */
+.job-table-tailored-errmsg {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 400;
+  color: oklch(0.55 0.14 25);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+  cursor: default;
+}
+
 .job-table-tailored-pill--none {
   color: var(--board-muted);
   font-weight: 500;
@@ -2529,13 +2605,13 @@ body.is-today-board .nav-tab.active:hover {
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  padding: 7px 8px;
+  padding: 6px 8px;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   background: transparent;
-  color: var(--board-sub);
+  color: oklch(0.52 0.008 260);
   font-family: "Inter", sans-serif;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -2543,18 +2619,18 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .today-board-group-label:hover {
-  background: rgba(255,255,255,0.05);
+  background: oklch(0.16 0.006 260);
   color: var(--board-ink);
 }
 
 .today-board-group-label.is-active {
-  background: var(--board-accent-soft);
-  color: var(--board-accent-strong);
+  background: oklch(0.62 0.19 255 / 0.12);
+  color: oklch(0.72 0.15 255);
   font-weight: 600;
 }
 
 .today-board-group-label.is-active .today-board-nav-count {
-  color: var(--board-accent);
+  color: oklch(0.72 0.15 255);
 }
 
 /* Sub-links (Top 500 / Others) */
@@ -2573,32 +2649,31 @@ body.is-today-board .nav-tab.active:hover {
   align-items: center;
   gap: 7px;
   width: 100%;
-  padding: 5px 8px 5px 6px;
+  padding: 4px 8px 4px 6px;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   background: transparent;
-  color: var(--board-sub);
+  color: oklch(0.44 0.006 260);
   font-family: "Inter", sans-serif;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11.5px;
+  font-weight: 400;
   text-align: left;
   cursor: pointer;
   transition: background 0.1s, color 0.1s;
 }
 
 .today-board-sub-item:hover {
-  background: rgba(255,255,255,0.04);
-  color: var(--board-ink);
+  background: oklch(0.16 0.006 260);
+  color: oklch(0.60 0.008 260);
 }
 
 .today-board-sub-item.is-active {
-  background: var(--board-accent-soft);
-  color: var(--board-accent-strong);
-  font-weight: 600;
+  color: oklch(0.72 0.15 255);
+  font-weight: 500;
 }
 
 .today-board-sub-item.is-active .today-board-nav-count {
-  color: var(--board-accent);
+  color: oklch(0.72 0.15 255);
 }
 
 .today-board-sub-item .today-board-nav-count {
