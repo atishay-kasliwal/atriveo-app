@@ -3151,37 +3151,45 @@ header {
 .clicked-jobs-table-wrap {
   overflow: auto;
   max-height: calc(100vh - 280px);
+  border: 1px solid var(--board-border, oklch(100% 0 0 / 0.08));
+  border-radius: 8px;
 }
 
 .clicked-jobs-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 980px;
+  background: var(--board-surface, #16161e);
 }
 
 .clicked-jobs-table th,
 .clicked-jobs-table td {
-  padding: 11px 14px;
-  border-bottom: 1px solid var(--border-col);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--board-border, oklch(100% 0 0 / 0.08));
   text-align: left;
   vertical-align: middle;
   font-size: 13px;
+  color: var(--board-text, oklch(92% 0.01 260));
 }
 
 .clicked-jobs-table th {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: var(--card-bg);
-  color: var(--muted);
+  background: var(--board-head-bg, oklch(18% 0.01 260));
+  color: var(--board-muted, oklch(60% 0.01 260));
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
+.clicked-jobs-table tbody tr:hover {
+  background: var(--board-row-hover, oklch(100% 0 0 / 0.03));
+}
+
 .clicked-jobs-index {
-  color: var(--muted);
+  color: var(--board-muted, oklch(60% 0.01 260));
   font-variant-numeric: tabular-nums;
 }
 
@@ -3192,12 +3200,12 @@ header {
 .clicked-jobs-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .clicked-jobs-link {
-  color: var(--foreground);
+  color: var(--board-text, oklch(92% 0.01 260));
   font-weight: 600;
   text-decoration: none;
 }
@@ -3208,20 +3216,22 @@ header {
 
 .clicked-jobs-restore-btn,
 .clicked-jobs-tracker-btn {
-  border: 1px solid var(--border-col);
-  border-radius: 7px;
-  background: var(--card-bg);
-  color: var(--muted-fg);
+  border: 1px solid var(--board-border, oklch(100% 0 0 / 0.08));
+  border-radius: 6px;
+  background: oklch(100% 0 0 / 0.05);
+  color: var(--board-sub, oklch(72% 0.01 260));
   font-size: 11px;
-  font-weight: 700;
-  padding: 5px 9px;
+  font-weight: 600;
+  padding: 4px 9px;
   cursor: pointer;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
 }
 
 .clicked-jobs-restore-btn:hover,
 .clicked-jobs-tracker-btn:hover:not(:disabled) {
-  border-color: oklch(0.66 0.19 255 / 0.4);
-  color: var(--primary);
+  background: oklch(100% 0 0 / 0.1);
+  border-color: oklch(55% 0.18 260 / 0.4);
+  color: oklch(72% 0.16 260);
 }
 
 .clicked-jobs-tracker-btn.synced {

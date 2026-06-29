@@ -744,9 +744,6 @@ export default function Dashboard() {
     setTermFilter("all");
   };
 
-  // Unified warm Matchflow board is used for ALL periods (This Hour / Today /
-  // Yesterday) so the Live Feed and Today page share one consistent design.
-  const isTodayBoard = true;
 
   const highMatchCount = useMemo(
     () => displayedJobs.filter((j) => careerOpsRating(j).score >= 75).length,
@@ -760,10 +757,9 @@ export default function Dashboard() {
   }, [displayedJobs]);
 
   useEffect(() => {
-    if (!isTodayBoard) return;
     document.body.classList.add("is-today-board");
     return () => document.body.classList.remove("is-today-board");
-  }, [isTodayBoard]);
+  }, []);
 
   const handleShare = () => {
     const url = window.location.href;
@@ -873,11 +869,11 @@ export default function Dashboard() {
           getTailorRecord={tailorStatus.getRecordForJob}
           onQueueUrgent={(job, resumeSlot) => tailorQueue.enqueueJob(job, "manual", true, resumeSlot)}
           onOpenTailorPath={handleOpenTailorPath}
-          onDismissJob={isTodayBoard ? handleDismissJob : undefined}
-          variant={isTodayBoard ? "board" : "default"}
+          onDismissJob={handleDismissJob}
+          variant="board"
           sortBy={sortBy}
           sortDir={sortDir}
-          onSortColumn={isTodayBoard ? handleSortColumn : undefined}
+          onSortColumn={handleSortColumn}
           sessionResumeByUrl={sessionResumeByUrl}
           resumeIdCompact={Boolean(selectedSession)}
         />
@@ -886,10 +882,9 @@ export default function Dashboard() {
   );
 
   return (
-    <div className={isTodayBoard ? "today-board-root" : undefined}>
-      <AppHeader hideLogo={isTodayBoard} />
+    <div className="today-board-root">
+      <AppHeader hideLogo />
 
-      {isTodayBoard ? (
         <div className="today-board-viewport">
           <TodayBoardSidebar
             period={period}
@@ -1224,7 +1219,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      )}
 
       <footer>
         <div className="wrapper">

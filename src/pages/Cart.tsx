@@ -6,7 +6,7 @@ import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useCart } from "../hooks/useCart";
 import { useJobSelection } from "../hooks/useJobSelection";
-import JobCard from "../components/JobCard";
+import JobTable from "../components/JobTable";
 
 export default function Cart() {
   const { recordClick, getRecord } = useApplyTracker();
@@ -57,9 +57,7 @@ export default function Cart() {
           </div>
           <div className="kpi-card purple">
             <div className="kpi-label">Applied</div>
-            <div className="kpi-value">
-              {items.filter((i) => i.job.job_url && getRecord(i.job.job_url)).length}
-            </div>
+            <div className="kpi-value">{appliedCount}</div>
             <div className="kpi-sub">of saved jobs</div>
           </div>
         </div>
@@ -102,31 +100,26 @@ export default function Cart() {
         />
         <BulkJobAnalysisPanel analysis={jobSelection.analysis} />
 
-        <div className="job-list">
-          {items.length === 0 ? (
-            <div className="state-msg">
-              <div className="icon">🔖</div>
-              <div>No saved jobs here. Cards now use Click, Apply, and Tracker instead.</div>
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="state-msg" style={{ fontSize: 13 }}>No jobs match your search.</div>
-          ) : (
-            <>
-              <div className="card-grid">
-                {filtered.map((item, i) => (
-                  <JobCard
-                    key={item.url || i}
-                    job={item.job}
-                    applyRecord={item.job.job_url ? getRecord(item.job.job_url) : null}
-                    onAddToTracker={recordClick}
-                    isSelected={jobSelection.isJobSelected(item.job)}
-                    onSelectionToggle={jobSelection.toggleJobSelection}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        {items.length === 0 ? (
+          <div className="state-msg">
+            <div className="icon">🔖</div>
+            <div>No saved jobs here. Cards now use Click, Apply, and Tracker instead.</div>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="state-msg" style={{ fontSize: 13 }}>No jobs match your search.</div>
+        ) : (
+          <JobTable
+            jobs={visibleJobs}
+            variant="board"
+            groupByCompany={false}
+            getRecord={getRecord}
+            onAddToTracker={recordClick}
+            isJobSelected={jobSelection.isJobSelected}
+            onSelectionToggle={jobSelection.toggleJobSelection}
+            onGroupSelectAll={jobSelection.toggleGroupSelection}
+            isGroupFullySelected={jobSelection.isGroupFullySelected}
+          />
+        )}
       </div>
 
       <footer>

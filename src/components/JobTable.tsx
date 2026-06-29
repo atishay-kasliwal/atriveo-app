@@ -674,103 +674,6 @@ function JobTableRow({
   );
 }
 
-interface CompanyGroupRowProps {
-  group: CompanyJobGroup;
-  index: number;
-  expanded: boolean;
-  onToggle: () => void;
-  onExcludeCompany?: (company: string) => void;
-  onGroupSelectAll?: (jobs: Job[]) => void;
-  isGroupFullySelected?: (jobs: Job[]) => boolean;
-}
-
-function CompanyGroupRow({
-  group,
-  index,
-  expanded,
-  onToggle,
-  onExcludeCompany,
-  onGroupSelectAll,
-  isGroupFullySelected,
-}: CompanyGroupRowProps) {
-  const top = group.jobs[0];
-  const topOps = careerOpsRating(top);
-  const allSelected = isGroupFullySelected?.(group.jobs) ?? false;
-  const title = top.title || "—";
-
-  return (
-    <tr
-      className={`job-table-row job-table-row--group job-table-row--${topOps.key}${expanded ? " is-expanded" : ""}`}
-      onClick={onToggle}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onToggle();
-        }
-      }}
-      aria-expanded={expanded}
-    >
-      <td className="job-table-check" onClick={(e) => e.stopPropagation()}>
-        {onGroupSelectAll && (
-          <JobTableSelectCheckbox
-            checked={allSelected}
-            onChange={() => onGroupSelectAll(group.jobs)}
-            title={allSelected ? "Deselect all roles" : "Select all roles"}
-          />
-        )}
-      </td>
-      <td className="job-table-num">{index}</td>
-      <td className="job-table-score">
-        <ScoreCell job={top} />
-      </td>
-      <td className="job-table-job">
-        <div className="job-table-group-head">
-          <span className="job-table-group-chevron" aria-hidden>{expanded ? "▾" : "▸"}</span>
-          <CompanyLogo company={group.company} size="sm" />
-          <div className="job-table-group-copy">
-            <span className="job-table-group-name" title={group.company}>{group.company}</span>
-            {!expanded && (
-              <span className="job-table-group-preview" title={title}>
-                {title}
-                {group.jobs.length > 1 ? ` · +${group.jobs.length - 1} more` : ""}
-              </span>
-            )}
-          </div>
-          <span className="job-table-group-count">{group.jobs.length}</span>
-        </div>
-      </td>
-      <td className="job-table-match">
-        <span className="job-table-stars">{careerOpsStars(topOps.score)}</span>
-        <span className={`job-table-match-label job-table-match-label--${topOps.key}`}>{topOps.label}</span>
-      </td>
-      <td className="job-table-level">{top.level || "—"}</td>
-      <td className="job-table-tailored" />
-      <td className="job-table-time">{fmtTime(top.batch_time || top.date_posted, top.scraped_date)}</td>
-      <td className="job-table-actions" onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          className={`job-table-action job-table-action--ghost${allSelected ? " is-active" : ""}`}
-          onClick={() => onGroupSelectAll?.(group.jobs)}
-        >
-          {allSelected ? "Deselect" : "Select all"}
-        </button>
-        {onExcludeCompany && (
-          <button
-            type="button"
-            className="job-table-action job-table-action--ghost"
-            onClick={() => onExcludeCompany(group.company)}
-            title={`Block ${group.company}`}
-          >
-            Block
-          </button>
-        )}
-      </td>
-    </tr>
-  );
-}
-
 // ── Virtualized board-mode table ──────────────────────────────────────────────
 // Used only when variant="board" and groupByCompany=false (the Dashboard default).
 // .job-table-wrap--board already has overflow:auto + flex:1 from CSS, so it's
@@ -934,7 +837,7 @@ interface Props {
   onQueueUrgent?: (job: Job, resumeSlot: number) => void;
   onOpenTailorPath?: (path: string) => void;
   onDismissJob?: (job: Job) => void;
-  variant?: "default" | "board";
+  variant?: "board";
   sortBy?: SortBy;
   sortDir?: SortDir;
   onSortColumn?: (column: SortBy) => void;
@@ -957,7 +860,7 @@ export default function JobTable({
   onQueueUrgent,
   onOpenTailorPath,
   onDismissJob,
-  variant = "default",
+  variant = "board",
   sortBy,
   sortDir,
   onSortColumn,
@@ -972,19 +875,9 @@ export default function JobTable({
     ),
     [jobs, groupByCompany, sortBy, sortDir, getTailorRecord],
   );
-  const [expandedCompanies, setExpandedCompanies] = useState<Set<string>>(() => new Set());
 
-  const toggleCompany = (company: string) => {
-    setExpandedCompanies((prev) => {
-      const next = new Set(prev);
-      if (next.has(company)) next.delete(company);
-      else next.add(company);
-      return next;
-    });
-  };
-
-  const wrapClass = variant === "board" ? "job-table-wrap job-table-wrap--board" : "job-table-wrap";
-  const tableClass = variant === "board" ? "job-table job-table--board" : "job-table";
+  const wrapClass = "job-table-wrap job-table-wrap--board";
+  const tableClass = "job-table job-table--board";
 
   const visibleSelection = useMemo(() => {
     if (!isJobSelected || !jobs.length) {
@@ -1065,12 +958,12 @@ export default function JobTable({
               </>
             ) : (
               <>
-                <th>{variant === "board" ? "Company" : "Job"}</th>
-                {variant === "board" ? <th>Role</th> : null}
+                <th>Company</th>
+                <th>Role</th>
                 <th>Score</th>
                 <th>Level</th>
-                {variant === "board" ? <th>Resume</th> : null}
-                <th>{variant === "board" ? "Posted" : "Time"}</th>
+                <th>Resume</th>
+                <th>Posted</th>
               </>
             )}
             <th>Actions</th>
@@ -1078,8 +971,7 @@ export default function JobTable({
         </thead>
         <tbody>
           {groupByCompany ? (
-            variant === "board" ? (
-              groups.map((group, gi) => {
+            groups.map((group, gi) => {
                 const multiRole = group.jobs.length > 1;
                 const priorCount = groups.slice(0, gi).reduce((acc, g) => acc + g.jobs.length, 0);
                 return (
@@ -1114,58 +1006,6 @@ export default function JobTable({
                   </Fragment>
                 );
               })
-            ) : (
-              groups.map((group, i) => {
-                const rowIndex = i + 1;
-                if (group.jobs.length === 1) {
-                  const job = group.jobs[0];
-                  return (
-                    <JobTableRow
-                      key={job.job_url || group.company}
-                      job={job}
-                      index={rowIndex}
-                      applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                      onAddToTracker={onAddToTracker}
-                      onSaveJob={onSaveJob}
-                      isSelected={isJobSelected?.(job)}
-                      onSelectionToggle={onSelectionToggle}
-                      onExcludeCompany={onExcludeCompany}
-                      showCompany
-                    />
-                  );
-                }
-
-                const expanded = expandedCompanies.has(group.company);
-                return (
-                  <Fragment key={group.company}>
-                    <CompanyGroupRow
-                      group={group}
-                      index={rowIndex}
-                      expanded={expanded}
-                      onToggle={() => toggleCompany(group.company)}
-                      onExcludeCompany={onExcludeCompany}
-                      onGroupSelectAll={onGroupSelectAll}
-                      isGroupFullySelected={isGroupFullySelected}
-                    />
-                    {expanded &&
-                      group.jobs.map((job, j) => (
-                        <JobTableRow
-                          key={job.job_url || `${group.company}-${j}`}
-                          job={job}
-                          index={rowIndex}
-                          applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                          onAddToTracker={onAddToTracker}
-                          onSaveJob={onSaveJob}
-                          isSelected={isJobSelected?.(job)}
-                          onSelectionToggle={onSelectionToggle}
-                          nested
-                          showCompany={false}
-                        />
-                      ))}
-                  </Fragment>
-                );
-              })
-            )
           ) : (
             jobs.map((job, i) => (
               <JobTableRow
@@ -1184,8 +1024,7 @@ export default function JobTable({
                 onDismissJob={onDismissJob}
                 sessionResumeByUrl={sessionResumeByUrl}
                 resumeIdCompact={resumeIdCompact}
-                showCompany
-                board={variant === "board"}
+                board
               />
             ))
           )}

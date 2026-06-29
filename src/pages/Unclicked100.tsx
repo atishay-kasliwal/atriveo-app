@@ -9,13 +9,13 @@ import { useExclusions } from "../hooks/useExclusions";
 import { jobDismissKey } from "../utils/jobCopy";
 import { useJobSelection } from "../hooks/useJobSelection";
 import type { Job } from "../types";
-import JobCard from "../components/JobCard";
+import JobTable from "../components/JobTable";
 
 type WeekJob = Job & { scraped_date?: string };
 
 export default function Unclicked100() {
   const { stats, recordClick, getRecord } = useApplyTracker();
-  const { clickedKeySet } = useApplyClickLog();
+  const { clickedKeySet, recordSavedJob } = useApplyClickLog();
   const { isExcluded } = useExclusions();
   const [weekJobs, setWeekJobs] = useState<WeekJob[]>([]);
   const [query, setQuery] = useState("");
@@ -72,7 +72,7 @@ export default function Unclicked100() {
         <PageIntro
           compact
           kicker="High Priority"
-          title="100+ scored jobs you haven’t touched yet"
+          title="100+ scored jobs you haven't touched yet"
           description="A focused list of the highest-scoring weekly roles that still need attention. Search, review, and clear the strongest matches first."
           stats={[
             { label: "100+ jobs", value: hundredPlus.length, tone: "blue" },
@@ -138,18 +138,18 @@ export default function Unclicked100() {
         ) : filtered.length === 0 ? (
           <div className="state-msg"><div className="icon">🎉</div>No unclicked 100+ jobs</div>
         ) : (
-          <div className="card-grid">
-            {filtered.map((job, i) => (
-              <JobCard
-                key={job.job_url || i}
-                job={job}
-                applyRecord={job.job_url ? getRecord(job.job_url) : null}
-                onAddToTracker={recordClick}
-                isSelected={jobSelection.isJobSelected(job)}
-                onSelectionToggle={jobSelection.toggleJobSelection}
-              />
-            ))}
-          </div>
+          <JobTable
+            jobs={filtered}
+            variant="board"
+            groupByCompany={false}
+            getRecord={getRecord}
+            onAddToTracker={recordClick}
+            onSaveJob={(job, source) => recordSavedJob(job, source)}
+            isJobSelected={jobSelection.isJobSelected}
+            onSelectionToggle={jobSelection.toggleJobSelection}
+            onGroupSelectAll={jobSelection.toggleGroupSelection}
+            isGroupFullySelected={jobSelection.isGroupFullySelected}
+          />
         )}
       </div>
 
