@@ -41,7 +41,7 @@ export default function BulkJobCopyBar({
         </div>
       )}
       {compact && selectedCount > 0 && (
-        <span className="bulk-copy-count">{selectedCount} selected</span>
+        <span className="bulk-copy-count">{selectedCount} selected ·</span>
       )}
 
       <div className="bulk-copy-actions">

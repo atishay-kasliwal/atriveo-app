@@ -754,46 +754,62 @@ export default function Dashboard() {
           <div className="today-board-main">
             <div className="board-metrics">
               <div className="board-metric">
-                <span className="board-metric-label">Active Matches</span>
-                <span className="board-metric-value">{displayedJobs.length}</span>
-                <span className="board-metric-sub">
-                  {clickedHiddenCount > 0
-                    ? `${clickedHiddenCount} clicked away · ${rawJobs.length} in feed`
-                    : "in current view"}
-                </span>
+                <div className="board-metric-icon board-metric-icon--blue">⊕</div>
+                <div className="board-metric-body">
+                  <span className="board-metric-value">{displayedJobs.length}</span>
+                  <span className="board-metric-label">Active Matches</span>
+                  <span className="board-metric-sub">
+                    {clickedHiddenCount > 0 ? `${clickedHiddenCount} clicked away` : "in current view"}
+                  </span>
+                </div>
               </div>
               <div className="board-metric board-metric--accent">
-                <span className="board-metric-label">Avg. Match Score</span>
-                <span className="board-metric-value">{avgMatchScore || "—"}</span>
-                <span className="board-metric-sub">CareerOps average</span>
+                <div className="board-metric-icon board-metric-icon--purple">⚡</div>
+                <div className="board-metric-body">
+                  <span className="board-metric-value">{avgMatchScore || "—"}</span>
+                  <span className="board-metric-label">Avg Score</span>
+                  <span className="board-metric-sub">CareerOps average</span>
+                </div>
               </div>
               <div className="board-metric board-metric--green">
-                <span className="board-metric-label">Strong Fits</span>
-                <span className="board-metric-value">{highMatchCount}</span>
-                <span className="board-metric-sub">score ≥ 75 in view</span>
+                <div className="board-metric-icon board-metric-icon--green">◆</div>
+                <div className="board-metric-body">
+                  <span className="board-metric-value">{highMatchCount}</span>
+                  <span className="board-metric-label">Strong Fits</span>
+                  <span className="board-metric-sub">score ≥ 75</span>
+                </div>
               </div>
               <div className="board-metric board-metric--amber">
-                <span className="board-metric-label">Applied Today</span>
-                <span className="board-metric-value">{todayApplicationRows.length}</span>
-                <span className="board-metric-sub">tracker activity</span>
+                <div className="board-metric-icon board-metric-icon--amber">✦</div>
+                <div className="board-metric-body">
+                  <span className="board-metric-value">{todayApplicationRows.length}</span>
+                  <span className="board-metric-label">Applied Today</span>
+                  <span className="board-metric-sub">tracker activity</span>
+                </div>
               </div>
               <div className="board-metric">
-                <span className="board-metric-label">Today</span>
-                <div className="board-metric-dual" aria-label={`${todayPostingsCount} postings, ${todayResumesCount} resumes compiled for today's scrapes`}>
-                  <span className="board-metric-value">{todayPostingsCount}</span>
-                  <span className="board-metric-dual-sep">/</span>
-                  <span className="board-metric-value">{todayResumesCount}</span>
+                <div className="board-metric-icon board-metric-icon--indigo">▤</div>
+                <div className="board-metric-body">
+                  <div className="board-metric-dual">
+                    <span className="board-metric-value">{todayPostingsCount}</span>
+                    <span className="board-metric-dual-sep">/</span>
+                    <span className="board-metric-value">{todayResumesCount}</span>
+                  </div>
+                  <span className="board-metric-label">Today</span>
+                  <span className="board-metric-sub">postings · resumes</span>
                 </div>
-                <span className="board-metric-sub">postings · resumes made</span>
               </div>
               <div className="board-metric">
-                <span className="board-metric-label">This hour · {hourLabel} ET</span>
-                <div className="board-metric-dual" aria-label={`${hourPostingsCount} postings, ${hourResumesCount} resumes compiled for this hour's batch`}>
-                  <span className="board-metric-value">{hourPostingsCount}</span>
-                  <span className="board-metric-dual-sep">/</span>
-                  <span className="board-metric-value">{hourResumesCount}</span>
+                <div className="board-metric-icon board-metric-icon--cyan">◷</div>
+                <div className="board-metric-body">
+                  <div className="board-metric-dual">
+                    <span className="board-metric-value">{hourPostingsCount}</span>
+                    <span className="board-metric-dual-sep">/</span>
+                    <span className="board-metric-value">{hourResumesCount}</span>
+                  </div>
+                  <span className="board-metric-label">This Hour · {hourLabel} ET</span>
+                  <span className="board-metric-sub">postings · resumes</span>
                 </div>
-                <span className="board-metric-sub">postings · resumes made</span>
               </div>
             </div>
 
