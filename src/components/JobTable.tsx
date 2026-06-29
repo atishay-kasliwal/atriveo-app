@@ -15,7 +15,7 @@ import { formatResumeSlot, resolveResumeSlot, resolveSessionHour } from "../util
 import { formatResumeId, type SessionResumeMeta } from "../utils/sessionResume";
 import TailorJobLogModal from "./TailorJobLogModal";
 import PdfPreviewModal from "./PdfPreviewModal";
-import JdDrawer from "./JdDrawer";
+import JobInspector from "./JobInspector";
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -285,7 +285,7 @@ interface RowProps {
   getTailorRecord?: (job: Job) => TailorRecord | null;
   onQueueUrgent?: (job: Job, resumeSlot: number) => void;
   onOpenTailorPath?: (path: string) => void;
-  onDismissJob?: (job: Job) => void;
+  onOpenInspector?: (job: Job) => void;
   nested?: boolean;
   showCompany?: boolean;
   board?: boolean;
@@ -305,7 +305,7 @@ function JobTableRow({
   getTailorRecord,
   onQueueUrgent,
   onOpenTailorPath,
-  onDismissJob,
+  onOpenInspector,
   nested = false,
   showCompany = true,
   board = false,
@@ -317,7 +317,6 @@ function JobTableRow({
   const [savedFeedback, setSavedFeedback] = useState<SavedJobSource | null>(null);
   const [logOpen, setLogOpen] = useState(false);
   const [pdfOpen, setPdfOpen] = useState(false);
-  const [jdOpen, setJdOpen] = useState(false);
   const co = job.company || "—";
   const title = job.title || "—";
   const careerOps = careerOpsRating(job);
@@ -390,11 +389,11 @@ function JobTableRow({
             : "Copy JD";
 
   function handleRowClick(e: React.MouseEvent<HTMLTableRowElement>) {
-    if (!board || !onDismissJob) return;
+    if (!board || !onOpenInspector) return;
     if ((e.target as HTMLElement).closest(
       "button, a, input, textarea, select, label, .job-table-check, .job-table-actions, .job-table-tailored",
     )) return;
-    onDismissJob(job);
+    onOpenInspector(job);
   }
 
   return (
@@ -583,13 +582,10 @@ function JobTableRow({
               type="button"
               className="job-table-board-apply"
               title="View full job description"
-              onClick={(e) => { e.stopPropagation(); setJdOpen(true); }}
+              onClick={(e) => { e.stopPropagation(); onOpenInspector?.(job); }}
             >
               JD
             </button>
-            {jdOpen && (
-              <JdDrawer job={job} onClose={() => setJdOpen(false)} />
-            )}
             {canRetryTracker && (
               <button
                 type="button"
@@ -691,7 +687,7 @@ interface BoardProps {
   getTailorRecord?: (job: Job) => TailorRecord | null;
   onQueueUrgent?: (job: Job, resumeSlot: number) => void;
   onOpenTailorPath?: (path: string) => void;
-  onDismissJob?: (job: Job) => void;
+  onOpenInspector?: (job: Job) => void;
   sortBy?: SortBy;
   sortDir?: SortDir;
   onSortColumn?: (column: SortBy) => void;
@@ -712,7 +708,7 @@ function JobTableBoard({
   getTailorRecord,
   onQueueUrgent,
   onOpenTailorPath,
-  onDismissJob,
+  onOpenInspector,
   sortBy,
   sortDir,
   onSortColumn,
@@ -803,7 +799,7 @@ function JobTableBoard({
                 getTailorRecord={getTailorRecord}
                 onQueueUrgent={onQueueUrgent}
                 onOpenTailorPath={onOpenTailorPath}
-                onDismissJob={onDismissJob}
+                onOpenInspector={onOpenInspector}
                 sessionResumeByUrl={sessionResumeByUrl}
                 resumeIdCompact={resumeIdCompact}
                 showCompany
@@ -865,6 +861,8 @@ export default function JobTable({
   sessionResumeByUrl,
   resumeIdCompact = false,
 }: Props) {
+  const [inspectorJob, setInspectorJob] = useState<Job | null>(null);
+
   const groups = useMemo(
     () => (
       groupByCompany
@@ -892,30 +890,45 @@ export default function JobTable({
   // Flat = virtualized path (Dashboard's primary rendering mode)
   if (!groupByCompany) {
     return (
-      <JobTableBoard
-        jobs={jobs}
-        getRecord={getRecord}
-        onAddToTracker={onAddToTracker}
-        onSaveJob={onSaveJob}
-        onExcludeCompany={onExcludeCompany}
-        isJobSelected={isJobSelected}
-        onSelectionToggle={onSelectionToggle}
-        onGroupSelectAll={onGroupSelectAll}
-        getTailorRecord={getTailorRecord}
-        onQueueUrgent={onQueueUrgent}
-        onOpenTailorPath={onOpenTailorPath}
-        onDismissJob={onDismissJob}
-        sortBy={sortBy}
-        sortDir={sortDir}
-        onSortColumn={onSortColumn}
-        sessionResumeByUrl={sessionResumeByUrl}
-        resumeIdCompact={resumeIdCompact}
-        visibleSelection={visibleSelection}
-      />
+      <>
+        <JobTableBoard
+          jobs={jobs}
+          getRecord={getRecord}
+          onAddToTracker={onAddToTracker}
+          onSaveJob={onSaveJob}
+          onExcludeCompany={onExcludeCompany}
+          isJobSelected={isJobSelected}
+          onSelectionToggle={onSelectionToggle}
+          onGroupSelectAll={onGroupSelectAll}
+          getTailorRecord={getTailorRecord}
+          onQueueUrgent={onQueueUrgent}
+          onOpenTailorPath={onOpenTailorPath}
+          onOpenInspector={setInspectorJob}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          onSortColumn={onSortColumn}
+          sessionResumeByUrl={sessionResumeByUrl}
+          resumeIdCompact={resumeIdCompact}
+          visibleSelection={visibleSelection}
+        />
+        {inspectorJob && (
+          <JobInspector
+            job={inspectorJob}
+            tailorRecord={getTailorRecord?.(inspectorJob) ?? null}
+            applyRecord={inspectorJob.job_url ? getRecord(inspectorJob.job_url) : null}
+            onClose={() => setInspectorJob(null)}
+            onQueueUrgent={onQueueUrgent}
+            onOpenTailorPath={onOpenTailorPath}
+            onDismissJob={onDismissJob ? (j) => { onDismissJob(j); setInspectorJob(null); } : undefined}
+            onAddToTracker={onAddToTracker}
+          />
+        )}
+      </>
     );
   }
 
   return (
+    <>
     <div className={wrapClass}>
       <table className={tableClass}>
         <colgroup>
@@ -992,7 +1005,7 @@ export default function JobTable({
                         getTailorRecord={getTailorRecord}
                         onQueueUrgent={onQueueUrgent}
                         onOpenTailorPath={onOpenTailorPath}
-                        onDismissJob={onDismissJob}
+                        onOpenInspector={setInspectorJob}
                         nested={multiRole}
                         board
                         sessionResumeByUrl={sessionResumeByUrl}
@@ -1017,7 +1030,7 @@ export default function JobTable({
                 getTailorRecord={getTailorRecord}
                 onQueueUrgent={onQueueUrgent}
                 onOpenTailorPath={onOpenTailorPath}
-                onDismissJob={onDismissJob}
+                onOpenInspector={setInspectorJob}
                 sessionResumeByUrl={sessionResumeByUrl}
                 resumeIdCompact={resumeIdCompact}
                 board
@@ -1027,5 +1040,18 @@ export default function JobTable({
         </tbody>
       </table>
     </div>
+    {inspectorJob && (
+      <JobInspector
+        job={inspectorJob}
+        tailorRecord={getTailorRecord?.(inspectorJob) ?? null}
+        applyRecord={inspectorJob.job_url ? getRecord(inspectorJob.job_url) : null}
+        onClose={() => setInspectorJob(null)}
+        onQueueUrgent={onQueueUrgent}
+        onOpenTailorPath={onOpenTailorPath}
+        onDismissJob={onDismissJob ? (j) => { onDismissJob(j); setInspectorJob(null); } : undefined}
+        onAddToTracker={onAddToTracker}
+      />
+    )}
+    </>
   );
 }
