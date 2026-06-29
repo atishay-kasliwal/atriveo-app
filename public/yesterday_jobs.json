@@ -2671,7 +2671,7 @@
       "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-28/quik-hire-staffing/13-35_37_financial-software-engineer-remote"
     },
     "ats_score": 68,
-    "fit_score": 19
+    "fit_score": 20
   },
   {
     "session_id": "2026-06-28T13:14:17Z",
@@ -2881,7 +2881,7 @@
     "summary": "Powered by the Nuro Driver\u2122, our universal autonomy platform enables the global mobility ecosystem to deploy autonomy at scale, from robotaxis and logistics fleets to personal vehicles.",
     "title": "Machine Learning Research Scientist: Generative Modeling for Planning",
     "ats_score": 66,
-    "fit_score": 2
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4431032585",
@@ -3101,7 +3101,7 @@
     "summary": "About Vercel: Vercel is the agentic infrastructure company.",
     "title": "Software Engineer, Dashboard",
     "ats_score": 40,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4434285472",
@@ -3678,7 +3678,7 @@
     "summary": "About Vercel: Vercel is the agentic infrastructure company.",
     "title": "Software Engineer, Dashboard",
     "ats_score": 40,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4405728805",
@@ -14993,7 +14993,7 @@
     "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
     "title": "Machine Learning Engineer: LLM Interpretability & Systems ($175K \u2013 $250K + Equity) at CTGT, Inc.",
     "ats_score": 33,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4433625468",
@@ -17161,6 +17161,27 @@
     "site": "linkedin",
     "summary": "**Skills \\& Abilities** Intermediate Knowledge of computer assisted design and drafting (CADD) 3D and 4D software and practices. Intermediate knowledge of engineering analysis/design software (e.g.",
     "title": "Structural Engineer 2 (2026 New Graduates!)",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-06-29T08:35:28.739Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.258 (need \u2265 0.45).",
+      "company": "CDM Smith",
+      "title": "Structural Engineer 2 (2026 New Graduates!)",
+      "resume_slot": 2,
+      "session_hour": "04",
+      "batch_time": "2026-06-29T01:30:43Z",
+      "session_id": "2026-06-29T08:29:27Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "08-35_02_structural-engineer-2-2026-new-graduates",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-06-29/cdm-smith/08-35_02_structural-engineer-2-2026-new-graduates"
+    },
     "ats_score": 0,
     "fit_score": 1
   },
