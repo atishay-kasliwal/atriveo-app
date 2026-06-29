@@ -35,7 +35,7 @@ function toolsActive(path: string): boolean {
   return TOOLS_LINKS.some((t) => path.startsWith(t.href)) || path.startsWith("/tools");
 }
 
-export default function AppHeader({ hideLogo: _hideLogo = false }: { hideLogo?: boolean }) {
+export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) {
   const { user, logout } = useAuth();
   const path = typeof window !== "undefined" ? window.location.pathname : "/";
   const [toolsOpen, setToolsOpen] = useState(false);
@@ -61,12 +61,14 @@ export default function AppHeader({ hideLogo: _hideLogo = false }: { hideLogo?: 
     <header className={toolsOpen ? "header--tools-open" : undefined}>
       <div className="header-inner">
         {/* Brand mark */}
-        <a href="/" className="logo" aria-label="Atriveo home">
-          <div className="logo-icon">
-            <AtriveoLogo size={18} fill="var(--primary-foreground)" />
-          </div>
-          <span className="logo-status-dot" />
-        </a>
+        {!hideLogo && (
+          <a href="/" className="logo" aria-label="Atriveo home">
+            <div className="logo-icon">
+              <AtriveoLogo size={18} fill="var(--primary-foreground)" />
+            </div>
+            <span className="logo-status-dot" />
+          </a>
+        )}
 
         {/* Nav */}
         <div className={`header-right${toolsOpen ? " header-right--tools-open" : ""}`}>
