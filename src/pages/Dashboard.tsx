@@ -566,12 +566,14 @@ export default function Dashboard() {
   });
 
   const handleSaveJobWithQueueCleanup = useCallback((job: Job, source: SavedJobSource) => {
-    if (!job.job_url || source !== "click") return;
+    if (source !== "click") return;
     recordSavedJob(job, source);
     tailorQueue.removeFromQueue(jobDismissKey(job));
-    recordClick(job.job_url, job.title || "Untitled role", job.company || "Unknown company", {
-      location: job.location || null,
-    });
+    if (job.job_url) {
+      recordClick(job.job_url, job.title || "Untitled role", job.company || "Unknown company", {
+        location: job.location || null,
+      });
+    }
   }, [recordSavedJob, recordClick, tailorQueue]);
 
   const handleOpenTailorPath = useCallback(async (path: string) => {

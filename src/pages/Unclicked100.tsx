@@ -3,8 +3,10 @@ import AppHeader from "../components/AppHeader";
 import BulkJobAnalysisPanel from "../components/BulkJobAnalysisPanel";
 import BulkJobCopyBar from "../components/BulkJobCopyBar";
 import PageIntro from "../components/PageIntro";
+import { useApplyClickLog } from "../hooks/useApplyClickLog";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
+import { jobDismissKey } from "../utils/jobCopy";
 import { useJobSelection } from "../hooks/useJobSelection";
 import type { Job } from "../types";
 import JobCard from "../components/JobCard";
@@ -13,6 +15,7 @@ type WeekJob = Job & { scraped_date?: string };
 
 export default function Unclicked100() {
   const { stats, recordClick, getRecord } = useApplyTracker();
+  const { clickedKeySet } = useApplyClickLog();
   const { isExcluded } = useExclusions();
   const [weekJobs, setWeekJobs] = useState<WeekJob[]>([]);
   const [query, setQuery] = useState("");
@@ -36,8 +39,12 @@ export default function Unclicked100() {
   );
 
   const unclicked = useMemo(
-    () => hundredPlus.filter((j) => !j.job_url || !appliedSet.has(j.job_url)),
-    [hundredPlus, appliedSet]
+    () => hundredPlus.filter((j) => {
+      if (j.job_url && appliedSet.has(j.job_url)) return false;
+      if (clickedKeySet.has(jobDismissKey(j))) return false;
+      return true;
+    }),
+    [hundredPlus, appliedSet, clickedKeySet]
   );
 
   const filtered = useMemo(() => {

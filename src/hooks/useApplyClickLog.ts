@@ -4,7 +4,12 @@ import type { Job } from "../types";
 import { careerOpsRating } from "../utils/jobPresentation";
 import { jobDismissKey } from "../utils/jobCopy";
 
+// Full click records — capped for Activity display performance
 const KEY = (uid: string) => `atriveo_apply_click_log_v1_${uid}`;
+// Dismiss-keys only — unlimited, used for feed de-duplication
+const DISMISS_KEY = (uid: string) => `atriveo_dismiss_set_v1_${uid}`;
+
+const RECORDS_CAP = 1500;
 
 export type SavedJobSource = "apply" | "click" | "add";
 
@@ -70,8 +75,27 @@ function load(uid: string): ApplyClickRecord[] {
 
 function persist(uid: string, records: ApplyClickRecord[]) {
   try {
-    localStorage.setItem(KEY(uid), JSON.stringify(records.slice(0, 250)));
+    localStorage.setItem(KEY(uid), JSON.stringify(records.slice(0, RECORDS_CAP)));
     window.dispatchEvent(new CustomEvent("atriveo:apply-click-log", { detail: { uid } }));
+  } catch {
+    /* ignore */
+  }
+}
+
+function loadDismissKeys(uid: string): Set<string> {
+  try {
+    const raw = localStorage.getItem(DISMISS_KEY(uid));
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr.filter((k): k is string => typeof k === "string") : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function persistDismissKeys(uid: string, keys: Set<string>) {
+  try {
+    localStorage.setItem(DISMISS_KEY(uid), JSON.stringify([...keys]));
   } catch {
     /* ignore */
   }
@@ -81,18 +105,21 @@ export function useApplyClickLog() {
   const { user, loading } = useAuth();
   const uid = user?.email ?? "anon";
   const [records, setRecords] = useState<ApplyClickRecord[]>([]);
+  const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (loading) return;
+
+    // Merge anon records into user records on first auth
     let loaded = load(uid);
     if (uid !== "anon") {
       try {
         const anonRaw = localStorage.getItem(KEY("anon"));
         if (anonRaw) {
           const anon = normalize(JSON.parse(anonRaw));
-          const byKey = new Map(loaded.map((record) => [record.jobKey, record]));
-          for (const record of anon) {
-            if (!byKey.has(record.jobKey)) byKey.set(record.jobKey, record);
+          const byKey = new Map(loaded.map((r) => [r.jobKey, r]));
+          for (const r of anon) {
+            if (!byKey.has(r.jobKey)) byKey.set(r.jobKey, r);
           }
           loaded = [...byKey.values()].sort(
             (a, b) => new Date(b.clickedAt).getTime() - new Date(a.clickedAt).getTime(),
@@ -105,16 +132,27 @@ export function useApplyClickLog() {
       }
     }
     setRecords(loaded);
+
+    // Load dismiss keys, seeding from records if the store doesn't exist yet (migration)
+    let keys = loadDismissKeys(uid);
+    if (keys.size === 0 && loaded.length > 0) {
+      keys = new Set(loaded.map((r) => r.jobKey));
+      persistDismissKeys(uid, keys);
+    }
+    setDismissedKeys(keys);
   }, [loading, uid]);
 
   useEffect(() => {
-    const reload = () => setRecords(load(uid));
+    const reload = () => {
+      setRecords(load(uid));
+      setDismissedKeys(loadDismissKeys(uid));
+    };
     const onCustom = (e: Event) => {
       const detail = (e as CustomEvent<{ uid?: string }>).detail;
       if (!detail?.uid || detail.uid === uid) reload();
     };
     const onStorage = (e: StorageEvent) => {
-      if (e.key === KEY(uid)) reload();
+      if (e.key === KEY(uid) || e.key === DISMISS_KEY(uid)) reload();
     };
     window.addEventListener("atriveo:apply-click-log", onCustom);
     window.addEventListener("storage", onStorage);
@@ -127,9 +165,20 @@ export function useApplyClickLog() {
   const recordSavedJob = useCallback((job: Job, source: SavedJobSource) => {
     const jobKey = jobDismissKey(job);
     if (!jobKey) return;
+
+    // Always add to unlimited dismiss-keys store first (controls feed visibility)
+    setDismissedKeys((prev) => {
+      if (prev.has(jobKey)) return prev;
+      const next = new Set(prev);
+      next.add(jobKey);
+      persistDismissKeys(uid, next);
+      return next;
+    });
+
+    // Add to capped records (used for Activity display)
     setRecords((prev) => {
       const nowIso = new Date().toISOString();
-      const existing = prev.find((record) => record.jobKey === jobKey);
+      const existing = prev.find((r) => r.jobKey === jobKey);
       const nextRecord: ApplyClickRecord = {
         jobKey,
         jobUrl: job.job_url || "",
@@ -143,7 +192,7 @@ export function useApplyClickLog() {
         score: careerOpsRating(job).score,
         source,
       };
-      const next = [nextRecord, ...prev.filter((record) => record.jobKey !== jobKey)];
+      const next = [nextRecord, ...prev.filter((r) => r.jobKey !== jobKey)];
       persist(uid, next);
       return next;
     });
@@ -151,21 +200,28 @@ export function useApplyClickLog() {
 
   const removeApplyClick = useCallback((jobKey: string) => {
     if (!jobKey) return;
+
+    setDismissedKeys((prev) => {
+      if (!prev.has(jobKey)) return prev;
+      const next = new Set(prev);
+      next.delete(jobKey);
+      persistDismissKeys(uid, next);
+      return next;
+    });
+
     setRecords((prev) => {
-      const next = prev.filter((record) => record.jobKey !== jobKey);
+      const next = prev.filter((r) => r.jobKey !== jobKey);
       persist(uid, next);
       return next;
     });
   }, [uid]);
 
-  const clickedKeySet = useMemo(
-    () => new Set(records.map((record) => record.jobKey)),
-    [records],
-  );
+  // Feed de-duplication key set — sourced from unlimited dismiss store
+  const clickedKeySet = dismissedKeys;
 
   const todayRecords = useMemo(() => {
     const today = todayEst();
-    return records.filter((record) => estDateKey(record.clickedAt) === today);
+    return records.filter((r) => estDateKey(r.clickedAt) === today);
   }, [records]);
 
   return { records, todayRecords, clickedKeySet, recordSavedJob, removeApplyClick };
