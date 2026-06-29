@@ -420,6 +420,26 @@ function JobTableRow({
             <div className="job-table-company-cell">
               <CompanyLogo company={co} size="sm" />
               <span className="job-table-company-name" title={co}>{co}</span>
+              {board && tailorRecord?.pdfPath && (
+                <button
+                  type="button"
+                  className="job-table-inline-pdf"
+                  title="Preview PDF"
+                  onClick={(e) => { e.stopPropagation(); setPdfOpen(true); }}
+                >
+                  PDF
+                </button>
+              )}
+              {board && !tailorRecord?.pdfPath && folderPath && onOpenTailorPath && (
+                <button
+                  type="button"
+                  className="job-table-inline-pdf"
+                  title={folderPath}
+                  onClick={(e) => { e.stopPropagation(); onOpenTailorPath(folderPath); }}
+                >
+                  ↗
+                </button>
+              )}
               {onExcludeCompany && (
                 <button
                   type="button"
