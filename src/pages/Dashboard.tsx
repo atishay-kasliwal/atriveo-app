@@ -204,12 +204,13 @@ export default function Dashboard({ initialPeriod = "hour", initialScope = "all"
     setSortBy(nextSort);
     setSortDir(defaultSortDir(nextSort));
     if (syncPath) {
-      const base = nextPeriod === "today" ? "/today"
-        : nextPeriod === "yesterday" ? "/yesterday"
-        : nextPeriod === "week" ? "/this-week"
-        : "/";
-      const suffix = nextScope === "top500" ? "/top-500" : nextScope === "others" ? "/others" : "";
-      const nextPath = `${base}${suffix}`;
+      const PATHS: Record<Period, Record<Scope, string>> = {
+        hour:      { all: "/",          top500: "/this-hour/top-500", others: "/this-hour/others" },
+        today:     { all: "/today",     top500: "/today/top-500",     others: "/today/others" },
+        yesterday: { all: "/yesterday", top500: "/yesterday/top-500", others: "/yesterday/others" },
+        week:      { all: "/this-week", top500: "/this-week/top-500", others: "/this-week/others" },
+      };
+      const nextPath = PATHS[nextPeriod][nextScope];
       if (window.location.pathname !== nextPath) navigate(nextPath);
     }
   };
