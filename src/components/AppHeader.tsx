@@ -14,6 +14,8 @@ const TOOLS_LINKS = [
   { href: "/settings", label: "Settings" },
 ];
 
+const ADMIN_EMAIL = "katishay@gmail.com";
+
 interface NavItem {
   href: string;
   label: string;
@@ -39,6 +41,7 @@ function toolsActive(path: string): boolean {
 export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) {
   const { user, logout } = useAuth();
   const { pathname: path } = useLocation();
+  const isAdmin = user?.email === ADMIN_EMAIL;
   const [toolsOpen, setToolsOpen] = useState(false);
   const toolsRef = useRef<HTMLDivElement>(null);
 
@@ -114,6 +117,15 @@ export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) 
 
           {/* Right cluster */}
           <div className="nav-right-cluster">
+            {isAdmin && (
+              <a
+                href="/manage-top-500"
+                className={`nav-tab${path.startsWith("/manage-top-500") ? " active" : ""}`}
+                style={{ fontSize: "0.75rem" }}
+              >
+                Manage
+              </a>
+            )}
             {user && (
               <span className="nav-user-pill">
                 <span className="nav-user-avatar">{user.name?.[0]?.toUpperCase() ?? "A"}</span>

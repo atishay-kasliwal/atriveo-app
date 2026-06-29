@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
+import { Top500Provider } from "./context/Top500Context";
 import AppHeader from "./components/AppHeader";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -15,13 +16,11 @@ import Activity from "./pages/Activity";
 import ManualTailor from "./pages/ManualTailor";
 import ResumeOptimizer from "./pages/ResumeOptimizer";
 import Onboarding from "./pages/Onboarding";
+import ManageTop500 from "./pages/ManageTop500";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  // While auth resolves, render the SAME shell (header) every page uses, with a
-  // spinner only in the content area — so a full-page reload never blanks the
-  // screen or shifts the header.
   if (loading) {
     return (
       <div>
@@ -31,134 +30,65 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
   if (!user) {
-    // Send unauthenticated visitors to the landing page, not login
     window.location.replace("/landing/index.html");
     return null;
   }
   return <>{children}</>;
 }
 
+function P({ children }: { children: React.ReactNode }) {
+  return <ProtectedRoute>{children}</ProtectedRoute>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/" element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/today" element={
-          <ProtectedRoute>
-            <Dashboard initialPeriod="today" />
-          </ProtectedRoute>
-        } />
-        <Route path="/swipe" element={<Navigate to="/" replace />} />
-        <Route
-          path="/weekly"
-          element={
-            <ProtectedRoute>
-              <Weekly />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/unclicked-100"
-          element={
-            <ProtectedRoute>
-              <Unclicked100 />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/cart"
-          element={
-            <ProtectedRoute>
-              <Cart />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/skills"
-          element={
-            <ProtectedRoute>
-              <Skills />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/states"
-          element={
-            <ProtectedRoute>
-              <States />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/emailfinder"
-          element={
-            <ProtectedRoute>
-              <EmailFinder />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/resumes"
-          element={
-            <ProtectedRoute>
-              <Resumes />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/tailored" element={<Navigate to="/resumes" replace />} />
-        <Route
-          path="/activity"
-          element={
-            <ProtectedRoute>
-              <Activity />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/clickedjobs" element={<Navigate to="/activity" replace />} />
-        <Route
-          path="/manual-tailor"
-          element={
-            <ProtectedRoute>
-              <ManualTailor />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/optimizer"
-          element={
-            <ProtectedRoute>
-              <ResumeOptimizer />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <Navigate to="/" replace />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+      <Top500Provider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+
+          {/* This Hour */}
+          <Route path="/" element={<P><Dashboard initialPeriod="hour" initialScope="all" /></P>} />
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/this-hour" element={<Navigate to="/" replace />} />
+          <Route path="/this-hour/top-500" element={<P><Dashboard initialPeriod="hour" initialScope="top500" /></P>} />
+          <Route path="/this-hour/others" element={<P><Dashboard initialPeriod="hour" initialScope="others" /></P>} />
+
+          {/* Today */}
+          <Route path="/today" element={<P><Dashboard initialPeriod="today" initialScope="all" /></P>} />
+          <Route path="/today/top-500" element={<P><Dashboard initialPeriod="today" initialScope="top500" /></P>} />
+          <Route path="/today/others" element={<P><Dashboard initialPeriod="today" initialScope="others" /></P>} />
+
+          {/* Yesterday */}
+          <Route path="/yesterday" element={<P><Dashboard initialPeriod="yesterday" initialScope="all" /></P>} />
+          <Route path="/yesterday/top-500" element={<P><Dashboard initialPeriod="yesterday" initialScope="top500" /></P>} />
+          <Route path="/yesterday/others" element={<P><Dashboard initialPeriod="yesterday" initialScope="others" /></P>} />
+
+          {/* This Week */}
+          <Route path="/this-week" element={<P><Dashboard initialPeriod="week" initialScope="all" /></P>} />
+          <Route path="/this-week/top-500" element={<P><Dashboard initialPeriod="week" initialScope="top500" /></P>} />
+          <Route path="/this-week/others" element={<P><Dashboard initialPeriod="week" initialScope="others" /></P>} />
+
+          {/* Legacy redirects */}
+          <Route path="/swipe" element={<Navigate to="/" replace />} />
+          <Route path="/weekly" element={<P><Weekly /></P>} />
+          <Route path="/unclicked-100" element={<P><Unclicked100 /></P>} />
+          <Route path="/cart" element={<P><Cart /></P>} />
+          <Route path="/settings" element={<P><Settings /></P>} />
+          <Route path="/skills" element={<P><Skills /></P>} />
+          <Route path="/states" element={<P><States /></P>} />
+          <Route path="/emailfinder" element={<P><EmailFinder /></P>} />
+          <Route path="/resumes" element={<P><Resumes /></P>} />
+          <Route path="/tailored" element={<Navigate to="/resumes" replace />} />
+          <Route path="/activity" element={<P><Activity /></P>} />
+          <Route path="/clickedjobs" element={<Navigate to="/activity" replace />} />
+          <Route path="/manual-tailor" element={<P><ManualTailor /></P>} />
+          <Route path="/optimizer" element={<P><ResumeOptimizer /></P>} />
+          <Route path="/manage-top-500" element={<P><ManageTop500 /></P>} />
+          <Route path="/*" element={<P><Navigate to="/" replace /></P>} />
+        </Routes>
+      </Top500Provider>
     </BrowserRouter>
   );
 }

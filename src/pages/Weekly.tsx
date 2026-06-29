@@ -6,7 +6,7 @@ import PageIntro from "../components/PageIntro";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useExclusions } from "../hooks/useExclusions";
 import { useJobSelection } from "../hooks/useJobSelection";
-import { isTop500 } from "../data/top500";
+import { useTop500 } from "../context/Top500Context";
 import type { Job } from "../types";
 import JobCard from "../components/JobCard";
 
@@ -30,6 +30,7 @@ function dayLabel(dateStr: string): string {
 export default function Weekly() {
   const { stats, recordClick, getRecord } = useApplyTracker();
   const { isExcluded, excludeCompany } = useExclusions();
+  const { isTop500 } = useTop500();
   const [weekJobs, setWeekJobs] = useState<WeekJob[]>([]);
   const [activeDay, setActiveDay] = useState("All");
   const [levelFilter, setLevelFilter] = useState("all");

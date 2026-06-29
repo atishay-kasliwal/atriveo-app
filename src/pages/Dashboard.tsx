@@ -5,7 +5,7 @@ import BulkJobAnalysisPanel from "../components/BulkJobAnalysisPanel";
 import BulkJobCopyBar from "../components/BulkJobCopyBar";
 import FeedTableToolbar from "../components/FeedTableToolbar";
 import TailorPanel from "../components/TailorPanel";
-import TodayBoardSidebar, { type ViewKey } from "../components/TodayBoardSidebar";
+import TodayBoardSidebar from "../components/TodayBoardSidebar";
 import TodayBoardFooter from "../components/TodayBoardFooter";
 import { useApplyClickLog } from "../hooks/useApplyClickLog";
 import { useApplyTracker } from "../hooks/useApplyTracker";
@@ -13,13 +13,13 @@ import { useExclusions } from "../hooks/useExclusions";
 import { useJobSelection } from "../hooks/useJobSelection";
 import { useMongoCompileQueue } from "../hooks/useMongoCompileQueue";
 import { useTailorStatus } from "../hooks/useTailorStatus";
-import { isTop500 } from "../data/top500";
+import { useTop500 } from "../context/Top500Context";
 import type { Job, RunEntry } from "../types";
 import type { TailorRecord } from "../types/tailorQueue";
 import type { SavedJobSource } from "../hooks/useApplyClickLog";
 import JobTable from "../components/JobTable";
 import { careerOpsRating } from "../utils/jobPresentation";
-import type { Period, SortBy, SortDir } from "./Dashboard.types";
+import type { Period, Scope, SortBy, SortDir } from "./Dashboard.types";
 import { defaultSortDir, sortJobs } from "../utils/jobSort";
 import { buildSessionResumeSlots } from "../utils/sessionResume";
 import { jobDismissKey } from "../utils/jobCopy";
@@ -84,6 +84,7 @@ function tailorFilterBucket(record: TailorRecord | null): TailorFilter {
 
 interface DashboardProps {
   initialPeriod?: Period;
+  initialScope?: Scope;
 }
 
 function parseDateLike(iso?: string | null): Date | null {
@@ -154,8 +155,9 @@ function formatRunTime(iso?: string | null): string {
 }
 
 
-export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
+export default function Dashboard({ initialPeriod = "hour", initialScope = "all" }: DashboardProps) {
   const navigate = useNavigate();
+  const { isTop500 } = useTop500();
   const { stats, recordClick, getRecord } = useApplyTracker();
   const { clickedKeySet, recordSavedJob, records: clickRecords } = useApplyClickLog();
   const tailorStatus = useTailorStatus();
@@ -167,8 +169,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const [hourJobs, setHourJobs] = useState<Job[]>([]);
   const [todayJobs, setTodayJobs] = useState<Job[]>([]);
   const [yesterdayJobs, setYesterdayJobs] = useState<Job[]>([]);
+  const [weekJobs, setWeekJobs] = useState<Job[]>([]);
   const [runHistory, setRunHistory] = useState<RunEntry[]>([]);
   const [period, setPeriod] = useState<Period>(initialPeriod);
+  const [scope, setScope] = useState<Scope>(initialScope);
   const initialSort = initialPeriod === "hour" ? "time" : "score";
   const [sortBy, setSortBy] = useState<SortBy>(initialSort);
   const [sortDir, setSortDir] = useState<SortDir>(() => defaultSortDir(initialSort));
@@ -181,7 +185,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const [loading, setLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [showTodayApplications, setShowTodayApplications] = useState(false);
-  const [activeView, setActiveView] = useState<ViewKey>("all");
+  const [highMatchFilter, setHighMatchFilter] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
   const [feedRefreshNotice, setFeedRefreshNotice] = useState("");
@@ -192,29 +196,30 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
   const [pipelineKpis, setPipelineKpis] = useState<PipelineKpis | null>(null);
   const hourSessionRef = useRef<string | null>(null);
 
-  const applyView = useCallback((view: ViewKey) => {
-    setActiveView(view);
-    setLevelFilter(view === "new-grad" ? "New Grad" : "all");
-    setH1bFilter(view === "h1b");
-    setTop500Filter(view === "top500");
-  }, []);
 
-  const handlePeriodChange = (nextPeriod: Period, syncPath = true) => {
+  const handlePeriodChange = (nextPeriod: Period, nextScope: Scope = "all", syncPath = true) => {
     setPeriod(nextPeriod);
+    setScope(nextScope);
     const nextSort = nextPeriod === "hour" ? "time" : "score";
     setSortBy(nextSort);
     setSortDir(defaultSortDir(nextSort));
     if (syncPath) {
-      const nextPath = nextPeriod === "today" ? "/today" : "/";
+      const base = nextPeriod === "today" ? "/today"
+        : nextPeriod === "yesterday" ? "/yesterday"
+        : nextPeriod === "week" ? "/this-week"
+        : "/";
+      const suffix = nextScope === "top500" ? "/top-500" : nextScope === "others" ? "/others" : "";
+      const nextPath = `${base}${suffix}`;
       if (window.location.pathname !== nextPath) navigate(nextPath);
     }
   };
 
   const refreshJobFeeds = useCallback(async (opts: { initial?: boolean } = {}) => {
-    const [hourList, todayList, yesterdayList, runsRes, metaRes] = await Promise.all([
+    const [hourList, todayList, yesterdayList, weekList, runsRes, metaRes] = await Promise.all([
       fetchJobFeed("hour"),
       fetchJobFeed("today"),
       fetchJobFeed("yesterday"),
+      fetchJobFeed("week"),
       fetch("/api/jobs?type=runs").then(async (r) => (r.ok ? r.json() : [])).catch(() => []),
       fetch("/metadata.json", { cache: "no-store" }).catch(() => null),
     ]);
@@ -246,6 +251,7 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     setHourJobs(hourList);
     setTodayJobs(todayList);
     setYesterdayJobs(yesterdayList);
+    setWeekJobs(weekList);
     setRunHistory(Array.isArray(runsRes) ? runsRes as RunEntry[] : []);
     return hourList;
   }, []);
@@ -377,8 +383,18 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     return counts;
   }, [jobKeySessionMap, jobSessionMap, clickRecords]);
 
-  const rawJobs = period === "hour" ? hourJobs : period === "today" ? todayJobs : yesterdayJobs;
-  const baseJobs = selectedSession ? rawJobs.filter((j) => j.session_id === selectedSession) : rawJobs;
+  const rawJobs = period === "hour" ? hourJobs
+    : period === "today" ? todayJobs
+    : period === "yesterday" ? yesterdayJobs
+    : weekJobs;
+  const rawScopedJobs = scope === "top500"
+    ? rawJobs.filter((j) => isTop500(j.company ?? ""))
+    : scope === "others"
+    ? rawJobs.filter((j) => !isTop500(j.company ?? ""))
+    : rawJobs;
+  const baseJobs = selectedSession
+    ? rawScopedJobs.filter((j) => j.session_id === selectedSession)
+    : rawScopedJobs;
 
   const runCards = useMemo(() => {
     const historyById = new Map(runHistory.map((r) => [r.session_id, r]));
@@ -436,11 +452,11 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       );
     }
     jobs = jobs.filter((j) => !isExcluded(j));
-    if (activeView === "high-match") {
+    if (highMatchFilter) {
       jobs = jobs.filter((j) => careerOpsRating(j).score >= 75);
     }
     return jobs;
-  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, activeView]);
+  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, highMatchFilter]);
 
   const visibleJobs = useMemo(() => {
     return feedJobsBeforeDismiss.filter((j) => !clickedKeySet.has(jobDismissKey(j)));
@@ -714,29 +730,13 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
     setTailorFilter("all");
     setH1bFilter(false);
     setTop500Filter(false);
+    setHighMatchFilter(false);
     setTermFilter("all");
-    setActiveView("all");
   };
 
   // Unified warm Matchflow board is used for ALL periods (This Hour / Today /
   // Yesterday) so the Live Feed and Today page share one consistent design.
   const isTodayBoard = true;
-
-  const catalogJobs = useMemo(
-    () => baseJobs.filter(isJobInFeed),
-    [baseJobs, isJobInFeed],
-  );
-
-  const viewCounts = useMemo(
-    () => ({
-      all: catalogJobs.length,
-      "high-match": catalogJobs.filter((j) => careerOpsRating(j).score >= 75).length,
-      "new-grad": catalogJobs.filter((j) => j.level === "New Grad").length,
-      h1b: catalogJobs.filter((j) => (j.ats_score ?? j.score_pct ?? 0) >= 60).length,
-      top500: catalogJobs.filter((j) => isTop500(j.company || "")).length,
-    }),
-    [catalogJobs],
-  );
 
   const highMatchCount = useMemo(
     () => displayedJobs.filter((j) => careerOpsRating(j).score >= 75).length,
@@ -882,12 +882,10 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
       {isTodayBoard ? (
         <div className="today-board-viewport">
           <TodayBoardSidebar
-            activeView={activeView}
-            onViewChange={applyView}
-            viewCounts={viewCounts}
             period={period}
-            onPeriodChange={(p) => {
-              handlePeriodChange(p);
+            scope={scope}
+            onNavigate={(p, s) => {
+              handlePeriodChange(p, s);
               setTermFilter("all");
               setSelectedSession(null);
             }}
@@ -898,6 +896,11 @@ export default function Dashboard({ initialPeriod = "hour" }: DashboardProps) {
             selectedSession={selectedSession}
             onSessionSelect={handleSessionSelect}
             formatRunTime={formatRunTime}
+            hourJobs={hourJobs}
+            todayJobs={todayJobs}
+            yesterdayJobs={yesterdayJobs}
+            weekJobs={weekJobs}
+            isTop500={isTop500}
           />
 
           <div className="today-board-main">
