@@ -48,30 +48,30 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
 
-          {/* This Hour */}
-          <Route path="/" element={<P><Dashboard initialPeriod="hour" initialScope="all" /></P>} />
+          {/* Dashboard — single mounted instance across all period/scope paths */}
+          <Route element={<P><Dashboard /></P>}>
+            <Route index element={null} />
+            <Route path="this-hour" element={null} />
+            <Route path="this-hour/top-500" element={null} />
+            <Route path="this-hour/others" element={null} />
+            <Route path="today" element={null} />
+            <Route path="today/top-500" element={null} />
+            <Route path="today/others" element={null} />
+            <Route path="yesterday" element={null} />
+            <Route path="yesterday/top-500" element={null} />
+            <Route path="yesterday/others" element={null} />
+            <Route path="this-week" element={null} />
+            <Route path="this-week/top-500" element={null} />
+            <Route path="this-week/others" element={null} />
+          </Route>
+
+          {/* Redirects */}
           <Route path="/dashboard" element={<Navigate to="/" replace />} />
-          <Route path="/this-hour" element={<Navigate to="/" replace />} />
-          <Route path="/this-hour/top-500" element={<P><Dashboard initialPeriod="hour" initialScope="top500" /></P>} />
-          <Route path="/this-hour/others" element={<P><Dashboard initialPeriod="hour" initialScope="others" /></P>} />
-
-          {/* Today */}
-          <Route path="/today" element={<P><Dashboard initialPeriod="today" initialScope="all" /></P>} />
-          <Route path="/today/top-500" element={<P><Dashboard initialPeriod="today" initialScope="top500" /></P>} />
-          <Route path="/today/others" element={<P><Dashboard initialPeriod="today" initialScope="others" /></P>} />
-
-          {/* Yesterday */}
-          <Route path="/yesterday" element={<P><Dashboard initialPeriod="yesterday" initialScope="all" /></P>} />
-          <Route path="/yesterday/top-500" element={<P><Dashboard initialPeriod="yesterday" initialScope="top500" /></P>} />
-          <Route path="/yesterday/others" element={<P><Dashboard initialPeriod="yesterday" initialScope="others" /></P>} />
-
-          {/* This Week */}
-          <Route path="/this-week" element={<P><Dashboard initialPeriod="week" initialScope="all" /></P>} />
-          <Route path="/this-week/top-500" element={<P><Dashboard initialPeriod="week" initialScope="top500" /></P>} />
-          <Route path="/this-week/others" element={<P><Dashboard initialPeriod="week" initialScope="others" /></P>} />
-
-          {/* Legacy redirects */}
           <Route path="/swipe" element={<Navigate to="/" replace />} />
+          <Route path="/tailored" element={<Navigate to="/resumes" replace />} />
+          <Route path="/clickedjobs" element={<Navigate to="/activity" replace />} />
+
+          {/* Pages */}
           <Route path="/weekly" element={<P><Weekly /></P>} />
           <Route path="/unclicked-100" element={<P><Unclicked100 /></P>} />
           <Route path="/cart" element={<P><Cart /></P>} />
@@ -80,9 +80,7 @@ export default function App() {
           <Route path="/states" element={<P><States /></P>} />
           <Route path="/emailfinder" element={<P><EmailFinder /></P>} />
           <Route path="/resumes" element={<P><Resumes /></P>} />
-          <Route path="/tailored" element={<Navigate to="/resumes" replace />} />
           <Route path="/activity" element={<P><Activity /></P>} />
-          <Route path="/clickedjobs" element={<Navigate to="/activity" replace />} />
           <Route path="/manual-tailor" element={<P><ManualTailor /></P>} />
           <Route path="/optimizer" element={<P><ResumeOptimizer /></P>} />
           <Route path="/manage-top-500" element={<P><ManageTop500 /></P>} />

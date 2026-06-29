@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import AtriveoLogo from "./AtriveoLogo";
 
 const TOOLS_LINKS = [
-  { href: "/optimizer", label: "Legacy Optimizer", note: "Gemma rewrites — not AC compiler" },
-  { href: "/skills", label: "Skills gap" },
   { href: "/weekly", label: "Weekly feed" },
-  { href: "/cart", label: "Cart" },
   { href: "/states", label: "States" },
   { href: "/unclicked-100", label: "100+ Unclicked" },
   { href: "/emailfinder", label: "Email Finder" },
@@ -66,12 +63,12 @@ export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) 
       <div className="header-inner">
         {/* Brand mark */}
         {!hideLogo && (
-          <a href="/" className="logo" aria-label="Atriveo home">
+          <Link to="/" className="logo" aria-label="Atriveo home">
             <div className="logo-icon">
               <AtriveoLogo size={18} fill="var(--primary-foreground)" />
             </div>
             <span className="logo-status-dot" />
-          </a>
+          </Link>
         )}
 
         {/* Nav */}
@@ -79,18 +76,18 @@ export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) 
           <nav className={`nav-tabs${toolsOpen ? " nav-tabs--tools-open" : ""}`}>
             <span className="nav-group-label">DAILY</span>
             {DAILY.map((n) => (
-              <a key={n.href} href={n.href} className={`nav-tab${n.match(path) ? " active" : ""}`}>
+              <Link key={n.href} to={n.href} className={`nav-tab${n.match(path) ? " active" : ""}`}>
                 {n.label}
-              </a>
+              </Link>
             ))}
 
             <span className="nav-separator" aria-hidden />
 
             <span className="nav-group-label">WORKBENCH</span>
             {WORKBENCH.map((n) => (
-              <a key={n.href} href={n.href} className={`nav-tab${n.match(path) ? " active" : ""}`}>
+              <Link key={n.href} to={n.href} className={`nav-tab${n.match(path) ? " active" : ""}`}>
                 {n.label}
-              </a>
+              </Link>
             ))}
 
             <div className="nav-tools-wrap" ref={toolsRef}>
@@ -105,10 +102,15 @@ export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) 
               {toolsOpen ? (
                 <div className="nav-tools-menu" role="menu">
                   {TOOLS_LINKS.map((t) => (
-                    <a key={t.href} href={t.href} className="nav-tools-item" role="menuitem">
+                    <Link
+                      key={t.href}
+                      to={t.href}
+                      className="nav-tools-item"
+                      role="menuitem"
+                      onClick={() => setToolsOpen(false)}
+                    >
                       <span>{t.label}</span>
-                      {t.note ? <small>{t.note}</small> : null}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               ) : null}
@@ -118,13 +120,13 @@ export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) 
           {/* Right cluster */}
           <div className="nav-right-cluster">
             {isAdmin && (
-              <a
-                href="/manage-top-500"
+              <Link
+                to="/manage-top-500"
                 className={`nav-tab${path.startsWith("/manage-top-500") ? " active" : ""}`}
                 style={{ fontSize: "0.75rem" }}
               >
                 Manage
-              </a>
+              </Link>
             )}
             {user && (
               <span className="nav-user-pill">

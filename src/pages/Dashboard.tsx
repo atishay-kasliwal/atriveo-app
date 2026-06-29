@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import AppHeader from "../components/AppHeader";
 import BulkJobAnalysisPanel from "../components/BulkJobAnalysisPanel";
 import BulkJobCopyBar from "../components/BulkJobCopyBar";
@@ -82,9 +82,12 @@ function tailorFilterBucket(record: TailorRecord | null): TailorFilter {
   }
 }
 
-interface DashboardProps {
-  initialPeriod?: Period;
-  initialScope?: Scope;
+function parseDashboardPath(pathname: string): { period: Period; scope: Scope } {
+  const scope: Scope = pathname.includes("/top-500") ? "top500" : pathname.includes("/others") ? "others" : "all";
+  if (pathname.startsWith("/today")) return { period: "today", scope };
+  if (pathname.startsWith("/yesterday")) return { period: "yesterday", scope };
+  if (pathname.startsWith("/this-week")) return { period: "week", scope };
+  return { period: "hour", scope };
 }
 
 function parseDateLike(iso?: string | null): Date | null {
@@ -155,8 +158,10 @@ function formatRunTime(iso?: string | null): string {
 }
 
 
-export default function Dashboard({ initialPeriod = "hour", initialScope = "all" }: DashboardProps) {
+export default function Dashboard() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { period, scope } = parseDashboardPath(pathname);
   const { isTop500 } = useTop500();
   const { stats, recordClick, getRecord } = useApplyTracker();
   const { clickedKeySet, recordSavedJob, records: clickRecords } = useApplyClickLog();
@@ -171,11 +176,9 @@ export default function Dashboard({ initialPeriod = "hour", initialScope = "all"
   const [yesterdayJobs, setYesterdayJobs] = useState<Job[]>([]);
   const [weekJobs, setWeekJobs] = useState<Job[]>([]);
   const [runHistory, setRunHistory] = useState<RunEntry[]>([]);
-  const [period, setPeriod] = useState<Period>(initialPeriod);
-  const [scope, setScope] = useState<Scope>(initialScope);
-  const initialSort = initialPeriod === "hour" ? "time" : "score";
-  const [sortBy, setSortBy] = useState<SortBy>(initialSort);
-  const [sortDir, setSortDir] = useState<SortDir>(() => defaultSortDir(initialSort));
+  const [sortBy, setSortBy] = useState<SortBy>(period === "hour" ? "time" : "score");
+  const [sortDir, setSortDir] = useState<SortDir>(defaultSortDir(period === "hour" ? "time" : "score"));
+  const prevPeriodRef = useRef<Period>(period);
   const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
   const [tailorFilter, setTailorFilter] = useState<TailorFilter>("all");
   const [h1bFilter, setH1bFilter] = useState(false);
@@ -185,7 +188,6 @@ export default function Dashboard({ initialPeriod = "hour", initialScope = "all"
   const [loading, setLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [showTodayApplications, setShowTodayApplications] = useState(false);
-  const [highMatchFilter, setHighMatchFilter] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
   const [feedRefreshNotice, setFeedRefreshNotice] = useState("");
@@ -197,23 +199,26 @@ export default function Dashboard({ initialPeriod = "hour", initialScope = "all"
   const hourSessionRef = useRef<string | null>(null);
 
 
-  const handlePeriodChange = (nextPeriod: Period, nextScope: Scope = "all", syncPath = true) => {
-    setPeriod(nextPeriod);
-    setScope(nextScope);
-    const nextSort = nextPeriod === "hour" ? "time" : "score";
+  const PATHS: Record<Period, Record<Scope, string>> = {
+    hour:      { all: "/",          top500: "/this-hour/top-500", others: "/this-hour/others" },
+    today:     { all: "/today",     top500: "/today/top-500",     others: "/today/others" },
+    yesterday: { all: "/yesterday", top500: "/yesterday/top-500", others: "/yesterday/others" },
+    week:      { all: "/this-week", top500: "/this-week/top-500", others: "/this-week/others" },
+  };
+
+  const handlePeriodChange = (nextPeriod: Period, nextScope: Scope = "all") => {
+    const nextPath = PATHS[nextPeriod][nextScope];
+    if (window.location.pathname !== nextPath) navigate(nextPath);
+  };
+
+  // Reset sort when period changes (URL-driven)
+  useEffect(() => {
+    if (prevPeriodRef.current === period) return;
+    prevPeriodRef.current = period;
+    const nextSort: SortBy = period === "hour" ? "time" : "score";
     setSortBy(nextSort);
     setSortDir(defaultSortDir(nextSort));
-    if (syncPath) {
-      const PATHS: Record<Period, Record<Scope, string>> = {
-        hour:      { all: "/",          top500: "/this-hour/top-500", others: "/this-hour/others" },
-        today:     { all: "/today",     top500: "/today/top-500",     others: "/today/others" },
-        yesterday: { all: "/yesterday", top500: "/yesterday/top-500", others: "/yesterday/others" },
-        week:      { all: "/this-week", top500: "/this-week/top-500", others: "/this-week/others" },
-      };
-      const nextPath = PATHS[nextPeriod][nextScope];
-      if (window.location.pathname !== nextPath) navigate(nextPath);
-    }
-  };
+  }, [period]);
 
   const refreshJobFeeds = useCallback(async (opts: { initial?: boolean } = {}) => {
     const [hourList, todayList, yesterdayList, weekList, runsRes, metaRes] = await Promise.all([
@@ -453,11 +458,8 @@ export default function Dashboard({ initialPeriod = "hour", initialScope = "all"
       );
     }
     jobs = jobs.filter((j) => !isExcluded(j));
-    if (highMatchFilter) {
-      jobs = jobs.filter((j) => careerOpsRating(j).score >= 75);
-    }
     return jobs;
-  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded, highMatchFilter]);
+  }, [baseJobs, h1bFilter, top500Filter, termFilter, query, isExcluded]);
 
   const visibleJobs = useMemo(() => {
     return feedJobsBeforeDismiss.filter((j) => !clickedKeySet.has(jobDismissKey(j)));
@@ -731,7 +733,6 @@ export default function Dashboard({ initialPeriod = "hour", initialScope = "all"
     setTailorFilter("all");
     setH1bFilter(false);
     setTop500Filter(false);
-    setHighMatchFilter(false);
     setTermFilter("all");
   };
 
@@ -757,7 +758,7 @@ export default function Dashboard({ initialPeriod = "hour", initialScope = "all"
   }, [isTodayBoard]);
 
   const handleShare = () => {
-    const url = `${window.location.origin}/today`;
+    const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
       setShareMessage("Copied!");
       setTimeout(() => setShareMessage(""), 1500);
@@ -801,7 +802,7 @@ export default function Dashboard({ initialPeriod = "hour", initialScope = "all"
           className={`chip-toggle${h1bFilter ? " active" : ""}`}
           onClick={() => setH1bFilter((v) => !v)}
         >
-          H1B ✓
+          ATS 60+
         </button>
         <button
           className={`chip-toggle chip-toggle-purple${top500Filter ? " active" : ""}`}
