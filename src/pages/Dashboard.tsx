@@ -211,7 +211,10 @@ export default function Dashboard() {
 
   const handlePeriodChange = (nextPeriod: Period, nextScope: Scope = "all") => {
     const nextPath = PATHS[nextPeriod][nextScope];
+    // navigate to an absolute path clears all search params (including ?session)
+    // in one atomic update — avoids racing with a separate setSearchParams call
     if (window.location.pathname !== nextPath) navigate(nextPath);
+    else if (searchParams.has("session")) setSearchParams({}, { replace: true });
   };
 
   // Reset sort + clear session filter when period changes (URL-driven)
@@ -891,7 +894,6 @@ export default function Dashboard() {
             onNavigate={(p, s) => {
               handlePeriodChange(p, s);
               setTermFilter("all");
-              setSearchParams((p) => { const n = new URLSearchParams(p); n.delete("session"); return n; }, { replace: true });
             }}
             periodCounts={periodCounts}
             periodClickedCounts={periodClickedCounts}
