@@ -2297,39 +2297,15 @@ body.is-today-board .nav-tab.active:hover {
   list-style: none;
 }
 
-.today-board-group-header {
-  display: flex;
-  align-items: stretch;
-  border-radius: 6px;
-  overflow: hidden;
-  transition: background 0.1s;
-}
-
-.today-board-group-header:hover {
-  background: rgba(255,255,255,0.05);
-}
-
-.today-board-group-header.is-active {
-  background: var(--board-accent-soft);
-}
-
-.today-board-group-header.is-active .today-board-group-label {
-  color: var(--board-accent-strong);
-  font-weight: 600;
-}
-
-.today-board-group-header.is-active .today-board-nav-count {
-  color: var(--board-accent);
-}
-
 .today-board-group-label {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 7px 0 7px 8px;
+  width: 100%;
+  padding: 7px 8px;
   border: none;
+  border-radius: 6px;
   background: transparent;
   color: var(--board-sub);
   font-family: "Inter", sans-serif;
@@ -2337,27 +2313,22 @@ body.is-today-board .nav-tab.active:hover {
   font-weight: 500;
   text-align: left;
   cursor: pointer;
+  transition: background 0.1s, color 0.1s;
 }
 
-.today-board-group-chevron {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  border: none;
-  background: transparent;
-  color: var(--board-muted);
-  cursor: pointer;
-  padding: 0;
-  transition: transform 0.15s;
+.today-board-group-label:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--board-ink);
 }
 
-.today-board-group-chevron.is-open svg {
-  transform: rotate(0deg);
+.today-board-group-label.is-active {
+  background: var(--board-accent-soft);
+  color: var(--board-accent-strong);
+  font-weight: 600;
 }
 
-.today-board-group-chevron:not(.is-open) svg {
-  transform: rotate(-90deg);
+.today-board-group-label.is-active .today-board-nav-count {
+  color: var(--board-accent);
 }
 
 /* Sub-links (Top 500 / Others) */
