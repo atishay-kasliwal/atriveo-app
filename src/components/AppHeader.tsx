@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import AtriveoLogo from "./AtriveoLogo";
 
@@ -37,7 +38,7 @@ function toolsActive(path: string): boolean {
 
 export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) {
   const { user, logout } = useAuth();
-  const path = typeof window !== "undefined" ? window.location.pathname : "/";
+  const { pathname: path } = useLocation();
   const [toolsOpen, setToolsOpen] = useState(false);
   const toolsRef = useRef<HTMLDivElement>(null);
 
