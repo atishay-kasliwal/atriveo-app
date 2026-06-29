@@ -110,7 +110,6 @@ export default function Cart() {
         ) : (
           <JobTable
             jobs={visibleJobs}
-            variant="board"
             groupByCompany={false}
             getRecord={getRecord}
             onAddToTracker={recordClick}

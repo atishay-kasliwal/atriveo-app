@@ -837,7 +837,6 @@ interface Props {
   onQueueUrgent?: (job: Job, resumeSlot: number) => void;
   onOpenTailorPath?: (path: string) => void;
   onDismissJob?: (job: Job) => void;
-  variant?: "board";
   sortBy?: SortBy;
   sortDir?: SortDir;
   onSortColumn?: (column: SortBy) => void;
@@ -860,7 +859,6 @@ export default function JobTable({
   onQueueUrgent,
   onOpenTailorPath,
   onDismissJob,
-  variant = "board",
   sortBy,
   sortDir,
   onSortColumn,
@@ -891,8 +889,8 @@ export default function JobTable({
     };
   }, [jobs, isJobSelected]);
 
-  // Board + flat = virtualized path (Dashboard's primary rendering mode)
-  if (variant === "board" && !groupByCompany) {
+  // Flat = virtualized path (Dashboard's primary rendering mode)
+  if (!groupByCompany) {
     return (
       <JobTableBoard
         jobs={jobs}
@@ -920,8 +918,7 @@ export default function JobTable({
   return (
     <div className={wrapClass}>
       <table className={tableClass}>
-        {variant === "board" && (
-          <colgroup>
+        <colgroup>
             <col className="col-check" />
             <col className="col-num" />
             <col className="col-company" />
@@ -932,7 +929,6 @@ export default function JobTable({
             <col className="col-posted" />
             <col className="col-actions" />
           </colgroup>
-        )}
         <thead>
           <tr>
             <th className="job-table-check job-table-check--head">
@@ -947,7 +943,7 @@ export default function JobTable({
               ) : null}
             </th>
             <th>#</th>
-            {variant === "board" && onSortColumn ? (
+            {onSortColumn ? (
               <>
                 <SortableHeader label="Company" column="company" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />
                 <SortableHeader label="Role" column="title" sortBy={sortBy} sortDir={sortDir} onSort={onSortColumn} />

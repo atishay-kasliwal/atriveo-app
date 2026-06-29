@@ -870,7 +870,6 @@ export default function Dashboard() {
           onQueueUrgent={(job, resumeSlot) => tailorQueue.enqueueJob(job, "manual", true, resumeSlot)}
           onOpenTailorPath={handleOpenTailorPath}
           onDismissJob={handleDismissJob}
-          variant="board"
           sortBy={sortBy}
           sortDir={sortDir}
           onSortColumn={handleSortColumn}
@@ -1006,7 +1005,6 @@ export default function Dashboard() {
               />
 
               <BulkJobCopyBar
-                variant="board"
                 selectedCount={jobSelection.selectedCount}
                 visibleCount={displayedJobs.length}
                 copyMessage={jobSelection.copyMessage}

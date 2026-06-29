@@ -224,7 +224,6 @@ export default function Weekly() {
         ) : (
           <JobTable
             jobs={filtered}
-            variant="board"
             groupByCompany={false}
             getRecord={getRecord}
             onAddToTracker={recordClick}

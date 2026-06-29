@@ -140,7 +140,6 @@ export default function Unclicked100() {
         ) : (
           <JobTable
             jobs={filtered}
-            variant="board"
             groupByCompany={false}
             getRecord={getRecord}
             onAddToTracker={recordClick}
