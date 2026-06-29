@@ -190,7 +190,6 @@ export default function Dashboard() {
   const [termFilter, setTermFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [showTodayApplications, setShowTodayApplications] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
   const [feedRefreshNotice, setFeedRefreshNotice] = useState("");
@@ -692,11 +691,7 @@ export default function Dashboard() {
     }
   }, [jobSelection.tailorRun, displayedJobs, markTailorStatus, getTailorRecordForJob]);
 
-  const ngCount = displayedJobs.filter((j) => j.level === "New Grad").length;
-  const selectedRun = useMemo(
-    () => runCards.find((r) => r.session_id === selectedSession) || null,
-    [runCards, selectedSession],
-  );
+
   const todayPostingsCount = pipelineKpis?.today.postings ?? todayJobs.length;
   const todayResumesCount = pipelineKpis?.today.resumes ?? 0;
   const hourPostingsCount = pipelineKpis?.hour.postings ?? hourJobs.length;
@@ -1041,189 +1036,6 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      ) : (
-      <div className="wrapper page-shell page-shell-wide dashboard-shell">
-        <aside className="dashboard-info-rail" aria-label="Dashboard context">
-          <section className={`today-apps-panel${showTodayApplications ? " is-open" : ""}`} aria-label="Today applications">
-            <button
-              type="button"
-              className="today-apps-button"
-              onClick={() => setShowTodayApplications((value) => !value)}
-              aria-expanded={showTodayApplications}
-            >
-              <span className="today-apps-copy">
-                <span className="today-apps-kicker">Today</span>
-                <strong>Applications</strong>
-                <small>{todayApplicationRows.length ? "Review everything you touched today" : "No applications logged yet"}</small>
-              </span>
-              <span className="today-apps-count">{todayApplicationRows.length}</span>
-            </button>
-
-            {showTodayApplications && (
-              <div className="today-apps-list">
-                {todayApplicationRows.length === 0 ? (
-                  <div className="today-apps-empty">Apply to a role, then it will appear here.</div>
-                ) : todayApplicationRows.map((item) => (
-                  <a className="today-app-row" href={item.url} target="_blank" rel="noopener" key={item.url}>
-                    <span className="today-app-row-main">
-                      <strong>{item.company}</strong>
-                      <small>{item.title}</small>
-                    </span>
-                    <span className="today-app-row-meta">
-                      <span>{formatRunTime(item.appliedAt)}</span>
-                      <span>{item.trackerSyncStatus === "synced" || item.trackerSyncStatus === "duplicate" ? "Synced" : `${item.clicks}×`}</span>
-                    </span>
-                  </a>
-                ))}
-                <button
-                  type="button"
-                  className="today-apps-feed-button"
-                  onClick={() => {
-                    handlePeriodChange("today");
-                    setSearchParams((p) => { const n = new URLSearchParams(p); n.delete("session"); return n; }, { replace: true });
-                    setTermFilter("all");
-                    setShowTodayApplications(false);
-                  }}
-                >
-                  Open today feed →
-                </button>
-              </div>
-              )}
-          </section>
-
-          {/* Period tabs + sort */}
-          <div className="top-bar">
-            <div className="top-bar-main">
-              <div className="period-tabs" aria-label="Feed period">
-                {(["hour", "today", "yesterday"] as Period[]).map((p) => (
-                  <button
-                    key={p}
-                    className={`period-tab${period === p ? " active" : ""}`}
-                    onClick={() => {
-                      handlePeriodChange(p);
-                      setTermFilter("all");
-                      setSearchParams((p) => { const n = new URLSearchParams(p); n.delete("session"); return n; }, { replace: true });
-                    }}
-                  >
-                    {p === "hour" ? "This Hour" : p.charAt(0).toUpperCase() + p.slice(1)}
-                    <span className="count">
-                      {p === "hour" ? periodCounts.hour : p === "today" ? periodCounts.today : periodCounts.yesterday}
-                    </span>
-                  </button>
-                ))}
-                <a href="/weekly" className="period-tab">
-                  7 Days
-                </a>
-              </div>
-              <div className="sort-group" aria-label="Sort jobs">
-                <button className={`sort-btn${sortBy === "score" ? " active" : ""}`} onClick={() => handleSortColumn("score")}>★ CareerOps</button>
-                <button className={`sort-btn${sortBy === "time" ? " active" : ""}`} onClick={() => handleSortColumn("time")}>↓ Recent</button>
-                <button className={`sort-btn${sortBy === "ats" ? " active" : ""}`} onClick={() => handleSortColumn("ats")}>ATS</button>
-                <button className={`sort-btn${sortBy === "fit" ? " active" : ""}`} onClick={() => handleSortColumn("fit")}>Fit</button>
-              </div>
-            </div>
-            <div className="feed-summary" aria-live="polite">
-              <span className="feed-summary-primary">{displayedJobs.length} job{displayedJobs.length !== 1 ? "s" : ""}</span>
-              {ngCount > 0 && <span className="feed-summary-chip">{ngCount} New Grad</span>}
-              {selectedRun && <span className="feed-summary-chip">Run {formatRunTime(selectedRun.displayAt)}</span>}
-            </div>
-          </div>
-
-          {/* Run history strip */}
-          {runCards.length > 0 && (
-            <section className="run-strip-wrap" aria-label="Session history">
-              <div className="run-strip-head">
-                <span className="run-strip-label">Session History</span>
-                <span className="run-strip-status">
-                  {selectedRun ? `Viewing ${formatRunTime(selectedRun.displayAt)}` : `${Math.min(10, runCards.length)} recent runs`}
-                </span>
-              </div>
-              <div className="run-strip">
-              {runCards.slice(0, 10).map((r) => {
-                const isActive = selectedSession === r.session_id;
-                return (
-                  <button
-                    type="button"
-                    key={r.session_id}
-                    className={`run-card${isActive ? " active" : ""}`}
-                    aria-pressed={isActive}
-                    onClick={() => {
-                      if (isActive) {
-                        setSearchParams((p) => { const n = new URLSearchParams(p); n.delete("session"); return n; }, { replace: true });
-                      } else {
-                        setSearchParams((p) => { const n = new URLSearchParams(p); n.set("session", r.session_id); return n; }, { replace: true });
-                        if (r.targetPeriod) handlePeriodChange(r.targetPeriod);
-                        setTermFilter("all");
-                      }
-                    }}
-                  >
-                    <div className="run-card-content">
-                      <div className="run-card-head">
-                        <span className="run-card-time">{formatRunTime(r.displayAt)}</span>
-                        <span className="run-card-pill">{r.progressPct}%</span>
-                      </div>
-                      <div className="run-card-countline">
-                        <span className="run-card-clicks">{r.clickCount} clicks</span>
-                        <span className="run-card-count">{r.count} jobs</span>
-                      </div>
-                      <div className="run-card-bars" aria-hidden="true">
-                        {Array.from({ length: 24 }).map((_, i) => (
-                          <span
-                            key={i}
-                            className={`run-card-bar${i < r.segmentsActive ? " active" : ""}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-              </div>
-            </section>
-          )}
-        </aside>
-
-        <div className="dashboard-layout">
-          <div className="right-panel">
-            {feedRefreshNotice ? (
-              <div className="feed-refresh-notice" role="status">{feedRefreshNotice}</div>
-            ) : null}
-            <CompilerStatusStrip
-              queue={tailorQueue.queue}
-              processing={tailorQueue.processing}
-              runningItem={tailorQueue.runningItem}
-              doneToday={todayResumesCount}
-              failedToday={failedTodayCount}
-              tailorStatus={tailorStatus}
-              workerMode={tailorQueue.mongoAvailable !== false}
-              streamLive={tailorQueue.streamLive}
-              syncMessage={tailorQueue.syncMessage}
-            />
-            {filterBar}
-
-            <BulkJobCopyBar
-              selectedCount={jobSelection.selectedCount}
-              visibleCount={displayedJobs.length}
-              copyMessage={jobSelection.copyMessage}
-              analysisMessage={jobSelection.analysisMessage}
-              onCopy={jobSelection.copySelectedJobs}
-              onAnalyze={jobSelection.analyzeSelectedJobDescriptions}
-              onTailor={jobSelection.tailorSelectedJobs}
-              tailoring={jobSelection.tailoring}
-              onSelectVisible={jobSelection.selectVisibleJobs}
-              onClear={jobSelection.clearSelectedJobs}
-            />
-            <TailorPanel
-              run={jobSelection.tailorRun}
-              onOpenPath={jobSelection.openTailorPath}
-              onDismiss={jobSelection.clearTailorRun}
-            />
-            <BulkJobAnalysisPanel analysis={jobSelection.analysis} />
-
-            {jobListContent}
-          </div>
-        </div>
-      </div>
 
       <footer>
         <div className="wrapper">
