@@ -483,11 +483,6 @@ function JobTableRow({
             >
               {tailor.label}
             </span>
-            {board && (tailor.tone === "error" || tailor.tone === "failed") && tailorRecord?.error ? (
-              <span className="job-table-tailored-errmsg" title={tailorRecord.error}>
-                {tailorRecord.error.length > 32 ? `${tailorRecord.error.slice(0, 32)}…` : tailorRecord.error}
-              </span>
-            ) : null}
             {!board && (
               <>
                 <div className="job-table-tailored-actions">

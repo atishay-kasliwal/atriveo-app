@@ -850,8 +850,8 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .job-table--board tbody td {
-  padding: 3px 10px;
-  min-height: 30px;
+  padding: 2px 10px;
+  min-height: 26px;
   height: auto;
   border-bottom: 1px solid oklch(0.20 0.004 260);
   vertical-align: middle;
