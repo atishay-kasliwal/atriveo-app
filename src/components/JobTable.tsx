@@ -483,52 +483,56 @@ function JobTableRow({
             >
               {tailor.label}
             </span>
-            <div className="job-table-tailored-actions">
-              {tailorRecord?.pdfPath ? (
-                <button
-                  type="button"
-                  className="job-table-tailored-pdf"
-                  title="Preview PDF"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setPdfOpen(true);
-                  }}
-                >
-                  PDF
-                </button>
-              ) : (folderPath && onOpenTailorPath) ? (
-                <button
-                  type="button"
-                  className="job-table-tailored-folder"
-                  title={tailorRecord?.folder || folderPath}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenTailorPath(folderPath);
-                  }}
-                >
-                  #{formatResumeSlot(displaySlot)}
-                </button>
-              ) : null}
-              {showTailorLog && tailorRecord ? (
-                <button
-                  type="button"
-                  className="job-table-tailored-log"
-                  title="View tailor log"
-                  aria-label={`View tailor log for ${co}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setLogOpen(true);
-                  }}
-                >
-                  <span className="job-table-tailored-log-icon" aria-hidden>📋</span>
-                </button>
-              ) : null}
-            </div>
-            {folderPath ? (
-              <span className="job-table-tailored-path" title={resumePathHint}>
-                {resumePathHint}
-              </span>
-            ) : null}
+            {!board && (
+              <>
+                <div className="job-table-tailored-actions">
+                  {tailorRecord?.pdfPath ? (
+                    <button
+                      type="button"
+                      className="job-table-tailored-pdf"
+                      title="Preview PDF"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPdfOpen(true);
+                      }}
+                    >
+                      PDF
+                    </button>
+                  ) : (folderPath && onOpenTailorPath) ? (
+                    <button
+                      type="button"
+                      className="job-table-tailored-folder"
+                      title={tailorRecord?.folder || folderPath}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenTailorPath(folderPath);
+                      }}
+                    >
+                      #{formatResumeSlot(displaySlot)}
+                    </button>
+                  ) : null}
+                  {showTailorLog && tailorRecord ? (
+                    <button
+                      type="button"
+                      className="job-table-tailored-log"
+                      title="View tailor log"
+                      aria-label={`View tailor log for ${co}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLogOpen(true);
+                      }}
+                    >
+                      <span className="job-table-tailored-log-icon" aria-hidden>📋</span>
+                    </button>
+                  ) : null}
+                </div>
+                {folderPath ? (
+                  <span className="job-table-tailored-path" title={resumePathHint}>
+                    {resumePathHint}
+                  </span>
+                ) : null}
+              </>
+            )}
           </div>
           {logOpen && tailorRecord ? (
             <TailorJobLogModal record={tailorRecord} onClose={() => setLogOpen(false)} />

@@ -723,7 +723,7 @@ body.is-today-board .nav-tab.active:hover {
 .job-table--board .col-company { width: 15%; min-width: 110px; }
 .job-table--board .col-rating  { width: 120px; }
 .job-table--board .col-level   { width: 56px; }
-.job-table--board .col-tailored{ width: 110px; }
+.job-table--board .col-tailored{ width: 80px; }
 .job-table--board .col-posted  { width: 76px; }
 .job-table--board .col-actions { width: 240px; }
 
@@ -819,8 +819,8 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .job-table--board tbody td {
-  padding: 8px 10px;
-  min-height: 50px;
+  padding: 5px 10px;
+  min-height: 36px;
   height: auto;
   border-bottom: 1px solid oklch(0.20 0.004 260);
   vertical-align: middle;
@@ -948,10 +948,10 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .job-table-score-cell--board .job-table-score-num {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--board-ink);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--board-muted);
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }

@@ -29,6 +29,8 @@ export default function BulkJobCopyBar({
 
   const compact = variant === "board";
 
+  if (compact && !selectedCount) return null;
+
   return (
     <div className={`bulk-copy-bar${selectedCount ? " has-selection" : ""}${compact ? " bulk-copy-bar--board" : ""}`}>
       <div className="bulk-copy-copy">
