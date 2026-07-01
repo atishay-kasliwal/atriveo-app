@@ -1161,7 +1161,8 @@ async function main() {
   const mongoUri = process.env.MONGO_URI;
   let db: Db | null = null;
   let client: import("mongodb").MongoClient | null = null;
-  let sessionTime = now.toLocaleString("en-US", {
+  // Canonical cycle time: always the top of the hour, never the scraper's finish time.
+  const sessionTime = hourStart.toLocaleString("en-US", {
     timeZone: NY_TZ,
     month: "short", day: "numeric",
     hour: "numeric", minute: "2-digit", hour12: true,
@@ -1173,19 +1174,6 @@ async function main() {
       client = new MongoClient(mongoUri, { appName: "AtriveoMailer" });
       await client.connect();
       db = client.db("job_pipeline");
-
-      const latestSession = await db
-        .collection("sessions")
-        .findOne({ archived: false }, { sort: { run_at: -1 } });
-      if (latestSession?.run_at) {
-        const runAtRaw = latestSession.run_at;
-        const runAt = runAtRaw instanceof Date ? runAtRaw : new Date(runAtRaw as string);
-        sessionTime = runAt.toLocaleString("en-US", {
-          timeZone: NY_TZ,
-          month: "short", day: "numeric",
-          hour: "numeric", minute: "2-digit", hour12: true,
-        });
-      }
     } catch (err) {
       console.warn("MongoDB unavailable — volume trends will be empty.", (err as Error).message);
       db = null;
