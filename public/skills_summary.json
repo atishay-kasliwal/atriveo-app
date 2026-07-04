@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-07-04T08:39:07.324476+00:00",
-  "total_analyzed": 40470,
+  "generated_at": "2026-07-04T09:39:26.901328+00:00",
+  "total_analyzed": 40471,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 23208,
+        "Python": 23209,
         "Java": 11462,
-        "SQL": 10325,
+        "SQL": 10326,
         "JavaScript": 7303,
         "TypeScript": 6130,
         "HTML/CSS": 2318,
@@ -54,9 +54,9 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 11327,
+        "AWS": 11328,
         "Azure": 6577,
-        "GCP": 5897,
+        "GCP": 5898,
         "S3": 1229,
         "Lambda": 1080,
         "Serverless": 830,
@@ -81,7 +81,7 @@
         "Microservices": 3427,
         "System Design": 3135,
         "Event-Driven": 1822,
-        "Kafka": 1796,
+        "Kafka": 1797,
         "API Design": 1360,
         "Caching": 768,
         "gRPC": 582,
@@ -95,7 +95,7 @@
       "color": "#10b981",
       "skills": {
         "CI/CD": 8152,
-        "Kubernetes": 5133,
+        "Kubernetes": 5134,
         "Docker": 4848,
         "Git": 4656,
         "Linux": 3502,
@@ -114,17 +114,17 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 5683,
+        "ETL/ELT": 5684,
         "PostgreSQL": 3049,
-        "Spark": 2549,
+        "Spark": 2550,
         "Vector DB": 1950,
-        "Kafka": 1796,
+        "Kafka": 1797,
         "MySQL": 1649,
-        "Databricks": 1316,
+        "Databricks": 1317,
         "MongoDB": 1186,
-        "Snowflake": 1169,
+        "Snowflake": 1170,
         "Redis": 1043,
-        "Airflow": 1015,
+        "Airflow": 1016,
         "Elasticsearch": 639,
         "BigQuery": 487,
         "dbt": 396,
@@ -136,7 +136,7 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 11978,
+        "Machine Learning": 11979,
         "Agents": 7871,
         "LLM": 7615,
         "GenAI": 5272,
@@ -173,7 +173,7 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 10354,
+        "Cross-functional": 10355,
         "Code Review": 8079,
         "Mentorship": 7552,
         "Agile/Scrum": 6279,
