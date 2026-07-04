@@ -86,20 +86,20 @@
       "fingerprint": null,
       "lease_until": null,
       "worker_id": "atishays-mini-b516d43c",
-      "updated_at": "2026-07-04T04:35:22.592Z",
+      "updated_at": "2026-07-04T07:35:38.249Z",
       "error": "Unsupported JD \u2014 engineering confidence 0.235 (need \u2265 0.45).",
       "company": "The Ai Training Company",
       "title": "Software Engineer (Cybersecurity)",
-      "resume_slot": 12,
+      "resume_slot": 11,
       "session_hour": "00",
       "batch_time": "2026-07-04T04:03:44Z",
-      "session_id": "2026-07-04T04:03:49Z",
+      "session_id": "2026-07-04T07:04:35Z",
       "priority": 1000,
       "source": "hourly",
       "cached": false,
-      "folder": "04-35_12_software-engineer-cybersecurity",
+      "folder": "07-35_11_software-engineer-cybersecurity",
       "pdf_path": null,
-      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-07-04/the-ai-training-company/04-35_12_software-engineer-cybersecurity"
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-07-04/the-ai-training-company/07-35_11_software-engineer-cybersecurity"
     },
     "ats_score": 40,
     "fit_score": 5
@@ -123,7 +123,7 @@
     "summary": "Responsibilities include designing, developing, debugging, and optimizing high\\-performance software, collaborating with cross\\-functional teams, and participating in code reviews.",
     "title": "Full-Time Software Engineer",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4435460707",
@@ -170,20 +170,20 @@
       "fingerprint": null,
       "lease_until": null,
       "worker_id": "atishays-mini-b516d43c",
-      "updated_at": "2026-07-04T06:35:48.748Z",
+      "updated_at": "2026-07-04T07:35:38.678Z",
       "error": "Unsupported JD \u2014 engineering confidence 0.396 (need \u2265 0.45).",
       "company": "Rivian and Volkswagen Group Technologies",
       "title": "Software Engineer II, Full-Stack (Developer Productivity)",
-      "resume_slot": 12,
+      "resume_slot": 8,
       "session_hour": "00",
       "batch_time": "2026-07-04T04:03:44Z",
-      "session_id": "2026-07-04T06:04:20Z",
+      "session_id": "2026-07-04T07:04:35Z",
       "priority": 1000,
       "source": "hourly",
       "cached": false,
-      "folder": "06-35_12_software-engineer-ii-full-stack-develope",
+      "folder": "07-35_08_software-engineer-ii-full-stack-develope",
       "pdf_path": null,
-      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-07-04/rivian-and-volkswagen-group-tech/06-35_12_software-engineer-ii-full-stack-develope"
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-07-04/rivian-and-volkswagen-group-tech/07-35_08_software-engineer-ii-full-stack-develope"
     },
     "ats_score": 53,
     "fit_score": 5
@@ -369,7 +369,7 @@
     "summary": "**Description** Propio is on a mission to make communication accessible to everyone.",
     "title": "AI Engineer II - Translation",
     "ats_score": 28,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4435701963",
@@ -819,6 +819,27 @@
     "site": "linkedin",
     "summary": "At Expedia Group, we help travelers explore the world, one journey at a time.",
     "title": "Machine Learning Scientist III",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-04T07:35:37.862Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.419 (need \u2265 0.45).",
+      "company": "Expedia Group",
+      "title": "Machine Learning Scientist III",
+      "resume_slot": 1,
+      "session_hour": "03",
+      "batch_time": "2026-07-04T07:04:31Z",
+      "session_id": "2026-07-04T07:04:35Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "folder": "07-35_01_machine-learning-scientist-iii",
+      "pdf_path": null,
+      "run_dir": "/Volumes/Kasliwal v2/tailored-resumes/2026-07-04/expedia-group/07-35_01_machine-learning-scientist-iii"
+    },
     "ats_score": 30,
     "fit_score": 5
   },
