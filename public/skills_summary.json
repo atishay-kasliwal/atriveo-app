@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-07-04T02:39:05.435827+00:00",
-  "total_analyzed": 40439,
+  "generated_at": "2026-07-04T03:39:05.430519+00:00",
+  "total_analyzed": 40442,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 23194,
-        "Java": 11453,
+        "Python": 23195,
+        "Java": 11454,
         "SQL": 10318,
         "JavaScript": 7297,
         "TypeScript": 6121,
@@ -27,7 +27,7 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 6733,
+        "React": 6734,
         "PyTorch": 4072,
         "TensorFlow": 3225,
         "Node.js": 2437,
@@ -54,7 +54,7 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 11322,
+        "AWS": 11323,
         "Azure": 6575,
         "GCP": 5896,
         "S3": 1227,
@@ -75,17 +75,17 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 15686,
-        "REST API": 5908,
+        "Scalability": 15688,
+        "REST API": 5909,
         "Distributed Systems": 5734,
         "Microservices": 3424,
         "System Design": 3128,
-        "Event-Driven": 1819,
-        "Kafka": 1795,
+        "Event-Driven": 1820,
+        "Kafka": 1796,
         "API Design": 1360,
         "Caching": 768,
         "gRPC": 582,
-        "RabbitMQ": 527,
+        "RabbitMQ": 528,
         "WebSocket": 230,
         "Load Balancing": 215,
         "Service Mesh": 205
@@ -94,7 +94,7 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 8143,
+        "CI/CD": 8144,
         "Kubernetes": 5132,
         "Docker": 4845,
         "Git": 4651,
@@ -118,7 +118,7 @@
         "PostgreSQL": 3049,
         "Spark": 2548,
         "Vector DB": 1950,
-        "Kafka": 1795,
+        "Kafka": 1796,
         "MySQL": 1647,
         "Databricks": 1316,
         "MongoDB": 1186,
@@ -175,10 +175,10 @@
       "skills": {
         "Cross-functional": 10348,
         "Code Review": 8072,
-        "Mentorship": 7546,
-        "Agile/Scrum": 6273,
+        "Mentorship": 7547,
+        "Agile/Scrum": 6274,
         "Leadership": 2302,
-        "On-call": 2062
+        "On-call": 2063
       }
     }
   }
