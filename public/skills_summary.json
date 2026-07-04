@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-07-04T06:38:40.528747+00:00",
-  "total_analyzed": 40457,
+  "generated_at": "2026-07-04T07:39:21.686610+00:00",
+  "total_analyzed": 40460,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 23202,
-        "Java": 11456,
-        "SQL": 10321,
+        "Python": 23203,
+        "Java": 11457,
+        "SQL": 10322,
         "JavaScript": 7298,
         "TypeScript": 6125,
         "HTML/CSS": 2315,
@@ -17,7 +17,7 @@
         "Rust": 1490,
         "Go": 1053,
         "Bash/Shell": 929,
-        "Scala": 748,
+        "Scala": 749,
         "Ruby": 723,
         "PHP": 365,
         "C++": 15,
@@ -34,8 +34,8 @@
         "Angular": 2146,
         "LangChain": 2141,
         "Spring": 1990,
-        "Scikit-learn": 1920,
-        "Pandas": 1779,
+        "Scikit-learn": 1921,
+        "Pandas": 1780,
         "NumPy": 1437,
         "GraphQL": 1267,
         "Spring Boot": 1212,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 15697,
+        "Scalability": 15699,
         "REST API": 5914,
         "Distributed Systems": 5735,
         "Microservices": 3425,
@@ -116,7 +116,7 @@
       "skills": {
         "ETL/ELT": 5683,
         "PostgreSQL": 3049,
-        "Spark": 2548,
+        "Spark": 2549,
         "Vector DB": 1950,
         "Kafka": 1796,
         "MySQL": 1649,
@@ -136,16 +136,16 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 11977,
+        "Machine Learning": 11978,
         "Agents": 7870,
-        "LLM": 7614,
-        "GenAI": 5271,
+        "LLM": 7615,
+        "GenAI": 5272,
         "PyTorch": 4072,
         "RAG": 3557,
         "TensorFlow": 3225,
         "NLP": 3101,
         "Prompt Eng": 2478,
-        "Deep Learning": 2462,
+        "Deep Learning": 2463,
         "Fine-tuning": 2163,
         "OpenAI": 2161,
         "LangChain": 2141,
