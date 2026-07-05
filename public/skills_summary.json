@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-07-05T20:09:10.125441+00:00",
-  "total_analyzed": 40676,
+  "generated_at": "2026-07-05T21:08:38.060423+00:00",
+  "total_analyzed": 40684,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 23340,
-        "Java": 11524,
+        "Python": 23348,
+        "Java": 11525,
         "SQL": 10355,
         "JavaScript": 7330,
-        "TypeScript": 6160,
+        "TypeScript": 6161,
         "HTML/CSS": 2323,
         "Kotlin": 2090,
         "Swift": 1813,
@@ -27,10 +27,10 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 6759,
+        "React": 6760,
         "PyTorch": 4105,
         "TensorFlow": 3253,
-        "Node.js": 2454,
+        "Node.js": 2455,
         "LangChain": 2153,
         "Angular": 2151,
         "Spring": 1996,
@@ -54,9 +54,9 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 11385,
-        "Azure": 6621,
-        "GCP": 5939,
+        "AWS": 11388,
+        "Azure": 6623,
+        "GCP": 5941,
         "S3": 1231,
         "Lambda": 1082,
         "Serverless": 835,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 15802,
+        "Scalability": 15809,
         "REST API": 5930,
         "Distributed Systems": 5763,
         "Microservices": 3449,
@@ -94,18 +94,18 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 8202,
-        "Kubernetes": 5165,
-        "Docker": 4872,
+        "CI/CD": 8203,
+        "Kubernetes": 5171,
+        "Docker": 4873,
         "Git": 4699,
         "Linux": 3508,
         "Terraform": 2050,
         "Jenkins": 1406,
         "GitHub Actions": 965,
-        "Grafana": 545,
-        "Ansible": 488,
+        "Grafana": 550,
+        "Ansible": 489,
         "Datadog": 465,
-        "Prometheus": 458,
+        "Prometheus": 463,
         "Helm": 269,
         "OpenTelemetry": 229,
         "ArgoCD": 97
@@ -136,10 +136,10 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 12037,
-        "Agents": 7907,
-        "LLM": 7660,
-        "GenAI": 5294,
+        "Machine Learning": 12039,
+        "Agents": 7912,
+        "LLM": 7666,
+        "GenAI": 5295,
         "PyTorch": 4105,
         "RAG": 3572,
         "TensorFlow": 3253,
@@ -153,7 +153,7 @@
         "Hugging Face": 981,
         "SageMaker": 704,
         "MLflow": 634,
-        "Vertex AI": 632
+        "Vertex AI": 633
       }
     },
     "Security": {
@@ -173,11 +173,11 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 10442,
-        "Code Review": 8126,
-        "Mentorship": 7589,
-        "Agile/Scrum": 6306,
-        "Leadership": 2316,
+        "Cross-functional": 10443,
+        "Code Review": 8127,
+        "Mentorship": 7590,
+        "Agile/Scrum": 6307,
+        "Leadership": 2317,
         "On-call": 2070
       }
     }
