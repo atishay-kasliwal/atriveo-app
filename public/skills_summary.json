@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-07-05T09:04:54.537129+00:00",
-  "total_analyzed": 40591,
+  "generated_at": "2026-07-05T10:08:36.434482+00:00",
+  "total_analyzed": 40592,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 23279,
+        "Python": 23280,
         "Java": 11507,
         "SQL": 10341,
         "JavaScript": 7319,
@@ -75,11 +75,11 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 15764,
+        "Scalability": 15765,
         "REST API": 5925,
-        "Distributed Systems": 5750,
+        "Distributed Systems": 5751,
         "Microservices": 3439,
-        "System Design": 3145,
+        "System Design": 3146,
         "Event-Driven": 1827,
         "Kafka": 1805,
         "API Design": 1363,
@@ -94,18 +94,18 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 8185,
-        "Kubernetes": 5148,
+        "CI/CD": 8186,
+        "Kubernetes": 5149,
         "Docker": 4861,
         "Git": 4681,
         "Linux": 3508,
-        "Terraform": 2049,
+        "Terraform": 2050,
         "Jenkins": 1404,
         "GitHub Actions": 964,
-        "Grafana": 542,
+        "Grafana": 543,
         "Ansible": 486,
         "Datadog": 465,
-        "Prometheus": 449,
+        "Prometheus": 450,
         "Helm": 269,
         "OpenTelemetry": 229,
         "ArgoCD": 97
@@ -152,7 +152,7 @@
         "Embeddings": 1117,
         "Hugging Face": 979,
         "SageMaker": 702,
-        "MLflow": 632,
+        "MLflow": 633,
         "Vertex AI": 631
       }
     },
@@ -175,7 +175,7 @@
       "skills": {
         "Cross-functional": 10406,
         "Code Review": 8109,
-        "Mentorship": 7578,
+        "Mentorship": 7579,
         "Agile/Scrum": 6299,
         "Leadership": 2313,
         "On-call": 2068
