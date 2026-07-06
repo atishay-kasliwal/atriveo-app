@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-07-06T08:39:47.622862+00:00",
-  "total_analyzed": 40776,
+  "generated_at": "2026-07-06T09:39:57.304520+00:00",
+  "total_analyzed": 40781,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 23397,
-        "Java": 11559,
-        "SQL": 10367,
-        "JavaScript": 7340,
-        "TypeScript": 6170,
+        "Python": 23400,
+        "Java": 11562,
+        "SQL": 10370,
+        "JavaScript": 7341,
+        "TypeScript": 6171,
         "HTML/CSS": 2325,
         "Kotlin": 2099,
         "Swift": 1813,
-        ".NET": 1721,
+        ".NET": 1722,
         "Rust": 1507,
         "Go": 1054,
         "Bash/Shell": 933,
@@ -27,10 +27,10 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 6770,
+        "React": 6771,
         "PyTorch": 4112,
         "TensorFlow": 3258,
-        "Node.js": 2461,
+        "Node.js": 2464,
         "LangChain": 2155,
         "Angular": 2154,
         "Spring": 1998,
@@ -55,8 +55,8 @@
       "color": "#f59e0b",
       "skills": {
         "AWS": 11418,
-        "Azure": 6635,
-        "GCP": 5951,
+        "Azure": 6636,
+        "GCP": 5952,
         "S3": 1232,
         "Lambda": 1083,
         "Serverless": 836,
@@ -75,8 +75,8 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 15841,
-        "REST API": 5937,
+        "Scalability": 15844,
+        "REST API": 5940,
         "Distributed Systems": 5779,
         "Microservices": 3451,
         "System Design": 3157,
@@ -97,7 +97,7 @@
         "CI/CD": 8212,
         "Kubernetes": 5181,
         "Docker": 4877,
-        "Git": 4707,
+        "Git": 4710,
         "Linux": 3515,
         "Terraform": 2052,
         "Jenkins": 1407,
@@ -115,7 +115,7 @@
       "color": "#f43f5e",
       "skills": {
         "ETL/ELT": 5737,
-        "PostgreSQL": 3065,
+        "PostgreSQL": 3066,
         "Spark": 2564,
         "Vector DB": 1965,
         "Kafka": 1812,
@@ -174,9 +174,9 @@
       "color": "#64748b",
       "skills": {
         "Cross-functional": 10462,
-        "Code Review": 8146,
+        "Code Review": 8150,
         "Mentorship": 7615,
-        "Agile/Scrum": 6321,
+        "Agile/Scrum": 6325,
         "Leadership": 2322,
         "On-call": 2071
       }
