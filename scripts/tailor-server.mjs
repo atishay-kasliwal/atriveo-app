@@ -16,6 +16,7 @@
  */
 import http from "node:http";
 import fs from "node:fs";
+import fsp from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import zlib from "node:zlib";
@@ -966,6 +967,13 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
 // ─── HTTP server ─────────────────────────────────────────────────────────────
 let tailorBusy = false;
 
+// /list-tailored walks the whole external drive tree (slow on exfat over
+// USB), and the dashboard polls it every few seconds. Cache briefly so
+// polling doesn't re-scan the drive on every request and stall the
+// single-threaded server.
+let listTailoredCache = null; // { at: number, resumes: [] }
+const LIST_TAILORED_CACHE_MS = 30_000;
+
 const server = http.createServer(async (req, res) => {
   // permissive CORS so the Vite dev origin can reach us
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -1124,32 +1132,41 @@ const server = http.createServer(async (req, res) => {
   // UTC/EST date boundary never hides today's runs. GET /list-tailored
   if (req.method === "GET" && pathname === "/list-tailored") {
     try {
+      const fresh = listTailoredCache && (Date.now() - listTailoredCache.at) < LIST_TAILORED_CACHE_MS;
+      if (fresh) {
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        return res.end(JSON.stringify({ ok: true, resumes: listTailoredCache.resumes, cached: true }));
+      }
+
       const out = [];
-      if (fs.existsSync(OUT_ROOT)) {
+      const rootExists = await fsp.access(OUT_ROOT).then(() => true).catch(() => false);
+      if (rootExists) {
         // Structure: OUT_ROOT/YYYY-MM-DD/company-slug/HH-MM_NN_role/
-        const dateDirs = fs.readdirSync(OUT_ROOT)
+        const rootEntries = await fsp.readdir(OUT_ROOT);
+        const dateDirs = rootEntries
           .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
           .sort().reverse().slice(0, 7);
         for (const dd of dateDirs) {
           const dateDir = path.join(OUT_ROOT, dd);
           let companyDirs;
-          try { companyDirs = fs.readdirSync(dateDir).filter((d) => !d.startsWith(".")); }
+          try { companyDirs = (await fsp.readdir(dateDir)).filter((d) => !d.startsWith(".")); }
           catch { continue; }
           for (const co of companyDirs) {
             const coDir = path.join(dateDir, co);
-            if (!fs.statSync(coDir).isDirectory()) continue;
+            try { if (!(await fsp.stat(coDir)).isDirectory()) continue; } catch { continue; }
             let folders;
-            try { folders = fs.readdirSync(coDir); }
+            try { folders = await fsp.readdir(coDir); }
             catch { continue; }
             for (const folder of folders) {
               const dir = path.join(coDir, folder);
               const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
-              if (!fs.existsSync(pdfPath)) continue;
+              const hasPdf = await fsp.access(pdfPath).then(() => true).catch(() => false);
+              if (!hasPdf) continue;
               let meta = {};
-              try { meta = JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8")); } catch { /* none */ }
+              try { meta = JSON.parse(await fsp.readFile(path.join(dir, "meta.json"), "utf8")); } catch { /* none */ }
               const ats = readAtsFromDir(dir);
               let explain = null;
-              try { explain = JSON.parse(fs.readFileSync(path.join(dir, "explain.json"), "utf8")); } catch { /* none */ }
+              try { explain = JSON.parse(await fsp.readFile(path.join(dir, "explain.json"), "utf8")); } catch { /* none */ }
               out.push({
                 folder,
                 dateDir: dd,
@@ -1171,6 +1188,7 @@ const server = http.createServer(async (req, res) => {
       }
       // newest first by tailoredAt
       out.sort((a, b) => new Date(b.tailoredAt || 0) - new Date(a.tailoredAt || 0));
+      listTailoredCache = { at: Date.now(), resumes: out };
       res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
       return res.end(JSON.stringify({ ok: true, resumes: out }));
     } catch (e) {
@@ -1182,34 +1200,38 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "POST" && pathname === "/check-job") {
     let raw = "";
     req.on("data", (c) => (raw += c));
-    req.on("end", () => {
+    req.on("end", async () => {
       try {
         const { company, title, job_url: jobUrlRaw } = JSON.parse(raw);
         if (!company || !title) throw new Error("company and title required");
         const compSlug = slug(company, 32);
         const titleSlug = slug(title, 40);
         const jobUrl = typeof jobUrlRaw === "string" ? jobUrlRaw.trim() : "";
-        // Scan all date dirs so a valid artifact isn't missed just because it
-        // landed outside the last few days or the folder name drifted.
-        const dateDirs = fs.existsSync(OUT_ROOT)
-          ? fs.readdirSync(OUT_ROOT).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort().reverse()
+        // Scan recent date dirs (most runs land within the last week; a full
+        // history scan on every check-job call is what starves the server).
+        const rootExists = await fsp.access(OUT_ROOT).then(() => true).catch(() => false);
+        const dateDirs = rootExists
+          ? (await fsp.readdir(OUT_ROOT)).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort().reverse().slice(0, 14)
           : [];
         let best = null; let bestDir = null;
         for (const dd of dateDirs) {
           const dateDir = path.join(OUT_ROOT, dd);
           let companyDirs;
-          try { companyDirs = fs.readdirSync(dateDir).filter((d) => !d.startsWith(".")); }
+          try { companyDirs = (await fsp.readdir(dateDir)).filter((d) => !d.startsWith(".")); }
           catch { continue; }
           for (const co of companyDirs) {
             const coDir = path.join(dateDir, co);
-            if (!fs.existsSync(coDir) || !fs.statSync(coDir).isDirectory()) continue;
-            const runs = fs.readdirSync(coDir).sort().reverse();
+            try { if (!(await fsp.stat(coDir)).isDirectory()) continue; } catch { continue; }
+            let runs;
+            try { runs = (await fsp.readdir(coDir)).sort().reverse(); }
+            catch { continue; }
             for (const folder of runs) {
               const dir = path.join(coDir, folder);
               const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
-              if (!fs.existsSync(pdfPath)) continue;
+              const hasPdf = await fsp.access(pdfPath).then(() => true).catch(() => false);
+              if (!hasPdf) continue;
               let meta = {};
-              try { meta = JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8")); } catch { /* none */ }
+              try { meta = JSON.parse(await fsp.readFile(path.join(dir, "meta.json"), "utf8")); } catch { /* none */ }
 
               if (jobUrl && meta.url === jobUrl) {
                 const ats = readAtsFromDir(dir);
@@ -1242,7 +1264,7 @@ const server = http.createServer(async (req, res) => {
         }
         const dir = path.join(bestDir, best);
         const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
-        const hasPdf = fs.existsSync(pdfPath);
+        const hasPdf = await fsp.access(pdfPath).then(() => true).catch(() => false);
         const ats = readAtsFromDir(dir);
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ ok: true, found: hasPdf, pdfPath: hasPdf ? pdfPath : null, dir, folder: best, ats }));

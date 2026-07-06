@@ -108,8 +108,22 @@ function bulletText(bullet) {
   return stripBanned(bullet.text || bullet.face?.text || "");
 }
 
+// Closed set only — never the JD's raw/verbatim job title. A JD titled
+// "Software Development Engineer, AWS Agentic AI" must map to one of these,
+// not be copied onto the resume as-is.
+const VALID_HEADER_TITLES = new Set([
+  "Software Engineer",
+  "Backend Engineer",
+  "Full Stack Engineer",
+  "AI Engineer",
+  "Machine Learning Engineer",
+  "Data Engineer",
+  "Research Scientist",
+]);
+
 export function deriveHeaderTitle(jd, composition) {
-  if (composition?.narrative?.header_title) return composition.narrative.header_title;
+  const narrativeTitle = composition?.narrative?.header_title;
+  if (narrativeTitle && VALID_HEADER_TITLES.has(narrativeTitle)) return narrativeTitle;
   const hay = String(jd || "").toLowerCase();
   if (/research scientist|applied scientist/.test(hay)) return "Research Scientist";
   if (/machine learning engineer|ml engineer/.test(hay)) return "Machine Learning Engineer";

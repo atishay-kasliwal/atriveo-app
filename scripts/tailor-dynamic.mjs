@@ -81,7 +81,14 @@ EXPERIENCE STRUCTURE (FIXED — do not deviate):
 - So "experience" has EXACTLY 3 entries: role_id 0, role_id 3, and ONE of (1 or 2).
 
 PROJECTS: choose the 2 projects that best fit the JD, 2 bullets each.
-HEADER: mirror the JD's role title.
+HEADER: pick ONE title from this closed set, whichever best matches the JD's actual domain. Never copy the JD's raw job title verbatim, even if it is long or company-specific (e.g. "Software Development Engineer, AWS Agentic AI" is NOT a valid header — it maps to "AI Engineer" or "Backend Engineer"):
+- "Software Engineer" (general/ambiguous JD)
+- "Backend Engineer" (APIs, services, databases, infra-leaning)
+- "Full Stack Engineer" (frontend + backend both emphasized)
+- "AI Engineer" (LLM, agentic, generative AI, RAG)
+- "Machine Learning Engineer" (model training/serving, ML pipelines)
+- "Data Engineer" (ETL, pipelines, data platforms)
+- "Research Scientist" (research scientist / applied scientist JDs)
 SKILLS: exactly 5 lines (category + comma list), ONLY skills the candidate has, prioritized by JD relevance.
 - Make each line FULL: 6-8 items per line (the resume has space — do not leave thin 3-4 item lines). Draw from every tool in the candidate's bank bullets/tags, not just the few in the selected bullets.
 - Lead each line with the items the JD asks for, then fill with the candidate's other real, relevant tools so the section reads complete.
@@ -93,7 +100,7 @@ Return ONLY:
 {
   "eligible": <bool>,
   "no_go_reason": "<string or empty>",
-  "header_title": "<role title mirroring the JD>",
+  "header_title": "<one of: Software Engineer | Backend Engineer | Full Stack Engineer | AI Engineer | Machine Learning Engineer | Data Engineer | Research Scientist>",
   "ats_before": <int 0-100>, "ats_after": <int 0-100>,
   "experience": [ { "role_id": <int index into roles>, "bullets": [ { "id": "R<r>.<b>", "text": "<rewritten>" } ] } ],
   "projects": [ { "project_id": <int index into projects>, "bullets": [ { "id": "P<p>.<b>", "text": "<rewritten>" } ] } ],
@@ -391,9 +398,22 @@ const EDUCATION = `\\section{Education}
     \\resumeSubheading{Symbiosis University of Applied Sciences}{Indore, Madhya Pradesh}{Bachelor of Technology in Computer Science and Information Technology}{Aug. 2018 -- May 2022}
   \\resumeSubHeadingListEnd`;
 
+// Closed set only — never the JD's raw/verbatim job title, even if the
+// model ignores the prompt instruction and mirrors the JD anyway.
+const VALID_HEADER_TITLES = new Set([
+  "Software Engineer",
+  "Backend Engineer",
+  "Full Stack Engineer",
+  "AI Engineer",
+  "Machine Learning Engineer",
+  "Data Engineer",
+  "Research Scientist",
+]);
+
 // Assemble a complete one-page resume from the model's selections.
 export function assembleResume(ai, bank) {
-  const title = stripBanned(ai.header_title || "Software Engineer");
+  const rawTitle = stripBanned(ai.header_title || "Software Engineer");
+  const title = VALID_HEADER_TITLES.has(rawTitle) ? rawTitle : "Software Engineer";
   const header = `\\begin{center}
     \\textbf{\\Huge \\scshape Atishay Kasliwal} \\\\ \\vspace{1pt}
     \\small ${esc(title)} $|$ 934-246-1198 $|$ \\href{mailto:katishay@gmail.com}{katishay@gmail.com} $|$
