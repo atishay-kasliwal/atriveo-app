@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-07-06T09:39:57.304520+00:00",
-  "total_analyzed": 40781,
+  "generated_at": "2026-07-06T10:40:36.413559+00:00",
+  "total_analyzed": 40784,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 23400,
+        "Python": 23401,
         "Java": 11562,
         "SQL": 10370,
         "JavaScript": 7341,
         "TypeScript": 6171,
-        "HTML/CSS": 2325,
+        "HTML/CSS": 2326,
         "Kotlin": 2099,
         "Swift": 1813,
         ".NET": 1722,
@@ -31,15 +31,15 @@
         "PyTorch": 4112,
         "TensorFlow": 3258,
         "Node.js": 2464,
-        "LangChain": 2155,
+        "LangChain": 2156,
         "Angular": 2154,
-        "Spring": 1998,
+        "Spring": 1999,
         "Scikit-learn": 1936,
         "Pandas": 1787,
         "NumPy": 1442,
         "GraphQL": 1273,
         "Spring Boot": 1216,
-        "FastAPI": 1150,
+        "FastAPI": 1151,
         "Express": 1120,
         "Next.js": 1046,
         "Django": 987,
@@ -54,7 +54,7 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 11418,
+        "AWS": 11419,
         "Azure": 6636,
         "GCP": 5952,
         "S3": 1232,
@@ -75,10 +75,10 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 15844,
+        "Scalability": 15845,
         "REST API": 5940,
         "Distributed Systems": 5779,
-        "Microservices": 3451,
+        "Microservices": 3452,
         "System Design": 3157,
         "Event-Driven": 1829,
         "Kafka": 1812,
@@ -138,7 +138,7 @@
       "skills": {
         "Machine Learning": 12064,
         "Agents": 7924,
-        "LLM": 7682,
+        "LLM": 7683,
         "GenAI": 5303,
         "PyTorch": 4112,
         "RAG": 3575,
@@ -147,8 +147,8 @@
         "Prompt Eng": 2488,
         "Deep Learning": 2481,
         "OpenAI": 2184,
-        "Fine-tuning": 2176,
-        "LangChain": 2155,
+        "Fine-tuning": 2177,
+        "LangChain": 2156,
         "Embeddings": 1119,
         "Hugging Face": 985,
         "SageMaker": 704,
@@ -173,7 +173,7 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 10462,
+        "Cross-functional": 10463,
         "Code Review": 8150,
         "Mentorship": 7615,
         "Agile/Scrum": 6325,
