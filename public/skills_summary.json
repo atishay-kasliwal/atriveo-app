@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-07-06T03:38:20.019461+00:00",
-  "total_analyzed": 40755,
+  "generated_at": "2026-07-06T04:38:16.007132+00:00",
+  "total_analyzed": 40756,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 23388,
+        "Python": 23389,
         "Java": 11553,
         "SQL": 10364,
         "JavaScript": 7337,
@@ -32,7 +32,7 @@
         "TensorFlow": 3257,
         "Node.js": 2459,
         "Angular": 2154,
-        "LangChain": 2153,
+        "LangChain": 2154,
         "Spring": 1998,
         "Scikit-learn": 1936,
         "Pandas": 1787,
@@ -55,7 +55,7 @@
       "color": "#f59e0b",
       "skills": {
         "AWS": 11415,
-        "Azure": 6634,
+        "Azure": 6635,
         "GCP": 5951,
         "S3": 1232,
         "Lambda": 1083,
@@ -94,10 +94,10 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 8210,
+        "CI/CD": 8211,
         "Kubernetes": 5176,
         "Docker": 4875,
-        "Git": 4703,
+        "Git": 4704,
         "Linux": 3514,
         "Terraform": 2051,
         "Jenkins": 1406,
@@ -137,7 +137,7 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 12060,
-        "Agents": 7921,
+        "Agents": 7922,
         "LLM": 7682,
         "GenAI": 5302,
         "PyTorch": 4111,
@@ -148,7 +148,7 @@
         "Deep Learning": 2480,
         "OpenAI": 2183,
         "Fine-tuning": 2176,
-        "LangChain": 2153,
+        "LangChain": 2154,
         "Embeddings": 1119,
         "Hugging Face": 985,
         "SageMaker": 704,
@@ -173,10 +173,10 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 10461,
+        "Cross-functional": 10462,
         "Code Review": 8144,
         "Mentorship": 7613,
-        "Agile/Scrum": 6316,
+        "Agile/Scrum": 6317,
         "Leadership": 2321,
         "On-call": 2071
       }
