@@ -26,7 +26,12 @@ if [ ! -f "$APP_DIR/.env" ]; then
   exit 1
 fi
 
-run_with_timeout 180 "$NODE_BIN" --env-file="$APP_DIR/.env" "$APP_DIR/scripts/resume-enqueue.mjs" --limit="$LIMIT" >> "$LOG" 2>&1
+ENV_FILE_ARGS=(--env-file="$APP_DIR/.env")
+if [ -f "$APP_DIR/.env.tailor" ]; then
+  ENV_FILE_ARGS+=(--env-file="$APP_DIR/.env.tailor")
+fi
+
+run_with_timeout 180 "$NODE_BIN" "${ENV_FILE_ARGS[@]}" "$APP_DIR/scripts/resume-enqueue.mjs" --limit="$LIMIT" >> "$LOG" 2>&1
 STATUS=$?
 echo "[$(ts)] resume:enqueue exit=$STATUS" >> "$LOG"
 echo "[$(ts)] === resume-sync done ===" >> "$LOG"

@@ -84,7 +84,7 @@ const DEFAULT_MODEL = "gemma4:12b";
 const USE_LEGACY = process.env.TAILOR_LEGACY === "1";
 const AC_PLANNER = process.env.TAILOR_PLANNER?.trim() || "v2";
 const AC_LEARN = process.env.TAILOR_LEARN === "1";
-const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || "/Volumes/Kasliwal v2/tailored-resumes";
+const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || path.join(os.homedir(), "Documents", "tailored-resumes");
 const TEMPLATE =
   "/Users/atishaykasliwal/atriveo-app/resume-engine/tailored/2026-06-12/04-veryai-fullstack-engineer/resume.tex";
 
@@ -1475,13 +1475,15 @@ const server = http.createServer(async (req, res) => {
           const body = JSON.parse(raw || "{}");
           const jobs = Array.isArray(body.jobs) ? body.jobs : [];
           if (!jobs.length) throw new Error("jobs array required");
+          const BATCH_CAP = 50;
+          const truncated = jobs.length > BATCH_CAP ? jobs.length - BATCH_CAP : 0;
           const results = await withMongo(
-            (db) => enqueueJobs(db, jobs.slice(0, 50), { force: body.force === true }),
+            (db) => enqueueJobs(db, jobs.slice(0, BATCH_CAP), { force: body.force === true }),
             { appName: "AtriveoTailorServer" },
           );
           const enqueued = results.filter((r) => !r.skipped).length;
           res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ ok: true, enqueued, results }));
+          res.end(JSON.stringify({ ok: true, enqueued, results, truncated }));
         } catch (e) {
           res.writeHead(400, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));

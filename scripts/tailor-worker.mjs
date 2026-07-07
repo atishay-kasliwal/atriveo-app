@@ -10,8 +10,8 @@
  *
  * Env:
  *   WORKER_ID          — override stable id (default: ~/.atriveo/worker-id)
- *   WORKER_REQUIRE_DRIVE=0 — claim jobs even without external drive (not recommended)
- *   TAILOR_OUT_ROOT    — PDF output root (must match across machines sharing a drive)
+ *   WORKER_REQUIRE_DRIVE=0 — claim jobs even without the output root present (not recommended)
+ *   TAILOR_OUT_ROOT    — PDF output root (must match across machines sharing storage)
  *   ARTIFACTS_ROOT     — manifest cache root
  */
 
@@ -42,7 +42,7 @@ import {
 
 dotenv.config();
 
-const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || "/Volumes/Kasliwal v2/tailored-resumes";
+const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || path.join(os.homedir(), "Documents", "tailored-resumes");
 const POLL_MS = Number(process.env.WORKER_POLL_MS || 30_000);
 const LEASE_SEC = Number(process.env.WORKER_LEASE_SEC || 900);
 const HEARTBEAT_MS = Number(process.env.WORKER_HEARTBEAT_MS || 30_000);

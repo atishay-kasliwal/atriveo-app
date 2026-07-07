@@ -201,8 +201,9 @@ async function checkSidecar() {
       const mongo = h.mongo ? "mongo ok" : "mongo not configured";
       ok("Sidecar healthy", `${h.pipeline === "legacy" ? "legacy" : `ac/${h.planner || "v2"}`} · drive ${h.driveMounted ? "ok" : "MISSING"} · ${mongo}`);
       if (!h.driveMounted) {
-        const root = h.outRoot || "/Volumes/Kasliwal v2";
-        bad(root.startsWith("/Volumes/") ? "External drive not mounted" : "Output root missing", root, root.startsWith("/Volumes/") ? "plug in drive" : `mkdir -p "${root}"`);
+        const root = h.outRoot || "output root";
+        const isDrive = root.startsWith("/Volumes/");
+        bad(isDrive ? "External drive not mounted" : "Output root missing", root, isDrive ? "plug in drive" : `mkdir -p "${root}"`);
       }
     }
   } catch (e) {

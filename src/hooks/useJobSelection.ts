@@ -48,11 +48,16 @@ async function assertTailorServerReady(): Promise<void> {
     const data = await res.json();
     if (!data.ok) throw new Error("unreachable");
     if (!data.driveMounted) {
-      throw new Error('External drive not mounted. Plug in "Kasliwal v2" and retry.');
+      const root = typeof data.outRoot === "string" ? data.outRoot : null;
+      throw new Error(
+        root && !root.startsWith("/Volumes/")
+          ? `Resume output folder not found: ${root}`
+          : 'External drive not mounted. Plug in "Kasliwal v2" and retry.',
+      );
     }
   } catch (e) {
     const msg = (e as Error).message || String(e);
-    if (msg.includes("drive") || msg.includes("relay not configured")) throw e;
+    if (msg.includes("drive") || msg.includes("output folder") || msg.includes("relay not configured")) throw e;
     throw new Error(tailorUnavailableMessage());
   }
 }

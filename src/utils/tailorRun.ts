@@ -78,7 +78,12 @@ export async function assertTailorServerReady(signal?: AbortSignal): Promise<voi
   const data = await res.json();
   if (!data.ok) throw new Error(tailorUnavailableMessage());
   if (!data.driveMounted) {
-    throw new Error('External drive not mounted. Plug in "Kasliwal v2" and retry.');
+    const root = typeof data.outRoot === "string" ? data.outRoot : null;
+    throw new Error(
+      root && !root.startsWith("/Volumes/")
+        ? `Resume output folder not found: ${root}`
+        : 'External drive not mounted. Plug in "Kasliwal v2" and retry.',
+    );
   }
 }
 

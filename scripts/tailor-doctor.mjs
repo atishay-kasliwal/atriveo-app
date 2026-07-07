@@ -14,13 +14,14 @@
  * Node built-ins only (+ the export script's own logic for the JD check).
  */
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const JD_DIR = path.join(ROOT, "public", "job_descriptions");
 const DRIVE_ROOT = "/Volumes/Kasliwal v2";
-const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || path.join(DRIVE_ROOT, "tailored-resumes");
+const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || path.join(os.homedir(), "Documents", "tailored-resumes");
 const USES_EXTERNAL_DRIVE = OUT_ROOT.startsWith("/Volumes/");
 const OLLAMA = "http://127.0.0.1:11434";
 const SIDECAR = "http://127.0.0.1:8787";

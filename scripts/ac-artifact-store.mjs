@@ -1,6 +1,7 @@
 // Immutable artifact dirs keyed by compile fingerprint + manifest.json checkpoints.
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { computeFingerprint } from "./ac-fingerprint.mjs";
@@ -18,7 +19,7 @@ export const COMPILE_STAGES = [
   "SUCCESS",
 ];
 
-const DEFAULT_ARTIFACTS_ROOT = "/Volumes/Kasliwal v2/artifacts";
+const DEFAULT_ARTIFACTS_ROOT = path.join(os.homedir(), "Documents", "artifacts");
 
 export function getArtifactsRoot() {
   return process.env.ARTIFACTS_ROOT?.trim() || DEFAULT_ARTIFACTS_ROOT;

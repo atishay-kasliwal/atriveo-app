@@ -526,9 +526,21 @@ export default function Dashboard() {
   });
   const jobSelection = useJobSelection(displayedJobs, {
     onCompileSelected: (selected) => {
-      for (const job of selected) {
-        tailorQueue.enqueueJob(job, "manual", true);
-      }
+      // Large "select all" batches (hundreds of jobs) would otherwise fire
+      // one concurrent HTTP request per job, which can overwhelm the tunnel
+      // and silently drop requests. Stagger in small chunks instead.
+      const ENQUEUE_BATCH_SIZE = 8;
+      const ENQUEUE_BATCH_DELAY_MS = 150;
+      let i = 0;
+      const runNextBatch = () => {
+        const batch = selected.slice(i, i + ENQUEUE_BATCH_SIZE);
+        for (const job of batch) {
+          tailorQueue.enqueueJob(job, "manual", true);
+        }
+        i += ENQUEUE_BATCH_SIZE;
+        if (i < selected.length) setTimeout(runNextBatch, ENQUEUE_BATCH_DELAY_MS);
+      };
+      runNextBatch();
     },
   });
 
