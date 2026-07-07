@@ -12,8 +12,10 @@ import dotenv from "dotenv";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
 const envPath = path.join(ROOT, ".env");
+const tailorEnvPath = path.join(ROOT, ".env.tailor");
 
 dotenv.config({ path: envPath, override: true });
+if (fs.existsSync(tailorEnvPath)) dotenv.config({ path: tailorEnvPath, override: true });
 
 if (!process.env.MONGO_URI?.trim()) {
   console.error("Missing MONGO_URI in .env — worker cannot start.");
@@ -26,7 +28,9 @@ let child = null;
 let stopping = false;
 
 function startWorker() {
-  child = spawn(process.execPath, [`--env-file=${envPath}`, workerScript], {
+  const envFileArgs = [`--env-file=${envPath}`];
+  if (fs.existsSync(tailorEnvPath)) envFileArgs.push(`--env-file=${tailorEnvPath}`);
+  child = spawn(process.execPath, [...envFileArgs, workerScript], {
     cwd: ROOT,
     env: {
       ...process.env,
