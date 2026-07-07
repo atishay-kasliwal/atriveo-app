@@ -57,8 +57,11 @@ ok &&= await check("Local sidecar", async () => {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
   if (!data.ok) throw new Error("not ok");
-  if (!data.driveMounted) throw new Error('drive "Kasliwal v2" not mounted');
-  return "drive mounted";
+  if (!data.driveMounted) {
+    const root = data.outRoot || "output root";
+    throw new Error(root.startsWith("/Volumes/") ? `drive "Kasliwal v2" not mounted` : `${root} missing`);
+  }
+  return "output root ok";
 });
 
 ok &&= await check(`DNS ${HOSTNAME}`, () => {

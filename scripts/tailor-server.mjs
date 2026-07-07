@@ -84,7 +84,7 @@ const DEFAULT_MODEL = "gemma4:12b";
 const USE_LEGACY = process.env.TAILOR_LEGACY === "1";
 const AC_PLANNER = process.env.TAILOR_PLANNER?.trim() || "v2";
 const AC_LEARN = process.env.TAILOR_LEARN === "1";
-const OUT_ROOT = "/Volumes/Kasliwal v2/tailored-resumes";
+const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || "/Volumes/Kasliwal v2/tailored-resumes";
 const TEMPLATE =
   "/Users/atishaykasliwal/atriveo-app/resume-engine/tailored/2026-06-12/04-veryai-fullstack-engineer/resume.tex";
 
@@ -1597,6 +1597,9 @@ server.listen(PORT, "127.0.0.1", () => {
   log(`output → ${OUT_ROOT}`);
   log(`pipeline → ${USE_LEGACY ? `legacy (gemma ${DEFAULT_MODEL})` : `ac (planner ${AC_PLANNER})`}`);
   if (USE_LEGACY) log(`template → ${TEMPLATE}`);
-  log(`drive mounted: ${fs.existsSync(path.dirname(OUT_ROOT)) ? "YES" : "NO — plug in 'Kasliwal v2'"}`);
+  const usesExternalDrive = OUT_ROOT.startsWith("/Volumes/");
+  log(usesExternalDrive
+    ? `drive mounted: ${fs.existsSync(path.dirname(OUT_ROOT)) ? "YES" : "NO — plug in the external drive"}`
+    : `output root: ${fs.existsSync(OUT_ROOT) ? "OK" : "MISSING — create it first"}`);
   void os; // reserved
 });

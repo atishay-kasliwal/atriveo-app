@@ -200,7 +200,10 @@ async function checkSidecar() {
     if (h.ok) {
       const mongo = h.mongo ? "mongo ok" : "mongo not configured";
       ok("Sidecar healthy", `${h.pipeline === "legacy" ? "legacy" : `ac/${h.planner || "v2"}`} · drive ${h.driveMounted ? "ok" : "MISSING"} · ${mongo}`);
-      if (!h.driveMounted) bad("External drive not mounted", "/Volumes/Kasliwal v2", "plug in drive");
+      if (!h.driveMounted) {
+        const root = h.outRoot || "/Volumes/Kasliwal v2";
+        bad(root.startsWith("/Volumes/") ? "External drive not mounted" : "Output root missing", root, root.startsWith("/Volumes/") ? "plug in drive" : `mkdir -p "${root}"`);
+      }
     }
   } catch (e) {
     bad("Sidecar unreachable", e.message, "npm run tailor  or  launchctl kickstart -k gui/$(id -u)/com.atriveo.tailor");

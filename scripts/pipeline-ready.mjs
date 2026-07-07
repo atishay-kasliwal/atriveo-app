@@ -34,5 +34,5 @@ console.log(`
 ✓ Ready. Tomorrow:
   1. Open Dashboard → filter Tailored: Done
   2. PDF opens resume on your Mac · Apply opens LinkedIn (tracker syncs automatically)
-  3. Keep Mac awake overnight + Kasliwal v2 mounted for hourly compiles
+  3. Keep Mac awake overnight for hourly compiles
 `);

@@ -20,7 +20,8 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const JD_DIR = path.join(ROOT, "public", "job_descriptions");
 const DRIVE_ROOT = "/Volumes/Kasliwal v2";
-const OUT_ROOT = path.join(DRIVE_ROOT, "tailored-resumes");
+const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || path.join(DRIVE_ROOT, "tailored-resumes");
+const USES_EXTERNAL_DRIVE = OUT_ROOT.startsWith("/Volumes/");
 const OLLAMA = "http://127.0.0.1:11434";
 const SIDECAR = "http://127.0.0.1:8787";
 const DEFAULT_MODEL = "gemma4:12b";
@@ -165,7 +166,10 @@ async function checkSidecar() {
       ok("Sidecar healthy", `${mode} · drive ${h.driveMounted ? "mounted" : "NOT mounted"}`);
       legacy = h.pipeline === "legacy";
     }
-    if (!h.driveMounted) bad("External drive not mounted", DRIVE_ROOT, "plug in 'Kasliwal v2'");
+    if (!h.driveMounted) {
+      if (USES_EXTERNAL_DRIVE) bad("External drive not mounted", DRIVE_ROOT, "plug in 'Kasliwal v2'");
+      else bad("Output root missing", OUT_ROOT, `mkdir -p "${OUT_ROOT}"`);
+    }
     return legacy;
   } catch (e) {
     bad("Sidecar not running", e.message, "npm run tailor   (or: launchctl kickstart -k gui/$(id -u)/com.atriveo.tailor)");
@@ -173,11 +177,16 @@ async function checkSidecar() {
   }
 }
 
-// ── 5. Output drive ──────────────────────────────────────────────────────────
+// ── 5. Output location ───────────────────────────────────────────────────────
 function checkDrive() {
-  section("Output drive");
-  if (!fs.existsSync(DRIVE_ROOT)) { bad("Drive not mounted", DRIVE_ROOT, "plug in 'Kasliwal v2'"); return; }
-  ok("Drive mounted", DRIVE_ROOT);
+  section("Output location");
+  if (USES_EXTERNAL_DRIVE) {
+    if (!fs.existsSync(DRIVE_ROOT)) { bad("Drive not mounted", DRIVE_ROOT, "plug in 'Kasliwal v2'"); return; }
+    ok("Drive mounted", DRIVE_ROOT);
+  } else {
+    if (!fs.existsSync(OUT_ROOT)) { bad("Output root missing", OUT_ROOT, `mkdir -p "${OUT_ROOT}"`); return; }
+    ok("Output root reachable", OUT_ROOT);
+  }
   const today = new Date().toISOString().slice(0, 10);
   const dateDir = path.join(OUT_ROOT, today);
   if (fs.existsSync(dateDir)) {

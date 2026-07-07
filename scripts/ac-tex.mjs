@@ -258,7 +258,7 @@ export function prepareResumeArtifacts({ jd, composition, bank, headerTitle }) {
       maxCategories: skillsCfg.max_categories ?? SKILLS_MAX_CATEGORIES,
       useSelectedAcCorpus: skillsCfg.use_selected_ac_corpus !== false,
     });
-  const title = headerTitle || deriveHeaderTitle(jd, compact);
+  const title = (headerTitle && VALID_HEADER_TITLES.has(headerTitle)) ? headerTitle : deriveHeaderTitle(jd, compact);
   const tex = assembleAcResume(compact, { headerTitle: title, skillsLines: skills, bank });
   return { compact, skills, headerTitle: title, tex };
 }

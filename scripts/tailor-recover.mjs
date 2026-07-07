@@ -14,6 +14,8 @@ const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const LOG_PATH = path.join(os.homedir(), "Library/Logs/atriveo-tailor-recover.log");
 const LABEL = "com.atriveo.tailor";
 const DRIVE_ROOT = "/Volumes/Kasliwal v2";
+const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || path.join(DRIVE_ROOT, "tailored-resumes");
+const USES_EXTERNAL_DRIVE = OUT_ROOT.startsWith("/Volumes/");
 const SIDEcar = "http://127.0.0.1:8787/health";
 const OLLAMA_TAGS = "http://127.0.0.1:11434/api/tags";
 const DEFAULT_MODEL = "gemma4:12b";
@@ -91,8 +93,11 @@ export async function runTailorRecovery(reason = "manual") {
   const steps = [];
   log(`── Recovery start · reason: ${reason} ──`);
 
-  if (!fs.existsSync(DRIVE_ROOT)) {
-    const msg = `External drive not mounted (${DRIVE_ROOT}) — plug in drive and retry`;
+  const outputMissing = USES_EXTERNAL_DRIVE ? !fs.existsSync(DRIVE_ROOT) : !fs.existsSync(OUT_ROOT);
+  if (outputMissing) {
+    const msg = USES_EXTERNAL_DRIVE
+      ? `External drive not mounted (${DRIVE_ROOT}) — plug in drive and retry`
+      : `Output root missing (${OUT_ROOT}) — create it and retry`;
     log(`✗ ${msg}`);
     return { ok: false, steps, error: msg };
   }
