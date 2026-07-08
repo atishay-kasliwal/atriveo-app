@@ -114,6 +114,7 @@ async function processOneJob(db) {
       status: "failed",
       stage: "GATED",
       error: "JD not found or too short in Mongo descriptions",
+      failure_reason: null,
       lease_until: null,
     });
     await setWorkerIdle(db, WORKER_ID, workerProfile());
@@ -180,6 +181,10 @@ async function processOneJob(db) {
     const success = result.status === "ok" && result.pdfPath;
     const fingerprint = result.fingerprint || null;
     const manifest = fingerprint ? readManifest(fingerprint) : null;
+    // no-go and unsupported-jd are deterministic on JD content — retrying
+    // them on the next hourly sweep will never succeed. Everything else
+    // (tex-failed, ai-failed, transient errors) stays retry-eligible.
+    const isPermanentFailure = result.status === "no-go" || result.status === "unsupported-jd";
 
     await updateResumeState(db, jobUrl, {
       status: success ? "success" : "failed",
@@ -188,6 +193,7 @@ async function processOneJob(db) {
       lease_until: null,
       worker_id: WORKER_ID,
       error: success ? null : (result.error || result.status),
+      failure_reason: success ? null : (isPermanentFailure ? result.status : null),
       run_dir: result.dir || null,
       pdf_path: result.pdfPath || null,
       folder: result.folder || null,

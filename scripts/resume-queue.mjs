@@ -6,10 +6,17 @@ import { hourEtFromBatch, parseSessionHour, etDateKey, etDayBoundsUtc } from "./
 
 export { COMPILE_STAGES };
 
+// no-go and unsupported-jd are deterministic on JD content — a job marked
+// with one of these in resume.failure_reason will fail the same way every
+// time, so it's excluded from automatic re-enqueue (still force-retryable
+// manually via /compile-enqueue with force=true).
 const RESUME_ELIGIBLE_OR = [
   { resume: { $exists: false } },
   { resume: null },
-  { "resume.status": { $in: [null, "failed", "skipped"] } },
+  {
+    "resume.status": { $in: [null, "failed", "skipped"] },
+    "resume.failure_reason": { $in: [null, undefined] },
+  },
 ];
 
 const DEFAULT_PLANNER = process.env.TAILOR_PLANNER?.trim() || "v2";
@@ -428,6 +435,16 @@ export async function listCompileJobs(db, { status, limit = 50 } = {}) {
     sort: { "resume.updated_at": -1, score_pct: -1 },
     limit,
   }).toArray();
+}
+
+export async function lookupJobsByUrl(db, jobUrls) {
+  return db.collection("jobs").find(
+    { job_url: { $in: jobUrls }, "resume.pdf_path": { $exists: true, $ne: null } },
+    {
+      projection: { _id: 0, job_url: 1, company: 1, title: 1, score_pct: 1, batch_time: 1, resume: 1 },
+      sort: { "resume.updated_at": -1 },
+    },
+  ).toArray();
 }
 
 export async function cancelCompileJob(db, jobUrl) {
