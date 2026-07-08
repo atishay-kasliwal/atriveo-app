@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import TailorQueueBar from "../components/TailorQueueBar";
 import ManualTailorAssistantCard from "../components/ManualTailorAssistantCard";
+import TrackerSection from "../components/TrackerSection";
 import { useAuth } from "../hooks/useAuth";
 import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useTailorQueue } from "../hooks/useTailorQueue";
@@ -369,6 +370,12 @@ export default function ManualTailor() {
                 </button>
               </div>
             </section>
+
+            <TrackerSection
+              sessions={sessions}
+              getTrackerRecord={applyTracker.getRecord}
+              onSelectSession={setActiveSessionId}
+            />
           </main>
 
           {/* Right rail */}
