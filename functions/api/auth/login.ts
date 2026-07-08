@@ -45,7 +45,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       .setExpirationTime("7d")
       .sign(secret);
 
-    return new Response(JSON.stringify({ ok: true, name: user.name }), {
+    return new Response(JSON.stringify({ ok: true, name: user.name, token }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
