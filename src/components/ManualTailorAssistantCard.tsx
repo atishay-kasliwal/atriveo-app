@@ -1,10 +1,13 @@
+import { useState } from "react";
 import type { TailorQueueItem } from "../types/tailorQueue";
 import type { TailorRecord } from "../types/tailorQueue";
 import { formatTailorDuration, tailorFolderPath } from "../utils/tailorProgress";
 import { formatTailorLogsForCopy } from "../utils/tailorLogCapture";
 import type { ManualTailorSession } from "../utils/manualJob";
 import { tailorCellDisplay } from "../utils/tailorOutcome";
+import type { ApplyRecord, TrackerStatus } from "../hooks/useApplyTracker";
 import TailorExplainPanel from "./TailorExplainPanel";
+import TrackerAddForm from "./TrackerAddForm";
 
 interface Props {
   session: ManualTailorSession;
@@ -14,6 +17,10 @@ interface Props {
   onOpenFolder?: (path: string) => void;
   onRetry?: () => void;
   stuckQueued?: boolean;
+  trackerRecord?: ApplyRecord | null;
+  onAddToTracker?: (jobUrl: string, title: string, company: string) => void;
+  onSetTrackerStatus?: (jobUrl: string, status: TrackerStatus) => void;
+  onSetTrackerNotes?: (jobUrl: string, notes: string) => void;
 }
 
 function statusLabel(record: TailorRecord | null, queueItem: TailorQueueItem | null, queuePosition: number | null): string {
@@ -51,12 +58,18 @@ export default function ManualTailorAssistantCard({
   queuePosition,
   onOpenFolder,
   onRetry,
+  trackerRecord,
+  onAddToTracker,
+  onSetTrackerStatus,
+  onSetTrackerNotes,
 }: Props) {
+  const [trackerOpen, setTrackerOpen] = useState(false);
   const logs = record?.logs ?? [];
   const folderPath = tailorFolderPath(record);
   const tone = statusTone(record, queueItem);
   const label = statusLabel(record, queueItem, queuePosition);
   const isLive = record?.status === "running" || queueItem?.status === "running";
+  const isDone = record?.status === "done";
 
   const copyLogs = () => {
     const header = `${session.company} · ${session.title}\n${label}\n`;
@@ -109,13 +122,35 @@ export default function ManualTailorAssistantCard({
               Open folder
             </button>
           ) : null}
-          {record?.status === "done" ? (
+          {isDone ? (
             <button type="button" className="manual-tailor-foot-btn manual-tailor-foot-btn--ghost" onClick={copyLogs}>
               Copy log
             </button>
           ) : null}
+          {isDone && onAddToTracker ? (
+            <button
+              type="button"
+              className="manual-tailor-foot-btn manual-tailor-foot-btn--ghost"
+              onClick={() => setTrackerOpen((v) => !v)}
+            >
+              {trackerRecord ? "Edit tracker entry" : "Add to tracker"}
+            </button>
+          ) : null}
         </div>
       </footer>
+
+      {isDone && trackerOpen && onAddToTracker && onSetTrackerStatus && onSetTrackerNotes ? (
+        <TrackerAddForm
+          jobUrl={session.jobKey}
+          defaultCompany={session.company}
+          defaultTitle={session.title}
+          trackerRecord={trackerRecord ?? null}
+          onAddToTracker={onAddToTracker}
+          onSetTrackerStatus={onSetTrackerStatus}
+          onSetTrackerNotes={onSetTrackerNotes}
+          onClose={() => setTrackerOpen(false)}
+        />
+      ) : null}
     </article>
   );
 }

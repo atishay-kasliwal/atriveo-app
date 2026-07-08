@@ -3,6 +3,7 @@ import AppHeader from "../components/AppHeader";
 import TailorQueueBar from "../components/TailorQueueBar";
 import ManualTailorAssistantCard from "../components/ManualTailorAssistantCard";
 import { useAuth } from "../hooks/useAuth";
+import { useApplyTracker } from "../hooks/useApplyTracker";
 import { useTailorQueue } from "../hooks/useTailorQueue";
 import { useTailorStatus } from "../hooks/useTailorStatus";
 import type { Job } from "../types";
@@ -69,6 +70,7 @@ export default function ManualTailor() {
   }, [authLoading, uid]);
 
   const tailorStatus = useTailorStatus();
+  const applyTracker = useApplyTracker();
 
   const processQueueJob = useCallback(async (job: Job) => {
     const onEvent = buildTailorStreamHandler(tailorStatus, job);
@@ -291,6 +293,10 @@ export default function ManualTailor() {
                 onOpenFolder={handleOpenFolder}
                 onRetry={isStuckQueued ? handleRetrySession : undefined}
                 stuckQueued={isStuckQueued}
+                trackerRecord={applyTracker.getRecord(activeSession.jobKey)}
+                onAddToTracker={applyTracker.recordClick}
+                onSetTrackerStatus={applyTracker.setTrackerStatus}
+                onSetTrackerNotes={applyTracker.setTrackerNotes}
               />
             )}
 

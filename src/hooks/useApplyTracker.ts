@@ -36,6 +36,7 @@ export interface ApplyRecord {
   trackerSyncedAt: string | null;
   interviewAt: string | null;
   offerStatus: OfferStatus;
+  notes: string | null;
 }
 
 interface ApplyStats {
@@ -85,6 +86,7 @@ function normalizeJobs(raw: unknown): Record<string, ApplyRecord> {
       trackerSyncedAt: r.trackerSyncedAt ? String(r.trackerSyncedAt) : null,
       interviewAt: r.interviewAt ? String(r.interviewAt) : null,
       offerStatus,
+      notes: r.notes ? String(r.notes) : null,
     };
   }
   return result;
@@ -438,6 +440,7 @@ export function useApplyTracker() {
             trackerSyncedAt: existing?.trackerSyncedAt ?? null,
             interviewAt: existing?.interviewAt ?? null,
             offerStatus: existing?.offerStatus ?? null,
+            notes: existing?.notes ?? null,
           },
         },
       };
@@ -460,6 +463,23 @@ export function useApplyTracker() {
         appliedJobs: {
           ...prev.appliedJobs,
           [jobUrl]: { ...existing, trackerStatus: status },
+        },
+      };
+      persist(uid, next);
+      syncSnapshot(next);
+      return next;
+    });
+  }, [syncSnapshot, uid]);
+
+  const setTrackerNotes = useCallback((jobUrl: string, notes: string) => {
+    setStats((prev) => {
+      const existing = prev.appliedJobs[jobUrl];
+      if (!existing) return prev;
+      const next: ApplyStats = {
+        ...prev,
+        appliedJobs: {
+          ...prev.appliedJobs,
+          [jobUrl]: { ...existing, notes: notes.trim() || null },
         },
       };
       persist(uid, next);
@@ -496,5 +516,5 @@ export function useApplyTracker() {
     return syncSnapshot(stats, scope);
   }, [stats, syncSnapshot, uid]);
 
-  return { stats, recordClick, getRecord, setTrackerStatus, updatePipelineStage, syncState, syncNow };
+  return { stats, recordClick, getRecord, setTrackerStatus, setTrackerNotes, updatePipelineStage, syncState, syncNow };
 }

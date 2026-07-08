@@ -48,6 +48,7 @@ type ApplyRecord = {
   jobApplicationId?: string | null;
   job_application_id?: string | null;
   trackerStatus?: "applied" | "rejected" | null;
+  notes?: string | null;
 };
 
 type ApplyStats = {
@@ -168,7 +169,7 @@ async function syncApplicationToTracker(
     job_link: entry.jobUrl,
     keyword_match: "Medium",
     referral: "No",
-    notes: "Applied from Atriveo Job Platform.",
+    notes: entry.record.notes?.trim() || "Applied from Atriveo Job Platform.",
   };
   if (jobApplicationId) application.job_application_id = jobApplicationId;
 

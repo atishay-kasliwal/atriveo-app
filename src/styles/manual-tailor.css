@@ -7,7 +7,7 @@
 }
 
 .manual-tailor-viewport {
-  max-width: 1280px;
+  max-width: 1536px;
   margin: 0 auto;
   padding: 16px 20px 40px;
   display: flex;
@@ -1037,5 +1037,74 @@
   .mt-compose-head {
     flex-direction: column;
     gap: 4px;
+  }
+}
+
+/* ── Tracker form (inside assistant card) ──────────────────────────────── */
+
+.tracker-form {
+  border-top: 1px solid var(--border-col);
+  background: var(--card-bg);
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tracker-form-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-fg);
+  font-family: var(--font-mono);
+}
+
+.tracker-form-close {
+  border: none;
+  background: none;
+  color: var(--muted-fg);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.tracker-form-close:hover {
+  color: var(--foreground);
+}
+
+.tracker-form-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted-fg);
+  background: var(--secondary-bg);
+  border: 1px solid var(--border-col);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.tracker-form-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.tracker-form-notes textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.tracker-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .tracker-form-fields {
+    grid-template-columns: 1fr;
   }
 }
