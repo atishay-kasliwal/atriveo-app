@@ -18,8 +18,8 @@ const NON_ENGINEERING_SIGNALS = [
   { re: /\b(retail sales|cashier|barista|warehouse associate)\b/i, w: 0.2 },
 ];
 
-export const SUPPORTED_THRESHOLD = 0.55;
-export const BORDERLINE_THRESHOLD = 0.45;
+export const SUPPORTED_THRESHOLD = 0.45;
+export const BORDERLINE_THRESHOLD = 0.30;
 const THRESHOLD = SUPPORTED_THRESHOLD;
 
 export function engineeringConfidence(jd) {

@@ -35,7 +35,7 @@ import { buildSkillsLines, capSkillsLineToOnePhysicalLine } from "./skills-libra
 import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
-import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis } from "./resume-queue.mjs";
+import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl } from "./resume-queue.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
 import { listActiveWorkers } from "./worker-registry.mjs";
 
@@ -1393,7 +1393,7 @@ const server = http.createServer(async (req, res) => {
       try {
         if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
         const status = reqUrl.searchParams.get("status") || undefined;
-        const limit = Math.min(Number(reqUrl.searchParams.get("limit") || 50), 200);
+        const limit = Math.min(Number(reqUrl.searchParams.get("limit") || 50), 2000);
         const jobs = await withMongo((db) => listCompileJobs(db, { status, limit }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify({ ok: true, jobs }));
@@ -1402,6 +1402,30 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
       }
     })();
+    return;
+  }
+
+  // POST /compile-queue/lookup { urls: string[] } — fetch queue entries for specific job URLs
+  // Used by the dock to resolve already_success skips that fall outside the paginated list
+  if (req.method === "POST" && pathname === "/compile-queue/lookup") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      (async () => {
+        try {
+          if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+          const body = JSON.parse(raw || "{}");
+          const urls = Array.isArray(body.urls) ? body.urls.slice(0, 500) : [];
+          if (!urls.length) throw new Error("urls array required");
+          const jobs = await withMongo((db) => lookupJobsByUrl(db, urls), { appName: "AtriveoTailorServer" });
+          res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+          res.end(JSON.stringify({ ok: true, jobs }));
+        } catch (e) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+        }
+      })();
+    });
     return;
   }
 
