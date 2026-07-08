@@ -5,7 +5,7 @@ import { formatTailorDuration, tailorFolderPath } from "../utils/tailorProgress"
 import { formatTailorLogsForCopy } from "../utils/tailorLogCapture";
 import type { ManualTailorSession } from "../utils/manualJob";
 import { tailorCellDisplay } from "../utils/tailorOutcome";
-import type { ApplyRecord, TrackerStatus } from "../hooks/useApplyTracker";
+import type { ApplyMetadata, ApplyRecord, TrackerStatus } from "../hooks/useApplyTracker";
 import TailorExplainPanel from "./TailorExplainPanel";
 import TrackerAddForm from "./TrackerAddForm";
 
@@ -18,7 +18,7 @@ interface Props {
   onRetry?: () => void;
   stuckQueued?: boolean;
   trackerRecord?: ApplyRecord | null;
-  onAddToTracker?: (jobUrl: string, title: string, company: string) => void;
+  onAddToTracker?: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
   onSetTrackerStatus?: (jobUrl: string, status: TrackerStatus) => void;
   onSetTrackerNotes?: (jobUrl: string, notes: string) => void;
 }

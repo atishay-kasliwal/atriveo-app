@@ -9,6 +9,8 @@ export type OfferStatus = "pending" | "accepted" | "declined" | null;
 export interface ApplyMetadata {
   location?: string | null;
   jobApplicationId?: string | null;
+  trackerStatus?: TrackerStatus;
+  notes?: string | null;
 }
 
 export type ApplySyncStatus = "idle" | "syncing" | "synced" | "queued" | "error";
@@ -434,13 +436,13 @@ export function useApplyTracker() {
             company,
             location: metadata.location ?? existing?.location ?? null,
             jobApplicationId: metadata.jobApplicationId ?? existing?.jobApplicationId ?? null,
-            trackerStatus: existing?.trackerStatus ?? null,
+            trackerStatus: metadata.trackerStatus ?? existing?.trackerStatus ?? null,
             trackerSyncStatus: "pending",
             trackerSyncMessage: "Sending to Atriveo tracker…",
             trackerSyncedAt: existing?.trackerSyncedAt ?? null,
             interviewAt: existing?.interviewAt ?? null,
             offerStatus: existing?.offerStatus ?? null,
-            notes: existing?.notes ?? null,
+            notes: metadata.notes !== undefined ? (metadata.notes?.trim() || null) : (existing?.notes ?? null),
           },
         },
       };

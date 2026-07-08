@@ -1,12 +1,12 @@
 import { useState } from "react";
-import type { ApplyRecord, TrackerStatus } from "../hooks/useApplyTracker";
+import type { ApplyMetadata, ApplyRecord, TrackerStatus } from "../hooks/useApplyTracker";
 
 interface Props {
   jobUrl: string;
   defaultCompany: string;
   defaultTitle: string;
   trackerRecord: ApplyRecord | null;
-  onAddToTracker: (jobUrl: string, title: string, company: string) => void;
+  onAddToTracker: (jobUrl: string, title: string, company: string, metadata?: ApplyMetadata) => void;
   onSetTrackerStatus: (jobUrl: string, status: TrackerStatus) => void;
   onSetTrackerNotes: (jobUrl: string, notes: string) => void;
   onClose: () => void;
@@ -37,10 +37,14 @@ export default function TrackerAddForm({
 
   const handleSave = () => {
     if (!trackerRecord) {
-      onAddToTracker(jobUrl, title.trim(), company.trim());
+      // First save: create + set status/notes in one atomic update so the
+      // separate setTrackerStatus/setTrackerNotes calls (which no-op if the
+      // record doesn't exist yet) don't race the record's own creation.
+      onAddToTracker(jobUrl, title.trim(), company.trim(), { trackerStatus: status, notes });
+    } else {
+      onSetTrackerStatus(jobUrl, status);
+      onSetTrackerNotes(jobUrl, notes);
     }
-    onSetTrackerStatus(jobUrl, status);
-    onSetTrackerNotes(jobUrl, notes);
     onClose();
   };
 
