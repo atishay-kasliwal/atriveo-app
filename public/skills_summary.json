@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-07-09T10:45:33.069719+00:00",
-  "total_analyzed": 42591,
+  "generated_at": "2026-07-09T11:46:01.484850+00:00",
+  "total_analyzed": 42597,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 24436,
-        "Java": 12065,
+        "Python": 24439,
+        "Java": 12067,
         "SQL": 10794,
         "JavaScript": 7614,
         "TypeScript": 6427,
@@ -16,7 +16,7 @@
         ".NET": 1823,
         "Rust": 1593,
         "Go": 1089,
-        "Bash/Shell": 972,
+        "Bash/Shell": 974,
         "Scala": 793,
         "Ruby": 737,
         "PHP": 382,
@@ -75,9 +75,9 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 16649,
+        "Scalability": 16650,
         "REST API": 6256,
-        "Distributed Systems": 6050,
+        "Distributed Systems": 6051,
         "Microservices": 3617,
         "System Design": 3303,
         "Kafka": 1896,
@@ -94,14 +94,14 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 8664,
+        "CI/CD": 8665,
         "Kubernetes": 5420,
         "Docker": 5114,
-        "Git": 4964,
-        "Linux": 3685,
+        "Git": 4965,
+        "Linux": 3688,
         "Terraform": 2121,
-        "Jenkins": 1463,
-        "GitHub Actions": 1006,
+        "Jenkins": 1464,
+        "GitHub Actions": 1007,
         "Grafana": 582,
         "Ansible": 500,
         "Prometheus": 490,
@@ -136,17 +136,17 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 12573,
-        "Agents": 8360,
-        "LLM": 7992,
-        "GenAI": 5551,
+        "Machine Learning": 12574,
+        "Agents": 8361,
+        "LLM": 7993,
+        "GenAI": 5552,
         "PyTorch": 4313,
         "RAG": 3759,
         "TensorFlow": 3411,
         "NLP": 3217,
         "Prompt Eng": 2644,
         "Deep Learning": 2588,
-        "Fine-tuning": 2299,
+        "Fine-tuning": 2300,
         "LangChain": 2277,
         "OpenAI": 2270,
         "Embeddings": 1171,
@@ -176,8 +176,8 @@
         "Cross-functional": 10949,
         "Code Review": 8576,
         "Mentorship": 7943,
-        "Agile/Scrum": 6632,
-        "Leadership": 2442,
+        "Agile/Scrum": 6633,
+        "Leadership": 2444,
         "On-call": 2173
       }
     }
