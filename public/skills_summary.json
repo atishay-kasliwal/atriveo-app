@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-07-10T08:59:19.967344+00:00",
-  "total_analyzed": 43175,
+  "generated_at": "2026-07-10T09:44:36.247789+00:00",
+  "total_analyzed": 43182,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 24777,
-        "Java": 12210,
+        "Python": 24780,
+        "Java": 12211,
         "SQL": 10931,
-        "JavaScript": 7694,
+        "JavaScript": 7695,
         "TypeScript": 6513,
         "HTML/CSS": 2448,
         "Kotlin": 2134,
@@ -75,11 +75,11 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 16883,
+        "Scalability": 16884,
         "REST API": 6351,
         "Distributed Systems": 6128,
         "Microservices": 3672,
-        "System Design": 3373,
+        "System Design": 3374,
         "Kafka": 1935,
         "Event-Driven": 1921,
         "API Design": 1436,
@@ -94,11 +94,11 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 8812,
+        "CI/CD": 8814,
         "Kubernetes": 5476,
         "Docker": 5190,
-        "Git": 5051,
-        "Linux": 3731,
+        "Git": 5053,
+        "Linux": 3733,
         "Terraform": 2152,
         "Jenkins": 1490,
         "GitHub Actions": 1023,
@@ -114,7 +114,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 6073,
+        "ETL/ELT": 6074,
         "PostgreSQL": 3260,
         "Spark": 2746,
         "Vector DB": 2102,
@@ -136,9 +136,9 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 12756,
+        "Machine Learning": 12757,
         "Agents": 8489,
-        "LLM": 8113,
+        "LLM": 8114,
         "GenAI": 5620,
         "PyTorch": 4373,
         "RAG": 3808,
@@ -176,7 +176,7 @@
         "Cross-functional": 11126,
         "Code Review": 8703,
         "Mentorship": 8064,
-        "Agile/Scrum": 6717,
+        "Agile/Scrum": 6719,
         "Leadership": 2470,
         "On-call": 2203
       }
