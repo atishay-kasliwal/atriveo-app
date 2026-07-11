@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-11T07:06:36.406778+00:00",
-  "total_analyzed": 43885,
+  "generated_at": "2026-07-11T07:53:42.169605+00:00",
+  "total_analyzed": 43888,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
@@ -8,9 +8,9 @@
         "Python": 25190,
         "Java": 12396,
         "SQL": 11097,
-        "JavaScript": 7775,
+        "JavaScript": 7777,
         "TypeScript": 6624,
-        "HTML/CSS": 2478,
+        "HTML/CSS": 2480,
         "Kotlin": 2151,
         ".NET": 1873,
         "Swift": 1850,
@@ -32,7 +32,7 @@
         "TensorFlow": 3510,
         "Node.js": 2677,
         "LangChain": 2351,
-        "Angular": 2317,
+        "Angular": 2318,
         "Spring": 2141,
         "Scikit-learn": 2124,
         "Pandas": 1873,
@@ -75,11 +75,11 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 17166,
-        "REST API": 6480,
+        "Scalability": 17167,
+        "REST API": 6481,
         "Distributed Systems": 6219,
-        "Microservices": 3722,
-        "System Design": 3412,
+        "Microservices": 3723,
+        "System Design": 3413,
         "Kafka": 1968,
         "Event-Driven": 1961,
         "API Design": 1472,
@@ -97,7 +97,7 @@
         "CI/CD": 8974,
         "Kubernetes": 5565,
         "Docker": 5282,
-        "Git": 5124,
+        "Git": 5125,
         "Linux": 3773,
         "Terraform": 2174,
         "Jenkins": 1514,
@@ -173,10 +173,10 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 11297,
-        "Code Review": 8850,
-        "Mentorship": 8163,
-        "Agile/Scrum": 6829,
+        "Cross-functional": 11298,
+        "Code Review": 8851,
+        "Mentorship": 8164,
+        "Agile/Scrum": 6832,
         "Leadership": 2554,
         "On-call": 2274
       }
