@@ -169,12 +169,12 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
   const suffix = day === 1 ? "st" : day === 2 ? "nd" : day === 3 ? "rd" : "th";
   const month = now.toLocaleString("en-US", { month: "long" });
   const datePart = `${day}${suffix}${month}`;
-  let folder = `${companyPart}(${datePart})`;
+  let folder = `${companyPart} (${datePart})`;
   let dir = path.join(dateDir, folder);
   // Disambiguate if the same company already has a folder today (different role
   // or a re-run): append the role slug so we don't overwrite the earlier PDF.
   if (fs.existsSync(dir) && !forceRecompile) {
-    folder = `${companyPart}(${datePart})-${slug(role, 40)}`;
+    folder = `${companyPart} (${datePart})-${slug(role, 40)}`;
     dir = path.join(dateDir, folder);
   }
 

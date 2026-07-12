@@ -790,7 +790,7 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
   const suffix = day === 1 ? 'st' : day === 2 ? 'nd' : day === 3 ? 'rd' : 'th';
   const month = now.toLocaleString('en-US', { month: 'long' });
   const datePart = `${day}${suffix}${month}`;
-  const folder = `${companyPart}(${datePart})`;
+  const folder = `${companyPart} (${datePart})`;
   const dir = path.join(dateDir, folder);
 
   onLog?.("step", `━━━ Job ${seq} · ${company} · ${role} ━━━`);
@@ -1612,7 +1612,7 @@ const server = http.createServer(async (req, res) => {
             const day = now.getDate();
             const suffix = day === 1 ? "st" : day === 2 ? "nd" : day === 3 ? "rd" : "th";
             const month = now.toLocaleString("en-US", { month: "long" });
-            dir = path.join(dateDir, `${companyPart}(${day}${suffix}${month})`);
+            dir = path.join(dateDir, `${companyPart} (${day}${suffix}${month})`);
           }
 
           const result = buildCoverLetter(
