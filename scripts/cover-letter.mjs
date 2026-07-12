@@ -84,6 +84,17 @@ function cleanRole(role) {
     .trim() || "role";
 }
 
+/**
+ * Clean a company name for prose. Drops marketing taglines that scrapers append:
+ * "TetraMem - Accelerate The World" → "TetraMem", "Stripe | Payments" → "Stripe".
+ */
+function cleanCompany(company) {
+  return String(company || "your company")
+    .replace(/\s*[-–—|:].*$/, "")    // drop " - Accelerate The World" / " | Payments"
+    .replace(/\s+/g, " ")
+    .trim() || "your company";
+}
+
 // ─── Keyword matching (deterministic, no AI) ─────────────────────────────────
 const STOP = new Set(["the","and","for","with","you","our","are","that","this","will","have","from","your","their","all","any","who","has","was","not","but","can","may","were","they","its","into","per","via"]);
 
@@ -179,8 +190,11 @@ function buildTex({ company, role, skills, bullets }) {
   // Keep the skills line short — 3 max reads cleaner than a laundry list.
   const skillsPhrase = skills.length ? joinList(skills.slice(0, 3)) : "building full-stack systems";
 
-  // Opening — warm, specific, no "I am writing to express my strong interest".
-  const body1 = `I'm reaching out about the ${escapeTex(cRole)} role at ${escapeTex(company)}. I'm a software engineer who enjoys taking systems from a rough idea all the way to production, and my work with ${escapeTex(skillsPhrase)} lines up closely with what your team is building. I'd be genuinely glad to bring that experience to ${escapeTex(company)}.`;
+  const co = cleanCompany(company);
+
+  // Voice rules (from the humanizer skill): no em dashes, no rule-of-three
+  // padding, plain "is/are" over "serves as", react rather than list.
+  const body1 = `I'm reaching out about the ${escapeTex(cRole)} role at ${escapeTex(co)}. I'm a software engineer who likes taking systems from a rough idea all the way to production. Most of my work has been in ${escapeTex(skillsPhrase)}, which lines up closely with what your team is building, and I'd be glad to bring that experience to ${escapeTex(co)}.`;
 
   // Body — up to two distinct achievements as narrative, one clean metric each.
   const proseBullets = bullets.map((b) => escapeTex(bulletToProse(b.text))).filter(Boolean);
@@ -188,12 +202,12 @@ function buildTex({ company, role, skills, bullets }) {
   const second = proseBullets[1];
 
   const body2 = lead
-    ? `Most recently, I ${lead}. Projects like that are where I do my best work — owning something end to end, making the hard tradeoffs, and shipping it so it holds up under real load.${second ? ` Before that, I ${second}, which taught me how much of good engineering is really about clarity and follow-through.` : ""}`
-    : `Across my projects I've shipped production systems that pair solid engineering fundamentals with real, measurable impact. I like owning problems end to end and following them through to something that actually works in the hands of users.`;
+    ? `Most recently, I ${lead}. That's the kind of work I enjoy most. I get to own something end to end, make the hard calls, and ship it so it holds up under real load.${second ? ` Before that, I ${second}. It taught me that a lot of good engineering comes down to clarity and follow-through.` : ""}`
+    : `Across my projects I've shipped production systems that pair solid engineering with real, measurable impact. I like owning a problem end to end and following it through to something that actually works for the people using it.`;
 
-  const body3 = `What draws me to ${escapeTex(company)} specifically is the chance to work on problems that matter at scale, alongside people who care about doing them well. I'd bring curiosity, a bias toward shipping, and a habit of leaving things better than I found them.`;
+  const body3 = `What draws me to ${escapeTex(co)} is the chance to work on hard problems at scale, with people who care about doing them well. I like to leave things better than I found them, and I tend to bias toward shipping over talking about it.`;
 
-  const body4 = `I'd welcome the chance to talk about how I can help your team. Thank you for taking the time to consider my application — I hope we get to speak soon.`;
+  const body4 = `I'd welcome the chance to talk about how I can help your team. Thank you for taking the time to read this, and I hope we get to speak soon.`;
 
   return `\\documentclass[letterpaper,11pt]{article}
 \\usepackage[empty]{fullpage}
@@ -218,7 +232,7 @@ function buildTex({ company, role, skills, bullets }) {
 ${escapeTex(date)}
 
 Hiring Team\\\\
-${escapeTex(company)}
+${escapeTex(co)}
 
 \\vspace{6pt}
 
