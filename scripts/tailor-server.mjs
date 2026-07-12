@@ -35,9 +35,10 @@ import { buildSkillsLines, capSkillsLineToOnePhysicalLine } from "./skills-libra
 import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
-import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl } from "./resume-queue.mjs";
+import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
 import { listActiveWorkers } from "./worker-registry.mjs";
+import { buildCoverLetter } from "./cover-letter.mjs";
 
 dotenv.config();
 
@@ -1580,6 +1581,57 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Reveal a saved PDF or its folder in Finder.
+  // POST /cover-enqueue { job_url, company, title } → build a template cover-letter PDF
+  if (req.method === "POST" && pathname === "/cover-enqueue") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      (async () => {
+        try {
+          if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+          const body = JSON.parse(raw || "{}");
+          if (!body.job_url) throw new Error("job_url required");
+          const company = body.company || "Unknown";
+          const role = body.title || "role";
+
+          // Resolve target folder: same dir as the resume PDF if it exists,
+          // otherwise a fresh CompanyName(12thJuly) folder under today's date.
+          const jd = await withMongo((db) => fetchDescription(db, body.job_url), { appName: "AtriveoTailorServer" });
+          if (!jd || jd.length < 200) throw new Error("No full JD captured for this job yet");
+
+          const existing = await withMongo((db) => lookupJobsByUrl(db, [body.job_url]), { appName: "AtriveoTailorServer" });
+          const pdfPath = existing?.[0]?.resume?.pdf_path;
+          let dir;
+          if (pdfPath && fs.existsSync(path.dirname(pdfPath))) {
+            dir = path.dirname(pdfPath);
+          } else {
+            const today = new Date().toISOString().slice(0, 10);
+            const dateDir = path.join(OUT_ROOT, today);
+            const companyPart = companySlug(company, 32);
+            const now = new Date();
+            const day = now.getDate();
+            const suffix = day === 1 ? "st" : day === 2 ? "nd" : day === 3 ? "rd" : "th";
+            const month = now.toLocaleString("en-US", { month: "long" });
+            dir = path.join(dateDir, `${companyPart}(${day}${suffix}${month})`);
+          }
+
+          const result = buildCoverLetter(
+            { company, role, jd, dir, bank: BANK },
+            (kind, text) => log(`[cover] ${kind}: ${text}`),
+          );
+          if (!result.ok) throw new Error(result.err || "cover letter build failed");
+
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true, pdf_path: result.pdf }));
+        } catch (e) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+        }
+      })();
+    });
+    return;
+  }
+
   if (req.method === "POST" && pathname === "/open") {
     let raw = "";
     req.on("data", (c) => (raw += c));
