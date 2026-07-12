@@ -52,6 +52,17 @@ function slug(s, max = 40) {
   return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, max) || "untitled";
 }
 
+function companySlug(s, max = 32) {
+  // PascalCase: strip non-alphanumeric, title-case each word, join without separator
+  return String(s || "")
+    .replace(/[^a-zA-Z0-9 ]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join("")
+    .slice(0, max) || "Unknown";
+}
+
 function pdfPageCount(pdfPath) {
   try {
     const latin = fs.readFileSync(pdfPath).toString("latin1");
@@ -151,11 +162,21 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
   const { sendPhase, log: onLog } = ctx;
   const company = job.company || "unknown";
   const role = job.title || "role";
-  // dateDir is OUT_ROOT/YYYY-MM-DD; company dirs live inside it
-  const companyDir = path.join(dateDir, slug(company, 32));
-  const ts = new Date().toISOString().slice(11, 16).replace(":", "-"); // HH-MM
-  const folder = `${ts}_${String(seq).padStart(2, "0")}_${slug(role, 40)}`;
-  const dir = path.join(companyDir, folder);
+  // dateDir is OUT_ROOT/YYYY-MM-DD; folders named CompanyName(12thJuly)
+  const companyPart = companySlug(company, 32);
+  const now = new Date();
+  const day = now.getDate();
+  const suffix = day === 1 ? "st" : day === 2 ? "nd" : day === 3 ? "rd" : "th";
+  const month = now.toLocaleString("en-US", { month: "long" });
+  const datePart = `${day}${suffix}${month}`;
+  let folder = `${companyPart}(${datePart})`;
+  let dir = path.join(dateDir, folder);
+  // Disambiguate if the same company already has a folder today (different role
+  // or a re-run): append the role slug so we don't overwrite the earlier PDF.
+  if (fs.existsSync(dir) && !forceRecompile) {
+    folder = `${companyPart}(${datePart})-${slug(role, 40)}`;
+    dir = path.join(dateDir, folder);
+  }
 
   const result = { folder, company, role, dir, status: "ok" };
 
