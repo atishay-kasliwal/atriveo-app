@@ -1580,6 +1580,58 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // POST /manual-jd { job_url, company, title, description }
+  // Stores a hand-pasted JD so the worker's fetchDescription() can find it.
+  // Used by the dock's "Build a Resume" (Create) tab for manual:// job URLs.
+  if (req.method === "POST" && pathname === "/manual-jd") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      (async () => {
+        try {
+          if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+          const body = JSON.parse(raw || "{}");
+          if (!body.job_url) throw new Error("job_url required");
+          const description = String(body.description || "");
+          if (description.length < MIN_FULL_JD_CHARS) {
+            throw new Error(`JD too short (${description.length} chars < ${MIN_FULL_JD_CHARS})`);
+          }
+          const now = new Date();
+          await withMongo(async (db) => {
+            // 1) descriptions collection — what fetchDescription() reads
+            await db.collection("descriptions").updateOne(
+              { job_url: body.job_url },
+              { $set: { job_url: body.job_url, description, source: "manual", updated_at: now } },
+              { upsert: true },
+            );
+            // 2) jobs collection — so company/title/score exist for the queue + folder naming
+            await db.collection("jobs").updateOne(
+              { job_url: body.job_url },
+              {
+                $set: {
+                  job_url: body.job_url,
+                  company: body.company || "Unknown",
+                  title: body.title || "role",
+                  score_pct: body.score_pct ?? 100,
+                  source: "manual",
+                  batch_time: now,
+                },
+                $setOnInsert: { created_at: now },
+              },
+              { upsert: true },
+            );
+          }, { appName: "AtriveoTailorServer" });
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true }));
+        } catch (e) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+        }
+      })();
+    });
+    return;
+  }
+
   // Reveal a saved PDF or its folder in Finder.
   // POST /cover-enqueue { job_url, company, title } → build a template cover-letter PDF
   if (req.method === "POST" && pathname === "/cover-enqueue") {
