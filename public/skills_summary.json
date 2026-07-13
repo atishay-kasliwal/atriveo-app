@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-07-13T05:44:01.236124+00:00",
-  "total_analyzed": 44368,
+  "generated_at": "2026-07-13T06:42:52.503163+00:00",
+  "total_analyzed": 44371,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 25441,
+        "Python": 25442,
         "Java": 12496,
         "SQL": 11191,
         "JavaScript": 7824,
@@ -14,7 +14,7 @@
         "Kotlin": 2157,
         ".NET": 1886,
         "Swift": 1855,
-        "Rust": 1644,
+        "Rust": 1645,
         "Go": 1135,
         "Bash/Shell": 996,
         "Scala": 819,
@@ -28,8 +28,8 @@
       "color": "#8b5cf6",
       "skills": {
         "React": 7255,
-        "PyTorch": 4503,
-        "TensorFlow": 3549,
+        "PyTorch": 4504,
+        "TensorFlow": 3550,
         "Node.js": 2700,
         "LangChain": 2366,
         "Angular": 2336,
@@ -54,9 +54,9 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 12407,
-        "Azure": 7202,
-        "GCP": 6485,
+        "AWS": 12408,
+        "Azure": 7203,
+        "GCP": 6486,
         "S3": 1368,
         "Lambda": 1207,
         "Serverless": 918,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 17349,
+        "Scalability": 17350,
         "REST API": 6553,
         "Distributed Systems": 6307,
         "Microservices": 3769,
@@ -136,16 +136,16 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 13112,
-        "Agents": 8798,
-        "LLM": 8382,
-        "GenAI": 5771,
-        "PyTorch": 4503,
+        "Machine Learning": 13114,
+        "Agents": 8799,
+        "LLM": 8383,
+        "GenAI": 5772,
+        "PyTorch": 4504,
         "RAG": 3915,
-        "TensorFlow": 3549,
-        "NLP": 3389,
+        "TensorFlow": 3550,
+        "NLP": 3391,
         "Prompt Eng": 2752,
-        "Deep Learning": 2729,
+        "Deep Learning": 2730,
         "Fine-tuning": 2396,
         "OpenAI": 2374,
         "LangChain": 2366,
