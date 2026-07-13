@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-07-13T03:43:56.268822+00:00",
-  "total_analyzed": 44354,
+  "generated_at": "2026-07-13T04:44:30.153443+00:00",
+  "total_analyzed": 44357,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 25435,
+        "Python": 25436,
         "Java": 12496,
         "SQL": 11190,
         "JavaScript": 7824,
         "TypeScript": 6692,
-        "HTML/CSS": 2508,
+        "HTML/CSS": 2509,
         "Kotlin": 2157,
         ".NET": 1886,
         "Swift": 1855,
@@ -28,7 +28,7 @@
       "color": "#8b5cf6",
       "skills": {
         "React": 7255,
-        "PyTorch": 4501,
+        "PyTorch": 4502,
         "TensorFlow": 3548,
         "Node.js": 2699,
         "LangChain": 2366,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 17344,
+        "Scalability": 17345,
         "REST API": 6552,
         "Distributed Systems": 6303,
         "Microservices": 3768,
@@ -114,10 +114,10 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 6266,
+        "ETL/ELT": 6267,
         "PostgreSQL": 3363,
         "Spark": 2844,
-        "Vector DB": 2176,
+        "Vector DB": 2177,
         "Kafka": 1992,
         "MySQL": 1795,
         "Databricks": 1492,
@@ -136,16 +136,16 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 13110,
-        "Agents": 8794,
+        "Machine Learning": 13111,
+        "Agents": 8795,
         "LLM": 8379,
         "GenAI": 5769,
-        "PyTorch": 4501,
+        "PyTorch": 4502,
         "RAG": 3914,
         "TensorFlow": 3548,
         "NLP": 3389,
         "Prompt Eng": 2752,
-        "Deep Learning": 2727,
+        "Deep Learning": 2728,
         "Fine-tuning": 2396,
         "OpenAI": 2373,
         "LangChain": 2366,
@@ -175,7 +175,7 @@
       "skills": {
         "Cross-functional": 11418,
         "Code Review": 8919,
-        "Mentorship": 8243,
+        "Mentorship": 8244,
         "Agile/Scrum": 6883,
         "Leadership": 2580,
         "On-call": 2287
