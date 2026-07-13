@@ -7,10 +7,37 @@ import { useApplyTracker } from "../hooks/useApplyTracker";
 import { listTailoredResumes, type TailoredResumeOnDisk } from "../utils/tailorRun";
 
 export default function ClickedJobs() {
-  const { records, todayRecords, removeApplyClick } = useApplyClickLog();
-  const { recordClick, getRecord, updatePipelineStage } = useApplyTracker();
+  const { records: localRecords, todayRecords, removeApplyClick } = useApplyClickLog();
+  const { stats, recordClick, getRecord, updatePipelineStage } = useApplyTracker();
   const [query, setQuery] = useState("");
   const [compiledByUrl, setCompiledByUrl] = useState<Record<string, TailoredResumeOnDisk>>({});
+
+  // Merge the server-side tracker (appliedJobs — where the dock's "Add to
+  // tracker" writes) into the local click-log so dock-added jobs (including
+  // manual:// builds) show up here, not just feed clicks made in this browser.
+  const records = useMemo(() => {
+    const byUrl = new Map(localRecords.map((r) => [r.jobUrl, r]));
+    for (const [url, rec] of Object.entries(stats.appliedJobs)) {
+      if (!url || byUrl.has(url)) continue;
+      byUrl.set(url, {
+        jobKey:    url,
+        jobUrl:    url,
+        title:     rec.title || "—",
+        company:   rec.company || "—",
+        location:  rec.location ?? null,
+        site:      null,
+        clickedAt: rec.lastAppliedAt || new Date().toISOString(),
+        clicks:    rec.clicks ?? 1,
+        level:     null,
+        score:     null,
+        source:    "apply",
+      });
+    }
+    // Newest first by clickedAt
+    return [...byUrl.values()].sort(
+      (a, b) => new Date(b.clickedAt).getTime() - new Date(a.clickedAt).getTime(),
+    );
+  }, [localRecords, stats.appliedJobs]);
 
   useEffect(() => {
     void listTailoredResumes().then((list) => {
