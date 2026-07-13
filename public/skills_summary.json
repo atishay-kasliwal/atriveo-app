@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-07-13T06:42:52.503163+00:00",
-  "total_analyzed": 44371,
+  "generated_at": "2026-07-13T07:41:53.278374+00:00",
+  "total_analyzed": 44376,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 25442,
-        "Java": 12496,
-        "SQL": 11191,
-        "JavaScript": 7824,
-        "TypeScript": 6694,
-        "HTML/CSS": 2509,
+        "Python": 25443,
+        "Java": 12497,
+        "SQL": 11192,
+        "JavaScript": 7825,
+        "TypeScript": 6695,
+        "HTML/CSS": 2511,
         "Kotlin": 2157,
         ".NET": 1886,
         "Swift": 1855,
@@ -19,7 +19,7 @@
         "Bash/Shell": 996,
         "Scala": 819,
         "Ruby": 759,
-        "PHP": 407,
+        "PHP": 408,
         "C++": 17,
         "C#": 5
       }
@@ -54,11 +54,11 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 12408,
+        "AWS": 12409,
         "Azure": 7203,
         "GCP": 6486,
         "S3": 1368,
-        "Lambda": 1207,
+        "Lambda": 1208,
         "Serverless": 918,
         "DynamoDB": 786,
         "EC2": 708,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 17350,
+        "Scalability": 17352,
         "REST API": 6553,
         "Distributed Systems": 6307,
         "Microservices": 3769,
@@ -94,7 +94,7 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 9075,
+        "CI/CD": 9077,
         "Kubernetes": 5617,
         "Docker": 5328,
         "Git": 5175,
@@ -114,17 +114,17 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 6271,
-        "PostgreSQL": 3364,
+        "ETL/ELT": 6272,
+        "PostgreSQL": 3365,
         "Spark": 2844,
         "Vector DB": 2177,
         "Kafka": 1992,
-        "MySQL": 1795,
+        "MySQL": 1796,
         "Databricks": 1492,
         "MongoDB": 1307,
         "Snowflake": 1284,
         "Redis": 1158,
-        "Airflow": 1094,
+        "Airflow": 1095,
         "Elasticsearch": 717,
         "BigQuery": 562,
         "dbt": 412,
@@ -161,7 +161,7 @@
       "skills": {
         "OAuth/OIDC": 602,
         "Encryption": 524,
-        "GDPR": 468,
+        "GDPR": 470,
         "IAM": 319,
         "JWT": 294,
         "SOC 2": 262,
@@ -173,11 +173,11 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 11419,
-        "Code Review": 8920,
+        "Cross-functional": 11420,
+        "Code Review": 8922,
         "Mentorship": 8245,
         "Agile/Scrum": 6883,
-        "Leadership": 2580,
+        "Leadership": 2581,
         "On-call": 2287
       }
     }
