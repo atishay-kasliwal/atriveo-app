@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-07-13T08:43:53.662625+00:00",
-  "total_analyzed": 44397,
+  "generated_at": "2026-07-13T09:45:01.166401+00:00",
+  "total_analyzed": 44405,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 25455,
+        "Python": 25457,
         "Java": 12499,
         "SQL": 11196,
         "JavaScript": 7829,
@@ -16,7 +16,7 @@
         "Swift": 1855,
         "Rust": 1647,
         "Go": 1135,
-        "Bash/Shell": 996,
+        "Bash/Shell": 997,
         "Scala": 820,
         "Ruby": 759,
         "PHP": 408,
@@ -28,7 +28,7 @@
       "color": "#8b5cf6",
       "skills": {
         "React": 7257,
-        "PyTorch": 4505,
+        "PyTorch": 4506,
         "TensorFlow": 3550,
         "Node.js": 2700,
         "LangChain": 2366,
@@ -75,8 +75,8 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 17357,
-        "REST API": 6554,
+        "Scalability": 17360,
+        "REST API": 6555,
         "Distributed Systems": 6310,
         "Microservices": 3770,
         "System Design": 3449,
@@ -97,10 +97,10 @@
         "CI/CD": 9080,
         "Kubernetes": 5619,
         "Docker": 5331,
-        "Git": 5177,
-        "Linux": 3807,
+        "Git": 5178,
+        "Linux": 3808,
         "Terraform": 2190,
-        "Jenkins": 1528,
+        "Jenkins": 1529,
         "GitHub Actions": 1048,
         "Grafana": 630,
         "Ansible": 514,
@@ -114,7 +114,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 6275,
+        "ETL/ELT": 6276,
         "PostgreSQL": 3367,
         "Spark": 2845,
         "Vector DB": 2177,
@@ -140,7 +140,7 @@
         "Agents": 8811,
         "LLM": 8390,
         "GenAI": 5774,
-        "PyTorch": 4505,
+        "PyTorch": 4506,
         "RAG": 3918,
         "TensorFlow": 3550,
         "NLP": 3392,
@@ -173,9 +173,9 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 11422,
-        "Code Review": 8922,
-        "Mentorship": 8247,
+        "Cross-functional": 11424,
+        "Code Review": 8924,
+        "Mentorship": 8249,
         "Agile/Scrum": 6884,
         "Leadership": 2581,
         "On-call": 2287
