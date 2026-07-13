@@ -121,7 +121,58 @@ const VALID_HEADER_TITLES = new Set([
   "Research Scientist",
 ]);
 
-export function deriveHeaderTitle(jd, composition) {
+// Map a specific/long job title to the closest canonical archetype using the
+// title's OWN words (not the JD body). Ordered most-specific first.
+function canonicalFromTitle(rawTitle) {
+  const t = String(rawTitle || "").toLowerCase();
+  if (!t) return null;
+  if (/research scientist|applied scientist|research engineer/.test(t)) return "Research Scientist";
+  if (/machine learning|\bml\b|deep learning|ml engineer/.test(t)) return "Machine Learning Engineer";
+  if (/\bai\b|agentic|\bllm\b|generative|genai/.test(t)) return "AI Engineer";
+  if (/data engineer|data platform|etl|analytics engineer/.test(t)) return "Data Engineer";
+  if (/full.?stack|fullstack/.test(t)) return "Full Stack Engineer";
+  if (/back.?end|backend|platform engineer|infrastructure|distributed systems/.test(t)) return "Backend Engineer";
+  if (/front.?end|frontend|\bui\b/.test(t)) return "Full Stack Engineer";
+  // Recognizable "…Engineer" / "…Developer" titles that don't match an archetype
+  // still deserve a sane default rather than a JD-body guess.
+  if (/engineer|developer|swe/.test(t)) return "Software Engineer";
+  return null;
+}
+
+// Count meaningful words in a title (ignores separators/parentheticals).
+function titleWordCount(rawTitle) {
+  return String(rawTitle || "")
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[^a-zA-Z0-9 ]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+}
+
+// Titles of 3 words or fewer are already clean and specific — keep them
+// verbatim. Longer/specific titles get mapped to a canonical archetype so we
+// never mislabel e.g. "Forward Deployment Engineer" as "Full Stack".
+function cleanShortTitle(rawTitle) {
+  return String(rawTitle || "")
+    .replace(/\([^)]*\)/g, "")     // drop parentheticals
+    .replace(/[,–—|].*$/, "")      // drop ", Backend" / "| Team" tails
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function deriveHeaderTitle(jd, composition, rawTitle) {
+  // 1) Title-first: use the actual job title before any JD-body guessing.
+  if (rawTitle) {
+    const wc = titleWordCount(rawTitle);
+    if (wc > 0 && wc <= 3) {
+      const kept = cleanShortTitle(rawTitle);
+      if (kept) return kept;               // ≤3 words → keep verbatim
+    }
+    const mapped = canonicalFromTitle(rawTitle);
+    if (mapped) return mapped;             // >3 words → map from the title itself
+  }
+
+  // 2) Fall back to the narrative / JD-signal heuristic (legacy behavior).
   const narrativeTitle = composition?.narrative?.header_title;
   if (narrativeTitle && VALID_HEADER_TITLES.has(narrativeTitle)) return narrativeTitle;
   const hay = String(jd || "").toLowerCase();
@@ -258,7 +309,10 @@ export function prepareResumeArtifacts({ jd, composition, bank, headerTitle }) {
       maxCategories: skillsCfg.max_categories ?? SKILLS_MAX_CATEGORIES,
       useSelectedAcCorpus: skillsCfg.use_selected_ac_corpus !== false,
     });
-  const title = (headerTitle && VALID_HEADER_TITLES.has(headerTitle)) ? headerTitle : deriveHeaderTitle(jd, compact);
+  // headerTitle here is the RAW job title. Pass it into deriveHeaderTitle so the
+  // title-first rule applies (≤3 words kept verbatim, longer mapped to canonical),
+  // instead of discarding it whenever it isn't an exact canonical match.
+  const title = deriveHeaderTitle(jd, compact, headerTitle);
   const tex = assembleAcResume(compact, { headerTitle: title, skillsLines: skills, bank });
   return { compact, skills, headerTitle: title, tex };
 }
