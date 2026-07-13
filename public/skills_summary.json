@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-07-13T02:43:36.724612+00:00",
-  "total_analyzed": 44345,
+  "generated_at": "2026-07-13T03:43:56.268822+00:00",
+  "total_analyzed": 44354,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 25431,
+        "Python": 25435,
         "Java": 12496,
-        "SQL": 11189,
+        "SQL": 11190,
         "JavaScript": 7824,
-        "TypeScript": 6691,
+        "TypeScript": 6692,
         "HTML/CSS": 2508,
         "Kotlin": 2157,
         ".NET": 1886,
@@ -75,9 +75,9 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 17341,
+        "Scalability": 17344,
         "REST API": 6552,
-        "Distributed Systems": 6300,
+        "Distributed Systems": 6303,
         "Microservices": 3768,
         "System Design": 3449,
         "Kafka": 1992,
@@ -86,7 +86,7 @@
         "Caching": 846,
         "gRPC": 637,
         "RabbitMQ": 573,
-        "WebSocket": 247,
+        "WebSocket": 249,
         "Load Balancing": 230,
         "Service Mesh": 214
       }
@@ -114,7 +114,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 6263,
+        "ETL/ELT": 6266,
         "PostgreSQL": 3363,
         "Spark": 2844,
         "Vector DB": 2176,
@@ -137,11 +137,11 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 13110,
-        "Agents": 8792,
-        "LLM": 8378,
+        "Agents": 8794,
+        "LLM": 8379,
         "GenAI": 5769,
         "PyTorch": 4501,
-        "RAG": 3913,
+        "RAG": 3914,
         "TensorFlow": 3548,
         "NLP": 3389,
         "Prompt Eng": 2752,
