@@ -169,13 +169,19 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
   const suffix = day === 1 ? "st" : day === 2 ? "nd" : day === 3 ? "rd" : "th";
   const month = now.toLocaleString("en-US", { month: "long" });
   const datePart = `${day}${suffix}${month}`;
-  let folder = `${companyPart} (${datePart})`;
+  const base = `${companyPart} (${datePart})`;
+  let folder = base;
   let dir = path.join(dateDir, folder);
-  // Disambiguate if the same company already has a folder today (different role
-  // or a re-run): append the role slug so we don't overwrite the earlier PDF.
-  if (fs.existsSync(dir) && !forceRecompile) {
-    folder = `${companyPart} (${datePart})-${slug(role, 40)}`;
-    dir = path.join(dateDir, folder);
+  // Disambiguate same-company builds on the same day with a numeric suffix:
+  //   Walmart (13thJuly), Walmart (13thJuly)-2, Walmart (13thJuly)-3, …
+  // Skip when forceRecompile (intentional overwrite of the same run).
+  if (!forceRecompile) {
+    let n = 2;
+    while (fs.existsSync(dir)) {
+      folder = `${base}-${n}`;
+      dir = path.join(dateDir, folder);
+      n++;
+    }
   }
 
   const result = { folder, company, role, dir, status: "ok" };
