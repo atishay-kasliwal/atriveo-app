@@ -12432,7 +12432,7 @@
     "summary": "Hamden, CT seeks Software Engineer to analyze, design \\& develop applications using Java, REACT JS, SQL, AWS, Windows, Linux, Hibernate and Spring Framework.",
     "title": "Software Engineer",
     "ats_score": 66,
-    "fit_score": 12
+    "fit_score": 11
   },
   {
     "session_id": "2026-07-17T17:14:42Z",
@@ -15460,7 +15460,7 @@
     "summary": "As a Software Engineer II, you will collaborate with engineers and product partners to design, build, test, and enhance solutions that support the movement of transactions around the world.",
     "title": "Software Engineer II",
     "ats_score": 60,
-    "fit_score": 12
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442137634",
@@ -27192,6 +27192,28 @@
     "site": "linkedin",
     "summary": "Our team is looking for exceptional software engineers who can work on a variety of technologies including frontend and backend while integrating with various external systems.",
     "title": "Full Stack Software Engineer - Billing Team",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "67cc9d4d6fd94b324a6844a95493ae4424396e0f4ae62d990dcd9b8db654c292",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-18T05:35:20.194Z",
+      "error": null,
+      "company": "ClickHouse",
+      "title": "Full Stack Software Engineer - Billing Team",
+      "resume_slot": 1,
+      "session_hour": "23",
+      "batch_time": "2026-07-18T03:10:02Z",
+      "session_id": "2026-07-18T05:32:12Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "ClickHouse (18thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/ClickHouse (18thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/ClickHouse (18thJuly)"
+    },
     "ats_score": 46,
     "fit_score": 7
   },
@@ -27213,6 +27235,28 @@
     "site": "linkedin",
     "summary": "The team focuses on great user experience, seamless, automated, and scalable cloud infrastructure deployment, and lifecycle management.",
     "title": "Full Stack Software Engineer - Control Plane",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "8d76bce6dea7696da1feccacaaf84882b4f2c65cd78fde09c37915c925194770",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-18T05:35:29.837Z",
+      "error": null,
+      "company": "ClickHouse",
+      "title": "Full Stack Software Engineer - Control Plane",
+      "resume_slot": 3,
+      "session_hour": "23",
+      "batch_time": "2026-07-18T03:10:02Z",
+      "session_id": "2026-07-18T05:32:12Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "ClickHouse (18thJuly)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/ClickHouse (18thJuly)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/ClickHouse (18thJuly)-2"
+    },
     "ats_score": 46,
     "fit_score": 8
   },
@@ -27839,7 +27883,7 @@
     "site": "linkedin",
     "title": "Remote Software Engineer - Data Infrastructure & Acquisition",
     "ats_score": 80,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441383208",

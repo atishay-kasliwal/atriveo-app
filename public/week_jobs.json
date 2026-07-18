@@ -44,6 +44,28 @@
     "fit_score": 7
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4441719013",
+    "session_id": "2026-07-18T06:07:21Z",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "RG&T Solutions",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Seattle, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 126,
+    "score_pct": 50,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**We are seeking an experienced Software Engineer responsible for designing, developing, and implementing complex software solutions for computer\\-based systems.",
+    "title": "Remote Software Engineer",
+    "scraped_date": "2026-07-18",
+    "ats_score": 57,
+    "fit_score": 8
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4442418851",
     "session_id": "2026-07-18T05:10:06Z",
     "batch_time": "2026-07-18T05:10:00Z",
@@ -107,7 +129,29 @@
     "title": "Software Development Engineer II",
     "scraped_date": "2026-07-18",
     "ats_score": 72,
-    "fit_score": 11
+    "fit_score": 9
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4439290617",
+    "session_id": "2026-07-18T06:07:21Z",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "Mastercard",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 109,
+    "score_pct": 44,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "**Our Purpose** *Mastercard powers economies and empowers people in 200\\+ countries and territories worldwide.",
+    "title": "Software Development Engineer",
+    "scraped_date": "2026-07-18",
+    "ats_score": 72,
+    "fit_score": 9
   },
   {
     "session_id": "2026-07-18T05:10:06Z",
@@ -149,6 +193,28 @@
     "site": "linkedin",
     "summary": "We\u2019re looking for a Software Engineer who is excited to build at the intersection of enterprise systems and AI.",
     "title": "Software Engineer \u2013 Enterprise Software",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "5f79ddd3de6b49004a27d100bc57bf6778ba7102c460c667308292443b8a4ad7",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-18T05:35:25.072Z",
+      "error": null,
+      "company": "Rivian",
+      "title": "Software Engineer \u2013 Enterprise Software",
+      "resume_slot": 5,
+      "session_hour": "01",
+      "batch_time": "2026-07-18T05:10:00Z",
+      "session_id": "2026-07-18T05:32:12Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "Rivian (18thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/Rivian (18thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/Rivian (18thJuly)"
+    },
     "scraped_date": "2026-07-18",
     "ats_score": 62,
     "fit_score": 6
@@ -213,7 +279,9 @@
     "score_pct": 47,
     "site": "linkedin",
     "title": "Remote Fullstack Software Engineer, Notifications Lifecycle",
-    "scraped_date": "2026-07-18"
+    "scraped_date": "2026-07-18",
+    "ats_score": 57,
+    "fit_score": 7
   },
   {
     "session_id": "2026-07-18T04:10:23Z",
@@ -253,7 +321,27 @@
     "score_pct": 39,
     "site": "linkedin",
     "title": "Software Engineer - Cloud Security",
-    "scraped_date": "2026-07-18"
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-18T05:35:25.339Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Illumio",
+      "title": "Software Engineer - Cloud Security",
+      "resume_slot": 2,
+      "session_hour": "01",
+      "batch_time": "2026-07-18T05:10:39Z",
+      "session_id": "2026-07-18T05:32:12Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    },
+    "scraped_date": "2026-07-18",
+    "ats_score": 61,
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4439288632",
@@ -271,7 +359,9 @@
     "score_pct": 38,
     "site": "linkedin",
     "title": "Software Developer",
-    "scraped_date": "2026-07-18"
+    "scraped_date": "2026-07-18",
+    "ats_score": 57,
+    "fit_score": 7
   },
   {
     "session_id": "2026-07-18T04:11:27Z",
@@ -360,6 +450,28 @@
     "fit_score": 6
   },
   {
+    "session_id": "2026-07-18T06:07:21Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4441710404",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "RG&T Solutions",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Philadelphia, PA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 44,
+    "score_pct": 18,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "**We are seeking a skilled Software Engineer to support our AI team's data collection efforts, crucial for training high\\-quality language models at scale.** **Key Responsibilities Include** * Identi\u2026",
+    "title": "Remote Software Engineer - Data Infrastructure & Acquisition",
+    "scraped_date": "2026-07-18",
+    "ats_score": 66,
+    "fit_score": 8
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4439296456",
     "session_id": "2026-07-18T05:10:06Z",
     "batch_time": "2026-07-18T05:10:00Z",
@@ -397,7 +509,31 @@
     "score_pct": 33,
     "site": "linkedin",
     "title": "Software Engineer",
-    "scraped_date": "2026-07-18"
+    "scraped_date": "2026-07-18",
+    "ats_score": 50,
+    "fit_score": 4
+  },
+  {
+    "session_id": "2026-07-18T06:07:21Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4439289589",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "Humana",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Kentucky, United States",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 43,
+    "score_pct": 17,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "**Become a part of our caring community** At Humana, a Fortune 100 healthcare technology leader, we're transforming how millions of people experience care.",
+    "title": "Software Engineer",
+    "scraped_date": "2026-07-18",
+    "ats_score": 50,
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442426676",
@@ -415,7 +551,9 @@
     "score_pct": 32,
     "site": "linkedin",
     "title": "Full Stack Software Developer (Remote)",
-    "scraped_date": "2026-07-18"
+    "scraped_date": "2026-07-18",
+    "ats_score": 66,
+    "fit_score": 10
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442420672",
@@ -476,6 +614,50 @@
     "search_term": "software engineer",
     "site": "linkedin",
     "summary": "**We are seeking a skilled Software Engineer to join the AI data team, focusing on data collection to support model training at scale.** **Key Responsibilities** * Identify and acquire new audio data\u2026",
+    "title": "Remote Software Engineer - Data Infrastructure & Acquisition",
+    "scraped_date": "2026-07-18",
+    "ats_score": 80,
+    "fit_score": 8
+  },
+  {
+    "session_id": "2026-07-18T06:07:21Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4441707435",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "RG&T Solutions",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Plano, TX",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 38,
+    "score_pct": 15,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "We are seeking a **Software Engineer** to join our AI data team, focusing on data collection to support model training at scale.",
+    "title": "Remote Software Engineer - Data Infrastructure & Acquisition",
+    "scraped_date": "2026-07-18",
+    "ats_score": 80,
+    "fit_score": 9
+  },
+  {
+    "session_id": "2026-07-18T06:07:21Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4441398940",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "RG&T Solutions",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Fremont, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 38,
+    "score_pct": 15,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**We are seeking a Software Engineer to support our AI team's data collection efforts, crucial for training high\\-quality models at scale.** **Key Responsibilities Include** * Finding and integrating\u2026",
     "title": "Remote Software Engineer - Data Infrastructure & Acquisition",
     "scraped_date": "2026-07-18",
     "ats_score": 80,
@@ -629,7 +811,53 @@
     "score_pct": 22,
     "site": "linkedin",
     "title": "Remote Software Engineer - iOS Core Product",
-    "scraped_date": "2026-07-18"
+    "scraped_date": "2026-07-18",
+    "ats_score": 33,
+    "fit_score": 4
+  },
+  {
+    "session_id": "2026-07-18T06:07:21Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4441711359",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "RG&T Solutions",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Gilbert, AZ",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 28,
+    "score_pct": 11,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "We are seeking a **Senior iOS Engineer** to support and enhance a rapidly growing, award\\-winning iOS app that reaches millions of users.",
+    "title": "Remote Software Engineer - iOS Core Product",
+    "scraped_date": "2026-07-18",
+    "ats_score": 33,
+    "fit_score": 5
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4441716084",
+    "session_id": "2026-07-18T06:07:21Z",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "RG&T Solutions",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Lubbock, TX",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 28,
+    "score_pct": 11,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "**We are seeking a *Fullstack Engineer* to join our mission\\-driven team, focusing on building technology that enhances the social safety net.** This role involves **identifying strategic technical a\u2026",
+    "title": "Remote Fullstack Software Engineer",
+    "scraped_date": "2026-07-18",
+    "ats_score": 33,
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441389520",
@@ -669,7 +897,31 @@
     "score_pct": 17,
     "site": "linkedin",
     "title": "Software Engineer, Security",
-    "scraped_date": "2026-07-18"
+    "scraped_date": "2026-07-18",
+    "ats_score": 0,
+    "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4441713272",
+    "session_id": "2026-07-18T06:07:21Z",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "RG&T Solutions",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Chicago, IL",
+    "max_exp": 3.0,
+    "min_exp": 3.0,
+    "pipeline": "standard",
+    "score": 22,
+    "score_pct": 9,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**Role Overview** This position involves building and maintaining systems that support growth channels by managing complex data flows, integrating diverse data sources, and applying AI/LLMs to unstru\u2026",
+    "title": "Remote Software Engineer \u2013 Growth Platform, Backend",
+    "scraped_date": "2026-07-18",
+    "ats_score": 66,
+    "fit_score": 5
   },
   {
     "session_id": "2026-07-18T04:11:27Z",
@@ -780,6 +1032,94 @@
     "fit_score": 4
   },
   {
+    "session_id": "2026-07-18T06:07:21Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4442420946",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "Domain Helper",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "North, SC",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**Job Summary** * Vacancy N/A * Job Nature Full Time * Age Any * Experience Not mandatory * Gender Any * Job Location Dhaka * Published 16 July 2026 * Deadline 18 Jul 2026 Latest Jobs of this company\u2026",
+    "title": "Associate Professor - Mathematics for Data Science and Machine Learning",
+    "scraped_date": "2026-07-18",
+    "ats_score": 0,
+    "fit_score": 6
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4442440020",
+    "session_id": "2026-07-18T06:07:21Z",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "Intersect",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "We\u2019re a team of friends bound together by a mission to preserve our planet for future generations through innovative energy solutions and modern infrastructure.",
+    "title": "Software Engineer, Microgrid Controls Developer",
+    "scraped_date": "2026-07-18",
+    "ats_score": 60,
+    "fit_score": 8
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4441713218",
+    "session_id": "2026-07-18T06:07:21Z",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "ZAAG SYSTEMS",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Mobile, AL",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "Mobile Development Posted on: Jun 21, 2021 Share:\\- Minimum Required Experience: 3/5 years Full\\-time Skill React Node MongoDB Express",
+    "title": "Software Engineer",
+    "scraped_date": "2026-07-18",
+    "ats_score": 0,
+    "fit_score": 1
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4442427769",
+    "session_id": "2026-07-18T06:07:21Z",
+    "batch_time": "2026-07-18T06:07:16Z",
+    "company": "Domain Helper",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "North, SC",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Job Summary** * Vacancy N/A * Job Nature Full Time * Age Any * Experience Not mandatory * Gender Any * Job Location Dhaka * Published 16 July 2026 * Deadline 18 Jul 2026 Others Jobs of this categor\u2026",
+    "title": "Lecturer - Mathematics for Data Science and Machine Learning",
+    "scraped_date": "2026-07-18",
+    "ats_score": 0,
+    "fit_score": 8
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4430119664",
     "session_id": "2026-07-18T04:10:23Z",
     "batch_time": "2026-07-18T04:10:15Z",
@@ -837,7 +1177,9 @@
     "score_pct": 0,
     "site": "linkedin",
     "title": "Remote Founding Software Engineer",
-    "scraped_date": "2026-07-18"
+    "scraped_date": "2026-07-18",
+    "ats_score": 60,
+    "fit_score": 4
   },
   {
     "session_id": "2026-07-18T05:10:40Z",
@@ -855,7 +1197,9 @@
     "score_pct": 0,
     "site": "linkedin",
     "title": "Remote Software Engineer",
-    "scraped_date": "2026-07-18"
+    "scraped_date": "2026-07-18",
+    "ats_score": 50,
+    "fit_score": 2
   },
   {
     "session_id": "2026-07-18T05:10:40Z",
@@ -873,7 +1217,9 @@
     "score_pct": 0,
     "site": "linkedin",
     "title": "Software Engineering Intern",
-    "scraped_date": "2026-07-18"
+    "scraped_date": "2026-07-18",
+    "ats_score": 25,
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441704062",
@@ -5643,6 +5989,28 @@
     "site": "linkedin",
     "summary": "Our team is looking for exceptional software engineers who can work on a variety of technologies including frontend and backend while integrating with various external systems.",
     "title": "Full Stack Software Engineer - Billing Team",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "67cc9d4d6fd94b324a6844a95493ae4424396e0f4ae62d990dcd9b8db654c292",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-18T05:35:20.194Z",
+      "error": null,
+      "company": "ClickHouse",
+      "title": "Full Stack Software Engineer - Billing Team",
+      "resume_slot": 1,
+      "session_hour": "23",
+      "batch_time": "2026-07-18T03:10:02Z",
+      "session_id": "2026-07-18T05:32:12Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "ClickHouse (18thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/ClickHouse (18thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/ClickHouse (18thJuly)"
+    },
     "scraped_date": "2026-07-17",
     "ats_score": 46,
     "fit_score": 7
@@ -6107,7 +6475,7 @@
     "title": "Software Engineer II",
     "scraped_date": "2026-07-17",
     "ats_score": 60,
-    "fit_score": 12
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441942666",
@@ -6897,6 +7265,28 @@
     "site": "linkedin",
     "summary": "The team focuses on great user experience, seamless, automated, and scalable cloud infrastructure deployment, and lifecycle management.",
     "title": "Full Stack Software Engineer - Control Plane",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "8d76bce6dea7696da1feccacaaf84882b4f2c65cd78fde09c37915c925194770",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-18T05:35:29.837Z",
+      "error": null,
+      "company": "ClickHouse",
+      "title": "Full Stack Software Engineer - Control Plane",
+      "resume_slot": 3,
+      "session_hour": "23",
+      "batch_time": "2026-07-18T03:10:02Z",
+      "session_id": "2026-07-18T05:32:12Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "ClickHouse (18thJuly)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/ClickHouse (18thJuly)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/ClickHouse (18thJuly)-2"
+    },
     "scraped_date": "2026-07-17",
     "ats_score": 46,
     "fit_score": 8
@@ -14733,7 +15123,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-17",
     "ats_score": 66,
-    "fit_score": 12
+    "fit_score": 11
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441319478",
@@ -16655,7 +17045,7 @@
     "title": "Remote Software Engineer - Data Infrastructure & Acquisition",
     "scraped_date": "2026-07-17",
     "ats_score": 80,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441956715",
@@ -32737,7 +33127,7 @@
     "title": "Software Engineer L3 Phone Numbers",
     "scraped_date": "2026-07-16",
     "ats_score": 44,
-    "fit_score": 4
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-17T02:13:45Z",
@@ -49809,7 +50199,7 @@
     "title": "Software Engineer I",
     "scraped_date": "2026-07-16",
     "ats_score": 0,
-    "fit_score": 3
+    "fit_score": 2
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4438741057",
@@ -52493,7 +52883,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-15",
     "ats_score": 64,
-    "fit_score": 24
+    "fit_score": 23
   },
   {
     "session_id": "2026-07-15T19:14:04Z",
@@ -52977,7 +53367,7 @@
     "title": "Infrastructure Software Engineer (Go, Python)",
     "scraped_date": "2026-07-15",
     "ats_score": 62,
-    "fit_score": 10
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4440612607",
@@ -67301,7 +67691,7 @@
     "title": "Software Engineer L2 - Cloud Infrastructure",
     "scraped_date": "2026-07-14",
     "ats_score": 46,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4438339800",
@@ -67345,7 +67735,7 @@
     "title": "Software Engineer II",
     "scraped_date": "2026-07-14",
     "ats_score": 62,
-    "fit_score": 15
+    "fit_score": 14
   },
   {
     "session_id": "2026-07-14T12:10:19Z",
@@ -69963,7 +70353,7 @@
     "title": "Software Engineer \u2013 Agentic AI (Amazon Bedrock)",
     "scraped_date": "2026-07-14",
     "ats_score": 55,
-    "fit_score": 12
+    "fit_score": 11
   },
   {
     "session_id": "2026-07-14T16:12:38Z",
@@ -70073,7 +70463,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-14",
     "ats_score": 55,
-    "fit_score": 12
+    "fit_score": 11
   },
   {
     "session_id": "2026-07-15T01:10:34Z",
@@ -83911,7 +84301,7 @@
     "title": "AI/ML Engineer, Data Scientist",
     "scraped_date": "2026-07-14",
     "ats_score": 46,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4414277565",
@@ -92843,7 +93233,7 @@
     "title": "Software Engineer II",
     "scraped_date": "2026-07-13",
     "ats_score": 33,
-    "fit_score": 7
+    "fit_score": 5
   },
   {
     "session_id": "2026-07-14T00:11:24Z",
@@ -96979,7 +97369,7 @@
     "title": "Machine Learning Research Engineer",
     "scraped_date": "2026-07-13",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4439486853",
@@ -108551,7 +108941,7 @@
     "title": "Software Engineer II",
     "scraped_date": "2026-07-12",
     "ats_score": 66,
-    "fit_score": 11
+    "fit_score": 9
   },
   {
     "session_id": "2026-07-13T02:06:12Z",
@@ -119991,7 +120381,7 @@
     "title": "Software Engineer (L2)",
     "scraped_date": "2026-07-11",
     "ats_score": 61,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-11T08:06:05Z",
