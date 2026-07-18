@@ -7620,7 +7620,7 @@
     "summary": "**Job Description** **Must\\-Have Requirements** **Requirement Details** Backend/Systems Experience 3\\+ years building production backend or distributed systems (pre\\-AI experience required) **Product\u2026",
     "title": "Applied AI Engineer",
     "ats_score": 50,
-    "fit_score": 9
+    "fit_score": 10
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4365591101",
@@ -13316,7 +13316,7 @@
     "summary": "**Description** As part of the AWS Applied AI Solutions organization, we have a vision to provide business applications, leveraging Amazon\u2019s unique experience and expertise, that are used by millions\u2026",
     "title": "Software Development Engineer, Applied AI Solutions",
     "ats_score": 50,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4423080255",
@@ -22168,7 +22168,7 @@
     "summary": "**Summary** **We are seeking a Front\\-End Software Engineer to develop scalable, maintainable applications using Angular and Typescript for a dynamic insurance platform.** In this role, you will lead\u2026",
     "title": "Remote Software Engineer, Front-End",
     "ats_score": 40,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "session_id": "2026-07-17T23:11:10Z",
@@ -26814,6 +26814,28 @@
     "site": "linkedin",
     "summary": "This position involves developing and maintaining backend systems for our equities portfolio management platform, which handles billions of dollars in client assets.",
     "title": "Software Engineer, Asset Management",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "520db12230fe315e49583a20f0aeda14d3b875ef6f0ac92c3d9d30c9e181f2a2",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-18T06:35:38.364Z",
+      "error": null,
+      "company": "Nuveen, a TIAA company",
+      "title": "Software Engineer, Asset Management",
+      "resume_slot": 29,
+      "session_hour": "23",
+      "batch_time": "2026-07-18T03:10:02Z",
+      "session_id": "2026-07-18T06:07:22Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "NuveenATIAACompany (18thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/NuveenATIAACompany (18thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/NuveenATIAACompany (18thJuly)"
+    },
     "ats_score": 54,
     "fit_score": 20
   },
@@ -27447,6 +27469,28 @@
     "site": "linkedin",
     "summary": "**Job Responsibilities \\& Requirements** As a Software Engineer in MiTek\u2019s Homebuilder division, you will help design, develop, modernize, and support MiTek Kova, a web\\-based ERP platform used by ho\u2026",
     "title": "Software Engineer",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-18T06:36:16.713Z",
+      "error": "Unsupported JD \u2014 non-engineering role detected (confidence 0.437).",
+      "company": "MiTek",
+      "title": "Software Engineer",
+      "resume_slot": 16,
+      "session_hour": "23",
+      "batch_time": "2026-07-18T03:10:02Z",
+      "session_id": "2026-07-18T06:07:22Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": "unsupported-jd",
+      "folder": "MiTek (18thJuly)",
+      "pdf_path": null,
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/MiTek (18thJuly)"
+    },
     "ats_score": 37,
     "fit_score": 7
   },
@@ -27615,6 +27659,28 @@
     "site": "linkedin",
     "summary": "**Job Description** The Data Scientist is responsible for mining big data, interpreting and analyzing highly complex data sets from multiple sources using a variety of techniques to aid Mazda North A\u2026",
     "title": "Data Scientist",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "2543ab7abd2a0b691ddcb1a68dcabb863f0929d00e3921861334d31388eba3db",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-18T06:36:33.169Z",
+      "error": null,
+      "company": "Mazda North American Operations",
+      "title": "Data Scientist",
+      "resume_slot": 4,
+      "session_hour": "23",
+      "batch_time": "2026-07-18T03:10:02Z",
+      "session_id": "2026-07-18T06:07:22Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "MazdaNorthAmericanOperations (18thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/MazdaNorthAmericanOperations (18thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/MazdaNorthAmericanOperations (18thJuly)"
+    },
     "ats_score": 30,
     "fit_score": 6
   },
@@ -27844,6 +27910,28 @@
     "score_pct": 50,
     "site": "linkedin",
     "title": "Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "6f10b85dab9913e03ad90aef0a2337ff77112a7e9a61cbff9f1cc86132c37ed9",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-18T06:35:46.069Z",
+      "error": null,
+      "company": "Horizontal Talent",
+      "title": "Software Engineer",
+      "resume_slot": 26,
+      "session_hour": "23",
+      "batch_time": "2026-07-18T03:12:45Z",
+      "session_id": "2026-07-18T06:07:22Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "HorizontalTalent (18thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/HorizontalTalent (18thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/HorizontalTalent (18thJuly)"
+    },
     "ats_score": 78,
     "fit_score": 16
   },
