@@ -1042,7 +1042,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/Mastercard (18thJuly)"
     },
     "ats_score": 72,
-    "fit_score": 11
+    "fit_score": 9
   },
   {
     "session_id": "2026-07-18T05:10:06Z",
@@ -2417,7 +2417,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/Mastercard (18thJuly)-2"
     },
     "ats_score": 72,
-    "fit_score": 12
+    "fit_score": 9
   },
   {
     "session_id": "2026-07-18T06:07:21Z",
@@ -6374,7 +6374,7 @@
     "summary": "**Position:** Backend Engineer **Type:** Hourly Contract **Compensation:** Up to $65/hour **Location:** Remote **Commitment:** 5\\-20 hours/week **Role Responsibilities** * Evaluate, review, and debug\u2026",
     "title": "Backend Developer | $65/hr Remote",
     "ats_score": 60,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-18T12:11:45Z",
@@ -6481,7 +6481,7 @@
     "summary": "**Position:** Backend Engineer **Type:** Hourly Contract **Compensation:** Up to $65/hour **Location:** Remote **Commitment:** 5\\-20 hours/week **Role Responsibilities** * Evaluate, review, and debug\u2026",
     "title": "Backend Developer | $65/hr Remote",
     "ats_score": 60,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4415183359",
@@ -7183,7 +7183,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-18/Hired (18thJuly)-2"
     },
     "ats_score": 76,
-    "fit_score": 9
+    "fit_score": 10
   },
   {
     "session_id": "2026-07-18T13:12:36Z",
@@ -20132,6 +20132,28 @@
     "site": "linkedin",
     "summary": "**Company Overview** WarpWare is opening space for all through software innovation.",
     "title": "Embedded Space Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "7a7f7e64da46d693ff2629329d7fc3bfc2b7e9f8c64a448300840c775ae349b4",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-19T04:35:16.383Z",
+      "error": null,
+      "company": "WarpWare",
+      "title": "Embedded Space Software Engineer",
+      "resume_slot": 7,
+      "session_hour": "00",
+      "batch_time": "2026-07-19T03:05:26Z",
+      "session_id": "2026-07-19T04:06:39Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "WarpWare (19thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-19/WarpWare (19thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-19/WarpWare (19thJuly)"
+    },
     "ats_score": 50,
     "fit_score": 5
   },
