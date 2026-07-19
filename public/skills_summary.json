@@ -1,24 +1,24 @@
 {
-  "generated_at": "2026-07-19T11:14:07.321741+00:00",
-  "total_analyzed": 48451,
+  "generated_at": "2026-07-19T12:11:38.662609+00:00",
+  "total_analyzed": 48461,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 27564,
-        "Java": 13444,
-        "SQL": 12146,
-        "JavaScript": 8360,
-        "TypeScript": 7374,
+        "Python": 27569,
+        "Java": 13446,
+        "SQL": 12150,
+        "JavaScript": 8361,
+        "TypeScript": 7376,
         "HTML/CSS": 2722,
         "Kotlin": 2276,
-        ".NET": 2060,
+        ".NET": 2061,
         "Swift": 1893,
         "Rust": 1809,
         "Go": 1245,
         "Bash/Shell": 1074,
         "Scala": 867,
-        "Ruby": 819,
+        "Ruby": 821,
         "PHP": 438,
         "C++": 18,
         "C#": 7
@@ -28,15 +28,15 @@
       "color": "#8b5cf6",
       "skills": {
         "React": 7940,
-        "PyTorch": 4872,
-        "TensorFlow": 3844,
+        "PyTorch": 4873,
+        "TensorFlow": 3845,
         "Node.js": 3001,
         "LangChain": 2579,
         "Angular": 2543,
         "Spring": 2367,
-        "Scikit-learn": 2299,
-        "Pandas": 1990,
-        "NumPy": 1617,
+        "Scikit-learn": 2300,
+        "Pandas": 1991,
+        "NumPy": 1618,
         "GraphQL": 1517,
         "Spring Boot": 1498,
         "FastAPI": 1412,
@@ -47,14 +47,14 @@
         "Vue": 831,
         "Selenium": 545,
         "Rails": 419,
-        "Playwright": 391,
+        "Playwright": 392,
         "NestJS": 248
       }
     },
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 13643,
+        "AWS": 13644,
         "Azure": 7901,
         "GCP": 7154,
         "S3": 1517,
@@ -75,11 +75,11 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 18954,
-        "REST API": 7257,
-        "Distributed Systems": 6907,
-        "Microservices": 4119,
-        "System Design": 3711,
+        "Scalability": 18957,
+        "REST API": 7258,
+        "Distributed Systems": 6909,
+        "Microservices": 4121,
+        "System Design": 3713,
         "Kafka": 2219,
         "Event-Driven": 2158,
         "API Design": 1631,
@@ -94,10 +94,10 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 9932,
+        "CI/CD": 9934,
         "Kubernetes": 6212,
-        "Docker": 5888,
-        "Git": 5663,
+        "Docker": 5889,
+        "Git": 5666,
         "Linux": 4094,
         "Terraform": 2416,
         "Jenkins": 1646,
@@ -114,7 +114,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 6818,
+        "ETL/ELT": 6819,
         "PostgreSQL": 3832,
         "Spark": 3078,
         "Vector DB": 2378,
@@ -136,13 +136,13 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 14099,
-        "Agents": 10025,
-        "LLM": 9170,
+        "Machine Learning": 14100,
+        "Agents": 10027,
+        "LLM": 9171,
         "GenAI": 6228,
-        "PyTorch": 4872,
+        "PyTorch": 4873,
         "RAG": 4296,
-        "TensorFlow": 3844,
+        "TensorFlow": 3845,
         "NLP": 3666,
         "Prompt Eng": 3059,
         "Deep Learning": 2950,
@@ -173,11 +173,11 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 12444,
-        "Code Review": 9807,
-        "Mentorship": 8944,
-        "Agile/Scrum": 7523,
-        "Leadership": 2841,
+        "Cross-functional": 12449,
+        "Code Review": 9810,
+        "Mentorship": 8947,
+        "Agile/Scrum": 7524,
+        "Leadership": 2842,
         "On-call": 2506
       }
     }
