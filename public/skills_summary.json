@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-07-19T08:07:26.247044+00:00",
-  "total_analyzed": 48425,
+  "generated_at": "2026-07-19T09:40:45.457504+00:00",
+  "total_analyzed": 48431,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 27550,
+        "Python": 27551,
         "Java": 13442,
         "SQL": 12140,
         "JavaScript": 8358,
@@ -30,14 +30,14 @@
         "React": 7937,
         "PyTorch": 4868,
         "TensorFlow": 3841,
-        "Node.js": 3000,
+        "Node.js": 3001,
         "LangChain": 2578,
         "Angular": 2543,
         "Spring": 2367,
         "Scikit-learn": 2296,
         "Pandas": 1990,
         "NumPy": 1617,
-        "GraphQL": 1515,
+        "GraphQL": 1516,
         "Spring Boot": 1498,
         "FastAPI": 1412,
         "Next.js": 1315,
@@ -75,10 +75,10 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 18943,
-        "REST API": 7255,
+        "Scalability": 18944,
+        "REST API": 7256,
         "Distributed Systems": 6903,
-        "Microservices": 4118,
+        "Microservices": 4119,
         "System Design": 3710,
         "Kafka": 2217,
         "Event-Driven": 2158,
@@ -94,10 +94,10 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 9925,
-        "Kubernetes": 6210,
-        "Docker": 5887,
-        "Git": 5661,
+        "CI/CD": 9929,
+        "Kubernetes": 6211,
+        "Docker": 5888,
+        "Git": 5662,
         "Linux": 4094,
         "Terraform": 2416,
         "Jenkins": 1646,
@@ -114,7 +114,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 6814,
+        "ETL/ELT": 6816,
         "PostgreSQL": 3830,
         "Spark": 3073,
         "Vector DB": 2377,
@@ -137,8 +137,8 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 14092,
-        "Agents": 10022,
-        "LLM": 9166,
+        "Agents": 10023,
+        "LLM": 9168,
         "GenAI": 6224,
         "PyTorch": 4868,
         "RAG": 4294,
@@ -174,10 +174,10 @@
       "color": "#64748b",
       "skills": {
         "Cross-functional": 12436,
-        "Code Review": 9804,
+        "Code Review": 9805,
         "Mentorship": 8936,
-        "Agile/Scrum": 7519,
-        "Leadership": 2836,
+        "Agile/Scrum": 7522,
+        "Leadership": 2839,
         "On-call": 2505
       }
     }
