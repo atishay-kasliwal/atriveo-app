@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-07-19T16:29:09.041307+00:00",
-  "total_analyzed": 48531,
+  "generated_at": "2026-07-19T17:15:47.983214+00:00",
+  "total_analyzed": 48536,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 27607,
-        "Java": 13457,
-        "SQL": 12160,
-        "JavaScript": 8370,
-        "TypeScript": 7388,
+        "Python": 27611,
+        "Java": 13461,
+        "SQL": 12161,
+        "JavaScript": 8374,
+        "TypeScript": 7392,
         "HTML/CSS": 2723,
-        "Kotlin": 2278,
+        "Kotlin": 2282,
         ".NET": 2062,
-        "Swift": 1895,
+        "Swift": 1899,
         "Rust": 1813,
         "Go": 1247,
         "Bash/Shell": 1074,
@@ -27,7 +27,7 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 7949,
+        "React": 7953,
         "PyTorch": 4883,
         "TensorFlow": 3852,
         "Node.js": 3005,
@@ -54,9 +54,9 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 13669,
-        "Azure": 7915,
-        "GCP": 7172,
+        "AWS": 13670,
+        "Azure": 7916,
+        "GCP": 7173,
         "S3": 1518,
         "Lambda": 1352,
         "Serverless": 1016,
@@ -68,19 +68,19 @@
         "SQS": 567,
         "CloudWatch": 412,
         "Cloud Run": 320,
-        "GKE": 251,
+        "GKE": 252,
         "Kinesis": 231
       }
     },
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 18989,
+        "Scalability": 18990,
         "REST API": 7262,
-        "Distributed Systems": 6918,
+        "Distributed Systems": 6919,
         "Microservices": 4122,
         "System Design": 3715,
-        "Kafka": 2220,
+        "Kafka": 2221,
         "Event-Driven": 2161,
         "API Design": 1635,
         "Caching": 925,
@@ -114,21 +114,21 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 6831,
+        "ETL/ELT": 6832,
         "PostgreSQL": 3840,
-        "Spark": 3082,
+        "Spark": 3083,
         "Vector DB": 2378,
-        "Kafka": 2220,
+        "Kafka": 2221,
         "MySQL": 2049,
         "Databricks": 1695,
-        "MongoDB": 1456,
+        "MongoDB": 1457,
         "Snowflake": 1411,
         "Redis": 1276,
         "Airflow": 1193,
         "Elasticsearch": 837,
-        "BigQuery": 617,
+        "BigQuery": 618,
         "dbt": 448,
-        "Cassandra": 381,
+        "Cassandra": 382,
         "Flink": 281,
         "ClickHouse": 276
       }
@@ -136,7 +136,7 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 14117,
+        "Machine Learning": 14122,
         "Agents": 10061,
         "LLM": 9183,
         "GenAI": 6231,
@@ -153,7 +153,7 @@
         "Hugging Face": 1173,
         "SageMaker": 879,
         "MLflow": 823,
-        "Vertex AI": 746
+        "Vertex AI": 747
       }
     },
     "Security": {
@@ -173,11 +173,11 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 12470,
+        "Cross-functional": 12471,
         "Code Review": 9822,
-        "Mentorship": 8953,
+        "Mentorship": 8954,
         "Agile/Scrum": 7527,
-        "Leadership": 2845,
+        "Leadership": 2846,
         "On-call": 2506
       }
     }
