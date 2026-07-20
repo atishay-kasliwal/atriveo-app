@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-07-20T02:46:23.027594+00:00",
-  "total_analyzed": 48640,
+  "generated_at": "2026-07-20T03:47:08.583205+00:00",
+  "total_analyzed": 48647,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 27666,
+        "Python": 27668,
         "Java": 13478,
         "SQL": 12176,
         "JavaScript": 8392,
@@ -14,7 +14,7 @@
         "Kotlin": 2292,
         ".NET": 2062,
         "Swift": 1907,
-        "Rust": 1817,
+        "Rust": 1818,
         "Go": 1252,
         "Bash/Shell": 1074,
         "Scala": 868,
@@ -27,11 +27,11 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 7979,
+        "React": 7980,
         "PyTorch": 4890,
         "TensorFlow": 3856,
         "Node.js": 3010,
-        "LangChain": 2581,
+        "LangChain": 2582,
         "Angular": 2550,
         "Spring": 2368,
         "Scikit-learn": 2306,
@@ -95,8 +95,8 @@
       "color": "#10b981",
       "skills": {
         "CI/CD": 9964,
-        "Kubernetes": 6236,
-        "Docker": 5909,
+        "Kubernetes": 6237,
+        "Docker": 5910,
         "Git": 5685,
         "Linux": 4097,
         "Terraform": 2422,
@@ -114,14 +114,14 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 6843,
+        "ETL/ELT": 6844,
         "PostgreSQL": 3847,
         "Spark": 3086,
-        "Vector DB": 2381,
+        "Vector DB": 2382,
         "Kafka": 2222,
         "MySQL": 2051,
-        "Databricks": 1701,
-        "MongoDB": 1459,
+        "Databricks": 1702,
+        "MongoDB": 1460,
         "Snowflake": 1414,
         "Redis": 1280,
         "Airflow": 1193,
@@ -137,8 +137,8 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 14150,
-        "Agents": 10120,
-        "LLM": 9204,
+        "Agents": 10125,
+        "LLM": 9205,
         "GenAI": 6239,
         "PyTorch": 4890,
         "RAG": 4306,
@@ -148,7 +148,7 @@
         "Deep Learning": 2958,
         "Fine-tuning": 2664,
         "OpenAI": 2599,
-        "LangChain": 2581,
+        "LangChain": 2582,
         "Embeddings": 1320,
         "Hugging Face": 1176,
         "SageMaker": 879,
@@ -162,7 +162,7 @@
         "OAuth/OIDC": 640,
         "Encryption": 564,
         "GDPR": 495,
-        "IAM": 363,
+        "IAM": 364,
         "JWT": 309,
         "SOC 2": 283,
         "RBAC": 240,
@@ -175,7 +175,7 @@
       "skills": {
         "Cross-functional": 12482,
         "Code Review": 9833,
-        "Mentorship": 8961,
+        "Mentorship": 8962,
         "Agile/Scrum": 7532,
         "Leadership": 2849,
         "On-call": 2507
