@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-07-20T06:45:22.691003+00:00",
-  "total_analyzed": 48655,
+  "generated_at": "2026-07-20T07:46:37.061407+00:00",
+  "total_analyzed": 48659,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
         "Python": 27672,
-        "Java": 13479,
+        "Java": 13481,
         "SQL": 12177,
-        "JavaScript": 8393,
+        "JavaScript": 8395,
         "TypeScript": 7423,
-        "HTML/CSS": 2725,
+        "HTML/CSS": 2727,
         "Kotlin": 2292,
         ".NET": 2062,
         "Swift": 1907,
@@ -19,7 +19,7 @@
         "Bash/Shell": 1074,
         "Scala": 868,
         "Ruby": 823,
-        "PHP": 439,
+        "PHP": 441,
         "C++": 18,
         "C#": 7
       }
@@ -119,7 +119,7 @@
         "Spark": 3087,
         "Vector DB": 2382,
         "Kafka": 2222,
-        "MySQL": 2051,
+        "MySQL": 2053,
         "Databricks": 1702,
         "MongoDB": 1460,
         "Snowflake": 1414,
@@ -177,7 +177,7 @@
         "Code Review": 9833,
         "Mentorship": 8962,
         "Agile/Scrum": 7533,
-        "Leadership": 2849,
+        "Leadership": 2851,
         "On-call": 2507
       }
     }
