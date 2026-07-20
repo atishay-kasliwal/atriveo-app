@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-07-19T23:46:38.768863+00:00",
-  "total_analyzed": 48607,
+  "generated_at": "2026-07-20T00:44:21.316820+00:00",
+  "total_analyzed": 48608,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 27651,
+        "Python": 27652,
         "Java": 13476,
-        "SQL": 12170,
+        "SQL": 12171,
         "JavaScript": 8387,
         "TypeScript": 7412,
         "HTML/CSS": 2724,
@@ -34,8 +34,8 @@
         "LangChain": 2581,
         "Angular": 2548,
         "Spring": 2368,
-        "Scikit-learn": 2304,
-        "Pandas": 1994,
+        "Scikit-learn": 2305,
+        "Pandas": 1995,
         "NumPy": 1621,
         "GraphQL": 1525,
         "Spring Boot": 1499,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 19013,
+        "Scalability": 19014,
         "REST API": 7266,
         "Distributed Systems": 6926,
         "Microservices": 4125,
@@ -126,7 +126,7 @@
         "Redis": 1278,
         "Airflow": 1193,
         "Elasticsearch": 838,
-        "BigQuery": 619,
+        "BigQuery": 620,
         "dbt": 448,
         "Cassandra": 382,
         "Flink": 281,
@@ -136,7 +136,7 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 14143,
+        "Machine Learning": 14144,
         "Agents": 10096,
         "LLM": 9197,
         "GenAI": 6237,
