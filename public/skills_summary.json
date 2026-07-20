@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-07-20T03:47:08.583205+00:00",
-  "total_analyzed": 48647,
+  "generated_at": "2026-07-20T04:46:10.281647+00:00",
+  "total_analyzed": 48649,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 27668,
+        "Python": 27669,
         "Java": 13478,
-        "SQL": 12176,
+        "SQL": 12177,
         "JavaScript": 8392,
         "TypeScript": 7421,
         "HTML/CSS": 2725,
@@ -28,13 +28,13 @@
       "color": "#8b5cf6",
       "skills": {
         "React": 7980,
-        "PyTorch": 4890,
-        "TensorFlow": 3856,
+        "PyTorch": 4891,
+        "TensorFlow": 3857,
         "Node.js": 3010,
         "LangChain": 2582,
         "Angular": 2550,
         "Spring": 2368,
-        "Scikit-learn": 2306,
+        "Scikit-learn": 2307,
         "Pandas": 1995,
         "NumPy": 1621,
         "GraphQL": 1526,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 19023,
+        "Scalability": 19024,
         "REST API": 7266,
         "Distributed Systems": 6931,
         "Microservices": 4125,
@@ -94,7 +94,7 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 9964,
+        "CI/CD": 9965,
         "Kubernetes": 6237,
         "Docker": 5910,
         "Git": 5685,
@@ -116,7 +116,7 @@
       "skills": {
         "ETL/ELT": 6844,
         "PostgreSQL": 3847,
-        "Spark": 3086,
+        "Spark": 3087,
         "Vector DB": 2382,
         "Kafka": 2222,
         "MySQL": 2051,
@@ -136,16 +136,16 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 14150,
-        "Agents": 10125,
-        "LLM": 9205,
+        "Machine Learning": 14151,
+        "Agents": 10126,
+        "LLM": 9206,
         "GenAI": 6239,
-        "PyTorch": 4890,
+        "PyTorch": 4891,
         "RAG": 4306,
-        "TensorFlow": 3856,
-        "NLP": 3679,
+        "TensorFlow": 3857,
+        "NLP": 3680,
         "Prompt Eng": 3068,
-        "Deep Learning": 2958,
+        "Deep Learning": 2959,
         "Fine-tuning": 2664,
         "OpenAI": 2599,
         "LangChain": 2582,
