@@ -3620,7 +3620,7 @@
     "summary": "Applied AI Engineer A fast\\-growing AI\\-first technology company is looking for an Applied AI Engineer to join their team building next\\-generation AI products powered by large language models and in\u2026",
     "title": "AI Engineer",
     "ats_score": 33,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442595663",
@@ -7005,7 +7005,7 @@
     "summary": "**Java Full Stack Developer with AI Integration** **New York, United States** We're looking for a talented Java developer to build scalable, production\\-ready Spring Boot microservices.",
     "title": "Jr Fullstack Software Engineer AI intergation",
     "ats_score": 52,
-    "fit_score": 21
+    "fit_score": 20
   },
   {
     "session_id": "2026-07-20T14:16:15Z",
@@ -11067,7 +11067,7 @@
     "summary": "**Java Full Stack Developer with AI Integration** **New York, United States** We're looking for a talented Java developer to build scalable, production\\-ready Spring Boot microservices.",
     "title": "Jr Fullstack Software Engineer AI intergation",
     "ats_score": 52,
-    "fit_score": 21
+    "fit_score": 20
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442099175",
@@ -16158,7 +16158,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-20/Sift (20thJuly)"
     },
     "ats_score": 46,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "session_id": "2026-07-20T19:16:13Z",
@@ -18588,7 +18588,7 @@
     "summary": "BeaconFire is based in Central NJ, specializing in Software Development, Web Development, and Business Intelligence; looking for candidates with a strong background in Software Engineering or Compute\u2026",
     "title": "Software Engineer",
     "ats_score": 60,
-    "fit_score": 9
+    "fit_score": 10
   },
   {
     "session_id": "2026-07-20T19:16:13Z",
@@ -19422,7 +19422,7 @@
     "summary": "**Job Description** **Job Title:** **Lead AI Engineer (GenAI \\& RAG)** **Overview / Summary** We are seeking an experienced Python Developer with 10\\+ years of software engineering experience, includ\u2026",
     "title": "AI Engineer (GenAI & RAG)",
     "ats_score": 35,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442781473",
@@ -28240,6 +28240,28 @@
     "site": "linkedin",
     "summary": "This person has strong design and implementation experience and a strong knowledge of web services and protocols.",
     "title": "Software Development Engineer II, Delivery Choice",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T05:36:03.193Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.258 (need \u2265 0.3).",
+      "company": "Amazon",
+      "title": "Software Development Engineer II, Delivery Choice",
+      "resume_slot": 19,
+      "session_hour": "20",
+      "batch_time": "2026-07-21T00:14:02Z",
+      "session_id": "2026-07-21T05:12:44Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": "unsupported-jd",
+      "folder": "Amazon (21thJuly)-20",
+      "pdf_path": null,
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Amazon (21thJuly)-20"
+    },
     "ats_score": 0,
     "fit_score": 1
   },
@@ -28261,6 +28283,28 @@
     "site": "linkedin",
     "summary": "This person has strong design and implementation experience and a strong knowledge of web services and protocols.",
     "title": "Software Development Engineer II, Delivery Choice",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T05:36:03.343Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.258 (need \u2265 0.3).",
+      "company": "Amazon",
+      "title": "Software Development Engineer II, Delivery Choice",
+      "resume_slot": 18,
+      "session_hour": "20",
+      "batch_time": "2026-07-21T00:14:02Z",
+      "session_id": "2026-07-21T05:12:44Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": "unsupported-jd",
+      "folder": "Amazon (21thJuly)-21",
+      "pdf_path": null,
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Amazon (21thJuly)-21"
+    },
     "ats_score": 0,
     "fit_score": 1
   },
@@ -28828,7 +28872,7 @@
     "summary": "**Description** Employer: Amazon Web Services, Inc.",
     "title": "Data Scientist II - AMZ27028.1",
     "ats_score": 62,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-07-21T00:14:12Z",
@@ -35313,7 +35357,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-20/Huxley (20thJuly)-2"
     },
     "ats_score": 40,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4443045510",
@@ -39376,6 +39420,28 @@
     "site": "linkedin",
     "summary": "**Description** Amazon\u2019s Specialized Business Services Security team is seeking an innovative Software Development Engineer to join our Core Engineering Automation team.",
     "title": "Software Development Engineer - Cybersecurity, SBS Core Engineering",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "f9145cec27e4a276885248ed698406f307d7a9304a84efd6654c733c44609762",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T05:35:07.498Z",
+      "error": null,
+      "company": "Amazon",
+      "title": "Software Development Engineer - Cybersecurity, SBS Core Engineering",
+      "resume_slot": 3,
+      "session_hour": "23",
+      "batch_time": "2026-07-21T03:14:36Z",
+      "session_id": "2026-07-21T05:12:44Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "Amazon (21thJuly)-16",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Amazon (21thJuly)-16/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Amazon (21thJuly)-16"
+    },
     "ats_score": 66,
     "fit_score": 4
   },
@@ -40145,6 +40211,28 @@
     "site": "linkedin",
     "summary": "* Responsible for the development and maintenance of key platforms needed for developing, evaluating and deploying LLM for real\\-world applications.",
     "title": "Machine Learning Engineer II, Special Projects",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "9bcbc83cf69c34096014e4d343b3410b56459e946c74d64c9b08303d5f4d4e75",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T05:35:16.529Z",
+      "error": null,
+      "company": "Amazon",
+      "title": "Machine Learning Engineer II, Special Projects",
+      "resume_slot": 7,
+      "session_hour": "23",
+      "batch_time": "2026-07-21T03:14:36Z",
+      "session_id": "2026-07-21T05:12:44Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "Amazon (21thJuly)-18",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Amazon (21thJuly)-18/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Amazon (21thJuly)-18"
+    },
     "ats_score": 0,
     "fit_score": 3
   },
@@ -41409,7 +41497,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-20/Amazon (20thJuly)-119"
     },
     "ats_score": 42,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4443028569",
@@ -41450,6 +41538,28 @@
     "site": "linkedin",
     "summary": "* Collaborate closely with cross\\-functional teams, including ML researchers, software engineers, and data engineers, to define requirements and align on architectural decisions.",
     "title": "Software Engineer, ML Platform (ML Training)",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "b315a7af61d519c28e940342c7b7aaf40e0db7249f5e1aad51fa37e57e7a7c42",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T05:36:03.054Z",
+      "error": null,
+      "company": "Zoox",
+      "title": "Software Engineer, ML Platform (ML Training)",
+      "resume_slot": 16,
+      "session_hour": "23",
+      "batch_time": "2026-07-21T03:14:36Z",
+      "session_id": "2026-07-21T05:12:44Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "Zoox (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Zoox (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Zoox (21thJuly)"
+    },
     "ats_score": 60,
     "fit_score": 4
   },
@@ -41471,6 +41581,28 @@
     "site": "linkedin",
     "summary": "This person has strong design and implementation experience and a strong knowledge of web services and protocols.",
     "title": "Software Development Engineer II, Delivery Choice",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T05:36:03.480Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.258 (need \u2265 0.3).",
+      "company": "Amazon",
+      "title": "Software Development Engineer II, Delivery Choice",
+      "resume_slot": 20,
+      "session_hour": "23",
+      "batch_time": "2026-07-21T03:14:36Z",
+      "session_id": "2026-07-21T05:12:44Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": "unsupported-jd",
+      "folder": "Amazon (21thJuly)-22",
+      "pdf_path": null,
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Amazon (21thJuly)-22"
+    },
     "ats_score": 0,
     "fit_score": 1
   },
@@ -41492,6 +41624,28 @@
     "site": "linkedin",
     "summary": "Who we are **About Stripe** Stripe is a financial infrastructure platform for businesses.",
     "title": "Software Engineer, Data Privacy Technologies",
+    "resume": {
+      "status": "failed",
+      "stage": "PDF",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T05:36:03.767Z",
+      "error": "Unsupported JD \u2014 engineering confidence 0.12 (need \u2265 0.3).",
+      "company": "Stripe",
+      "title": "Software Engineer, Data Privacy Technologies",
+      "resume_slot": 21,
+      "session_hour": "23",
+      "batch_time": "2026-07-21T03:14:36Z",
+      "session_id": "2026-07-21T05:12:44Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": "unsupported-jd",
+      "folder": "Stripe (21thJuly)-2",
+      "pdf_path": null,
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Stripe (21thJuly)-2"
+    },
     "ats_score": 50,
     "fit_score": 5
   },
