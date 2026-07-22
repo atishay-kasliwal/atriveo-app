@@ -391,7 +391,7 @@
     },
     "scraped_date": "2026-07-21",
     "ats_score": 50,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-21T12:10:54Z",
@@ -929,6 +929,28 @@
     },
     "scraped_date": "2026-07-21",
     "ats_score": 40,
+    "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4443703327",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Snowflake",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Bellevue, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 178,
+    "score_pct": 71,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "At Snowflake, we are powering the era of the agentic enterprise.",
+    "title": "Software Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 37,
     "fit_score": 4
   },
   {
@@ -1876,6 +1898,50 @@
     "fit_score": 4
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4443701386",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Snap Inc.",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Seattle, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 163,
+    "score_pct": 65,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "Snap Inc is a technology company.",
+    "title": "Software Engineer, Android, Level 5",
+    "scraped_date": "2026-07-21",
+    "ats_score": 40,
+    "fit_score": 2
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4443592663",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Amazon",
+    "competition_score": 5,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Seattle, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 162,
+    "score_pct": 65,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "**Description** The Amazon Checkout Platform team seeks a creative software development engineer who treats software development as a craft, cares deeply about our customers, and takes great pride in\u2026",
+    "title": "Software Dev Engineer II, Checkout Platform",
+    "scraped_date": "2026-07-21",
+    "ats_score": 0,
+    "fit_score": 3
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4442633166",
     "session_id": "2026-07-21T12:10:54Z",
     "batch_time": "2026-07-21T12:10:50Z",
@@ -2123,6 +2189,28 @@
     "site": "linkedin",
     "summary": "As the company scales, your ownership and impact will grow alongside it, giving you the opportunity to build the tools, systems, and platforms that support rapid innovation.",
     "title": "Software Engineer (On-site NYC)",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "455335e45cc2d2c39aaf9834dd26f38d8801552741341ef9db3064a9d7b602d8",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:38:05.466Z",
+      "error": null,
+      "company": "Morgan Pinnacle Group",
+      "title": "Software Engineer (On-site NYC)",
+      "resume_slot": 44,
+      "session_hour": "18",
+      "batch_time": "2026-07-21T22:37:19Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "MorganPinnacleGroup (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/MorganPinnacleGroup (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/MorganPinnacleGroup (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 66,
     "fit_score": 7
@@ -2331,6 +2419,28 @@
     "site": "linkedin",
     "summary": "At Moody's, we unite the brightest minds to turn today\u2019s risks into tomorrow\u2019s opportunities.",
     "title": "Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "b924e025d62a6fbb3046d93983200e751a3963bf80d93655312af19e6a4a4280",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:38:10.687Z",
+      "error": null,
+      "company": "Moody's Corporation",
+      "title": "Software Engineer",
+      "resume_slot": 33,
+      "session_hour": "18",
+      "batch_time": "2026-07-21T22:37:19Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "MoodySCorporation (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/MoodySCorporation (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/MoodySCorporation (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 62,
     "fit_score": 8
@@ -2531,6 +2641,28 @@
     "title": "Applied AI Engineer",
     "scraped_date": "2026-07-21",
     "ats_score": 42,
+    "fit_score": 6
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4443592296",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "DomainTools",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Raleigh, NC",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 146,
+    "score_pct": 58,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "DomainTools is seeking a **Software Engineer** to join our Frontend Team. **Job Responsibilities{{:}}** * Produce well designed, testable, efficient code using software development best practices.",
+    "title": "Full Stack Software Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 33,
     "fit_score": 6
   },
   {
@@ -3298,6 +3430,28 @@
     "fit_score": 7
   },
   {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4441008794",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Change Order",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "New Grad",
+    "location": "New York, NY",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 135,
+    "score_pct": 54,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**About The Role** We're looking for a hungry, hands\\-on AI Engineer to join our data science team.",
+    "title": "Jr. AI Engineer - Data Annotation",
+    "scraped_date": "2026-07-21",
+    "ats_score": 66,
+    "fit_score": 8
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4443362760",
     "session_id": "2026-07-21T13:13:32Z",
     "batch_time": "2026-07-21T13:13:26Z",
@@ -3459,7 +3613,7 @@
     },
     "scraped_date": "2026-07-21",
     "ats_score": 33,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-07-21T07:08:31Z",
@@ -3790,6 +3944,50 @@
     "scraped_date": "2026-07-21",
     "ats_score": 57,
     "fit_score": 6
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4443598522",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Amazon Web Services (AWS)",
+    "competition_score": 5,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Seattle, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 130,
+    "score_pct": 52,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Description** Ever wondered how AWS protects its infrastructure from the ever\\-evolving threat of DDoS (Distributed Denial of Service) attacks?",
+    "title": "Software Dev Engineer II, Shield",
+    "scraped_date": "2026-07-21",
+    "ats_score": 40,
+    "fit_score": 7
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4443702439",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Amazon Web Services (AWS)",
+    "competition_score": 5,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Seattle, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 130,
+    "score_pct": 52,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Description** Ever wondered how AWS protects its infrastructure from the ever\\-evolving threat of DDoS (Distributed Denial of Service) attacks?",
+    "title": "Software Dev Engineer II, Shield",
+    "scraped_date": "2026-07-21",
+    "ats_score": 40,
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442272048",
@@ -4154,6 +4352,28 @@
     "fit_score": 8
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4443578012",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "SAS",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Cary, NC",
+    "max_exp": 2.0,
+    "min_exp": 2.0,
+    "pipeline": "standard",
+    "score": 128,
+    "score_pct": 51,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Software Developer (Emerging Careers) \\- Hybrid, Cary, North Carolina** We\u2019re a leader in data and AI.",
+    "title": "Software Developer (Emerging Careers)",
+    "scraped_date": "2026-07-21",
+    "ats_score": 42,
+    "fit_score": 4
+  },
+  {
     "session_id": "2026-07-21T13:13:32Z",
     "job_url": "https://www.linkedin.com/jobs/view/4420148934",
     "batch_time": "2026-07-21T13:13:26Z",
@@ -4174,6 +4394,28 @@
     "scraped_date": "2026-07-21",
     "ats_score": 58,
     "fit_score": 6
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4443578903",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Current",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "New York, NY",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 127,
+    "score_pct": 51,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**SOFTWARE ENGINEER, iOS** Current is a leading consumer fintech platform transforming financial access for everyday Americans with over 6 million members.",
+    "title": "Software Engineer, iOS",
+    "scraped_date": "2026-07-21",
+    "ats_score": 16,
+    "fit_score": 7
   },
   {
     "session_id": "2026-07-21T15:13:53Z",
@@ -5100,6 +5342,28 @@
     "fit_score": 4
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4443707028",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Amazon Web Services (AWS)",
+    "competition_score": 5,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Seattle, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 121,
+    "score_pct": 48,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**Description** The AWS Marketplace \\& Partner Services (AMPS) Science team seeks a Software Engineer to design and build the infrastructure and tooling behind our AI solutions, including LLM trainin\u2026",
+    "title": "Software Development Engineer, AWS Marketplace & Partner Services",
+    "scraped_date": "2026-07-21",
+    "ats_score": 30,
+    "fit_score": 9
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4442629511",
     "session_id": "2026-07-21T14:14:11Z",
     "batch_time": "2026-07-21T14:14:05Z",
@@ -5880,6 +6144,28 @@
     "fit_score": 8
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4443593495",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Microsoft AI",
+    "competition_score": 5,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Redmond, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 112,
+    "score_pct": 45,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Overview** The **Bing Places team** is building intelligence that powers local search experiences used by millions of people every day.",
+    "title": "Applied Scientist II (Bing Places)",
+    "scraped_date": "2026-07-21",
+    "ats_score": 33,
+    "fit_score": 5
+  },
+  {
     "session_id": "2026-07-21T05:12:42Z",
     "job_url": "https://www.linkedin.com/jobs/view/4443064782",
     "batch_time": "2026-07-21T05:12:35Z",
@@ -5921,7 +6207,7 @@
     },
     "scraped_date": "2026-07-21",
     "ats_score": 60,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-21T05:12:42Z",
@@ -6012,6 +6298,28 @@
     "fit_score": 4
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4441011688",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Amazon Science",
+    "competition_score": 5,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Seattle, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 111,
+    "score_pct": 44,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**Description** Join us in the evolution of Amazon\u2019s Seller business!",
+    "title": "Data Scientist II, Selection Growth Science",
+    "scraped_date": "2026-07-21",
+    "ats_score": 50,
+    "fit_score": 4
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4393868336",
     "session_id": "2026-07-21T13:13:32Z",
     "batch_time": "2026-07-21T13:13:26Z",
@@ -6053,7 +6361,7 @@
     "title": "Software Engineer, Applied ML (Discovery, Recommendation & Search)",
     "scraped_date": "2026-07-21",
     "ats_score": 54,
-    "fit_score": 10
+    "fit_score": 9
   },
   {
     "session_id": "2026-07-21T11:12:01Z",
@@ -6250,6 +6558,28 @@
     "scraped_date": "2026-07-21",
     "ats_score": 50,
     "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4440493717",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Reyk Tech",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 106,
+    "score_pct": 42,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Location:** Manhattan, New York **Work arrangement:** Hybrid \u2014 two days per week onsite **Employment type:** Full\\-time **Base salary:** $115,000\u2013$135,000 annually **About the role** We are adding \u2026",
+    "title": "Software Engineer \u2013 Identity Applications & Integrations",
+    "scraped_date": "2026-07-21",
+    "ats_score": 50,
+    "fit_score": 26
   },
   {
     "session_id": "2026-07-21T17:14:57Z",
@@ -6621,6 +6951,16 @@
     "site": "linkedin",
     "summary": "Applicants in San Francisco: Qualified applications with arrest or conviction records will be considered for employment in accordance with the San Francisco Fair Chance Ordinance for Employers and th\u2026",
     "title": "Software Engineer III, Full Stack",
+    "resume": {
+      "cached": true,
+      "error": null,
+      "fingerprint": "233fa32912cff16e48f49f46f4f9fe2b6df32773dfe1ef8959a69941cb5b29f5",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Google (21thJuly)-14/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Google (21thJuly)-14",
+      "stage": "SUCCESS",
+      "status": "success",
+      "updated_at": "2026-07-21T23:37:31.517Z"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 50,
     "fit_score": 4
@@ -6643,6 +6983,16 @@
     "site": "linkedin",
     "summary": "Applicants in San Francisco: Qualified applications with arrest or conviction records will be considered for employment in accordance with the San Francisco Fair Chance Ordinance for Employers and th\u2026",
     "title": "Software Engineer III, Full Stack",
+    "resume": {
+      "cached": true,
+      "error": null,
+      "fingerprint": "233fa32912cff16e48f49f46f4f9fe2b6df32773dfe1ef8959a69941cb5b29f5",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Google (21thJuly)-14/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Google (21thJuly)-14",
+      "stage": "SUCCESS",
+      "status": "success",
+      "updated_at": "2026-07-21T23:37:31.693Z"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 50,
     "fit_score": 4
@@ -7247,6 +7597,28 @@
     "site": "linkedin",
     "summary": "**About Benzinga** Benzinga is a fast\\-growing financial media and data technology company reshaping how investors access information.",
     "title": "AI Machine Learning Engineer (AI / ML: Python / Go)",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "91d17a7c2383af0b300d834439652bdf0bc711ec9fad39d243b21f5524077be8",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:40:54.982Z",
+      "error": null,
+      "company": "Benzinga",
+      "title": "AI Machine Learning Engineer (AI / ML: Python / Go)",
+      "resume_slot": 34,
+      "session_hour": "18",
+      "batch_time": "2026-07-21T22:37:19Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "Benzinga (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Benzinga (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Benzinga (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 44,
     "fit_score": 23
@@ -7315,7 +7687,7 @@
     "title": "Backend Developer",
     "scraped_date": "2026-07-21",
     "ats_score": 64,
-    "fit_score": 18
+    "fit_score": 19
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4443353879",
@@ -7514,6 +7886,28 @@
     "scraped_date": "2026-07-21",
     "ats_score": 57,
     "fit_score": 5
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4443592046",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Everbridge",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 94,
+    "score_pct": 38,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "We're looking for a **Software Engineer** to join our platform engineering team. * Experience building distributed systems, microservices, or cloud\\-native SaaS applications on AWS.",
+    "title": "Software Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 50,
+    "fit_score": 9
   },
   {
     "session_id": "2026-07-21T04:14:01Z",
@@ -7832,6 +8226,28 @@
     "scraped_date": "2026-07-21",
     "ats_score": 50,
     "fit_score": 4
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4442912318",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Tata Consultancy Services",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "St. Petersburg, FL",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 92,
+    "score_pct": 37,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**Job Description** Must Have Technical/Functional Skills * Senior .NET Developer with Python and AI skills Roles \\& Responsibilities * Design, develop, and maintain enterprise applications using .NE\u2026",
+    "title": "Gen AI Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 44,
+    "fit_score": 8
   },
   {
     "session_id": "2026-07-21T15:13:53Z",
@@ -8513,6 +8929,28 @@
     "site": "linkedin",
     "summary": "**About Us** Proofpoint is a global leader in human\\- and agent\\-centric cybersecurity.",
     "title": "Software Engineer - AI Platform Team",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "93dc86858e5d4f8db53a432a16e9cef4eb5d09e23bfa38144f83b4bded8df467",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:40:59.913Z",
+      "error": null,
+      "company": "Proofpoint",
+      "title": "Software Engineer - AI Platform Team",
+      "resume_slot": 10,
+      "session_hour": "18",
+      "batch_time": "2026-07-21T22:37:19Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "Proofpoint (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Proofpoint (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Proofpoint (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 33,
     "fit_score": 6
@@ -8535,6 +8973,28 @@
     "site": "linkedin",
     "summary": "**About Us** Proofpoint is a global leader in human\\- and agent\\-centric cybersecurity.",
     "title": "Software Engineer - AI Platform Team",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "93dc86858e5d4f8db53a432a16e9cef4eb5d09e23bfa38144f83b4bded8df467",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:00.221Z",
+      "error": null,
+      "company": "Proofpoint",
+      "title": "Software Engineer - AI Platform Team",
+      "resume_slot": 11,
+      "session_hour": "18",
+      "batch_time": "2026-07-21T22:37:19Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "folder": "Proofpoint (21thJuly)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Proofpoint (21thJuly)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Proofpoint (21thJuly)-2"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 33,
     "fit_score": 6
@@ -8557,6 +9017,28 @@
     "site": "linkedin",
     "summary": "**About Us** Proofpoint is a global leader in human\\- and agent\\-centric cybersecurity.",
     "title": "Software Engineer - AI Platform Team",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "93dc86858e5d4f8db53a432a16e9cef4eb5d09e23bfa38144f83b4bded8df467",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:00.530Z",
+      "error": null,
+      "company": "Proofpoint",
+      "title": "Software Engineer - AI Platform Team",
+      "resume_slot": 8,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "folder": "Proofpoint (21thJuly)-3",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Proofpoint (21thJuly)-3/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Proofpoint (21thJuly)-3"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 33,
     "fit_score": 6
@@ -8579,6 +9061,28 @@
     "site": "linkedin",
     "summary": "This role has been designed as 'Hybrid' with a requirement that you will work on average 2 days per week from an HPE office.",
     "title": "Software Engineer 3 (Routing Protocols)",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "f3a853a305f7b594eb784a5b3a48991169abd00c84cc6df7e93b4c64b76faa33",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:04.169Z",
+      "error": null,
+      "company": "Hewlett Packard Enterprise",
+      "title": "Software Engineer 3 (Routing Protocols)",
+      "resume_slot": 9,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "HewlettPackardEnterprise (21thJuly)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/HewlettPackardEnterprise (21thJuly)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/HewlettPackardEnterprise (21thJuly)-2"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 40,
     "fit_score": 4
@@ -8723,7 +9227,7 @@
     },
     "scraped_date": "2026-07-21",
     "ats_score": 40,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "session_id": "2026-07-21T18:42:55Z",
@@ -8746,6 +9250,28 @@
     "scraped_date": "2026-07-21",
     "ats_score": 20,
     "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4443586847",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Snap Inc.",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 83,
+    "score_pct": 33,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "Snap Inc is a technology company.",
+    "title": "Software Engineer, Android, Level 5",
+    "scraped_date": "2026-07-21",
+    "ats_score": 40,
+    "fit_score": 2
   },
   {
     "session_id": "2026-07-21T21:15:42Z",
@@ -9183,6 +9709,28 @@
     "site": "linkedin",
     "summary": "**What To Expect** Tesla is building the future of AI systems that operate in the real world where safety, reliability, and performance are non\\-negotiable.",
     "title": "Machine Learning Integration Engineer, Tesla AI",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "80e329f35137e6e5bb2a6f0a0edb1dadd253a1f3feb43bfbd6bdd1c3f178a5df",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:08.648Z",
+      "error": null,
+      "company": "Tesla",
+      "title": "Machine Learning Integration Engineer, Tesla AI",
+      "resume_slot": 12,
+      "session_hour": "18",
+      "batch_time": "2026-07-21T22:37:19Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "Tesla (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Tesla (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Tesla (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 50,
     "fit_score": 3
@@ -9379,6 +9927,28 @@
     "site": "linkedin",
     "summary": "* Augusta, Ga\\*\\*\\* **Work Location \\& Schedule** This is a **hybrid position based in our Augusta, GA office** .",
     "title": "Software Developer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "2bb38053bf4facd61529e5f21fe8750bacd90f0386fb620dc95776c266d35067",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:15.303Z",
+      "error": null,
+      "company": "TaxSlayer",
+      "title": "Software Developer",
+      "resume_slot": 38,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "TaxSlayer (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/TaxSlayer (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/TaxSlayer (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 38,
     "fit_score": 10
@@ -9392,6 +9962,50 @@
     "date_posted": null,
     "level": "Entry",
     "location": "Evans, GA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 78,
+    "score_pct": 31,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "* Augusta, Ga\\*\\*\\* **Work Location \\& Schedule** This is a **hybrid position based in our Augusta, GA office** .",
+    "title": "Software Developer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "2bb38053bf4facd61529e5f21fe8750bacd90f0386fb620dc95776c266d35067",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:15.931Z",
+      "error": null,
+      "company": "TaxSlayer",
+      "title": "Software Developer",
+      "resume_slot": 37,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "folder": "TaxSlayer (21thJuly)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/TaxSlayer (21thJuly)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/TaxSlayer (21thJuly)-2"
+    },
+    "scraped_date": "2026-07-21",
+    "ats_score": 38,
+    "fit_score": 10
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4443553728",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "TaxSlayer",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Augusta, GA",
     "max_exp": null,
     "min_exp": null,
     "pipeline": "standard",
@@ -9599,6 +10213,28 @@
     "site": "linkedin",
     "summary": "**Job summary** Client is looking for Java Developer with Backend experience is the priority; frontend work is minimal **Responsibilities:** * Strong backend Java developer with expertise in Spring B\u2026",
     "title": "Java Software Engineer-W2",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "864414d33326a4bca9e57b84427b4e13efe83a9473c0b3c035a016694bab9e2a",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:20.730Z",
+      "error": null,
+      "company": "System Soft Technologies",
+      "title": "Java Software Engineer-W2",
+      "resume_slot": 13,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "SystemSoftTechnologies (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/SystemSoftTechnologies (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/SystemSoftTechnologies (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 60,
     "fit_score": 29
@@ -9950,6 +10586,28 @@
     "fit_score": 3
   },
   {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4419354172",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Waymo",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Mountain View, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 71,
+    "score_pct": 28,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "Waymo is an autonomous driving technology company with the mission to be the world's most trusted driver.",
+    "title": "Software Engineer - Marketplace Experimentation Platform",
+    "scraped_date": "2026-07-21",
+    "ats_score": 100,
+    "fit_score": 4
+  },
+  {
     "session_id": "2026-07-21T14:14:11Z",
     "job_url": "https://www.linkedin.com/jobs/view/4434933671",
     "batch_time": "2026-07-21T14:14:05Z",
@@ -10014,6 +10672,28 @@
     "scraped_date": "2026-07-21",
     "ats_score": 44,
     "fit_score": 10
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4442904313",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Woods & Co",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 69,
+    "score_pct": 28,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**Woods \\& Co Recruitment** is excited to partner with one of the world's most popular AI gateways; a unified API for over 100\\+ LLM providers trusted by Nasa, Netflix, and the DoD.",
+    "title": "Founding Software Engineer (Product / AI)",
+    "scraped_date": "2026-07-21",
+    "ats_score": 62,
+    "fit_score": 17
   },
   {
     "session_id": "2026-07-21T15:13:53Z",
@@ -10222,6 +10902,28 @@
     "scraped_date": "2026-07-21",
     "ats_score": 33,
     "fit_score": 4
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4437317006",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Antera Software USA",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Plano, TX",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 66,
+    "score_pct": 26,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "As a Full Stack Software Engineer, you'll help modernize a mature SaaS platform by designing new capabilities, improving existing systems, influencing architecture, and mentoring other engineers.",
+    "title": "Full Stack Software Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 46,
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4443372260",
@@ -10938,6 +11640,28 @@
     "fit_score": 8
   },
   {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4441011681",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Rocket",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Detroit, MI",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 58,
+    "score_pct": 23,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "As the product and team grow, so does the opportunity: a clear path to senior, real architectural exposure, and the chance to build AI\\-native engineering skills that are in high demand.",
+    "title": "Software Engineer (Agentic AI Applications)",
+    "scraped_date": "2026-07-21",
+    "ats_score": 47,
+    "fit_score": 8
+  },
+  {
     "session_id": "2026-07-21T12:10:54Z",
     "job_url": "https://www.linkedin.com/jobs/view/4443367268",
     "batch_time": "2026-07-21T12:10:50Z",
@@ -11198,6 +11922,50 @@
     "fit_score": 9
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4443588425",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "DomainTools",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Washington, DC",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 56,
+    "score_pct": 22,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "DomainTools is seeking a **Software Engineer** to join our Frontend Team. **Job Responsibilities{{:}}** * Produce well designed, testable, efficient code using software development best practices.",
+    "title": "Full Stack Software Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 33,
+    "fit_score": 6
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4443583643",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "DomainTools",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Austin, TX",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 56,
+    "score_pct": 22,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "DomainTools is seeking a **Software Engineer** to join our Frontend Team. **Job Responsibilities{{:}}** * Produce well designed, testable, efficient code using software development best practices.",
+    "title": "Full Stack Software Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 33,
+    "fit_score": 6
+  },
+  {
     "session_id": "2026-07-21T13:13:32Z",
     "job_url": "https://www.linkedin.com/jobs/view/4441698429",
     "batch_time": "2026-07-21T13:13:26Z",
@@ -11338,6 +12106,28 @@
     "fit_score": 14
   },
   {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4442685967",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Aurora",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Louisville, CO",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 55,
+    "score_pct": 22,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Who We Are** Aurora\u2019s mission is to deliver the benefits of self\\-driving technology safely, quickly, and broadly.",
+    "title": "Software Engineer, Maps Infra",
+    "scraped_date": "2026-07-21",
+    "ats_score": 75,
+    "fit_score": 5
+  },
+  {
     "session_id": "2026-07-21T08:08:01Z",
     "job_url": "https://www.linkedin.com/jobs/view/4442297649",
     "batch_time": "2026-07-21T08:07:57Z",
@@ -11470,6 +12260,28 @@
     "fit_score": 7
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4442922132",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Intelliswift - An LTTS Company",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Plano, TX",
+    "max_exp": 5.0,
+    "min_exp": 5.0,
+    "pipeline": "standard",
+    "score": 54,
+    "score_pct": 22,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "\\- $80/hr** **Fully Onsite** **Job Description:** Top skills: \\-Data Modeling \\-Machine Learning \\-Artificial Intelligence KEY RESPONSIBILITES/REQUIREMENTS: As a Performance Assurance Machine Learnin\u2026",
+    "title": "Data Scientist",
+    "scraped_date": "2026-07-21",
+    "ats_score": 31,
+    "fit_score": 7
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4440488652",
     "session_id": "2026-07-21T19:15:11Z",
     "batch_time": "2026-07-21T19:15:05Z",
@@ -11519,8 +12331,52 @@
     "site": "linkedin",
     "summary": "**Job Title: GenAI Engineer (Applied AI Engineer, LLM Agent Systems)** **Location: Charlotte NC, Addison TX, Jersey City NJ** **Duration: Fulltime** **Mandatory skills: GenAI \\- LLMOps, LLMOps** Role\u2026",
     "title": "GenAI Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "6e074264b8ddd7084c2808a740d5d8278a4c6273977c7cb81ba1a069181c17e7",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:26.154Z",
+      "error": null,
+      "company": "Quantum World Technologies Inc.",
+      "title": "GenAI Engineer",
+      "resume_slot": 43,
+      "session_hour": "18",
+      "batch_time": "2026-07-21T22:37:19Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "QuantumWorldTechnologiesInc (21thJuly)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/QuantumWorldTechnologiesInc (21thJuly)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/QuantumWorldTechnologiesInc (21thJuly)-2"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 47,
+    "fit_score": 9
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4442687937",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "TransLoop",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Chicago, IL",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 53,
+    "score_pct": 21,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "**About The Role** We are looking for a Software Engineer to help build our internal technology ecosystem.",
+    "title": "Software Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 70,
     "fit_score": 9
   },
   {
@@ -12173,6 +13029,28 @@
     "site": "linkedin",
     "summary": "Optum is a global organization that delivers care, aided by technology to help millions of people live healthier lives.",
     "title": "Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "98af97d4c1f14f733c24320bdcd6c38d9cb77c2a6f79b2ef28f680c5112fb539",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:30.569Z",
+      "error": null,
+      "company": "Optum",
+      "title": "Software Engineer",
+      "resume_slot": 14,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "Optum (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Optum (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Optum (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 60,
     "fit_score": 5
@@ -12729,6 +13607,28 @@
     "site": "linkedin",
     "summary": "What you'll do...Role summary: As a Software Engineer III, you will lead the design and development of scalable software solutions by collaborating with cross\\-functional teams including product mana\u2026",
     "title": "(USA) Software Engineer III",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "07f1bbd4013b60a2dde5cd71f044be189f5e0d39a271e4fddf6b921eb1eff128",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:34.874Z",
+      "error": null,
+      "company": "Walmart",
+      "title": "(USA) Software Engineer III",
+      "resume_slot": 45,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "Walmart (21thJuly)-3",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Walmart (21thJuly)-3/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/Walmart (21thJuly)-3"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 80,
     "fit_score": 4
@@ -12817,6 +13717,28 @@
     "site": "linkedin",
     "summary": "**Description** **Job Summary** Springs Window Fashions is a leader in the custom window treatment industry since 1939\\.",
     "title": "AI Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "fc888d334c6878ce9187dabff3c895148abeff1435ebd9ac98e55907afda8262",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:40.004Z",
+      "error": null,
+      "company": "Springs Window Fashions",
+      "title": "AI Engineer",
+      "resume_slot": 46,
+      "session_hour": "18",
+      "batch_time": "2026-07-21T22:37:19Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "SpringsWindowFashions (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/SpringsWindowFashions (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/SpringsWindowFashions (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 31,
     "fit_score": 6
@@ -12842,6 +13764,28 @@
     "scraped_date": "2026-07-21",
     "ats_score": 28,
     "fit_score": 7
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4441010721",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "H.I.G. Capital",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 46,
+    "score_pct": 18,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Experience** * 3\\+ years implementing, integrating, or building AI or ML systems, with clear evidence of solutions taken from scoping through production deployment and sustained adoption.",
+    "title": "Forward-Deployed AI Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 36,
+    "fit_score": 9
   },
   {
     "session_id": "2026-07-21T09:08:15Z",
@@ -13064,6 +14008,28 @@
     "fit_score": 5
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4442901613",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "FetchJobs.co",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 45,
+    "score_pct": 18,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**About The Company** Capital One is a leading financial services company dedicated to transforming banking through innovative technology and responsible AI systems.",
+    "title": "AI Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 46,
+    "fit_score": 7
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4442682817",
     "session_id": "2026-07-21T20:15:17Z",
     "batch_time": "2026-07-21T20:15:11Z",
@@ -13171,7 +14137,7 @@
     "title": "Software Engineer, Offboard Infrastructure",
     "scraped_date": "2026-07-21",
     "ats_score": 66,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-21T14:14:11Z",
@@ -13235,6 +14201,28 @@
     "site": "linkedin",
     "summary": "Position: AWS Python Data Engineer Client \\- Fannimae Location: Remote Exp: 10\\+ Years **Job Description** Must Have Strong working experience on Python, PySpark and SQL.",
     "title": "AWS Python Data Engineer - H1B, GC , USC, H4-EAD (C2C role) Remote",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "1fe87daef599ca4219fd04de556fbe2d18a2c2b40edb7cd3d676b8da6edfd3a1",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:42.809Z",
+      "error": null,
+      "company": "MillenniumSoft Inc",
+      "title": "AWS Python Data Engineer - H1B, GC , USC, H4-EAD (C2C role) Remote",
+      "resume_slot": 48,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "MillenniumSoftInc (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/MillenniumSoftInc (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/MillenniumSoftInc (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 60,
     "fit_score": 10
@@ -13257,6 +14245,28 @@
     "site": "linkedin",
     "summary": "**Software Engineer III (!!!!NO C2C OR 3RD PARTY VENDORS!!!!!)** Job Summary We are seeking a highly skilled **Software Engineer III** to design, develop, test, and maintain enterprise software solut\u2026",
     "title": "Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "b0e0c04da3ac6992be04ca9858517d4455af36f5e59a9da7795e6e6e6271e000",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:47.765Z",
+      "error": null,
+      "company": "ICON Consultants, LP",
+      "title": "Software Engineer",
+      "resume_slot": 47,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "ICONConsultantsLP (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/ICONConsultantsLP (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/ICONConsultantsLP (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 38,
     "fit_score": 8
@@ -13726,6 +14736,28 @@
     "fit_score": 2
   },
   {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4442905496",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "FetchJobs.co",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 41,
+    "score_pct": 16,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "* Experience with web development frameworks, APIs, and cloud platforms like AWS or Azure.",
+    "title": "Software Engineer - Python",
+    "scraped_date": "2026-07-21",
+    "ats_score": 62,
+    "fit_score": 6
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4443082717",
     "session_id": "2026-07-21T05:12:42Z",
     "batch_time": "2026-07-21T05:12:35Z",
@@ -14123,6 +15155,28 @@
     "site": "linkedin",
     "summary": "Bank, we\u2019re on a journey to do our best.",
     "title": "Software Engineer 2 (ServiceNow Platform Developer)",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "f09b4e8ca74e488e1ecaf6b79a54aa0121b5717ac862e7ccd20db4904243fb98",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:52.179Z",
+      "error": null,
+      "company": "U.S. Bank",
+      "title": "Software Engineer 2 (ServiceNow Platform Developer)",
+      "resume_slot": 16,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "USBank (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/USBank (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/USBank (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 28,
     "fit_score": 3
@@ -14519,7 +15573,7 @@
     },
     "scraped_date": "2026-07-21",
     "ats_score": 33,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-07-21T21:15:42Z",
@@ -15055,6 +16109,28 @@
     "site": "linkedin",
     "summary": "* Build production\\-ready applications and services using APIs, webhooks, AI technologies, and modern software engineering practices.",
     "title": "IFD AI Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "44fe4b9c2b918b8359b5e62da12da3c95566b8a4a9bc7b9960d11e217e512d85",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:41:56.366Z",
+      "error": null,
+      "company": "HirexHire",
+      "title": "IFD AI Engineer",
+      "resume_slot": 21,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "HirexHire (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/HirexHire (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/HirexHire (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 42,
     "fit_score": 5
@@ -15751,6 +16827,28 @@
     "site": "linkedin",
     "summary": "**The Next Level of Fire \\& Life Safety Leadership** With more than two centuries of combined history, brands like Kidde, Kidde Commercial, Edwards, GST, Badger, Gloria and Aritech have been leading \u2026",
     "title": "Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "8f596c9a962024cebebfc1021c3b3bc80c6375b8b913ad6703ff87b12d62b469",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:42:00.294Z",
+      "error": null,
+      "company": "Kidde Global Solutions",
+      "title": "Software Engineer",
+      "resume_slot": 22,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "KiddeGlobalSolutions (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/KiddeGlobalSolutions (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/KiddeGlobalSolutions (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 100,
     "fit_score": 6
@@ -15829,7 +16927,7 @@
     },
     "scraped_date": "2026-07-21",
     "ats_score": 60,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "session_id": "2026-07-21T08:08:01Z",
@@ -16311,9 +17409,53 @@
     "site": "linkedin",
     "summary": "**Position Overview:** * Participate in the design, implementation, and test of firmware/software systems.",
     "title": "Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "322cc118c9fc997938264e0ce8c351e662de36f9289610cadc435eeb8884ebc8",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:42:03.192Z",
+      "error": null,
+      "company": "Schweitzer Engineering Laboratories (SEL)",
+      "title": "Software Engineer",
+      "resume_slot": 23,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "SchweitzerEngineeringLaboratorie (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/SchweitzerEngineeringLaboratorie (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/SchweitzerEngineeringLaboratorie (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 33,
     "fit_score": 5
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4441014475",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "ClearpointCo",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Houston, TX",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 35,
+    "score_pct": 14,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "* Collaborate effectively with Data Engineering and the VP of Software Development to align AI systems with broader data platform architecture.",
+    "title": "AI Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 38,
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4434150797",
@@ -16761,6 +17903,28 @@
     "site": "linkedin",
     "summary": "**About The Company** Interactive Brokers Group, Inc.",
     "title": "Technical Writer \u2013 Software Development",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "a006dd86c2b81dc8a26973a5ba8b598a89c6cd87c9fc1633ad3deba3a5ccdfbc",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:42:07.593Z",
+      "error": null,
+      "company": "Interactive Brokers",
+      "title": "Technical Writer \u2013 Software Development",
+      "resume_slot": 30,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "InteractiveBrokers (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/InteractiveBrokers (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/InteractiveBrokers (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 50,
     "fit_score": 5
@@ -16839,7 +18003,7 @@
     "title": "Software Developer / Java / AI / Onsite",
     "scraped_date": "2026-07-21",
     "ats_score": 75,
-    "fit_score": 11
+    "fit_score": 10
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4422277345",
@@ -16925,6 +18089,28 @@
     "site": "linkedin",
     "summary": "**JOIN US AND \"CREATE YOUR VISION\"** **About Us** S\\&S Activewear is a leading North American, tech enabled specialty distributor of imprintable apparel, including t shirts, fleece, athletic wear, he\u2026",
     "title": "Software Engineer (Hybrid) Bolingbrook, IL",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "a279c6aab62c7877fc963a7aee60d752c094298dbbce78bb4e925796d87cd1f4",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:42:12.210Z",
+      "error": null,
+      "company": "S&S Activewear",
+      "title": "Software Engineer (Hybrid) Bolingbrook, IL",
+      "resume_slot": 31,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "SSActivewear (21thJuly)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/SSActivewear (21thJuly)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/SSActivewear (21thJuly)-2"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 33,
     "fit_score": 6
@@ -18026,6 +19212,50 @@
     "scraped_date": "2026-07-21",
     "ats_score": 57,
     "fit_score": 5
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4442900001",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Astrion",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Houston, TX",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 29,
+    "score_pct": 12,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**Overview** **Mission Design Tools Software Engineer** **Location:** NASA Johnson Space Center, TX **Status:** Full Time **Clearance:** Background check and U.S.",
+    "title": "Mission Design Tools Software Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 40,
+    "fit_score": 5
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4441025004",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "OneMagnify",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Detroit, MI",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 29,
+    "score_pct": 12,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "Role Summary OneMagnify's Data Scientists sit at the intersection of client strategy and technical delivery, turning complex business questions into models, analyses, and insights that clients actual\u2026",
+    "title": "Data Scientist",
+    "scraped_date": "2026-07-21",
+    "ats_score": 33,
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-21T04:14:01Z",
@@ -21155,7 +22385,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-21",
     "ats_score": 75,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-07-21T21:15:42Z",
@@ -22090,6 +23320,50 @@
     "scraped_date": "2026-07-21",
     "ats_score": 60,
     "fit_score": 5
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4442914043",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "GAC Solutions",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 23,
+    "score_pct": 9,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "Strong Python and LLM experience is preferred for data modeling, vocabulary mapping, quality automation, and knowledge graph pipeline development",
+    "title": "Knowledge Graph & Ontology Specialist AI Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 50,
+    "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4441012679",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "scalr",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 23,
+    "score_pct": 9,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "**AI Engineer (Forward Deployed)** **SF/NYC / Travel / $200k\\-$350k \\+ early stage equity** My client is hiring a Forward Deployed Software Engineer to work directly with customers on high\\-impact AI\u2026",
+    "title": "AI Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 33,
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442076466",
@@ -28073,6 +29347,28 @@
     "site": "linkedin",
     "summary": "With a team of over 250 dedicated employees, we manage our online platforms (Sawiday.be, Sawiday.fr, and Sanitairwinkel.nl), 14 showrooms in the Netherlands, and 3 in Belgium.",
     "title": "Data scientist at Sawiday",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "b9242a0a957c312c0be029db95d615e2dae73f199c99656c5beebe7011697909",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:42:15.380Z",
+      "error": null,
+      "company": "Dimension Study Association",
+      "title": "Data scientist at Sawiday",
+      "resume_slot": 18,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "DimensionStudyAssociation (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/DimensionStudyAssociation (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/DimensionStudyAssociation (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 66,
     "fit_score": 5
@@ -28095,6 +29391,28 @@
     "site": "linkedin",
     "summary": "The Center for AI and Research Computing (AIRC) is seeking a Research Software Engineer I to help advance AI\\-enabled scientific discovery at the Salk Institute for Biological Studies.",
     "title": "Research Software Engineer I - Center for AI and Research Computing (AIRC)",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "fc53913fbd4977c341a03e8bb068585c5002ae2ec889e389531363bf63c9bd8f",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:42:20.433Z",
+      "error": null,
+      "company": "Salk Institute for Biological Studies",
+      "title": "Research Software Engineer I - Center for AI and Research Computing (AIRC)",
+      "resume_slot": 36,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "SalkInstituteForBiologicalStudie (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/SalkInstituteForBiologicalStudie (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/SalkInstituteForBiologicalStudie (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 50,
     "fit_score": 8
@@ -28188,6 +29506,380 @@
     "fit_score": 3
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4443596498",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Provectus",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Pennsylvania, United States",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**About the role:** Provectus is a Premier AWS partner and an Anthropic Strategic Partner at the forefront of applied AI, helping enterprises turn Claude, agentic systems, and their own data into mea\u2026",
+    "title": "Forward Deployed AI Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 53,
+    "fit_score": 8
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4443700330",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Rippling",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Mid",
+    "location": "New York, NY",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "**What You Will Need** * 2\\+ years of professional software engineering experience, preferably building backend, platform, infrastructure, or product systems.",
+    "title": "Software Engineer II, Backend - Rippling AI",
+    "scraped_date": "2026-07-21",
+    "ats_score": 0,
+    "fit_score": 3
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4443589679",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Provectus",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Virginia, United States",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**About the role:** Provectus is a Premier AWS partner and an Anthropic Strategic Partner at the forefront of applied AI, helping enterprises turn Claude, agentic systems, and their own data into mea\u2026",
+    "title": "Forward Deployed AI Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 53,
+    "fit_score": 8
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4443599424",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Provectus",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Connecticut, United States",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**About the role:** Provectus is a Premier AWS partner and an Anthropic Strategic Partner at the forefront of applied AI, helping enterprises turn Claude, agentic systems, and their own data into mea\u2026",
+    "title": "Forward Deployed AI Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 53,
+    "fit_score": 8
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4442690808",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Experis",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "New Jersey, United States",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "As an Embedded Graphics Software Engineer, you will be part of the Embedded Systems Department supporting the development of cutting\\-edge graphics solutions.",
+    "title": "Embedded Graphics Software Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 0,
+    "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4442910415",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Enercon Services, Inc.",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "New Grad",
+    "location": "Fort Worth, TX",
+    "max_exp": 1.0,
+    "min_exp": 1.0,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "new grad",
+    "site": "linkedin",
+    "summary": "**Overview** **Why Start Your License Renewal Engineering Career at ENERCON Services?** At ENERCON, new graduate License Renewal Engineers play a vital role in supporting the long\\-term safety and re\u2026",
+    "title": "New Graduate (May/June 2026) \u2013 License Renewal Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 0,
+    "fit_score": 3
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4443707040",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Amazon Music",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "**Description** Amazon Music is an immersive audio entertainment service that deepens connections between fans, artists, and creators.",
+    "title": "Software Development Engineer, Amazon Music",
+    "scraped_date": "2026-07-21",
+    "ats_score": 55,
+    "fit_score": 3
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4441004914",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Amazon Science",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Sunnyvale, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Description** The Region Flexibility Engineering (RFE) team builds and leverages foundational infrastructure capabilities, tools, and datasets needed to support the rapid global expansion of Amazon\u2026",
+    "title": "Data Scientist, Region Flexibility",
+    "scraped_date": "2026-07-21",
+    "ats_score": 55,
+    "fit_score": 6
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4443704374",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Amazon Web Services (AWS)",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Boston, MA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "Our organization is responsible for creating and maintaining a high bar for automated reasoning across all of Amazon's products and services.",
+    "title": "Applied Scientist, AWS Automated Reasoning",
+    "scraped_date": "2026-07-21",
+    "ats_score": 20,
+    "fit_score": 2
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4441008818",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Swarm Aero",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "Swarm Aero is redefining air power, building the largest swarming UAV and the most versatile swarming aircraft network in the world.",
+    "title": "Software Engineer, Autonomy",
+    "scraped_date": "2026-07-21",
+    "ats_score": 0,
+    "fit_score": 3
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4442908555",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Astiva Health, Inc",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Orange County, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**About Us:** Astiva Health, Inc., located in Orange, CA is a premier healthcare provider specializing in Medicare and HMO services.",
+    "title": "Software Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 58,
+    "fit_score": 6
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4441003793",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Acquire Me",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "Summary Highly proficient, ambitious C\\+\\+ programmer wanted for a unique opportunity in one of the most forward\\-thinking technology led quant trading firms globally.",
+    "title": "Software Engineer - C++ Quantitative Trading",
+    "scraped_date": "2026-07-21",
+    "ats_score": 0,
+    "fit_score": 2
+  },
+  {
+    "session_id": "2026-07-22T00:13:09Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4441020250",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Bruker Daltonics",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**Responsibilities** * Architect, design, implement, debug, test, and deploy production software for automated scientific instruments and semiconductor metrology systems.",
+    "title": "Software Development Engineer IV - Windows Instrumentation and Automation",
+    "scraped_date": "2026-07-21",
+    "ats_score": 0,
+    "fit_score": 8
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4441001952",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Bruker Daltonics",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**Responsibilities** * Architect, design, implement, debug, test, and deploy production software for automated scientific instruments and semiconductor metrology systems.",
+    "title": "Software Development Engineer IV - Windows Instrumentation and Automation",
+    "scraped_date": "2026-07-21",
+    "ats_score": 0,
+    "fit_score": 8
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4441017413",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Amazon Science",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "New York, United States",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Description** Global Optimization is a strategic initiative aimed at improving Amazon advertisers experience at global scale.",
+    "title": "Applied Scientist II, Sponsored Products Global Optimization",
+    "scraped_date": "2026-07-21",
+    "ats_score": 42,
+    "fit_score": 2
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4443583976",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Provectus",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Massachusetts, United States",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**About the role:** Provectus is a Premier AWS partner and an Anthropic Strategic Partner at the forefront of applied AI, helping enterprises turn Claude, agentic systems, and their own data into mea\u2026",
+    "title": "Forward Deployed AI Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 53,
+    "fit_score": 8
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4443704337",
+    "session_id": "2026-07-22T00:13:09Z",
+    "batch_time": "2026-07-22T00:12:56Z",
+    "company": "Provectus",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "New York, United States",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**About the role:** Provectus is a Premier AWS partner and an Anthropic Strategic Partner at the forefront of applied AI, helping enterprises turn Claude, agentic systems, and their own data into mea\u2026",
+    "title": "Forward Deployed AI Engineer",
+    "scraped_date": "2026-07-21",
+    "ats_score": 53,
+    "fit_score": 8
+  },
+  {
     "session_id": "2026-07-21T15:13:53Z",
     "job_url": "https://www.linkedin.com/jobs/view/4440459853",
     "batch_time": "2026-07-21T15:13:46Z",
@@ -28271,6 +29963,28 @@
     "site": "linkedin",
     "summary": "**Position; Java Backend Developer** **Location: Irving, TX ( (Hybrid)** **Duration: Fulltime** **Skills** **Mandatory Skills :** Hibernate, Java, Java SpringCloud, Microservices **Job Description:**\u2026",
     "title": "Full Time For All Visa: Java Backend Developer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "875c1c132d9d24250dae22dcf642df4a1b02eeca523895f88612811c6fdaac03",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-21T23:42:23.569Z",
+      "error": null,
+      "company": "Visionary Innovative Technology Solutions LLC",
+      "title": "Full Time For All Visa: Java Backend Developer",
+      "resume_slot": 40,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-21T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "VisionaryInnovativeTechnologySol (21thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/VisionaryInnovativeTechnologySol (21thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-21/VisionaryInnovativeTechnologySol (21thJuly)"
+    },
     "scraped_date": "2026-07-21",
     "ats_score": 90,
     "fit_score": 15
@@ -30301,7 +32015,7 @@
     "title": "Software Development Engineer, Amazon Optics",
     "scraped_date": "2026-07-20",
     "ats_score": 66,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4433672406",
@@ -32255,7 +33969,7 @@
     },
     "scraped_date": "2026-07-20",
     "ats_score": 33,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4443032527",
@@ -34155,7 +35869,7 @@
     },
     "scraped_date": "2026-07-20",
     "ats_score": 62,
-    "fit_score": 19
+    "fit_score": 20
   },
   {
     "session_id": "2026-07-20T21:14:48Z",
@@ -34199,7 +35913,7 @@
     },
     "scraped_date": "2026-07-20",
     "ats_score": 50,
-    "fit_score": 11
+    "fit_score": 10
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4443026038",
@@ -35743,7 +37457,7 @@
     },
     "scraped_date": "2026-07-20",
     "ats_score": 50,
-    "fit_score": 11
+    "fit_score": 10
   },
   {
     "session_id": "2026-07-20T21:14:48Z",
@@ -37591,7 +39305,7 @@
     "title": "Therapy New Graduate Fast-Track Application - All Sentara Locations",
     "scraped_date": "2026-07-20",
     "ats_score": 0,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-20T16:17:00Z",
@@ -38427,7 +40141,7 @@
     },
     "scraped_date": "2026-07-20",
     "ats_score": 40,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "session_id": "2026-07-21T03:14:48Z",
@@ -38691,7 +40405,7 @@
     },
     "scraped_date": "2026-07-20",
     "ats_score": 75,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4443073281",
@@ -44369,7 +46083,7 @@
     "title": "Jr. Software Development Engineer - Atlanta, GA, Jr. Developer Program",
     "scraped_date": "2026-07-20",
     "ats_score": 66,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4443049802",
@@ -47281,7 +48995,7 @@
     },
     "scraped_date": "2026-07-20",
     "ats_score": 50,
-    "fit_score": 11
+    "fit_score": 10
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4443031950",
@@ -50821,7 +52535,7 @@
     },
     "scraped_date": "2026-07-20",
     "ats_score": 50,
-    "fit_score": 11
+    "fit_score": 10
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4443045763",
@@ -62113,7 +63827,7 @@
     "title": "Software Engineer-Other - Advanced",
     "scraped_date": "2026-07-20",
     "ats_score": 60,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-07-20T16:17:00Z",
@@ -62839,7 +64553,7 @@
     "title": "Data Scientist- Process Modeling & Machine Learning",
     "scraped_date": "2026-07-20",
     "ats_score": 28,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442249814",
@@ -63795,7 +65509,7 @@
     "title": "Forward Deployed AI Engineer (New York)",
     "scraped_date": "2026-07-20",
     "ats_score": 33,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-07-20T10:09:10Z",
@@ -64597,7 +66311,7 @@
     "title": "Software Engineer (Applied AI)",
     "scraped_date": "2026-07-20",
     "ats_score": 33,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-20T16:17:00Z",
@@ -70321,7 +72035,7 @@
     },
     "scraped_date": "2026-07-20",
     "ats_score": 44,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4443012948",
@@ -70669,7 +72383,7 @@
     },
     "scraped_date": "2026-07-20",
     "ats_score": 44,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4443074238",
@@ -74601,7 +76315,7 @@
     "title": "Software Engineer \u2013 Platform Services",
     "scraped_date": "2026-07-19",
     "ats_score": 40,
-    "fit_score": 11
+    "fit_score": 12
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4433464466",
@@ -75699,7 +77413,7 @@
     },
     "scraped_date": "2026-07-19",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-19T12:09:04Z",
@@ -76995,7 +78709,7 @@
     },
     "scraped_date": "2026-07-19",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441790925",
@@ -87331,7 +89045,7 @@
     "title": "Software Engineer II",
     "scraped_date": "2026-07-18",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4434029672",
@@ -87903,7 +89617,7 @@
     "title": "Software Engineer II",
     "scraped_date": "2026-07-18",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441719186",
@@ -91451,7 +93165,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-18",
     "ats_score": 11,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441737156",
@@ -91997,7 +93711,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-18",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4439288632",
@@ -92281,7 +93995,7 @@
     "title": "Full Stack Software Developer",
     "scraped_date": "2026-07-18",
     "ats_score": 55,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-07-19T02:05:36Z",
@@ -92367,7 +94081,7 @@
     "title": "Data Scientist II",
     "scraped_date": "2026-07-18",
     "ats_score": 50,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441707018",
@@ -96161,7 +97875,7 @@
     "title": "AI Engineer - Remote",
     "scraped_date": "2026-07-18",
     "ats_score": 28,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441399912",
@@ -98135,7 +99849,7 @@
     "title": "STAR Residency - New Grad RN (with <12mo of RN exp) - Inpatient Oncology - Boise   -   156863",
     "scraped_date": "2026-07-18",
     "ats_score": 0,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442429650",
@@ -98201,7 +99915,7 @@
     "title": "AI/ML Engineer",
     "scraped_date": "2026-07-18",
     "ats_score": 0,
-    "fit_score": 0
+    "fit_score": 1
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442453066",
@@ -98487,7 +100201,7 @@
     "title": "Software Engineer IV",
     "scraped_date": "2026-07-18",
     "ats_score": 68,
-    "fit_score": 12
+    "fit_score": 13
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441737092",
@@ -98905,7 +100619,7 @@
     "title": "GNSS Engineer (Python + Java / C++): 26-01820",
     "scraped_date": "2026-07-18",
     "ats_score": 100,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4397161861",
@@ -100027,7 +101741,7 @@
     "title": "Machine Learning - Software Engineer - Python, FastAPI, React",
     "scraped_date": "2026-07-18",
     "ats_score": 58,
-    "fit_score": 10
+    "fit_score": 9
   },
   {
     "session_id": "2026-07-18T20:11:21Z",
@@ -101855,7 +103569,7 @@
     "title": "Full Stack AI Engineer (Generative AI)",
     "scraped_date": "2026-07-17",
     "ats_score": 45,
-    "fit_score": 18
+    "fit_score": 19
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4415101077",
@@ -102999,7 +104713,7 @@
     "title": "Software Development Engineer III",
     "scraped_date": "2026-07-17",
     "ats_score": 58,
-    "fit_score": 15
+    "fit_score": 14
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4438765866",
@@ -103021,7 +104735,7 @@
     "title": "Software Engineer II",
     "scraped_date": "2026-07-17",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4430235334",
@@ -103065,7 +104779,7 @@
     "title": "Software Engineer II",
     "scraped_date": "2026-07-17",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-17T14:13:11Z",
@@ -103087,7 +104801,7 @@
     "title": "Software Engineer II",
     "scraped_date": "2026-07-17",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442199365",
@@ -103615,7 +105329,7 @@
     "title": "Full Stack Software Engineer",
     "scraped_date": "2026-07-17",
     "ats_score": 50,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4439270397",
@@ -103879,7 +105593,7 @@
     "title": "Software Engineer, Facilities Pipeline",
     "scraped_date": "2026-07-17",
     "ats_score": 60,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441158690",
@@ -104077,7 +105791,7 @@
     "title": "Software Engineer II",
     "scraped_date": "2026-07-17",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4439217251",
@@ -106827,7 +108541,7 @@
     "title": "Software Engineer, Operation Platforms",
     "scraped_date": "2026-07-17",
     "ats_score": 66,
-    "fit_score": 13
+    "fit_score": 12
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442129432",
@@ -108301,7 +110015,7 @@
     "title": "Python/AI / AWS Bedrock Full Stack Develope",
     "scraped_date": "2026-07-17",
     "ats_score": 61,
-    "fit_score": 12
+    "fit_score": 11
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441332084",
@@ -108675,7 +110389,7 @@
     "title": "Game Backend Developer (Mandarin Speaker)",
     "scraped_date": "2026-07-17",
     "ats_score": 66,
-    "fit_score": 10
+    "fit_score": 11
   },
   {
     "session_id": "2026-07-17T09:10:35Z",
@@ -109599,7 +111313,7 @@
     "title": "Data Scientist",
     "scraped_date": "2026-07-17",
     "ats_score": 38,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4417250664",
@@ -109993,7 +111707,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-17",
     "ats_score": 78,
-    "fit_score": 16
+    "fit_score": 17
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441950570",
@@ -110370,6 +112084,28 @@
     "fit_score": 9
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4439460859",
+    "session_id": "2026-07-18T03:10:13Z",
+    "batch_time": "2026-07-18T03:10:02Z",
+    "company": "True Classic",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Los Angeles, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 61,
+    "score_pct": 24,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "True Classic is looking for an **AI Engineer** to design, build, and deploy AI\\-powered applications and workflows that solve real business problems across the company.",
+    "title": "AI Engineer",
+    "scraped_date": "2026-07-17",
+    "ats_score": 43,
+    "fit_score": 6
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4441127734",
     "session_id": "2026-07-17T04:11:42Z",
     "batch_time": "2026-07-17T04:11:30Z",
@@ -110607,7 +112343,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-17",
     "ats_score": 33,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4430606262",
@@ -111517,7 +113253,7 @@
     "title": "Forward Deployed AI Engineer",
     "scraped_date": "2026-07-17",
     "ats_score": 33,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442196514",
@@ -111561,7 +113297,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-17",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441914493",
@@ -111605,7 +113341,7 @@
     "title": "Software Engineer II",
     "scraped_date": "2026-07-17",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-17T11:13:48Z",
@@ -111649,7 +113385,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-17",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4292457271",
@@ -114091,7 +115827,7 @@
     "title": "Software Engineer, Analytics",
     "scraped_date": "2026-07-17",
     "ats_score": 55,
-    "fit_score": 10
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4429397046",
@@ -114487,7 +116223,7 @@
     "title": "Remote Backend Developer",
     "scraped_date": "2026-07-17",
     "ats_score": 66,
-    "fit_score": 10
+    "fit_score": 11
   },
   {
     "session_id": "2026-07-17T23:11:10Z",
@@ -115497,7 +117233,7 @@
     "title": "Software Engineer, Facilities Pipeline",
     "scraped_date": "2026-07-17",
     "ats_score": 60,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441365995",
@@ -115539,7 +117275,7 @@
     "title": "Software Engineer, Facilities Pipeline",
     "scraped_date": "2026-07-17",
     "ats_score": 60,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441370887",
@@ -116351,7 +118087,7 @@
     "title": "(USA) Data Scientist III",
     "scraped_date": "2026-07-17",
     "ats_score": 41,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-07-17T13:14:39Z",
@@ -123583,7 +125319,7 @@
     "title": "Chip Simulation Software Engineer",
     "scraped_date": "2026-07-17",
     "ats_score": 25,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441329895",
@@ -123671,7 +125407,7 @@
     "title": "Machine Learning Engineer",
     "scraped_date": "2026-07-17",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-07-17T21:12:46Z",
@@ -123759,7 +125495,7 @@
     "title": "Machine Learning Engineer",
     "scraped_date": "2026-07-17",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-07-17T21:12:46Z",
@@ -125331,7 +127067,7 @@
     "title": "Software Development Engineer, Platform Engineering and Services (AFT Labor Insights)",
     "scraped_date": "2026-07-16",
     "ats_score": 52,
-    "fit_score": 13
+    "fit_score": 14
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441657056",
@@ -125353,7 +127089,7 @@
     "title": "Full Stack Developers (Python, React)",
     "scraped_date": "2026-07-16",
     "ats_score": 54,
-    "fit_score": 16
+    "fit_score": 17
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4431899358",
@@ -127267,7 +129003,7 @@
     "title": "Software Engineering Consultant",
     "scraped_date": "2026-07-16",
     "ats_score": 54,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-17T00:12:49Z",
@@ -127421,7 +129157,7 @@
     "title": "Software Engineer II",
     "scraped_date": "2026-07-16",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-17T03:12:24Z",
@@ -128719,7 +130455,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-16",
     "ats_score": 60,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441903007",
@@ -129709,7 +131445,7 @@
     "title": "Software Engineer (AI Training)",
     "scraped_date": "2026-07-16",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441649026",
@@ -131271,7 +133007,7 @@
     "title": "Software Engineer 4/5\u2013 AI for Member Systems",
     "scraped_date": "2026-07-16",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441111861",
@@ -132723,7 +134459,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-16",
     "ats_score": 61,
-    "fit_score": 20
+    "fit_score": 21
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441670709",
@@ -133185,7 +134921,7 @@
     "title": "Software Engineer - Mapping Data Software",
     "scraped_date": "2026-07-16",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4440759016",
@@ -133496,6 +135232,28 @@
     "fit_score": 8
   },
   {
+    "session_id": "2026-07-17T00:12:49Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4439307583",
+    "batch_time": "2026-07-17T00:12:45Z",
+    "company": "Compunnel Inc.",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Boston, MA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 75,
+    "score_pct": 30,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "**Role \\- Java Software Engineer \\-\\- SINDC5836410** **Location \\- Boston Massachusetts** **100% Onsite** **Must Have \\- Java, AWS, spring, SQL, Kafka, JUnit and Jenkins** **The Expertise You Have** \u2026",
+    "title": "Java Software Engineer -- SINDC5836410",
+    "scraped_date": "2026-07-16",
+    "ats_score": 66,
+    "fit_score": 20
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4438485886",
     "session_id": "2026-07-16T10:10:42Z",
     "batch_time": "2026-07-16T10:10:37Z",
@@ -133779,7 +135537,7 @@
     "title": "Data Scientist",
     "scraped_date": "2026-07-16",
     "ats_score": 50,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4418523141",
@@ -133801,7 +135559,7 @@
     "title": "Data Scientist",
     "scraped_date": "2026-07-16",
     "ats_score": 50,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4422685117",
@@ -137605,7 +139363,7 @@
     "title": "AI Engineer, Physical Systems and Sensing",
     "scraped_date": "2026-07-16",
     "ats_score": 62,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441660103",
@@ -140421,7 +142179,7 @@
     "title": "Software Engineer (AI Training)",
     "scraped_date": "2026-07-16",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441905337",
@@ -140443,7 +142201,7 @@
     "title": "Software Engineer (AI Training)",
     "scraped_date": "2026-07-16",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441904476",
@@ -140531,7 +142289,7 @@
     "title": "Software Engineer (AI Training)",
     "scraped_date": "2026-07-16",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441902450",
@@ -140553,7 +142311,7 @@
     "title": "Software Engineer (AI Training)",
     "scraped_date": "2026-07-16",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441910255",
@@ -140597,7 +142355,7 @@
     "title": "Software Engineer (AI Training)",
     "scraped_date": "2026-07-16",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-07-17T03:12:24Z",
@@ -140641,7 +142399,7 @@
     "title": "Software Engineer (AI Training)",
     "scraped_date": "2026-07-16",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4438453030",
@@ -146405,7 +148163,7 @@
     "title": "Software Development Engineer, Data Platform, Prime Video Personalization & Discovery",
     "scraped_date": "2026-07-16",
     "ats_score": 44,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4422466807",
@@ -146713,7 +148471,7 @@
     "title": "Software Development Engineer, Data Platform, Prime Video Personalization & Discovery",
     "scraped_date": "2026-07-16",
     "ats_score": 44,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-07-16T15:27:37Z",
@@ -146779,7 +148537,7 @@
     "title": "Software Development Engineer, Data Platform, Prime Video Personalization & Discovery",
     "scraped_date": "2026-07-16",
     "ats_score": 44,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4440748962",
@@ -146933,7 +148691,7 @@
     "title": "Applied Scientist, Machine Learning Accelerator - Annapurna Labs",
     "scraped_date": "2026-07-16",
     "ats_score": 57,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4422923410",
@@ -147153,7 +148911,7 @@
     "title": "Applied Scientist, Machine Learning Accelerator - Annapurna Labs",
     "scraped_date": "2026-07-16",
     "ats_score": 57,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4422635466",
@@ -147241,7 +148999,7 @@
     "title": "Software Engineer I",
     "scraped_date": "2026-07-16",
     "ats_score": 0,
-    "fit_score": 3
+    "fit_score": 2
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4438741057",
@@ -151619,7 +153377,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-15",
     "ats_score": 50,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "session_id": "2026-07-15T19:14:04Z",
@@ -152081,7 +153839,7 @@
     "title": "Software Engineer II - AI",
     "scraped_date": "2026-07-15",
     "ats_score": 40,
-    "fit_score": 11
+    "fit_score": 12
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4441286086",
@@ -154735,7 +156493,7 @@
     "title": "Software Engineer II, Data Engineering",
     "scraped_date": "2026-07-15",
     "ats_score": 64,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4440289759",
@@ -154975,7 +156733,7 @@
     "title": "Software Engineer",
     "scraped_date": "2026-07-15",
     "ats_score": 66,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-15T19:14:04Z",
@@ -155283,7 +157041,7 @@
     "title": "Software Development Engineer In Test",
     "scraped_date": "2026-07-15",
     "ats_score": 75,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "session_id": "2026-07-15T19:14:04Z",
@@ -155547,7 +157305,7 @@
     "title": "Software Engineer, Growth Data Platform",
     "scraped_date": "2026-07-15",
     "ats_score": 41,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "session_id": "2026-07-15T20:14:01Z",
@@ -155591,7 +157349,7 @@
     "title": "Software Engineer, Growth Data Platform",
     "scraped_date": "2026-07-15",
     "ats_score": 41,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "session_id": "2026-07-15T21:14:16Z",
@@ -156558,6 +158316,28 @@
     "scraped_date": "2026-07-15",
     "ats_score": 60,
     "fit_score": 6
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4440877016",
+    "session_id": "2026-07-15T20:14:01Z",
+    "batch_time": "2026-07-15T20:13:55Z",
+    "company": "Ascend",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": 3.0,
+    "min_exp": 3.0,
+    "pipeline": "standard",
+    "score": 42,
+    "score_pct": 17,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "**Your Role** Ascend is seeking a Software Engineer to join our team on\\-site in San Francisco to help expand our core product.",
+    "title": "Software Engineer",
+    "scraped_date": "2026-07-15",
+    "ats_score": 41,
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4440237694",
@@ -159077,7 +160857,7 @@
     "title": "Data Scientist",
     "scraped_date": "2026-07-15",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-15T20:14:01Z",
@@ -159319,7 +161099,7 @@
     "title": "Data Scientist",
     "scraped_date": "2026-07-15",
     "ats_score": 33,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4438446293",
@@ -160289,6 +162069,28 @@
   },
   {
     "session_id": "2026-07-15T05:26:48Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4385028052",
+    "batch_time": "2026-07-15T05:26:39Z",
+    "company": "Edra",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "New York, NY",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**About Edra** Edra is solving one of the hardest problems in enterprise AI: AI models are generic but company processes are specific.",
+    "title": "AI Engineer (New York)",
+    "scraped_date": "2026-07-15",
+    "ats_score": 33,
+    "fit_score": 4
+  },
+  {
+    "session_id": "2026-07-15T05:26:48Z",
     "job_url": "https://www.linkedin.com/jobs/view/4440905460",
     "batch_time": "2026-07-15T05:26:39Z",
     "company": "Apex Systems",
@@ -160572,6 +162374,28 @@
     "scraped_date": "2026-07-15",
     "ats_score": 57,
     "fit_score": 10
+  },
+  {
+    "session_id": "2026-07-15T08:07:58Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4438031369",
+    "batch_time": "2026-07-15T08:07:52Z",
+    "company": "Johns Hopkins Hospital",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "New Grad",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "new grad",
+    "site": "linkedin",
+    "summary": "Requisition \\#:672497 Location:Johns Hopkins Hospital, Baltimore, MD 21287 Category:Nursing New Grad RN Schedule:Evening Shift Employment Type:Full Time **Make it happen at Hopkins.** Weekly Working \u2026",
+    "title": "New Grad RN - Med Tele",
+    "scraped_date": "2026-07-15",
+    "ats_score": 0,
+    "fit_score": 1
   },
   {
     "session_id": "2026-07-15T19:14:04Z",
@@ -161165,7 +162989,7 @@
     "title": "AI/ML Engineer II",
     "scraped_date": "2026-07-15",
     "ats_score": 50,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "session_id": "2026-07-15T21:14:16Z",
@@ -162820,28 +164644,6 @@
     "fit_score": 3
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4440873284",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Amazon",
-    "competition_score": 5,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Bellevue, WA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 166,
-    "score_pct": 66,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "**Description** The Artificial General Intelligence (AGI) team is seeking a dedicated, skilled, and innovative Applied Scientist with a robust background in machine learning, statistics, quality assu\u2026",
-    "title": "Applied Scientist, Artificial General Intelligence, AGI Data Services",
-    "scraped_date": "2026-07-14",
-    "ats_score": 60,
-    "fit_score": 3
-  },
-  {
     "session_id": "2026-07-15T01:10:34Z",
     "job_url": "https://www.linkedin.com/jobs/view/4440879074",
     "batch_time": "2026-07-15T01:10:26Z",
@@ -162862,28 +164664,6 @@
     "scraped_date": "2026-07-14",
     "ats_score": 33,
     "fit_score": 4
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4439955034",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "NVIDIA",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Mid",
-    "location": "Redmond, WA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 161,
-    "score_pct": 64,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "* Experience diagnosing performance jitter * Experience building resilience, fault\\-detection, or failure\\-attribution systems for datacenter\\-scale infrastructure.",
-    "title": "Software Engineer, DGX Cloud AI Infrastructure",
-    "scraped_date": "2026-07-14",
-    "ats_score": 33,
-    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4440857960",
@@ -163480,94 +165260,6 @@
     "fit_score": 5
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4438041014",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Tenant Inc.",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "New Grad",
-    "location": "Irvine, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 99,
-    "score_pct": 40,
-    "search_term": "software engineer",
-    "site": "linkedin",
-    "summary": "**Tenant Inc** Tenant Inc is building the industry's first truly open and modern self\\-storage ecosystem\u2014powered by Hummingbird (our Property Management Software), an API\\-first architecture, and a s\u2026",
-    "title": "Software Engineer Intern",
-    "scraped_date": "2026-07-14",
-    "ats_score": 50,
-    "fit_score": 17
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4439900685",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Google",
-    "competition_score": 5,
-    "date_posted": null,
-    "level": "Mid",
-    "location": "Sunnyvale, CA",
-    "max_exp": 2.0,
-    "min_exp": 2.0,
-    "pipeline": "standard",
-    "score": 97,
-    "score_pct": 39,
-    "search_term": "backend engineer",
-    "site": "linkedin",
-    "summary": "* 2 years of experience with developing large\\-scale infrastructure, storage, distributed systems or experience with compute technologies, or hardware architecture.",
-    "title": "Software Engineer III, Infrastructure, Google Cloud Storage",
-    "scraped_date": "2026-07-14",
-    "ats_score": 40,
-    "fit_score": 4
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4440857947",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Scale AI",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 96,
-    "score_pct": 38,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "The Public Sector software engineers (SWEs) create the core product building blocks forward\\-deployed teams use to develop agentic capabilities that function across multiple domains.",
-    "title": "Software Engineer, Public Sector",
-    "scraped_date": "2026-07-14",
-    "ats_score": 50,
-    "fit_score": 6
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4440858968",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Scale AI",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "St Louis, MO",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 96,
-    "score_pct": 38,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "The Public Sector software engineers (SWEs) create the core product building blocks forward\\-deployed teams use to develop agentic capabilities that function across multiple domains.",
-    "title": "Software Engineer, Public Sector",
-    "scraped_date": "2026-07-14",
-    "ats_score": 50,
-    "fit_score": 6
-  },
-  {
     "job_url": "https://www.linkedin.com/jobs/view/4440879003",
     "session_id": "2026-07-15T03:10:37Z",
     "batch_time": "2026-07-15T03:10:28Z",
@@ -163700,28 +165392,6 @@
     "fit_score": 3
   },
   {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4440868510",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Amazon",
-    "competition_score": 5,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Boston, MA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 86,
-    "score_pct": 34,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "**Description** The Artificial General Intelligence (AGI) team is seeking a dedicated, skilled, and innovative Applied Scientist with a robust background in machine learning, statistics, quality assu\u2026",
-    "title": "Applied Scientist, Artificial General Intelligence, AGI Data Services",
-    "scraped_date": "2026-07-14",
-    "ats_score": 60,
-    "fit_score": 3
-  },
-  {
     "session_id": "2026-07-15T02:10:34Z",
     "job_url": "https://www.linkedin.com/jobs/view/4439936248",
     "batch_time": "2026-07-15T02:10:24Z",
@@ -163785,94 +165455,6 @@
     "title": "Gen AI Python Engineer",
     "scraped_date": "2026-07-14",
     "ats_score": 30,
-    "fit_score": 5
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4439953227",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "NVIDIA",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Mid",
-    "location": "Santa Clara, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 81,
-    "score_pct": 32,
-    "search_term": "software engineer",
-    "site": "linkedin",
-    "summary": "Today, NVIDIA is tapping into the unlimited potential of AI to define the next era of computing.",
-    "title": "System Software Engineer, Dynamo-Triton Inference Server - New College Grad 2026",
-    "scraped_date": "2026-07-14",
-    "ats_score": 25,
-    "fit_score": 6
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4439945621",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "NVIDIA",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Mid",
-    "location": "Oregon, United States",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 81,
-    "score_pct": 32,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "* Experience diagnosing performance jitter * Experience building resilience, fault\\-detection, or failure\\-attribution systems for datacenter\\-scale infrastructure.",
-    "title": "Software Engineer, DGX Cloud AI Infrastructure",
-    "scraped_date": "2026-07-14",
-    "ats_score": 33,
-    "fit_score": 5
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4439955036",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "NVIDIA",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Mid",
-    "location": "California, United States",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 81,
-    "score_pct": 32,
-    "search_term": "software engineer",
-    "site": "linkedin",
-    "summary": "Today, NVIDIA is tapping into the unlimited potential of AI to define the next era of computing.",
-    "title": "System Software Engineer, Dynamo-Triton Inference Server - New College Grad 2026",
-    "scraped_date": "2026-07-14",
-    "ats_score": 25,
-    "fit_score": 6
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4439950336",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "NVIDIA",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Mid",
-    "location": "Austin, TX",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 81,
-    "score_pct": 32,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "* Experience diagnosing performance jitter * Experience building resilience, fault\\-detection, or failure\\-attribution systems for datacenter\\-scale infrastructure.",
-    "title": "Software Engineer, DGX Cloud AI Infrastructure",
-    "scraped_date": "2026-07-14",
-    "ats_score": 33,
     "fit_score": 5
   },
   {
@@ -163964,50 +165546,6 @@
     "fit_score": 19
   },
   {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4439307583",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Compunnel Inc.",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Boston, MA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 75,
-    "score_pct": 30,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "**Role \\- Java Software Engineer \\-\\- SINDC5836410** **Location \\- Boston Massachusetts** **100% Onsite** **Must Have \\- Java, AWS, spring, SQL, Kafka, JUnit and Jenkins** **The Expertise You Have** \u2026",
-    "title": "Java Software Engineer -- SINDC5836410",
-    "scraped_date": "2026-07-14",
-    "ats_score": 66,
-    "fit_score": 20
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4440861374",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "PowerPay",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Wayne, PA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 72,
-    "score_pct": 29,
-    "search_term": "backend engineer",
-    "site": "linkedin",
-    "summary": "**Company Description** **PowerPay** is a financial technology company (fintech) in several vertical markets including home improvement, healthcare, recreational vehicles and more.",
-    "title": "Backend Software Developer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 53,
-    "fit_score": 8
-  },
-  {
     "job_url": "https://www.linkedin.com/jobs/view/4440900021",
     "session_id": "2026-07-15T03:10:37Z",
     "batch_time": "2026-07-15T03:10:28Z",
@@ -164027,7 +165565,7 @@
     "title": "Embedded Software Engineer - Power Systems",
     "scraped_date": "2026-07-14",
     "ats_score": 0,
-    "fit_score": 3
+    "fit_score": 2
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4438025498",
@@ -164096,28 +165634,6 @@
     "fit_score": 13
   },
   {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4438818396",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "MetLife",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "New Grad",
-    "location": "Whippany, NJ",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 64,
-    "score_pct": 26,
-    "search_term": "software engineer",
-    "site": "linkedin",
-    "summary": "**The Opportunity** MetLife Investments IT is looking for a curious, motivated Junior Software/Platform Engineer to join our Investments IT Private Capital team in Whippany.",
-    "title": "Junior Software Engineer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 44,
-    "fit_score": 6
-  },
-  {
     "session_id": "2026-07-15T01:10:34Z",
     "job_url": "https://www.linkedin.com/jobs/view/4439933917",
     "batch_time": "2026-07-15T01:10:26Z",
@@ -164140,28 +165656,6 @@
     "fit_score": 17
   },
   {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4439460859",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "True Classic",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Los Angeles, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 61,
-    "score_pct": 24,
-    "search_term": "AI engineer",
-    "site": "linkedin",
-    "summary": "True Classic is looking for an **AI Engineer** to design, build, and deploy AI\\-powered applications and workflows that solve real business problems across the company.",
-    "title": "AI Engineer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 43,
-    "fit_score": 6
-  },
-  {
     "job_url": "https://www.linkedin.com/jobs/view/4436392946",
     "session_id": "2026-07-15T02:10:34Z",
     "batch_time": "2026-07-15T02:10:24Z",
@@ -164182,28 +165676,6 @@
     "scraped_date": "2026-07-14",
     "ats_score": 66,
     "fit_score": 7
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4440858498",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Kforce Inc",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Winchester, VA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 59,
-    "score_pct": 24,
-    "search_term": "backend engineer",
-    "site": "linkedin",
-    "summary": "**Responsibilities** Kforce has a client in Winchester, VA (hybrid) seeking a Software Engineer (Cloud \\& Full Stack Development).",
-    "title": "Software Engineer (Cloud & Full Stack Development)",
-    "scraped_date": "2026-07-14",
-    "ats_score": 55,
-    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4439955538",
@@ -164313,7 +165785,7 @@
     "title": "Software Development Engineer II",
     "scraped_date": "2026-07-14",
     "ats_score": 35,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "session_id": "2026-07-15T02:10:34Z",
@@ -164512,50 +165984,6 @@
     "scraped_date": "2026-07-14",
     "ats_score": 30,
     "fit_score": 6
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4439903818",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Fractal",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 42,
-    "score_pct": 17,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "**Required Skills** **AI \\& Machine Learning** * Strong experience in Machine Learning, Generative AI, and Agentic AI systems.",
-    "title": "Agentic AI Engineer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 30,
-    "fit_score": 7
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4440877016",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Ascend",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "San Francisco, CA",
-    "max_exp": 3.0,
-    "min_exp": 3.0,
-    "pipeline": "standard",
-    "score": 42,
-    "score_pct": 17,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "Your Role Ascend is seeking a Software Engineer to join our team on\\-site in San Francisco to help expand our core product.",
-    "title": "Software Engineer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 41,
-    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4440880585",
@@ -164844,94 +166272,6 @@
     "fit_score": 7
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4439935863",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Hudl",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 29,
-    "score_pct": 12,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "Your Role We are looking for **Software Engineers** with a passion for cloud technology and building highly scalable software solutions.",
-    "title": "Software Engineer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 33,
-    "fit_score": 2
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4439930995",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Hudl",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Lincoln, Nebraska Metropolitan Area",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 29,
-    "score_pct": 12,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "Your Role We are looking for **Software Engineers** with a passion for cloud technology and building highly scalable software solutions.",
-    "title": "Software Engineer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 33,
-    "fit_score": 2
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4439936065",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Cepton",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "San Jose, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 29,
-    "score_pct": 12,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "**Responsibilities** \u00b7 Design **novel neural\\-network architectures from first principles** for LiDAR\\-oriented **ADAS perception systems** .",
-    "title": "R&D Machine Learning Research Scientist",
-    "scraped_date": "2026-07-14",
-    "ats_score": 50,
-    "fit_score": 4
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4439936957",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Peace Through Trade (PTT Coin) | Layer-1 PoW Blockchain",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Austin, TX",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 29,
-    "score_pct": 12,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "**What You'll Do** * Design and deploy AI and machine learning systems across our products, including search, recommendations, and discovery.",
-    "title": "AI Engineer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 33,
-    "fit_score": 3
-  },
-  {
     "job_url": "https://www.linkedin.com/jobs/view/4440850742",
     "session_id": "2026-07-15T01:10:34Z",
     "batch_time": "2026-07-15T01:10:26Z",
@@ -165108,28 +166448,6 @@
     "fit_score": 5
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4439925551",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Cepton",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "San Jose, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 23,
-    "score_pct": 9,
-    "search_term": "data scientist",
-    "site": "linkedin",
-    "summary": "**Employment:** Contractor **CEPTON** (A Koito Group Company, Automotive Tier1\\), a leading intelligent lidar solution provider, is seeking a **R\\&D Machine Learning Postdoctoral Researcher** who is \u2026",
-    "title": "R&D Machine Learning Research Scientist (Contractor)",
-    "scraped_date": "2026-07-14",
-    "ats_score": 40,
-    "fit_score": 6
-  },
-  {
     "session_id": "2026-07-15T01:10:34Z",
     "job_url": "https://www.linkedin.com/jobs/view/4438026265",
     "batch_time": "2026-07-15T01:10:26Z",
@@ -165174,270 +166492,6 @@
     "fit_score": 3
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4439936946",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Persona AI",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "* Work with the team to develop, test, and deploy software, machine learning pipelines, and data collection pipelines.",
-    "title": "Robotics Machine Learning Engineer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 42,
-    "fit_score": 4
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4438025483",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "i-Link Solutions",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Albany, NY",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "data scientist",
-    "site": "linkedin",
-    "summary": "3 60 months experience performing development work using Oracle Application Express building web based database application system..",
-    "title": "Software Developer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 20,
-    "fit_score": 5
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4440856407",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Konami Gaming, Inc.",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Las Vegas, NV",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "software engineer",
-    "site": "linkedin",
-    "summary": "Konami Gaming is looking for a Software Engineer I, Unity Game Developer, to join our team!",
-    "title": "Software Engineer I, Unity Game Developer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 0,
-    "fit_score": 3
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4439905695",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "US Tech Solutions",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Mid",
-    "location": "Santa Clarita, CA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "software engineer",
-    "site": "linkedin",
-    "summary": "**Duration: 12\\+ months Description:** Develops software systems, applications, firmware, and/or provides software systems testing and validation in support of R\\&D and/or Manufacturing Process Engin\u2026",
-    "title": "Software Engineer II- #26-16996",
-    "scraped_date": "2026-07-14",
-    "ats_score": 100,
-    "fit_score": 6
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4385028052",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Edra",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "New York, NY",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "**About Edra** Edra is solving one of the hardest problems in enterprise AI: AI models are generic but company processes are specific.",
-    "title": "AI Engineer (New York)",
-    "scraped_date": "2026-07-14",
-    "ats_score": 33,
-    "fit_score": 4
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4440841928",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Apex Systems",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Dearborn, MI",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "software engineer",
-    "site": "linkedin",
-    "summary": "As a Platform Engineer, you will help design, develop, and maintain the connectivity layer that powers enterprise\\-scale cloud platforms and digital services.",
-    "title": "Platform Software Engineer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 62,
-    "fit_score": 8
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4440843195",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Intersect",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "software engineer",
-    "site": "linkedin",
-    "summary": "We\u2019re a team of friends bound together by a mission to preserve our planet for future generations through innovative energy solutions and modern infrastructure.",
-    "title": "Software Engineer, Microgrid Controls Developer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 60,
-    "fit_score": 7
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4438024592",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Johns Hopkins Hospital",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "New Grad",
-    "location": "",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "new grad",
-    "site": "linkedin",
-    "summary": "Renowned for our specialty services and innovative clinical advances, we strive to make The Johns Hopkins Hospital an exceptional place to work, learn, and advance your career.",
-    "title": "New Grad RN - Surgical PCU",
-    "scraped_date": "2026-07-14",
-    "ats_score": 0,
-    "fit_score": 2
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4439912562",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "HCA Healthcare Summerville Hospital",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "New Grad",
-    "location": "Summerville, SC",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "new grad",
-    "site": "linkedin",
-    "summary": "The **HCA Healthcare New Grad Residency Program** is a year\\-long program designed to give you hands\\-on experience to help establish valuable clinical and critical thinking skills.",
-    "title": "New Graduate RN Residency",
-    "scraped_date": "2026-07-14",
-    "ats_score": 0,
-    "fit_score": 3
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4438031369",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Johns Hopkins Hospital",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "New Grad",
-    "location": "",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "new grad",
-    "site": "linkedin",
-    "summary": "Requisition \\#:672497 Location:Johns Hopkins Hospital, Baltimore, MD 21287 Category:Nursing New Grad RN Schedule:Evening Shift Employment Type:Full Time **Make it happen at Hopkins.** Weekly Working \u2026",
-    "title": "New Grad RN - Med Tele",
-    "scraped_date": "2026-07-14",
-    "ats_score": 0,
-    "fit_score": 1
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4438037019",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "CFS",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "New Grad",
-    "location": "Akron, OH",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "new grad",
-    "site": "linkedin",
-    "summary": "****Job Title** **:**** Entry Level Accountant ****Location:**** On Site in Canton, OH ****Schedule:**** Monday \\- Friday ****Salary:**** $50,000 \\- $55,000 **NEW ACCOUNTING GRADS!** **Our clients ar\u2026",
-    "title": "New Grad Accounting",
-    "scraped_date": "2026-07-14",
-    "ats_score": 0,
-    "fit_score": 1
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4414268805",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Emerald AI",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Boston, MA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "AI engineer",
-    "site": "linkedin",
-    "summary": "**About the Role** We\u2019re hiring a Distributed Systems / Backend Engineer to serve as a key contributor on the core backend platform powering Emerald AI.",
-    "title": "Software Engineer - Backend/Distributed Systems",
-    "scraped_date": "2026-07-14",
-    "ats_score": 25,
-    "fit_score": 7
-  },
-  {
     "job_url": "https://www.linkedin.com/jobs/view/4436395769",
     "session_id": "2026-07-15T01:10:34Z",
     "batch_time": "2026-07-15T01:10:26Z",
@@ -165457,7 +166511,7 @@
     "title": "Software Engineer - Grid Services",
     "scraped_date": "2026-07-14",
     "ats_score": 63,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-15T01:10:34Z",
@@ -165501,7 +166555,7 @@
     "title": "Software Engineer - Grid Services",
     "scraped_date": "2026-07-14",
     "ats_score": 63,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-07-15T01:10:34Z",
@@ -165678,6 +166732,82 @@
     "scraped_date": "2026-07-14",
     "ats_score": 20,
     "fit_score": 3
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4439955034",
+    "session_id": "2026-07-15T01:10:34Z",
+    "company": "NVIDIA",
+    "date_posted": null,
+    "level": "Mid",
+    "location": "Redmond, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 161,
+    "score_pct": 64,
+    "site": "linkedin",
+    "summary": "* Experience diagnosing performance jitter * Experience building resilience, fault\\-detection, or failure\\-attribution systems for datacenter\\-scale infrastructure.",
+    "title": "Software Engineer, DGX Cloud AI Infrastructure",
+    "scraped_date": "2026-07-14",
+    "ats_score": 33,
+    "fit_score": 5
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4439955036",
+    "session_id": "2026-07-15T01:10:34Z",
+    "company": "NVIDIA",
+    "date_posted": null,
+    "level": "Mid",
+    "location": "California, United States",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 81,
+    "score_pct": 32,
+    "site": "linkedin",
+    "summary": "Today, NVIDIA is tapping into the unlimited potential of AI to define the next era of computing.",
+    "title": "System Software Engineer, Dynamo-Triton Inference Server - New College Grad 2026",
+    "scraped_date": "2026-07-14",
+    "ats_score": 25,
+    "fit_score": 6
+  },
+  {
+    "session_id": "2026-07-15T01:10:34Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4439953227",
+    "company": "NVIDIA",
+    "date_posted": null,
+    "level": "Mid",
+    "location": "Santa Clara, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 81,
+    "score_pct": 32,
+    "site": "linkedin",
+    "summary": "Today, NVIDIA is tapping into the unlimited potential of AI to define the next era of computing.",
+    "title": "System Software Engineer, Dynamo-Triton Inference Server - New College Grad 2026",
+    "scraped_date": "2026-07-14",
+    "ats_score": 25,
+    "fit_score": 6
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4439950336",
+    "session_id": "2026-07-15T01:10:34Z",
+    "company": "NVIDIA",
+    "date_posted": null,
+    "level": "Mid",
+    "location": "Austin, TX",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 81,
+    "score_pct": 32,
+    "site": "linkedin",
+    "summary": "* Experience diagnosing performance jitter * Experience building resilience, fault\\-detection, or failure\\-attribution systems for datacenter\\-scale infrastructure.",
+    "title": "Software Engineer, DGX Cloud AI Infrastructure",
+    "scraped_date": "2026-07-14",
+    "ats_score": 33,
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4439926350",
@@ -165872,6 +167002,25 @@
     "fit_score": 4
   },
   {
+    "session_id": "2026-07-15T02:10:34Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4440858968",
+    "company": "Scale AI",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "St Louis, MO",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 96,
+    "score_pct": 38,
+    "site": "linkedin",
+    "summary": "The Public Sector software engineers (SWEs) create the core product building blocks forward\\-deployed teams use to develop agentic capabilities that function across multiple domains.",
+    "title": "Software Engineer, Public Sector",
+    "scraped_date": "2026-07-14",
+    "ats_score": 50,
+    "fit_score": 6
+  },
+  {
     "session_id": "2026-07-15T03:10:37Z",
     "job_url": "https://www.linkedin.com/jobs/view/4438054327",
     "batch_time": "2026-07-15T03:10:28Z",
@@ -165980,50 +167129,6 @@
     "scraped_date": "2026-07-14",
     "ats_score": 40,
     "fit_score": 12
-  },
-  {
-    "session_id": "2026-07-15T00:11:16Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4438028046",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Tech Consulting",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "New Grad",
-    "location": "New Jersey, United States",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": -124,
-    "score_pct": 0,
-    "search_term": "machine learning engineer",
-    "site": "linkedin",
-    "summary": "**Job Title: Entry\\-Level Software Engineer** **Full\\-Time** **Candidate must be open to relocate.** We are seeking a motivated Entry\\-Level Python Developer with a strong interest in SQL and data an\u2026",
-    "title": "Software Engineer",
-    "scraped_date": "2026-07-14",
-    "ats_score": 50,
-    "fit_score": 9
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4440814531",
-    "session_id": "2026-07-15T00:11:16Z",
-    "batch_time": "2026-07-15T00:11:08Z",
-    "company": "Dahl Consulting",
-    "competition_score": 0,
-    "date_posted": null,
-    "level": "Entry",
-    "location": "Minneapolis, MN",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "score": -129,
-    "score_pct": 0,
-    "search_term": "backend engineer",
-    "site": "linkedin",
-    "summary": "**Job Description** The Backend Engineer will be responsible for designing, developing, testing, and maintaining backend services and APIs that support critical business operations.",
-    "title": "Backend Software Engineer \u2013 Supply Chain & Warehouse Systems (MN)",
-    "scraped_date": "2026-07-14",
-    "ats_score": 77,
-    "fit_score": 11
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4438031453",
