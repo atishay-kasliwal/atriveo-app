@@ -1,21 +1,21 @@
 {
-  "generated_at": "2026-07-23T10:55:12.696003+00:00",
-  "total_analyzed": 51374,
+  "generated_at": "2026-07-23T11:56:13.838701+00:00",
+  "total_analyzed": 51383,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 29063,
-        "Java": 14215,
-        "SQL": 12713,
+        "Python": 29072,
+        "Java": 14216,
+        "SQL": 12716,
         "JavaScript": 8757,
         "TypeScript": 7883,
         "HTML/CSS": 2842,
         "Kotlin": 2367,
         ".NET": 2148,
         "Swift": 1957,
-        "Rust": 1946,
-        "Go": 1310,
+        "Rust": 1947,
+        "Go": 1311,
         "Bash/Shell": 1123,
         "Scala": 908,
         "Ruby": 847,
@@ -27,12 +27,12 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 8368,
-        "PyTorch": 5205,
+        "React": 8369,
+        "PyTorch": 5206,
         "TensorFlow": 4046,
-        "Node.js": 3220,
+        "Node.js": 3221,
         "LangChain": 2680,
-        "Angular": 2668,
+        "Angular": 2669,
         "Spring": 2477,
         "Scikit-learn": 2413,
         "Pandas": 2052,
@@ -48,15 +48,15 @@
         "Selenium": 592,
         "Rails": 432,
         "Playwright": 419,
-        "NestJS": 271
+        "NestJS": 272
       }
     },
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 14570,
-        "Azure": 8266,
-        "GCP": 7512,
+        "AWS": 14572,
+        "Azure": 8268,
+        "GCP": 7515,
         "S3": 1621,
         "Lambda": 1433,
         "Serverless": 1078,
@@ -75,11 +75,11 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 20076,
-        "REST API": 7613,
-        "Distributed Systems": 7394,
+        "Scalability": 20080,
+        "REST API": 7614,
+        "Distributed Systems": 7396,
         "Microservices": 4325,
-        "System Design": 3870,
+        "System Design": 3871,
         "Kafka": 2313,
         "Event-Driven": 2258,
         "API Design": 1721,
@@ -94,11 +94,11 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 10483,
-        "Kubernetes": 6549,
-        "Docker": 6200,
-        "Git": 6010,
-        "Linux": 4314,
+        "CI/CD": 10484,
+        "Kubernetes": 6552,
+        "Docker": 6203,
+        "Git": 6013,
+        "Linux": 4316,
         "Terraform": 2516,
         "Jenkins": 1706,
         "GitHub Actions": 1242,
@@ -124,10 +124,10 @@
         "MongoDB": 1548,
         "Snowflake": 1483,
         "Redis": 1363,
-        "Airflow": 1224,
+        "Airflow": 1227,
         "Elasticsearch": 901,
-        "BigQuery": 640,
-        "dbt": 456,
+        "BigQuery": 643,
+        "dbt": 459,
         "Cassandra": 413,
         "ClickHouse": 298,
         "Flink": 293
@@ -136,24 +136,24 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 14949,
-        "Agents": 10931,
+        "Machine Learning": 14950,
+        "Agents": 10935,
         "LLM": 9801,
-        "GenAI": 6598,
-        "PyTorch": 5205,
+        "GenAI": 6599,
+        "PyTorch": 5206,
         "RAG": 4483,
         "TensorFlow": 4046,
-        "NLP": 3890,
+        "NLP": 3891,
         "Prompt Eng": 3206,
-        "Deep Learning": 3150,
+        "Deep Learning": 3151,
         "Fine-tuning": 2832,
         "OpenAI": 2723,
         "LangChain": 2680,
         "Embeddings": 1396,
-        "Hugging Face": 1247,
+        "Hugging Face": 1248,
         "SageMaker": 934,
         "MLflow": 881,
-        "Vertex AI": 786
+        "Vertex AI": 787
       }
     },
     "Security": {
@@ -173,10 +173,10 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 13154,
-        "Code Review": 10523,
-        "Mentorship": 9523,
-        "Agile/Scrum": 7927,
+        "Cross-functional": 13155,
+        "Code Review": 10526,
+        "Mentorship": 9525,
+        "Agile/Scrum": 7928,
         "Leadership": 3005,
         "On-call": 2645
       }
