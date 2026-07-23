@@ -2075,6 +2075,28 @@
     "site": "linkedin",
     "summary": "This role has been designed as 'Hybrid' with a requirement that you will work on average 2 days per week from an HPE office.",
     "title": "Software Engineer, Systems",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "f6ce0ae329095fcfbcfaf9199a0da4f1b08169b5db130d2074beb4803d06cfd7",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-22T23:35:45.365Z",
+      "error": null,
+      "company": "Hewlett Packard Enterprise",
+      "title": "Software Engineer, Systems",
+      "resume_slot": 2,
+      "session_hour": "01",
+      "batch_time": "2026-07-21T05:12:35Z",
+      "session_id": "2026-07-22T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "HewlettPackardEnterprise (22thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-22/HewlettPackardEnterprise (22thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-22/HewlettPackardEnterprise (22thJuly)"
+    },
     "ats_score": 40,
     "fit_score": 7
   },
@@ -6355,7 +6377,7 @@
     "summary": "Candescent is a forward\\-thinking technology company transforming how financial institutions deliver Intelligent Banking experiences.",
     "title": "Software Engineer IV - Android & React Native developer",
     "ats_score": 33,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-07-21T07:08:31Z",
@@ -12928,7 +12950,7 @@
     "summary": "**Software Engineer** Optomi, in partnership with an industry\\-leading enterprise organization, is seeking a Software Engineer to join a collaborative engineering team building modern, cloud\\-native \u2026",
     "title": "Software Engineer",
     "ats_score": 45,
-    "fit_score": 17
+    "fit_score": 18
   },
   {
     "session_id": "2026-07-21T15:13:53Z",
@@ -18874,7 +18896,7 @@
     "summary": "At Commure, we're building the AI Operating System for healthcare, the foundation that defines how care is delivered, documented, and financed.",
     "title": "Software Engineer, AI Integrations",
     "ats_score": 53,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "session_id": "2026-07-21T19:15:11Z",
@@ -22550,7 +22572,7 @@
     "summary": "This role is ideal for someone who understands Angular as a full framework and can design clean, maintainable front end systems that integrate seamlessly with Java and NodeJS services.",
     "title": "Front End Software Engineer",
     "ats_score": 69,
-    "fit_score": 13
+    "fit_score": 14
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4442231099",
@@ -23347,6 +23369,28 @@
     "site": "linkedin",
     "summary": "This role has been designed as 'Hybrid' with a requirement that you will work on average 2 days per week from an HPE office.",
     "title": "Software Engineer 3 (Routing Protocols)",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "f3a853a305f7b594eb784a5b3a48991169abd00c84cc6df7e93b4c64b76faa33",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-22T23:35:49.404Z",
+      "error": null,
+      "company": "Hewlett Packard Enterprise",
+      "title": "Software Engineer 3 (Routing Protocols)",
+      "resume_slot": 4,
+      "session_hour": "19",
+      "batch_time": "2026-07-21T23:12:51Z",
+      "session_id": "2026-07-22T23:13:01Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "HewlettPackardEnterprise (22thJuly)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-22/HewlettPackardEnterprise (22thJuly)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-22/HewlettPackardEnterprise (22thJuly)-2"
+    },
     "ats_score": 40,
     "fit_score": 5
   },
