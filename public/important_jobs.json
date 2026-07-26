@@ -1,7 +1,28 @@
 [
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4445602473",
+    "session_id": "2026-07-26T07:04:33Z",
+    "batch_time": "2026-07-26T07:04:30Z",
+    "company": "A16Z GAMES",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 52,
+    "score_pct": 21,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "**You Might Be a Great Fit If You Have** * 4\\+ years of software, backend, applied AI, or product\\-engineering experience building reliable production systems.",
+    "title": "Applied AI Engineer, GTM Growth Engineering",
+    "ats_score": 40,
+    "fit_score": 7
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4445383425",
-    "session_id": "2026-07-26T06:03:44Z",
+    "session_id": "2026-07-26T07:04:33Z",
     "company": "PTR Global",
     "date_posted": null,
     "keyword_score": 57,
@@ -16,7 +37,7 @@
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4445391155",
-    "session_id": "2026-07-26T06:03:44Z",
+    "session_id": "2026-07-26T07:04:33Z",
     "company": "eNGINE",
     "date_posted": null,
     "keyword_score": 43,
@@ -30,8 +51,8 @@
     "fit_score": 22
   },
   {
+    "session_id": "2026-07-26T07:04:33Z",
     "job_url": "https://www.linkedin.com/jobs/view/4444645476",
-    "session_id": "2026-07-26T06:03:44Z",
     "company": "TalentAlly",
     "date_posted": null,
     "keyword_score": 34,
@@ -45,8 +66,8 @@
     "fit_score": 9
   },
   {
+    "session_id": "2026-07-26T07:04:33Z",
     "job_url": "https://www.linkedin.com/jobs/view/4445387076",
-    "session_id": "2026-07-26T06:03:44Z",
     "company": "PANI",
     "date_posted": null,
     "keyword_score": 31,
@@ -58,20 +79,5 @@
     "title": "Associate Software Development Engineer",
     "ats_score": 36,
     "fit_score": 11
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4445377144",
-    "session_id": "2026-07-26T06:03:44Z",
-    "company": "Toyota Automated Logistics",
-    "date_posted": null,
-    "keyword_score": 19,
-    "level": "Entry",
-    "location": "Grapevine, TX",
-    "min_exp": 3.0,
-    "pipeline": "keywords",
-    "site": "linkedin",
-    "title": "R&D Software Engineer",
-    "ats_score": 44,
-    "fit_score": 4
   }
 ]

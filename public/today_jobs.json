@@ -17,6 +17,28 @@
     "site": "linkedin",
     "summary": "S\\&P Global Off Campus Recruitment 2026 has been announced to hire Associate Software Development Engineer at its Chennai / Hyderabad / New York locations.",
     "title": "Associate Software Development Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "2f0e417cdb1ccd58e4b88979f7d58da056ad7cdc0d655a3121af181c3cfd7a8d",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-26T06:35:21.759Z",
+      "error": null,
+      "company": "PANI",
+      "title": "Associate Software Development Engineer",
+      "resume_slot": 4,
+      "session_hour": "00",
+      "batch_time": "2026-07-26T04:04:07Z",
+      "session_id": "2026-07-26T06:03:44Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "PANI (26thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-26/PANI (26thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-26/PANI (26thJuly)"
+    },
     "ats_score": 36,
     "fit_score": 11
   },
@@ -831,7 +853,7 @@
     "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
     "title": "Backend Engineer at Tavus",
     "ats_score": 42,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4444800646",
@@ -998,6 +1020,28 @@
     "site": "linkedin",
     "summary": "**Position:** AI Developer (Agentic AI / Lang Chain / Vertex AI) **Location:** Charlotte, North Carolina **Duration:** Contract **Job ID:** 178342 **Job Overview:** We are seeking a highly skilled an\u2026",
     "title": "Software Engineer 4",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "15619d6d1ba4224b4f8a36354d0e3d7b7d468c792d245ce9112f6ba9edde8a75",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-07-26T06:35:18.263Z",
+      "error": null,
+      "company": "PTR Global",
+      "title": "Software Engineer 4",
+      "resume_slot": 1,
+      "session_hour": "02",
+      "batch_time": "2026-07-26T06:03:41Z",
+      "session_id": "2026-07-26T06:03:44Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "PTRGlobal (26thJuly)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-26/PTRGlobal (26thJuly)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-07-26/PTRGlobal (26thJuly)"
+    },
     "ats_score": 40,
     "fit_score": 10
   },
@@ -1042,5 +1086,26 @@
     "title": "Infrastructure Monitoring - Software Developer",
     "ats_score": 0,
     "fit_score": 0
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4445602473",
+    "session_id": "2026-07-26T07:04:33Z",
+    "batch_time": "2026-07-26T07:04:30Z",
+    "company": "A16Z GAMES",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 52,
+    "score_pct": 21,
+    "search_term": "software engineer",
+    "site": "linkedin",
+    "summary": "**You Might Be a Great Fit If You Have** * 4\\+ years of software, backend, applied AI, or product\\-engineering experience building reliable production systems.",
+    "title": "Applied AI Engineer, GTM Growth Engineering",
+    "ats_score": 40,
+    "fit_score": 7
   }
 ]

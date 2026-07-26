@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-07-26T06:58:02.798581+00:00",
-  "total_analyzed": 53069,
+  "generated_at": "2026-07-26T07:54:35.607375+00:00",
+  "total_analyzed": 53070,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 29939,
+        "Python": 29940,
         "Java": 14615,
         "SQL": 13087,
         "JavaScript": 8960,
@@ -114,7 +114,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 7419,
+        "ETL/ELT": 7420,
         "PostgreSQL": 4272,
         "Spark": 3338,
         "Vector DB": 2564,
@@ -137,8 +137,8 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 15332,
-        "Agents": 11511,
-        "LLM": 10154,
+        "Agents": 11512,
+        "LLM": 10155,
         "GenAI": 6818,
         "PyTorch": 5386,
         "RAG": 4672,
@@ -147,7 +147,7 @@
         "Prompt Eng": 3276,
         "Deep Learning": 3244,
         "Fine-tuning": 2922,
-        "OpenAI": 2828,
+        "OpenAI": 2829,
         "LangChain": 2771,
         "Embeddings": 1454,
         "Hugging Face": 1289,
@@ -173,7 +173,7 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 13547,
+        "Cross-functional": 13548,
         "Code Review": 10900,
         "Mentorship": 9780,
         "Agile/Scrum": 8204,
