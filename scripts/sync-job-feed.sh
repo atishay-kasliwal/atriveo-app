@@ -55,9 +55,22 @@ npm run build >> "$LOG" 2>&1
 BUILD_STATUS=$?
 echo "[$(ts)] build exit=$BUILD_STATUS" >> "$LOG"
 
-if [ "$BUILD_STATUS" -eq 0 ]; then
-  npx wrangler pages deploy dist --project-name atriveo-app --commit-dirty=true >> "$LOG" 2>&1
-  echo "[$(ts)] pages deploy exit=$?" >> "$LOG"
+if [ "$BUILD_STATUS" -ne 0 ]; then
+  echo "[$(ts)] === feed-sync failed (build) ===" >> "$LOG"
+  exit "$BUILD_STATUS"
+fi
+
+npx wrangler pages deploy dist --project-name atriveo-app --commit-dirty=true >> "$LOG" 2>&1
+# Capture BEFORE anything else runs. This used to read `exit=$?` inline inside
+# an echo whose "[$(ts)]" prefix ran `date` first — so $? reported date's status,
+# not wrangler's, and every failed deploy was logged as exit=0. A broken deploy
+# then showed up as a green feed_deploy phase while production stayed stale.
+DEPLOY_STATUS=$?
+echo "[$(ts)] pages deploy exit=$DEPLOY_STATUS" >> "$LOG"
+
+if [ "$DEPLOY_STATUS" -ne 0 ]; then
+  echo "[$(ts)] === feed-sync failed (deploy) ===" >> "$LOG"
+  exit "$DEPLOY_STATUS"
 fi
 
 echo "[$(ts)] === feed-sync done ===" >> "$LOG"

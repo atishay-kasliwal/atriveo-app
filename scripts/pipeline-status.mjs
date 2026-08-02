@@ -48,7 +48,10 @@ function section(title) {
 function launchAgentLoaded(label) {
   const r = spawnSync("launchctl", ["list"], { encoding: "utf8" });
   if (r.status !== 0) return null;
-  const line = r.stdout.split("\n").find((l) => l.includes(label));
+  // Match the label exactly. Substring matching reported com.atriveo.tailor as
+  // running whenever com.atriveo.tailor-worker was loaded — a false green on
+  // the one service the Scrape now button actually depends on.
+  const line = r.stdout.split("\n").find((l) => l.trim().split(/\s+/)[2] === label);
   if (!line) return { loaded: false, pid: null, lastExit: null };
   const parts = line.trim().split(/\s+/);
   const pid = parts[0] === "-" ? null : Number(parts[0]);
