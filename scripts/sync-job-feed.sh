@@ -60,7 +60,23 @@ if [ "$BUILD_STATUS" -ne 0 ]; then
   exit "$BUILD_STATUS"
 fi
 
-npx wrangler pages deploy dist --project-name atriveo-app --commit-dirty=true >> "$LOG" 2>&1
+# Wrangler needs credentials, and this script runs from cron-like contexts
+# (sidecar spawn, LaunchAgent) that carry none of the shell's environment.
+# Without this the deploy dies on "set a CLOUDFLARE_API_TOKEN env variable".
+if [ -f "$APP_DIR/.env" ]; then
+  while IFS= read -r line; do
+    case "$line" in
+      CLOUDFLARE_API_TOKEN=*|CLOUDFLARE_ACCOUNT_ID=*) export "${line?}" ;;
+    esac
+  done < "$APP_DIR/.env"
+fi
+
+# Deploy to the Pages *production* branch explicitly. Wrangler otherwise infers
+# the branch from the git checkout, so running this from any working branch
+# (e.g. macbook-air) silently produces a preview deployment while
+# application.atriveo.com keeps serving stale data — a green phase and no change.
+CF_BRANCH="${CF_PAGES_BRANCH:-main}"
+npx wrangler pages deploy dist --project-name atriveo-app --branch "$CF_BRANCH" --commit-dirty=true >> "$LOG" 2>&1
 # Capture BEFORE anything else runs. This used to read `exit=$?` inline inside
 # an echo whose "[$(ts)]" prefix ran `date` first — so $? reported date's status,
 # not wrangler's, and every failed deploy was logged as exit=0. A broken deploy
