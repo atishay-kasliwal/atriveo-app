@@ -66,7 +66,7 @@ fi
 if [ -f "$APP_DIR/.env" ]; then
   while IFS= read -r line; do
     case "$line" in
-      CLOUDFLARE_API_TOKEN=*|CLOUDFLARE_ACCOUNT_ID=*) export "${line?}" ;;
+      CLOUDFLARE_API_TOKEN=*|CLOUDFLARE_ACCOUNT_ID=*|CF_PAGES_BRANCH=*) export "${line?}" ;;
     esac
   done < "$APP_DIR/.env"
 fi
@@ -76,6 +76,10 @@ fi
 # (e.g. macbook-air) silently produces a preview deployment while
 # application.atriveo.com keeps serving stale data — a green phase and no change.
 CF_BRANCH="${CF_PAGES_BRANCH:-main}"
+# Log the target. Deploying to a non-production branch still exits 0 — it just
+# silently becomes a preview — so the branch is the only thing that
+# distinguishes "published" from "published somewhere nobody looks".
+echo "[$(ts)] deploying to Pages branch '$CF_BRANCH'" >> "$LOG"
 npx wrangler pages deploy dist --project-name atriveo-app --branch "$CF_BRANCH" --commit-dirty=true >> "$LOG" 2>&1
 # Capture BEFORE anything else runs. This used to read `exit=$?` inline inside
 # an echo whose "[$(ts)]" prefix ran `date` first — so $? reported date's status,
