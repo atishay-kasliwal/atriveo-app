@@ -22,6 +22,8 @@ interface NavItem {
 
 const DAILY: NavItem[] = [
   { href: "/", label: "Signal", match: (p) => p === "/" || p.startsWith("/dashboard") || p.startsWith("/today") },
+  // Spec 1678 — ~180-source aggregator intake, alongside the LinkedIn-only pipeline.
+  { href: "/ever-jobs", label: "Intake", match: (p) => p.startsWith("/ever-jobs") },
 ];
 
 const WORKBENCH: NavItem[] = [

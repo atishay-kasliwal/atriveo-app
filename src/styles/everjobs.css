@@ -1,0 +1,307 @@
+/**
+ * Ever Jobs tab (Spec 1678 / Phase D).
+ *
+ * Every colour here comes from Atriveo's existing tokens — the tab must read as part of
+ * the app, not as an embedded third-party page. The standalone ever-jobs web app uses a
+ * cool steel light palette; none of that crosses over. What carries across is the *idea*
+ * of the intake ledger, rendered in this app's language.
+ *
+ * All selectors are `ej-` prefixed so nothing here can leak into sibling pages.
+ */
+
+.ej-page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+/* ── Controls ─────────────────────────────────────────────────────────── */
+
+.ej-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1.25rem 0 0.9rem;
+}
+
+.ej-input {
+  flex: 1 1 auto;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.ej-input:focus {
+  outline: none;
+  border-color: var(--border-hi);
+  box-shadow: 0 0 0 3px var(--blue-lo);
+}
+
+.ej-btn {
+  background: var(--blue);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.55rem 1.2rem;
+  cursor: pointer;
+}
+
+.ej-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ── Recency spine ────────────────────────────────────────────────────── */
+
+.ej-spine {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.6rem;
+  margin-bottom: 1.1rem;
+}
+
+.ej-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  cursor: pointer;
+}
+
+.ej-tab:hover {
+  color: var(--text);
+}
+
+.ej-tab-on {
+  color: var(--blue-hi);
+  border-bottom-color: var(--blue);
+}
+
+.ej-spine-fill {
+  flex: 1 1 auto;
+}
+
+.ej-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.ej-toggle input {
+  accent-color: var(--blue);
+}
+
+.ej-select {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.78rem;
+  padding: 0.25rem 0.4rem;
+}
+
+/* ── Ledger ───────────────────────────────────────────────────────────── */
+
+.ej-ledger {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.85rem 0.95rem;
+  margin-bottom: 1.25rem;
+}
+
+.ej-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ej-chip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  border-radius: 4px;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid transparent;
+}
+
+.ej-chip-live {
+  background: var(--blue-lo);
+  border-color: var(--border-hi);
+  color: var(--text);
+}
+
+.ej-chip-live strong {
+  color: var(--blue-hi);
+}
+
+.ej-chip-silent {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.ej-chip-silent em {
+  opacity: 0.8;
+}
+
+.ej-chip-pending {
+  background: var(--surface-2);
+  color: var(--muted);
+  animation: ej-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes ej-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.ej-trail {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.ej-trail b {
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.ej-cached {
+  margin-left: 0.5rem;
+  color: var(--blue-hi);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Rows ─────────────────────────────────────────────────────────────── */
+
+.ej-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ej-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ej-row:hover {
+  background: var(--accent-bg);
+}
+
+.ej-row-main {
+  min-width: 0;
+}
+
+.ej-row-title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.ej-row-co {
+  margin: 0.15rem 0 0;
+  color: var(--text-2);
+  font-size: 0.85rem;
+}
+
+.ej-row-meta {
+  margin: 0.45rem 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.ej-row-side {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex: 0 0 auto;
+}
+
+.ej-row-src,
+.ej-row-age {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.ej-apply {
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--blue-hi);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ej-apply:hover {
+  border-color: var(--border-hi);
+  background: var(--blue-lo);
+}
+
+.ej-apply-dead {
+  color: var(--muted);
+  cursor: default;
+}
+
+.ej-apply-dead:hover {
+  border-color: var(--border);
+  background: none;
+}
+
+/* ── States ───────────────────────────────────────────────────────────── */
+
+.ej-state {
+  padding: 2rem 0.6rem;
+}
+
+.ej-state-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ej-state-body {
+  margin: 0.3rem 0 1rem;
+  color: var(--muted);
+  max-width: 52ch;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 640px) {
+  .ej-row {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .ej-row-side {
+    width: 100%;
+  }
+}

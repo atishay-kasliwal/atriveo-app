@@ -19,6 +19,7 @@ import ManualTailor from "./pages/ManualTailor";
 import ResumeOptimizer from "./pages/ResumeOptimizer";
 import Onboarding from "./pages/Onboarding";
 import ManageTop500 from "./pages/ManageTop500";
+import EverJobs from "./pages/EverJobs";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -88,6 +89,7 @@ export default function App() {
           <Route path="/activity" element={<P><Activity /></P>} />
           <Route path="/manual-tailor" element={<P><ManualTailor /></P>} />
           <Route path="/optimizer" element={<P><ResumeOptimizer /></P>} />
+          <Route path="/ever-jobs" element={<P><EverJobs /></P>} />
           <Route path="/manage-top-500" element={<P><ManageTop500 /></P>} />
           <Route path="/*" element={<P><Navigate to="/" replace /></P>} />
         </Routes>
