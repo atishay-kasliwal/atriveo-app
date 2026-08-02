@@ -126,6 +126,20 @@ export function scrapeElapsedMs(state: ScrapeRunState, now: number): number {
   return (Number.isNaN(end) ? now : end) - start;
 }
 
+/**
+ * "about 6m left", or null when there is no history to estimate from.
+ *
+ * Clamped at zero-ish: a run that has already passed the median is reported as
+ * "any moment now" rather than a negative countdown, which is honest — we know
+ * it is late, not how late.
+ */
+export function scrapeRemainingLabel(estimateSec: number | null | undefined, elapsedMs: number): string | null {
+  if (estimateSec == null || estimateSec <= 0) return null;
+  const remainingMs = estimateSec * 1000 - elapsedMs;
+  if (remainingMs <= 30_000) return "any moment now";
+  return `about ${formatDuration(remainingMs)} left`;
+}
+
 /** Jobs added by the run, when both counts were captured. */
 export function scrapeJobDelta(state: ScrapeRunState): number | null {
   if (state.jobsBefore == null || state.jobsAfter == null) return null;

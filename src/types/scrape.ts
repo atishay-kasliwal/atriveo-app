@@ -40,11 +40,19 @@ export interface ScrapeRunState {
   error?: string;
 }
 
+/** Median timings from past successful runs; `totalSec` is null until some exist. */
+export interface ScrapeEstimate {
+  totalSec: number | null;
+  samples: number;
+  byPhase: Partial<Record<ScrapePhaseName, number>>;
+}
+
 export interface ScrapeStatusResponse {
   ok: boolean;
   running: boolean;
   knownPhases: ScrapePhaseName[];
   state: ScrapeRunState;
+  estimate?: ScrapeEstimate;
   logLines?: string[];
 }
 

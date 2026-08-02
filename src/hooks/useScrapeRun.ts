@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   fetchScrapeStatus, startScrapeRun, cancelScrapeRun, fetchScrapeLog, ScrapeOfflineError,
 } from "../utils/scrapeControl";
-import type { ScrapeRunState, ScrapePhaseName } from "../types/scrape";
+import type { ScrapeRunState, ScrapePhaseName, ScrapeEstimate } from "../types/scrape";
 
 const IDLE: ScrapeRunState = { runId: null, status: "idle", phase: null, phases: [] };
+const NO_ESTIMATE: ScrapeEstimate = { totalSec: null, samples: 0, byPhase: {} };
 
 /** Fast enough to feel live, slow enough that a 15-minute run is ~450 requests. */
 const POLL_ACTIVE_MS = 2_000;
@@ -14,6 +15,18 @@ const POLL_IDLE_MS = 30_000;
 export interface UseScrapeRunResult {
   state: ScrapeRunState;
   knownPhases: ScrapePhaseName[];
+  /** Median timings from past runs, for the "about N left" readout. */
+  estimate: ScrapeEstimate;
+  /**
+   * The run that just ended, held until acknowledged.
+   *
+   * Set when polling sees a run we watched go from running to a terminal state,
+   * so the UI can show a result card. Null on a fresh page load even if the
+   * last recorded run finished long ago — otherwise every visit would open with
+   * a stale "complete" dialog.
+   */
+  justFinished: ScrapeRunState | null;
+  acknowledgeFinish: () => void;
   running: boolean;
   /** Mac unreachable — asleep, offline, or the sidecar is down. */
   offline: boolean;
@@ -41,6 +54,8 @@ const DEFAULT_PHASES: ScrapePhaseName[] = ["scrape", "jd_export", "feed_deploy",
  */
 export function useScrapeRun(onComplete?: (state: ScrapeRunState) => void): UseScrapeRunResult {
   const [state, setState] = useState<ScrapeRunState>(IDLE);
+  const [estimate, setEstimate] = useState<ScrapeEstimate>(NO_ESTIMATE);
+  const [justFinished, setJustFinished] = useState<ScrapeRunState | null>(null);
   const [knownPhases, setKnownPhases] = useState<ScrapePhaseName[]>(DEFAULT_PHASES);
   const [running, setRunning] = useState(false);
   const [offline, setOffline] = useState(false);
@@ -53,6 +68,8 @@ export function useScrapeRun(onComplete?: (state: ScrapeRunState) => void): UseS
   // Which run we have already reported, so onComplete fires once even though
   // polling keeps seeing the same terminal state afterwards.
   const completedRunId = useRef<string | null>(null);
+  // Only report a finish for a run we actually watched running in this session.
+  const sawRunning = useRef(false);
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
 
@@ -69,12 +86,19 @@ export function useScrapeRun(onComplete?: (state: ScrapeRunState) => void): UseS
       setRunning(res.running);
       setState(res.state);
       if (res.knownPhases?.length) setKnownPhases(res.knownPhases);
+      if (res.estimate) setEstimate(res.estimate);
 
-      const finished = !res.running && res.state.status === "done";
-      if (finished && res.state.runId && completedRunId.current !== res.state.runId) {
-        completedRunId.current = res.state.runId;
-        onCompleteRef.current?.(res.state);
+      if (res.running) {
+        sawRunning.current = true;
+        return;
       }
+      const terminal = res.state.status !== "idle" && res.state.status !== "running";
+      if (!sawRunning.current || !terminal || !res.state.runId) return;
+      if (completedRunId.current === res.state.runId) return;
+      completedRunId.current = res.state.runId;
+      sawRunning.current = false;
+      setJustFinished(res.state);
+      if (res.state.status === "done") onCompleteRef.current?.(res.state);
     } catch (e) {
       if (!mounted.current) return;
       if (e instanceof ScrapeOfflineError) {
@@ -140,9 +164,11 @@ export function useScrapeRun(onComplete?: (state: ScrapeRunState) => void): UseS
   }, []);
 
   const dismissError = useCallback(() => setError(null), []);
+  const acknowledgeFinish = useCallback(() => setJustFinished(null), []);
 
   return {
-    state, knownPhases, running, offline, error, starting,
+    state, knownPhases, estimate, justFinished, running, offline, error, starting,
     logLines, loadingLog, start, cancel, refresh: poll, loadLog, dismissError,
+    acknowledgeFinish,
   };
 }

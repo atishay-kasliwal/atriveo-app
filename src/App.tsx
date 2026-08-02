@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import { Top500Provider } from "./context/Top500Context";
+import { ScrapeRunProvider } from "./context/ScrapeRunContext";
 import AppHeader from "./components/AppHeader";
+import ScrapeRunOverlay from "./components/ScrapeRunOverlay";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Weekly from "./pages/Weekly";
@@ -44,6 +46,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Top500Provider>
+        <ScrapeRunProvider>
+        {/* Blocks interaction while a run rewrites the feed. */}
+        <ScrapeRunOverlay />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
@@ -86,6 +91,7 @@ export default function App() {
           <Route path="/manage-top-500" element={<P><ManageTop500 /></P>} />
           <Route path="/*" element={<P><Navigate to="/" replace /></P>} />
         </Routes>
+        </ScrapeRunProvider>
       </Top500Provider>
     </BrowserRouter>
   );

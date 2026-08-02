@@ -40,7 +40,7 @@ import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
 import { listActiveWorkers } from "./worker-registry.mjs";
 import { buildCoverLetter } from "./cover-letter.mjs";
 import {
-  startScrape, cancelScrape, readScrapeState, tailScrapeLog,
+  startScrape, cancelScrape, readScrapeState, tailScrapeLog, readScrapeEstimate,
   isScrapeRunning, SCRAPE_PHASES, JOB_PIPELINE_DIR, SCRAPE_SCRIPT,
 } from "./scrape-control.mjs";
 
@@ -1041,6 +1041,7 @@ const server = http.createServer(async (req, res) => {
       running: isScrapeRunning(),
       knownPhases: SCRAPE_PHASES,
       state,
+      estimate: readScrapeEstimate(),
       logLines: wantLog ? tailScrapeLog(Number.isFinite(lines) ? lines : 40) : undefined,
     }));
   }

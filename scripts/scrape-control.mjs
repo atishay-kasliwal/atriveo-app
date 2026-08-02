@@ -99,6 +99,43 @@ export function readScrapeState() {
   return state;
 }
 
+const HISTORY_FILE =
+  process.env.ATRIVEO_SCRAPE_HISTORY?.trim() || path.join(JOB_PIPELINE_DIR, "output", "scrape_history.json");
+
+function median(values) {
+  if (!values.length) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+}
+
+/**
+ * How long a full run usually takes, from the last 20 successful runs.
+ *
+ * Median rather than mean: one run that stalled on a slow LinkedIn response for
+ * 40 minutes should not drag every future estimate with it. Returns null with
+ * no history, and the UI then says nothing rather than inventing a number.
+ */
+export function readScrapeEstimate() {
+  const history = readJson(HISTORY_FILE);
+  if (!Array.isArray(history) || !history.length) {
+    return { totalSec: null, samples: 0, byPhase: {} };
+  }
+  const totals = history.map((h) => h?.durationSec).filter((n) => Number.isFinite(n) && n > 0);
+
+  const byPhase = {};
+  for (const name of SCRAPE_PHASES) {
+    const durations = history
+      .flatMap((h) => (Array.isArray(h?.phases) ? h.phases : []))
+      .filter((p) => p?.name === name && Number.isFinite(p.durationSec))
+      .map((p) => p.durationSec);
+    const m = median(durations);
+    if (m != null) byPhase[name] = m;
+  }
+
+  return { totalSec: median(totals), samples: totals.length, byPhase };
+}
+
 /** Last `lines` lines of the pipeline log, for the UI's log drawer. */
 export function tailScrapeLog(lines = 40) {
   try {

@@ -1,13 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { useScrapeRun } from "../hooks/useScrapeRun";
+import { useScrapeRunContext } from "../context/ScrapeRunContext";
 import { formatDuration, scrapeElapsedMs, scrapeJobDelta } from "../utils/scrapeControl";
 import { SCRAPE_PHASE_LABELS, type ScrapePhase, type ScrapeRunState } from "../types/scrape";
 import "../styles/scrape.css";
-
-interface ScrapeNowButtonProps {
-  /** Fired after a successful run so the caller can refetch the feed. */
-  onComplete?: (state: ScrapeRunState) => void;
-}
 
 function phaseFor(state: ScrapeRunState, name: string): ScrapePhase | undefined {
   return state.phases?.find((p) => p.name === name);
@@ -44,23 +39,20 @@ function summaryLabel(state: ScrapeRunState, running: boolean, elapsed: number):
  * everything here reflects polled state — closing the tab does not stop a run,
  * and reopening reattaches to one already going.
  */
-export default function ScrapeNowButton({ onComplete }: ScrapeNowButtonProps) {
+export default function ScrapeNowButton() {
   const [open, setOpen] = useState(false);
   const [showLog, setShowLog] = useState(false);
   const [now, setNow] = useState(() => Date.now());
-  // A finished run redeploys the static feed JSON that /api/jobs serves, so the
-  // new jobs only exist in a fresh page load. Offer that instead of yanking the
-  // page out from under whatever the user was doing.
-  const [freshRun, setFreshRun] = useState<ScrapeRunState | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
+  // Shared with the blocking overlay — see context/ScrapeRunContext. The hook
+  // owns "a run just finished"; a finished run redeploys the static feed JSON
+  // that /api/jobs serves, so the new rows only exist after a page load.
   const {
     state, knownPhases, running, offline, error, starting,
-    logLines, loadingLog, start, cancel, loadLog, dismissError,
-  } = useScrapeRun((finished) => {
-    setFreshRun(finished);
-    onComplete?.(finished);
-  });
+    logLines, loadingLog, start, cancel, loadLog, dismissError, justFinished,
+  } = useScrapeRunContext();
+  const freshRun = justFinished?.status === "done" ? justFinished : null;
 
   // Local ticker so the elapsed readout moves between 2s status polls.
   useEffect(() => {
@@ -161,7 +153,7 @@ export default function ScrapeNowButton({ onComplete }: ScrapeNowButtonProps) {
           )}
 
           <ol className="scrape-phases">
-            {knownPhases.map((name) => {
+            {knownPhases.map((name: string) => {
               const phase = phaseFor(state, name);
               const isActive = running && state.phase === name;
               const status = phase?.status ?? (isActive ? "running" : "pending");
