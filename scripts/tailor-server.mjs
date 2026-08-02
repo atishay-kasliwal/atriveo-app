@@ -39,6 +39,10 @@ import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqu
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
 import { listActiveWorkers } from "./worker-registry.mjs";
 import { buildCoverLetter } from "./cover-letter.mjs";
+import {
+  startScrape, cancelScrape, readScrapeState, tailScrapeLog,
+  isScrapeRunning, SCRAPE_PHASES, JOB_PIPELINE_DIR, SCRAPE_SCRIPT,
+} from "./scrape-control.mjs";
 
 dotenv.config();
 
@@ -1015,7 +1019,68 @@ const server = http.createServer(async (req, res) => {
       mongo: Boolean(process.env.MONGO_URI),
       pipeline: USE_LEGACY ? "legacy" : "ac",
       planner: USE_LEGACY ? null : AC_PLANNER,
+      scrape: {
+        available: fs.existsSync(SCRAPE_SCRIPT),
+        running: isScrapeRunning(),
+        pipelineDir: JOB_PIPELINE_DIR,
+      },
     }));
+  }
+
+  // ─── On-demand scrape ──────────────────────────────────────────────────────
+  // Replaces the hourly LaunchAgent: the app starts a run, polls status, and
+  // can stop it. See scripts/scrape-control.mjs.
+
+  if (req.method === "GET" && pathname === "/scrape/status") {
+    const state = readScrapeState();
+    const wantLog = reqUrl.searchParams.get("log") === "1";
+    const lines = Number.parseInt(reqUrl.searchParams.get("lines") || "40", 10);
+    res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+    return res.end(JSON.stringify({
+      ok: true,
+      running: isScrapeRunning(),
+      knownPhases: SCRAPE_PHASES,
+      state,
+      logLines: wantLog ? tailScrapeLog(Number.isFinite(lines) ? lines : 40) : undefined,
+    }));
+  }
+
+  if (req.method === "GET" && pathname === "/scrape/log") {
+    const lines = Number.parseInt(reqUrl.searchParams.get("lines") || "200", 10);
+    res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+    return res.end(JSON.stringify({
+      ok: true,
+      lines: tailScrapeLog(Number.isFinite(lines) ? lines : 200),
+    }));
+  }
+
+  if (req.method === "POST" && pathname === "/scrape/start") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      let opts = {};
+      try {
+        opts = raw.trim() ? JSON.parse(raw) : {};
+      } catch {
+        opts = {};
+      }
+      const result = startScrape({
+        skipResume: opts.skipResume === true,
+        skipDeploy: opts.skipDeploy === true,
+      });
+      const status = result.ok ? 200 : (result.code ?? 500);
+      log(result.ok ? `scrape started · ${result.runId}` : `scrape start rejected · ${result.error}`);
+      res.writeHead(status, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(result));
+    });
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/scrape/cancel") {
+    const result = cancelScrape();
+    log(result.ok ? `scrape cancelled · pid ${result.pid}` : `scrape cancel noop · ${result.error}`);
+    res.writeHead(result.ok ? 200 : (result.code ?? 500), { "Content-Type": "application/json" });
+    return res.end(JSON.stringify(result));
   }
 
   if (req.method === "POST" && pathname === "/tailor") {
@@ -1739,6 +1804,14 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, "127.0.0.1", () => {
   log(`listening on http://localhost:${PORT}`);
+  // Bound to loopback, so this only matters once cloudflared publishes it — but
+  // then /scrape/start is reachable by anyone who knows the tunnel URL, and it
+  // both scrapes and deploys to production. The Pages Function's JWT check does
+  // not help: the tunnel is a second, unauthenticated way in.
+  if (!TAILOR_TOKEN) {
+    log("WARNING: TAILOR_TOKEN is empty — every route, including /scrape/start, is unauthenticated.");
+    log("         Set TAILOR_TOKEN in .env (same value as the Cloudflare env var) to close this.");
+  }
   log(`output → ${OUT_ROOT}`);
   log(`pipeline → ${USE_LEGACY ? `legacy (gemma ${DEFAULT_MODEL})` : `ac (planner ${AC_PLANNER})`}`);
   if (USE_LEGACY) log(`template → ${TEMPLATE}`);

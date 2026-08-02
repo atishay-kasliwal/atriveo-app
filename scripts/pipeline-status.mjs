@@ -12,6 +12,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { readScrapeState } from "./scrape-control.mjs";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 dotenv.config({ path: path.join(ROOT, ".env") });
@@ -82,55 +83,62 @@ function loadEnvToken() {
   return "";
 }
 
+/** Scraping is on-demand now, so only the always-on services are required. */
 function checkLaunchAgents() {
-  section("Automation (Mac LaunchAgents)");
+  section("Services (Mac LaunchAgents)");
   const agents = [
-    { label: "com.atriveo.job-pipeline", fix: "npm run pipeline:install", detail: "hourly scrape + jd:export" },
-    { label: "com.atriveo.feed-sync", fix: "npm run pipeline:install", detail: "job feed → Cloudflare" },
-    { label: "com.atriveo.resume-sync", fix: "npm run pipeline:install", detail: "enqueue top resumes" },
-    { label: "com.atriveo.tailor", fix: "npm run tailor:install", detail: null },
-    { label: "com.atriveo.tailor-worker", fix: "npm run tailor:worker:install", detail: null },
+    { label: "com.atriveo.tailor", fix: "npm run tailor:install", restart: "launchctl kickstart -k gui/$(id -u)/com.atriveo.tailor" },
+    { label: "com.atriveo.tailor-worker", fix: "npm run tailor:worker:install", restart: "npm run tailor:worker:restart" },
   ];
-  for (const { label, fix, detail } of agents) {
+  for (const { label, fix, restart } of agents) {
     const st = launchAgentLoaded(label);
     if (!st?.loaded) {
-      bad(`${label} not loaded`, "automation won't run unattended", fix);
+      bad(`${label} not loaded`, label === "com.atriveo.tailor" ? "Scrape now button will not work" : "resumes won't compile", fix);
       continue;
     }
-    if (label === "com.atriveo.tailor" || label === "com.atriveo.tailor-worker") {
-      if (st.pid) ok(`${label} running`, `pid ${st.pid}`);
-      else warn(`${label} loaded but not running`, `last exit ${st.lastExit ?? "?"}`,
-        label === "com.atriveo.tailor-worker"
-          ? "npm run tailor:worker:restart"
-          : "launchctl kickstart -k gui/$(id -u)/com.atriveo.tailor");
-    } else {
-      ok(label, detail || "loaded");
-    }
+    if (st.pid) ok(`${label} running`, `pid ${st.pid}`);
+    else warn(`${label} loaded but not running`, `last exit ${st.lastExit ?? "?"}`, restart);
+  }
+
+  // These used to scrape on a timer. If any survived a migration they will
+  // scrape behind your back, which is exactly what on-demand was meant to stop.
+  const retired = ["com.atriveo.job-pipeline", "com.atriveo.feed-sync", "com.atriveo.resume-sync"];
+  const stragglers = retired.filter((label) => launchAgentLoaded(label)?.loaded);
+  if (stragglers.length) {
+    warn("Scheduled scrape agents still loaded", stragglers.join(", "), "npm run pipeline:install");
+  } else {
+    ok("No scheduled scrape agents", "scraping runs only when triggered");
   }
 }
 
+function checkScrapeState() {
+  section("Last scrape run (on-demand)");
+  const state = readScrapeState();
+  if (state.status === "idle") {
+    warn("No run recorded yet", "never scraped on this Mac", "npm run scrape:now");
+    return;
+  }
+  const phases = (state.phases || [])
+    .map((p) => `${p.name}:${p.status}`)
+    .join(" · ");
+  const age = state.finishedAt || state.updatedAt ? fmtAge(hoursSince(state.finishedAt || state.updatedAt)) : "unknown";
+  const detail = `${state.runId ?? "?"} · ${age}${phases ? ` · ${phases}` : ""}`;
+  if (state.status === "running") ok("Run in flight", `phase ${state.phase} · ${detail}`);
+  else if (state.status === "done") ok("Last run succeeded", detail);
+  else if (state.status === "interrupted") warn("Last run was interrupted", detail, "npm run scrape:now");
+  else if (state.status === "cancelled") warn("Last run was cancelled", detail, "npm run scrape:now");
+  else bad("Last run failed", detail, "check /tmp/atriveo_pipeline.log");
+}
+
+/** Raw log tail. Per-phase outcomes come from the run state, not this. */
 function checkPipelineLog() {
-  section("Last scrape + JD export");
+  section("Pipeline log tail");
   const lines = tailLines(PIPELINE_LOG, 8);
   if (!lines.length) {
-    warn("No pipeline log yet", PIPELINE_LOG, "wait for hourly run or: cd ~/job-pipeline && bash run-pipeline-and-export.sh");
+    warn("No pipeline log yet", PIPELINE_LOG, "npm run scrape:now");
     return;
   }
   for (const line of lines) console.log(`  ${C.dim}${line}${C.reset}`);
-  const lastExport = [...lines].reverse().find((l) => l.includes("jd:export exit="));
-  const lastScrape = [...lines].reverse().find((l) => l.includes("scraper exit="));
-  if (lastScrape) {
-    const exit = lastScrape.match(/scraper exit=(\d+)/)?.[1];
-    if (exit === "0") ok("Last scraper run", "exit 0");
-    else warn("Last scraper run had errors", `exit ${exit}`, "check ~/job-pipeline logs");
-  }
-  if (lastExport) {
-    const exit = lastExport.match(/jd:export exit=(\d+)/)?.[1];
-    if (exit === "0") ok("Last jd:export", "exit 0");
-    else bad("Last jd:export failed", `exit ${exit}`, "npm run pipeline:sync");
-  } else {
-    warn("No jd:export line in recent log", "buckets may be stale", "npm run pipeline:sync");
-  }
 }
 
 function checkFeedSyncLog() {
@@ -247,19 +255,22 @@ async function checkWorkerFleet() {
 
 function printNextSteps() {
   section("To run the pipeline now");
-  console.log(`  ${C.dim}1.${C.reset} Scrape:  cd ~/job-pipeline && .venv/bin/python -m job_pipeline.main --pipeline all --deploy`);
-  console.log(`  ${C.dim}2.${C.reset} Sync JD: npm run pipeline:sync`);
-  console.log(`  ${C.dim}3.${C.reset} Worker:  npm run tailor:worker:install  (or via pipeline:install)`);
-  console.log(`  ${C.dim}Feed:${C.reset}   npm run feed:sync     (dashboard sessions → Cloudflare)`);
-  console.log(`  ${C.dim}Resume:${C.reset} npm run resume:sync   (enqueue top 25 for worker)`);
-  console.log(`  ${C.dim}Both:${C.reset}   npm run sync:all      (run feed + resume in parallel)`);
-  console.log(`  ${C.dim}5.${C.reset} App:     open Dashboard — optional; worker compiles without tab`);
-  console.log(`  ${C.dim}6.${C.reset} Deep:    npm run tailor:doctor`);
+  console.log(`  ${C.dim}Button:${C.reset} in the app header → Scrape now  (runs the whole chain)`);
+  console.log(`  ${C.dim}CLI:${C.reset}    npm run scrape:now             (same chain, same lock)`);
+  console.log(`  ${C.dim}Stop:${C.reset}   npm run scrape:now -- --cancel`);
+  console.log(`  ${C.dim}State:${C.reset}  npm run scrape:now -- --status`);
+  console.log();
+  console.log(`  ${C.dim}Individual steps, if you need them:${C.reset}`);
+  console.log(`  ${C.dim}JD:${C.reset}     npm run pipeline:sync   (buckets only)`);
+  console.log(`  ${C.dim}Feed:${C.reset}   npm run feed:sync       (dashboard sessions → Cloudflare)`);
+  console.log(`  ${C.dim}Resume:${C.reset} npm run resume:sync     (enqueue for worker)`);
+  console.log(`  ${C.dim}Deep:${C.reset}   npm run tailor:doctor`);
 }
 
 (async function main() {
   console.log(`${C.bold}Atriveo pipeline status${C.reset} ${C.dim}· ${new Date().toLocaleString()}${C.reset}`);
   checkLaunchAgents();
+  checkScrapeState();
   checkPipelineLog();
   checkFeedSyncLog();
   checkResumeSyncLog();

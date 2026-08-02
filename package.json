@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "clean:install": "node scripts/clean-install.mjs",
     "tailor": "node --env-file=.env.tailor scripts/tailor-server.mjs",
     "tailor:tunnel": "cloudflared tunnel --config scripts/cloudflared-tailor.yml run",
     "tailor:setup": "node scripts/setup-tailor-tunnel.mjs",
@@ -50,6 +51,7 @@
     "jd:export": "node scripts/export-job-descriptions.mjs",
     "export:descriptions": "node scripts/export-job-descriptions.mjs",
     "pipeline:sync": "node scripts/export-job-descriptions.mjs",
+    "scrape:now": "node --env-file=.env scripts/scrape-now.mjs",
     "pipeline:status": "node scripts/pipeline-status.mjs",
     "pipeline:install": "node scripts/install-pipeline-services.mjs",
     "pipeline:ready": "node scripts/pipeline-ready.mjs",
