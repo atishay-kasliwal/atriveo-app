@@ -34,6 +34,7 @@ import {
 import { buildSkillsLines, capSkillsLineToOnePhysicalLine } from "./skills-library.mjs";
 import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
+import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
@@ -950,7 +951,7 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
     sendPhase("assembling");
     logAssemblePlan(onLog, ai, BANK);
     onLog?.("think", "Applying LaTeX preamble + header + education (fixed blocks)…");
-    const tex = assembleResume(ai, BANK);
+    const tex = assembleResume(ai, BANK, { location: job.location });
     onLog?.("think", `Base .tex size · ${tex.length.toLocaleString()} chars`);
     const withJd = tex.replace(/\\end\{document\}/, `\\end{document}\n\n% ==== JD: ${company} — ${role} ====\n% ${jd.replace(/\n/g, "\n% ").slice(0, 4000)}`);
     onLog?.("step", "Writing resume.tex (with JD appendix comment)…");
@@ -998,7 +999,7 @@ const server = http.createServer(async (req, res) => {
   // permissive CORS so the Vite dev origin can reach us
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Tailor-Token");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS,DELETE");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS,DELETE");
   if (req.method === "OPTIONS") { res.writeHead(204); return res.end(); }
 
   const reqUrl = new URL(req.url || "/", "http://127.0.0.1");
@@ -1646,7 +1647,41 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // POST /manual-jd { job_url, company, title, description }
+  // GET /resume-profile — the editable resume header identity (name, contact,
+  // links, default title, home city). Backs Settings in both the dock and web.
+  if (req.method === "GET" && pathname === "/resume-profile") {
+    try {
+      res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+      res.end(JSON.stringify({ ok: true, profile: loadResumeProfile(), defaults: PROFILE_DEFAULTS }));
+    } catch (e) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+    }
+    return;
+  }
+
+  // PUT /resume-profile { name?, title?, email?, phone?, location?, links… }
+  // Partial patch — omitted fields keep their current value, and blank ones
+  // fall back to the shipped default. Takes effect on the next build.
+  if (req.method === "PUT" && pathname === "/resume-profile") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      try {
+        const body = JSON.parse(raw || "{}");
+        const profile = saveResumeProfile(body);
+        log(`resume profile updated · ${profile.name} · ${profile.email} · ${profile.location}`);
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: true, profile }));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    });
+    return;
+  }
+
+  // POST /manual-jd { job_url, company, title, location?, description }
   // Stores a hand-pasted JD so the worker's fetchDescription() can find it.
   // Used by the dock's "Build a Resume" (Create) tab for manual:// job URLs.
   if (req.method === "POST" && pathname === "/manual-jd") {
@@ -1678,6 +1713,8 @@ const server = http.createServer(async (req, res) => {
                   job_url: body.job_url,
                   company: body.company || "Unknown",
                   title: body.title || "role",
+                  // Optional — drives the resume header city when supplied.
+                  location: String(body.location || "").trim() || null,
                   score_pct: body.score_pct ?? 100,
                   source: "manual",
                   batch_time: now,

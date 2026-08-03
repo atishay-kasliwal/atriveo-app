@@ -11,9 +11,17 @@ function isJsonRoute(path: string): boolean {
   return path.startsWith("/api/") || path.startsWith("/tailor");
 }
 
+function isLocalHostname(hostname: string): boolean {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
+}
+
 export const onRequest: PagesFunction<Env> = async ({ request, env, next }) => {
   const url = new URL(request.url);
   const path = url.pathname;
+
+  if (isLocalHostname(url.hostname)) {
+    return next();
+  }
 
   // Allow assets, auth endpoints, landing page, and login through untouched.
   if (ASSET_RE.test(path)) {

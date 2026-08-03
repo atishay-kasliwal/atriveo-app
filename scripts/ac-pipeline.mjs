@@ -86,7 +86,7 @@ function scoreCandidate(args) {
   return scoreResumeCandidate(args);
 }
 
-function finalizeCandidate(candidate, { bank, jd, title, pages = 1 }) {
+function finalizeCandidate(candidate, { bank, jd, title, location, pages = 1 }) {
   const baselineRcs = candidate.resume_confidence_score;
   const { composition: pruned, pruned: prunedIds } = applyContributionPruning(
     candidate.composition,
@@ -96,7 +96,7 @@ function finalizeCandidate(candidate, { bank, jd, title, pages = 1 }) {
   if (!prunedIds.length) {
     return { ...candidate, contribution_pruned: [], beam_variant: candidate.variant_id };
   }
-  const rescored = scoreCandidate({ composition: pruned, bank, jd, title, pages });
+  const rescored = scoreCandidate({ composition: pruned, bank, jd, title, location, pages });
   if (rescored.resume_confidence_score < baselineRcs * 0.97) {
     return {
       ...candidate,
@@ -153,6 +153,7 @@ function applyGlobalOptimize(candidate, { bank, jd, planner, meta, pages, cfg })
     bank,
     jd,
     title: meta.title,
+    location: meta.location,
     pages,
   });
 
@@ -208,9 +209,9 @@ function singleCompose({ jd, bank, planner, meta, pages = 1, jdGate = null, forc
       jd,
     };
   }
-  const scored = scoreCandidate({ composition, bank, jd, title: meta.title, pages });
+  const scored = scoreCandidate({ composition, bank, jd, title: meta.title, location: meta.location, pages });
   let finalized = finalizeCandidate({ ...scored, variant_id: "compose", variant_label: "Direct compose" }, {
-    bank, jd, title: meta.title, pages,
+    bank, jd, title: meta.title, location: meta.location, pages,
   });
   const cfg = loadPlannerConfig(planner);
   finalized = applyGlobalOptimize(finalized, {
@@ -283,6 +284,7 @@ export function generateResume({
     bank: loadedBank,
     jd,
     title: meta.title,
+    location: meta.location,
     pages,
   });
   finalized = applyGlobalOptimize(finalized, {

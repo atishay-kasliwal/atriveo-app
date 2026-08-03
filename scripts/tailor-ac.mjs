@@ -16,6 +16,7 @@ import { ingestComposeRun } from "./ac-learning.mjs";
 import { assessJdGate, writeJdGateFile, MIN_JD_IDEAL } from "./ac-jd-gate.mjs";
 import { buildComposeExplain, formatExplainLogLines } from "./ac-compose-explain.mjs";
 import { loadBank } from "./ac-bank.mjs";
+import { resolveHeaderLocation } from "./ac-header-location.mjs";
 import {
   createArtifactRun,
   advanceArtifactStage,
@@ -314,10 +315,14 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     sendPhase("analyzing");
     onLog?.("think", `Planner · ${planner} · full slots · no delete-test prune`);
 
+    onLog?.("think", job.location
+      ? `Header location · ${resolveHeaderLocation(job.location)} (posting: ${job.location})`
+      : `Header location · ${resolveHeaderLocation(null)} (posting has no location)`);
+
     const pipeline = generateResume({
       jd,
       planner,
-      meta: { company, title: role },
+      meta: { company, title: role, location: job.location },
       forceBorderline: job.force_borderline === true,
       strictJdGate: job.strict_jd_gate === true,
       jdGate,

@@ -4311,6 +4311,32 @@ footer a:hover { color: var(--blue); }
   margin-bottom: 12px;
 }
 
+/* Resume header identity — two columns on desktop, stacked on narrow screens. */
+.settings-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px 16px;
+}
+
+.settings-profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.settings-profile-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.settings-profile-hint {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
 .settings-input {
   flex: 1;
   height: 34px;

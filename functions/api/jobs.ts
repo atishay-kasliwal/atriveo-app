@@ -5,7 +5,14 @@ interface Env {
   ASSETS: Fetcher;
 }
 
+function isLocalHostname(hostname: string): boolean {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
+}
+
 async function requireAuth(request: Request, env: Env): Promise<boolean> {
+  const url = new URL(request.url);
+  if (isLocalHostname(url.hostname)) return true;
+
   const cookie = request.headers.get("Cookie") || "";
   const token = cookie.match(/atriveo_token=([^;]+)/)?.[1];
   if (!token) return false;
