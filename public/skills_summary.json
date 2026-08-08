@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-08-08T15:39:44.500600+00:00",
-  "total_analyzed": 53533,
+  "generated_at": "2026-08-08T16:38:29.647061+00:00",
+  "total_analyzed": 53534,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 30209,
+        "Python": 30210,
         "Java": 14681,
         "SQL": 13162,
         "JavaScript": 9001,
@@ -94,7 +94,7 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 11019,
+        "CI/CD": 11020,
         "Kubernetes": 6848,
         "Docker": 6497,
         "Git": 6338,
@@ -136,12 +136,12 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 15450,
-        "Agents": 11726,
-        "LLM": 10260,
+        "Machine Learning": 15451,
+        "Agents": 11727,
+        "LLM": 10261,
         "GenAI": 6874,
         "PyTorch": 5442,
-        "RAG": 4746,
+        "RAG": 4747,
         "TensorFlow": 4212,
         "NLP": 4060,
         "Prompt Eng": 3304,
