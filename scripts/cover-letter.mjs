@@ -11,12 +11,23 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { loadResumeProfile } from "./resume-profile.mjs";
 
-// ─── Identity (matches resume header) ────────────────────────────────────────
-const NAME     = "Atishay Kasliwal";
-const EMAIL    = "katishay@gmail.com";
-const PHONE    = "934-246-1198";
-const LINKEDIN = "https://www.linkedin.com/in/atishay-kasliwal";
+// ─── Identity ────────────────────────────────────────────────────────────────
+// Read from the same profile the resume header uses. These were copies, and
+// they drifted: the cover letter still carried katishay@gmail.com after the
+// resume moved to katishay45@gmail.com, so a single application went out
+// under two different addresses. Read at build time so an edit to the profile
+// reaches both.
+function identity() {
+  const p = loadResumeProfile();
+  return {
+    NAME:     p.name,
+    EMAIL:    p.email,
+    PHONE:    p.phone,
+    LINKEDIN: p.linkedin,
+  };
+}
 
 // ─── LaTeX escaping (same rules as the resume path) ──────────────────────────
 function escapeTex(s) {
@@ -185,6 +196,7 @@ function joinList(items) {
 }
 
 function buildTex({ company, role, skills, bullets }) {
+  const { NAME, EMAIL, PHONE, LINKEDIN } = identity();
   const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
   const cRole = cleanRole(role);
   // Keep the skills line short — 3 max reads cleaner than a laundry list.
@@ -257,6 +269,7 @@ ${escapeTex(NAME)}
 
 // ─── Public API ──────────────────────────────────────────────────────────────
 export function buildCoverLetter({ company, role, jd, dir, bank }, onLog) {
+  const { NAME } = identity();
   onLog?.("step", "Selecting bank bullets by JD keyword overlap…");
   const bullets = pickBullets(bank, jd, 2);
   const skills = topSkills(bullets.length ? bullets : allBullets(bank).slice(0, 2));
