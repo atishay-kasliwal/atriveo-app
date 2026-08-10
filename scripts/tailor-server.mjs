@@ -985,6 +985,128 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
   return result;
 }
 
+// ─── Job feed ────────────────────────────────────────────────────────────────
+// A JS port of the tab windows in job_pipeline/export_static.py. Both read the
+// same sessions/jobs collections; keep them in step if either changes.
+
+const DASHBOARD_TZ = process.env.DASHBOARD_TZ?.trim() || "America/New_York";
+
+/** Milliseconds a zone is offset from UTC at a given instant. */
+function tzOffsetMs(date, tz) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, hour12: false,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).formatToParts(date).reduce((acc, p) => (acc[p.type] = p.value, acc), {});
+  const asUtc = Date.UTC(
+    Number(parts.year), Number(parts.month) - 1, Number(parts.day),
+    Number(parts.hour) % 24, Number(parts.minute), Number(parts.second),
+  );
+  return asUtc - date.getTime();
+}
+
+/**
+ * [start, end) in UTC for a local calendar day in DASHBOARD_TZ, `daysAgo`
+ * days back. The offset is resolved twice because the first guess can land on
+ * the wrong side of a DST boundary.
+ */
+function localDayBoundsUtc(daysAgo, tz = DASHBOARD_TZ) {
+  const todayLocal = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(new Date());
+  const [y, m, d] = todayLocal.split("-").map(Number);
+
+  const midnightUtcGuess = Date.UTC(y, m - 1, d - daysAgo);
+  let start = midnightUtcGuess - tzOffsetMs(new Date(midnightUtcGuess), tz);
+  start = midnightUtcGuess - tzOffsetMs(new Date(start), tz);
+
+  const nextGuess = midnightUtcGuess + 86_400_000;
+  let end = nextGuess - tzOffsetMs(new Date(nextGuess), tz);
+  end = nextGuess - tzOffsetMs(new Date(end), tz);
+
+  return { start: new Date(start), end: new Date(end) };
+}
+
+const FEED_PROJECTION = { _id: 0, run_at: 0 };
+
+/** Keep the first occurrence of each job_url, matching the exporter's dedup. */
+function dedupeByUrl(jobs) {
+  const seen = new Set();
+  const unique = [];
+  for (const j of jobs) {
+    const key = j.job_url || `${j.title}-${j.company}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(j);
+  }
+  return unique;
+}
+
+async function sessionIdsForDay(db, daysAgo) {
+  const { start, end } = localDayBoundsUtc(daysAgo);
+  const sessions = await db.collection("sessions")
+    .find({ pipeline: "standard", archived: false, run_at: { $gte: start, $lt: end } }, { projection: { session_id: 1 } })
+    .toArray();
+  return sessions.map((s) => s.session_id);
+}
+
+async function jobsForSessions(db, sessionIds) {
+  if (!sessionIds.length) return [];
+  return db.collection("jobs")
+    .find({ session_id: { $in: sessionIds } }, { projection: FEED_PROJECTION })
+    .toArray();
+}
+
+/** The most recent standard session only — what the "Hour" tab shows. */
+async function fetchLatestSessionJobs(db) {
+  const session = await db.collection("sessions").findOne(
+    { pipeline: "standard", archived: false },
+    { sort: { run_at: -1 }, projection: { session_id: 1 } },
+  );
+  if (!session) return [];
+  return jobsForSessions(db, [session.session_id]);
+}
+
+/** Last 7 days, deduped oldest-first, tagged with the local day they were scraped. */
+async function fetchWeekJobs(db) {
+  const cutoff = new Date(Date.now() - 7 * 86_400_000);
+  const sessions = await db.collection("sessions")
+    .find({ pipeline: "standard", archived: false, run_at: { $gte: cutoff } }, { projection: { session_id: 1, run_at: 1 } })
+    .sort({ run_at: 1 })
+    .toArray();
+  if (!sessions.length) return [];
+
+  const dayFmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: DASHBOARD_TZ, year: "numeric", month: "2-digit", day: "2-digit",
+  });
+  const sidToDate = new Map();
+  const sidOrder = new Map();
+  sessions.forEach((s, i) => {
+    sidToDate.set(s.session_id, dayFmt.format(new Date(s.run_at)));
+    sidOrder.set(s.session_id, i);
+  });
+
+  const jobs = await jobsForSessions(db, [...sidOrder.keys()]);
+  // Oldest session first, so dedup keeps the earliest sighting of each job.
+  jobs.sort((a, b) => (sidOrder.get(a.session_id) ?? Infinity) - (sidOrder.get(b.session_id) ?? Infinity));
+
+  const unique = dedupeByUrl(jobs);
+  for (const j of unique) j.scraped_date = sidToDate.get(j.session_id) ?? "";
+  unique.sort((a, b) =>
+    (b.scraped_date || "").localeCompare(a.scraped_date || "") || (b.score || 0) - (a.score || 0));
+  return unique;
+}
+
+async function fetchFeedJobs(db, type) {
+  switch (type) {
+    case "hour":      return fetchLatestSessionJobs(db);
+    case "yesterday": return dedupeByUrl(await jobsForSessions(db, await sessionIdsForDay(db, 1)));
+    case "week":      return fetchWeekJobs(db);
+    case "today":
+    default:          return dedupeByUrl(await jobsForSessions(db, await sessionIdsForDay(db, 0)));
+  }
+}
+
 // ─── HTTP server ─────────────────────────────────────────────────────────────
 let tailorBusy = false;
 
@@ -1026,6 +1148,38 @@ const server = http.createServer(async (req, res) => {
         pipelineDir: JOB_PIPELINE_DIR,
       },
     }));
+  }
+
+  // ─── Job feed ──────────────────────────────────────────────────────────────
+  // GET /jobs?type=hour|today|yesterday|week
+  //
+  // The web dashboard reads this from a static JSON snapshot that the
+  // pipeline's feed_deploy phase publishes to Cloudflare Pages. That is a poor
+  // fit for the dock on two counts: the snapshot is only as fresh as the last
+  // deploy, and the Pages function guarding it authenticates with a
+  // SameSite=Strict cookie a cross-origin WebView will not send (it ignores
+  // bearer tokens, so there is no way around it from the client).
+  //
+  // The sidecar already holds Mongo credentials on localhost, so it can answer
+  // from the same collections the exporter reads. Window semantics mirror
+  // job_pipeline/export_static.py so these tabs agree with the dashboard.
+  if (req.method === "GET" && pathname === "/jobs") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const type = reqUrl.searchParams.get("type") || "today";
+        const jobs = await withMongo(
+          (db) => fetchFeedJobs(db, type),
+          { appName: "AtriveoTailorServer" },
+        );
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(jobs));
+      } catch (e) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
   }
 
   // ─── On-demand scrape ──────────────────────────────────────────────────────

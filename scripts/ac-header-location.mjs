@@ -53,8 +53,13 @@ export function resolveHeaderLocation(raw, fallback = HOME_LOCATION) {
   // so it's treated exactly like a posting that names none: the home city.
   // "Seattle, WA or Remote" still resolves to Seattle — "Remote" isn't a place,
   // so only one real office survives.
+  // "and"/"or" are matched lower-case and space-delimited on purpose. Case
+  // -insensitively, \bor\b also matches the Oregon state code, so "Portland,
+  // OR" split into ["Portland, ", ""] and the header lost its state — 1,348
+  // postings' worth. Written as separators, these words appear lower-case;
+  // an upper-case OR is the state.
   const places = new Set();
-  for (const segment of raw.split(/[;|/\n]|\band\b|\bor\b|&/i)) {
+  for (const segment of raw.split(/[;|/\n]|&|\s+(?:and|or)\s+/)) {
     const place = resolveOnePlace(segment);
     if (place) places.add(place);
   }
