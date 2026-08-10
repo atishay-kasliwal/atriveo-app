@@ -37,6 +37,7 @@ import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
+import { getWorkerId } from "./worker-id.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
 import { listActiveWorkers } from "./worker-registry.mjs";
 import { buildCoverLetter } from "./cover-letter.mjs";
@@ -1613,7 +1614,7 @@ const server = http.createServer(async (req, res) => {
     (async () => {
       try {
         if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
-        const stats = await withMongo((db) => countActiveCompileJobs(db), { appName: "AtriveoTailorServer" });
+        const stats = await withMongo((db) => countActiveCompileJobs(db, { owner: getWorkerId() }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify({ ok: true, ...stats }));
       } catch (e) {
@@ -1631,7 +1632,11 @@ const server = http.createServer(async (req, res) => {
         if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
         const status = reqUrl.searchParams.get("status") || undefined;
         const limit = Math.min(Number(reqUrl.searchParams.get("limit") || 50), 2000);
-        const jobs = await withMongo((db) => listCompileJobs(db, { status, limit }), { appName: "AtriveoTailorServer" });
+        // Scoped to this machine: its worker is the only one that will build
+        // these, and its filesystem is the only one holding the PDFs.
+        // "all=1" opts back into the whole fleet for debugging.
+        const owner = reqUrl.searchParams.get("all") === "1" ? undefined : getWorkerId();
+        const jobs = await withMongo((db) => listCompileJobs(db, { status, limit, owner }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify({ ok: true, jobs }));
       } catch (e) {

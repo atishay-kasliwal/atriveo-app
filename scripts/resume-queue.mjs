@@ -3,6 +3,18 @@
 import { COMPILE_STAGES, resolveCachedCompile } from "./ac-artifact-store.mjs";
 import { loadBank } from "./ac-bank.mjs";
 import { hourEtFromBatch, parseSessionHour, etDateKey, etDayBoundsUtc } from "./resume-path.mjs";
+import { getWorkerId } from "./worker-id.mjs";
+
+// Each machine runs its own queue.
+//
+// The queue lives in shared Mongo but a built PDF does not: pdf_path is an
+// absolute path on whichever machine compiled it. With workers on two Macs
+// racing for the same jobs, a resume asked for on one dock was routinely
+// built on the other, and the Download button could only report "not found".
+//
+// So every queued job records the machine that asked for it, and a worker
+// claims only its own. Enqueue and compile happen on one machine, which is
+// the machine holding the PDF.
 
 export { COMPILE_STAGES };
 
@@ -97,7 +109,7 @@ export async function enqueueJob(db, job, { force = false, planner = DEFAULT_PLA
 
   const existing = await db.collection("jobs").findOne(
     { job_url: jobUrl },
-    { projection: { resume: 1, batch_time: 1, session_id: 1, company: 1, title: 1 } },
+    { projection: { resume: 1, batch_time: 1, session_id: 1, company: 1, title: 1, location: 1 } },
   );
   if (!force && existing?.resume?.status === "success") {
     return { jobUrl, skipped: true, reason: "already_success" };
@@ -125,6 +137,9 @@ export async function enqueueJob(db, job, { force = false, planner = DEFAULT_PLA
   const existingSlot = parseResumeSlot(existing?.resume?.resume_slot);
   const resumeSlot = incomingSlot ?? existingSlot ?? null;
   const batchTime = job.batch_time || existing?.batch_time || null;
+  const location = typeof job.location === "string" && job.location.trim()
+    ? job.location.trim()
+    : (typeof existing?.location === "string" && existing.location.trim() ? existing.location.trim() : null);
   const sessionHour = parseSessionHour(job.session_hour)
     ?? parseSessionHour(existing?.resume?.session_hour)
     ?? hourEtFromBatch(batchTime);
@@ -137,12 +152,18 @@ export async function enqueueJob(db, job, { force = false, planner = DEFAULT_PLA
     { job_url: jobUrl },
     {
       $set: {
+        location,
         resume: {
           status: "queued",
           stage: "QUEUED",
           fingerprint: existing?.resume?.fingerprint ?? null,
           lease_until: null,
           worker_id: null,
+          // The machine that asked for this build, and the only one that will
+          // run it. Defaulted here rather than at the call sites so every
+          // path — dock, hourly sweep, manual retry — is owned by whichever
+          // machine the enqueuing process is running on.
+          owner: job.owner || getWorkerId(),
           updated_at: now,
           error: null,
           company: job.company || existing?.company || null,
@@ -362,6 +383,10 @@ export async function claimNextJob(db, workerId, leaseSec = 900) {
   const result = await db.collection("jobs").findOneAndUpdate(
     {
       "resume.status": "queued",
+      // Only this machine's work. A job enqueued elsewhere is left alone even
+      // when this worker is idle — the requesting machine is the one that can
+      // hand the finished PDF back to its user.
+      "resume.owner": workerId,
       $or: [
         { "resume.lease_until": null },
         { "resume.lease_until": { $lt: now } },
@@ -412,16 +437,23 @@ export async function updateResumeState(db, jobUrl, patch) {
   await db.collection("jobs").updateOne({ job_url: jobUrl }, { $set: set });
 }
 
-export async function countActiveCompileJobs(db) {
+export async function countActiveCompileJobs(db, { owner } = {}) {
+  const scope = owner ? { "resume.owner": owner } : {};
   const [queued, running] = await Promise.all([
-    db.collection("jobs").countDocuments({ "resume.status": "queued" }),
-    db.collection("jobs").countDocuments({ "resume.status": "running" }),
+    db.collection("jobs").countDocuments({ ...scope, "resume.status": "queued" }),
+    db.collection("jobs").countDocuments({ ...scope, "resume.status": "running" }),
   ]);
   return { queued, running, active: queued + running };
 }
 
-export async function listCompileJobs(db, { status, limit = 50 } = {}) {
+/**
+ * `owner` scopes the list to one machine's builds. The dock passes its own,
+ * so a resume compiled on another Mac never appears in a queue whose Download
+ * button cannot reach the file.
+ */
+export async function listCompileJobs(db, { status, limit = 50, owner } = {}) {
   const filter = status ? { "resume.status": status } : { resume: { $exists: true } };
+  if (owner) filter["resume.owner"] = owner;
   return db.collection("jobs").find(filter, {
     projection: {
       _id: 0,
