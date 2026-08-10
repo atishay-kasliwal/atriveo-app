@@ -1,24 +1,24 @@
 {
-  "generated_at": "2026-08-10T05:51:05.202248+00:00",
-  "total_analyzed": 53690,
+  "generated_at": "2026-08-10T06:50:12.937001+00:00",
+  "total_analyzed": 53694,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 30279,
+        "Python": 30281,
         "Java": 14706,
         "SQL": 13180,
-        "JavaScript": 9013,
+        "JavaScript": 9014,
         "TypeScript": 8253,
         "HTML/CSS": 2906,
         "Kotlin": 2414,
         ".NET": 2281,
-        "Rust": 2053,
+        "Rust": 2054,
         "Swift": 1982,
         "Go": 1378,
         "Bash/Shell": 1151,
         "Scala": 939,
-        "Ruby": 871,
+        "Ruby": 872,
         "PHP": 488,
         "C++": 19,
         "C#": 8
@@ -30,7 +30,7 @@
         "React": 8801,
         "PyTorch": 5458,
         "TensorFlow": 4219,
-        "Node.js": 3400,
+        "Node.js": 3401,
         "LangChain": 2836,
         "Angular": 2783,
         "Spring": 2579,
@@ -41,7 +41,7 @@
         "Spring Boot": 1659,
         "Next.js": 1597,
         "FastAPI": 1569,
-        "Express": 1384,
+        "Express": 1385,
         "Django": 1317,
         "Flask": 1205,
         "Vue": 950,
@@ -54,7 +54,7 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 15267,
+        "AWS": 15268,
         "Azure": 8673,
         "GCP": 7925,
         "S3": 1694,
@@ -65,7 +65,7 @@
         "ECS": 712,
         "EKS": 647,
         "SQS": 616,
-        "API Gateway": 615,
+        "API Gateway": 616,
         "CloudWatch": 451,
         "Cloud Run": 411,
         "GKE": 357,
@@ -75,9 +75,9 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 20917,
+        "Scalability": 20918,
         "REST API": 8008,
-        "Distributed Systems": 7673,
+        "Distributed Systems": 7674,
         "Microservices": 4535,
         "System Design": 4037,
         "Kafka": 2474,
@@ -87,7 +87,7 @@
         "gRPC": 771,
         "RabbitMQ": 652,
         "WebSocket": 309,
-        "Load Balancing": 277,
+        "Load Balancing": 278,
         "Service Mesh": 244
       }
     },
@@ -95,7 +95,7 @@
       "color": "#10b981",
       "skills": {
         "CI/CD": 11044,
-        "Kubernetes": 6866,
+        "Kubernetes": 6867,
         "Docker": 6510,
         "Git": 6345,
         "Linux": 4467,
@@ -107,7 +107,7 @@
         "Datadog": 581,
         "Prometheus": 579,
         "OpenTelemetry": 371,
-        "Helm": 348,
+        "Helm": 349,
         "ArgoCD": 147
       }
     },
@@ -137,11 +137,11 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 15475,
-        "Agents": 11794,
+        "Agents": 11796,
         "LLM": 10294,
         "GenAI": 6887,
         "PyTorch": 5458,
-        "RAG": 4756,
+        "RAG": 4757,
         "TensorFlow": 4219,
         "NLP": 4070,
         "Prompt Eng": 3309,
@@ -159,13 +159,13 @@
     "Security": {
       "color": "#6366f1",
       "skills": {
-        "OAuth/OIDC": 698,
+        "OAuth/OIDC": 699,
         "Encryption": 606,
         "GDPR": 523,
         "IAM": 405,
-        "JWT": 332,
+        "JWT": 333,
         "SOC 2": 303,
-        "TLS/SSL": 259,
+        "TLS/SSL": 260,
         "RBAC": 256,
         "Zero Trust": 111
       }
