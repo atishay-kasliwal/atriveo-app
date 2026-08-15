@@ -1,7 +1,7 @@
 [
   {
-    "session_id": "2026-08-14T23:11:49Z",
     "job_url": "https://www.linkedin.com/jobs/view/4453721979",
+    "session_id": "2026-08-15T00:11:17Z",
     "company": "Google",
     "date_posted": null,
     "level": "Mid",
@@ -18,8 +18,26 @@
     "fit_score": 7
   },
   {
-    "session_id": "2026-08-14T23:11:49Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4454818811",
+    "session_id": "2026-08-15T00:11:17Z",
+    "company": "Lyft",
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Seattle, WA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 198,
+    "score_pct": 79,
+    "site": "linkedin",
+    "summary": "At Lyft, our purpose is to serve and connect.",
+    "title": "Software Engineer, Fulfillment Core Services",
+    "ats_score": 50,
+    "fit_score": 6
+  },
+  {
     "job_url": "https://www.linkedin.com/jobs/view/4454599430",
+    "session_id": "2026-08-15T00:11:17Z",
     "company": "Stripe",
     "date_posted": null,
     "level": "New Grad",
@@ -36,7 +54,7 @@
     "fit_score": 6
   },
   {
-    "session_id": "2026-08-14T23:11:49Z",
+    "session_id": "2026-08-15T00:11:17Z",
     "job_url": "https://www.linkedin.com/jobs/view/4454517325",
     "company": "Amazon",
     "date_posted": null,
@@ -54,8 +72,8 @@
     "fit_score": 4
   },
   {
+    "session_id": "2026-08-15T00:11:17Z",
     "job_url": "https://www.linkedin.com/jobs/view/4454522321",
-    "session_id": "2026-08-14T23:11:49Z",
     "company": "Amazon",
     "date_posted": null,
     "level": "Entry",
@@ -72,25 +90,25 @@
     "fit_score": 4
   },
   {
-    "session_id": "2026-08-14T23:11:49Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4444043222",
-    "company": "NVIDIA",
+    "session_id": "2026-08-15T00:11:17Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4454823802",
+    "company": "Amazon",
     "date_posted": null,
     "level": "Entry",
-    "location": "Durham, NC",
+    "location": "Seattle, WA",
     "max_exp": null,
     "min_exp": null,
     "pipeline": "important",
-    "priority_score": 162,
-    "score_pct": 65,
+    "priority_score": 166,
+    "score_pct": 66,
     "site": "linkedin",
-    "summary": "Are you passionate about 3D graphics, GPUs, and pushing the boundaries of rendering technology?",
-    "title": "Software Engineer, Neural Graphics Developer Tools",
-    "ats_score": 25,
+    "summary": "Key job responsibilities As an Applied Scientist in our team, you will be responsible for the research, design, and development of new AI technologies for personalization.",
+    "title": "Applied Scientist, Customer360",
+    "ats_score": 33,
     "fit_score": 3
   },
   {
-    "session_id": "2026-08-14T23:11:49Z",
+    "session_id": "2026-08-15T00:11:17Z",
     "job_url": "https://www.linkedin.com/jobs/view/4454805111",
     "company": "Notion",
     "date_posted": null,
@@ -108,8 +126,8 @@
     "fit_score": 5
   },
   {
-    "session_id": "2026-08-14T23:11:49Z",
     "job_url": "https://www.linkedin.com/jobs/view/4453731566",
+    "session_id": "2026-08-15T00:11:17Z",
     "company": "Klaviyo",
     "date_posted": null,
     "level": "Mid",
@@ -127,7 +145,7 @@
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4454596483",
-    "session_id": "2026-08-14T23:11:49Z",
+    "session_id": "2026-08-15T00:11:17Z",
     "company": "Stripe",
     "date_posted": null,
     "level": "New Grad",
@@ -145,7 +163,7 @@
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4454577878",
-    "session_id": "2026-08-14T23:11:49Z",
+    "session_id": "2026-08-15T00:11:17Z",
     "company": "Salesforce",
     "date_posted": null,
     "level": "Entry",
@@ -162,8 +180,8 @@
     "fit_score": 4
   },
   {
+    "session_id": "2026-08-15T00:11:17Z",
     "job_url": "https://www.linkedin.com/jobs/view/4454517321",
-    "session_id": "2026-08-14T23:11:49Z",
     "company": "Amazon",
     "date_posted": null,
     "level": "Entry",
@@ -181,7 +199,7 @@
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4453740005",
-    "session_id": "2026-08-14T23:11:49Z",
+    "session_id": "2026-08-15T00:11:17Z",
     "company": "Google",
     "date_posted": null,
     "level": "Mid",
@@ -198,8 +216,26 @@
     "fit_score": 6
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4453735487",
+    "session_id": "2026-08-15T00:11:17Z",
+    "company": "NVIDIA",
+    "date_posted": null,
+    "level": "Mid",
+    "location": "Santa Clara, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 89,
+    "score_pct": 36,
+    "site": "linkedin",
+    "summary": "NVIDIA's Deep Learning Libraries Team is looking for excellent software engineers to enable the next wave of NVIDIA\u2019s highest performing deep learning software.",
+    "title": "Software Engineer, Deep Learning Libraries - New College Graduate 2026",
+    "ats_score": 57,
+    "fit_score": 7
+  },
+  {
+    "session_id": "2026-08-15T00:11:17Z",
     "job_url": "https://www.linkedin.com/jobs/view/4453717866",
-    "session_id": "2026-08-14T23:11:49Z",
     "company": "Waymo",
     "date_posted": null,
     "level": "Entry",
@@ -216,8 +252,26 @@
     "fit_score": 3
   },
   {
+    "session_id": "2026-08-15T00:11:17Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4453750344",
+    "company": "NVIDIA",
+    "date_posted": null,
+    "level": "Mid",
+    "location": "Santa Clara, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "important",
+    "priority_score": 72,
+    "score_pct": 29,
+    "site": "linkedin",
+    "summary": "* Experience with software development tools such as GitHub * Effective communication and interpersonal skills are required, along with the ability to work in a dynamic, distributed team.",
+    "title": "Software Engineer, Infrastructure - DGX Cloud",
+    "ats_score": 0,
+    "fit_score": 6
+  },
+  {
+    "session_id": "2026-08-15T00:11:17Z",
     "job_url": "https://www.linkedin.com/jobs/view/4453710799",
-    "session_id": "2026-08-14T23:11:49Z",
     "company": "Wealthfront",
     "date_posted": null,
     "level": "Entry",
