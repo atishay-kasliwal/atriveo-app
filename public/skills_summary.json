@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-08-16T02:55:13.177319+00:00",
-  "total_analyzed": 56948,
+  "generated_at": "2026-08-16T03:52:10.135377+00:00",
+  "total_analyzed": 56956,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 32043,
-        "Java": 15581,
+        "Python": 32047,
+        "Java": 15582,
         "SQL": 13879,
-        "JavaScript": 9335,
-        "TypeScript": 8676,
+        "JavaScript": 9336,
+        "TypeScript": 8679,
         "HTML/CSS": 3022,
         "Kotlin": 2473,
         ".NET": 2415,
-        "Rust": 2186,
+        "Rust": 2187,
         "Swift": 2023,
         "Go": 1437,
         "Bash/Shell": 1208,
@@ -27,16 +27,16 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 9244,
-        "PyTorch": 5787,
+        "React": 9245,
+        "PyTorch": 5788,
         "TensorFlow": 4425,
-        "Node.js": 3583,
+        "Node.js": 3584,
         "LangChain": 3038,
         "Angular": 2910,
         "Spring": 2700,
         "Scikit-learn": 2621,
         "Pandas": 2176,
-        "Next.js": 1765,
+        "Next.js": 1766,
         "GraphQL": 1763,
         "NumPy": 1763,
         "Spring Boot": 1749,
@@ -54,9 +54,9 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 16390,
-        "Azure": 9212,
-        "GCP": 8400,
+        "AWS": 16391,
+        "Azure": 9213,
+        "GCP": 8401,
         "S3": 1837,
         "Lambda": 1602,
         "Serverless": 1183,
@@ -77,12 +77,12 @@
       "skills": {
         "Scalability": 22210,
         "REST API": 8537,
-        "Distributed Systems": 8227,
+        "Distributed Systems": 8228,
         "Microservices": 4805,
         "System Design": 4265,
         "Kafka": 2667,
         "Event-Driven": 2488,
-        "API Design": 1845,
+        "API Design": 1846,
         "Caching": 1082,
         "gRPC": 816,
         "RabbitMQ": 675,
@@ -95,26 +95,26 @@
       "color": "#10b981",
       "skills": {
         "CI/CD": 11808,
-        "Kubernetes": 7292,
+        "Kubernetes": 7293,
         "Docker": 6903,
-        "Git": 6803,
-        "Linux": 4777,
-        "Terraform": 2737,
+        "Git": 6804,
+        "Linux": 4778,
+        "Terraform": 2738,
         "Jenkins": 1866,
         "GitHub Actions": 1393,
-        "Grafana": 819,
+        "Grafana": 820,
         "Datadog": 616,
-        "Prometheus": 614,
+        "Prometheus": 615,
         "Ansible": 612,
-        "OpenTelemetry": 413,
-        "Helm": 375,
+        "OpenTelemetry": 414,
+        "Helm": 376,
         "ArgoCD": 160
       }
     },
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 7945,
+        "ETL/ELT": 7947,
         "PostgreSQL": 4700,
         "Spark": 3584,
         "Vector DB": 2822,
@@ -129,28 +129,28 @@
         "BigQuery": 698,
         "dbt": 483,
         "Cassandra": 458,
-        "ClickHouse": 360,
+        "ClickHouse": 361,
         "Flink": 337
       }
     },
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 16442,
-        "Agents": 12697,
-        "LLM": 11073,
+        "Machine Learning": 16444,
+        "Agents": 12701,
+        "LLM": 11074,
         "GenAI": 7318,
-        "PyTorch": 5787,
+        "PyTorch": 5788,
         "RAG": 5138,
         "TensorFlow": 4425,
-        "NLP": 4315,
-        "Prompt Eng": 3530,
+        "NLP": 4316,
+        "Prompt Eng": 3531,
         "Deep Learning": 3514,
-        "Fine-tuning": 3220,
+        "Fine-tuning": 3221,
         "LangChain": 3038,
         "OpenAI": 3025,
         "Embeddings": 1676,
-        "Hugging Face": 1396,
+        "Hugging Face": 1397,
         "SageMaker": 1041,
         "Vertex AI": 1001,
         "MLflow": 985
@@ -173,12 +173,12 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 14384,
+        "Cross-functional": 14385,
         "Code Review": 11914,
         "Mentorship": 10588,
-        "Agile/Scrum": 8809,
+        "Agile/Scrum": 8810,
         "Leadership": 3321,
-        "On-call": 3105
+        "On-call": 3106
       }
     }
   }
