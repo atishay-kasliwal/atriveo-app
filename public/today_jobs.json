@@ -1104,7 +1104,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-16/FELICIS (16thAugust)"
     },
     "ats_score": 40,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4455164406",
@@ -1380,7 +1380,7 @@
       "updated_at": "2026-08-16T08:35:08.461Z"
     },
     "ats_score": 61,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4453968629",
@@ -4083,7 +4083,7 @@
       "updated_at": "2026-08-16T14:35:11.285Z"
     },
     "ats_score": 61,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4417180059",
@@ -4104,7 +4104,7 @@
     "summary": "**About The Team** The Privacy Engineering team builds the systems and technical foundations that govern how user data is understood, retained, accessed, and used across OpenAI.",
     "title": "Software Engineer, Privacy Engineering",
     "ats_score": 40,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4377894010",
@@ -4759,7 +4759,7 @@
     "summary": "Enjoy collaborating with engineering and research teams to improve real production systems.",
     "title": "Software Engineer, Inference - Performance Optimization",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4417182007",
@@ -5465,7 +5465,7 @@
     "summary": "**About The Team** The Support Automation team at OpenAI scales the organization by applying cutting\\-edge AI models to real\\-world challenges, automating and enhancing work across the organization.",
     "title": "Backend Software Engineer (Evals)",
     "ats_score": 42,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4417160961",
@@ -5486,7 +5486,7 @@
     "summary": "**About The Team** With Codex we\u2019re building an AI software engineer.",
     "title": "Software Engineer, Codex Enterprise",
     "ats_score": 37,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4417182004",
@@ -6710,7 +6710,7 @@
     "summary": "**Multiple openings \\- work is onsite (not remote) at client office in metro\\-Boston area.",
     "title": "Portfolio Accounting API - Software Engineer",
     "ats_score": 63,
-    "fit_score": 22
+    "fit_score": 23
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4455204292",
@@ -6774,5 +6774,185 @@
     "title": "Founding Software Engineer",
     "ats_score": 42,
     "fit_score": 9
+  },
+  {
+    "session_id": "2026-08-16T20:04:30Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4453999366",
+    "batch_time": "2026-08-16T20:04:26Z",
+    "company": "TikTok",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Jose, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 92,
+    "score_pct": 37,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**Responsibilities** Monetization Technology teams are building the next\\-generation monetization platforms to help millions of customers grow their businesses, utilizing our products like TikTok.",
+    "title": "Machine Learning Engineer, Monetization Technology",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "66bb36f4a58ad0a5df9201a9d63ac6394da962fa61e3fffa9ffa4abffec1c78d",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-08-16T20:35:28.620Z",
+      "error": null,
+      "company": "TikTok",
+      "title": "Machine Learning Engineer, Monetization Technology",
+      "resume_slot": 3,
+      "session_hour": "16",
+      "batch_time": "2026-08-16T20:04:26Z",
+      "session_id": "2026-08-16T20:04:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "TikTok (16thAugust)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-16/TikTok (16thAugust)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-16/TikTok (16thAugust)"
+    },
+    "ats_score": 40,
+    "fit_score": 3
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4454200403",
+    "session_id": "2026-08-16T20:04:30Z",
+    "batch_time": "2026-08-16T20:04:26Z",
+    "company": "Jack & Jill",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": 2.0,
+    "min_exp": 2.0,
+    "pipeline": "standard",
+    "score": 85,
+    "score_pct": 34,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
+    "title": "Backend Engineer ($110K\u2013$160K + Equity) at fast-growing consumer AI startup",
+    "resume": {
+      "cached": true,
+      "error": null,
+      "fingerprint": "387f8d9b18f54e252b18f5c25d571d80294aa34f4af75fcc59c6f48403013316",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-15/JackJill (15thAugust)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-15/JackJill (15thAugust)-2",
+      "stage": "SUCCESS",
+      "status": "success",
+      "updated_at": "2026-08-16T20:35:08.801Z"
+    },
+    "ats_score": 61,
+    "fit_score": 7
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4455204174",
+    "session_id": "2026-08-16T20:04:30Z",
+    "batch_time": "2026-08-16T20:04:26Z",
+    "company": "TikTok USDS Joint Venture",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Jose, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 57,
+    "score_pct": 23,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**Responsibilities** About the Team Our Search Team is responsible for building and owning TikTok's search engine, which provides our users the best search experience.",
+    "title": "Software Engineer, Search - USDS",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "c8cab0418e2350afd6707beaca9422a1c276075069372a97221fdc098b3d2d22",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-08-16T20:35:32.676Z",
+      "error": null,
+      "company": "TikTok USDS Joint Venture",
+      "title": "Software Engineer, Search - USDS",
+      "resume_slot": 8,
+      "session_hour": "16",
+      "batch_time": "2026-08-16T20:04:26Z",
+      "session_id": "2026-08-16T20:04:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "TikTokUSDSJointVenture (16thAugust)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-16/TikTokUSDSJointVenture (16thAugust)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-16/TikTokUSDSJointVenture (16thAugust)-2"
+    },
+    "ats_score": 22,
+    "fit_score": 5
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4453987434",
+    "session_id": "2026-08-16T20:04:30Z",
+    "batch_time": "2026-08-16T20:04:26Z",
+    "company": "Jack & Jill",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": 2.0,
+    "min_exp": 2.0,
+    "pipeline": "standard",
+    "score": 32,
+    "score_pct": 13,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
+    "title": "Applied AI Engineer ($150k-$240k + Equity) at well-funded AI-native fintech platform",
+    "ats_score": 0,
+    "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4453988457",
+    "session_id": "2026-08-16T20:04:30Z",
+    "batch_time": "2026-08-16T20:04:26Z",
+    "company": "Jack & Jill",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Palo Alto, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 29,
+    "score_pct": 12,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**What You Will Do** * Architect and implement core backend services, APIs, and data pipelines to support a complex, real\\-world AI platform.",
+    "title": "Founding Software Engineer ($150k-$250k + Equity) at high-growth applied AI startup",
+    "ats_score": 60,
+    "fit_score": 3
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4452213138",
+    "session_id": "2026-08-16T20:04:30Z",
+    "batch_time": "2026-08-16T20:04:26Z",
+    "company": "scalr",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 23,
+    "score_pct": 9,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**AI Engineer (Forward Deployed)** **SF/NYC \\- $200k\\-$400k \\- early equity** Join a small, high\\-calibre AI team working at the frontier of model development and deployment.",
+    "title": "AI Engineer",
+    "ats_score": 50,
+    "fit_score": 5
   }
 ]
