@@ -1,21 +1,21 @@
 {
-  "generated_at": "2026-08-16T03:52:10.135377+00:00",
-  "total_analyzed": 56956,
+  "generated_at": "2026-08-16T04:50:16.266798+00:00",
+  "total_analyzed": 56962,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 32047,
+        "Python": 32051,
         "Java": 15582,
         "SQL": 13879,
         "JavaScript": 9336,
-        "TypeScript": 8679,
+        "TypeScript": 8681,
         "HTML/CSS": 3022,
         "Kotlin": 2473,
         ".NET": 2415,
-        "Rust": 2187,
+        "Rust": 2188,
         "Swift": 2023,
-        "Go": 1437,
+        "Go": 1438,
         "Bash/Shell": 1208,
         "Scala": 1002,
         "Ruby": 922,
@@ -28,8 +28,8 @@
       "color": "#8b5cf6",
       "skills": {
         "React": 9245,
-        "PyTorch": 5788,
-        "TensorFlow": 4425,
+        "PyTorch": 5789,
+        "TensorFlow": 4426,
         "Node.js": 3584,
         "LangChain": 3038,
         "Angular": 2910,
@@ -54,7 +54,7 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 16391,
+        "AWS": 16392,
         "Azure": 9213,
         "GCP": 8401,
         "S3": 1837,
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 22210,
+        "Scalability": 22211,
         "REST API": 8537,
         "Distributed Systems": 8228,
         "Microservices": 4805,
@@ -95,7 +95,7 @@
       "color": "#10b981",
       "skills": {
         "CI/CD": 11808,
-        "Kubernetes": 7293,
+        "Kubernetes": 7294,
         "Docker": 6903,
         "Git": 6804,
         "Linux": 4778,
@@ -114,7 +114,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 7947,
+        "ETL/ELT": 7948,
         "PostgreSQL": 4700,
         "Spark": 3584,
         "Vector DB": 2822,
@@ -136,21 +136,21 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 16444,
-        "Agents": 12701,
-        "LLM": 11074,
+        "Machine Learning": 16447,
+        "Agents": 12702,
+        "LLM": 11079,
         "GenAI": 7318,
-        "PyTorch": 5788,
-        "RAG": 5138,
-        "TensorFlow": 4425,
+        "PyTorch": 5789,
+        "RAG": 5139,
+        "TensorFlow": 4426,
         "NLP": 4316,
         "Prompt Eng": 3531,
-        "Deep Learning": 3514,
-        "Fine-tuning": 3221,
+        "Deep Learning": 3515,
+        "Fine-tuning": 3222,
         "LangChain": 3038,
         "OpenAI": 3025,
         "Embeddings": 1676,
-        "Hugging Face": 1397,
+        "Hugging Face": 1398,
         "SageMaker": 1041,
         "Vertex AI": 1001,
         "MLflow": 985
