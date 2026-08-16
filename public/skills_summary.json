@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-08-16T10:51:53.397688+00:00",
-  "total_analyzed": 56987,
+  "generated_at": "2026-08-16T11:55:48.249161+00:00",
+  "total_analyzed": 56988,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
         "Python": 32059,
         "Java": 15586,
-        "SQL": 13881,
-        "JavaScript": 9336,
+        "SQL": 13882,
+        "JavaScript": 9337,
         "TypeScript": 8689,
         "HTML/CSS": 3022,
         "Kotlin": 2474,
-        ".NET": 2415,
+        ".NET": 2416,
         "Rust": 2191,
         "Swift": 2023,
         "Go": 1440,
@@ -32,7 +32,7 @@
         "TensorFlow": 4426,
         "Node.js": 3587,
         "LangChain": 3038,
-        "Angular": 2910,
+        "Angular": 2911,
         "Spring": 2702,
         "Scikit-learn": 2621,
         "Pandas": 2176,
@@ -173,10 +173,10 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 14386,
+        "Cross-functional": 14387,
         "Code Review": 11917,
-        "Mentorship": 10590,
-        "Agile/Scrum": 8812,
+        "Mentorship": 10591,
+        "Agile/Scrum": 8813,
         "Leadership": 3321,
         "On-call": 3107
       }
