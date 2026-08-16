@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-08-16T11:55:48.249161+00:00",
-  "total_analyzed": 56988,
+  "generated_at": "2026-08-16T12:52:33.661460+00:00",
+  "total_analyzed": 56989,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 32059,
+        "Python": 32060,
         "Java": 15586,
         "SQL": 13882,
-        "JavaScript": 9337,
+        "JavaScript": 9338,
         "TypeScript": 8689,
         "HTML/CSS": 3022,
         "Kotlin": 2474,
@@ -138,8 +138,8 @@
       "skills": {
         "Machine Learning": 16448,
         "Agents": 12716,
-        "LLM": 11089,
-        "GenAI": 7320,
+        "LLM": 11090,
+        "GenAI": 7321,
         "PyTorch": 5789,
         "RAG": 5140,
         "TensorFlow": 4426,
@@ -148,7 +148,7 @@
         "Deep Learning": 3515,
         "Fine-tuning": 3223,
         "LangChain": 3038,
-        "OpenAI": 3026,
+        "OpenAI": 3027,
         "Embeddings": 1676,
         "Hugging Face": 1398,
         "SageMaker": 1041,
