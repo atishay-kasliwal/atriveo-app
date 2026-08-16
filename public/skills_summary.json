@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-16T08:51:53.084381+00:00",
-  "total_analyzed": 56986,
+  "generated_at": "2026-08-16T09:52:20.268762+00:00",
+  "total_analyzed": 56987,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
@@ -114,10 +114,10 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 7950,
+        "ETL/ELT": 7951,
         "PostgreSQL": 4709,
         "Spark": 3584,
-        "Vector DB": 2822,
+        "Vector DB": 2823,
         "Kafka": 2671,
         "MySQL": 2450,
         "Databricks": 2003,
@@ -137,7 +137,7 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 16448,
-        "Agents": 12715,
+        "Agents": 12716,
         "LLM": 11089,
         "GenAI": 7320,
         "PyTorch": 5789,
