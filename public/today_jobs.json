@@ -1104,7 +1104,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-16/FELICIS (16thAugust)"
     },
     "ats_score": 40,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4455164406",
@@ -1264,7 +1264,7 @@
       "updated_at": "2026-08-16T08:35:09.400Z"
     },
     "ats_score": 50,
-    "fit_score": 12
+    "fit_score": 11
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4453972654",
@@ -6984,7 +6984,7 @@
       "updated_at": "2026-08-16T21:35:04.827Z"
     },
     "ats_score": 50,
-    "fit_score": 12
+    "fit_score": 11
   },
   {
     "session_id": "2026-08-16T21:07:09Z",
@@ -7323,5 +7323,131 @@
     "title": "Software Development Engineer, Annapurna Labs, Elastic Collectives",
     "ats_score": 16,
     "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4455215358",
+    "session_id": "2026-08-16T23:04:45Z",
+    "batch_time": "2026-08-16T23:04:42Z",
+    "company": "Prosum",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Fort Worth, TX",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 43,
+    "score_pct": 17,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "**Generative AI Engineer** **Location:** Dallas Fort Worth, TX **Salary Range:** $120k to $170k **About the Role** We are seeking a highly skilled Generative AI Engineer to lead the end\\-to\\-end deli\u2026",
+    "title": "Generative AI Engineer",
+    "ats_score": 33,
+    "fit_score": 8
+  },
+  {
+    "session_id": "2026-08-16T23:04:45Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4447564011",
+    "batch_time": "2026-08-16T23:04:42Z",
+    "company": "kadence",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 43,
+    "score_pct": 17,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "You'll design, build, and deploy production AI systems that help customers automate complex workflows, retrieve knowledge, and make better decisions using large\\-scale enterprise data.",
+    "title": "AI Engineer",
+    "ats_score": 50,
+    "fit_score": 7
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4453991418",
+    "session_id": "2026-08-16T23:04:45Z",
+    "batch_time": "2026-08-16T23:04:42Z",
+    "company": "Jack & Jill",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": 3.0,
+    "min_exp": 1.0,
+    "pipeline": "standard",
+    "score": 32,
+    "score_pct": 13,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "**This is a job that Jill, our AI Recruiter, is recruiting for on behalf of one of our customers.** She will pick the best candidates from Jack's network.",
+    "title": "Investor - AI Infrastructure and Software at Headline",
+    "ats_score": 33,
+    "fit_score": 2
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4452219300",
+    "session_id": "2026-08-16T23:04:45Z",
+    "batch_time": "2026-08-16T23:04:42Z",
+    "company": "Samsara",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "San Francisco, CA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 29,
+    "score_pct": 12,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Who We Are** Samsara (NYSE: IOT) is the pioneer of the Connected Operations\u2122 Cloud, which is a platform that enables organizations that depend on physical operations to harness Internet of Things (\u2026",
+    "title": "Finance & Strategy AI Engineer",
+    "ats_score": 40,
+    "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4454215104",
+    "session_id": "2026-08-16T23:04:45Z",
+    "batch_time": "2026-08-16T23:04:42Z",
+    "company": "Confidential",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Denver, CO",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 22,
+    "score_pct": 9,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "This involves deep collaboration with our international software team to design, implement, and maintain a unified software platform supporting our next generation of automated industrial equipment.",
+    "title": "Embedded Software Engineer",
+    "ats_score": 0,
+    "fit_score": 6
+  },
+  {
+    "session_id": "2026-08-16T23:04:45Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4416352363",
+    "batch_time": "2026-08-16T23:04:42Z",
+    "company": "Mark VII - Clean Cars\u00ae",
+    "competition_score": 0,
+    "date_posted": null,
+    "level": "Entry",
+    "location": "Arvada, CO",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "score": 22,
+    "score_pct": 9,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "This involves deep collaboration with our international software team to design, implement, and maintain a unified software platform supporting our next generation of carwash equipment.",
+    "title": "Software Engineer-- Embedded",
+    "ats_score": 0,
+    "fit_score": 6
   }
 ]
