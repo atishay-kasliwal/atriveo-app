@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-08-22T06:15:22.191894+00:00",
-  "total_analyzed": 60729,
+  "generated_at": "2026-08-22T07:17:24.648162+00:00",
+  "total_analyzed": 60737,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 34107,
-        "Java": 17021,
+        "Python": 34110,
+        "Java": 17025,
         "SQL": 14680,
-        "JavaScript": 9639,
-        "TypeScript": 9100,
+        "JavaScript": 9640,
+        "TypeScript": 9101,
         "HTML/CSS": 3131,
         "Kotlin": 2557,
         ".NET": 2533,
@@ -28,7 +28,7 @@
       "color": "#8b5cf6",
       "skills": {
         "React": 9622,
-        "PyTorch": 6238,
+        "PyTorch": 6241,
         "TensorFlow": 4757,
         "Node.js": 3752,
         "LangChain": 3221,
@@ -54,7 +54,7 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 17932,
+        "AWS": 17936,
         "Azure": 9775,
         "GCP": 8961,
         "S3": 2032,
@@ -75,8 +75,8 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 23913,
-        "Distributed Systems": 9070,
+        "Scalability": 23914,
+        "Distributed Systems": 9073,
         "REST API": 9058,
         "Microservices": 5084,
         "System Design": 4543,
@@ -94,7 +94,7 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 12631,
+        "CI/CD": 12632,
         "Kubernetes": 7697,
         "Docker": 7285,
         "Git": 7192,
@@ -136,11 +136,11 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 17750,
+        "Machine Learning": 17753,
         "Agents": 13669,
-        "LLM": 12048,
+        "LLM": 12051,
         "GenAI": 7974,
-        "PyTorch": 6238,
+        "PyTorch": 6241,
         "RAG": 5477,
         "TensorFlow": 4757,
         "NLP": 4683,
@@ -173,12 +173,12 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 15333,
-        "Code Review": 13174,
-        "Mentorship": 11640,
-        "Agile/Scrum": 9366,
+        "Cross-functional": 15338,
+        "Code Review": 13175,
+        "Mentorship": 11645,
+        "Agile/Scrum": 9369,
         "Leadership": 3543,
-        "On-call": 3468
+        "On-call": 3469
       }
     }
   }
