@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-08-23T03:57:40.347671+00:00",
-  "total_analyzed": 60988,
+  "generated_at": "2026-08-23T04:59:40.696247+00:00",
+  "total_analyzed": 60990,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
         "Python": 34244,
-        "Java": 17078,
-        "SQL": 14724,
+        "Java": 17079,
+        "SQL": 14725,
         "JavaScript": 9659,
         "TypeScript": 9145,
         "HTML/CSS": 3138,
@@ -33,7 +33,7 @@
         "Node.js": 3770,
         "LangChain": 3234,
         "Angular": 3042,
-        "Spring": 2894,
+        "Spring": 2895,
         "Scikit-learn": 2818,
         "Pandas": 2272,
         "Next.js": 1885,
@@ -80,7 +80,7 @@
         "REST API": 9097,
         "Microservices": 5104,
         "System Design": 4572,
-        "Kafka": 2949,
+        "Kafka": 2950,
         "Event-Driven": 2655,
         "API Design": 1945,
         "Caching": 1148,
@@ -118,7 +118,7 @@
         "PostgreSQL": 5063,
         "Spark": 3896,
         "Vector DB": 3021,
-        "Kafka": 2949,
+        "Kafka": 2950,
         "MySQL": 2629,
         "Databricks": 2202,
         "MongoDB": 1809,
@@ -175,7 +175,7 @@
       "skills": {
         "Cross-functional": 15392,
         "Code Review": 13225,
-        "Mentorship": 11690,
+        "Mentorship": 11691,
         "Agile/Scrum": 9410,
         "Leadership": 3567,
         "On-call": 3497
