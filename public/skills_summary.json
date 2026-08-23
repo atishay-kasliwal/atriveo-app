@@ -1,20 +1,20 @@
 {
-  "generated_at": "2026-08-23T02:55:53.350249+00:00",
-  "total_analyzed": 60980,
+  "generated_at": "2026-08-23T03:57:40.347671+00:00",
+  "total_analyzed": 60988,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 34240,
+        "Python": 34244,
         "Java": 17078,
-        "SQL": 14722,
+        "SQL": 14724,
         "JavaScript": 9659,
         "TypeScript": 9145,
         "HTML/CSS": 3138,
-        "Kotlin": 2566,
-        ".NET": 2539,
-        "Rust": 2351,
-        "Swift": 2065,
+        "Kotlin": 2567,
+        ".NET": 2540,
+        "Rust": 2352,
+        "Swift": 2066,
         "Go": 1517,
         "Bash/Shell": 1286,
         "Scala": 1073,
@@ -27,14 +27,14 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 9652,
-        "PyTorch": 6273,
-        "TensorFlow": 4781,
+        "React": 9653,
+        "PyTorch": 6274,
+        "TensorFlow": 4782,
         "Node.js": 3770,
         "LangChain": 3234,
         "Angular": 3042,
         "Spring": 2894,
-        "Scikit-learn": 2817,
+        "Scikit-learn": 2818,
         "Pandas": 2272,
         "Next.js": 1885,
         "Spring Boot": 1879,
@@ -54,10 +54,10 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 18021,
+        "AWS": 18023,
         "Azure": 9807,
-        "GCP": 8987,
-        "S3": 2042,
+        "GCP": 8988,
+        "S3": 2043,
         "Lambda": 1761,
         "Serverless": 1268,
         "DynamoDB": 1195,
@@ -75,18 +75,18 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 24015,
-        "Distributed Systems": 9121,
+        "Scalability": 24016,
+        "Distributed Systems": 9122,
         "REST API": 9097,
         "Microservices": 5104,
-        "System Design": 4571,
+        "System Design": 4572,
         "Kafka": 2949,
         "Event-Driven": 2655,
-        "API Design": 1944,
+        "API Design": 1945,
         "Caching": 1148,
-        "gRPC": 865,
+        "gRPC": 866,
         "RabbitMQ": 714,
-        "WebSocket": 379,
+        "WebSocket": 380,
         "Load Balancing": 334,
         "Service Mesh": 271
       }
@@ -94,11 +94,11 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 12684,
+        "CI/CD": 12685,
         "Kubernetes": 7737,
         "Docker": 7317,
-        "Git": 7215,
-        "Linux": 5194,
+        "Git": 7216,
+        "Linux": 5195,
         "Terraform": 2918,
         "Jenkins": 1982,
         "GitHub Actions": 1499,
@@ -114,13 +114,13 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 8574,
-        "PostgreSQL": 5062,
+        "ETL/ELT": 8576,
+        "PostgreSQL": 5063,
         "Spark": 3896,
         "Vector DB": 3021,
         "Kafka": 2949,
-        "MySQL": 2628,
-        "Databricks": 2201,
+        "MySQL": 2629,
+        "Databricks": 2202,
         "MongoDB": 1809,
         "Snowflake": 1805,
         "Redis": 1693,
@@ -136,19 +136,19 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 17833,
-        "Agents": 13731,
-        "LLM": 12115,
+        "Machine Learning": 17836,
+        "Agents": 13737,
+        "LLM": 12117,
         "GenAI": 7992,
-        "PyTorch": 6273,
-        "RAG": 5497,
-        "TensorFlow": 4781,
-        "NLP": 4692,
+        "PyTorch": 6274,
+        "RAG": 5498,
+        "TensorFlow": 4782,
+        "NLP": 4693,
         "Deep Learning": 3906,
-        "Prompt Eng": 3846,
+        "Prompt Eng": 3847,
         "Fine-tuning": 3484,
         "LangChain": 3234,
-        "OpenAI": 3207,
+        "OpenAI": 3208,
         "Embeddings": 1825,
         "Hugging Face": 1516,
         "SageMaker": 1134,
@@ -159,13 +159,13 @@
     "Security": {
       "color": "#6366f1",
       "skills": {
-        "OAuth/OIDC": 797,
-        "Encryption": 669,
+        "OAuth/OIDC": 799,
+        "Encryption": 670,
         "GDPR": 572,
-        "IAM": 471,
+        "IAM": 472,
         "JWT": 392,
         "SOC 2": 326,
-        "RBAC": 297,
+        "RBAC": 298,
         "TLS/SSL": 283,
         "Zero Trust": 114
       }
@@ -175,9 +175,9 @@
       "skills": {
         "Cross-functional": 15392,
         "Code Review": 13225,
-        "Mentorship": 11689,
+        "Mentorship": 11690,
         "Agile/Scrum": 9410,
-        "Leadership": 3566,
+        "Leadership": 3567,
         "On-call": 3497
       }
     }
