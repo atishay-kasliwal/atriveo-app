@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-08-23T22:11:41.141274+00:00",
-  "total_analyzed": 61115,
+  "generated_at": "2026-08-23T23:11:18.801635+00:00",
+  "total_analyzed": 61118,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 34313,
-        "Java": 17103,
-        "SQL": 14757,
-        "JavaScript": 9671,
+        "Python": 34316,
+        "Java": 17105,
+        "SQL": 14759,
+        "JavaScript": 9672,
         "TypeScript": 9168,
         "HTML/CSS": 3142,
         "Kotlin": 2570,
@@ -94,10 +94,10 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 12713,
+        "CI/CD": 12714,
         "Kubernetes": 7746,
         "Docker": 7337,
-        "Git": 7227,
+        "Git": 7228,
         "Linux": 5204,
         "Terraform": 2919,
         "Jenkins": 1983,
@@ -114,7 +114,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 8598,
+        "ETL/ELT": 8599,
         "PostgreSQL": 5074,
         "Spark": 3901,
         "Vector DB": 3027,
@@ -136,7 +136,7 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 17884,
+        "Machine Learning": 17885,
         "Agents": 13779,
         "LLM": 12150,
         "GenAI": 8003,
