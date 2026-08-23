@@ -3450,21 +3450,21 @@
       "fingerprint": null,
       "lease_until": null,
       "worker_id": "atishays-mini-b516d43c",
-      "updated_at": "2026-08-23T00:35:26.499Z",
+      "updated_at": "2026-08-23T04:35:36.783Z",
       "error": "Unsupported JD \u2014 engineering confidence 0.281 (need \u2265 0.3).",
       "company": "Stripe",
       "title": "Backend Engineer, Payments and Risk",
-      "resume_slot": 2,
+      "resume_slot": 4,
       "session_hour": "06",
       "batch_time": "2026-08-22T10:11:27Z",
-      "session_id": "2026-08-23T00:06:30Z",
+      "session_id": "2026-08-23T04:06:31Z",
       "priority": 1000,
       "source": "hourly",
       "cached": false,
       "failure_reason": "unsupported-jd",
-      "folder": "Stripe (22thAugust)-10",
+      "folder": "Stripe (23thAugust)",
       "pdf_path": null,
-      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-22/Stripe (22thAugust)-10"
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-23/Stripe (23thAugust)"
     },
     "ats_score": 66,
     "fit_score": 7
@@ -14326,7 +14326,7 @@
     "summary": "University of Pennsylvania: Postdoctoral Positions: Perelman School of Medicine Postdoctoral Location University of Pennsylvania \\- Perelman School of Medicine Open Date Sep 18, 2025 **Description** \u2026",
     "title": "Postdoctoral Researcher in Bio/Statistics and Machine Learning",
     "ats_score": 33,
-    "fit_score": 9
+    "fit_score": 10
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4457868593",
