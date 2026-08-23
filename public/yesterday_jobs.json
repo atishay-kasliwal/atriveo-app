@@ -3450,21 +3450,21 @@
       "fingerprint": null,
       "lease_until": null,
       "worker_id": "atishays-mini-b516d43c",
-      "updated_at": "2026-08-23T04:35:36.783Z",
+      "updated_at": "2026-08-23T05:35:12.817Z",
       "error": "Unsupported JD \u2014 engineering confidence 0.281 (need \u2265 0.3).",
       "company": "Stripe",
       "title": "Backend Engineer, Payments and Risk",
-      "resume_slot": 4,
+      "resume_slot": 2,
       "session_hour": "06",
       "batch_time": "2026-08-22T10:11:27Z",
-      "session_id": "2026-08-23T04:06:31Z",
+      "session_id": "2026-08-23T05:05:53Z",
       "priority": 1000,
       "source": "hourly",
       "cached": false,
       "failure_reason": "unsupported-jd",
-      "folder": "Stripe (23thAugust)",
+      "folder": "Stripe (23thAugust)-2",
       "pdf_path": null,
-      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-23/Stripe (23thAugust)"
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-23/Stripe (23thAugust)-2"
     },
     "ats_score": 66,
     "fit_score": 7
@@ -10302,7 +10302,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-22/QuikHireStaffing (22thAugust)-2"
     },
     "ats_score": 53,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-08-22T17:12:59Z",
