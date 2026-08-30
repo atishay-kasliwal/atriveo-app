@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-30T08:05:36.089923+00:00",
-  "total_analyzed": 64448,
+  "generated_at": "2026-08-30T09:09:22.865721+00:00",
+  "total_analyzed": 64450,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
@@ -32,7 +32,7 @@
         "TensorFlow": 5050,
         "Node.js": 3954,
         "LangChain": 3478,
-        "Angular": 3226,
+        "Angular": 3227,
         "Spring": 3121,
         "Scikit-learn": 3053,
         "Pandas": 2453,
@@ -173,9 +173,9 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 16392,
+        "Cross-functional": 16393,
         "Code Review": 13967,
-        "Mentorship": 12366,
+        "Mentorship": 12367,
         "Agile/Scrum": 10044,
         "Leadership": 3778,
         "On-call": 3737
