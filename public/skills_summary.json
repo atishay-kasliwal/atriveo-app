@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-08-30T11:17:41.081006+00:00",
-  "total_analyzed": 64463,
+  "generated_at": "2026-08-30T12:21:54.790016+00:00",
+  "total_analyzed": 64466,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 36364,
+        "Python": 36366,
         "Java": 18053,
         "SQL": 15771,
         "JavaScript": 10096,
-        "TypeScript": 9584,
+        "TypeScript": 9585,
         "HTML/CSS": 3337,
         ".NET": 2721,
         "Kotlin": 2638,
@@ -75,11 +75,11 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 25584,
+        "Scalability": 25585,
         "REST API": 9809,
-        "Distributed Systems": 9576,
+        "Distributed Systems": 9577,
         "Microservices": 5467,
-        "System Design": 4882,
+        "System Design": 4883,
         "Kafka": 3177,
         "Event-Driven": 2866,
         "API Design": 2091,
@@ -102,7 +102,7 @@
         "Terraform": 3119,
         "Jenkins": 2094,
         "GitHub Actions": 1606,
-        "Grafana": 926,
+        "Grafana": 927,
         "Prometheus": 699,
         "Ansible": 679,
         "Datadog": 679,
@@ -114,7 +114,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 9303,
+        "ETL/ELT": 9304,
         "PostgreSQL": 5323,
         "Spark": 4190,
         "Vector DB": 3222,
@@ -137,7 +137,7 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 19047,
-        "Agents": 14483,
+        "Agents": 14484,
         "LLM": 12909,
         "GenAI": 8737,
         "PyTorch": 6662,
@@ -146,7 +146,7 @@
         "NLP": 4966,
         "Deep Learning": 4206,
         "Prompt Eng": 4059,
-        "Fine-tuning": 3632,
+        "Fine-tuning": 3633,
         "LangChain": 3479,
         "OpenAI": 3404,
         "Embeddings": 2007,
@@ -178,7 +178,7 @@
         "Mentorship": 12369,
         "Agile/Scrum": 10045,
         "Leadership": 3778,
-        "On-call": 3738
+        "On-call": 3739
       }
     }
   }
