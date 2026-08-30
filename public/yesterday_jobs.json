@@ -60,7 +60,7 @@
     "summary": "* Build and enhance REST APIs and backend services in Java with Spring Boot, ensuring reliability, performance, and clean design.",
     "title": "Software Engineer II",
     "ats_score": 53,
-    "fit_score": 28
+    "fit_score": 27
   },
   {
     "session_id": "2026-08-29T04:12:36Z",
@@ -165,7 +165,7 @@
     "summary": "**Description** AWS Infrastructure Services owns the design, planning, delivery, and operation of all AWS global infrastructure.",
     "title": "Software Development Engineer, Route 53",
     "ats_score": 41,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "session_id": "2026-08-29T04:12:36Z",
@@ -1716,7 +1716,7 @@
     "summary": "**About Calfus** At Calfus, we are known for delivering cutting\\-edge AI agents and products that transform businesses in previously unimaginable ways.",
     "title": "Software Engineer",
     "ats_score": 50,
-    "fit_score": 16
+    "fit_score": 15
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4394467702",
@@ -4782,7 +4782,7 @@
     "summary": "all jobsretailersplatformsagenciesremotelocationsrolescompanies \\> remote only jobs/klaviyo Software Engineer II \\- Recommendations company Klaviyo location Boston, Morocco posted 29 Aug * At Klaviyo\u2026",
     "title": "Software Engineer II - Recommendations",
     "ats_score": 47,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4459485344",
@@ -7596,7 +7596,7 @@
     "summary": "**Qualifications \\& Requirements** * **Experience:** 3\\+ years of professional experience in software development, cloud infrastructure, or AI/ML deployment.",
     "title": "Software Engineer - AI/Java/Devops",
     "ats_score": 61,
-    "fit_score": 25
+    "fit_score": 24
   },
   {
     "session_id": "2026-08-29T17:13:09Z",
@@ -8418,7 +8418,7 @@
     "summary": "EngRadar / Alex Full\\-Stack Software Engineer **Alex** We're building the future of hiring: our AI recruiter conducts live job interviews, helping companies get deep hiring signals faster and more ef\u2026",
     "title": "Full-Stack Software Engineer",
     "ats_score": 57,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-08-29T18:12:47Z",
@@ -10479,21 +10479,21 @@
       "fingerprint": null,
       "lease_until": null,
       "worker_id": "atishays-mini-b516d43c",
-      "updated_at": "2026-08-30T03:35:20.874Z",
+      "updated_at": "2026-08-30T04:35:51.896Z",
       "error": "Unsupported JD \u2014 engineering confidence 0.281 (need \u2265 0.3).",
       "company": "Amazon Web Services (AWS)",
       "title": "Software Development Engineer - Amazon MSK, Managed Streaming for Kafka",
-      "resume_slot": 6,
+      "resume_slot": 11,
       "session_hour": "21",
       "batch_time": "2026-08-30T01:06:22Z",
-      "session_id": "2026-08-30T03:05:51Z",
+      "session_id": "2026-08-30T04:05:12Z",
       "priority": 1000,
       "source": "hourly",
       "cached": false,
       "failure_reason": "unsupported-jd",
-      "folder": "AmazonWebServicesAWS (29thAugust)-4",
+      "folder": "AmazonWebServicesAWS (30thAugust)",
       "pdf_path": null,
-      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-29/AmazonWebServicesAWS (29thAugust)-4"
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-30/AmazonWebServicesAWS (30thAugust)"
     },
     "ats_score": 40,
     "fit_score": 9
@@ -10579,6 +10579,28 @@
     "site": "linkedin",
     "summary": "**Level Up Your Career with Zynga!** At Zynga, we bring people together through the power of play.",
     "title": "Software Engineer - Game of Thrones Slots",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "402ab8fff6349b803d2b242949eef1e9b71795b4976093dcfba349ba0bebfbf3",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-08-30T04:35:46.464Z",
+      "error": null,
+      "company": "Zynga",
+      "title": "Software Engineer - Game of Thrones Slots",
+      "resume_slot": 5,
+      "session_hour": "22",
+      "batch_time": "2026-08-30T02:05:58Z",
+      "session_id": "2026-08-30T04:05:12Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "folder": "Zynga (30thAugust)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-30/Zynga (30thAugust)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-30/Zynga (30thAugust)"
+    },
     "ats_score": 0,
     "fit_score": 5
   },
@@ -10750,6 +10772,28 @@
     "site": "linkedin",
     "summary": "**Level Up Your Career with Zynga!** At Zynga, we bring people together through the power of play.",
     "title": "Software Engineer - Game of Thrones Slots",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "402ab8fff6349b803d2b242949eef1e9b71795b4976093dcfba349ba0bebfbf3",
+      "lease_until": null,
+      "worker_id": "atishays-mini-b516d43c",
+      "updated_at": "2026-08-30T04:35:46.901Z",
+      "error": null,
+      "company": "Zynga",
+      "title": "Software Engineer - Game of Thrones Slots",
+      "resume_slot": 4,
+      "session_hour": "23",
+      "batch_time": "2026-08-30T03:05:46Z",
+      "session_id": "2026-08-30T04:05:12Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "folder": "Zynga (30thAugust)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-30/Zynga (30thAugust)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-08-30/Zynga (30thAugust)-2"
+    },
     "ats_score": 0,
     "fit_score": 5
   },
