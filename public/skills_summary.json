@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-08-30T00:40:21.102676+00:00",
-  "total_analyzed": 64420,
+  "generated_at": "2026-08-30T01:43:48.977658+00:00",
+  "total_analyzed": 64426,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 36341,
-        "Java": 18046,
+        "Python": 36343,
+        "Java": 18047,
         "SQL": 15763,
         "JavaScript": 10091,
         "TypeScript": 9578,
         "HTML/CSS": 3337,
-        ".NET": 2719,
+        ".NET": 2720,
         "Kotlin": 2636,
         "Rust": 2492,
         "Swift": 2105,
@@ -28,8 +28,8 @@
       "color": "#8b5cf6",
       "skills": {
         "React": 10120,
-        "PyTorch": 6656,
-        "TensorFlow": 5046,
+        "PyTorch": 6657,
+        "TensorFlow": 5047,
         "Node.js": 3953,
         "LangChain": 3477,
         "Angular": 3225,
@@ -41,7 +41,7 @@
         "GraphQL": 1954,
         "NumPy": 1922,
         "FastAPI": 1860,
-        "Express": 1785,
+        "Express": 1786,
         "Django": 1600,
         "Flask": 1502,
         "Vue": 1087,
@@ -54,14 +54,14 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 19188,
+        "AWS": 19189,
         "Azure": 10678,
         "GCP": 9724,
-        "S3": 2136,
+        "S3": 2137,
         "Lambda": 1841,
         "Serverless": 1358,
         "DynamoDB": 1247,
-        "EC2": 1185,
+        "EC2": 1186,
         "ECS": 909,
         "EKS": 794,
         "API Gateway": 743,
@@ -69,18 +69,18 @@
         "Cloud Run": 692,
         "CloudWatch": 559,
         "GKE": 519,
-        "Kinesis": 332
+        "Kinesis": 333
       }
     },
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 25570,
+        "Scalability": 25571,
         "REST API": 9801,
         "Distributed Systems": 9568,
         "Microservices": 5466,
-        "System Design": 4876,
-        "Kafka": 3174,
+        "System Design": 4877,
+        "Kafka": 3175,
         "Event-Driven": 2864,
         "API Design": 2089,
         "Caching": 1268,
@@ -116,9 +116,9 @@
       "skills": {
         "ETL/ELT": 9295,
         "PostgreSQL": 5319,
-        "Spark": 4185,
+        "Spark": 4187,
         "Vector DB": 3220,
-        "Kafka": 3174,
+        "Kafka": 3175,
         "MySQL": 2767,
         "Databricks": 2436,
         "Snowflake": 2003,
@@ -130,21 +130,21 @@
         "dbt": 544,
         "Cassandra": 525,
         "ClickHouse": 422,
-        "Flink": 406
+        "Flink": 408
       }
     },
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 19039,
-        "Agents": 14475,
-        "LLM": 12902,
+        "Machine Learning": 19040,
+        "Agents": 14477,
+        "LLM": 12903,
         "GenAI": 8734,
-        "PyTorch": 6656,
+        "PyTorch": 6657,
         "RAG": 5925,
-        "TensorFlow": 5046,
-        "NLP": 4963,
-        "Deep Learning": 4203,
+        "TensorFlow": 5047,
+        "NLP": 4964,
+        "Deep Learning": 4204,
         "Prompt Eng": 4058,
         "Fine-tuning": 3629,
         "LangChain": 3477,
@@ -173,10 +173,10 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 16382,
-        "Code Review": 13961,
-        "Mentorship": 12358,
-        "Agile/Scrum": 10041,
+        "Cross-functional": 16383,
+        "Code Review": 13962,
+        "Mentorship": 12361,
+        "Agile/Scrum": 10042,
         "Leadership": 3777,
         "On-call": 3736
       }
