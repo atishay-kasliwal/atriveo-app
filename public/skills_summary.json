@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-08-31T08:34:49.953392+00:00",
-  "total_analyzed": 64642,
+  "generated_at": "2026-08-31T09:38:49.303737+00:00",
+  "total_analyzed": 64648,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 36497,
-        "Java": 18114,
-        "SQL": 15802,
-        "JavaScript": 10124,
-        "TypeScript": 9617,
+        "Python": 36500,
+        "Java": 18116,
+        "SQL": 15803,
+        "JavaScript": 10125,
+        "TypeScript": 9619,
         "HTML/CSS": 3347,
         ".NET": 2726,
         "Kotlin": 2639,
-        "Rust": 2499,
+        "Rust": 2501,
         "Swift": 2107,
         "Go": 1594,
         "Bash/Shell": 1352,
@@ -27,10 +27,10 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 10147,
+        "React": 10148,
         "PyTorch": 6683,
         "TensorFlow": 5065,
-        "Node.js": 3960,
+        "Node.js": 3961,
         "LangChain": 3489,
         "Angular": 3233,
         "Spring": 3132,
@@ -54,8 +54,8 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 19264,
-        "Azure": 10712,
+        "AWS": 19266,
+        "Azure": 10713,
         "GCP": 9761,
         "S3": 2160,
         "Lambda": 1842,
@@ -75,8 +75,8 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 25642,
-        "REST API": 9835,
+        "Scalability": 25645,
+        "REST API": 9836,
         "Distributed Systems": 9611,
         "Microservices": 5481,
         "System Design": 4905,
@@ -136,9 +136,9 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 19110,
+        "Machine Learning": 19111,
         "Agents": 14505,
-        "LLM": 12940,
+        "LLM": 12941,
         "GenAI": 8757,
         "PyTorch": 6683,
         "RAG": 5946,
@@ -173,9 +173,9 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 16442,
+        "Cross-functional": 16446,
         "Code Review": 14025,
-        "Mentorship": 12410,
+        "Mentorship": 12411,
         "Agile/Scrum": 10064,
         "Leadership": 3794,
         "On-call": 3746
