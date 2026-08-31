@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-08-30T22:59:06.202985+00:00",
-  "total_analyzed": 64581,
+  "generated_at": "2026-08-31T00:03:34.271267+00:00",
+  "total_analyzed": 64584,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 36455,
-        "Java": 18090,
+        "Python": 36457,
+        "Java": 18091,
         "SQL": 15793,
         "JavaScript": 10109,
         "TypeScript": 9601,
@@ -15,7 +15,7 @@
         "Kotlin": 2639,
         "Rust": 2497,
         "Swift": 2107,
-        "Go": 1593,
+        "Go": 1594,
         "Bash/Shell": 1351,
         "Scala": 1123,
         "Ruby": 997,
@@ -45,7 +45,7 @@
         "Django": 1606,
         "Flask": 1510,
         "Vue": 1087,
-        "Selenium": 648,
+        "Selenium": 649,
         "Playwright": 514,
         "Rails": 513,
         "NestJS": 337
@@ -75,7 +75,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 25629,
+        "Scalability": 25632,
         "REST API": 9832,
         "Distributed Systems": 9592,
         "Microservices": 5481,
@@ -94,17 +94,17 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 13640,
+        "CI/CD": 13642,
         "Kubernetes": 8250,
         "Docker": 7824,
         "Git": 7752,
-        "Linux": 5520,
+        "Linux": 5521,
         "Terraform": 3126,
         "Jenkins": 2101,
         "GitHub Actions": 1609,
         "Grafana": 927,
         "Prometheus": 699,
-        "Ansible": 681,
+        "Ansible": 682,
         "Datadog": 679,
         "OpenTelemetry": 490,
         "Helm": 430,
@@ -173,10 +173,10 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 16433,
-        "Code Review": 14003,
+        "Cross-functional": 16435,
+        "Code Review": 14004,
         "Mentorship": 12388,
-        "Agile/Scrum": 10061,
+        "Agile/Scrum": 10062,
         "Leadership": 3789,
         "On-call": 3743
       }
