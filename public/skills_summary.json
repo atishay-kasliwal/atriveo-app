@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-09-01T04:47:08.449137+00:00",
-  "total_analyzed": 64951,
+  "generated_at": "2026-09-01T05:50:52.374272+00:00",
+  "total_analyzed": 64953,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
         "Python": 36706,
         "Java": 18194,
-        "SQL": 15920,
+        "SQL": 15921,
         "JavaScript": 10167,
         "TypeScript": 9660,
         "HTML/CSS": 3362,
         ".NET": 2751,
         "Kotlin": 2641,
-        "Rust": 2511,
+        "Rust": 2512,
         "Swift": 2109,
         "Go": 1600,
         "Bash/Shell": 1357,
@@ -55,7 +55,7 @@
       "color": "#f59e0b",
       "skills": {
         "AWS": 19350,
-        "Azure": 10778,
+        "Azure": 10779,
         "GCP": 9826,
         "S3": 2167,
         "Lambda": 1849,
@@ -137,11 +137,11 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 19198,
-        "Agents": 14573,
-        "LLM": 13016,
+        "Agents": 14574,
+        "LLM": 13017,
         "GenAI": 8815,
         "PyTorch": 6714,
-        "RAG": 5985,
+        "RAG": 5986,
         "TensorFlow": 5090,
         "NLP": 5004,
         "Deep Learning": 4228,
@@ -174,7 +174,7 @@
       "color": "#64748b",
       "skills": {
         "Cross-functional": 16505,
-        "Code Review": 14092,
+        "Code Review": 14093,
         "Mentorship": 12473,
         "Agile/Scrum": 10124,
         "Leadership": 3814,
