@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-09-03T03:48:02.968923+00:00",
-  "total_analyzed": 66032,
+  "generated_at": "2026-09-03T04:52:48.210069+00:00",
+  "total_analyzed": 66037,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 37322,
-        "Java": 18516,
+        "Python": 37324,
+        "Java": 18517,
         "SQL": 16220,
-        "JavaScript": 10320,
-        "TypeScript": 9812,
+        "JavaScript": 10321,
+        "TypeScript": 9814,
         "HTML/CSS": 3402,
-        ".NET": 2806,
+        ".NET": 2807,
         "Kotlin": 2674,
         "Rust": 2559,
         "Swift": 2129,
@@ -27,7 +27,7 @@
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 10337,
+        "React": 10339,
         "PyTorch": 6812,
         "TensorFlow": 5167,
         "Node.js": 4039,
@@ -37,7 +37,7 @@
         "Scikit-learn": 3138,
         "Pandas": 2512,
         "Spring Boot": 2109,
-        "Next.js": 2017,
+        "Next.js": 2018,
         "GraphQL": 2002,
         "NumPy": 1957,
         "FastAPI": 1938,
@@ -54,9 +54,9 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 19657,
-        "Azure": 10982,
-        "GCP": 9997,
+        "AWS": 19658,
+        "Azure": 10984,
+        "GCP": 9998,
         "S3": 2211,
         "Lambda": 1889,
         "Serverless": 1372,
@@ -75,13 +75,13 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 26203,
-        "REST API": 10104,
-        "Distributed Systems": 9821,
-        "Microservices": 5617,
-        "System Design": 5033,
+        "Scalability": 26207,
+        "REST API": 10106,
+        "Distributed Systems": 9822,
+        "Microservices": 5619,
+        "System Design": 5035,
         "Kafka": 3273,
-        "Event-Driven": 2935,
+        "Event-Driven": 2936,
         "API Design": 2133,
         "Caching": 1315,
         "gRPC": 938,
@@ -94,9 +94,9 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 14027,
-        "Kubernetes": 8454,
-        "Docker": 8009,
+        "CI/CD": 14029,
+        "Kubernetes": 8456,
+        "Docker": 8010,
         "Git": 7991,
         "Linux": 5643,
         "Terraform": 3190,
@@ -137,11 +137,11 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 19515,
-        "Agents": 14860,
+        "Agents": 14862,
         "LLM": 13268,
-        "GenAI": 9023,
+        "GenAI": 9024,
         "PyTorch": 6812,
-        "RAG": 6132,
+        "RAG": 6133,
         "TensorFlow": 5167,
         "NLP": 5112,
         "Deep Learning": 4285,
@@ -174,8 +174,8 @@
       "color": "#64748b",
       "skills": {
         "Cross-functional": 16763,
-        "Code Review": 14367,
-        "Mentorship": 12681,
+        "Code Review": 14370,
+        "Mentorship": 12683,
         "Agile/Scrum": 10343,
         "Leadership": 3895,
         "On-call": 3852
