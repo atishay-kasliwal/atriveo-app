@@ -37,7 +37,6 @@ import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
-import { fetchFeed, FEED_TYPES } from "./feed-jobs.mjs";
 import { listActiveWorkers } from "./worker-registry.mjs";
 import { buildCoverLetter } from "./cover-letter.mjs";
 
@@ -1367,27 +1366,6 @@ const server = http.createServer(async (req, res) => {
           res.writeHead(503, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
         }
-      }
-    })();
-    return;
-  }
-
-  // GET /jobs?type=hour|today|yesterday|week|important — the dock's job feed (Mongo)
-  if (req.method === "GET" && pathname === "/jobs") {
-    (async () => {
-      try {
-        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
-        const type = reqUrl.searchParams.get("type") || "today";
-        if (!FEED_TYPES.includes(type)) {
-          res.writeHead(400, { "Content-Type": "application/json" });
-          return res.end(JSON.stringify({ ok: false, error: `unknown type "${type}"` }));
-        }
-        const jobs = await withMongo((db) => fetchFeed(db, type), { appName: "AtriveoTailorServer" });
-        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
-        res.end(JSON.stringify({ ok: true, type, count: jobs.length, jobs }));
-      } catch (e) {
-        res.writeHead(503, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
       }
     })();
     return;
