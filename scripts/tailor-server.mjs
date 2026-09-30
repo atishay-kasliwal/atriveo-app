@@ -2035,8 +2035,10 @@ const server = http.createServer(async (req, res) => {
   // GET /serve-pdf?path=...           → inline (browser preview)
   // GET /serve-pdf?path=...&dl=1      → attachment (download)
   if (req.method === "GET" && pathname === "/serve-pdf") {
-    const pdfPath = reqUrl.searchParams.get("path");
-    if (!pdfPath || !pdfPath.startsWith(OUT_ROOT)) {
+    const raw = reqUrl.searchParams.get("path");
+    // Resolve first so "…/tailored-resumes/../../x" cannot escape the folder; PDFs only.
+    const pdfPath = raw ? path.resolve(raw) : "";
+    if (!pdfPath || !pdfPath.startsWith(path.resolve(OUT_ROOT) + path.sep) || path.extname(pdfPath).toLowerCase() !== ".pdf") {
       res.writeHead(400); res.end("invalid path");
       return;
     }

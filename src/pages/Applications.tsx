@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import CompanyLogo from "../components/CompanyLogo";
+import PdfPreviewModal from "../components/PdfPreviewModal";
 import { getTailorServerBase } from "../utils/tailorServer";
 import "../styles/applications.css";
 
@@ -416,7 +417,7 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     ref.current?.focus();
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !document.querySelector(".pdf-modal-overlay")) onClose(); };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
@@ -434,6 +435,12 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
     return (detail?.questions ?? []).filter((q) => !f || `${q.label} ${q.answer ?? ""} ${q.source}`.toLowerCase().includes(f));
   }, [detail, filter]);
   const answered = detail?.questions.filter((q) => q.resolution === "answered").length ?? 0;
+  const [pdfPath, setPdfPath] = useState<string | null>(null);
+  // Phones show only the first page of a PDF inside a frame, so open it in its own tab there.
+  const openResume = (path: string) => {
+    if (window.matchMedia("(max-width: 720px)").matches) window.open(`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(path)}`, "_blank", "noopener");
+    else setPdfPath(path);
+  };
 
   return (
     <div className="apps-drawer-wrap">
@@ -458,7 +465,12 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
                     <dt>File</dt><dd>{detail.resume.fileName} <span className="apps-muted">{bytesLabel(detail.resume.bytes)}</span></dd>
                     <dt>Verified</dt><dd>{detail.resume.verifiedAt ? when(detail.resume.verifiedAt) : "—"}{detail.resume.sha256 ? <span className="apps-muted"> · sha256 {detail.resume.sha256.slice(0, 12)}…</span> : null}</dd>
                     {detail.resume.sourceJobUrl && <><dt>Made for</dt><dd><a href={detail.resume.sourceJobUrl} target="_blank" rel="noreferrer">The tailored job ↗</a></dd></>}
-                    {detail.resume.path && <><dt>On your Mac</dt><dd><code>{detail.resume.path}</code></dd></>}
+                    {detail.resume.path && (
+                      <><dt>Resume</dt><dd className="apps-resume-open">
+                        <button type="button" className="apps-btn accent" onClick={() => openResume(detail.resume.path!)} title={detail.resume.path}>Open resume</button>
+                        <a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(detail.resume.path)}&dl=1`} download="Atishay Kasliwal.pdf">Download</a>
+                      </dd></>
+                    )}
                   </dl>
                 ) : <p className="apps-muted">No resume recorded yet.</p>}
               </section>
@@ -507,6 +519,7 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
           )}
         </div>
       </aside>
+      {pdfPath && <PdfPreviewModal pdfPath={pdfPath} onClose={() => setPdfPath(null)} />}
     </div>
   );
 }
