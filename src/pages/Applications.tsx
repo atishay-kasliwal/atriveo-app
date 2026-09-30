@@ -394,6 +394,25 @@ interface Detail {
   attempts: Array<{ n: number; startedAt: string; endedAt: string | null; outcome: string | null }>;
   submission: { by: string | null; submittedAt: string | null; confirmation: string | null };
   failure: { code: string; message: string } | null;
+  resumeReport?: ResumeReport | null;
+}
+
+interface ResumeReport {
+  pipeline: string | null; tailoredAt: string | null; thesis: string | null; headerTitle: string | null;
+  ats: { before: number | null; after: number | null };
+  confidence: number | null;
+  human: {
+    score: number | null; wouldInterview: boolean | null; diagnosis: string | null; because: string[]; concerns: string[];
+    parts: { technical: number | null; impact: number | null; execution: number | null; uniqueness: number | null; overclaimRisk: number | null };
+  } | null;
+  coverage: {
+    pct: number | null;
+    covered: Array<{ term: string; where: string | null; how: string | null }>;
+    gaps: Array<{ term: string; where: string | null; how: string | null; status: string }>;
+    missingClaimable: string[]; unclaimable: string[];
+  };
+  keywords: Array<{ keyword: string; count: number; min: number | null; max: number | null; status: string }>;
+  jdNote: string | null;
 }
 
 const bytesLabel = (n: number | null) => (n == null ? "—" : n < 1024 * 1024 ? `${Math.round(n / 1024)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`);
@@ -408,12 +427,34 @@ function answerText(q: Detail["questions"][number]): { text: string; muted: bool
   }
 }
 
-/** Everything the engine did for one application: the resume used, each question with its answer and where it came from, and the timeline. */
+/** Score tile: a big number, what it means, and an optional tone. */
+function Score({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: "good" | "warn" | "bad" }) {
+  return (
+    <div className={`apps-score ${tone ?? ""}`}>
+      <span className="apps-score-label">{label}</span>
+      <strong>{value}</strong>
+      {sub && <small>{sub}</small>}
+    </div>
+  );
+}
+
+const toneFor = (v: number | null, good: number, ok: number) => (v == null ? undefined : v >= good ? "good" : v >= ok ? "warn" : "bad");
+
+const PART_LABELS: Array<[keyof NonNullable<ResumeReport["human"]>["parts"], string]> = [
+  ["technical", "Technical depth"], ["impact", "Business impact"], ["execution", "Execution"], ["uniqueness", "Uniqueness"],
+];
+
+/**
+ * Everything about one application in a single view: scores (ATS, hiring manager, JD coverage),
+ * what the resume covers and misses, the hiring-manager read, every question with its answer,
+ * and the timeline. Opens as a large panel on desktop and a full-screen sheet on phones.
+ */
 function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void }) {
   useBodyLock();
   const [detail, setDetail] = useState<Detail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
+  const [showAllKeywords, setShowAllKeywords] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     ref.current?.focus();
@@ -442,83 +483,187 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
     else setPdfPath(path);
   };
 
+  const rep = detail?.resumeReport ?? null;
+  const human = rep?.human ?? null;
+  const notCovered = rep ? [
+    ...rep.coverage.missingClaimable.map((t) => ({ term: t, kind: "missing" as const })),
+    ...rep.coverage.gaps.filter((g) => !rep.coverage.missingClaimable.includes(g.term)).map((g) => ({ term: g.term, kind: "missing" as const })),
+    ...rep.coverage.unclaimable.map((t) => ({ term: t, kind: "no-evidence" as const })),
+  ] : [];
+  const overUsed = rep?.keywords.filter((k) => k.status === "over") ?? [];
+  const underUsed = rep?.keywords.filter((k) => k.status === "under" || k.status === "missing") ?? [];
+
   return (
-    <div className="apps-drawer-wrap">
+    <div className="apps-drawer-wrap apps-full-wrap">
       <div className="apps-scrim" onClick={onClose} />
-      <aside className="apps-drawer wide" role="dialog" aria-modal="true" aria-label={`History for ${row.company}`} tabIndex={-1} ref={ref}>
+      <div className="apps-full" role="dialog" aria-modal="true" aria-label={`Application details for ${row.company}`} tabIndex={-1} ref={ref}>
         <span className="apps-handle" aria-hidden />
         <div className="apps-drawer-head">
           <CompanyLogo company={row.company} size="md" />
-          <div className="apps-drawer-title"><strong>{row.company}</strong><span>{row.title}</span></div>
+          <div className="apps-drawer-title"><strong>{row.company}</strong><span>{row.title}{row.ats ? ` · ${row.ats}` : ""}</span></div>
           <StatusPill status={row.status} />
-          <button className="apps-x" onClick={onClose} aria-label="Close history">✕</button>
+          <a className="apps-link apps-full-open" href={row.url} target="_blank" rel="noreferrer">Open application ↗</a>
+          <button className="apps-x" onClick={onClose} aria-label="Close">✕</button>
         </div>
-        <div className="apps-drawer-body apps-hist">
-          {error && <p className="apps-error">Couldn't load the history: {error}</p>}
+
+        <div className="apps-full-body">
+          {error && <p className="apps-error">Couldn't load this application: {error}</p>}
           {!detail && !error && <p className="apps-muted">Loading…</p>}
           {detail && (
             <>
-              <section>
-                <h3>Resume used</h3>
-                {detail.resume.fileName ? (
-                  <dl className="apps-status">
-                    <dt>File</dt><dd>{detail.resume.fileName} <span className="apps-muted">{bytesLabel(detail.resume.bytes)}</span></dd>
-                    <dt>Verified</dt><dd>{detail.resume.verifiedAt ? when(detail.resume.verifiedAt) : "—"}{detail.resume.sha256 ? <span className="apps-muted"> · sha256 {detail.resume.sha256.slice(0, 12)}…</span> : null}</dd>
-                    {detail.resume.sourceJobUrl && <><dt>Made for</dt><dd><a href={detail.resume.sourceJobUrl} target="_blank" rel="noreferrer">The tailored job ↗</a></dd></>}
-                    {detail.resume.path && (
-                      <><dt>Resume</dt><dd className="apps-resume-open">
-                        <button type="button" className="apps-btn accent" onClick={() => openResume(detail.resume.path!)} title={detail.resume.path}>Open resume</button>
-                        <a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(detail.resume.path)}&dl=1`} download="Atishay Kasliwal.pdf">Download</a>
-                      </dd></>
-                    )}
-                  </dl>
-                ) : <p className="apps-muted">No resume recorded yet.</p>}
+              <section className="apps-scores" aria-label="Scores">
+                <Score
+                  label="ATS score"
+                  value={rep?.ats.after != null ? `${rep.ats.after}` : "—"}
+                  sub={rep?.ats.before != null && rep.ats.after != null ? `${rep.ats.before} before tailoring (${rep.ats.after - rep.ats.before >= 0 ? "+" : ""}${rep.ats.after - rep.ats.before})` : rep ? "keyword match to the JD" : "no scoring report"}
+                  tone={toneFor(rep?.ats.after ?? null, 75, 60)}
+                />
+                <Score
+                  label="Hiring manager"
+                  value={human?.score != null ? `${human.score}/10` : "—"}
+                  sub={human?.wouldInterview == null ? "human read" : human.wouldInterview ? "✓ would interview" : "✕ would not interview"}
+                  tone={human?.score != null ? (human.score >= 8 ? "good" : human.score >= 6 ? "warn" : "bad") : undefined}
+                />
+                <Score
+                  label="JD coverage"
+                  value={rep?.coverage.pct != null ? `${rep.coverage.pct}%` : "—"}
+                  sub={rep ? `${rep.coverage.covered.length} covered · ${notCovered.length} not covered` : "weighted by importance"}
+                  tone={toneFor(rep?.coverage.pct ?? null, 70, 50)}
+                />
+                <Score label="Resume confidence" value={rep?.confidence != null ? `${rep.confidence}` : "—"} sub="overall, out of 100" tone={toneFor(rep?.confidence ?? null, 75, 60)} />
+                <Score label="Questions" value={`${answered}/${detail.questions.length}`} sub="answered on the form" tone={answered === detail.questions.length ? "good" : "warn"} />
               </section>
 
-              <section>
-                <div className="apps-card-head">
-                  <h3>Questions and answers <span className="apps-count">{answered}/{detail.questions.length}</span></h3>
-                  <input className="apps-hist-search" placeholder="Filter" aria-label="Filter questions" value={filter} onChange={(e) => setFilter(e.target.value)} />
-                </div>
-                {qs.length === 0 ? <p className="apps-muted">No questions recorded.</p> : (
-                  <ul className="apps-qa">
-                    {qs.map((q, i) => {
-                      const a = answerText(q);
-                      return (
-                        <li key={`${q.label}-${i}`}>
-                          <div className="apps-qa-q">{q.label}{q.required ? " *" : ""}{q.sensitive ? <em> · {q.sensitive.replace(/_/g, " ")}</em> : null}</div>
-                          <div className={`apps-qa-a ${a.muted ? "muted" : ""}`}>{a.text}</div>
-                          <div className="apps-qa-meta">
-                            <span>{q.source}</span>
-                            {q.resolution === "answered" && <span className={q.verified ? "ok" : "warn"}>{q.verified ? "✓ read back from the form" : "not read back"}</span>}
-                            {q.resolution === "needs_review" && <span className="warn">needs your answer</span>}
-                            {q.detail && q.resolution !== "answered" ? <span>{q.detail}</span> : null}
+              <div className="apps-full-grid">
+                <div className="apps-full-col">
+                  <section className="apps-block">
+                    <div className="apps-block-head"><h3>Resume</h3>
+                      {detail.resume.path && (
+                        <div className="apps-resume-open">
+                          <button type="button" className="apps-btn accent" onClick={() => openResume(detail.resume.path!)} title={detail.resume.path}>Open resume</button>
+                          <a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(detail.resume.path)}&dl=1`} download="Atishay Kasliwal.pdf">Download</a>
+                        </div>
+                      )}
+                    </div>
+                    {rep?.thesis && <p className="apps-thesis">“{rep.thesis}”</p>}
+                    <p className="apps-muted">
+                      {detail.resume.fileName ?? "No resume recorded"}{detail.resume.bytes ? ` · ${bytesLabel(detail.resume.bytes)}` : ""}
+                      {detail.resume.verifiedAt ? ` · uploaded ${when(detail.resume.verifiedAt)}` : ""}
+                      {detail.resume.sourceJobUrl && <> · <a href={detail.resume.sourceJobUrl} target="_blank" rel="noreferrer">tailored job ↗</a></>}
+                    </p>
+                    {rep?.jdNote && <p className="apps-muted">{rep.jdNote}</p>}
+                  </section>
+
+                  <section className="apps-block">
+                    <h3>What the resume covers</h3>
+                    {!rep ? <p className="apps-muted">No coverage report was saved for this resume.</p> : (
+                      <>
+                        <div className="apps-chips-group">
+                          <span className="apps-chips-title good">Covered · {rep.coverage.covered.length}</span>
+                          <div className="apps-chips">
+                            {rep.coverage.covered.map((c) => <span key={c.term} className="apps-chip2 good" title={c.where ? `in ${c.where}` : undefined}>{c.term}{c.where && c.where !== "none" ? <em>{c.where}</em> : null}</span>)}
+                            {rep.coverage.covered.length === 0 && <span className="apps-muted">Nothing matched.</span>}
                           </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </section>
+                        </div>
+                        <div className="apps-chips-group">
+                          <span className="apps-chips-title warn">Not covered · {notCovered.length}</span>
+                          <div className="apps-chips">
+                            {notCovered.map((c) => <span key={`${c.kind}-${c.term}`} className={`apps-chip2 ${c.kind === "missing" ? "warn" : "muted"}`} title={c.kind === "missing" ? "You have evidence for this but it is not on the resume" : "No evidence in your experience bank"}>{c.term}{c.kind === "no-evidence" ? <em>no evidence</em> : null}</span>)}
+                            {notCovered.length === 0 && <span className="apps-muted">Every JD term is covered.</span>}
+                          </div>
+                        </div>
+                        {(overUsed.length > 0 || underUsed.length > 0) && (
+                          <div className="apps-chips-group">
+                            <span className="apps-chips-title">Keyword balance</span>
+                            <div className="apps-chips">
+                              {overUsed.map((k) => <span key={k.keyword} className="apps-chip2 muted" title={`Used ${k.count}× (target ${k.min ?? 0}–${k.max ?? "?"})`}>{k.keyword}<em>{k.count}× over</em></span>)}
+                              {underUsed.map((k) => <span key={k.keyword} className="apps-chip2 warn" title={`Used ${k.count}× (target ${k.min ?? 0}–${k.max ?? "?"})`}>{k.keyword}<em>{k.count}× under</em></span>)}
+                            </div>
+                          </div>
+                        )}
+                        {rep.keywords.length > 0 && (
+                          <>
+                            <button className="apps-link" onClick={() => setShowAllKeywords((v) => !v)}>{showAllKeywords ? "Hide keyword table" : `All ${rep.keywords.length} ATS keywords`}</button>
+                            {showAllKeywords && (
+                              <div className="apps-table-wrap"><table className="apps-table">
+                                <thead><tr><th>Keyword</th><th>Used</th><th>Target</th><th>Status</th></tr></thead>
+                                <tbody>{rep.keywords.map((k) => <tr key={k.keyword}><td>{k.keyword}</td><td>{k.count}</td><td>{k.min ?? 0}–{k.max ?? "?"}</td><td>{k.status}</td></tr>)}</tbody>
+                              </table></div>
+                            )}
+                          </>
+                        )}
+                      </>
+                    )}
+                  </section>
 
-              <section>
-                <h3>Timeline</h3>
-                <ol className="apps-timeline">
-                  {detail.timeline.map((t, i) => (
-                    <li key={i}>
-                      <span className="apps-muted">{when(t.at)}</span>
-                      <span>{t.from ? `${humanize(t.from)} → ` : ""}<strong>{humanize(t.to)}</strong> <span className="apps-muted">· {t.actor}</span></span>
-                      {t.reason && <span className="apps-muted">{t.reason}</span>}
-                    </li>
-                  ))}
-                </ol>
-                {detail.submission.confirmation && <p className="apps-muted">Confirmation: {detail.submission.confirmation}</p>}
-                {detail.failure && <p className="apps-muted">Last failure: {humanize(detail.failure.code)} — {detail.failure.message}</p>}
-              </section>
+                  <section className="apps-block">
+                    <h3>Hiring manager read</h3>
+                    {!human ? <p className="apps-muted">No hiring-manager review was saved for this resume.</p> : (
+                      <>
+                        {human.diagnosis && <p className="apps-diagnosis">{human.diagnosis}</p>}
+                        <ul className="apps-bars">
+                          {PART_LABELS.map(([k, label]) => {
+                            const v = human.parts[k];
+                            return v == null ? null : (
+                              <li key={k}><span>{label}</span><span className="apps-bar"><i style={{ width: `${Math.max(2, v * 10)}%` }} /></span><b>{v}</b></li>
+                            );
+                          })}
+                          {human.parts.overclaimRisk != null && <li><span>Overclaim risk</span><span className="apps-bar risk"><i style={{ width: `${Math.max(2, human.parts.overclaimRisk * 10)}%` }} /></span><b>{human.parts.overclaimRisk}</b></li>}
+                        </ul>
+                        <div className="apps-proscons">
+                          <ul className="pros">{human.because.map((b) => <li key={b}>{b}</li>)}</ul>
+                          {human.concerns.length > 0 && <ul className="cons">{human.concerns.map((c) => <li key={c}>{c}</li>)}</ul>}
+                        </div>
+                      </>
+                    )}
+                  </section>
+                </div>
+
+                <div className="apps-full-col">
+                  <section className="apps-block">
+                    <div className="apps-block-head">
+                      <h3>Questions and answers <span className="apps-count">{answered}/{detail.questions.length}</span></h3>
+                      <input className="apps-hist-search" placeholder="Filter" aria-label="Filter questions" value={filter} onChange={(e) => setFilter(e.target.value)} />
+                    </div>
+                    {qs.length === 0 ? <p className="apps-muted">No questions recorded.</p> : (
+                      <ul className="apps-qa2">
+                        {qs.map((q, i) => {
+                          const a = answerText(q);
+                          return (
+                            <li key={`${q.label}-${i}`} className={q.resolution === "needs_review" ? "needs" : ""}>
+                              <span className="q">{q.label}{q.required ? " *" : ""}</span>
+                              <span className={`a ${a.muted ? "muted" : ""}`}>{a.text}</span>
+                              <span className="m" title={q.source}>
+                                {q.resolution === "answered" ? (q.verified ? <b className="ok">✓</b> : <b className="warn">?</b>) : q.resolution === "needs_review" ? <b className="warn">!</b> : null}
+                                {q.source !== "—" ? q.source.split(" · ")[0] : ""}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </section>
+
+                  <section className="apps-block">
+                    <h3>Timeline</h3>
+                    <ol className="apps-timeline">
+                      {detail.timeline.map((t, i) => (
+                        <li key={i}>
+                          <span className="apps-muted">{when(t.at)}</span>
+                          <span>{t.from ? `${humanize(t.from)} → ` : ""}<strong>{humanize(t.to)}</strong> <span className="apps-muted">· {t.actor}</span></span>
+                          {t.reason && <span className="apps-muted">{t.reason}</span>}
+                        </li>
+                      ))}
+                    </ol>
+                    {detail.submission.confirmation && <p className="apps-muted">Confirmation: {detail.submission.confirmation}</p>}
+                    {detail.failure && <p className="apps-muted">Last failure: {humanize(detail.failure.code)} — {detail.failure.message}</p>}
+                  </section>
+                </div>
+              </div>
             </>
           )}
         </div>
-      </aside>
+      </div>
       {pdfPath && <PdfPreviewModal pdfPath={pdfPath} onClose={() => setPdfPath(null)} />}
     </div>
   );
