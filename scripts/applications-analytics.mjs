@@ -8,7 +8,7 @@ const dayKey = (iso) => (iso ? new Date(iso).toLocaleString("sv-SE", { timeZone:
 
 export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {}) {
   const apps = db.collection("applications");
-  const [statusRows, atsRows, reasonRows, failureRows, pendingRows, records, patternRows, control, boardRows, siteRows, resumeReady, discovered] = await Promise.all([
+  const [statusRows, atsRows, reasonRows, failureRows, pendingRows, records, patternRows, control, boardRows, siteRows, resumeReady, discovered, accountRows] = await Promise.all([
     apps.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]).toArray(),
     apps.aggregate([{ $group: { _id: { ats: "$ats", status: "$status" }, n: { $sum: 1 } } }]).toArray(),
     apps.aggregate([{ $match: { status: "NEEDS_REVIEW" } }, { $group: { _id: "$review.reason", n: { $sum: 1 } } }, { $sort: { n: -1 } }]).toArray(),
@@ -35,6 +35,9 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     db.collection("jobs").aggregate([{ $group: { _id: "$site", n: { $sum: 1 } } }]).toArray(),
     db.collection("jobs").distinct("job_url", { "resume.status": "success" }),
     db.collection("jobs").distinct("job_url"),
+    // Portal accounts the engine created (playatriveo `accounts.email`). Includes the generated
+    // password on purpose: this endpoint sits behind the site login and the Dashboard masks it.
+    db.collection("application_accounts").find({}).sort({ createdAt: -1 }).limit(100).toArray(),
   ]);
 
   const byStatus = Object.fromEntries(statusRows.map((r) => [r._id, r.n]));
@@ -100,6 +103,10 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       boards: boardRows.map((b) => ({ ats: b._id, boards: b.boards, polled: b.polled, withMatches: b.matched })),
       jobsBySite: siteRows.map((s) => ({ site: s._id ?? "unknown", n: s.n })).sort((a, b) => b.n - a.n),
     },
+    accounts: accountRows.map((a) => ({
+      id: a._id, ats: a.ats, tenant: a.tenant, email: a.email, password: a.password, status: a.status,
+      loginUrl: a.loginUrl ?? null, createdAt: a.createdAt, updatedAt: a.updatedAt,
+    })),
     history: records.map((r) => ({
       id: r._id,
       company: r.company,
