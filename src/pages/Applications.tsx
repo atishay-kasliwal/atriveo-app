@@ -660,6 +660,13 @@ export default function Applications() {
     return () => clearInterval(t);
   }, [load]);
 
+  // The scrape dock asks pages to refresh when a run finishes; this page can do it without a reload.
+  useEffect(() => {
+    const onFeed = (e: Event) => { e.preventDefault(); void load(); };
+    window.addEventListener("atriveo:feed-updated", onFeed);
+    return () => window.removeEventListener("atriveo:feed-updated", onFeed);
+  }, [load]);
+
   useEffect(() => {
     if (!notice) return;
     const t = setTimeout(() => setNotice(null), 6000);

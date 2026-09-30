@@ -241,19 +241,60 @@
 .scrape-action--go   { color: var(--blue); border-color: var(--primary-line); }
 .scrape-action--stop { color: var(--red); border-color: color-mix(in oklch, var(--red) 45%, transparent); }
 
-/* ── Blocking overlay ──────────────────────────────────────────────────── */
+/* ── Background run dock (never blocks the page) ───────────────────────── */
 
-.scrape-overlay {
+.scrape-dock {
   position: fixed;
-  inset: 0;
-  z-index: 200;
+  left: 16px;
+  bottom: 16px;
+  z-index: 55;              /* above the header (50), below sheets (60) and toasts (70) */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: calc(100vw - 32px);
+  pointer-events: none;     /* only the pill and panel take clicks */
+}
+.scrape-dock > * { pointer-events: auto; }
+.scrape-dock-panel { width: min(26rem, calc(100vw - 32px)); max-height: 70dvh; }
+.scrape-dock-pill {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  background: color-mix(in oklch, var(--bg) 82%, transparent);
-  backdrop-filter: blur(6px);
+  max-width: 100%;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border-hi);
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.45);
 }
+.scrape-dock-pill--ok { border-color: color-mix(in oklch, #2faa4a 55%, var(--border-hi)); }
+.scrape-dock-pill--error { border-color: color-mix(in oklch, var(--red) 55%, var(--border-hi)); }
+.scrape-dock-main {
+  display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px;
+  background: none; border: 0; color: var(--text); font: inherit; font-size: 0.78rem; cursor: pointer; min-width: 0;
+}
+.scrape-dock-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.scrape-dock-caret { color: var(--muted); font-size: 0.7rem; }
+.scrape-dock-x {
+  min-height: 40px; padding: 0 12px; background: none; border: 0; border-left: 1px solid var(--border);
+  color: var(--text-2); font: inherit; font-size: 0.74rem; cursor: pointer;
+}
+.scrape-dock-x:hover { color: var(--text); }
+.scrape-dock-ring { width: 16px; height: 16px; transform: rotate(-90deg); flex: 0 0 auto; }
+.scrape-dock-ring circle { fill: none; stroke-width: 2.5; }
+.scrape-dock-ring-bg { stroke: var(--border); }
+.scrape-dock-ring-fg { stroke: var(--blue); stroke-linecap: round; transition: stroke-dasharray 600ms ease; }
+.scrape-dock-panel { animation: scrape-dock-in 160ms ease-out; transform-origin: bottom left; }
+@keyframes scrape-dock-in { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
+@media (max-width: 720px) {
+  .scrape-dock { left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); max-width: none; }
+  .scrape-dock-panel { width: 100%; }
+  .scrape-dock-pill { width: 100%; }
+  .scrape-dock-main { flex: 1; min-height: 44px; }
+  .scrape-dock-x { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) { .scrape-dock-ring-fg, .scrape-dock-panel { transition: none; animation: none; } }
 
 .scrape-overlay-card {
   width: min(30rem, 100%);
@@ -263,7 +304,7 @@
   background: var(--surface);
   border: 1px solid var(--border-hi);
   border-radius: var(--radius);
-  box-shadow: 0 24px 64px rgb(0 0 0 / 0.55);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.5);
 }
 
 .scrape-overlay-head {
