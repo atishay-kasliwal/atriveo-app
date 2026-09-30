@@ -23,11 +23,8 @@ const ROLE_MISMATCH = [
       && !/software\s+engineer/i.test(title),
     reason: "Embedded/hardware role — no embedded evidence in AC bank",
   },
-  {
-    test: (title) => /\bintern\b/i.test(title)
-      && !/graduate|new\s+grad/i.test(title),
-    reason: "Intern role — senior experience profile; skip unless targeting internships",
-  },
+  // Internships are no longer screened out: they are targeted, and an intern
+  // posting that doesn't fit falls back to the basic resume like any other.
 ];
 
 export function screenJdEligibility(jd, title = "") {
