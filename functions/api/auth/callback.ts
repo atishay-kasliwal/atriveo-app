@@ -1,6 +1,7 @@
 import { SignJWT } from "jose";
+import { emailAllowed, type AdminEnv } from "../../_lib/admin";
 
-interface Env {
+interface Env extends AdminEnv {
   atriveo_auth: D1Database;
   JWT_SECRET: string;
   GOOGLE_CLIENT_ID: string;
@@ -77,6 +78,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 
   if (!profile.email_verified) {
     return Response.redirect(new URL("/login?error=unverified_email", url.origin).toString(), 302);
+  }
+  if (!emailAllowed(env, profile.email)) {
+    return Response.redirect(new URL("/login?error=not_allowed", url.origin).toString(), 302);
   }
 
   // Upsert user — link google_id to existing account if email matches

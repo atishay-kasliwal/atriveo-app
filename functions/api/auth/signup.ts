@@ -1,6 +1,7 @@
 import { SignJWT } from "jose";
+import { emailAllowed, NOT_ALLOWED_MESSAGE, type AdminEnv } from "../../_lib/admin";
 
-interface Env {
+interface Env extends AdminEnv {
   atriveo_auth: D1Database;
   JWT_SECRET: string;
 }
@@ -23,6 +24,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
     if (!email || !password || !name) {
       return Response.json({ error: "Name, email and password are required" }, { status: 400 });
+    }
+    // On the admin site only allowlisted emails can create an account.
+    if (!emailAllowed(env, email)) {
+      return Response.json({ error: NOT_ALLOWED_MESSAGE }, { status: 403 });
     }
     if (password.length < 8) {
       return Response.json({ error: "Password must be at least 8 characters" }, { status: 400 });

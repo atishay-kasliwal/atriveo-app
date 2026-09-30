@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import AppHeader from "../components/AppHeader";
 import CompanyLogo from "../components/CompanyLogo";
 import PdfPreviewModal from "../components/PdfPreviewModal";
 import { getTailorServerBase } from "../utils/tailorServer";
@@ -616,10 +615,10 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
                           {PART_LABELS.map(([k, label]) => {
                             const v = human.parts[k];
                             return v == null ? null : (
-                              <li key={k}><span>{label}</span><span className="apps-bar"><i style={{ width: `${Math.max(2, v * 10)}%` }} /></span><b>{v}</b></li>
+                              <li key={k}><span>{label}</span><span className="apps-meter"><i style={{ width: `${Math.max(2, v * 10)}%` }} /></span><b>{v}</b></li>
                             );
                           })}
-                          {human.parts.overclaimRisk != null && <li><span>Overclaim risk</span><span className="apps-bar risk"><i style={{ width: `${Math.max(2, human.parts.overclaimRisk * 10)}%` }} /></span><b>{human.parts.overclaimRisk}</b></li>}
+                          {human.parts.overclaimRisk != null && <li><span>Overclaim risk</span><span className="apps-meter risk"><i style={{ width: `${Math.max(2, human.parts.overclaimRisk * 10)}%` }} /></span><b>{human.parts.overclaimRisk}</b></li>}
                         </ul>
                         <div className="apps-proscons">
                           <ul className="pros">{human.because.map((b) => <li key={b}>{b}</li>)}</ul>
@@ -841,7 +840,8 @@ function AttentionPanel({ rows, onReview, onRetry, onHistory }: { rows: HistoryR
   );
 }
 
-export default function Applications() {
+/** The Applications console. Lives on apply.atriveo.com; the site supplies its own header. */
+export default function Applications({ header }: { header?: React.ReactNode }) {
   const [days, setDays] = useState(30);
   const [data, setData] = useState<Analytics | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -906,7 +906,7 @@ export default function Applications() {
 
   return (
     <div className="apps-page">
-      <AppHeader />
+      {header}
       <main className="apps-body">
         {error && <div className="apps-error">Couldn't load analytics: {error}. The Mac sidecar must be running (npm run tailor:restart).</div>}
         {!data && !error && <p className="apps-muted">Loading…</p>}

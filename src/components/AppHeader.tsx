@@ -29,7 +29,6 @@ const DAILY: NavItem[] = [
 const WORKBENCH: NavItem[] = [
   { href: "/manual-tailor", label: "Loadout", match: (p) => p.startsWith("/manual-tailor") },
   { href: "/resumes", label: "Resumes", match: (p) => p.startsWith("/resumes") || p.startsWith("/tailored") },
-  { href: "/applications", label: "Applications", match: (p) => p.startsWith("/applications") },
   { href: "/skills", label: "Arsenal", match: (p) => p.startsWith("/skills") },
   { href: "/emailfinder", label: "Recon", match: (p) => p.startsWith("/emailfinder") },
   { href: "/activity", label: "Activity", match: (p) => p.startsWith("/activity") || p.startsWith("/clickedjobs") },

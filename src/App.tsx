@@ -15,7 +15,6 @@ import States from "./pages/States";
 import EmailFinder from "./pages/EmailFinder";
 import Resumes from "./pages/Resumes";
 import Activity from "./pages/Activity";
-import Applications from "./pages/Applications";
 import ManualTailor from "./pages/ManualTailor";
 import ResumeOptimizer from "./pages/ResumeOptimizer";
 import Onboarding from "./pages/Onboarding";
@@ -38,6 +37,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return null;
   }
   return <>{children}</>;
+}
+
+function ExternalRedirect({ to }: { to: string }) {
+  window.location.replace(to);
+  return null;
 }
 
 function P({ children }: { children: React.ReactNode }) {
@@ -88,7 +92,8 @@ export default function App() {
           <Route path="/emailfinder" element={<P><EmailFinder /></P>} />
           <Route path="/resumes" element={<P><Resumes /></P>} />
           <Route path="/activity" element={<P><Activity /></P>} />
-          <Route path="/applications" element={<P><Applications /></P>} />
+          {/* The application-engine console moved to its own admin-only site. */}
+          <Route path="/applications/*" element={<ExternalRedirect to="https://apply.atriveo.com" />} />
           <Route path="/manual-tailor" element={<P><ManualTailor /></P>} />
           <Route path="/optimizer" element={<P><ResumeOptimizer /></P>} />
           <Route path="/ever-jobs" element={<P><EverJobs /></P>} />
