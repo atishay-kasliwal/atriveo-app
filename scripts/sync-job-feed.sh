@@ -75,7 +75,18 @@ fi
 # the branch from the git checkout, so running this from any working branch
 # (e.g. macbook-air) silently produces a preview deployment while
 # application.atriveo.com keeps serving stale data — a green phase and no change.
-CF_BRANCH="${CF_PAGES_BRANCH:-main}"
+#
+# Ask Pages which branch that is (the branch of its latest production deploy)
+# rather than assuming. The old default "main" was wrong for this project, and
+# the CF_PAGES_BRANCH override lived in a gitignored .env that a re-clone lost:
+# from 2026-08-09 to 2026-09-30 every deploy quietly landed in preview.
+# CF_PAGES_BRANCH still wins when set.
+production_branch() {
+  npx wrangler pages deployment list --project-name atriveo-app --environment production --json 2>/dev/null \
+    | "$NODE_BIN" -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(JSON.parse(s)[0]?.Branch||"")}catch{}})'
+}
+CF_BRANCH="${CF_PAGES_BRANCH:-$(production_branch)}"
+CF_BRANCH="${CF_BRANCH:-main}"
 # Log the target. Deploying to a non-production branch still exits 0 — it just
 # silently becomes a preview — so the branch is the only thing that
 # distinguishes "published" from "published somewhere nobody looks".
