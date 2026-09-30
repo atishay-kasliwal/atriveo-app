@@ -21,7 +21,7 @@ export function resolveProfilePath() {
 export const PROFILE_DEFAULTS = Object.freeze({
   name:      "Atishay Kasliwal",
   title:     "Software Engineer",
-  email:     "katishay@gmail.com",
+  email:     "katishay45@gmail.com",
   phone:     "934-246-1198",
   location:  "New York, NY",
   linkedin:  "https://www.linkedin.com/in/atishay-kasliwal",
