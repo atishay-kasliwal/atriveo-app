@@ -23,8 +23,8 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     apps.find({}, {
       projection: {
         company: 1, title: 1, location: 1, ats: 1, status: 1, applyUrl: 1, finalUrl: 1, attemptCount: 1, createdAt: 1, updatedAt: 1,
-        lifecycle: 1, "review.reason": 1, "review.detail": 1, "review.pending.label": 1, "failure.code": 1, "failure.message": 1,
-        "submission.by": 1, "submission.submittedAt": 1, "domain.domain": 1, source: 1,
+        lifecycle: 1, "review.reason": 1, "review.detail": 1, "review.pending": 1, "failure.code": 1, "failure.message": 1,
+        "submission.by": 1, "submission.submittedAt": 1, "submission.attemptedAt": 1, "domain.domain": 1, source: 1,
       },
     }).sort({ updatedAt: -1 }).limit(limit).toArray(),
     db.collection("form_patterns").aggregate([{ $group: { _id: "$trust", n: { $sum: 1 } } }]).toArray(),
@@ -110,6 +110,12 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       reviewReason: r.review?.reason ?? null,
       reviewDetail: r.review?.detail ?? null,
       pending: (r.review?.pending ?? []).map((p) => p.label),
+      // Full questions for answering in the dashboard (no answer values are stored here).
+      questions: (r.review?.pending ?? []).map((p) => ({
+        fingerprint: p.fingerprint, label: p.label, type: p.type, required: p.required, options: p.options ?? [],
+        canonicalKey: p.canonicalKey ?? null, sensitive: p.sensitive ?? null, reason: p.reason, detail: p.detail,
+      })),
+      submitAttempted: Boolean(r.submission?.attemptedAt),
       failureCode: r.failure?.code ?? null,
       failureMessage: r.failure?.message ? String(r.failure.message).split("\n")[0].slice(0, 200) : null,
       submittedBy: r.submission?.by ?? null,

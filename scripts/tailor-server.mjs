@@ -1611,6 +1611,35 @@ const server = http.createServer(async (req, res) => {
   }
 
   // GET /compile-queue/stats — active queued + running counts (Mongo)
+  // POST /applications/action — your dashboard actions (answer | skip | retry | mark_applied | not_submitted).
+  // Runs playatriveo's action CLI on this Mac; answers are saved locally, never in Mongo.
+  if (req.method === "POST" && pathname === "/applications/action") {
+    let raw = "";
+    req.on("data", (c) => {
+      raw += c;
+      if (raw.length > 200_000) req.destroy();
+    });
+    req.on("end", () => {
+      const dir = process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo");
+      const child = spawn(path.join(dir, "node_modules", ".bin", "tsx"), ["src/cli/action.ts"], { cwd: dir, env: process.env });
+      let out = "";
+      let err = "";
+      const timer = setTimeout(() => child.kill("SIGKILL"), 60_000);
+      child.stdout.on("data", (c) => (out += c));
+      child.stderr.on("data", (c) => (err += c));
+      child.on("close", (code) => {
+        clearTimeout(timer);
+        const line = out.trim().split("\n").pop() || "";
+        let body;
+        try { body = JSON.parse(line); } catch { body = { ok: false, error: (err || out || `exit ${code}`).slice(0, 400) }; }
+        res.writeHead(body.ok ? 200 : 400, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(body));
+      });
+      child.stdin.end(raw);
+    });
+    return;
+  }
+
   // GET /applications/analytics — application engine history & outcomes (read-only)
   if (req.method === "GET" && pathname === "/applications/analytics") {
     (async () => {

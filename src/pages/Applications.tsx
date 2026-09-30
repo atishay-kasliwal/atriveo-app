@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import { getTailorServerBase } from "../utils/tailorServer";
 import "../styles/applications.css";
@@ -9,7 +9,12 @@ import "../styles/applications.css";
 type Status = "READY_TO_APPLY" | "APPLYING" | "NEEDS_REVIEW" | "SUBMITTING" | "APPLIED" | "FAILED" | "SKIPPED";
 
 interface Day { day: string; queued: number; applied: number; needsReview: number; failed: number; skipped: number }
+interface PendingQ {
+  fingerprint: string; label: string; type: string; required: boolean; options: string[];
+  canonicalKey: string | null; sensitive: string | null; reason: string; detail: string;
+}
 interface HistoryRow {
+  questions: PendingQ[]; submitAttempted: boolean;
   id: string; company: string; title: string; location: string | null; ats: string | null; status: Status;
   reviewReason: string | null; reviewDetail: string | null; pending: string[]; failureCode: string | null; failureMessage: string | null;
   submittedBy: string | null; submittedAt: string | null; attempts: number; domain: string | null; url: string; updatedAt: string;
@@ -70,6 +75,87 @@ function BarList({ rows, empty }: { rows: Array<{ label: string; n: number }>; e
         </li>
       ))}
     </ul>
+  );
+}
+
+type Scope = "application" | "company" | "global";
+
+async function postAction(body: object): Promise<{ ok: boolean; error?: string; requeued?: boolean }> {
+  const res = await fetch(`${getTailorServerBase()}/applications/action`, {
+    method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+  });
+  const json = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
+  return res.ok ? json : { ok: false, error: json.error || `HTTP ${res.status}` };
+}
+
+/** Answer pending questions, or decide on an application, without the terminal. */
+function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) => void }) {
+  const companyWord = row.company.toLowerCase().split(/\s+/)[0] ?? "";
+  const defaultScope = (q: PendingQ): Scope =>
+    q.sensitive ? "application" : companyWord && q.label.toLowerCase().includes(companyWord) ? "company" : "global";
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [scopes, setScopes] = useState<Record<string, Scope>>(() => Object.fromEntries(row.questions.map((q) => [q.fingerprint, defaultScope(q)])));
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const run = async (body: object, success: string) => {
+    setBusy(true);
+    setError(null);
+    const r = await postAction(body);
+    setBusy(false);
+    if (!r.ok) setError(r.error ?? "Failed");
+    else onDone(success);
+  };
+
+  if (row.submitAttempted) {
+    return (
+      <div className="apps-review">
+        <p>Submit was already clicked for this application, so it is never retried automatically. Did it go through? Check your email for a confirmation.</p>
+        <div className="apps-review-actions">
+          <button disabled={busy} onClick={() => run({ action: "mark_applied", applicationId: row.id }, "Marked as applied.")}>✓ It went through</button>
+          <button disabled={busy} onClick={() => run({ action: "not_submitted", applicationId: row.id }, "Queued again.")}>It did not go through, retry</button>
+        </div>
+        {error && <p className="apps-error">{error}</p>}
+      </div>
+    );
+  }
+
+  const answers = row.questions
+    .filter((q) => values[q.fingerprint]?.trim())
+    .map((q) => ({ fingerprint: q.fingerprint, label: q.label, type: q.type, canonicalKey: q.canonicalKey, sensitive: q.sensitive, value: values[q.fingerprint]!.trim(), scope: scopes[q.fingerprint] ?? "global" }));
+
+  return (
+    <div className="apps-review">
+      {row.questions.length === 0 && <p>No questions are pending. {row.reviewDetail}</p>}
+      {row.questions.map((q) => (
+        <div key={q.fingerprint} className="apps-q">
+          <label>
+            <span className="apps-q-label">{q.label}{q.required ? " *" : ""}{q.sensitive ? <em> · {q.sensitive.replace(/_/g, " ")}</em> : null}</span>
+            {q.options.length ? (
+              <select value={values[q.fingerprint] ?? ""} onChange={(e) => setValues({ ...values, [q.fingerprint]: e.target.value })}>
+                <option value="">Choose…</option>
+                {q.options.map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            ) : (
+              <textarea rows={q.type === "textarea" ? 3 : 1} value={values[q.fingerprint] ?? ""} onChange={(e) => setValues({ ...values, [q.fingerprint]: e.target.value })} placeholder="Your answer" />
+            )}
+          </label>
+          <select className="apps-q-scope" aria-label="Use this answer for" value={scopes[q.fingerprint]} onChange={(e) => setScopes({ ...scopes, [q.fingerprint]: e.target.value as Scope })}>
+            <option value="application">Only this application</option>
+            <option value="company">All {row.company} jobs</option>
+            <option value="global">Every application</option>
+          </select>
+        </div>
+      ))}
+      <div className="apps-review-actions">
+        <button className="primary" disabled={busy || !answers.length} onClick={() => run({ action: "answer", applicationId: row.id, answers }, `Saved ${answers.length} answer(s). It will be filled again and, if everything is answered, submitted.`)}>
+          Save answers & continue
+        </button>
+        <button disabled={busy} onClick={() => run({ action: "retry", applicationId: row.id }, "Queued again.")}>Retry without changes</button>
+        <button disabled={busy} onClick={() => run({ action: "skip", applicationId: row.id }, "Skipped.")}>Skip this job</button>
+      </div>
+      {error && <p className="apps-error">{error}</p>}
+    </div>
   );
 }
 
@@ -137,6 +223,8 @@ export default function Applications() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Status | "ALL">("ALL");
   const [query, setQuery] = useState("");
+  const [open, setOpen] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -236,7 +324,7 @@ export default function Applications() {
               </div>
               <div className="apps-card apps-wide">
                 <h2>Questions that most often need your answer</h2>
-                <p className="apps-sub">Answer these once in the review console (npm run apply -- --application &lt;id&gt;) and they're remembered.</p>
+                <p className="apps-sub">Answer these once (Review, in History below) and they're remembered for future applications.</p>
                 <BarList rows={data.topPendingQuestions.map((q) => ({ label: q.label, n: q.n }))} empty="No pending questions." />
               </div>
               <div className="apps-card apps-wide">
@@ -265,7 +353,8 @@ export default function Applications() {
                   <table className="apps-table">
                     <thead><tr><th>Updated</th><th>Company</th><th>Role</th><th>ATS</th><th>Status</th><th>Details</th><th>Attempts</th><th /></tr></thead>
                     <tbody>{history.map((h) => (
-                      <tr key={h.id}>
+                      <Fragment key={h.id}>
+                      <tr>
                         <td>{when(h.updatedAt)}</td>
                         <td>{h.company}</td>
                         <td>{h.title}</td>
@@ -277,13 +366,24 @@ export default function Applications() {
                           {h.status === "APPLIED" && <>by {h.submittedBy ?? "engine"} · {when(h.submittedAt)}</>}
                         </td>
                         <td>{h.attempts}</td>
-                        <td><a href={h.url} target="_blank" rel="noreferrer">Open</a></td>
+                        <td className="apps-row-actions">
+                          {h.status === "NEEDS_REVIEW" && <button className="apps-link" onClick={() => setOpen(open === h.id ? null : h.id)}>{open === h.id ? "Close" : "Review"}</button>}
+                          {h.status === "FAILED" && <button className="apps-link" onClick={() => void postAction({ action: "retry", applicationId: h.id }).then((r) => { setNotice(r.ok ? "Queued again." : r.error ?? "Failed"); void load(); })}>Retry</button>}
+                          <a href={h.url} target="_blank" rel="noreferrer">Open</a>
+                        </td>
                       </tr>
+                      {open === h.id && (
+                        <tr className="apps-review-row"><td colSpan={8}>
+                          <ReviewPanel row={h} onDone={(msg) => { setNotice(msg); setOpen(null); void load(); }} />
+                        </td></tr>
+                      )}
+                      </Fragment>
                     ))}</tbody>
                   </table>
                 </div>
               )}
-              <p className="apps-sub">Review one: <code>npm run apply -- --application &lt;id&gt;</code> · ids: {history.slice(0, 1).map((h) => h.id).join("")}</p>
+              {notice && <p className="apps-notice">{notice}</p>}
+              <p className="apps-sub">Open <strong>Review</strong> on any "Needs review" row to answer its questions here. Your answers are saved on your Mac and reused; fully answered forms then submit automatically.</p>
             </section>
           </>
         )}

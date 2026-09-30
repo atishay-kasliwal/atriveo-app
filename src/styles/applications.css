@@ -75,3 +75,20 @@
   .apps-barlist li, .apps-funnel li { grid-template-columns: 1fr auto; }
   .apps-barlist-track { grid-column: 1 / -1; order: 3; }
 }
+
+/* Review panel */
+.apps-row-actions { display: flex; gap: 10px; align-items: center; white-space: nowrap; }
+.apps-review-row td { background: var(--secondary-bg); }
+.apps-review { display: flex; flex-direction: column; gap: 12px; padding: 6px 2px; }
+.apps-review p { margin: 0; font-size: 13px; }
+.apps-q { display: grid; grid-template-columns: 1fr 200px; gap: 10px; align-items: end; }
+.apps-q label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.apps-q-label em { color: var(--muted-fg); font-style: normal; font-size: 12px; }
+.apps-q select, .apps-q textarea { background: var(--input-bg); color: var(--foreground); border: 1px solid var(--border-col); border-radius: 8px; padding: 6px 8px; font: inherit; font-size: 13px; }
+.apps-q textarea { resize: vertical; }
+.apps-review-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.apps-review-actions button { background: var(--secondary-bg); color: var(--foreground); border: 1px solid var(--border-col); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+.apps-review-actions button.primary { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+.apps-review-actions button:disabled { opacity: .5; cursor: default; }
+.apps-notice { font-size: 13px; color: var(--foreground); background: var(--primary-soft, var(--secondary-bg)); border-radius: 8px; padding: 8px 12px; margin: 8px 0 0; }
+@media (max-width: 640px) { .apps-q { grid-template-columns: 1fr; } }
