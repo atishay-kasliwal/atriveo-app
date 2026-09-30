@@ -1,6 +1,7 @@
 import { SignJWT } from "jose";
+import { emailAllowed, NOT_ALLOWED_MESSAGE, type AdminEnv } from "../../_lib/admin";
 
-interface Env {
+interface Env extends AdminEnv {
   atriveo_auth: D1Database;
   JWT_SECRET: string;
 }
@@ -25,6 +26,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
     if (!email || !password) {
       return Response.json({ error: "Email and password required" }, { status: 400 });
+    }
+
+    if (!emailAllowed(env, email)) {
+      return Response.json({ error: NOT_ALLOWED_MESSAGE }, { status: 403 });
     }
 
     const passwordHash = await hashPassword(password);

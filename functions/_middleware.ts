@@ -1,6 +1,7 @@
 import { jwtVerify } from "jose";
+import { emailAllowed, isAdminSite, NOT_ALLOWED_MESSAGE, type AdminEnv } from "./_lib/admin";
 
-interface Env {
+interface Env extends AdminEnv {
   JWT_SECRET: string;
 }
 
@@ -38,16 +39,25 @@ export const onRequest: PagesFunction<Env> = async ({ request, env, next }) => {
   const token = cookie.match(/atriveo_token=([^;]+)/)?.[1];
   const indexUrl = new URL("/index.html", request.url);
 
+  // The admin site has no landing page: signed-out visitors go straight to its login.
+  const signedOutPage = isAdminSite(env) ? "/login" : "/landing/index.html";
   if (!token) {
     if (isJsonRoute(path)) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return Response.redirect(new URL("/landing/index.html", request.url).toString(), 302);
+    return Response.redirect(new URL(signedOutPage, request.url).toString(), 302);
   }
 
   try {
     const secret = new TextEncoder().encode(env.JWT_SECRET);
-    await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, secret);
+    if (!emailAllowed(env, payload.email)) {
+      const clear = "atriveo_token=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0";
+      if (isJsonRoute(path)) {
+        return new Response(JSON.stringify({ error: NOT_ALLOWED_MESSAGE }), { status: 403, headers: { "Content-Type": "application/json", "Set-Cookie": clear } });
+      }
+      return new Response(null, { status: 302, headers: { Location: new URL("/login?error=not_allowed", request.url).toString(), "Set-Cookie": clear } });
+    }
   } catch {
     if (isJsonRoute(path)) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });

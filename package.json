@@ -63,6 +63,9 @@
     "dev:full": "wrangler pages dev dist --compatibility-date=2024-01-01",
     "sync:logos": "node scripts/sync-company-domains.mjs",
     "build": "tsc -b && vite build",
+    "build:apply": "tsc -b && vite build --config vite.apply.config.ts && node -e \"const f=require('fs');f.renameSync('dist-apply/apply.html','dist-apply/index.html');f.copyFileSync('public/favicon.svg','dist-apply/favicon.svg')\"",
+    "dev:apply": "vite --config vite.apply.config.ts",
+    "deploy:apply": "bash scripts/deploy-apply.sh",
     "lint": "eslint .",
     "preview": "vite preview"
   },

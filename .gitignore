@@ -1,6 +1,8 @@
 node_modules
 .npm-cache/
 dist
+dist-apply
+.deploy-apply/
 .env
 .env.tailor
 scripts/cloudflared-tailor.yml
