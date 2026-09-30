@@ -37,6 +37,7 @@ import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { applicationsAnalytics, applicationDetail } from "./applications-analytics.mjs";
+import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
 import { getWorkerId } from "./worker-id.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
@@ -1648,6 +1649,11 @@ const server = http.createServer(async (req, res) => {
         const id = String(new URL(req.url, "http://x").searchParams.get("id") || "").slice(0, 80);
         if (!id) throw new Error("id required");
         const data = await withMongo((db) => applicationDetail(db, id), { appName: "AtriveoTailorServer" });
+        // Scores and JD coverage from the tailoring run that produced this resume (files next to the PDF).
+        if (data.ok) {
+          const dir = resumeDirFor(data.resume?.path, OUT_ROOT);
+          data.resumeReport = dir ? readResumeReport(dir) : null;
+        }
         res.writeHead(data.ok ? 200 : 404, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify(data));
       } catch (e) {
