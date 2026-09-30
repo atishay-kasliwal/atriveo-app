@@ -50,8 +50,15 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
   const daysList = Array.from({ length: days }, (_, i) => dayKey(new Date(today.getTime() - (days - 1 - i) * 86_400_000).toISOString()));
   const daily = new Map(daysList.map((d) => [d, { day: d, queued: 0, applied: 0, needsReview: 0, failed: 0, skipped: 0 }]));
   const all = await apps.find({}, { projection: { status: 1, lifecycle: 1 } }).toArray();
+  // Newest event per tile (ISO strings compare correctly); null when nothing has happened yet.
+  const lastAt = { discovered: null, matched: null, queued: null, applied: null, needsReview: null, failed: null };
+  const newer = (cur, v) => (v && (!cur || String(v) > String(cur)) ? v : cur);
   for (const r of all) {
     const lc = r.lifecycle ?? {};
+    if (r.status === "READY_TO_APPLY") lastAt.queued = newer(lastAt.queued, lc.queuedAt);
+    if (r.status === "APPLIED") lastAt.applied = newer(lastAt.applied, lc.appliedAt);
+    if (r.status === "NEEDS_REVIEW") lastAt.needsReview = newer(lastAt.needsReview, lc.reviewAt);
+    if (r.status === "FAILED") lastAt.failed = newer(lastAt.failed, lc.failedAt);
     const q = daily.get(dayKey(lc.queuedAt));
     if (q) q.queued += 1;
     const outcome = r.status === "APPLIED" ? ["applied", lc.appliedAt]
@@ -62,6 +69,22 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     const bucket = outcome ? daily.get(dayKey(outcome[1])) : null;
     if (bucket) bucket[outcome[0]] += 1;
   }
+
+  const [lastJob, lastResume] = await Promise.all([
+    db.collection("jobs").find({}, { projection: { created_at: 1 } }).sort({ created_at: -1 }).limit(1).toArray(),
+    db.collection("jobs").find({ "resume.status": "success" }, { projection: { "resume.updated_at": 1 } }).sort({ "resume.updated_at": -1 }).limit(1).toArray(),
+  ]);
+  lastAt.discovered = lastJob[0]?.created_at ?? null;
+  lastAt.matched = lastResume[0]?.resume?.updated_at ?? null;
+
+  // Average wall-clock time of the finished attempt for recent successful applications.
+  const durations = records
+    .filter((r) => r.status === "APPLIED")
+    .map((r) => (r.attempts ?? []).filter((a) => a.endedAt && a.startedAt).pop())
+    .filter(Boolean)
+    .map((a) => new Date(a.endedAt).getTime() - new Date(a.startedAt).getTime())
+    .filter((ms) => ms > 0 && ms < 3_600_000);
+  const avgApplyMs = durations.length ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : null;
 
   const atsMap = new Map();
   for (const r of atsRows) {
@@ -117,6 +140,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       };
     })(),
     lastActivityAt: records[0]?.updatedAt ?? null,
+    lastAt: { ...lastAt, avgApplyMs },
     worker: (() => {
       const w = [...workerDocs].sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))[0];
       if (!w) return null;
