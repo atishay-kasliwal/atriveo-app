@@ -248,7 +248,26 @@
     "score_pct": 60,
     "site": "greenhouse",
     "summary": "Who we are About Stripe Stripe is a technology company focused on improving the conditions for economic growth and prosperity.",
-    "title": "High School Fellowship, Software Engineering"
+    "title": "High School Fellowship, Software Engineering",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-09-30T16:02:14.688Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Stripe",
+      "title": "High School Fellowship, Software Engineering",
+      "resume_slot": 4,
+      "session_hour": null,
+      "batch_time": null,
+      "session_id": "2026-09-30T16:01:18Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4455915233",
@@ -361,7 +380,26 @@
     "score_pct": 33,
     "site": "greenhouse",
     "summary": "Who we are About Stripe Stripe is a financial infrastructure platform for businesses.",
-    "title": "Software Engineer, Security Business Enablement"
+    "title": "Software Engineer, Security Business Enablement",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-09-30T16:02:46.300Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Stripe",
+      "title": "Software Engineer, Security Business Enablement",
+      "resume_slot": 8,
+      "session_hour": null,
+      "batch_time": null,
+      "session_id": "2026-09-30T16:01:18Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4455789966",
