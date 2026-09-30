@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import { getTailorServerBase } from "../utils/tailorServer";
 import "../styles/applications.css";
@@ -33,6 +33,11 @@ interface Analytics {
   killSwitch: { enabled: boolean; reason: string | null; updatedAt: string; updatedBy: string } | null;
   discovery: { boards: Array<{ ats: string; boards: number; polled: number; withMatches: number }>; jobsBySite: Array<{ site: string; n: number }> };
   history: HistoryRow[];
+  accounts?: AccountRow[];
+}
+interface AccountRow {
+  id: string; ats: string; tenant: string; email: string; password: string;
+  status: "created" | "verify_email" | "signed_in"; loginUrl: string | null; createdAt: string; updatedAt: string;
 }
 
 // Outcome series use the fixed status palette, always paired with an icon + label.
@@ -159,6 +164,101 @@ function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) =
   );
 }
 
+const ACCOUNT_STATUS: Record<AccountRow["status"], { label: string; icon: string; cls: string }> = {
+  signed_in: { label: "Signed in", icon: "✓", cls: "st-good" },
+  verify_email: { label: "Verify email", icon: "!", cls: "st-warning" },
+  created: { label: "Created", icon: "…", cls: "st-neutral" },
+};
+
+/** Portal accounts the engine created. The password stays masked until you reveal or copy it. */
+function AccountsCard({ accounts }: { accounts: AccountRow[] }) {
+  const [shown, setShown] = useState<Record<string, boolean>>({});
+  const [copied, setCopied] = useState<string | null>(null);
+  const copy = (id: string, text: string) => {
+    void navigator.clipboard?.writeText(text).then(() => {
+      setCopied(id);
+      setTimeout(() => setCopied((c) => (c === id ? null : c)), 1500);
+    }).catch(() => {});
+  };
+  const needsVerify = accounts.filter((a) => a.status === "verify_email").length;
+  return (
+    <section className="apps-card">
+      <div className="apps-card-head">
+        <h2>Employer accounts <span className="apps-count">{accounts.length}</span></h2>
+        {needsVerify > 0 && <span className="apps-pill st-warning">! {needsVerify} waiting for email verification</span>}
+      </div>
+      <div className="apps-table-wrap"><table className="apps-table">
+        <thead><tr><th>Employer</th><th>Email</th><th>Password</th><th>Status</th><th>Created</th><th /></tr></thead>
+        <tbody>{accounts.map((a) => {
+          const m = ACCOUNT_STATUS[a.status] ?? ACCOUNT_STATUS.created;
+          return (
+            <tr key={a.id}>
+              <td>{a.tenant} <span className="apps-chip">{a.ats}</span></td>
+              <td>{a.email}</td>
+              <td className="apps-secret">
+                <code>{shown[a.id] ? a.password : "••••••••••••"}</code>
+                <button className="apps-link" onClick={() => setShown({ ...shown, [a.id]: !shown[a.id] })}>{shown[a.id] ? "Hide" : "Show"}</button>
+                <button className="apps-link" onClick={() => copy(a.id, a.password)}>{copied === a.id ? "Copied" : "Copy"}</button>
+              </td>
+              <td><span className={`apps-pill ${m.cls}`}><span aria-hidden>{m.icon}</span> {m.label}</span></td>
+              <td>{when(a.createdAt)}</td>
+              <td>{a.loginUrl && <a href={a.loginUrl} target="_blank" rel="noreferrer">Open</a>}</td>
+            </tr>
+          );
+        })}</tbody>
+      </table></div>
+    </section>
+  );
+}
+
+/** What needs you, most urgent first. Each row is one decision; Review expands in place. */
+function AttentionList({ rows, open, setOpen, onDone, onRetry }: {
+  rows: HistoryRow[]; open: string | null; setOpen: (id: string | null) => void;
+  onDone: (msg: string) => void; onRetry: (id: string) => void;
+}) {
+  return (
+    <section className={`apps-attn ${rows.length ? "has-items" : ""}`} aria-labelledby="attn-title">
+      <div className="apps-card-head">
+        <h2 id="attn-title">Needs your attention {rows.length > 0 && <span className="apps-count warn">{rows.length}</span>}</h2>
+      </div>
+      {rows.length === 0 ? (
+        <p className="apps-clear"><span className="st-good-ink" aria-hidden>✓</span> All clear. Nothing is waiting for you.</p>
+      ) : (
+        <ul className="apps-attn-list">
+          {rows.map((h) => {
+            const failed = h.status === "FAILED";
+            const why = failed
+              ? `${humanize(h.failureCode ?? "failed")}${h.failureMessage ? ` — ${h.failureMessage}` : ""}`
+              : h.submitAttempted ? "Submit was clicked. Confirm whether it went through."
+              : `${humanize(h.reviewReason ?? "needs review")}${h.pending.length ? ` · ${h.pending.length} question${h.pending.length === 1 ? "" : "s"} to answer` : ""}`;
+            return (
+              <li key={h.id} className={failed ? "is-failed" : "is-review"}>
+                <div className="apps-attn-row">
+                  <div className="apps-attn-main">
+                    <StatusPill status={h.status} />
+                    <div>
+                      <strong>{h.company}</strong> <span className="apps-attn-title">{h.title}</span>
+                      <p className="apps-attn-why">{why}</p>
+                    </div>
+                  </div>
+                  <div className="apps-row-actions">
+                    <span className="apps-attn-when">{when(h.updatedAt)}</span>
+                    {failed
+                      ? <button className="apps-btn" onClick={() => onRetry(h.id)}>Retry</button>
+                      : <button className="apps-btn primary" onClick={() => setOpen(open === h.id ? null : h.id)}>{open === h.id ? "Close" : "Review"}</button>}
+                    <a href={h.url} target="_blank" rel="noreferrer">Open</a>
+                  </div>
+                </div>
+                {open === h.id && <ReviewPanel row={h} onDone={onDone} />}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 function DailyChart({ days }: { days: Day[] }) {
   const [hover, setHover] = useState<Day | null>(null);
   const [asTable, setAsTable] = useState(false);
@@ -250,15 +350,23 @@ export default function Applications() {
   }, [data, filter, query]);
 
   const k = data?.kpis;
+  const attention = useMemo(() => {
+    const rank = (h: HistoryRow) => (h.submitAttempted ? 0 : h.status === "NEEDS_REVIEW" ? 1 : 2);
+    return (data?.history ?? [])
+      .filter((h) => h.status === "NEEDS_REVIEW" || h.status === "FAILED")
+      .sort((a, b) => rank(a) - rank(b) || b.updatedAt.localeCompare(a.updatedAt));
+  }, [data]);
+  const retry = (id: string) => void postAction({ action: "retry", applicationId: id }).then((r) => { setNotice(r.ok ? "Queued again." : r.error ?? "Failed"); void load(); });
+  const done = (msg: string) => { setNotice(msg); setOpen(null); void load(); };
+
   return (
     <div className="apps-page">
       <AppHeader />
       <main className="apps-body">
         <header className="apps-head">
           <div>
-            <p className="apps-kicker">Application engine</p>
             <h1>Applications</h1>
-            <p className="apps-sub">Every application the engine has touched: outcomes, what needs you, and the pipeline behind it.{data && ` Updated ${when(data.generatedAt)}.`}</p>
+            <p className="apps-sub">{data ? `Updated ${when(data.generatedAt)}` : "Application engine"}</p>
           </div>
           <div className="apps-range" role="group" aria-label="Time range">
             {[14, 30, 90].map((d) => <button key={d} className={d === days ? "active" : ""} onClick={() => setDays(d)}>{d}d</button>)}
@@ -267,19 +375,87 @@ export default function Applications() {
 
         {error && <div className="apps-error">Couldn't load analytics: {error}. The Mac sidecar must be running (npm run tailor:restart).</div>}
         {!data && !error && <p className="apps-empty">Loading…</p>}
+        {notice && <p className="apps-notice" role="status">{notice}</p>}
 
         {data && k && (
           <>
+            {data.killSwitch && !data.killSwitch.enabled && (
+              <div className="apps-banner" role="alert">✕ Submissions are blocked{data.killSwitch.reason ? `: ${data.killSwitch.reason}` : ""}. Applications will fill but not submit.</div>
+            )}
+
+            <AttentionList rows={attention} open={open} setOpen={setOpen} onDone={done} onRetry={retry} />
+
             <section className="apps-kpis">
               <div className="apps-kpi"><span className="apps-kpi-label"><span className="st-good-ink" aria-hidden>✓</span> Applied</span><strong>{k.applied}</strong></div>
-              <div className="apps-kpi"><span className="apps-kpi-label"><span className="st-warning-ink" aria-hidden>!</span> Needs review</span><strong>{k.needsReview}</strong></div>
-              <div className="apps-kpi"><span className="apps-kpi-label"><span className="st-critical-ink" aria-hidden>✕</span> Failed</span><strong>{k.failed}</strong></div>
-              <div className="apps-kpi"><span className="apps-kpi-label">– Skipped</span><strong>{k.skipped}</strong></div>
               <div className="apps-kpi"><span className="apps-kpi-label">… In progress</span><strong>{k.inProgress}</strong></div>
               <div className="apps-kpi"><span className="apps-kpi-label">Success rate</span><strong>{pct(k.successRate)}</strong><small>applied ÷ (applied + failed)</small></div>
+              <div className="apps-kpi"><span className="apps-kpi-label">– Skipped</span><strong>{k.skipped}</strong></div>
             </section>
 
+            {data.accounts && data.accounts.length > 0 && <AccountsCard accounts={data.accounts} />}
+
+            <section className="apps-card apps-wide">
+              <div className="apps-card-head">
+                <h2>History</h2>
+                <div className="apps-filters">
+                  {(["ALL", "APPLIED", "NEEDS_REVIEW", "FAILED", "SKIPPED", "READY_TO_APPLY"] as const).map((s) => (
+                    <button key={s} className={filter === s ? "active" : ""} onClick={() => setFilter(s)}>{s === "ALL" ? "All" : STATUS_META[s].label}</button>
+                  ))}
+                  <input placeholder="Search company or role" value={query} onChange={(e) => setQuery(e.target.value)} />
+                </div>
+              </div>
+              {history.length === 0 ? <p className="apps-empty">No applications match.</p> : (
+                <div className="apps-table-wrap">
+                  <table className="apps-table">
+                    <thead><tr><th>Updated</th><th>Company</th><th>Role</th><th>ATS</th><th>Status</th><th>Details</th><th>Attempts</th><th /></tr></thead>
+                    <tbody>{history.map((h) => (
+                      <tr key={h.id}>
+                        <td>{when(h.updatedAt)}</td>
+                        <td>{h.company}</td>
+                        <td>{h.title}</td>
+                        <td>{h.ats ?? "—"}</td>
+                        <td><StatusPill status={h.status} /></td>
+                        <td className="apps-detail">
+                          {h.status === "NEEDS_REVIEW" && <>{humanize(h.reviewReason ?? "")}{h.pending.length ? ` · ${h.pending.length} question(s)` : ""}</>}
+                          {h.status === "FAILED" && <>{humanize(h.failureCode ?? "")}{h.failureMessage ? ` — ${h.failureMessage}` : ""}</>}
+                          {h.status === "APPLIED" && <>by {h.submittedBy ?? "engine"} · {when(h.submittedAt)}</>}
+                        </td>
+                        <td>{h.attempts}</td>
+                        <td className="apps-row-actions">
+                          <a href={h.url} target="_blank" rel="noreferrer">Open</a>
+                        </td>
+                      </tr>
+                    ))}</tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+
+            <h2 className="apps-divider">Insights</h2>
+            <DailyChart days={data.daily} />
             <section className="apps-grid">
+              <div className="apps-card">
+                <h2>Why applications wait for you</h2>
+                <BarList rows={data.reviewReasons.map((r) => ({ label: humanize(r.reason), n: r.n }))} empty="Nothing waiting for review." />
+              </div>
+              <div className="apps-card">
+                <h2>Failures by type</h2>
+                <BarList rows={data.failureCodes.map((r) => ({ label: humanize(r.code), n: r.n }))} empty="No failures." />
+              </div>
+              <div className="apps-card apps-wide">
+                <h2>Questions that most often need your answer</h2>
+                <p className="apps-sub">Answer these once (Review, above) and they're remembered for future applications.</p>
+                <BarList rows={data.topPendingQuestions.map((q) => ({ label: q.label, n: q.n }))} empty="No pending questions." />
+              </div>
+              <div className="apps-card apps-wide">
+                <h2>By ATS</h2>
+                <div className="apps-table-wrap"><table className="apps-table">
+                  <thead><tr><th>ATS</th><th>Total</th><th>✓ Applied</th><th>! Needs review</th><th>✕ Failed</th><th>– Skipped</th><th>In progress</th></tr></thead>
+                  <tbody>{data.byAts.map((a) => (
+                    <tr key={a.ats}><td>{a.ats}</td><td>{a.total}</td><td>{a.APPLIED}</td><td>{a.NEEDS_REVIEW}</td><td>{a.FAILED}</td><td>{a.SKIPPED}</td><td>{a.other}</td></tr>
+                  ))}</tbody>
+                </table></div>
+              </div>
               <div className="apps-card">
                 <h2>Pipeline funnel</h2>
                 <ul className="apps-funnel">
@@ -309,81 +485,6 @@ export default function Applications() {
                   <dd>{data.discovery.jobsBySite.map((s) => `${s.site} ${s.n}`).join(" · ")}</dd>
                 </dl>
               </div>
-            </section>
-
-            <DailyChart days={data.daily} />
-
-            <section className="apps-grid">
-              <div className="apps-card">
-                <h2>Why applications wait for you</h2>
-                <BarList rows={data.reviewReasons.map((r) => ({ label: humanize(r.reason), n: r.n }))} empty="Nothing waiting for review." />
-              </div>
-              <div className="apps-card">
-                <h2>Failures by type</h2>
-                <BarList rows={data.failureCodes.map((r) => ({ label: humanize(r.code), n: r.n }))} empty="No failures." />
-              </div>
-              <div className="apps-card apps-wide">
-                <h2>Questions that most often need your answer</h2>
-                <p className="apps-sub">Answer these once (Review, in History below) and they're remembered for future applications.</p>
-                <BarList rows={data.topPendingQuestions.map((q) => ({ label: q.label, n: q.n }))} empty="No pending questions." />
-              </div>
-              <div className="apps-card apps-wide">
-                <h2>By ATS</h2>
-                <div className="apps-table-wrap"><table className="apps-table">
-                  <thead><tr><th>ATS</th><th>Total</th><th>✓ Applied</th><th>! Needs review</th><th>✕ Failed</th><th>– Skipped</th><th>In progress</th></tr></thead>
-                  <tbody>{data.byAts.map((a) => (
-                    <tr key={a.ats}><td>{a.ats}</td><td>{a.total}</td><td>{a.APPLIED}</td><td>{a.NEEDS_REVIEW}</td><td>{a.FAILED}</td><td>{a.SKIPPED}</td><td>{a.other}</td></tr>
-                  ))}</tbody>
-                </table></div>
-              </div>
-            </section>
-
-            <section className="apps-card apps-wide">
-              <div className="apps-card-head">
-                <h2>History</h2>
-                <div className="apps-filters">
-                  {(["ALL", "APPLIED", "NEEDS_REVIEW", "FAILED", "SKIPPED", "READY_TO_APPLY"] as const).map((s) => (
-                    <button key={s} className={filter === s ? "active" : ""} onClick={() => setFilter(s)}>{s === "ALL" ? "All" : STATUS_META[s].label}</button>
-                  ))}
-                  <input placeholder="Search company or role" value={query} onChange={(e) => setQuery(e.target.value)} />
-                </div>
-              </div>
-              {history.length === 0 ? <p className="apps-empty">No applications match.</p> : (
-                <div className="apps-table-wrap">
-                  <table className="apps-table">
-                    <thead><tr><th>Updated</th><th>Company</th><th>Role</th><th>ATS</th><th>Status</th><th>Details</th><th>Attempts</th><th /></tr></thead>
-                    <tbody>{history.map((h) => (
-                      <Fragment key={h.id}>
-                      <tr>
-                        <td>{when(h.updatedAt)}</td>
-                        <td>{h.company}</td>
-                        <td>{h.title}</td>
-                        <td>{h.ats ?? "—"}</td>
-                        <td><StatusPill status={h.status} /></td>
-                        <td className="apps-detail">
-                          {h.status === "NEEDS_REVIEW" && <>{humanize(h.reviewReason ?? "")}{h.pending.length ? ` · ${h.pending.length} question(s)` : ""}</>}
-                          {h.status === "FAILED" && <>{humanize(h.failureCode ?? "")}{h.failureMessage ? ` — ${h.failureMessage}` : ""}</>}
-                          {h.status === "APPLIED" && <>by {h.submittedBy ?? "engine"} · {when(h.submittedAt)}</>}
-                        </td>
-                        <td>{h.attempts}</td>
-                        <td className="apps-row-actions">
-                          {h.status === "NEEDS_REVIEW" && <button className="apps-link" onClick={() => setOpen(open === h.id ? null : h.id)}>{open === h.id ? "Close" : "Review"}</button>}
-                          {h.status === "FAILED" && <button className="apps-link" onClick={() => void postAction({ action: "retry", applicationId: h.id }).then((r) => { setNotice(r.ok ? "Queued again." : r.error ?? "Failed"); void load(); })}>Retry</button>}
-                          <a href={h.url} target="_blank" rel="noreferrer">Open</a>
-                        </td>
-                      </tr>
-                      {open === h.id && (
-                        <tr className="apps-review-row"><td colSpan={8}>
-                          <ReviewPanel row={h} onDone={(msg) => { setNotice(msg); setOpen(null); void load(); }} />
-                        </td></tr>
-                      )}
-                      </Fragment>
-                    ))}</tbody>
-                  </table>
-                </div>
-              )}
-              {notice && <p className="apps-notice">{notice}</p>}
-              <p className="apps-sub">Open <strong>Review</strong> on any "Needs review" row to answer its questions here. Your answers are saved on your Mac and reused; fully answered forms then submit automatically.</p>
             </section>
           </>
         )}
