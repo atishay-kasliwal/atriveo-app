@@ -22,7 +22,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     ]).toArray(),
     apps.find({}, {
       projection: {
-        company: 1, title: 1, location: 1, ats: 1, status: 1, applyUrl: 1, finalUrl: 1, attemptCount: 1, createdAt: 1, updatedAt: 1,
+        company: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, applyUrl: 1, finalUrl: 1, attemptCount: 1, createdAt: 1, updatedAt: 1,
         lifecycle: 1, step: 1, attempts: 1, "review.reason": 1, "review.detail": 1, "review.pending": 1, "failure.code": 1, "failure.message": 1,
         "submission.by": 1, "submission.submittedAt": 1, "submission.attemptedAt": 1, "domain.domain": 1, source: 1,
       },
@@ -180,6 +180,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       url: r.finalUrl ?? r.applyUrl,
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
+      priority: r.priority ?? 0,
     })),
   };
 }

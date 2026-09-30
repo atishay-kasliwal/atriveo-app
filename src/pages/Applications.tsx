@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import CompanyLogo from "../components/CompanyLogo";
 import PdfPreviewModal from "../components/PdfPreviewModal";
 import { getTailorServerBase } from "../utils/tailorServer";
@@ -18,7 +18,8 @@ interface HistoryRow {
   questions: PendingQ[]; submitAttempted: boolean;
   id: string; company: string; title: string; location: string | null; ats: string | null; status: Status;
   reviewReason: string | null; reviewDetail: string | null; pending: string[]; failureCode: string | null; failureMessage: string | null;
-  submittedBy: string | null; submittedAt: string | null; attempts: number; domain: string | null; url: string; updatedAt: string;
+  submittedBy: string | null; submittedAt: string | null; attempts: number; domain: string | null; url: string; createdAt: string; updatedAt: string;
+  priority?: number;
 }
 interface Analytics {
   ok: boolean;
@@ -318,38 +319,6 @@ function DailyChart({ days }: { days: Day[] }) {
   );
 }
 
-
-const STAGES = ["Found", "Matched", "Resume", "Form", "Review", "Submit"] as const;
-const STAGE_HINT = ["Job discovered", "Resume selected", "Resume ready", "Filling application", "Waiting if needed", "Not started"];
-
-/** Stage index the application is at, from the engine's own status machine. */
-function stageOf(status: Status): number {
-  switch (status) {
-    case "APPLYING": return 3;
-    case "NEEDS_REVIEW": return 4;
-    case "SUBMITTING": return 5;
-    case "APPLIED": return 6;
-    default: return 2;
-  }
-}
-
-function Stages({ status }: { status: Status }) {
-  const at = stageOf(status);
-  return (
-    <ol className="apps-stages" aria-label="Progress">
-      {STAGES.map((name, i) => {
-        const state = i < at ? "done" : i === at ? "now" : "next";
-        return (
-          <li key={name} className={`st ${state}`} aria-current={state === "now" ? "step" : undefined}>
-            <span className="st-dot" aria-hidden>{state === "done" ? "✓" : i + 1}</span>
-            <span className="st-name">{name}</span>
-            <span className="st-hint">{state === "now" ? (status === "SUBMITTING" ? "Submitting" : STAGE_HINT[i]) : state === "done" ? "Done" : "Upcoming"}</span>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
 
 const REASON_LABEL: Record<string, string> = {
   BOT_CHALLENGE: "Bot challenge", CAPTCHA: "CAPTCHA", LOGIN_REQUIRED: "Sign-in needed", MFA_OR_EMAIL_CODE: "Email verification",
@@ -760,50 +729,82 @@ function ReviewDrawer({ row, onClose, onDone }: { row: HistoryRow; onClose: () =
   );
 }
 
-function CurrentActivity({ data }: { data: Analytics }) {
-  const cur = data.current ?? null;
-  const queued = data.byStatus?.READY_TO_APPLY ?? 0;
+const OPS_PREVIEW = 4;
+const OPS_VISIBLE = 10;
+
+/** Rows for the two ops panels: 4 collapsed; expanded shows 10 and scrolls the rest. */
+function OpsRows({ expanded, children }: { expanded: boolean; children: React.ReactNode[] }) {
+  const ref = useRef<HTMLUListElement>(null);
+  const scrolls = expanded && children.length > OPS_VISIBLE;
+
+  // Row height changes across breakpoints, so size the list to the 10th row. Written straight to the
+  // DOM (no state) so the first expanded paint is already the right height.
+  useLayoutEffect(() => {
+    const ul = ref.current;
+    if (!scrolls || !ul) return;
+    const fit = () => {
+      const tenth = ul.children[OPS_VISIBLE - 1] as HTMLElement | undefined;
+      if (tenth) ul.style.maxHeight = `${Math.ceil(tenth.getBoundingClientRect().bottom - ul.getBoundingClientRect().top + ul.scrollTop)}px`;
+      ul.toggleAttribute("data-more", ul.scrollTop + ul.clientHeight < ul.scrollHeight - 2);
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(ul);
+    ul.addEventListener("scroll", fit, { passive: true });
+    return () => {
+      ro.disconnect();
+      ul.removeEventListener("scroll", fit);
+      ul.style.maxHeight = "";
+      ul.removeAttribute("data-more");
+    };
+  }, [scrolls, children.length]);
+
+  return <ul ref={ref} className={`apps-rows ${scrolls ? "is-scroll" : ""}`}>{expanded ? children : children.slice(0, OPS_PREVIEW)}</ul>;
+}
+
+function QueuePanel({ rows, expanded, onToggle, onHistory }: { rows: HistoryRow[]; expanded: boolean; onToggle: () => void; onHistory: (id: string) => void }) {
+  const firstQueued = rows.find((h) => h.status === "READY_TO_APPLY")?.id;
   return (
-    <section className="apps-panel" aria-labelledby="act-title">
+    <section className="apps-panel" aria-labelledby="queue-title">
       <div className="apps-panel-head">
-        <h2 id="act-title">Current activity</h2>
-        {cur?.startedAt && <span className="apps-muted">Started {when(cur.startedAt)}</span>}
+        <h2 id="queue-title">Apply queue {rows.length > 0 && <span className="apps-count">{rows.length}</span>}</h2>
       </div>
-      {cur ? (
-        <div className="apps-activity">
-          <div className="apps-activity-top">
-            <CompanyLogo company={cur.company} size="lg" />
-            <div className="apps-activity-id">
-              <strong>{cur.company}</strong>
-              <span>{cur.title}</span>
-              <span className="apps-muted">{cur.ats ?? "unknown ATS"} · <a href={cur.url} target="_blank" rel="noreferrer">Open ↗</a></span>
-            </div>
-            <span className="apps-tag active">{cur.status === "SUBMITTING" ? "Submitting" : "Applying"}</span>
-          </div>
-          <Stages status={cur.status} />
-          <p className="apps-activity-line">
-            <span className="apps-pulse" aria-hidden />
-            {cur.status === "SUBMITTING" ? "Submitting application" : "Filling application"}
-            {stepLabel(cur.step) ? <span className="apps-muted"> · {stepLabel(cur.step)}</span> : null}
-            {cur.attempt ? <span className="apps-muted"> · attempt {cur.attempt}</span> : null}
-          </p>
-        </div>
+      {rows.length === 0 ? (
+        <p className="apps-clear">Nothing is queued.</p>
       ) : (
-        <div className="apps-idle">
-          <p><strong>Idle.</strong> No application is being filled right now.</p>
-          <p className="apps-muted">
-            {queued > 0 ? `${queued} queued; the worker picks up the next one on its next cycle.` : "Nothing is queued."}
-            {data.lastActivityAt ? ` Last activity ${when(data.lastActivityAt)}.` : ""}
-          </p>
-        </div>
+        <>
+          <OpsRows expanded={expanded}>
+            {rows.map((h) => {
+              const active = h.status === "APPLYING" || h.status === "SUBMITTING";
+              return (
+                <li key={h.id}>
+                  <CompanyLogo company={h.company} size="sm" />
+                  <div className="apps-row-id">
+                    <strong>{h.company}</strong>
+                    <span>{h.title}</span>
+                  </div>
+                  <span className={`apps-tag ${active ? "active" : ""}`}>
+                    {active && <span className="apps-pulse" aria-hidden />}
+                    {active ? STATUS_META[h.status].label : h.id === firstQueued ? "Next up" : "Queued"}
+                  </span>
+                  <span className="apps-row-act">
+                    <button className="apps-link" onClick={() => onHistory(h.id)}>History</button>
+                    <a className="apps-btn-link" href={h.url} target="_blank" rel="noreferrer">Open ↗</a>
+                  </span>
+                </li>
+              );
+            })}
+          </OpsRows>
+          {rows.length > OPS_PREVIEW && (
+            <button className="apps-link" onClick={onToggle}>{expanded ? "Show fewer" : `View full queue (${rows.length})`}</button>
+          )}
+        </>
       )}
     </section>
   );
 }
 
-function AttentionPanel({ rows, onReview, onRetry, onHistory }: { rows: HistoryRow[]; onReview: (id: string) => void; onRetry: (id: string) => void; onHistory: (id: string) => void }) {
-  const [all, setAll] = useState(false);
-  const shown = all ? rows : rows.slice(0, 4);
+function AttentionPanel({ rows, expanded, onToggle, onReview, onRetry, onHistory }: { rows: HistoryRow[]; expanded: boolean; onToggle: () => void; onReview: (id: string) => void; onRetry: (id: string) => void; onHistory: (id: string) => void }) {
   return (
     <section className={`apps-panel is-attn ${rows.length ? "has-items" : ""}`} aria-labelledby="attn-title">
       <div className="apps-panel-head">
@@ -813,8 +814,8 @@ function AttentionPanel({ rows, onReview, onRetry, onHistory }: { rows: HistoryR
         <p className="apps-clear">Nothing is waiting for you.</p>
       ) : (
         <>
-          <ul className="apps-rows">
-            {shown.map((h) => {
+          <OpsRows expanded={expanded}>
+            {rows.map((h) => {
               const r = reasonOf(h);
               return (
                 <li key={h.id}>
@@ -833,9 +834,9 @@ function AttentionPanel({ rows, onReview, onRetry, onHistory }: { rows: HistoryR
                 </li>
               );
             })}
-          </ul>
-          {rows.length > 4 && (
-            <button className="apps-link" onClick={() => setAll((v) => !v)}>{all ? "Show fewer" : `View all needing review (${rows.length})`}</button>
+          </OpsRows>
+          {rows.length > OPS_PREVIEW && (
+            <button className="apps-link" onClick={onToggle}>{expanded ? "Show fewer" : `View all needing review (${rows.length})`}</button>
           )}
         </>
       )}
@@ -853,6 +854,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [historyId, setHistoryId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [opsExpanded, setOpsExpanded] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -897,13 +899,22 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
       .sort((a, b) => rank(a) - rank(b) || b.updatedAt.localeCompare(a.updatedAt));
   }, [data]);
 
+  // In-flight first, then queued in the order the worker claims them (priority, then oldest first).
+  const queue = useMemo(() => {
+    const rank = (h: HistoryRow) => (h.status === "SUBMITTING" ? 0 : h.status === "APPLYING" ? 1 : 2);
+    return (data?.history ?? [])
+      .filter((h) => h.status === "READY_TO_APPLY" || h.status === "APPLYING" || h.status === "SUBMITTING")
+      .sort((a, b) => rank(a) - rank(b) || (b.priority ?? 0) - (a.priority ?? 0) || a.createdAt.localeCompare(b.createdAt));
+  }, [data]);
+
   const openRow = openId ? attention.find((h) => h.id === openId && h.status === "NEEDS_REVIEW") ?? null : null;
   const closeDrawer = useCallback(() => setOpenId(null), []);
   const retry = (id: string) => void postAction({ action: "retry", applicationId: id }).then((r) => { setNotice(r.ok ? "Queued again." : r.error ?? "Failed"); void load(); });
   const done = (msg: string) => { setNotice(msg); setOpenId(null); void load(); };
 
   const k = data?.kpis;
-  const working = Boolean(data?.current);
+  const cur = data?.current ?? null;
+  const working = Boolean(cur);
   const today = data?.daily.at(-1);
   const needsVerify = (data?.accounts ?? []).filter((a) => a.status === "verify_email").length;
 
@@ -922,7 +933,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                   <h1>Application Engine</h1>
                   {data.worker && !data.worker.online
                     ? <span className="apps-state bad" title={`Last seen ${when(data.worker.updatedAt)}`}><i aria-hidden />Worker offline</span>
-                    : <span className={`apps-state ${working ? "on" : ""}`}><i aria-hidden />{working ? "Working" : "Idle"}</span>}
+                    : <span className={`apps-state ${working ? "on" : ""}`} title={data.lastActivityAt ? `Last activity ${when(data.lastActivityAt)}` : undefined}><i aria-hidden />{working ? "Working" : "Idle"}</span>}
                   {data.worker && (
                     <span className={`apps-state ${data.worker.gmailConnected ? "" : "warn"}`} title={data.worker.gmailConnected ? "Emailed security codes and verification links are handled automatically" : "Run npm run apply:gmail-auth on the Mac so codes are entered automatically"}>
                       Gmail {data.worker.gmailConnected ? "connected" : "not connected"}
@@ -936,6 +947,20 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                 </div>
                 <button className="apps-refresh" onClick={() => void load()} aria-label="Refresh now">Updated {when(data.generatedAt)} <span aria-hidden>↻</span></button>
               </div>
+              {cur && (
+                <div className="apps-now">
+                  <span className="apps-pulse" aria-hidden />
+                  <CompanyLogo company={cur.company} size="sm" />
+                  <span className="apps-now-id"><strong>{cur.company}</strong> {cur.title}</span>
+                  <span className="apps-muted">
+                    {cur.status === "SUBMITTING" ? "Submitting" : "Filling application"}
+                    {stepLabel(cur.step) ? ` · ${stepLabel(cur.step)}` : ""}
+                    {cur.attempt ? ` · attempt ${cur.attempt}` : ""}
+                    {cur.startedAt ? ` · started ${clock(cur.startedAt)}` : ""}
+                  </span>
+                  <a href={cur.url} target="_blank" rel="noreferrer">Open ↗</a>
+                </div>
+              )}
               <div className="apps-stats">
                 <Stat label="Jobs discovered" value={data.funnel[0]?.n ?? 0} sub={clock(data.lastAt?.discovered) ? `latest ${clock(data.lastAt?.discovered)}` : undefined} />
                 <Stat label="Matched / resume ready" value={data.funnel[1]?.n ?? 0} sub={clock(data.lastAt?.matched) ? `latest ${clock(data.lastAt?.matched)}` : undefined} />
@@ -947,8 +972,8 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
             </section>
 
             <div className="apps-ops">
-              <CurrentActivity data={data} />
-              <AttentionPanel rows={attention} onReview={setOpenId} onRetry={retry} onHistory={setHistoryId} />
+              <QueuePanel rows={queue} expanded={opsExpanded} onToggle={() => setOpsExpanded((v) => !v)} onHistory={setHistoryId} />
+              <AttentionPanel rows={attention} expanded={opsExpanded} onToggle={() => setOpsExpanded((v) => !v)} onReview={setOpenId} onRetry={retry} onHistory={setHistoryId} />
             </div>
 
             <section className="apps-insights" aria-labelledby="ins-title">
