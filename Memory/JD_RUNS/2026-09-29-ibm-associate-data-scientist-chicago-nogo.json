@@ -1,0 +1,14 @@
+{
+  "company": "IBM",
+  "title": "Associate Data Scientist (University Hire, Associate Program)",
+  "location": "Chicago",
+  "anticipated_start": "2027",
+  "screened_at": "2026-09-29T00:00:00.000Z",
+  "eligibility_status": "no_go",
+  "sponsorship_restriction": "IBM will not be providing visa sponsorship for this position now or in the future. Therefore, in order to be considered for this position, you must have the ability to work without a need for current or future visa sponsorship.",
+  "user_answer": "Can work for 3 years (time-limited work authorization; will need sponsorship after that window).",
+  "reason": "Time-limited authorization means sponsorship would eventually be needed, which conflicts with IBM's explicit 'now or in the future' exclusion.",
+  "resume_generated": false,
+  "workflow_rule_source": "/Users/atishaykasliwal/atriveo-app/CLAUDE.md",
+  "workflow_rule": "Screen work authorization first; stop drafting if hard-blocked."
+}

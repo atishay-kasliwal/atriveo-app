@@ -1,0 +1,460 @@
+{
+  "pipeline": "ac",
+  "ats_before": 77,
+  "ats_after": 73,
+  "resume_confidence_score": 72.9,
+  "thesis": "Engineer who builds production AI systems with measurable business impact.",
+  "hiring_manager_test": {
+    "objective": "optimize_hiring_decision",
+    "thesis": "Engineer who builds production AI systems with measurable business impact.",
+    "technical_confidence": 10,
+    "business_impact": 9.7,
+    "execution_confidence": 8.7,
+    "uniqueness": 7,
+    "risk_of_overclaiming": 0,
+    "would_interview": true,
+    "because": [
+      "Exceptional quantified impact",
+      "Strong technical depth with named systems",
+      "Clear business and research impact",
+      "Production delivery signals",
+      "Proof chain builds confidence step by step",
+      "High information density"
+    ],
+    "concerns": [
+      "Replaceable bullets weaken the story"
+    ],
+    "composite": 9,
+    "questions": {
+      "can_do_job": true,
+      "solves_problems": true,
+      "would_interview": true
+    },
+    "diagnosis": "A hiring manager would likely advance this candidate to interview."
+  },
+  "variant_id": "default",
+  "rulebook": {
+    "complete": true,
+    "gaps": [],
+    "counts": {
+      "experience": 11,
+      "projects": 4,
+      "total": 15,
+      "perRole": {
+        "stony-brook": 4,
+        "wake-forest": 3,
+        "accolite": 4
+      },
+      "perProject": {
+        "atriveo": 2,
+        "insurance-platform": 2
+      },
+      "expected_total": 15
+    },
+    "targets": {
+      "experience": {
+        "stony-brook": 4,
+        "wake-forest": 3,
+        "accolite": 4
+      },
+      "projects": {
+        "default": 2,
+        "atriveo": 2,
+        "insurance-platform": 2
+      },
+      "expected_total": 15
+    }
+  },
+  "explain": {
+    "outcome": "borderline",
+    "borderline": true,
+    "engineering_identity": {
+      "primary": "Platform Engineer",
+      "secondary": "AI Systems Engineer",
+      "confidence": 0.622,
+      "coherence": 0.368
+    },
+    "global_score": {
+      "before": 192.74,
+      "after": 204.5,
+      "delta": 11.76,
+      "applied": true
+    },
+    "information_gain": 111.16,
+    "per_bullet_gain": [
+      {
+        "ac_id": "AC-026",
+        "position": 1,
+        "gain": 23.4,
+        "adds": [
+          "platform",
+          "ai",
+          "leadership",
+          "scope",
+          "backend",
+          "data",
+          "cloud"
+        ],
+        "redundant": []
+      },
+      {
+        "ac_id": "AC-001",
+        "position": 2,
+        "gain": 11.34,
+        "adds": [
+          "macro_intelligence",
+          "event_pipeline",
+          "performance"
+        ],
+        "redundant": [
+          "ai",
+          "platform",
+          "backend",
+          "cloud"
+        ]
+      },
+      {
+        "ac_id": "AC-023",
+        "position": 3,
+        "gain": 12.05,
+        "adds": [
+          "multi_agent",
+          "forecasting",
+          "ml_systems",
+          "evaluation"
+        ],
+        "redundant": [
+          "ai",
+          "platform"
+        ]
+      },
+      {
+        "ac_id": "AC-025",
+        "position": 4,
+        "gain": 5.05,
+        "adds": [
+          "retrieval"
+        ],
+        "redundant": [
+          "ai",
+          "platform",
+          "evaluation",
+          "backend"
+        ]
+      },
+      {
+        "ac_id": "AC-031",
+        "position": 5,
+        "gain": 11.84,
+        "adds": [
+          "clinical",
+          "segmentation",
+          "radiomics",
+          "upload"
+        ],
+        "redundant": [
+          "platform",
+          "ml_systems",
+          "ai",
+          "leadership"
+        ]
+      },
+      {
+        "ac_id": "AC-047",
+        "position": 6,
+        "gain": 6.48,
+        "adds": [
+          "dashboard",
+          "visualization",
+          "frontend",
+          "redux"
+        ],
+        "redundant": [
+          "platform"
+        ]
+      },
+      {
+        "ac_id": "AC-044",
+        "position": 7,
+        "gain": 3.44,
+        "adds": [
+          "biomarkers",
+          "features"
+        ],
+        "redundant": [
+          "radiomics",
+          "ml_systems",
+          "ai",
+          "platform"
+        ]
+      },
+      {
+        "ac_id": "AC-198",
+        "position": 8,
+        "gain": 3.84,
+        "adds": [],
+        "redundant": [
+          "platform",
+          "ai",
+          "leadership",
+          "scope"
+        ]
+      },
+      {
+        "ac_id": "AC-183",
+        "position": 9,
+        "gain": 4.2,
+        "adds": [
+          "enterprise"
+        ],
+        "redundant": [
+          "backend",
+          "platform",
+          "data"
+        ]
+      },
+      {
+        "ac_id": "AC-186",
+        "position": 10,
+        "gain": 3.2,
+        "adds": [],
+        "redundant": [
+          "enterprise",
+          "backend",
+          "platform",
+          "data"
+        ]
+      },
+      {
+        "ac_id": "AC-187",
+        "position": 11,
+        "gain": 2.88,
+        "adds": [],
+        "redundant": [
+          "cloud",
+          "backend",
+          "platform"
+        ]
+      },
+      {
+        "ac_id": "AC-053",
+        "position": 12,
+        "gain": 4.96,
+        "adds": [
+          "api_design",
+          "postgres",
+          "tracker",
+          "sync"
+        ],
+        "redundant": [
+          "backend",
+          "platform",
+          "data"
+        ]
+      },
+      {
+        "ac_id": "AC-057",
+        "position": 13,
+        "gain": 6.64,
+        "adds": [
+          "cloudflare",
+          "deployment",
+          "docker",
+          "uptime"
+        ],
+        "redundant": [
+          "cloud",
+          "backend",
+          "platform"
+        ]
+      },
+      {
+        "ac_id": "AC-068",
+        "position": 14,
+        "gain": 6.84,
+        "adds": [
+          "gateway",
+          "jwt",
+          "security",
+          "rate_limit",
+          "circuit_breaker"
+        ],
+        "redundant": [
+          "backend",
+          "platform",
+          "cloud"
+        ]
+      },
+      {
+        "ac_id": "AC-069",
+        "position": 15,
+        "gain": 5,
+        "adds": [
+          "eureka",
+          "config_server",
+          "discovery"
+        ],
+        "redundant": [
+          "docker",
+          "backend",
+          "platform",
+          "cloud"
+        ]
+      }
+    ],
+    "swaps": [
+      {
+        "from": "AC-046",
+        "to": "AC-044",
+        "role": "wake-forest",
+        "position": 3,
+        "reason": "reduce redundancy",
+        "delta": 6.16
+      },
+      {
+        "from": "AC-045",
+        "to": "AC-047",
+        "role": "wake-forest",
+        "position": 2,
+        "reason": "reduce redundancy; new capability coverage",
+        "delta": 5.6
+      }
+    ],
+    "rejections_sample": [
+      {
+        "rejected": "AC-061",
+        "selected": "AC-057",
+        "role": "atriveo",
+        "information_gain": 1.96,
+        "reasons": [
+          "Lower information gain (1.96 vs selected 6.6)",
+          "Already proven: postgres, sync, api_design, backend",
+          "Adds only 1 new capability node(s)",
+          "Information gain too low (1.96)"
+        ]
+      },
+      {
+        "rejected": "AC-190",
+        "selected": "AC-198",
+        "role": "accolite",
+        "information_gain": 3.04,
+        "reasons": [
+          "Lower information gain (3.04 vs selected 3.8)",
+          "Already proven: cloud, backend, platform",
+          "Adds only 0 new capability node(s)"
+        ]
+      },
+      {
+        "rejected": "AC-190",
+        "selected": "AC-183",
+        "role": "accolite",
+        "information_gain": 3.04,
+        "reasons": [
+          "Lower information gain (3.04 vs selected 4.2)",
+          "Already proven: cloud, backend, platform",
+          "Adds only 0 new capability node(s)"
+        ]
+      },
+      {
+        "rejected": "AC-190",
+        "selected": "AC-186",
+        "role": "accolite",
+        "information_gain": 3.04,
+        "reasons": [
+          "Already proven: cloud, backend, platform",
+          "Adds only 0 new capability node(s)"
+        ]
+      },
+      {
+        "rejected": "AC-192",
+        "selected": "AC-198",
+        "role": "accolite",
+        "information_gain": 3.2,
+        "reasons": [
+          "Lower information gain (3.2 vs selected 3.8)",
+          "Already proven: backend, platform",
+          "Adds only 0 new capability node(s)"
+        ]
+      },
+      {
+        "rejected": "AC-192",
+        "selected": "AC-183",
+        "role": "accolite",
+        "information_gain": 3.2,
+        "reasons": [
+          "Lower information gain (3.2 vs selected 4.2)",
+          "Already proven: backend, platform",
+          "Adds only 0 new capability node(s)"
+        ]
+      },
+      {
+        "rejected": "AC-169",
+        "selected": "AC-198",
+        "role": "accolite",
+        "information_gain": 3.28,
+        "reasons": [
+          "Lower information gain (3.28 vs selected 3.8)",
+          "Already proven: backend, platform",
+          "Adds only 0 new capability node(s)"
+        ]
+      },
+      {
+        "rejected": "AC-169",
+        "selected": "AC-183",
+        "role": "accolite",
+        "information_gain": 3.28,
+        "reasons": [
+          "Lower information gain (3.28 vs selected 4.2)",
+          "Already proven: backend, platform",
+          "Adds only 0 new capability node(s)"
+        ]
+      },
+      {
+        "rejected": "AC-164",
+        "selected": "AC-198",
+        "role": "accolite",
+        "information_gain": 3.44,
+        "reasons": [
+          "Already proven: backend, platform",
+          "Adds only 0 new capability node(s)"
+        ]
+      },
+      {
+        "rejected": "AC-166",
+        "selected": "AC-198",
+        "role": "accolite",
+        "information_gain": 3.44,
+        "reasons": [
+          "Already proven: backend, platform",
+          "Adds only 0 new capability node(s)"
+        ]
+      }
+    ],
+    "jd_gate": {
+      "outcome": "borderline",
+      "message": "Borderline engineering JD (confidence 0.35, ideal ≥ 0.45). Proceeding with warning.",
+      "warnings": [
+        "JD is short (223 chars; 400+ recommended for best results).",
+        "Borderline engineering JD (confidence 0.35, ideal ≥ 0.45)."
+      ],
+      "confidence": 0.35
+    },
+    "selected_acs": [
+      "AC-026",
+      "AC-001",
+      "AC-023",
+      "AC-025",
+      "AC-031",
+      "AC-047",
+      "AC-044",
+      "AC-198",
+      "AC-183",
+      "AC-186",
+      "AC-187",
+      "AC-053",
+      "AC-057",
+      "AC-068",
+      "AC-069"
+    ]
+  }
+}

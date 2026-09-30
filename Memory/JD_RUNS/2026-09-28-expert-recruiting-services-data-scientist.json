@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "company": "Expert Recruiting Services, LLC",
+    "role": "Data Scientist",
+    "url": "manual://expert-recruiting-services-data-scientist-2026-09-28",
+    "tailored_at": "2026-09-28T21:14:41.372Z",
+    "pipeline": "ac",
+    "pipeline_version": "2.0.0",
+    "planner": "v2",
+    "eligibility": {
+      "eligible": true,
+      "reason": "",
+      "signal": null
+    }
+  },
+  "output_dir": "/Users/atishaykasliwal/atriveo-app/tailored/2026-09-28/01-expert-recruiting-services-data-scientist",
+  "pdf": "/Users/atishaykasliwal/atriveo-app/tailored/2026-09-28/01-expert-recruiting-services-data-scientist/Atishay Kasliwal.pdf",
+  "pages": 1,
+  "eligibility": {
+    "eligible": true,
+    "reason": "",
+    "signal": null
+  },
+  "jd_gate": {
+    "outcome": "borderline",
+    "can_compose": true,
+    "jd_length": 223,
+    "eligibility": {
+      "eligible": true,
+      "reason": "",
+      "signal": null
+    },
+    "relevance": {
+      "confidence": 0.35,
+      "supported": false,
+      "threshold": 0.45,
+      "hits": {
+        "engineering": [
+          "\\b(python|java|javascript|typescript|c\\+",
+          "\\b(machine learning|llm|rag|agent|nlp|de"
+        ],
+        "non_engineering": []
+      }
+    },
+    "warnings": [
+      "JD is short (223 chars; 400+ recommended for best results).",
+      "Borderline engineering JD (confidence 0.35, ideal ≥ 0.45)."
+    ],
+    "message": "Borderline engineering JD (confidence 0.35, ideal ≥ 0.45).",
+    "user_message": "Borderline engineering JD (confidence 0.35, ideal ≥ 0.45). Proceeding with warning.",
+    "thresholds": {
+      "supported": 0.45,
+      "borderline": 0.3,
+      "min_jd": 200,
+      "ideal_jd": 400
+    }
+  },
+  "selection_review": [
+    {
+      "section": "experience",
+      "role": "stony-brook",
+      "before": "AC-001",
+      "after": "AC-005",
+      "reason": "Use quantitative backtesting instead of repeating the opener's FOMC runtime metric."
+    },
+    {
+      "section": "experience",
+      "role": "wake-forest",
+      "before": "AC-047",
+      "after": "AC-046",
+      "reason": "Restore survival analysis as evidence for the explicit statistics requirement."
+    },
+    {
+      "section": "experience",
+      "role": "accolite",
+      "before": "AC-186",
+      "after": "AC-188",
+      "reason": "Prioritize Python automation over a frontend performance-review workflow."
+    },
+    {
+      "section": "projects",
+      "role": "atriveo",
+      "before": "AC-053",
+      "after": "AC-059",
+      "reason": "Prioritize Python data indexing over general backend services."
+    }
+  ],
+  "invariant": {
+    "passes": true,
+    "violations": [],
+    "selected_acs": [
+      "AC-026",
+      "AC-005",
+      "AC-023",
+      "AC-025",
+      "AC-031",
+      "AC-046",
+      "AC-044",
+      "AC-198",
+      "AC-183",
+      "AC-188",
+      "AC-187",
+      "AC-059",
+      "AC-057",
+      "AC-068",
+      "AC-069"
+    ],
+    "corpus_size": 214
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "fingerprint": "0adfd19b869d481348911751d7cbddbfe44861a73b8d5a88883bda6833403c51",
+  "jd_hash": "bfb274460111",
+  "bank_version": 51,
+  "planner": "v2",
+  "pipeline_version": "2.0.0",
+  "optimizer_id": "global-hill-climb-v1",
+  "renderer_id": "tectonic",
+  "template_id": "ac-latex-v51",
+  "job": {
+    "company": "Expert Recruiting Services, LLC",
+    "title": "Data Scientist",
+    "job_url": "manual://expert-recruiting-services-data-scientist-2026-09-28",
+    "score_pct": null
+  },
+  "stage": "SUCCESS",
+  "status": "success",
+  "stages": [
+    {
+      "stage": "GATED",
+      "at": "2026-09-28T21:14:41.398Z",
+      "detail": {
+        "jd_chars": 223
+      }
+    },
+    {
+      "stage": "COMPOSED",
+      "at": "2026-09-28T21:14:42.962Z",
+      "detail": {
+        "rcs": 72.9,
+        "variant_id": "default",
+        "bank_version": 51
+      }
+    },
+    {
+      "stage": "OPTIMIZED",
+      "at": "2026-09-28T21:14:42.963Z",
+      "detail": {
+        "invariant_pass": true
+      }
+    },
+    {
+      "stage": "TEX",
+      "at": "2026-09-28T21:14:42.963Z",
+      "detail": {
+        "tex_chars": 7066
+      }
+    },
+    {
+      "stage": "PDF",
+      "at": "2026-09-28T21:14:44.586Z",
+      "detail": {
+        "pages": null
+      }
+    },
+    {
+      "stage": "SUCCESS",
+      "at": "2026-09-28T21:14:44.588Z",
+      "detail": {
+        "pdf_path": "/Users/atishaykasliwal/atriveo-app/tailored/2026-09-28/ExpertRecruitingServicesLLC (28thSeptember)/Atishay Kasliwal.pdf"
+      }
+    }
+  ],
+  "created_at": "2026-09-28T21:14:41.398Z",
+  "updated_at": "2026-09-28T21:14:44.588Z",
+  "run_dir": "/Users/atishaykasliwal/atriveo-app/tailored/2026-09-28/ExpertRecruitingServicesLLC (28thSeptember)",
+  "pdf_path": "/Users/atishaykasliwal/atriveo-app/tailored/2026-09-28/ExpertRecruitingServicesLLC (28thSeptember)/Atishay Kasliwal.pdf",
+  "error": null
+}

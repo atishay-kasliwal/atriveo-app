@@ -1,0 +1,34 @@
+{
+  "changes": [
+    {
+      "section": "experience",
+      "role": "stony-brook",
+      "before": "AC-001",
+      "after": "AC-005",
+      "reason": "Use quantitative backtesting instead of repeating the opener's FOMC runtime metric."
+    },
+    {
+      "section": "experience",
+      "role": "wake-forest",
+      "before": "AC-047",
+      "after": "AC-046",
+      "reason": "Restore survival analysis as evidence for the explicit statistics requirement."
+    },
+    {
+      "section": "experience",
+      "role": "accolite",
+      "before": "AC-186",
+      "after": "AC-188",
+      "reason": "Prioritize Python automation over a frontend performance-review workflow."
+    },
+    {
+      "section": "projects",
+      "role": "atriveo",
+      "before": "AC-053",
+      "after": "AC-059",
+      "reason": "Prioritize Python data indexing over general backend services."
+    }
+  ],
+  "skills_evidence": "AC-046 statistics and survival analysis",
+  "policy": "Exact pre-authored variants; no new metrics or qualifications"
+}
