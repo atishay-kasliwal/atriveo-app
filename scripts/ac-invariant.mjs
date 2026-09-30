@@ -3,7 +3,7 @@
 import { ROLE_META, PROJECT_META } from "./tailor-dynamic.mjs";
 
 const PROFILE_ALLOWLIST = new Set([
-  "atishay", "kasliwal", "katishay@gmail.com", "934-246-1198",
+  "atishay", "kasliwal", "katishay45@gmail.com", "934-246-1198",
   "linkedin", "github", "portfolio", "new york", "ny",
   "stony brook", "symbiosis", "indore", "madhya pradesh",
   "master of science", "data science", "bachelor of technology",
