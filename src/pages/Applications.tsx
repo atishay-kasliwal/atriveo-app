@@ -214,7 +214,26 @@ function AccountsCard({ accounts }: { accounts: AccountRow[] }) {
         <h3>Sign-ins the engine created</h3>
         {needsVerify > 0 && <span className="apps-pill st-warning">! {needsVerify} waiting for email verification</span>}
       </div>
-      <div className="apps-table-wrap"><table className="apps-table">
+      <ul className="apps-cards apps-only-narrow">
+        {accounts.map((a) => {
+          const m = ACCOUNT_STATUS[a.status] ?? ACCOUNT_STATUS.created;
+          return (
+            <li key={a.id}>
+              <div className="apps-cards-top">
+                <div className="apps-cards-id"><strong>{a.tenant}</strong><span>{a.email}</span></div>
+                <span className={`apps-pill ${m.cls}`}><span aria-hidden>{m.icon}</span> {m.label}</span>
+              </div>
+              <div className="apps-secret"><code>{shown[a.id] ? a.password : "••••••••••••"}</code></div>
+              <div className="apps-cards-actions">
+                <button className="apps-btn" onClick={() => setShown({ ...shown, [a.id]: !shown[a.id] })}>{shown[a.id] ? "Hide" : "Show"}</button>
+                <button className="apps-btn" onClick={() => copy(a.id, a.password)}>{copied === a.id ? "Copied" : "Copy"}</button>
+                {a.loginUrl && <a className="apps-btn" href={a.loginUrl} target="_blank" rel="noreferrer">Open</a>}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="apps-table-wrap apps-only-wide"><table className="apps-table">
         <thead><tr><th>Employer</th><th>Email</th><th>Password</th><th>Status</th><th>Created</th><th /></tr></thead>
         <tbody>{accounts.map((a) => {
           const m = ACCOUNT_STATUS[a.status] ?? ACCOUNT_STATUS.created;
@@ -390,6 +409,7 @@ function answerText(q: Detail["questions"][number]): { text: string; muted: bool
 
 /** Everything the engine did for one application: the resume used, each question with its answer and where it came from, and the timeline. */
 function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void }) {
+  useBodyLock();
   const [detail, setDetail] = useState<Detail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
@@ -419,12 +439,13 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
     <div className="apps-drawer-wrap">
       <div className="apps-scrim" onClick={onClose} />
       <aside className="apps-drawer wide" role="dialog" aria-modal="true" aria-label={`History for ${row.company}`} tabIndex={-1} ref={ref}>
-        <header>
+        <span className="apps-handle" aria-hidden />
+        <div className="apps-drawer-head">
           <CompanyLogo company={row.company} size="md" />
           <div className="apps-drawer-title"><strong>{row.company}</strong><span>{row.title}</span></div>
           <StatusPill status={row.status} />
           <button className="apps-x" onClick={onClose} aria-label="Close history">✕</button>
-        </header>
+        </div>
         <div className="apps-drawer-body apps-hist">
           {error && <p className="apps-error">Couldn't load the history: {error}</p>}
           {!detail && !error && <p className="apps-muted">Loading…</p>}
@@ -490,6 +511,23 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
   );
 }
 
+/** One line about what happened to an application, shared by the table and the phone cards. */
+function detailOf(h: HistoryRow): string {
+  if (h.status === "NEEDS_REVIEW") return `${humanize(h.reviewReason ?? "")}${h.pending.length ? ` · ${h.pending.length} question(s)` : ""}`;
+  if (h.status === "FAILED") return `${humanize(h.failureCode ?? "")}${h.failureMessage ? ` — ${h.failureMessage}` : ""}`;
+  if (h.status === "APPLIED") return `by ${h.submittedBy ?? "engine"} · ${when(h.submittedAt)}`;
+  return "";
+}
+
+/** Stops the page behind a sheet from scrolling while it is open. */
+function useBodyLock() {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+}
+
 function Stat({ label, value, tone, sub }: { label: string; value: string | number; tone?: "warn" | "bad" | "good"; sub?: string }) {
   return (
     <div className={`apps-stat ${tone ?? ""}`}>
@@ -515,6 +553,7 @@ function Section({ title, hint, meta, children }: { title: string; hint: string;
 }
 
 function ReviewDrawer({ row, onClose, onDone }: { row: HistoryRow; onClose: () => void; onDone: (msg: string) => void }) {
+  useBodyLock();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     ref.current?.focus();
@@ -527,14 +566,15 @@ function ReviewDrawer({ row, onClose, onDone }: { row: HistoryRow; onClose: () =
     <div className="apps-drawer-wrap">
       <div className="apps-scrim" onClick={onClose} />
       <aside className="apps-drawer" role="dialog" aria-modal="true" aria-label={`Review ${row.company}`} tabIndex={-1} ref={ref}>
-        <header>
+        <span className="apps-handle" aria-hidden />
+        <div className="apps-drawer-head">
           <CompanyLogo company={row.company} size="md" />
           <div className="apps-drawer-title">
             <strong>{row.company}</strong>
             <span>{row.title}</span>
           </div>
           <button className="apps-x" onClick={onClose} aria-label="Close review">✕</button>
-        </header>
+        </div>
         <div className="apps-drawer-meta">
           <span className={`apps-tag ${reason.tone}`}>{reason.label}</span>
           {row.ats && <span className="apps-tag">{row.ats}</span>}
@@ -554,10 +594,10 @@ function CurrentActivity({ data }: { data: Analytics }) {
   const queued = data.byStatus?.READY_TO_APPLY ?? 0;
   return (
     <section className="apps-panel" aria-labelledby="act-title">
-      <header className="apps-panel-head">
+      <div className="apps-panel-head">
         <h2 id="act-title">Current activity</h2>
         {cur?.startedAt && <span className="apps-muted">Started {when(cur.startedAt)}</span>}
-      </header>
+      </div>
       {cur ? (
         <div className="apps-activity">
           <div className="apps-activity-top">
@@ -594,10 +634,10 @@ function AttentionPanel({ rows, onReview, onRetry, onHistory }: { rows: HistoryR
   const [all, setAll] = useState(false);
   const shown = all ? rows : rows.slice(0, 4);
   return (
-    <section className="apps-panel" aria-labelledby="attn-title">
-      <header className="apps-panel-head">
+    <section className={`apps-panel is-attn ${rows.length ? "has-items" : ""}`} aria-labelledby="attn-title">
+      <div className="apps-panel-head">
         <h2 id="attn-title">Needs your attention {rows.length > 0 && <span className="apps-count warn">{rows.length}</span>}</h2>
-      </header>
+      </div>
       {rows.length === 0 ? (
         <p className="apps-clear">Nothing is waiting for you.</p>
       ) : (
@@ -715,7 +755,7 @@ export default function Applications() {
                     </span>
                   )}
                 </div>
-                <span className="apps-muted">Updated {when(data.generatedAt)}</span>
+                <button className="apps-refresh" onClick={() => void load()} aria-label="Refresh now">Updated {when(data.generatedAt)} <span aria-hidden>↻</span></button>
               </div>
               <div className="apps-stats">
                 <Stat label="Jobs discovered" value={data.funnel[0]?.n ?? 0} />
@@ -775,7 +815,8 @@ export default function Applications() {
                   <input placeholder="Search company or role" aria-label="Search applications" value={query} onChange={(e) => setQuery(e.target.value)} />
                 </div>
                 {history.length === 0 ? <p className="apps-muted">No applications match.</p> : (
-                  <div className="apps-table-wrap">
+                  <>
+                  <div className="apps-table-wrap apps-only-wide">
                     <table className="apps-table">
                       <thead><tr><th>Updated</th><th>Company</th><th>Role</th><th>ATS</th><th>Status</th><th>Details</th><th>Attempts</th><th /></tr></thead>
                       <tbody>{history.map((h) => (
@@ -785,11 +826,7 @@ export default function Applications() {
                           <td>{h.title}</td>
                           <td>{h.ats ?? "—"}</td>
                           <td><StatusPill status={h.status} /></td>
-                          <td className="apps-detail">
-                            {h.status === "NEEDS_REVIEW" && <>{humanize(h.reviewReason ?? "")}{h.pending.length ? ` · ${h.pending.length} question(s)` : ""}</>}
-                            {h.status === "FAILED" && <>{humanize(h.failureCode ?? "")}{h.failureMessage ? ` — ${h.failureMessage}` : ""}</>}
-                            {h.status === "APPLIED" && <>by {h.submittedBy ?? "engine"} · {when(h.submittedAt)}</>}
-                          </td>
+                          <td className="apps-detail">{detailOf(h)}</td>
                           <td>{h.attempts}</td>
                           <td className="apps-row-actions">
                             {h.status === "NEEDS_REVIEW" && <button className="apps-link" onClick={() => setOpenId(h.id)}>Review</button>}
@@ -801,11 +838,39 @@ export default function Applications() {
                       ))}</tbody>
                     </table>
                   </div>
+                  <ul className="apps-cards apps-only-narrow">
+                    {history.map((h) => (
+                      <li key={h.id}>
+                        <div className="apps-cards-top">
+                          <CompanyLogo company={h.company} size="sm" />
+                          <div className="apps-cards-id"><strong>{h.company}</strong><span>{h.title}</span></div>
+                          <StatusPill status={h.status} />
+                        </div>
+                        <div className="apps-muted">{h.ats ?? "—"} · {when(h.updatedAt)} · {h.attempts} attempt{h.attempts === 1 ? "" : "s"}</div>
+                        {detailOf(h) && <div className="apps-cards-detail">{detailOf(h)}</div>}
+                        <div className="apps-cards-actions">
+                          {h.status === "NEEDS_REVIEW" && <button className="apps-btn accent" onClick={() => setOpenId(h.id)}>Review</button>}
+                          {h.status === "FAILED" && <button className="apps-btn" onClick={() => retry(h.id)}>Retry</button>}
+                          <button className="apps-btn" onClick={() => setHistoryId(h.id)}>History</button>
+                          <a className="apps-btn" href={h.url} target="_blank" rel="noreferrer">Open</a>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  </>
                 )}
               </Section>
 
               <Section title="ATS performance" hint="Application results by platform" meta={<><span>{data.byAts.length} platform{data.byAts.length === 1 ? "" : "s"}</span><span>{k.total} jobs</span></>}>
-                <div className="apps-table-wrap"><table className="apps-table">
+                <ul className="apps-cards apps-only-narrow">
+                  {data.byAts.map((a) => (
+                    <li key={a.ats}>
+                      <div className="apps-cards-top"><div className="apps-cards-id"><strong>{a.ats}</strong><span>{a.total} total</span></div></div>
+                      <div className="apps-kv"><span>Applied <b>{a.APPLIED}</b></span><span>Needs review <b>{a.NEEDS_REVIEW}</b></span><span>Failed <b>{a.FAILED}</b></span><span>Skipped <b>{a.SKIPPED}</b></span><span>In progress <b>{a.other}</b></span></div>
+                    </li>
+                  ))}
+                </ul>
+                <div className="apps-table-wrap apps-only-wide"><table className="apps-table">
                   <thead><tr><th>ATS</th><th>Total</th><th>Applied</th><th>Needs review</th><th>Failed</th><th>Skipped</th><th>In progress</th></tr></thead>
                   <tbody>{data.byAts.map((a) => (
                     <tr key={a.ats}><td>{a.ats}</td><td>{a.total}</td><td>{a.APPLIED}</td><td>{a.NEEDS_REVIEW}</td><td>{a.FAILED}</td><td>{a.SKIPPED}</td><td>{a.other}</td></tr>
