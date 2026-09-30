@@ -23,7 +23,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     apps.find({}, {
       projection: {
         company: 1, title: 1, location: 1, ats: 1, status: 1, applyUrl: 1, finalUrl: 1, attemptCount: 1, createdAt: 1, updatedAt: 1,
-        lifecycle: 1, "review.reason": 1, "review.detail": 1, "review.pending": 1, "failure.code": 1, "failure.message": 1,
+        lifecycle: 1, step: 1, attempts: 1, "review.reason": 1, "review.detail": 1, "review.pending": 1, "failure.code": 1, "failure.message": 1,
         "submission.by": 1, "submission.submittedAt": 1, "submission.attemptedAt": 1, "domain.domain": 1, source: 1,
       },
     }).sort({ updatedAt: -1 }).limit(limit).toArray(),
@@ -103,6 +103,18 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       boards: boardRows.map((b) => ({ ats: b._id, boards: b.boards, polled: b.polled, withMatches: b.matched })),
       jobsBySite: siteRows.map((s) => ({ site: s._id ?? "unknown", n: s.n })).sort((a, b) => b.n - a.n),
     },
+    // The application being worked on right now (read-only view of the engine's own record).
+    current: (() => {
+      const r = records.find((x) => x.status === "APPLYING" || x.status === "SUBMITTING");
+      if (!r) return null;
+      const attempt = (r.attempts ?? []).filter((a) => !a.endedAt).pop() ?? (r.attempts ?? []).at(-1) ?? null;
+      return {
+        id: r._id, company: r.company, title: r.title, ats: r.ats ?? null, status: r.status,
+        step: r.step?.name ?? null, attempt: attempt?.n ?? r.attemptCount ?? null,
+        startedAt: attempt?.startedAt ?? null, updatedAt: r.updatedAt, url: r.finalUrl ?? r.applyUrl,
+      };
+    })(),
+    lastActivityAt: records[0]?.updatedAt ?? null,
     accounts: accountRows.map((a) => ({
       id: a._id, ats: a.ats, tenant: a.tenant, email: a.email, password: a.password, status: a.status,
       loginUrl: a.loginUrl ?? null, createdAt: a.createdAt, updatedAt: a.updatedAt,
