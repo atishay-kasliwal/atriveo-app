@@ -36,6 +36,7 @@ import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
+import { applicationsAnalytics } from "./applications-analytics.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
 import { getWorkerId } from "./worker-id.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
@@ -1610,6 +1611,23 @@ const server = http.createServer(async (req, res) => {
   }
 
   // GET /compile-queue/stats — active queued + running counts (Mongo)
+  // GET /applications/analytics — application engine history & outcomes (read-only)
+  if (req.method === "GET" && pathname === "/applications/analytics") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const days = Math.min(Math.max(Number(new URL(req.url, "http://x").searchParams.get("days")) || 30, 7), 180);
+        const data = await withMongo((db) => applicationsAnalytics(db, { days }), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
+  }
+
   if (req.method === "GET" && pathname === "/compile-queue/stats") {
     (async () => {
       try {

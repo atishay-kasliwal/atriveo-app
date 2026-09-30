@@ -15,6 +15,7 @@ import States from "./pages/States";
 import EmailFinder from "./pages/EmailFinder";
 import Resumes from "./pages/Resumes";
 import Activity from "./pages/Activity";
+import Applications from "./pages/Applications";
 import ManualTailor from "./pages/ManualTailor";
 import ResumeOptimizer from "./pages/ResumeOptimizer";
 import Onboarding from "./pages/Onboarding";
@@ -87,6 +88,7 @@ export default function App() {
           <Route path="/emailfinder" element={<P><EmailFinder /></P>} />
           <Route path="/resumes" element={<P><Resumes /></P>} />
           <Route path="/activity" element={<P><Activity /></P>} />
+          <Route path="/applications" element={<P><Applications /></P>} />
           <Route path="/manual-tailor" element={<P><ManualTailor /></P>} />
           <Route path="/optimizer" element={<P><ResumeOptimizer /></P>} />
           <Route path="/ever-jobs" element={<P><EverJobs /></P>} />
