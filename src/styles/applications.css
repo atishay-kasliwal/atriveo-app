@@ -426,3 +426,6 @@
 @media (prefers-reduced-motion: reduce) { .apps-full { animation: none; } }
 
 .apps-resume-open { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.apps-score-missing { margin-top: 4px; font-size: 12px; line-height: 1.4; color: var(--amber); overflow-wrap: anywhere; }
+.apps-score-missing-label { color: var(--muted-fg); }
+.apps-score-missing .apps-link { font-size: 12px; min-height: 0; padding: 0; }

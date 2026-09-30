@@ -428,12 +428,13 @@ function answerText(q: Detail["questions"][number]): { text: string; muted: bool
 }
 
 /** Score tile: a big number, what it means, and an optional tone. */
-function Score({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: "good" | "warn" | "bad" }) {
+function Score({ label, value, sub, tone, children }: { label: string; value: string; sub?: string; tone?: "good" | "warn" | "bad"; children?: React.ReactNode }) {
   return (
     <div className={`apps-score ${tone ?? ""}`}>
       <span className="apps-score-label">{label}</span>
       <strong>{value}</strong>
       {sub && <small>{sub}</small>}
+      {children}
     </div>
   );
 }
@@ -529,7 +530,17 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
                   value={rep?.coverage.pct != null ? `${rep.coverage.pct}%` : "—"}
                   sub={rep ? `${rep.coverage.covered.length} covered · ${notCovered.length} not covered` : "weighted by importance"}
                   tone={toneFor(rep?.coverage.pct ?? null, 70, 50)}
-                />
+                >
+                  {notCovered.length > 0 && (
+                    <span className="apps-score-missing">
+                      <span className="apps-score-missing-label">Missing:</span>{" "}
+                      {notCovered.slice(0, 6).map((c) => c.term).join(", ")}
+                      {notCovered.length > 6 && (
+                        <> · <button type="button" className="apps-link" onClick={() => document.getElementById("apps-not-covered")?.scrollIntoView({ behavior: "smooth", block: "center" })}>+{notCovered.length - 6} more</button></>
+                      )}
+                    </span>
+                  )}
+                </Score>
                 <Score label="Resume confidence" value={rep?.confidence != null ? `${rep.confidence}` : "—"} sub="overall, out of 100" tone={toneFor(rep?.confidence ?? null, 75, 60)} />
                 <Score label="Questions" value={`${answered}/${detail.questions.length}`} sub="answered on the form" tone={answered === detail.questions.length ? "good" : "warn"} />
               </section>
@@ -565,7 +576,7 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
                             {rep.coverage.covered.length === 0 && <span className="apps-muted">Nothing matched.</span>}
                           </div>
                         </div>
-                        <div className="apps-chips-group">
+                        <div className="apps-chips-group" id="apps-not-covered">
                           <span className="apps-chips-title warn">Not covered · {notCovered.length}</span>
                           <div className="apps-chips">
                             {notCovered.map((c) => <span key={`${c.kind}-${c.term}`} className={`apps-chip2 ${c.kind === "missing" ? "warn" : "muted"}`} title={c.kind === "missing" ? "You have evidence for this but it is not on the resume" : "No evidence in your experience bank"}>{c.term}{c.kind === "no-evidence" ? <em>no evidence</em> : null}</span>)}
