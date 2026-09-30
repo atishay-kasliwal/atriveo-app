@@ -38,6 +38,7 @@ interface Analytics {
   byStatus?: Record<string, number>;
   current?: CurrentRow | null;
   lastActivityAt?: string | null;
+  lastAt?: { discovered: string | null; matched: string | null; queued: string | null; applied: string | null; needsReview: string | null; failed: string | null; avgApplyMs: number | null };
   worker?: { online: boolean; host: string | null; concurrency: number | null; gmailConnected: boolean; accountsEmail: string | null; updatedAt: string } | null;
 }
 interface CurrentRow {
@@ -69,6 +70,8 @@ const STATUS_META: Record<Status, { label: string; icon: string; cls: string }> 
 
 const humanize = (s: string) => s.toLowerCase().replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
 const pct = (n: number | null) => (n === null ? "—" : `${Math.round(n * 100)}%`);
+const clock = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString([], { ...(new Date(iso).toDateString() === new Date().toDateString() ? {} : { month: "short", day: "numeric" }), hour: "numeric", minute: "2-digit" }) : null);
+const duration = (ms: number | null | undefined) => (ms == null ? null : ms < 60_000 ? `${Math.round(ms / 1000)}s` : `${Math.floor(ms / 60_000)}m ${Math.round((ms % 60_000) / 1000)}s`);
 const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—");
 
 function StatusPill({ status }: { status: Status }) {
@@ -934,12 +937,12 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                 <button className="apps-refresh" onClick={() => void load()} aria-label="Refresh now">Updated {when(data.generatedAt)} <span aria-hidden>↻</span></button>
               </div>
               <div className="apps-stats">
-                <Stat label="Jobs discovered" value={data.funnel[0]?.n ?? 0} />
-                <Stat label="Matched / resume ready" value={data.funnel[1]?.n ?? 0} />
-                <Stat label="Queued to apply" value={data.byStatus?.READY_TO_APPLY ?? 0} />
-                <Stat label="Submitted today" value={today?.applied ?? 0} tone={today?.applied ? "good" : undefined} sub={`${k.applied} total`} />
-                <Stat label="Need your review" value={k.needsReview} tone={k.needsReview ? "warn" : undefined} />
-                <Stat label="Failed" value={k.failed} tone={k.failed ? "bad" : undefined} />
+                <Stat label="Jobs discovered" value={data.funnel[0]?.n ?? 0} sub={clock(data.lastAt?.discovered) ? `latest ${clock(data.lastAt?.discovered)}` : undefined} />
+                <Stat label="Matched / resume ready" value={data.funnel[1]?.n ?? 0} sub={clock(data.lastAt?.matched) ? `latest ${clock(data.lastAt?.matched)}` : undefined} />
+                <Stat label="Queued to apply" value={data.byStatus?.READY_TO_APPLY ?? 0} sub={clock(data.lastAt?.queued) ? `latest ${clock(data.lastAt?.queued)}` : undefined} />
+                <Stat label="Submitted today" value={today?.applied ?? 0} tone={today?.applied ? "good" : undefined} sub={[`${k.applied} total`, clock(data.lastAt?.applied) && `last ${clock(data.lastAt?.applied)}`, duration(data.lastAt?.avgApplyMs) && `avg ${duration(data.lastAt?.avgApplyMs)}`].filter(Boolean).join(" · ")} />
+                <Stat label="Need your review" value={k.needsReview} tone={k.needsReview ? "warn" : undefined} sub={clock(data.lastAt?.needsReview) ? `latest ${clock(data.lastAt?.needsReview)}` : undefined} />
+                <Stat label="Failed" value={k.failed} tone={k.failed ? "bad" : undefined} sub={clock(data.lastAt?.failed) ? `latest ${clock(data.lastAt?.failed)}` : undefined} />
               </div>
             </section>
 
