@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import { Top500Provider } from "./context/Top500Context";
+import { ScrapeRunProvider } from "./context/ScrapeRunContext";
 import AppHeader from "./components/AppHeader";
+import ScrapeRunOverlay from "./components/ScrapeRunOverlay";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Weekly from "./pages/Weekly";
@@ -17,6 +19,7 @@ import ManualTailor from "./pages/ManualTailor";
 import ResumeOptimizer from "./pages/ResumeOptimizer";
 import Onboarding from "./pages/Onboarding";
 import ManageTop500 from "./pages/ManageTop500";
+import EverJobs from "./pages/EverJobs";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -44,6 +47,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Top500Provider>
+        <ScrapeRunProvider>
+        {/* Blocks interaction while a run rewrites the feed. */}
+        <ScrapeRunOverlay />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
@@ -83,9 +89,11 @@ export default function App() {
           <Route path="/activity" element={<P><Activity /></P>} />
           <Route path="/manual-tailor" element={<P><ManualTailor /></P>} />
           <Route path="/optimizer" element={<P><ResumeOptimizer /></P>} />
+          <Route path="/ever-jobs" element={<P><EverJobs /></P>} />
           <Route path="/manage-top-500" element={<P><ManageTop500 /></P>} />
           <Route path="/*" element={<P><Navigate to="/" replace /></P>} />
         </Routes>
+        </ScrapeRunProvider>
       </Top500Provider>
     </BrowserRouter>
   );

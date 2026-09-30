@@ -13,6 +13,8 @@
  * Node built-ins only.
  */
 import { bankToPrompt, loadBannedPhrases } from "./tailor-bank.mjs";
+import { resolveHeaderLocation } from "./ac-header-location.mjs";
+import { loadResumeProfile } from "./resume-profile.mjs";
 
 // Canonical role/project metadata (title, location, stack, dates). The bullet
 // bank has dates in headers; titles/locations live here (from QUESTION_ANSWERS +
@@ -411,15 +413,19 @@ const VALID_HEADER_TITLES = new Set([
 ]);
 
 // Assemble a complete one-page resume from the model's selections.
-export function assembleResume(ai, bank) {
-  const rawTitle = stripBanned(ai.header_title || "Software Engineer");
-  const title = VALID_HEADER_TITLES.has(rawTitle) ? rawTitle : "Software Engineer";
+export function assembleResume(ai, bank, { location, profile } = {}) {
+  const me = profile || loadResumeProfile();
+  const rawTitle = stripBanned(ai.header_title || me.title);
+  const title = VALID_HEADER_TITLES.has(rawTitle) ? rawTitle : me.title;
+  // Header city follows the posting so the resume reads local to the team;
+  // a posting with no location — or several — falls back to the home city.
+  const city = resolveHeaderLocation(location, me.location);
   const header = `\\begin{center}
-    \\textbf{\\Huge \\scshape Atishay Kasliwal} \\\\ \\vspace{1pt}
-    \\small ${esc(title)} $|$ 934-246-1198 $|$ \\href{mailto:katishay@gmail.com}{katishay@gmail.com} $|$
-    \\href{https://www.linkedin.com/in/atishay-kasliwal}{Linkedin} $|$
-    \\href{https://github.com/atishay-kasliwal}{Github} $|$
-    \\href{https://atishaykasliwal.com}{Portfolio} $|$ New York, NY
+    \\textbf{\\Huge \\scshape ${esc(me.name)}} \\\\ \\vspace{1pt}
+    \\small ${esc(title)} $|$ ${esc(me.phone)} $|$ \\href{mailto:${me.email}}{${esc(me.email)}} $|$
+    \\href{${me.linkedin}}{Linkedin} $|$
+    \\href{${me.github}}{Github} $|$
+    \\href{${me.portfolio}}{Portfolio} $|$ ${esc(city)}
 \\end{center}`;
 
   // Enforce the FIXED experience structure regardless of what the model returned:

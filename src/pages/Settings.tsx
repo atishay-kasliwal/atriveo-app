@@ -5,6 +5,12 @@ import PageIntro from "../components/PageIntro";
 import { useExclusions } from "../hooks/useExclusions";
 import { assertTailorServerReady, listTailoredResumes } from "../utils/tailorRun";
 import { useNotifications } from "../hooks/useNotifications";
+import {
+  fetchResumeProfile,
+  saveResumeProfile,
+  RESUME_PROFILE_FIELDS,
+  type ResumeProfile,
+} from "../utils/resumeProfile";
 
 const RESUME_KEY = "atriveo_resume";
 const BANK_VERSION = 51;
@@ -23,6 +29,13 @@ export default function Settings() {
   const [bucketFresh, setBucketFresh] = useState<string>("…");
   const [artifactsToday, setArtifactsToday] = useState<number | null>(null);
 
+  // Resume header identity — lives in the sidecar, not localStorage, so the
+  // dock and the compiler see the same values.
+  const [profile, setProfile] = useState<ResumeProfile | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+
   useEffect(() => {
     const saved = localStorage.getItem(RESUME_KEY) || "";
     setResumeText(saved);
@@ -37,6 +50,9 @@ export default function Settings() {
         setBucketFresh(h < 2 ? `fresh (${Math.round(h * 60) || 1}m ago)` : `stale (${Math.round(h)}h)`);
       })
       .catch(() => setBucketFresh("unknown"));
+    fetchResumeProfile()
+      .then(({ profile: p }) => setProfile(p))
+      .catch((err: unknown) => setProfileError(err instanceof Error ? err.message : String(err)));
     listTailoredResumes().then((list) => {
       const tz = "America/New_York";
       const today = new Date().toLocaleDateString("en-US", { timeZone: tz });
@@ -48,6 +64,21 @@ export default function Settings() {
     localStorage.setItem(RESUME_KEY, resumeText);
     setResumeSaved(true);
     setTimeout(() => setResumeSaved(false), 2500);
+  }
+
+  async function saveProfile() {
+    if (!profile) return;
+    setProfileSaving(true);
+    setProfileError(null);
+    try {
+      setProfile(await saveResumeProfile(profile));
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 2500);
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setProfileSaving(false);
+    }
   }
 
   function addCompany() {
@@ -79,6 +110,58 @@ export default function Settings() {
             { label: "Today", value: artifactsToday ?? "…", tone: "green" },
           ]}
         />
+
+        {/* ── Resume header ── */}
+        <div className="settings-section">
+          <div className="settings-section-header">
+            <div>
+              <div className="settings-section-title">Resume header</div>
+              <div className="settings-section-sub">
+                The contact line printed at the top of every tailored resume. Saved on your Mac by the
+                tailor sidecar and picked up by the next build — no recompile needed.
+              </div>
+            </div>
+          </div>
+
+          {profileError && !profile ? (
+            <div className="settings-empty">{profileError}</div>
+          ) : !profile ? (
+            <div className="settings-empty">Loading…</div>
+          ) : (
+            <>
+              <div className="settings-profile-grid">
+                {RESUME_PROFILE_FIELDS.map(({ key, label, hint, type }) => (
+                  <label key={key} className="settings-profile-field">
+                    <span className="settings-profile-label">{label}</span>
+                    <input
+                      className="settings-input"
+                      type={type ?? "text"}
+                      value={profile[key]}
+                      onChange={(e) => setProfile({ ...profile, [key]: e.target.value })}
+                    />
+                    <span className="settings-profile-hint">{hint}</span>
+                  </label>
+                ))}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
+                <button
+                  className="settings-add-btn"
+                  type="button"
+                  onClick={() => void saveProfile()}
+                  disabled={profileSaving}
+                >
+                  {profileSaving ? "Saving…" : "Save"}
+                </button>
+                {profileSaved && <span style={{ fontSize: 12, color: "var(--green)" }}>Saved ✓</span>}
+                {profileError && <span style={{ fontSize: 12, color: "var(--red)" }}>{profileError}</span>}
+              </div>
+              <p className="compiler-settings-hint">
+                Leave a field blank and save to restore its shipped default. The location here is only a
+                fallback — a posting that names one office still wins.
+              </p>
+            </>
+          )}
+        </div>
 
         <div className="settings-section compiler-settings">
           <div className="settings-section-header">

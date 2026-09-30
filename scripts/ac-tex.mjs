@@ -16,6 +16,8 @@ import {
 import { buildSkillsFromComposition } from "./ac-skills.mjs";
 import { SKILLS_MAX_CATEGORIES } from "./skills-library.mjs";
 import { resolveBankDir } from "./ac-bank.mjs";
+import { resolveHeaderLocation } from "./ac-header-location.mjs";
+import { loadResumeProfile } from "./resume-profile.mjs";
 
 const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 \\usepackage{latexsym}\\usepackage[empty]{fullpage}\\usepackage{titlesec}
@@ -184,18 +186,24 @@ export function deriveHeaderTitle(jd, composition, rawTitle) {
   if (/backend/.test(hay)) return "Backend Engineer";
   if (composition.theme === "ai-llm") return "AI Engineer";
   if (composition.theme === "data-engineering") return "Data Engineer";
-  return "Software Engineer";
+  // Nothing in the title or the JD said what this role is — use the default
+  // title from Settings rather than assuming "Software Engineer".
+  return loadResumeProfile().title;
 }
 
-export function assembleAcResume(composition, { headerTitle, skillsLines, bank } = {}) {
+export function assembleAcResume(composition, { headerTitle, skillsLines, bank, location, profile } = {}) {
   const bankDir = bank?.bank_dir || resolveBankDir();
-  const title = stripBanned(headerTitle || "Software Engineer");
+  const me = profile || loadResumeProfile();
+  const title = stripBanned(headerTitle || me.title);
+  // Header city follows the posting so the resume reads local to the team;
+  // a posting with no location — or several — falls back to the home city.
+  const city = resolveHeaderLocation(location, me.location);
   const header = `\\begin{center}
-    \\textbf{\\Huge \\scshape Atishay Kasliwal} \\\\ \\vspace{1pt}
-    \\small ${esc(title)} $|$ 934-246-1198 $|$ \\href{mailto:katishay@gmail.com}{katishay@gmail.com} $|$
-    \\href{https://www.linkedin.com/in/atishay-kasliwal}{Linkedin} $|$
-    \\href{https://github.com/atishay-kasliwal}{Github} $|$
-    \\href{https://atishaykasliwal.com}{Portfolio} $|$ New York, NY
+    \\textbf{\\Huge \\scshape ${esc(me.name)}} \\\\ \\vspace{1pt}
+    \\small ${esc(title)} $|$ ${esc(me.phone)} $|$ \\href{mailto:${me.email}}{${esc(me.email)}} $|$
+    \\href{${me.linkedin}}{Linkedin} $|$
+    \\href{${me.github}}{Github} $|$
+    \\href{${me.portfolio}}{Portfolio} $|$ ${esc(city)}
 \\end{center}`;
 
   const skills = skillsLines?.length
@@ -298,7 +306,7 @@ export function compactCompositionForTex(result) {
   };
 }
 
-export function prepareResumeArtifacts({ jd, composition, bank, headerTitle }) {
+export function prepareResumeArtifacts({ jd, composition, bank, headerTitle, location }) {
   const compact = composition.experience?.[0]?.bullets?.[0]?.ac
     ? compactCompositionForTex(composition)
     : composition;
@@ -313,6 +321,6 @@ export function prepareResumeArtifacts({ jd, composition, bank, headerTitle }) {
   // title-first rule applies (≤3 words kept verbatim, longer mapped to canonical),
   // instead of discarding it whenever it isn't an exact canonical match.
   const title = deriveHeaderTitle(jd, compact, headerTitle);
-  const tex = assembleAcResume(compact, { headerTitle: title, skillsLines: skills, bank });
+  const tex = assembleAcResume(compact, { headerTitle: title, skillsLines: skills, bank, location });
   return { compact, skills, headerTitle: title, tex };
 }

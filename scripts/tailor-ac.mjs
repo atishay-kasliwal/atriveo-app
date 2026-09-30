@@ -16,6 +16,8 @@ import { ingestComposeRun } from "./ac-learning.mjs";
 import { assessJdGate, writeJdGateFile, MIN_JD_IDEAL } from "./ac-jd-gate.mjs";
 import { buildComposeExplain, formatExplainLogLines } from "./ac-compose-explain.mjs";
 import { loadBank } from "./ac-bank.mjs";
+import { resolveHeaderLocation } from "./ac-header-location.mjs";
+import { loadResumeProfile } from "./resume-profile.mjs";
 import {
   createArtifactRun,
   advanceArtifactStage,
@@ -30,6 +32,9 @@ import {
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const MIN_FULL_JD_CHARS = MIN_JD_IDEAL;
+// A neutral general-SWE posting. A job whose own posting fails the fit check
+// is composed against this instead, so it still gets the basic resume.
+const BASELINE_JD_PATH = path.join(ROOT, "data", "baseline-jd.txt");
 // const REVIEW_TASKS = ["readability", "weakest", "verify"];
 
 function hashText(text) {
@@ -217,17 +222,22 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     return result;
   }
 
+  // A posting that fails the fit check still gets a resume: the basic one,
+  // composed against the neutral baseline under the profile's own headline.
+  // jd stays the real posting (jd.txt, fingerprint, the tex footer); only
+  // composition reads composeJd.
+  let composeJd = jd;
+  let composeTitle = role;
+  let composeGate = jdGate;
   if (!jdGate.can_compose) {
-    onLog?.("warn", `Unsupported JD · ${jdGate.message}`);
-    fs.writeFileSync(path.join(dir, "jd.txt"), jd);
-    fs.writeFileSync(path.join(dir, "meta.json"), JSON.stringify({
-      company, role, url: job.job_url, tailored_at: new Date().toISOString(),
-      pipeline: "ac", jd_gate: jdGate,
-    }, null, 2));
-    result.status = "unsupported-jd";
-    result.error = jdGate.user_message || jdGate.message;
-    sendPhase("done", result);
-    return result;
+    const reason = jdGate.user_message || jdGate.message;
+    onLog?.("warn", `Unsupported JD · ${reason}`);
+    onLog?.("step", "Building the basic resume instead");
+    composeJd = fs.readFileSync(BASELINE_JD_PATH, "utf8");
+    composeTitle = loadResumeProfile().title || "Software Engineer";
+    composeGate = assessJdGate(composeJd, { title: composeTitle });
+    result.fallback = "basic";
+    result.fallback_reason = reason;
   }
 
   for (const w of jdGate.warnings || []) onLog?.("warn", w);
@@ -255,12 +265,17 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     pipeline_version: PIPELINE_VERSION,
     planner,
     eligibility,
+    ...(result.fallback && {
+      fallback: { type: result.fallback, reason: result.fallback_reason, jd_gate: jdGate },
+    }),
   };
   onLog?.("step", "Writing meta.json…");
   fs.writeFileSync(path.join(dir, "meta.json"), JSON.stringify(meta, null, 2));
   onLog?.("result", "meta.json saved");
 
-  const forceCompile = forceRecompile || job.force_recompile === true;
+  // The cache is keyed on the real posting, but a basic resume's header city
+  // depends on the job, so never reuse one.
+  const forceCompile = forceRecompile || job.force_recompile === true || Boolean(result.fallback);
   let artifactCtx = null;
   try {
     const bankPreview = loadBank();
@@ -314,13 +329,17 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     sendPhase("analyzing");
     onLog?.("think", `Planner · ${planner} · full slots · no delete-test prune`);
 
+    onLog?.("think", job.location
+      ? `Header location · ${resolveHeaderLocation(job.location)} (posting: ${job.location})`
+      : `Header location · ${resolveHeaderLocation(null)} (posting has no location)`);
+
     const pipeline = generateResume({
-      jd,
+      jd: composeJd,
       planner,
-      meta: { company, title: role },
+      meta: { company, title: composeTitle, location: job.location },
       forceBorderline: job.force_borderline === true,
       strictJdGate: job.strict_jd_gate === true,
-      jdGate,
+      jdGate: composeGate,
     });
 
     if (pipeline.unsupported_jd || !pipeline.result) {
@@ -410,7 +429,7 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     snapshot.beam_winner = variant_id;
     snapshot.pipeline_version = pipeline.pipeline_version;
 
-    const explain = buildComposeExplain(pipeline, pipeline.jd_gate || jdGate);
+    const explain = buildComposeExplain(pipeline, pipeline.jd_gate || composeGate);
     result.explain = explain;
     result.borderline = explain.borderline || result.borderline;
 
@@ -430,6 +449,7 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
       rulebook,
       eligibility,
       jd_gate: pipeline.jd_gate || jdGate,
+      fallback: result.fallback ? { type: result.fallback, reason: result.fallback_reason } : null,
       borderline_jd: pipeline.borderline_jd || jdGate.outcome === "borderline",
       explain,
     };
@@ -452,7 +472,8 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     }, null, 2));
 
     persistSnapshot(snapshot, ROOT);
-    if (learn) {
+    // The basic resume says nothing about how well this posting was matched.
+    if (learn && !result.fallback) {
       ingestComposeRun({
         composition: compact,
         job: { company, title: headerTitle },
@@ -505,7 +526,7 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     //   onLog?.("warn", "Gemma review skipped — Ollama not reachable (run: ollama serve)");
     // }
 
-    onLog?.("result", `✓ Complete · ${result.ats || "RCS"}${result.overflow ? ` · ⚠ ${c.pages} pages` : " · 1 page"} · ${c.pdf}`);
+    onLog?.("result", `✓ Complete${result.fallback ? " · basic resume" : ""} · ${result.ats || "RCS"}${result.overflow ? ` · ⚠ ${c.pages} pages` : " · 1 page"} · ${c.pdf}`);
     if (artifactCtx) {
       finalizeArtifactRun(artifactCtx, { success: true, pdfPath: c.pdf, runDir: dir });
     }

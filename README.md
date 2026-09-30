@@ -51,7 +51,7 @@ The pivot (2026): treat the resume as **compiled output** from a **structured ev
 | Global optimizer | ~95% | 15-bullet hill climb, capability graph |
 | ATS strategy | ~97% | Matrix penalties in selection scoring |
 | Resume compiler (PDF) | ~98% | AC pipeline default; legacy Gemma optional |
-| End-to-end automation | ~92% | Mongo worker + hourly enqueue; browser optional |
+| End-to-end automation | ~92% | Mongo worker + per-run enqueue; browser optional |
 | Product UX / trust | ~88% | Trust report, diff, compile history, activity timeline |
 
 **North star:** LinkedIn JD in → valid PDF / borderline warning / unsupported explanation out — never crash.
@@ -99,9 +99,9 @@ Three folders matter. Only **one** is the product.
 - **JD soak test** — `npm run ac:jd-soak` (10 fixtures, no crashes)
 
 ### Product / pipeline
-- **LinkedIn → Mongo → JD buckets** — hourly via LaunchAgent + `jd:export`
+- **LinkedIn → Mongo → JD buckets** — on demand via `Scrape now` + `jd:export`
 - **Feed UI** — jobs + full JD lookup via hash buckets
-- **Mongo compile queue** — `resume:enqueue` hourly + `tailor-worker` LaunchAgent (no browser tab)
+- **Mongo compile queue** — `resume:enqueue` at the end of each run + `tailor-worker` LaunchAgent (no browser tab)
 - **Dashboard observe mode** — live SSE on `GET /compile-queue/stream` (Mongo change streams); polls only as fallback
 - **AC tailor default** — no Ollama required for PDF generation
 - **Explain + trust report** — `explain.json`, `TrustReportPanel` (recruiter replay, rejections, JD coverage)
@@ -109,7 +109,7 @@ Three folders matter. Only **one** is the product.
 - **Stream recovery** — `POST /check-job` finds PDF after relay timeout
 - **Health commands** — `tailor:doctor`, `pipeline:status`
 - **CI fix** — GitHub Actions uses `jd:export` (not broken `export:descriptions`)
-- **Permanent install** — `npm run pipeline:install` (scrape + sidecar + worker LaunchAgents)
+- **Permanent install** — `npm run pipeline:install` (sidecar + worker LaunchAgents; clears retired scrape timers)
 
 ### Compiler service (Phase 1–2)
 - **Compile fingerprint** — `SHA256(jd_hash + bank + planner + optimizer + renderer + template)`
@@ -151,13 +151,14 @@ Three folders matter. Only **one** is the product.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  HOURLY (Mac LaunchAgent: com.atriveo.job-pipeline)                     │
+│  ON DEMAND — "Scrape now" (app header, dock footer, or npm run scrape:now) │
+│  POST /scrape/start → sidecar spawns                                     │
 │  ~/job-pipeline/run-pipeline-and-export.sh                              │
-│    1. JobSpy scrape → MongoDB (jobs + descriptions)                     │
-│    2. backfill_descriptions.py (recover ~10% missed JDs)                 │
-│    3. trigger GitHub deploy (optional)                                    │
-│    4. cd ~/atriveo-app && npm run jd:export                             │
-│    5. cd ~/atriveo-app && npm run resume:enqueue  (all eligible → Mongo queue)  │
+│    1. scrape        JobSpy → MongoDB (jobs + descriptions)              │
+│    2. jd_export     npm run jd:export → public/job_descriptions/        │
+│    3. feed_deploy   npm run feed:sync → Cloudflare Pages                │
+│    4. resume_queue  npm run resume:sync → Mongo compile queue           │
+│  Progress polled from /tmp/atriveo_scrape_state.json via /scrape/status │
 └───────────────────────────────┬─────────────────────────────────────────┘
                                 ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -199,7 +200,7 @@ Three folders matter. Only **one** is the product.
 
 Prerequisites on the Mac:
 
-- Node 20+
+- Node 20 LTS
 - Python venv at `~/job-pipeline/.venv`
 - [Tectonic](https://tectonic-typesetting.github.io/) installed
 - External drive **Kasliwal v2** mounted at `/Volumes/Kasliwal v2`
@@ -211,17 +212,42 @@ Prerequisites on the Mac:
 
 ```bash
 cd ~/atriveo-app
-npm install
+nvm use
+npm ci
 npm run pipeline:install
 ```
+
+The committed lockfile keeps installs reproducible, and `npm ci` avoids the half-finished `node_modules` state that was breaking `npm install`.
+If the tree gets wedged again, run `npm run clean:install` to wipe `node_modules/` and the local `.npm-cache/` before reinstalling.
 
 This installs:
 
 | LaunchAgent | Schedule | What it does |
 |-------------|----------|--------------|
-| `com.atriveo.job-pipeline` | Every hour (0:00–23:00) | Scrape + `jd:export` + `resume:enqueue` |
-| `com.atriveo.tailor` | At login, **KeepAlive** | Sidecar + cloudflared tunnel |
+| `com.atriveo.tailor` | At login, **KeepAlive** | Sidecar + cloudflared tunnel — also serves `/scrape/*` |
 | `com.atriveo.tailor-worker` | At login, **KeepAlive** | Drains Mongo compile queue |
+
+It also **removes** the retired scheduled agents (`com.atriveo.job-pipeline`,
+`com.atriveo.feed-sync`, `com.atriveo.resume-sync`). Scraping is on demand now —
+nothing scrapes on a timer.
+
+### Running a scrape
+
+| Where | How |
+|---|---|
+| Web app | Header → **Scrape now** (admin only) |
+| Dock | Footer bar → scrape button |
+| Terminal | `npm run scrape:now` |
+
+```bash
+npm run scrape:now                 # scrape → jd export → feed deploy → resume queue
+npm run scrape:now -- --status     # current run state
+npm run scrape:now -- --cancel     # stop the run in flight
+```
+
+One run at a time: a second trigger returns HTTP 409 and attaches to the run
+already going. Closing the app or dock does not stop a run — reopening
+reattaches to it.
 
 Logs:
 
@@ -352,7 +378,8 @@ Legacy path: set `TAILOR_LEGACY=1` for Gemma bullet rewrites (not recommended).
 
 | Script | Purpose |
 |--------|---------|
-| `pipeline:install` | Install scrape + sidecar + worker LaunchAgents |
+| `pipeline:install` | Install sidecar + worker LaunchAgents; remove retired scrape timers |
+| `scrape:now` | Run the pipeline now (`-- --status`, `-- --cancel`) |
 | `pipeline:ready` | Tonight prep: sync + enqueue + build + restart services |
 | `pipeline:status` | Scrape log, JD freshness, sidecar health |
 | `pipeline:sync` | Mongo → `public/job_descriptions/` |
@@ -457,8 +484,8 @@ Optional compile cache / paths:
 | **Timeout** but PDF exists | Relay stream drop | App auto-checks disk; or `POST /check-job` |
 | Queue not moving | Worker down or empty queue | `tail -f ~/Library/Logs/atriveo-tailor-worker.log`; `npm run resume:enqueue` |
 | `/health` shows mongo not configured | Sidecar missing `MONGO_URI` | Add to `.env` or `.env.tailor`; `npm run tailor:restart` |
-| Compile queue empty in UI | No manifests yet / worker idle | Wait for hourly enqueue or run `resume:enqueue` |
-| Scrape not running | LaunchAgent unloaded | `npm run pipeline:install` |
+| Compile queue empty in UI | No manifests yet / worker idle | Run `npm run scrape:now`, or `resume:enqueue` alone |
+| Scrape button does nothing | Sidecar down | `npm run tailor:restart`; check `npm run pipeline:status` |
 | CI buckets stale | Was `export:descriptions` bug | Fixed — uses `jd:export` now |
 
 Always start with:

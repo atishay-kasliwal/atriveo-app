@@ -20,9 +20,9 @@ function gateInputFrom(composition, compact, skills) {
   };
 }
 
-export function scoreResumeCandidate({ composition, bank, jd, title, pages = 1 }) {
+export function scoreResumeCandidate({ composition, bank, jd, title, location, pages = 1 }) {
   const { compact, skills, headerTitle, tex } = prepareResumeArtifacts({
-    jd, composition, bank, headerTitle: title,
+    jd, composition, bank, headerTitle: title, location,
   });
   const oracle = scoreOracle(compact);
   const input = gateInputFrom(composition, compact, skills);

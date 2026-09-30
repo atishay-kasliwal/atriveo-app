@@ -167,6 +167,8 @@ async function processOneJob(db) {
         job_url: jobUrl,
         jd,
         score_pct: jobDoc.score_pct ?? null,
+        // Drives the resume header city — see ac-header-location.mjs.
+        location: jobDoc.location ?? jobDoc.resume?.location ?? null,
       },
       seq,
       dateDir,
@@ -201,11 +203,13 @@ async function processOneJob(db) {
       session_hour: hour,
       batch_time: batchTime,
       cached: Boolean(result.cached),
+      // "basic" when the posting failed the fit check and got the general resume.
+      fallback: result.fallback || null,
     });
 
     log(
       success ? (result.cached ? "cache" : "done") : "fail",
-      `${company} · ${result.cached ? "cache hit" : result.status}${fingerprint ? ` · fp ${fingerprint.slice(0, 12)}…` : ""}`,
+      `${company} · ${result.cached ? "cache hit" : result.status}${result.fallback ? " · basic resume" : ""}${fingerprint ? ` · fp ${fingerprint.slice(0, 12)}…` : ""}`,
     );
   } finally {
     if (leaseTimer) clearInterval(leaseTimer);

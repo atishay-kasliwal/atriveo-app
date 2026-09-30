@@ -34,11 +34,17 @@ import {
 import { buildSkillsLines, capSkillsLineToOnePhysicalLine } from "./skills-library.mjs";
 import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
+import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
+import { getWorkerId } from "./worker-id.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
 import { listActiveWorkers } from "./worker-registry.mjs";
 import { buildCoverLetter } from "./cover-letter.mjs";
+import {
+  startScrape, cancelScrape, readScrapeState, tailScrapeLog, readScrapeEstimate,
+  isScrapeRunning, SCRAPE_PHASES, JOB_PIPELINE_DIR, SCRAPE_SCRIPT,
+} from "./scrape-control.mjs";
 
 dotenv.config();
 
@@ -946,7 +952,7 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
     sendPhase("assembling");
     logAssemblePlan(onLog, ai, BANK);
     onLog?.("think", "Applying LaTeX preamble + header + education (fixed blocks)…");
-    const tex = assembleResume(ai, BANK);
+    const tex = assembleResume(ai, BANK, { location: job.location });
     onLog?.("think", `Base .tex size · ${tex.length.toLocaleString()} chars`);
     const withJd = tex.replace(/\\end\{document\}/, `\\end{document}\n\n% ==== JD: ${company} — ${role} ====\n% ${jd.replace(/\n/g, "\n% ").slice(0, 4000)}`);
     onLog?.("step", "Writing resume.tex (with JD appendix comment)…");
@@ -980,6 +986,128 @@ async function tailorOne(job, resumeText, model, seq, dateDir, ctx) {
   return result;
 }
 
+// ─── Job feed ────────────────────────────────────────────────────────────────
+// A JS port of the tab windows in job_pipeline/export_static.py. Both read the
+// same sessions/jobs collections; keep them in step if either changes.
+
+const DASHBOARD_TZ = process.env.DASHBOARD_TZ?.trim() || "America/New_York";
+
+/** Milliseconds a zone is offset from UTC at a given instant. */
+function tzOffsetMs(date, tz) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, hour12: false,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).formatToParts(date).reduce((acc, p) => (acc[p.type] = p.value, acc), {});
+  const asUtc = Date.UTC(
+    Number(parts.year), Number(parts.month) - 1, Number(parts.day),
+    Number(parts.hour) % 24, Number(parts.minute), Number(parts.second),
+  );
+  return asUtc - date.getTime();
+}
+
+/**
+ * [start, end) in UTC for a local calendar day in DASHBOARD_TZ, `daysAgo`
+ * days back. The offset is resolved twice because the first guess can land on
+ * the wrong side of a DST boundary.
+ */
+function localDayBoundsUtc(daysAgo, tz = DASHBOARD_TZ) {
+  const todayLocal = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(new Date());
+  const [y, m, d] = todayLocal.split("-").map(Number);
+
+  const midnightUtcGuess = Date.UTC(y, m - 1, d - daysAgo);
+  let start = midnightUtcGuess - tzOffsetMs(new Date(midnightUtcGuess), tz);
+  start = midnightUtcGuess - tzOffsetMs(new Date(start), tz);
+
+  const nextGuess = midnightUtcGuess + 86_400_000;
+  let end = nextGuess - tzOffsetMs(new Date(nextGuess), tz);
+  end = nextGuess - tzOffsetMs(new Date(end), tz);
+
+  return { start: new Date(start), end: new Date(end) };
+}
+
+const FEED_PROJECTION = { _id: 0, run_at: 0 };
+
+/** Keep the first occurrence of each job_url, matching the exporter's dedup. */
+function dedupeByUrl(jobs) {
+  const seen = new Set();
+  const unique = [];
+  for (const j of jobs) {
+    const key = j.job_url || `${j.title}-${j.company}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(j);
+  }
+  return unique;
+}
+
+async function sessionIdsForDay(db, daysAgo) {
+  const { start, end } = localDayBoundsUtc(daysAgo);
+  const sessions = await db.collection("sessions")
+    .find({ pipeline: "standard", archived: false, run_at: { $gte: start, $lt: end } }, { projection: { session_id: 1 } })
+    .toArray();
+  return sessions.map((s) => s.session_id);
+}
+
+async function jobsForSessions(db, sessionIds) {
+  if (!sessionIds.length) return [];
+  return db.collection("jobs")
+    .find({ session_id: { $in: sessionIds } }, { projection: FEED_PROJECTION })
+    .toArray();
+}
+
+/** The most recent standard session only — what the "Hour" tab shows. */
+async function fetchLatestSessionJobs(db) {
+  const session = await db.collection("sessions").findOne(
+    { pipeline: "standard", archived: false },
+    { sort: { run_at: -1 }, projection: { session_id: 1 } },
+  );
+  if (!session) return [];
+  return jobsForSessions(db, [session.session_id]);
+}
+
+/** Last 7 days, deduped oldest-first, tagged with the local day they were scraped. */
+async function fetchWeekJobs(db) {
+  const cutoff = new Date(Date.now() - 7 * 86_400_000);
+  const sessions = await db.collection("sessions")
+    .find({ pipeline: "standard", archived: false, run_at: { $gte: cutoff } }, { projection: { session_id: 1, run_at: 1 } })
+    .sort({ run_at: 1 })
+    .toArray();
+  if (!sessions.length) return [];
+
+  const dayFmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: DASHBOARD_TZ, year: "numeric", month: "2-digit", day: "2-digit",
+  });
+  const sidToDate = new Map();
+  const sidOrder = new Map();
+  sessions.forEach((s, i) => {
+    sidToDate.set(s.session_id, dayFmt.format(new Date(s.run_at)));
+    sidOrder.set(s.session_id, i);
+  });
+
+  const jobs = await jobsForSessions(db, [...sidOrder.keys()]);
+  // Oldest session first, so dedup keeps the earliest sighting of each job.
+  jobs.sort((a, b) => (sidOrder.get(a.session_id) ?? Infinity) - (sidOrder.get(b.session_id) ?? Infinity));
+
+  const unique = dedupeByUrl(jobs);
+  for (const j of unique) j.scraped_date = sidToDate.get(j.session_id) ?? "";
+  unique.sort((a, b) =>
+    (b.scraped_date || "").localeCompare(a.scraped_date || "") || (b.score || 0) - (a.score || 0));
+  return unique;
+}
+
+async function fetchFeedJobs(db, type) {
+  switch (type) {
+    case "hour":      return fetchLatestSessionJobs(db);
+    case "yesterday": return dedupeByUrl(await jobsForSessions(db, await sessionIdsForDay(db, 1)));
+    case "week":      return fetchWeekJobs(db);
+    case "today":
+    default:          return dedupeByUrl(await jobsForSessions(db, await sessionIdsForDay(db, 0)));
+  }
+}
+
 // ─── HTTP server ─────────────────────────────────────────────────────────────
 let tailorBusy = false;
 
@@ -994,7 +1122,7 @@ const server = http.createServer(async (req, res) => {
   // permissive CORS so the Vite dev origin can reach us
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Tailor-Token");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS,DELETE");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS,DELETE");
   if (req.method === "OPTIONS") { res.writeHead(204); return res.end(); }
 
   const reqUrl = new URL(req.url || "/", "http://127.0.0.1");
@@ -1015,7 +1143,101 @@ const server = http.createServer(async (req, res) => {
       mongo: Boolean(process.env.MONGO_URI),
       pipeline: USE_LEGACY ? "legacy" : "ac",
       planner: USE_LEGACY ? null : AC_PLANNER,
+      scrape: {
+        available: fs.existsSync(SCRAPE_SCRIPT),
+        running: isScrapeRunning(),
+        pipelineDir: JOB_PIPELINE_DIR,
+      },
     }));
+  }
+
+  // ─── Job feed ──────────────────────────────────────────────────────────────
+  // GET /jobs?type=hour|today|yesterday|week
+  //
+  // The web dashboard reads this from a static JSON snapshot that the
+  // pipeline's feed_deploy phase publishes to Cloudflare Pages. That is a poor
+  // fit for the dock on two counts: the snapshot is only as fresh as the last
+  // deploy, and the Pages function guarding it authenticates with a
+  // SameSite=Strict cookie a cross-origin WebView will not send (it ignores
+  // bearer tokens, so there is no way around it from the client).
+  //
+  // The sidecar already holds Mongo credentials on localhost, so it can answer
+  // from the same collections the exporter reads. Window semantics mirror
+  // job_pipeline/export_static.py so these tabs agree with the dashboard.
+  if (req.method === "GET" && pathname === "/jobs") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const type = reqUrl.searchParams.get("type") || "today";
+        const jobs = await withMongo(
+          (db) => fetchFeedJobs(db, type),
+          { appName: "AtriveoTailorServer" },
+        );
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(jobs));
+      } catch (e) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
+  }
+
+  // ─── On-demand scrape ──────────────────────────────────────────────────────
+  // Replaces the hourly LaunchAgent: the app starts a run, polls status, and
+  // can stop it. See scripts/scrape-control.mjs.
+
+  if (req.method === "GET" && pathname === "/scrape/status") {
+    const state = readScrapeState();
+    const wantLog = reqUrl.searchParams.get("log") === "1";
+    const lines = Number.parseInt(reqUrl.searchParams.get("lines") || "40", 10);
+    res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+    return res.end(JSON.stringify({
+      ok: true,
+      running: isScrapeRunning(),
+      knownPhases: SCRAPE_PHASES,
+      state,
+      estimate: readScrapeEstimate(),
+      logLines: wantLog ? tailScrapeLog(Number.isFinite(lines) ? lines : 40) : undefined,
+    }));
+  }
+
+  if (req.method === "GET" && pathname === "/scrape/log") {
+    const lines = Number.parseInt(reqUrl.searchParams.get("lines") || "200", 10);
+    res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+    return res.end(JSON.stringify({
+      ok: true,
+      lines: tailScrapeLog(Number.isFinite(lines) ? lines : 200),
+    }));
+  }
+
+  if (req.method === "POST" && pathname === "/scrape/start") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      let opts = {};
+      try {
+        opts = raw.trim() ? JSON.parse(raw) : {};
+      } catch {
+        opts = {};
+      }
+      const result = startScrape({
+        skipResume: opts.skipResume === true,
+        skipDeploy: opts.skipDeploy === true,
+      });
+      const status = result.ok ? 200 : (result.code ?? 500);
+      log(result.ok ? `scrape started · ${result.runId}` : `scrape start rejected · ${result.error}`);
+      res.writeHead(status, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(result));
+    });
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/scrape/cancel") {
+    const result = cancelScrape();
+    log(result.ok ? `scrape cancelled · pid ${result.pid}` : `scrape cancel noop · ${result.error}`);
+    res.writeHead(result.ok ? 200 : (result.code ?? 500), { "Content-Type": "application/json" });
+    return res.end(JSON.stringify(result));
   }
 
   if (req.method === "POST" && pathname === "/tailor") {
@@ -1392,7 +1614,7 @@ const server = http.createServer(async (req, res) => {
     (async () => {
       try {
         if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
-        const stats = await withMongo((db) => countActiveCompileJobs(db), { appName: "AtriveoTailorServer" });
+        const stats = await withMongo((db) => countActiveCompileJobs(db, { owner: getWorkerId() }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify({ ok: true, ...stats }));
       } catch (e) {
@@ -1410,7 +1632,11 @@ const server = http.createServer(async (req, res) => {
         if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
         const status = reqUrl.searchParams.get("status") || undefined;
         const limit = Math.min(Number(reqUrl.searchParams.get("limit") || 50), 2000);
-        const jobs = await withMongo((db) => listCompileJobs(db, { status, limit }), { appName: "AtriveoTailorServer" });
+        // Scoped to this machine: its worker is the only one that will build
+        // these, and its filesystem is the only one holding the PDFs.
+        // "all=1" opts back into the whole fleet for debugging.
+        const owner = reqUrl.searchParams.get("all") === "1" ? undefined : getWorkerId();
+        const jobs = await withMongo((db) => listCompileJobs(db, { status, limit, owner }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify({ ok: true, jobs }));
       } catch (e) {
@@ -1580,7 +1806,41 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // POST /manual-jd { job_url, company, title, description }
+  // GET /resume-profile — the editable resume header identity (name, contact,
+  // links, default title, home city). Backs Settings in both the dock and web.
+  if (req.method === "GET" && pathname === "/resume-profile") {
+    try {
+      res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+      res.end(JSON.stringify({ ok: true, profile: loadResumeProfile(), defaults: PROFILE_DEFAULTS }));
+    } catch (e) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+    }
+    return;
+  }
+
+  // PUT /resume-profile { name?, title?, email?, phone?, location?, links… }
+  // Partial patch — omitted fields keep their current value, and blank ones
+  // fall back to the shipped default. Takes effect on the next build.
+  if (req.method === "PUT" && pathname === "/resume-profile") {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      try {
+        const body = JSON.parse(raw || "{}");
+        const profile = saveResumeProfile(body);
+        log(`resume profile updated · ${profile.name} · ${profile.email} · ${profile.location}`);
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: true, profile }));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    });
+    return;
+  }
+
+  // POST /manual-jd { job_url, company, title, location?, description }
   // Stores a hand-pasted JD so the worker's fetchDescription() can find it.
   // Used by the dock's "Build a Resume" (Create) tab for manual:// job URLs.
   if (req.method === "POST" && pathname === "/manual-jd") {
@@ -1612,6 +1872,8 @@ const server = http.createServer(async (req, res) => {
                   job_url: body.job_url,
                   company: body.company || "Unknown",
                   title: body.title || "role",
+                  // Optional — drives the resume header city when supplied.
+                  location: String(body.location || "").trim() || null,
                   score_pct: body.score_pct ?? 100,
                   source: "manual",
                   batch_time: now,
@@ -1708,7 +1970,7 @@ const server = http.createServer(async (req, res) => {
   // GET /serve-pdf?path=...           → inline (browser preview)
   // GET /serve-pdf?path=...&dl=1      → attachment (download)
   if (req.method === "GET" && pathname === "/serve-pdf") {
-    const pdfPath = url.searchParams.get("path");
+    const pdfPath = reqUrl.searchParams.get("path");
     if (!pdfPath || !pdfPath.startsWith(OUT_ROOT)) {
       res.writeHead(400); res.end("invalid path");
       return;
@@ -1719,7 +1981,7 @@ const server = http.createServer(async (req, res) => {
     }
     try {
       const data = fs.readFileSync(pdfPath);
-      const isDownload = url.searchParams.get("dl") === "1";
+      const isDownload = reqUrl.searchParams.get("dl") === "1";
       res.writeHead(200, {
         "Content-Type": "application/pdf",
         "Content-Length": data.length,
@@ -1739,6 +2001,14 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, "127.0.0.1", () => {
   log(`listening on http://localhost:${PORT}`);
+  // Bound to loopback, so this only matters once cloudflared publishes it — but
+  // then /scrape/start is reachable by anyone who knows the tunnel URL, and it
+  // both scrapes and deploys to production. The Pages Function's JWT check does
+  // not help: the tunnel is a second, unauthenticated way in.
+  if (!TAILOR_TOKEN) {
+    log("WARNING: TAILOR_TOKEN is empty — every route, including /scrape/start, is unauthenticated.");
+    log("         Set TAILOR_TOKEN in .env (same value as the Cloudflare env var) to close this.");
+  }
   log(`output → ${OUT_ROOT}`);
   log(`pipeline → ${USE_LEGACY ? `legacy (gemma ${DEFAULT_MODEL})` : `ac (planner ${AC_PLANNER})`}`);
   if (USE_LEGACY) log(`template → ${TEMPLATE}`);

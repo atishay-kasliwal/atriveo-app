@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import AtriveoLogo from "./AtriveoLogo";
+import ScrapeNowButton from "./ScrapeNowButton";
 
 const TOOLS_LINKS = [
   { href: "/weekly", label: "Weekly feed" },
@@ -21,6 +22,8 @@ interface NavItem {
 
 const DAILY: NavItem[] = [
   { href: "/", label: "Signal", match: (p) => p === "/" || p.startsWith("/dashboard") || p.startsWith("/today") },
+  // Spec 1678 — ~180-source aggregator intake, alongside the LinkedIn-only pipeline.
+  { href: "/ever-jobs", label: "Intake", match: (p) => p.startsWith("/ever-jobs") },
 ];
 
 const WORKBENCH: NavItem[] = [
@@ -119,6 +122,8 @@ export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) 
 
           {/* Right cluster */}
           <div className="nav-right-cluster">
+            {/* Scraping is on-demand — this is the only trigger for a run. */}
+            {isAdmin && <ScrapeNowButton />}
             {isAdmin && (
               <Link
                 to="/manage-top-500"

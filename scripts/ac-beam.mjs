@@ -56,6 +56,7 @@ export function beamSearch({
       bank,
       jd,
       title: meta.title,
+      location: meta.location,
       pages,
     });
     const gate = scored.gate;
@@ -88,7 +89,7 @@ export function beamSearch({
   if (!candidates.length) {
     const runtime = buildRuntime(planner, { id: "fallback" }, { jd, bank, company: meta.company });
     const composition = compose(jd, bank, runtime);
-    const scored = scoreResumeCandidate({ composition, bank, jd, title: meta.title, pages });
+    const scored = scoreResumeCandidate({ composition, bank, jd, title: meta.title, location: meta.location, pages });
     return {
       best: { ...scored, variant_id: "fallback", contribution_pruned: [] },
       candidates: [],
