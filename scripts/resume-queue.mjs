@@ -99,6 +99,10 @@ async function applyManifestCacheHit(db, jobUrl, { force = false, planner = DEFA
     run_dir: cached.runDir,
     error: null,
     cached: true,
+    // The cached PDF lives in this machine's artifact store. Without an owner
+    // the row drops out of every owner-scoped queue listing, so the dock never
+    // offers Download and its Resume button only answers "already_success".
+    owner: getWorkerId(),
   });
   return cached;
 }
@@ -219,6 +223,26 @@ export async function resolveLatestSession(db) {
   return { sessionId: latest.session_id, runAt: latest.run_at };
 }
 
+// A run writes one session per pipeline (standard, important, top500, h1b2026,
+// keywords) within seconds; anything this close to the newest belongs to it.
+const RUN_WINDOW_MS = 5 * 60 * 1000;
+
+/**
+ * Every pipeline's session from the latest run. resolveLatestSession alone
+ * returns whichever pipeline wrote last (keywords), a subset of the standard
+ * feed the dock shows, so about a third of each run's feed never got a resume.
+ */
+export async function resolveLatestRunSessionIds(db) {
+  const latest = await resolveLatestSession(db);
+  if (!latest) return [];
+  const since = new Date(new Date(latest.runAt).getTime() - RUN_WINDOW_MS);
+  const sessions = await db.collection("sessions").find(
+    { archived: { $ne: true }, run_at: { $gte: since } },
+    { projection: { session_id: 1 } },
+  ).toArray();
+  return [...new Set(sessions.map((s) => s.session_id))];
+}
+
 /** @deprecated use resolveLatestSession — kept for logging */
 export async function resolveFreshSessionIds(db) {
   const latest = await resolveLatestSession(db);
@@ -325,8 +349,8 @@ export async function purgeStaleQueuedJobs(db) {
 
 /** Hourly auto-queue: only jobs from today's latest scrape session. */
 export async function enqueueFreshSessionJobs(db, { limit = null, minScore = 0, planner = DEFAULT_PLANNER } = {}) {
-  const latest = await resolveLatestSession(db);
-  if (!latest) {
+  const sessionIds = await resolveLatestRunSessionIds(db);
+  if (!sessionIds.length) {
     return [{ skipped: true, reason: "no_fresh_session_today" }];
   }
 
@@ -354,14 +378,17 @@ export async function enqueueFreshSessionJobs(db, { limit = null, minScore = 0, 
       ],
     };
 
-  const jobs = await db.collection("jobs").find(
+  const rows = await db.collection("jobs").find(
     {
-      session_id: latest.sessionId,
+      session_id: { $in: sessionIds },
       ...scoreFilter,
       $or: RESUME_ELIGIBLE_OR,
     },
     findOptions,
   ).toArray();
+  // The same posting appears in several pipelines' sessions; queue it once.
+  const seen = new Set();
+  const jobs = rows.filter((j) => !seen.has(j.job_url) && seen.add(j.job_url));
 
   const results = [];
   for (let i = 0; i < jobs.length; i += 1) {
