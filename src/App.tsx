@@ -3,7 +3,7 @@ import { useAuth } from "./hooks/useAuth";
 import { Top500Provider } from "./context/Top500Context";
 import { ScrapeRunProvider } from "./context/ScrapeRunContext";
 import AppHeader from "./components/AppHeader";
-import ScrapeRunOverlay from "./components/ScrapeRunOverlay";
+import ScrapeRunDock from "./components/ScrapeRunDock";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Weekly from "./pages/Weekly";
@@ -50,7 +50,7 @@ export default function App() {
       <Top500Provider>
         <ScrapeRunProvider>
         {/* Blocks interaction while a run rewrites the feed. */}
-        <ScrapeRunOverlay />
+        <ScrapeRunDock />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
