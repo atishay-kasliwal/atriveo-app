@@ -14,7 +14,7 @@
  *   RESEND_API_KEY   — Resend API key (re_xxxxxxxx)
  *
  * Optional env vars:
- *   NOTIFY_EMAIL     — recipient address  (default: katishay@gmail.com)
+ *   NOTIFY_EMAIL     — recipient address  (default: katishay45@gmail.com)
  *   RESEND_FROM      — sender address     (default: Atriveo Jobs <jobs@atriveo.com>)
  *   JOBS_BASE_URL    — site origin        (default: https://atriveo-app.pages.dev)
  *   JWT_SECRET       — sign a short-lived session for /api/jobs (live feed parity)
@@ -31,7 +31,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ─── config ───────────────────────────────────────────────────────────────────
 
-const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL ?? "katishay@gmail.com";
+const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL ?? "katishay45@gmail.com";
 const RESEND_FROM  = process.env.RESEND_FROM  ?? "Atriveo Jobs <jobs@atriveo.com>";
 const DASHBOARD_URL = "https://atriveo-app.pages.dev";
 const NY_TZ = "America/New_York";
