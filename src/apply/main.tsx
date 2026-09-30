@@ -1,0 +1,12 @@
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "../index.css";
+import "./apply.css";
+import ApplyApp from "./ApplyApp";
+
+// apply.atriveo.com — the application-engine console, admin only.
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <ApplyApp />
+  </StrictMode>,
+);

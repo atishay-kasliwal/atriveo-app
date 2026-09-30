@@ -559,3 +559,22 @@ handled, "Security code not entered" or "Verify email" when it needs you, and a 
 chip from the worker's heartbeat (`engine_control` `worker:<id>`). Employer accounts created by the engine are
 listed under Application insights (passwords masked until you show them). **History** (on each row) opens a drawer with the resume that was used (file, size, checksum), every question with the answer the engine gave and where it came from (profile, answer bank, learned, rule), and the status timeline; it reads `GET /applications/detail?id=`. Sensitive answers show as filled but their values are not stored.
 
+## apply.atriveo.com (application engine console)
+
+The Applications console moved to its own admin-only site, **apply.atriveo.com** (Cloudflare Pages project
+`atriveo-apply`). Same repo and same Pages Functions as application.atriveo.com; `SITE=apply` switches on
+admin-only mode (`functions/_lib/admin.ts`): only emails in `ADMIN_EMAILS` can sign up, sign in or call any API,
+and a signed-in non-admin is signed out. application.atriveo.com is unaffected; `/applications` there redirects.
+
+- Build: `npm run build:apply` → `dist-apply/` (entry `apply.html`, `src/apply/`). Dev: `npm run dev:apply`.
+- Deploy: `npm run deploy:apply` (or `ADMIN_EMAILS="a@x.com,b@y.com" npm run deploy:apply`).
+
+One-time setup:
+1. `npx wrangler pages project create atriveo-apply --production-branch main`
+2. Secrets (use a new random `JWT_SECRET`, not the main site's):
+   `npx wrangler pages secret put JWT_SECRET --project-name atriveo-apply`, and the same for
+   `TAILOR_ORIGIN`, `TAILOR_TOKEN`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (same values as atriveo-app).
+3. `npm run deploy:apply`
+4. Cloudflare dashboard → Workers & Pages → atriveo-apply → Custom domains → add `apply.atriveo.com`.
+5. Google Cloud → the site's OAuth client → add redirect URI `https://apply.atriveo.com/api/auth/callback`.
+

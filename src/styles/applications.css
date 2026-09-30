@@ -333,7 +333,7 @@
 @media (prefers-reduced-motion: reduce) { .apps-drawer { animation: none !important; } }
 
 /* Flex children must be allowed to shrink, or a nowrap chip row widens the whole page. */
-.apps-body > * { min-width: 0; }
+.apps-body > * { min-width: 0; flex-shrink: 0; }   /* the page scrolls; sections keep their height */
 .apps-bar-title { min-width: 0; }
 
 /* ───────────── Application single view (History) ───────────── */
@@ -382,9 +382,9 @@
 .apps-bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .apps-bars li { display: grid; grid-template-columns: 130px 1fr 36px; align-items: center; gap: 10px; font-size: 12.5px; }
 .apps-bars b { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
-.apps-bar { height: 6px; border-radius: 3px; background: var(--muted-bg); overflow: hidden; }
-.apps-bar i { display: block; height: 100%; background: var(--primary); border-radius: 3px; }
-.apps-bar.risk i { background: var(--red); }
+.apps-meter { height: 6px; border-radius: 3px; background: var(--muted-bg); overflow: hidden; }
+.apps-meter i { display: block; height: 100%; background: var(--primary); border-radius: 3px; }
+.apps-meter.risk i { background: var(--red); }
 .apps-proscons { display: grid; grid-template-columns: 1fr; gap: 6px; }
 .apps-proscons ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
 .apps-proscons .pros li::before { content: "✓ "; color: var(--green); }
