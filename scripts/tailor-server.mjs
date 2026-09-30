@@ -36,7 +36,7 @@ import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
-import { applicationsAnalytics } from "./applications-analytics.mjs";
+import { applicationsAnalytics, applicationDetail } from "./applications-analytics.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
 import { getWorkerId } from "./worker-id.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
@@ -1637,6 +1637,24 @@ const server = http.createServer(async (req, res) => {
       });
       child.stdin.end(raw);
     });
+    return;
+  }
+
+  // GET /applications/detail?id= — one application: resume used, every question + answer, timeline (read-only)
+  if (req.method === "GET" && pathname === "/applications/detail") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const id = String(new URL(req.url, "http://x").searchParams.get("id") || "").slice(0, 80);
+        if (!id) throw new Error("id required");
+        const data = await withMongo((db) => applicationDetail(db, id), { appName: "AtriveoTailorServer" });
+        res.writeHead(data.ok ? 200 : 404, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
     return;
   }
 

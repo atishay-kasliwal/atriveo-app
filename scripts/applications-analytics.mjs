@@ -8,7 +8,7 @@ const dayKey = (iso) => (iso ? new Date(iso).toLocaleString("sv-SE", { timeZone:
 
 export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {}) {
   const apps = db.collection("applications");
-  const [statusRows, atsRows, reasonRows, failureRows, pendingRows, records, patternRows, control, boardRows, siteRows, resumeReady, discovered, accountRows] = await Promise.all([
+  const [statusRows, atsRows, reasonRows, failureRows, pendingRows, records, patternRows, control, boardRows, siteRows, resumeReady, discovered, accountRows, workerDocs] = await Promise.all([
     apps.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]).toArray(),
     apps.aggregate([{ $group: { _id: { ats: "$ats", status: "$status" }, n: { $sum: 1 } } }]).toArray(),
     apps.aggregate([{ $match: { status: "NEEDS_REVIEW" } }, { $group: { _id: "$review.reason", n: { $sum: 1 } } }, { $sort: { n: -1 } }]).toArray(),
@@ -38,6 +38,8 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     // Portal accounts the engine created (playatriveo `accounts.email`). Includes the generated
     // password on purpose: this endpoint sits behind the site login and the Dashboard masks it.
     db.collection("application_accounts").find({}).sort({ createdAt: -1 }).limit(100).toArray(),
+    // Worker heartbeats written by playatriveo (`worker:<id>`): online state and Gmail status. No secrets in them.
+    db.collection("engine_control").find({ _id: { $regex: "^worker:" } }).toArray(),
   ]);
 
   const byStatus = Object.fromEntries(statusRows.map((r) => [r._id, r.n]));
@@ -115,6 +117,16 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       };
     })(),
     lastActivityAt: records[0]?.updatedAt ?? null,
+    worker: (() => {
+      const w = [...workerDocs].sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))[0];
+      if (!w) return null;
+      const age = Date.now() - Date.parse(w.updatedAt);
+      return {
+        online: w.status === "online" && age < 3 * 60_000,
+        host: w.host ?? null, concurrency: w.concurrency ?? null, gmailConnected: Boolean(w.gmailConnected),
+        accountsEmail: w.accountsEmail ?? null, updatedAt: w.updatedAt,
+      };
+    })(),
     accounts: accountRows.map((a) => ({
       id: a._id, ats: a.ats, tenant: a.tenant, email: a.email, password: a.password, status: a.status,
       loginUrl: a.loginUrl ?? null, createdAt: a.createdAt, updatedAt: a.updatedAt,
@@ -145,5 +157,47 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
     })),
+  };
+}
+
+
+const SOURCE_LABEL = (p) => {
+  if (!p) return "—";
+  switch (p.source) {
+    case "profile": return `Profile · ${p.path}`;
+    case "answer_bank": return `Answer bank · ${p.scope === "global" ? "everywhere" : String(p.scope).replace("company:", "company ")} · ${p.key}`;
+    case "learned": return "Learned from your earlier answer";
+    case "rule": return `Rule · ${p.ruleId}`;
+    case "policy": return `Policy · ${p.policyId}`;
+    case "manual_review": return "You answered in review";
+    default: return String(p.source);
+  }
+};
+
+/** One application's full record for the History drawer: the resume used, every question with its answer, and the timeline. Read-only. */
+export async function applicationDetail(db, id) {
+  const r = await db.collection("applications").findOne({ _id: id });
+  if (!r) return { ok: false, error: "Application not found" };
+  return {
+    ok: true,
+    id: r._id, company: r.company, title: r.title, ats: r.ats ?? null, status: r.status, url: r.finalUrl ?? r.applyUrl,
+    resume: {
+      fileName: r.resume?.fileName ?? null, path: r.resume?.path ?? null, sha256: r.resume?.sha256 ?? null,
+      bytes: r.resume?.bytes ?? null, verifiedAt: r.resume?.verifiedAt ?? null, sourceJobUrl: r.resume?.sourceJobUrl ?? null,
+    },
+    questions: (r.questions ?? []).map((q) => {
+      const withheld = q.sensitive && q.value == null && q.resolution === "answered";
+      return {
+        label: q.label, step: q.step ?? 0, required: Boolean(q.required), type: q.type,
+        resolution: q.resolution, verified: Boolean(q.verified), sensitive: q.sensitive ?? null,
+        answer: q.declined ? "Decline to self-identify" : q.value ?? null,
+        answerKind: q.declined ? "declined" : q.value != null ? "value" : withheld ? "withheld" : q.resolution === "skipped" ? "blank" : "none",
+        source: SOURCE_LABEL(q.provenance), detail: q.detail ?? null,
+      };
+    }),
+    timeline: (r.history ?? []).map((h) => ({ at: h.at, from: h.from, to: h.to, actor: h.actor, reason: h.reason })),
+    attempts: (r.attempts ?? []).map((a) => ({ n: a.n, startedAt: a.startedAt, endedAt: a.endedAt ?? null, outcome: a.outcome ?? null })),
+    submission: { by: r.submission?.by ?? null, submittedAt: r.submission?.submittedAt ?? null, confirmation: r.submission?.confirmation?.excerpt ?? null },
+    failure: r.failure ? { code: r.failure.code, message: String(r.failure.message ?? "").split("\n")[0].slice(0, 300) } : null,
   };
 }
