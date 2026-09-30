@@ -548,3 +548,14 @@ Do **not** build these — diminishing returns vs trust/ops work:
 ## License
 
 MIT
+
+## Applications page
+
+`/applications` shows the application engine (playatriveo): worker and Gmail status, what it is doing now,
+what needs you (Review opens a side drawer), and collapsed insights. It reads the engine's Mongo data through
+the sidecar (`GET /applications/analytics`, `POST /applications/action`). The email-code process is visible
+there: "Waiting for the security code in Gmail" / "Entering the security code" while a Greenhouse code is
+handled, "Security code not entered" or "Verify email" when it needs you, and a Gmail connected / not connected
+chip from the worker's heartbeat (`engine_control` `worker:<id>`). Employer accounts created by the engine are
+listed under Application insights (passwords masked until you show them). **History** (on each row) opens a drawer with the resume that was used (file, size, checksum), every question with the answer the engine gave and where it came from (profile, answer bank, learned, rule), and the status timeline; it reads `GET /applications/detail?id=`. Sensitive answers show as filled but their values are not stored.
+

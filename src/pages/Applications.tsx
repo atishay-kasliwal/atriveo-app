@@ -38,6 +38,7 @@ interface Analytics {
   byStatus?: Record<string, number>;
   current?: CurrentRow | null;
   lastActivityAt?: string | null;
+  worker?: { online: boolean; host: string | null; concurrency: number | null; gmailConnected: boolean; accountsEmail: string | null; updatedAt: string } | null;
 }
 interface CurrentRow {
   id: string; company: string; title: string; ats: string | null; status: "APPLYING" | "SUBMITTING";
@@ -123,7 +124,14 @@ function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) =
   if (row.submitAttempted) {
     return (
       <div className="apps-review">
-        <p>Submit was already clicked for this application, so it is never retried automatically. Did it go through? Check your email for a confirmation.</p>
+        {emailStepOf(row) === "code" ? (
+          <div className="apps-note">
+            <p><strong>Greenhouse asked for an emailed security code.</strong> {row.reviewDetail}</p>
+            <p>If Gmail is connected the engine normally reads the code and finishes by itself. This one did not get it in time. Check your inbox for a “thank you for applying” email: if it is there, choose “It went through”. If not, choose “It did not go through, retry”, and a fresh code is requested on the next attempt.</p>
+          </div>
+        ) : (
+          <p>Submit was already clicked for this application, so it is never retried automatically. Did it go through? Check your email for a confirmation.</p>
+        )}
         <div className="apps-review-actions">
           <button disabled={busy} onClick={() => run({ action: "mark_applied", applicationId: row.id }, "Marked as applied.")}>✓ It went through</button>
           <button disabled={busy} onClick={() => run({ action: "not_submitted", applicationId: row.id }, "Queued again.")}>It did not go through, retry</button>
@@ -326,8 +334,25 @@ const REASON_LABEL: Record<string, string> = {
   SENSITIVE_QUESTION: "Sensitive question", SUBMIT_APPROVAL: "Approve submit", UNCERTAIN_SUBMISSION: "Confirm submission",
   VALIDATION_FAILED: "Validation failed",
 };
+/** Which email step the engine stopped on, from the engine's own message. */
+function emailStepOf(h: Pick<HistoryRow, "reviewReason" | "reviewDetail">): "code" | "verify" | null {
+  if (h.reviewReason !== "MFA_OR_EMAIL_CODE") return null;
+  return /security code/i.test(h.reviewDetail ?? "") ? "code" : "verify";
+}
+
+/** The engine's live sub-step while it handles an email code, in plain words. */
+function stepLabel(step: string | null): string | null {
+  if (!step) return null;
+  if (step.startsWith("security code · waiting")) return "Waiting for the security code in Gmail";
+  if (step.startsWith("security code · entering")) return "Entering the security code";
+  return step;
+}
+
 function reasonOf(h: HistoryRow): { label: string; tone: "warn" | "bad" } {
   if (h.status === "FAILED") return { label: humanize(h.failureCode ?? "failed"), tone: "bad" };
+  const email = emailStepOf(h);
+  if (email === "code") return { label: "Security code not entered", tone: "warn" };
+  if (email === "verify") return { label: "Verify email", tone: "warn" };
   if (h.submitAttempted) return { label: "Confirm submission", tone: "warn" };
   if (h.reviewReason === "UNKNOWN_QUESTION" || h.reviewReason === "SENSITIVE_QUESTION") {
     const n = h.pending.length;
@@ -335,6 +360,134 @@ function reasonOf(h: HistoryRow): { label: string; tone: "warn" | "bad" } {
     if (n > 1) return { label: `${n} sensitive questions`, tone: "warn" };
   }
   return { label: REASON_LABEL[h.reviewReason ?? ""] ?? humanize(h.reviewReason ?? "needs review"), tone: "warn" };
+}
+
+interface Detail {
+  ok: boolean; error?: string;
+  id: string; company: string; title: string; ats: string | null; status: Status; url: string;
+  resume: { fileName: string | null; path: string | null; sha256: string | null; bytes: number | null; verifiedAt: string | null; sourceJobUrl: string | null };
+  questions: Array<{
+    label: string; step: number; required: boolean; type: string; resolution: "answered" | "needs_review" | "skipped"; verified: boolean;
+    sensitive: string | null; answer: string | null; answerKind: "value" | "declined" | "withheld" | "blank" | "none"; source: string; detail: string | null;
+  }>;
+  timeline: Array<{ at: string; from: string | null; to: string; actor: string; reason: string }>;
+  attempts: Array<{ n: number; startedAt: string; endedAt: string | null; outcome: string | null }>;
+  submission: { by: string | null; submittedAt: string | null; confirmation: string | null };
+  failure: { code: string; message: string } | null;
+}
+
+const bytesLabel = (n: number | null) => (n == null ? "—" : n < 1024 * 1024 ? `${Math.round(n / 1024)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`);
+
+function answerText(q: Detail["questions"][number]): { text: string; muted: boolean } {
+  switch (q.answerKind) {
+    case "value": return { text: q.answer ?? "", muted: false };
+    case "declined": return { text: "Decline to self-identify", muted: false };
+    case "withheld": return { text: "Filled (value not stored: sensitive)", muted: true };
+    case "blank": return { text: "Left blank", muted: true };
+    default: return { text: q.resolution === "needs_review" ? "Waiting for your answer" : "—", muted: true };
+  }
+}
+
+/** Everything the engine did for one application: the resume used, each question with its answer and where it came from, and the timeline. */
+function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void }) {
+  const [detail, setDetail] = useState<Detail | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref.current?.focus();
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  useEffect(() => {
+    let live = true;
+    fetch(`${getTailorServerBase()}/applications/detail?id=${encodeURIComponent(row.id)}`, { credentials: "include", cache: "no-store" })
+      .then(async (res) => { const j = await res.json(); if (!res.ok || j.ok === false) throw new Error(j.error || `HTTP ${res.status}`); return j as Detail; })
+      .then((d) => { if (live) setDetail(d); })
+      .catch((e) => { if (live) setError(e instanceof Error ? e.message : String(e)); });
+    return () => { live = false; };
+  }, [row.id]);
+
+  const qs = useMemo(() => {
+    const f = filter.trim().toLowerCase();
+    return (detail?.questions ?? []).filter((q) => !f || `${q.label} ${q.answer ?? ""} ${q.source}`.toLowerCase().includes(f));
+  }, [detail, filter]);
+  const answered = detail?.questions.filter((q) => q.resolution === "answered").length ?? 0;
+
+  return (
+    <div className="apps-drawer-wrap">
+      <div className="apps-scrim" onClick={onClose} />
+      <aside className="apps-drawer wide" role="dialog" aria-modal="true" aria-label={`History for ${row.company}`} tabIndex={-1} ref={ref}>
+        <header>
+          <CompanyLogo company={row.company} size="md" />
+          <div className="apps-drawer-title"><strong>{row.company}</strong><span>{row.title}</span></div>
+          <StatusPill status={row.status} />
+          <button className="apps-x" onClick={onClose} aria-label="Close history">✕</button>
+        </header>
+        <div className="apps-drawer-body apps-hist">
+          {error && <p className="apps-error">Couldn't load the history: {error}</p>}
+          {!detail && !error && <p className="apps-muted">Loading…</p>}
+          {detail && (
+            <>
+              <section>
+                <h3>Resume used</h3>
+                {detail.resume.fileName ? (
+                  <dl className="apps-status">
+                    <dt>File</dt><dd>{detail.resume.fileName} <span className="apps-muted">{bytesLabel(detail.resume.bytes)}</span></dd>
+                    <dt>Verified</dt><dd>{detail.resume.verifiedAt ? when(detail.resume.verifiedAt) : "—"}{detail.resume.sha256 ? <span className="apps-muted"> · sha256 {detail.resume.sha256.slice(0, 12)}…</span> : null}</dd>
+                    {detail.resume.sourceJobUrl && <><dt>Made for</dt><dd><a href={detail.resume.sourceJobUrl} target="_blank" rel="noreferrer">The tailored job ↗</a></dd></>}
+                    {detail.resume.path && <><dt>On your Mac</dt><dd><code>{detail.resume.path}</code></dd></>}
+                  </dl>
+                ) : <p className="apps-muted">No resume recorded yet.</p>}
+              </section>
+
+              <section>
+                <div className="apps-card-head">
+                  <h3>Questions and answers <span className="apps-count">{answered}/{detail.questions.length}</span></h3>
+                  <input className="apps-hist-search" placeholder="Filter" aria-label="Filter questions" value={filter} onChange={(e) => setFilter(e.target.value)} />
+                </div>
+                {qs.length === 0 ? <p className="apps-muted">No questions recorded.</p> : (
+                  <ul className="apps-qa">
+                    {qs.map((q, i) => {
+                      const a = answerText(q);
+                      return (
+                        <li key={`${q.label}-${i}`}>
+                          <div className="apps-qa-q">{q.label}{q.required ? " *" : ""}{q.sensitive ? <em> · {q.sensitive.replace(/_/g, " ")}</em> : null}</div>
+                          <div className={`apps-qa-a ${a.muted ? "muted" : ""}`}>{a.text}</div>
+                          <div className="apps-qa-meta">
+                            <span>{q.source}</span>
+                            {q.resolution === "answered" && <span className={q.verified ? "ok" : "warn"}>{q.verified ? "✓ read back from the form" : "not read back"}</span>}
+                            {q.resolution === "needs_review" && <span className="warn">needs your answer</span>}
+                            {q.detail && q.resolution !== "answered" ? <span>{q.detail}</span> : null}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </section>
+
+              <section>
+                <h3>Timeline</h3>
+                <ol className="apps-timeline">
+                  {detail.timeline.map((t, i) => (
+                    <li key={i}>
+                      <span className="apps-muted">{when(t.at)}</span>
+                      <span>{t.from ? `${humanize(t.from)} → ` : ""}<strong>{humanize(t.to)}</strong> <span className="apps-muted">· {t.actor}</span></span>
+                      {t.reason && <span className="apps-muted">{t.reason}</span>}
+                    </li>
+                  ))}
+                </ol>
+                {detail.submission.confirmation && <p className="apps-muted">Confirmation: {detail.submission.confirmation}</p>}
+                {detail.failure && <p className="apps-muted">Last failure: {humanize(detail.failure.code)} — {detail.failure.message}</p>}
+              </section>
+            </>
+          )}
+        </div>
+      </aside>
+    </div>
+  );
 }
 
 function Stat({ label, value, tone, sub }: { label: string; value: string | number; tone?: "warn" | "bad" | "good"; sub?: string }) {
@@ -420,7 +573,7 @@ function CurrentActivity({ data }: { data: Analytics }) {
           <p className="apps-activity-line">
             <span className="apps-pulse" aria-hidden />
             {cur.status === "SUBMITTING" ? "Submitting application" : "Filling application"}
-            {cur.step ? <span className="apps-muted"> · {cur.step}</span> : null}
+            {stepLabel(cur.step) ? <span className="apps-muted"> · {stepLabel(cur.step)}</span> : null}
             {cur.attempt ? <span className="apps-muted"> · attempt {cur.attempt}</span> : null}
           </p>
         </div>
@@ -437,7 +590,7 @@ function CurrentActivity({ data }: { data: Analytics }) {
   );
 }
 
-function AttentionPanel({ rows, onReview, onRetry }: { rows: HistoryRow[]; onReview: (id: string) => void; onRetry: (id: string) => void }) {
+function AttentionPanel({ rows, onReview, onRetry, onHistory }: { rows: HistoryRow[]; onReview: (id: string) => void; onRetry: (id: string) => void; onHistory: (id: string) => void }) {
   const [all, setAll] = useState(false);
   const shown = all ? rows : rows.slice(0, 4);
   return (
@@ -461,6 +614,7 @@ function AttentionPanel({ rows, onReview, onRetry }: { rows: HistoryRow[]; onRev
                   </div>
                   <span className={`apps-tag ${r.tone}`}>{r.label}</span>
                   <span className="apps-row-act">
+                    <button className="apps-link" onClick={() => onHistory(h.id)}>History</button>
                     {h.status === "FAILED"
                       ? <button className="apps-btn" onClick={() => onRetry(h.id)}>Retry</button>
                       : <button className="apps-btn accent" onClick={() => onReview(h.id)}>Review</button>}
@@ -485,6 +639,7 @@ export default function Applications() {
   const [filter, setFilter] = useState<Status | "ALL">("ALL");
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [historyId, setHistoryId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -546,7 +701,14 @@ export default function Applications() {
               <div className="apps-bar-top">
                 <div className="apps-bar-title">
                   <h1>Application Engine</h1>
-                  <span className={`apps-state ${working ? "on" : ""}`}><i aria-hidden />{working ? "Working" : "Idle"}</span>
+                  {data.worker && !data.worker.online
+                    ? <span className="apps-state bad" title={`Last seen ${when(data.worker.updatedAt)}`}><i aria-hidden />Worker offline</span>
+                    : <span className={`apps-state ${working ? "on" : ""}`}><i aria-hidden />{working ? "Working" : "Idle"}</span>}
+                  {data.worker && (
+                    <span className={`apps-state ${data.worker.gmailConnected ? "" : "warn"}`} title={data.worker.gmailConnected ? "Emailed security codes and verification links are handled automatically" : "Run npm run apply:gmail-auth on the Mac so codes are entered automatically"}>
+                      Gmail {data.worker.gmailConnected ? "connected" : "not connected"}
+                    </span>
+                  )}
                   {data.killSwitch && (
                     <span className={`apps-state ${data.killSwitch.enabled ? "" : "bad"}`} title={data.killSwitch.reason ?? undefined}>
                       Submissions {data.killSwitch.enabled ? "allowed" : `blocked${data.killSwitch.reason ? `: ${data.killSwitch.reason}` : ""}`}
@@ -567,7 +729,7 @@ export default function Applications() {
 
             <div className="apps-ops">
               <CurrentActivity data={data} />
-              <AttentionPanel rows={attention} onReview={setOpenId} onRetry={retry} />
+              <AttentionPanel rows={attention} onReview={setOpenId} onRetry={retry} onHistory={setHistoryId} />
             </div>
 
             <section className="apps-insights" aria-labelledby="ins-title">
@@ -632,6 +794,7 @@ export default function Applications() {
                           <td className="apps-row-actions">
                             {h.status === "NEEDS_REVIEW" && <button className="apps-link" onClick={() => setOpenId(h.id)}>Review</button>}
                             {h.status === "FAILED" && <button className="apps-link" onClick={() => retry(h.id)}>Retry</button>}
+                            <button className="apps-link" onClick={() => setHistoryId(h.id)}>History</button>
                             <a href={h.url} target="_blank" rel="noreferrer">Open</a>
                           </td>
                         </tr>
@@ -672,6 +835,10 @@ export default function Applications() {
         )}
       </main>
 
+      {historyId && data && (() => {
+        const hr = data.history.find((h) => h.id === historyId);
+        return hr ? <HistoryDrawer row={hr} onClose={() => setHistoryId(null)} /> : null;
+      })()}
       {openRow && <ReviewDrawer row={openRow} onClose={closeDrawer} onDone={done} />}
       {notice && <p className="apps-toast" role="status">{notice}</p>}
     </div>
