@@ -45,6 +45,8 @@
     "ats_board": null,
     "ats_posting_id": null,
     "job_url_direct": null,
+    "apply_link_checked_at": "2026-09-30T21:51:26.335Z",
+    "apply_link_kind": "easy_apply",
     "ats_score": 56,
     "fit_score": 13
   },
@@ -88,6 +90,17 @@
       "folder": "Amazon (29thSeptember)",
       "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-09-29/Amazon (29thSeptember)/Atishay Kasliwal.pdf",
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-09-29/Amazon (29thSeptember)"
+    },
+    "apply_link_checked_at": "2026-09-30T21:54:24.123Z",
+    "apply_link_kind": "external",
+    "job_url_direct": "https://www.amazon.jobs/jobs/10563738/software-development-engineer-advertising-services?cmpid=SPLICX0248M&utm_source=linkedin.com&utm_campaign=cxro&utm_medium=social_media&utm_content=job_posting&ss=paid",
+    "application": {
+      "applicationId": "5727dcf0-4a9d-4b3b-9d49-4bc39151daa9",
+      "applicationKey": "url:https://www.amazon.jobs/jobs/10563738/software-development-engineer-advertising-services?cmpid=SPLICX0248M&ss=paid",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UPLOAD_UNVERIFIED",
+      "ats": "generic",
+      "updatedAt": "2026-09-30T21:55:16.833Z"
     },
     "ats_score": 42,
     "fit_score": 7
@@ -668,7 +681,7 @@
     "ats_posting_id": null,
     "job_url_direct": null,
     "ats_score": 75,
-    "fit_score": 15
+    "fit_score": 13
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4471960493",
@@ -3212,7 +3225,7 @@
     "ats_posting_id": null,
     "job_url_direct": null,
     "ats_score": 27,
-    "fit_score": 17
+    "fit_score": 15
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473566140",
@@ -3472,7 +3485,7 @@
     "company": "Coinbase",
     "competition_score": 0,
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://grnh.se/zb2xnl6h1us?gh_src=20687b321us",
     "level": "Entry",
     "location": "New York, NY",
     "max_exp": null,
@@ -3506,6 +3519,16 @@
       "folder": "Coinbase (29thSeptember)",
       "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-09-29/Coinbase (29thSeptember)/Atishay Kasliwal.pdf",
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-09-29/Coinbase (29thSeptember)"
+    },
+    "apply_link_checked_at": "2026-09-30T21:52:28.581Z",
+    "apply_link_kind": "external",
+    "application": {
+      "applicationId": "89de9888-e0b9-4966-9ff3-b6b820e09863",
+      "applicationKey": "url:https://grnh.se/zb2xnl6h1us",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": null,
+      "updatedAt": "2026-09-30T21:53:10.462Z"
     },
     "ats_score": 40,
     "fit_score": 5
@@ -3925,7 +3948,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-09-29/EarlyWarning (29thSeptember)"
     },
     "ats_score": 90,
-    "fit_score": 10
+    "fit_score": 11
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473558295",
@@ -3970,7 +3993,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-09-29/EarlyWarning (29thSeptember)-2"
     },
     "ats_score": 90,
-    "fit_score": 10
+    "fit_score": 11
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473554348",
@@ -4015,7 +4038,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-09-29/EarlyWarning (29thSeptember)-3"
     },
     "ats_score": 90,
-    "fit_score": 10
+    "fit_score": 11
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4471968255",
@@ -4797,7 +4820,7 @@
     "company": "Deloitte",
     "competition_score": 0,
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://ars2.equest.com/?response_id=dfca5aaa47a58cee272e50837c18e7c2",
     "level": "Mid",
     "location": "Rochester, NY",
     "max_exp": null,
@@ -4831,6 +4854,16 @@
       "folder": "Deloitte (29thSeptember)",
       "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-09-29/Deloitte (29thSeptember)/Atishay Kasliwal.pdf",
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-09-29/Deloitte (29thSeptember)"
+    },
+    "apply_link_checked_at": "2026-09-30T21:54:50.651Z",
+    "apply_link_kind": "external",
+    "application": {
+      "applicationId": "75410bc2-1ac3-497a-90ca-6cc848b8dd42",
+      "applicationKey": "url:https://ars2.equest.com/?response_id=dfca5aaa47a58cee272e50837c18e7c2",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "generic",
+      "updatedAt": "2026-09-30T21:55:00.492Z"
     },
     "ats_score": 37,
     "fit_score": 4
@@ -5655,7 +5688,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-09-29/LiveRamp (29thSeptember)"
     },
     "ats_score": 53,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "session_id": "2026-09-30T00:59:40Z",
@@ -5986,7 +6019,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-09-30/UniversityOfPittsburgh (30thSeptember)"
     },
     "ats_score": 0,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4471947591",
