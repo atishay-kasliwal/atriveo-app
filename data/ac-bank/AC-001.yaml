@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Engineered an event-driven FastAPI pipeline on AWS over 7 years of FOMC data cutting macro analysis from 3 days to
-      under 20 minutes at 67.7% accuracy.
+      Constructed an event-driven FastAPI pipeline on AWS spanning 7 years of FOMC data, delivering 67.7%
+      forecasting accuracy for macro analysis.

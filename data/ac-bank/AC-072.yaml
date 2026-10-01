@@ -29,5 +29,5 @@ variants:
     emphasis: infra
     strength: 8
     text: >-
-      Deployed 8 microservices with Docker Compose spanning 3-broker Kafka, Elasticsearch,
-      and Redis-backed monitoring stacks.
+      Arranged 8 microservices with Docker Compose spanning 3-broker Kafka, Elasticsearch, and Redis-backed
+      monitoring stacks.

@@ -38,7 +38,7 @@ variants:
     emphasis: product
     strength: 9
     text: >-
-      Implemented Python human-in-the-loop mask review so physicians could correct AI segmentations on edge cases
-      improving clinical trust in production workflows.
+      Instituted Python human-in-the-loop mask review so physicians could correct AI segmentations on edge
+      cases improving clinical trust in production workflows.
 signature_technologies:
   - Python

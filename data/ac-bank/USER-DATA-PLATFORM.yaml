@@ -1,5 +1,5 @@
 # User Data Platform | Canonical achievement bank (review file)
-# Bank v50
+# Bank v52
 # Lint: npm run ac:bullet-lint -- --role user-data-platform
 
 role:
@@ -39,53 +39,53 @@ achievements:
   - id: AC-153
     theme: platform-ownership
     resume_bullet: >-
-      Built Python a FastAPI external-agent sample exercising the full /api/v1 consent
-      flow with client-side X25519 and AES-GCM decryption.
+      Demonstrated the full /api/v1 consent flow in a Python FastAPI external-agent sample with client-side
+      X25519 and AES-GCM decryption.
   - id: AC-154
     theme: cryptography
     resume_bullet: >-
-      Implemented X25519 and AES-GCM scoped-export decryption validating ECDH unwrap in
-      1.3 ms warm latency for production Hushh wire contracts.
+      Reinforced X25519 and AES-GCM scoped-export decryption validating ECDH unwrap in 1.3 ms warm latency for
+      production Hushh wire contracts.
   - id: AC-155
     theme: principles
     resume_bullet: >-
-      Built Python documentation of 4 trust invariants covering BYOK key boundaries,
-      scoped consent tokens, and append-only audit receipts.
+      Documented 4 trust invariants for the Python platform covering BYOK key boundaries, scoped consent
+      tokens, and append-only audit receipts.
   - id: AC-156
     theme: mcp-demo
     resume_bullet: >-
-      Built a Claude Desktop MCP demo connecting consented Hushh vault reads into a live
-      production agent workflow over /api/v1.
+      Illustrated consented Hushh vault reads in a live production agent workflow through a Claude Desktop MCP
+      demo over /api/v1.
   - id: AC-157
     theme: consent
     resume_bullet: >-
-      Engineered FastAPI a consent-first /api/v1 flow from scope discovery through
-      approval polling to client-side AES-GCM decryption.
+      Composed a FastAPI consent-first /api/v1 flow from scope discovery through approval polling to
+      client-side AES-GCM decryption.
   - id: AC-158
     theme: architecture
     resume_bullet: >-
-      Built Python gap analysis mapping an always-on platform design to the production
-      Hushh consent protocol across 4 invariants.
+      Conducted a Python gap analysis mapping an always-on platform design to the production Hushh consent
+      protocol across 4 invariants.
   - id: AC-159
     theme: testing
     resume_bullet: >-
-      Shipped FastAPI mock-mode /ask endpoints verifying the decryption contract locally
-      in 1.3 ms without developer tokens.
+      Proved the decryption contract locally in 1.3 ms with FastAPI mock-mode /ask endpoints and no developer
+      tokens.
   - id: AC-160
     theme: authorization
     resume_bullet: >-
-      Integrated Python scoped capability tokens with attr.domain path grammar for
-      time-bounded access across 4 trust invariants in production.
+      Assigned time-bounded access through Python scoped capability tokens with attr.domain path grammar
+      across 4 trust invariants in production.
   - id: AC-161
     theme: planning
     resume_bullet: >-
-      Built a Python 90-day roadmap sequencing 7 platform tiles for external developer
-      onboarding to the consent API in production.
+      Planned a Python 90-day roadmap sequencing 7 platform tiles for external developer onboarding to the
+      consent API in production.
   - id: AC-162
     theme: verification
     resume_bullet: >-
-      Built Python verified mock smoke tests documenting end-to-end X25519-AES256-GCM
-      decryption against the Hushh wire contract in production.
+      Wrote Python mock smoke tests documenting end-to-end X25519-AES256-GCM decryption against the Hushh wire
+      contract in production.
 selection_examples:
   backend_jd:
     typical_pick: [AC-153, AC-157]

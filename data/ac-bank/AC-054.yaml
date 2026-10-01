@@ -30,5 +30,5 @@ variants:
     emphasis: ai
     strength: 9
     text: >-
-      Built a LangChain RAG pipeline handling 2K+ daily queries to power contextual job search
-      across indexed applications.
+      Retrieved context for 2K+ daily job-search queries with a LangChain RAG pipeline across indexed
+      applications.

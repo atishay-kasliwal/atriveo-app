@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Implemented MCP-based agent orchestration in Python across 3+ financial tool-use workflows connecting LLM agents
-      to external APIs with structured evaluation benchmarks.
+      Integrated LLM agents with external financial APIs through MCP-based orchestration in Python across 3+
+      tool-use workflows with structured evaluation benchmarks.

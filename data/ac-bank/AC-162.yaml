@@ -27,5 +27,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Built Python verified mock smoke tests documenting end-to-end X25519-AES256-GCM decryption against the Hushh wire
+      Wrote Python mock smoke tests documenting end-to-end X25519-AES256-GCM decryption against the Hushh wire
       contract in production.

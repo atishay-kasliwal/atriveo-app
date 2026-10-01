@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Built a Python and LangChain 3-agent RL debate system achieving 60% directional accuracy across 30 S&P 500 stocks
-      on 7d 30d and 90d forecasting windows in production.
+      Orchestrated a Python and LangChain 3-agent RL debate system achieving 60% directional accuracy across
+      30 S&P 500 stocks on 7d 30d and 90d forecasting windows in production.

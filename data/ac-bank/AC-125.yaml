@@ -26,5 +26,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Built Express.js role-based access control separating Admin, Doctor, and Patient permissions across 3 protected
-      API route groups in production.
+      Defined Express.js role-based access control separating Admin, Doctor, and Patient permissions across 3
+      protected API route groups in production.

@@ -36,5 +36,5 @@ variants:
     emphasis: forecasting
     strength: 9
     text: >-
-      Built Python 1,000-run Monte Carlo simulation producing 90% confidence interval coverage for probabilistic sales
-      forecast uncertainty.
+      Computed a 1,000-run Python Monte Carlo simulation producing 90% confidence interval coverage for
+      probabilistic sales forecast uncertainty.

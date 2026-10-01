@@ -27,5 +27,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Engineered Python Kaplan-Meier and Cox survival models using lifelines on 73-patient clinical research cohorts
-      from 2020–2022.
+      Predicted survival with Python Kaplan-Meier and Cox models using lifelines on 73-patient clinical
+      research cohorts from 2020–2022.

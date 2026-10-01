@@ -10,13 +10,15 @@ import { loadBank } from "./ac-bank.mjs";
 import { scoreStoryTriple } from "./ac-story-select.mjs";
 
 const WEAK_VERBS = /^(worked on|helped|assisted|participated|used|supported|involved in)\b/i;
-const STRONG_VERBS = /^(architected|built|designed|developed|engineered|implemented|integrated|deployed|automated|standardized|reduced|accelerated|eliminated|unified|enabled|scaled|extracted|synthesized|created|launched|shipped|owned|sustained|delivered|replaced|converted|documented|led|cut|expanded|processed)/i;
+const actionVerbs = JSON.parse(fs.readFileSync(path.join("data/ac-bank/HARVARD_ACTION_VERBS.json"), "utf8"));
+const STRONG_VERBS = new Set(Object.values(actionVerbs.categories).flat().map((verb) => verb.toLowerCase()));
+const GENERIC_VERBS = new Set(["built", "developed", "trained"]);
 
 const MAX_WORDS = 35;
 const MIN_WORDS = 12;
 const MAX_AND = 2;
 const MAX_COMMAS = 2;
-const MAX_SIGNATURE_TECH = 2;
+const MAX_SIGNATURE_TECH = 3;
 
 const BANNED_PUFFERY = /\b(modern|advanced|innovative|cutting-edge|cloud-native|cloud native)\b/i;
 const BANNED_RESEARCH_STONY = /\bresearch\w*\b/i;
@@ -61,7 +63,9 @@ function lintBullet(ac, text) {
   if (andCount > MAX_AND) issues.push(`too many "and" clauses (${andCount})`);
   if (commaCount > MAX_COMMAS) issues.push(`too many commas (${commaCount})`);
   if (WEAK_VERBS.test(text.trim())) issues.push("weak opening verb");
-  if (!STRONG_VERBS.test(firstWord)) issues.push(`verb "${firstWord}" not in strong list`);
+  if (!STRONG_VERBS.has(firstWord.toLowerCase()) || GENERIC_VERBS.has(firstWord.toLowerCase())) {
+    issues.push(`verb "${firstWord}" is not an allowed Harvard action verb`);
+  }
   if (BANNED_PUFFERY.test(text)) issues.push("banned puffery (modern/advanced/innovative/cloud-native)");
   if (ac.role === "stony-brook" && BANNED_RESEARCH_STONY.test(text)) {
     issues.push('banned word "research" on Stony Brook bullets — use analysis, analytics, or analysts');
@@ -86,7 +90,7 @@ function lintBullet(ac, text) {
   if (words > MAX_WORDS || words < MIN_WORDS) score -= 2;
   if (andCount > MAX_AND) score -= 1;
   if (commaCount > MAX_COMMAS) score -= 0.5;
-  if (!STRONG_VERBS.test(firstWord)) score -= 1.5;
+  if (!STRONG_VERBS.has(firstWord.toLowerCase()) || GENERIC_VERBS.has(firstWord.toLowerCase())) score -= 1.5;
   if (WEAK_VERBS.test(text.trim())) score -= 2;
   if (BANNED_PUFFERY.test(text)) score -= 1;
   if ((ac.signature_technologies || []).length > MAX_SIGNATURE_TECH) score -= 1;

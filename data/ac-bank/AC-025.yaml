@@ -12,8 +12,9 @@ concepts_claimed:
   - ai
 signature_technologies:
   - LangChain
-  - Python
-fact: Production RAG with LangChain and AWS — 18% accuracy lift in evaluations.
+  - Pinecone
+  - AWS
+fact: Production RAG with LangChain and AWS — 18% accuracy lift in evaluations; retrieval moved from ChromaDB to Pinecone, while ChromaDB remains in lower-cost workflows.
 capabilities:
   ai: 90
   backend: 78
@@ -25,17 +26,18 @@ strength:
   recruiter: 9
 ats_keywords:
   - LangChain
-  - Python
+  - Pinecone
+  - AWS
 facets:
   default:
     phrase: production-rag
     keywords:
       - langchain
-      - python
+      - pinecone
 variants:
   - facet: default
     emphasis: default
     strength: 9
     text: >-
-      Built a production Python RAG pipeline with LangChain vector retrieval and AWS inference APIs delivering 18%
-      accuracy lift in macro analysis evaluations.
+      Engineered production RAG with LangChain and Pinecone retrieval on AWS, delivering 18% accuracy lift in
+      macro analysis evaluations.

@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Automated timesheet submission on AWS Lambda and SQS for 3,000 employees eliminating manual weekly filing across
-      production operations.
+      Upgraded timesheet submission to AWS Lambda and SQS for 3,000 employees eliminating manual weekly filing
+      across production operations.

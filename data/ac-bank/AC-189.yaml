@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Reduced ERP API latency from 350ms to 80ms on a Python and AWS Lambda serverless platform serving 3K+ daily
-      production users.
+      Optimized ERP API latency from 350ms to 80ms on a Python and AWS Lambda serverless platform serving 3K+
+      daily production users.

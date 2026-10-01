@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Built FastAPI ingestion APIs on AWS loading 200K+ financial records into macro analytics pipelines with validated
-      schemas for downstream NLP and forecasting.
+      Programmed FastAPI ingestion APIs on AWS loading 200K+ financial records into macro analytics pipelines
+      with validated schemas for downstream NLP and forecasting.

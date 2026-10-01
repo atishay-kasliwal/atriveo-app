@@ -28,5 +28,5 @@ variants:
     emphasis: consensus
     strength: 10
     text: >-
-      Implemented Raft consensus with NuRaft quorum writes, replicating policy and claim events
-      across 3 nodes before acknowledgment.
+      Implemented Raft consensus with NuRaft quorum writes, replicating policy and claim events across 3 nodes
+      before acknowledgment.
