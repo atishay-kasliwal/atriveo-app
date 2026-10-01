@@ -248,7 +248,7 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
                   {actionError && <p className="apps-q-note warn" role="alert">{actionError}</p>}
                   {heldSelected && <p className="apps-q-note warn">{heldSelected}</p>}
                   <div className="rv-actions-row">
-                    <button className="rv-primary" disabled={busy || blocked || selected.companySubmittedToday} onClick={() => void approve(selected)}>
+                    <button className="rv-primary" disabled={busy || blocked || Boolean(heldSelected)} onClick={() => void approve(selected)}>
                       {busy ? "Working…" : "Approve and submit"}
                     </button>
                     {confirmSkip
