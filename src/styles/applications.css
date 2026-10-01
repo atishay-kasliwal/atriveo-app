@@ -413,3 +413,13 @@
 .apps-score-missing { margin-top: 4px; font-size: 12px; line-height: 1.4; color: var(--amber); overflow-wrap: anywhere; }
 .apps-score-missing-label { color: var(--muted-fg); }
 .apps-score-missing .apps-link { font-size: 12px; min-height: 0; padding: 0; }
+
+/* Employer responses (inbox watcher) */
+.apps-subhead { font-size: 13px; font-weight: 600; margin: 4px 0 8px; }
+.apps-inbox-list { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 8px; }
+.apps-inbox-item { border: 1px solid var(--border-col); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; min-width: 0; }
+.apps-select { background: var(--input-bg); color: var(--foreground); border: 1px solid var(--border-col); border-radius: 6px; padding: 4px 8px; font-size: 12px; max-width: 100%; min-width: 0; }
+.apps-inbox-item .apps-cards-id { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.apps-inbox-item .apps-cards-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.apps-inbox-item .apps-cards-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+@media (max-width: 640px) { .apps-hide-narrow { display: none; } }

@@ -6,9 +6,43 @@
 const TZ = "America/New_York";
 const dayKey = (iso) => (iso ? new Date(iso).toLocaleString("sv-SE", { timeZone: TZ }).slice(0, 10) : null);
 
+const ROLEISH = /\b(engineer|developer|scientist|analyst|intern|manager|designer)\b/i;
+const companyOf = (names = []) => names.find((c) => /[A-Z]/.test(c) && !ROLEISH.test(c)) ?? names.find((c) => !ROLEISH.test(c)) ?? null;
+
+/** Employer responses for the dashboard: counts, recent mails, and the ones waiting for you to confirm. */
+function inboxSummary(rows, records) {
+  const mail = rows.filter((e) => e.state !== "dismissed" && e.state !== "undone");
+  const appLabel = new Map(records.map((r) => [r._id, `${r.company} · ${r.title}`]));
+  const base = (e) => ({ id: e._id, at: e.receivedAt, kind: e.kind, subject: e.subject, company: companyOf(e.companies), title: e.titles?.[0] ?? null });
+  const recordedIn = (e) => [
+    e.state === "updated" ? "engine" : null,
+    // no_change = already there (e.g. a confirmation for a job you'd already tracked).
+    e.tracker && ["updated", "created", "no_change"].includes(e.tracker.state) ? "tracker" : null,
+    e.feed && ["updated", "no_change"].includes(e.feed.state) ? "feed" : null,
+  ].filter(Boolean);
+  return {
+    days: 60,
+    confirmed: mail.filter((e) => e.kind === "applied").length,
+    rejected: mail.filter((e) => e.kind === "rejected").length,
+    recent: mail.slice(0, 25).map((e) => ({ ...base(e), recordedIn: recordedIn(e), note: e.tracker?.reason ?? null })),
+    confirm: [
+      ...mail.filter((e) => e.tracker?.state === "needs_confirm").map((e) => ({
+        ...base(e), target: "tracker",
+        reason: String(e.tracker.reason ?? "").replace(/^tracker: /, "").replace(/ · candidates:.*$/, ""),
+        candidates: e.tracker.candidates ?? [],
+      })),
+      ...mail.filter((e) => e.state === "needs_confirm" && !e.tracker).map((e) => ({
+        ...base(e), target: "engine", reason: e.match?.reason ?? "",
+        candidates: (e.match?.candidates ?? []).map((id) => ({ id, label: appLabel.get(id) ?? id })),
+      })),
+    ],
+  };
+}
+
 export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {}) {
   const apps = db.collection("applications");
-  const [statusRows, atsRows, reasonRows, failureRows, pendingRows, records, patternRows, control, boardRows, siteRows, resumeReady, discovered, accountRows, workerDocs] = await Promise.all([
+  const inboxSince = new Date(Date.now() - 60 * 86_400_000).toISOString();
+  const [statusRows, atsRows, reasonRows, failureRows, pendingRows, records, patternRows, control, boardRows, siteRows, resumeReady, discovered, accountRows, workerDocs, inboxRows, queueReportDoc] = await Promise.all([
     apps.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]).toArray(),
     apps.aggregate([{ $group: { _id: { ats: "$ats", status: "$status" }, n: { $sum: 1 } } }]).toArray(),
     apps.aggregate([{ $match: { status: "NEEDS_REVIEW" } }, { $group: { _id: "$review.reason", n: { $sum: 1 } } }, { $sort: { n: -1 } }]).toArray(),
@@ -24,7 +58,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       projection: {
         company: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, applyUrl: 1, finalUrl: 1, attemptCount: 1, createdAt: 1, updatedAt: 1,
         lifecycle: 1, step: 1, attempts: 1, "review.reason": 1, "review.detail": 1, "review.pending": 1, "failure.code": 1, "failure.message": 1,
-        "submission.by": 1, "submission.submittedAt": 1, "submission.attemptedAt": 1, "domain.domain": 1, source: 1,
+        "submission.by": 1, "submission.submittedAt": 1, "submission.attemptedAt": 1, "domain.domain": 1, source: 1, outcome: 1,
       },
     }).sort({ updatedAt: -1 }).limit(limit).toArray(),
     db.collection("form_patterns").aggregate([{ $group: { _id: "$trust", n: { $sum: 1 } } }]).toArray(),
@@ -40,6 +74,12 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     db.collection("application_accounts").find({}).sort({ createdAt: -1 }).limit(100).toArray(),
     // Worker heartbeats written by playatriveo (`worker:<id>`): online state and Gmail status. No secrets in them.
     db.collection("engine_control").find({ _id: { $regex: "^worker:" } }).toArray(),
+    // Inbox watcher (playatriveo): confirmation / rejection mails and where they were recorded. Metadata only.
+    db.collection("inbox_events").find({ receivedAt: { $gte: inboxSince }, kind: { $in: ["applied", "rejected"] } }, {
+      projection: { receivedAt: 1, kind: 1, subject: 1, companies: 1, titles: 1, state: 1, match: 1, tracker: 1, feed: 1 },
+    }).sort({ receivedAt: -1 }).limit(500).toArray(),
+    // "Why aren't jobs applied" — computed by the playatriveo worker with the engine's own rules.
+    db.collection("engine_control").findOne({ _id: "queue_report" }),
   ]);
 
   const byStatus = Object.fromEntries(statusRows.map((r) => [r._id, r.n]));
@@ -113,7 +153,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     funnel: [
       { stage: "Jobs found", n: discovered.length },
       { stage: "Resume ready", n: resumeReady.length },
-      { stage: "Queued to apply", n: total },
+      { stage: "Sent to the engine", n: total },
       { stage: "Applied", n: applied },
     ],
     byStatus,
@@ -151,6 +191,8 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
         accountsEmail: w.accountsEmail ?? null, updatedAt: w.updatedAt,
       };
     })(),
+    inbox: inboxSummary(inboxRows, records),
+    queueReport: queueReportDoc ? (({ _id, ...r }) => r)(queueReportDoc) : null,
     accounts: accountRows.map((a) => ({
       id: a._id, ats: a.ats, tenant: a.tenant, email: a.email, password: a.password, status: a.status,
       loginUrl: a.loginUrl ?? null, createdAt: a.createdAt, updatedAt: a.updatedAt,
@@ -178,6 +220,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       attempts: r.attemptCount ?? 0,
       domain: r.domain?.domain ?? null,
       url: r.finalUrl ?? r.applyUrl,
+      outcome: r.outcome ? { status: r.outcome.status, at: r.outcome.rejectedAt ?? r.outcome.confirmedAt ?? null, subject: r.outcome.subject ?? null } : null,
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
       priority: r.priority ?? 0,
