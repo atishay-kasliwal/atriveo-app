@@ -15,10 +15,9 @@ import { loadResumeProfile } from "./resume-profile.mjs";
 
 // ─── Identity ────────────────────────────────────────────────────────────────
 // Read from the same profile the resume header uses. These were copies, and
-// they drifted: the cover letter still carried katishay@gmail.com after the
-// resume moved to katishay45@gmail.com, so a single application went out
-// under two different addresses. Read at build time so an edit to the profile
-// reaches both.
+// they drifted: the cover letter kept an old email after the resume changed
+// address, so a single application went out under two different addresses.
+// Read at build time so an edit to the profile reaches both.
 function identity() {
   const p = loadResumeProfile();
   return {

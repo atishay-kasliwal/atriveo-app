@@ -25,3 +25,10 @@ resume-engine/
 *.dmg
 *.pdf
 "Atishay Kasliwal.pdf"
+
+# Personal data and local run output (never publish)
+Memory/
+tailored/
+output/
+data/artifacts/
+data/resume-profile.json

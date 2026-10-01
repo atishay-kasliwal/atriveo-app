@@ -198,12 +198,19 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
   // Header city follows the posting so the resume reads local to the team;
   // a posting with no location — or several — falls back to the home city.
   const city = resolveHeaderLocation(location, me.location);
+  // Only the fields that are set, so a blank phone or email leaves no "| |".
+  const contact = [
+    esc(title),
+    me.phone && esc(me.phone),
+    me.email && `\\href{mailto:${me.email}}{${esc(me.email)}}`,
+    me.linkedin && `\\href{${me.linkedin}}{Linkedin}`,
+    me.github && `\\href{${me.github}}{Github}`,
+    me.portfolio && `\\href{${me.portfolio}}{Portfolio}`,
+    city && esc(city),
+  ].filter(Boolean).join(" $|$\n    ");
   const header = `\\begin{center}
     \\textbf{\\Huge \\scshape ${esc(me.name)}} \\\\ \\vspace{1pt}
-    \\small ${esc(title)} $|$ ${esc(me.phone)} $|$ \\href{mailto:${me.email}}{${esc(me.email)}} $|$
-    \\href{${me.linkedin}}{Linkedin} $|$
-    \\href{${me.github}}{Github} $|$
-    \\href{${me.portfolio}}{Portfolio} $|$ ${esc(city)}
+    \\small ${contact}
 \\end{center}`;
 
   const skills = skillsLines?.length

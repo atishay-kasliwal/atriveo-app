@@ -1,9 +1,9 @@
 // INVARIANT enforcement: every emitted resume word must trace to evidence or profile.
 
 import { ROLE_META, PROJECT_META } from "./tailor-dynamic.mjs";
+import { loadResumeProfile } from "./resume-profile.mjs";
 
 const PROFILE_ALLOWLIST = new Set([
-  "atishay", "kasliwal", "katishay45@gmail.com", "934-246-1198",
   "linkedin", "github", "portfolio", "new york", "ny",
   "stony brook", "symbiosis", "indore", "madhya pradesh",
   "master of science", "data science", "bachelor of technology",
@@ -70,6 +70,12 @@ function buildEvidenceCorpus(bank, composition) {
   }
 
   for (const term of PROFILE_ALLOWLIST) corpus.add(norm(term));
+  // The header's own identity comes from the profile file, not this source,
+  // since the repo is public.
+  const me = loadResumeProfile();
+  for (const value of [...String(me.name || "").split(/\s+/), me.email, me.phone, me.location]) {
+    if (value) corpus.add(norm(value));
+  }
 
   const coveredSkills = (composition.skills_audit || [])
     .filter((s) => s.covered)
