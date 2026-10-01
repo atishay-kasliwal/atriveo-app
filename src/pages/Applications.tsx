@@ -306,20 +306,30 @@ function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) =
   const answers = row.questions
     .filter((q) => values[q.fingerprint]?.trim())
     .map((q) => ({ fingerprint: q.fingerprint, label: q.label, type: q.type, canonicalKey: q.canonicalKey, sensitive: q.sensitive, value: values[q.fingerprint]!.trim(), scope: scopes[q.fingerprint] ?? "global" }));
+  const canApproveSubmit = row.status === "NEEDS_REVIEW" && row.reviewReason === "SUBMIT_APPROVAL" && row.questions.length === 0;
 
   return (
     <div className="apps-review">
       {row.questions.length === 0 && (
         <div className="apps-note">
-          <p><strong>Nothing to answer here.</strong> {row.reviewDetail ?? "The engine stopped on a rule."}</p>
-          <p>Some questions, such as legal confirmations and privacy notices, are never answered for you. Open the form, finish it yourself, then choose “I submitted it myself”.</p>
+          {canApproveSubmit ? (
+            <p><strong>Ready for your decision.</strong> Approve to have the worker reopen the form, refill it, check it again, and submit. If anything changed, it returns to review.</p>
+          ) : (
+            <p><strong>Needs your attention.</strong> {row.reviewDetail ?? "The engine stopped on a rule."}</p>
+          )}
         </div>
       )}
       {row.questions.map((q) => (
         <div key={q.fingerprint} className="apps-q">
           <label>
             <span className="apps-q-label">{q.label}{q.required ? " *" : ""}{q.sensitive ? <em> · {q.sensitive.replace(/_/g, " ")}</em> : null}</span>
-            {q.options.length ? (
+            {q.type === "checkbox" ? (
+              <select value={values[q.fingerprint] ?? ""} onChange={(e) => setValues({ ...values, [q.fingerprint]: e.target.value })}>
+                <option value="">Choose…</option>
+                <option value="true">Check this box</option>
+                <option value="false">Leave unchecked</option>
+              </select>
+            ) : q.options.length ? (
               <select value={values[q.fingerprint] ?? ""} onChange={(e) => setValues({ ...values, [q.fingerprint]: e.target.value })}>
                 <option value="">Choose…</option>
                 {q.options.map((o) => <option key={o} value={o}>{o}</option>)}
@@ -328,6 +338,7 @@ function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) =
               <textarea rows={q.type === "textarea" ? 3 : 1} value={values[q.fingerprint] ?? ""} onChange={(e) => setValues({ ...values, [q.fingerprint]: e.target.value })} placeholder="Your answer" />
             )}
           </label>
+          {q.type === "checkbox" && q.sensitive && <p className="apps-q-note">Read the notice or declaration before choosing. A required box left unchecked keeps this application in review.</p>}
           <select className="apps-q-scope" aria-label="Use this answer for" value={scopes[q.fingerprint]} onChange={(e) => setScopes({ ...scopes, [q.fingerprint]: e.target.value as Scope })}>
             <option value="application">Only this application</option>
             <option value="company">All {row.company} jobs</option>
@@ -336,7 +347,10 @@ function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) =
         </div>
       ))}
       <div className="apps-review-actions">
-        {row.questions.length > 0 && <button className="primary" disabled={busy || !answers.length} onClick={() => run({ action: "answer", applicationId: row.id, answers }, `Saved ${answers.length} answer(s). It will be filled again and, if everything is answered, submitted.`)}>
+        {canApproveSubmit && (
+          <button className="primary" disabled={busy} onClick={() => run({ action: "approve_submit", applicationId: row.id, expectedUpdatedAt: row.updatedAt }, "Approval queued. The worker will refill, validate, and submit if nothing changed.")}>Approve and submit</button>
+        )}
+        {row.questions.length > 0 && <button className="primary" disabled={busy || !answers.length} onClick={() => run({ action: "answer", applicationId: row.id, answers }, `Saved ${answers.length} answer(s). The engine will refill this application under the current review settings.`)}>
           Save answers & continue
         </button>}
         {row.questions.length === 0 && (
@@ -928,7 +942,7 @@ function QueuePanel({ rows, expanded, onToggle, onHistory }: { rows: HistoryRow[
         <h2 id="queue-title">Apply queue {rows.length > 0 && <span className="apps-count">{rows.length}</span>}</h2>
       </div>
       {rows.length === 0 ? (
-        <p className="apps-clear">Nothing is queued.</p>
+        <p className="apps-clear">Nothing is queued. See “Why jobs aren't being applied” below for the current reasons.</p>
       ) : (
         <>
           <OpsRows expanded={expanded}>
@@ -939,7 +953,7 @@ function QueuePanel({ rows, expanded, onToggle, onHistory }: { rows: HistoryRow[
                   <CompanyLogo company={h.company} size="sm" />
                   <div className="apps-row-id">
                     <strong>{h.company}</strong>
-                    <span>{h.title}</span>
+                    <span>{h.title} · {when(h.updatedAt)}</span>
                   </div>
                   <span className={`apps-tag ${active ? "active" : ""}`}>
                     {active && <span className="apps-pulse" aria-hidden />}
@@ -980,7 +994,7 @@ function AttentionPanel({ rows, expanded, onToggle, onReview, onRetry, onHistory
                   <CompanyLogo company={h.company} size="sm" />
                   <div className="apps-row-id">
                     <strong>{h.company}</strong>
-                    <span>{h.title}</span>
+                    <span>{h.title} · {when(h.updatedAt)}</span>
                   </div>
                   <span className={`apps-tag ${r.tone}`}>{r.label}</span>
                   <span className="apps-row-act">
@@ -1051,10 +1065,9 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
   }, [data, filter, query]);
 
   const attention = useMemo(() => {
-    const rank = (h: HistoryRow) => (h.submitAttempted ? 0 : h.status === "NEEDS_REVIEW" ? 1 : 2);
     return (data?.history ?? [])
       .filter((h) => h.status === "NEEDS_REVIEW" || h.status === "FAILED")
-      .sort((a, b) => rank(a) - rank(b) || b.updatedAt.localeCompare(a.updatedAt));
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }, [data]);
 
   // In-flight first, then queued in the order the worker claims them (priority, then oldest first).
@@ -1091,7 +1104,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                   <h1>Application Engine</h1>
                   {data.worker && !data.worker.online
                     ? <span className="apps-state bad" title={`Last seen ${when(data.worker.updatedAt)}`}><i aria-hidden />Worker offline</span>
-                    : <span className={`apps-state ${working ? "on" : ""}`} title={data.lastActivityAt ? `Last activity ${when(data.lastActivityAt)}` : undefined}><i aria-hidden />{working ? "Working" : "Idle"}</span>}
+                    : <span className={`apps-state ${working ? "on" : ""}`}><i aria-hidden />{working ? "Working" : `Idle${data.lastActivityAt ? ` · last application ${when(data.lastActivityAt)}` : ""}`}</span>}
                   {data.worker && (
                     <span className={`apps-state ${data.worker.gmailConnected ? "" : "warn"}`} title={data.worker.gmailConnected ? "Emailed security codes and verification links are handled automatically" : "Run npm run apply:gmail-auth on the Mac so codes are entered automatically"}>
                       Gmail {data.worker.gmailConnected ? "connected" : "not connected"}
@@ -1103,7 +1116,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                     </span>
                   )}
                 </div>
-                <button className="apps-refresh" onClick={() => void load()} aria-label="Refresh now">Updated {when(data.generatedAt)} <span aria-hidden>↻</span></button>
+                <button className="apps-refresh" onClick={() => void load()} aria-label="Refresh now">Dashboard refreshed {when(data.generatedAt)} <span aria-hidden>↻</span></button>
               </div>
               {cur && (
                 <div className="apps-now">
