@@ -39,6 +39,9 @@ export interface ApplyRecord {
   interviewAt: string | null;
   offerStatus: OfferStatus;
   notes: string | null;
+  /** When trackerStatus was last set (by you here, or by the inbox watcher); newer wins on save. */
+  trackerStatusAt?: string | null;
+  trackerStatusBy?: "you" | "inbox" | null;
 }
 
 interface ApplyStats {
@@ -89,6 +92,8 @@ function normalizeJobs(raw: unknown): Record<string, ApplyRecord> {
       interviewAt: r.interviewAt ? String(r.interviewAt) : null,
       offerStatus,
       notes: r.notes ? String(r.notes) : null,
+      trackerStatusAt: r.trackerStatusAt ? String(r.trackerStatusAt) : null,
+      trackerStatusBy: r.trackerStatusBy === "you" || r.trackerStatusBy === "inbox" ? r.trackerStatusBy : null,
     };
   }
   return result;
@@ -437,6 +442,8 @@ export function useApplyTracker() {
             location: metadata.location ?? existing?.location ?? null,
             jobApplicationId: metadata.jobApplicationId ?? existing?.jobApplicationId ?? null,
             trackerStatus: metadata.trackerStatus ?? existing?.trackerStatus ?? null,
+            trackerStatusAt: metadata.trackerStatus !== undefined ? nowIso : (existing?.trackerStatusAt ?? null),
+            trackerStatusBy: metadata.trackerStatus !== undefined ? "you" : (existing?.trackerStatusBy ?? null),
             trackerSyncStatus: "pending",
             trackerSyncMessage: "Sending to Atriveo tracker…",
             trackerSyncedAt: existing?.trackerSyncedAt ?? null,
@@ -464,7 +471,7 @@ export function useApplyTracker() {
         ...prev,
         appliedJobs: {
           ...prev.appliedJobs,
-          [jobUrl]: { ...existing, trackerStatus: status },
+          [jobUrl]: { ...existing, trackerStatus: status, trackerStatusAt: new Date().toISOString(), trackerStatusBy: "you" },
         },
       };
       persist(uid, next);

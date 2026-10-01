@@ -48,6 +48,9 @@ type ApplyRecord = {
   jobApplicationId?: string | null;
   job_application_id?: string | null;
   trackerStatus?: "applied" | "rejected" | null;
+  /** When the status was last set, and by whom (you on the page, or the inbox watcher). */
+  trackerStatusAt?: string | null;
+  trackerStatusBy?: "you" | "inbox" | null;
   notes?: string | null;
 };
 
@@ -274,6 +277,20 @@ export const onRequestPut: PagesFunction<Env> = async ({ request, env }) => {
   if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = (await request.json()) as ApplyStats;
+  // A tab opened before the inbox watcher set a status must not undo it: keep the newer one.
+  const current = await env.atriveo_auth
+    .prepare("SELECT data FROM apply_tracker WHERE email = ?")
+    .bind(user.email)
+    .first<{ data: string }>();
+  if (current && body.appliedJobs) {
+    const saved = (JSON.parse(current.data) as ApplyStats).appliedJobs ?? {};
+    for (const [url, incoming] of Object.entries(body.appliedJobs)) {
+      const prev = saved[url];
+      if (!prev?.trackerStatusAt) continue;
+      if (incoming.trackerStatusAt && incoming.trackerStatusAt >= prev.trackerStatusAt) continue;
+      body.appliedJobs[url] = { ...incoming, trackerStatus: prev.trackerStatus ?? null, trackerStatusAt: prev.trackerStatusAt, trackerStatusBy: prev.trackerStatusBy ?? null, notes: prev.notes ?? incoming.notes ?? null };
+    }
+  }
   const data = JSON.stringify(body);
 
   await env.atriveo_auth
