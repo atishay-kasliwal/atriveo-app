@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import CompanyLogo from "../components/CompanyLogo";
-import PdfPreviewModal from "../components/PdfPreviewModal";
+import ApplicationDetail from "../apply/ApplicationDetail";
+import QuestionField from "../apply/QuestionField";
+import { answerFor, defaultScope, humanize, postAction, questionKind, when, type PendingQ, type Scope } from "../apply/engine";
 import { getTailorServerBase } from "../utils/tailorServer";
 import "../styles/applications.css";
 
@@ -10,10 +13,6 @@ import "../styles/applications.css";
 type Status = "READY_TO_APPLY" | "APPLYING" | "NEEDS_REVIEW" | "SUBMITTING" | "APPLIED" | "FAILED" | "SKIPPED";
 
 interface Day { day: string; queued: number; applied: number; needsReview: number; failed: number; skipped: number }
-interface PendingQ {
-  fingerprint: string; label: string; type: string; required: boolean; options: string[];
-  canonicalKey: string | null; sensitive: string | null; reason: string; detail: string;
-}
 interface HistoryRow {
   questions: PendingQ[]; submitAttempted: boolean;
   id: string; company: string; title: string; location: string | null; ats: string | null; status: Status;
@@ -73,11 +72,9 @@ const STATUS_META: Record<Status, { label: string; icon: string; cls: string }> 
   SUBMITTING: { label: "Submitting", icon: "…", cls: "st-serious" },
 };
 
-const humanize = (s: string) => s.toLowerCase().replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
 const pct = (n: number | null) => (n === null ? "—" : `${Math.round(n * 100)}%`);
 const clock = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString([], { ...(new Date(iso).toDateString() === new Date().toDateString() ? {} : { month: "short", day: "numeric" }), hour: "numeric", minute: "2-digit" }) : null);
 const duration = (ms: number | null | undefined) => (ms == null ? null : ms < 60_000 ? `${Math.round(ms / 1000)}s` : `${Math.floor(ms / 60_000)}m ${Math.round((ms % 60_000) / 1000)}s`);
-const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—");
 
 interface InboxMail { id: string; at: string; kind: "applied" | "rejected"; subject: string; company: string | null; title: string | null }
 interface InboxSummary {
@@ -254,23 +251,10 @@ function BarList({ rows, empty }: { rows: Array<{ label: string; n: number }>; e
   );
 }
 
-type Scope = "application" | "company" | "global";
-
-async function postAction(body: object): Promise<{ ok: boolean; error?: string; requeued?: boolean }> {
-  const res = await fetch(`${getTailorServerBase()}/applications/action`, {
-    method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
-  });
-  const json = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
-  return res.ok ? json : { ok: false, error: json.error || `HTTP ${res.status}` };
-}
-
 /** Answer pending questions, or decide on an application, without the terminal. */
 function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) => void }) {
-  const companyWord = row.company.toLowerCase().split(/\s+/)[0] ?? "";
-  const defaultScope = (q: PendingQ): Scope =>
-    q.sensitive ? "application" : companyWord && q.label.toLowerCase().includes(companyWord) ? "company" : "global";
   const [values, setValues] = useState<Record<string, string>>({});
-  const [scopes, setScopes] = useState<Record<string, Scope>>(() => Object.fromEntries(row.questions.map((q) => [q.fingerprint, defaultScope(q)])));
+  const [scopes, setScopes] = useState<Record<string, Scope>>(() => Object.fromEntries(row.questions.map((q) => [q.fingerprint, defaultScope(q, row.company)])));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -304,8 +288,8 @@ function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) =
   }
 
   const answers = row.questions
-    .filter((q) => values[q.fingerprint]?.trim())
-    .map((q) => ({ fingerprint: q.fingerprint, label: q.label, type: q.type, canonicalKey: q.canonicalKey, sensitive: q.sensitive, value: values[q.fingerprint]!.trim(), scope: scopes[q.fingerprint] ?? "global" }));
+    .filter((q) => questionKind(q) !== "file" && values[q.fingerprint]?.trim())
+    .map((q) => answerFor(q, values[q.fingerprint]!.trim(), scopes[q.fingerprint] ?? defaultScope(q, row.company)));
   const canApproveSubmit = row.status === "NEEDS_REVIEW" && row.reviewReason === "SUBMIT_APPROVAL" && row.questions.length === 0;
 
   return (
@@ -320,31 +304,9 @@ function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) =
         </div>
       )}
       {row.questions.map((q) => (
-        <div key={q.fingerprint} className="apps-q">
-          <label>
-            <span className="apps-q-label">{q.label}{q.required ? " *" : ""}{q.sensitive ? <em> · {q.sensitive.replace(/_/g, " ")}</em> : null}</span>
-            {q.type === "checkbox" ? (
-              <select value={values[q.fingerprint] ?? ""} onChange={(e) => setValues({ ...values, [q.fingerprint]: e.target.value })}>
-                <option value="">Choose…</option>
-                <option value="true">Check this box</option>
-                <option value="false">Leave unchecked</option>
-              </select>
-            ) : q.options.length ? (
-              <select value={values[q.fingerprint] ?? ""} onChange={(e) => setValues({ ...values, [q.fingerprint]: e.target.value })}>
-                <option value="">Choose…</option>
-                {q.options.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
-            ) : (
-              <textarea rows={q.type === "textarea" ? 3 : 1} value={values[q.fingerprint] ?? ""} onChange={(e) => setValues({ ...values, [q.fingerprint]: e.target.value })} placeholder="Your answer" />
-            )}
-          </label>
-          {q.type === "checkbox" && q.sensitive && <p className="apps-q-note">Read the notice or declaration before choosing. A required box left unchecked keeps this application in review.</p>}
-          <select className="apps-q-scope" aria-label="Use this answer for" value={scopes[q.fingerprint]} onChange={(e) => setScopes({ ...scopes, [q.fingerprint]: e.target.value as Scope })}>
-            <option value="application">Only this application</option>
-            <option value="company">All {row.company} jobs</option>
-            <option value="global">Every application</option>
-          </select>
-        </div>
+        <QuestionField key={q.fingerprint} q={q} appId={row.id} company={row.company}
+          value={values[q.fingerprint] ?? ""} onValue={(v) => setValues((cur) => ({ ...cur, [q.fingerprint]: v }))}
+          scope={scopes[q.fingerprint] ?? defaultScope(q, row.company)} onScope={(sc) => setScopes((cur) => ({ ...cur, [q.fingerprint]: sc }))} />
       ))}
       <div className="apps-review-actions">
         {canApproveSubmit && (
@@ -525,80 +487,9 @@ function reasonOf(h: HistoryRow): { label: string; tone: "warn" | "bad" } {
   return { label: REASON_LABEL[h.reviewReason ?? ""] ?? humanize(h.reviewReason ?? "needs review"), tone: "warn" };
 }
 
-interface Detail {
-  ok: boolean; error?: string;
-  id: string; company: string; title: string; ats: string | null; status: Status; url: string;
-  resume: { fileName: string | null; path: string | null; sha256: string | null; bytes: number | null; verifiedAt: string | null; sourceJobUrl: string | null };
-  questions: Array<{
-    label: string; step: number; required: boolean; type: string; resolution: "answered" | "needs_review" | "skipped"; verified: boolean;
-    sensitive: string | null; answer: string | null; answerKind: "value" | "declined" | "withheld" | "blank" | "none"; source: string; detail: string | null;
-  }>;
-  timeline: Array<{ at: string; from: string | null; to: string; actor: string; reason: string }>;
-  attempts: Array<{ n: number; startedAt: string; endedAt: string | null; outcome: string | null }>;
-  submission: { by: string | null; submittedAt: string | null; confirmation: string | null };
-  failure: { code: string; message: string } | null;
-  resumeReport?: ResumeReport | null;
-}
-
-interface ResumeReport {
-  pipeline: string | null; tailoredAt: string | null; thesis: string | null; headerTitle: string | null;
-  ats: { before: number | null; after: number | null };
-  confidence: number | null;
-  human: {
-    score: number | null; wouldInterview: boolean | null; diagnosis: string | null; because: string[]; concerns: string[];
-    parts: { technical: number | null; impact: number | null; execution: number | null; uniqueness: number | null; overclaimRisk: number | null };
-  } | null;
-  coverage: {
-    pct: number | null;
-    covered: Array<{ term: string; where: string | null; how: string | null }>;
-    gaps: Array<{ term: string; where: string | null; how: string | null; status: string }>;
-    missingClaimable: string[]; unclaimable: string[];
-  };
-  keywords: Array<{ keyword: string; count: number; min: number | null; max: number | null; status: string }>;
-  jdNote: string | null;
-}
-
-const bytesLabel = (n: number | null) => (n == null ? "—" : n < 1024 * 1024 ? `${Math.round(n / 1024)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`);
-
-function answerText(q: Detail["questions"][number]): { text: string; muted: boolean } {
-  switch (q.answerKind) {
-    case "value": return { text: q.answer ?? "", muted: false };
-    case "declined": return { text: "Decline to self-identify", muted: false };
-    case "withheld": return { text: "Filled (value not stored: sensitive)", muted: true };
-    case "blank": return { text: "Left blank", muted: true };
-    default: return { text: q.resolution === "needs_review" ? "Waiting for your answer" : "—", muted: true };
-  }
-}
-
-/** Score tile: a big number, what it means, and an optional tone. */
-function Score({ label, value, sub, tone, children }: { label: string; value: string; sub?: string; tone?: "good" | "warn" | "bad"; children?: React.ReactNode }) {
-  return (
-    <div className={`apps-score ${tone ?? ""}`}>
-      <span className="apps-score-label">{label}</span>
-      <strong>{value}</strong>
-      {sub && <small>{sub}</small>}
-      {children}
-    </div>
-  );
-}
-
-const toneFor = (v: number | null, good: number, ok: number) => (v == null ? undefined : v >= good ? "good" : v >= ok ? "warn" : "bad");
-
-const PART_LABELS: Array<[keyof NonNullable<ResumeReport["human"]>["parts"], string]> = [
-  ["technical", "Technical depth"], ["impact", "Business impact"], ["execution", "Execution"], ["uniqueness", "Uniqueness"],
-];
-
-/**
- * Everything about one application in a single view: scores (ATS, hiring manager, JD coverage),
- * what the resume covers and misses, the hiring-manager read, every question with its answer,
- * and the timeline. Opens as a large panel on desktop and a full-screen sheet on phones.
- */
+/** One application's single view (ApplicationDetail) as a large panel on desktop and a full-screen sheet on phones. */
 function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void }) {
   useBodyLock();
-  const [detail, setDetail] = useState<Detail | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState("");
-  const [showAllKeywords, setShowAllKeywords] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     ref.current?.focus();
@@ -606,36 +497,6 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
-  useEffect(() => {
-    let live = true;
-    fetch(`${getTailorServerBase()}/applications/detail?id=${encodeURIComponent(row.id)}`, { credentials: "include", cache: "no-store" })
-      .then(async (res) => { const j = await res.json(); if (!res.ok || j.ok === false) throw new Error(j.error || `HTTP ${res.status}`); return j as Detail; })
-      .then((d) => { if (live) setDetail(d); })
-      .catch((e) => { if (live) setError(e instanceof Error ? e.message : String(e)); });
-    return () => { live = false; };
-  }, [row.id]);
-
-  const qs = useMemo(() => {
-    const f = filter.trim().toLowerCase();
-    return (detail?.questions ?? []).filter((q) => !f || `${q.label} ${q.answer ?? ""} ${q.source}`.toLowerCase().includes(f));
-  }, [detail, filter]);
-  const answered = detail?.questions.filter((q) => q.resolution === "answered").length ?? 0;
-  const [pdfPath, setPdfPath] = useState<string | null>(null);
-  // Phones show only the first page of a PDF inside a frame, so open it in its own tab there.
-  const openResume = (path: string) => {
-    if (window.matchMedia("(max-width: 720px)").matches) window.open(`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(path)}`, "_blank", "noopener");
-    else setPdfPath(path);
-  };
-
-  const rep = detail?.resumeReport ?? null;
-  const human = rep?.human ?? null;
-  const notCovered = rep ? [
-    ...rep.coverage.missingClaimable.map((t) => ({ term: t, kind: "missing" as const })),
-    ...rep.coverage.gaps.filter((g) => !rep.coverage.missingClaimable.includes(g.term)).map((g) => ({ term: g.term, kind: "missing" as const })),
-    ...rep.coverage.unclaimable.map((t) => ({ term: t, kind: "no-evidence" as const })),
-  ] : [];
-  const overUsed = rep?.keywords.filter((k) => k.status === "over") ?? [];
-  const underUsed = rep?.keywords.filter((k) => k.status === "under" || k.status === "missing") ?? [];
 
   return (
     <div className="apps-drawer-wrap apps-full-wrap">
@@ -649,176 +510,10 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
           <a className="apps-link apps-full-open" href={row.url} target="_blank" rel="noreferrer">Open application ↗</a>
           <button className="apps-x" onClick={onClose} aria-label="Close">✕</button>
         </div>
-
         <div className="apps-full-body">
-          {error && <p className="apps-error">Couldn't load this application: {error}</p>}
-          {!detail && !error && <p className="apps-muted">Loading…</p>}
-          {detail && (
-            <>
-              <section className="apps-scores" aria-label="Scores">
-                <Score
-                  label="ATS score"
-                  value={rep?.ats.after != null ? `${rep.ats.after}` : "—"}
-                  sub={rep?.ats.before != null && rep.ats.after != null ? `${rep.ats.before} before tailoring (${rep.ats.after - rep.ats.before >= 0 ? "+" : ""}${rep.ats.after - rep.ats.before})` : rep ? "keyword match to the JD" : "no scoring report"}
-                  tone={toneFor(rep?.ats.after ?? null, 75, 60)}
-                />
-                <Score
-                  label="Hiring manager"
-                  value={human?.score != null ? `${human.score}/10` : "—"}
-                  sub={human?.wouldInterview == null ? "human read" : human.wouldInterview ? "✓ would interview" : "✕ would not interview"}
-                  tone={human?.score != null ? (human.score >= 8 ? "good" : human.score >= 6 ? "warn" : "bad") : undefined}
-                />
-                <Score
-                  label="JD coverage"
-                  value={rep?.coverage.pct != null ? `${rep.coverage.pct}%` : "—"}
-                  sub={rep ? `${rep.coverage.covered.length} covered · ${notCovered.length} not covered` : "weighted by importance"}
-                  tone={toneFor(rep?.coverage.pct ?? null, 70, 50)}
-                >
-                  {notCovered.length > 0 && (
-                    <span className="apps-score-missing">
-                      <span className="apps-score-missing-label">Missing:</span>{" "}
-                      {notCovered.slice(0, 6).map((c) => c.term).join(", ")}
-                      {notCovered.length > 6 && (
-                        <> · <button type="button" className="apps-link" onClick={() => document.getElementById("apps-not-covered")?.scrollIntoView({ behavior: "smooth", block: "center" })}>+{notCovered.length - 6} more</button></>
-                      )}
-                    </span>
-                  )}
-                </Score>
-                <Score label="Resume confidence" value={rep?.confidence != null ? `${rep.confidence}` : "—"} sub="overall, out of 100" tone={toneFor(rep?.confidence ?? null, 75, 60)} />
-                <Score label="Questions" value={`${answered}/${detail.questions.length}`} sub="answered on the form" tone={answered === detail.questions.length ? "good" : "warn"} />
-              </section>
-
-              <div className="apps-full-grid">
-                <div className="apps-full-col">
-                  <section className="apps-block">
-                    <div className="apps-block-head"><h3>Resume</h3>
-                      {detail.resume.path && (
-                        <div className="apps-resume-open">
-                          <button type="button" className="apps-btn accent" onClick={() => openResume(detail.resume.path!)} title={detail.resume.path}>Open resume</button>
-                          <a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(detail.resume.path)}&dl=1`} download="Atishay Kasliwal.pdf">Download</a>
-                        </div>
-                      )}
-                    </div>
-                    {rep?.thesis && <p className="apps-thesis">“{rep.thesis}”</p>}
-                    <p className="apps-muted">
-                      {detail.resume.fileName ?? "No resume recorded"}{detail.resume.bytes ? ` · ${bytesLabel(detail.resume.bytes)}` : ""}
-                      {detail.resume.verifiedAt ? ` · uploaded ${when(detail.resume.verifiedAt)}` : ""}
-                      {detail.resume.sourceJobUrl && <> · <a href={detail.resume.sourceJobUrl} target="_blank" rel="noreferrer">tailored job ↗</a></>}
-                    </p>
-                    {rep?.jdNote && <p className="apps-muted">{rep.jdNote}</p>}
-                  </section>
-
-                  <section className="apps-block">
-                    <h3>What the resume covers</h3>
-                    {!rep ? <p className="apps-muted">No coverage report was saved for this resume.</p> : (
-                      <>
-                        <div className="apps-chips-group">
-                          <span className="apps-chips-title good">Covered · {rep.coverage.covered.length}</span>
-                          <div className="apps-chips">
-                            {rep.coverage.covered.map((c) => <span key={c.term} className="apps-chip2 good" title={c.where ? `in ${c.where}` : undefined}>{c.term}{c.where && c.where !== "none" ? <em>{c.where}</em> : null}</span>)}
-                            {rep.coverage.covered.length === 0 && <span className="apps-muted">Nothing matched.</span>}
-                          </div>
-                        </div>
-                        <div className="apps-chips-group" id="apps-not-covered">
-                          <span className="apps-chips-title warn">Not covered · {notCovered.length}</span>
-                          <div className="apps-chips">
-                            {notCovered.map((c) => <span key={`${c.kind}-${c.term}`} className={`apps-chip2 ${c.kind === "missing" ? "warn" : "muted"}`} title={c.kind === "missing" ? "You have evidence for this but it is not on the resume" : "No evidence in your experience bank"}>{c.term}{c.kind === "no-evidence" ? <em>no evidence</em> : null}</span>)}
-                            {notCovered.length === 0 && <span className="apps-muted">Every JD term is covered.</span>}
-                          </div>
-                        </div>
-                        {(overUsed.length > 0 || underUsed.length > 0) && (
-                          <div className="apps-chips-group">
-                            <span className="apps-chips-title">Keyword balance</span>
-                            <div className="apps-chips">
-                              {overUsed.map((k) => <span key={k.keyword} className="apps-chip2 muted" title={`Used ${k.count}× (target ${k.min ?? 0}–${k.max ?? "?"})`}>{k.keyword}<em>{k.count}× over</em></span>)}
-                              {underUsed.map((k) => <span key={k.keyword} className="apps-chip2 warn" title={`Used ${k.count}× (target ${k.min ?? 0}–${k.max ?? "?"})`}>{k.keyword}<em>{k.count}× under</em></span>)}
-                            </div>
-                          </div>
-                        )}
-                        {rep.keywords.length > 0 && (
-                          <>
-                            <button className="apps-link" onClick={() => setShowAllKeywords((v) => !v)}>{showAllKeywords ? "Hide keyword table" : `All ${rep.keywords.length} ATS keywords`}</button>
-                            {showAllKeywords && (
-                              <div className="apps-table-wrap"><table className="apps-table">
-                                <thead><tr><th>Keyword</th><th>Used</th><th>Target</th><th>Status</th></tr></thead>
-                                <tbody>{rep.keywords.map((k) => <tr key={k.keyword}><td>{k.keyword}</td><td>{k.count}</td><td>{k.min ?? 0}–{k.max ?? "?"}</td><td>{k.status}</td></tr>)}</tbody>
-                              </table></div>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
-                  </section>
-
-                  <section className="apps-block">
-                    <h3>Hiring manager read</h3>
-                    {!human ? <p className="apps-muted">No hiring-manager review was saved for this resume.</p> : (
-                      <>
-                        {human.diagnosis && <p className="apps-diagnosis">{human.diagnosis}</p>}
-                        <ul className="apps-bars">
-                          {PART_LABELS.map(([k, label]) => {
-                            const v = human.parts[k];
-                            return v == null ? null : (
-                              <li key={k}><span>{label}</span><span className="apps-meter"><i style={{ width: `${Math.max(2, v * 10)}%` }} /></span><b>{v}</b></li>
-                            );
-                          })}
-                          {human.parts.overclaimRisk != null && <li><span>Overclaim risk</span><span className="apps-meter risk"><i style={{ width: `${Math.max(2, human.parts.overclaimRisk * 10)}%` }} /></span><b>{human.parts.overclaimRisk}</b></li>}
-                        </ul>
-                        <div className="apps-proscons">
-                          <ul className="pros">{human.because.map((b) => <li key={b}>{b}</li>)}</ul>
-                          {human.concerns.length > 0 && <ul className="cons">{human.concerns.map((c) => <li key={c}>{c}</li>)}</ul>}
-                        </div>
-                      </>
-                    )}
-                  </section>
-                </div>
-
-                <div className="apps-full-col">
-                  <section className="apps-block">
-                    <div className="apps-block-head">
-                      <h3>Questions and answers <span className="apps-count">{answered}/{detail.questions.length}</span></h3>
-                      <input className="apps-hist-search" placeholder="Filter" aria-label="Filter questions" value={filter} onChange={(e) => setFilter(e.target.value)} />
-                    </div>
-                    {qs.length === 0 ? <p className="apps-muted">No questions recorded.</p> : (
-                      <ul className="apps-qa2">
-                        {qs.map((q, i) => {
-                          const a = answerText(q);
-                          return (
-                            <li key={`${q.label}-${i}`} className={q.resolution === "needs_review" ? "needs" : ""}>
-                              <span className="q">{q.label}{q.required ? " *" : ""}</span>
-                              <span className={`a ${a.muted ? "muted" : ""}`}>{a.text}</span>
-                              <span className="m" title={q.source}>
-                                {q.resolution === "answered" ? (q.verified ? <b className="ok">✓</b> : <b className="warn">?</b>) : q.resolution === "needs_review" ? <b className="warn">!</b> : null}
-                                {q.source !== "—" ? q.source.split(" · ")[0] : ""}
-                              </span>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                  </section>
-
-                  <section className="apps-block">
-                    <h3>Timeline</h3>
-                    <ol className="apps-timeline">
-                      {detail.timeline.map((t, i) => (
-                        <li key={i}>
-                          <span className="apps-muted">{when(t.at)}</span>
-                          <span>{t.from ? `${humanize(t.from)} → ` : ""}<strong>{humanize(t.to)}</strong> <span className="apps-muted">· {t.actor}</span></span>
-                          {t.reason && <span className="apps-muted">{t.reason}</span>}
-                        </li>
-                      ))}
-                    </ol>
-                    {detail.submission.confirmation && <p className="apps-muted">Confirmation: {detail.submission.confirmation}</p>}
-                    {detail.failure && <p className="apps-muted">Last failure: {humanize(detail.failure.code)} — {detail.failure.message}</p>}
-                  </section>
-                </div>
-              </div>
-            </>
-          )}
+          <ApplicationDetail id={row.id} version={row.updatedAt} />
         </div>
       </div>
-      {pdfPath && <PdfPreviewModal pdfPath={pdfPath} onClose={() => setPdfPath(null)} />}
     </div>
   );
 }
@@ -981,6 +676,7 @@ function AttentionPanel({ rows, expanded, onToggle, onReview, onRetry, onHistory
     <section className={`apps-panel is-attn ${rows.length ? "has-items" : ""}`} aria-labelledby="attn-title">
       <div className="apps-panel-head">
         <h2 id="attn-title">Needs your attention {rows.length > 0 && <span className="apps-count warn">{rows.length}</span>}</h2>
+        <span className="apps-panel-links"><Link to="/unanswered">All questions on one page</Link><Link to="/ready">Ready to submit</Link></span>
       </div>
       {rows.length === 0 ? (
         <p className="apps-clear">Nothing is waiting for you.</p>

@@ -36,7 +36,7 @@ import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
-import { applicationsAnalytics, applicationDetail } from "./applications-analytics.mjs";
+import { applicationsAnalytics, applicationDetail, questionOptions, reviewQueue } from "./applications-analytics.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
 import { getWorkerId } from "./worker-id.mjs";
@@ -1112,6 +1112,8 @@ async function fetchFeedJobs(db, type) {
 
 // ─── HTTP server ─────────────────────────────────────────────────────────────
 let tailorBusy = false;
+// Dashboard actions (POST /applications/action) run one after another; see that route.
+let applicationActions = Promise.resolve();
 
 // /list-tailored walks the whole external drive tree (slow on exfat over
 // USB), and the dashboard polls it every few seconds. Cache briefly so
@@ -1620,24 +1622,68 @@ const server = http.createServer(async (req, res) => {
       raw += c;
       if (raw.length > 200_000) req.destroy();
     });
+    // One action at a time: each run rewrites the learned-answers file, so two at once could drop answers.
     req.on("end", () => {
-      const dir = process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo");
-      const child = spawn(path.join(dir, "node_modules", ".bin", "tsx"), ["src/cli/action.ts"], { cwd: dir, env: process.env });
-      let out = "";
-      let err = "";
-      const timer = setTimeout(() => child.kill("SIGKILL"), 60_000);
-      child.stdout.on("data", (c) => (out += c));
-      child.stderr.on("data", (c) => (err += c));
-      child.on("close", (code) => {
-        clearTimeout(timer);
-        const line = out.trim().split("\n").pop() || "";
-        let body;
-        try { body = JSON.parse(line); } catch { body = { ok: false, error: (err || out || `exit ${code}`).slice(0, 400) }; }
-        res.writeHead(body.ok ? 200 : 400, { "Content-Type": "application/json", "Cache-Control": "no-store" });
-        res.end(JSON.stringify(body));
-      });
-      child.stdin.end(raw);
+      applicationActions = applicationActions.then(() => new Promise((done) => {
+        const dir = process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo");
+        const child = spawn(path.join(dir, "node_modules", ".bin", "tsx"), ["src/cli/action.ts"], { cwd: dir, env: process.env });
+        let out = "";
+        let err = "";
+        const timer = setTimeout(() => child.kill("SIGKILL"), 60_000);
+        child.stdout.on("data", (c) => (out += c));
+        child.stderr.on("data", (c) => (err += c));
+        child.on("error", (e) => (err += String(e.message || e)));
+        child.on("close", (code) => {
+          clearTimeout(timer);
+          const line = out.trim().split("\n").pop() || "";
+          let body;
+          try { body = JSON.parse(line); } catch { body = { ok: false, error: (err || out || `exit ${code}`).slice(0, 400) }; }
+          res.writeHead(body.ok ? 200 : 400, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+          res.end(JSON.stringify(body));
+          done();
+        });
+        child.stdin.end(raw);
+      }));
     });
+    return;
+  }
+
+  // GET /applications/review-queue — the Unanswered and Ready pages: every application blocked on
+  // questions, every one waiting only for your approval, and approvals in flight (read-only, no cap).
+  // ?counts=1 returns only the counts (the header badges).
+  if (req.method === "GET" && pathname === "/applications/review-queue") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const countsOnly = new URL(req.url, "http://x").searchParams.get("counts") === "1";
+        const data = await withMongo((db) => reviewQueue(db, { countsOnly }), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
+  }
+
+  // GET /applications/question-options?id=&fp= — the full choice list of one unanswered question (read-only)
+  if (req.method === "GET" && pathname === "/applications/question-options") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const params = new URL(req.url, "http://x").searchParams;
+        const id = String(params.get("id") || "").slice(0, 80);
+        const fp = String(params.get("fp") || "").slice(0, 80);
+        if (!id || !fp) throw new Error("id and fp required");
+        const data = await withMongo((db) => questionOptions(db, id, fp), { appName: "AtriveoTailorServer" });
+        res.writeHead(data.ok ? 200 : 404, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
     return;
   }
 

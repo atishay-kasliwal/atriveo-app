@@ -424,3 +424,15 @@
 .apps-inbox-item .apps-cards-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .apps-inbox-item .apps-cards-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 @media (max-width: 640px) { .apps-hide-narrow { display: none; } }
+
+/* Question inputs shared by the Review drawer and the Unanswered page */
+.apps-q input { background: var(--input-bg); color: var(--foreground); border: 1px solid var(--border-col); border-radius: 6px; padding: 6px 8px; font: inherit; font-size: 13px; }
+.apps-q select, .apps-q textarea, .apps-q input { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
+.apps-q select.apps-q-scope { width: auto; }
+.apps-q.is-file, .apps-q.is-unreadable { border-left: 2px solid color-mix(in oklab, var(--amber) 60%, var(--border-col)); padding-left: 8px; }
+.apps-q-note.warn { color: var(--amber); }
+.apps-link.danger { color: var(--red); }
+.apps-link:disabled { opacity: .5; cursor: default; }
+.apps-tag.good { color: var(--green); border-color: color-mix(in oklab, var(--green) 45%, var(--border-col)); background: color-mix(in oklab, var(--green) 9%, transparent); }
+.apps-panel-links { display: inline-flex; gap: 14px; font-size: 12.5px; white-space: nowrap; }
+@media (max-width: 720px) { .apps-q input { font-size: 16px; min-height: 44px; padding: 8px 12px; } .apps-panel-links { gap: 12px; } }

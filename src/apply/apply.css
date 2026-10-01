@@ -46,3 +46,19 @@
 .apply-login-brand { align-items: flex-end; gap: 8px; }
 .apply-login-brand svg { width: auto; height: 34px; }
 .apply-login-brand .apply-brand-by { margin: 0 0 4px; }
+
+/* Console pages: Overview · Unanswered · Ready to submit */
+.apply-nav { display: flex; align-items: center; gap: 2px; margin: 0 auto 0 18px; min-width: 0; }
+.apply-nav a { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 6px; color: var(--muted-fg); text-decoration: none; font-size: 13px; white-space: nowrap; }
+.apply-nav a:hover { color: var(--foreground); background: var(--accent-bg); }
+.apply-nav a[aria-current="page"] { color: var(--foreground); background: var(--secondary-bg); }
+.apply-nav a:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.apply-nav-n { min-width: 18px; padding: 0 5px; border-radius: 5px; background: var(--muted-bg); color: var(--muted-fg); font-size: 11px; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; }
+.apply-nav a[aria-current="page"] .apply-nav-n { background: var(--primary-soft); color: var(--primary); }
+@media (max-width: 720px) {
+  .apply-header { flex-wrap: wrap; height: auto; row-gap: 0; }
+  .apply-brand, .apply-header-right { height: 52px; }
+  .apply-nav { order: 3; flex: 1 0 100%; margin: 0 -6px; padding-bottom: 6px; overflow-x: auto; scrollbar-width: none; }
+  .apply-nav::-webkit-scrollbar { display: none; }
+  .apply-nav a { min-height: 40px; font-size: 13.5px; }
+}
