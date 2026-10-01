@@ -4,7 +4,7 @@ import CompanyLogo from "../components/CompanyLogo";
 import ApplicationDetail from "./ApplicationDetail";
 import { loadDetail } from "./detail";
 import { humanize, postAction, when } from "./engine";
-import { adjustCounts, refreshReviewQueue, useReviewQueue, type ApprovedApp, type ReadyApp } from "./reviewQueue";
+import { adjustCounts, refreshReady, useReadyQueue, type ApprovedApp, type ReadyApp } from "./reviewQueue";
 import "../styles/applications.css";
 import "./review-pages.css";
 
@@ -47,7 +47,7 @@ function holdReasons(ready: ReadyApp[], approved: ApprovedApp[]): Map<string, st
 
 export default function ReadyPage({ header }: { header?: React.ReactNode }) {
   const [fast, setFast] = useState(false);
-  const { data, error, loading } = useReviewQueue(fast ? 15_000 : 60_000);
+  const { data, error, loading } = useReadyQueue(fast ? 15_000 : 60_000);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [done, setDone] = useState<Record<string, string>>({});
   // Approved here and not yet visible in the server's list.
@@ -119,13 +119,13 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
     setBusy(false);
     if (!res.ok) {
       setActionError(res.error ?? "Couldn't approve");
-      if (/changed since/i.test(res.error ?? "")) void refreshReviewQueue();
+      if (/changed since/i.test(res.error ?? "")) void refreshReady();
       return;
     }
     markApproved(r);
     setSelectedId(ready[index + 1]?.id ?? ready[index - 1]?.id ?? null);
     setNotice(`Approved ${r.company}. The worker refills it, checks it again, and submits.`);
-    setTimeout(() => void refreshReviewQueue(), 1500);
+    setTimeout(() => void refreshReady(), 1500);
   };
 
   const skip = async (r: ReadyApp) => {
@@ -158,7 +158,7 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
     }
     setBusy(false);
     setNotice(`Approved ${list.length - failed.length} of ${list.length}.${failed.length ? " Some were refused; see the list." : " The worker submits them one by one."}`);
-    void refreshReviewQueue();
+    void refreshReady();
   };
 
   const heldSelected = selected ? held.get(selected.id) ?? null : null;
@@ -174,7 +174,7 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
         <div className="rv-bar-actions">
           {data?.worker && !data.worker.online && <span className="apps-state bad" title={`Last seen ${when(data.worker.updatedAt)}`}><i aria-hidden />Worker offline: approvals wait</span>}
           {blocked && <span className="apps-state bad" title={data?.killSwitch?.reason ?? undefined}><i aria-hidden />Submissions blocked{data?.killSwitch?.reason ? `: ${data.killSwitch.reason}` : ""}</span>}
-          <button className="apps-refresh" onClick={() => void refreshReviewQueue()} disabled={loading}>{loading ? "Refreshing…" : data ? `Updated ${when(data.generatedAt)} ↻` : ""}</button>
+          <button className="apps-refresh" onClick={() => void refreshReady()} disabled={loading}>{loading ? "Refreshing…" : data ? `Updated ${when(data.generatedAt)} ↻` : ""}</button>
           <button className="rv-primary" disabled={!bulkable.length || blocked || busy || Boolean(bulk && bulk.n < bulk.total)} onClick={() => setConfirmAll(true)}>
             {bulk && bulk.n < bulk.total ? `Approving ${bulk.n + 1} of ${bulk.total}…` : `Approve all (${bulkable.length})`}
           </button>

@@ -35,6 +35,7 @@
 .rv-card-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 8px 10px; display: flex; flex-direction: column; gap: 10px; }
 .rv-card .apps-q textarea { min-height: 44px; height: 44px; }
 .rv-card-foot { flex: 0 0 auto; display: flex; flex-direction: column; gap: 5px; padding: 8px 10px; border-top: 1px solid var(--border-col); }
+.rv-card-wait { align-items: center; justify-content: center; padding: 12px; text-align: center; }
 .rv-card-links { display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: center; font-size: 12.5px; }
 
 /* Ready: the list beside the selected application */

@@ -107,78 +107,129 @@ const pendingQuestion = (p) => ({
   canonicalKey: p.canonicalKey ?? null, sensitive: p.sensitive ?? null, reason: p.reason, detail: p.detail ?? null,
 });
 
-/**
- * The two work piles for the Unanswered and Ready pages, with no history cap:
- * applications blocked on questions (fewest first, then best match), applications
- * waiting only for your approval (best match first), and the ones you approved
- * that are on their way to Submit. Read-only. `countsOnly` skips the questions and lists (fast).
- */
-export async function reviewQueue(db, { now = new Date(), countsOnly = false } = {}) {
-  const apps = db.collection("applications");
+// Blocked on questions: the Unanswered page.
+const BLOCKED = { status: "NEEDS_REVIEW", "review.pending.0": { $exists: true }, "submission.attemptedAt": null };
+// readyForApproval needs this reason; its other checks run on these few rows.
+const MAYBE_READY = { status: "NEEDS_REVIEW", "review.reason": "SUBMIT_APPROVAL" };
+
+const rowBase = (r) => ({
+  id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
+  url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, updatedAt: r.updatedAt,
+});
+
+async function engineState(db) {
+  const [control, workerDocs] = await Promise.all([
+    db.collection("engine_control").findOne({ _id: "submissions" }),
+    db.collection("engine_control").find({ _id: { $regex: "^worker:" } }).toArray(),
+  ]);
+  return { killSwitch: killSwitchOf(control), worker: workerOf(workerDocs) };
+}
+
+/** Every application blocked on questions as { id, updatedAt, n }, in page order: fewest questions, then best match, then oldest. */
+const unansweredOrder = (apps) => apps.aggregate([
+  { $match: BLOCKED },
+  { $project: { updatedAt: 1, n: { $size: "$review.pending" }, rank: { $ifNull: ["$priority", 0] } } },
+  { $sort: { n: 1, rank: -1, updatedAt: 1, _id: 1 } },
+  { $project: { _id: 0, id: "$_id", updatedAt: 1, n: 1 } },
+]).toArray();
+
+/** The cards (questions included) of these applications, in this order; any no longer blocked are left out. */
+async function unansweredCards(apps, ids) {
+  if (!ids.length) return [];
+  const rows = await apps.aggregate([{ $match: { ...BLOCKED, _id: { $in: ids } } }, reviewRow(true)]).toArray();
+  const byId = new Map(rows.map((r) => [r._id, r]));
+  return ids.filter((id) => byId.has(id)).map((id) => byId.get(id))
+    .map((r) => ({ ...rowBase(r), reviewReason: r.review.reason ?? null, questions: r.review.pending.map(pendingQuestion) }));
+}
+
+const blockedTotals = async (apps) => {
+  const [t] = await apps.aggregate([{ $match: BLOCKED }, { $group: { _id: null, apps: { $sum: 1 }, questions: { $sum: { $size: "$review.pending" } } } }]).toArray();
+  return { unanswered: t?.apps ?? 0, questions: t?.questions ?? 0 };
+};
+
+const readyRows = async (apps) => (await apps.aggregate([{ $match: MAYBE_READY }, reviewRow(false)]).toArray()).filter(readyForApproval);
+
+/** Approved in the dashboard: still waiting for the worker, or claimed in the last two days; and who was submitted to lately. */
+async function approvals(apps, now) {
   const since = new Date(now.getTime() - 2 * 86_400_000).toISOString();
-  const [review, approved, submittedRecently, control, workerDocs] = await Promise.all([
-    apps.aggregate([{ $match: { status: "NEEDS_REVIEW" } }, reviewRow(!countsOnly)]).toArray(),
-    // Approved in the dashboard: still waiting for the worker, or claimed in the last two days.
+  const [approved, submittedRecently] = await Promise.all([
     apps.aggregate([
       { $match: { $or: [{ "submission.approvalRequestedAt": { $ne: null } }, { "submission.approvalInAttemptAt": { $gte: since } }] } },
       reviewRow(false),
     ]).toArray(),
     apps.find({ "submission.attemptedAt": { $gte: since } }, { projection: { companyKey: 1, "submission.attemptedAt": 1 } }).toArray(),
-    db.collection("engine_control").findOne({ _id: "submissions" }),
-    db.collection("engine_control").find({ _id: { $regex: "^worker:" } }).toArray(),
   ]);
+  return { approved, submittedRecently };
+}
 
+/** The Ready page's lists: waiting for your approval (best match first), and the approvals on their way. */
+function readyLists(readyDocs, { approved, submittedRecently }, now) {
   const today = dayKey(now.toISOString());
   const companiesSubmittedToday = new Set(submittedRecently.filter((r) => dayKey(r.submission.attemptedAt) === today).map((r) => r.companyKey));
-  const base = (r) => ({
-    id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
-    url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, updatedAt: r.updatedAt,
-  });
-
-  const blocked = review.filter((r) => (r.review?.pending ?? []).length > 0 && !r.submission?.attemptedAt);
-  const counts = {
-    unanswered: blocked.length,
-    questions: blocked.reduce((n, r) => n + r.review.pending.length, 0),
-    ready: review.filter(readyForApproval).length,
-  };
-  if (countsOnly) return { ok: true, generatedAt: now.toISOString(), killSwitch: killSwitchOf(control), worker: workerOf(workerDocs), counts };
-
-  const unanswered = blocked
-    .map((r) => ({ ...base(r), reviewReason: r.review.reason ?? null, questions: r.review.pending.map(pendingQuestion) }))
-    .sort((a, b) => a.questions.length - b.questions.length || b.priority - a.priority || a.updatedAt.localeCompare(b.updatedAt));
-
-  const readyRows = review.filter(readyForApproval);
   const perCompany = new Map();
-  for (const r of readyRows) perCompany.set(r.companyKey, (perCompany.get(r.companyKey) ?? 0) + 1);
-  const ready = readyRows
-    .map((r) => ({
-      ...base(r),
-      filledAt: r.review.since ?? r.updatedAt,
-      resumeFile: r.resume?.fileName ?? null,
-      answered: r.answered ?? 0,
-      readyAtCompany: perCompany.get(r.companyKey) ?? 1,
-      companySubmittedToday: companiesSubmittedToday.has(r.companyKey),
-    }))
-    .sort((a, b) => b.priority - a.priority || a.filledAt.localeCompare(b.filledAt));
-
+  for (const r of readyDocs) perCompany.set(r.companyKey, (perCompany.get(r.companyKey) ?? 0) + 1);
   return {
-    ok: true,
-    generatedAt: now.toISOString(),
-    killSwitch: killSwitchOf(control),
-    worker: workerOf(workerDocs),
-    counts,
-    unanswered,
-    ready,
+    ready: readyDocs
+      .map((r) => ({
+        ...rowBase(r),
+        filledAt: r.review.since ?? r.updatedAt,
+        resumeFile: r.resume?.fileName ?? null,
+        answered: r.answered ?? 0,
+        readyAtCompany: perCompany.get(r.companyKey) ?? 1,
+        companySubmittedToday: companiesSubmittedToday.has(r.companyKey),
+      }))
+      .sort((a, b) => b.priority - a.priority || a.filledAt.localeCompare(b.filledAt)),
     // Approved earlier and now back in the Ready pile: listed there instead.
     approved: approved
       .filter((r) => !readyForApproval(r))
       .map((r) => ({
-        ...base(r), status: r.status, reviewReason: r.review?.reason ?? null, reviewDetail: r.review?.detail ?? null,
+        ...rowBase(r), status: r.status, reviewReason: r.review?.reason ?? null, reviewDetail: r.review?.detail ?? null,
         failureCode: r.failure?.code ?? null, submittedAt: r.submission?.submittedAt ?? null,
         approvedAt: r.submission?.approvalRequestedAt ?? r.submission?.approvalInAttemptAt ?? null,
       }))
       .sort((a, b) => String(b.approvedAt).localeCompare(String(a.approvedAt))),
   };
+}
+
+const countsOf = (order, ready) => ({ unanswered: order.length, questions: order.reduce((n, r) => n + r.n, 0), ready: ready.length });
+
+/**
+ * The Unanswered and Ready pages and the header counts, each reading only what it shows:
+ * the link to Mongo is slow, so load time follows the bytes read. Read-only, no history cap.
+ *   counts      the header numbers
+ *   unanswered  every application blocked on questions as { id, updatedAt, n } in page order,
+ *               plus the cards of the first `cards`
+ *   cards       the cards of `ids` still blocked, in that order
+ *   ready       applications waiting only for your approval, and the approvals on their way
+ *   full        all of it with every card, for consoles loaded before the views existed
+ */
+export async function reviewQueue(db, { view = "full", cards = 0, ids = [], now = new Date() } = {}) {
+  const apps = db.collection("applications");
+  const generatedAt = now.toISOString();
+  switch (view) {
+    case "cards":
+      return { ok: true, generatedAt, cards: await unansweredCards(apps, ids) };
+    case "counts": {
+      const [engine, totals, ready] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps)]);
+      return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length } };
+    }
+    case "unanswered": {
+      const [engine, order, ready] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps)]);
+      const first = await unansweredCards(apps, order.slice(0, cards).map((r) => r.id));
+      return { ok: true, generatedAt, ...engine, counts: countsOf(order, ready), unanswered: order, cards: first };
+    }
+    case "ready": {
+      const [engine, totals, ready, approved] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps), approvals(apps, now)]);
+      return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length }, ...readyLists(ready, approved, now) };
+    }
+    case "full": {
+      const [engine, order, ready, approved] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps), approvals(apps, now)]);
+      const unanswered = await unansweredCards(apps, order.map((r) => r.id));
+      return { ok: true, generatedAt, ...engine, counts: countsOf(order, ready), unanswered, ...readyLists(ready, approved, now) };
+    }
+    default:
+      throw new Error(`Unknown review-queue view: ${view}`);
+  }
 }
 
 /** Every choice of one pending question: the lists too long to send with the review queue. Read-only. */

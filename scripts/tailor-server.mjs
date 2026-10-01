@@ -1648,15 +1648,19 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // GET /applications/review-queue — the Unanswered and Ready pages: every application blocked on
-  // questions, every one waiting only for your approval, and approvals in flight (read-only, no cap).
-  // ?counts=1 returns only the counts (the header badges).
+  // GET /applications/review-queue?view=counts|unanswered|cards|ready — the Unanswered and Ready pages
+  // and the header counts, each reading only what it shows (read-only, no cap; see reviewQueue).
+  // &cards=N with view=unanswered: the first N cards too. &ids=a,b with view=cards: those cards.
+  // No view: everything at once; ?counts=1 is view=counts (consoles loaded before the views).
   if (req.method === "GET" && pathname === "/applications/review-queue") {
     (async () => {
       try {
         if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
-        const countsOnly = new URL(req.url, "http://x").searchParams.get("counts") === "1";
-        const data = await withMongo((db) => reviewQueue(db, { countsOnly }), { appName: "AtriveoTailorServer" });
+        const params = new URL(req.url, "http://x").searchParams;
+        const view = params.get("counts") === "1" ? "counts" : params.get("view") || "full";
+        const cards = Math.min(Math.max(Number(params.get("cards")) || 0, 0), 50);
+        const ids = String(params.get("ids") || "").split(",").map((id) => id.trim().slice(0, 80)).filter(Boolean).slice(0, 50);
+        const data = await withMongo((db) => reviewQueue(db, { view, cards, ids }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify(data));
       } catch (e) {

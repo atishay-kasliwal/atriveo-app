@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import CompanyLogo from "../components/CompanyLogo";
 import QuestionField from "./QuestionField";
 import { answerFor, defaultScope, plainQuestion, postAction, questionKind, when, type PendingQ, type Scope } from "./engine";
-import { adjustCounts, refreshReviewQueue, useReviewQueue, type UnansweredApp } from "./reviewQueue";
+import { adjustCounts, loadCards, refreshUnanswered, useUnansweredCards, useUnansweredQueue, type UnansweredApp } from "./reviewQueue";
 import "../styles/applications.css";
 import "./review-pages.css";
 
 // Show as many applications as fit in the window, up to five columns. Each card
 // scrolls its own questions; saving a card pulls the next application into view.
+// The page loads the order of every waiting application, and the questions only for
+// the cards on screen and the next set.
 
 const MIN_COLUMN = 260;
 const MIN_ROW = 260;
@@ -40,7 +42,8 @@ interface Entry { v: string; from?: string }
 
 
 export default function UnansweredPage({ header }: { header?: React.ReactNode }) {
-  const { data, error, loading } = useReviewQueue(60_000);
+  const { data, error, loading } = useUnansweredQueue(60_000);
+  const { cards, gone, error: cardsError } = useUnansweredCards();
   const gridRef = useRef<HTMLDivElement>(null);
   const { cols, rows } = useGridSize(gridRef);
   const pageSize = cols * rows;
@@ -49,7 +52,10 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
   const [order, setOrder] = useState<string[]>([]);
   // Saved or skipped here: id → the record's updatedAt then. It returns if the engine updates it again.
   const [done, setDone] = useState<Record<string, string>>({});
-  const [values, setValues] = useState<Record<string, Record<string, Entry>>>({});
+  // Typed on each card: application id → fingerprint → value.
+  const [values, setValues] = useState<Record<string, Record<string, string>>>({});
+  // Your latest answer to each plain question, offered on every other card that asks it.
+  const [shared, setShared] = useState<Record<string, Required<Entry>>>({});
   const [scopes, setScopes] = useState<Record<string, Record<string, Scope>>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -67,9 +73,13 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
     const byId = new Map(server.map((a) => [a.id, a]));
     const known = new Set(order);
     const ids = [...order.filter((id) => byId.has(id)), ...server.filter((a) => !known.has(a.id)).map((a) => a.id)];
-    return ids.map((id) => byId.get(id)!).filter((a) => !(done[a.id] && done[a.id] >= a.updatedAt));
-  }, [server, order, done]);
+    const shown = (id: string, version: string) => !(done[id] && done[id] >= version) && !(gone[id] && gone[id] >= version);
+    return ids.map((id) => byId.get(id)!).filter((a) => shown(a.id, a.updatedAt));
+  }, [server, order, done, gone]);
   const visible = ordered.slice(0, pageSize);
+  // The cards on screen and the next set, so "Next" and a saved card's replacement show at once.
+  const upcoming = useMemo(() => ordered.slice(0, pageSize * 2), [ordered, pageSize]);
+  useEffect(() => { void loadCards(upcoming); }, [upcoming]);
 
   /** Put the next waiting application in this card's place and send this one to the back. */
   const replace = (id: string) => {
@@ -88,22 +98,21 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
     setOrder([...ids.slice(pageSize), ...ids.slice(0, pageSize)]);
   };
 
-  const entry = (app: UnansweredApp, q: PendingQ) => values[app.id]?.[q.fingerprint];
+  const entry = (app: UnansweredApp, q: PendingQ): Entry | undefined => {
+    const own = values[app.id]?.[q.fingerprint];
+    if (own !== undefined) return { v: own };
+    const s = shared[q.fingerprint];
+    return s && s.from !== app.id && plainQuestion(q) ? s : undefined;
+  };
   const scopeOf = (app: UnansweredApp, q: PendingQ) => scopes[app.id]?.[q.fingerprint] ?? defaultScope(q, app.company);
 
-  /** Your answer, and the same answer offered on every other application with this exact question. */
+  /**
+   * Your answer, and the same answer offered on every other application with this exact question
+   * where you haven't typed one. Sensitive, unreadable and declaration questions are answered one by one.
+   */
   const setValue = (app: UnansweredApp, q: PendingQ, v: string) => {
-    setValues((cur) => {
-      const next: Record<string, Record<string, Entry>> = { ...cur, [app.id]: { ...cur[app.id], [q.fingerprint]: { v } } };
-      if (!plainQuestion(q)) return next; // sensitive, unreadable and declarations are answered one by one
-      for (const other of server) {
-        if (other.id === app.id || !other.questions.some((oq) => oq.fingerprint === q.fingerprint)) continue;
-        const existing = next[other.id]?.[q.fingerprint];
-        if (existing && existing.from !== app.id && existing.v) continue; // keep what you typed there
-        next[other.id] = { ...next[other.id], [q.fingerprint]: v ? { v, from: app.id } : { v: "" } };
-      }
-      return next;
-    });
+    setValues((cur) => ({ ...cur, [app.id]: { ...cur[app.id], [q.fingerprint]: v } }));
+    if (plainQuestion(q)) setShared((cur) => ({ ...cur, [q.fingerprint]: { v, from: app.id } }));
   };
 
   const answersOf = (app: UnansweredApp) => app.questions
@@ -150,7 +159,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
   };
 
   const remaining = ordered.length;
-  const questionsLeft = ordered.reduce((n, a) => n + a.questions.length, 0);
+  const questionsLeft = ordered.reduce((n, a) => n + a.n, 0);
 
   return (
     <div className="rv-page">
@@ -164,13 +173,13 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
           {data?.worker && !data.worker.online && <span className="apps-state bad" title={`Last seen ${when(data.worker.updatedAt)}`}><i aria-hidden />Worker offline: saved answers wait</span>}
           {remaining > visible.length && <span className="apps-muted">Showing {visible.length} of {remaining}</span>}
           {remaining > visible.length && <button className="apps-btn" onClick={nextSet}>Next {pageSize} ›</button>}
-          <button className="apps-refresh" onClick={() => void refreshReviewQueue()} disabled={loading}>{loading ? "Refreshing…" : data ? `Updated ${when(data.generatedAt)} ↻` : ""}</button>
+          <button className="apps-refresh" onClick={() => void refreshUnanswered()} disabled={loading}>{loading ? "Refreshing…" : data ? `Updated ${when(data.generatedAt)} ↻` : ""}</button>
         </div>
       </div>
 
       <main className="rv-main">
         {error && !data && <p className="apps-error">Couldn't load the questions: {error}. The Mac sidecar must be running (npm run tailor:restart).</p>}
-        {!data && !error && <p className="apps-muted rv-wait">Loading every unanswered question… this takes a few seconds.</p>}
+        {!data && !error && <p className="apps-muted rv-wait">Loading the unanswered questions…</p>}
         {data && remaining === 0 && (
           <div className="rv-empty">
             <strong>Nothing is waiting for an answer.</strong>
@@ -178,7 +187,15 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
           </div>
         )}
         <div className="rv-columns" ref={gridRef} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${Math.max(1, Math.ceil(visible.length / cols))}, minmax(0, 1fr))` }}>
-          {visible.map((app) => {
+          {visible.map((row) => {
+            const app = cards[row.id];
+            if (!app) {
+              return (
+                <article key={row.id} className="rv-card rv-card-wait" aria-busy={!cardsError}>
+                  <p className={cardsError ? "apps-q-note warn" : "apps-muted"}>{cardsError ? `Couldn't load these questions: ${cardsError}` : "Loading questions…"}</p>
+                </article>
+              );
+            }
             const answers = answersOf(app);
             const files = app.questions.filter((q) => questionKind(q) === "file").length;
             const answerable = app.questions.length - files;
@@ -196,7 +213,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
                 <div className="rv-card-body">
                   {app.questions.map((q) => {
                     const e = entry(app, q);
-                    const from = e?.from ? server.find((a) => a.id === e.from)?.company : null;
+                    const from = e?.from ? cards[e.from]?.company : null;
                     return (
                       <QuestionField key={q.fingerprint} q={q} appId={app.id} company={app.company}
                         value={e?.v ?? ""} onValue={(v) => setValue(app, q, v)}
