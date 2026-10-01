@@ -39,6 +39,158 @@ function inboxSummary(rows, records) {
   };
 }
 
+const killSwitchOf = (control) =>
+  control ? { enabled: Boolean(control.enabled), reason: control.reason ?? null, updatedAt: control.updatedAt, updatedBy: control.updatedBy } : null;
+
+/** Newest worker heartbeat: online state and Gmail status. */
+function workerOf(workerDocs) {
+  const w = [...workerDocs].sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))[0];
+  if (!w) return null;
+  const age = Date.now() - Date.parse(w.updatedAt);
+  return {
+    online: w.status === "online" && age < 3 * 60_000,
+    host: w.host ?? null, concurrency: w.concurrency ?? null, gmailConnected: Boolean(w.gmailConnected),
+    accountsEmail: w.accountsEmail ?? null, updatedAt: w.updatedAt,
+  };
+}
+
+/**
+ * Waiting only for your Submit approval. Mirrors the guard in playatriveo's
+ * approve_submit (src/application/humanAction.ts), which stays the authority:
+ * keep the two in step so nothing listed here is refused there.
+ */
+export function readyForApproval(r) {
+  return r.status === "NEEDS_REVIEW" && r.review?.reason === "SUBMIT_APPROVAL"
+    && !r.submission?.attemptedAt && !r.submission?.submittedAt
+    && (r.review.pending ?? []).length === 0 && (r.review.failedChecks ?? []).length === 0
+    && Boolean(r.submission?.validation?.passed && r.submission?.formSignature && r.resume?.sha256);
+}
+
+// Longer choice lists (a school picker can have thousands) are left out of the
+// list and fetched for one question when its card is on screen; the link to
+// Mongo is slow enough that a few such lists would double the load time.
+const MAX_INLINE_OPTIONS = 300;
+const size = (path) => ({ $size: { $ifNull: [path, []] } });
+
+/**
+ * One application as the review pages need it, shaped in Mongo so only that crosses the wire.
+ * Without questions, each pending question is just its fingerprint (enough to count).
+ */
+const reviewRow = (withQuestions) => ({
+  $project: {
+    company: 1, companyKey: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, applyUrl: 1, finalUrl: 1, createdAt: 1, updatedAt: 1,
+    "resume.fileName": 1, "resume.sha256": 1, "failure.code": 1,
+    "submission.attemptedAt": 1, "submission.submittedAt": 1, "submission.validation.passed": 1, "submission.formSignature": 1,
+    "submission.approvalRequestedAt": 1, "submission.approvalInAttemptAt": 1,
+    answered: size({ $filter: { input: { $ifNull: ["$questions", []] }, cond: { $eq: ["$$this.resolution", "answered"] } } }),
+    review: {
+      reason: "$review.reason", detail: "$review.detail", since: "$review.since",
+      failedChecks: { $map: { input: { $ifNull: ["$review.failedChecks", []] }, in: "$$this.id" } },
+      pending: {
+        $map: {
+          input: { $ifNull: ["$review.pending", []] },
+          in: !withQuestions ? "$$this.fingerprint" : {
+            fingerprint: "$$this.fingerprint", label: "$$this.label", type: "$$this.type", required: "$$this.required",
+            canonicalKey: "$$this.canonicalKey", sensitive: "$$this.sensitive", reason: "$$this.reason", detail: "$$this.detail",
+            optionCount: size("$$this.options"),
+            options: { $cond: [{ $gt: [size("$$this.options"), MAX_INLINE_OPTIONS] }, [], { $ifNull: ["$$this.options", []] }] },
+          },
+        },
+      },
+    },
+  },
+});
+
+const pendingQuestion = (p) => ({
+  fingerprint: p.fingerprint, label: p.label, type: p.type, required: Boolean(p.required),
+  options: p.options ?? [], optionCount: p.optionCount ?? (p.options ?? []).length,
+  canonicalKey: p.canonicalKey ?? null, sensitive: p.sensitive ?? null, reason: p.reason, detail: p.detail ?? null,
+});
+
+/**
+ * The two work piles for the Unanswered and Ready pages, with no history cap:
+ * applications blocked on questions (fewest first, then best match), applications
+ * waiting only for your approval (best match first), and the ones you approved
+ * that are on their way to Submit. Read-only. `countsOnly` skips the questions and lists (fast).
+ */
+export async function reviewQueue(db, { now = new Date(), countsOnly = false } = {}) {
+  const apps = db.collection("applications");
+  const since = new Date(now.getTime() - 2 * 86_400_000).toISOString();
+  const [review, approved, submittedRecently, control, workerDocs] = await Promise.all([
+    apps.aggregate([{ $match: { status: "NEEDS_REVIEW" } }, reviewRow(!countsOnly)]).toArray(),
+    // Approved in the dashboard: still waiting for the worker, or claimed in the last two days.
+    apps.aggregate([
+      { $match: { $or: [{ "submission.approvalRequestedAt": { $ne: null } }, { "submission.approvalInAttemptAt": { $gte: since } }] } },
+      reviewRow(false),
+    ]).toArray(),
+    apps.find({ "submission.attemptedAt": { $gte: since } }, { projection: { companyKey: 1, "submission.attemptedAt": 1 } }).toArray(),
+    db.collection("engine_control").findOne({ _id: "submissions" }),
+    db.collection("engine_control").find({ _id: { $regex: "^worker:" } }).toArray(),
+  ]);
+
+  const today = dayKey(now.toISOString());
+  const companiesSubmittedToday = new Set(submittedRecently.filter((r) => dayKey(r.submission.attemptedAt) === today).map((r) => r.companyKey));
+  const base = (r) => ({
+    id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
+    url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, updatedAt: r.updatedAt,
+  });
+
+  const blocked = review.filter((r) => (r.review?.pending ?? []).length > 0 && !r.submission?.attemptedAt);
+  const counts = {
+    unanswered: blocked.length,
+    questions: blocked.reduce((n, r) => n + r.review.pending.length, 0),
+    ready: review.filter(readyForApproval).length,
+  };
+  if (countsOnly) return { ok: true, generatedAt: now.toISOString(), killSwitch: killSwitchOf(control), worker: workerOf(workerDocs), counts };
+
+  const unanswered = blocked
+    .map((r) => ({ ...base(r), reviewReason: r.review.reason ?? null, questions: r.review.pending.map(pendingQuestion) }))
+    .sort((a, b) => a.questions.length - b.questions.length || b.priority - a.priority || a.updatedAt.localeCompare(b.updatedAt));
+
+  const readyRows = review.filter(readyForApproval);
+  const perCompany = new Map();
+  for (const r of readyRows) perCompany.set(r.companyKey, (perCompany.get(r.companyKey) ?? 0) + 1);
+  const ready = readyRows
+    .map((r) => ({
+      ...base(r),
+      filledAt: r.review.since ?? r.updatedAt,
+      resumeFile: r.resume?.fileName ?? null,
+      answered: r.answered ?? 0,
+      readyAtCompany: perCompany.get(r.companyKey) ?? 1,
+      companySubmittedToday: companiesSubmittedToday.has(r.companyKey),
+    }))
+    .sort((a, b) => b.priority - a.priority || a.filledAt.localeCompare(b.filledAt));
+
+  return {
+    ok: true,
+    generatedAt: now.toISOString(),
+    killSwitch: killSwitchOf(control),
+    worker: workerOf(workerDocs),
+    counts,
+    unanswered,
+    ready,
+    // Approved earlier and now back in the Ready pile: listed there instead.
+    approved: approved
+      .filter((r) => !readyForApproval(r))
+      .map((r) => ({
+        ...base(r), status: r.status, reviewReason: r.review?.reason ?? null, reviewDetail: r.review?.detail ?? null,
+        failureCode: r.failure?.code ?? null, submittedAt: r.submission?.submittedAt ?? null,
+        approvedAt: r.submission?.approvalRequestedAt ?? r.submission?.approvalInAttemptAt ?? null,
+      }))
+      .sort((a, b) => String(b.approvedAt).localeCompare(String(a.approvedAt))),
+  };
+}
+
+/** Every choice of one pending question: the lists too long to send with the review queue. Read-only. */
+export async function questionOptions(db, id, fingerprint) {
+  const [row] = await db.collection("applications").aggregate([
+    { $match: { _id: id } },
+    { $project: { _id: 0, q: { $filter: { input: { $ifNull: ["$review.pending", []] }, cond: { $eq: ["$$this.fingerprint", fingerprint] } } } } },
+  ]).toArray();
+  const q = row?.q?.[0];
+  return q ? { ok: true, options: q.options ?? [] } : { ok: false, error: "That question is no longer waiting for an answer" };
+}
+
 export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {}) {
   const apps = db.collection("applications");
   const inboxSince = new Date(Date.now() - 60 * 86_400_000).toISOString();
@@ -163,7 +315,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     failureCodes: failureRows.map((r) => ({ code: r._id, n: r.n })),
     topPendingQuestions: pendingRows.map((r) => ({ label: r._id, n: r.n, reason: r.reason })),
     formTrust: Object.fromEntries(patternRows.map((r) => [r._id, r.n])),
-    killSwitch: control ? { enabled: Boolean(control.enabled), reason: control.reason ?? null, updatedAt: control.updatedAt, updatedBy: control.updatedBy } : null,
+    killSwitch: killSwitchOf(control),
     discovery: {
       boards: boardRows.map((b) => ({ ats: b._id, boards: b.boards, polled: b.polled, withMatches: b.matched })),
       jobsBySite: siteRows.map((s) => ({ site: s._id ?? "unknown", n: s.n })).sort((a, b) => b.n - a.n),
@@ -181,16 +333,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     })(),
     lastActivityAt: records[0]?.updatedAt ?? null,
     lastAt: { ...lastAt, avgApplyMs },
-    worker: (() => {
-      const w = [...workerDocs].sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))[0];
-      if (!w) return null;
-      const age = Date.now() - Date.parse(w.updatedAt);
-      return {
-        online: w.status === "online" && age < 3 * 60_000,
-        host: w.host ?? null, concurrency: w.concurrency ?? null, gmailConnected: Boolean(w.gmailConnected),
-        accountsEmail: w.accountsEmail ?? null, updatedAt: w.updatedAt,
-      };
-    })(),
+    worker: workerOf(workerDocs),
     inbox: inboxSummary(inboxRows, records),
     queueReport: queueReportDoc ? (({ _id, ...r }) => r)(queueReportDoc) : null,
     accounts: accountRows.map((a) => ({

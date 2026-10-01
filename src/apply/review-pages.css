@@ -1,0 +1,99 @@
+/* Unanswered and Ready pages: work screens that fill the window (no page scroll on
+   desktop). Built on the console's tokens and classes (styles/applications.css). */
+.rv-page {
+  height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--background); color: var(--foreground);
+  --amber: #e0a526; --red: #d9534f; --green: #2faa4a; --r: 8px;
+}
+.rv-page h1, .rv-page h2, .rv-page h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+.rv-page a { color: var(--primary); text-decoration: none; }
+.rv-page a:hover { text-decoration: underline; }
+
+.rv-bar { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; padding: 10px 14px; border-bottom: 1px solid var(--border-col); }
+.rv-bar-title { display: flex; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; min-width: 0; }
+.rv-bar-title h1 { font-size: 17px; }
+.rv-bar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rv-main { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 10px 12px 12px; }
+.rv-wait { padding: 8px 2px; }
+.rv-empty { display: flex; flex-direction: column; gap: 6px; padding: 20px; margin: 4px; border: 1px dashed var(--border-col); border-radius: var(--r); font-size: 14px; }
+
+.rv-primary { background: var(--primary); color: var(--primary-foreground); border: 1px solid var(--primary); border-radius: 6px; padding: 7px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.rv-primary:hover:not(:disabled) { filter: brightness(1.08); }
+.rv-primary:disabled { opacity: .45; cursor: default; }
+.rv-primary:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.rv-confirm { display: inline-flex; gap: 8px; align-items: center; font-size: 12.5px; }
+
+/* Unanswered: one column per application */
+.rv-columns { flex: 1; min-height: 0; display: grid; gap: 10px; }
+.rv-card { min-width: 0; min-height: 0; display: flex; flex-direction: column; border: 1px solid var(--border-col); border-radius: var(--r); background: var(--card-bg); overflow: hidden; }
+.rv-card:focus-within { border-color: var(--primary-line); }
+.rv-card-head { flex: 0 0 auto; display: flex; gap: 10px; align-items: flex-start; padding: 12px 12px 10px; border-bottom: 1px solid var(--border-col); }
+.rv-card-id { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+.rv-card-id strong { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rv-card-id span { font-size: 12.5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rv-card-id small { font-size: 11.5px; color: var(--muted-fg); margin-top: 2px; }
+.rv-card-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 12px; display: flex; flex-direction: column; gap: 14px; }
+.rv-card-foot { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid var(--border-col); }
+.rv-card-links { display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: center; font-size: 12.5px; }
+
+/* Ready: the list beside the selected application */
+.rv-split { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); gap: 10px; }
+.rv-list { min-height: 0; overflow-y: auto; scrollbar-width: thin; display: flex; flex-direction: column; border: 1px solid var(--border-col); border-radius: var(--r); background: var(--card-bg); }
+.rv-rows { list-style: none; margin: 0; padding: 4px; display: flex; flex-direction: column; gap: 2px; }
+.rv-row { width: 100%; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px; text-align: left; background: none; border: 1px solid transparent; border-radius: 6px; color: var(--foreground); font: inherit; cursor: pointer; }
+.rv-row:hover { background: var(--accent-bg); }
+.rv-row.is-on { background: var(--primary-soft); border-color: var(--primary-line); }
+.rv-row:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.rv-row-id { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+.rv-row-id strong { font-size: 13.5px; font-weight: 600; }
+.rv-row-id span { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rv-row-id small { font-size: 11.5px; color: var(--muted-fg); }
+.rv-approved { margin-top: auto; padding: 10px 12px 12px; border-top: 1px solid var(--border-col); }
+.rv-approved h2 { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12.5px; color: var(--muted-fg); }
+.rv-approved ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.rv-approved li { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-width: 0; font-size: 12.5px; }
+.rv-approved li strong { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-approved .apps-tag { max-width: 62%; overflow: hidden; text-overflow: ellipsis; }
+
+.rv-detail { min-height: 0; min-width: 0; display: flex; flex-direction: column; border: 1px solid var(--border-col); border-radius: var(--r); background: var(--card-bg); overflow: hidden; }
+.rv-detail-head { flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border-col); }
+.rv-detail-head .apps-link { white-space: nowrap; }
+.rv-detail-body { flex: 1; min-height: 0; }
+.rv-actions { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 10px 14px 12px; border-top: 1px solid var(--border-col); background: var(--card-bg); }
+.rv-actions-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rv-nav { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; }
+.rv-how { font-size: 12px; }
+.rv-back { display: none; }
+
+.rv-modal-wrap { align-items: center; justify-content: center; padding: 16px; }
+.rv-modal { position: relative; width: min(560px, 100%); max-height: 86vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 18px; background: var(--card-bg); border: 1px solid var(--border-col); border-radius: 10px; box-shadow: 0 24px 64px rgba(0, 0, 0, .5); }
+.rv-modal h2 { font-size: 16px; }
+.rv-modal h3 { margin-top: 4px; font-size: 12.5px; color: var(--muted-fg); }
+.rv-modal p { margin: 0; }
+.rv-modal-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-height: 36vh; overflow-y: auto; font-size: 13px; }
+
+@media (max-width: 1000px) {
+  .rv-split { grid-template-columns: minmax(230px, 290px) minmax(0, 1fr); }
+}
+
+/* Phones: one card at a time and the page scrolls; the Ready record opens over the list. */
+@media (max-width: 720px) {
+  .rv-page { height: auto; min-height: 100dvh; overflow: visible; }
+  .rv-bar { padding: 10px 12px; }
+  .rv-main { padding: 8px 10px calc(16px + env(safe-area-inset-bottom)); }
+  .rv-columns { display: flex; flex-direction: column; }
+  .rv-card-body { overflow: visible; }
+  .rv-primary { min-height: 44px; font-size: 14px; }
+  .rv-card-links { font-size: 13.5px; }
+  .rv-card-links .apps-link, .rv-card-links a { min-height: 40px; display: inline-flex; align-items: center; }
+  .rv-split { display: block; }
+  .rv-list { overflow: visible; }
+  .rv-row { min-height: 56px; }
+  .rv-detail { display: none; }
+  .rv-split.is-detail .rv-list { display: none; }
+  .rv-split.is-detail .rv-detail { display: flex; position: fixed; inset: 0; z-index: 55; border: 0; border-radius: 0; padding-bottom: env(safe-area-inset-bottom); }
+  .rv-detail-head { flex-wrap: wrap; padding: 10px 12px; }
+  .rv-back { display: inline-flex; flex-basis: 100%; min-height: 36px; align-items: center; }
+  .rv-actions { padding: 10px 12px 12px; }
+  .rv-nav { margin-left: 0; }
+}
