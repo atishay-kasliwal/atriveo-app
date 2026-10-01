@@ -7,26 +7,32 @@ import { adjustCounts, refreshReviewQueue, useReviewQueue, type UnansweredApp } 
 import "../styles/applications.css";
 import "./review-pages.css";
 
-// Every application blocked on questions, on one screen: one column per application, as many
-// columns as fit (up to 5), no page scrolling. Saving a column refills that application and
-// puts the next one in its place.
+// Show as many applications as fit in the window, up to five columns. Each card
+// scrolls its own questions; saving a card pulls the next application into view.
 
 const MIN_COLUMN = 260;
+const MIN_ROW = 260;
 const GAP = 10;
 
-/** How many columns fit the grid's width (1 to 5). */
-function useColumns(ref: React.RefObject<HTMLElement | null>): number {
-  const [cols, setCols] = useState(5);
+/** Number of cards that fit without scrolling the page. */
+function useGridSize(ref: React.RefObject<HTMLElement | null>): { cols: number; rows: number } {
+  const [size, setSize] = useState({ cols: 5, rows: 1 });
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const fit = () => setCols(Math.max(1, Math.min(5, Math.floor((el.clientWidth + GAP) / (MIN_COLUMN + GAP)))));
+    const fit = () => {
+      const mobile = window.matchMedia("(max-width: 720px)").matches;
+      const cols = mobile ? 1 : Math.max(1, Math.min(5, Math.floor((el.clientWidth + GAP) / (MIN_COLUMN + GAP))));
+      const rows = mobile ? 1 : Math.max(1, Math.floor((el.clientHeight + GAP) / (MIN_ROW + GAP)));
+      setSize((current) => current.cols === cols && current.rows === rows ? current : { cols, rows });
+    };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
-    return () => ro.disconnect();
+    window.addEventListener("resize", fit);
+    return () => { ro.disconnect(); window.removeEventListener("resize", fit); };
   }, [ref]);
-  return cols;
+  return size;
 }
 
 /** A value you typed, or one copied from the same question on another application (`from`). */
@@ -36,7 +42,8 @@ interface Entry { v: string; from?: string }
 export default function UnansweredPage({ header }: { header?: React.ReactNode }) {
   const { data, error, loading } = useReviewQueue(60_000);
   const gridRef = useRef<HTMLDivElement>(null);
-  const cols = useColumns(gridRef);
+  const { cols, rows } = useGridSize(gridRef);
+  const pageSize = cols * rows;
 
   // Display order (ids). New applications from a refresh are appended after these.
   const [order, setOrder] = useState<string[]>([]);
@@ -62,23 +69,23 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
     const ids = [...order.filter((id) => byId.has(id)), ...server.filter((a) => !known.has(a.id)).map((a) => a.id)];
     return ids.map((id) => byId.get(id)!).filter((a) => !(done[a.id] && done[a.id] >= a.updatedAt));
   }, [server, order, done]);
-  const visible = ordered.slice(0, cols);
+  const visible = ordered.slice(0, pageSize);
 
-  /** Put the next waiting application in this one's column and send this one to the back. */
+  /** Put the next waiting application in this card's place and send this one to the back. */
   const replace = (id: string) => {
     const ids = ordered.map((a) => a.id);
     const i = ids.indexOf(id);
     if (i < 0) return;
     ids.splice(i, 1);
-    if (ids.length >= cols) {
-      const [next] = ids.splice(cols - 1, 1);
+    if (ids.length >= pageSize) {
+      const [next] = ids.splice(pageSize - 1, 1);
       ids.splice(i, 0, next!);
     }
     setOrder([...ids, id]);
   };
   const nextSet = () => {
     const ids = ordered.map((a) => a.id);
-    setOrder([...ids.slice(cols), ...ids.slice(0, cols)]);
+    setOrder([...ids.slice(pageSize), ...ids.slice(0, pageSize)]);
   };
 
   const entry = (app: UnansweredApp, q: PendingQ) => values[app.id]?.[q.fingerprint];
@@ -156,7 +163,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
         <div className="rv-bar-actions">
           {data?.worker && !data.worker.online && <span className="apps-state bad" title={`Last seen ${when(data.worker.updatedAt)}`}><i aria-hidden />Worker offline: saved answers wait</span>}
           {remaining > visible.length && <span className="apps-muted">Showing {visible.length} of {remaining}</span>}
-          {remaining > visible.length && <button className="apps-btn" onClick={nextSet}>Next {cols} ›</button>}
+          {remaining > visible.length && <button className="apps-btn" onClick={nextSet}>Next {pageSize} ›</button>}
           <button className="apps-refresh" onClick={() => void refreshReviewQueue()} disabled={loading}>{loading ? "Refreshing…" : data ? `Updated ${when(data.generatedAt)} ↻` : ""}</button>
         </div>
       </div>
@@ -170,7 +177,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
             {data.counts.ready > 0 && <span><Link to="/ready">{data.counts.ready} application{data.counts.ready === 1 ? " is" : "s are"} ready to submit →</Link></span>}
           </div>
         )}
-        <div className="rv-columns" ref={gridRef} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+        <div className="rv-columns" ref={gridRef} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${Math.max(1, Math.ceil(visible.length / cols))}, minmax(0, 1fr))` }}>
           {visible.map((app) => {
             const answers = answersOf(app);
             const files = app.questions.filter((q) => questionKind(q) === "file").length;
