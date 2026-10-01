@@ -38,7 +38,7 @@
     "ac:ats-matrix": "node scripts/ac-ats-matrix.mjs",
     "ats:readiness": "node scripts/ats/cli.mjs",
     "ats:compare": "node scripts/ats/compare-template.mjs",
-    "test:ats": "node --test \"tests/ats/*.test.mjs\"",
+    "test:ats": "node --test tests/ats/*.test.mjs",
     "ac:wake-random": "node scripts/ac-wake-random-batch.mjs --clean",
     "ac:atriveo-random": "node scripts/ac-atriveo-random-batch.mjs --clean",
     "ac:routing-golden": "node scripts/ac-routing-golden.mjs",
