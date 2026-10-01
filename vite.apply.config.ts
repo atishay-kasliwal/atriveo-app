@@ -3,10 +3,10 @@ import react from "@vitejs/plugin-react";
 
 // apply.atriveo.com — the application-engine console, built as its own small site.
 // Output: dist-apply/ (apply.html is renamed to index.html after the build; see package.json).
-// No public/ copy: the job-feed JSON belongs to application.atriveo.com only.
+// Its own public dir (icons, manifest): the job-feed JSON in public/ belongs to application.atriveo.com only.
 export default defineConfig({
   plugins: [react()],
-  publicDir: false,
+  publicDir: "apply-public",
   build: {
     outDir: "dist-apply",
     emptyOutDir: true,

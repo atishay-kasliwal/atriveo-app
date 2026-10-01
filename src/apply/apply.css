@@ -8,8 +8,6 @@
   padding-top: env(safe-area-inset-top);
 }
 .apply-brand { display: flex; align-items: center; gap: 10px; color: var(--foreground); text-decoration: none; font-size: 14px; }
-.apply-brand svg, .apply-brand img { width: 26px; height: 26px; }
-.apply-brand b { font-weight: 650; }
 .apply-header-right { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .apply-ext { color: var(--muted-fg); font-size: 12.5px; text-decoration: none; white-space: nowrap; }
 .apply-ext:hover { color: var(--foreground); }
@@ -26,8 +24,6 @@
 .apply-login { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px 16px; background: var(--background); color: var(--foreground); }
 .apply-login-card { width: min(400px, 100%); display: flex; flex-direction: column; gap: 14px; padding: 28px 24px; background: var(--card-bg); border: 1px solid var(--border-col); border-radius: 10px; }
 .apply-login-brand { display: flex; align-items: center; gap: 10px; font-size: 15px; }
-.apply-login-brand svg, .apply-login-brand img { width: 30px; height: 30px; }
-.apply-login-brand b { font-weight: 650; }
 .apply-login h1 { margin: 6px 0 0; font-size: 20px; font-weight: 650; letter-spacing: -0.01em; }
 .apply-login-sub { margin: 0; font-size: 13px; color: var(--muted-fg); line-height: 1.45; }
 .apply-google { display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 8px; border: 1px solid var(--border-col); background: var(--secondary-bg); color: var(--foreground); text-decoration: none; font-size: 14px; }
@@ -43,3 +39,10 @@
 .apply-error { margin: 0; padding: 10px 12px; border-radius: 8px; border: 1px solid color-mix(in oklab, #d9534f 50%, var(--border-col)); background: color-mix(in oklab, #d9534f 10%, transparent); font-size: 13px; }
 .apply-switch { margin: 0; font-size: 13px; color: var(--muted-fg); text-align: center; }
 .apply-switch button { background: none; border: 0; color: var(--primary); font: inherit; cursor: pointer; padding: 6px 2px; }
+
+.apply-brand { gap: 8px; align-items: center; }
+.apply-brand svg { width: auto; color: var(--foreground); }
+.apply-brand-by { font-size: 11.5px; color: var(--muted-fg); letter-spacing: .02em; align-self: center; margin-top: 2px; }
+.apply-login-brand { align-items: flex-end; gap: 8px; }
+.apply-login-brand svg { width: auto; height: 34px; }
+.apply-login-brand .apply-brand-by { margin: 0 0 4px; }
