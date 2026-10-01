@@ -5,7 +5,9 @@ interface Env extends AdminEnv {
   JWT_SECRET: string;
 }
 
-const PUBLIC_API_PATHS = ["/api/auth/login", "/api/auth/logout", "/api/auth/google", "/api/auth/callback", "/api/auth/signup"];
+const PUBLIC_API_PATHS = ["/api/auth/login", "/api/auth/logout", "/api/auth/google", "/api/auth/callback", "/api/auth/signup",
+  // Token-checked by the route itself (inbox watcher on the Mac), not a login cookie.
+  "/api/tracker/inbox"];
 const ASSET_RE = /\.(js|css|ico|svg|png|jpe?g|gif|webp|avif|woff2?|map)$/i;
 
 function isJsonRoute(path: string): boolean {
