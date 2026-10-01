@@ -1214,7 +1214,26 @@
     "score_pct": 31,
     "site": "greenhouse",
     "summary": "Who we are About Stripe Stripe is a technology company focused on improving the conditions for economic growth and prosperity.",
-    "title": "PhD Data Scientist, Intern"
+    "title": "PhD Data Scientist, Intern",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-01T16:12:19.033Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Stripe",
+      "title": "PhD Data Scientist, Intern",
+      "resume_slot": 93,
+      "session_hour": null,
+      "batch_time": null,
+      "session_id": "2026-10-01T16:04:07Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
   },
   {
     "job_url": "https://job-boards.greenhouse.io/affirm/jobs/8010489003",
@@ -1236,6 +1255,14 @@
     "site": "greenhouse",
     "summary": "What We Look For 3+ years of experience in analytics engineering, data engineering, or similar roles working with production data systems.",
     "title": "Analyst II, Full Stack",
+    "application": {
+      "applicationId": "16a01e14-ea4a-4085-bd72-e46911f032e0",
+      "applicationKey": "greenhouse:8010489003",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "SENSITIVE_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-01T16:14:05.216Z"
+    },
     "ats_score": 55,
     "fit_score": 5
   },
@@ -1373,7 +1400,26 @@
     "score_pct": 28,
     "site": "greenhouse",
     "summary": "Who we are About Stripe Stripe is a technology company focused on improving the conditions for economic growth and prosperity.",
-    "title": "Data Analyst, Intern"
+    "title": "Data Analyst, Intern",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-01T16:12:55.441Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Stripe",
+      "title": "Data Analyst, Intern",
+      "resume_slot": 104,
+      "session_hour": null,
+      "batch_time": null,
+      "session_id": "2026-10-01T16:04:05Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4455939998",
@@ -1417,6 +1463,25 @@
     "score_pct": 14,
     "site": "greenhouse",
     "summary": "Our mission at Greenhouse is to make hiring work for everyone \u2013 so we go to great lengths to hire great people because we believe that they\u2019re the foundation of our success.",
-    "title": "Software Engineer"
+    "title": "Software Engineer",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-01T16:15:02.911Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Greenhouse",
+      "title": "Software Engineer",
+      "resume_slot": 124,
+      "session_hour": null,
+      "batch_time": null,
+      "session_id": "2026-10-01T16:04:05Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
   }
 ]
