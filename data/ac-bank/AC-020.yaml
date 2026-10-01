@@ -13,7 +13,8 @@ concepts_claimed:
 signature_technologies:
   - AWS
   - Python
-fact: Production LLM inference on AWS for macro analysis APIs.
+  - OpenAI
+fact: OpenAI GPT-backed macro analysis APIs in Python on AWS for 5 daily financial analysts.
 capabilities:
   ai: 82
   backend: 74
@@ -26,16 +27,18 @@ strength:
 ats_keywords:
   - AWS
   - Python
+  - OpenAI
 facets:
   default:
     phrase: inference-deploy
     keywords:
       - aws
       - python
+      - openai
 variants:
   - facet: default
     emphasis: default
     strength: 8
     text: >-
-      Operated Python LLM inference on AWS serving macro analysis APIs with sub-minute latency for 5 daily
-      financial analysts.
+      Operated OpenAI GPT-backed macro analysis APIs in Python on AWS, serving 5 daily financial analysts with
+      sub-minute response times.

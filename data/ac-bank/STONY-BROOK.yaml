@@ -197,8 +197,8 @@ achievements:
     theme: mcp-orchestration
     tier: A
     resume_bullet: >-
-      Integrated LLM agents with external financial APIs through MCP-based orchestration in Python across 3+
-      tool-use workflows with structured evaluation benchmarks.
+      Integrated LLM agents with external financial APIs through MCP servers and function calling in Python
+      across 3+ tool-use workflows with structured evaluation benchmarks.
   - id: AC-025
     engineering_identity: ai
     theme: production-rag
@@ -253,8 +253,8 @@ achievements:
     theme: inference-deploy
     tier: B
     resume_bullet: >-
-      Operated Python LLM inference on AWS serving macro analysis APIs with sub-minute latency for 5 daily
-      financial analysts.
+      Operated OpenAI GPT-backed macro analysis APIs in Python on AWS, serving 5 daily financial analysts with
+      sub-minute response times.
   - id: AC-021
     engineering_identity: backend
     theme: schema-validation
