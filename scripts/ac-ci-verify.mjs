@@ -108,6 +108,7 @@ function main() {
   const skipPdf = hasFlag("skip-pdf");
 
   try {
+    runStep("Achievement bullet lint", path.join(ROOT, "scripts/ac-bullet-lint.mjs"));
     runStep("Routing golden", path.join(ROOT, "scripts/ac-routing-golden.mjs"));
     runStep("JD soak", path.join(ROOT, "scripts/ac-jd-soak.mjs"));
     if (!skipPdf) verifyPdfCompile();
