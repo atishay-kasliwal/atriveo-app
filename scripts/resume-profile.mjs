@@ -17,12 +17,16 @@ export function resolveProfilePath() {
   return process.env.RESUME_PROFILE_PATH || path.join(APP_ROOT, "data", "resume-profile.json");
 }
 
-/** Shipped defaults — the values the header carried before it was editable. */
+/**
+ * Shipped defaults. Email and phone are blank on purpose: this repo is public,
+ * so real contact details live only in data/resume-profile.json (gitignored),
+ * set from the dock's or the web app's Settings.
+ */
 export const PROFILE_DEFAULTS = Object.freeze({
   name:      "Atishay Kasliwal",
   title:     "Software Engineer",
-  email:     "katishay45@gmail.com",
-  phone:     "934-246-1198",
+  email:     "",
+  phone:     "",
   location:  "New York, NY",
   linkedin:  "https://www.linkedin.com/in/atishay-kasliwal",
   github:    "https://github.com/atishay-kasliwal",

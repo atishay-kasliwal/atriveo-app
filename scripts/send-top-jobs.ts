@@ -14,7 +14,7 @@
  *   RESEND_API_KEY   — Resend API key (re_xxxxxxxx)
  *
  * Optional env vars:
- *   NOTIFY_EMAIL     — recipient address  (default: katishay45@gmail.com)
+ *   NOTIFY_EMAIL     — recipient address (required; set it in .env)
  *   RESEND_FROM      — sender address     (default: Atriveo Jobs <jobs@atriveo.com>)
  *   JOBS_BASE_URL    — site origin        (default: https://atriveo-app.pages.dev)
  *   JWT_SECRET       — sign a short-lived session for /api/jobs (live feed parity)
@@ -31,7 +31,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ─── config ───────────────────────────────────────────────────────────────────
 
-const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL ?? "katishay45@gmail.com";
+// Set in main() once .env is loaded; there is no default, since this repo is public.
+let NOTIFY_EMAIL = "";
 const RESEND_FROM  = process.env.RESEND_FROM  ?? "Atriveo Jobs <jobs@atriveo.com>";
 const DASHBOARD_URL = "https://atriveo-app.pages.dev";
 const NY_TZ = "America/New_York";
@@ -1123,6 +1124,11 @@ function mockInsights(): Insights {
 async function main() {
   const dotenv = await import("dotenv");
   dotenv.config({ path: resolve(__dirname, "../.env") });
+  NOTIFY_EMAIL = process.env.NOTIFY_EMAIL?.trim() ?? "";
+  if (!NOTIFY_EMAIL) {
+    console.error("NOTIFY_EMAIL is not set. Add NOTIFY_EMAIL=you@example.com to .env.");
+    process.exit(1);
+  }
 
   if (process.env.MOCK === "1") {
     const insights = mockInsights();
