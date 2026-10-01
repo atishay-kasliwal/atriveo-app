@@ -94,6 +94,8 @@ interface QueueReport {
   reasons: Array<{ code: string; label: string; n: number; examples: Array<{ company: string; title: string }> }>;
   queued: number;
   waitingForCompanySlot: number;
+  /** Jobs on sites the engine can't fill, best score first (engines from before Oct 2026 omit it). */
+  youApply?: Array<{ company: string; title: string; applyUrl: string; score: number | null; site: string }>;
 }
 
 const RECORDED_IN = { engine: "engine", tracker: "tracker", feed: "job feed" } as const;
@@ -205,6 +207,28 @@ function QueueReasons({ report }: { report: QueueReport }) {
           ))}</tbody>
         </table>
       </div>
+      {report.youApply && report.youApply.length > 0 && <YouApplyPile jobs={report.youApply} />}
+    </>
+  );
+}
+
+/** Jobs whose site the engine can't fill: you apply, with the tailored resume already made. */
+function YouApplyPile({ jobs }: { jobs: NonNullable<QueueReport["youApply"]> }) {
+  return (
+    <>
+      <h3 className="apps-subhead">You apply ({jobs.length}{jobs.length >= 50 ? ", best first" : ""})</h3>
+      <p className="apps-muted">Company career sites and platforms the engine can't fill. Your tailored resume is ready for each.</p>
+      <ul className="apps-inbox-list">
+        {jobs.map((j) => (
+          <li key={j.applyUrl} className="apps-inbox-item">
+            <div className="apps-cards-top">
+              <div className="apps-cards-id"><strong>{j.company}</strong><span>{j.title}</span></div>
+              <a className="apps-btn-link" href={j.applyUrl} target="_blank" rel="noreferrer">Apply ↗</a>
+            </div>
+            <div className="apps-muted">{j.site}{j.score !== null ? ` · score ${Math.round(j.score)}` : ""}</div>
+          </li>
+        ))}
+      </ul>
     </>
   );
 }
