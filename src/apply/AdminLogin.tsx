@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AtriveoLogo from "../components/AtriveoLogo";
+import ApplyLogo from "./ApplyLogo";
 
 const ERROR_MESSAGES: Record<string, string> = {
   not_allowed: "That account is not an admin of this site.",
@@ -49,7 +49,7 @@ export default function AdminLogin() {
   return (
     <main className="apply-login">
       <div className="apply-login-card">
-        <div className="apply-login-brand"><AtriveoLogo /><span>Atriveo <b>Apply</b></span></div>
+        <div className="apply-login-brand"><ApplyLogo height={34} /><span className="apply-brand-by">by Atriveo</span></div>
         <h1>{mode === "login" ? "Admin sign in" : "Create the admin account"}</h1>
         <p className="apply-login-sub">The application engine console. Only allowlisted admin emails can sign in or sign up.</p>
 

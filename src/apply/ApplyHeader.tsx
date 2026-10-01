@@ -1,4 +1,4 @@
-import AtriveoLogo from "../components/AtriveoLogo";
+import ApplyLogo from "./ApplyLogo";
 import type { User } from "../types";
 
 async function signOut() {
@@ -11,8 +11,8 @@ export default function ApplyHeader({ user }: { user: User }) {
   return (
     <div className="apply-header">
       <a className="apply-brand" href="/" aria-label="Atriveo Apply home">
-        <AtriveoLogo />
-        <span>Atriveo <b>Apply</b></span>
+        <ApplyLogo height={22} />
+        <span className="apply-brand-by">by Atriveo</span>
       </a>
       <div className="apply-header-right">
         <a className="apply-ext" href="https://application.atriveo.com" target="_blank" rel="noreferrer">Job feed ↗</a>
