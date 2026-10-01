@@ -19,6 +19,8 @@ interface HistoryRow {
   id: string; company: string; title: string; location: string | null; ats: string | null; status: Status;
   reviewReason: string | null; reviewDetail: string | null; pending: string[]; failureCode: string | null; failureMessage: string | null;
   submittedBy: string | null; submittedAt: string | null; attempts: number; domain: string | null; url: string; createdAt: string; updatedAt: string;
+  /** What the employer's mail said after you applied (inbox watcher). */
+  outcome?: { status: "confirmed" | "rejected"; at: string | null; subject: string | null } | null;
   priority?: number;
 }
 interface Analytics {
@@ -41,6 +43,8 @@ interface Analytics {
   lastActivityAt?: string | null;
   lastAt?: { discovered: string | null; matched: string | null; queued: string | null; applied: string | null; needsReview: string | null; failed: string | null; avgApplyMs: number | null };
   worker?: { online: boolean; host: string | null; concurrency: number | null; gmailConnected: boolean; accountsEmail: string | null; updatedAt: string } | null;
+  inbox?: InboxSummary;
+  queueReport?: QueueReport | null;
 }
 interface CurrentRow {
   id: string; company: string; title: string; ats: string | null; status: "APPLYING" | "SUBMITTING";
@@ -74,6 +78,136 @@ const pct = (n: number | null) => (n === null ? "—" : `${Math.round(n * 100)}%
 const clock = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString([], { ...(new Date(iso).toDateString() === new Date().toDateString() ? {} : { month: "short", day: "numeric" }), hour: "numeric", minute: "2-digit" }) : null);
 const duration = (ms: number | null | undefined) => (ms == null ? null : ms < 60_000 ? `${Math.round(ms / 1000)}s` : `${Math.floor(ms / 60_000)}m ${Math.round((ms % 60_000) / 1000)}s`);
 const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—");
+
+interface InboxMail { id: string; at: string; kind: "applied" | "rejected"; subject: string; company: string | null; title: string | null }
+interface InboxSummary {
+  days: number;
+  confirmed: number;
+  rejected: number;
+  recent: Array<InboxMail & { recordedIn: Array<"engine" | "tracker" | "feed">; note: string | null }>;
+  confirm: Array<InboxMail & { target: "tracker" | "engine"; reason: string; candidates: Array<{ id: string; label: string }> }>;
+}
+interface QueueReport {
+  generatedAt: string;
+  autoQueue: boolean;
+  resumeReady: number;
+  reasons: Array<{ code: string; label: string; n: number; examples: Array<{ company: string; title: string }> }>;
+  queued: number;
+  waitingForCompanySlot: number;
+}
+
+const RECORDED_IN = { engine: "engine", tracker: "tracker", feed: "job feed" } as const;
+
+function OutcomePill({ outcome }: { outcome: HistoryRow["outcome"] }) {
+  if (!outcome) return null;
+  const rejected = outcome.status === "rejected";
+  return (
+    <span className={`apps-pill ${rejected ? "st-critical" : "st-good"}`} title={outcome.subject ? `From: "${outcome.subject}"` : undefined}>
+      <span aria-hidden>{rejected ? "✕" : "✓"}</span> {rejected ? "Rejected" : "Confirmed"}
+    </span>
+  );
+}
+
+function InboxConfirmItem({ item, onDone }: { item: InboxSummary["confirm"][number]; onDone: (message: string) => void }) {
+  const [pick, setPick] = useState(item.candidates[0]?.id ?? "");
+  const [busy, setBusy] = useState(false);
+  const run = async (body: object, ok: string) => {
+    setBusy(true);
+    const r = await postAction(body);
+    setBusy(false);
+    onDone(r.ok ? ok : r.error ?? "Failed");
+  };
+  return (
+    <li className="apps-inbox-item">
+      <div className="apps-cards-id">
+        <strong>{item.company ?? "Unknown company"}{item.title ? ` · ${item.title}` : ""}</strong>
+        <span>{item.kind === "rejected" ? "Rejection" : "Confirmation"} · {when(item.at)} · “{item.subject}”</span>
+      </div>
+      <div className="apps-muted">{item.reason}</div>
+      <div className="apps-cards-actions">
+        {item.candidates.length > 0 && (
+          <select className="apps-select" aria-label="Which application is this about?" value={pick} onChange={(e) => setPick(e.target.value)}>
+            {item.candidates.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+          </select>
+        )}
+        <button className="apps-btn accent" disabled={!pick || busy}
+          onClick={() => void run({ action: "inbox_confirm", mailId: item.id, target: item.target, id: pick }, item.kind === "rejected" ? "Marked rejected." : "Linked.")}>
+          {item.kind === "rejected" ? "Mark rejected" : "Link"}
+        </button>
+        <button className="apps-btn" disabled={busy} onClick={() => void run({ action: "inbox_dismiss", mailId: item.id }, "Dismissed.")}>Not one of mine</button>
+      </div>
+    </li>
+  );
+}
+
+function EmployerResponses({ inbox, onDone }: { inbox: InboxSummary; onDone: (message: string) => void }) {
+  return (
+    <>
+      {inbox.confirm.length > 0 && (
+        <>
+          <h3 className="apps-subhead">Please confirm ({inbox.confirm.length})</h3>
+          <ul className="apps-inbox-list">{inbox.confirm.map((item) => <InboxConfirmItem key={item.id} item={item} onDone={onDone} />)}</ul>
+        </>
+      )}
+      <h3 className="apps-subhead">Recent</h3>
+      {inbox.recent.length === 0 ? <p className="apps-muted">No confirmations or rejections in the last {inbox.days} days.</p> : (
+        <>
+        <div className="apps-only-narrow">
+        <ul className="apps-inbox-list">
+          {inbox.recent.map((m) => (
+            <li key={m.id} className="apps-inbox-item" title={m.subject}>
+              <div className="apps-cards-top">
+                <div className="apps-cards-id"><strong>{m.company ?? "—"}</strong><span>{m.title ?? "Role not named"}</span></div>
+                <span className={`apps-pill ${m.kind === "rejected" ? "st-critical" : "st-good"}`}><span aria-hidden>{m.kind === "rejected" ? "✕" : "✓"}</span> {m.kind === "rejected" ? "Rejected" : "Confirmed"}</span>
+              </div>
+              <div className="apps-muted">{when(m.at)} · {m.recordedIn.length ? `in ${m.recordedIn.map((w) => RECORDED_IN[w]).join(", ")}` : "not matched"}</div>
+            </li>
+          ))}
+        </ul>
+        </div>
+        <div className="apps-table-wrap apps-only-wide">
+          <table className="apps-table">
+            <thead><tr><th>Received</th><th>Company</th><th>Role</th><th>Result</th><th>Recorded in</th></tr></thead>
+            <tbody>{inbox.recent.map((m) => (
+              <tr key={m.id} title={m.subject}>
+                <td>{when(m.at)}</td>
+                <td>{m.company ?? "—"}</td>
+                <td>{m.title ?? "—"}</td>
+                <td><span className={`apps-pill ${m.kind === "rejected" ? "st-critical" : "st-good"}`}><span aria-hidden>{m.kind === "rejected" ? "✕" : "✓"}</span> {m.kind === "rejected" ? "Rejected" : "Confirmed"}</span></td>
+                <td className="apps-detail">{m.recordedIn.length ? m.recordedIn.map((w) => RECORDED_IN[w]).join(", ") : "not matched"}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+        </>
+      )}
+    </>
+  );
+}
+
+function QueueReasons({ report }: { report: QueueReport }) {
+  return (
+    <>
+      <p className="apps-muted">
+        {report.resumeReady} jobs have a finished resume. Auto-queue is <strong>{report.autoQueue ? "on" : "off"}</strong>
+        {report.queued ? ` · ${report.queued} in the engine's queue${report.waitingForCompanySlot ? ` (${report.waitingForCompanySlot} waiting for the company's daily slot)` : ""}` : ""}
+        {" · "}as of {when(report.generatedAt)}
+      </p>
+      <div className="apps-table-wrap">
+        <table className="apps-table">
+          <thead><tr><th>Jobs</th><th>Reason</th><th className="apps-hide-narrow">For example</th></tr></thead>
+          <tbody>{report.reasons.map((r) => (
+            <tr key={r.code}>
+              <td>{r.n}</td>
+              <td>{r.code === "READY" && !report.autoQueue ? `${r.label} (auto-queue is off)` : r.label}</td>
+              <td className="apps-detail apps-hide-narrow">{r.examples.map((e) => `${e.company} · ${e.title}`).join("; ")}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </>
+  );
+}
 
 function StatusPill({ status }: { status: Status }) {
   const m = STATUS_META[status] ?? { label: status, icon: "·", cls: "st-neutral" };
@@ -984,6 +1118,18 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                 </div>
               </div>
 
+              {data.inbox && (
+                <Section title="Employer responses" hint={`Confirmations and rejections from your inbox, last ${data.inbox.days} days`}
+                  meta={<><span>{data.inbox.confirmed} confirmed</span><span>{data.inbox.rejected} rejected</span>{data.inbox.confirm.length > 0 && <span className="warn">{data.inbox.confirm.length} to confirm</span>}</>}>
+                  <EmployerResponses inbox={data.inbox} onDone={(m) => { setNotice(m); void load(); }} />
+                </Section>
+              )}
+              {data.queueReport && (
+                <Section title="Why jobs aren't being applied" hint="Every job with a resume, by the reason it isn't going to the engine"
+                  meta={<><span>{data.queueReport.resumeReady} with a resume</span><span className={data.queueReport.autoQueue ? "" : "warn"}>auto-queue {data.queueReport.autoQueue ? "on" : "off"}</span></>}>
+                  <QueueReasons report={data.queueReport} />
+                </Section>
+              )}
               <Section title="Pipeline" hint="Job funnel from discovery to submission" meta={<>{data.funnel.map((f) => <span key={f.stage}>{f.n} {f.stage.toLowerCase()}</span>)}</>}>
                 <ul className="apps-funnel">
                   {data.funnel.map((f, i) => {
@@ -1029,7 +1175,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                           <td>{h.company}</td>
                           <td>{h.title}</td>
                           <td>{h.ats ?? "—"}</td>
-                          <td><StatusPill status={h.status} /></td>
+                          <td><StatusPill status={h.status} /> <OutcomePill outcome={h.outcome} /></td>
                           <td className="apps-detail">{detailOf(h)}</td>
                           <td>{h.attempts}</td>
                           <td className="apps-row-actions">
@@ -1049,6 +1195,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                           <CompanyLogo company={h.company} size="sm" />
                           <div className="apps-cards-id"><strong>{h.company}</strong><span>{h.title}</span></div>
                           <StatusPill status={h.status} />
+                          <OutcomePill outcome={h.outcome} />
                         </div>
                         <div className="apps-muted">{h.ats ?? "—"} · {when(h.updatedAt)} · {h.attempts} attempt{h.attempts === 1 ? "" : "s"}</div>
                         {detailOf(h) && <div className="apps-cards-detail">{detailOf(h)}</div>}
