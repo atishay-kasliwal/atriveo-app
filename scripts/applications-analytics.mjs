@@ -93,6 +93,7 @@ const reviewRow = (withQuestions) => ({
             fieldKey: "$$this.fieldKey", fingerprint: "$$this.fingerprint", label: "$$this.label", type: "$$this.type", required: "$$this.required",
             canonicalKey: "$$this.canonicalKey", sensitive: "$$this.sensitive", reason: "$$this.reason", detail: "$$this.detail",
             openEndedAssessment: "$$this.openEndedAssessment", openEndedSuggestion: "$$this.openEndedSuggestion", openEndedUserReview: "$$this.openEndedUserReview",
+            answerProposal: "$$this.answerProposal",
             optionCount: size("$$this.options"),
             options: { $cond: [{ $gt: [size("$$this.options"), MAX_INLINE_OPTIONS] }, [], { $ifNull: ["$$this.options", []] }] },
           },
@@ -110,6 +111,14 @@ const pendingQuestion = (p) => ({
   openEndedAssessment: p.openEndedAssessment ?? null,
   openEndedSuggestion: p.openEndedSuggestion ?? null,
   openEndedUserReview: p.openEndedUserReview ?? null,
+  answerProposal: p.answerProposal ?? null,
+  suggestedAnswer: p.answerProposal?.answer ?? p.openEndedSuggestion?.suggestedAnswer,
+  questionFamily: p.answerProposal?.family ?? p.openEndedAssessment?.questionFamily ?? null,
+  selectedStory: p.openEndedAssessment?.selectedStory,
+  suggestionReason: p.answerProposal?.reason ?? p.openEndedAssessment?.reason,
+  userDraft: p.openEndedUserReview?.draftAnswer ?? null,
+  userDraftAction: p.openEndedUserReview?.action,
+  reviewStatus: p.openEndedUserReview?.status ?? (p.answerProposal?.answer || p.openEndedSuggestion ? "suggested" : "none"),
 });
 
 // Blocked on questions: the Unanswered page.
@@ -133,17 +142,25 @@ async function engineState(db) {
   return { killSwitch: killSwitchOf(control), worker: workerOf(workerDocs) };
 }
 
-/** Every application blocked on questions, with suggested answers first, then fewest questions, best match, and oldest. */
+const questionCategory = { $switch: { branches: [
+  { case: { $or: [{ $eq: ["$$this.type", "file"] }, { $eq: ["$$this.answerProposal.state", "action_required"] }, { $regexMatch: { input: { $ifNull: ["$$this.label", ""] }, regex: "^(?:\\(?unlabeled|yes$|no$)", options: "i" } }] }, then: "actionRequired" },
+  { case: { $eq: ["$$this.openEndedUserReview.status", "rejected"] }, then: "needsInput" },
+  { case: { $ne: [{ $ifNull: ["$$this.answerProposal.answer", { $ifNull: ["$$this.openEndedSuggestion.suggestedAnswer", ""] }] }, ""] }, then: "readyForReview" },
+] , default: "needsInput" } };
+const categoryCount = category => ({ $size: { $filter: { input: { $ifNull: ["$review.pending", []] }, cond: { $eq: [questionCategory, category] } } } });
+
+/** Lightweight per-application counts keep filtering independent of card loading. */
 const unansweredOrder = (apps) => apps.aggregate([
   { $match: BLOCKED },
   { $project: {
     updatedAt: 1,
     n: { $size: "$review.pending" },
-    suggestions: { $size: { $filter: { input: { $ifNull: ["$review.pending", []] }, cond: { $ne: [{ $ifNull: ["$$this.openEndedSuggestion.suggestedAnswer", ""] }, ""] } } } },
+    suggestions: categoryCount("readyForReview"),
+    readyForReview: categoryCount("readyForReview"), needsInput: categoryCount("needsInput"), actionRequired: categoryCount("actionRequired"),
     rank: { $ifNull: ["$priority", 0] },
   } },
   { $sort: { suggestions: -1, n: 1, rank: -1, updatedAt: 1, _id: 1 } },
-  { $project: { _id: 0, id: "$_id", updatedAt: 1, n: 1, suggestions: 1 } },
+  { $project: { _id: 0, id: "$_id", updatedAt: 1, n: 1, suggestions: 1, readyForReview: 1, needsInput: 1, actionRequired: 1 } },
 ]).toArray();
 
 /** The cards (questions included) of these applications, in this order; any no longer blocked are left out. */
@@ -204,7 +221,8 @@ function readyLists(readyDocs, { approved, submittedRecently }, now) {
   };
 }
 
-const countsOf = (order, ready) => ({ unanswered: order.length, questions: order.reduce((n, r) => n + r.n, 0), ready: ready.length });
+const countsOf = (order, ready) => ({ unanswered: order.length, questions: order.reduce((n, r) => n + r.n, 0), ready: ready.length,
+  readyForReview: order.reduce((n, r) => n + r.readyForReview, 0), needsInput: order.reduce((n, r) => n + r.needsInput, 0), actionRequired: order.reduce((n, r) => n + r.actionRequired, 0) });
 
 /**
  * The Unanswered and Ready pages and the header counts, each reading only what it shows:

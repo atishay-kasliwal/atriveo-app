@@ -1,320 +1,130 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import CompanyLogo from "../components/CompanyLogo";
 import QuestionField from "./QuestionField";
-import { answerFor, defaultScope, plainQuestion, postAction, questionKind, when, type PendingQ, type Scope } from "./engine";
-import { adjustCounts, loadCards, refreshUnanswered, useUnansweredCards, useUnansweredQueue, type UnansweredApp } from "./reviewQueue";
+import { postAction, proposalText, reviewCategory, when, type PendingQ, type ReviewCategory, type Scope } from "./engine";
+import { loadCards, refreshUnanswered, useUnansweredCards, useUnansweredQueue, type UnansweredApp } from "./reviewQueue";
 import "../styles/applications.css";
 import "./review-pages.css";
 
-// Show as many applications as fit in the window, up to five columns. Each card
-// scrolls its own questions; saving a card pulls the next application into view.
-// The page loads the order of every waiting application, and the questions only for
-// the cards on screen and the next set.
-
-const MIN_COLUMN = 260;
-const MIN_ROW = 420;
-const GAP = 10;
-
-/** Number of cards that fit without scrolling the page. */
-function useGridSize(ref: React.RefObject<HTMLElement | null>): { cols: number; rows: number } {
-  const [size, setSize] = useState({ cols: 5, rows: 1 });
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const fit = () => {
-      const mobile = window.matchMedia("(max-width: 720px)").matches;
-      const cols = mobile ? 1 : Math.max(1, Math.min(5, Math.floor((el.clientWidth + GAP) / (MIN_COLUMN + GAP))));
-      const rows = mobile ? 1 : Math.max(1, Math.floor((el.clientHeight + GAP) / (MIN_ROW + GAP)));
-      setSize((current) => current.cols === cols && current.rows === rows ? current : { cols, rows });
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(el);
-    window.addEventListener("resize", fit);
-    return () => { ro.disconnect(); window.removeEventListener("resize", fit); };
-  }, [ref]);
-  return size;
+const FILTERS = { all: "All", ready_for_review: "Ready for review", needs_input: "Needs input", action_required: "Action required" } as const;
+type Filter = keyof typeof FILTERS;
+const COUNT_KEY = { ready_for_review: "readyForReview", needs_input: "needsInput", action_required: "actionRequired" } as const;
+const SOURCE: Record<string, string> = { candidate_profile: "From Candidate Profile", approved_answer: "From an approved answer", approved_story: "From an approved story", none: "Needs your input" };
+function explanation(q: PendingQ) {
+  const reason = q.answerProposal?.reason ?? q.suggestionReason ?? q.openEndedAssessment?.reason ?? q.reason;
+  if (reason.includes("candidate_written")) return "This site asks for your own wording. Write your response here.";
+  if (q.answerProposal?.family === "compensation" || q.sensitive === "salary") return "Your compensation expectation hasn’t been established for this question.";
+  if (reason.includes("missing_jd")) return "The saved job description is missing, so company details cannot be checked.";
+  if (reason.includes("exceeds") || reason.includes("fits_field")) return "The grounded answer does not fit the form’s limit. Please write a shorter response.";
+  if (q.openEndedUserReview?.status === "rejected") return "You rejected the proposal. Add a corrected answer when you’re ready.";
+  return "There isn’t enough approved information to propose an answer to this question.";
 }
-
-/** A value you typed, or one copied from the same question on another application (`from`). */
-interface Entry { v: string; from?: string }
-
 
 export default function UnansweredPage({ header }: { header?: React.ReactNode }) {
   const { data, error, loading } = useUnansweredQueue(60_000);
-  const { cards, gone, error: cardsError } = useUnansweredCards();
-  const gridRef = useRef<HTMLDivElement>(null);
-  const { cols, rows } = useGridSize(gridRef);
-  const pageSize = cols * rows;
-
-  // Display order (ids). New applications from a refresh are appended after these.
-  const [order, setOrder] = useState<string[]>([]);
-  // Saved or skipped here: id → the record's updatedAt then. It returns if the engine updates it again.
-  const [done, setDone] = useState<Record<string, string>>({});
-  // Typed on each card: application id → fingerprint → value.
-  const [values, setValues] = useState<Record<string, Record<string, string>>>({});
-  // Your latest answer to each plain question, offered on every other card that asks it.
-  const [shared, setShared] = useState<Record<string, Required<Entry>>>({});
-  const [scopes, setScopes] = useState<Record<string, Record<string, Scope>>>({});
+  const { cards, error: cardsError } = useUnansweredCards();
+  const grid = useRef<HTMLDivElement>(null);
+  const [columns, setColumns] = useState(3);
+  const [filter, setFilter] = useState<Filter>("all");
+  const [deferred, setDeferred] = useState<string[]>([]);
+  const [offset, setOffset] = useState(0);
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [scopes, setScopes] = useState<Record<string, Scope>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [confirmSkip, setConfirmSkip] = useState<string | null>(null);
-  const [saved, setSaved] = useState(0);
-  const [notice, setNotice] = useState<string | null>(null);
-  useEffect(() => {
-    if (!notice) return;
-    const t = setTimeout(() => setNotice(null), 6000);
-    return () => clearTimeout(t);
-  }, [notice]);
-
-  const server = useMemo(() => data?.unanswered ?? [], [data]);
+  const [notice, setNotice] = useState("");
+  useLayoutEffect(() => {
+    if (!grid.current) return;
+    const el = grid.current;
+    const resize = () => setColumns(Math.max(1, Math.min(3, Math.floor((el.clientWidth + 18) / 398))));
+    resize(); const observer = new ResizeObserver(resize); observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => { if (!notice) return; const timer = setTimeout(() => setNotice(""), 7000); return () => clearTimeout(timer); }, [notice]);
+  const pageSize = columns * 2;
   const ordered = useMemo(() => {
-    const byId = new Map(server.map((a) => [a.id, a]));
-    const known = new Set(order);
-    const ids = [...order.filter((id) => byId.has(id)), ...server.filter((a) => !known.has(a.id)).map((a) => a.id)];
-    const shown = (id: string, version: string) => !(done[id] && done[id] >= version) && !(gone[id] && gone[id] >= version);
-    return ids.map((id) => byId.get(id)!).filter((a) => shown(a.id, a.updatedAt));
-  }, [server, order, done, gone]);
-  const visible = ordered.slice(0, pageSize);
-  // The cards on screen and the next set, so "Next" and a saved card's replacement show at once.
-  const upcoming = useMemo(() => ordered.slice(0, pageSize * 2), [ordered, pageSize]);
+    const rows = (data?.unanswered ?? []).filter(r => filter === "all" || (r[COUNT_KEY[filter]] ?? 0) > 0);
+    return [...rows.filter(r => !deferred.includes(r.id)), ...rows.filter(r => deferred.includes(r.id))];
+  }, [data, filter, deferred]);
+  const start = ordered.length ? offset % ordered.length : 0;
+  const visible = ordered.slice(start, start + pageSize);
+  const upcoming = useMemo(() => ordered.slice(start, start + pageSize * 2), [ordered, start, pageSize]);
   useEffect(() => { void loadCards(upcoming); }, [upcoming]);
-
-  /** Put the next waiting application in this card's place and send this one to the back. */
-  const replace = (id: string) => {
-    const ids = ordered.map((a) => a.id);
-    const i = ids.indexOf(id);
-    if (i < 0) return;
-    ids.splice(i, 1);
-    if (ids.length >= pageSize) {
-      const [next] = ids.splice(pageSize - 1, 1);
-      ids.splice(i, 0, next!);
-    }
-    setOrder([...ids, id]);
-  };
-  const nextSet = () => {
-    const ids = ordered.map((a) => a.id);
-    setOrder([...ids.slice(pageSize), ...ids.slice(0, pageSize)]);
-  };
-
-  const entry = (app: UnansweredApp, q: PendingQ): Entry | undefined => {
-    const own = values[app.id]?.[q.fingerprint];
-    if (own !== undefined) return { v: own };
-    const s = shared[q.fingerprint];
-    return s && s.from !== app.id && plainQuestion(q) ? s : undefined;
-  };
-  const scopeOf = (app: UnansweredApp, q: PendingQ) => scopes[app.id]?.[q.fingerprint] ?? defaultScope(q, app.company);
-
-  /**
-   * Your answer, and the same answer offered on every other application with this exact question
-   * where you haven't typed one. Sensitive, unreadable and declaration questions are answered one by one.
-   */
-  const setValue = (app: UnansweredApp, q: PendingQ, v: string) => {
-    setValues((cur) => ({ ...cur, [app.id]: { ...cur[app.id], [q.fingerprint]: v } }));
-    if (plainQuestion(q)) setShared((cur) => ({ ...cur, [q.fingerprint]: { v, from: app.id } }));
-  };
-
-  const answersOf = (app: UnansweredApp) => app.questions
-    .filter((q) => questionKind(q) !== "file" && !q.openEndedAssessment?.questionFamily)
-    .map((q) => ({ q, v: entry(app, q)?.v.trim() ?? "" }))
-    .filter((x) => x.v);
-
-  const save = async (app: UnansweredApp) => {
-    const answers = answersOf(app);
-    if (!answers.length || busy) return;
-    setBusy(app.id);
-    setErrors((e) => ({ ...e, [app.id]: "" }));
-    const r = await postAction({ action: "answer", applicationId: app.id, answers: answers.map(({ q, v }) => answerFor(q, v, scopeOf(app, q))) });
-    setBusy(null);
-    if (!r.ok) {
-      setErrors((e) => ({ ...e, [app.id]: r.error ?? "Couldn't save" }));
-      return;
-    }
-    const left = app.questions.length - answers.length;
-    replace(app.id);
-    setDone((d) => ({ ...d, [app.id]: app.updatedAt }));
-    setSaved((n) => n + 1);
-    adjustCounts({ unanswered: -1, questions: -answers.length });
-    setNotice(!r.requeued
-      ? `Saved ${answers.length} answer${answers.length === 1 ? "" : "s"} for ${app.company}. It wasn't refilled: check it on the overview.`
-      : left > 0
-        ? `Saved ${answers.length} for ${app.company}. It's being refilled and will come back for the other ${left}.`
-        : `Saved ${app.company}. It's being refilled; if every check passes it moves to Ready to submit.`);
-  };
-
-  const reviewStory = async (app: UnansweredApp, q: PendingQ, operation: string, answer?: string) => {
-    if (busy || !q.fieldKey) return;
-    setBusy(app.id);
-    setErrors((e) => ({ ...e, [app.id]: "" }));
-    const review = answer === undefined ? { operation, scope: "application" } : { operation, answer };
-    const result = await postAction({ action: "question_review", applicationId: app.id, expectedUpdatedAt: app.updatedAt, fieldKey: q.fieldKey, review });
-    setBusy(null);
-    if (!result.ok) {
-      setErrors((e) => ({ ...e, [app.id]: result.error ?? "Couldn't review answer" }));
-      return;
-    }
-    setDone((d) => ({ ...d, [app.id]: app.updatedAt }));
-    setNotice(result.questionReviewStatus === "complete" ? `${app.company}: answers reviewed. Continue the application to refill and validate.` : `${app.company}: review saved.`);
-    await refreshUnanswered();
-  };
-
-  const continueApplication = async (app: UnansweredApp) => {
+  const keyOf = (app: UnansweredApp, q: PendingQ) => `${app.id}:${q.fieldKey ?? q.fingerprint}`;
+  const textOf = (app: UnansweredApp, q: PendingQ) => values[keyOf(app, q)] ?? q.userDraft ?? q.openEndedUserReview?.draftAnswer ?? proposalText(q);
+  const defer = (id: string) => { setDeferred(ids => [...ids.filter(x => x !== id), id]); setNotice("Deferred for this session."); };
+  const perform = async (app: UnansweredApp, body: object, message: string) => {
     if (busy) return;
-    setBusy(app.id);
-    const result = await postAction({ action: "continue_application", applicationId: app.id, expectedUpdatedAt: app.updatedAt });
-    setBusy(null);
-    if (!result.ok) {
-      setErrors((e) => ({ ...e, [app.id]: result.error ?? "Couldn't continue application" }));
-      return;
-    }
-    setDone((d) => ({ ...d, [app.id]: app.updatedAt }));
-    setNotice(`${app.company}: queued for refill and validation. Submit still needs separate approval.`);
-    await refreshUnanswered();
+    setBusy(app.id); setErrors(old => ({ ...old, [app.id]: "" }));
+    try {
+      const result = await postAction({ ...body, applicationId: app.id, expectedUpdatedAt: app.updatedAt });
+      if (!result.ok) { setErrors(old => ({ ...old, [app.id]: result.error ?? "Couldn’t save. Please retry." })); return; }
+      setNotice(message); await refreshUnanswered();
+    } catch (e) { setErrors(old => ({ ...old, [app.id]: e instanceof Error ? e.message : String(e) })); }
+    finally { setBusy(null); }
   };
-
-  const refreshSuggestions = async (app: UnansweredApp) => {
-    if (busy) return;
-    setBusy(app.id);
-    setErrors((e) => ({ ...e, [app.id]: "" }));
-    const result = await postAction({ action: "refresh_suggestions", applicationId: app.id, expectedUpdatedAt: app.updatedAt });
-    setBusy(null);
-    if (!result.ok) {
-      setErrors((e) => ({ ...e, [app.id]: result.error ?? "Couldn't refresh suggestions" }));
-      return;
+  const approve = (app: UnansweredApp, q: PendingQ) => perform(app, { action: "question_review", fieldKey: q.fieldKey, review: { operation: "approve_answer", answer: textOf(app, q), scope: scopes[keyOf(app, q)] ?? "application" } }, `${app.company}: answer approved. Continue remains a separate action.`);
+  const shortcut = (event: React.KeyboardEvent, app: UnansweredApp, q: PendingQ) => {
+    const target = event.target as HTMLElement;
+    const typing = target.matches("input,textarea,select") || target.isContentEditable;
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter" && reviewCategory(q) !== "action_required" && textOf(app, q).trim()) { event.preventDefault(); void approve(app, q); return; }
+    if (typing || event.altKey || event.metaKey || event.ctrlKey) return;
+    if (event.key.toLowerCase() === "a" && textOf(app, q).trim() && reviewCategory(q) !== "action_required") { event.preventDefault(); void approve(app, q); }
+    if (event.key.toLowerCase() === "e") { event.preventDefault(); event.currentTarget.querySelector<HTMLElement>("textarea,input,select")?.focus(); }
+    if (event.key.toLowerCase() === "s") { event.preventDefault(); defer(app.id); }
+    if (["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"].includes(event.key) && target === event.currentTarget) {
+      event.preventDefault(); const items = Array.from(grid.current?.querySelectorAll<HTMLElement>(".review-question") ?? []);
+      const index = items.indexOf(event.currentTarget as HTMLElement);
+      items[(index + (event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1) + items.length) % items.length]?.focus();
     }
-    const changed = (result.suggestionsAdded ?? 0) + (result.suggestionsChanged ?? 0);
-    setNotice(changed
-      ? `Refreshed ${changed} suggestion${changed === 1 ? "" : "s"} for ${app.company}. Nothing was submitted.`
-      : result.refreshed
-        ? `Rechecked ${result.refreshed} question${result.refreshed === 1 ? "" : "s"} for ${app.company}: no suggestion changed.`
-        : `No questions needed refreshing for ${app.company}.`);
-    await refreshUnanswered();
   };
-
-  const skip = async (app: UnansweredApp) => {
-    setBusy(app.id);
-    const r = await postAction({ action: "skip", applicationId: app.id, note: "skipped on the Unanswered page" });
-    setBusy(null);
-    setConfirmSkip(null);
-    if (!r.ok) {
-      setErrors((e) => ({ ...e, [app.id]: r.error ?? "Couldn't skip" }));
-      return;
-    }
-    replace(app.id);
-    setDone((d) => ({ ...d, [app.id]: app.updatedAt }));
-    adjustCounts({ unanswered: -1, questions: -app.questions.length });
-    setNotice(`Skipped ${app.company}.`);
-  };
-
-  const remaining = ordered.length;
-  const questionsLeft = ordered.reduce((n, a) => n + a.n, 0);
-
-  return (
-    <div className="rv-page">
-      {header}
-      <div className="rv-bar">
-        <div className="rv-bar-title">
-          <h1>Unanswered questions</h1>
-          {data && <span className="apps-muted">{remaining} application{remaining === 1 ? "" : "s"} · {questionsLeft} question{questionsLeft === 1 ? "" : "s"}{saved ? ` · ${saved} saved here` : ""}</span>}
-        </div>
-        <div className="rv-bar-actions">
-          {data?.worker && !data.worker.online && <span className="apps-state bad" title={`Last seen ${when(data.worker.updatedAt)}`}><i aria-hidden />Worker offline: saved answers wait</span>}
-          {remaining > visible.length && <span className="apps-muted">Showing {visible.length} of {remaining}</span>}
-          {remaining > visible.length && <button className="apps-btn" onClick={nextSet}>Next {pageSize} ›</button>}
-          <button className="apps-refresh" onClick={() => void refreshUnanswered()} disabled={loading}>{loading ? "Refreshing…" : data ? `Updated ${when(data.generatedAt)} ↻` : ""}</button>
-        </div>
+  return <div className="rv-page review-workspace">
+    {header}
+    <div className="rv-bar"><div className="rv-bar-title"><h1>Review queue</h1><span className="apps-muted">{data?.counts.questions.toLocaleString() ?? "…"} questions · review answers, then continue separately</span></div>
+      <button className="apps-refresh" onClick={() => void refreshUnanswered()} disabled={loading}>{loading ? "Updating…" : `Updated ${when(data?.generatedAt ?? null)} ↻`}</button></div>
+    <nav className="review-filters" aria-label="Review state">{Object.entries(FILTERS).map(([value, label]) => <button key={value} aria-pressed={filter === value} onClick={() => { setFilter(value as Filter); setOffset(0); }}>
+      {label} <span>{value === "all" ? data?.counts.questions ?? "…" : data?.counts[COUNT_KEY[value as ReviewCategory]] ?? "…"}</span></button>)}
+      <details className="review-shortcuts"><summary>Shortcuts</summary><span>Focus a question: A approve · E edit · S later · arrows move. Ctrl/⌘ Enter approves your edit.</span></details></nav>
+    <main className="rv-main">
+      {(error || cardsError) && <p className="apps-error" role="alert">{error || cardsError} <button className="apps-link" onClick={() => void refreshUnanswered()}>Retry</button></p>}
+      {!data && !error && <p className="apps-muted">Loading your review queue…</p>}
+      {data && !ordered.length && <div className="rv-empty"><strong>No questions in this view.</strong><span>Choose another review state to keep going.</span></div>}
+      <div ref={grid} className="rv-columns" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+        {visible.map(row => {
+          const app = cards[row.id];
+          if (!app || app.updatedAt < row.updatedAt) return <article key={row.id} className="rv-card rv-card-wait" aria-busy="true">Loading questions…</article>;
+          const questions = app.questions.filter(q => filter === "all" || reviewCategory(q) === filter);
+          return <article key={app.id} className="rv-card" aria-label={app.company} aria-busy={busy === app.id}>
+            <header className="rv-card-head"><CompanyLogo company={app.company} size="sm" /><div className="rv-card-id"><strong>{app.company}</strong><span>{app.title}</span><small>{app.questions.length} pending · {app.ats}</small></div></header>
+            <div className="rv-card-body">{questions.map(q => {
+              const category = reviewCategory(q); const key = keyOf(app, q); const text = textOf(app, q);
+              const narrative = q.openEndedAssessment?.questionFamily || q.questionFamily === "why_company_role" || q.type === "textarea";
+              const canReuse = !narrative && !["demographic", "attachment", "unknown"].includes(q.answerProposal?.family ?? "unknown");
+              return <section key={key} className={`review-question is-${category}`} tabIndex={0} onKeyDown={e => shortcut(e, app, q)} aria-label={q.label}>
+                <div className="review-state">{FILTERS[category]}</div>
+                {category === "action_required" ? <><h2>{q.type === "file" ? "Attachment needs attention" : "Form inspection needed"}</h2><p className="apps-q-note">{q.label}. Open the form to inspect this control; a text answer cannot resolve it.</p><a href={app.url} target="_blank" rel="noreferrer">Open form ↗</a></>
+                  : <><p className="review-source">{q.userDraft || q.openEndedUserReview?.status === "draft" ? "Your saved draft" : proposalText(q) ? SOURCE[q.answerProposal?.source ?? "approved_story"] : explanation(q)}</p>
+                    {narrative ? <label className="apps-q"><strong className="apps-q-label">{q.label}{q.required ? " *" : ""}</strong><textarea rows={7} value={text} onChange={e => setValues(v => ({ ...v, [key]: e.target.value }))} placeholder="Your answer" /></label>
+                      : <QuestionField hideScope q={q} appId={app.id} company={app.company} value={text} scope={scopes[key] ?? "application"} onValue={value => setValues(v => ({ ...v, [key]: value }))} onScope={scope => setScopes(s => ({ ...s, [key]: scope }))} />}
+                    {q.answerProposal?.caution && <p className="apps-q-note">{q.answerProposal.caution}</p>}
+                    <div className="review-actions"><button className="rv-primary" disabled={busy !== null || !text.trim() || !q.fieldKey} onClick={() => void approve(app, q)}>{busy === app.id ? "Saving…" : "✓ Approve answer"}</button>
+                      <button className="apps-btn" disabled={busy !== null || !text.trim()} onClick={() => void perform(app, { action: "question_review", fieldKey: q.fieldKey, review: { operation: "replace_answer", answer: text } }, "Draft saved. It hasn’t been approved.")}>Save draft</button></div>
+                    <details className="review-details"><summary>Sources & answer reuse</summary><p>{q.selectedStory ?? q.openEndedAssessment?.selectedStory ?? "Candidate facts / your own response"}</p><p className="apps-q-note">{q.answerProposal?.reason ?? q.suggestionReason ?? q.detail}</p>
+                      {canReuse && <label>Use this approved answer for<select value={scopes[key] ?? "application"} onChange={e => setScopes(s => ({ ...s, [key]: e.target.value as Scope }))}><option value="application">Only this application</option><option value="company">Matching questions at {app.company}</option><option value="global">Similar questions across applications</option></select></label>}
+                      {!canReuse && <p className="apps-q-note">This response stays with this application.</p>}
+                      <pre>{JSON.stringify(q.answerProposal?.provenance ?? q.openEndedAssessment, null, 2)}</pre>
+                      {proposalText(q) && <button className="apps-link" disabled={busy !== null} onClick={() => void perform(app, { action: "question_review", fieldKey: q.fieldKey, review: { operation: "reject_suggestion" } }, "Proposal rejected. Your question remains in review.")}>Reject proposal</button>}
+                    </details></>}
+              </section>;
+            })}</div>
+            <footer className="rv-card-foot">{errors[app.id] && <p className="apps-error" role="alert">{errors[app.id]} <button className="apps-link" onClick={() => void refreshUnanswered()}>Load latest version</button></p>}
+              {!app.questions.length && app.questionReviewStatus === "complete" && <button className="rv-primary" disabled={busy !== null} onClick={() => void perform(app, { action: "continue_application" }, "Queued for refill and validation. Submission still requires separate approval.")}>Continue application</button>}
+              <details className="review-details"><summary>Application actions</summary><div className="rv-card-links"><button className="apps-link" onClick={() => defer(app.id)}>Later</button><a href={app.url} target="_blank" rel="noreferrer">Open form ↗</a><button className="apps-link" disabled={busy !== null} onClick={() => void perform(app, { action: "refresh_suggestions" }, "Proposals refreshed. No answer was approved.")}>Refresh suggestions</button></div>
+                <button className="apps-link" disabled={busy !== null} onClick={() => { if (window.confirm(`Skip ${app.company} — ${app.title}?`)) void perform(app, { action: "skip", note: "Skipped in review workspace" }, "Application skipped."); }}>Skip this job</button></details>
+            </footer></article>;
+        })}
       </div>
-
-      <main className="rv-main">
-        {error && !data && <p className="apps-error">Couldn't load the questions: {error}. The Mac sidecar must be running (npm run tailor:restart).</p>}
-        {!data && !error && <p className="apps-muted rv-wait">Loading the unanswered questions…</p>}
-        {data && remaining === 0 && (
-          <div className="rv-empty">
-            <strong>Nothing is waiting for an answer.</strong>
-            {data.counts.ready > 0 && <span><Link to="/ready">{data.counts.ready} application{data.counts.ready === 1 ? " is" : "s are"} ready to submit →</Link></span>}
-          </div>
-        )}
-        <div className="rv-columns" ref={gridRef} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${Math.max(1, Math.ceil(visible.length / cols))}, minmax(0, 1fr))` }}>
-          {visible.map((row) => {
-            const app = cards[row.id];
-            if (!app) {
-              return (
-                <article key={row.id} className="rv-card rv-card-wait" aria-busy={!cardsError}>
-                  <p className={cardsError ? "apps-q-note warn" : "apps-muted"}>{cardsError ? `Couldn't load these questions: ${cardsError}` : "Loading questions…"}</p>
-                </article>
-              );
-            }
-            const answers = answersOf(app);
-            const answerable = app.questions.filter((q) => questionKind(q) !== "file" && !q.openEndedAssessment?.questionFamily).length;
-            const hasOpenEnded = app.questions.some((q) => q.openEndedAssessment?.questionFamily);
-            return (
-              <article key={app.id} data-id={app.id} className="rv-card" aria-label={`${app.company}: ${app.questions.length} question${app.questions.length === 1 ? "" : "s"}`}
-                onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); void save(app); } }}>
-                <header className="rv-card-head">
-                  <CompanyLogo company={app.company} size="sm" />
-                  <div className="rv-card-id">
-                    <strong title={app.company}>{app.company}</strong>
-                    <span title={app.title}>{app.title}</span>
-                    <small>{hasOpenEnded && app.questions.some((q) => q.openEndedSuggestion) ? "Suggested answer ready · " : ""}{app.questions.length} question{app.questions.length === 1 ? "" : "s"}{app.ats ? ` · ${app.ats}` : ""}{app.priority ? ` · match ${app.priority}` : ""}</small>
-                  </div>
-                </header>
-                <div className="rv-card-body">
-                  {app.questions.length === 0 && app.questionReviewStatus === "complete" && <p className="apps-q-note">All questions have been reviewed. Continue to refill and validate this application. This does not submit it.</p>}
-                  {app.questions.map((q) => {
-                    const e = entry(app, q);
-                    const from = e?.from ? cards[e.from]?.company : null;
-                    if (q.openEndedAssessment?.questionFamily) {
-                      const draft = q.openEndedUserReview?.status === "draft";
-                      const text = e?.v ?? q.openEndedUserReview?.draftAnswer ?? q.openEndedSuggestion?.suggestedAnswer ?? "";
-                      return <div key={q.fieldKey ?? q.fingerprint} className="apps-q apps-q-narrative">
-                        <strong className="apps-q-label">{q.label}{q.required ? " *" : ""}</strong>
-                        {q.openEndedSuggestion && <p className="apps-q-note">{q.openEndedSuggestion.confidenceBand === "high" ? "Strong" : "Possible"} suggestion from an approved story. Review every claim before accepting.</p>}
-                        {!q.openEndedSuggestion && <p className="apps-q-note">No approved suggestion is available. Write your answer and approve it yourself.</p>}
-                        <textarea rows={5} value={text} onChange={(event) => setValue(app, q, event.target.value)} aria-label={`Answer to ${q.label}`} />
-                        <details className="apps-q-note"><summary>Suggestion match details</summary>Story match: {q.openEndedAssessment.questionFamily.replaceAll("_", " ")} · family {Math.round(q.openEndedAssessment.familyConfidence * 100)}% · story {Math.round(q.openEndedAssessment.storyConfidence * 100)}%{q.openEndedAssessment.selectedStory ? ` · ${q.openEndedAssessment.selectedStory}` : ""}. These scores describe the match, not your chance of getting the job.</details>
-                        {draft && <p className="apps-q-note">Your edited draft is saved. Approve it explicitly before continuing.</p>}
-                        <div className="rv-card-links">
-                          {q.openEndedSuggestion && !draft && <button className="apps-link" disabled={busy !== null} onClick={() => void reviewStory(app, q, "accept_suggestion")}>Accept suggestion</button>}
-                          {q.openEndedSuggestion && !draft && <button className="apps-link" disabled={busy !== null} onClick={() => void reviewStory(app, q, "reject_suggestion")}>Reject suggestion</button>}
-                          {!draft && <button className="apps-link" disabled={busy !== null || !text.trim()} onClick={() => void reviewStory(app, q, q.openEndedSuggestion ? "edit_suggestion" : "replace_answer", text.trim())}>Save {q.openEndedSuggestion ? "edited" : "replacement"} draft</button>}
-                          {draft && <button className="apps-link" disabled={busy !== null} onClick={() => void reviewStory(app, q, q.openEndedUserReview?.action === "edited" ? "approve_edited_answer" : "approve_replacement")}>Approve this answer</button>}
-                        </div>
-                      </div>;
-                    }
-                    return (
-                      <QuestionField key={q.fingerprint} q={q} appId={app.id} company={app.company}
-                        value={e?.v ?? ""} onValue={(v) => setValue(app, q, v)}
-                        scope={scopeOf(app, q)} onScope={(sc) => setScopes((cur) => ({ ...cur, [app.id]: { ...cur[app.id], [q.fingerprint]: sc } }))}
-                        note={from && e?.v ? `Filled from your ${from} answer. Check it before saving.` : null} />
-                    );
-                  })}
-                </div>
-                <footer className="rv-card-foot">
-                  {errors[app.id] && <p className="apps-q-note warn" role="alert">{errors[app.id]}</p>}
-                  {app.questions.length === 0 && app.questionReviewStatus === "complete" ? <button className="rv-primary" disabled={busy !== null} onClick={() => void continueApplication(app)}>{busy === app.id ? "Continuing…" : "Continue application"}</button> : answerable > 0 ? <button className="rv-primary" disabled={!answers.length || busy !== null} onClick={() => void save(app)}
-                    title="Saves your answers and refills this application (Ctrl or ⌘ + Enter)">
-                    {busy === app.id ? "Saving…" : answers.length === 0 ? (answerable ? "Answer to save" : "Nothing to answer here")
-                      : answers.length < answerable ? `Save ${answers.length} of ${answerable}` : "Save and refill"}
-                  </button> : null}
-                  {hasOpenEnded && <button className="apps-btn" disabled={busy !== null} onClick={() => void refreshSuggestions(app)}
-                    title="Recompute suggestions with the current answer logic and saved job description. This cannot approve or submit an application.">
-                    {busy === app.id ? "Refreshing…" : "Refresh suggestions"}
-                  </button>}
-                  <div className="rv-card-links">
-                    <button className="apps-link" onClick={() => replace(app.id)} disabled={busy !== null}>Later</button>
-                    <a href={app.url} target="_blank" rel="noreferrer">Open form ↗</a>
-                    {confirmSkip === app.id
-                      ? <span className="rv-confirm">Skip this job? <button className="apps-link danger" onClick={() => void skip(app)} disabled={busy !== null}>Skip</button> <button className="apps-link" onClick={() => setConfirmSkip(null)}>Keep</button></span>
-                      : <button className="apps-link" onClick={() => setConfirmSkip(app.id)} disabled={busy !== null}>Skip job</button>}
-                  </div>
-                </footer>
-              </article>
-            );
-          })}
-        </div>
-      </main>
-      {notice && <p className="apps-toast" role="status">{notice}</p>}
-    </div>
-  );
+      {ordered.length > pageSize && <div className="review-pagination"><span className="apps-muted">{start + 1}–{Math.min(start + pageSize, ordered.length)} of {ordered.length} applications</span><button className="apps-btn" onClick={() => setOffset(current => current + pageSize)}>Next applications →</button></div>}
+    </main>{notice && <p className="apps-toast" role="status">{notice}</p>}
+  </div>;
 }

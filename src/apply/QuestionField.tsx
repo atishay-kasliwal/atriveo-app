@@ -41,7 +41,8 @@ function SearchChoice({ list, value, onValue }: { list: string[]; value: string;
 }
 
 /** One unanswered question: the right input for its type, and where the answer is remembered. */
-export default function QuestionField({ q, appId, company, value, scope, onValue, onScope, note }: {
+export default function QuestionField({ q, appId, company, value, scope, onValue, onScope, note, hideScope = false }: {
+  hideScope?: boolean;
   q: PendingQ; appId: string; company: string; value: string; scope: Scope;
   onValue: (v: string) => void; onScope: (s: Scope) => void;
   /** Shown under the input, e.g. where a pre-filled answer came from. */
@@ -75,6 +76,8 @@ export default function QuestionField({ q, appId, company, value, scope, onValue
         {options.list.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
     );
+  } else if (q.type !== "textarea") {
+    input = <input value={value} onChange={(e) => onValue(e.target.value)} placeholder="Your answer" />;
   } else {
     input = <textarea rows={q.type === "textarea" ? 3 : 1} value={value} onChange={(e) => onValue(e.target.value)} placeholder="Your answer" />;
   }
@@ -89,7 +92,7 @@ export default function QuestionField({ q, appId, company, value, scope, onValue
       {kind === "unreadable" && <p className="apps-q-note">The engine couldn't read this field's label. Open the form to see what it asks. Your answer is kept for this application only.</p>}
       {q.type === "checkbox" && q.sensitive && <p className="apps-q-note">Read the notice or declaration before choosing. A required box left unchecked keeps this application in review.</p>}
       {note && <p className="apps-q-note">{note}</p>}
-      {kind === "question" && (
+      {kind === "question" && !hideScope && (
         <select className="apps-q-scope" aria-label="Use this answer for" value={scope} onChange={(e) => onScope(e.target.value as Scope)}>
           <option value="application">Only this application</option>
           <option value="company">All {company} jobs</option>

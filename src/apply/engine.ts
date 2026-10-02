@@ -9,6 +9,14 @@ export const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString(
 
 /** A question the engine could not answer, as it waits in review. */
 export interface PendingQ {
+  answerProposal?: { state: "ready_for_review" | "needs_input" | "action_required"; answer?: string; family: string; source: string; reason: string; caution?: string; provenance?: unknown } | null;
+  suggestedAnswer?: string;
+  questionFamily?: string | null;
+  selectedStory?: string;
+  suggestionReason?: string;
+  userDraft?: string | null;
+  userDraftAction?: "edited" | "replaced";
+  reviewStatus?: "suggested" | "draft" | "approved" | "rejected" | "none";
   fieldKey?: string | null;
   fingerprint: string; label: string; type: string; required: boolean; options: string[];
   /** How many choices the form offered; more than `options.length` when the list was too long to send up front. */
@@ -61,10 +69,17 @@ export function plainQuestion(q: PendingQ): boolean {
  * questions stay with this application; a question that names the company stays with the company.
  */
 export function defaultScope(q: PendingQ, company: string): Scope {
-  if (!plainQuestion(q)) return "application";
-  const companyWord = company.toLowerCase().split(/\s+/)[0] ?? "";
-  return companyWord && q.label.toLowerCase().includes(companyWord) ? "company" : "global";
+  void q; void company;
+  return "application";
 }
+
+export type ReviewCategory = "ready_for_review" | "needs_input" | "action_required";
+export function reviewCategory(q: PendingQ): ReviewCategory {
+  if (questionKind(q) !== "question") return "action_required";
+  if (q.openEndedUserReview?.status === "rejected" || q.reviewStatus === "rejected") return "needs_input";
+  return q.answerProposal?.state ?? (q.suggestedAnswer || q.openEndedSuggestion?.suggestedAnswer ? "ready_for_review" : "needs_input");
+}
+export const proposalText = (q: PendingQ) => q.answerProposal?.answer ?? q.suggestedAnswer ?? q.openEndedSuggestion?.suggestedAnswer ?? "";
 
 /** The `answer` action's payload for one question; unreadable questions never leave this application. */
 export function answerFor(q: PendingQ, value: string, scope: Scope) {

@@ -10,7 +10,7 @@ export interface EngineState {
   killSwitch: { enabled: boolean; reason: string | null } | null;
   worker: { online: boolean; updatedAt: string } | null;
 }
-export interface Counts { unanswered: number; questions: number; ready: number }
+export interface Counts { unanswered: number; questions: number; ready: number; readyForReview?: number; needsInput?: number; actionRequired?: number }
 
 interface Row {
   id: string; company: string; companyKey: string | null; title: string; location: string | null; ats: string | null;
@@ -29,7 +29,7 @@ export interface ApprovedApp extends Row {
   submittedAt: string | null; approvedAt: string | null;
 }
 /** An application blocked on questions, in the Unanswered page's order; its card loads when it's needed. */
-export interface QueuedApp { id: string; updatedAt: string; /** questions waiting */ n: number; /** approved story suggestions ready for review */ suggestions?: number }
+export interface QueuedApp { id: string; updatedAt: string; n: number; suggestions?: number; readyForReview?: number; needsInput?: number; actionRequired?: number }
 
 interface View extends EngineState { ok: boolean; generatedAt: string; counts: Counts }
 export interface UnansweredQueue extends View { unanswered: QueuedApp[] }
