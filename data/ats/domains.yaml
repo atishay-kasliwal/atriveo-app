@@ -1,0 +1,7 @@
+healthcare: { label: Healthcare, terms: [healthcare, clinical, patient, medical], equivalents: [hospital, clinician, health] }
+finance: { label: Finance, terms: [finance, financial, banking, payments], equivalents: [billing, fintech, transaction] }
+insurance: { label: Insurance, terms: [insurance, insurer, claims], equivalents: [underwriting, policyholder] }
+security: { label: Security, terms: [cybersecurity, security, identity], equivalents: [fraud, threat] }
+retail: { label: Retail, terms: [retail, ecommerce, e-commerce], equivalents: [commerce, marketplace] }
+media: { label: Media, terms: [media, streaming, advertising], equivalents: [content, video] }
+education: { label: Education, terms: [education, learning, student], equivalents: [university, academic] }

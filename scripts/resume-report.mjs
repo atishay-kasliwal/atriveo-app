@@ -6,6 +6,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { readSavedAts } from "./ats/persist.mjs";
 
 const readJson = (dir, name) => {
   try { return JSON.parse(fs.readFileSync(path.join(dir, name), "utf8")); } catch { return null; }
@@ -25,7 +26,8 @@ export function readResumeReport(dir) {
   const optimizer = readJson(dir, "optimizer.json");
   const report = readJson(dir, "report.json") ?? readJson(dir, "composition.json");
   const meta = readJson(dir, "meta.json");
-  if (!optimizer && !report) return null;
+  const assessment = readSavedAts(dir);
+  if (!optimizer && !report && !assessment) return null;
 
   const hm = report?.hiring_manager_test ?? optimizer?.hiring_manager_test ?? report?.composition?.quality?.hiring_manager_test ?? null;
   const coverage = report?.composition?.coverage ?? report?.coverage ?? null;
@@ -49,6 +51,8 @@ export function readResumeReport(dir) {
       before: num(optimizer?.ats_before),
       after: num(optimizer?.ats_after) ?? num(matrix?.score),
     },
+    atsReadiness: assessment?.readiness ? { status: assessment.readiness.status, score: assessment.readiness.parseability } : null,
+    jobMatch: assessment?.job_match ? { score: assessment.job_match.score, coverage: assessment.job_match.coverage } : null,
     confidence: round1(num(report?.resume_confidence_score) ?? num(optimizer?.resume_confidence_score)),
     human: hm ? {
       score: num(hm.composite),                       // 0-10

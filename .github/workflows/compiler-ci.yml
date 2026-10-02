@@ -5,7 +5,9 @@ on:
     branches: [main, master]
     paths:
       - "data/ac-bank/**"
+      - "data/ats/**"
       - "scripts/**"
+      - "tests/ats/**"
       - "package.json"
       - "package-lock.json"
       - "Dockerfile"
@@ -13,7 +15,9 @@ on:
   pull_request:
     paths:
       - "data/ac-bank/**"
+      - "data/ats/**"
       - "scripts/**"
+      - "tests/ats/**"
       - "package.json"
       - "package-lock.json"
       - "Dockerfile"
@@ -38,7 +42,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             ca-certificates \
             fontconfig \
-            libfontconfig1
+            libfontconfig1 \
+            poppler-utils
           mkdir -p "$HOME/.local/bin"
           curl -fsSL -o /tmp/tectonic.tgz \
             "https://github.com/tectonic-typesetting/tectonic/releases/download/tectonic%400.16.9/tectonic-0.16.9-x86_64-unknown-linux-musl.tar.gz"
@@ -52,6 +57,9 @@ jobs:
 
       - name: Compiler CI verification
         run: npm run ac:ci
+
+      - name: ATS Readiness and Job Match tests
+        run: npm run test:ats
 
   docker:
     name: Docker portable compiler

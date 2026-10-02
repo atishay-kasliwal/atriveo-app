@@ -17,6 +17,7 @@ import { assessJdGate, writeJdGateFile, MIN_JD_IDEAL } from "./ac-jd-gate.mjs";
 import { buildComposeExplain, formatExplainLogLines } from "./ac-compose-explain.mjs";
 import { loadBank } from "./ac-bank.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
+import { scoreAndSaveRun } from "./ats/persist.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
 import {
   createArtifactRun,
@@ -298,6 +299,10 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
       result.dir = materialized.dir;
       result.pdf = true;
       result.status = "ok";
+      try {
+        const { saved } = scoreAndSaveRun(dir);
+        onLog?.("result", `ATS Readiness ${saved.readiness.status} ${saved.readiness.parseability} · Job Match ${saved.job_match?.score ?? "manual review"}`);
+      } catch (e) { onLog?.("warn", `ATS assessment unavailable: ${String(e.message || e)}`); }
       recordCacheReuse(cached.fingerprint, {
         job_url: job.job_url,
         company,
@@ -500,6 +505,10 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     report.pdf = c.pdf;
     report.pages = c.pages;
     fs.writeFileSync(path.join(dir, "report.json"), `${JSON.stringify(report, null, 2)}\n`);
+    try {
+      const { saved } = scoreAndSaveRun(dir);
+      onLog?.("result", `ATS Readiness ${saved.readiness.status} ${saved.readiness.parseability} · Job Match ${saved.job_match?.score ?? "manual review"}`);
+    } catch (e) { onLog?.("warn", `ATS assessment unavailable: ${String(e.message || e)}`); }
     result.overflow = c.pages != null && c.pages > 1;
 
     // Gemma critique — disabled (~8 min/job). Opt in: TAILOR_CRITIQUE=1 + uncomment block below.

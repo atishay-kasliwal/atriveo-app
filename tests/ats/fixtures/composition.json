@@ -1,0 +1,50 @@
+{
+  "profile": {
+    "name": "Jordan Rivera",
+    "title": "Software Engineer",
+    "email": "jordan.rivera@example.com",
+    "phone": "555-201-4477",
+    "location": "Austin, TX",
+    "linkedin": "https://www.linkedin.com/in/jordan-rivera",
+    "github": "https://github.com/jrivera",
+    "portfolio": "https://jordanrivera.dev"
+  },
+  "headerTitle": "Backend Engineer",
+  "skills": [
+    "Languages: Python, Java, SQL, TypeScript, JavaScript",
+    "Cloud & DevOps: AWS, Docker, Kubernetes, GCP, Terraform, CI/CD",
+    "Backend Frameworks: FastAPI, Spring Boot, Node.js, REST APIs, Kafka",
+    "AI & Machine Learning: LLMs, RAG, LangChain, PyTorch"
+  ],
+  "composition": {
+    "experience": [
+      { "role": "stony-brook", "bullets": [
+        { "ac_id": "T-001", "text": "Built a Python and FastAPI retrieval service on AWS that answers analyst questions over 7 years of filings and cut research time from 3 days to under 20 minutes." },
+        { "ac_id": "T-002", "text": "Designed a LangChain RAG pipeline with vector search and evaluation harness that lifted answer accuracy by 18% across 400 benchmark questions." },
+        { "ac_id": "T-003", "text": "Shipped an event-driven ingestion job on AWS Lambda and SQS that processes 50K documents per day with retries and dead-letter alerts." },
+        { "ac_id": "T-004", "text": "Wrote integration tests and CI checks in GitHub Actions that caught 30 regressions before release and kept deploys under 10 minutes." }
+      ] },
+      { "role": "wake-forest", "bullets": [
+        { "ac_id": "T-005", "text": "Built Python ETL pipelines on GCP that turned 10K imaging studies into reproducible research cohorts for three clinical research groups." },
+        { "ac_id": "T-006", "text": "Automated feature extraction that produced 200+ quantitative measures per study and reduced manual preparation from 3 hours to 2 minutes." },
+        { "ac_id": "T-007", "text": "Partnered with physicians to define data quality rules that flagged 4% of studies for review before they reached downstream models." }
+      ] },
+      { "role": "accolite", "bullets": [
+        { "ac_id": "T-008", "text": "Delivered Java and Spring Boot services on AWS for three enterprise clients, serving 3,000 employees with secure document exchange." },
+        { "ac_id": "T-009", "text": "Replaced a vendor CRM with an in-house React and MongoDB operations platform used for onboarding, timesheets and reviews." },
+        { "ac_id": "T-010", "text": "Automated weekly timesheet filing on AWS Lambda and SQS for 3,000 employees, removing a manual process across operations." },
+        { "ac_id": "T-011", "text": "Standardized performance reviews on React and MongoDB across 10+ manager teams, replacing spreadsheet workflows in production." }
+      ] }
+    ],
+    "projects": [
+      { "role": "atriveo", "bullets": [
+        { "text": "Built a React and FastAPI job search platform with a browser extension that tracks applications and tailors resumes for 1K+ daily users." },
+        { "text": "Shipped a TypeScript Chrome extension that captures job postings in one click and syncs them to the tracker in real time." }
+      ] },
+      { "role": "insurance-platform", "bullets": [
+        { "text": "Built a Spring Cloud API gateway with JWT authentication, Redis rate limiting at 5 requests per second and circuit breakers." },
+        { "text": "Deployed service discovery and an encrypted config server across 8 Docker Compose microservices with Kafka messaging." }
+      ] }
+    ]
+  }
+}

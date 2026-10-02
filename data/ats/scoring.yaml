@@ -1,0 +1,116 @@
+# ATS scoring configuration. Every weight, penalty and threshold the ATS scorer uses lives here;
+# the code reads them and holds none of its own. Edit and re-run `npm run ats:readiness` to see
+# the effect. The config's hash is printed with every result, so a changed number is traceable.
+#
+# ATS Readiness answers one question: can a parser read this resume's text and structure?
+# It starts at `start` and loses each finding's penalty. A critical finding fails the resume no
+# matter what the number says.
+#
+# This is our own deterministic check. It is not the score Workday, Greenhouse, Lever, iCIMS,
+# Ashby or any employer's system gives the resume.
+
+readiness:
+  start: 100
+  floor: 0
+  # No critical or warning findings and at least this parseability → PASS; otherwise WARN.
+  pass_min: 85
+  # Reading-order views each entry's fields are checked in (poppler's column-aware reading order
+  # and its content-stream order). The layout view is the reference they are compared against.
+  order_views: [reading, raw]
+
+  checks:
+    # ── Text ──────────────────────────────────────────────────────────────────
+    text_extractable:     { severity: critical, penalty: 40, min_words: 150 }
+    # Replacement characters, private-use glyphs or control characters in the text.
+    # Above max_share of all characters it is critical; any at all is a warning.
+    unreadable_glyphs:    { severity: critical, penalty: 30, max_share: 0.01, warning_penalty: 6 }
+    # "ﬁ"-style ligature characters: a parser reads "ﬁnance", not "finance".
+    ligature_glyphs:      { severity: warning, penalty: 4 }
+    images:               { severity: warning, penalty: 3, cap: 9 }
+    page_count:           { severity: info, penalty: 0, max_pages: 2 }
+    repeated_page_lines:  { severity: info, penalty: 0 }
+
+    # ── Contact ───────────────────────────────────────────────────────────────
+    name:                 { severity: warning, penalty: 8 }
+    email:                { severity: critical, penalty: 20 }
+    phone:                { severity: warning, penalty: 8 }
+    location:             { severity: warning, penalty: 3 }
+    # A link whose address is not printed: the text a parser receives has the label only.
+    link_url_hidden:      { severity: warning, penalty: 2, cap: 6 }
+
+    # ── Sections ──────────────────────────────────────────────────────────────
+    section_experience:   { severity: critical, penalty: 25 }
+    section_education:    { severity: warning, penalty: 8 }
+    section_skills:       { severity: warning, penalty: 8 }
+    # Section headings come out in a different order in a reading-order view than on the page.
+    section_order:        { severity: warning, penalty: 6 }
+
+    # ── Entries ───────────────────────────────────────────────────────────────
+    # No position with both an employer and a date range.
+    positions_found:      { severity: critical, penalty: 20 }
+    # Per position the resume was built with that the parser did not find (run folders only).
+    positions_expected:   { severity: warning, penalty: 6, cap: 18 }
+    position_dates:       { severity: warning, penalty: 5, cap: 15 }
+    position_title:       { severity: warning, penalty: 4, cap: 12 }
+    # Text after the title on the title line ("Engineer | FastAPI, Python") is read as title.
+    title_extra_text:     { severity: warning, penalty: 3, cap: 9 }
+    # Per education entry missing its institution, degree or dates.
+    education_fields:     { severity: warning, penalty: 4, cap: 8 }
+    # Per entry whose dates, title or location land outside it in a reading-order view.
+    entry_order:          { severity: warning, penalty: 4, cap: 12 }
+    # Dates a parser cannot turn into a duration ("Summer '19").
+    nonstandard_dates:    { severity: warning, penalty: 3, cap: 6 }
+    # Lines carrying two blocks of prose side by side: a multi-column layout.
+    multi_column:         { severity: warning, penalty: 10, min_lines: 5, min_words_per_cell: 3 }
+
+# Job Match is independent of Readiness. All arithmetic uses integer tenths internally.
+job_match:
+  version: "1.0.0"
+  jd_parser: { max_heading_chars: 50, max_title_chars: 110 }
+  # Bare lowercase uses of these words are usually ordinary prose, not the technology.
+  case_sensitive_terms: [Go, Rust, Swift, React, Spark, Airflow, Snowflake, Lambda, ECS, REST, RAG, S3]
+  unknown_skill_stopwords: [About, Ability, Advanced, All, Also, Bachelor, Background, Bonus, Build, Building, Collaborative, Comfort, Communication, Computer, Degree, Develop, Developing, Engineering, Experience, Experienced, Familiarity, For, Four, Hands, Have, High, Knowledge, Master, Minimum, Nice, PhD, Preferred, Previous, Proficiency, Recent, Required, Requirements, Strong, Technical, The, This, We, Work, Working, You, AML]
+  weights:
+    required_skills: 30
+    experience_alignment: 25
+    role_alignment: 10
+    preferred_skills: 10
+    seniority: 10
+    education_certs: 5
+    achievement_evidence: 5
+    domain_terminology: 5
+  evidence_tiers: { measured_job_bullet: 1.0, job_bullet: 0.9, project_bullet: 0.75, skills_only: 0.5, missing: 0 }
+  match_kinds: { exact: 1.0, equivalent: 0.95, related: 0.5, missing: 0 }
+  responsibility_tiers: { job_bullet: 1.0, project_bullet: 0.75, missing: 0 }
+  domain_kinds: { exact: 1.0, equivalent: 0.6, missing: 0 }
+  achievement:
+    quantified_points: 3
+    action_verb_points: 1
+    clear_wording_points: 1
+    action_verbs: [built, designed, developed, delivered, implemented, improved, increased, reduced, automated, optimized, led, launched, created, deployed, scaled, shipped, analyzed, evaluated, integrated, migrated]
+    weak_phrases: [responsible for, helped with, worked on, various tasks, assisted with]
+  role:
+    title_points: 5
+    headline_points: 3
+    words_points: 2
+    min_shared_word_length: 4
+    families:
+      software: [software engineer, software developer, development engineer, full stack engineer, full stack, backend engineer, frontend engineer, platform engineer, developer]
+      data: [data engineer, data scientist, data analyst, analytics engineer]
+      ai: [ai engineer, machine learning engineer, ml engineer, applied scientist, research scientist]
+      security: [security engineer, cybersecurity analyst, security analyst]
+      product: [product manager, technical program manager]
+  seniority:
+    years_points: 7
+    title_points: 3
+    levels: { intern: 0, junior: 1, mid: 2, senior: 3, staff: 4, principal: 5 }
+  education:
+    degree_points: 3
+    certification_points: 2
+    equivalent_experience_years_default: 3
+    degree_levels: { associate: 1, bachelor: 2, master: 3, phd: 4 }
+  recommendations_limit: 8
+  stuffing:
+    max_distinct_bullets: 3
+    warning_repetitions: 5
+    penalty: 0

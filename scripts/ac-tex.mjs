@@ -18,6 +18,7 @@ import { SKILLS_MAX_CATEGORIES } from "./skills-library.mjs";
 import { resolveBankDir } from "./ac-bank.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
+import { displayUrl } from "./ats/patterns.mjs";
 
 const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 \\usepackage{latexsym}\\usepackage[empty]{fullpage}\\usepackage{titlesec}
@@ -32,20 +33,24 @@ const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 \\newcommand{\\resumeItem}[1]{\\item\\small{{#1 \\vspace{-2pt}}}}
 \\newcommand{\\resumeSubheading}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\textbf{#1} & #2 \\\\ \\textit{\\small#3} & \\textit{\\small #4} \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\newcommand{\\resumeProjectHeading}[2]{\\item\\begin{tabular*}{0.97\\textwidth}{l@{\\extracolsep{\\fill}}r}\\small#1 & #2 \\\\ \\end{tabular*}\\vspace{-7pt}}
+\\newcommand{\\resumeEducation}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l}\\textbf{#1}, #2 \\\\ \\textit{\\small #3, #4} \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
 \\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.15in, label={}]}
 \\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}}
 \\newcommand{\\resumeItemListStart}{\\begin{itemize}}
 \\newcommand{\\resumeItemListEnd}{\\end{itemize}\\vspace{-5pt}}`;
 
+// Education keeps each school's city and dates on its own lines, left-aligned. With the city and
+// dates right-aligned, column-aware text extractors (poppler's default mode, pdfminer) read both
+// schools first and both date ranges after them, so a parser can pin dates on the wrong school.
 const EDUCATION = `\\section{Education}
   \\resumeSubHeadingListStart
-    \\resumeSubheading{Stony Brook University}{Stony Brook, New York}{Master of Science in Data Science}{Aug. 2024 -- May 2026}
-    \\resumeSubheading{Symbiosis University of Applied Sciences}{Indore, Madhya Pradesh}{Bachelor of Technology in Computer Science and Information Technology}{Aug. 2018 -- May 2022}
+    \\resumeEducation{Stony Brook University}{Stony Brook, New York}{Master of Science in Data Science}{Aug. 2024 -- May 2026}
+    \\resumeEducation{Symbiosis University of Applied Sciences}{Indore, Madhya Pradesh}{Bachelor of Technology in Computer Science and Information Technology}{Aug. 2018 -- May 2022}
   \\resumeSubHeadingListEnd`;
 
+// Stack shown after a project's name when its bullets name fewer than five tools.
 const ROLE_STACK_DEFAULTS = {
-  "wake-forest": ["Python", "GCP", "SimpleITK", "React", "TypeScript", "Apache Airflow"],
   atriveo: ["React", "TypeScript", "FastAPI", "LangChain", "Cloudflare"],
   "insurance-platform": ["Java", "Spring Boot", "Kafka", "Elasticsearch", "Docker"],
   insureraft: ["C++", "Raft", "NuRaft", "CMake"],
@@ -54,8 +59,6 @@ const ROLE_STACK_DEFAULTS = {
   "mri-research": ["Python", "scikit-learn", "XGBoost", "lifelines", "SHAP"],
   medledger: ["Node.js", "Express.js", "MongoDB", "JWT", "EJS"],
   "user-data-platform": ["FastAPI", "Python", "X25519", "AES-GCM", "MCP"],
-  accolite: ["Java", "Spring Boot", "Python", "React", "Angular", "AWS", "Azure", "GCP", "MySQL", "MongoDB"],
-  shriffle: ["Python", "JavaScript"],
 };
 
 const TOOL_PATTERNS = [
@@ -198,20 +201,20 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
   // Header city follows the posting so the resume reads local to the team;
   // a posting with no location — or several — falls back to the home city.
   const city = resolveHeaderLocation(location, me.location);
+  // Profile links show their address, not a label: extracted text keeps only what is printed,
+  // so a link drawn as "Linkedin" reaches a parser without its URL.
+  const link = (url) => `\\href{${url}}{${esc(displayUrl(url))}}`;
   // Only the fields that are set, so a blank phone or email leaves no "| |".
-  const contact = [
-    esc(title),
-    me.phone && esc(me.phone),
-    me.email && `\\href{mailto:${me.email}}{${esc(me.email)}}`,
-    me.linkedin && `\\href{${me.linkedin}}{Linkedin}`,
-    me.github && `\\href{${me.github}}{Github}`,
-    me.portfolio && `\\href{${me.portfolio}}{Portfolio}`,
-    city && esc(city),
-  ].filter(Boolean).join(" $|$\n    ");
+  const contactLines = [
+    [esc(title), me.phone && esc(me.phone), me.email && `\\href{mailto:${me.email}}{${esc(me.email)}}`],
+    [me.linkedin && link(me.linkedin), me.github && link(me.github), me.portfolio && link(me.portfolio), city && esc(city)],
+  ].map((fields) => fields.filter(Boolean).join(" $|$\n    ")).filter(Boolean);
+  // The addresses need a second contact line. Taking 5pt back under the header keeps the
+  // page's existing spacing close to what it was (TeX's list glue absorbs the rest).
   const header = `\\begin{center}
     \\textbf{\\Huge \\scshape ${esc(me.name)}} \\\\ \\vspace{1pt}
-    \\small ${contact}
-\\end{center}`;
+    \\small ${contactLines.join(" \\\\\n    ")}
+\\end{center}${contactLines.length > 1 ? "\\vspace{-5pt}" : ""}`;
 
   const skills = skillsLines?.length
     ? skillsLines
@@ -226,12 +229,12 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
         text: bulletText(b),
         ac_id: b.ac_id,
       }));
-      const stack = toolsFromBullets(bullets, role.role);
-      const titleLine = `${esc(meta.title)}${stack.length ? " $|$ " + stack.map(esc).join(", ") : ""}`;
+      // The title line carries the title only: parsers file that whole line as the job title,
+      // so a stack printed after it ("Software Engineer | FastAPI, Python") becomes part of it.
       const items = bullets.map((b) => `        \\resumeItem{${esc(b.text)}}`).join("\n");
       return {
         order: meta.order || 0,
-        tex: `    \\resumeSubheading{${esc(name)}}{${meta.dates}}{${titleLine}}{${esc(meta.loc)}}\n      \\resumeItemListStart\n${items}\n      \\resumeItemListEnd`,
+        tex: `    \\resumeSubheading{${esc(name)}}{${meta.dates}}{${esc(meta.title)}}{${esc(meta.loc)}}\n      \\resumeItemListStart\n${items}\n      \\resumeItemListEnd`,
       };
     })
     .sort((a, b) => b.order - a.order)
