@@ -5,6 +5,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { loadBank } from "./ac-bank.mjs";
 import { scoreStoryTriple } from "./ac-story-select.mjs";
@@ -116,6 +117,42 @@ function metricOverlap(acs) {
   return overlaps;
 }
 
+const readYaml = (file) => (fs.existsSync(file) ? yaml.load(fs.readFileSync(file, "utf8")) : null);
+const openingVerb = (text) => (String(text).trim().match(/^([A-Za-z]+)/) || [])[1]?.toLowerCase() || "";
+
+/**
+ * Roles whose bullets can share one resume: the planner's experience roles and every project a
+ * resume can draw from (planner pools, PROJECTS.yaml on_resume, TRACKS.yaml track projects).
+ */
+function resumeRoles(bankDir) {
+  const planner = JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "planner", "v2.json"), "utf8"));
+  const roles = new Set([
+    ...Object.keys(planner.min_bullets_per_role || {}),
+    ...(planner.resume_project_pool || []),
+    ...(planner.fixed_project_roles || []),
+  ]);
+  for (const p of readYaml(path.join(bankDir, "PROJECTS.yaml"))?.projects || []) if (p.on_resume) roles.add(p.role);
+  for (const t of Object.values(readYaml(path.join(bankDir, "TRACKS.yaml"))?.tracks || {})) for (const r of t.projects || []) roles.add(r);
+  return roles;
+}
+
+/**
+ * Opening verbs shared by bullets that can appear on the same resume. Every variant counts:
+ * compose refuses a resume that repeats a verb (assertUniqueCompositionVerbs), so a shared
+ * verb here would fail that resume's build.
+ */
+function sharedOpeningVerbs(acs, roles) {
+  const byVerb = new Map();
+  for (const ac of acs.filter((a) => roles.has(a.role))) {
+    for (const v of ac.variants || []) {
+      const verb = openingVerb(v.text);
+      if (!byVerb.has(verb)) byVerb.set(verb, new Set());
+      byVerb.get(verb).add(ac.id);
+    }
+  }
+  return [...byVerb].filter(([, ids]) => ids.size > 1).map(([verb, ids]) => ({ verb, ids: [...ids] }));
+}
+
 function main() {
   const roleFilter = process.argv.includes("--role")
     ? process.argv[process.argv.indexOf("--role") + 1]
@@ -202,6 +239,19 @@ function main() {
       const missing = anchors.filter((t) => !covered.has(t));
       console.log(`  ${missing.length ? "✗" : "✓"} ${role}${missing.length ? ` — missing: ${missing.join(", ")}` : ""}`);
       if (missing.length) fail += 1;
+    }
+  }
+
+  if (!roleFilter) {
+    const roles = resumeRoles(bank.bank_dir);
+    const active = bank.acs.filter((a) => a.variants?.[0]?.text && a.visibility?.default !== false);
+    const shared = sharedOpeningVerbs(active, roles);
+    console.log(`\nUnique opening verbs across resume roles (${[...roles].join(", ")}):`);
+    if (shared.length) {
+      for (const { verb, ids } of shared) console.log(`  ✗ "${verb}" opens ${ids.join(", ")}`);
+      fail += shared.length;
+    } else {
+      console.log("  ✓ every bullet that can share a resume opens with its own verb");
     }
   }
 

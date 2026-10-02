@@ -59,7 +59,7 @@ achievements:
   - id: AC-157
     theme: consent
     resume_bullet: >-
-      Composed a FastAPI consent-first /api/v1 flow from scope discovery through approval polling to
+      Completed a FastAPI consent-first /api/v1 flow from scope discovery through approval polling to
       client-side AES-GCM decryption.
   - id: AC-158
     theme: architecture
