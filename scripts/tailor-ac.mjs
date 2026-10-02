@@ -109,6 +109,18 @@ function compileTex(dir, onLog) {
 }
 
 export function readAtsFromDir(dir) {
+  // Most AC runs have a small optimizer.json. Read it first: report.json is
+  // much larger and made the 1,784-run Compile history scan several seconds slower.
+  const optPath = path.join(dir, "optimizer.json");
+  if (fs.existsSync(optPath)) {
+    try {
+      const opt = JSON.parse(fs.readFileSync(optPath, "utf8"));
+      if (opt.ats_before != null && opt.ats_after != null) return opt.pipeline === "ac"
+        ? `${Math.round(opt.ats_before)}→${Math.round(opt.ats_after)}`
+        : `${opt.ats_before}→${opt.ats_after}`;
+      if (opt.resume_confidence_score != null) return `RCS ${Math.round(opt.resume_confidence_score)}`;
+    } catch { /* fall through */ }
+  }
   const reportPath = path.join(dir, "report.json");
   if (fs.existsSync(reportPath)) {
     try {
@@ -118,13 +130,6 @@ export function readAtsFromDir(dir) {
       if (before != null && after != null) return `${Math.round(before)}→${Math.round(after)}`;
       if (after != null) return `RCS ${Math.round(after)}`;
     } catch { /* fall through */ }
-  }
-  const optPath = path.join(dir, "optimizer.json");
-  if (fs.existsSync(optPath)) {
-    try {
-      const opt = JSON.parse(fs.readFileSync(optPath, "utf8"));
-      if (opt.ats_before != null && opt.ats_after != null) return `${opt.ats_before}→${opt.ats_after}`;
-    } catch { /* ignore */ }
   }
   return null;
 }

@@ -1394,45 +1394,52 @@ const server = http.createServer(async (req, res) => {
           let companyDirs;
           try { companyDirs = (await fsp.readdir(dateDir)).filter((d) => !d.startsWith(".")); }
           catch { continue; }
-          for (const co of companyDirs) {
+          const readRun = async ({ folder, dir }, co) => {
+            const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
+            const hasPdf = await fsp.access(pdfPath).then(() => true).catch(() => false);
+            if (!hasPdf) return null;
+            let meta = {};
+            try { meta = JSON.parse(await fsp.readFile(path.join(dir, "meta.json"), "utf8")); } catch { /* none */ }
+            const ats = readAtsFromDir(dir);
+            const assessment = readSavedAts(dir);
+            let explain = null;
+            try { explain = JSON.parse(await fsp.readFile(path.join(dir, "explain.json"), "utf8")); } catch { /* none */ }
+            return {
+              folder,
+              dateDir: dd,
+              dir,
+              pdfPath,
+              company: meta.company || co,
+              title: meta.role || "",
+              jobUrl: meta.url || "",
+              score: meta.score_pct ?? null,
+              ats,
+              atsReadiness: assessment?.readiness ? { status: assessment.readiness.status, score: assessment.readiness.parseability } : null,
+              jobMatch: assessment?.job_match ? { score: assessment.job_match.score, coverage: assessment.job_match.coverage } : null,
+              atsNote: assessment?.note ?? null,
+              tailoredAt: meta.tailored_at || null,
+              identity: explain?.engineering_identity?.primary || null,
+              informationGain: explain?.information_gain ?? null,
+              borderline: Boolean(explain?.borderline),
+            };
+          };
+          const scanCompany = async (co) => {
             const coDir = path.join(dateDir, co);
-            try { if (!(await fsp.stat(coDir)).isDirectory()) continue; } catch { continue; }
+            try { if (!(await fsp.stat(coDir)).isDirectory()) return []; } catch { return []; }
             let runDirs;
             if (fs.existsSync(path.join(coDir, "Atishay Kasliwal.pdf"))) runDirs = [{ folder: co, dir: coDir }];
             else {
               let folders;
-              try { folders = await fsp.readdir(coDir); } catch { continue; }
+              try { folders = await fsp.readdir(coDir); } catch { return []; }
               runDirs = folders.map((folder) => ({ folder, dir: path.join(coDir, folder) }));
             }
-            for (const { folder, dir } of runDirs) {
-              const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
-              const hasPdf = await fsp.access(pdfPath).then(() => true).catch(() => false);
-              if (!hasPdf) continue;
-              let meta = {};
-              try { meta = JSON.parse(await fsp.readFile(path.join(dir, "meta.json"), "utf8")); } catch { /* none */ }
-              const ats = readAtsFromDir(dir);
-              const assessment = readSavedAts(dir);
-              let explain = null;
-              try { explain = JSON.parse(await fsp.readFile(path.join(dir, "explain.json"), "utf8")); } catch { /* none */ }
-              out.push({
-                folder,
-                dateDir: dd,
-                dir,
-                pdfPath,
-                company: meta.company || co,
-                title: meta.role || "",
-                jobUrl: meta.url || "",
-                score: meta.score_pct ?? null,
-                ats,
-                atsReadiness: assessment?.readiness ? { status: assessment.readiness.status, score: assessment.readiness.parseability } : null,
-                jobMatch: assessment?.job_match ? { score: assessment.job_match.score, coverage: assessment.job_match.coverage } : null,
-                atsNote: assessment?.note ?? null,
-                tailoredAt: meta.tailored_at || null,
-                identity: explain?.engineering_identity?.primary || null,
-                informationGain: explain?.information_gain ?? null,
-                borderline: Boolean(explain?.borderline),
-              });
-            }
+            return (await Promise.all(runDirs.map((run) => readRun(run, co)))).filter(Boolean);
+          };
+          // Bounded concurrent reads keep the first load below the browser timeout
+          // without opening thousands of files at once.
+          for (let i = 0; i < companyDirs.length; i += 48) {
+            const batches = await Promise.all(companyDirs.slice(i, i + 48).map(scanCompany));
+            out.push(...batches.flat());
           }
         }
       }
