@@ -29,5 +29,5 @@ variants:
     emphasis: observability
     strength: 9
     text: >-
-      Integrated a Prometheus and Grafana observability stack with Zipkin tracing and ELK
-      logging across all 8 microservices via Spring Actuator metrics.
+      Monitored all 8 microservices with a Prometheus and Grafana observability stack, Zipkin tracing and ELK
+      logging via Spring Actuator metrics.

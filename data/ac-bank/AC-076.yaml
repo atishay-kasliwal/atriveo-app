@@ -36,5 +36,5 @@ variants:
     emphasis: reliability
     strength: 9
     text: >-
-      Implemented C++ exactly-once delivery across 8 event types by deduplicating event_id values before committing
-      insurance transactions to the Raft log.
+      Achieved C++ exactly-once delivery across 8 event types by deduplicating event_id values before
+      committing insurance transactions to the Raft log.

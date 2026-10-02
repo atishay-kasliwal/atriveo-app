@@ -29,6 +29,7 @@ import { selectStoryTriple } from "./ac-story-select.mjs";
 import { auditAtsMatrix, keywordCountsFromTexts, bulletTextsFromAcs } from "./ac-ats-matrix.mjs";
 import { assessJdGate } from "./ac-jd-gate.mjs";
 import { RULEBOOK_PROJECT_COUNT } from "./ac-rulebook.mjs";
+import { assertUniqueCompositionVerbs } from "./ac-verbs.mjs";
 import {
   loadResumeProjectPool,
   pickResumeProjectRoles,
@@ -1225,6 +1226,7 @@ export function compose(jd, bank, plannerConfig = {}) {
   }
 
   composition.minimum_visual_targets = cfg.minimum_visual_targets || null;
+  assertUniqueCompositionVerbs(composition);
   enrichComposition(composition, bank, jd, cfg);
   composition.selection_trace = selectionTrace;
 

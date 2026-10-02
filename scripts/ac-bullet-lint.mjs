@@ -5,18 +5,21 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { loadBank } from "./ac-bank.mjs";
 import { scoreStoryTriple } from "./ac-story-select.mjs";
 
 const WEAK_VERBS = /^(worked on|helped|assisted|participated|used|supported|involved in)\b/i;
-const STRONG_VERBS = /^(architected|built|designed|developed|engineered|implemented|integrated|deployed|automated|standardized|reduced|accelerated|eliminated|unified|enabled|scaled|extracted|synthesized|created|launched|shipped|owned|sustained|delivered|replaced|converted|documented|led|cut|expanded|processed)/i;
+const actionVerbs = JSON.parse(fs.readFileSync(path.join("data/ac-bank/HARVARD_ACTION_VERBS.json"), "utf8"));
+const STRONG_VERBS = new Set(Object.values(actionVerbs.categories).flat().map((verb) => verb.toLowerCase()));
+const GENERIC_VERBS = new Set(["built", "developed", "trained"]);
 
 const MAX_WORDS = 35;
 const MIN_WORDS = 12;
 const MAX_AND = 2;
 const MAX_COMMAS = 2;
-const MAX_SIGNATURE_TECH = 2;
+const MAX_SIGNATURE_TECH = 3;
 
 const BANNED_PUFFERY = /\b(modern|advanced|innovative|cutting-edge|cloud-native|cloud native)\b/i;
 const BANNED_RESEARCH_STONY = /\bresearch\w*\b/i;
@@ -61,7 +64,9 @@ function lintBullet(ac, text) {
   if (andCount > MAX_AND) issues.push(`too many "and" clauses (${andCount})`);
   if (commaCount > MAX_COMMAS) issues.push(`too many commas (${commaCount})`);
   if (WEAK_VERBS.test(text.trim())) issues.push("weak opening verb");
-  if (!STRONG_VERBS.test(firstWord)) issues.push(`verb "${firstWord}" not in strong list`);
+  if (!STRONG_VERBS.has(firstWord.toLowerCase()) || GENERIC_VERBS.has(firstWord.toLowerCase())) {
+    issues.push(`verb "${firstWord}" is not an allowed Harvard action verb`);
+  }
   if (BANNED_PUFFERY.test(text)) issues.push("banned puffery (modern/advanced/innovative/cloud-native)");
   if (ac.role === "stony-brook" && BANNED_RESEARCH_STONY.test(text)) {
     issues.push('banned word "research" on Stony Brook bullets — use analysis, analytics, or analysts');
@@ -86,7 +91,7 @@ function lintBullet(ac, text) {
   if (words > MAX_WORDS || words < MIN_WORDS) score -= 2;
   if (andCount > MAX_AND) score -= 1;
   if (commaCount > MAX_COMMAS) score -= 0.5;
-  if (!STRONG_VERBS.test(firstWord)) score -= 1.5;
+  if (!STRONG_VERBS.has(firstWord.toLowerCase()) || GENERIC_VERBS.has(firstWord.toLowerCase())) score -= 1.5;
   if (WEAK_VERBS.test(text.trim())) score -= 2;
   if (BANNED_PUFFERY.test(text)) score -= 1;
   if ((ac.signature_technologies || []).length > MAX_SIGNATURE_TECH) score -= 1;
@@ -110,6 +115,42 @@ function metricOverlap(acs) {
     }
   }
   return overlaps;
+}
+
+const readYaml = (file) => (fs.existsSync(file) ? yaml.load(fs.readFileSync(file, "utf8")) : null);
+const openingVerb = (text) => (String(text).trim().match(/^([A-Za-z]+)/) || [])[1]?.toLowerCase() || "";
+
+/**
+ * Roles whose bullets can share one resume: the planner's experience roles and every project a
+ * resume can draw from (planner pools, PROJECTS.yaml on_resume, TRACKS.yaml track projects).
+ */
+function resumeRoles(bankDir) {
+  const planner = JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "planner", "v2.json"), "utf8"));
+  const roles = new Set([
+    ...Object.keys(planner.min_bullets_per_role || {}),
+    ...(planner.resume_project_pool || []),
+    ...(planner.fixed_project_roles || []),
+  ]);
+  for (const p of readYaml(path.join(bankDir, "PROJECTS.yaml"))?.projects || []) if (p.on_resume) roles.add(p.role);
+  for (const t of Object.values(readYaml(path.join(bankDir, "TRACKS.yaml"))?.tracks || {})) for (const r of t.projects || []) roles.add(r);
+  return roles;
+}
+
+/**
+ * Opening verbs shared by bullets that can appear on the same resume. Every variant counts:
+ * compose refuses a resume that repeats a verb (assertUniqueCompositionVerbs), so a shared
+ * verb here would fail that resume's build.
+ */
+function sharedOpeningVerbs(acs, roles) {
+  const byVerb = new Map();
+  for (const ac of acs.filter((a) => roles.has(a.role))) {
+    for (const v of ac.variants || []) {
+      const verb = openingVerb(v.text);
+      if (!byVerb.has(verb)) byVerb.set(verb, new Set());
+      byVerb.get(verb).add(ac.id);
+    }
+  }
+  return [...byVerb].filter(([, ids]) => ids.size > 1).map(([verb, ids]) => ({ verb, ids: [...ids] }));
 }
 
 function main() {
@@ -198,6 +239,19 @@ function main() {
       const missing = anchors.filter((t) => !covered.has(t));
       console.log(`  ${missing.length ? "✗" : "✓"} ${role}${missing.length ? ` — missing: ${missing.join(", ")}` : ""}`);
       if (missing.length) fail += 1;
+    }
+  }
+
+  if (!roleFilter) {
+    const roles = resumeRoles(bank.bank_dir);
+    const active = bank.acs.filter((a) => a.variants?.[0]?.text && a.visibility?.default !== false);
+    const shared = sharedOpeningVerbs(active, roles);
+    console.log(`\nUnique opening verbs across resume roles (${[...roles].join(", ")}):`);
+    if (shared.length) {
+      for (const { verb, ids } of shared) console.log(`  ✗ "${verb}" opens ${ids.join(", ")}`);
+      fail += shared.length;
+    } else {
+      console.log("  ✓ every bullet that can share a resume opens with its own verb");
     }
   }
 

@@ -38,5 +38,5 @@ variants:
     emphasis: storage
     strength: 9
     text: >-
-      Engineered C++ file-backed per-entry log persistence on 3 nodes with automatic replay and snapshot recovery when
-      servers restart and rejoin the cluster.
+      Devised C++ file-backed per-entry log persistence on 3 nodes with automatic replay and snapshot recovery
+      when servers restart and rejoin the cluster.

@@ -27,5 +27,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Engineered FastAPI a consent-first /api/v1 flow from scope discovery through approval polling to client-side
-      AES-GCM decryption.
+      Completed a FastAPI consent-first /api/v1 flow from scope discovery through approval polling to
+      client-side AES-GCM decryption.

@@ -1,5 +1,5 @@
 # Atriveo | Canonical achievement bank (review file)
-# Bank v50
+# Bank v52
 # Lint: npm run ac:bullet-lint -- --role atriveo
 
 role:
@@ -93,71 +93,68 @@ achievements:
   - id: AC-050
     theme: product-ownership
     resume_bullet: >-
-      Architected a React and FastAPI job search platform with an integrated Chrome
-      extension, serving 1K+ daily users while automating application tracking and
-      resume tailoring at 99.9% uptime.
+      Founded a React and FastAPI job search platform with an integrated Chrome extension, serving 1K+ daily
+      users while automating application tracking and resume tailoring at 99.9% uptime.
   - id: AC-051
     theme: chrome-extension
     resume_bullet: >-
-      Shipped a JavaScript Chrome extension rated 5.0 stars on the Chrome Web Store
-      capturing LinkedIn and Indeed job postings in one click for production users.
+      Published a JavaScript Chrome extension rated 5.0 stars on the Chrome Web Store capturing LinkedIn and
+      Indeed job postings in one click for production users.
   - id: AC-052
     theme: application-dashboard
     resume_bullet: >-
-      Built a React and TypeScript dashboard that centralized application tracking,
-      pipeline analytics, and job timelines for 1K+ daily users.
+      Centralized application tracking, pipeline analytics, and job timelines for 1K+ daily users in a React
+      and TypeScript dashboard.
   - id: AC-053
     theme: backend-api
     resume_bullet: >-
-      Engineered FastAPI and PostgreSQL services powering application tracking, search
-      APIs, and production data synchronization across the platform.
+      Implemented FastAPI and PostgreSQL services powering application tracking, search APIs, and production
+      data synchronization across the platform.
   - id: AC-054
     theme: rag-search
     resume_bullet: >-
-      Built a LangChain RAG pipeline handling 2K+ daily queries to power contextual job
-      search across indexed applications.
+      Retrieved context for 2K+ daily job-search queries with a LangChain RAG pipeline across indexed
+      applications.
   - id: AC-042
     theme: resume-compiler
     resume_bullet: >-
-      Built a Python resume compiler with planner-driven beam search and RCS scoring,
-      auto-generating one-page tailored PDFs from indexed job descriptions.
+      Shaped a Python resume compiler with planner-driven beam search and RCS scoring, auto-generating
+      one-page tailored PDFs from indexed job descriptions.
   - id: AC-056
     theme: tailor-integration
     resume_bullet: >-
-      Integrated Python an evidence-based tailoring pipeline that generated
-      role-specific resumes from 5K+ weekly job descriptions with automated bullet
-      selection.
+      Generated role-specific resumes from 5K+ weekly job descriptions with a Python evidence-based tailoring
+      pipeline and automated bullet selection.
   - id: AC-057
     theme: cloud-deployment
     resume_bullet: >-
-      Deployed the platform on Cloudflare Pages and Workers with Docker, maintaining
-      99.9% uptime across 2K+ daily production queries.
+      Maintained 99.9% uptime across 2K+ daily production queries by running the platform on Cloudflare Pages
+      and Workers with Docker.
   - id: AC-058
     theme: pipeline-analytics
     resume_bullet: >-
-      Built pipeline analytics exposing response rates and hiring stage bottlenecks,
-      helping users prioritize follow-ups across tracked applications.
+      Identified response rates and hiring-stage bottlenecks with pipeline analytics, helping users prioritize
+      follow-ups across tracked applications.
   - id: AC-059
     theme: jd-indexing
     resume_bullet: >-
-      Built a Python indexing pipeline that processed 5K+ LinkedIn job descriptions each
-      week for offline resume tailoring and ATS matching.
+      Cataloged 5K+ LinkedIn job descriptions each week with a Python indexing pipeline for offline resume
+      tailoring and ATS matching.
   - id: AC-060
     theme: bulk-tailor
     resume_bullet: >-
-      Built a React bulk tailoring queue with streaming progress feedback, enabling
-      concurrent resume generation across multiple job applications.
+      Expanded resume generation to multiple job applications at once with a React bulk tailoring queue and
+      streaming progress feedback.
   - id: AC-061
     theme: tracker-sync
     resume_bullet: >-
-      Designed PostgreSQL schemas and FastAPI APIs that synchronized centralized
-      application tracking with external job tracker integrations.
+      Modeled PostgreSQL schemas and FastAPI APIs that synchronized centralized application tracking with
+      external job tracker integrations.
   - id: AC-062
     theme: pdf-quality-gate
     resume_bullet: >-
-      Implemented automated PDF regression testing that enforced one-page layout
-      invariants across generated resumes, preventing formatting drift with Python in
-      production.
+      Established automated PDF regression testing that enforced one-page layout invariants across generated
+      resumes, preventing formatting drift with Python in production.
 # ── JD selection guide (which 2 tend to win) ────────────────────────────────
 
 selection_examples:

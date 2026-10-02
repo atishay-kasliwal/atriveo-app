@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Built Python NLP entity extraction on AWS across financial news identifying firms and macro themes in 200K+
-      records powering downstream forecasting features.
+      Extracted firms and macro themes from 200K+ financial news records with Python NLP on AWS powering
+      downstream forecasting features.

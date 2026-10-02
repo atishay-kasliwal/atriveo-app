@@ -32,5 +32,5 @@ variants:
     emphasis: cloud
     strength: 9
     text: >-
-      Deployed the imaging pipeline on GCP in clinical production, delivering clinician-ready
-      insights within 2 minutes of MRI upload.
+      Expedited clinician-ready insights to within 2 minutes of MRI upload by running the imaging pipeline on
+      GCP in clinical production.

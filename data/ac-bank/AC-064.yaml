@@ -29,5 +29,5 @@ variants:
     emphasis: data-pipeline
     strength: 9
     text: >-
-      Built a Kafka ingestion pipeline with Avro serialization and Confluent Schema Registry,
-      publishing insurance policy events to a 3-broker cluster.
+      Specified Avro schemas in Confluent Schema Registry for a Kafka ingestion pipeline publishing insurance
+      policy events to a 3-broker cluster.

@@ -28,5 +28,5 @@ variants:
     emphasis: infra
     strength: 8
     text: >-
-      Deployed Netflix Eureka service discovery and a Spring Cloud Config Server with encrypted
-      secrets across 8 Docker Compose microservices.
+      Administered Netflix Eureka service discovery and a Spring Cloud Config Server with encrypted secrets
+      across 8 Docker Compose microservices.

@@ -44,5 +44,5 @@ variants:
     emphasis: platform
     strength: 10
     text: >-
-      Built InsureRaft, a C++ and NuRaft platform replicating insurance data on a 3-node cluster for distributed
-      carriers and regulators in production.
+      Originated InsureRaft, a C++ and NuRaft platform replicating insurance data on a 3-node cluster for
+      distributed carriers and regulators in production.

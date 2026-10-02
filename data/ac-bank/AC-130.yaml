@@ -27,5 +27,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Built MongoDB and Express.js doctor profile CRUD APIs with Mongoose models and role-scoped access for 3 clinic
-      roles managing production patient workflows.
+      Assembled MongoDB and Express.js doctor profile CRUD APIs with Mongoose models and role-scoped access
+      for 3 clinic roles managing production patient workflows.

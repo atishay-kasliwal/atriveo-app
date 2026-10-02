@@ -28,5 +28,5 @@ variants:
     emphasis: cloud
     strength: 8
     text: >-
-      Deployed the platform on Cloudflare Pages and Workers with Docker, maintaining
-      99.9% uptime across 2K+ daily production queries.
+      Maintained 99.9% uptime across 2K+ daily production queries by running the platform on Cloudflare Pages
+      and Workers with Docker.

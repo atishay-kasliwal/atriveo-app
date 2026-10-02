@@ -21,7 +21,8 @@ Audience: ex-Google Staff Engineer / ex-Meta Hiring Manager bar.
 3. **Lead with impact** — transformation or result in the first half; tech supports the story.
 4. **One strongest metric per bullet** — do not repeat the same metric across selected bullets.
 5. **Answer "So what?"** — end with user or business value.
-6. **Business verbs** — Architected, Automated, Standardized, Reduced, Accelerated, Deployed, Built, Designed, Integrated, Implemented.
+6. **Action verbs** — start with a verb from Harvard's resume list in `HARVARD_ACTION_VERBS.json`; exclude Built, Developed, and Trained.
+   Opening verbs must be unique across each composed resume. Change the bank text to resolve a clash; the composer never rewrites a bullet.
 7. **No keyword stuffing** — technologies only when they strengthen the story.
 8. **Show ownership** — owned a meaningful subsystem or product.
 9. **Memorable** — one takeaway after a single read.
@@ -45,8 +46,9 @@ Audience: ex-Google Staff Engineer / ex-Meta Hiring Manager bar.
 | `and` clauses | ≤ 2 |
 | Commas | ≤ 2 |
 | Weak verbs | none at start |
+| Opening verb | Harvard list, excluding Built / Developed / Trained; no repeats in one resume |
 | Primary metrics per bullet | 1 (AC-031 headline may use 2) |
-| Signature technologies | ≤ 2 per bullet; must match `signature_technologies` field |
+| Signature technologies | ≤ 3 per bullet; must match `signature_technologies` field |
 | Puffery | no modern / advanced / innovative / cloud-native |
 | Wake Forest ATS coverage | Python, GCP, SimpleITK, PyRadiomics, Apache Airflow, React across bank |
 
@@ -107,7 +109,7 @@ Audience: ex-Google Staff Engineer / ex-Meta Hiring Manager bar.
 
 **Scope bullet (AC-198):** Do not replace with a feature bullet. It answers *"What was your scope and why should I care?"* Embed stack **in context** — never as a bare list (`Java React Angular AWS Azure GCP`). Example: *Java backend services and React/Angular apps on AWS, Azure, and GCP*.
 
-**Evidence bullets:** Max **two** signature technologies per bullet, each tied to an outcome. Spread Spring Boot, Kafka, Docker, etc. across the bank — repetition across the **composed resume** is capped by `ATS_COVERAGE_MATRIX.yaml`.
+**Evidence bullets:** Max **three** signature technologies per bullet, each tied to an outcome. Spread Spring Boot, Kafka, Docker, etc. across the bank — repetition across the **composed resume** is capped by `ATS_COVERAGE_MATRIX.yaml`.
 
 ### Insurance platform verified metrics (GitHub — do not invent)
 
@@ -158,9 +160,11 @@ A technology should answer: what language, framework, cloud, library, or recogni
 **Good:** Python, GCP, SimpleITK, PyRadiomics, Apache Airflow, React
 **Bad (unless backed by specifics):** AI, ML, LLM, Cloud, Modern, Advanced, Innovative
 
-### Max two signature technologies per bullet
+### Max three signature technologies per bullet
 
-Spread coverage across bullets — do not repeat Python or GCP in every line.
+Raised from two to three on 2026-10-01 so an AI bullet can name the framework or model tooling
+(PyTorch, LangGraph, a vector database) alongside the language. Spread coverage across bullets — do
+not repeat Python or GCP in every line.
 
 | Bullet anchor | Signature tech |
 |---------------|----------------|
@@ -189,6 +193,6 @@ Example:
 
 - [ ] One breath (25–35 words)
 - [ ] One achievement, one primary metric
-- [ ] One or two signature technologies (if any)
+- [ ] One to three signature technologies (if any)
 - [ ] No invented claims or filler adjectives
 - [ ] If a technology can be removed without weakening the story, remove it

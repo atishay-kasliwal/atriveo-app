@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Built a Python quantitative backtesting engine on AWS evaluating trading signals across 30 S&P 500 stocks on 7d
-      and 30d forecasting windows in production.
+      Devised a Python quantitative backtesting engine on AWS evaluating trading signals across 30 S&P 500
+      stocks on 7d and 30d forecasting windows in production.

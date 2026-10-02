@@ -38,5 +38,5 @@ variants:
     emphasis: distributed
     strength: 8
     text: >-
-      Built dynamic cluster membership on a 3-node Raft cluster with configuration updates and learner-node snapshot
-      catch-up for zero-downtime onboarding.
+      Enabled dynamic cluster membership on a 3-node Raft cluster with configuration updates and learner-node
+      snapshot catch-up for zero-downtime onboarding.
