@@ -58,7 +58,7 @@ jobs:
       - name: Compiler CI verification
         run: npm run ac:ci
 
-      - name: ATS Readiness PDF regression
+      - name: ATS Readiness and Job Match tests
         run: npm run test:ats
 
   docker:

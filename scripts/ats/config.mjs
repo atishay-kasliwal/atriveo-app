@@ -23,7 +23,11 @@ export const sha256 = (data) => crypto.createHash("sha256").update(data).digest(
 
 export function loadAtsConfig(dir = ATS_CONFIG_DIR) {
   const read = (name) => yaml.load(fs.readFileSync(path.join(dir, name), "utf8")) || {};
-  return withHash({ scoring: read("scoring.yaml"), sections: read("sections.yaml") });
+  return withHash({
+    scoring: read("scoring.yaml"), sections: read("sections.yaml"),
+    skills: read("skills.yaml"), responsibilities: read("responsibilities.yaml"),
+    domains: read("domains.yaml"),
+  });
 }
 
 /** Attach (or refresh) the hash for a config object built or modified in code. */
