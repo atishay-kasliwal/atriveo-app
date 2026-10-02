@@ -2,9 +2,9 @@
 // Ambiguous prose is retained as an unparsed requirement rather than silently becoming a match.
 
 const BACKGROUND = /^(?:about(?: us| the | our| \w+)?|who we are|company|our mission|benefits|job benefits|perks|compensation|salary|base salary|actual compensation|equal opportunity|committed to equal opportunities|eeo|what we offer|what's in it for you|why join|privacy|our culture|how we work|our approach|important note|you want to know more|a quick note about the process|a note on ai|health and wellbeing|growth and future|community|you belong here|usa-based roles only|canada-based roles only|why your work matters|a day in the life)/i;
-const REQUIRED = /^(?:required skills?(?: and experience)?|requirements?|qualifications?|minimum qualifications?|must haves?|what you(?:'ll| will) need|what we're looking for|what we look for|what you bring|who you are|basic qualifications?|additional considerations|you might thrive in this role|experience we value|mindset we value|is it you we're looking for|about you|you likely)/i;
-const PREFERRED = /^(?:preferred qualifications?|nice[- ]to[- ]haves?|bonus points for|bonus|preferred|desirable|what sets you apart)$/i;
-const RESPONSIBILITIES = /^(?:key job responsibilities?|key responsibilities?|responsibilities?|in this role,? you will|what you(?:'ll| will) (?:do|be doing)|what you can expect|what success looks like|as an early engineer|role overview|duties|your impact|what you will build)/i;
+const REQUIRED = /^(?:required skills?(?: and experience)?|required (?:qualifications?|expertise)|requirements?|job requirements?|basic requirements?|qualifications?|job qualifications?|candidate background\s*(?:&|and)\s*qualifications?|pre[- ]requisite qualifications?|what qualifications you will need|minimum qualifications?|must[- ]haves?(?: skills?)?|mandatory (?:skills?|qualifications?)|core mandatory skills?|position requirements?|top \d+ qualifications?|skills sought|key skills|technical skills?|skill set|knowledge,? skills,? and\/?or abilities required|skills you(?:'ll| will) need (?:to bring|to be successful)|skills that will differentiate your candidacy|your skills and experience|your expertise|you must have|you have|we're excited about you because you have|we're excited about you because|to thrive in this role,? you have|what we (?:value|require)|we look for|who you might be|who we're looking for|what skills and experience do you need|what does it take to be successful|the ideal candidate|you may be a (?:good )?fit if|you might be a good fit if you|what you(?:'ll| will) need|what you'll bring to the team|what we(?:'re| are) looking for|what we look for|what you bring|who you are|basic qualifications?|additional considerations|you might thrive in this role|experience we value|mindset we value|is it you we're looking for|about you|you likely)/i;
+const PREFERRED = /^(?:preferred (?:qualifications?|skills?|experience)|secondary\s*\/\s*preferred skills?|desired experience|ideal experience|additional desired experience|bonus skills and attributes|how you stand out|even better|strong candidates may have|nice[- ]to[- ]haves?|bonus points for|bonus|preferred|desirable|what sets you apart)$/i;
+const RESPONSIBILITIES = /^(?:essential (?:functions?|duties)|core job functions?|job duties?|day[- ]to[- ]day tasks?|role and responsibilities?|roles and responsibilities?|job responsibilities?|key job responsibilities?|key responsibilities?|your core responsibilities?|responsibilities?|a typical day|the impact you'll make|the difference you will make|you will|what you'll achieve|what you'll be responsible for|what you'll be working on|you're excited about this opportunity because you will|what will you be doing|what will you do in this role|what does the day[- ]to[- ]day look like|here's a taste of the problems we're solving|as a .+ you will|in this role,? you (?:will|can expect to)|in your day[- ]to[- ]day,? you will|how your work moves the mission forward|what you(?:'ll| will) (?:do|be doing)|what you can expect|what success looks like|as an early engineer|role overview|duties|your impact|what you will build)/i;
 const MARK_REQUIRED = /\b(?:required|must have|minimum|need to have|essential)\b/i;
 const DEGREE = /\b(?:associate(?:'s)?|bachelor(?:'s)?|master(?:'s)?|ph\.?d\.?|doctorate|BS|BA|MS|MA|BTech)\b[^\n.;]{0,90}/gi;
 const YEARS = /\b(\d{1,2})\s*\+?\s*(?:years?|yrs?)\b/gi;
@@ -21,13 +21,18 @@ export function phrase(text, term, config = null) {
 }
 
 function clean(line) {
-  return line.replace(/[’‘]/g, "'").replace(/\\([+&#-])/g, "$1").replace(/^\s*(?:[-•*]|\d+[.)])\s*/, "")
+  return line.replace(/[’‘]/g, "'").replace(/\\([+&#.*-])/g, "$1").replace(/^\s*(?:[-•*]|\d+[.)])\s*/, "")
     .replace(/^\s*#{1,6}\s*/, "").replace(/^\*+|\*+$/g, "").replace(/^[^A-Za-z0-9]+/, "").replace(/\s+/g, " ").trim().replace(/\*+$/, "").trim();
 }
 
 function sectionOf(line) {
-  const s = line.replace(/[:\s]+$/, "").trim();
+  const s = line.replace(/^\d+[.)]\s*/, "").replace(/[:\s.]+$/, "").trim();
+  const parenthetical = s.match(/\((requirements?|qualifications?|responsibilities?)\)$/i);
+  if (parenthetical) return /^responsibilities?$/i.test(parenthetical[1]) ? "responsibilities" : "required";
+  if (/^the responsibilities of this position include\b/i.test(s)) return "responsibilities";
+  if (/^to select this job .+\bmust have\b/i.test(s)) return "required";
   if (s.length > 80) return null;
+  if (/^qualities that will help you thrive in this role/i.test(s)) return "required";
   if (/^you likely\b/i.test(s) && !/^you likely$/i.test(s)) return null;
   if (REQUIRED.test(s)) return "required";
   if (PREFERRED.test(s)) return "preferred";
@@ -93,6 +98,9 @@ export function parseJobDescription(text, config) {
       line = line.slice(colon + 1).trim();
     }
     if (/\b(?:equal opportunity employer|base salary|actual compensation|competitive compensation|benefits program|benefit offerings|sign-on payments|pay transparency notice)\b/i.test(line)) { section = "background"; continue; }
+    // Some postings have no section headings. Only explicit qualification bullets
+    // are safe to classify there; prose about the employer stays background.
+    if (section === "background" && bullet && /^(?:must have|minimum|experience (?:in|with|working)|proficien(?:cy|t)|knowledge of|familiarity with|strong (?:skills|knowledge|experience)|bachelor|master|ph\.?d|\d+\+? years?)\b/i.test(line)) section = "required";
     if (section === "background") continue;
     relevant.push(line);
     const kind = /^(?:preferred|nice to have|bonus)\b/i.test(line) || /\b(?:is a plus|a bonus)\b/i.test(line) ? "preferred" : MARK_REQUIRED.test(line) ? "required" : section;

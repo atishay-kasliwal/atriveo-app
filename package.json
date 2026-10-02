@@ -38,6 +38,7 @@
     "ac:ats-matrix": "node scripts/ac-ats-matrix.mjs",
     "ats:readiness": "node scripts/ats/cli.mjs",
     "ats:match": "node scripts/ats/match-cli.mjs",
+    "ats:backfill": "node scripts/ats/backfill-cli.mjs",
     "ats:diff": "node scripts/ats/diff-cli.mjs",
     "ats:compare": "node scripts/ats/compare-template.mjs",
     "test:ats": "node --test tests/ats/*.test.mjs",

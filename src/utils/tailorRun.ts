@@ -3,6 +3,7 @@ import type { TailorLogEntry, TailorStreamEvent } from "../types/tailor";
 import type { TailorOutcomeKind } from "../types/tailorQueue";
 import type { TailorExplainSummary } from "../types/tailorExplain";
 import type { ResumeArtifacts } from "./resumeDiff";
+import type { AtsAssessment } from "../types/atsAssessment";
 import { outcomeFromError, outcomeFromServerStatus } from "./tailorOutcome";
 import { captureTailorStreamEvent, resetTailorLogCapture, trimTailorLogs } from "./tailorLogCapture";
 import { loadJobDescriptions } from "./jobDescriptionBuckets";
@@ -154,6 +155,9 @@ export interface TailoredResumeOnDisk {
   identity?: string | null;
   informationGain?: number | null;
   borderline?: boolean;
+  atsReadiness?: { status: string; score: number } | null;
+  jobMatch?: { score: number; coverage: { status: string } } | null;
+  atsNote?: string | null;
 }
 
 function normalizeTailorMatch(value: string | null | undefined): string {
@@ -211,6 +215,7 @@ export async function fetchResumeArtifacts(dir: string): Promise<ResumeArtifacts
       coverage: data.coverage ?? null,
       graphCoverage: data.graphCoverage ?? null,
       hiringManager: data.hiringManager ?? null,
+      atsAssessment: data.atsAssessment as AtsAssessment | null ?? null,
     };
   } catch {
     return null;
