@@ -84,14 +84,15 @@ const reviewRow = (withQuestions) => ({
     "submission.approvalRequestedAt": 1, "submission.approvalInAttemptAt": 1,
     answered: size({ $filter: { input: { $ifNull: ["$questions", []] }, cond: { $eq: ["$$this.resolution", "answered"] } } }),
     review: {
-      reason: "$review.reason", detail: "$review.detail", since: "$review.since",
+      reason: "$review.reason", detail: "$review.detail", since: "$review.since", questionReviewStatus: "$review.questionReviewStatus",
       failedChecks: { $map: { input: { $ifNull: ["$review.failedChecks", []] }, in: "$$this.id" } },
       pending: {
         $map: {
           input: { $ifNull: ["$review.pending", []] },
           in: !withQuestions ? "$$this.fingerprint" : {
-            fingerprint: "$$this.fingerprint", label: "$$this.label", type: "$$this.type", required: "$$this.required",
+            fieldKey: "$$this.fieldKey", fingerprint: "$$this.fingerprint", label: "$$this.label", type: "$$this.type", required: "$$this.required",
             canonicalKey: "$$this.canonicalKey", sensitive: "$$this.sensitive", reason: "$$this.reason", detail: "$$this.detail",
+            openEndedAssessment: "$$this.openEndedAssessment", openEndedSuggestion: "$$this.openEndedSuggestion", openEndedUserReview: "$$this.openEndedUserReview",
             optionCount: size("$$this.options"),
             options: { $cond: [{ $gt: [size("$$this.options"), MAX_INLINE_OPTIONS] }, [], { $ifNull: ["$$this.options", []] }] },
           },
@@ -102,13 +103,20 @@ const reviewRow = (withQuestions) => ({
 });
 
 const pendingQuestion = (p) => ({
+  fieldKey: p.fieldKey ?? null,
   fingerprint: p.fingerprint, label: p.label, type: p.type, required: Boolean(p.required),
   options: p.options ?? [], optionCount: p.optionCount ?? (p.options ?? []).length,
   canonicalKey: p.canonicalKey ?? null, sensitive: p.sensitive ?? null, reason: p.reason, detail: p.detail ?? null,
+  openEndedAssessment: p.openEndedAssessment ?? null,
+  openEndedSuggestion: p.openEndedSuggestion ?? null,
+  openEndedUserReview: p.openEndedUserReview ?? null,
 });
 
 // Blocked on questions: the Unanswered page.
-const BLOCKED = { status: "NEEDS_REVIEW", "review.pending.0": { $exists: true }, "submission.attemptedAt": null };
+const BLOCKED = { status: "NEEDS_REVIEW", "submission.attemptedAt": null, $or: [
+  { "review.pending.0": { $exists: true } },
+  { "review.questionReviewStatus": "complete", "review.reason": { $ne: "SUBMIT_APPROVAL" } },
+] };
 // readyForApproval needs this reason; its other checks run on these few rows.
 const MAYBE_READY = { status: "NEEDS_REVIEW", "review.reason": "SUBMIT_APPROVAL" };
 
@@ -139,7 +147,7 @@ async function unansweredCards(apps, ids) {
   const rows = await apps.aggregate([{ $match: { ...BLOCKED, _id: { $in: ids } } }, reviewRow(true)]).toArray();
   const byId = new Map(rows.map((r) => [r._id, r]));
   return ids.filter((id) => byId.has(id)).map((id) => byId.get(id))
-    .map((r) => ({ ...rowBase(r), reviewReason: r.review.reason ?? null, questions: r.review.pending.map(pendingQuestion) }));
+    .map((r) => ({ ...rowBase(r), reviewReason: r.review.reason ?? null, questionReviewStatus: r.review.questionReviewStatus ?? null, questions: r.review.pending.map(pendingQuestion) }));
 }
 
 const blockedTotals = async (apps) => {
@@ -260,7 +268,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     apps.find({}, {
       projection: {
         company: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, applyUrl: 1, finalUrl: 1, attemptCount: 1, createdAt: 1, updatedAt: 1,
-        lifecycle: 1, step: 1, attempts: 1, "review.reason": 1, "review.detail": 1, "review.pending": 1, "failure.code": 1, "failure.message": 1,
+        lifecycle: 1, step: 1, attempts: 1, "review.reason": 1, "review.detail": 1, "review.questionReviewStatus": 1, "review.pending": 1, "failure.code": 1, "failure.message": 1,
         "submission.by": 1, "submission.submittedAt": 1, "submission.attemptedAt": 1, "domain.domain": 1, source: 1, outcome: 1,
       },
     }).sort({ updatedAt: -1 }).limit(limit).toArray(),
@@ -400,11 +408,13 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       status: r.status,
       reviewReason: r.review?.reason ?? null,
       reviewDetail: r.review?.detail ?? null,
+      questionReviewStatus: r.review?.questionReviewStatus ?? null,
       pending: (r.review?.pending ?? []).map((p) => p.label),
       // Full questions for answering in the dashboard (no answer values are stored here).
       questions: (r.review?.pending ?? []).map((p) => ({
         fingerprint: p.fingerprint, label: p.label, type: p.type, required: p.required, options: p.options ?? [],
         canonicalKey: p.canonicalKey ?? null, sensitive: p.sensitive ?? null, reason: p.reason, detail: p.detail,
+        openEndedAssessment: p.openEndedAssessment ?? null,
       })),
       submitAttempted: Boolean(r.submission?.attemptedAt),
       failureCode: r.failure?.code ?? null,

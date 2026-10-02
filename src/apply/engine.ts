@@ -9,13 +9,17 @@ export const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString(
 
 /** A question the engine could not answer, as it waits in review. */
 export interface PendingQ {
+  fieldKey?: string | null;
   fingerprint: string; label: string; type: string; required: boolean; options: string[];
   /** How many choices the form offered; more than `options.length` when the list was too long to send up front. */
   optionCount?: number;
   canonicalKey: string | null; sensitive: string | null; reason: string; detail: string | null;
+  openEndedAssessment?: { questionFamily: string | null; familyConfidence: number; storyConfidence: number; selectedStory: string | null; reason: string } | null;
+  openEndedSuggestion?: { suggestedAnswer: string; confidenceBand: "high" | "medium"; selectedStory: string } | null;
+  openEndedUserReview?: { status: "draft" | "approved" | "rejected"; action: "edited" | "replaced" | "accepted" | "rejected"; draftAnswer?: string } | null;
 }
 
-export async function postAction(body: object): Promise<{ ok: boolean; error?: string; requeued?: boolean }> {
+export async function postAction(body: object): Promise<{ ok: boolean; error?: string; requeued?: boolean; resolved?: boolean; questionReviewStatus?: "open" | "complete"; updatedAt?: string }> {
   const res = await fetch(`${getTailorServerBase()}/applications/action`, {
     method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
   });
@@ -49,7 +53,7 @@ const DECLARATION = /acknowledg|privacy|consent|certif|attest|declar|\bagree|ter
 
 /** A readable, non-sensitive question that isn't a declaration: safe to remember widely or copy between forms. */
 export function plainQuestion(q: PendingQ): boolean {
-  return !q.sensitive && questionKind(q) === "question" && !DECLARATION.test(q.label);
+  return !q.sensitive && !q.openEndedAssessment?.questionFamily && questionKind(q) === "question" && !DECLARATION.test(q.label);
 }
 
 /**
