@@ -116,7 +116,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
   };
 
   const answersOf = (app: UnansweredApp) => app.questions
-    .filter((q) => questionKind(q) !== "file")
+    .filter((q) => questionKind(q) !== "file" && !q.openEndedAssessment?.questionFamily)
     .map((q) => ({ q, v: entry(app, q)?.v.trim() ?? "" }))
     .filter((x) => x.v);
 
@@ -141,6 +141,36 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
       : left > 0
         ? `Saved ${answers.length} for ${app.company}. It's being refilled and will come back for the other ${left}.`
         : `Saved ${app.company}. It's being refilled; if every check passes it moves to Ready to submit.`);
+  };
+
+  const reviewStory = async (app: UnansweredApp, q: PendingQ, operation: string, answer?: string) => {
+    if (busy || !q.fieldKey) return;
+    setBusy(app.id);
+    setErrors((e) => ({ ...e, [app.id]: "" }));
+    const review = answer === undefined ? { operation, scope: "application" } : { operation, answer };
+    const result = await postAction({ action: "question_review", applicationId: app.id, expectedUpdatedAt: app.updatedAt, fieldKey: q.fieldKey, review });
+    setBusy(null);
+    if (!result.ok) {
+      setErrors((e) => ({ ...e, [app.id]: result.error ?? "Couldn't review answer" }));
+      return;
+    }
+    setDone((d) => ({ ...d, [app.id]: app.updatedAt }));
+    setNotice(result.questionReviewStatus === "complete" ? `${app.company}: answers reviewed. Continue the application to refill and validate.` : `${app.company}: review saved.`);
+    await refreshUnanswered();
+  };
+
+  const continueApplication = async (app: UnansweredApp) => {
+    if (busy) return;
+    setBusy(app.id);
+    const result = await postAction({ action: "continue_application", applicationId: app.id, expectedUpdatedAt: app.updatedAt });
+    setBusy(null);
+    if (!result.ok) {
+      setErrors((e) => ({ ...e, [app.id]: result.error ?? "Couldn't continue application" }));
+      return;
+    }
+    setDone((d) => ({ ...d, [app.id]: app.updatedAt }));
+    setNotice(`${app.company}: queued for refill and validation. Submit still needs separate approval.`);
+    await refreshUnanswered();
   };
 
   const skip = async (app: UnansweredApp) => {
@@ -197,8 +227,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
               );
             }
             const answers = answersOf(app);
-            const files = app.questions.filter((q) => questionKind(q) === "file").length;
-            const answerable = app.questions.length - files;
+            const answerable = app.questions.filter((q) => questionKind(q) !== "file" && !q.openEndedAssessment?.questionFamily).length;
             return (
               <article key={app.id} data-id={app.id} className="rv-card" aria-label={`${app.company}: ${app.questions.length} question${app.questions.length === 1 ? "" : "s"}`}
                 onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); void save(app); } }}>
@@ -211,9 +240,28 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
                   </div>
                 </header>
                 <div className="rv-card-body">
+                  {app.questions.length === 0 && app.questionReviewStatus === "complete" && <p className="apps-q-note">All questions have been reviewed. Continue to refill and validate this application. This does not submit it.</p>}
                   {app.questions.map((q) => {
                     const e = entry(app, q);
                     const from = e?.from ? cards[e.from]?.company : null;
+                    if (q.openEndedAssessment?.questionFamily) {
+                      const draft = q.openEndedUserReview?.status === "draft";
+                      const text = e?.v ?? q.openEndedUserReview?.draftAnswer ?? q.openEndedSuggestion?.suggestedAnswer ?? "";
+                      return <div key={q.fieldKey ?? q.fingerprint} className="apps-q">
+                        <strong className="apps-q-label">{q.label}{q.required ? " *" : ""}</strong>
+                        <p className="apps-q-note">Story match: {q.openEndedAssessment.questionFamily.replaceAll("_", " ")} · family {Math.round(q.openEndedAssessment.familyConfidence * 100)}% · story {Math.round(q.openEndedAssessment.storyConfidence * 100)}%{q.openEndedAssessment.selectedStory ? ` · ${q.openEndedAssessment.selectedStory}` : ""}. These scores describe the match, not your chance of getting the job.</p>
+                        {q.openEndedSuggestion && <p className="apps-q-note">{q.openEndedSuggestion.confidenceBand === "high" ? "Strong" : "Possible"} suggestion from an approved story. Review every claim before accepting.</p>}
+                        {!q.openEndedSuggestion && <p className="apps-q-note">No approved suggestion is available. Write your answer and approve it yourself.</p>}
+                        <textarea rows={5} value={text} onChange={(event) => setValue(app, q, event.target.value)} aria-label={`Answer to ${q.label}`} />
+                        {draft && <p className="apps-q-note">Your edited draft is saved. Approve it explicitly before continuing.</p>}
+                        <div className="rv-card-links">
+                          {q.openEndedSuggestion && !draft && <button className="apps-link" disabled={busy !== null} onClick={() => void reviewStory(app, q, "accept_suggestion")}>Accept suggestion</button>}
+                          {q.openEndedSuggestion && !draft && <button className="apps-link" disabled={busy !== null} onClick={() => void reviewStory(app, q, "reject_suggestion")}>Reject suggestion</button>}
+                          {!draft && <button className="apps-link" disabled={busy !== null || !text.trim()} onClick={() => void reviewStory(app, q, q.openEndedSuggestion ? "edit_suggestion" : "replace_answer", text.trim())}>Save {q.openEndedSuggestion ? "edited" : "replacement"} draft</button>}
+                          {draft && <button className="apps-link" disabled={busy !== null} onClick={() => void reviewStory(app, q, q.openEndedUserReview?.action === "edited" ? "approve_edited_answer" : "approve_replacement")}>Approve this answer</button>}
+                        </div>
+                      </div>;
+                    }
                     return (
                       <QuestionField key={q.fingerprint} q={q} appId={app.id} company={app.company}
                         value={e?.v ?? ""} onValue={(v) => setValue(app, q, v)}
@@ -224,11 +272,11 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
                 </div>
                 <footer className="rv-card-foot">
                   {errors[app.id] && <p className="apps-q-note warn" role="alert">{errors[app.id]}</p>}
-                  <button className="rv-primary" disabled={!answers.length || busy !== null} onClick={() => void save(app)}
+                  {app.questions.length === 0 && app.questionReviewStatus === "complete" ? <button className="rv-primary" disabled={busy !== null} onClick={() => void continueApplication(app)}>{busy === app.id ? "Continuing…" : "Continue application"}</button> : <button className="rv-primary" disabled={!answers.length || busy !== null} onClick={() => void save(app)}
                     title="Saves your answers and refills this application (Ctrl or ⌘ + Enter)">
                     {busy === app.id ? "Saving…" : answers.length === 0 ? (answerable ? "Answer to save" : "Nothing to answer here")
                       : answers.length < answerable ? `Save ${answers.length} of ${answerable}` : "Save and refill"}
-                  </button>
+                  </button>}
                   <div className="rv-card-links">
                     <button className="apps-link" onClick={() => replace(app.id)} disabled={busy !== null}>Later</button>
                     <a href={app.url} target="_blank" rel="noreferrer">Open form ↗</a>

@@ -17,6 +17,7 @@ interface HistoryRow {
   questions: PendingQ[]; submitAttempted: boolean;
   id: string; company: string; title: string; location: string | null; ats: string | null; status: Status;
   reviewReason: string | null; reviewDetail: string | null; pending: string[]; failureCode: string | null; failureMessage: string | null;
+  questionReviewStatus?: "open" | "complete" | null;
   submittedBy: string | null; submittedAt: string | null; attempts: number; domain: string | null; url: string; createdAt: string; updatedAt: string;
   /** What the employer's mail said after you applied (inbox watcher). */
   outcome?: { status: "confirmed" | "rejected"; at: string | null; subject: string | null } | null;
@@ -288,7 +289,7 @@ function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) =
   }
 
   const answers = row.questions
-    .filter((q) => questionKind(q) !== "file" && values[q.fingerprint]?.trim())
+    .filter((q) => questionKind(q) !== "file" && !q.openEndedAssessment?.questionFamily && values[q.fingerprint]?.trim())
     .map((q) => answerFor(q, values[q.fingerprint]!.trim(), scopes[q.fingerprint] ?? defaultScope(q, row.company)));
   const canApproveSubmit = row.status === "NEEDS_REVIEW" && row.reviewReason === "SUBMIT_APPROVAL" && row.questions.length === 0;
 
@@ -303,12 +304,13 @@ function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) =
           )}
         </div>
       )}
-      {row.questions.map((q) => (
+      {row.questions.filter((q) => !q.openEndedAssessment?.questionFamily).map((q) => (
         <QuestionField key={q.fingerprint} q={q} appId={row.id} company={row.company}
           value={values[q.fingerprint] ?? ""} onValue={(v) => setValues((cur) => ({ ...cur, [q.fingerprint]: v }))}
           scope={scopes[q.fingerprint] ?? defaultScope(q, row.company)} onScope={(sc) => setScopes((cur) => ({ ...cur, [q.fingerprint]: sc }))} />
       ))}
       <div className="apps-review-actions">
+        {(row.questions.some((q) => q.openEndedAssessment?.questionFamily) || row.questionReviewStatus === "complete") && <Link className="apps-btn-link" to="/unanswered">Review story answers and continue →</Link>}
         {canApproveSubmit && (
           <button className="primary" disabled={busy} onClick={() => run({ action: "approve_submit", applicationId: row.id, expectedUpdatedAt: row.updatedAt }, "Approval queued. The worker will refill, validate, and submit if nothing changed.")}>Approve and submit</button>
         )}
