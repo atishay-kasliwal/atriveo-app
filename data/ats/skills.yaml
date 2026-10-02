@@ -1,0 +1,71 @@
+# Independent JD vocabulary. This includes skills the resume bank may not contain.
+# variants are equivalent spellings; related terms earn partial credit only.
+Python: { variants: [python 3], related: [] }
+Java: { variants: [], related: [] }
+JavaScript: { variants: [js], related: [] }
+TypeScript: { variants: [typescript], related: [javascript] }
+Go: { variants: [golang], related: [] }
+Rust: { variants: [], related: [] }
+Swift: { variants: [], related: [] }
+iOS SDK: { variants: [Apple SDKs, Apple SDK], related: [iOS] }
+Kotlin: { variants: [], related: [] }
+C++: { variants: [cpp], related: [] }
+C#: { variants: [c sharp], related: [] }
+SQL: { variants: [], related: [] }
+React: { variants: [react.js, reactjs], related: [] }
+Next.js: { variants: [nextjs], related: [react] }
+Node.js: { variants: [nodejs], related: [] }
+FastAPI: { variants: [], related: [api] }
+Django: { variants: [], related: [] }
+Spring Boot: { variants: [springboot], related: [spring] }
+PostgreSQL: { variants: [postgres], related: [sql] }
+MySQL: { variants: [], related: [sql] }
+MongoDB: { variants: [mongo db], related: [] }
+Redis: { variants: [], related: [] }
+Kafka: { variants: [apache kafka], related: [streaming] }
+Spark: { variants: [apache spark, pyspark], related: [] }
+Airflow: { variants: [apache airflow], related: [] }
+dbt: { variants: [data build tool], related: [] }
+Snowflake: { variants: [], related: [] }
+AWS: { variants: [amazon web services], related: [cloud] }
+Azure: { variants: [microsoft azure], related: [cloud] }
+GCP: { variants: [google cloud platform, google cloud], related: [cloud] }
+Docker: { variants: [], related: [containers] }
+Kubernetes: { variants: [k8s], related: [containers] }
+Terraform: { variants: [], related: [infrastructure as code] }
+CI/CD: { variants: [continuous integration, continuous delivery, continuous deployment], related: [github actions] }
+GitHub Actions: { variants: [], related: [ci/cd] }
+Linux: { variants: [], related: [] }
+GraphQL: { variants: [], related: [api] }
+REST: { variants: [restful], related: [api] }
+API: { variants: [APIs, application programming interface], related: [rest, graphql] }
+gRPC: { variants: [], related: [api] }
+Microservices: { variants: [microservice], related: [distributed systems] }
+Distributed systems: { variants: [distributed computing], related: [microservices] }
+LLM: { variants: [LLMs, large language models, large language model], related: [generative ai] }
+Generative AI: { variants: [genai, gen ai], related: [llm] }
+RAG: { variants: [retrieval augmented generation], related: [retrieval] }
+LangChain: { variants: [], related: [llm] }
+LlamaIndex: { variants: [], related: [rag] }
+LangGraph: { variants: [], related: [agent orchestration] }
+OpenAI SDK: { variants: [OpenAI SDKs], related: [llm] }
+PyTorch: { variants: [torch], related: [machine learning] }
+TensorFlow: { variants: [], related: [machine learning] }
+Machine learning: { variants: [ml], related: [pytorch, tensorflow] }
+Photonics: { variants: [photonic], related: [] }
+Silicon photonics: { variants: [], related: [photonics] }
+NLP: { variants: [natural language processing], related: [llm] }
+Vector search: { variants: [vector database, vector db], related: [search, embeddings] }
+Embeddings: { variants: [embedding models], related: [vector search] }
+Observability: { variants: [monitoring], related: [cloudwatch] }
+Prometheus: { variants: [], related: [observability] }
+Grafana: { variants: [], related: [observability] }
+CloudWatch: { variants: [amazon cloudwatch], related: [observability] }
+S3: { variants: [amazon s3], related: [aws] }
+Lambda: { variants: [aws lambda], related: [aws] }
+ECS: { variants: [amazon ecs], related: [aws] }
+Selenium: { variants: [], related: [browser automation] }
+Playwright: { variants: [], related: [browser automation] }
+Tableau: { variants: [], related: [data visualization] }
+Power BI: { variants: [powerbi], related: [data visualization] }
+Kubernetes security: { variants: [], related: [kubernetes, security] }

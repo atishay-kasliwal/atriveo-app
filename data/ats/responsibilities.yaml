@@ -1,0 +1,17 @@
+api_development: { label: API development, terms: [api, rest, graphql, grpc, fastapi], evidence: [api, rest, graphql, grpc, fastapi] }
+data_pipelines: { label: Data pipelines, terms: [data pipeline, etl, data engineering, airflow], evidence: [data pipeline, etl, airflow, ingestion] }
+distributed_systems: { label: Distributed systems, terms: [distributed system, microservice, scale, scalable], evidence: [distributed system, microservice, scale, scalable] }
+machine_learning: { label: Machine learning, terms: [machine learning, model training, predictive model], evidence: [machine learning, model, training] }
+llm_applications: { label: LLM applications, terms: [llm, generative ai, agent workflow, agent orchestration], evidence: [llm, generative ai, agent, rag] }
+retrieval: { label: Retrieval and search, terms: [rag, retrieval, vector search, search system], evidence: [rag, retrieval, vector search, search] }
+cloud_deployment: { label: Cloud deployment, terms: [deploy, cloud, aws, kubernetes], evidence: [deployed, deployment, aws, kubernetes] }
+testing: { label: Testing, terms: [test automation, unit test, integration test, quality assurance], evidence: [test, testing, coverage] }
+observability: { label: Observability, terms: [monitor, observability, telemetry], evidence: [monitor, observability, telemetry, logging] }
+security: { label: Security, terms: [security, secure, threat, vulnerability], evidence: [security, secure, threat, vulnerability] }
+frontend: { label: Frontend development, terms: [frontend, user interface, ui, react], evidence: [frontend, user interface, ui, react] }
+collaboration: { label: Cross-team collaboration, terms: [collaborate, partner with, cross functional], evidence: [collaborat, partnered, cross functional] }
+feature_delivery: { label: Feature delivery, terms: [build and ship, ship new features, product improvements, user-facing features], evidence: [built, developed, shipped, delivered, implemented] }
+software_lifecycle: { label: Software lifecycle, terms: [full development lifecycle, release, post-launch support], evidence: [release, deployed, launched, production] }
+code_quality: { label: Code quality, terms: [maintainable, code review, codebase, quality mindset], evidence: [test, testing, review, coverage, maintainab] }
+documentation: { label: Documentation, terms: [document your work, documentation], evidence: [document, documentation] }
+customer_support: { label: Customer support, terms: [customer support, customer feedback], evidence: [customer, support, user] }
