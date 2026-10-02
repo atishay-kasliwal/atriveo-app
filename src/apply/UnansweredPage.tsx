@@ -13,7 +13,7 @@ import "./review-pages.css";
 // the cards on screen and the next set.
 
 const MIN_COLUMN = 260;
-const MIN_ROW = 260;
+const MIN_ROW = 420;
 const GAP = 10;
 
 /** Number of cards that fit without scrolling the page. */
@@ -267,12 +267,12 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
                     if (q.openEndedAssessment?.questionFamily) {
                       const draft = q.openEndedUserReview?.status === "draft";
                       const text = e?.v ?? q.openEndedUserReview?.draftAnswer ?? q.openEndedSuggestion?.suggestedAnswer ?? "";
-                      return <div key={q.fieldKey ?? q.fingerprint} className="apps-q">
+                      return <div key={q.fieldKey ?? q.fingerprint} className="apps-q apps-q-narrative">
                         <strong className="apps-q-label">{q.label}{q.required ? " *" : ""}</strong>
-                        <p className="apps-q-note">Story match: {q.openEndedAssessment.questionFamily.replaceAll("_", " ")} · family {Math.round(q.openEndedAssessment.familyConfidence * 100)}% · story {Math.round(q.openEndedAssessment.storyConfidence * 100)}%{q.openEndedAssessment.selectedStory ? ` · ${q.openEndedAssessment.selectedStory}` : ""}. These scores describe the match, not your chance of getting the job.</p>
                         {q.openEndedSuggestion && <p className="apps-q-note">{q.openEndedSuggestion.confidenceBand === "high" ? "Strong" : "Possible"} suggestion from an approved story. Review every claim before accepting.</p>}
                         {!q.openEndedSuggestion && <p className="apps-q-note">No approved suggestion is available. Write your answer and approve it yourself.</p>}
                         <textarea rows={5} value={text} onChange={(event) => setValue(app, q, event.target.value)} aria-label={`Answer to ${q.label}`} />
+                        <details className="apps-q-note"><summary>Suggestion match details</summary>Story match: {q.openEndedAssessment.questionFamily.replaceAll("_", " ")} · family {Math.round(q.openEndedAssessment.familyConfidence * 100)}% · story {Math.round(q.openEndedAssessment.storyConfidence * 100)}%{q.openEndedAssessment.selectedStory ? ` · ${q.openEndedAssessment.selectedStory}` : ""}. These scores describe the match, not your chance of getting the job.</details>
                         {draft && <p className="apps-q-note">Your edited draft is saved. Approve it explicitly before continuing.</p>}
                         <div className="rv-card-links">
                           {q.openEndedSuggestion && !draft && <button className="apps-link" disabled={busy !== null} onClick={() => void reviewStory(app, q, "accept_suggestion")}>Accept suggestion</button>}
@@ -292,11 +292,11 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
                 </div>
                 <footer className="rv-card-foot">
                   {errors[app.id] && <p className="apps-q-note warn" role="alert">{errors[app.id]}</p>}
-                  {app.questions.length === 0 && app.questionReviewStatus === "complete" ? <button className="rv-primary" disabled={busy !== null} onClick={() => void continueApplication(app)}>{busy === app.id ? "Continuing…" : "Continue application"}</button> : <button className="rv-primary" disabled={!answers.length || busy !== null} onClick={() => void save(app)}
+                  {app.questions.length === 0 && app.questionReviewStatus === "complete" ? <button className="rv-primary" disabled={busy !== null} onClick={() => void continueApplication(app)}>{busy === app.id ? "Continuing…" : "Continue application"}</button> : answerable > 0 ? <button className="rv-primary" disabled={!answers.length || busy !== null} onClick={() => void save(app)}
                     title="Saves your answers and refills this application (Ctrl or ⌘ + Enter)">
                     {busy === app.id ? "Saving…" : answers.length === 0 ? (answerable ? "Answer to save" : "Nothing to answer here")
                       : answers.length < answerable ? `Save ${answers.length} of ${answerable}` : "Save and refill"}
-                  </button>}
+                  </button> : null}
                   {hasOpenEnded && <button className="apps-btn" disabled={busy !== null} onClick={() => void refreshSuggestions(app)}
                     title="Recompute suggestions with the current answer logic and saved job description. This cannot approve or submit an application.">
                     {busy === app.id ? "Refreshing…" : "Refresh suggestions"}
