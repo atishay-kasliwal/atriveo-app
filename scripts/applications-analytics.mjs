@@ -133,12 +133,17 @@ async function engineState(db) {
   return { killSwitch: killSwitchOf(control), worker: workerOf(workerDocs) };
 }
 
-/** Every application blocked on questions as { id, updatedAt, n }, in page order: fewest questions, then best match, then oldest. */
+/** Every application blocked on questions, with suggested answers first, then fewest questions, best match, and oldest. */
 const unansweredOrder = (apps) => apps.aggregate([
   { $match: BLOCKED },
-  { $project: { updatedAt: 1, n: { $size: "$review.pending" }, rank: { $ifNull: ["$priority", 0] } } },
-  { $sort: { n: 1, rank: -1, updatedAt: 1, _id: 1 } },
-  { $project: { _id: 0, id: "$_id", updatedAt: 1, n: 1 } },
+  { $project: {
+    updatedAt: 1,
+    n: { $size: "$review.pending" },
+    suggestions: { $size: { $filter: { input: { $ifNull: ["$review.pending", []] }, cond: { $ne: [{ $ifNull: ["$$this.openEndedSuggestion.suggestedAnswer", ""] }, ""] } } } },
+    rank: { $ifNull: ["$priority", 0] },
+  } },
+  { $sort: { suggestions: -1, n: 1, rank: -1, updatedAt: 1, _id: 1 } },
+  { $project: { _id: 0, id: "$_id", updatedAt: 1, n: 1, suggestions: 1 } },
 ]).toArray();
 
 /** The cards (questions included) of these applications, in this order; any no longer blocked are left out. */

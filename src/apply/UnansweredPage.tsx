@@ -256,7 +256,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
                   <div className="rv-card-id">
                     <strong title={app.company}>{app.company}</strong>
                     <span title={app.title}>{app.title}</span>
-                    <small>{app.questions.length} question{app.questions.length === 1 ? "" : "s"}{app.ats ? ` · ${app.ats}` : ""}{app.priority ? ` · match ${app.priority}` : ""}</small>
+                    <small>{hasOpenEnded && app.questions.some((q) => q.openEndedSuggestion) ? "Suggested answer ready · " : ""}{app.questions.length} question{app.questions.length === 1 ? "" : "s"}{app.ats ? ` · ${app.ats}` : ""}{app.priority ? ` · match ${app.priority}` : ""}</small>
                   </div>
                 </header>
                 <div className="rv-card-body">

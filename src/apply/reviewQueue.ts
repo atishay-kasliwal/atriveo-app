@@ -29,7 +29,7 @@ export interface ApprovedApp extends Row {
   submittedAt: string | null; approvedAt: string | null;
 }
 /** An application blocked on questions, in the Unanswered page's order; its card loads when it's needed. */
-export interface QueuedApp { id: string; updatedAt: string; /** questions waiting */ n: number }
+export interface QueuedApp { id: string; updatedAt: string; /** questions waiting */ n: number; /** approved story suggestions ready for review */ suggestions?: number }
 
 interface View extends EngineState { ok: boolean; generatedAt: string; counts: Counts }
 export interface UnansweredQueue extends View { unanswered: QueuedApp[] }
