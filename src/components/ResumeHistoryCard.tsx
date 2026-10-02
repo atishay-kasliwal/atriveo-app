@@ -1,5 +1,6 @@
 import { useState } from "react";
 import TrustReportPanel from "./TrustReportPanel";
+import AtsAssessmentPanel from "./AtsAssessmentPanel";
 import ResumeDiffPanel from "./ResumeDiffPanel";
 import type { TailoredResumeOnDisk } from "../utils/tailorRun";
 import { fetchResumeArtifacts } from "../utils/tailorRun";
@@ -56,6 +57,18 @@ export default function ResumeHistoryCard({
   const [diffOpen, setDiffOpen] = useState(false);
   const [diffLoading, setDiffLoading] = useState(false);
   const [diffResult, setDiffResult] = useState<ReturnType<typeof diffResumeArtifacts> | null>(null);
+  const [atsOpen, setAtsOpen] = useState(false);
+  const [atsLoading, setAtsLoading] = useState(false);
+  const [atsAssessment, setAtsAssessment] = useState<Awaited<ReturnType<typeof fetchResumeArtifacts>>>(null);
+
+  const loadAts = async () => {
+    if (atsOpen) { setAtsOpen(false); return; }
+    setAtsLoading(true);
+    const artifacts = await fetchResumeArtifacts(r.dir);
+    setAtsAssessment(artifacts);
+    setAtsLoading(false);
+    setAtsOpen(true);
+  };
 
   const loadExplain = async () => {
     if (explain) {
@@ -108,6 +121,9 @@ export default function ResumeHistoryCard({
                 <span className="resume-history-badge">IG {Number(r.informationGain).toFixed(1)}</span>
               ) : null}
               {r.borderline ? <span className="resume-history-badge resume-history-badge--warn">Borderline</span> : null}
+              {r.atsReadiness && <span className={`resume-history-badge${r.atsReadiness.status === "PASS" ? " resume-history-badge--applied" : " resume-history-badge--warn"}`}>Readiness {r.atsReadiness.status} {r.atsReadiness.score}</span>}
+              {r.jobMatch && <span className={`resume-history-badge${r.jobMatch.coverage.status === "complete" ? " resume-history-badge--id" : " resume-history-badge--warn"}`}>Job Match {r.jobMatch.score}{r.jobMatch.coverage.status !== "complete" ? " · review" : ""}</span>}
+              {!r.jobMatch && r.atsReadiness && <span className="resume-history-badge resume-history-badge--warn">Job Match · manual review</span>}
               {applied ? <span className="resume-history-badge resume-history-badge--applied">Applied</span> : null}
             </div>
           </div>
@@ -115,6 +131,9 @@ export default function ResumeHistoryCard({
           <div className="resume-history-actions">
             <button type="button" className="tailored-btn" onClick={() => void loadExplain()} disabled={explainLoading}>
               {explainLoading ? "Loading…" : explainOpen ? "Hide trust" : "Trust"}
+            </button>
+            <button type="button" className="tailored-btn" onClick={() => void loadAts()} disabled={atsLoading}>
+              {atsLoading ? "Loading…" : atsOpen ? "Hide ATS" : "ATS"}
             </button>
             {previous ? (
               <button type="button" className="tailored-btn" onClick={() => void loadDiff()} disabled={diffLoading}>
@@ -135,6 +154,7 @@ export default function ResumeHistoryCard({
               <TrustReportPanel explain={explain?.explain} dir={r.dir} />
             </div>
           ) : null}
+          {atsOpen && <div className="resume-history-explain"><AtsAssessmentPanel assessment={atsAssessment?.atsAssessment} /></div>}
 
           {jdOpen ? (
             <div className="tailored-jd">

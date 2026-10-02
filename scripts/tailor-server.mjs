@@ -38,6 +38,7 @@ import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { applicationsAnalytics, applicationDetail, questionOptions, reviewQueue } from "./applications-analytics.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
+import { readSavedAts } from "./ats/persist.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
 import { getWorkerId } from "./worker-id.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
@@ -1383,7 +1384,7 @@ const server = http.createServer(async (req, res) => {
       const out = [];
       const rootExists = await fsp.access(OUT_ROOT).then(() => true).catch(() => false);
       if (rootExists) {
-        // Structure: OUT_ROOT/YYYY-MM-DD/company-slug/HH-MM_NN_role/
+        // Saved runs exist as both date/run and date/company/run.
         const rootEntries = await fsp.readdir(OUT_ROOT);
         const dateDirs = rootEntries
           .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
@@ -1396,17 +1397,21 @@ const server = http.createServer(async (req, res) => {
           for (const co of companyDirs) {
             const coDir = path.join(dateDir, co);
             try { if (!(await fsp.stat(coDir)).isDirectory()) continue; } catch { continue; }
-            let folders;
-            try { folders = await fsp.readdir(coDir); }
-            catch { continue; }
-            for (const folder of folders) {
-              const dir = path.join(coDir, folder);
+            let runDirs;
+            if (fs.existsSync(path.join(coDir, "Atishay Kasliwal.pdf"))) runDirs = [{ folder: co, dir: coDir }];
+            else {
+              let folders;
+              try { folders = await fsp.readdir(coDir); } catch { continue; }
+              runDirs = folders.map((folder) => ({ folder, dir: path.join(coDir, folder) }));
+            }
+            for (const { folder, dir } of runDirs) {
               const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
               const hasPdf = await fsp.access(pdfPath).then(() => true).catch(() => false);
               if (!hasPdf) continue;
               let meta = {};
               try { meta = JSON.parse(await fsp.readFile(path.join(dir, "meta.json"), "utf8")); } catch { /* none */ }
               const ats = readAtsFromDir(dir);
+              const assessment = readSavedAts(dir);
               let explain = null;
               try { explain = JSON.parse(await fsp.readFile(path.join(dir, "explain.json"), "utf8")); } catch { /* none */ }
               out.push({
@@ -1419,6 +1424,9 @@ const server = http.createServer(async (req, res) => {
                 jobUrl: meta.url || "",
                 score: meta.score_pct ?? null,
                 ats,
+                atsReadiness: assessment?.readiness ? { status: assessment.readiness.status, score: assessment.readiness.parseability } : null,
+                jobMatch: assessment?.job_match ? { score: assessment.job_match.score, coverage: assessment.job_match.coverage } : null,
+                atsNote: assessment?.note ?? null,
                 tailoredAt: meta.tailored_at || null,
                 identity: explain?.engineering_identity?.primary || null,
                 informationGain: explain?.information_gain ?? null,
@@ -1464,11 +1472,14 @@ const server = http.createServer(async (req, res) => {
           for (const co of companyDirs) {
             const coDir = path.join(dateDir, co);
             try { if (!(await fsp.stat(coDir)).isDirectory()) continue; } catch { continue; }
-            let runs;
-            try { runs = (await fsp.readdir(coDir)).sort().reverse(); }
-            catch { continue; }
-            for (const folder of runs) {
-              const dir = path.join(coDir, folder);
+            let runDirs;
+            if (fs.existsSync(path.join(coDir, "Atishay Kasliwal.pdf"))) runDirs = [{ folder: co, dir: coDir }];
+            else {
+              let runs;
+              try { runs = (await fsp.readdir(coDir)).sort().reverse(); } catch { continue; }
+              runDirs = runs.map((folder) => ({ folder, dir: path.join(coDir, folder) }));
+            }
+            for (const { folder, dir } of runDirs) {
               const pdfPath = path.join(dir, "Atishay Kasliwal.pdf");
               const hasPdf = await fsp.access(pdfPath).then(() => true).catch(() => false);
               if (!hasPdf) continue;
@@ -1488,12 +1499,12 @@ const server = http.createServer(async (req, res) => {
 
               if (companyMatch && titleMatch) {
                 best = folder;
-                bestDir = coDir;
+                bestDir = path.dirname(dir);
                 break;
               }
               if (!best && companyMatch) {
                 best = folder;
-                bestDir = coDir;
+                bestDir = path.dirname(dir);
               }
             }
             if (best) break;
@@ -1530,6 +1541,7 @@ const server = http.createServer(async (req, res) => {
 
       let explain = null;
       let composition = null;
+      const atsAssessment = readSavedAts(dir);
       try { explain = JSON.parse(fs.readFileSync(path.join(dir, "explain.json"), "utf8")); } catch { /* none */ }
       try { composition = JSON.parse(fs.readFileSync(path.join(dir, "composition.json"), "utf8")); } catch { /* none */ }
 
@@ -1557,6 +1569,7 @@ const server = http.createServer(async (req, res) => {
         coverage,
         graphCoverage,
         hiringManager,
+        atsAssessment,
       }));
     } catch (e) {
       res.writeHead(400, { "Content-Type": "application/json" });

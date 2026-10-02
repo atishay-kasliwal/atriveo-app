@@ -85,6 +85,18 @@ test("a requirement on the same line as its heading is retained", () => {
   assert.deepEqual(headingFirst.required.map((x) => x.label), ["Go"]);
 });
 
+test("saved Markdown headings and alternative section names expose real requirements", () => {
+  const pine = parseJobDescription("**Must\\-Have Skills**\n* **Python, FastAPI \\& React.js**\n**Preferred Skills**\n* Snowflake, Oracle", config);
+  assert.ok(pine.required.some((r) => r.alternatives.includes("Python")));
+  assert.ok(pine.preferred.some((r) => r.alternatives.includes("Snowflake")));
+  const airbnb = parseJobDescription("Software Engineer\nA Typical Day:\nDesign web features with React.\nYour Expertise:\nProficiency in TypeScript and React.", config);
+  assert.equal(airbnb.responsibilities.length, 1);
+  assert.ok(airbnb.required.some((r) => r.alternatives.includes("TypeScript")));
+  const numbered = parseJobDescription("**3\\. Responsibilities:**\n* Build APIs.\n**4\\. Requirements:**\n* Experience with Python.", config);
+  assert.equal(numbered.responsibilities.length, 1);
+  assert.ok(numbered.required.some((r) => r.alternatives.includes("Python")));
+});
+
 test("ordinary lowercase go is not Go language evidence", () => {
   const posting = parseJobDescription("Software Engineer\nRequirements:\n- Ability to go beyond standard approaches.\n- Experience with Go.", config);
   assert.deepEqual(posting.required.map((x) => x.label), ["Go"]);

@@ -1,5 +1,6 @@
 import type { TailorExplainSummary } from "../types/tailorExplain";
 import type { TrustReportCompositionExtras } from "../types/trustReport";
+import type { AtsAssessment } from "../types/atsAssessment";
 
 export interface ResumeArtifacts extends TrustReportCompositionExtras {
   dir: string;
@@ -8,6 +9,7 @@ export interface ResumeArtifacts extends TrustReportCompositionExtras {
   identity: string | null;
   informationGain: number | null;
   borderline: boolean;
+  atsAssessment?: AtsAssessment | null;
 }
 
 export interface SlotChange {
