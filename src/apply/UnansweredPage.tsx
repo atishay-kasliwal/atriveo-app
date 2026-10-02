@@ -173,6 +173,25 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
     await refreshUnanswered();
   };
 
+  const refreshSuggestions = async (app: UnansweredApp) => {
+    if (busy) return;
+    setBusy(app.id);
+    setErrors((e) => ({ ...e, [app.id]: "" }));
+    const result = await postAction({ action: "refresh_suggestions", applicationId: app.id, expectedUpdatedAt: app.updatedAt });
+    setBusy(null);
+    if (!result.ok) {
+      setErrors((e) => ({ ...e, [app.id]: result.error ?? "Couldn't refresh suggestions" }));
+      return;
+    }
+    const changed = (result.suggestionsAdded ?? 0) + (result.suggestionsChanged ?? 0);
+    setNotice(changed
+      ? `Refreshed ${changed} suggestion${changed === 1 ? "" : "s"} for ${app.company}. Nothing was submitted.`
+      : result.refreshed
+        ? `Rechecked ${result.refreshed} question${result.refreshed === 1 ? "" : "s"} for ${app.company}: no suggestion changed.`
+        : `No questions needed refreshing for ${app.company}.`);
+    await refreshUnanswered();
+  };
+
   const skip = async (app: UnansweredApp) => {
     setBusy(app.id);
     const r = await postAction({ action: "skip", applicationId: app.id, note: "skipped on the Unanswered page" });
@@ -228,6 +247,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
             }
             const answers = answersOf(app);
             const answerable = app.questions.filter((q) => questionKind(q) !== "file" && !q.openEndedAssessment?.questionFamily).length;
+            const hasOpenEnded = app.questions.some((q) => q.openEndedAssessment?.questionFamily);
             return (
               <article key={app.id} data-id={app.id} className="rv-card" aria-label={`${app.company}: ${app.questions.length} question${app.questions.length === 1 ? "" : "s"}`}
                 onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); void save(app); } }}>
@@ -276,6 +296,10 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
                     title="Saves your answers and refills this application (Ctrl or ⌘ + Enter)">
                     {busy === app.id ? "Saving…" : answers.length === 0 ? (answerable ? "Answer to save" : "Nothing to answer here")
                       : answers.length < answerable ? `Save ${answers.length} of ${answerable}` : "Save and refill"}
+                  </button>}
+                  {hasOpenEnded && <button className="apps-btn" disabled={busy !== null} onClick={() => void refreshSuggestions(app)}
+                    title="Recompute suggestions with the current answer logic and saved job description. This cannot approve or submit an application.">
+                    {busy === app.id ? "Refreshing…" : "Refresh suggestions"}
                   </button>}
                   <div className="rv-card-links">
                     <button className="apps-link" onClick={() => replace(app.id)} disabled={busy !== null}>Later</button>
