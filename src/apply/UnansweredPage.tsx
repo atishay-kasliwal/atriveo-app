@@ -3,6 +3,7 @@ import DiscardApplications from "./DiscardApplications";
 import { attachmentMessage } from "./attachmentMessage";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CompanyLogo from "../components/CompanyLogo";
+import PriorityTags from "../components/PriorityTags";
 import QuestionField from "./QuestionField";
 import { postAction, proposalText, reviewCategory, type PendingQ } from "./engine";
 import { loadCards, refreshUnanswered, useUnansweredCards, useUnansweredQueue, type UnansweredApp } from "./reviewQueue";
@@ -125,7 +126,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
         {data && !rows.length && <div className="ar-empty"><span className="ar-empty-icon">✓</span><h2>No applications to review</h2><p>{search || filter !== "all" ? "Try another company or filter." : "New applications will appear here after their questions are collected."}</p></div>}
         {activeRow && !appCurrent && <div className="ar-empty">Loading the complete application form…</div>}
         {appCurrent && app && <>
-          <header className="ar-application-head"><CompanyLogo company={app.company} size="sm" /><div><span className="ar-eyebrow">{app.ats} · APPLICATION</span><h2>{app.company}</h2><p>{app.title}</p></div><div className="ar-progress"><strong>{questions.length ? `${complete} / ${questions.length}` : '✓'}</strong><span>{questions.length ? 'answers ready' : 'Answers reviewed'}</span></div></header>
+          <header className="ar-application-head"><CompanyLogo company={app.company} size="sm" /><div><span className="ar-eyebrow">{app.ats} · APPLICATION</span><h2>{app.company}</h2><p>{app.title}</p><PriorityTags tags={app.priorityTags} /></div><div className="ar-progress"><strong>{questions.length ? `${complete} / ${questions.length}` : '✓'}</strong><span>{questions.length ? 'answers ready' : 'Answers reviewed'}</span></div></header>
           <div className="ar-form-nav"><div role="tablist" aria-label="Application views"><button role="tab" aria-selected={tab === "form"} onClick={() => setTab("form")}>Your answers <span>{questions.length}</span></button><button role="tab" aria-selected={tab === "details"} onClick={() => setTab("details")}>Application details</button></div><a href={app.url} target="_blank" rel="noreferrer">Open original form ↗</a></div>
           <select className="ar-mobile-app" aria-label="Choose application" value={activeRow.id} onChange={e => choose(e.target.value)}>{rows.map(r => <option key={r.id} value={r.id}>{r.company ?? cards[r.id]?.company ?? "Loading"} — {r.title ?? cards[r.id]?.title}</option>)}</select>
           {tab === "details" ? <div className="ar-details"><ApplicationDetail id={app.id} version={app.updatedAt} /></div> : <form id="application-answer-form" className="ar-form" onSubmit={e => { e.preventDefault(); review("approve_all"); }}>

@@ -16,6 +16,7 @@ import { formatResumeId, type SessionResumeMeta } from "../utils/sessionResume";
 import TailorJobLogModal from "./TailorJobLogModal";
 import PdfPreviewModal from "./PdfPreviewModal";
 import JobInspector from "./JobInspector";
+import PriorityTags from "./PriorityTags";
 
 const TZ_SUFFIX_RE = /([zZ]|[+-]\d{2}:\d{2})$/;
 
@@ -454,6 +455,7 @@ function JobTableRow({
           </td>
           <td className="job-table-job job-table-job--role">
             <div className="job-table-role-title" title={title}>{title}</div>
+            <PriorityTags tags={job.priority_tags} group={job.priority_group} />
           </td>
           <td className="job-table-score">
             <ScoreCell job={job} board={board} />
@@ -468,6 +470,7 @@ function JobTableRow({
                 <div className="job-table-role-copy">
                   <div className="job-table-role-title" title={title}>{title}</div>
                   <div className="job-table-role-company" title={co}>{co.toUpperCase()}</div>
+                  <PriorityTags tags={job.priority_tags} group={job.priority_group} />
                 </div>
                 {onExcludeCompany && (
                   <button

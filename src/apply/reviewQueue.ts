@@ -15,6 +15,8 @@ export interface Counts { unanswered: number; questions: number; ready: number; 
 interface Row {
   id: string; company: string; companyKey: string | null; title: string; location: string | null; ats: string | null;
   url: string; priority: number; updatedAt: string;
+  /** Why it sits where it does in the application order (job-pipeline priority tags). */
+  priorityTags?: string[];
 }
 export interface UnansweredApp extends Row { reviewStage?: "questions" | "final_form" | null; reviewReason: string | null; questionReviewStatus: "open" | "complete" | null; questions: PendingQ[] }
 export interface ReadyApp extends Row {

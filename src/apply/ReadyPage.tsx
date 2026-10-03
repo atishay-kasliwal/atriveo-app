@@ -2,6 +2,7 @@ import DiscardApplications from "./DiscardApplications";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import CompanyLogo from "../components/CompanyLogo";
+import PriorityTags from "../components/PriorityTags";
 import ApplicationDetail from "./ApplicationDetail";
 import { loadDetail } from "./detail";
 import { humanize, postAction, when } from "./engine";
@@ -250,6 +251,7 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
                         <span className="rv-row-id">
                           <strong>{r.company}</strong>
                           <span>{r.title}</span>
+                          <PriorityTags tags={r.priorityTags} />
                           <small>{r.answered} answers · filled {when(r.filledAt)}{r.priority ? ` · match ${r.priority}` : ""}</small>
                         </span>
                         {why && <span className="apps-tag warn" title={why}>{r.companySubmittedToday ? "Tomorrow" : "Not first"}</span>}
@@ -269,6 +271,7 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
                           <span className="rv-row-id">
                             <strong>{r.company}</strong>
                             <span>{r.title}</span>
+                          <PriorityTags tags={r.priorityTags} />
                             <small>{r.answered} answers · verified {when(r.filledAt)}{r.openFill?.filledAt ? ` · filled in your browser ${when(r.openFill.filledAt)}` : r.openFill?.armedAt ? ` · opened ${when(r.openFill.armedAt)}` : ""}</small>
                           </span>
                           <span className="apps-tag" title="The engine never submits this one: you do">You submit</span>
