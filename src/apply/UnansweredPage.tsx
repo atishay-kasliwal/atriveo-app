@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import CompanyLogo from "../components/CompanyLogo";
 import QuestionField from "./QuestionField";
@@ -54,6 +54,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
   const [done, setDone] = useState<Record<string, string>>({});
   // Typed on each card: application id → fingerprint → value.
   const [values, setValues] = useState<Record<string, Record<string, string>>>({});
+  const [draftModes, setDraftModes] = useState<Record<string, Record<string, "edited" | "replaced">>>({});
   // Your latest answer to each plain question, offered on every other card that asks it.
   const [shared, setShared] = useState<Record<string, Required<Entry>>>({});
   const [scopes, setScopes] = useState<Record<string, Record<string, Scope>>>({});
@@ -68,7 +69,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
     return () => clearTimeout(t);
   }, [notice]);
 
-  const server = useMemo(() => data?.unanswered ?? [], [data]);
+  const server = useMemo(() => [...(data?.unanswered ?? []), ...(data?.reviewComplete ?? [])], [data]);
   const ordered = useMemo(() => {
     const byId = new Map(server.map((a) => [a.id, a]));
     const known = new Set(order);
@@ -112,13 +113,78 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
    */
   const setValue = (app: UnansweredApp, q: PendingQ, v: string) => {
     setValues((cur) => ({ ...cur, [app.id]: { ...cur[app.id], [q.fingerprint]: v } }));
-    if (plainQuestion(q)) setShared((cur) => ({ ...cur, [q.fingerprint]: { v, from: app.id } }));
+    if (!q.questionFamily && plainQuestion(q)) setShared((cur) => ({ ...cur, [q.fingerprint]: { v, from: app.id } }));
   };
 
   const answersOf = (app: UnansweredApp) => app.questions
-    .filter((q) => questionKind(q) !== "file")
+    .filter((q) => questionKind(q) !== "file" && !q.questionFamily)
     .map((q) => ({ q, v: entry(app, q)?.v.trim() ?? "" }))
     .filter((x) => x.v);
+
+  const reviewQuestion = async (app: UnansweredApp, q: PendingQ, operation: string, answer?: string) => {
+    setBusy(app.id);
+    setErrors((e) => ({ ...e, [app.id]: "" }));
+    const review: Record<string, unknown> = { operation };
+    if (answer !== undefined) review.answer = answer;
+    if (["accept_suggestion", "approve_edited_answer", "approve_replacement"].includes(operation)) review.scope = scopeOf(app, q);
+    const result = await postAction({
+      action: "question_review",
+      applicationId: app.id,
+      expectedUpdatedAt: app.updatedAt,
+      fieldKey: q.fieldKey,
+      review,
+    });
+    setBusy(null);
+    if (!result.ok) {
+      setErrors((e) => ({ ...e, [app.id]: result.error ?? "Couldn't save this question review" }));
+      return;
+    }
+    setDraftModes((current) => {
+      const byQuestion = { ...current[app.id] };
+      delete byQuestion[q.fingerprint];
+      return { ...current, [app.id]: byQuestion };
+    });
+    setSaved((n) => n + 1);
+    setNotice(operation === "reject_suggestion" ? "Suggestion rejected. The question is still waiting for an answer."
+      : operation === "edit_suggestion" || operation === "replace_answer" ? "Draft saved. Approve it explicitly to resolve the question."
+      : "Answer approved for this question. The application has not been submitted.");
+    await refreshUnanswered();
+  };
+
+  const continueApplication = async (app: UnansweredApp) => {
+    setBusy(app.id);
+    setErrors((e) => ({ ...e, [app.id]: "" }));
+    const result = await postAction({ action: "continue_application", applicationId: app.id, expectedUpdatedAt: app.updatedAt });
+    setBusy(null);
+    if (!result.ok) {
+      setErrors((e) => ({ ...e, [app.id]: result.error ?? "Couldn't continue this application" }));
+      return;
+    }
+    setDone((current) => ({ ...current, [app.id]: app.updatedAt }));
+    setOrder((current) => [...current.filter((id) => id !== app.id), app.id]);
+    adjustCounts({ reviewComplete: -1 });
+    setNotice(`Continuing ${app.company} for a review-only refill and validation. It will not be submitted.`);
+    await refreshUnanswered();
+  };
+
+  const refreshSuggestions = async (app: UnansweredApp) => {
+    setBusy(app.id);
+    setErrors((e) => ({ ...e, [app.id]: "" }));
+    const result = await postAction({ action: "refresh_suggestions", applicationId: app.id, expectedUpdatedAt: app.updatedAt });
+    setBusy(null);
+    if (!result.ok) {
+      setErrors((e) => ({ ...e, [app.id]: result.error ?? "Couldn't refresh suggestions" }));
+      return;
+    }
+    setNotice(
+      result.suggestions
+        ? `Refreshed suggestions for ${app.company}: ${result.suggestions} new suggestion${result.suggestions === 1 ? "" : "s"}. Nothing was submitted.`
+        : result.refreshed
+          ? `Rechecked ${result.refreshed} question${result.refreshed === 1 ? "" : "s"} for ${app.company}: no new suggestion available.`
+          : `No questions needed refreshing for ${app.company}.`
+    );
+    await refreshUnanswered();
+  };
 
   const save = async (app: UnansweredApp) => {
     const answers = answersOf(app);
@@ -159,7 +225,6 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
   };
 
   const remaining = ordered.length;
-  const questionsLeft = ordered.reduce((n, a) => n + a.n, 0);
 
   return (
     <div className="rv-page">
@@ -167,7 +232,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
       <div className="rv-bar">
         <div className="rv-bar-title">
           <h1>Unanswered questions</h1>
-          {data && <span className="apps-muted">{remaining} application{remaining === 1 ? "" : "s"} · {questionsLeft} question{questionsLeft === 1 ? "" : "s"}{saved ? ` · ${saved} saved here` : ""}</span>}
+          {data && <span className="apps-muted">{data.counts.unanswered} application{data.counts.unanswered === 1 ? "" : "s"} · {data.counts.questions} question{data.counts.questions === 1 ? "" : "s"}{data.counts.reviewComplete ? ` · ${data.counts.reviewComplete} ready to continue` : ""}{saved ? ` · ${saved} reviewed here` : ""}</span>}
         </div>
         <div className="rv-bar-actions">
           {data?.worker && !data.worker.online && <span className="apps-state bad" title={`Last seen ${when(data.worker.updatedAt)}`}><i aria-hidden />Worker offline: saved answers wait</span>}
@@ -183,6 +248,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
         {data && remaining === 0 && (
           <div className="rv-empty">
             <strong>Nothing is waiting for an answer.</strong>
+            {data.counts.reviewComplete > 0 && <span>{data.counts.reviewComplete} application{data.counts.reviewComplete === 1 ? " is" : "s are"} ready to continue.</span>}
             {data.counts.ready > 0 && <span><Link to="/ready">{data.counts.ready} application{data.counts.ready === 1 ? " is" : "s are"} ready to submit →</Link></span>}
           </div>
         )}
@@ -197,8 +263,42 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
               );
             }
             const answers = answersOf(app);
-            const files = app.questions.filter((q) => questionKind(q) === "file").length;
-            const answerable = app.questions.length - files;
+            const answerable = app.questions.filter((q) => questionKind(q) !== "file" && !q.questionFamily).length;
+            const hasOpenEnded = app.questions.some((q) => q.questionFamily);
+            const questionValue = (q: PendingQ) => q.questionFamily
+              ? values[app.id]?.[q.fingerprint] ?? q.userDraft ?? (draftModes[app.id]?.[q.fingerprint] === "replaced" ? "" : q.suggestedAnswer ?? "")
+              : entry(app, q)?.v ?? "";
+            const openEndedControls = (q: PendingQ) => {
+              if (!q.questionFamily) return null;
+              const mode = draftModes[app.id]?.[q.fingerprint];
+              const draftAction = q.userDraftAction ?? mode;
+              const currentAnswer = questionValue(q).trim();
+              const hasDraft = q.reviewStatus === "draft";
+              return (
+                <div className="apps-open-actions" aria-label="Suggested answer actions">
+                  {q.suggestedAnswer && q.reviewStatus !== "rejected" && !hasDraft && !mode && (
+                    <button className="rv-primary" disabled={busy !== null} onClick={() => void reviewQuestion(app, q, "accept_suggestion")}>Accept suggestion</button>
+                  )}
+                  {mode && (
+                    <button className="rv-primary" disabled={busy !== null || !currentAnswer} onClick={() => void reviewQuestion(app, q, mode === "edited" ? "edit_suggestion" : "replace_answer", currentAnswer)}>
+                      {mode === "edited" ? "Save edit draft" : "Save replacement draft"}
+                    </button>
+                  )}
+                  {hasDraft && draftAction && (
+                    <>
+                      <button className="rv-primary" disabled={busy !== null} onClick={() => void reviewQuestion(app, q, draftAction === "edited" ? "approve_edited_answer" : "approve_replacement")}>
+                        {draftAction === "edited" ? "Approve edited answer" : "Approve replacement"}
+                      </button>
+                      <button className="apps-btn" disabled={busy !== null || !currentAnswer} onClick={() => void reviewQuestion(app, q, draftAction === "edited" ? "edit_suggestion" : "replace_answer", currentAnswer)}>Save draft changes</button>
+                    </>
+                  )}
+                  {!mode && q.suggestedAnswer && <button className="apps-btn" disabled={busy !== null || hasDraft} onClick={() => setDraftModes((current) => ({ ...current, [app.id]: { ...current[app.id], [q.fingerprint]: "edited" } }))}>Edit</button>}
+                  {!mode && <button className="apps-btn" disabled={busy !== null || hasDraft} onClick={() => { setDraftModes((current) => ({ ...current, [app.id]: { ...current[app.id], [q.fingerprint]: "replaced" } })); setValue(app, q, ""); }}>Replace</button>}
+                  {q.suggestedAnswer && q.reviewStatus !== "rejected" && <button className="apps-link danger" disabled={busy !== null} onClick={() => void reviewQuestion(app, q, "reject_suggestion")}>Reject suggestion</button>}
+                  {q.reviewStatus === "rejected" && <span className="apps-q-note">Suggestion rejected. The question is still unresolved.</span>}
+                </div>
+              );
+            };
             return (
               <article key={app.id} data-id={app.id} className="rv-card" aria-label={`${app.company}: ${app.questions.length} question${app.questions.length === 1 ? "" : "s"}`}
                 onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); void save(app); } }}>
@@ -207,28 +307,42 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
                   <div className="rv-card-id">
                     <strong title={app.company}>{app.company}</strong>
                     <span title={app.title}>{app.title}</span>
-                    <small>{app.questions.length} question{app.questions.length === 1 ? "" : "s"}{app.ats ? ` · ${app.ats}` : ""}{app.priority ? ` · match ${app.priority}` : ""}</small>
+                    <small>{app.questionReviewStatus === "complete" ? "Question review complete" : `${app.questions.length} question${app.questions.length === 1 ? "" : "s"}`}{app.ats ? ` · ${app.ats}` : ""}{app.priority ? ` · match ${app.priority}` : ""}</small>
                   </div>
                 </header>
                 <div className="rv-card-body">
                   {app.questions.map((q) => {
-                    const e = entry(app, q);
+                    const e = q.questionFamily ? undefined : entry(app, q);
                     const from = e?.from ? cards[e.from]?.company : null;
                     return (
-                      <QuestionField key={q.fingerprint} q={q} appId={app.id} company={app.company}
-                        value={e?.v ?? ""} onValue={(v) => setValue(app, q, v)}
-                        scope={scopeOf(app, q)} onScope={(sc) => setScopes((cur) => ({ ...cur, [app.id]: { ...cur[app.id], [q.fingerprint]: sc } }))}
-                        note={from && e?.v ? `Filled from your ${from} answer. Check it before saving.` : null} />
+                      <Fragment key={q.fingerprint}>
+                        <QuestionField q={q} appId={app.id} company={app.company}
+                          value={questionValue(q)} onValue={(v) => setValue(app, q, v)}
+                          scope={scopeOf(app, q)} onScope={(sc) => setScopes((cur) => ({ ...cur, [app.id]: { ...cur[app.id], [q.fingerprint]: sc } }))}
+                          note={from && e?.v ? `Filled from your ${from} answer. Check it before saving.` : null} />
+                        {openEndedControls(q)}
+                      </Fragment>
                     );
                   })}
                 </div>
                 <footer className="rv-card-foot">
                   {errors[app.id] && <p className="apps-q-note warn" role="alert">{errors[app.id]}</p>}
-                  <button className="rv-primary" disabled={!answers.length || busy !== null} onClick={() => void save(app)}
-                    title="Saves your answers and refills this application (Ctrl or ⌘ + Enter)">
-                    {busy === app.id ? "Saving…" : answers.length === 0 ? (answerable ? "Answer to save" : "Nothing to answer here")
-                      : answers.length < answerable ? `Save ${answers.length} of ${answerable}` : "Save and refill"}
-                  </button>
+                  {app.questionReviewStatus === "complete" ? (
+                    <button className="rv-primary" disabled={busy !== null} onClick={() => void continueApplication(app)} title="Refills and validates this application in review-only mode. It will not submit.">
+                      {busy === app.id ? "Continuing…" : "Continue Application"}
+                    </button>
+                  ) : answerable > 0 ? (
+                    <button className="rv-primary" disabled={!answers.length || busy !== null} onClick={() => void save(app)}
+                      title="Saves factual answers and refills in review-only mode. It will not submit.">
+                      {busy === app.id ? "Saving…" : answers.length === 0 ? "Answer to save" : answers.length < answerable ? `Save ${answers.length} of ${answerable}` : "Save and refill for review"}
+                    </button>
+                  ) : null}
+                  {hasOpenEnded && (
+                    <button className="apps-btn" disabled={busy !== null} onClick={() => void refreshSuggestions(app)}
+                      title="Recompute suggestions with the current answer logic and saved job info. Review-only; nothing is submitted.">
+                      {busy === app.id ? "Refreshing…" : "Refresh suggestions"}
+                    </button>
+                  )}
                   <div className="rv-card-links">
                     <button className="apps-link" onClick={() => replace(app.id)} disabled={busy !== null}>Later</button>
                     <a href={app.url} target="_blank" rel="noreferrer">Open form ↗</a>

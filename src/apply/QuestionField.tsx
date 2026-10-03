@@ -85,9 +85,26 @@ export default function QuestionField({ q, appId, company, value, scope, onValue
         <span className="apps-q-label">{q.label}{q.required ? " *" : ""}{q.sensitive ? <em> · {q.sensitive.replace(/_/g, " ")}</em> : null}</span>
         {input}
       </label>
-      {kind === "file" && <p className="apps-q-note">An attachment the engine couldn't add. Open the form to attach it yourself, or skip this job.</p>}
+      {kind === "file" && <p className="apps-q-note">
+        {q.reason === "UPLOAD_FAILED"
+          ? "The attachment upload failed. Open the form to attach it yourself, or skip this job."
+          : q.reason === "ATTACHMENT_UNVERIFIED" || q.reason === "UPLOAD_UNVERIFIED"
+            ? "Atriveo couldn't confirm that this attachment finished saving. Open the form to verify it, or skip this job."
+            : "This attachment needs attention. Open the form to verify it, or skip this job."}
+      </p>}
       {kind === "unreadable" && <p className="apps-q-note">The engine couldn't read this field's label. Open the form to see what it asks. Your answer is kept for this application only.</p>}
       {q.type === "checkbox" && q.sensitive && <p className="apps-q-note">Read the notice or declaration before choosing. A required box left unchecked keeps this application in review.</p>}
+      {q.suggestedAnswer && (
+        <aside className="apps-open-suggestion" aria-label="Unapproved suggested answer">
+          <div className="apps-open-suggestion-head">
+            <strong>Suggested answer</strong>
+            <span>{q.suggestionConfidence?.band === "high" ? "High" : "Medium"} confidence</span>
+          </div>
+          <p>{q.suggestedAnswer}</p>
+          {q.selectedStory && <small>Story: {q.selectedStory}{q.matchedSignals?.length ? ` · context: ${q.matchedSignals.map((signal) => signal.replace(/^(?:domain|title_skill|jd_skill):/, "")).join(", ")}` : ""}</small>}
+          <small>{q.reviewStatus === "draft" ? "Draft saved. It remains unresolved until you approve it." : "This is a suggestion only. It is not approved or saved."}</small>
+        </aside>
+      )}
       {note && <p className="apps-q-note">{note}</p>}
       {kind === "question" && (
         <select className="apps-q-scope" aria-label="Use this answer for" value={scope} onChange={(e) => onScope(e.target.value as Scope)}>

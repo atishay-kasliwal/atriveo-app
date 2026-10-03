@@ -1,0 +1,247 @@
+# Fact and provenance source only. This file does not approve application prose.
+schema_version: 1
+updated_at: 2026-10-02
+
+provenance_priority:
+  - USER_CONFIRMED
+  - VERIFIED_IDENTITY
+  - PRIMARY_PROJECT_SOURCE
+  - CURATED_CLAIM
+  - MULTI_SOURCE_CLAIM
+  - HISTORICAL_CLAIM
+  - SAVED_ANSWER_CLAIM
+  - UNSUPPORTED
+
+rules:
+  - USER_CONFIRMED overrides conflicting historical resumes, learned answers, memory, and derived claim banks.
+  - Preserve superseded claims with status and provenance.
+  - Keep every metric attached to its measurement and workstream.
+  - Do not merge workstreams because they share an employer.
+
+stories:
+  wake_forest:
+    structure:
+      relationship: One broader medical-imaging platform containing separate studies and processing workstreams.
+      workstreams: [broader_imaging_platform, brain_tumor_study, stroke_study, latest_processing_pipeline]
+      provenance: USER_CONFIRMED
+    workstreams:
+      broader_imaging_platform:
+        available_mri_corpus:
+          value: 10K+
+          measurement: MRI studies available in the broader imaging corpus/platform.
+          context: Research-specific cohorts were created after quality control, preprocessing, and standardization of the broader imaging corpus.
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+      latest_processing_pipeline:
+        processed_cases:
+          value: 2,250
+          measurement: Cases processed at the latest pipeline stage.
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+        approximate_accuracy:
+          value: approximately 90%
+          measurement: Accuracy in the validated latest-stage processing/output workflow.
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+        validation_mismatches:
+          value: no mismatches
+          measurement: Unspecified comparison or validation check in the processing/output workflow.
+          interpretation: Preserve as user-confirmed wording; do not reinterpret as 100% model accuracy.
+          provenance: USER_CONFIRMED
+          status: ACTIVE_INTERPRETATION_UNSPECIFIED
+        processing_time:
+          value: approximately 20 minutes to under 5 minutes
+          measurement: End-to-end processing time for the latest pipeline stage.
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+      brain_tumor_study:
+        corpus_context:
+          value: 10K+ broader MRI corpus
+          measurement: Platform context, not the size of every tumor experiment.
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+        tumor_mask_accuracy:
+          value: 90%+
+          measurement: Brain-tumor segmentation mask accuracy.
+          provenance: CURATED_CLAIM
+          status: ACTIVE
+        radiomic_biomarkers:
+          value: 200+
+          measurement: Biomarkers produced by the radiomics pipeline.
+          provenance: CURATED_CLAIM
+          status: ACTIVE
+        segmentation_time:
+          value: approximately 3 hours to 2 minutes
+          measurement: Tumor segmentation/manual outlining workflow time.
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+        scope:
+          value: [tumor segmentation, radiomics, patient similarity, survival analysis, physician and researcher clinical review]
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+      stroke_study:
+        research_cohort:
+          value: 450+ MRI studies
+          measurement: Stroke-specific research cohort.
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+        data_work:
+          value: [DICOM ingestion, cleaning, preprocessing]
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+        extracted_features:
+          value: 500+
+          measurement: Features extracted for stroke modeling.
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+        predictive_accuracy:
+          value: 87%
+          measurement: Stroke prediction/classification accuracy.
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+        audience:
+          value: [doctors, residents, researchers]
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+    historical_claims:
+      - claim: processed_cases
+        value: 1,250+
+        prior_context: Wake pipeline, retrieval, co-registration, and radiomics wording in historical resume memory.
+        status: SUPERSEDED
+        superseded_by: 2,250 cases for the latest processing pipeline
+        provenance: HISTORICAL_CLAIM
+
+  stony_brook:
+    structure:
+      workstreams: [fedtalk, sentiment_benchmark, rag_evaluation, three_agent_rl, backtesting, broader_platform_infrastructure, mcp]
+      provenance: USER_CONFIRMED
+    workstreams:
+      fedtalk:
+        earlier_directional_evaluation:
+          value: 67.7%
+          preferred_general_wording: approximately 68% directional accuracy
+          measurement: Directional accuracy in an earlier FedTalk/FOMC evaluation.
+          evaluation_scope: 13 FOMC sessions
+          provenance: USER_CONFIRMED
+          status: ACTIVE_WITH_CONTEXT
+        current_repository_evaluation:
+          value: 58.7%
+          measurement: Directional accuracy on the repository's labeled positive-prediction evaluation set.
+          context: Current public repository evaluation; not the universal result of all FedTalk versions.
+          provenance: PRIMARY_PROJECT_SOURCE
+          status: ACTIVE_WITH_CONTEXT
+        prediction_windows:
+          total_principal_windows: 7
+          directly_confirmed_values_minutes: [1, 5, 10]
+          preferred_concise_values_minutes: [1, 5, 10]
+          additional_experimental_horizon: 10 seconds
+          application_rule: Do not use the 10-second horizon in application answers.
+          exact_unconfirmed_windows_rule: Do not infer the other four minute-level values.
+          provenance: USER_CONFIRMED
+        components:
+          value: [Pinecone, RAG, Whisper transcription]
+          provenance: USER_CONFIRMED
+        evaluation_years:
+          progression: [2024, 2025, 2026]
+          context: Work progressed through 2024 and 2025 and is being updated for 2026; preserve the period of each experiment.
+          provenance: USER_CONFIRMED
+      sentiment_benchmark:
+        classification_accuracy:
+          value: 80.8%
+          measurement: Sentiment classification accuracy.
+          evaluation_scope: 1,159 five-minute intervals
+          prohibited_interpretations: [market-direction prediction accuracy, trading accuracy, universal FedTalk accuracy]
+          provenance: USER_CONFIRMED
+          status: ACTIVE_WITH_CONTEXT
+      broader_platform_infrastructure:
+        earlier_daily_users:
+          value: 200+
+          measurement: Daily platform users at an earlier stage.
+          provenance: USER_CONFIRMED
+          status: HISTORICAL_ACTIVE
+        current_daily_users:
+          value: approximately 1,000
+          measurement: Current daily platform users.
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+        internal_research_audience:
+          value: 5 researchers/analysts
+          measurement: Smaller internal research workflow audience.
+          provenance: USER_CONFIRMED
+        frontend_hosting:
+          value: Google cloud infrastructure / Google console deployment
+          provenance: USER_CONFIRMED
+        separate_components:
+          value: [Kafka, FastAPI]
+          context: Broader platform components; do not attach automatically to FedTalk.
+          provenance: USER_CONFIRMED
+      rag_evaluation:
+        rule: Keep separate from FedTalk accuracy and other model evaluations.
+        provenance: USER_CONFIRMED
+      three_agent_rl:
+        rule: Keep separate from FedTalk.
+        provenance: USER_CONFIRMED
+      backtesting:
+        rule: Keep separate from classification and directional-accuracy evaluations.
+        provenance: USER_CONFIRMED
+      mcp:
+        rule: Keep separate from FedTalk unless the story explicitly covers MCP work.
+        provenance: USER_CONFIRMED
+
+  accolite:
+    branding:
+      value: Bounteous x Accolite
+      meaning: Employer branding following the merger; not a separate project.
+      provenance: USER_CONFIRMED
+    structure:
+      workstreams: [fidelity_secure_data_exchange, fidelity_financial_data_backend, bt, t_mobile, internal_erp, erp_automation, ci_cd, leadership]
+      provenance: USER_CONFIRMED
+    workstreams:
+      fidelity_secure_data_exchange:
+        components: [secure or encrypted data exchange, contract or consent gating, audit and compliance visibility, Java, AWS, MySQL, Python onboarding and integration paths, Angular operations UI, Bootstrap]
+        provenance: USER_CONFIRMED
+        status: ACTIVE_WITH_SOURCE_CONTEXT
+      fidelity_financial_data_backend:
+        components: [Kafka, Airflow, PostgreSQL, high-volume financial data processing, enterprise integrations and services, Spring Security, OAuth2, JWT]
+        provenance: USER_CONFIRMED
+        status: ACTIVE_WITH_SOURCE_CONTEXT
+        historical_metrics:
+          daily_transactions: { value: 250K+, provenance: HISTORICAL_CLAIM, status: EXACT_VALUE_REQUIRES_CONFIRMATION }
+          integrations_or_services: { value: 10+, provenance: HISTORICAL_CLAIM, status: EXACT_MEASUREMENT_REQUIRES_CONFIRMATION }
+          uptime: { values: [99%, 99.9%], provenance: HISTORICAL_CLAIM, status: CONFLICTED_EXACT_VALUE }
+      fidelity_shared_metrics:
+        scalability_improvement:
+          value: approximately 30%
+          measurement: Scalability improvement in Fidelity work.
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+        latency_reduction:
+          value: approximately 35%
+          measurement: Latency reduction in Fidelity work.
+          provenance: USER_CONFIRMED
+          status: ACTIVE
+        rule: Do not merge Fidelity workstreams A and B into one architecture without direct source support.
+      ecommerce_performance:
+        approximate_range: 32% to 35%
+        measurement: Separate ecommerce performance/scalability improvement.
+        provenance: USER_CONFIRMED
+        status: EXACT_VALUE_REQUIRES_CONFIRMATION
+        rule: Do not merge with the Fidelity 30% scalability or 35% latency metrics.
+      bt:
+        rule: Keep BT transaction, latency, reliability, commerce, and device metrics in BT.
+        provenance: USER_CONFIRMED
+      t_mobile:
+        rule: Keep T-Mobile onboarding, provisioning, and payment work separate.
+        provenance: USER_CONFIRMED
+      internal_erp:
+        rule: Keep the 3,000-user internal ERP scope separate from client work.
+        provenance: USER_CONFIRMED
+      erp_automation:
+        rule: Keep the 500+ annual-hour automation result with ERP automation.
+        provenance: USER_CONFIRMED
+      ci_cd:
+        rule: Keep 6 hours to 90 seconds and 20 engineers with CI/CD.
+        provenance: USER_CONFIRMED
+      leadership:
+        rule: Keep 500+ interviews and 10+ intern conversions with leadership and mentoring.
+        provenance: USER_CONFIRMED

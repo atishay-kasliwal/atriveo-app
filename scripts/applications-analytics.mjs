@@ -85,15 +85,32 @@ const reviewRow = (withQuestions) => ({
     answered: size({ $filter: { input: { $ifNull: ["$questions", []] }, cond: { $eq: ["$$this.resolution", "answered"] } } }),
     review: {
       reason: "$review.reason", detail: "$review.detail", since: "$review.since",
+      questionReviewStatus: "$review.questionReviewStatus",
       failedChecks: { $map: { input: { $ifNull: ["$review.failedChecks", []] }, in: "$$this.id" } },
       pending: {
         $map: {
           input: { $ifNull: ["$review.pending", []] },
           in: !withQuestions ? "$$this.fingerprint" : {
-            fingerprint: "$$this.fingerprint", label: "$$this.label", type: "$$this.type", required: "$$this.required",
+            fieldKey: "$$this.fieldKey", fingerprint: "$$this.fingerprint", label: "$$this.label", type: "$$this.type", required: "$$this.required",
             canonicalKey: "$$this.canonicalKey", sensitive: "$$this.sensitive", reason: "$$this.reason", detail: "$$this.detail",
+            questionFamily: "$$this.openEndedAssessment.questionFamily",
             optionCount: size("$$this.options"),
             options: { $cond: [{ $gt: [size("$$this.options"), MAX_INLINE_OPTIONS] }, [], { $ifNull: ["$$this.options", []] }] },
+            openEndedSuggestion: {
+              suggestedAnswer: "$$this.openEndedSuggestion.suggestedAnswer",
+              questionFamily: "$$this.openEndedSuggestion.questionFamily",
+              familyConfidence: "$$this.openEndedSuggestion.familyConfidence",
+              storyConfidence: "$$this.openEndedSuggestion.storyConfidence",
+              confidenceBand: "$$this.openEndedSuggestion.confidenceBand",
+              selectedStory: "$$this.openEndedSuggestion.selectedStory",
+              matchedSignals: "$$this.openEndedSuggestion.matchedSignals",
+              reason: "$$this.openEndedSuggestion.reason",
+            },
+            openEndedUserReview: {
+              status: "$$this.openEndedUserReview.status",
+              action: "$$this.openEndedUserReview.action",
+              draftAnswer: "$$this.openEndedUserReview.draftAnswer",
+            },
           },
         },
       },
@@ -102,19 +119,50 @@ const reviewRow = (withQuestions) => ({
 });
 
 const pendingQuestion = (p) => ({
-  fingerprint: p.fingerprint, label: p.label, type: p.type, required: Boolean(p.required),
+  fieldKey: p.fieldKey ?? p.fingerprint, fingerprint: p.fingerprint, label: p.label, type: p.type, required: Boolean(p.required),
   options: p.options ?? [], optionCount: p.optionCount ?? (p.options ?? []).length,
   canonicalKey: p.canonicalKey ?? null, sensitive: p.sensitive ?? null, reason: p.reason, detail: p.detail ?? null,
+  questionFamily: p.questionFamily ?? p.openEndedSuggestion?.questionFamily ?? null,
+  ...(p.openEndedSuggestion?.suggestedAnswer ? {
+    suggestedAnswer: p.openEndedSuggestion.suggestedAnswer,
+    suggestionConfidence: {
+      band: p.openEndedSuggestion.confidenceBand,
+      family: p.openEndedSuggestion.familyConfidence,
+      story: p.openEndedSuggestion.storyConfidence,
+    },
+    questionFamily: p.openEndedSuggestion.questionFamily,
+    selectedStory: p.openEndedSuggestion.selectedStory,
+    matchedSignals: p.openEndedSuggestion.matchedSignals ?? [],
+    suggestionReason: p.openEndedSuggestion.reason,
+  } : {}),
+  userDraft: p.openEndedUserReview?.status === "draft" ? p.openEndedUserReview.draftAnswer ?? null : null,
+  userDraftAction: p.openEndedUserReview?.status === "draft" ? p.openEndedUserReview.action : null,
+  reviewStatus: p.openEndedUserReview?.status ?? (p.openEndedSuggestion?.suggestedAnswer ? "suggested" : "none"),
 });
 
 // Blocked on questions: the Unanswered page.
 const BLOCKED = { status: "NEEDS_REVIEW", "review.pending.0": { $exists: true }, "submission.attemptedAt": null };
+const QUESTION_REVIEW_COMPLETE = {
+  status: "NEEDS_REVIEW",
+  "review.reason": "UNKNOWN_QUESTION",
+  "review.questionReviewStatus": "complete",
+  "review.pending.0": { $exists: false },
+  "review.failedChecks.0": { $exists: false },
+  "submission.attemptedAt": null,
+  "submission.submittedAt": null,
+  "submission.approvalRequestedAt": null,
+};
+const UNANSWERED_PAGE = { status: "NEEDS_REVIEW", "submission.attemptedAt": null, $or: [
+  { "review.pending.0": { $exists: true } },
+  { "review.reason": "UNKNOWN_QUESTION", "review.questionReviewStatus": "complete", "review.pending.0": { $exists: false }, "review.failedChecks.0": { $exists: false }, "submission.submittedAt": null, "submission.approvalRequestedAt": null },
+] };
 // readyForApproval needs this reason; its other checks run on these few rows.
 const MAYBE_READY = { status: "NEEDS_REVIEW", "review.reason": "SUBMIT_APPROVAL" };
 
 const rowBase = (r) => ({
   id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
   url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, updatedAt: r.updatedAt,
+  questionReviewStatus: r.review?.questionReviewStatus ?? "open",
 });
 
 async function engineState(db) {
@@ -133,10 +181,18 @@ const unansweredOrder = (apps) => apps.aggregate([
   { $project: { _id: 0, id: "$_id", updatedAt: 1, n: 1 } },
 ]).toArray();
 
+/** Questions explicitly approved, awaiting a separate review-only refill. */
+const questionReviewCompleteOrder = (apps) => apps.aggregate([
+  { $match: QUESTION_REVIEW_COMPLETE },
+  { $project: { updatedAt: 1, rank: { $ifNull: ["$priority", 0] } } },
+  { $sort: { rank: -1, updatedAt: 1, _id: 1 } },
+  { $project: { _id: 0, id: "$_id", updatedAt: 1, n: { $literal: 0 } } },
+]).toArray();
+
 /** The cards (questions included) of these applications, in this order; any no longer blocked are left out. */
 async function unansweredCards(apps, ids) {
   if (!ids.length) return [];
-  const rows = await apps.aggregate([{ $match: { ...BLOCKED, _id: { $in: ids } } }, reviewRow(true)]).toArray();
+  const rows = await apps.aggregate([{ $match: { ...UNANSWERED_PAGE, _id: { $in: ids } } }, reviewRow(true)]).toArray();
   const byId = new Map(rows.map((r) => [r._id, r]));
   return ids.filter((id) => byId.has(id)).map((id) => byId.get(id))
     .map((r) => ({ ...rowBase(r), reviewReason: r.review.reason ?? null, questions: r.review.pending.map(pendingQuestion) }));
@@ -146,6 +202,8 @@ const blockedTotals = async (apps) => {
   const [t] = await apps.aggregate([{ $match: BLOCKED }, { $group: { _id: null, apps: { $sum: 1 }, questions: { $sum: { $size: "$review.pending" } } } }]).toArray();
   return { unanswered: t?.apps ?? 0, questions: t?.questions ?? 0 };
 };
+
+const questionReviewCompleteCount = async (apps) => apps.countDocuments(QUESTION_REVIEW_COMPLETE);
 
 const readyRows = async (apps) => (await apps.aggregate([{ $match: MAYBE_READY }, reviewRow(false)]).toArray()).filter(readyForApproval);
 
@@ -191,7 +249,12 @@ function readyLists(readyDocs, { approved, submittedRecently }, now) {
   };
 }
 
-const countsOf = (order, ready) => ({ unanswered: order.length, questions: order.reduce((n, r) => n + r.n, 0), ready: ready.length });
+const countsOf = (order, reviewComplete, ready) => ({
+  unanswered: order.length,
+  questions: order.reduce((n, r) => n + r.n, 0),
+  reviewComplete: reviewComplete.length,
+  ready: ready.length,
+});
 
 /**
  * The Unanswered and Ready pages and the header counts, each reading only what it shows:
@@ -210,22 +273,26 @@ export async function reviewQueue(db, { view = "full", cards = 0, ids = [], now 
     case "cards":
       return { ok: true, generatedAt, cards: await unansweredCards(apps, ids) };
     case "counts": {
-      const [engine, totals, ready] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps)]);
-      return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length } };
+      const [engine, totals, reviewComplete, ready] = await Promise.all([engineState(db), blockedTotals(apps), questionReviewCompleteCount(apps), readyRows(apps)]);
+      return { ok: true, generatedAt, ...engine, counts: { ...totals, reviewComplete, ready: ready.length } };
     }
     case "unanswered": {
-      const [engine, order, ready] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps)]);
-      const first = await unansweredCards(apps, order.slice(0, cards).map((r) => r.id));
-      return { ok: true, generatedAt, ...engine, counts: countsOf(order, ready), unanswered: order, cards: first };
+      const [engine, order, complete, ready] = await Promise.all([engineState(db), unansweredOrder(apps), questionReviewCompleteOrder(apps), readyRows(apps)]);
+      const all = [...order, ...complete];
+      const first = await unansweredCards(apps, all.slice(0, cards).map((r) => r.id));
+      return { ok: true, generatedAt, ...engine, counts: countsOf(order, complete, ready), unanswered: order, reviewComplete: complete, cards: first };
     }
     case "ready": {
-      const [engine, totals, ready, approved] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps), approvals(apps, now)]);
-      return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length }, ...readyLists(ready, approved, now) };
+      const [engine, totals, reviewComplete, ready, approved] = await Promise.all([engineState(db), blockedTotals(apps), questionReviewCompleteCount(apps), readyRows(apps), approvals(apps, now)]);
+      return { ok: true, generatedAt, ...engine, counts: { ...totals, reviewComplete, ready: ready.length }, ...readyLists(ready, approved, now) };
     }
     case "full": {
-      const [engine, order, ready, approved] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps), approvals(apps, now)]);
-      const unanswered = await unansweredCards(apps, order.map((r) => r.id));
-      return { ok: true, generatedAt, ...engine, counts: countsOf(order, ready), unanswered, ...readyLists(ready, approved, now) };
+      const [engine, order, complete, ready, approved] = await Promise.all([engineState(db), unansweredOrder(apps), questionReviewCompleteOrder(apps), readyRows(apps), approvals(apps, now)]);
+      const [unanswered, reviewComplete] = await Promise.all([
+        unansweredCards(apps, order.map((r) => r.id)),
+        unansweredCards(apps, complete.map((r) => r.id)),
+      ]);
+      return { ok: true, generatedAt, ...engine, counts: countsOf(order, complete, ready), unanswered, reviewComplete, ...readyLists(ready, approved, now) };
     }
     default:
       throw new Error(`Unknown review-queue view: ${view}`);

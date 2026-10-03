@@ -13,6 +13,30 @@ role:
   slot_kind: experience
   resume_pick_count: 4
   resume_structure: 1 scope thesis (AC-198) + 3 JD evidence bullets
+
+authoritative_fact_lock:
+  source: AUTHORITATIVE-FACTS.yaml#stories.accolite
+  provenance: USER_CONFIRMED
+  branding: Bounteous x Accolite is post-merger employer branding, not a project.
+  workstreams:
+    fidelity:
+      secure_data_exchange:
+        components: [secure data exchange, contract or consent gating, audit and compliance, Java, AWS, MySQL, Python onboarding paths, Angular operations UI, Bootstrap]
+      financial_data_backend:
+        components: [Kafka, Airflow, PostgreSQL, high-volume financial data processing, enterprise integrations and services, Spring Security, OAuth2, JWT]
+      separation_rule: Both histories are real separate workstreams; do not combine them into one architecture without direct evidence.
+      confirmed_metrics:
+        scalability_improvement: approximately 30%
+        latency_reduction: approximately 35%
+      historical_metrics_pending_exact_value:
+        daily_transactions: 250K+
+        integrations_or_services: 10+
+        uptime: [99%, 99.9%]
+    ecommerce_performance:
+      approximate_range: 32% to 35%
+      status: EXACT_VALUE_REQUIRES_CONFIRMATION
+      rule: Do not merge with Fidelity scalability or latency metrics.
+    separate: [BT, T-Mobile, internal ERP, ERP automation, CI/CD, leadership]
 scope_ac:
   id: AC-198
   theme: career-scope
@@ -54,6 +78,8 @@ product:
   leadership: 500+ technical interviews; intern mentorship and conversion; hiring rubrics; knowledge transfer.
 metrics:
   tenure_years: 3
+  fidelity_scalability_improvement: approximately 30%
+  fidelity_latency_reduction: approximately 35%
   fidelity_policy_records: 10K+
   bt_daily_transactions: 10K+
   bt_p99_ms: 200

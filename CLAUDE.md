@@ -15,6 +15,7 @@ folder as the engine. Do NOT improvise a resume here. Follow its system exactly:
 2. Use the engine's bullet bank as the only source of bullets:
    - `/Users/atishaykasliwal/atriveo-app/resume-engine/Memory/experience.md`
    - `/Users/atishaykasliwal/atriveo-app/resume-engine/Memory/RAW_POINTS_HUB.md`
+
 3. Screen work authorization / sponsorship / clearance / years-of-experience FIRST.
    If hard-blocked, mark `No Go`, log it, and stop. Do not draft.
 4. Give a fit summary and ask before full drafting. Never auto-build on JD paste.

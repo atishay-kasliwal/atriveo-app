@@ -19,10 +19,10 @@
     "tier": "S",
     "display_order": 1,
     "wow_score": 0.94,
-    "fact": "Event-driven FastAPI FOMC pipeline on AWS — 3+ days to under 20 minutes at 67.7% accuracy.",
-    "text": "Engineered an event-driven FastAPI pipeline on AWS over 7 years of FOMC data cutting macro analysis from 3 days to under 20 minutes at 67.7% accuracy.",
+    "fact": "Earlier 13-session FedTalk evaluation — 3+ days to under 20 minutes at 67.7% directional accuracy.",
+    "text": "Built a FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis from 3 days to under 20 minutes and reaching approximately 68% directional accuracy across 13 sessions.",
     "signature_technologies": ["FastAPI", "AWS"],
-    "metrics_claimed": ["3d_20m", "accuracy_677"],
+    "metrics_claimed": ["3d_20m", "accuracy_677", "sessions_13"],
     "capabilities": { "ai": 85, "backend": 92, "data": 80, "cloud": 88 }
   },
   {

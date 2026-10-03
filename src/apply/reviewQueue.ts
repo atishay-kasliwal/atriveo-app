@@ -10,13 +10,13 @@ export interface EngineState {
   killSwitch: { enabled: boolean; reason: string | null } | null;
   worker: { online: boolean; updatedAt: string } | null;
 }
-export interface Counts { unanswered: number; questions: number; ready: number }
+export interface Counts { unanswered: number; questions: number; reviewComplete: number; ready: number }
 
 interface Row {
   id: string; company: string; companyKey: string | null; title: string; location: string | null; ats: string | null;
   url: string; priority: number; updatedAt: string;
 }
-export interface UnansweredApp extends Row { reviewReason: string | null; questions: PendingQ[] }
+export interface UnansweredApp extends Row { reviewReason: string | null; questionReviewStatus: "open" | "complete"; questions: PendingQ[] }
 export interface ReadyApp extends Row {
   filledAt: string; resumeFile: string | null; answered: number;
   /** Ready jobs at this company; one is submitted per company per day. */
@@ -29,10 +29,10 @@ export interface ApprovedApp extends Row {
   submittedAt: string | null; approvedAt: string | null;
 }
 /** An application blocked on questions, in the Unanswered page's order; its card loads when it's needed. */
-export interface QueuedApp { id: string; updatedAt: string; /** questions waiting */ n: number }
+export interface QueuedApp { id: string; updatedAt: string; /** questions waiting */ n: number; questionReviewStatus?: "open" | "complete" }
 
 interface View extends EngineState { ok: boolean; generatedAt: string; counts: Counts }
-export interface UnansweredQueue extends View { unanswered: QueuedApp[] }
+export interface UnansweredQueue extends View { unanswered: QueuedApp[]; reviewComplete: QueuedApp[] }
 export interface ReadyQueue extends View { ready: ReadyApp[]; approved: ApprovedApp[] }
 
 const visible = () => document.visibilityState === "visible";
@@ -80,6 +80,7 @@ export function adjustCounts(delta: Partial<Counts>): void {
     counts: {
       unanswered: Math.max(0, c.unanswered + (delta.unanswered ?? 0)),
       questions: Math.max(0, c.questions + (delta.questions ?? 0)),
+      reviewComplete: Math.max(0, c.reviewComplete + (delta.reviewComplete ?? 0)),
       ready: Math.max(0, c.ready + (delta.ready ?? 0)),
     },
   });

@@ -9,13 +9,22 @@ export const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString(
 
 /** A question the engine could not answer, as it waits in review. */
 export interface PendingQ {
-  fingerprint: string; label: string; type: string; required: boolean; options: string[];
+  fieldKey: string; fingerprint: string; label: string; type: string; required: boolean; options: string[];
   /** How many choices the form offered; more than `options.length` when the list was too long to send up front. */
   optionCount?: number;
   canonicalKey: string | null; sensitive: string | null; reason: string; detail: string | null;
+  suggestedAnswer?: string;
+  suggestionConfidence?: { band: "high" | "medium"; family: number; story: number };
+  questionFamily?: string | null;
+  selectedStory?: string;
+  matchedSignals?: string[];
+  suggestionReason?: string;
+  userDraftAction?: "edited" | "replaced";
+  userDraft?: string | null;
+  reviewStatus: "suggested" | "draft" | "approved" | "rejected" | "none";
 }
 
-export async function postAction(body: object): Promise<{ ok: boolean; error?: string; requeued?: boolean }> {
+export async function postAction(body: object): Promise<{ ok: boolean; error?: string; requeued?: boolean; resolved?: boolean; questionReviewStatus?: "open" | "complete"; refreshed?: number; suggestions?: number; noSuggestion?: number }> {
   const res = await fetch(`${getTailorServerBase()}/applications/action`, {
     method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
   });

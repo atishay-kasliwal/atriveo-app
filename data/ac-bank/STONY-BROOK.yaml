@@ -13,6 +13,12 @@ role:
   resume_pick_count: 4
   resume_structure: 1 scope thesis (AC-026) + 3 JD evidence bullets from story packages
 
+authoritative_fact_lock:
+  source: AUTHORITATIVE-FACTS.yaml#stories.stony_brook
+  provenance: USER_CONFIRMED
+  structure: [FedTalk, sentiment benchmark, RAG evaluation, three-agent RL system, backtesting, broader platform/infrastructure, MCP work]
+  separation_rule: Do not combine metrics from these workstreams as one model result.
+
 scope_ac:
   id: AC-026
   theme: career-scope
@@ -28,7 +34,10 @@ product:
   summary: >-
     AI-powered financial intelligence platform spanning 7 years of FOMC history — event-driven
     pipelines, Kafka streaming, multi-agent equity forecasting, production RAG, and researcher UI.
-  platform: FastAPI on AWS; event-driven FOMC ingestion; 3+ days to under 20 minutes at 67.7% accuracy.
+  platform: >-
+    FastAPI on AWS and event-driven FOMC ingestion are broader platform work. An earlier
+    FedTalk evaluation across 13 FOMC sessions reached 67.7% directional accuracy; this
+    is not the universal or current accuracy of every FedTalk version.
   backend: Python and Kafka NLP on 200K+ records; trading backtesting; streaming consumers.
   ai: 3-agent RL debate (60% on 30 S&P stocks); MCP orchestration; production RAG (+18% lift).
   frontend: React analytics dashboard and LLM analytics APIs for 5 daily users.
@@ -37,7 +46,16 @@ product:
 metrics:
   fomc_history_years: 7
   pipeline_speed: 3 days → under 20 minutes
-  fomc_accuracy: 67.7%
+  earlier_fedtalk_accuracy: 67.7%
+  earlier_fedtalk_sessions: 13
+  earlier_fedtalk_general_wording: approximately 68% directional accuracy
+  current_repository_accuracy: 58.7%
+  sentiment_classification_accuracy: 80.8%
+  sentiment_classification_intervals: 1,159 five-minute intervals
+  principal_prediction_windows: 7
+  concise_prediction_windows_minutes: [1, 5, 10]
+  earlier_platform_daily_users: 200+
+  current_platform_daily_users: approximately 1,000
   financial_records: 200K+
   portfolio_return: 27%
   backtest_profit: $2.6K
@@ -134,8 +152,9 @@ achievements:
     theme: fomc-pipeline
     tier: S
     resume_bullet: >-
-      Engineered an event-driven FastAPI pipeline on AWS over 7 years of FOMC data
-      cutting macro analysis from 3 days to under 20 minutes at 67.7% accuracy.
+      Built a FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis from
+      3 days to under 20 minutes and reaching approximately 68% directional accuracy
+      across 13 sessions.
   - id: AC-002
     engineering_identity: backend
     theme: kafka-trading

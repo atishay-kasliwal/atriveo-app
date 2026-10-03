@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const BANK = path.join(path.dirname(fileURLToPath(import.meta.url)), "../data/ac-bank");
 
 const FIXES = {
-  "AC-001": "Engineered an event-driven FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis from 3+ days to under 20 minutes at 67.7% accuracy.",
+  "AC-001": "Built a FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis from 3 days to under 20 minutes and reaching approximately 68% directional accuracy across 13 sessions.",
   "AC-002": "Engineered a Python NLP pipeline on AWS with Kafka processing 200K+ financial records in real time, delivering 27% portfolio return and $2.6K profit.",
   "AC-022": "Built React and Python LLM-driven analytics workflows across financial news and transcripts with schema validation, delivering production APIs used daily by 5 researchers.",
   "AC-023": "Built a Python and LangChain 3-agent RL debate system achieving 60% directional accuracy across 30 S&P 500 stocks on 7d/30d/90d forecasting windows in production.",
