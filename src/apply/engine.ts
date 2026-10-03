@@ -24,7 +24,7 @@ export interface PendingQ {
   canonicalKey: string | null; sensitive: string | null; reason: string; detail: string | null;
   openEndedAssessment?: { questionFamily: string | null; familyConfidence: number; storyConfidence: number; selectedStory: string | null; reason: string } | null;
   openEndedSuggestion?: { suggestedAnswer: string; confidenceBand: "high" | "medium"; selectedStory: string } | null;
-  openEndedUserReview?: { status: "draft" | "approved" | "rejected"; action: "edited" | "replaced" | "accepted" | "rejected"; draftAnswer?: string } | null;
+  openEndedUserReview?: { generatedBy?: "muse"; sources?: string[]; missingFacts?: string[]; status: "draft" | "approved" | "rejected"; action: "edited" | "replaced" | "accepted" | "rejected"; draftAnswer?: string } | null;
 }
 
 export async function postAction(body: object): Promise<{ ok: boolean; error?: string; requeued?: boolean; resolved?: boolean; questionReviewStatus?: "open" | "complete"; updatedAt?: string; refreshed?: number; suggestions?: number; suggestionsAdded?: number; suggestionsChanged?: number; noSuggestion?: number }> {

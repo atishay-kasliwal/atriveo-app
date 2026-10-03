@@ -12,7 +12,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const q = (label, extra = {}) => ({ fieldKey: label, fingerprint: label, label, type: 'textarea', required: true, options: [], canonicalKey: null, sensitive: null, reason: 'UNKNOWN_QUESTION', detail: null, ...extra });
 const rows = [
   { id: 'motivation', company: 'Test Midpage', questions: [q('Why Midpage?', { questionFamily: 'why_company_role', answerProposal: { state: 'ready_for_review', family: 'why_company_role', source: 'approved_story', answer: 'An approved candidate story with exact saved posting evidence.', reason: 'grounded_story_proposal' } })] },
-  { id: 'factual', company: 'Test Profile', questions: [q('What timezone are you in?', { type: 'text', answerProposal: { state: 'ready_for_review', family: 'timezone', source: 'candidate_profile', answer: 'America/New_York', reason: 'explicit_candidate_fact' } })] },
+  { id: 'factual', company: 'Test Profile', questions: [q('What timezone are you in?', { type: 'text', openEndedUserReview: { status: 'draft', action: 'replaced', generatedBy: 'muse', draftAnswer: 'America/New_York', missingFacts: ['Confirm timezone'] }, answerProposal: { state: 'ready_for_review', family: 'timezone', source: 'candidate_profile', answer: 'America/New_York', reason: 'explicit_candidate_fact' } })] },
   { id: 'salary', company: 'Test Salary', questions: [q('What are your salary expectations?', { sensitive: 'salary', answerProposal: { state: 'needs_input', family: 'compensation', source: 'none', reason: 'SENSITIVE_QUESTION' } })] },
   { id: 'attachment', company: 'Test Attachment', questions: [q('Resume', { type: 'file', reason: 'UPLOAD_UNVERIFIED', answerProposal: { state: 'action_required', family: 'attachment', source: 'none', reason: 'attachment_requires_remote_verification' } })] },
 ].map(r => ({ ...r, title: 'Test Engineer', ats: 'ashby', url: 'https://blocked.test/form', priority: 0, updatedAt: '2026-10-02T23:00:00Z', questionReviewStatus: 'open' }));
@@ -46,6 +46,8 @@ test('built review workspace: visible proposals, filters, scopes, keyboard, conc
     assert.equal(await page.locator('textarea').first().inputValue(), rows[0].questions[0].answerProposal.answer);
     assert.equal(await page.locator('.rv-columns').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 3);
     const factual = page.locator('article', { has: page.getByText('Test Profile', { exact: true }) });
+    await factual.getByText('Muse draft — requires your review', { exact: true }).waitFor();
+    await factual.getByText('Muse flagged missing facts: Confirm timezone', { exact: true }).waitFor();
     await factual.locator('input:not([type=checkbox]),textarea').fill('America/Chicago');
     await factual.locator('input:not([type=checkbox]),textarea').press('a');
     assert.equal(actions.length, 0, 'typing A must not approve');

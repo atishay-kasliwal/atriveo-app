@@ -14,6 +14,7 @@
  *
  * No external dependencies — Node built-ins only.
  */
+import { handleMuse } from "./muse-http.mjs";
 import http from "node:http";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
@@ -1132,6 +1133,7 @@ const server = http.createServer(async (req, res) => {
 
   const reqUrl = new URL(req.url || "/", "http://127.0.0.1");
   const pathname = reqUrl.pathname;
+  if (await handleMuse(req, res, reqUrl)) return;
   if (TAILOR_TOKEN && req.headers["x-tailor-token"] !== TAILOR_TOKEN) {
     res.writeHead(401, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({ ok: false, error: "Unauthorized" }));
