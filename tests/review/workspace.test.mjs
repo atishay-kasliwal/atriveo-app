@@ -14,7 +14,7 @@ const rows = [
   { id: 'motivation', company: 'Test Midpage', questions: [q('Why Midpage?', { questionFamily: 'why_company_role', answerProposal: { state: 'ready_for_review', family: 'why_company_role', source: 'approved_story', answer: 'An approved candidate story with exact saved posting evidence.', reason: 'grounded_story_proposal' } })] },
   { id: 'factual', company: 'Test Profile', questions: [q('What timezone are you in?', { type: 'text', answerProposal: { state: 'ready_for_review', family: 'timezone', source: 'candidate_profile', answer: 'America/New_York', reason: 'explicit_candidate_fact' } })] },
   { id: 'salary', company: 'Test Salary', questions: [q('What are your salary expectations?', { sensitive: 'salary', answerProposal: { state: 'needs_input', family: 'compensation', source: 'none', reason: 'SENSITIVE_QUESTION' } })] },
-  { id: 'attachment', company: 'Test Attachment', questions: [q('Resume', { type: 'file', answerProposal: { state: 'action_required', family: 'attachment', source: 'none', reason: 'attachment_requires_remote_verification' } })] },
+  { id: 'attachment', company: 'Test Attachment', questions: [q('Resume', { type: 'file', reason: 'UPLOAD_UNVERIFIED', answerProposal: { state: 'action_required', family: 'attachment', source: 'none', reason: 'attachment_requires_remote_verification' } })] },
 ].map(r => ({ ...r, title: 'Test Engineer', ats: 'ashby', url: 'https://blocked.test/form', priority: 0, updatedAt: '2026-10-02T23:00:00Z', questionReviewStatus: 'open' }));
 const counts = { unanswered: 4, questions: 4, ready: 0, readyForReview: 2, needsInput: 1, actionRequired: 1 };
 const order = rows.map(r => ({ id: r.id, updatedAt: r.updatedAt, n: 1, readyForReview: r.questions[0].answerProposal.state === 'ready_for_review' ? 1 : 0, needsInput: r.id === 'salary' ? 1 : 0, actionRequired: r.id === 'attachment' ? 1 : 0 }));
@@ -61,7 +61,8 @@ test('built review workspace: visible proposals, filters, scopes, keyboard, conc
     assert.equal(actions[1].review.scope, 'global');
     await page.getByRole('button', { name: /^Action required/ }).click();
     assert.equal(await page.locator('.rv-card').count(), 1); assert.equal(await page.locator('textarea').count(), 0);
-    await page.getByText('Attachment needs attention').waitFor();
+    await page.getByRole('heading', { name: 'Attachment needs attention', exact: true }).waitFor();
+    await page.getByText("Atriveo couldn't confirm that this attachment finished saving. Open the form to verify it, or skip this job.", { exact: true }).waitFor();
     await page.getByRole('button', { name: /^All / }).click();
     await page.setViewportSize({ width: 390, height: 844 });
     await page.waitForFunction(() => document.querySelector('.rv-columns').style.gridTemplateColumns.startsWith('repeat(1,'));

@@ -1,3 +1,4 @@
+import { attachmentMessage } from "./attachmentMessage";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import CompanyLogo from "../components/CompanyLogo";
 import QuestionField from "./QuestionField";
@@ -102,7 +103,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
               const canReuse = !narrative && !["demographic", "attachment", "unknown"].includes(q.answerProposal?.family ?? "unknown");
               return <section key={key} className={`review-question is-${category}`} tabIndex={0} onKeyDown={e => shortcut(e, app, q)} aria-label={q.label}>
                 <div className="review-state">{FILTERS[category]}</div>
-                {category === "action_required" ? <><h2>{q.type === "file" ? "Attachment needs attention" : "Form inspection needed"}</h2><p className="apps-q-note">{q.label}. Open the form to inspect this control; a text answer cannot resolve it.</p><a href={app.url} target="_blank" rel="noreferrer">Open form ↗</a></>
+                {category === "action_required" ? <><h2>{q.type === "file" ? "Attachment needs attention" : "Form inspection needed"}</h2><p className="apps-q-note">{q.type === "file" ? attachmentMessage(q.reason) : `${q.label}. Open the form to inspect this control; a text answer cannot resolve it.`}</p><a href={app.url} target="_blank" rel="noreferrer">Open form ↗</a></>
                   : <><p className="review-source">{q.userDraft || q.openEndedUserReview?.status === "draft" ? "Your saved draft" : proposalText(q) ? SOURCE[q.answerProposal?.source ?? "approved_story"] : explanation(q)}</p>
                     {narrative ? <label className="apps-q"><strong className="apps-q-label">{q.label}{q.required ? " *" : ""}</strong><textarea rows={7} value={text} onChange={e => setValues(v => ({ ...v, [key]: e.target.value }))} placeholder="Your answer" /></label>
                       : <QuestionField hideScope q={q} appId={app.id} company={app.company} value={text} scope={scopes[key] ?? "application"} onValue={value => setValues(v => ({ ...v, [key]: value }))} onScope={scope => setScopes(s => ({ ...s, [key]: scope }))} />}

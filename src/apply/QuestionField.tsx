@@ -1,3 +1,4 @@
+import { attachmentMessage } from "./attachmentMessage";
 import { useEffect, useId, useState } from "react";
 import { getJson, questionKind, type PendingQ, type Scope } from "./engine";
 
@@ -88,7 +89,7 @@ export default function QuestionField({ q, appId, company, value, scope, onValue
         <span className="apps-q-label">{q.label}{q.required ? " *" : ""}{q.sensitive ? <em> · {q.sensitive.replace(/_/g, " ")}</em> : null}</span>
         {input}
       </label>
-      {kind === "file" && <p className="apps-q-note">An attachment the engine couldn't add. Open the form to attach it yourself, or skip this job.</p>}
+      {kind === "file" && <p className="apps-q-note">{attachmentMessage(q.reason)}</p>}
       {kind === "unreadable" && <p className="apps-q-note">The engine couldn't read this field's label. Open the form to see what it asks. Your answer is kept for this application only.</p>}
       {q.type === "checkbox" && q.sensitive && <p className="apps-q-note">Read the notice or declaration before choosing. A required box left unchecked keeps this application in review.</p>}
       {note && <p className="apps-q-note">{note}</p>}
