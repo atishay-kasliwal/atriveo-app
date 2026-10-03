@@ -27,7 +27,7 @@ export interface PendingQ {
   openEndedUserReview?: { generatedBy?: "muse"; sources?: string[]; missingFacts?: string[]; status: "draft" | "approved" | "rejected"; action: "edited" | "replaced" | "accepted" | "rejected"; draftAnswer?: string } | null;
 }
 
-export async function postAction(body: object): Promise<{ ok: boolean; error?: string; requeued?: boolean; resolved?: boolean; questionReviewStatus?: "open" | "complete"; updatedAt?: string; refreshed?: number; suggestions?: number; suggestionsAdded?: number; suggestionsChanged?: number; noSuggestion?: number }> {
+export async function postAction(body: object): Promise<{ ok: boolean; error?: string; url?: string; requeued?: boolean; resolved?: boolean; questionReviewStatus?: "open" | "complete"; updatedAt?: string; refreshed?: number; suggestions?: number; suggestionsAdded?: number; suggestionsChanged?: number; noSuggestion?: number }> {
   const res = await fetch(`${getTailorServerBase()}/applications/action`, {
     method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
   });

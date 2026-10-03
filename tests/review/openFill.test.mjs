@@ -4,12 +4,16 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 import { readyForApproval, readyForYou, reviewQueue } from '../../scripts/applications-analytics.mjs';
 import { handleFillRoute, isLocalExtensionRequest, runManualFill } from '../../scripts/fill-routes.mjs';
 
 // Open & Fill in the dashboard: Ashby/Lever applications waiting for you to submit, the sidecar's
-// local-only fill routes (local fixtures; nothing is submitted anywhere).
+// local-only fill routes, and the built Ready page (local fixtures; nothing is submitted anywhere).
 
+const requireEngine = createRequire(path.join(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), 'playatriveo'), 'package.json'));
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 const doc = (id, reason, extra = {}) => ({
   _id: id, company: `Co ${id}`, companyKey: `co-${id}`, title: 'Engineer', status: 'NEEDS_REVIEW', ats: reason === 'MANUAL_SUBMIT' ? 'ashby' : 'greenhouse',
@@ -82,4 +86,87 @@ test('fill routes answer only the Atriveo Fill extension on this Mac, never the 
   fs.writeFileSync(tsx, '#!/bin/sh\nread -r line\necho "log line"\necho "{\\"ok\\":true,\\"got\\":$line}"\n');
   fs.chmodSync(tsx, 0o755);
   assert.deepEqual(await runManualFill(dir, { op: 'plan', url: 'u' }), { ok: true, got: { op: 'plan', url: 'u' } });
+});
+
+test('built Ready page: Open & Fill instead of Approve for Ashby/Lever; arms, then opens the form in a new tab', async () => {
+  const { chromium } = requireEngine('playwright');
+  const manualRow = { id: 'm1', company: 'Test Ashby', companyKey: 'test-ashby', title: 'Software Engineer', location: null, ats: 'ashby', url: 'https://jobs.ashbyhq.com/test/x', priority: 5, updatedAt: '2026-10-03T19:00:00Z', filledAt: '2026-10-03T18:00:00Z', resumeFile: 'r.pdf', answered: 6, readyAtCompany: 1, companySubmittedToday: false, openFill: null };
+  const formUrl = 'https://jobs.ashbyhq.com/test/1f0e2d3c-4b5a-4968-8776-655443322110/application';
+  const queue = { ok: true, generatedAt: '2026-10-03T19:00:00Z', counts: { unanswered: 0, questions: 0, ready: 1 }, ready: [], approved: [], manual: [manualRow], worker: { online: false, updatedAt: '2026-10-03T19:00:00Z' }, killSwitch: { enabled: true, reason: null } };
+  const server = http.createServer((req, res) => {
+    const requested = path.join(root, 'dist-apply', req.url.split('?')[0]);
+    const file = fs.existsSync(requested) && fs.statSync(requested).isFile() ? requested : path.join(root, 'dist-apply/index.html');
+    res.setHeader('Content-Type', file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : 'text/html'); res.end(fs.readFileSync(file));
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const port = server.address().port;
+  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const errors = [];
+  try {
+    const run = async ({ extension }) => {
+      const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+      const actions = [];
+      const opened = [];
+      await context.route('**/*', (route) => {
+        const url = new URL(route.request().url());
+        if (url.pathname === '/api/auth/me') return route.fulfill({ json: { user: { id: 1, name: 'Test reviewer', email: 'test@example.test' } } });
+        if (url.pathname === '/applications/review-queue') return route.fulfill({ json: queue });
+        if (url.pathname === '/applications/detail') return route.fulfill({ status: 404, json: { ok: false, error: 'not in this test' } });
+        if (url.pathname === '/applications/action') {
+          const body = route.request().postDataJSON();
+          actions.push(body);
+          return route.fulfill({ json: { ok: true, action: body.action, url: formUrl, expiresAt: '2026-10-03T19:15:00Z' } });
+        }
+        if (url.hostname === 'jobs.ashbyhq.com') { opened.push(url.href); return route.fulfill({ contentType: 'text/html', body: '<title>form</title>' }); }
+        if (url.hostname === '127.0.0.1' && url.port === String(port)) return route.continue();
+        return route.abort();
+      });
+      if (extension) {
+        // Stands in for the extension's dashboard script: marks the page, answers the arm request.
+        await context.addInitScript(() => {
+          const mark = () => document.documentElement?.setAttribute('data-atriveo-fill', '0.1.0');
+          mark();
+          document.addEventListener('readystatechange', mark);
+          window.addEventListener('message', (e) => {
+            if (e.source === window && e.data?.source === 'atriveo-dashboard' && e.data.type === 'arm') {
+              window.__armed = e.data;
+              window.postMessage({ source: 'atriveo-fill', type: 'armed', nonce: e.data.nonce, reply: { ok: true } }, location.origin);
+            }
+          });
+        });
+      }
+      const page = await context.newPage();
+      page.on('pageerror', (e) => errors.push(e.message));
+      await page.goto(`http://127.0.0.1:${port}/ready`);
+      await page.getByText('You submit these').waitFor();
+      return { context, page, actions, opened };
+    };
+
+    // Without the extension: listed, explained, no way to approve it, and Open & Fill is off.
+    const without = await run({ extension: false });
+    await without.page.locator('.rv-row', { hasText: 'Test Ashby' }).click();
+    const openButton = without.page.getByRole('button', { name: 'Open & Fill' });
+    assert.equal(await openButton.isDisabled(), true);
+    await without.page.getByText('needs the Atriveo Fill extension').waitFor();
+    assert.equal(await without.page.getByRole('button', { name: 'Approve and submit' }).count(), 0);
+    assert.match(await without.page.locator('.rv-bar-actions .rv-primary').textContent(), /Approve all \(0\)/);
+    await without.context.close();
+
+    // With it: one click arms the application (version included), tells the extension, opens the form.
+    const withExt = await run({ extension: true });
+    await withExt.page.locator('.rv-row', { hasText: 'Test Ashby' }).click();
+    const popup = withExt.context.waitForEvent('page');
+    await withExt.page.getByRole('button', { name: 'Open & Fill' }).click();
+    const tab = await popup;
+    await tab.waitForURL(formUrl);
+    assert.deepEqual(withExt.actions, [{ action: 'open_and_fill', applicationId: 'm1', expectedUpdatedAt: '2026-10-03T19:00:00Z' }]);
+    assert.deepEqual(await withExt.page.evaluate(() => ({ url: window.__armed.url, applicationId: window.__armed.applicationId })), { url: formUrl, applicationId: 'm1' });
+    await withExt.page.getByText(/Atriveo Fill fills it and stops/).waitFor();
+    assert.ok(!withExt.actions.some((a) => a.action === 'approve_submit'));
+    await withExt.context.close();
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+    server.close();
+  }
 });

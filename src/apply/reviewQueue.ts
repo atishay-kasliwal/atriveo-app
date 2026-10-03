@@ -24,6 +24,11 @@ export interface ReadyApp extends Row {
   /** A job at this company was already submitted today, so an approval now would wait until tomorrow. */
   companySubmittedToday: boolean;
 }
+/** Filled and verified on an ATS you submit yourself (Ashby, Lever): Open & Fill instead of Approve. */
+export interface ManualApp extends ReadyApp {
+  /** Your last Open & Fill: when you opened it, and what Atriveo Fill reported from your browser. */
+  openFill: { armedAt: string | null; filledAt: string | null; filled: number | null; toCheck: number | null } | null;
+}
 export interface ApprovedApp extends Row {
   status: string; reviewReason: string | null; reviewDetail: string | null; failureCode: string | null;
   submittedAt: string | null; approvedAt: string | null;
@@ -33,7 +38,7 @@ export interface QueuedApp { id: string; updatedAt: string; n: number; suggestio
 
 interface View extends EngineState { ok: boolean; generatedAt: string; counts: Counts }
 export interface UnansweredQueue extends View { unanswered: QueuedApp[] }
-export interface ReadyQueue extends View { ready: ReadyApp[]; approved: ApprovedApp[] }
+export interface ReadyQueue extends View { ready: ReadyApp[]; approved: ApprovedApp[]; manual?: ManualApp[] }
 
 const visible = () => document.visibilityState === "visible";
 
@@ -137,7 +142,7 @@ const ready = pageView<ReadyQueue>(() => getJson<ReadyQueue>("/applications/revi
 /** The Unanswered page's order: every application blocked on questions, without its questions. */
 export const useUnansweredQueue = unanswered.use;
 export const refreshUnanswered = unanswered.refresh;
-/** The Ready page: waiting for your approval, and the approvals on their way. */
+/** The Ready page: waiting for your approval or for you to submit (Open & Fill), and the approvals on their way. */
 export const useReadyQueue = ready.use;
 export const refreshReady = ready.refresh;
 
