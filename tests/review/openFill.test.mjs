@@ -56,10 +56,14 @@ test('fill routes answer only the Atriveo Fill extension on this Mac, never the 
   const base = `http://127.0.0.1:${server.address().port}`;
   const ext = { Origin: 'chrome-extension://abcdefghijklmnop' };
   try {
-    const plan = await fetch(`${base}/applications/fill-plan?url=${encodeURIComponent('https://jobs.ashbyhq.com/a/b/application')}`, { headers: ext });
+    const post = (route, body, headers = ext) => fetch(`${base}${route}`, { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const plan = await post('/applications/fill-plan', { url: 'https://jobs.ashbyhq.com/a/b/application' });
     assert.equal(plan.status, 200);
     assert.deepEqual(await plan.json(), { ok: true, echo: 'plan' });
-    const event = await fetch(`${base}/applications/fill-event`, { method: 'POST', headers: { ...ext, 'Content-Type': 'application/json' }, body: JSON.stringify({ applicationId: 'x', event: { type: 'filled' } }) });
+    assert.deepEqual(calls.at(-1), { op: 'plan', url: 'https://jobs.ashbyhq.com/a/b/application' });
+    await post('/applications/fill-resume', { applicationId: 'x' });
+    assert.deepEqual(calls.at(-1), { op: 'resume', applicationId: 'x' });
+    const event = await post('/applications/fill-event', { applicationId: 'x', event: { type: 'filled' } });
     assert.equal(event.status, 200);
     assert.deepEqual(calls.at(-1), { op: 'event', applicationId: 'x', event: { type: 'filled' } });
     const before = calls.length;
@@ -69,9 +73,11 @@ test('fill routes answer only the Atriveo Fill extension on this Mac, never the 
       { ...ext, 'x-forwarded-for': '1.2.3.4' },
       {},
     ]) {
-      const r = await fetch(`${base}/applications/fill-resume?id=x`, { headers });
+      const r = await post('/applications/fill-resume', { applicationId: 'x' }, headers);
       assert.equal(r.status, 403);
     }
+    // Chrome sends no Origin on an extension's GET, so GET is not served at all.
+    assert.equal((await fetch(`${base}/applications/fill-plan?url=x`, { headers: ext })).status, 404);
     assert.equal(calls.length, before, 'refused requests never reach playatriveo');
     assert.equal((await fetch(`${base}/applications/review-queue`)).status, 404, 'other routes are not handled here');
     assert.equal(isLocalExtensionRequest({ headers: { origin: 'chrome-extension://x' } }), true);

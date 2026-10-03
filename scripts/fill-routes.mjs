@@ -5,7 +5,8 @@ import path from "node:path";
 // sidecar for the fill plan, the verified resume, and reports what happened; playatriveo answers
 // (src/cli/manualFill.ts). The plan carries your answers, including sensitive ones, so these routes
 // answer only the extension on this Mac: anything that came through Cloudflare (the dashboard relay
-// or the tunnel) is refused, and the request must come from a chrome-extension:// origin.
+// or the tunnel) is refused, and the request must come from a chrome-extension:// origin. All three are
+// POST: Chrome sends an extension's Origin header only on non-GET requests.
 
 const RELAY_HEADERS = ["cf-ray", "cf-connecting-ip", "cf-ipcountry", "cf-visitor", "cdn-loop", "x-forwarded-for", "x-forwarded-host", "x-real-ip"];
 
@@ -14,7 +15,7 @@ export function isLocalExtensionRequest(req) {
   return String(req.headers.origin ?? "").startsWith("chrome-extension://");
 }
 
-const ROUTES = new Set(["GET /applications/fill-plan", "GET /applications/fill-resume", "POST /applications/fill-event"]);
+const ROUTES = new Set(["POST /applications/fill-plan", "POST /applications/fill-resume", "POST /applications/fill-event"]);
 
 async function readJson(req, limit = 50_000) {
   let raw = "";
@@ -38,9 +39,10 @@ export async function handleFillRoute(req, res, url, run) {
     return true;
   }
   try {
-    const request = route === "GET /applications/fill-plan" ? { op: "plan", url: String(url.searchParams.get("url") || "") }
-      : route === "GET /applications/fill-resume" ? { op: "resume", applicationId: String(url.searchParams.get("id") || "") }
-      : { op: "event", ...(await readJson(req)) };
+    const body = await readJson(req);
+    const request = url.pathname === "/applications/fill-plan" ? { op: "plan", url: String(body.url || "") }
+      : url.pathname === "/applications/fill-resume" ? { op: "resume", applicationId: String(body.applicationId || "") }
+      : { op: "event", ...body };
     const result = await run(request);
     send(result.ok ? 200 : 400, result);
   } catch (e) {
