@@ -59,6 +59,17 @@ function workerOf(workerDocs) {
  * approve_submit (src/application/humanAction.ts), which stays the authority:
  * keep the two in step so nothing listed here is refused there.
  */
+/**
+ * Filled and verified on an ATS you submit yourself (Ashby, Lever): Open & Fill instead of Approve.
+ * Mirrors playatriveo's Open & Fill checks (src/application/manualFill/fillPlan.ts), which stay the authority.
+ */
+export function readyForYou(r) {
+  return r.status === "NEEDS_REVIEW" && r.review?.reason === "MANUAL_SUBMIT"
+    && !r.submission?.attemptedAt && !r.submission?.submittedAt
+    && (r.review.pending ?? []).length === 0 && (r.review.failedChecks ?? []).length === 0
+    && Boolean(r.submission?.validation?.passed && r.submission?.certification?.status === "CERTIFIED" && r.resume?.sha256);
+}
+
 export function readyForApproval(r) {
   return r.status === "NEEDS_REVIEW" && r.review?.reason === "SUBMIT_APPROVAL"
     && !r.submission?.attemptedAt && !r.submission?.submittedAt
@@ -81,7 +92,8 @@ const reviewRow = (withQuestions) => ({
     company: 1, companyKey: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, applyUrl: 1, finalUrl: 1, createdAt: 1, updatedAt: 1,
     "resume.fileName": 1, "resume.sha256": 1, "failure.code": 1,
     "submission.attemptedAt": 1, "submission.submittedAt": 1, "submission.validation.passed": 1, "submission.formSignature": 1,
-    "submission.approvalRequestedAt": 1, "submission.approvalInAttemptAt": 1,
+    "submission.approvalRequestedAt": 1, "submission.approvalInAttemptAt": 1, "submission.certification.status": 1,
+    "submission.manualFill.armedAt": 1, "submission.manualFill.filledAt": 1, "submission.manualFill.report": 1,
     answered: size({ $filter: { input: { $ifNull: ["$questions", []] }, cond: { $eq: ["$$this.resolution", "answered"] } } }),
     review: {
       reason: "$review.reason", detail: "$review.detail", stage: "$review.stage", since: "$review.since", questionReviewStatus: "$review.questionReviewStatus",
@@ -124,10 +136,10 @@ const pendingQuestion = (p) => ({
 // Blocked on questions: the Unanswered page.
 const BLOCKED = { status: "NEEDS_REVIEW", "submission.attemptedAt": null, $or: [
   { "review.pending.0": { $exists: true } },
-  { "review.questionReviewStatus": "complete", "review.reason": { $ne: "SUBMIT_APPROVAL" } },
+  { "review.questionReviewStatus": "complete", "review.reason": { $nin: ["SUBMIT_APPROVAL", "MANUAL_SUBMIT"] } },
 ] };
-// readyForApproval needs this reason; its other checks run on these few rows.
-const MAYBE_READY = { status: "NEEDS_REVIEW", "review.reason": "SUBMIT_APPROVAL" };
+// readyForApproval / readyForYou need one of these reasons; their other checks run on these few rows.
+const MAYBE_READY = { status: "NEEDS_REVIEW", "review.reason": { $in: ["SUBMIT_APPROVAL", "MANUAL_SUBMIT"] } };
 
 const rowBase = (r) => ({
   id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
@@ -177,7 +189,8 @@ const blockedTotals = async (apps) => {
   return { unanswered: t?.apps ?? 0, questions: t?.questions ?? 0 };
 };
 
-const readyRows = async (apps) => (await apps.aggregate([{ $match: MAYBE_READY }, reviewRow(false)]).toArray()).filter(readyForApproval);
+/** Everything on the Ready page: waiting for your approval, or for you to submit it yourself (Open & Fill). */
+const readyRows = async (apps) => (await apps.aggregate([{ $match: MAYBE_READY }, reviewRow(false)]).toArray()).filter((r) => readyForApproval(r) || readyForYou(r));
 
 /** Approved in the dashboard: still waiting for the worker, or claimed in the last two days; and who was submitted to lately. */
 async function approvals(apps, now) {
@@ -198,16 +211,23 @@ function readyLists(readyDocs, { approved, submittedRecently }, now) {
   const companiesSubmittedToday = new Set(submittedRecently.filter((r) => dayKey(r.submission.attemptedAt) === today).map((r) => r.companyKey));
   const perCompany = new Map();
   for (const r of readyDocs) perCompany.set(r.companyKey, (perCompany.get(r.companyKey) ?? 0) + 1);
+  const row = (r) => ({
+    ...rowBase(r),
+    filledAt: r.review.since ?? r.updatedAt,
+    resumeFile: r.resume?.fileName ?? null,
+    answered: r.answered ?? 0,
+    readyAtCompany: perCompany.get(r.companyKey) ?? 1,
+    companySubmittedToday: companiesSubmittedToday.has(r.companyKey),
+  });
   return {
-    ready: readyDocs
-      .map((r) => ({
-        ...rowBase(r),
-        filledAt: r.review.since ?? r.updatedAt,
-        resumeFile: r.resume?.fileName ?? null,
-        answered: r.answered ?? 0,
-        readyAtCompany: perCompany.get(r.companyKey) ?? 1,
-        companySubmittedToday: companiesSubmittedToday.has(r.companyKey),
-      }))
+    // You submit these in your own browser; the engine never does (submission.manualSubmitAts).
+    manual: readyDocs.filter(readyForYou)
+      .map((r) => {
+        const fill = r.submission?.manualFill ?? null;
+        return { ...row(r), openFill: fill ? { armedAt: fill.armedAt ?? null, filledAt: fill.filledAt ?? null, filled: fill.report?.filled ?? null, toCheck: fill.report ? fill.report.mismatched.length + fill.report.missing.length : null } : null };
+      })
+      .sort((a, b) => b.priority - a.priority || a.filledAt.localeCompare(b.filledAt)),
+    ready: readyDocs.filter(readyForApproval).map(row)
       .sort((a, b) => b.priority - a.priority || a.filledAt.localeCompare(b.filledAt)),
     // Approved earlier and now back in the Ready pile: listed there instead.
     approved: approved
