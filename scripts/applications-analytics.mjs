@@ -153,14 +153,14 @@ const categoryCount = category => ({ $size: { $filter: { input: { $ifNull: ["$re
 const unansweredOrder = (apps) => apps.aggregate([
   { $match: BLOCKED },
   { $project: {
-    updatedAt: 1,
+    updatedAt: 1, company: 1, title: 1,
     n: { $size: "$review.pending" },
     suggestions: categoryCount("readyForReview"),
     readyForReview: categoryCount("readyForReview"), needsInput: categoryCount("needsInput"), actionRequired: categoryCount("actionRequired"),
     rank: { $ifNull: ["$priority", 0] },
   } },
   { $sort: { suggestions: -1, n: 1, rank: -1, updatedAt: 1, _id: 1 } },
-  { $project: { _id: 0, id: "$_id", updatedAt: 1, n: 1, suggestions: 1, readyForReview: 1, needsInput: 1, actionRequired: 1 } },
+  { $project: { _id: 0, id: "$_id", updatedAt: 1, company: 1, title: 1, n: 1, suggestions: 1, readyForReview: 1, needsInput: 1, actionRequired: 1 } },
 ]).toArray();
 
 /** The cards (questions included) of these applications, in this order; any no longer blocked are left out. */

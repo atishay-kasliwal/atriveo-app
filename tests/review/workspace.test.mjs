@@ -9,17 +9,20 @@ import { fileURLToPath } from 'node:url';
 const requireEngine = createRequire(path.join(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), 'playatriveo'), 'package.json'));
 const { chromium } = requireEngine('playwright');
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const q = (label, extra = {}) => ({ fieldKey: label, fingerprint: label, label, type: 'textarea', required: true, options: [], canonicalKey: null, sensitive: null, reason: 'UNKNOWN_QUESTION', detail: null, ...extra });
-const rows = [
-  { id: 'motivation', company: 'Test Midpage', questions: [q('Why Midpage?', { questionFamily: 'why_company_role', answerProposal: { state: 'ready_for_review', family: 'why_company_role', source: 'approved_story', answer: 'An approved candidate story with exact saved posting evidence.', reason: 'grounded_story_proposal' } })] },
-  { id: 'factual', company: 'Test Profile', questions: [q('What timezone are you in?', { type: 'text', openEndedUserReview: { status: 'draft', action: 'replaced', generatedBy: 'muse', draftAnswer: 'America/New_York', missingFacts: ['Confirm timezone'] }, answerProposal: { state: 'ready_for_review', family: 'timezone', source: 'candidate_profile', answer: 'America/New_York', reason: 'explicit_candidate_fact' } })] },
-  { id: 'salary', company: 'Test Salary', questions: [q('What are your salary expectations?', { sensitive: 'salary', answerProposal: { state: 'needs_input', family: 'compensation', source: 'none', reason: 'SENSITIVE_QUESTION' } })] },
-  { id: 'attachment', company: 'Test Attachment', questions: [q('Resume', { type: 'file', reason: 'UPLOAD_UNVERIFIED', answerProposal: { state: 'action_required', family: 'attachment', source: 'none', reason: 'attachment_requires_remote_verification' } })] },
-].map(r => ({ ...r, title: 'Test Engineer', ats: 'ashby', url: 'https://blocked.test/form', priority: 0, updatedAt: '2026-10-02T23:00:00Z', questionReviewStatus: 'open' }));
-const counts = { unanswered: 4, questions: 4, ready: 0, readyForReview: 2, needsInput: 1, actionRequired: 1 };
-const order = rows.map(r => ({ id: r.id, updatedAt: r.updatedAt, n: 1, readyForReview: r.questions[0].answerProposal.state === 'ready_for_review' ? 1 : 0, needsInput: r.id === 'salary' ? 1 : 0, actionRequired: r.id === 'attachment' ? 1 : 0 }));
-
-test('built review workspace: visible proposals, filters, scopes, keyboard, concurrency and responsive layout', async () => {
+const q = (label, answer = '', extra = {}) => ({ fieldKey: label, fingerprint: label, label, type: 'textarea', required: true, options: [], canonicalKey: null, sensitive: null, reason: 'UNKNOWN_QUESTION', detail: null, answerProposal: { state: answer ? 'ready_for_review' : 'needs_input', answer, family: 'experience_project', source: 'approved_story', reason: 'approved_source' }, ...extra });
+const app = (id, company, questions) => ({ id, company, questions, title: 'Software Engineer', ats: 'ashby', url: 'https://blocked.test/form', priority: 0, updatedAt: '2026-10-03T20:00:00.000Z', questionReviewStatus: questions.length ? 'open' : 'complete', reviewStage: 'questions' });
+const initialRows = () => [
+  app('acme', 'Acme Robotics', [
+    q('Why are you interested in this role?', 'I enjoy building reliable backend systems that connect software with the physical world. This role combines the systems work I have done with a domain I want to understand more deeply.'),
+    q('Tell us about a project you are proud of.', 'I built a data processing service and worked with the team to improve reliability. I focused on clear failure handling, useful diagnostics, and predictable behavior.'),
+    q('What are your salary expectations?', '', { type: 'text', sensitive: 'salary' }),
+    q('Country', 'United States', { type: 'select', options: ['United States', 'Canada'] }),
+    q('What timezone are you in?', 'America/New_York', { type: 'text', openEndedUserReview: { status: 'draft', action: 'replaced', generatedBy: 'muse', draftAnswer: 'America/New_York', missingFacts: ['Confirm timezone'] } }),
+  ]),
+  app('beacon', 'Beacon', [q('Describe your experience.', 'A saved company-specific answer.')]),
+  app('cedar', 'Cedar Analytics', [q('Resume', '', { type: 'file', reason: 'UPLOAD_UNVERIFIED', answerProposal: { state: 'action_required', family: 'attachment', source: 'none', reason: 'attachment_requires_remote_verification' } })]),
+];
+async function fixture(rows, action = () => ({ status: 200, body: { ok: true } })) {
   const server = http.createServer((req, res) => {
     const requested = path.join(root, 'dist-apply', req.url.split('?')[0]);
     const file = fs.existsSync(requested) && fs.statSync(requested).isFile() ? requested : path.join(root, 'dist-apply/index.html');
@@ -28,132 +31,100 @@ test('built review workspace: visible proposals, filters, scopes, keyboard, conc
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const port = server.address().port;
   const browser = await chromium.launch({ channel: 'chrome', headless: true });
-  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-  const actions = [], errors = [];
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const calls = [], errors = [];
   page.on('pageerror', e => errors.push(e.message));
+  await page.route('**/*', route => {
+    const url = new URL(route.request().url());
+    if (url.pathname === '/api/auth/me') return route.fulfill({ json: { user: { id: 1, name: 'Atishay', email: 'test@example.test' } } });
+    if (url.pathname === '/applications/review-queue') return route.fulfill({ json: { ok: true, generatedAt: rows[0]?.updatedAt, counts: { unanswered: rows.length, questions: rows.reduce((n,a) => n + a.questions.length,0), ready: 0 }, unanswered: rows.map(a => ({ id:a.id, company:a.company, title:a.title, updatedAt:a.updatedAt, n:a.questions.length, needsInput:a.questions.filter(q => !q.answerProposal?.answer).length, actionRequired:a.questions.filter(q => q.type==='file').length })), cards: rows } });
+    if (url.pathname === '/applications/detail') return route.fulfill({ json: { ok:true, id:rows[0].id, company:rows[0].company, title:rows[0].title, ats:'ashby',status:'NEEDS_REVIEW',url:rows[0].url,resume:{},questions:[{label:'Name',step:0,required:true,type:'text',resolution:'answered',verified:false,answerKind:'value',answer:'Test Candidate',source:'profile'}],timeline:[],attempts:[],submission:{},failure:null } });
+    if (url.pathname === '/applications/action') { const body = route.request().postDataJSON(); calls.push(body); const result = action(body); return route.fulfill({ status:result.status, json:result.body }); }
+    if (url.hostname === '127.0.0.1' && url.port === String(port)) return route.continue();
+    return route.abort();
+  });
+  await page.goto(`http://127.0.0.1:${port}/unanswered`);
+  await page.getByText('One company. One complete form.', { exact: true }).waitFor();
+  return { page, calls, errors, close: async () => { await browser.close(); await new Promise(resolve=>server.close(resolve)); } };
+}
+async function noPageScroll(page) {
+  assert.ok(await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight + 1), 'document must fit viewport');
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'document must not overflow horizontally');
+  const box = await page.locator('.ar-actionbar').boundingBox();
+  assert.ok(box && box.y + box.height <= (await page.evaluate(() => window.innerHeight)) + 1, 'application actions stay visible');
+}
+
+test('five questions form one application, fit the desktop, preserve edits between companies and approve together', async () => {
+  const f = await fixture(initialRows(), () => ({ status:400, body:{ok:false,error:'Application changed; load the latest version.'} }));
+  const {page,calls,errors}=f;
   try {
-    await page.route('**/*', route => {
-      const url = new URL(route.request().url());
-      if (url.pathname === '/api/auth/me') return route.fulfill({ json: { user: { id: 1, name: 'Test reviewer', email: 'test@example.test' } } });
-      if (url.pathname === '/applications/review-queue') return route.fulfill({ json: { ok: true, generatedAt: '2026-10-02T23:00:00Z', counts, unanswered: order, cards: rows, worker: { online: true, updatedAt: 'now' } } });
-      if (url.pathname === '/applications/action') { actions.push(route.request().postDataJSON()); return route.fulfill({ status: 400, json: { ok: false, error: 'Application changed since you opened it; refresh before reviewing the answer' } }); }
-      if (url.hostname === '127.0.0.1' && url.port === String(port)) return route.continue();
-      return route.abort();
-    });
-    await page.goto(`http://127.0.0.1:${port}/unanswered`);
-    await page.getByText('Review queue', { exact: true }).waitFor();
-    assert.equal(await page.locator('.rv-card').count(), 4);
-    assert.equal(await page.locator('textarea').first().inputValue(), rows[0].questions[0].answerProposal.answer);
-    assert.equal(await page.locator('.rv-columns').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 3);
-    const factual = page.locator('article', { has: page.getByText('Test Profile', { exact: true }) });
-    await factual.getByText('Muse draft — requires your review', { exact: true }).waitFor();
-    await factual.getByText('Muse flagged missing facts: Confirm timezone', { exact: true }).waitFor();
-    await factual.locator('input:not([type=checkbox]),textarea').fill('America/Chicago');
-    await factual.locator('input:not([type=checkbox]),textarea').press('a');
-    assert.equal(actions.length, 0, 'typing A must not approve');
-    await factual.locator('.review-question').focus();
-    await factual.locator('.review-question').press('a');
-    await page.getByRole('alert').waitFor();
-    assert.equal(actions[0].action, 'question_review'); assert.equal(actions[0].review.operation, 'approve_answer'); assert.equal(actions[0].review.scope, 'application');
-    assert.equal(actions[0].expectedUpdatedAt, rows[1].updatedAt);
-    await factual.getByText('Sources & answer reuse').click();
-    await factual.locator('select').selectOption('global');
-    await factual.getByRole('button', { name: '✓ Approve answer' }).click();
-    await page.waitForFunction(() => !document.querySelector('article[aria-busy="true"]'));
-    assert.equal(actions[1].review.scope, 'global');
-    await page.getByRole('button', { name: /^Action required/ }).click();
-    assert.equal(await page.locator('.rv-card').count(), 1); assert.equal(await page.locator('textarea').count(), 0);
-    await page.getByRole('heading', { name: 'Attachment needs attention', exact: true }).waitFor();
-    await page.getByText("Atriveo couldn't confirm that this attachment finished saving. Open the form to verify it, or skip this job.", { exact: true }).waitFor();
-    await page.getByRole('button', { name: /^All / }).click();
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.waitForFunction(() => document.querySelector('.rv-columns').style.gridTemplateColumns.startsWith('repeat(1,'));
-    assert.equal(await page.locator('.rv-columns').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 1);
-    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
-    await page.screenshot({ path: '/tmp/atriveo-review-mobile.png', fullPage: true });
-    await page.setViewportSize({ width: 1440, height: 1000 });
-    await page.waitForFunction(() => document.querySelector('.rv-columns').style.gridTemplateColumns.startsWith('repeat(3,'));
-    await page.screenshot({ path: '/tmp/atriveo-review-desktop.png', fullPage: true });
-    assert.deepEqual(errors, []);
-    assert.ok(actions.every(a => a.action === 'question_review'), 'no submission/continue action in tests');
-  } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
+    await page.getByRole('heading',{name:'Acme Robotics',exact:true}).waitFor();
+    assert.equal(await page.locator('.ar-question').count(),5);
+    assert.equal(await page.getByRole('button',{name:'Approve answer',exact:true}).count(),0);
+    const approve=page.getByRole('button',{name:'Approve all 5 answers',exact:true});
+    assert.equal(await approve.isDisabled(),true);
+    await page.getByLabel('What are your salary expectations?',{exact:false}).filter({visible:true}).last().fill('120000');
+    await page.getByRole('button',{name:/Beacon.*Software Engineer/}).click();
+    await page.getByRole('heading',{name:'Beacon',exact:true}).waitFor();
+    await page.getByRole('button',{name:/Acme Robotics.*Software Engineer/}).click();
+    assert.equal(await page.locator('input').filter({hasNot:page.locator('[type=checkbox]')}).count()>0,true);
+    assert.equal(await page.getByLabel('What are your salary expectations?',{exact:false}).last().inputValue(),'120000');
+    await page.getByText('Muse draft · review before approving',{exact:true}).waitFor();
+    await page.getByText('Confirm: Confirm timezone',{exact:true}).waitFor();
+    await noPageScroll(page);
+    for (const selector of ['.ar-question textarea','.ar-question input','.ar-question select']) for (const input of await page.locator(selector).all()) { const b=await input.boundingBox(); assert.ok(b && b.height>=30 && b.width>100); }
+    await page.screenshot({path:'/tmp/atriveo-company-review-desktop.png',fullPage:true});
+    await page.setViewportSize({width:1366,height:768}); await page.waitForTimeout(100); await noPageScroll(page);
+    assert.equal(await page.locator('.ar-question').count(),5);
+    await page.screenshot({path:'/tmp/atriveo-company-review-laptop.png',fullPage:true});
+    assert.equal(calls.length,0);
+    await approve.click(); await page.getByRole('alert').waitFor();
+    assert.equal(calls.length,1); assert.equal(calls[0].action,'application_review'); assert.equal(calls[0].operation,'approve_all');
+    assert.equal(calls[0].answers.length,5); assert.equal(calls[0].applicationId,'acme'); assert.equal(calls[0].expectedUpdatedAt,'2026-10-03T20:00:00.000Z');
+    assert.ok(calls.every(c=>c.action!=='approve_submit' && c.action!=='continue_application'));
+    assert.deepEqual(errors,[]);
+  } finally {await f.close();}
 });
 
-test('bulk discard previews exact records, supports cancellation, and never sends submission actions', async () => {
-  const server = http.createServer((req, res) => {
-    const requested = path.join(root, 'dist-apply', req.url.split('?')[0]);
-    const file = fs.existsSync(requested) && fs.statSync(requested).isFile() ? requested : path.join(root, 'dist-apply/index.html');
-    res.setHeader('Content-Type', file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : 'text/html'); res.end(fs.readFileSync(file));
-  });
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const port = server.address().port;
-  const browser = await chromium.launch({ channel: 'chrome', headless: true });
-  const page = await browser.newPage({ viewport: {width:1440,height:1000} });
-  const actions=[];
+test('long forms use pages; mobile, expanded answers and attachments stay accessible',async()=>{
+  const rows=initialRows(); rows[0].questions=Array.from({length:13},(_,i)=>q(`Question ${i+1}`,`Reviewed answer ${i+1}`));
+  const f=await fixture(rows);const {page,calls}=f;
   try {
-    await page.route('**/*',route=>{
-      const url=new URL(route.request().url());
-      if(url.pathname==='/api/auth/me') return route.fulfill({json:{user:{id:1,name:'Test',email:'test@example.test'}}});
-      if(url.pathname==='/applications/review-queue') return route.fulfill({json:{ok:true,generatedAt:'2026-10-02T23:00:00Z',counts,unanswered:order,cards:rows}});
-      if(url.pathname==='/applications/action') {
-        const body=route.request().postDataJSON();actions.push(body);
-        return route.fulfill({json:body.operation==='preview'?{ok:true,targets:rows.slice(0,2),moreAvailable:false}:{ok:true,discarded:rows.slice(0,2).map(r=>r.id),errors:[]}});
-      }
-      if(url.hostname==='127.0.0.1'&&url.port===String(port)) return route.continue();
-      return route.abort();
-    });
-    await page.goto(`http://127.0.0.1:${port}/unanswered`);
-    await page.getByRole('checkbox',{name:'Select Test Midpage',exact:true}).check();
-    await page.getByRole('checkbox',{name:'Select Test Profile',exact:true}).check();
-    await page.getByRole('button',{name:'Discard selected (2)',exact:true}).click();
-    await page.getByRole('dialog').waitFor();
-    assert.deepEqual(actions[0].ids,['motivation','factual']);
-    await page.getByRole('button',{name:'Cancel',exact:true}).click();
-    assert.equal(actions.length,1);
-    await page.getByRole('button',{name:'Clear older than 24 hours',exact:true}).click();
-    await page.getByRole('dialog').waitFor();assert.equal(actions[1].olderThan24Hours,true);
-    await page.getByRole('button',{name:'Discard 2 applications',exact:true}).click();
-    await page.getByRole('status').filter({hasText:'2 applications discarded'}).waitFor();
-    assert.equal(actions[2].operation,'confirm');assert.deepEqual(actions[2].targets,rows.slice(0,2).map(({id,updatedAt})=>({id,updatedAt})));
-    assert.ok(actions.every(a=>a.action==='discard_applications'));
-  } finally {await browser.close();await new Promise(resolve=>server.close(resolve));}
+    await page.getByRole('button',{name:'Approve all 13 answers',exact:true}).waitFor();
+    assert.equal(await page.locator('.ar-question').count(),6); await noPageScroll(page);
+    await page.getByRole('button',{name:'Next →',exact:true}).click(); await page.getByText('Questions 7–12 of 13',{exact:true}).waitFor();
+    await page.getByRole('button',{name:'Expand question 7',exact:true}).click();
+    const dialog=page.getByRole('dialog'); await dialog.waitFor();
+    await dialog.getByLabel('Question 7',{exact:false}).fill('Edited full answer');
+    await dialog.getByRole('button',{name:'Done editing'}).click();
+    await page.setViewportSize({width:390,height:844}); await page.waitForTimeout(100); await noPageScroll(page);
+    await page.screenshot({path:'/tmp/atriveo-company-review-mobile.png',fullPage:true});
+    await page.getByLabel('Choose application').selectOption('cedar');
+    await page.getByText('Resume',{exact:true}).waitFor();
+    assert.equal(await page.getByRole('button',{name:'Approve all 1 answer',exact:true}).isDisabled(),true);
+    assert.equal(calls.length,0);
+  }finally{await f.close();}
 });
 
+test('complete reviewed forms expose separate Fill and verify; details cause no action',async()=>{
+  const f=await fixture([app('complete','Complete Example',[])]);const{page,calls}=f;
+  try{
+    await page.getByRole('button',{name:'Fill and verify',exact:true}).waitFor();
+    await page.getByRole('tab',{name:'Application details',exact:true}).click(); await page.getByText('Test Candidate',{exact:true}).waitFor();
+    assert.equal(calls.length,0);await page.getByRole('button',{name:'Fill and verify',exact:true}).click();
+    await page.waitForFunction(()=>!document.querySelector('[aria-busy=true]'));
+    assert.equal(calls[0].action,'continue_application');assert.equal(calls.length,1);
+  }finally{await f.close();}
+});
 
-test('question discovery shows all resolved answers and requires explicit Fill and verify', async () => {
-  const server = http.createServer((req, res) => {
-    const requested = path.join(root, 'dist-apply', req.url.split('?')[0]);
-    const file = fs.existsSync(requested) && fs.statSync(requested).isFile() ? requested : path.join(root, 'dist-apply/index.html');
-    res.setHeader('Content-Type', file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : 'text/html'); res.end(fs.readFileSync(file));
-  });
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const port = server.address().port;
-  const browser = await chromium.launch({ channel: 'chrome', headless: true });
-  const page = await browser.newPage();
-  const actions = [], errors = [];
-  const app = { ...rows[0], id: 'discovered', company: 'Collected Example', questions: [], questionReviewStatus: 'complete', reviewStage: 'questions' };
-  page.on('pageerror', e => errors.push(e.message));
-  try {
-    await page.route('**/*', route => {
-      const url = new URL(route.request().url());
-      if (url.pathname === '/api/auth/me') return route.fulfill({ json: { user: { id: 1, name: 'Test reviewer' } } });
-      if (url.pathname === '/applications/review-queue') return route.fulfill({ json: { ok: true, generatedAt: app.updatedAt, counts: { unanswered: 1, questions: 0, ready: 0 }, unanswered: [{ id: app.id, updatedAt: app.updatedAt, n: 0 }], cards: [app] } });
-      if (url.pathname === '/applications/detail') return route.fulfill({ json: { ok: true, id: app.id, company: app.company, title: app.title, status: 'NEEDS_REVIEW', ats: 'ashby', url: app.url, resume: {}, questions: [{ label: 'Name', required: true, step: 0, type: 'text', resolution: 'answered', verified: false, answerKind: 'value', answer: 'Test Candidate', source: 'profile', sensitive: null }], timeline: [], attempts: [], submission: {}, failure: null } });
-      if (url.pathname === '/applications/action') { actions.push(route.request().postDataJSON()); return route.fulfill({ json: { ok: true } }); }
-      if (url.hostname === '127.0.0.1' && url.port === String(port)) return route.continue();
-      return route.abort();
-    });
-    await page.goto(`http://127.0.0.1:${port}/unanswered`);
-    await page.getByRole('button', { name: 'Fill and verify', exact: true }).waitFor();
-    assert.equal(actions.length, 0);
-    await page.getByText('Review all extracted questions and answers', { exact: true }).click();
-    await page.getByText('Test Candidate', { exact: true }).waitFor();
-    assert.equal(actions.length, 0, 'viewing the answer plan cannot fill or submit');
-    await page.getByRole('button', { name: 'Fill and verify', exact: true }).click();
-    await page.waitForFunction(() => !document.querySelector('article[aria-busy="true"]'));
-    assert.equal(actions.length, 1);
-    assert.equal(actions[0].action, 'continue_application');
-    assert.equal(actions[0].expectedUpdatedAt, app.updatedAt);
-    assert.deepEqual(errors, []);
-  } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
+test('queue management previews exact selected applications and supports cancellation',async()=>{
+  const rows=initialRows();const f=await fixture(rows,body=>({status:200,body:body.operation==='preview'?{ok:true,targets:[{id:'acme',updatedAt:rows[0].updatedAt,company:'Acme Robotics',title:'Software Engineer'}],moreAvailable:false}:{ok:true,discarded:['acme'],errors:[]}}));
+  const{page,calls}=f;try{
+    await page.getByRole('button',{name:'Manage queue',exact:true}).click();await page.getByLabel('Select Acme Robotics',{exact:true}).check();
+    await page.getByRole('button',{name:'Discard selected (1)',exact:true}).click();await page.getByRole('dialog').waitFor();
+    assert.equal(calls.length,1);assert.deepEqual(calls[0].ids,['acme']);await page.getByRole('button',{name:'Cancel',exact:true}).click();
+    assert.equal(calls.length,1);await page.getByRole('button',{name:'Discard selected (1)',exact:true}).click();
+    await page.getByRole('button',{name:'Discard 1 applications',exact:true}).click();await page.getByText('1 applications discarded. History retained.',{exact:true}).waitFor();
+    assert.equal(calls[2].operation,'confirm');assert.ok(calls.every(c=>c.action==='discard_applications'));
+  }finally{await f.close();}
 });
