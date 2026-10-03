@@ -42,6 +42,7 @@ import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
 import { getWorkerId } from "./worker-id.mjs";
+import { handleFillRoute, runManualFill } from "./fill-routes.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
 import { listActiveWorkers } from "./worker-registry.mjs";
 import { buildCoverLetter } from "./cover-letter.mjs";
@@ -1138,6 +1139,8 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(401, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({ ok: false, error: "Unauthorized" }));
   }
+  // Open & Fill: the Atriveo Fill extension on this Mac only (never through the relay); see fill-routes.mjs.
+  if (await handleFillRoute(req, res, reqUrl, (request) => runManualFill(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo"), request))) return;
 
   if (req.method === "GET" && pathname === "/health") {
     const driveOk = fs.existsSync(path.dirname(OUT_ROOT));
