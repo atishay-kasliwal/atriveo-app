@@ -46,8 +46,8 @@ test('built review workspace: visible proposals, filters, scopes, keyboard, conc
     assert.equal(await page.locator('textarea').first().inputValue(), rows[0].questions[0].answerProposal.answer);
     assert.equal(await page.locator('.rv-columns').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 3);
     const factual = page.locator('article', { has: page.getByText('Test Profile', { exact: true }) });
-    await factual.locator('input,textarea').fill('America/Chicago');
-    await factual.locator('input,textarea').press('a');
+    await factual.locator('input:not([type=checkbox]),textarea').fill('America/Chicago');
+    await factual.locator('input:not([type=checkbox]),textarea').press('a');
     assert.equal(actions.length, 0, 'typing A must not approve');
     await factual.locator('.review-question').focus();
     await factual.locator('.review-question').press('a');
@@ -75,4 +75,44 @@ test('built review workspace: visible proposals, filters, scopes, keyboard, conc
     assert.deepEqual(errors, []);
     assert.ok(actions.every(a => a.action === 'question_review'), 'no submission/continue action in tests');
   } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
+});
+
+test('bulk discard previews exact records, supports cancellation, and never sends submission actions', async () => {
+  const server = http.createServer((req, res) => {
+    const requested = path.join(root, 'dist-apply', req.url.split('?')[0]);
+    const file = fs.existsSync(requested) && fs.statSync(requested).isFile() ? requested : path.join(root, 'dist-apply/index.html');
+    res.setHeader('Content-Type', file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : 'text/html'); res.end(fs.readFileSync(file));
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const port = server.address().port;
+  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const page = await browser.newPage({ viewport: {width:1440,height:1000} });
+  const actions=[];
+  try {
+    await page.route('**/*',route=>{
+      const url=new URL(route.request().url());
+      if(url.pathname==='/api/auth/me') return route.fulfill({json:{user:{id:1,name:'Test',email:'test@example.test'}}});
+      if(url.pathname==='/applications/review-queue') return route.fulfill({json:{ok:true,generatedAt:'2026-10-02T23:00:00Z',counts,unanswered:order,cards:rows}});
+      if(url.pathname==='/applications/action') {
+        const body=route.request().postDataJSON();actions.push(body);
+        return route.fulfill({json:body.operation==='preview'?{ok:true,targets:rows.slice(0,2),moreAvailable:false}:{ok:true,discarded:rows.slice(0,2).map(r=>r.id),errors:[]}});
+      }
+      if(url.hostname==='127.0.0.1'&&url.port===String(port)) return route.continue();
+      return route.abort();
+    });
+    await page.goto(`http://127.0.0.1:${port}/unanswered`);
+    await page.getByRole('checkbox',{name:'Select Test Midpage',exact:true}).check();
+    await page.getByRole('checkbox',{name:'Select Test Profile',exact:true}).check();
+    await page.getByRole('button',{name:'Discard selected (2)',exact:true}).click();
+    await page.getByRole('dialog').waitFor();
+    assert.deepEqual(actions[0].ids,['motivation','factual']);
+    await page.getByRole('button',{name:'Cancel',exact:true}).click();
+    assert.equal(actions.length,1);
+    await page.getByRole('button',{name:'Clear older than 24 hours',exact:true}).click();
+    await page.getByRole('dialog').waitFor();assert.equal(actions[1].olderThan24Hours,true);
+    await page.getByRole('button',{name:'Discard 2 applications',exact:true}).click();
+    await page.getByRole('status').filter({hasText:'2 applications discarded'}).waitFor();
+    assert.equal(actions[2].operation,'confirm');assert.deepEqual(actions[2].targets,rows.slice(0,2).map(({id,updatedAt})=>({id,updatedAt})));
+    assert.ok(actions.every(a=>a.action==='discard_applications'));
+  } finally {await browser.close();await new Promise(resolve=>server.close(resolve));}
 });

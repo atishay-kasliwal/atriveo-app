@@ -1,3 +1,4 @@
+import DiscardApplications from "./DiscardApplications";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import CompanyLogo from "../components/CompanyLogo";
@@ -47,6 +48,7 @@ function holdReasons(ready: ReadyApp[], approved: ApprovedApp[]): Map<string, st
 
 export default function ReadyPage({ header }: { header?: React.ReactNode }) {
   const [fast, setFast] = useState(false);
+  const [discardSelected, setDiscardSelected] = useState<string[]>([]);
   const { data, error, loading } = useReadyQueue(fast ? 15_000 : 60_000);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [done, setDone] = useState<Record<string, string>>({});
@@ -182,6 +184,7 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
       </div>
 
       <main className="rv-main">
+        <DiscardApplications selected={discardSelected} disabled={busy} onDone={async () => { setDiscardSelected([]); await refreshReady(); }} />
         {error && !data && <p className="apps-error">Couldn't load: {error}. The Mac sidecar must be running (npm run tailor:restart).</p>}
         {!data && !error && <p className="apps-muted rv-wait">Loading the applications ready to submit…</p>}
         {data && (
@@ -198,6 +201,7 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
                   const why = held.get(r.id);
                   return (
                     <li key={r.id}>
+                      <label className="discard-select"><input type="checkbox" checked={discardSelected.includes(r.id)} disabled={busy} onChange={e => setDiscardSelected(ids => e.target.checked ? [...ids, r.id].slice(0, 200) : ids.filter(id => id !== r.id))} /> Select {r.company}</label>
                       <button className={`rv-row ${selected?.id === r.id ? "is-on" : ""}`} onClick={() => select(r)} aria-current={selected?.id === r.id}>
                         <CompanyLogo company={r.company} size="sm" />
                         <span className="rv-row-id">

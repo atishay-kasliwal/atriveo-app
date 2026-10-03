@@ -136,3 +136,7 @@
 .review-pagination { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 24px 0 0; font-size: 13px; }
 @media (max-width: 720px) { .review-workspace .rv-main { padding: 12px; } .review-filters { padding: 10px 12px; } .review-shortcuts { margin-left: 0; } }
 @media (prefers-reduced-motion: reduce) { .review-question { transition: none; } }
+
+.review-discard { display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:12px 0; }
+.review-discard > p { flex-basis:100%; }
+.discard-select { display:flex; gap:8px; padding:8px 12px; align-items:center; }

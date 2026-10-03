@@ -1,3 +1,4 @@
+import DiscardApplications from "./DiscardApplications";
 import { attachmentMessage } from "./attachmentMessage";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import CompanyLogo from "../components/CompanyLogo";
@@ -34,6 +35,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
   const [busy, setBusy] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
   useLayoutEffect(() => {
     if (!grid.current) return;
     const el = grid.current;
@@ -87,6 +89,8 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
       {label} <span>{value === "all" ? data?.counts.questions ?? "…" : data?.counts[COUNT_KEY[value as ReviewCategory]] ?? "…"}</span></button>)}
       <details className="review-shortcuts"><summary>Shortcuts</summary><span>Focus a question: A approve · E edit · S later · arrows move. Ctrl/⌘ Enter approves your edit.</span></details></nav>
     <main className="rv-main">
+      <DiscardApplications selected={selected} disabled={busy !== null} onDone={async () => { setSelected([]); await refreshUnanswered(); }} />
+      <button className="apps-link" disabled={busy !== null} onClick={() => setSelected(visible.map(r => r.id))}>Select this page</button> <button className="apps-link" onClick={() => setSelected([])}>Clear selection</button>
       {(error || cardsError) && <p className="apps-error" role="alert">{error || cardsError} <button className="apps-link" onClick={() => void refreshUnanswered()}>Retry</button></p>}
       {!data && !error && <p className="apps-muted">Loading your review queue…</p>}
       {data && !ordered.length && <div className="rv-empty"><strong>No questions in this view.</strong><span>Choose another review state to keep going.</span></div>}
@@ -96,7 +100,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
           if (!app || app.updatedAt < row.updatedAt) return <article key={row.id} className="rv-card rv-card-wait" aria-busy="true">Loading questions…</article>;
           const questions = app.questions.filter(q => filter === "all" || reviewCategory(q) === filter);
           return <article key={app.id} className="rv-card" aria-label={app.company} aria-busy={busy === app.id}>
-            <header className="rv-card-head"><CompanyLogo company={app.company} size="sm" /><div className="rv-card-id"><strong>{app.company}</strong><span>{app.title}</span><small>{app.questions.length} pending · {app.ats}</small></div></header>
+            <header className="rv-card-head"><input type="checkbox" aria-label={`Select ${app.company}`} checked={selected.includes(app.id)} disabled={busy !== null} onChange={e => setSelected(ids => e.target.checked ? [...ids, app.id].slice(0, 200) : ids.filter(id => id !== app.id))} /><CompanyLogo company={app.company} size="sm" /><div className="rv-card-id"><strong>{app.company}</strong><span>{app.title}</span><small>{app.questions.length} pending · {app.ats}</small></div></header>
             <div className="rv-card-body">{questions.map(q => {
               const category = reviewCategory(q); const key = keyOf(app, q); const text = textOf(app, q);
               const narrative = q.openEndedAssessment?.questionFamily || q.questionFamily === "why_company_role" || q.type === "textarea";
