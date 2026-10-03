@@ -1,0 +1,5 @@
+/* Application priority tags (PriorityTags) */
+.priority-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+.priority-tag { font-size: 10.5px; line-height: 16px; padding: 0 6px; border-radius: 8px; background: var(--chip-bg, rgba(100, 116, 139, 0.14)); color: var(--chip-fg, inherit); white-space: nowrap; }
+.priority-tag--strong { background: rgba(16, 185, 129, 0.16); color: #047857; font-weight: 600; }
+@media (prefers-color-scheme: dark) { .priority-tag--strong { color: #6ee7b7; } }

@@ -24,7 +24,7 @@ const doc = (id, reason, extra = {}) => ({
 
 test('Ready view: Ashby/Lever waiting for you are listed for Open & Fill, never for approval', async () => {
   const manual = doc('m1', 'MANUAL_SUBMIT', { manualFill: { armedAt: '2026-10-03T19:01:00Z', filledAt: '2026-10-03T19:02:00Z', report: { filled: 6, mismatched: [], missing: ['x'], yours: 1 } } });
-  const approval = doc('a1', 'SUBMIT_APPROVAL');
+  const approval = { ...doc('a1', 'SUBMIT_APPROVAL'), priorityTags: ['Strong match', 'Raleigh', '0–1 yrs'] };
   assert.equal(readyForYou(manual), true);
   assert.equal(readyForApproval(manual), false);
   assert.equal(readyForYou(approval), false);
@@ -40,6 +40,8 @@ test('Ready view: Ashby/Lever waiting for you are listed for Open & Fill, never 
   }) };
   const view = await reviewQueue(db, { view: 'ready', now: new Date('2026-10-03T20:00:00Z') });
   assert.deepEqual(view.ready.map((r) => r.id), ['a1']);
+  assert.deepEqual(view.ready[0].priorityTags, ['Strong match', 'Raleigh', '0–1 yrs'], 'priority tags reach the console');
+  assert.deepEqual(view.manual[0].priorityTags, []);
   assert.deepEqual(view.manual.map((r) => r.id), ['m1']);
   assert.deepEqual(view.manual[0].openFill, { armedAt: '2026-10-03T19:01:00Z', filledAt: '2026-10-03T19:02:00Z', filled: 6, toCheck: 1 });
   assert.equal(view.counts.ready, 2, 'the Ready badge counts both');
@@ -96,7 +98,7 @@ test('fill routes answer only the Atriveo Fill extension on this Mac, never the 
 
 test('built Ready page: Open & Fill instead of Approve for Ashby/Lever; arms, then opens the form in a new tab', async () => {
   const { chromium } = requireEngine('playwright');
-  const manualRow = { id: 'm1', company: 'Test Ashby', companyKey: 'test-ashby', title: 'Software Engineer', location: null, ats: 'ashby', url: 'https://jobs.ashbyhq.com/test/x', priority: 5, updatedAt: '2026-10-03T19:00:00Z', filledAt: '2026-10-03T18:00:00Z', resumeFile: 'r.pdf', answered: 6, readyAtCompany: 1, companySubmittedToday: false, openFill: null };
+  const manualRow = { id: 'm1', company: 'Test Ashby', companyKey: 'test-ashby', title: 'Software Engineer', location: null, ats: 'ashby', url: 'https://jobs.ashbyhq.com/test/x', priority: 5, updatedAt: '2026-10-03T19:00:00Z', filledAt: '2026-10-03T18:00:00Z', resumeFile: 'r.pdf', answered: 6, readyAtCompany: 1, companySubmittedToday: false, openFill: null, priorityTags: ['Strong match', 'New York', 'New grad'] };
   const formUrl = 'https://jobs.ashbyhq.com/test/1f0e2d3c-4b5a-4968-8776-655443322110/application';
   const queue = { ok: true, generatedAt: '2026-10-03T19:00:00Z', counts: { unanswered: 0, questions: 0, ready: 1 }, ready: [], approved: [], manual: [manualRow], worker: { online: false, updatedAt: '2026-10-03T19:00:00Z' }, killSwitch: { enabled: true, reason: null } };
   const server = http.createServer((req, res) => {
@@ -153,6 +155,7 @@ test('built Ready page: Open & Fill instead of Approve for Ashby/Lever; arms, th
     await without.page.locator('.rv-row', { hasText: 'Test Ashby' }).click();
     const openButton = without.page.getByRole('button', { name: 'Open & Fill' });
     assert.equal(await openButton.isDisabled(), true);
+    for (const tag of ['Strong match', 'New York', 'New grad']) await without.page.locator('.rv-row .priority-tag', { hasText: tag }).waitFor();
     await without.page.getByText('needs the Atriveo Fill extension').waitFor();
     assert.equal(await without.page.getByRole('button', { name: 'Approve and submit' }).count(), 0);
     assert.match(await without.page.locator('.rv-bar-actions .rv-primary').textContent(), /Approve all \(0\)/);

@@ -3,6 +3,7 @@ import DiscardApplications from "./DiscardApplications";
 import { attachmentMessage } from "./attachmentMessage";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import CompanyLogo from "../components/CompanyLogo";
+import PriorityTags from "../components/PriorityTags";
 import QuestionField from "./QuestionField";
 import { postAction, proposalText, reviewCategory, when, type PendingQ, type ReviewCategory, type Scope } from "./engine";
 import { loadCards, refreshUnanswered, useUnansweredCards, useUnansweredQueue, type UnansweredApp } from "./reviewQueue";
@@ -102,7 +103,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
           if (!app || app.updatedAt < row.updatedAt) return <article key={row.id} className="rv-card rv-card-wait" aria-busy="true">Loading questions…</article>;
           const questions = app.questions.filter(q => filter === "all" || reviewCategory(q) === filter);
           return <article key={app.id} className="rv-card" aria-label={app.company} aria-busy={busy === app.id}>
-            <header className="rv-card-head"><input type="checkbox" aria-label={`Select ${app.company}`} checked={selected.includes(app.id)} disabled={busy !== null} onChange={e => setSelected(ids => e.target.checked ? [...ids, app.id].slice(0, 200) : ids.filter(id => id !== app.id))} /><CompanyLogo company={app.company} size="sm" /><div className="rv-card-id"><strong>{app.company}</strong><span>{app.title}</span><small>{app.questions.length} pending · {app.ats}{app.reviewStage === "questions" ? " · Questions collected before filling" : ""}</small></div></header>
+            <header className="rv-card-head"><input type="checkbox" aria-label={`Select ${app.company}`} checked={selected.includes(app.id)} disabled={busy !== null} onChange={e => setSelected(ids => e.target.checked ? [...ids, app.id].slice(0, 200) : ids.filter(id => id !== app.id))} /><CompanyLogo company={app.company} size="sm" /><div className="rv-card-id"><strong>{app.company}</strong><span>{app.title}</span><PriorityTags tags={app.priorityTags} /><small>{app.questions.length} pending · {app.ats}{app.reviewStage === "questions" ? " · Questions collected before filling" : ""}</small></div></header>
             <div className="rv-card-body">{questions.map(q => {
               const category = reviewCategory(q); const key = keyOf(app, q); const text = textOf(app, q);
               const narrative = q.openEndedAssessment?.questionFamily || q.questionFamily === "why_company_role" || q.type === "textarea";

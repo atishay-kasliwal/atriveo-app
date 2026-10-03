@@ -89,7 +89,7 @@ const size = (path) => ({ $size: { $ifNull: [path, []] } });
  */
 const reviewRow = (withQuestions) => ({
   $project: {
-    company: 1, companyKey: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, applyUrl: 1, finalUrl: 1, createdAt: 1, updatedAt: 1,
+    company: 1, companyKey: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, priorityTags: 1, applyUrl: 1, finalUrl: 1, createdAt: 1, updatedAt: 1,
     "resume.fileName": 1, "resume.sha256": 1, "failure.code": 1,
     "submission.attemptedAt": 1, "submission.submittedAt": 1, "submission.validation.passed": 1, "submission.formSignature": 1,
     "submission.approvalRequestedAt": 1, "submission.approvalInAttemptAt": 1, "submission.certification.status": 1,
@@ -143,7 +143,7 @@ const MAYBE_READY = { status: "NEEDS_REVIEW", "review.reason": { $in: ["SUBMIT_A
 
 const rowBase = (r) => ({
   id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
-  url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, updatedAt: r.updatedAt,
+  url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, priorityTags: r.priorityTags ?? [], updatedAt: r.updatedAt,
 });
 
 async function engineState(db) {
