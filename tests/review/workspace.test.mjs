@@ -116,3 +116,42 @@ test('bulk discard previews exact records, supports cancellation, and never send
     assert.ok(actions.every(a=>a.action==='discard_applications'));
   } finally {await browser.close();await new Promise(resolve=>server.close(resolve));}
 });
+
+
+test('question discovery shows all resolved answers and requires explicit Fill and verify', async () => {
+  const server = http.createServer((req, res) => {
+    const requested = path.join(root, 'dist-apply', req.url.split('?')[0]);
+    const file = fs.existsSync(requested) && fs.statSync(requested).isFile() ? requested : path.join(root, 'dist-apply/index.html');
+    res.setHeader('Content-Type', file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : 'text/html'); res.end(fs.readFileSync(file));
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const port = server.address().port;
+  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const page = await browser.newPage();
+  const actions = [], errors = [];
+  const app = { ...rows[0], id: 'discovered', company: 'Collected Example', questions: [], questionReviewStatus: 'complete', reviewStage: 'questions' };
+  page.on('pageerror', e => errors.push(e.message));
+  try {
+    await page.route('**/*', route => {
+      const url = new URL(route.request().url());
+      if (url.pathname === '/api/auth/me') return route.fulfill({ json: { user: { id: 1, name: 'Test reviewer' } } });
+      if (url.pathname === '/applications/review-queue') return route.fulfill({ json: { ok: true, generatedAt: app.updatedAt, counts: { unanswered: 1, questions: 0, ready: 0 }, unanswered: [{ id: app.id, updatedAt: app.updatedAt, n: 0 }], cards: [app] } });
+      if (url.pathname === '/applications/detail') return route.fulfill({ json: { ok: true, id: app.id, company: app.company, title: app.title, status: 'NEEDS_REVIEW', ats: 'ashby', url: app.url, resume: {}, questions: [{ label: 'Name', required: true, step: 0, type: 'text', resolution: 'answered', verified: false, answerKind: 'value', answer: 'Test Candidate', source: 'profile', sensitive: null }], timeline: [], attempts: [], submission: {}, failure: null } });
+      if (url.pathname === '/applications/action') { actions.push(route.request().postDataJSON()); return route.fulfill({ json: { ok: true } }); }
+      if (url.hostname === '127.0.0.1' && url.port === String(port)) return route.continue();
+      return route.abort();
+    });
+    await page.goto(`http://127.0.0.1:${port}/unanswered`);
+    await page.getByRole('button', { name: 'Fill and verify', exact: true }).waitFor();
+    assert.equal(actions.length, 0);
+    await page.getByText('Review all extracted questions and answers', { exact: true }).click();
+    await page.getByText('Test Candidate', { exact: true }).waitFor();
+    assert.equal(actions.length, 0, 'viewing the answer plan cannot fill or submit');
+    await page.getByRole('button', { name: 'Fill and verify', exact: true }).click();
+    await page.waitForFunction(() => !document.querySelector('article[aria-busy="true"]'));
+    assert.equal(actions.length, 1);
+    assert.equal(actions[0].action, 'continue_application');
+    assert.equal(actions[0].expectedUpdatedAt, app.updatedAt);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
+});

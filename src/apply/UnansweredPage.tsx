@@ -1,3 +1,4 @@
+import ApplicationDetail from "./ApplicationDetail";
 import DiscardApplications from "./DiscardApplications";
 import { attachmentMessage } from "./attachmentMessage";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -36,6 +37,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
+  const [answerPlans, setAnswerPlans] = useState<string[]>([]);
   useLayoutEffect(() => {
     if (!grid.current) return;
     const el = grid.current;
@@ -100,7 +102,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
           if (!app || app.updatedAt < row.updatedAt) return <article key={row.id} className="rv-card rv-card-wait" aria-busy="true">Loading questions…</article>;
           const questions = app.questions.filter(q => filter === "all" || reviewCategory(q) === filter);
           return <article key={app.id} className="rv-card" aria-label={app.company} aria-busy={busy === app.id}>
-            <header className="rv-card-head"><input type="checkbox" aria-label={`Select ${app.company}`} checked={selected.includes(app.id)} disabled={busy !== null} onChange={e => setSelected(ids => e.target.checked ? [...ids, app.id].slice(0, 200) : ids.filter(id => id !== app.id))} /><CompanyLogo company={app.company} size="sm" /><div className="rv-card-id"><strong>{app.company}</strong><span>{app.title}</span><small>{app.questions.length} pending · {app.ats}</small></div></header>
+            <header className="rv-card-head"><input type="checkbox" aria-label={`Select ${app.company}`} checked={selected.includes(app.id)} disabled={busy !== null} onChange={e => setSelected(ids => e.target.checked ? [...ids, app.id].slice(0, 200) : ids.filter(id => id !== app.id))} /><CompanyLogo company={app.company} size="sm" /><div className="rv-card-id"><strong>{app.company}</strong><span>{app.title}</span><small>{app.questions.length} pending · {app.ats}{app.reviewStage === "questions" ? " · Questions collected before filling" : ""}</small></div></header>
             <div className="rv-card-body">{questions.map(q => {
               const category = reviewCategory(q); const key = keyOf(app, q); const text = textOf(app, q);
               const narrative = q.openEndedAssessment?.questionFamily || q.questionFamily === "why_company_role" || q.type === "textarea";
@@ -122,8 +124,9 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
                     </details></>}
               </section>;
             })}</div>
-            <footer className="rv-card-foot">{errors[app.id] && <p className="apps-error" role="alert">{errors[app.id]} <button className="apps-link" onClick={() => void refreshUnanswered()}>Load latest version</button></p>}
-              {!app.questions.length && app.questionReviewStatus === "complete" && <button className="rv-primary" disabled={busy !== null} onClick={() => void perform(app, { action: "continue_application" }, "Queued for refill and validation. Submission still requires separate approval.")}>Continue application</button>}
+            <footer className="rv-card-foot">
+              {app.reviewStage === "questions" && <div className="review-answer-plan"><button className="apps-link" aria-expanded={answerPlans.includes(app.id)} onClick={() => setAnswerPlans(ids => ids.includes(app.id) ? ids.filter(id => id !== app.id) : [...ids, app.id])}>Review all extracted questions and answers</button>{answerPlans.includes(app.id) && <ApplicationDetail id={app.id} version={app.updatedAt} />}</div>}{errors[app.id] && <p className="apps-error" role="alert">{errors[app.id]} <button className="apps-link" onClick={() => void refreshUnanswered()}>Load latest version</button></p>}
+              {!app.questions.length && app.questionReviewStatus === "complete" && <button className="rv-primary" disabled={busy !== null} onClick={() => void perform(app, { action: "continue_application" }, "Queued for refill and validation. Submission still requires separate approval.")}>{app.reviewStage === "questions" ? "Fill and verify" : "Continue application"}</button>}
               <details className="review-details"><summary>Application actions</summary><div className="rv-card-links"><button className="apps-link" onClick={() => defer(app.id)}>Later</button><a href={app.url} target="_blank" rel="noreferrer">Open form ↗</a><button className="apps-link" disabled={busy !== null} onClick={() => void perform(app, { action: "refresh_suggestions" }, "Proposals refreshed. No answer was approved.")}>Refresh suggestions</button></div>
                 <button className="apps-link" disabled={busy !== null} onClick={() => { if (window.confirm(`Skip ${app.company} — ${app.title}?`)) void perform(app, { action: "skip", note: "Skipped in review workspace" }, "Application skipped."); }}>Skip this job</button></details>
             </footer></article>;

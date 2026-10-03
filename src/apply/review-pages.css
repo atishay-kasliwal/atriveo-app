@@ -140,3 +140,8 @@
 .review-discard { display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:12px 0; }
 .review-discard > p { flex-basis:100%; }
 .discard-select { display:flex; gap:8px; padding:8px 12px; align-items:center; }
+
+/* The complete extracted plan must remain readable inside a narrow queue card. */
+.review-answer-plan .apps-full-grid { grid-template-columns: minmax(0, 1fr); }
+.review-answer-plan .apps-qa2 li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.review-answer-plan .apps-scores { grid-template-columns: minmax(0, 1fr); }

@@ -84,7 +84,7 @@ const reviewRow = (withQuestions) => ({
     "submission.approvalRequestedAt": 1, "submission.approvalInAttemptAt": 1,
     answered: size({ $filter: { input: { $ifNull: ["$questions", []] }, cond: { $eq: ["$$this.resolution", "answered"] } } }),
     review: {
-      reason: "$review.reason", detail: "$review.detail", since: "$review.since", questionReviewStatus: "$review.questionReviewStatus",
+      reason: "$review.reason", detail: "$review.detail", stage: "$review.stage", since: "$review.since", questionReviewStatus: "$review.questionReviewStatus",
       failedChecks: { $map: { input: { $ifNull: ["$review.failedChecks", []] }, in: "$$this.id" } },
       pending: {
         $map: {
@@ -169,7 +169,7 @@ async function unansweredCards(apps, ids) {
   const rows = await apps.aggregate([{ $match: { ...BLOCKED, _id: { $in: ids } } }, reviewRow(true)]).toArray();
   const byId = new Map(rows.map((r) => [r._id, r]));
   return ids.filter((id) => byId.has(id)).map((id) => byId.get(id))
-    .map((r) => ({ ...rowBase(r), reviewReason: r.review.reason ?? null, questionReviewStatus: r.review.questionReviewStatus ?? null, questions: r.review.pending.map(pendingQuestion) }));
+    .map((r) => ({ ...rowBase(r), reviewReason: r.review.reason ?? null, questionReviewStatus: r.review.questionReviewStatus ?? null, reviewStage: r.review.stage ?? null, questions: r.review.pending.map(pendingQuestion) }));
 }
 
 const blockedTotals = async (apps) => {

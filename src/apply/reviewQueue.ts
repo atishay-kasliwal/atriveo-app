@@ -16,7 +16,7 @@ interface Row {
   id: string; company: string; companyKey: string | null; title: string; location: string | null; ats: string | null;
   url: string; priority: number; updatedAt: string;
 }
-export interface UnansweredApp extends Row { reviewReason: string | null; questionReviewStatus: "open" | "complete" | null; questions: PendingQ[] }
+export interface UnansweredApp extends Row { reviewStage?: "questions" | "final_form" | null; reviewReason: string | null; questionReviewStatus: "open" | "complete" | null; questions: PendingQ[] }
 export interface ReadyApp extends Row {
   filledAt: string; resumeFile: string | null; answered: number;
   /** Ready jobs at this company; one is submitted per company per day. */

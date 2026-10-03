@@ -11,7 +11,7 @@ function answerText(q: Detail["questions"][number]): { text: string; muted: bool
   switch (q.answerKind) {
     case "value": return { text: q.answer ?? "", muted: false };
     case "declined": return { text: "Decline to self-identify", muted: false };
-    case "withheld": return { text: "Filled (value not stored: sensitive)", muted: true };
+    case "withheld": return { text: q.verified ? "Filled (value not stored: sensitive)" : "Answer resolved from saved source (sensitive value withheld)", muted: true };
     case "blank": return { text: "Left blank", muted: true };
     default: return { text: q.resolution === "needs_review" ? "Waiting for your answer" : "—", muted: true };
   }
