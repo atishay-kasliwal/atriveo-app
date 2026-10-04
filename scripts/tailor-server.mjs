@@ -41,11 +41,12 @@ import { applicationsAnalytics, applicationDetail, overviewHistory, overviewSumm
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
-import { getWorkerId } from "./worker-id.mjs";
+import { compileOwner } from "./worker-id.mjs";
 import { handleFillRoute, runManualFill } from "./fill-routes.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
 import { listActiveWorkers } from "./worker-registry.mjs";
 import { buildCoverLetter } from "./cover-letter.mjs";
+import { applyHereDocs } from "./apply-here-docs.mjs";
 import {
   startScrape, cancelScrape, readScrapeState, tailScrapeLog, readScrapeEstimate,
   isScrapeRunning, SCRAPE_PHASES, JOB_PIPELINE_DIR, SCRAPE_SCRIPT,
@@ -86,6 +87,10 @@ function isRecoverableServerError(message) {
 }
 
 const BANK = loadBullets();
+
+// Apply with Atriveo: the compile queue and cover letter generator for its Resume and Cover letter tabs.
+const APPLY_HERE_DOCS = applyHereDocs({ withMongo, outRoot: process.env.TAILOR_OUT_ROOT?.trim() || path.join(os.homedir(), "Documents", "tailored-resumes"), bank: BANK, log: (...a) => console.log("[tailor]", ...a) });
+
 const SAFE_CLAIMS = loadSafeClaims(BANK);
 const BANK_NUMBERS = loadBankNumbers(BANK);
 
@@ -1140,7 +1145,7 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({ ok: false, error: "Unauthorized" }));
   }
   // Open & Fill: the Atriveo Fill extension on this Mac only (never through the relay); see fill-routes.mjs.
-  if (await handleFillRoute(req, res, reqUrl, (request) => runManualFill(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo"), request))) return;
+  if (await handleFillRoute(req, res, reqUrl, (request) => runManualFill(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo"), request), APPLY_HERE_DOCS)) return;
 
   if (req.method === "GET" && pathname === "/health") {
     const driveOk = fs.existsSync(path.dirname(OUT_ROOT));
@@ -1769,7 +1774,7 @@ const server = http.createServer(async (req, res) => {
     (async () => {
       try {
         if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
-        const stats = await withMongo((db) => countActiveCompileJobs(db, { owner: getWorkerId() }), { appName: "AtriveoTailorServer" });
+        const stats = await withMongo((db) => countActiveCompileJobs(db, { owner: compileOwner() }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify({ ok: true, ...stats }));
       } catch (e) {
@@ -1790,7 +1795,7 @@ const server = http.createServer(async (req, res) => {
         // Scoped to this machine: its worker is the only one that will build
         // these, and its filesystem is the only one holding the PDFs.
         // "all=1" opts back into the whole fleet for debugging.
-        const owner = reqUrl.searchParams.get("all") === "1" ? undefined : getWorkerId();
+        const owner = reqUrl.searchParams.get("all") === "1" ? undefined : compileOwner();
         const jobs = await withMongo((db) => listCompileJobs(db, { status, limit, owner }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify({ ok: true, jobs }));

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { IN_BROWSER_LABEL, inBrowserSummary } from "./InBrowser";
 import { createPortal } from "react-dom";
 import PdfPreviewModal from "../components/PdfPreviewModal";
 import { getTailorServerBase } from "../utils/tailorServer";
@@ -84,6 +85,9 @@ export default function ApplicationDetail({ id, version }: { id: string; version
       {!detail && !error && <p className="apps-muted">Loading…</p>}
       {detail && (
         <>
+          {detail.owner === "extension" && detail.inBrowser && (
+            <p className="apps-note ib-banner" role="status"><strong>{IN_BROWSER_LABEL}.</strong> Opened with Apply with Atriveo · {inBrowserSummary(detail.inBrowser)}. The worker never touches it.</p>
+          )}
           <section className="apps-scores" aria-label="Scores">
             <Score
               label="ATS score"

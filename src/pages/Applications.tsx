@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { IN_BROWSER_LABEL, InBrowserActions, inBrowserSummary } from "../apply/InBrowser";
+import type { InBrowserApp } from "../apply/reviewQueue";
 import { Link } from "react-router-dom";
 import CompanyLogo from "../components/CompanyLogo";
 import ApplicationDetail from "../apply/ApplicationDetail";
@@ -22,6 +24,9 @@ interface HistoryRow {
   /** What the employer's mail said after you applied (inbox watcher). */
   outcome?: { status: "confirmed" | "rejected"; at: string | null; subject: string | null } | null;
   priority?: number;
+  /** "extension": open in your browser (Apply with Atriveo); only Return to worker and Skip apply. */
+  owner?: "engine" | "extension";
+  inBrowser?: InBrowserApp;
 }
 interface Analytics {
   ok: boolean;
@@ -479,6 +484,7 @@ function stepLabel(step: string | null): string | null {
 }
 
 function reasonOf(h: HistoryRow): { label: string; tone: "warn" | "bad" } {
+  if (h.owner === "extension" && h.status === "NEEDS_REVIEW") return { label: IN_BROWSER_LABEL, tone: "warn" };
   if (h.status === "FAILED") return { label: humanize(h.failureCode ?? "failed"), tone: "bad" };
   const email = emailStepOf(h);
   if (email === "code") return { label: "Security code not entered", tone: "warn" };
@@ -525,6 +531,7 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
 
 /** One line about what happened to an application, shared by the table and the phone cards. */
 function detailOf(h: HistoryRow): string {
+  if (h.owner === "extension" && h.status === "NEEDS_REVIEW") return h.inBrowser ? `${IN_BROWSER_LABEL} · ${inBrowserSummary(h.inBrowser)}` : IN_BROWSER_LABEL;
   if (h.status === "NEEDS_REVIEW") return `${humanize(h.reviewReason ?? "")}${h.pendingCount ? ` · ${h.pendingCount} question(s)` : ""}`;
   if (h.status === "FAILED") return `${humanize(h.failureCode ?? "")}${h.failureMessage ? ` — ${h.failureMessage}` : ""}`;
   if (h.status === "APPLIED") return `by ${h.submittedBy ?? "engine"} · ${when(h.submittedAt)}`;
@@ -575,10 +582,11 @@ function ReviewDrawer({ row, onClose, onDone }: { row: HistoryRow; onClose: () =
   }, [onClose]);
   const reason = reasonOf(row);
   // History rows are light; this application's pending questions load when you open it.
-  const [questions, setQuestions] = useState<PendingQ[] | null>(row.pendingCount ? null : []);
+  const inBrowser = row.owner === "extension" ? row.inBrowser ?? null : null;
+  const [questions, setQuestions] = useState<PendingQ[] | null>(row.pendingCount && !inBrowser ? null : []);
   const [loadError, setLoadError] = useState<string | null>(null);
   useEffect(() => {
-    if (!row.pendingCount) return;
+    if (!row.pendingCount || inBrowser) return;
     let live = true;
     fetch(`${getTailorServerBase()}/applications/review-queue?view=cards&ids=${encodeURIComponent(row.id)}`, { credentials: "include", cache: "no-store" })
       .then((r) => r.json())
@@ -606,7 +614,12 @@ function ReviewDrawer({ row, onClose, onDone }: { row: HistoryRow; onClose: () =
           <a href={row.url} target="_blank" rel="noreferrer">Open ↗</a>
         </div>
         <div className="apps-drawer-body">
-          {loadError ? <p className="apps-error">{loadError}</p>
+          {inBrowser ? (
+            <div className="apps-review">
+              <div className="apps-note"><p><strong>{IN_BROWSER_LABEL}.</strong> You opened it with Apply with Atriveo: review the answers and click Submit on the page. The worker never touches it, so there is nothing to approve here. {inBrowserSummary(inBrowser)}.</p></div>
+              <InBrowserActions app={inBrowser} onDone={onDone} />
+            </div>
+          ) : loadError ? <p className="apps-error">{loadError}</p>
             : questions ? <ReviewPanel row={{ ...row, questions }} onDone={onDone} />
             : <p className="apps-muted">Loading questions…</p>}
         </div>
@@ -715,7 +728,7 @@ function AttentionPanel({ rows, total, expanded, onToggle, onReview, onRetry, on
                   <span className={`apps-tag ${r.tone}`}>{r.label}</span>
                   <span className="apps-row-act">
                     <button className="apps-link" onClick={() => onHistory(h.id)}>History</button>
-                    {h.status === "FAILED"
+                    {h.status === "FAILED" && h.owner !== "extension"
                       ? <button className="apps-btn" onClick={() => onRetry(h.id)}>Retry</button>
                       : <button className="apps-btn accent" onClick={() => onReview(h.id)}>Review</button>}
                   </span>

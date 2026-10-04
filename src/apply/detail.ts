@@ -6,6 +6,9 @@ import { getJson } from "./engine";
 export interface Detail {
   ok: boolean; error?: string;
   id: string; company: string; title: string; ats: string | null; status: string; url: string;
+  /** "extension": open in your browser (Apply with Atriveo). */
+  owner?: "engine" | "extension";
+  inBrowser?: import("./reviewQueue").InBrowserApp | null;
   resume: { fileName: string | null; path: string | null; sha256: string | null; bytes: number | null; verifiedAt: string | null; sourceJobUrl: string | null };
   questions: Array<{
     label: string; step: number; required: boolean; type: string; resolution: "answered" | "needs_review" | "skipped"; verified: boolean;

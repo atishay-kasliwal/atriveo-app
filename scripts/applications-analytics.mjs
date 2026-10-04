@@ -3,6 +3,8 @@
 // ats_boards for the discovery → resume → apply funnel. Served by the sidecar
 // at GET /applications/analytics (behind the site login via the /tailor relay).
 
+import fs from "node:fs";
+
 const TZ = "America/New_York";
 const dayKey = (iso) => (iso ? new Date(iso).toLocaleString("sv-SE", { timeZone: TZ }).slice(0, 10) : null);
 
@@ -77,6 +79,62 @@ export function readyForApproval(r) {
     && Boolean(r.submission?.validation?.passed && r.submission?.formSignature && r.resume?.sha256);
 }
 
+/**
+ * Applications you opened with Apply with Atriveo (playatriveo `owner: "extension"`) belong to your browser:
+ * the worker never claims them and the backend refuses Approve, Fill and verify, Continue and Retry on them.
+ * So they never appear in the Unanswered, Ready or Today action lists; they get their own list
+ * ("Applying in your browser") whose only actions are Return to worker (when allowed) and Skip.
+ */
+export const NOT_IN_BROWSER = { owner: { $ne: "extension" } };
+const OUTCOME_HOURS = 4;
+const POST_FENCE_REVIEWS = new Set(["UNCERTAIN_SUBMISSION", "SPAM_BLOCKED", "SECURITY_CODE_REJECTED"]);
+
+/**
+ * Why Return to worker would be refused right now, or null when it is allowed. Mirrors playatriveo's
+ * returnBlock (src/application/applyHere/ownership.ts), which stays the authority; keep the two in step
+ * so the dashboard never offers an action the backend refuses.
+ */
+export function returnToWorkerBlock(r, now = new Date(), fileExists = fs.existsSync) {
+  const s = r.submission ?? {};
+  if (r.owner !== "extension") return "It already belongs to the worker.";
+  if (r.status === "APPLIED") return "You already applied to this posting.";
+  if (r.status === "SUBMITTING") return "It is being submitted right now.";
+  if (r.status === "APPLYING" || r.lease) return "It is being filled right now.";
+  if (s.attemptedAt || s.submittedAt || POST_FENCE_REVIEWS.has(r.review?.reason ?? "")) return "Submit was already attempted. Check whether it went through instead.";
+  const fill = s.manualFill;
+  if (fill?.planServedAt && Date.parse(fill.armedAt) + OUTCOME_HOURS * 3_600_000 > now.getTime()) return "You filled it in your browser and may still submit it there. Try again in a few hours, or skip it.";
+  if (r.status !== "NEEDS_REVIEW" || r.review?.reason !== "IN_EXTENSION") return "It isn't open in your browser.";
+  const before = r.extension?.before;
+  const queued = !((before?.status === "NEEDS_REVIEW" && before.review) || (before?.status === "SKIPPED" && before.skip));
+  if (queued && !(r.resume?.path && fileExists(r.resume.path))) return "There is no resume file for the worker to use yet.";
+  return null;
+}
+
+/** Fields returnToWorkerBlock and the in-browser rows read (kept small: the link to Mongo is slow). */
+const IN_BROWSER_FIELDS = {
+  owner: 1, lease: 1, "resume.path": 1, "extension.startedAt": 1, "extension.takenOverFrom": 1, "extension.before.status": 1,
+  "extension.before.review.reason": 1, "extension.before.skip.reason": 1,
+  "submission.manualFill.armedAt": 1, "submission.manualFill.planServedAt": 1,
+};
+
+/** One application open in your browser, as the dashboard lists it. */
+export function inBrowserRow(r, now = new Date(), fileExists = fs.existsSync) {
+  const fill = r.submission?.manualFill ?? null;
+  const block = returnToWorkerBlock(r, now, fileExists);
+  return {
+    id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
+    url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, updatedAt: r.updatedAt,
+    state: "Applying in your browser",
+    startedAt: r.extension?.startedAt ?? null,
+    takenOverFrom: r.extension?.takenOverFrom ?? null,
+    pending: Array.isArray(r.review?.pending) ? r.review.pending.length : 0,
+    filledAt: fill?.filledAt ?? null,
+    filled: fill?.report?.filled ?? null,
+    canReturn: block === null,
+    returnBlock: block,
+  };
+}
+
 // Longer choice lists (a school picker can have thousands) are left out of the
 // list and fetched for one question when its card is on screen; the link to
 // Mongo is slow enough that a few such lists would double the load time.
@@ -94,6 +152,7 @@ const reviewRow = (withQuestions) => ({
     "submission.attemptedAt": 1, "submission.submittedAt": 1, "submission.validation.passed": 1, "submission.formSignature": 1,
     "submission.approvalRequestedAt": 1, "submission.approvalInAttemptAt": 1, "submission.certification.status": 1,
     "submission.manualFill.armedAt": 1, "submission.manualFill.filledAt": 1, "submission.manualFill.report": 1,
+    ...IN_BROWSER_FIELDS,
     answered: size({ $filter: { input: { $ifNull: ["$questions", []] }, cond: { $eq: ["$$this.resolution", "answered"] } } }),
     review: {
       reason: "$review.reason", detail: "$review.detail", stage: "$review.stage", since: "$review.since", questionReviewStatus: "$review.questionReviewStatus",
@@ -134,12 +193,17 @@ const pendingQuestion = (p) => ({
 });
 
 // Blocked on questions: the Unanswered page.
-const BLOCKED = { status: "NEEDS_REVIEW", "submission.attemptedAt": null, $or: [
+const BLOCKED = { status: "NEEDS_REVIEW", ...NOT_IN_BROWSER, "submission.attemptedAt": null, $or: [
   { "review.pending.0": { $exists: true } },
   { "review.questionReviewStatus": "complete", "review.reason": { $nin: ["SUBMIT_APPROVAL", "MANUAL_SUBMIT"] } },
 ] };
 // readyForApproval / readyForYou need one of these reasons; their other checks run on these few rows.
-const MAYBE_READY = { status: "NEEDS_REVIEW", "review.reason": { $in: ["SUBMIT_APPROVAL", "MANUAL_SUBMIT"] } };
+const MAYBE_READY = { status: "NEEDS_REVIEW", ...NOT_IN_BROWSER, "review.reason": { $in: ["SUBMIT_APPROVAL", "MANUAL_SUBMIT"] } };
+// Open in your browser and still yours to finish (not applied, skipped or failed).
+const IN_BROWSER = { owner: "extension", status: "NEEDS_REVIEW" };
+
+/** Applications open in your browser, newest first. */
+const inBrowserRows = async (apps, now) => (await apps.aggregate([{ $match: IN_BROWSER }, { $sort: { updatedAt: -1 } }, { $limit: 100 }, reviewRow(false)]).toArray()).map((r) => inBrowserRow(r, now));
 
 const rowBase = (r) => ({
   id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
@@ -198,7 +262,7 @@ async function approvals(apps, now) {
   const since = new Date(now.getTime() - 2 * 86_400_000).toISOString();
   const [approved, submittedRecently] = await Promise.all([
     apps.aggregate([
-      { $match: { $or: [{ "submission.approvalRequestedAt": { $ne: null } }, { "submission.approvalInAttemptAt": { $gte: since } }] } },
+      { $match: { ...NOT_IN_BROWSER, $or: [{ "submission.approvalRequestedAt": { $ne: null } }, { "submission.approvalInAttemptAt": { $gte: since } }] } },
       reviewRow(false),
     ]).toArray(),
     apps.find({ "submission.attemptedAt": { $gte: since } }, { projection: { companyKey: 1, "submission.attemptedAt": 1 } }).toArray(),
@@ -273,13 +337,13 @@ export async function reviewQueue(db, { view = "full", cards = 0, ids = [], now 
       return { ok: true, generatedAt, ...engine, counts: countsOf(order, ready), unanswered: order, cards: first };
     }
     case "ready": {
-      const [engine, totals, ready, approved] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps), approvals(apps, now)]);
-      return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length }, ...readyLists(ready, approved, now) };
+      const [engine, totals, ready, approved, inBrowser] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps), approvals(apps, now), inBrowserRows(apps, now)]);
+      return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length, inBrowser: inBrowser.length }, ...readyLists(ready, approved, now), inBrowser };
     }
     case "full": {
-      const [engine, order, ready, approved] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps), approvals(apps, now)]);
+      const [engine, order, ready, approved, inBrowser] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps), approvals(apps, now), inBrowserRows(apps, now)]);
       const unanswered = await unansweredCards(apps, order.map((r) => r.id));
-      return { ok: true, generatedAt, ...engine, counts: countsOf(order, ready), unanswered, ...readyLists(ready, approved, now) };
+      return { ok: true, generatedAt, ...engine, counts: { ...countsOf(order, ready), inBrowser: inBrowser.length }, unanswered, ...readyLists(ready, approved, now), inBrowser };
     }
     default:
       throw new Error(`Unknown review-queue view: ${view}`);
@@ -316,6 +380,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
         company: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, applyUrl: 1, finalUrl: 1, attemptCount: 1, createdAt: 1, updatedAt: 1,
         lifecycle: 1, step: 1, attempts: 1, "review.reason": 1, "review.detail": 1, "review.questionReviewStatus": 1, "review.pending": 1, "failure.code": 1, "failure.message": 1,
         "submission.by": 1, "submission.submittedAt": 1, "submission.attemptedAt": 1, "domain.domain": 1, source: 1, outcome: 1,
+        ...IN_BROWSER_FIELDS,
       },
     }).sort({ updatedAt: -1 }).limit(limit).toArray(),
     db.collection("form_patterns").aggregate([{ $group: { _id: "$trust", n: { $sum: 1 } } }]).toArray(),
@@ -474,6 +539,8 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
       priority: r.priority ?? 0,
+      owner: r.owner === "extension" ? "extension" : "engine",
+      ...(r.owner === "extension" ? { inBrowser: inBrowserRow(r) } : {}),
     })),
   };
 }
@@ -494,6 +561,7 @@ const LIGHT_ROW = {
   "submission.by": 1, "submission.submittedAt": 1, "submission.attemptedAt": 1, "domain.domain": 1,
   "outcome.status": 1, "outcome.rejectedAt": 1, "outcome.confirmedAt": 1, "outcome.subject": 1,
   pendingCount: { $size: { $ifNull: ["$review.pending", []] } },
+  ...IN_BROWSER_FIELDS,
 };
 
 /** A history row as the Overview shows it; `questions` stay empty until the review drawer loads them. */
@@ -508,6 +576,9 @@ const lightRow = (r) => ({
   attempts: r.attemptCount ?? 0, domain: r.domain?.domain ?? null, url: r.finalUrl ?? r.applyUrl,
   outcome: r.outcome?.status ? { status: r.outcome.status, at: r.outcome.rejectedAt ?? r.outcome.confirmedAt ?? null, subject: r.outcome.subject ?? null } : null,
   createdAt: r.createdAt, updatedAt: r.updatedAt, priority: r.priority ?? 0,
+  // Open in your browser (Apply with Atriveo): the dashboard offers only Return to worker and Skip.
+  owner: r.owner === "extension" ? "extension" : "engine",
+  ...(r.owner === "extension" ? { inBrowser: inBrowserRow(r) } : {}),
 });
 
 const lightRows = async (apps, match, { skip = 0, limit = 0 } = {}) => (await apps.aggregate([
@@ -699,6 +770,8 @@ export async function applicationDetail(db, id) {
   return {
     ok: true,
     id: r._id, company: r.company, title: r.title, ats: r.ats ?? null, status: r.status, url: r.finalUrl ?? r.applyUrl,
+    owner: r.owner === "extension" ? "extension" : "engine",
+    inBrowser: r.owner === "extension" ? inBrowserRow(r) : null,
     resume: {
       fileName: r.resume?.fileName ?? null, path: r.resume?.path ?? null, sha256: r.resume?.sha256 ?? null,
       bytes: r.resume?.bytes ?? null, verifiedAt: r.resume?.verifiedAt ?? null, sourceJobUrl: r.resume?.sourceJobUrl ?? null,
