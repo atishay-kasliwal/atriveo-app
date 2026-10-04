@@ -32,6 +32,7 @@ import { resolveResumeSessionDir } from "./resume-path.mjs";
 import { tailorOneAc } from "./tailor-ac.mjs";
 import { getArtifactsRoot, readManifest } from "./ac-artifact-store.mjs";
 import { getWorkerId } from "./worker-id.mjs";
+import { draftCoverLetter } from "./resume-cover.mjs";
 import {
   ensureWorkerIndex,
   heartbeatWorker,
@@ -206,6 +207,8 @@ async function processOneJob(db) {
       // "basic" when the posting failed the fit check and got the general resume.
       fallback: result.fallback || null,
     });
+
+    if (success && result.pdfPath) await draftCoverLetter(db, { jobUrl, company, title, jd, dir: path.dirname(result.pdfPath) }, { log });
 
     log(
       success ? (result.cached ? "cache" : "done") : "fail",

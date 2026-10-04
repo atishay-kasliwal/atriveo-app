@@ -1,4 +1,5 @@
 import DiscardApplications from "./DiscardApplications";
+import { InBrowserSection } from "./InBrowser";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import CompanyLogo from "../components/CompanyLogo";
@@ -234,7 +235,7 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
         {data && (
           <div className={`rv-split ${showDetail && selected ? "is-detail" : ""}`}>
             <aside className="rv-list" aria-label="Ready to submit">
-              {rows.length === 0 && (
+              {rows.length === 0 && !(data.inBrowser ?? []).length && (
                 <div className="rv-empty">
                   <strong>Nothing is waiting for your approval.</strong>
                   {data.counts.unanswered > 0 && <Link to="/unanswered">{data.counts.unanswered} application{data.counts.unanswered === 1 ? " needs" : "s need"} answers →</Link>}
@@ -281,6 +282,7 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
                   </ul>
                 </section>
               )}
+              <InBrowserSection rows={data.inBrowser ?? []} onDone={(message) => { setNotice(message); void refreshReady(); }} />
               {(approved.length > 0 || (bulk?.failed.length ?? 0) > 0) && (
                 <section className="rv-approved" aria-label="Approved">
                   <h2>Approved {inFlight && <span className="apps-pulse" aria-hidden />}</h2>

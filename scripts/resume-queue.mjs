@@ -3,7 +3,7 @@
 import { COMPILE_STAGES, resolveCachedCompile } from "./ac-artifact-store.mjs";
 import { loadBank } from "./ac-bank.mjs";
 import { hourEtFromBatch, parseSessionHour, etDateKey, etDayBoundsUtc } from "./resume-path.mjs";
-import { getWorkerId } from "./worker-id.mjs";
+import { compileOwner } from "./worker-id.mjs";
 
 // Each machine runs its own queue.
 //
@@ -102,7 +102,7 @@ async function applyManifestCacheHit(db, jobUrl, { force = false, planner = DEFA
     // The cached PDF lives in this machine's artifact store. Without an owner
     // the row drops out of every owner-scoped queue listing, so the dock never
     // offers Download and its Resume button only answers "already_success".
-    owner: getWorkerId(),
+    owner: compileOwner(),
   });
   return cached;
 }
@@ -167,7 +167,7 @@ export async function enqueueJob(db, job, { force = false, planner = DEFAULT_PLA
           // run it. Defaulted here rather than at the call sites so every
           // path — dock, hourly sweep, manual retry — is owned by whichever
           // machine the enqueuing process is running on.
-          owner: job.owner || getWorkerId(),
+          owner: job.owner || compileOwner(),
           updated_at: now,
           error: null,
           company: job.company || existing?.company || null,

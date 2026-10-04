@@ -21,3 +21,14 @@ export function getWorkerId() {
   fs.writeFileSync(ID_PATH, `${id}\n`);
   return id;
 }
+
+/**
+ * The resume compiler that builds what this process queues, and whose builds its queue views show.
+ * On one machine it is this machine (getWorkerId). On Oracle the dashboard and the compiler are separate
+ * containers: the compiler (atriveo-resume-worker) runs with WORKER_ID=oracle-atriveo and claims only jobs
+ * owned by it, while the dashboard has no worker id of its own, so RESUME_WORKER_ID names the compiler there.
+ * Without it, every job the dashboard queued got a random owner no compiler would ever claim.
+ */
+export function compileOwner() {
+  return process.env.RESUME_WORKER_ID?.trim() || getWorkerId();
+}

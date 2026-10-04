@@ -14,6 +14,19 @@ export interface Counts {
   unanswered: number; questions: number; ready: number; readyForReview?: number; needsInput?: number; actionRequired?: number;
   /** Of `unanswered`: every answer approved, waiting for you to choose Fill and verify. */
   reviewComplete?: number;
+  /** Open in your browser (Apply with Atriveo): never in the lists above. */
+  inBrowser?: number;
+}
+/**
+ * An application open in your browser (Apply with Atriveo). The worker never touches it; the only dashboard
+ * actions are Return to worker (when `canReturn`; otherwise `returnBlock` says why) and Skip.
+ */
+export interface InBrowserApp {
+  id: string; company: string; companyKey: string | null; title: string; location: string | null; ats: string | null;
+  url: string; priority: number; updatedAt: string;
+  state: string; startedAt: string | null; takenOverFrom: string | null; pending: number;
+  filledAt: string | null; filled: number | null;
+  canReturn: boolean; returnBlock: string | null;
 }
 
 interface Row {
@@ -44,7 +57,7 @@ export interface QueuedApp { company?: string; title?: string; id: string; updat
 
 interface View extends EngineState { ok: boolean; generatedAt: string; counts: Counts }
 export interface UnansweredQueue extends View { unanswered: QueuedApp[] }
-export interface ReadyQueue extends View { ready: ReadyApp[]; approved: ApprovedApp[]; manual?: ManualApp[] }
+export interface ReadyQueue extends View { ready: ReadyApp[]; approved: ApprovedApp[]; manual?: ManualApp[]; inBrowser?: InBrowserApp[] }
 
 const visible = () => document.visibilityState === "visible";
 

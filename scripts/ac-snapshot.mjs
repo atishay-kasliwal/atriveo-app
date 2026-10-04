@@ -51,9 +51,15 @@ export function buildResumeSnapshot({
   };
 }
 
+// An analytics log only: a folder it can't write (a read-only container) never fails the resume it describes.
 export function persistSnapshot(snapshot, rootDir) {
   const indexPath = path.join(rootDir, "data", "snapshots", "index.jsonl");
-  fs.mkdirSync(path.dirname(indexPath), { recursive: true });
-  fs.appendFileSync(indexPath, `${JSON.stringify(snapshot)}\n`);
-  return indexPath;
+  try {
+    fs.mkdirSync(path.dirname(indexPath), { recursive: true });
+    fs.appendFileSync(indexPath, `${JSON.stringify(snapshot)}\n`);
+    return indexPath;
+  } catch (e) {
+    console.warn(`snapshot not saved (${e.code || e.message}): ${indexPath}`);
+    return null;
+  }
 }
