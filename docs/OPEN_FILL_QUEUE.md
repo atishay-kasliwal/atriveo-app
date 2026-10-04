@@ -20,3 +20,7 @@ Requires Atriveo Fill 0.2.2. The local bundle is built with `npm run extension:b
 `npm run test:open-fill-queue` runs isolated browser scenarios with mock records and blocked external requests: sequential success, failure pause, stop, and old-extension refusal. It uses Chrome and Playwright from the local playatriveo checkout; set `PLAYATRIVEO_ROOT` if that checkout is elsewhere.
 
 Backend tests cover trusted dashboard opening, destination restrictions, regular single-application compatibility, and the existing Ashby/Lever manual-fill submission boundary. No real applications are processed by these tests.
+
+## Verified forms: alternative browser fill
+
+Today offers Open & Fill beside Approve submit for certified Greenhouse, Ashby, and Lever forms. It requires successful validation, CERTIFIED final-form evidence, an unchanged resume hash, no previous submission attempt, and no queued submission approval. Awaiting answer review or worker verification remains blocked. Greenhouse requires Atriveo Fill 0.2.3 and supports hosted job-board pages. The extension reports newly exposed required fields for human attention and never clicks Submit. Engine submission configuration is unchanged.
