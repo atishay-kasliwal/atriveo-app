@@ -16,7 +16,7 @@ interface Day { day: string; queued: number; applied: number; needsReview: numbe
 interface HistoryRow {
   questions: PendingQ[]; submitAttempted: boolean;
   id: string; company: string; title: string; location: string | null; ats: string | null; status: Status;
-  reviewReason: string | null; reviewDetail: string | null; pending: string[]; failureCode: string | null; failureMessage: string | null;
+  reviewReason: string | null; reviewDetail: string | null; pendingCount: number; failureCode: string | null; failureMessage: string | null;
   questionReviewStatus?: "open" | "complete" | null;
   submittedBy: string | null; submittedAt: string | null; attempts: number; domain: string | null; url: string; createdAt: string; updatedAt: string;
   /** What the employer's mail said after you applied (inbox watcher). */
@@ -36,7 +36,10 @@ interface Analytics {
   formTrust: Record<string, number>;
   killSwitch: { enabled: boolean; reason: string | null; updatedAt: string; updatedBy: string } | null;
   discovery: { boards: Array<{ ats: string; boards: number; polled: number; withMatches: number }>; jobsBySite: Array<{ site: string; n: number }> };
-  history: HistoryRow[];
+  /** The first rows of "Needs your attention"; attentionTotal counts them all (the rest load on "View all"). */
+  attention: HistoryRow[];
+  attentionTotal: number;
+  queue: HistoryRow[];
   accounts?: AccountRow[];
   byStatus?: Record<string, number>;
   current?: CurrentRow | null;
@@ -482,7 +485,7 @@ function reasonOf(h: HistoryRow): { label: string; tone: "warn" | "bad" } {
   if (email === "verify") return { label: "Verify email", tone: "warn" };
   if (h.submitAttempted) return { label: "Confirm submission", tone: "warn" };
   if (h.reviewReason === "UNKNOWN_QUESTION" || h.reviewReason === "SENSITIVE_QUESTION") {
-    const n = h.pending.length;
+    const n = h.pendingCount;
     if (h.reviewReason === "UNKNOWN_QUESTION" && n) return { label: `${n} unanswered question${n === 1 ? "" : "s"}`, tone: "warn" };
     if (n > 1) return { label: `${n} sensitive questions`, tone: "warn" };
   }
@@ -522,7 +525,7 @@ function HistoryDrawer({ row, onClose }: { row: HistoryRow; onClose: () => void 
 
 /** One line about what happened to an application, shared by the table and the phone cards. */
 function detailOf(h: HistoryRow): string {
-  if (h.status === "NEEDS_REVIEW") return `${humanize(h.reviewReason ?? "")}${h.pending.length ? ` · ${h.pending.length} question(s)` : ""}`;
+  if (h.status === "NEEDS_REVIEW") return `${humanize(h.reviewReason ?? "")}${h.pendingCount ? ` · ${h.pendingCount} question(s)` : ""}`;
   if (h.status === "FAILED") return `${humanize(h.failureCode ?? "")}${h.failureMessage ? ` — ${h.failureMessage}` : ""}`;
   if (h.status === "APPLIED") return `by ${h.submittedBy ?? "engine"} · ${when(h.submittedAt)}`;
   return "";
@@ -571,6 +574,18 @@ function ReviewDrawer({ row, onClose, onDone }: { row: HistoryRow; onClose: () =
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
   const reason = reasonOf(row);
+  // History rows are light; this application's pending questions load when you open it.
+  const [questions, setQuestions] = useState<PendingQ[] | null>(row.pendingCount ? null : []);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!row.pendingCount) return;
+    let live = true;
+    fetch(`${getTailorServerBase()}/applications/review-queue?view=cards&ids=${encodeURIComponent(row.id)}`, { credentials: "include", cache: "no-store" })
+      .then((r) => r.json())
+      .then((j) => { if (live) { if (j.ok === false) setLoadError(j.error ?? "Couldn't load the questions"); else setQuestions(j.cards?.[0]?.questions ?? []); } })
+      .catch((e: unknown) => { if (live) setLoadError(e instanceof Error ? e.message : String(e)); });
+    return () => { live = false; };
+  }, [row.id, row.pendingCount]);
   return (
     <div className="apps-drawer-wrap">
       <div className="apps-scrim" onClick={onClose} />
@@ -591,7 +606,9 @@ function ReviewDrawer({ row, onClose, onDone }: { row: HistoryRow; onClose: () =
           <a href={row.url} target="_blank" rel="noreferrer">Open ↗</a>
         </div>
         <div className="apps-drawer-body">
-          <ReviewPanel row={row} onDone={onDone} />
+          {loadError ? <p className="apps-error">{loadError}</p>
+            : questions ? <ReviewPanel row={{ ...row, questions }} onDone={onDone} />
+            : <p className="apps-muted">Loading questions…</p>}
         </div>
       </aside>
     </div>
@@ -599,6 +616,7 @@ function ReviewDrawer({ row, onClose, onDone }: { row: HistoryRow; onClose: () =
 }
 
 const OPS_PREVIEW = 4;
+const HISTORY_PAGE = 25;
 const OPS_VISIBLE = 10;
 
 /** Rows for the two ops panels: 4 collapsed; expanded shows 10 and scrolls the rest. */
@@ -673,11 +691,11 @@ function QueuePanel({ rows, expanded, onToggle, onHistory }: { rows: HistoryRow[
   );
 }
 
-function AttentionPanel({ rows, expanded, onToggle, onReview, onRetry, onHistory }: { rows: HistoryRow[]; expanded: boolean; onToggle: () => void; onReview: (id: string) => void; onRetry: (id: string) => void; onHistory: (id: string) => void }) {
+function AttentionPanel({ rows, total, expanded, onToggle, onReview, onRetry, onHistory }: { rows: HistoryRow[]; total: number; expanded: boolean; onToggle: () => void; onReview: (id: string) => void; onRetry: (id: string) => void; onHistory: (id: string) => void }) {
   return (
     <section className={`apps-panel is-attn ${rows.length ? "has-items" : ""}`} aria-labelledby="attn-title">
       <div className="apps-panel-head">
-        <h2 id="attn-title">Needs your attention {rows.length > 0 && <span className="apps-count warn">{rows.length}</span>}</h2>
+        <h2 id="attn-title">Needs your attention {total > 0 && <span className="apps-count warn">{total}</span>}</h2>
         <span className="apps-panel-links"><Link to="/unanswered">All questions on one page</Link><Link to="/ready">Ready to submit</Link></span>
       </div>
       {rows.length === 0 ? (
@@ -705,8 +723,8 @@ function AttentionPanel({ rows, expanded, onToggle, onReview, onRetry, onHistory
               );
             })}
           </OpsRows>
-          {rows.length > OPS_PREVIEW && (
-            <button className="apps-link" onClick={onToggle}>{expanded ? "Show fewer" : `View all needing review (${rows.length})`}</button>
+          {total > OPS_PREVIEW && (
+            <button className="apps-link" onClick={onToggle}>{expanded ? "Show fewer" : `View all needing review (${total})`}</button>
           )}
         </>
       )}
@@ -728,7 +746,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch(`${getTailorServerBase()}/applications/analytics?days=${days}`, { credentials: "include", cache: "no-store" });
+      const res = await fetch(`${getTailorServerBase()}/applications/analytics?view=summary&days=${days}`, { credentials: "include", cache: "no-store" });
       const json = await res.json();
       if (!res.ok || json.ok === false) throw new Error(json.error || `HTTP ${res.status}`);
       setData(json);
@@ -757,26 +775,60 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
     return () => clearTimeout(t);
   }, [notice]);
 
-  const history = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return (data?.history ?? []).filter((h) => (filter === "ALL" || h.status === filter) && (!q || `${h.company} ${h.title} ${h.ats ?? ""}`.toLowerCase().includes(q)));
-  }, [data, filter, query]);
+  // History loads a page at a time (newest first); filter and search run on the sidecar.
+  const [history, setHistory] = useState<{ rows: HistoryRow[]; total: number; key: string } | null>(null);
+  const [historyBusy, setHistoryBusy] = useState(false);
+  const historyKey = `${filter}|${query.trim()}`;
+  const loadHistory = useCallback(async (skip: number, limit = HISTORY_PAGE) => {
+    setHistoryBusy(true);
+    try {
+      const params = new URLSearchParams({ view: "history", status: filter, q: query.trim(), skip: String(skip), limit: String(limit) });
+      const res = await fetch(`${getTailorServerBase()}/applications/analytics?${params}`, { credentials: "include", cache: "no-store" });
+      const json = await res.json();
+      if (!res.ok || json.ok === false) throw new Error(json.error || `HTTP ${res.status}`);
+      setHistory((cur) => ({ key: historyKey, total: json.total, rows: skip && cur?.key === historyKey ? [...cur.rows, ...json.rows] : json.rows }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setHistoryBusy(false);
+    }
+  }, [filter, query, historyKey]);
+  // A new filter or search (typed searches wait a moment) loads its first page; each later summary refresh
+  // (every minute) reloads the rows shown. The first summary doesn't: history loads alongside it.
+  const shownRef = useRef(HISTORY_PAGE);
+  shownRef.current = Math.max(HISTORY_PAGE, history?.key === historyKey ? history.rows.length : 0);
+  useEffect(() => {
+    const t = setTimeout(() => void loadHistory(0, shownRef.current), query ? 250 : 0);
+    return () => clearTimeout(t);
+  }, [loadHistory, query]);
+  const lastSummary = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const prev = lastSummary.current;
+    lastSummary.current = data?.generatedAt;
+    if (prev && data?.generatedAt && prev !== data.generatedAt) void loadHistory(0, shownRef.current);
+  }, [data?.generatedAt, loadHistory]);
+  const historyRows = history?.key === historyKey ? history.rows : [];
 
-  const attention = useMemo(() => {
-    return (data?.history ?? [])
-      .filter((h) => h.status === "NEEDS_REVIEW" || h.status === "FAILED")
-      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  }, [data]);
+  // "View all" in Needs your attention loads the rest of it; the summary carries the first rows.
+  const [allAttention, setAllAttention] = useState<HistoryRow[] | null>(null);
+  useEffect(() => {
+    if (!opsExpanded || !data || data.attentionTotal <= data.attention.length) return;
+    let live = true;
+    void fetch(`${getTailorServerBase()}/applications/analytics?view=history&status=NEEDS_REVIEW,FAILED&limit=500`, { credentials: "include", cache: "no-store" })
+      .then((r) => r.json()).then((j) => { if (live && j.ok !== false) setAllAttention(j.rows); }).catch(() => {});
+    return () => { live = false; };
+  }, [opsExpanded, data]);
+  const attention = opsExpanded && allAttention ? allAttention : data?.attention ?? [];
 
   // In-flight first, then queued in the order the worker claims them (priority, then oldest first).
   const queue = useMemo(() => {
     const rank = (h: HistoryRow) => (h.status === "SUBMITTING" ? 0 : h.status === "APPLYING" ? 1 : 2);
-    return (data?.history ?? [])
-      .filter((h) => h.status === "READY_TO_APPLY" || h.status === "APPLYING" || h.status === "SUBMITTING")
-      .sort((a, b) => rank(a) - rank(b) || (b.priority ?? 0) - (a.priority ?? 0) || a.createdAt.localeCompare(b.createdAt));
+    return [...(data?.queue ?? [])].sort((a, b) => rank(a) - rank(b) || (b.priority ?? 0) - (a.priority ?? 0) || a.createdAt.localeCompare(b.createdAt));
   }, [data]);
+  const findRow = (id: string) => attention.find((h) => h.id === id) ?? historyRows.find((h) => h.id === id) ?? queue.find((h) => h.id === id) ?? null;
 
-  const openRow = openId ? attention.find((h) => h.id === openId && h.status === "NEEDS_REVIEW") ?? null : null;
+  const found = openId ? findRow(openId) : null;
+  const openRow = found?.status === "NEEDS_REVIEW" ? found : null;
   const closeDrawer = useCallback(() => setOpenId(null), []);
   const retry = (id: string) => void postAction({ action: "retry", applicationId: id }).then((r) => { setNotice(r.ok ? "Queued again." : r.error ?? "Failed"); void load(); });
   const done = (msg: string) => { setNotice(msg); setOpenId(null); void load(); };
@@ -842,7 +894,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
 
             <div className="apps-ops">
               <QueuePanel rows={queue} expanded={opsExpanded} onToggle={() => setOpsExpanded((v) => !v)} onHistory={setHistoryId} />
-              <AttentionPanel rows={attention} expanded={opsExpanded} onToggle={() => setOpsExpanded((v) => !v)} onReview={setOpenId} onRetry={retry} onHistory={setHistoryId} />
+              <AttentionPanel rows={attention} total={data.attentionTotal} expanded={opsExpanded} onToggle={() => setOpsExpanded((v) => !v)} onReview={setOpenId} onRetry={retry} onHistory={setHistoryId} />
             </div>
 
             <section className="apps-insights" aria-labelledby="ins-title">
@@ -899,12 +951,12 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                   ))}
                   <input placeholder="Search company or role" aria-label="Search applications" value={query} onChange={(e) => setQuery(e.target.value)} />
                 </div>
-                {history.length === 0 ? <p className="apps-muted">No applications match.</p> : (
+                {!history ? <p className="apps-muted">Loading history…</p> : historyRows.length === 0 ? <p className="apps-muted">{historyBusy ? "Loading…" : "No applications match."}</p> : (
                   <>
                   <div className="apps-table-wrap apps-only-wide">
                     <table className="apps-table">
                       <thead><tr><th>Updated</th><th>Company</th><th>Role</th><th>ATS</th><th>Status</th><th>Details</th><th>Attempts</th><th /></tr></thead>
-                      <tbody>{history.map((h) => (
+                      <tbody>{historyRows.map((h) => (
                         <tr key={h.id}>
                           <td>{when(h.updatedAt)}</td>
                           <td>{h.company}</td>
@@ -924,7 +976,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                     </table>
                   </div>
                   <ul className="apps-cards apps-only-narrow">
-                    {history.map((h) => (
+                    {historyRows.map((h) => (
                       <li key={h.id}>
                         <div className="apps-cards-top">
                           <CompanyLogo company={h.company} size="sm" />
@@ -943,6 +995,12 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                       </li>
                     ))}
                   </ul>
+                  {history.total > historyRows.length && (
+                    <div className="apps-more">
+                      <span className="apps-muted">{historyRows.length} of {history.total}</span>
+                      <button className="apps-btn" disabled={historyBusy} onClick={() => void loadHistory(historyRows.length)}>{historyBusy ? "Loading…" : `Show ${Math.min(HISTORY_PAGE, history.total - historyRows.length)} more`}</button>
+                    </div>
+                  )}
                   </>
                 )}
               </Section>
@@ -987,7 +1045,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
       </main>
 
       {historyId && data && (() => {
-        const hr = data.history.find((h) => h.id === historyId);
+        const hr = findRow(historyId);
         return hr ? <HistoryDrawer row={hr} onClose={() => setHistoryId(null)} /> : null;
       })()}
       {openRow && <ReviewDrawer row={openRow} onClose={closeDrawer} onDone={done} />}

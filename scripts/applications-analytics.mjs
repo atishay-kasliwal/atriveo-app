@@ -478,6 +478,206 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
   };
 }
 
+// --- Overview, per view -----------------------------------------------------------------------
+// The full response above reads the 300 newest records whole (every pending question and its option
+// lists, every attempt): ~1 MB, ~11 s over the Mac's link to Atlas. The Overview page now asks for
+//   view=summary  everything but history, computed in Mongo, plus light rows for the queue panel and
+//                 the first ATTENTION_PREVIEW of the attention panel (counted over every record, not
+//                 only the newest 300);
+//   view=history  one page of light history rows (&status=A,B&q=&skip=&limit=), newest first; the
+//                 attention panel's "View all" is status=NEEDS_REVIEW,FAILED.
+// A row's pending questions load only when you open its review drawer (review-queue view=cards).
+
+const LIGHT_ROW = {
+  company: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, applyUrl: 1, finalUrl: 1, attemptCount: 1, createdAt: 1, updatedAt: 1,
+  "review.reason": 1, "review.detail": 1, "review.questionReviewStatus": 1, "failure.code": 1, "failure.message": 1,
+  "submission.by": 1, "submission.submittedAt": 1, "submission.attemptedAt": 1, "domain.domain": 1,
+  "outcome.status": 1, "outcome.rejectedAt": 1, "outcome.confirmedAt": 1, "outcome.subject": 1,
+  pendingCount: { $size: { $ifNull: ["$review.pending", []] } },
+};
+
+/** A history row as the Overview shows it; `questions` stay empty until the review drawer loads them. */
+const lightRow = (r) => ({
+  id: r._id, company: r.company, title: r.title, location: r.location ?? null, ats: r.ats ?? null, status: r.status,
+  reviewReason: r.review?.reason ?? null, reviewDetail: r.review?.detail ?? null, questionReviewStatus: r.review?.questionReviewStatus ?? null,
+  pendingCount: r.pendingCount ?? 0, questions: [],
+  submitAttempted: Boolean(r.submission?.attemptedAt),
+  failureCode: r.failure?.code ?? null,
+  failureMessage: r.failure?.message ? String(r.failure.message).split("\n")[0].slice(0, 200) : null,
+  submittedBy: r.submission?.by ?? null, submittedAt: r.submission?.submittedAt ?? null,
+  attempts: r.attemptCount ?? 0, domain: r.domain?.domain ?? null, url: r.finalUrl ?? r.applyUrl,
+  outcome: r.outcome?.status ? { status: r.outcome.status, at: r.outcome.rejectedAt ?? r.outcome.confirmedAt ?? null, subject: r.outcome.subject ?? null } : null,
+  createdAt: r.createdAt, updatedAt: r.updatedAt, priority: r.priority ?? 0,
+});
+
+const lightRows = async (apps, match, { skip = 0, limit = 0 } = {}) => (await apps.aggregate([
+  { $match: match }, { $sort: { updatedAt: -1, _id: 1 } }, ...(skip ? [{ $skip: skip }] : []), ...(limit ? [{ $limit: limit }] : []), { $project: LIGHT_ROW },
+]).toArray()).map(lightRow);
+
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** One page of history, newest first, filtered by status and a company/role/ATS search. */
+export async function overviewHistory(db, { status = "ALL", q = "", skip = 0, limit = 25 } = {}) {
+  const apps = db.collection("applications");
+  const term = q.trim().slice(0, 80);
+  const statuses = String(status || "ALL").split(",").map((s) => s.trim()).filter((s) => s && s !== "ALL");
+  const match = {
+    ...(statuses.length ? { status: { $in: statuses } } : {}),
+    ...(term ? { $or: ["company", "title", "ats"].map((f) => ({ [f]: { $regex: escapeRegex(term), $options: "i" } })) } : {}),
+  };
+  const [rows, total] = await Promise.all([lightRows(apps, match, { skip, limit }), apps.countDocuments(match)]);
+  return { ok: true, generatedAt: new Date().toISOString(), rows, total, skip, limit };
+}
+
+const ATTENTION = { status: { $in: ["NEEDS_REVIEW", "FAILED"] } };
+const ATTENTION_PREVIEW = 20;
+
+const OUTCOME_AT = { $switch: { branches: [
+  { case: { $eq: ["$status", "APPLIED"] }, then: "$lifecycle.appliedAt" },
+  { case: { $eq: ["$status", "NEEDS_REVIEW"] }, then: "$lifecycle.reviewAt" },
+  { case: { $eq: ["$status", "FAILED"] }, then: "$lifecycle.failedAt" },
+  { case: { $eq: ["$status", "SKIPPED"] }, then: "$lifecycle.skippedAt" },
+], default: null } };
+const dayOf = (field) => ({ $dateToString: { date: { $toDate: field }, format: "%Y-%m-%d", timezone: TZ } });
+
+/** The Overview without its history: the same numbers as the full response, computed in Mongo. */
+export async function overviewSummary(db, { days = 30 } = {}) {
+  const apps = db.collection("applications");
+  const inboxSince = new Date(Date.now() - 60 * 86_400_000).toISOString();
+  // A day of margin either side; the day keys below decide what counts.
+  const windowSince = new Date(Date.now() - (days + 1) * 86_400_000).toISOString();
+  const [statusRows, atsRows, reasonRows, failureRows, pendingRows, patternRows, control, boardRows, siteRows, resumeReady, discovered, accountRows, workerDocs, inboxRows, queueReportDoc,
+    timeline, recent, current, attention, queue, lastJob, lastResume] = await Promise.all([
+    apps.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]).toArray(),
+    apps.aggregate([{ $group: { _id: { ats: "$ats", status: "$status" }, n: { $sum: 1 } } }]).toArray(),
+    apps.aggregate([{ $match: { status: "NEEDS_REVIEW" } }, { $group: { _id: "$review.reason", n: { $sum: 1 } } }, { $sort: { n: -1 } }]).toArray(),
+    apps.aggregate([{ $match: { "failure.code": { $exists: true, $ne: null } } }, { $group: { _id: "$failure.code", n: { $sum: 1 } } }, { $sort: { n: -1 } }]).toArray(),
+    apps.aggregate([
+      { $match: { status: "NEEDS_REVIEW" } }, { $unwind: "$review.pending" },
+      { $group: { _id: "$review.pending.label", n: { $sum: 1 }, reason: { $first: "$review.pending.reason" } } }, { $sort: { n: -1, _id: 1 } }, { $limit: 15 },
+    ]).toArray(),
+    db.collection("form_patterns").aggregate([{ $group: { _id: "$trust", n: { $sum: 1 } } }]).toArray(),
+    db.collection("engine_control").findOne({ _id: "submissions" }),
+    db.collection("ats_boards").aggregate([
+      { $group: { _id: "$ats", boards: { $sum: 1 }, polled: { $sum: { $cond: [{ $ifNull: ["$last_polled_at", false] }, 1, 0] } }, matched: { $sum: { $cond: [{ $ifNull: ["$last_matched_at", false] }, 1, 0] } } } },
+    ]).toArray(),
+    db.collection("jobs").aggregate([{ $group: { _id: "$site", n: { $sum: 1 } } }]).toArray(),
+    // Distinct job URLs, counted in Mongo instead of downloading them.
+    db.collection("jobs").aggregate([{ $match: { "resume.status": "success" } }, { $group: { _id: "$job_url" } }, { $count: "n" }]).toArray(),
+    db.collection("jobs").aggregate([{ $group: { _id: "$job_url" } }, { $count: "n" }]).toArray(),
+    db.collection("application_accounts").find({}).sort({ createdAt: -1 }).limit(100).toArray(),
+    db.collection("engine_control").find({ _id: { $regex: "^worker:" } }).toArray(),
+    db.collection("inbox_events").find({ receivedAt: { $gte: inboxSince }, kind: { $in: ["applied", "rejected"] } }, {
+      projection: { receivedAt: 1, kind: 1, subject: 1, companies: 1, titles: 1, state: 1, match: 1, tracker: 1, feed: 1 },
+    }).sort({ receivedAt: -1 }).limit(500).toArray(),
+    db.collection("engine_control").findOne({ _id: "queue_report" }),
+    // Daily outcomes and the newest event per tile, grouped in Mongo (dayKey's America/New_York days).
+    apps.aggregate([
+      { $project: { status: 1, queuedAt: "$lifecycle.queuedAt", outcomeAt: OUTCOME_AT } },
+      { $facet: {
+        last: [{ $group: { _id: "$status", queuedAt: { $max: "$queuedAt" }, outcomeAt: { $max: "$outcomeAt" } } }],
+        queued: [{ $match: { queuedAt: { $gte: windowSince } } }, { $group: { _id: dayOf("$queuedAt"), n: { $sum: 1 } } }],
+        outcomes: [{ $match: { outcomeAt: { $gte: windowSince } } }, { $group: { _id: { day: dayOf("$outcomeAt"), status: "$status" }, n: { $sum: 1 } } }],
+      } },
+    ]).toArray(),
+    // The 300 newest, as the full response saw them: average apply time and the newest activity.
+    apps.aggregate([
+      { $sort: { updatedAt: -1 } }, { $limit: 300 }, { $match: { status: "APPLIED" } },
+      { $project: { done: { $last: { $filter: { input: { $ifNull: ["$attempts", []] }, cond: { $and: ["$$this.endedAt", "$$this.startedAt"] } } } } } },
+      { $project: { startedAt: "$done.startedAt", endedAt: "$done.endedAt" } },
+    ]).toArray(),
+    apps.find({ status: { $in: ["APPLYING", "SUBMITTING"] } }, { projection: { company: 1, title: 1, ats: 1, status: 1, step: 1, attempts: 1, attemptCount: 1, updatedAt: 1, finalUrl: 1, applyUrl: 1 } })
+      .sort({ updatedAt: -1 }).limit(1).toArray(),
+    lightRows(apps, ATTENTION, { limit: ATTENTION_PREVIEW }),
+    lightRows(apps, { status: { $in: ["READY_TO_APPLY", "APPLYING", "SUBMITTING"] } }),
+    db.collection("jobs").find({}, { projection: { created_at: 1 } }).sort({ created_at: -1 }).limit(1).toArray(),
+    db.collection("jobs").find({ "resume.status": "success" }, { projection: { "resume.updated_at": 1 } }).sort({ "resume.updated_at": -1 }).limit(1).toArray(),
+  ]);
+  const newest = await apps.find({}, { projection: { updatedAt: 1 } }).sort({ updatedAt: -1 }).limit(1).toArray();
+
+  const byStatus = Object.fromEntries(statusRows.map((r) => [r._id, r.n]));
+  const total = statusRows.reduce((s, r) => s + r.n, 0);
+  const today = new Date();
+  const daysList = Array.from({ length: days }, (_, i) => dayKey(new Date(today.getTime() - (days - 1 - i) * 86_400_000).toISOString()));
+  const daily = new Map(daysList.map((d) => [d, { day: d, queued: 0, applied: 0, needsReview: 0, failed: 0, skipped: 0 }]));
+  const { last, queued, outcomes } = timeline[0];
+  for (const r of queued) { const d = daily.get(r._id); if (d) d.queued += r.n; }
+  const OUTCOME_KEY = { APPLIED: "applied", NEEDS_REVIEW: "needsReview", FAILED: "failed", SKIPPED: "skipped" };
+  for (const r of outcomes) { const d = daily.get(r._id.day); const key = OUTCOME_KEY[r._id.status]; if (d && key) d[key] += r.n; }
+  const lastOf = (status, field) => last.find((r) => r._id === status)?.[field] ?? null;
+  const lastAt = {
+    discovered: lastJob[0]?.created_at ?? null,
+    matched: lastResume[0]?.resume?.updated_at ?? null,
+    queued: lastOf("READY_TO_APPLY", "queuedAt"),
+    applied: lastOf("APPLIED", "outcomeAt"),
+    needsReview: lastOf("NEEDS_REVIEW", "outcomeAt"),
+    failed: lastOf("FAILED", "outcomeAt"),
+  };
+  const durations = recent.map((a) => new Date(a.endedAt).getTime() - new Date(a.startedAt).getTime()).filter((ms) => ms > 0 && ms < 3_600_000);
+  const avgApplyMs = durations.length ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : null;
+
+  const atsMap = new Map();
+  for (const r of atsRows) {
+    const ats = r._id.ats ?? "unknown";
+    const row = atsMap.get(ats) ?? { ats, total: 0, APPLIED: 0, NEEDS_REVIEW: 0, FAILED: 0, SKIPPED: 0, other: 0 };
+    row.total += r.n;
+    if (row[r._id.status] !== undefined) row[r._id.status] += r.n;
+    else row.other += r.n;
+    atsMap.set(ats, row);
+  }
+  // Labels for the applications an unsure mail might belong to.
+  const candidateIds = [...new Set(inboxRows.flatMap((e) => (e.state === "needs_confirm" && !e.tracker ? e.match?.candidates ?? [] : [])))];
+  const labelled = candidateIds.length ? await apps.find({ _id: { $in: candidateIds } }, { projection: { company: 1, title: 1 } }).toArray() : [];
+
+  const applied = byStatus.APPLIED ?? 0;
+  const failed = byStatus.FAILED ?? 0;
+  const cur = current[0];
+  const attempt = cur ? (cur.attempts ?? []).filter((a) => !a.endedAt).pop() ?? (cur.attempts ?? []).at(-1) ?? null : null;
+  return {
+    ok: true,
+    generatedAt: new Date().toISOString(),
+    kpis: {
+      total, applied, needsReview: byStatus.NEEDS_REVIEW ?? 0, failed, skipped: byStatus.SKIPPED ?? 0,
+      inProgress: (byStatus.READY_TO_APPLY ?? 0) + (byStatus.APPLYING ?? 0) + (byStatus.SUBMITTING ?? 0),
+      successRate: applied + failed ? applied / (applied + failed) : null,
+    },
+    funnel: [
+      { stage: "Jobs found", n: discovered[0]?.n ?? 0 },
+      { stage: "Resume ready", n: resumeReady[0]?.n ?? 0 },
+      { stage: "Sent to the engine", n: total },
+      { stage: "Applied", n: applied },
+    ],
+    byStatus,
+    daily: [...daily.values()],
+    byAts: [...atsMap.values()].sort((a, b) => b.total - a.total),
+    reviewReasons: reasonRows.map((r) => ({ reason: r._id ?? "unknown", n: r.n })),
+    failureCodes: failureRows.map((r) => ({ code: r._id, n: r.n })),
+    topPendingQuestions: pendingRows.map((r) => ({ label: r._id, n: r.n, reason: r.reason })),
+    formTrust: Object.fromEntries(patternRows.map((r) => [r._id, r.n])),
+    killSwitch: killSwitchOf(control),
+    discovery: {
+      boards: boardRows.map((b) => ({ ats: b._id, boards: b.boards, polled: b.polled, withMatches: b.matched })),
+      jobsBySite: siteRows.map((s) => ({ site: s._id ?? "unknown", n: s.n })).sort((a, b) => b.n - a.n || a.site.localeCompare(b.site)),
+    },
+    current: cur ? {
+      id: cur._id, company: cur.company, title: cur.title, ats: cur.ats ?? null, status: cur.status,
+      step: cur.step?.name ?? null, attempt: attempt?.n ?? cur.attemptCount ?? null,
+      startedAt: attempt?.startedAt ?? null, updatedAt: cur.updatedAt, url: cur.finalUrl ?? cur.applyUrl,
+    } : null,
+    lastActivityAt: newest[0]?.updatedAt ?? null,
+    lastAt: { ...lastAt, avgApplyMs },
+    worker: workerOf(workerDocs),
+    inbox: inboxSummary(inboxRows, labelled),
+    queueReport: queueReportDoc ? (({ _id, ...r }) => r)(queueReportDoc) : null,
+    accounts: accountRows.map((a) => ({
+      id: a._id, ats: a.ats, tenant: a.tenant, email: a.email, password: a.password, status: a.status,
+      loginUrl: a.loginUrl ?? null, createdAt: a.createdAt, updatedAt: a.updatedAt,
+    })),
+    attention,
+    attentionTotal: (byStatus.NEEDS_REVIEW ?? 0) + (byStatus.FAILED ?? 0),
+    queue,
+  };
+}
 
 const SOURCE_LABEL = (p) => {
   if (!p) return "—";

@@ -37,7 +37,7 @@ import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
-import { applicationsAnalytics, applicationDetail, questionOptions, reviewQueue } from "./applications-analytics.mjs";
+import { applicationsAnalytics, applicationDetail, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
@@ -1739,13 +1739,22 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // GET /applications/analytics — application engine history & outcomes (read-only)
+  // GET /applications/analytics — application engine history & outcomes (read-only).
+  // ?view=summary: the Overview without history; ?view=history&status=A,B&q=&skip=&limit=: one page of it.
+  // No view: everything at once (consoles loaded before the views).
   if (req.method === "GET" && pathname === "/applications/analytics") {
     (async () => {
       try {
         if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
-        const days = Math.min(Math.max(Number(new URL(req.url, "http://x").searchParams.get("days")) || 30, 7), 180);
-        const data = await withMongo((db) => applicationsAnalytics(db, { days }), { appName: "AtriveoTailorServer" });
+        const params = new URL(req.url, "http://x").searchParams;
+        const days = Math.min(Math.max(Number(params.get("days")) || 30, 7), 180);
+        const view = params.get("view");
+        const data = await withMongo((db) => view === "summary" ? overviewSummary(db, { days })
+          : view === "history" ? overviewHistory(db, {
+            status: String(params.get("status") || "ALL").slice(0, 120), q: String(params.get("q") || ""),
+            skip: Math.min(Math.max(Number(params.get("skip")) || 0, 0), 100_000), limit: Math.min(Math.max(Number(params.get("limit")) || 25, 1), 500),
+          })
+          : applicationsAnalytics(db, { days }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify(data));
       } catch (e) {

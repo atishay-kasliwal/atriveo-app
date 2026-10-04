@@ -80,6 +80,7 @@
 .apps-range, .apps-filters { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
 .apps-range button, .apps-filters button { background: transparent; color: var(--muted-fg); border: 1px solid var(--border-col); border-radius: 6px; padding: 2px 10px; font-size: 12px; cursor: pointer; }
 .apps-range button.active, .apps-filters button.active { background: var(--secondary-bg); color: var(--foreground); border-color: var(--primary-line); }
+.apps-more { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 0 4px; font-size: 13px; }
 .apps-filters { margin-bottom: 10px; }
 .apps-filters input { background: var(--input-bg); color: var(--foreground); border: 1px solid var(--border-col); border-radius: 6px; padding: 3px 10px; font-size: 12px; min-width: 200px; margin-left: auto; }
 
