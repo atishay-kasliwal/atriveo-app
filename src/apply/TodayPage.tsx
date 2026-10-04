@@ -96,8 +96,12 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
 
   /** Open & Fill, as on the Ready page: the tab opens during your click, then points at the form once armed. */
   const openFill = async (item: Item) => {
-    if (item.ats === "greenhouse" && !/^0\.2\.([3-9]|[1-9]\d+)$/.test(extensionVersion() ?? "")) {
-      setErrors(e => ({ ...e, [item.id]: "Reload Atriveo Fill 0.2.3 or newer in chrome://extensions, then refresh this page for Greenhouse Open & Fill." }));
+    const version = (extensionVersion() ?? "0.0.0").split(".").map(Number);
+    const minimum = item.ats === "workday" ? [0, 3, 0] : [0, 2, 3];
+    const installed = (version[0] ?? 0) * 1_000_000 + (version[1] ?? 0) * 1000 + (version[2] ?? 0);
+    const required = minimum[0]! * 1_000_000 + minimum[1]! * 1000 + minimum[2]!;
+    if (["greenhouse", "workday"].includes(item.ats ?? "") && (!Number.isFinite(installed) || installed < required)) {
+      setErrors(e => ({ ...e, [item.id]: `Reload Atriveo Fill ${minimum.join(".")} or newer in chrome://extensions, then refresh this page.` }));
       return;
     }
     const tab = window.open("about:blank", "_blank");
@@ -187,7 +191,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {item.kind === "fill" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "continue_application" }, () => finish(item, `Filling ${item.company} now. It moves on once every answer checks out. Nothing is submitted.`, {}))}>{isBusy ? "Starting…" : "Fill and verify"}</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
           {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}
-          {item.kind === "approve" && ["greenhouse", "ashby", "lever"].includes(item.ats ?? "") && <button className="apps-btn" disabled={isBusy} onClick={() => void openFill(item)}>Open & Fill</button>}
+          {item.kind === "approve" && ["greenhouse", "ashby", "lever", "workday"].includes(item.ats ?? "") && <button className="apps-btn" disabled={isBusy} onClick={() => void openFill(item)}>Open & Fill</button>}
           <div className="td-review-links">
             {item.kind !== "answer" && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Review answers</button>}
             <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Review resume</button>

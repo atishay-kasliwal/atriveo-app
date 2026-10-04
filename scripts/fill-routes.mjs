@@ -15,7 +15,7 @@ export function isLocalExtensionRequest(req) {
   return String(req.headers.origin ?? "").startsWith("chrome-extension://");
 }
 
-const ROUTES = new Set(["POST /applications/fill-plan", "POST /applications/fill-resume", "POST /applications/fill-event"]);
+const ROUTES = new Set(["POST /applications/fill-plan", "POST /applications/fill-resume", "POST /applications/fill-event", "POST /applications/workday-account"]);
 
 async function readJson(req, limit = 50_000) {
   let raw = "";
@@ -40,7 +40,8 @@ export async function handleFillRoute(req, res, url, run) {
   }
   try {
     const body = await readJson(req);
-    const request = url.pathname === "/applications/fill-plan" ? { op: "plan", url: String(body.url || "") }
+    const request = url.pathname === "/applications/workday-account" ? { op: "workday_account", applicationId: String(body.applicationId || ""), url: String(body.url || ""), operation: body.operation }
+      : url.pathname === "/applications/fill-plan" ? { op: "plan", url: String(body.url || "") }
       : url.pathname === "/applications/fill-resume" ? { op: "resume", applicationId: String(body.applicationId || "") }
       : { op: "event", ...body };
     const result = await run(request);
