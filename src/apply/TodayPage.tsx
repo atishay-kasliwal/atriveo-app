@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import ApplicationReview from "./ApplicationReview";
 import CompanyLogo from "../components/CompanyLogo";
 import PriorityTags from "../components/PriorityTags";
 import { postAction, when } from "./engine";
@@ -41,6 +42,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const navigate = useNavigate();
   const { columns, rows } = useLayout();
   const perPage = columns * rows;
+  const [review, setReview] = useState<{ id: string; updatedAt: string; company: string; mode: "answers" | "resume" } | null>(null);
   const [page, setPage] = useState(0);
   const [done, setDone] = useState<Record<string, string>>({});
   const [later, setLater] = useState<string[]>([]);
@@ -177,6 +179,10 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {item.kind === "fill" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "continue_application" }, () => finish(item, `Filling ${item.company} now. It moves on once every answer checks out. Nothing is submitted.`, {}))}>{isBusy ? "Starting…" : "Fill and verify"}</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
           {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}
+          <div className="td-review-links">
+            {item.kind !== "answer" && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Review answers</button>}
+            <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Review resume</button>
+          </div>
           <div className="td-links">
             <button className="apps-link" disabled={isBusy} onClick={() => setLater((l) => [...l.filter((id) => id !== item.id), item.id])}>Later</button>
             {(item.kind === "approve" || item.kind === "you_submit") && <Link to={`/ready?app=${encodeURIComponent(item.id)}`}>Details</Link>}
@@ -230,6 +236,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           </div>
         );
       })()}
+      {review && <ApplicationReview key={`${review.id}:${review.mode}`} application={review} onClose={() => setReview(null)} />}
       {notice && <p className="apps-toast" role="status">{notice}</p>}
     </div>
   );
