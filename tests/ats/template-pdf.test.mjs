@@ -43,7 +43,8 @@ test("template source: education macro, title-only role lines, printed profile U
   assert.equal(texArgs(tex, "resumeEducation").length, 2);
   for (const [, , title] of texArgs(tex, "resumeSubheading")) assert.doesNotMatch(title, /\|/, `title line '${title}' carries more than the title`);
   assert.match(tex, /\\href\{https:\/\/www\.linkedin\.com\/in\/jordan-rivera\}\{linkedin\.com\/in\/jordan-rivera\}/);
-  assert.match(tex, /\\href\{https:\/\/jordanrivera\.dev\}\{jordanrivera\.dev\}/);
+  assert.doesNotMatch(tex, /jordanrivera\.dev/);
+  assert.match(tex, /\\fontsize\{9\}\{11\}\\selectfont/);
   assert.match(tex, /jordan\.rivera@example\.com\} \\\\\n/, "profile links start a second contact line");
   assert.match(tex, /\\end\{center\}\\vspace\{-5pt\}/);
   // No links and no city: one contact line and no spacing change.
@@ -103,7 +104,8 @@ test("generated PDF: one page, ATS Readiness PASS, and each fix holds in every e
 
   // 3. URLs: every link's address is printed, so it survives in every view.
   const webLinks = x.links.filter((l) => !l.url.startsWith("mailto:"));
-  assert.equal(webLinks.length, 3);
+  assert.equal(webLinks.length, 2);
+  for (const view of VIEWS) assert.ok(!x.views[view].includes("jordanrivera.dev"));
   for (const view of VIEWS) {
     for (const { url } of webLinks) assert.ok(x.views[view].includes(displayUrl(url)), `${view}: ${displayUrl(url)} missing`);
   }

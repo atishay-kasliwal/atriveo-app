@@ -207,13 +207,13 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
   // Only the fields that are set, so a blank phone or email leaves no "| |".
   const contactLines = [
     [esc(title), me.phone && esc(me.phone), me.email && `\\href{mailto:${me.email}}{${esc(me.email)}}`],
-    [me.linkedin && link(me.linkedin), me.github && link(me.github), me.portfolio && link(me.portfolio), city && esc(city)],
+    [me.linkedin && link(me.linkedin), me.github && link(me.github), city && esc(city)],
   ].map((fields) => fields.filter(Boolean).join(" $|$\n    ")).filter(Boolean);
   // The addresses need a second contact line. Taking 5pt back under the header keeps the
   // page's existing spacing close to what it was (TeX's list glue absorbs the rest).
   const header = `\\begin{center}
     \\textbf{\\Huge \\scshape ${esc(me.name)}} \\\\ \\vspace{1pt}
-    \\small ${contactLines.join(" \\\\\n    ")}
+    \\fontsize{9}{11}\\selectfont ${contactLines.join(" \\\\\n    ")}
 \\end{center}${contactLines.length > 1 ? "\\vspace{-5pt}" : ""}`;
 
   const skills = skillsLines?.length
