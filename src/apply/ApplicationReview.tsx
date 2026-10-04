@@ -19,13 +19,13 @@ export default function ApplicationReview({ application, onClose }: {
     return () => { live = false; };
   }, [application.id, application.updatedAt]);
   const pdf = detail?.resume.path ? `${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(detail.resume.path)}` : null;
-  return <dialog ref={dialog} className="td-review-dialog" onCancel={onClose} onClose={onClose}>
+  return <dialog ref={dialog} className={`td-review-dialog${application.mode === "resume" ? " is-resume" : ""}`} onCancel={onClose} onClose={onClose}>
     <header><h2>{application.company} · Review {application.mode}</h2><button className="apps-btn" onClick={onClose} aria-label="Close review">Close</button></header>
     {error && <p role="alert">{error}</p>}
     {!detail && !error && <p role="status">Loading…</p>}
     {detail && (application.mode === "resume" ? <>
       <p className="apps-muted">The resume selected for this application: {detail.resume.fileName || "No filename recorded"}</p>
-      {pdf ? <><a className="apps-link" href={pdf} target="_blank" rel="noreferrer">Open PDF in a new tab</a><iframe title={`${application.company} selected resume`} src={pdf} /></> : <p>No resume is recorded for this application.</p>}
+      {pdf ? <iframe title={`${application.company} selected resume`} src={`${pdf}#page=1&view=Fit&zoom=page-fit&toolbar=0&navpanes=0`} /> : <p>No resume is recorded for this application.</p>}
     </> : <>
       <p className="apps-muted">Saved answers for this application. Reviewing here does not approve or submit anything.</p>
       {detail.questions.length ? <dl>{detail.questions.map((q, i) => <div key={`${q.step}:${i}`}>

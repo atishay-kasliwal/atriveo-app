@@ -55,3 +55,10 @@
 .td-review-dialog dt { font-weight: 600; }
 .td-review-dialog dd { margin: 6px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .td-review-dialog iframe { display: block; width: 100%; height: 60dvh; margin-top: 12px; border: 0; }
+
+/* Explicit centering overrides the global margin reset on native dialogs. */
+.td-review-dialog { margin: auto; }
+.td-review-dialog.is-resume { width: min(900px, calc(100vw - 24px)); height: 94dvh; max-height: 94dvh; overflow: hidden; }
+.td-review-dialog.is-resume[open] { display: flex; flex-direction: column; gap: 8px; }
+.td-review-dialog.is-resume header, .td-review-dialog.is-resume > p { flex: 0 0 auto; }
+.td-review-dialog.is-resume iframe { flex: 1 1 auto; min-height: 0; height: auto; margin: 0; background: #343434; }
