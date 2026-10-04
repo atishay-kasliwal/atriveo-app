@@ -62,3 +62,6 @@
 .td-review-dialog.is-resume[open] { display: flex; flex-direction: column; gap: 8px; }
 .td-review-dialog.is-resume header, .td-review-dialog.is-resume > p { flex: 0 0 auto; }
 .td-review-dialog.is-resume iframe { flex: 1 1 auto; min-height: 0; height: auto; margin: 0; background: #343434; }
+
+.td-fill-queue { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; }
+.td-fill-queue [role="status"] { max-width: 340px; overflow-wrap: anywhere; }

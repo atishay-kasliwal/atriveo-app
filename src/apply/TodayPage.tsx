@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import OpenFillQueue from "./OpenFillQueue";
 import ApplicationReview from "./ApplicationReview";
 import CompanyLogo from "../components/CompanyLogo";
 import PriorityTags from "../components/PriorityTags";
@@ -42,6 +43,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const navigate = useNavigate();
   const { columns, rows } = useLayout();
   const perPage = columns * rows;
+  const [queueRunning, setQueueRunning] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [review, setReview] = useState<{ id: string; updatedAt: string; company: string; mode: "answers" | "resume" } | null>(null);
   const [page, setPage] = useState(0);
   const [done, setDone] = useState<Record<string, string>>({});
@@ -144,10 +147,11 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const r = item.ready as ManualApp | undefined;
     const drafted = q ? (q.readyForReview ?? q.suggestions ?? 0) : 0;
     const needYou = q ? (q.needsInput ?? 0) + (q.actionRequired ?? 0) : 0;
-    const isBusy = busy === item.id;
+    const isBusy = queueRunning || busy === item.id;
     return (
       <article key={item.id} className={`td-card is-${stage.tone}`} aria-label={`${item.company}: ${stage.label}`} aria-busy={isBusy}>
         <header className="td-head">
+          {item.kind === "you_submit" && <input type="checkbox" disabled={queueRunning} aria-label={`Select ${item.company} ${item.title}`} checked={selectedIds.includes(item.id)} onChange={e => setSelectedIds(ids => e.target.checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} />}
           <CompanyLogo company={item.company} size="sm" />
           <div className="td-id"><strong title={item.company}>{item.company}</strong><span title={item.title}>{item.title}</span></div>
         </header>
@@ -205,9 +209,10 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           <li className="go"><b>{count("you_submit")}</b><span>You submit</span></li>
         </ol>
         <div className="td-actions">
+          {count("you_submit") > 0 && <><button className="apps-btn" disabled={queueRunning} onClick={() => setSelectedIds(items.filter(i => i.kind === "you_submit").map(i => i.id))}>Select all You submit ({count("you_submit")})</button><button className="apps-btn" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear selection</button><OpenFillQueue onRunning={setQueueRunning} selected={items.filter(i => i.kind === "you_submit" && selectedIds.includes(i.id))} onFinish={() => { void refreshReady(); }} /></>}
           {worker && <span className={`apps-state ${worker.online ? "" : "bad"}`}><i aria-hidden />{worker.online ? "Worker running" : "Worker offline"}</span>}
-          {fillable.length > 0 && <button className="apps-btn" disabled={busy !== null} onClick={() => setConfirmAll("fill")}>Fill and verify all {fillable.length}</button>}
-          {approvable.length > 0 && <button className="apps-btn" disabled={busy !== null} onClick={() => setConfirmAll("approve")}>Approve all {approvable.length} ready</button>}
+          {fillable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("fill")}>Fill and verify all {fillable.length}</button>}
+          {approvable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("approve")}>Approve all {approvable.length} ready</button>}
         </div>
       </div>
       {(unanswered.error || ready.error) && <p className="ar-error" role="alert">{unanswered.error || ready.error}</p>}

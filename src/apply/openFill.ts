@@ -10,7 +10,7 @@ export function extensionVersion(): string | null {
 }
 
 /** Ask the extension to fill this posting when it opens (15 minutes). */
-export function armExtension(url: string, applicationId: string, timeoutMs = 3_000): Promise<{ ok: boolean; error?: string }> {
+export function armExtension(url: string, applicationId: string, timeoutMs = 3_000, openTab = false): Promise<{ ok: boolean; error?: string }> {
   const nonce = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   return new Promise((resolve) => {
     const done = (r: { ok: boolean; error?: string }) => { clearTimeout(timer); window.removeEventListener("message", onReply); resolve(r); };
@@ -21,6 +21,6 @@ export function armExtension(url: string, applicationId: string, timeoutMs = 3_0
       done(d.reply?.ok ? { ok: true } : { ok: false, error: d.reply?.error ?? "Atriveo Fill refused" });
     };
     window.addEventListener("message", onReply);
-    window.postMessage({ source: "atriveo-dashboard", type: "arm", url, applicationId, nonce }, window.location.origin);
+    window.postMessage({ source: "atriveo-dashboard", type: "arm", url, applicationId, nonce, openTab }, window.location.origin);
   });
 }
