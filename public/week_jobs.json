@@ -23213,10 +23213,10 @@
     "application": {
       "applicationId": "a8a340ec-b287-4406-aa40-5aec12d22f1f",
       "applicationKey": "ashby:278bce22-653b-41f1-aaeb-2c2f7c7f4092",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:06:36.882Z"
+      "updatedAt": "2026-10-04T17:44:25.766Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 75,
@@ -25129,10 +25129,10 @@
     "application": {
       "applicationId": "ecaf4ec3-5bed-42c8-9265-76c1d6830ea4",
       "applicationKey": "ashby:4019093f-a90b-476a-82af-c8a2bcf289d1",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "OPTION_NOT_FOUND",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:06:37.329Z"
+      "updatedAt": "2026-10-04T21:31:14.219Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 60,
@@ -27625,10 +27625,10 @@
     "application": {
       "applicationId": "94742716-6da1-488c-82d6-1ccbc89a5eb0",
       "applicationKey": "ashby:f96084cd-766a-4791-95e4-2f4ffbadacc0",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:06:34.622Z"
+      "updatedAt": "2026-10-04T17:26:36.839Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 50,
@@ -36655,10 +36655,10 @@
     "application": {
       "applicationId": "3ddcbc11-5657-4582-9230-4c34ded25e0a",
       "applicationKey": "greenhouse:8011590003",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "UNKNOWN_QUESTION",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "greenhouse",
-      "updatedAt": "2026-10-04T15:15:58.190Z"
+      "updatedAt": "2026-10-04T21:41:34.324Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 44,
@@ -45576,10 +45576,10 @@
     "application": {
       "applicationId": "8f8877fa-1218-4075-8dc2-2d9cc976af6b",
       "applicationKey": "ashby:1bdf7b14-1a68-4c3b-ab64-4a3a2793b937",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:07:33.983Z"
+      "updatedAt": "2026-10-04T17:35:04.241Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 41,
@@ -46032,10 +46032,10 @@
     "application": {
       "applicationId": "41227a46-81d6-46f5-abee-b3c25e4e75b0",
       "applicationKey": "ashby:12f2fe47-e905-41d4-b1e8-ca09a79d007e",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "UNKNOWN_QUESTION",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:07:30.414Z"
+      "updatedAt": "2026-10-04T21:43:34.545Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 66,
@@ -54247,10 +54247,10 @@
     "application": {
       "applicationId": "2b866b0d-9a47-45bc-bd63-00bb03f67a66",
       "applicationKey": "ashby:11a5cba5-ccf3-48e8-a20c-98e66f6802d3",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "UNKNOWN_QUESTION",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T06:18:35.222Z"
+      "updatedAt": "2026-10-04T21:48:16.976Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 75,
@@ -55371,10 +55371,10 @@
     "application": {
       "applicationId": "4316fab9-3c42-41f9-ab04-4c5e9ff48d30",
       "applicationKey": "ashby:5d341aa7-6bc2-4ba2-99d0-10eac34f0335",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:08:01.116Z"
+      "updatedAt": "2026-10-04T18:39:14.942Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 75,
@@ -58005,10 +58005,10 @@
     "application": {
       "applicationId": "e7aaecc5-a825-47c2-bb1a-18fbe287ff3c",
       "applicationKey": "ashby:c8354f11-556c-496c-8ef4-d6bd336a8f2d",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:08:01.995Z"
+      "updatedAt": "2026-10-04T18:39:23.655Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 40,
@@ -59912,10 +59912,10 @@
     "application": {
       "applicationId": "e1469063-46a2-430a-a5c6-416c9e5f12b9",
       "applicationKey": "ashby:cc65498a-6b71-4276-994e-4dcc585da61b",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:08:51.273Z"
+      "updatedAt": "2026-10-04T18:39:57.729Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 0,
@@ -59976,10 +59976,10 @@
     "application": {
       "applicationId": "694e92b2-4064-41bb-a548-cc320485322f",
       "applicationKey": "ashby:997d9c88-e299-468b-9c9a-88d4a5b77b88",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:08:45.511Z"
+      "updatedAt": "2026-10-04T18:39:46.050Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 0,
@@ -60297,10 +60297,10 @@
     "application": {
       "applicationId": "d9c5bd9d-8c4b-44b8-b2ab-ff4ff598f348",
       "applicationKey": "ashby:329998a7-824a-4558-9026-5662f9d2e7f7",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:09:10.852Z"
+      "updatedAt": "2026-10-04T18:40:53.011Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 0,
@@ -67674,10 +67674,10 @@
     "application": {
       "applicationId": "b4eda45e-eafc-4653-989a-2b42b765fc1d",
       "applicationKey": "ashby:2621b304-05ce-4a11-a5ef-3c209b1571e3",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:06:31.072Z"
+      "updatedAt": "2026-10-04T18:38:49.920Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 50,
@@ -72993,7 +72993,7 @@
       "status": "NEEDS_REVIEW",
       "reviewReason": "UNKNOWN_QUESTION",
       "ats": "greenhouse",
-      "updatedAt": "2026-10-04T00:37:04.852Z"
+      "updatedAt": "2026-10-04T17:41:57.942Z"
     },
     "scraped_date": "2026-10-01",
     "ats_score": 40,
@@ -73114,10 +73114,10 @@
     "application": {
       "applicationId": "a1570f85-7664-44b0-a9d4-77b3d5fcfc1e",
       "applicationKey": "greenhouse:5155548007",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "UNKNOWN_QUESTION",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "greenhouse",
-      "updatedAt": "2026-10-04T16:06:27.616Z"
+      "updatedAt": "2026-10-04T21:30:10.564Z"
     },
     "scraped_date": "2026-10-01",
     "ats_score": 51,
@@ -89492,10 +89492,10 @@
     "application": {
       "applicationId": "752c6865-9e23-4638-bccb-e9bf47ec865b",
       "applicationKey": "ashby:43680f0b-7aa0-4427-a0ba-ae8c9a5aa52e",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:06:34.619Z"
+      "updatedAt": "2026-10-04T18:05:49.477Z"
     },
     "scraped_date": "2026-10-01",
     "ats_score": 0,
@@ -109946,10 +109946,10 @@
     "application": {
       "applicationId": "6aa98539-b753-462d-9054-f0061a019d22",
       "applicationKey": "ashby:3fd04c23-a63d-4b40-bfae-feafaa478caf",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:09:36.518Z"
+      "updatedAt": "2026-10-04T18:40:36.314Z"
     },
     "scraped_date": "2026-10-01",
     "ats_score": 62,
@@ -112544,10 +112544,10 @@
     "application": {
       "applicationId": "e4c9c22e-0e87-438e-9433-e6ad16b6e28e",
       "applicationKey": "ashby:90056e96-44ad-4deb-a3a7-56e3f691eb10",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:07:05.267Z"
+      "updatedAt": "2026-10-04T18:41:43.329Z"
     },
     "scraped_date": "2026-10-01",
     "ats_score": 50,
@@ -122448,10 +122448,10 @@
     "application": {
       "applicationId": "bf236809-01cb-43c4-8a89-6375c4d466de",
       "applicationKey": "ashby:ad4e24e1-7f85-419d-b15a-d589540ea8fa",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "MANUAL_SUBMIT",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T16:09:01.785Z"
+      "updatedAt": "2026-10-04T18:41:00.276Z"
     },
     "scraped_date": "2026-10-01",
     "ats_score": 0,
@@ -149181,10 +149181,10 @@
     "application": {
       "applicationId": "f1933769-cfe4-4fa2-afc6-731a7dfad6b4",
       "applicationKey": "greenhouse:8201255",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "UNKNOWN_QUESTION",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "greenhouse",
-      "updatedAt": "2026-10-04T00:44:27.149Z"
+      "updatedAt": "2026-10-04T21:46:32.867Z"
     },
     "scraped_date": "2026-09-30",
     "ats_score": 37,
@@ -162685,7 +162685,7 @@
       "status": "NEEDS_REVIEW",
       "reviewReason": "UNKNOWN_QUESTION",
       "ats": "greenhouse",
-      "updatedAt": "2026-10-04T04:17:19.941Z"
+      "updatedAt": "2026-10-04T18:57:16.436Z"
     },
     "scraped_date": "2026-09-30",
     "ats_score": 73,
@@ -162802,10 +162802,10 @@
     "application": {
       "applicationId": "0e143b27-b866-40a6-8a49-b57fff618591",
       "applicationKey": "greenhouse:7990666003",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "UNKNOWN_QUESTION",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "greenhouse",
-      "updatedAt": "2026-10-04T01:51:43.466Z"
+      "updatedAt": "2026-10-04T21:36:43.051Z"
     },
     "scraped_date": "2026-09-30",
     "ats_score": 73,
@@ -164942,7 +164942,7 @@
       "status": "NEEDS_REVIEW",
       "reviewReason": "UNKNOWN_QUESTION",
       "ats": "greenhouse",
-      "updatedAt": "2026-10-04T01:57:55.794Z"
+      "updatedAt": "2026-10-04T19:14:10.453Z"
     },
     "scraped_date": "2026-09-30",
     "ats_score": 40,
@@ -167929,10 +167929,10 @@
     "application": {
       "applicationId": "25e48569-26be-4d7a-9c5d-3218f3b76807",
       "applicationKey": "ashby:851761ae-2f48-4d0e-b55e-9d0b378271ba",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "OPTION_NOT_FOUND",
+      "status": "SKIPPED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T01:15:16.579Z"
+      "updatedAt": "2026-10-04T21:46:26.988Z"
     },
     "scraped_date": "2026-09-30",
     "ats_score": 66,
@@ -176105,7 +176105,7 @@
       "status": "NEEDS_REVIEW",
       "reviewReason": "UNKNOWN_QUESTION",
       "ats": "greenhouse",
-      "updatedAt": "2026-10-04T01:35:23.766Z"
+      "updatedAt": "2026-10-04T19:32:05.051Z"
     },
     "scraped_date": "2026-09-30",
     "ats_score": 50,
