@@ -12,7 +12,8 @@ export default function ApplyHeader({ user }: { user: User }) {
   const initial = (user.name || user.email || "A").trim().charAt(0).toUpperCase();
   const path = useLocation().pathname.replace(/\/+$/, "");
   const counts = useReviewCounts();
-  const page = path === "/unanswered" ? "unanswered" : path === "/ready" || path === "/review" ? "ready" : "overview";
+  const page = path === "/stats" || path === "/overview" ? "stats" : path === "/unanswered" || path === "/ready" || path === "/review" ? "work" : "today";
+  const waiting = counts ? counts.unanswered + counts.ready : null;
   return (
     <div className="apply-header">
       <a className="apply-brand" href="/" aria-label="Atriveo Apply home">
@@ -20,13 +21,10 @@ export default function ApplyHeader({ user }: { user: User }) {
         <span className="apply-brand-by">by Atriveo</span>
       </a>
       <nav className="apply-nav" aria-label="Console">
-        <Link to="/" aria-current={page === "overview" ? "page" : undefined}>Overview</Link>
-        <Link to="/unanswered" aria-current={page === "unanswered" ? "page" : undefined}>
-          Unanswered{counts ? <span className="apply-nav-n">{counts.unanswered}</span> : null}
+        <Link to="/" aria-current={page === "today" ? "page" : undefined}>
+          Today{waiting !== null ? <span className="apps-nav-n">{waiting}</span> : null}
         </Link>
-        <Link to="/ready" aria-current={page === "ready" ? "page" : undefined}>
-          Ready to submit{counts ? <span className="apply-nav-n">{counts.ready}</span> : null}
-        </Link>
+        <Link to="/stats" aria-current={page === "stats" ? "page" : undefined}>Stats</Link>
       </nav>
       <div className="apply-header-right">
         <a className="apply-ext" href="https://application.atriveo.com" target="_blank" rel="noreferrer">Job feed ↗</a>

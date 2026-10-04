@@ -1,0 +1,46 @@
+/* Today: the whole screen, cards side by side, no page scroll (long text scrolls inside a card). */
+.td-page { overflow: hidden; }
+.td-bar { flex: 0 0 auto; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 14px 20px 10px; }
+.td-title { display: flex; flex-direction: column; gap: 2px; min-width: 150px; }
+.td-title h1 { font-size: 22px; }
+.td-strip { display: flex; gap: 8px; margin: 0; padding: 0; list-style: none; flex-wrap: wrap; }
+.td-strip li { display: flex; align-items: baseline; gap: 7px; padding: 7px 12px; border: 1px solid var(--border-col); border-radius: 999px; background: var(--card-bg); font-size: 12.5px; color: var(--muted-fg); }
+.td-strip li b { color: var(--foreground); font-size: 15px; font-variant-numeric: tabular-nums; }
+.td-strip li.go b { color: var(--green, #2faa4a); }
+.td-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.td-grid { flex: 1 1 auto; min-height: 0; display: grid; gap: 14px; padding: 4px 20px 12px; align-items: start; }
+.td-grid .td-card { max-height: 100%; }
+.td-card { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid var(--border-col); border-radius: var(--r, 10px); background: var(--card-bg); animation: td-in .25s ease-out; }
+@keyframes td-in { from { opacity: 0; transform: translateY(6px); } }
+.td-card.is-go { border-top: 3px solid var(--green, #2faa4a); }
+.td-card.is-info { border-top: 3px solid var(--primary); }
+.td-card.is-warn { border-top: 3px solid var(--amber, #e0a526); }
+.td-card[aria-busy="true"] { opacity: .65; }
+.td-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.td-id { min-width: 0; display: flex; flex-direction: column; }
+.td-id strong { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-id span { font-size: 12.5px; color: var(--muted-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-stage { align-self: flex-start; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; background: var(--accent-bg); color: var(--muted-fg); }
+.td-stage.is-go { color: var(--green, #2faa4a); }
+.td-stage.is-info { color: var(--primary); }
+.td-stage.is-warn { color: var(--amber, #e0a526); }
+.td-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.td-big { margin: 0; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.td-facts { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted-fg); }
+.td-facts b { color: var(--foreground); font-variant-numeric: tabular-nums; }
+.td-facts .warn b { color: var(--amber, #e0a526); }
+.td-note { margin: 0; font-size: 12.5px; color: var(--muted-fg); }
+.td-note.warn { color: var(--amber, #e0a526); }
+.td-error { margin: 0; font-size: 12.5px; color: var(--red, #d9534f); }
+.td-foot { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; }
+.td-foot .rv-primary { width: 100%; }
+.td-links { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; }
+.td-empty { grid-column: 1 / -1; align-self: center; justify-self: center; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--muted-fg); }
+.td-empty strong { color: var(--foreground); font-size: 16px; }
+.td-pager { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 20px 14px; font-size: 13px; color: var(--muted-fg); }
+.td-modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: rgba(0, 0, 0, .45); padding: 16px; }
+.td-modal-card { width: min(520px, 100%); max-height: 80vh; overflow: auto; padding: 20px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--border-col); }
+.td-modal-card h2 { font-size: 18px; margin-bottom: 6px; }
+.td-modal-card ul { margin: 12px 0; padding-left: 18px; font-size: 13px; }
+.td-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+@media (max-width: 760px) { .td-page { overflow: auto; } .td-actions { margin-left: 0; } .td-grid { padding: 4px 16px 12px; } .td-bar { padding: 12px 16px 8px; } }

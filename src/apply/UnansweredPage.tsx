@@ -32,7 +32,8 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
   const { data, error, loading } = useUnansweredQueue(60_000);
   const { cards, error: cardsError } = useUnansweredCards();
   const [search, setSearch] = useState("");
-  const [activeId, setActiveId] = useState<string | null>(null);
+  // Opened from a Today card: start on that application.
+  const [activeId, setActiveId] = useState<string | null>(() => new URLSearchParams(window.location.search).get("app"));
   const [queuePage, setQueuePage] = useState(0);
   const [questionPage, setQuestionPage] = useState(0);
   const [values, setValues] = useState<Record<string, string>>({});

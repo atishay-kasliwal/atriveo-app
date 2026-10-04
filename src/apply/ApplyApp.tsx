@@ -4,6 +4,7 @@ import Applications from "../pages/Applications";
 import AdminLogin from "./AdminLogin";
 import ApplyHeader from "./ApplyHeader";
 import ReadyPage from "./ReadyPage";
+import TodayPage from "./TodayPage";
 import UnansweredPage from "./UnansweredPage";
 
 /** Signed-in admins see the console; everyone else is sent to the admin login. */
@@ -15,7 +16,8 @@ function Console() {
   const header = <ApplyHeader user={user} />;
   if (path === "/unanswered") return <UnansweredPage header={header} />;
   if (path === "/ready" || path === "/review") return <ReadyPage header={header} />;
-  return <Applications header={header} />;
+  if (path === "/stats" || path === "/overview") return <Applications header={header} />;
+  return <TodayPage header={header} />;
 }
 
 export default function ApplyApp() {

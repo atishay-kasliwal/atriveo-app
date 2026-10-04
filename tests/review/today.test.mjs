@@ -1,0 +1,107 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+const requireEngine = createRequire(path.join(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), 'playatriveo'), 'package.json'));
+const { chromium } = requireEngine('playwright');
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const at = '2026-10-04T12:00:00.000Z';
+
+// Built console + fake sidecar: the Today screen's cards, order, actions, and that nothing is sent without a click.
+const readyRow = (id, company, extra = {}) => ({ id, company, companyKey: company.toLowerCase(), title: 'Software Engineer', location: 'NY', ats: 'greenhouse', url: 'https://blocked.test', priority: 0, updatedAt: at, filledAt: at, resumeFile: 'resume.pdf', answered: 12, readyAtCompany: 1, companySubmittedToday: false, priorityTags: ['Strong match'], ...extra });
+const queued = (id, company, n, extra = {}) => ({ id, company, title: 'Backend Engineer', updatedAt: at, n, readyForReview: Math.max(0, n - 1), needsInput: n ? 1 : 0, actionRequired: 0, ...extra });
+const view = { ok: true, generatedAt: at, killSwitch: null, worker: { online: true, updatedAt: at }, counts: { unanswered: 4, questions: 9, ready: 3 } };
+const READY = { ...view, ready: [readyRow('r1', 'Stripe'), readyRow('r2', 'Ramp'), readyRow('m1', 'Spotify', { ats: 'lever' })], manual: [{ ...readyRow('m1', 'Spotify', { ats: 'lever' }), openFill: null }], approved: [] };
+const UNANSWERED = { ...view, unanswered: [queued('u1', 'Rogo', 4), queued('u2', 'Vercel', 5), queued('c1', 'Anthropic', 0), queued('u3', 'Tailscale', 2)], cards: [] };
+
+async function fixture() {
+  const server = http.createServer((req, res) => {
+    const requested = path.join(root, 'dist-apply', req.url.split('?')[0]);
+    const file = fs.existsSync(requested) && fs.statSync(requested).isFile() ? requested : path.join(root, 'dist-apply/index.html');
+    res.setHeader('Content-Type', file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : 'text/html'); res.end(fs.readFileSync(file));
+  });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  const port = server.address().port;
+  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const page = await browser.newPage({ viewport: { width: 1600, height: 800 } });
+  const calls = [], errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.route('**/*', (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname === '/api/auth/me') return route.fulfill({ json: { user: { id: 1, name: 'Atishay', email: 'test@example.test' } } });
+    if (url.pathname === '/applications/review-queue') {
+      const v = url.searchParams.get('view');
+      return route.fulfill({ json: v === 'ready' ? READY : v === 'counts' ? view : v === 'cards' ? { ok: true, generatedAt: at, cards: [] } : UNANSWERED });
+    }
+    if (url.pathname === '/applications/action') { calls.push(route.request().postDataJSON()); return route.fulfill({ json: { ok: true } }); }
+    if (url.hostname === '127.0.0.1' && url.port === String(port)) return route.continue();
+    return route.abort();
+  });
+  return { page, calls, errors, base: `http://127.0.0.1:${port}`, close: async () => { await browser.close(); await new Promise((r) => server.close(r)); } };
+}
+
+test('Today shows what needs you, closest to submission first, five at a time, without page scroll', async () => {
+  const f = await fixture(); const { page, calls, errors } = f;
+  try {
+    await page.goto(`${f.base}/`);
+    await page.getByRole('heading', { name: 'Today', exact: true }).waitFor();
+    await page.getByText('7 applications waiting for you', { exact: true }).waitFor();
+    const order = await page.locator('.td-card .td-id strong').allTextContents();
+    assert.deepEqual(order, ['Spotify', 'Stripe', 'Ramp', 'Anthropic', 'Rogo'], 'you submit, approve, answers approved, then review answers');
+    assert.ok(await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight + 1), 'no page scroll');
+    await page.getByRole('button', { name: 'Next applications' }).click();
+    assert.deepEqual(await page.locator('.td-card .td-id strong').allTextContents(), ['Vercel', 'Tailscale']);
+    assert.equal(calls.length, 0, 'looking sends nothing');
+    assert.deepEqual(errors, []);
+  } finally { await f.close(); }
+});
+
+test('each card runs only its own action; Approve all lists what goes out and waits for confirm', async () => {
+  const f = await fixture(); const { page, calls } = f;
+  try {
+    await page.goto(`${f.base}/`);
+    await page.getByRole('article', { name: 'Stripe: Approve to submit' }).getByRole('button', { name: 'Approve submit' }).click();
+    await page.getByText(/Approved Stripe\./).waitFor();
+    assert.deepEqual(calls.at(-1), { action: 'approve_submit', applicationId: 'r1', expectedUpdatedAt: at });
+    await page.getByRole('article', { name: 'Anthropic: Answers approved' }).getByRole('button', { name: 'Fill and verify' }).click();
+    await page.getByText(/Filling Anthropic now/).waitFor();
+    assert.deepEqual(calls.at(-1), { action: 'continue_application', applicationId: 'c1', expectedUpdatedAt: at });
+    await page.getByRole('button', { name: /^Approve all \d+ ready$/ }).click();
+    const dialog = page.getByRole('dialog'); await dialog.waitFor();
+    assert.match(await dialog.innerText(), /Ramp/);
+    const before = calls.length;
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
+    assert.equal(calls.length, before, 'cancel sends nothing');
+    assert.ok(calls.every((c) => c.action !== 'open_and_fill'));
+
+  } finally { await f.close(); }
+});
+
+test('Review answers opens that application in the answer view', async () => {
+  const f = await fixture(); const { page } = f;
+  try {
+    await page.goto(`${f.base}/`);
+    await page.getByRole('article', { name: 'Rogo: Review answers' }).getByRole('button', { name: 'Review answers' }).click();
+    await page.waitForURL(/\/unanswered\?app=u1$/);
+    await page.getByText('One company. One complete form.', { exact: true }).waitFor();
+    assert.equal(await page.locator('.ar-company[aria-current="true"] strong').textContent(), 'Rogo');
+  } finally { await f.close(); }
+});
+
+test('Fill and verify all lists the approved forms and starts them only on confirm, never submitting', async () => {
+  const f = await fixture(); const { page, calls } = f;
+  try {
+    await page.goto(`${f.base}/`);
+    await page.getByRole('button', { name: 'Fill and verify all 1' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Fill and verify all approved applications' });
+    assert.match(await dialog.innerText(), /Anthropic/);
+    assert.equal(calls.length, 0);
+    await dialog.getByRole('button', { name: 'Fill and verify 1' }).click();
+    await page.getByText(/Started filling 1 of 1/).waitFor();
+    assert.deepEqual(calls, [{ action: 'continue_application', applicationId: 'c1', expectedUpdatedAt: at }]);
+  } finally { await f.close(); }
+});
