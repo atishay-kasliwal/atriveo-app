@@ -242,7 +242,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         );
       })()}
       {review && <ApplicationReview key={`${review.id}:${review.mode}`} application={review} onClose={() => setReview(null)} />}
-      {notice && <p className="apps-toast" role="status">{notice}</p>}
+      {notice && <div className="apps-toast" role="status"><span>{notice}</span><button type="button" className="apps-toast-close" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
     </div>
   );
 }

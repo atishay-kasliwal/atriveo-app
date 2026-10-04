@@ -437,3 +437,9 @@
 .apps-tag.good { color: var(--green); border-color: color-mix(in oklab, var(--green) 45%, var(--border-col)); background: color-mix(in oklab, var(--green) 9%, transparent); }
 .apps-panel-links { display: inline-flex; gap: 14px; font-size: 12.5px; white-space: nowrap; }
 @media (max-width: 720px) { .apps-q input { font-size: 16px; min-height: 44px; padding: 8px 12px; } .apps-panel-links { gap: 12px; } }
+
+.apps-toast { display: flex; align-items: flex-start; gap: 12px; }
+.apps-toast > span { flex: 1; min-width: 0; }
+.apps-toast-close { flex: none; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: inherit; font-size: 24px; line-height: 1; cursor: pointer; }
+.apps-toast-close:hover { background: rgba(128, 128, 128, .18); }
+.apps-toast-close:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }

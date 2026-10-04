@@ -1049,7 +1049,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
         return hr ? <HistoryDrawer row={hr} onClose={() => setHistoryId(null)} /> : null;
       })()}
       {openRow && <ReviewDrawer row={openRow} onClose={closeDrawer} onDone={done} />}
-      {notice && <p className="apps-toast" role="status">{notice}</p>}
+      {notice && <div className="apps-toast" role="status"><span>{notice}</span><button type="button" className="apps-toast-close" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
     </div>
   );
 }
