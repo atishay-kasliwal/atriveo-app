@@ -1,0 +1,91 @@
+% Output of scripts/ac-tex.mjs before the parseability fixes (synthetic profile and bullets).
+% Kept so tests can show the readiness checks catch the problems it had.
+\documentclass[letterpaper,11pt]{article}
+\usepackage{latexsym}\usepackage[empty]{fullpage}\usepackage{titlesec}
+\usepackage[usenames,dvipsnames]{color}\usepackage{verbatim}\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}\usepackage{fancyhdr}\usepackage[english]{babel}\usepackage{tabularx}
+\pagestyle{fancy}\fancyhf{}\fancyfoot{}\renewcommand{\headrulewidth}{0pt}\renewcommand{\footrulewidth}{0pt}
+\addtolength{\oddsidemargin}{-0.5in}\addtolength{\evensidemargin}{-0.5in}\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}\addtolength{\textheight}{1.0in}
+\urlstyle{same}\raggedbottom\raggedright\setlength{\tabcolsep}{0in}
+\titleformat{\section}{\vspace{-1pt}\raggedright\large}{}{0em}{}[\color{black}\titlerule \vspace{2pt}]
+\titlespacing*{\section}{0pt}{2pt}{2pt}
+\newcommand{\resumeItem}[1]{\item\small{{#1 \vspace{-2pt}}}}
+\newcommand{\resumeSubheading}[4]{\vspace{-2pt}\item\begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}\textbf{#1} & #2 \\ \textit{\small#3} & \textit{\small #4} \\ \end{tabular*}\vspace{-7pt}}
+\newcommand{\resumeProjectHeading}[2]{\item\begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}\small#1 & #2 \\ \end{tabular*}\vspace{-7pt}}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+\begin{document}
+\begin{center}
+    \textbf{\Huge \scshape Jordan Rivera} \\ \vspace{1pt}
+    \small Backend Engineer $|$
+    555-201-4477 $|$
+    \href{mailto:jordan.rivera@example.com}{jordan.rivera@example.com} $|$
+    \href{https://www.linkedin.com/in/jordan-rivera}{Linkedin} $|$
+    \href{https://github.com/jrivera}{Github} $|$
+    \href{https://jordanrivera.dev}{Portfolio} $|$
+    Austin, TX
+\end{center}
+
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading{Stony Brook University}{Stony Brook, New York}{Master of Science in Data Science}{Aug. 2024 -- May 2026}
+    \resumeSubheading{Symbiosis University of Applied Sciences}{Indore, Madhya Pradesh}{Bachelor of Technology in Computer Science and Information Technology}{Aug. 2018 -- May 2022}
+  \resumeSubHeadingListEnd
+
+\section{Experience}
+  \resumeSubHeadingListStart
+    \resumeSubheading{Stony Brook University}{November 2024 -- May 2026}{Software Engineer $|$ FastAPI, Python, AWS, ETL, RAG}{Stony Brook, NY}
+      \resumeItemListStart
+        \resumeItem{Built a Python and FastAPI retrieval service on AWS that answers analyst questions over 7 years of filings and cut research time from 3 days to under 20 minutes.}
+        \resumeItem{Designed a LangChain RAG pipeline with vector search and evaluation harness that lifted answer accuracy by 18\% across 400 benchmark questions.}
+        \resumeItem{Shipped an event-driven ingestion job on AWS Lambda and SQS that processes 50K documents per day with retries and dead-letter alerts.}
+        \resumeItem{Wrote integration tests and CI checks in GitHub Actions that caught 30 regressions before release and kept deploys under 10 minutes.}
+      \resumeItemListEnd
+
+    \resumeSubheading{Wake Forest - CAIR}{May 2025 -- August 2025}{Software Engineer $|$ Python, Healthcare Data, ETL, GCP, SimpleITK}{Winston-Salem, NC}
+      \resumeItemListStart
+        \resumeItem{Built Python ETL pipelines on GCP that turned 10K imaging studies into reproducible research cohorts for three clinical research groups.}
+        \resumeItem{Automated feature extraction that produced 200+ quantitative measures per study and reduced manual preparation from 3 hours to 2 minutes.}
+        \resumeItem{Partnered with physicians to define data quality rules that flagged 4\% of studies for review before they reached downstream models.}
+      \resumeItemListEnd
+
+    \resumeSubheading{Accolite Digital}{August 2021 -- August 2024}{Senior Software Engineer $|$ Java, Spring Boot, AWS, React, Python}{Hyderabad, TG}
+      \resumeItemListStart
+        \resumeItem{Delivered Java and Spring Boot services on AWS for three enterprise clients, serving 3,000 employees with secure document exchange.}
+        \resumeItem{Replaced a vendor CRM with an in-house React and MongoDB operations platform used for onboarding, timesheets and reviews.}
+        \resumeItem{Automated weekly timesheet filing on AWS Lambda and SQS for 3,000 employees, removing a manual process across operations.}
+        \resumeItem{Standardized performance reviews on React and MongoDB across 10+ manager teams, replacing spreadsheet workflows in production.}
+      \resumeItemListEnd
+  \resumeSubHeadingListEnd
+
+\section{Projects}
+  \resumeSubHeadingListStart
+    \resumeProjectHeading{\textbf{Atriveo} $|$ \emph{FastAPI, React, TypeScript, LangChain, Cloudflare}}{September 2025 -- Present}
+    \resumeItemListStart
+      \resumeItem{Built a React and FastAPI job search platform with a browser extension that tracks applications and tailors resumes for 1K+ daily users.}
+      \resumeItem{Shipped a TypeScript Chrome extension that captures job postings in one click and syncs them to the tracker in real time.}
+    \resumeItemListEnd
+
+    \resumeProjectHeading{\textbf{Insurance Microservices Platform} $|$ \emph{Spring Boot, Kafka, Docker, Redis, Java}}{June 2025 -- August 2025}
+    \resumeItemListStart
+      \resumeItem{Built a Spring Cloud API gateway with JWT authentication, Redis rate limiting at 5 requests per second and circuit breakers.}
+      \resumeItem{Deployed service discovery and an encrypted config server across 8 Docker Compose microservices with Kafka messaging.}
+    \resumeItemListEnd
+  \resumeSubHeadingListEnd
+
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages}{: Python, Java, SQL, TypeScript, JavaScript} \\
+     \textbf{Cloud \& DevOps}{: AWS, Docker, Kubernetes, GCP, Terraform, CI/CD} \\
+     \textbf{Backend Frameworks}{: FastAPI, Spring Boot, Node.js, REST APIs, Kafka} \\
+     \textbf{AI \& Machine Learning}{: LLMs, RAG, LangChain, PyTorch} \\
+    }}
+ \end{itemize}
+
+\end{document}

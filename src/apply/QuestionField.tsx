@@ -1,3 +1,4 @@
+import { attachmentMessage } from "./attachmentMessage";
 import { useEffect, useId, useState } from "react";
 import { getJson, questionKind, type PendingQ, type Scope } from "./engine";
 
@@ -41,7 +42,8 @@ function SearchChoice({ list, value, onValue }: { list: string[]; value: string;
 }
 
 /** One unanswered question: the right input for its type, and where the answer is remembered. */
-export default function QuestionField({ q, appId, company, value, scope, onValue, onScope, note }: {
+export default function QuestionField({ q, appId, company, value, scope, onValue, onScope, note, hideScope = false }: {
+  hideScope?: boolean;
   q: PendingQ; appId: string; company: string; value: string; scope: Scope;
   onValue: (v: string) => void; onScope: (s: Scope) => void;
   /** Shown under the input, e.g. where a pre-filled answer came from. */
@@ -75,6 +77,8 @@ export default function QuestionField({ q, appId, company, value, scope, onValue
         {options.list.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
     );
+  } else if (q.type !== "textarea") {
+    input = <input value={value} onChange={(e) => onValue(e.target.value)} placeholder="Your answer" />;
   } else {
     input = <textarea rows={q.type === "textarea" ? 3 : 1} value={value} onChange={(e) => onValue(e.target.value)} placeholder="Your answer" />;
   }
@@ -85,28 +89,11 @@ export default function QuestionField({ q, appId, company, value, scope, onValue
         <span className="apps-q-label">{q.label}{q.required ? " *" : ""}{q.sensitive ? <em> · {q.sensitive.replace(/_/g, " ")}</em> : null}</span>
         {input}
       </label>
-      {kind === "file" && <p className="apps-q-note">
-        {q.reason === "UPLOAD_FAILED"
-          ? "The attachment upload failed. Open the form to attach it yourself, or skip this job."
-          : q.reason === "ATTACHMENT_UNVERIFIED" || q.reason === "UPLOAD_UNVERIFIED"
-            ? "Atriveo couldn't confirm that this attachment finished saving. Open the form to verify it, or skip this job."
-            : "This attachment needs attention. Open the form to verify it, or skip this job."}
-      </p>}
+      {kind === "file" && <p className="apps-q-note">{attachmentMessage(q.reason)}</p>}
       {kind === "unreadable" && <p className="apps-q-note">The engine couldn't read this field's label. Open the form to see what it asks. Your answer is kept for this application only.</p>}
       {q.type === "checkbox" && q.sensitive && <p className="apps-q-note">Read the notice or declaration before choosing. A required box left unchecked keeps this application in review.</p>}
-      {q.suggestedAnswer && (
-        <aside className="apps-open-suggestion" aria-label="Unapproved suggested answer">
-          <div className="apps-open-suggestion-head">
-            <strong>Suggested answer</strong>
-            <span>{q.suggestionConfidence?.band === "high" ? "High" : "Medium"} confidence</span>
-          </div>
-          <p>{q.suggestedAnswer}</p>
-          {q.selectedStory && <small>Story: {q.selectedStory}{q.matchedSignals?.length ? ` · context: ${q.matchedSignals.map((signal) => signal.replace(/^(?:domain|title_skill|jd_skill):/, "")).join(", ")}` : ""}</small>}
-          <small>{q.reviewStatus === "draft" ? "Draft saved. It remains unresolved until you approve it." : "This is a suggestion only. It is not approved or saved."}</small>
-        </aside>
-      )}
       {note && <p className="apps-q-note">{note}</p>}
-      {kind === "question" && (
+      {kind === "question" && !hideScope && (
         <select className="apps-q-scope" aria-label="Use this answer for" value={scope} onChange={(e) => onScope(e.target.value as Scope)}>
           <option value="application">Only this application</option>
           <option value="company">All {company} jobs</option>

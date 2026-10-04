@@ -10,13 +10,19 @@ export interface EngineState {
   killSwitch: { enabled: boolean; reason: string | null } | null;
   worker: { online: boolean; updatedAt: string } | null;
 }
-export interface Counts { unanswered: number; questions: number; reviewComplete: number; ready: number }
+export interface Counts {
+  unanswered: number; questions: number; ready: number; readyForReview?: number; needsInput?: number; actionRequired?: number;
+  /** Of `unanswered`: every answer approved, waiting for you to choose Fill and verify. */
+  reviewComplete?: number;
+}
 
 interface Row {
   id: string; company: string; companyKey: string | null; title: string; location: string | null; ats: string | null;
   url: string; priority: number; updatedAt: string;
+  /** Why it sits where it does in the application order (job-pipeline priority tags). */
+  priorityTags?: string[];
 }
-export interface UnansweredApp extends Row { reviewReason: string | null; questionReviewStatus: "open" | "complete"; questions: PendingQ[] }
+export interface UnansweredApp extends Row { reviewStage?: "questions" | "final_form" | null; reviewReason: string | null; questionReviewStatus: "open" | "complete" | null; questions: PendingQ[] }
 export interface ReadyApp extends Row {
   filledAt: string; resumeFile: string | null; answered: number;
   /** Ready jobs at this company; one is submitted per company per day. */
@@ -24,16 +30,21 @@ export interface ReadyApp extends Row {
   /** A job at this company was already submitted today, so an approval now would wait until tomorrow. */
   companySubmittedToday: boolean;
 }
+/** Filled and verified on an ATS you submit yourself (Ashby, Lever): Open & Fill instead of Approve. */
+export interface ManualApp extends ReadyApp {
+  /** Your last Open & Fill: when you opened it, and what Atriveo Fill reported from your browser. */
+  openFill: { armedAt: string | null; filledAt: string | null; filled: number | null; toCheck: number | null } | null;
+}
 export interface ApprovedApp extends Row {
   status: string; reviewReason: string | null; reviewDetail: string | null; failureCode: string | null;
   submittedAt: string | null; approvedAt: string | null;
 }
 /** An application blocked on questions, in the Unanswered page's order; its card loads when it's needed. */
-export interface QueuedApp { id: string; updatedAt: string; /** questions waiting */ n: number; questionReviewStatus?: "open" | "complete" }
+export interface QueuedApp { company?: string; title?: string; id: string; updatedAt: string; n: number; suggestions?: number; readyForReview?: number; needsInput?: number; actionRequired?: number }
 
 interface View extends EngineState { ok: boolean; generatedAt: string; counts: Counts }
-export interface UnansweredQueue extends View { unanswered: QueuedApp[]; reviewComplete: QueuedApp[] }
-export interface ReadyQueue extends View { ready: ReadyApp[]; approved: ApprovedApp[] }
+export interface UnansweredQueue extends View { unanswered: QueuedApp[] }
+export interface ReadyQueue extends View { ready: ReadyApp[]; approved: ApprovedApp[]; manual?: ManualApp[] }
 
 const visible = () => document.visibilityState === "visible";
 
@@ -78,9 +89,9 @@ export function adjustCounts(delta: Partial<Counts>): void {
   if (!c) return;
   counts.set({
     counts: {
+      ...c,
       unanswered: Math.max(0, c.unanswered + (delta.unanswered ?? 0)),
       questions: Math.max(0, c.questions + (delta.questions ?? 0)),
-      reviewComplete: Math.max(0, c.reviewComplete + (delta.reviewComplete ?? 0)),
       ready: Math.max(0, c.ready + (delta.ready ?? 0)),
     },
   });
@@ -138,7 +149,7 @@ const ready = pageView<ReadyQueue>(() => getJson<ReadyQueue>("/applications/revi
 /** The Unanswered page's order: every application blocked on questions, without its questions. */
 export const useUnansweredQueue = unanswered.use;
 export const refreshUnanswered = unanswered.refresh;
-/** The Ready page: waiting for your approval, and the approvals on their way. */
+/** The Ready page: waiting for your approval or for you to submit (Open & Fill), and the approvals on their way. */
 export const useReadyQueue = ready.use;
 export const refreshReady = ready.refresh;
 

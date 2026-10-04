@@ -19,6 +19,9 @@ export interface Job {
   scraped_date?: string;
   ats_score?: number;
   fit_score?: number;
+  /** Application priority from job-pipeline: group 0 is applied to first; tags say why. */
+  priority_group?: number | null;
+  priority_tags?: string[] | null;
 }
 
 export interface RunEntry {

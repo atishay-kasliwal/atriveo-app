@@ -17,6 +17,7 @@ import { assessJdGate, writeJdGateFile, MIN_JD_IDEAL } from "./ac-jd-gate.mjs";
 import { buildComposeExplain, formatExplainLogLines } from "./ac-compose-explain.mjs";
 import { loadBank } from "./ac-bank.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
+import { scoreAndSaveRun } from "./ats/persist.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
 import {
   createArtifactRun,
@@ -108,6 +109,18 @@ function compileTex(dir, onLog) {
 }
 
 export function readAtsFromDir(dir) {
+  // Most AC runs have a small optimizer.json. Read it first: report.json is
+  // much larger and made the 1,784-run Compile history scan several seconds slower.
+  const optPath = path.join(dir, "optimizer.json");
+  if (fs.existsSync(optPath)) {
+    try {
+      const opt = JSON.parse(fs.readFileSync(optPath, "utf8"));
+      if (opt.ats_before != null && opt.ats_after != null) return opt.pipeline === "ac"
+        ? `${Math.round(opt.ats_before)}→${Math.round(opt.ats_after)}`
+        : `${opt.ats_before}→${opt.ats_after}`;
+      if (opt.resume_confidence_score != null) return `RCS ${Math.round(opt.resume_confidence_score)}`;
+    } catch { /* fall through */ }
+  }
   const reportPath = path.join(dir, "report.json");
   if (fs.existsSync(reportPath)) {
     try {
@@ -117,13 +130,6 @@ export function readAtsFromDir(dir) {
       if (before != null && after != null) return `${Math.round(before)}→${Math.round(after)}`;
       if (after != null) return `RCS ${Math.round(after)}`;
     } catch { /* fall through */ }
-  }
-  const optPath = path.join(dir, "optimizer.json");
-  if (fs.existsSync(optPath)) {
-    try {
-      const opt = JSON.parse(fs.readFileSync(optPath, "utf8"));
-      if (opt.ats_before != null && opt.ats_after != null) return `${opt.ats_before}→${opt.ats_after}`;
-    } catch { /* ignore */ }
   }
   return null;
 }
@@ -298,6 +304,10 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
       result.dir = materialized.dir;
       result.pdf = true;
       result.status = "ok";
+      try {
+        const { saved } = scoreAndSaveRun(dir);
+        onLog?.("result", `ATS Readiness ${saved.readiness.status} ${saved.readiness.parseability} · Job Match ${saved.job_match?.score ?? "manual review"}`);
+      } catch (e) { onLog?.("warn", `ATS assessment unavailable: ${String(e.message || e)}`); }
       recordCacheReuse(cached.fingerprint, {
         job_url: job.job_url,
         company,
@@ -500,6 +510,10 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     report.pdf = c.pdf;
     report.pages = c.pages;
     fs.writeFileSync(path.join(dir, "report.json"), `${JSON.stringify(report, null, 2)}\n`);
+    try {
+      const { saved } = scoreAndSaveRun(dir);
+      onLog?.("result", `ATS Readiness ${saved.readiness.status} ${saved.readiness.parseability} · Job Match ${saved.job_match?.score ?? "manual review"}`);
+    } catch (e) { onLog?.("warn", `ATS assessment unavailable: ${String(e.message || e)}`); }
     result.overflow = c.pages != null && c.pages > 1;
 
     // Gemma critique — disabled (~8 min/job). Opt in: TAILOR_CRITIQUE=1 + uncomment block below.

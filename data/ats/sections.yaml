@@ -1,0 +1,85 @@
+# Section headings the ATS parser recognizes, and the words it uses to tell fields apart.
+# Headings match whole lines, case-insensitive, ignoring a trailing colon and "&" vs "and".
+# Parsers file content by heading: a section called "Where I've Been" lands in no field.
+
+headings:
+  summary: [summary, professional summary, profile, professional profile, objective, career objective, about me]
+  experience:
+    - experience
+    - work experience
+    - professional experience
+    - employment
+    - employment history
+    - work history
+    - career history
+    - relevant experience
+    - industry experience
+  education: [education, academic background, academics, education and training]
+  skills:
+    - skills
+    - technical skills
+    - core competencies
+    - competencies
+    - technologies
+    - skills and technologies
+    - tools and technologies
+    - areas of expertise
+  projects: [projects, personal projects, selected projects, academic projects, technical projects, research projects]
+  certifications: [certifications, certificates, licenses and certifications, licenses]
+  publications: [publications, research, papers]
+  awards: [awards, honors, honors and awards, achievements]
+  leadership: [leadership, leadership experience, activities, extracurricular activities, volunteer, volunteering, volunteer experience]
+
+# Sections whose content is a list of entries (an organization, a role, dates, bullets).
+entry_sections: [experience, education, projects, leadership]
+
+# A cell holding one of these words names a school.
+institution_words: [university, college, institute, school, academy, polytechnic, iit, conservatory]
+
+# A cell holding one of these names a degree.
+degree_words:
+  - bachelor
+  - master
+  - doctor
+  - associate
+  - phd
+  - ph.d
+  - mba
+  - b.s
+  - m.s
+  - b.a
+  - m.a
+  - bs
+  - ms
+  - ba
+  - b.tech
+  - m.tech
+  - btech
+  - mtech
+  - b.e
+  - m.e
+  - bsc
+  - msc
+  - diploma
+  - certificate
+
+# A cell holding one of these, and no school word, reads as a job title rather than an employer.
+title_words:
+  - engineer
+  - developer
+  - scientist
+  - analyst
+  - intern
+  - manager
+  - lead
+  - architect
+  - consultant
+  - researcher
+  - assistant
+  - specialist
+  - designer
+  - director
+  - administrator
+  - associate
+  - fellow
+  - programmer

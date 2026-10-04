@@ -1,7 +1,11 @@
 [
   {
     "job_url": "https://www.linkedin.com/jobs/view/4475357009",
+<<<<<<< HEAD
     "session_id": "2026-10-04T00:55:44Z",
+=======
+    "session_id": "2026-10-03T23:55:48Z",
+>>>>>>> main
     "application_key": null,
     "ats": null,
     "ats_board": null,
@@ -18,11 +22,21 @@
     "score_pct": 42,
     "site": "linkedin",
     "summary": "****Basic Qualifications**** * 3\\+ years of professional software engineering experience in backend development, distributed systems, or data engineering.",
+<<<<<<< HEAD
     "title": "Software Engineer II - Security Review Automation"
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4475355059",
     "session_id": "2026-10-04T00:55:44Z",
+=======
+    "title": "Software Engineer II - Security Review Automation",
+    "ats_score": 42,
+    "fit_score": 8
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4475355059",
+    "session_id": "2026-10-03T23:55:48Z",
+>>>>>>> main
     "application_key": null,
     "ats": null,
     "ats_board": null,
@@ -37,6 +51,7 @@
     "pipeline": "important",
     "priority_score": 105,
     "score_pct": 42,
+<<<<<<< HEAD
     "site": "linkedin",
     "summary": "****Basic Qualifications**** * 3\\+ years of professional software engineering experience in backend development, distributed systems, or data engineering.",
     "title": "Software Engineer II - Security Review Automation"
@@ -373,5 +388,12 @@
     "pipeline": "keywords",
     "site": "linkedin",
     "title": "Full Stack Engineer"
+=======
+    "site": "linkedin",
+    "summary": "****Basic Qualifications**** * 3\\+ years of professional software engineering experience in backend development, distributed systems, or data engineering.",
+    "title": "Software Engineer II - Security Review Automation",
+    "ats_score": 42,
+    "fit_score": 8
+>>>>>>> main
   }
 ]

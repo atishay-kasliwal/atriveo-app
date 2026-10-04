@@ -59,6 +59,17 @@ function workerOf(workerDocs) {
  * approve_submit (src/application/humanAction.ts), which stays the authority:
  * keep the two in step so nothing listed here is refused there.
  */
+/**
+ * Filled and verified on an ATS you submit yourself (Ashby, Lever): Open & Fill instead of Approve.
+ * Mirrors playatriveo's Open & Fill checks (src/application/manualFill/fillPlan.ts), which stay the authority.
+ */
+export function readyForYou(r) {
+  return r.status === "NEEDS_REVIEW" && r.review?.reason === "MANUAL_SUBMIT"
+    && !r.submission?.attemptedAt && !r.submission?.submittedAt
+    && (r.review.pending ?? []).length === 0 && (r.review.failedChecks ?? []).length === 0
+    && Boolean(r.submission?.validation?.passed && r.submission?.certification?.status === "CERTIFIED" && r.resume?.sha256);
+}
+
 export function readyForApproval(r) {
   return r.status === "NEEDS_REVIEW" && r.review?.reason === "SUBMIT_APPROVAL"
     && !r.submission?.attemptedAt && !r.submission?.submittedAt
@@ -78,14 +89,14 @@ const size = (path) => ({ $size: { $ifNull: [path, []] } });
  */
 const reviewRow = (withQuestions) => ({
   $project: {
-    company: 1, companyKey: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, applyUrl: 1, finalUrl: 1, createdAt: 1, updatedAt: 1,
+    company: 1, companyKey: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, priorityTags: 1, applyUrl: 1, finalUrl: 1, createdAt: 1, updatedAt: 1,
     "resume.fileName": 1, "resume.sha256": 1, "failure.code": 1,
     "submission.attemptedAt": 1, "submission.submittedAt": 1, "submission.validation.passed": 1, "submission.formSignature": 1,
-    "submission.approvalRequestedAt": 1, "submission.approvalInAttemptAt": 1,
+    "submission.approvalRequestedAt": 1, "submission.approvalInAttemptAt": 1, "submission.certification.status": 1,
+    "submission.manualFill.armedAt": 1, "submission.manualFill.filledAt": 1, "submission.manualFill.report": 1,
     answered: size({ $filter: { input: { $ifNull: ["$questions", []] }, cond: { $eq: ["$$this.resolution", "answered"] } } }),
     review: {
-      reason: "$review.reason", detail: "$review.detail", since: "$review.since",
-      questionReviewStatus: "$review.questionReviewStatus",
+      reason: "$review.reason", detail: "$review.detail", stage: "$review.stage", since: "$review.since", questionReviewStatus: "$review.questionReviewStatus",
       failedChecks: { $map: { input: { $ifNull: ["$review.failedChecks", []] }, in: "$$this.id" } },
       pending: {
         $map: {
@@ -93,24 +104,10 @@ const reviewRow = (withQuestions) => ({
           in: !withQuestions ? "$$this.fingerprint" : {
             fieldKey: "$$this.fieldKey", fingerprint: "$$this.fingerprint", label: "$$this.label", type: "$$this.type", required: "$$this.required",
             canonicalKey: "$$this.canonicalKey", sensitive: "$$this.sensitive", reason: "$$this.reason", detail: "$$this.detail",
-            questionFamily: "$$this.openEndedAssessment.questionFamily",
+            openEndedAssessment: "$$this.openEndedAssessment", openEndedSuggestion: "$$this.openEndedSuggestion", openEndedUserReview: "$$this.openEndedUserReview",
+            answerProposal: "$$this.answerProposal",
             optionCount: size("$$this.options"),
             options: { $cond: [{ $gt: [size("$$this.options"), MAX_INLINE_OPTIONS] }, [], { $ifNull: ["$$this.options", []] }] },
-            openEndedSuggestion: {
-              suggestedAnswer: "$$this.openEndedSuggestion.suggestedAnswer",
-              questionFamily: "$$this.openEndedSuggestion.questionFamily",
-              familyConfidence: "$$this.openEndedSuggestion.familyConfidence",
-              storyConfidence: "$$this.openEndedSuggestion.storyConfidence",
-              confidenceBand: "$$this.openEndedSuggestion.confidenceBand",
-              selectedStory: "$$this.openEndedSuggestion.selectedStory",
-              matchedSignals: "$$this.openEndedSuggestion.matchedSignals",
-              reason: "$$this.openEndedSuggestion.reason",
-            },
-            openEndedUserReview: {
-              status: "$$this.openEndedUserReview.status",
-              action: "$$this.openEndedUserReview.action",
-              draftAnswer: "$$this.openEndedUserReview.draftAnswer",
-            },
           },
         },
       },
@@ -119,50 +116,34 @@ const reviewRow = (withQuestions) => ({
 });
 
 const pendingQuestion = (p) => ({
-  fieldKey: p.fieldKey ?? p.fingerprint, fingerprint: p.fingerprint, label: p.label, type: p.type, required: Boolean(p.required),
+  fieldKey: p.fieldKey ?? null,
+  fingerprint: p.fingerprint, label: p.label, type: p.type, required: Boolean(p.required),
   options: p.options ?? [], optionCount: p.optionCount ?? (p.options ?? []).length,
   canonicalKey: p.canonicalKey ?? null, sensitive: p.sensitive ?? null, reason: p.reason, detail: p.detail ?? null,
-  questionFamily: p.questionFamily ?? p.openEndedSuggestion?.questionFamily ?? null,
-  ...(p.openEndedSuggestion?.suggestedAnswer ? {
-    suggestedAnswer: p.openEndedSuggestion.suggestedAnswer,
-    suggestionConfidence: {
-      band: p.openEndedSuggestion.confidenceBand,
-      family: p.openEndedSuggestion.familyConfidence,
-      story: p.openEndedSuggestion.storyConfidence,
-    },
-    questionFamily: p.openEndedSuggestion.questionFamily,
-    selectedStory: p.openEndedSuggestion.selectedStory,
-    matchedSignals: p.openEndedSuggestion.matchedSignals ?? [],
-    suggestionReason: p.openEndedSuggestion.reason,
-  } : {}),
-  userDraft: p.openEndedUserReview?.status === "draft" ? p.openEndedUserReview.draftAnswer ?? null : null,
-  userDraftAction: p.openEndedUserReview?.status === "draft" ? p.openEndedUserReview.action : null,
-  reviewStatus: p.openEndedUserReview?.status ?? (p.openEndedSuggestion?.suggestedAnswer ? "suggested" : "none"),
+  openEndedAssessment: p.openEndedAssessment ?? null,
+  openEndedSuggestion: p.openEndedSuggestion ?? null,
+  openEndedUserReview: p.openEndedUserReview ?? null,
+  answerProposal: p.answerProposal ?? null,
+  suggestedAnswer: p.answerProposal?.answer ?? p.openEndedSuggestion?.suggestedAnswer,
+  questionFamily: p.answerProposal?.family ?? p.openEndedAssessment?.questionFamily ?? null,
+  selectedStory: p.openEndedAssessment?.selectedStory,
+  suggestionReason: p.answerProposal?.reason ?? p.openEndedAssessment?.reason,
+  userDraft: p.openEndedUserReview?.draftAnswer ?? null,
+  userDraftAction: p.openEndedUserReview?.action,
+  reviewStatus: p.openEndedUserReview?.status ?? (p.answerProposal?.answer || p.openEndedSuggestion ? "suggested" : "none"),
 });
 
 // Blocked on questions: the Unanswered page.
-const BLOCKED = { status: "NEEDS_REVIEW", "review.pending.0": { $exists: true }, "submission.attemptedAt": null };
-const QUESTION_REVIEW_COMPLETE = {
-  status: "NEEDS_REVIEW",
-  "review.reason": "UNKNOWN_QUESTION",
-  "review.questionReviewStatus": "complete",
-  "review.pending.0": { $exists: false },
-  "review.failedChecks.0": { $exists: false },
-  "submission.attemptedAt": null,
-  "submission.submittedAt": null,
-  "submission.approvalRequestedAt": null,
-};
-const UNANSWERED_PAGE = { status: "NEEDS_REVIEW", "submission.attemptedAt": null, $or: [
+const BLOCKED = { status: "NEEDS_REVIEW", "submission.attemptedAt": null, $or: [
   { "review.pending.0": { $exists: true } },
-  { "review.reason": "UNKNOWN_QUESTION", "review.questionReviewStatus": "complete", "review.pending.0": { $exists: false }, "review.failedChecks.0": { $exists: false }, "submission.submittedAt": null, "submission.approvalRequestedAt": null },
+  { "review.questionReviewStatus": "complete", "review.reason": { $nin: ["SUBMIT_APPROVAL", "MANUAL_SUBMIT"] } },
 ] };
-// readyForApproval needs this reason; its other checks run on these few rows.
-const MAYBE_READY = { status: "NEEDS_REVIEW", "review.reason": "SUBMIT_APPROVAL" };
+// readyForApproval / readyForYou need one of these reasons; their other checks run on these few rows.
+const MAYBE_READY = { status: "NEEDS_REVIEW", "review.reason": { $in: ["SUBMIT_APPROVAL", "MANUAL_SUBMIT"] } };
 
 const rowBase = (r) => ({
   id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
-  url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, updatedAt: r.updatedAt,
-  questionReviewStatus: r.review?.questionReviewStatus ?? "open",
+  url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, priorityTags: r.priorityTags ?? [], updatedAt: r.updatedAt,
 });
 
 async function engineState(db) {
@@ -173,39 +154,44 @@ async function engineState(db) {
   return { killSwitch: killSwitchOf(control), worker: workerOf(workerDocs) };
 }
 
-/** Every application blocked on questions as { id, updatedAt, n }, in page order: fewest questions, then best match, then oldest. */
+const questionCategory = { $switch: { branches: [
+  { case: { $or: [{ $eq: ["$$this.type", "file"] }, { $eq: ["$$this.answerProposal.state", "action_required"] }, { $regexMatch: { input: { $ifNull: ["$$this.label", ""] }, regex: "^(?:\\(?unlabeled|yes$|no$)", options: "i" } }] }, then: "actionRequired" },
+  { case: { $eq: ["$$this.openEndedUserReview.status", "rejected"] }, then: "needsInput" },
+  { case: { $ne: [{ $ifNull: ["$$this.answerProposal.answer", { $ifNull: ["$$this.openEndedSuggestion.suggestedAnswer", ""] }] }, ""] }, then: "readyForReview" },
+] , default: "needsInput" } };
+const categoryCount = category => ({ $size: { $filter: { input: { $ifNull: ["$review.pending", []] }, cond: { $eq: [questionCategory, category] } } } });
+
+/** Lightweight per-application counts keep filtering independent of card loading. */
 const unansweredOrder = (apps) => apps.aggregate([
   { $match: BLOCKED },
-  { $project: { updatedAt: 1, n: { $size: "$review.pending" }, rank: { $ifNull: ["$priority", 0] } } },
-  { $sort: { n: 1, rank: -1, updatedAt: 1, _id: 1 } },
-  { $project: { _id: 0, id: "$_id", updatedAt: 1, n: 1 } },
-]).toArray();
-
-/** Questions explicitly approved, awaiting a separate review-only refill. */
-const questionReviewCompleteOrder = (apps) => apps.aggregate([
-  { $match: QUESTION_REVIEW_COMPLETE },
-  { $project: { updatedAt: 1, rank: { $ifNull: ["$priority", 0] } } },
-  { $sort: { rank: -1, updatedAt: 1, _id: 1 } },
-  { $project: { _id: 0, id: "$_id", updatedAt: 1, n: { $literal: 0 } } },
+  { $project: {
+    updatedAt: 1, company: 1, title: 1,
+    n: { $size: "$review.pending" },
+    suggestions: categoryCount("readyForReview"),
+    readyForReview: categoryCount("readyForReview"), needsInput: categoryCount("needsInput"), actionRequired: categoryCount("actionRequired"),
+    rank: { $ifNull: ["$priority", 0] },
+  } },
+  { $sort: { suggestions: -1, n: 1, rank: -1, updatedAt: 1, _id: 1 } },
+  { $project: { _id: 0, id: "$_id", updatedAt: 1, company: 1, title: 1, n: 1, suggestions: 1, readyForReview: 1, needsInput: 1, actionRequired: 1 } },
 ]).toArray();
 
 /** The cards (questions included) of these applications, in this order; any no longer blocked are left out. */
 async function unansweredCards(apps, ids) {
   if (!ids.length) return [];
-  const rows = await apps.aggregate([{ $match: { ...UNANSWERED_PAGE, _id: { $in: ids } } }, reviewRow(true)]).toArray();
+  const rows = await apps.aggregate([{ $match: { ...BLOCKED, _id: { $in: ids } } }, reviewRow(true)]).toArray();
   const byId = new Map(rows.map((r) => [r._id, r]));
   return ids.filter((id) => byId.has(id)).map((id) => byId.get(id))
-    .map((r) => ({ ...rowBase(r), reviewReason: r.review.reason ?? null, questions: r.review.pending.map(pendingQuestion) }));
+    .map((r) => ({ ...rowBase(r), reviewReason: r.review.reason ?? null, questionReviewStatus: r.review.questionReviewStatus ?? null, reviewStage: r.review.stage ?? null, questions: r.review.pending.map(pendingQuestion) }));
 }
 
 const blockedTotals = async (apps) => {
-  const [t] = await apps.aggregate([{ $match: BLOCKED }, { $group: { _id: null, apps: { $sum: 1 }, questions: { $sum: { $size: "$review.pending" } } } }]).toArray();
-  return { unanswered: t?.apps ?? 0, questions: t?.questions ?? 0 };
+  const [t] = await apps.aggregate([{ $match: BLOCKED }, { $group: { _id: null, apps: { $sum: 1 }, questions: { $sum: { $size: "$review.pending" } },
+    reviewComplete: { $sum: { $cond: [{ $eq: [{ $size: { $ifNull: ["$review.pending", []] } }, 0] }, 1, 0] } } } }]).toArray();
+  return { unanswered: t?.apps ?? 0, questions: t?.questions ?? 0, reviewComplete: t?.reviewComplete ?? 0 };
 };
 
-const questionReviewCompleteCount = async (apps) => apps.countDocuments(QUESTION_REVIEW_COMPLETE);
-
-const readyRows = async (apps) => (await apps.aggregate([{ $match: MAYBE_READY }, reviewRow(false)]).toArray()).filter(readyForApproval);
+/** Everything on the Ready page: waiting for your approval, or for you to submit it yourself (Open & Fill). */
+const readyRows = async (apps) => (await apps.aggregate([{ $match: MAYBE_READY }, reviewRow(false)]).toArray()).filter((r) => readyForApproval(r) || readyForYou(r));
 
 /** Approved in the dashboard: still waiting for the worker, or claimed in the last two days; and who was submitted to lately. */
 async function approvals(apps, now) {
@@ -226,16 +212,23 @@ function readyLists(readyDocs, { approved, submittedRecently }, now) {
   const companiesSubmittedToday = new Set(submittedRecently.filter((r) => dayKey(r.submission.attemptedAt) === today).map((r) => r.companyKey));
   const perCompany = new Map();
   for (const r of readyDocs) perCompany.set(r.companyKey, (perCompany.get(r.companyKey) ?? 0) + 1);
+  const row = (r) => ({
+    ...rowBase(r),
+    filledAt: r.review.since ?? r.updatedAt,
+    resumeFile: r.resume?.fileName ?? null,
+    answered: r.answered ?? 0,
+    readyAtCompany: perCompany.get(r.companyKey) ?? 1,
+    companySubmittedToday: companiesSubmittedToday.has(r.companyKey),
+  });
   return {
-    ready: readyDocs
-      .map((r) => ({
-        ...rowBase(r),
-        filledAt: r.review.since ?? r.updatedAt,
-        resumeFile: r.resume?.fileName ?? null,
-        answered: r.answered ?? 0,
-        readyAtCompany: perCompany.get(r.companyKey) ?? 1,
-        companySubmittedToday: companiesSubmittedToday.has(r.companyKey),
-      }))
+    // You submit these in your own browser; the engine never does (submission.manualSubmitAts).
+    manual: readyDocs.filter(readyForYou)
+      .map((r) => {
+        const fill = r.submission?.manualFill ?? null;
+        return { ...row(r), openFill: fill ? { armedAt: fill.armedAt ?? null, filledAt: fill.filledAt ?? null, filled: fill.report?.filled ?? null, toCheck: fill.report ? fill.report.mismatched.length + fill.report.missing.length : null } : null };
+      })
+      .sort((a, b) => b.priority - a.priority || a.filledAt.localeCompare(b.filledAt)),
+    ready: readyDocs.filter(readyForApproval).map(row)
       .sort((a, b) => b.priority - a.priority || a.filledAt.localeCompare(b.filledAt)),
     // Approved earlier and now back in the Ready pile: listed there instead.
     approved: approved
@@ -249,12 +242,10 @@ function readyLists(readyDocs, { approved, submittedRecently }, now) {
   };
 }
 
-const countsOf = (order, reviewComplete, ready) => ({
-  unanswered: order.length,
-  questions: order.reduce((n, r) => n + r.n, 0),
-  reviewComplete: reviewComplete.length,
-  ready: ready.length,
-});
+const countsOf = (order, ready) => ({ unanswered: order.length, questions: order.reduce((n, r) => n + r.n, 0), ready: ready.length,
+  readyForReview: order.reduce((n, r) => n + r.readyForReview, 0), needsInput: order.reduce((n, r) => n + r.needsInput, 0), actionRequired: order.reduce((n, r) => n + r.actionRequired, 0),
+  // Only a completed question review is in BLOCKED with nothing pending.
+  reviewComplete: order.filter((r) => r.n === 0).length });
 
 /**
  * The Unanswered and Ready pages and the header counts, each reading only what it shows:
@@ -273,26 +264,22 @@ export async function reviewQueue(db, { view = "full", cards = 0, ids = [], now 
     case "cards":
       return { ok: true, generatedAt, cards: await unansweredCards(apps, ids) };
     case "counts": {
-      const [engine, totals, reviewComplete, ready] = await Promise.all([engineState(db), blockedTotals(apps), questionReviewCompleteCount(apps), readyRows(apps)]);
-      return { ok: true, generatedAt, ...engine, counts: { ...totals, reviewComplete, ready: ready.length } };
+      const [engine, totals, ready] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps)]);
+      return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length } };
     }
     case "unanswered": {
-      const [engine, order, complete, ready] = await Promise.all([engineState(db), unansweredOrder(apps), questionReviewCompleteOrder(apps), readyRows(apps)]);
-      const all = [...order, ...complete];
-      const first = await unansweredCards(apps, all.slice(0, cards).map((r) => r.id));
-      return { ok: true, generatedAt, ...engine, counts: countsOf(order, complete, ready), unanswered: order, reviewComplete: complete, cards: first };
+      const [engine, order, ready] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps)]);
+      const first = await unansweredCards(apps, order.slice(0, cards).map((r) => r.id));
+      return { ok: true, generatedAt, ...engine, counts: countsOf(order, ready), unanswered: order, cards: first };
     }
     case "ready": {
-      const [engine, totals, reviewComplete, ready, approved] = await Promise.all([engineState(db), blockedTotals(apps), questionReviewCompleteCount(apps), readyRows(apps), approvals(apps, now)]);
-      return { ok: true, generatedAt, ...engine, counts: { ...totals, reviewComplete, ready: ready.length }, ...readyLists(ready, approved, now) };
+      const [engine, totals, ready, approved] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps), approvals(apps, now)]);
+      return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length }, ...readyLists(ready, approved, now) };
     }
     case "full": {
-      const [engine, order, complete, ready, approved] = await Promise.all([engineState(db), unansweredOrder(apps), questionReviewCompleteOrder(apps), readyRows(apps), approvals(apps, now)]);
-      const [unanswered, reviewComplete] = await Promise.all([
-        unansweredCards(apps, order.map((r) => r.id)),
-        unansweredCards(apps, complete.map((r) => r.id)),
-      ]);
-      return { ok: true, generatedAt, ...engine, counts: countsOf(order, complete, ready), unanswered, reviewComplete, ...readyLists(ready, approved, now) };
+      const [engine, order, ready, approved] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps), approvals(apps, now)]);
+      const unanswered = await unansweredCards(apps, order.map((r) => r.id));
+      return { ok: true, generatedAt, ...engine, counts: countsOf(order, ready), unanswered, ...readyLists(ready, approved, now) };
     }
     default:
       throw new Error(`Unknown review-queue view: ${view}`);
@@ -327,7 +314,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     apps.find({}, {
       projection: {
         company: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, applyUrl: 1, finalUrl: 1, attemptCount: 1, createdAt: 1, updatedAt: 1,
-        lifecycle: 1, step: 1, attempts: 1, "review.reason": 1, "review.detail": 1, "review.pending": 1, "failure.code": 1, "failure.message": 1,
+        lifecycle: 1, step: 1, attempts: 1, "review.reason": 1, "review.detail": 1, "review.questionReviewStatus": 1, "review.pending": 1, "failure.code": 1, "failure.message": 1,
         "submission.by": 1, "submission.submittedAt": 1, "submission.attemptedAt": 1, "domain.domain": 1, source: 1, outcome: 1,
       },
     }).sort({ updatedAt: -1 }).limit(limit).toArray(),
@@ -467,11 +454,13 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       status: r.status,
       reviewReason: r.review?.reason ?? null,
       reviewDetail: r.review?.detail ?? null,
+      questionReviewStatus: r.review?.questionReviewStatus ?? null,
       pending: (r.review?.pending ?? []).map((p) => p.label),
       // Full questions for answering in the dashboard (no answer values are stored here).
       questions: (r.review?.pending ?? []).map((p) => ({
         fingerprint: p.fingerprint, label: p.label, type: p.type, required: p.required, options: p.options ?? [],
         canonicalKey: p.canonicalKey ?? null, sensitive: p.sensitive ?? null, reason: p.reason, detail: p.detail,
+        openEndedAssessment: p.openEndedAssessment ?? null,
       })),
       submitAttempted: Boolean(r.submission?.attemptedAt),
       failureCode: r.failure?.code ?? null,
