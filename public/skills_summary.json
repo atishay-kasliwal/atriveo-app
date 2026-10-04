@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-10-04T01:01:21.770154+00:00",
-  "total_analyzed": 3437,
+  "generated_at": "2026-10-04T01:59:10.336384+00:00",
+  "total_analyzed": 3440,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 1934,
-        "Java": 975,
-        "SQL": 855,
+        "Python": 1936,
+        "Java": 978,
+        "SQL": 854,
         "TypeScript": 534,
-        "JavaScript": 413,
+        "JavaScript": 415,
         "Rust": 186,
         ".NET": 153,
         "C++": 142,
@@ -27,8 +27,8 @@
       "color": "#8b5cf6",
       "skills": {
         "React": 486,
-        "PyTorch": 461,
-        "TensorFlow": 251,
+        "PyTorch": 460,
+        "TensorFlow": 250,
         "Express": 214,
         "Node.js": 197,
         "Spring": 170,
@@ -53,9 +53,9 @@
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 1101,
+        "AWS": 1100,
         "Azure": 475,
-        "GCP": 369,
+        "GCP": 370,
         "S3": 143,
         "EC2": 112,
         "Lambda": 106,
@@ -74,7 +74,7 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 1358,
+        "Scalability": 1359,
         "Distributed Systems": 673,
         "REST API": 517,
         "System Design": 249,
@@ -93,12 +93,12 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 629,
+        "CI/CD": 630,
         "Kubernetes": 417,
         "Git": 354,
         "Docker": 353,
-        "Linux": 269,
-        "Terraform": 159,
+        "Linux": 267,
+        "Terraform": 160,
         "GitHub Actions": 98,
         "Jenkins": 70,
         "Datadog": 57,
@@ -122,8 +122,8 @@
         "Vector DB": 123,
         "Snowflake": 118,
         "MySQL": 100,
-        "BigQuery": 77,
         "Elasticsearch": 76,
+        "BigQuery": 76,
         "Airflow": 76,
         "MongoDB": 70,
         "dbt": 58,
@@ -135,22 +135,22 @@
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
-        "Machine Learning": 1117,
-        "Agents": 898,
-        "LLM": 800,
-        "GenAI": 476,
-        "PyTorch": 461,
+        "Machine Learning": 1119,
+        "Agents": 899,
+        "LLM": 801,
+        "GenAI": 475,
+        "PyTorch": 460,
         "RAG": 315,
         "Deep Learning": 254,
-        "TensorFlow": 251,
-        "NLP": 251,
-        "Prompt Eng": 231,
+        "TensorFlow": 250,
+        "NLP": 250,
+        "Prompt Eng": 232,
         "OpenAI": 213,
         "Fine-tuning": 183,
         "LangChain": 152,
         "Embeddings": 128,
         "Hugging Face": 85,
-        "Vertex AI": 64,
+        "Vertex AI": 65,
         "MLflow": 61,
         "SageMaker": 53
       }
@@ -172,12 +172,12 @@
     "Soft Skills & Process": {
       "color": "#64748b",
       "skills": {
-        "Cross-functional": 947,
+        "Cross-functional": 949,
         "Mentorship": 908,
         "Code Review": 882,
         "Agile/Scrum": 446,
         "On-call": 289,
-        "Leadership": 229
+        "Leadership": 230
       }
     }
   }
