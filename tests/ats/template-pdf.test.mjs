@@ -38,10 +38,10 @@ const texArgs = (tex, macro) => [...tex.matchAll(new RegExp(`\\\\${macro}\\{([^}
 const VIEWS = ["layout", "reading", "raw"];
 const flat = (s) => normalizeText(String(s).replace(/\s+/g, " "));
 
-test("template source: education macro, title-only role lines, printed profile URLs", () => {
+test("template source: education alignment, experience stacks, printed profile URLs", () => {
   const tex = newTex();
   assert.equal(texArgs(tex, "resumeEducation").length, 2);
-  for (const [, , title] of texArgs(tex, "resumeSubheading")) assert.doesNotMatch(title, /\|/, `title line '${title}' carries more than the title`);
+  for (const [, , title] of texArgs(tex, "resumeSubheading")) assert.match(title, / \| /, "experience stack is displayed after the title");
   assert.match(tex, /\\href\{https:\/\/www\.linkedin\.com\/in\/jordan-rivera\}\{linkedin\.com\/in\/jordan-rivera\}/);
   assert.doesNotMatch(tex, /jordanrivera\.dev/);
   assert.match(tex, /\\fontsize\{9\}\{11\}\\selectfont/);
@@ -55,7 +55,7 @@ test("template source: education macro, title-only role lines, printed profile U
   assert.doesNotMatch(bare, /\\end\{center\}\\vspace/);
 });
 
-test("generated PDF: one page, ATS Readiness PASS, and each fix holds in every extraction view", { skip }, () => {
+test("generated PDF: one page, experience-stack warnings remain visible, and extraction is intact", { skip }, () => {
   const tex = newTex();
   const x = extractPdf(compile(tex, "new"));
   const r = assessReadiness(x, config, { expected: expectedFromTex(tex) });
@@ -63,8 +63,9 @@ test("generated PDF: one page, ATS Readiness PASS, and each fix holds in every e
   assert.equal(x.pages, 1);
   const contact = x.views.layout.split("\n").find(l => l.includes("jordan.rivera@example.com"));
   assert.ok(contact.includes("linkedin.com/in/jordan-rivera") && contact.includes("github.com/jrivera") && contact.includes("Austin, TX"), "all contact fields fit one physical line");
-  assert.equal(r.status, "PASS", JSON.stringify(r.findings, null, 2));
-  assert.deepEqual(r.findings, []);
+  assert.equal(r.status, "WARN", JSON.stringify(r.findings, null, 2));
+  assert.equal(r.findings.length, 3);
+  assert.ok(r.findings.every(f => f.check === "title_extra_text"), JSON.stringify(r.findings));
   assert.deepEqual(r.expected, { experience: 3, education: 2, projects: 2 });
   assert.equal(r.parsed.experience.length, 3);
   assert.equal(r.parsed.education.length, 2);
@@ -90,7 +91,7 @@ test("generated PDF: one page, ATS Readiness PASS, and each fix holds in every e
   const locations = new Set(roles.map(([, , , loc]) => loc));
   roles.forEach(([, , title], i) => {
     assert.equal(r.parsed.experience[i].title, title);
-    assert.equal(r.parsed.experience[i].title_extra, null);
+    assert.equal(r.parsed.experience[i].title_extra, title.split(" | ")[1]);
   });
   for (const view of VIEWS) {
     const lines = x.views[view].slice(x.views[view].indexOf("Experience")).split("\n").map((l) => l.trim());
@@ -130,8 +131,8 @@ test("legacy template PDF: the checks catch all three problems it had", { skip }
   const tex = newTex();
   assert.match(tex, /\\textbf\{#1\} & #4/);
   const roles = texArgs(tex, "resumeSubheading");
-  assert.equal(roles.find(r => r[0] === "Stony Brook University")[2], fixture.headerTitle);
-  assert.equal(roles.find(r => r[0].includes("Wake Forest"))[2], "AI/ML Engineer");
+  assert.equal(roles.find(r => r[0] === "Stony Brook University")[2].split(" | ")[0], fixture.headerTitle);
+  assert.equal(roles.find(r => r[0].includes("Wake Forest"))[2].split(" | ")[0], "AI/ML Engineer");
   const rich = assembleAcResume({ experience: [], projects: [{role: "atriveo", bullets: [{text: "Python FastAPI Docker PostgreSQL Redis AWS React"}]}]}, {profile: fixture.profile});
   for (const skill of ["Python", "FastAPI", "Docker", "PostgreSQL", "Redis", "AWS", "React", "TypeScript", "LangChain", "Cloudflare"]) assert.ok(rich.includes(skill), skill);
 });

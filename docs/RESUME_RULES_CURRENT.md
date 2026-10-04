@@ -9,7 +9,7 @@ Updated October 4, 2026. This describes the deterministic AC resume path (`ac-te
 - LinkedIn and GitHub display their URLs, rather than only labels.
 - Current location behavior follows the job location when usable, otherwise the profile location. This existing behavior remains a factual-consistency concern from the audit; the formatting changes do not resolve it.
 - Education: school on the left, dates on the right; degree on the left, location on the right. Both recorded degrees remain included.
-- Experience: employer left, dates right; role title left, location right. No technology list appended to an experience title.
+- Experience: employer left, dates right; role title left, location right. Selected-bullet technologies follow the experience title after a pipe. Long title/stack rows shrink to fit their reserved left column. The existing ATS title-extra warning remains enabled because external parsers may read the stack as part of the title.
 
 ## Experience titles and ordering
 
@@ -23,7 +23,7 @@ Updated October 4, 2026. This describes the deterministic AC resume path (`ac-te
 ## Projects and skills
 
 - Project headings show technologies recognized in selected bullet text plus the existing project-specific stack defaults, deduplicated.
-- The previous five-tool project-heading cutoff is removed. This does not add unknown technologies or guarantee every technology in the entire bank appears on each resume.
+- The previous five-tool project-heading cutoff is removed. Project name and stack stay on one physical line, scaled down only when needed, with dates right-aligned. This does not add unknown technologies or guarantee every technology in the entire bank appears on each resume.
 - Technical Skills uses supplied composition skills when available; otherwise it builds evidence-backed skills from selected experience/projects and the configured AC corpus.
 - Skill categories are ranked for the JD, with a default maximum of five categories. Skills are ranked by relevance/evidence, deduplicated, and fitted to one physical line per category. Lower-ranked skills can still be omitted by that width limit.
 - Exact content, bullet counts, and project selection come from the composition/selection pipeline, not this template. Existing evidence/provenance checks remain required; formatting approval does not certify an older factual claim.
