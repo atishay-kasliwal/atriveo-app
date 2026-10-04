@@ -10,7 +10,11 @@ export interface EngineState {
   killSwitch: { enabled: boolean; reason: string | null } | null;
   worker: { online: boolean; updatedAt: string } | null;
 }
-export interface Counts { unanswered: number; questions: number; ready: number; readyForReview?: number; needsInput?: number; actionRequired?: number }
+export interface Counts {
+  unanswered: number; questions: number; ready: number; readyForReview?: number; needsInput?: number; actionRequired?: number;
+  /** Of `unanswered`: every answer approved, waiting for you to choose Fill and verify. */
+  reviewComplete?: number;
+}
 
 interface Row {
   id: string; company: string; companyKey: string | null; title: string; location: string | null; ats: string | null;
@@ -85,6 +89,7 @@ export function adjustCounts(delta: Partial<Counts>): void {
   if (!c) return;
   counts.set({
     counts: {
+      ...c,
       unanswered: Math.max(0, c.unanswered + (delta.unanswered ?? 0)),
       questions: Math.max(0, c.questions + (delta.questions ?? 0)),
       ready: Math.max(0, c.ready + (delta.ready ?? 0)),

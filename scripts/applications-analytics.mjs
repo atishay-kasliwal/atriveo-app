@@ -185,8 +185,9 @@ async function unansweredCards(apps, ids) {
 }
 
 const blockedTotals = async (apps) => {
-  const [t] = await apps.aggregate([{ $match: BLOCKED }, { $group: { _id: null, apps: { $sum: 1 }, questions: { $sum: { $size: "$review.pending" } } } }]).toArray();
-  return { unanswered: t?.apps ?? 0, questions: t?.questions ?? 0 };
+  const [t] = await apps.aggregate([{ $match: BLOCKED }, { $group: { _id: null, apps: { $sum: 1 }, questions: { $sum: { $size: "$review.pending" } },
+    reviewComplete: { $sum: { $cond: [{ $eq: [{ $size: { $ifNull: ["$review.pending", []] } }, 0] }, 1, 0] } } } }]).toArray();
+  return { unanswered: t?.apps ?? 0, questions: t?.questions ?? 0, reviewComplete: t?.reviewComplete ?? 0 };
 };
 
 /** Everything on the Ready page: waiting for your approval, or for you to submit it yourself (Open & Fill). */
@@ -242,7 +243,9 @@ function readyLists(readyDocs, { approved, submittedRecently }, now) {
 }
 
 const countsOf = (order, ready) => ({ unanswered: order.length, questions: order.reduce((n, r) => n + r.n, 0), ready: ready.length,
-  readyForReview: order.reduce((n, r) => n + r.readyForReview, 0), needsInput: order.reduce((n, r) => n + r.needsInput, 0), actionRequired: order.reduce((n, r) => n + r.actionRequired, 0) });
+  readyForReview: order.reduce((n, r) => n + r.readyForReview, 0), needsInput: order.reduce((n, r) => n + r.needsInput, 0), actionRequired: order.reduce((n, r) => n + r.actionRequired, 0),
+  // Only a completed question review is in BLOCKED with nothing pending.
+  reviewComplete: order.filter((r) => r.n === 0).length });
 
 /**
  * The Unanswered and Ready pages and the header counts, each reading only what it shows:

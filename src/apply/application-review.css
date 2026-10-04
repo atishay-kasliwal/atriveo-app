@@ -47,6 +47,10 @@
 .ar-question-meta > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .ar-question-meta > span > span { margin-left: 6px; }
 .ar-question-meta button { flex-shrink: 0; padding: 0; color: var(--primary); border: 0; background: none; cursor: pointer; font: inherit; }
+.ar-question-meta > .ar-question-tools { flex-shrink: 0; display: flex; gap: 12px; overflow: visible; }
+.ar-question-meta .is-reject { color: var(--muted-fg); }
+.ar-question-meta .is-reject:hover:not(:disabled) { color: var(--red, #c0392b); }
+.ar-question-meta button:disabled { opacity: .45; cursor: not-allowed; }
 .ar-question .apps-q { min-height: 0; flex: 1; display: flex; flex-direction: column; margin: 0; }
 .ar-question .apps-q > label { min-height: 0; flex: 1; display: flex; flex-direction: column; gap: 6px; }
 .ar-question .apps-q-label { flex: 0 0 auto; font-size: 12px; line-height: 1.4; font-weight: 550; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 0; }

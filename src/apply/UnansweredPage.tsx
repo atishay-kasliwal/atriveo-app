@@ -16,7 +16,11 @@ function source(q: PendingQ) {
   if (q.openEndedUserReview?.generatedBy === "muse") return "Muse draft · review before approving";
   if (q.userDraft || q.openEndedUserReview?.status === "draft") return "Your saved draft";
   if (q.openEndedUserReview?.status === "rejected") return "Suggestion rejected · add your answer";
-  if (proposalText(q)) return q.answerProposal?.source === "candidate_profile" ? "From your profile" : "Suggested from approved information";
+  if (proposalText(q)) {
+    if (q.answerProposal?.source === "candidate_profile") return "From your profile";
+    const band = q.openEndedSuggestion?.confidenceBand;
+    return `Suggested from approved information${band ? ` · ${band} confidence` : ""}`;
+  }
   return "Your answer is needed";
 }
 function useViewport() {
@@ -103,11 +107,15 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
     const index = rows.findIndex(r => r.id === activeRow?.id), next = Math.max(0, Math.min(rows.length - 1, index + delta));
     if (rows[next]) { choose(rows[next]!.id); setQueuePage(Math.floor(next / queueSize)); }
   };
+  // Rejecting reloads this form, so it waits until unsaved edits are saved or discarded.
+  const unsaved = Boolean(app && draftVersions[app.id]);
+  const canReject = (q: PendingQ) => Boolean(q.fieldKey && proposalText(q) && q.reviewStatus !== "rejected" && reviewCategory(q) !== "action_required");
+  const reject = (q: PendingQ) => void perform({ action: "question_review", fieldKey: q.fieldKey, review: { operation: "reject_suggestion" } }, "Suggestion rejected. Add your own answer before approving.");
   const field = (q: PendingQ) => app && <QuestionField hideScope q={q} appId={app.id} company={app.company} value={textOf(app, q)} scope="application" onValue={text => setText(app, q, text)} onScope={() => {}} />;
 
   return <div className="rv-page application-workspace">
     {header}
-    <div className="ar-toolbar"><div><span className="ar-eyebrow">APPLICATION REVIEW</span><h1>One company. One complete form.</h1></div><div className="ar-toolbar-actions"><span>{data?.counts.unanswered ?? "…"} applications</span><button className="apps-btn" disabled={loading || busy} onClick={() => void refreshUnanswered()}>{loading ? "Updating…" : "Refresh"}</button><button className="apps-btn" aria-pressed={manage} onClick={() => setManage(!manage)}>Manage queue</button></div></div>
+    <div className="ar-toolbar"><div><span className="ar-eyebrow">APPLICATION REVIEW</span><h1>One company. One complete form.</h1></div><div className="ar-toolbar-actions"><span>{data?.counts.unanswered ?? "…"} applications{data?.counts.reviewComplete ? ` · ${data.counts.reviewComplete} ready to fill and verify` : ""}</span><button className="apps-btn" disabled={loading || busy} onClick={() => void refreshUnanswered()}>{loading ? "Updating…" : "Refresh"}</button><button className="apps-btn" aria-pressed={manage} onClick={() => setManage(!manage)}>Manage queue</button></div></div>
     {(error || cardsError) && <p className="ar-error" role="alert">{error || cardsError}</p>}
     <main className="ar-workspace">
       <aside className="ar-queue" aria-label="Application list">
@@ -133,7 +141,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
             {!questions.length ? <div className="ar-empty"><span className="ar-empty-icon">✓</span><h3>All answers are reviewed</h3><p>Fill the original form and verify its fields and attachments next.</p><button className="apps-btn" type="button" onClick={() => setTab("details")}>Review the complete answer plan</button></div> : <>
               <div className="ar-question-grid" style={{ gridTemplateColumns: viewport.width >= 1050 ? 'repeat(2, minmax(0, 1fr))' : 'minmax(0, 1fr)', gridTemplateRows: `repeat(${Math.ceil(shown.length / (viewport.width >= 1050 ? 2 : 1))}, minmax(0, 1fr))` }}>
                 {shown.map((q, index) => <section className={`ar-question ${reviewCategory(q) === 'action_required' ? 'is-blocked' : ''}`} key={q.fieldKey ?? q.fingerprint} aria-label={q.label}>
-                  <div className="ar-question-meta"><span>{String(qPage * perPage + index + 1).padStart(2, '0')} <span>{reviewCategory(q) === 'action_required' ? 'Action needed' : source(q)}</span></span><button type="button" onClick={() => setExpanded(q)} aria-label={`Expand question ${qPage * perPage + index + 1}`}>Expand ↗</button></div>
+                  <div className="ar-question-meta"><span>{String(qPage * perPage + index + 1).padStart(2, '0')} <span>{reviewCategory(q) === 'action_required' ? 'Action needed' : source(q)}</span></span><span className="ar-question-tools">{canReject(q) && <button type="button" className="is-reject" disabled={busy || unsaved} title={unsaved ? "Save a draft first: rejecting reloads this form" : "Reject this suggestion and answer it yourself"} onClick={() => reject(q)}>Reject</button>}<button type="button" onClick={() => setExpanded(q)} aria-label={`Expand question ${qPage * perPage + index + 1}`}>Expand ↗</button></span></div>
                   {reviewCategory(q) === 'action_required' ? <div className="ar-attachment"><strong>{q.label}</strong><p>{q.type === 'file' ? attachmentMessage(q.reason) : 'Open the original form to inspect this control.'}</p></div> : field(q)}
                   {q.openEndedUserReview?.missingFacts?.length ? <small className="ar-caution" title={q.openEndedUserReview.missingFacts.join('; ')}>Confirm: {q.openEndedUserReview.missingFacts.join('; ')}</small> : null}
                 </section>)}
@@ -151,6 +159,6 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
     </main>
     {manage && <div className="ar-manage"><DiscardApplications selected={selected} disabled={busy} onDone={async () => { setSelected([]); await refreshUnanswered(); }} /><button className="apps-link" onClick={() => setSelected(visibleRows.map(r => r.id))}>Select visible</button><button className="apps-link" onClick={() => setSelected([])}>Clear selection</button></div>}
     {notice && <p className="apps-toast" role="status">{notice}</p>}
-    <dialog ref={editor} className="ar-editor" onClose={() => setExpanded(null)}><header><span className="ar-eyebrow">{app?.company} · ANSWER DETAIL</span><button aria-label="Close answer detail" onClick={() => setExpanded(null)}>✕</button></header>{expanded && <><h2>{expanded.label}</h2><p>{source(expanded)}</p>{field(expanded)}<div className="ar-evidence"><strong>Sources and context</strong><p>{expanded.selectedStory ?? expanded.openEndedAssessment?.selectedStory ?? 'Candidate profile / your response'}</p><p>{expanded.answerProposal?.caution ?? expanded.detail ?? expanded.answerProposal?.reason}</p>{expanded.openEndedUserReview?.sources?.map(s => <small key={s}>{s}</small>)}{expanded.openEndedUserReview?.missingFacts?.map(s => <p key={s}>Needs confirmation: {s}</p>)}</div><footer><span>Approve every answer together from the application form.</span><button className="rv-primary" onClick={() => setExpanded(null)}>Done editing</button></footer></>}</dialog>
+    <dialog ref={editor} className="ar-editor" onClose={() => setExpanded(null)}><header><span className="ar-eyebrow">{app?.company} · ANSWER DETAIL</span><button aria-label="Close answer detail" onClick={() => setExpanded(null)}>✕</button></header>{expanded && <><h2>{expanded.label}</h2><p>{source(expanded)}</p>{field(expanded)}<div className="ar-evidence"><strong>Sources and context</strong><p>{expanded.selectedStory ?? expanded.openEndedAssessment?.selectedStory ?? 'Candidate profile / your response'}</p>{expanded.openEndedSuggestion && <p>{expanded.openEndedSuggestion.confidenceBand === "high" ? "High" : "Medium"} confidence{expanded.openEndedSuggestion.matchedSignals?.length ? ` · context: ${expanded.openEndedSuggestion.matchedSignals.map(s => s.replace(/^(?:domain|title_skill|jd_skill):/, "")).join(", ")}` : ""}</p>}<p>{expanded.answerProposal?.caution ?? expanded.detail ?? expanded.answerProposal?.reason}</p>{expanded.openEndedUserReview?.sources?.map(s => <small key={s}>{s}</small>)}{expanded.openEndedUserReview?.missingFacts?.map(s => <p key={s}>Needs confirmation: {s}</p>)}</div><footer><span>Approve every answer together from the application form.</span>{canReject(expanded) && <button className="apps-link danger" disabled={busy || unsaved} title={unsaved ? "Save a draft first: rejecting reloads this form" : undefined} onClick={() => { reject(expanded); setExpanded(null); }}>Reject suggestion</button>}<button className="rv-primary" onClick={() => setExpanded(null)}>Done editing</button></footer></>}</dialog>
   </div>;
 }

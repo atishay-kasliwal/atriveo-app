@@ -37,7 +37,7 @@ async function fixture(rows, action = () => ({ status: 200, body: { ok: true } }
   await page.route('**/*', route => {
     const url = new URL(route.request().url());
     if (url.pathname === '/api/auth/me') return route.fulfill({ json: { user: { id: 1, name: 'Atishay', email: 'test@example.test' } } });
-    if (url.pathname === '/applications/review-queue') return route.fulfill({ json: { ok: true, generatedAt: rows[0]?.updatedAt, counts: { unanswered: rows.length, questions: rows.reduce((n,a) => n + a.questions.length,0), ready: 0 }, unanswered: rows.map(a => ({ id:a.id, company:a.company, title:a.title, updatedAt:a.updatedAt, n:a.questions.length, needsInput:a.questions.filter(q => !q.answerProposal?.answer).length, actionRequired:a.questions.filter(q => q.type==='file').length })), cards: rows } });
+    if (url.pathname === '/applications/review-queue') return route.fulfill({ json: { ok: true, generatedAt: rows[0]?.updatedAt, counts: { unanswered: rows.length, questions: rows.reduce((n,a) => n + a.questions.length,0), reviewComplete: rows.filter(a => !a.questions.length).length, ready: 0 }, unanswered: rows.map(a => ({ id:a.id, company:a.company, title:a.title, updatedAt:a.updatedAt, n:a.questions.length, needsInput:a.questions.filter(q => !q.answerProposal?.answer).length, actionRequired:a.questions.filter(q => q.type==='file').length })), cards: rows } });
     if (url.pathname === '/applications/detail') return route.fulfill({ json: { ok:true, id:rows[0].id, company:rows[0].company, title:rows[0].title, ats:'ashby',status:'NEEDS_REVIEW',url:rows[0].url,resume:{},questions:[{label:'Name',step:0,required:true,type:'text',resolution:'answered',verified:false,answerKind:'value',answer:'Test Candidate',source:'profile'}],timeline:[],attempts:[],submission:{},failure:null } });
     if (url.pathname === '/applications/action') { const body = route.request().postDataJSON(); calls.push(body); const result = action(body); return route.fulfill({ status:result.status, json:result.body }); }
     if (url.hostname === '127.0.0.1' && url.port === String(port)) return route.continue();
@@ -114,6 +114,33 @@ test('complete reviewed forms expose separate Fill and verify; details cause no 
     assert.equal(calls.length,0);await page.getByRole('button',{name:'Fill and verify',exact:true}).click();
     await page.waitForFunction(()=>!document.querySelector('[aria-busy=true]'));
     assert.equal(calls[0].action,'continue_application');assert.equal(calls.length,1);
+  }finally{await f.close();}
+});
+
+test('one suggestion can be rejected on its own, with its confidence and context shown; edits are never lost to it',async()=>{
+  const rows=initialRows();
+  rows[0].questions[0].openEndedSuggestion={suggestedAnswer:rows[0].questions[0].answerProposal.answer,confidenceBand:'high',selectedStory:'Robotics telemetry service',matchedSignals:['jd_skill:python','domain:robotics']};
+  rows.push(app('done','Delta Labs',[]));
+  const f=await fixture(rows);const{page,calls,errors}=f;
+  try{
+    await page.getByRole('heading',{name:'Acme Robotics',exact:true}).waitFor();
+    await page.getByText('4 applications · 1 ready to fill and verify',{exact:false}).waitFor();
+    const first=page.locator('.ar-question').first();
+    await first.getByText('Suggested from approved information · high confidence',{exact:true}).waitFor();
+    // No reject for a question without a suggestion (salary) or a control that needs the form (file).
+    assert.equal(await page.locator('.ar-question').nth(2).getByRole('button',{name:'Reject',exact:true}).count(),0);
+    await first.getByRole('button',{name:'Expand question 1',exact:true}).click();
+    const dialog=page.getByRole('dialog');await dialog.getByText('High confidence · context: python, robotics',{exact:true}).waitFor();
+    await dialog.getByRole('button',{name:'Done editing'}).click();
+    assert.equal(calls.length,0);
+    await first.getByRole('button',{name:'Reject',exact:true}).click();
+    await page.getByText('Suggestion rejected. Add your own answer before approving.',{exact:true}).waitFor();
+    assert.equal(calls.length,1);
+    assert.deepEqual(calls[0],{action:'question_review',fieldKey:'Why are you interested in this role?',review:{operation:'reject_suggestion'},applicationId:'acme',expectedUpdatedAt:'2026-10-03T20:00:00.000Z'});
+    // An unsaved edit disables Reject: rejecting reloads the form and would drop it.
+    await page.getByLabel('What are your salary expectations?',{exact:false}).filter({visible:true}).last().fill('120000');
+    assert.equal(await first.getByRole('button',{name:'Reject',exact:true}).isDisabled(),true);
+    assert.equal(calls.length,1);assert.deepEqual(errors,[]);
   }finally{await f.close();}
 });
 

@@ -11,10 +11,22 @@ role:
   slot_kind: experience
   resume_pick_count: 3
 
+authoritative_fact_lock:
+  source: AUTHORITATIVE-FACTS.yaml#stories.wake_forest
+  provenance: USER_CONFIRMED
+  structure: One broader medical-imaging platform with separate brain-tumor, stroke, and latest-processing workstreams.
+  cohort_rule: >-
+    Research-specific cohorts were created after quality control, preprocessing, and
+    standardization of the broader imaging corpus.
+  superseded:
+    - value: 1,250+
+      replacement: 2,250 cases for the latest processing pipeline
+      status: SUPERSEDED_HISTORICAL_CLAIM
+
 # ── Product story (source of truth) ─────────────────────────────────────────
 
 product:
-  name: AI-powered brain MRI radiology platform
+  name: AI-powered medical-imaging platform
   problem: >
     Brain tumor evaluation required radiologists to manually review multiple MRI scan
     types with inconsistent slice counts, clarity, and dimensions. Preprocessing,
@@ -40,6 +52,21 @@ metrics:
   volume:
     mri_studies_processed: "10K+"
     historical_data_span: "5 to 10 years"
+    measurement: Broader available MRI corpus/platform, not the size of each research cohort.
+  latest_processing_pipeline:
+    cases_processed: "2,250"
+    accuracy: "approximately 90%"
+    validation_output: "no mismatches"
+    validation_output_interpretation: >-
+      User-confirmed wording; the comparison being validated is unspecified. Do not
+      reinterpret this as 100% model accuracy.
+    processing_time: "approximately 20 minutes → under 5 minutes"
+  stroke_study:
+    research_cohort: "450+ MRI studies"
+    extracted_features: "500+"
+    predictive_accuracy: "87%"
+    data_work: [DICOM ingestion, cleaning, preprocessing]
+    audience: [doctors, residents, researchers]
   speed:
     segmentation_per_scan: "3 hours → 2 minutes"
     upload_to_clinician_insight: "2 minutes after scan enters system"
