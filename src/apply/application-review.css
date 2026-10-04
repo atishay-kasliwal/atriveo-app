@@ -8,9 +8,6 @@
 .ar-queue { min-height: 0; display: flex; flex-direction: column; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); overflow: hidden; }
 .ar-queue-tools { padding: 14px 12px; display: flex; flex-direction: column; gap: 12px; }
 .ar-queue-tools > input { width: 100%; border: 1px solid var(--border-col); background: var(--background); color: var(--foreground); padding: 10px; border-radius: 7px; font: inherit; }
-.ar-filters { display: flex; gap: 2px; }
-.ar-filters button { padding: 6px 7px; border: 0; border-radius: 5px; background: transparent; color: var(--muted-fg); font: inherit; font-size: 11px; cursor: pointer; }
-.ar-filters button[aria-pressed=true] { background: var(--primary-soft); color: var(--primary); }
 .ar-company-list { flex: 1; min-height: 0; }
 .ar-company-item { display: flex; align-items: center; margin: 2px 7px; border: 1px solid transparent; border-radius: 8px; }
 .ar-company-item.is-active { border-color: var(--primary-line); background: var(--primary-soft); }

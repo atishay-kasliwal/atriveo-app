@@ -11,7 +11,6 @@ import "../styles/applications.css";
 import "./review-pages.css";
 import "./application-review.css";
 
-type Filter = "all" | "ready" | "needs_input";
 function source(q: PendingQ) {
   if (q.openEndedUserReview?.generatedBy === "muse") return "Muse draft · review before approving";
   if (q.userDraft || q.openEndedUserReview?.status === "draft") return "Your saved draft";
@@ -32,7 +31,6 @@ function useViewport() {
 export default function UnansweredPage({ header }: { header?: React.ReactNode }) {
   const { data, error, loading } = useUnansweredQueue(60_000);
   const { cards, error: cardsError } = useUnansweredCards();
-  const [filter, setFilter] = useState<Filter>("all");
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
   const [queuePage, setQueuePage] = useState(0);
@@ -55,11 +53,10 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
     const term = search.toLowerCase().trim();
     const candidates = (data?.unanswered ?? []).filter(r => {
       const name = `${r.company ?? cards[r.id]?.company ?? ""} ${r.title ?? cards[r.id]?.title ?? ""}`;
-      const ready = !r.needsInput && !r.actionRequired;
-      return (!term || name.toLowerCase().includes(term)) && (filter === "all" || (filter === "ready" ? ready : !ready));
+      return !term || name.toLowerCase().includes(term);
     });
     return [...candidates].sort((a, b) => Number(deferred.includes(a.id)) - Number(deferred.includes(b.id)) || (a.company ?? cards[a.id]?.company ?? "").localeCompare(b.company ?? cards[b.id]?.company ?? "") || a.id.localeCompare(b.id));
-  }, [data, cards, filter, search, deferred]);
+  }, [data, cards, search, deferred]);
   const page = Math.min(queuePage, Math.max(0, Math.ceil(rows.length / queueSize) - 1));
   const visibleRows = useMemo(() => rows.slice(page * queueSize, (page + 1) * queueSize), [rows, page, queueSize]);
   const activeRow = rows.find(r => r.id === activeId) ?? visibleRows[0];
@@ -105,11 +102,26 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
     } catch (e) { setActionError(e instanceof Error ? e.message : String(e)); }
     finally { setBusy(false); }
   };
-  const review = (operation: "approve_all" | "save_drafts") => {
-    if (!app || operation === "approve_all" && !canApprove) return;
-    const answers = answerable.filter(q => textOf(app, q).trim()).map(q => ({ fieldKey: q.fieldKey, answer: textOf(app, q) }));
-    void perform({ action: "application_review", operation, answers, ...(operation === "approve_all" && leaveBlank.length ? { leaveBlank: leaveBlank.map(q => q.fieldKey) } : {}) },
-      operation === "approve_all" ? `All answers approved${leaveBlank.length ? `, ${leaveBlank.length} optional left blank` : ""}. You can now fill and verify.` : "Application draft saved. Your answers still need approval.");
+  const answersOf = (a: UnansweredApp) => answerable.filter(q => textOf(a, q).trim()).map(q => ({ fieldKey: q.fieldKey, answer: textOf(a, q) }));
+  const saveDraft = () => { if (app) void perform({ action: "application_review", operation: "save_drafts", answers: answersOf(app) }, "Application draft saved. Your answers still need approval."); };
+  /**
+   * Approve every answer, then start filling at once: the engine fills and verifies the form (never submits),
+   * and it moves to Ready to submit, where you approve the submission itself.
+   */
+  const approveAndFill = async () => {
+    if (!app || busy || !canApprove) return;
+    setBusy(true); setActionError("");
+    try {
+      const approved = await postAction({ action: "application_review", operation: "approve_all", applicationId: app.id, expectedUpdatedAt: draftVersions[app.id] ?? app.updatedAt,
+        answers: answersOf(app), ...(leaveBlank.length ? { leaveBlank: leaveBlank.map(q => q.fieldKey) } : {}) });
+      if (!approved.ok) { setActionError(approved.error ?? "Couldn’t save this form."); return; }
+      clearEdits(app.id);
+      const blanks = leaveBlank.length ? `, ${leaveBlank.length} optional left blank` : "";
+      const filling = approved.updatedAt ? await postAction({ action: "continue_application", applicationId: app.id, expectedUpdatedAt: approved.updatedAt }) : { ok: false, error: "no version returned" };
+      if (!filling.ok) { setNotice(`Answers approved${blanks}. Filling didn't start (${filling.error}); choose Fill and verify.`); return; }
+      setNotice(`Answers approved${blanks}. Filling and verifying now; it moves to Ready to submit once checked. Nothing is submitted.`);
+    } catch (e) { setActionError(e instanceof Error ? e.message : String(e)); }
+    finally { setBusy(false); await refreshUnanswered(); }
   };
   const move = (delta: number) => {
     const index = rows.findIndex(r => r.id === activeRow?.id), next = Math.max(0, Math.min(rows.length - 1, index + delta));
@@ -127,7 +139,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
     {(error || cardsError) && <p className="ar-error" role="alert">{error || cardsError}</p>}
     <main className="ar-workspace">
       <aside className="ar-queue" aria-label="Application list">
-        <div className="ar-queue-tools"><input aria-label="Find a company or role" placeholder="Find a company or role…" value={search} onChange={e => { setSearch(e.target.value); setQueuePage(0); setActiveId(null); }} /><div className="ar-filters">{([['all','All'],['ready','Ready to review'],['needs_input','Needs input']] as const).map(([value,label]) => <button key={value} aria-pressed={filter === value} onClick={() => { setFilter(value); setQueuePage(0); setActiveId(null); }}>{label}</button>)}</div></div>
+        <div className="ar-queue-tools"><input aria-label="Find a company or role" placeholder="Find a company or role…" value={search} onChange={e => { setSearch(e.target.value); setQueuePage(0); setActiveId(null); }} /></div>
         <div className="ar-company-list">{visibleRows.map(row => {
           const card = cards[row.id], company = row.company ?? card?.company ?? "Loading company…";
           return <div className={`ar-company-item ${row.id === activeRow?.id ? 'is-active' : ''}`} key={row.id}>
@@ -139,13 +151,13 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
       </aside>
       <section className="ar-panel" aria-label="Application form" aria-busy={busy}>
         {!data && <div className="ar-empty">Loading your applications…</div>}
-        {data && !rows.length && <div className="ar-empty"><span className="ar-empty-icon">✓</span><h2>No applications to review</h2><p>{search || filter !== "all" ? "Try another company or filter." : "New applications will appear here after their questions are collected."}</p></div>}
+        {data && !rows.length && <div className="ar-empty"><span className="ar-empty-icon">✓</span><h2>No applications to review</h2><p>{search ? "Try another company or role." : "New applications will appear here after their questions are collected."}</p></div>}
         {activeRow && !appCurrent && <div className="ar-empty">Loading the complete application form…</div>}
         {appCurrent && app && <>
           <header className="ar-application-head"><CompanyLogo company={app.company} size="sm" /><div><span className="ar-eyebrow">{app.ats} · APPLICATION</span><h2>{app.company}</h2><p>{app.title}</p><PriorityTags tags={app.priorityTags} /></div><div className="ar-progress"><strong>{questions.length ? `${complete} / ${questions.length}` : '✓'}</strong><span>{questions.length ? `answers ready${optionalCount ? ` · ${optionalCount} optional` : ''}` : 'Answers reviewed'}</span></div></header>
           <div className="ar-form-nav"><div role="tablist" aria-label="Application views"><button role="tab" aria-selected={tab === "form"} onClick={() => setTab("form")}>Your answers <span>{questions.length}</span></button><button role="tab" aria-selected={tab === "details"} onClick={() => setTab("details")}>Application details</button></div><a href={app.url} target="_blank" rel="noreferrer">Open original form ↗</a></div>
           <select className="ar-mobile-app" aria-label="Choose application" value={activeRow.id} onChange={e => choose(e.target.value)}>{rows.map(r => <option key={r.id} value={r.id}>{r.company ?? cards[r.id]?.company ?? "Loading"} — {r.title ?? cards[r.id]?.title}</option>)}</select>
-          {tab === "details" ? <div className="ar-details"><ApplicationDetail id={app.id} version={app.updatedAt} /></div> : <form id="application-answer-form" className="ar-form" onSubmit={e => { e.preventDefault(); review("approve_all"); }}>
+          {tab === "details" ? <div className="ar-details"><ApplicationDetail id={app.id} version={app.updatedAt} /></div> : <form id="application-answer-form" className="ar-form" onSubmit={e => { e.preventDefault(); void approveAndFill(); }}>
             {!questions.length ? <div className="ar-empty"><span className="ar-empty-icon">✓</span><h3>All answers are reviewed</h3><p>Fill the original form and verify its fields and attachments next.</p><button className="apps-btn" type="button" onClick={() => setTab("details")}>Review the complete answer plan</button></div> : <>
               <div className="ar-question-grid" style={{ gridTemplateColumns: viewport.width >= 1050 ? 'repeat(2, minmax(0, 1fr))' : 'minmax(0, 1fr)', gridTemplateRows: `repeat(${Math.ceil(shown.length / (viewport.width >= 1050 ? 2 : 1))}, minmax(0, 1fr))` }}>
                 {shown.map((q, index) => <section className={`ar-question ${reviewCategory(q) === 'action_required' ? 'is-blocked' : ''}`} key={q.fieldKey ?? q.fingerprint} aria-label={q.label}>
@@ -160,7 +172,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
           <footer className="ar-actionbar">
             {staleEdits && <p role="alert">This application changed while you were editing. Your edits are still here. <button className="apps-link" onClick={() => { if (window.confirm("Replace your unsaved edits with the latest saved answers?")) clearEdits(app.id); }}>Load latest answers</button></p>}
             {actionError && <p role="alert">{actionError} <button className="apps-link" onClick={() => void refreshUnanswered()}>Load latest version</button></p>}
-            <div className="ar-actionrow"><div><button className="apps-btn" disabled={busy} onClick={() => { setDeferred(ids => [...ids.filter(id => id !== app.id), app.id]); move(1); }}>Later</button><button className="apps-link" disabled={busy} onClick={() => void perform({ action: 'refresh_suggestions' }, 'Suggestions refreshed. Review the full form before approving.')}>Refresh suggestions</button></div><div><span className="ar-action-hint">{blocked ? `${blocked} control${blocked > 1 ? 's' : ''} need attention` : requiredLeft ? `${requiredLeft} required answer${requiredLeft > 1 ? 's' : ''} left` : leaveBlank.length ? `${leaveBlank.length} optional left blank` : questions.length ? 'Approval covers every answer' : 'Submission stays a separate step'}</span>{questions.length > 0 && <button className="apps-btn" disabled={busy || staleEdits || !complete} onClick={() => review('save_drafts')}>Save draft</button>}{questions.length ? <button className="rv-primary" disabled={busy || !canApprove} onClick={() => review('approve_all')}>{busy ? 'Saving…' : leaveBlank.length ? `Approve ${questions.length - leaveBlank.length} · leave ${leaveBlank.length} blank` : `Approve all ${questions.length} ${questions.length === 1 ? 'answer' : 'answers'}`}</button> : app.questionReviewStatus === 'complete' && <button className="rv-primary" disabled={busy} onClick={() => void perform({action:'continue_application'}, 'Queued to fill and verify. Submission requires separate approval.')}>Fill and verify</button>}</div></div>
+            <div className="ar-actionrow"><div><button className="apps-btn" disabled={busy} onClick={() => { setDeferred(ids => [...ids.filter(id => id !== app.id), app.id]); move(1); }}>Later</button><button className="apps-link" disabled={busy} onClick={() => void perform({ action: 'refresh_suggestions' }, 'Suggestions refreshed. Review the full form before approving.')}>Refresh suggestions</button></div><div><span className="ar-action-hint">{blocked ? `${blocked} control${blocked > 1 ? 's' : ''} need attention` : requiredLeft ? `${requiredLeft} required answer${requiredLeft > 1 ? 's' : ''} left` : leaveBlank.length ? `${leaveBlank.length} optional left blank` : questions.length ? 'Fills and verifies; never submits' : 'Submission stays a separate step'}</span>{questions.length > 0 && <button className="apps-btn" disabled={busy || staleEdits || !complete} onClick={saveDraft}>Save draft</button>}{questions.length ? <button className="rv-primary" disabled={busy || !canApprove} onClick={() => void approveAndFill()} title="Approves these answers and fills the form to verify it. Nothing is submitted: that's a separate step on Ready to submit.">{busy ? 'Saving…' : leaveBlank.length ? `Approve ${questions.length - leaveBlank.length}, leave ${leaveBlank.length} blank & fill` : `Approve all ${questions.length} & fill`}</button> : app.questionReviewStatus === 'complete' && <button className="rv-primary" disabled={busy} onClick={() => void perform({action:'continue_application'}, 'Queued to fill and verify. Submission requires separate approval.')}>Fill and verify</button>}</div></div>
           </footer>
         </>}
       </section>

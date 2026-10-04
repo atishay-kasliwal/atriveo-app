@@ -61,7 +61,7 @@ test('five questions form one application, fit the desktop, preserve edits betwe
     await page.getByRole('heading',{name:'Acme Robotics',exact:true}).waitFor();
     assert.equal(await page.locator('.ar-question').count(),5);
     assert.equal(await page.getByRole('button',{name:'Approve answer',exact:true}).count(),0);
-    const approve=page.getByRole('button',{name:'Approve all 5 answers',exact:true});
+    const approve=page.getByRole('button',{name:'Approve all 5 & fill',exact:true});
     assert.equal(await approve.isDisabled(),true);
     await page.getByLabel('What are your salary expectations?',{exact:false}).filter({visible:true}).last().fill('120000');
     await page.getByRole('button',{name:/Beacon.*Software Engineer/}).click();
@@ -90,7 +90,7 @@ test('long forms use pages; mobile, expanded answers and attachments stay access
   const rows=initialRows(); rows[0].questions=Array.from({length:13},(_,i)=>q(`Question ${i+1}`,`Reviewed answer ${i+1}`));
   const f=await fixture(rows);const {page,calls}=f;
   try {
-    await page.getByRole('button',{name:'Approve all 13 answers',exact:true}).waitFor();
+    await page.getByRole('button',{name:'Approve all 13 & fill',exact:true}).waitFor();
     assert.equal(await page.locator('.ar-question').count(),6); await noPageScroll(page);
     await page.getByRole('button',{name:'Next →',exact:true}).click(); await page.getByText('Questions 7–12 of 13',{exact:true}).waitFor();
     await page.getByRole('button',{name:'Expand question 7',exact:true}).click();
@@ -101,7 +101,7 @@ test('long forms use pages; mobile, expanded answers and attachments stay access
     await page.screenshot({path:'/tmp/atriveo-company-review-mobile.png',fullPage:true});
     await page.getByLabel('Choose application').selectOption('cedar');
     await page.getByText('Resume',{exact:true}).waitFor();
-    assert.equal(await page.getByRole('button',{name:'Approve all 1 answer',exact:true}).isDisabled(),true);
+    assert.equal(await page.getByRole('button',{name:'Approve all 1 & fill',exact:true}).isDisabled(),true);
     assert.equal(calls.length,0);
   }finally{await f.close();}
 });
@@ -144,19 +144,19 @@ test('one suggestion can be rejected on its own, with its confidence and context
   }finally{await f.close();}
 });
 
-test('optional questions are shown and can stay blank: approval sends them as leave blank, required ones still block',async()=>{
+test('optional questions are shown and can stay blank; one click approves and starts filling, never submitting; required ones still block',async()=>{
   const rows=[app('opt','Orbit Labs',[
     q('Why Orbit?','Because I build reliable systems.'),
     q('Pronouns','',{type:'text',required:false}),
     q('How did you hear about us?','LinkedIn',{type:'text',required:false}),
     q('Cover letter','',{type:'file',required:false,reason:'UPLOAD_UNVERIFIED',answerProposal:{state:'action_required',family:'attachment',source:'none',reason:'optional_attachment'}}),
   ])];
-  const f=await fixture(rows);const{page,calls,errors}=f;
+  const f=await fixture(rows,body=>({status:200,body:body.action==='application_review'?{ok:true,updatedAt:'2026-10-03T20:05:00.000Z'}:{ok:true}}));const{page,calls,errors}=f;
   try{
     await page.getByRole('heading',{name:'Orbit Labs',exact:true}).waitFor();
     assert.equal(await page.locator('.ar-optional').count(),3);
     await page.getByText('answers ready · 3 optional',{exact:true}).waitFor();
-    const approve=page.getByRole('button',{name:'Approve 2 · leave 2 blank',exact:true});
+    const approve=page.getByRole('button',{name:'Approve 2, leave 2 blank & fill',exact:true});
     assert.equal(await approve.isDisabled(),false);
     // A required answer cleared: approval waits for it.
     await page.getByLabel('Why Orbit?',{exact:false}).filter({visible:true}).last().fill('');
@@ -164,8 +164,11 @@ test('optional questions are shown and can stay blank: approval sends them as le
     assert.equal(await page.getByRole('button',{name:/^Approve /}).isDisabled(),true);
     await page.getByLabel('Why Orbit?',{exact:false}).filter({visible:true}).last().fill('Because I build reliable systems.');
     await approve.click();
-    await page.getByText('All answers approved, 2 optional left blank. You can now fill and verify.',{exact:true}).waitFor();
-    assert.equal(calls.length,1);
+    // One click: approve, then fill and verify at once (never submit).
+    await page.getByText('Answers approved, 2 optional left blank. Filling and verifying now; it moves to Ready to submit once checked. Nothing is submitted.',{exact:true}).waitFor();
+    assert.equal(calls.length,2);
+    assert.deepEqual(calls[1],{action:'continue_application',applicationId:'opt',expectedUpdatedAt:'2026-10-03T20:05:00.000Z'});
+    assert.ok(calls.every(c=>c.action!=='approve_submit'));
     assert.equal(calls[0].operation,'approve_all');
     assert.deepEqual(calls[0].answers.map(a=>a.fieldKey).sort(),['How did you hear about us?','Why Orbit?']);
     assert.deepEqual(calls[0].leaveBlank.sort(),['Cover letter','Pronouns']);
