@@ -5,7 +5,7 @@ Updated October 4, 2026. This describes the deterministic AC resume path (`ac-te
 ## Layout and header
 
 - US Letter, 11-point article body; one-page output is checked by PDF regressions. The preview fits the actual PDF page; it does not convert it to A4.
-- Centered name. Contact rows use 9-point type: title/phone/email, then LinkedIn/GitHub/location. No personal portfolio link in the header.
+- Centered name. One contact row contains title, phone, email, LinkedIn, GitHub, and location, centered at 9 points and scaled down only when needed to fit the page width. No personal portfolio link in the header.
 - LinkedIn and GitHub display their URLs, rather than only labels.
 - Current location behavior follows the job location when usable, otherwise the profile location. This existing behavior remains a factual-consistency concern from the audit; the formatting changes do not resolve it.
 - Education: school on the left, dates on the right; degree on the left, location on the right. Both recorded degrees remain included.

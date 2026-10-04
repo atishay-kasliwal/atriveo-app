@@ -21,7 +21,7 @@ import { loadResumeProfile } from "./resume-profile.mjs";
 import { displayUrl } from "./ats/patterns.mjs";
 
 const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
-\\usepackage{latexsym}\\usepackage[empty]{fullpage}\\usepackage{titlesec}
+\\usepackage{graphicx}\\newsavebox{\\contactbox}\n\\usepackage{latexsym}\\usepackage[empty]{fullpage}\\usepackage{titlesec}
 \\usepackage[usenames,dvipsnames]{color}\\usepackage{verbatim}\\usepackage{enumitem}
 \\usepackage[hidelinks]{hyperref}\\usepackage{fancyhdr}\\usepackage[english]{babel}\\usepackage{tabularx}
 \\pagestyle{fancy}\\fancyhf{}\\fancyfoot{}\\renewcommand{\\headrulewidth}{0pt}\\renewcommand{\\footrulewidth}{0pt}
@@ -205,16 +205,15 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
   // so a link drawn as "Linkedin" reaches a parser without its URL.
   const link = (url) => `\\href{${url}}{${esc(displayUrl(url))}}`;
   // Only the fields that are set, so a blank phone or email leaves no "| |".
-  const contactLines = [
-    [esc(title), me.phone && esc(me.phone), me.email && `\\href{mailto:${me.email}}{${esc(me.email)}}`],
-    [me.linkedin && link(me.linkedin), me.github && link(me.github), city && esc(city)],
-  ].map((fields) => fields.filter(Boolean).join(" $|$\n    ")).filter(Boolean);
-  // The addresses need a second contact line. Taking 5pt back under the header keeps the
-  // page's existing spacing close to what it was (TeX's list glue absorbs the rest).
+  const contactLine = [esc(title), me.phone && esc(me.phone), me.email && `\\href{mailto:${me.email}}{${esc(me.email)}}`, me.linkedin && link(me.linkedin), me.github && link(me.github), city && esc(city)].filter(Boolean).join(" $|$ ");
+  // Keep all contact fields on one line; shrink only when the actual width requires it.
   const header = `\\begin{center}
     \\textbf{\\Huge \\scshape ${esc(me.name)}} \\\\ \\vspace{1pt}
-    \\fontsize{9}{11}\\selectfont ${contactLines.join(" \\\\\n    ")}
-\\end{center}${contactLines.length > 1 ? "\\vspace{-5pt}" : ""}`;
+    \\sbox{\\contactbox}{\\fontsize{9}{11}\\selectfont ${contactLine}}
+    \\ifdim\\wd\\contactbox>\\textwidth
+      \\resizebox{\\textwidth}{!}{\\usebox{\\contactbox}}
+    \\else\\usebox{\\contactbox}\\fi
+\\end{center}`;
 
   const skills = skillsLines?.length
     ? skillsLines

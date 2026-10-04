@@ -45,8 +45,8 @@ test("template source: education macro, title-only role lines, printed profile U
   assert.match(tex, /\\href\{https:\/\/www\.linkedin\.com\/in\/jordan-rivera\}\{linkedin\.com\/in\/jordan-rivera\}/);
   assert.doesNotMatch(tex, /jordanrivera\.dev/);
   assert.match(tex, /\\fontsize\{9\}\{11\}\\selectfont/);
-  assert.match(tex, /jordan\.rivera@example\.com\} \\\\\n/, "profile links start a second contact line");
-  assert.match(tex, /\\end\{center\}\\vspace\{-5pt\}/);
+  assert.match(tex, /\\sbox\{\\contactbox\}/);
+  assert.match(tex, /\\resizebox\{\\textwidth\}/);
   // No links and no city: one contact line and no spacing change.
   const bare = assembleAcResume(fixture.composition, {
     headerTitle: "Backend Engineer", skillsLines: fixture.skills, location: null,
@@ -61,6 +61,8 @@ test("generated PDF: one page, ATS Readiness PASS, and each fix holds in every e
   const r = assessReadiness(x, config, { expected: expectedFromTex(tex) });
 
   assert.equal(x.pages, 1);
+  const contact = x.views.layout.split("\n").find(l => l.includes("jordan.rivera@example.com"));
+  assert.ok(contact.includes("linkedin.com/in/jordan-rivera") && contact.includes("github.com/jrivera") && contact.includes("Austin, TX"), "all contact fields fit one physical line");
   assert.equal(r.status, "PASS", JSON.stringify(r.findings, null, 2));
   assert.deepEqual(r.findings, []);
   assert.deepEqual(r.expected, { experience: 3, education: 2, projects: 2 });
