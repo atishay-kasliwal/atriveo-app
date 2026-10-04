@@ -856,7 +856,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
     <div className="apps-page">
       {header}
       <main className="apps-body">
-        {error && <div className="apps-error">Couldn't load analytics: {error}. The Mac sidecar must be running (npm run tailor:restart).</div>}
+        {error && <div className="apps-error">Couldn't load analytics: {error}. Please retry; if this continues, the analytics service or relay needs attention.</div>}
         {!data && !error && <p className="apps-muted">Loading…</p>}
 
         {data && k && (

@@ -2161,7 +2161,7 @@ const server = http.createServer(async (req, res) => {
   res.writeHead(404); res.end("not found");
 });
 
-server.listen(PORT, "127.0.0.1", () => {
+server.listen(PORT, process.env.TAILOR_HOST?.trim() || "127.0.0.1", () => {
   log(`listening on http://localhost:${PORT}`);
   // Bound to loopback, so this only matters once cloudflared publishes it — but
   // then /scrape/start is reachable by anyone who knows the tunnel URL, and it
