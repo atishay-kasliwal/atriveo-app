@@ -46,6 +46,8 @@
 .ar-question-meta { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 7px; color: var(--muted-fg); font-size: 10px; }
 .ar-question-meta > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .ar-question-meta > span > span { margin-left: 6px; }
+.ar-question-meta .ar-optional { margin-left: 6px; padding: 1px 6px; border-radius: 99px; font-style: normal; font-weight: 600; letter-spacing: .02em;
+  color: var(--primary); background: var(--primary-soft, color-mix(in oklab, var(--primary) 14%, transparent)); }
 .ar-question-meta button { flex-shrink: 0; padding: 0; color: var(--primary); border: 0; background: none; cursor: pointer; font: inherit; }
 .ar-question-meta > .ar-question-tools { flex-shrink: 0; display: flex; gap: 12px; overflow: visible; }
 .ar-question-meta .is-reject { color: var(--muted-fg); }

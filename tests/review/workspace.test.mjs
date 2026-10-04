@@ -144,6 +144,35 @@ test('one suggestion can be rejected on its own, with its confidence and context
   }finally{await f.close();}
 });
 
+test('optional questions are shown and can stay blank: approval sends them as leave blank, required ones still block',async()=>{
+  const rows=[app('opt','Orbit Labs',[
+    q('Why Orbit?','Because I build reliable systems.'),
+    q('Pronouns','',{type:'text',required:false}),
+    q('How did you hear about us?','LinkedIn',{type:'text',required:false}),
+    q('Cover letter','',{type:'file',required:false,reason:'UPLOAD_UNVERIFIED',answerProposal:{state:'action_required',family:'attachment',source:'none',reason:'optional_attachment'}}),
+  ])];
+  const f=await fixture(rows);const{page,calls,errors}=f;
+  try{
+    await page.getByRole('heading',{name:'Orbit Labs',exact:true}).waitFor();
+    assert.equal(await page.locator('.ar-optional').count(),3);
+    await page.getByText('answers ready · 3 optional',{exact:true}).waitFor();
+    const approve=page.getByRole('button',{name:'Approve 2 · leave 2 blank',exact:true});
+    assert.equal(await approve.isDisabled(),false);
+    // A required answer cleared: approval waits for it.
+    await page.getByLabel('Why Orbit?',{exact:false}).filter({visible:true}).last().fill('');
+    await page.getByText('1 required answer left',{exact:true}).waitFor();
+    assert.equal(await page.getByRole('button',{name:/^Approve /}).isDisabled(),true);
+    await page.getByLabel('Why Orbit?',{exact:false}).filter({visible:true}).last().fill('Because I build reliable systems.');
+    await approve.click();
+    await page.getByText('All answers approved, 2 optional left blank. You can now fill and verify.',{exact:true}).waitFor();
+    assert.equal(calls.length,1);
+    assert.equal(calls[0].operation,'approve_all');
+    assert.deepEqual(calls[0].answers.map(a=>a.fieldKey).sort(),['How did you hear about us?','Why Orbit?']);
+    assert.deepEqual(calls[0].leaveBlank.sort(),['Cover letter','Pronouns']);
+    assert.deepEqual(errors,[]);
+  }finally{await f.close();}
+});
+
 test('queue management previews exact selected applications and supports cancellation',async()=>{
   const rows=initialRows();const f=await fixture(rows,body=>({status:200,body:body.operation==='preview'?{ok:true,targets:[{id:'acme',updatedAt:rows[0].updatedAt,company:'Acme Robotics',title:'Software Engineer'}],moreAvailable:false}:{ok:true,discarded:['acme'],errors:[]}}));
   const{page,calls}=f;try{
