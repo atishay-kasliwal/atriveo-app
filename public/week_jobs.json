@@ -3043,7 +3043,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-03",
     "ats_score": 35,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-10-03T17:59:48Z",
@@ -3585,7 +3585,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-03",
     "ats_score": 40,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4419975933",
@@ -7930,7 +7930,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-03",
     "ats_score": 50,
-    "fit_score": 2
+    "fit_score": 3
   },
   {
     "session_id": "2026-10-03T16:01:28Z",
@@ -10165,7 +10165,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-03",
     "ats_score": 58,
-    "fit_score": 14
+    "fit_score": 15
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473452081",
@@ -10814,7 +10814,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-03",
     "ats_score": 42,
-    "fit_score": 12
+    "fit_score": 13
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4464231312",
@@ -16193,6 +16193,14 @@
       "Internship"
     ],
     "priority_version": 2,
+    "application": {
+      "applicationId": "815834e3-f2c1-4f6f-82f0-67058311d223",
+      "applicationKey": "greenhouse:8247622",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-04T02:03:50.542Z"
+    },
     "scraped_date": "2026-10-03",
     "ats_score": 10,
     "fit_score": 3
@@ -22478,7 +22486,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 25,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://job-boards.greenhouse.io/stripe/jobs/8249901",
@@ -24759,7 +24767,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 71,
-    "fit_score": 21
+    "fit_score": 17
   },
   {
     "job_url": "https://jobs.ashbyhq.com/numeral/4019093f-a90b-476a-82af-c8a2bcf289d1",
@@ -26560,7 +26568,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 40,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "session_id": "2026-10-02T14:34:41Z",
@@ -26711,7 +26719,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 40,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4446745306",
@@ -28301,7 +28309,7 @@
     },
     "scraped_date": "2026-10-02",
     "ats_score": 57,
-    "fit_score": 12
+    "fit_score": 11
   },
   {
     "job_url": "https://jobs.ashbyhq.com/monk/d2139ee6-c55b-451f-9030-c64eddbb1024",
@@ -28827,7 +28835,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 33,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4472867002",
@@ -29538,7 +29546,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 57,
-    "fit_score": 12
+    "fit_score": 11
   },
   {
     "job_url": "https://jobs.ashbyhq.com/titan/71d2bbf9-7506-4527-b424-3ae554f62e95",
@@ -34612,6 +34620,14 @@
       "Internship"
     ],
     "priority_version": 2,
+    "application": {
+      "applicationId": "7b10dc6c-9789-4b53-8415-9a49e5e62e67",
+      "applicationKey": "greenhouse:8008645003",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-04T01:59:05.060Z"
+    },
     "scraped_date": "2026-10-02",
     "ats_score": 50,
     "fit_score": 8
@@ -37473,7 +37489,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 64,
-    "fit_score": 12
+    "fit_score": 13
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4464802823",
@@ -40383,7 +40399,7 @@
       "status": "FAILED",
       "reviewReason": null,
       "ats": "greenhouse",
-      "updatedAt": "2026-10-04T01:35:07.422Z"
+      "updatedAt": "2026-10-04T02:05:41.127Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 50,
@@ -45601,9 +45617,9 @@
       "applicationId": "41227a46-81d6-46f5-abee-b3c25e4e75b0",
       "applicationKey": "ashby:12f2fe47-e905-41d4-b1e8-ca09a79d007e",
       "status": "NEEDS_REVIEW",
-      "reviewReason": "OPTION_NOT_FOUND",
+      "reviewReason": "VALIDATION_FAILED",
       "ats": "ashby",
-      "updatedAt": "2026-10-04T01:06:39.659Z"
+      "updatedAt": "2026-10-04T02:11:00.781Z"
     },
     "scraped_date": "2026-10-02",
     "ats_score": 66,
@@ -46726,6 +46742,14 @@
       "Internship"
     ],
     "priority_version": 2,
+    "application": {
+      "applicationId": "ac82d889-ee57-4756-bdbe-1275a4199bcc",
+      "applicationKey": "greenhouse:4955293101",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-04T01:59:32.014Z"
+    },
     "scraped_date": "2026-10-02",
     "ats_score": 37,
     "fit_score": 12
@@ -51393,6 +51417,14 @@
       "Internship"
     ],
     "priority_version": 2,
+    "application": {
+      "applicationId": "1da0522e-30c4-446c-9859-7ce8d1de3aa2",
+      "applicationKey": "ashby:c394615d-26c6-4435-ad84-3ca3269c2952",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "OPTION_NOT_FOUND",
+      "ats": "ashby",
+      "updatedAt": "2026-10-04T01:57:48.391Z"
+    },
     "scraped_date": "2026-10-02",
     "ats_score": 60,
     "fit_score": 5
@@ -53848,6 +53880,14 @@
       "Internship"
     ],
     "priority_version": 2,
+    "application": {
+      "applicationId": "9245d346-c35b-4cf0-ba08-116a92b779ba",
+      "applicationKey": "greenhouse:6188497004",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-04T02:00:06.907Z"
+    },
     "scraped_date": "2026-10-02",
     "ats_score": 66,
     "fit_score": 3
@@ -55442,6 +55482,14 @@
       "Internship"
     ],
     "priority_version": 2,
+    "application": {
+      "applicationId": "8a809077-71d2-4e61-821a-0abeb9d9e207",
+      "applicationKey": "greenhouse:8862951002",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "AMBIGUOUS_MATCH",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-04T02:01:10.513Z"
+    },
     "scraped_date": "2026-10-02",
     "ats_score": 50,
     "fit_score": 7
@@ -55500,7 +55548,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 66,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4408940437",
@@ -59662,6 +59710,14 @@
       "Internship"
     ],
     "priority_version": 2,
+    "application": {
+      "applicationId": "fd5838e2-28d0-4fdb-8c55-7730b7e98a88",
+      "applicationKey": "greenhouse:8213476",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-04T02:02:29.861Z"
+    },
     "scraped_date": "2026-10-02",
     "ats_score": 33,
     "fit_score": 6
@@ -60587,7 +60643,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 28,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4446367128",
@@ -62043,7 +62099,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 40,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-10-02T15:04:19Z",
@@ -62171,7 +62227,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 0,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "session_id": "2026-10-02T15:04:19Z",
@@ -65786,7 +65842,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-10-02T20:00:28Z",
@@ -66284,6 +66340,14 @@
       "Internship"
     ],
     "priority_version": 2,
+    "application": {
+      "applicationId": "737172a5-0be4-4b68-81f3-c93d2e0c761b",
+      "applicationKey": "greenhouse:8229735",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-04T02:03:21.901Z"
+    },
     "scraped_date": "2026-10-02",
     "ats_score": 0,
     "fit_score": 8
@@ -69057,7 +69121,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4475063793",
@@ -69963,7 +70027,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-02",
     "ats_score": 59,
-    "fit_score": 9
+    "fit_score": 10
   },
   {
     "session_id": "2026-10-02T23:24:46Z",
@@ -77797,7 +77861,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 50,
-    "fit_score": 2
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4455903888",
@@ -79768,10 +79832,10 @@
     "application": {
       "applicationId": "f4423480-0192-451d-9647-f1086371ce84",
       "applicationKey": "greenhouse:8227553",
-      "status": "READY_TO_APPLY",
-      "reviewReason": null,
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
       "ats": "greenhouse",
-      "updatedAt": "2026-10-04T01:54:06.125Z"
+      "updatedAt": "2026-10-04T01:58:51.600Z"
     },
     "scraped_date": "2026-10-01",
     "ats_score": 61,
@@ -85996,7 +86060,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 28,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "session_id": "2026-10-01T18:06:15Z",
@@ -92732,7 +92796,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 50,
-    "fit_score": 13
+    "fit_score": 14
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4474544856",
@@ -100826,7 +100890,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 52,
-    "fit_score": 12
+    "fit_score": 13
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4474562301",
@@ -104362,9 +104426,9 @@
       "applicationId": "20ac39b3-bd29-4854-abea-2aab33b3b5cb",
       "applicationKey": "ashby:583a9a1c-433e-4b76-a1b7-4d9e6a30f1da",
       "status": "NEEDS_REVIEW",
-      "reviewReason": "OPTION_NOT_FOUND",
+      "reviewReason": "UNKNOWN_QUESTION",
       "ats": "ashby",
-      "updatedAt": "2026-10-04T01:02:22.233Z"
+      "updatedAt": "2026-10-04T02:00:32.775Z"
     },
     "scraped_date": "2026-10-01",
     "ats_score": 37,
@@ -105604,7 +105668,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 62,
-    "fit_score": 18
+    "fit_score": 17
   },
   {
     "session_id": "2026-10-01T20:00:01Z",
@@ -106596,7 +106660,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 45,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "session_id": "2026-10-02T03:01:09Z",
@@ -106708,7 +106772,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 55,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4455901175",
@@ -109080,7 +109144,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 62,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4472547967",
@@ -109247,6 +109311,14 @@
       "Internship"
     ],
     "priority_version": 2,
+    "application": {
+      "applicationId": "6aa98539-b753-462d-9054-f0061a019d22",
+      "applicationKey": "ashby:3fd04c23-a63d-4b40-bfae-feafaa478caf",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "ashby",
+      "updatedAt": "2026-10-04T01:57:48.137Z"
+    },
     "scraped_date": "2026-10-01",
     "ats_score": 62,
     "fit_score": 7
@@ -119402,10 +119474,10 @@
     "application": {
       "applicationId": "6c7f80b1-2208-4cf4-9b1c-aba5261a4a2c",
       "applicationKey": "ashby:87526a4d-b026-4bef-9a03-dc257a40ffa6",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "UNKNOWN_QUESTION",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T01:29:43.978Z"
+      "updatedAt": "2026-10-04T02:10:51.765Z"
     },
     "scraped_date": "2026-10-01",
     "ats_score": 50,
@@ -120145,6 +120217,14 @@
       "Internship"
     ],
     "priority_version": 2,
+    "application": {
+      "applicationId": "1968ccc8-f0b7-4db3-8ff8-33350d3d9f94",
+      "applicationKey": "greenhouse:7999274003",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "SENSITIVE_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-04T02:01:36.098Z"
+    },
     "scraped_date": "2026-10-01",
     "ats_score": 20,
     "fit_score": 5
@@ -122580,9 +122660,9 @@
       "applicationId": "713ad34e-fefb-4c14-b2c6-9abba7285bad",
       "applicationKey": "ashby:44c76e2d-2d86-4f13-8598-3365dd3129d1",
       "status": "NEEDS_REVIEW",
-      "reviewReason": "OPTION_NOT_FOUND",
+      "reviewReason": "UNKNOWN_QUESTION",
       "ats": "ashby",
-      "updatedAt": "2026-10-04T00:44:13.327Z"
+      "updatedAt": "2026-10-04T02:10:56.200Z"
     },
     "scraped_date": "2026-10-01",
     "ats_score": 0,
@@ -127917,7 +127997,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 66,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4446595965",
@@ -131700,7 +131780,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 54,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://jobs.ashbyhq.com/fieldguide/c7af5e2a-7522-4c8c-91f0-2c3542d42548",
@@ -132048,7 +132128,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 54,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4455977895",
@@ -135628,7 +135708,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 46,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-10-02T03:01:09Z",
@@ -135684,7 +135764,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 46,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://job-boards.greenhouse.io/rvohealth/jobs/4739247005",
@@ -135740,7 +135820,7 @@
     "priority_version": 2,
     "scraped_date": "2026-10-01",
     "ats_score": 46,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-10-02T03:01:09Z",
@@ -136313,7 +136393,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 42,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4462575306",
@@ -136633,7 +136713,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 66,
-    "fit_score": 10
+    "fit_score": 11
   },
   {
     "session_id": "2026-09-30T13:57:07Z",
@@ -137727,7 +137807,7 @@
     },
     "scraped_date": "2026-09-30",
     "ats_score": 25,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4462058112",
@@ -138549,7 +138629,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4455932161",
@@ -141900,7 +141980,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4455786802",
@@ -156752,7 +156832,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4471986022",
@@ -156838,7 +156918,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473572293",
@@ -156881,7 +156961,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-09-30T05:12:48Z",
@@ -156924,7 +157004,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-09-30T05:12:48Z",
@@ -157053,7 +157133,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4455789966",
@@ -162273,7 +162353,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 38,
-    "fit_score": 9
+    "fit_score": 10
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4472338132",
@@ -164054,7 +164134,7 @@
       "status": "NEEDS_REVIEW",
       "reviewReason": "UNKNOWN_QUESTION",
       "ats": "greenhouse",
-      "updatedAt": "2026-10-04T01:05:01.235Z"
+      "updatedAt": "2026-10-04T01:57:55.794Z"
     },
     "scraped_date": "2026-09-30",
     "ats_score": 40,
@@ -169728,7 +169808,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 42,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4446546327",
@@ -171922,7 +172002,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 75,
-    "fit_score": 2
+    "fit_score": 3
   },
   {
     "job_url": "https://job-boards.greenhouse.io/aiedu/jobs/5237074007",
@@ -175031,9 +175111,9 @@
       "applicationId": "7ab9d4e1-add3-4615-889b-9c7c45f8b4a6",
       "applicationKey": "greenhouse:8821383002",
       "status": "NEEDS_REVIEW",
-      "reviewReason": "UNKNOWN_QUESTION",
+      "reviewReason": "UPLOAD_UNVERIFIED",
       "ats": "greenhouse",
-      "updatedAt": "2026-10-04T01:29:43.720Z"
+      "updatedAt": "2026-10-04T01:58:25.483Z"
     },
     "scraped_date": "2026-09-30",
     "ats_score": 18,
@@ -175093,7 +175173,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-30",
     "ats_score": 0,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-09-30T17:00:45Z",
@@ -183251,6 +183331,14 @@
       "Internship"
     ],
     "priority_version": 2,
+    "application": {
+      "applicationId": "b47fed7e-390c-4a4f-812d-e05070bface8",
+      "applicationKey": "greenhouse:4713683006",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-04T02:04:22.410Z"
+    },
     "scraped_date": "2026-09-30",
     "ats_score": 100,
     "fit_score": 6
@@ -183733,7 +183821,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-29",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4454407348",
@@ -185401,7 +185489,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-29",
     "ats_score": 90,
-    "fit_score": 13
+    "fit_score": 12
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473558295",
@@ -185452,7 +185540,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-29",
     "ats_score": 90,
-    "fit_score": 13
+    "fit_score": 12
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473554348",
@@ -185503,7 +185591,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-29",
     "ats_score": 90,
-    "fit_score": 13
+    "fit_score": 12
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473556978",
@@ -185765,7 +185853,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-29",
     "ats_score": 77,
-    "fit_score": 18
+    "fit_score": 17
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473582093",
@@ -185816,7 +185904,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-29",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4471980187",
@@ -185918,7 +186006,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-29",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473566820",
@@ -185969,7 +186057,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-29",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473572300",
@@ -186020,7 +186108,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-29",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-09-30T00:59:40Z",
@@ -186071,7 +186159,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-29",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473562892",
@@ -186122,7 +186210,7 @@
     "priority_version": 2,
     "scraped_date": "2026-09-29",
     "ats_score": 37,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473518969",
