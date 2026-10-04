@@ -7126,10 +7126,10 @@
     "application": {
       "applicationId": "2b866b0d-9a47-45bc-bd63-00bb03f67a66",
       "applicationKey": "ashby:11a5cba5-ccf3-48e8-a20c-98e66f6802d3",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "UNKNOWN_QUESTION",
+      "status": "APPLIED",
+      "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-04T06:18:35.222Z"
+      "updatedAt": "2026-10-04T21:48:16.976Z"
     },
     "ats_score": 75,
     "fit_score": 3
