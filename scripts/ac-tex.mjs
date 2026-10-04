@@ -33,7 +33,7 @@ const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 \\newcommand{\\resumeItem}[1]{\\item\\small{{#1 \\vspace{-2pt}}}}
 \\newcommand{\\resumeSubheading}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\textbf{#1} & #2 \\\\ \\textit{\\small#3} & \\textit{\\small #4} \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\newcommand{\\resumeProjectHeading}[2]{\\item\\begin{tabular*}{0.97\\textwidth}{l@{\\extracolsep{\\fill}}r}\\small#1 & #2 \\\\ \\end{tabular*}\\vspace{-7pt}}
-\\newcommand{\\resumeEducation}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l}\\textbf{#1}, #2 \\\\ \\textit{\\small #3, #4} \\\\ \\end{tabular*}\\vspace{-7pt}}
+\\newcommand{\\resumeEducation}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\textbf{#1} & #4 \\\\ \\textit{\\small #3} & \\textit{\\small #2} \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
 \\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.15in, label={}]}
 \\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}}
@@ -106,7 +106,7 @@ function toolsFromBullets(bullets, roleSlug) {
   for (const d of (ROLE_STACK_DEFAULTS[roleSlug] || [])) {
     if (!out.includes(d)) out.push(d);
   }
-  return [...new Set(out)].slice(0, 5);
+  return [...new Set(out)];
 }
 
 function bulletText(bullet) {
@@ -225,6 +225,7 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
     .map((role) => {
       const name = ROLE_SLUG_TO_NAME[role.role] || role.role;
       const meta = resolveExperienceMeta(role.role, bankDir);
+      const roleTitle = role.role === "wake-forest" ? "AI/ML Engineer" : role.role === "stony-brook" ? title : meta.title;
       const bullets = (role.bullets || []).map((b) => ({
         text: bulletText(b),
         ac_id: b.ac_id,
@@ -234,7 +235,7 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
       const items = bullets.map((b) => `        \\resumeItem{${esc(b.text)}}`).join("\n");
       return {
         order: meta.order || 0,
-        tex: `    \\resumeSubheading{${esc(name)}}{${meta.dates}}{${esc(meta.title)}}{${esc(meta.loc)}}\n      \\resumeItemListStart\n${items}\n      \\resumeItemListEnd`,
+        tex: `    \\resumeSubheading{${esc(name)}}{${meta.dates}}{${esc(roleTitle)}}{${esc(meta.loc)}}\n      \\resumeItemListStart\n${items}\n      \\resumeItemListEnd`,
       };
     })
     .sort((a, b) => b.order - a.order)

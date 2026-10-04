@@ -91,7 +91,7 @@ test("generated PDF: one page, ATS Readiness PASS, and each fix holds in every e
     assert.equal(r.parsed.experience[i].title_extra, null);
   });
   for (const view of VIEWS) {
-    const lines = x.views[view].split("\n").map((l) => l.trim());
+    const lines = x.views[view].slice(x.views[view].indexOf("Experience")).split("\n").map((l) => l.trim());
     for (const title of new Set(roles.map(([, , t]) => t))) {
       const titleLines = lines.filter((l) => l === title || l.startsWith(`${title} `));
       assert.ok(titleLines.length >= roles.filter(([, , t]) => t === title).length, `${view}: '${title}' lines missing`);
@@ -122,4 +122,14 @@ test("legacy template PDF: the checks catch all three problems it had", { skip }
   assert.equal(count("entry_order"), 2);
   assert.ok(r.findings.filter((f) => f.check === "entry_order").every((f) => /^Education entry/.test(f.message)));
   assert.equal(r.status, "WARN");
+});
+
+ test("approved education alignment, fixed Wake Forest title, adaptive SBU and complete project stack", () => {
+  const tex = newTex();
+  assert.match(tex, /\\textbf\{#1\} & #4/);
+  const roles = texArgs(tex, "resumeSubheading");
+  assert.equal(roles.find(r => r[0] === "Stony Brook University")[2], fixture.headerTitle);
+  assert.equal(roles.find(r => r[0].includes("Wake Forest"))[2], "AI/ML Engineer");
+  const rich = assembleAcResume({ experience: [], projects: [{role: "atriveo", bullets: [{text: "Python FastAPI Docker PostgreSQL Redis AWS React"}]}]}, {profile: fixture.profile});
+  for (const skill of ["Python", "FastAPI", "Docker", "PostgreSQL", "Redis", "AWS", "React", "TypeScript", "LangChain", "Cloudflare"]) assert.ok(rich.includes(skill), skill);
 });
