@@ -364,12 +364,54 @@ const countsOf = (order, ready) => ({ unanswered: order.length, questions: order
  *   ready       applications waiting only for your approval, and the approvals on their way
  *   full        all of it with every card, for consoles loaded before the views existed
  */
+/**
+ * LinkedIn postings the pipeline found in the last `days` with a resume ready: Today shows them as "On LinkedIn"
+ * cards. The engine never applies on LinkedIn (you click Apply there, then Apply with Atriveo fills the company's
+ * form). Jobs that already have an application, or that you discarded (job_swipes direction "left"), are left out.
+ */
+export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600 } = {}) {
+  const since = new Date(now.getTime() - days * 86_400_000);
+  const [docs, applied, dismissed] = await Promise.all([
+    db.collection("jobs").find({ run_at: { $gte: since }, job_url: /^https:\/\/(www\.)?linkedin\.com\//, "resume.status": "success" },
+      { projection: { _id: 0, job_url: 1, company: 1, title: 1, location: 1, score_pct: 1, date_posted: 1, run_at: 1, "resume.pdf_path": 1 } }).toArray(),
+    db.collection("applications").distinct("jobUrls"),
+    db.collection("job_swipes").distinct("job_url", { direction: "left" }),
+  ]);
+  const skip = new Set([...applied, ...dismissed]);
+  const byUrl = new Map();
+  for (const d of docs) {
+    if (skip.has(d.job_url)) continue;
+    const found = isoOf(d.run_at), posted = isoOf(d.date_posted);
+    const cur = byUrl.get(d.job_url);
+    if (!cur) {
+      byUrl.set(d.job_url, { id: d.job_url, url: d.job_url, company: d.company ?? "", title: d.title ?? "", location: d.location ?? null,
+        score: typeof d.score_pct === "number" ? d.score_pct : null, postedAt: posted, foundAt: found, track: trackOf(d.title),
+        resumeFile: d.resume?.pdf_path ? String(d.resume.pdf_path).split("/").slice(-2).join("/") : null });
+    } else {
+      if (typeof d.score_pct === "number") cur.score = Math.max(cur.score ?? 0, d.score_pct);
+      if (found && (!cur.foundAt || found < cur.foundAt)) cur.foundAt = found;
+      if (posted && (!cur.postedAt || posted < cur.postedAt)) cur.postedAt = posted;
+    }
+  }
+  return [...byUrl.values()].sort((a, b) => (b.foundAt ?? "").localeCompare(a.foundAt ?? "")).slice(0, limit);
+}
+
+/** Not interested in this job (Discard on a Today card that has no application): a left swipe, as the job feed records it. */
+export async function dismissJob(db, jobUrl, now = new Date()) {
+  if (!/^https:\/\//.test(String(jobUrl || ""))) throw new Error("A job URL is required");
+  await db.collection("job_swipes").updateOne({ job_url: jobUrl },
+    { $set: { job_url: jobUrl, direction: "left", swiped_at: now.toISOString(), date: now.toISOString().slice(0, 10), source: "apply-console" } }, { upsert: true });
+  return { ok: true };
+}
+
 export async function reviewQueue(db, { view = "full", cards = 0, ids = [], now = new Date() } = {}) {
   const apps = db.collection("applications");
   const generatedAt = now.toISOString();
   switch (view) {
     case "cards":
       return { ok: true, generatedAt, cards: await unansweredCards(apps, ids) };
+    case "linkedin":
+      return { ok: true, generatedAt, linkedin: await linkedinJobs(db, { now }) };
     case "counts": {
       const [engine, totals, ready] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps)]);
       return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length } };

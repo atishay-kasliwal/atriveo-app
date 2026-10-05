@@ -6,8 +6,8 @@ import CompanyLogo from "../components/CompanyLogo";
 import { postAction, when } from "./engine";
 import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, extensionVersion } from "./openFill";
 import { blocking } from "./questionGroups";
-import { discardNow } from "./discard";
-import { adjustCounts, loadCards, refreshReady, refreshUnanswered, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
+import { discardNow, dismissJobs } from "./discard";
+import { adjustCounts, loadCards, refreshLinkedin, refreshReady, refreshUnanswered, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
 import "../styles/applications.css";
 import "./review-pages.css";
 import "./today.css";
@@ -18,7 +18,7 @@ import "./today.css";
 // it live and shows each answer, drafts included, in its side panel. You always click Submit. Applications with
 // a question nobody has answered come last and send you to To answer, which shows only those questions.
 
-type Kind = "you_submit" | "approve" | "fill" | "drafted" | "answer";
+type Kind = "you_submit" | "approve" | "fill" | "drafted" | "linkedin" | "answer";
 interface Item { track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
 
 /** The resume track's short name (TRACKS.yaml ids). */
@@ -44,6 +44,7 @@ const STAGE: Record<Kind, { label: string; tone: string }> = {
   approve: { label: "Approve to submit", tone: "go" },
   fill: { label: "Answers approved", tone: "info" },
   drafted: { label: "Answers drafted", tone: "info" },
+  linkedin: { label: "On LinkedIn", tone: "info" },
   answer: { label: "Needs your answers", tone: "warn" },
 };
 
@@ -61,6 +62,7 @@ function useLayout() {
 export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const unanswered = useUnansweredQueue(60_000);
   const ready = useReadyQueue(60_000);
+  const linkedin = useLinkedinQueue(300_000);
   const { cards } = useUnansweredCards();
   const navigate = useNavigate();
   const { columns, rows } = useLayout();
@@ -93,17 +95,20 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     };
     // What you can act on now comes first (Open & Fill: approved or drafted alike), then what needs answers;
     // within each, North Carolina first, then the newest posting, then the best match.
-    const order: Record<Kind, number> = { you_submit: 0, approve: 1, fill: 2, drafted: 2, answer: 3 };
+    const order: Record<Kind, number> = { you_submit: 0, approve: 1, fill: 2, drafted: 2, linkedin: 2, answer: 3 };
     const all = [
       ...manual.map((r) => fromReady(r, "you_submit")),
       ...(ready.data?.ready ?? []).filter((r) => !manualIds.has(r.id)).map((r) => fromReady(r, "approve")),
       ...(unanswered.data?.unanswered ?? []).map(fromQueue),
+      // LinkedIn postings: no application (the engine never applies on LinkedIn); same score, place and age.
+      ...(linkedin.data?.linkedin ?? []).map((l): Item => ({ id: l.id, kind: "linkedin", company: l.company, title: l.title, ats: null, url: l.url,
+        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt })),
     ];
     return all
       .filter((i) => done[i.id] !== i.updatedAt)
       .sort((a, b) => Number(later.includes(a.id)) - Number(later.includes(b.id)) || order[a.kind] - order[b.kind]
         || Number(inNC(b.location)) - Number(inNC(a.location)) || (b.age ?? "").localeCompare(a.age ?? "") || (b.score ?? -1) - (a.score ?? -1));
-  }, [ready.data, unanswered.data, cards, done, later]);
+  }, [ready.data, unanswered.data, linkedin.data, cards, done, later]);
 
   const pages = Math.max(1, Math.ceil(items.length / perPage));
   const current = Math.min(page, pages - 1);
@@ -227,7 +232,12 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     if (!ids.length) return;
     setBusy(ids.length === 1 ? ids[0]! : "discard");
     try {
-      const r = await discardNow(ids);
+      // LinkedIn postings have no application: they're dismissed as jobs; the rest are discarded applications.
+      const jobIds = ids.filter((id) => items.find((i) => i.id === id)?.kind === "linkedin");
+      const appIds = ids.filter((id) => !jobIds.includes(id));
+      const [r, j] = await Promise.all([appIds.length ? discardNow(appIds) : { discarded: [] as string[], errors: [] as string[] }, jobIds.length ? dismissJobs(jobIds) : { dismissed: [] as string[], errors: [] as string[] }]);
+      r.discarded.push(...j.dismissed); r.errors.push(...j.errors);
+      if (j.dismissed.length) setTimeout(() => void refreshLinkedin(), 1500);
       const gone = new Set(r.discarded);
       setDone((d) => ({ ...d, ...Object.fromEntries(items.filter((i) => gone.has(i.id)).map((i) => [i.id, i.updatedAt])) }));
       setSelectedIds((s) => s.filter((id) => !gone.has(id)));
@@ -270,6 +280,10 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
             <p className="td-note">Answer {item.toAnswer === 1 ? "it" : "them"} once; then it moves up for Open & Fill.</p>
           </>}
           {item.kind === "fill" && <p className="td-note">Every answer is approved. Atriveo fills it on the job page; you check, then Submit.</p>}
+          {item.kind === "linkedin" && <>
+            <p className="td-big">Resume ready</p>
+            <p className="td-note">Open it, click Apply on LinkedIn, then Atriveo → Apply on this page on the company's form. Atriveo never fills LinkedIn itself.</p>
+          </>}
           {item.kind === "approve" && r && <>
             <p className="td-big">{r.answered} answers verified</p>
             <p className="td-note">Filled {when(r.filledAt)}{r.resumeFile ? ` · ${r.resumeFile}` : ""}.</p>
@@ -282,6 +296,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {errors[item.id] && <p className="td-error" role="alert">{errors[item.id]}</p>}
         </div>
         <footer className="td-foot">
+          {item.kind === "linkedin" && <a className="rv-primary td-linkedin" href={item.url} target="_blank" rel="noreferrer">Open on LinkedIn ↗</a>}
           {(item.kind === "drafted" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => void openInBrowser(item)}>{busy === item.id ? "Opening…" : "Open & Fill"}</button>}
           {item.kind === "answer" && <button className="rv-primary" disabled={isBusy} onClick={() => navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer {item.toAnswer ?? ""}</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
@@ -289,8 +304,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {item.kind === "approve" && ["greenhouse", "ashby", "lever", "workday"].includes(item.ats ?? "") && <button className="apps-btn" disabled={isBusy} onClick={() => void openFill(item)}>Open & Fill</button>}
           <div className="td-review-links">
             {(item.kind === "approve" || item.kind === "you_submit") && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Answers</button>}
-            <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Resume</button>
-            {item.url && <a className="apps-btn" href={item.url} target="_blank" rel="noreferrer">Job ↗</a>}
+            {item.kind !== "linkedin" && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Resume</button>}
+            {item.url && item.kind !== "linkedin" && <a className="apps-btn" href={item.url} target="_blank" rel="noreferrer">Job ↗</a>}
           </div>
           <div className="td-links">
             <button className="apps-link" disabled={isBusy} onClick={() => setLater((l) => [...l.filter((id) => id !== item.id), item.id])}>Later</button>
@@ -312,6 +327,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           <li className="go"><b>{count("you_submit")}</b><span>You submit</span></li>
           <li className="go"><b>{count("approve")}</b><span>Approve to submit</span></li>
           <li className="go"><b>{count("fill") + count("drafted")}</b><span>Open & Fill</span></li>
+          <li><b>{count("linkedin")}</b><span>On LinkedIn</span></li>
           <li className="td-strip-link"><Link to="/unanswered"><b>{count("answer")}</b><span>Need your answers →</span></Link></li>
         </ol>
         <div className="td-actions">

@@ -37,7 +37,7 @@ import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
-import { applicationsAnalytics, applicationDetail, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
+import { applicationsAnalytics, applicationDetail, dismissJob, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
@@ -1698,6 +1698,26 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
       }
     })();
+    return;
+  }
+
+  // POST /applications/job-dismiss {jobUrl} — Discard on a Today card with no application (a LinkedIn posting):
+  // recorded as a left swipe so it stays off Today and the job feed. Nothing is sent anywhere.
+  if (req.method === "POST" && pathname === "/applications/job-dismiss") {
+    let raw = "";
+    req.on("data", (c) => { raw += c; if (raw.length > 10_000) req.destroy(); });
+    req.on("end", async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const body = JSON.parse(raw || "{}");
+        const data = await withMongo((db) => dismissJob(db, body?.jobUrl), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    });
     return;
   }
 

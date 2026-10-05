@@ -123,14 +123,15 @@ interface Loaded<T> { data: T | null; error: string | null; loading: boolean }
 const STALE_MS = 10_000;
 
 /** One page's view: loaded on first use, then every `pollMs` while the tab is visible. */
-function pageView<T extends View>(load: (first: boolean) => Promise<T>) {
+/** A polled server view; views with header counts (Unanswered, Ready) also refresh those counts. */
+function pageView<T extends { generatedAt: string; counts?: Counts }>(load: (first: boolean) => Promise<T>) {
   const s = store<Loaded<T>>({ data: null, error: null, loading: false });
   let inflight: Promise<void> | null = null;
   const refresh = (): Promise<void> => {
     if (inflight) return inflight;
     s.set({ loading: true });
     inflight = load(!s.get().data)
-      .then((data) => { s.set({ data, error: null }); counts.set({ counts: data.counts }); })
+      .then((data) => { s.set({ data, error: null }); if (data.counts) counts.set({ counts: data.counts }); })
       .catch((e) => s.set({ error: e instanceof Error ? e.message : String(e) }))
       .finally(() => { inflight = null; s.set({ loading: false }); });
     return inflight;
@@ -163,6 +164,14 @@ const unanswered = pageView<UnansweredQueue>(async (first) => {
   return r;
 });
 const ready = pageView<ReadyQueue>(() => getJson<ReadyQueue>("/applications/review-queue?view=ready"));
+
+/** A LinkedIn posting with a resume ready and no application (the engine never applies on LinkedIn). */
+export interface LinkedinJob { id: string; url: string; company: string; title: string; location: string | null; score: number | null; postedAt: string | null; foundAt: string | null; track: string | null; resumeFile: string | null }
+export interface LinkedinQueue { ok: boolean; generatedAt: string; linkedin: LinkedinJob[] }
+const linkedin = pageView<LinkedinQueue>(() => getJson<LinkedinQueue>("/applications/review-queue?view=linkedin"));
+/** Today's "On LinkedIn" cards: you open the posting, click Apply there, and Apply with Atriveo fills the company's form. */
+export const useLinkedinQueue = linkedin.use;
+export const refreshLinkedin = linkedin.refresh;
 
 /** The Unanswered page's order: every application blocked on questions, without its questions. */
 export const useUnansweredQueue = unanswered.use;

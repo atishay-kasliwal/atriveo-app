@@ -14,6 +14,9 @@ const at = '2026-10-04T12:00:00.000Z';
 // Built console + fake sidecar: the Today screen's cards, order, actions, and that nothing is sent without a click.
 const readyRow = (id, company, extra = {}) => ({ id, company, companyKey: company.toLowerCase(), title: 'Software Engineer', location: 'NY', ats: 'greenhouse', url: 'https://blocked.test', priority: 0, updatedAt: at, filledAt: at, resumeFile: 'resume.pdf', answered: 12, readyAtCompany: 1, companySubmittedToday: false, priorityTags: ['Strong match'], ...extra });
 const queued = (id, company, n, extra = {}) => ({ id, company, title: 'Backend Engineer', updatedAt: at, n, readyForReview: Math.max(0, n - 1), needsInput: n ? 1 : 0, actionRequired: 0, ...extra });
+// A LinkedIn posting with a resume ready and no application (only the LinkedIn test lists it).
+let LINKEDIN = [];
+const PENDO = [{ id: 'https://www.linkedin.com/jobs/view/111', url: 'https://www.linkedin.com/jobs/view/111', company: 'Pendo', title: 'Software Engineer', location: 'Raleigh, NC', score: 66, postedAt: null, foundAt: at, track: 'software-engineer', resumeFile: 'Pendo/Jane Doe.pdf' }];
 const view = { ok: true, generatedAt: at, killSwitch: null, worker: { online: true, updatedAt: at }, counts: { unanswered: 4, questions: 9, ready: 3 } };
 const READY = { ...view, ready: [readyRow('r1', 'Stripe'), readyRow('r2', 'Ramp'), readyRow('m1', 'Spotify', { ats: 'lever' })], manual: [{ ...readyRow('m1', 'Spotify', { ats: 'lever' }), openFill: null }], approved: [] };
 const UNANSWERED = { ...view, unanswered: [queued('u1', 'Rogo', 4), queued('u2', 'Vercel', 5), queued('c1', 'Anthropic', 0), queued('d1', 'Figma', 3, { readyForReview: 3, needsInput: 0 }), queued('u3', 'Tailscale', 2)] };
@@ -47,6 +50,7 @@ async function fixture() {
     if (url.pathname === '/api/auth/me') return route.fulfill({ json: { user: { id: 1, name: 'Atishay', email: 'test@example.test' } } });
     if (url.pathname === '/applications/review-queue') {
       const v = url.searchParams.get('view');
+      if (v === 'linkedin') return route.fulfill({ json: { ok: true, generatedAt: at, linkedin: LINKEDIN } });
       return route.fulfill({ json: v === 'ready' ? READY : v === 'counts' ? view : v === 'cards' ? { ok: true, generatedAt: at, cards: UNANSWERED.cards.filter((c) => (url.searchParams.get('ids') ?? '').split(',').includes(c.id)) } : UNANSWERED });
     }
     if (url.pathname === '/applications/action') { calls.push(route.request().postDataJSON()); return route.fulfill({ json: { ok: true } }); }
@@ -242,4 +246,22 @@ test('within Open & Fill: North Carolina first, then the newest posting; score a
     assert.deepEqual(calls.filter((c) => c.action === 'discard_applications').map((c) => c.operation), ['preview', 'confirm']);
     assert.equal(await anthropic.count(), 0, 'a discarded card leaves Today');
   } finally { await f.close(); UNANSWERED.unanswered.splice(0, UNANSWERED.unanswered.length, ...saved); }
+});
+
+test('LinkedIn postings show as On LinkedIn cards: the button opens the posting, Discard records it as not interested', async () => {
+  LINKEDIN = PENDO;
+  const f = await fixture(); const { page, calls } = f;
+  try {
+    await page.route('**/applications/job-dismiss', (route) => { calls.push({ dismiss: route.request().postDataJSON() }); return route.fulfill({ json: { ok: true } }); });
+    await page.goto(`${f.base}/`);
+    const card = page.getByRole('article', { name: 'Pendo: On LinkedIn' });
+    await card.waitFor();
+    assert.equal(await card.getByRole('link', { name: 'Open on LinkedIn ↗' }).getAttribute('href'), 'https://www.linkedin.com/jobs/view/111');
+    assert.match(await card.locator('.td-loc').textContent(), /Raleigh, NC/);
+    assert.equal(await card.getByRole('button', { name: 'Resume' }).count(), 0, 'no application, so no resume review here');
+    await card.getByRole('button', { name: 'Discard' }).click();
+    await page.getByText('Discarded 1').waitFor();
+    assert.deepEqual(calls.filter((c) => c.dismiss), [{ dismiss: { jobUrl: 'https://www.linkedin.com/jobs/view/111' } }]);
+    assert.ok(calls.every((c) => c.dismiss || c.action !== 'discard_applications'), 'a LinkedIn posting is not an application');
+  } finally { await f.close(); LINKEDIN = []; }
 });

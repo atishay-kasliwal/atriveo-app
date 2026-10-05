@@ -121,3 +121,4 @@
 .td-track.is-data-science { color: #34d399; }
 .td-track.is-data-analytics { color: #fbbf24; }
 .td-track.is-forward-deployed { color: #f472b6; }
+.td-foot a.td-linkedin { display: flex; align-items: center; justify-content: center; text-decoration: none; color: #fff; }
