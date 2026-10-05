@@ -48,9 +48,9 @@ product:
 
 confirmed_technology_context:
   retrieval: ChromaDB preceded Pinecone; ChromaDB remains for lower-cost workflows.
-  llm: Anthropic
+  llm: Anthropic Claude summarized the histories of 10K+ similar patients; a separate PyTorch / scikit-learn model predicted outcomes at 6, 12 and 24 months for treating physicians (confirmed 2026-10-05).
   agents: MCP servers and function calling.
-  modeling: PyTorch, TensorFlow, and scikit-learn were used for models.
+  modeling: PyTorch, TensorFlow, and scikit-learn were used for models. The tumor segmentation model was trained in PyTorch, with N4ITK bias-field correction in preprocessing (confirmed 2026-10-05).
   conference_workflow: A similar model workflow existed; launch status and provider details are unconfirmed, so do not claim a live deployment.
 
 # ── Verified metrics (do not invent beyond this list) ───────────────────────
@@ -126,11 +126,11 @@ achievements:
     display_order: 3
     theme: tumor-segmentation
     skills: [ML, computer vision, segmentation]
-    fact: Brain tumor segmentation model at 90%+ mask accuracy across 10K+ multimodal clinical MRI studies.
+    fact: Brain tumor segmentation model trained in PyTorch on N4ITK bias-corrected MRI, at 90%+ mask accuracy across 10K+ multimodal clinical MRI studies (confirmed 2026-10-05).
     metrics_used: [90%+ accuracy, 10K+ studies]
     resume_bullet: >-
-      Attained 90%+ mask accuracy with a Python brain tumor segmentation model replacing manual tumor
-      outlining for treating clinicians in production.
+      Attained 90%+ mask accuracy with a PyTorch brain tumor segmentation model on N4ITK bias-corrected MRI,
+      replacing manual tumor outlining for treating clinicians in production.
     review_notes: |
       Does not repeat 3h→2min (that lives in pinned AC-031). Compatible with AC-048 human-in-the-loop.
 

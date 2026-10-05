@@ -10,7 +10,7 @@ concepts_claimed:
   - segmentation
   - computer_vision
   - tumor
-fact: Brain tumor segmentation model at 90%+ mask accuracy across 10K+ multimodal clinical MRI studies.
+fact: Brain tumor segmentation model trained in PyTorch on N4ITK bias-corrected MRI, at 90%+ mask accuracy across 10K+ multimodal clinical MRI studies (confirmed 2026-10-05).
 capabilities:
   ml: 92
   backend: 70
@@ -18,6 +18,8 @@ strength:
   recruiter: 10
 ats_keywords:
   - Python
+  - PyTorch
+  - N4ITK
   - segmentation
   - MRI
   - computer vision
@@ -37,7 +39,8 @@ variants:
     emphasis: ml
     strength: 10
     text: >-
-      Attained 90%+ mask accuracy with a Python brain tumor segmentation model replacing manual tumor
-      outlining for treating clinicians in production.
+      Attained 90%+ mask accuracy with a PyTorch brain tumor segmentation model on N4ITK bias-corrected MRI,
+      replacing manual tumor outlining for treating clinicians in production.
 signature_technologies:
-  - Python
+  - PyTorch
+  - N4ITK
