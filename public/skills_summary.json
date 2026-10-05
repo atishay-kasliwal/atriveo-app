@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-10-05T01:57:58.639007+00:00",
-  "total_analyzed": 3661,
+  "generated_at": "2026-10-05T02:57:54.902460+00:00",
+  "total_analyzed": 3666,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 2077,
-        "Java": 1034,
+        "Python": 2080,
+        "Java": 1036,
         "SQL": 900,
-        "TypeScript": 565,
-        "JavaScript": 439,
+        "TypeScript": 567,
+        "JavaScript": 441,
         "Rust": 203,
         ".NET": 157,
         "C++": 147,
@@ -29,7 +29,7 @@
         "React": 511,
         "PyTorch": 491,
         "TensorFlow": 270,
-        "Express": 240,
+        "Express": 241,
         "Node.js": 213,
         "Spring": 188,
         "LangChain": 156,
@@ -74,8 +74,8 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 1439,
-        "Distributed Systems": 704,
+        "Scalability": 1440,
+        "Distributed Systems": 706,
         "REST API": 543,
         "System Design": 266,
         "Microservices": 248,
@@ -93,10 +93,10 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 663,
+        "CI/CD": 664,
         "Kubernetes": 439,
         "Docker": 376,
-        "Git": 366,
+        "Git": 367,
         "Linux": 280,
         "Terraform": 162,
         "GitHub Actions": 101,
@@ -113,7 +113,7 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 525,
+        "ETL/ELT": 526,
         "Spark": 280,
         "PostgreSQL": 269,
         "Kafka": 172,
@@ -137,14 +137,14 @@
       "skills": {
         "Machine Learning": 1188,
         "Agents": 944,
-        "LLM": 853,
+        "LLM": 854,
         "GenAI": 494,
         "PyTorch": 491,
         "RAG": 334,
         "Deep Learning": 273,
         "TensorFlow": 270,
         "NLP": 267,
-        "Prompt Eng": 244,
+        "Prompt Eng": 246,
         "OpenAI": 229,
         "Fine-tuning": 203,
         "LangChain": 156,
@@ -173,8 +173,8 @@
       "color": "#64748b",
       "skills": {
         "Cross-functional": 1014,
-        "Mentorship": 945,
-        "Code Review": 917,
+        "Mentorship": 948,
+        "Code Review": 919,
         "Agile/Scrum": 469,
         "On-call": 301,
         "Leadership": 248
