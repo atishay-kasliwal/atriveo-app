@@ -1,0 +1,73 @@
+// Resume tracks (data/ac-bank/TRACKS.yaml): which identity a job's resume takes, from its title,
+// and what that changes — planner settings, the title shown at each employer, confirmed skills.
+
+import fs from "node:fs";
+import path from "node:path";
+import yaml from "js-yaml";
+import { resolveBankDir } from "./ac-role-meta.mjs";
+
+export function loadTracks(bankDir = resolveBankDir()) {
+  return yaml.load(fs.readFileSync(path.join(bankDir, "TRACKS.yaml"), "utf8")) || {};
+}
+
+const matches = (patterns, title) => (patterns || []).some((p) => new RegExp(p, "i").test(title));
+
+/** The track id for a job title (first match in TRACKS.yaml `order`), or null when none fits. */
+export function classifyTrack(title, doc = loadTracks()) {
+  const t = String(title || "");
+  for (const id of doc.order || Object.keys(doc.tracks || {})) {
+    const track = doc.tracks?.[id];
+    if (track && matches(track.title_patterns, t) && !matches(track.exclude_patterns, t)) return id;
+  }
+  return null;
+}
+
+/** Planner settings a track changes, applied over the planner's own (see buildPlannerRuntimeConfig). */
+export function trackPlannerOverrides(runtime, title, doc = loadTracks()) {
+  const id = classifyTrack(title, doc);
+  const track = id ? doc.tracks[id] : null;
+  const out = { track: id };
+  if (!track) return out;
+  if (track.experience_bullets) {
+    out.min_bullets_per_role = { ...runtime.min_bullets_per_role, ...track.experience_bullets };
+    const experience = { ...runtime.minimum_visual_targets?.experience };
+    for (const [role, n] of Object.entries(track.experience_bullets)) experience[role] = { preferred: n, minimum: n };
+    out.minimum_visual_targets = { ...runtime.minimum_visual_targets, experience };
+  }
+  if (track.projects) {
+    out.resume_project_pool = track.projects;
+    out.fixed_project_roles = null;
+  }
+  if (track.max_ai_bullets != null) out.concept_caps = { ...runtime.concept_caps, ai: track.max_ai_bullets };
+  if (track.ats_matrix === false) out.ats_matrix = false;
+  return out;
+}
+
+// Seniority and level words a past job title doesn't take from the posting.
+const LEVEL_WORDS = /\b(?:senior|sr|staff|lead|principal|junior|jr|associate|entry level|new grad(?:uate)?|graduate|intern(?:ship)?|[ivx]+|\d+)\b\.?/gi;
+
+/**
+ * The title shown at an employer. Stony Brook, the latest role, shows the role being applied for
+ * (the header title without seniority words); the others come from TRACKS.yaml. Null keeps the
+ * bank's own title.
+ */
+export function employerTitle(roleSlug, headerTitle, doc = loadTracks()) {
+  if (roleSlug === "stony-brook") {
+    const role = String(headerTitle || "").replace(LEVEL_WORDS, " ").replace(/[\s,–—-]+$/, "").replace(/\s+/g, " ").trim();
+    return role ? doc.stony_brook_title_overrides?.[role] ?? role : null;
+  }
+  return doc.employer_titles?.[roleSlug] ?? null;
+}
+
+const skillKey = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9+#.]/g, "");
+
+/** Skills Atishay confirmed using (any employer), as normalized names; never the not-confirmed ones. */
+export function confirmedSkillKeys(doc = loadTracks()) {
+  const lists = Object.entries(doc.confirmed_skills || {}).filter(([key]) => key !== "not_confirmed");
+  return new Set(lists.flatMap(([, skills]) => skills || []).map(skillKey));
+}
+
+/** Whether a skills-library entry is one Atishay confirmed (by its name, never an alias). */
+export function isConfirmedSkill(skill, keys) {
+  return keys.has(skillKey(skill.name)) || keys.has(skillKey(skill.displayName));
+}

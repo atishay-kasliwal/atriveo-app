@@ -47,7 +47,7 @@ export function beamSearch({
   const candidates = [];
 
   for (const variant of variants) {
-    const runtime = buildRuntime(planner, variant, { jd, bank, company: meta.company });
+    const runtime = buildRuntime(planner, variant, { jd, bank, company: meta.company, title: meta.title });
     let composition = compose(jd, bank, runtime);
     composition = applyDiversify(composition, variant);
 
@@ -87,7 +87,7 @@ export function beamSearch({
   }
 
   if (!candidates.length) {
-    const runtime = buildRuntime(planner, { id: "fallback" }, { jd, bank, company: meta.company });
+    const runtime = buildRuntime(planner, { id: "fallback" }, { jd, bank, company: meta.company, title: meta.title });
     const composition = compose(jd, bank, runtime);
     const scored = scoreResumeCandidate({ composition, bank, jd, title: meta.title, location: meta.location, pages });
     return {

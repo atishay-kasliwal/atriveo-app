@@ -7,6 +7,7 @@ import { compose, loadBank } from "./ac-bank.mjs";
 import { generateResume } from "./ac-pipeline.mjs";
 import { retrieveCandidateAcs } from "./ac-embeddings.mjs";
 import { warmStartBoosts } from "./ac-case-memory.mjs";
+import { trackPlannerOverrides } from "./ac-tracks.mjs";
 
 const PLANNER_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "planner");
 
@@ -22,9 +23,11 @@ export function loadPlannerConfig(version = "v1") {
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
-export function buildPlannerRuntimeConfig(version, { jd, bank, company = null } = {}) {
+export function buildPlannerRuntimeConfig(version, { jd, bank, company = null, title = null } = {}) {
   const cfg = loadPlannerConfig(version);
   const runtime = { ...cfg, version: cfg.version || version, name: cfg.name || version };
+  // The job's track (TRACKS.yaml) can change bullet counts, projects and the AI cap.
+  Object.assign(runtime, trackPlannerOverrides(runtime, title));
 
   if (cfg.retrieval_top_k) {
     const retrieved = retrieveCandidateAcs(jd, bank, cfg.retrieval_top_k);
@@ -52,7 +55,7 @@ export function runPlanner(version, jd, bank, meta = {}) {
     const pipeline = generateResume({ jd, bank, planner: version, meta });
     return pipeline.result.composition;
   }
-  const runtime = buildPlannerRuntimeConfig(version, { jd, bank, company: meta.company || null });
+  const runtime = buildPlannerRuntimeConfig(version, { jd, bank, company: meta.company || null, title: meta.title || null });
   runtime.narrative_first = cfg.narrative_first !== false;
   return compose(jd, bank, runtime);
 }

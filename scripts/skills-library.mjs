@@ -130,10 +130,6 @@ export const SKILLS_LIBRARY = [
     skills: [
       defineSkill({ name: "LLMs", displayName: "LLMs", aliases: ["large language models", "foundation models", "generative ai", "genai"], match: ["llm", "llms"], marketFrequency: 9453, priority: 10, tier: "A", related: ["RAG", "LangChain", "Agent Systems"] }),
       defineSkill({ name: "RAG", displayName: "RAG", aliases: ["retrieval augmented generation"], match: ["rag"], marketFrequency: 2800, priority: 9, tier: "A", related: ["LLMs", "LangChain", "Vector Retrieval"] }),
-      defineSkill({ name: "LangChain", displayName: "LangChain", match: ["langchain"], marketFrequency: 1600, priority: 8, tier: "B", related: ["RAG", "LLMs", "Vector Retrieval"] }),
-      defineSkill({ name: "LangGraph", displayName: "LangGraph", match: ["langgraph"], marketFrequency: 900, priority: 6, tier: "B", related: ["LangChain", "Agent Systems"] }),
-      defineSkill({ name: "PyTorch", displayName: "PyTorch", match: ["pytorch", "torch"], marketFrequency: 2400, priority: 8, tier: "B", related: ["Machine Learning", "Transformers"] }),
-      defineSkill({ name: "Transformers", displayName: "Transformers", aliases: ["hugging face", "huggingface"], match: ["transformer", "transformers", "bert"], marketFrequency: 1800, priority: 7, tier: "B", related: ["NLP", "LLMs"] }),
       defineSkill({ name: "MCP", displayName: "MCP", aliases: ["model context protocol"], match: ["mcp"], marketFrequency: 400, priority: 4, tier: "C", related: ["Agent Systems"] }),
       defineSkill({ name: "NLP", displayName: "NLP", aliases: ["natural language processing"], match: ["nlp"], marketFrequency: 3200, priority: 8, tier: "B", related: ["Transformers", "Machine Learning"] }),
       defineSkill({ name: "Reinforcement Learning", displayName: "Reinforcement Learning", match: ["reinforcement learning", " rl "], marketFrequency: 1100, priority: 6, tier: "B", related: ["Machine Learning", "Agent Systems"] }),
@@ -141,7 +137,31 @@ export const SKILLS_LIBRARY = [
       defineSkill({ name: "Prompt Engineering", displayName: "Prompt Engineering", match: ["prompt engineering", "prompting"], marketFrequency: 900, priority: 5, tier: "C", evidence: "inferred", related: ["LLMs"] }),
       defineSkill({ name: "Feature Engineering", displayName: "Feature Engineering", match: ["feature engineering", "feature extraction"], marketFrequency: 1500, priority: 7, tier: "B", related: ["Machine Learning", "ETL Pipelines"] }),
       defineSkill({ name: "Machine Learning", displayName: "Machine Learning", aliases: ["ml"], match: ["machine learning"], marketFrequency: 9453, priority: 9, tier: "A", related: ["PyTorch", "NLP"] }),
+      defineSkill({ name: "Generative AI", displayName: "Generative AI", aliases: ["genai", "gen ai"], match: ["generative ai", "genai", "gen ai"], marketFrequency: 3000, priority: 8, tier: "B", bankBacked: false, related: ["LLMs", "RAG"] }),
+      defineSkill({ name: "Deep Learning", displayName: "Deep Learning", match: ["deep learning"], marketFrequency: 2500, priority: 7, tier: "B", bankBacked: false, related: ["PyTorch", "TensorFlow"] }),
+      defineSkill({ name: "Function Calling", displayName: "Function Calling", aliases: ["tool calling"], match: ["function calling", "tool calling"], marketFrequency: 500, priority: 5, tier: "C", bankBacked: false, related: ["Agent Systems", "LLMs"] }),
+      defineSkill({ name: "MLOps", displayName: "MLOps", aliases: ["ml ops"], match: ["mlops", "ml ops"], marketFrequency: 1500, priority: 6, tier: "B", bankBacked: false, related: ["MLflow"] }),
       defineSkill({ name: "Healthcare AI", displayName: "Healthcare AI", match: ["healthcare", "clinical"], marketFrequency: 800, priority: 5, tier: "C", related: ["Feature Engineering"] }),
+    ],
+  },
+  {
+    // Libraries, frameworks and model providers: their own line so an AI resume can list the
+    // ones the JD names without crowding out LLMs, RAG and the rest. Entries marked
+    // bankBacked: false appear only when confirmed in TRACKS.yaml and the JD asks for them.
+    label: "ML Frameworks",
+    kind: "technology",
+    skills: [
+      defineSkill({ name: "LangChain", displayName: "LangChain", match: ["langchain"], marketFrequency: 1600, priority: 8, tier: "B", related: ["RAG", "LLMs", "Vector Retrieval"] }),
+      defineSkill({ name: "LangGraph", displayName: "LangGraph", match: ["langgraph"], marketFrequency: 900, priority: 6, tier: "B", related: ["LangChain", "Agent Systems"] }),
+      defineSkill({ name: "PyTorch", displayName: "PyTorch", match: ["pytorch", "torch"], marketFrequency: 2400, priority: 8, tier: "B", related: ["Machine Learning", "Transformers"] }),
+      defineSkill({ name: "Transformers", displayName: "Transformers", match: ["transformer", "transformers", "bert"], marketFrequency: 1800, priority: 7, tier: "B", related: ["NLP", "LLMs"] }),
+      defineSkill({ name: "TensorFlow", displayName: "TensorFlow", match: ["tensorflow"], marketFrequency: 2000, priority: 7, tier: "B", bankBacked: false, related: ["PyTorch", "Machine Learning"] }),
+      defineSkill({ name: "scikit-learn", displayName: "scikit-learn", aliases: ["sklearn", "scikit learn"], match: ["scikit-learn", "scikit learn", "sklearn"], marketFrequency: 1800, priority: 7, tier: "B", related: ["Machine Learning", "XGBoost"] }),
+      defineSkill({ name: "Hugging Face", displayName: "Hugging Face", aliases: ["huggingface"], match: ["hugging face", "huggingface"], marketFrequency: 1200, priority: 6, tier: "B", bankBacked: false, related: ["Transformers", "LLMs"] }),
+      defineSkill({ name: "OpenAI", displayName: "OpenAI", match: ["openai"], marketFrequency: 1500, priority: 6, tier: "B", bankBacked: false, related: ["LLMs"] }),
+      defineSkill({ name: "Anthropic", displayName: "Anthropic", aliases: ["claude"], match: ["anthropic", "claude"], marketFrequency: 600, priority: 5, tier: "C", bankBacked: false, related: ["LLMs"] }),
+      defineSkill({ name: "MLflow", displayName: "MLflow", match: ["mlflow"], marketFrequency: 700, priority: 5, tier: "C", bankBacked: false, related: ["MLOps"] }),
+      defineSkill({ name: "GitHub Copilot", displayName: "GitHub Copilot", aliases: ["copilot"], match: ["copilot"], marketFrequency: 300, priority: 3, tier: "C", bankBacked: false, related: ["LLMs"] }),
     ],
   },
   {
@@ -192,6 +212,7 @@ export const SKILLS_LIBRARY = [
     label: "Cloud & DevOps",
     kind: "technology",
     skills: [
+      defineSkill({ name: "Git", displayName: "Git", match: ["git"], marketFrequency: 4000, priority: 6, tier: "B", bankBacked: false, related: ["CI/CD"] }),
       defineSkill({ name: "AWS", displayName: "AWS", aliases: ["amazon web services"], match: ["aws"], marketFrequency: 8483, priority: 10, tier: "A", related: ["Lambda", "S3", "EC2", "Docker"] }),
       defineSkill({ name: "Docker", displayName: "Docker", aliases: ["containerization"], match: ["docker", "container"], marketFrequency: 5200, priority: 9, tier: "A", related: ["Kubernetes", "CI/CD"] }),
       defineSkill({ name: "Kubernetes", displayName: "Kubernetes", aliases: ["k8s"], match: ["kubernetes", "k8s"], marketFrequency: 4100, priority: 7, tier: "B", bankBacked: false, related: ["Docker"] }),
@@ -269,7 +290,15 @@ export function rankCategoriesForJd(jd, library = SKILLS_LIBRARY) {
 
 /** Pick top N JD-relevant categories that have at least one evidenced skill. */
 export function pickCategoriesForJd(jd, { maxCategories = SKILLS_MAX_CATEGORIES, hasEvidence = null } = {}) {
-  const ranked = rankCategoriesForJd(jd);
+  let ranked = rankCategoriesForJd(jd);
+  if (hasEvidence) {
+    // Lines that can show the most skills this JD names (with evidence) come first; the
+    // market-weighted rank only breaks ties, so filler lines don't push out JD skills.
+    const hay = normJd(jd);
+    const shown = (cat) => cat.skills.filter((s) => hasEvidence(s) && jdMentionsSkill(s, hay)).length;
+    const hits = new Map(ranked.map((cat) => [cat, shown(cat)]));
+    ranked = ranked.map((cat, i) => ({ cat, i })).sort((a, b) => hits.get(b.cat) - hits.get(a.cat) || a.i - b.i).map(({ cat }) => cat);
+  }
   const picked = [];
   for (const cat of ranked) {
     if (picked.length >= maxCategories) break;

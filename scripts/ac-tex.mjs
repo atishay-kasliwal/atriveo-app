@@ -19,6 +19,7 @@ import { resolveBankDir } from "./ac-bank.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
 import { displayUrl } from "./ats/patterns.mjs";
+import { employerTitle } from "./ac-tracks.mjs";
 
 const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 \\usepackage{graphicx}\\newsavebox{\\contactbox}\\newsavebox{\\projectbox}\n\\usepackage{latexsym}\\usepackage[empty]{fullpage}\\usepackage{titlesec}
@@ -124,6 +125,9 @@ const VALID_HEADER_TITLES = new Set([
   "Machine Learning Engineer",
   "Data Engineer",
   "Research Scientist",
+  "Forward Deployed Engineer",
+  "Data Scientist",
+  "Data Analyst",
 ]);
 
 // Map a specific/long job title to the closest canonical archetype using the
@@ -131,6 +135,9 @@ const VALID_HEADER_TITLES = new Set([
 function canonicalFromTitle(rawTitle) {
   const t = String(rawTitle || "").toLowerCase();
   if (!t) return null;
+  if (/forward.?deploy/.test(t)) return "Forward Deployed Engineer";
+  if (/data scien/.test(t)) return "Data Scientist";
+  if (/data analyst|business analyst|product analyst|insights analyst/.test(t)) return "Data Analyst";
   if (/research scientist|applied scientist|research engineer/.test(t)) return "Research Scientist";
   if (/machine learning|\bml\b|deep learning|ml engineer/.test(t)) return "Machine Learning Engineer";
   if (/\bai\b|agentic|\bllm\b|generative|genai/.test(t)) return "AI Engineer";
@@ -194,6 +201,27 @@ export function deriveHeaderTitle(jd, composition, rawTitle) {
   return loadResumeProfile().title;
 }
 
+// A link as printed: "https://www.linkedin.com/in/x/" → "linkedin.com/in/x".
+const linkText = (url) => String(url).replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/+$/, "");
+// Characters that fit on the \small contact line; past this the portfolio is left out
+// (it's linked from LinkedIn and GitHub anyway).
+const CONTACT_LINE_CHARS = 110;
+
+/** Phone, email, LinkedIn, GitHub, the portfolio when it fits, and the city, on one line. */
+function contactLine(me, city) {
+  const link = (url) => [linkText(url), `\\href{${url}}{${esc(linkText(url))}}`];
+  const parts = (withPortfolio) => [
+    me.phone && [me.phone, esc(me.phone)],
+    me.email && [me.email, `\\href{mailto:${me.email}}{${esc(me.email)}}`],
+    me.linkedin && link(me.linkedin),
+    me.github && link(me.github),
+    withPortfolio && me.portfolio && link(me.portfolio),
+    city && [city, esc(city)],
+  ].filter(Boolean);
+  const fits = (list) => list.map(([text]) => text).join(" | ").length <= CONTACT_LINE_CHARS;
+  return (fits(parts(true)) ? parts(true) : parts(false)).map(([, tex]) => tex).join(" $|$\n    ");
+}
+
 export function assembleAcResume(composition, { headerTitle, skillsLines, bank, location, profile } = {}) {
   const bankDir = bank?.bank_dir || resolveBankDir();
   const me = profile || loadResumeProfile();
@@ -224,7 +252,7 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
     .map((role) => {
       const name = ROLE_SLUG_TO_NAME[role.role] || role.role;
       const meta = resolveExperienceMeta(role.role, bankDir);
-      const roleTitle = role.role === "wake-forest" ? "AI/ML Engineer" : role.role === "stony-brook" ? title : meta.title;
+      const roleTitle = employerTitle(role.role, title) || (role.role === "wake-forest" ? "AI/ML Engineer" : role.role === "stony-brook" ? title : meta.title);
       const bullets = (role.bullets || []).map((b) => ({
         text: bulletText(b),
         ac_id: b.ac_id,
@@ -266,8 +294,6 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
 \\begin{document}
 ${header}
 
-${EDUCATION}
-
 \\section{Experience}
   \\resumeSubHeadingListStart
 ${expBlocks}
@@ -277,6 +303,8 @@ ${expBlocks}
   \\resumeSubHeadingListStart
 ${projBlocks}
   \\resumeSubHeadingListEnd
+
+${EDUCATION}
 
 \\section{Technical Skills}
  \\begin{itemize}[leftmargin=0.15in, label={}]

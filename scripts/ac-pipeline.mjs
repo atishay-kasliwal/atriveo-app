@@ -126,7 +126,7 @@ function themeFromComposition(composition, bank) {
 function applyGlobalOptimize(candidate, { bank, jd, planner, meta, pages, cfg }) {
   if (cfg.global_optimize === false || !candidate?.composition) return candidate;
 
-  const runtime = buildPlannerRuntimeConfig(planner, { jd, bank, company: meta.company });
+  const runtime = buildPlannerRuntimeConfig(planner, { jd, bank, company: meta.company, title: meta.title });
   runtime.narrative_first = cfg.narrative_first !== false;
 
   const opt = optimizeResumeGlobally(candidate.composition, bank, jd, {
@@ -190,7 +190,7 @@ function singleCompose({ jd, bank, planner, meta, pages = 1, jdGate = null, forc
       jd,
     };
   }
-  const runtime = buildPlannerRuntimeConfig(planner, { jd, bank, company: meta.company });
+  const runtime = buildPlannerRuntimeConfig(planner, { jd, bank, company: meta.company, title: meta.title });
   runtime.narrative_first = loadPlannerConfig(planner).narrative_first !== false;
   runtime.force_borderline = forceBorderline;
   runtime.title = meta.title;

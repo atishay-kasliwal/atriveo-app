@@ -1,6 +1,7 @@
 // Dynamic skills lines from selected AC evidence only — no untraceable drift.
 
 import { parseAtsKeywords } from "./ac-bank.mjs";
+import { confirmedSkillKeys, isConfirmedSkill } from "./ac-tracks.mjs";
 import {
   SKILLS_LIBRARY,
   SKILLS_MAX_CATEGORIES,
@@ -150,15 +151,21 @@ function skillInEvidence(skill, evidenceTerms) {
   return false;
 }
 
+// Skills Atishay confirmed using (TRACKS.yaml) back a skill the JD asks for, with no bullet naming it.
+const CONFIRMED_SOURCE = "confirmed by Atishay (TRACKS.yaml)";
+const confirmedForJd = (skill, hay, keys) => isConfirmedSkill(skill, keys) && jdMentionsSkill(skill, hay);
+
 export function buildSkillsEvidenceAudit(composition, bank, jd, opts = {}) {
   const { terms, evidenceBySkill, confidenceMap } = collectBulletEvidence(composition, bank, opts);
   const hay = normJd(jd);
+  const confirmed = confirmedSkillKeys();
   const audit = [];
 
   for (const cat of SKILLS_LIBRARY) {
     for (const skill of cat.skills) {
-      const fromEvidence = skillInEvidence(skill, terms);
-      const sources = [...(evidenceBySkill.get(norm(skill.name)) || [])];
+      const fromBullets = skillInEvidence(skill, terms);
+      const fromEvidence = fromBullets || confirmedForJd(skill, hay, confirmed);
+      const sources = fromBullets ? [...(evidenceBySkill.get(norm(skill.name)) || [])] : fromEvidence ? [CONFIRMED_SOURCE] : [];
       const jdRelevant = jdMentionsSkill(skill, hay);
       audit.push({
         skill: skill.displayName,
@@ -188,10 +195,12 @@ export function buildSkillsFromComposition(composition, bank, jd, {
 } = {}) {
   const hay = normJd(jd);
   const { terms, confidenceMap } = collectBulletEvidence(composition, bank, { useSelectedAcCorpus });
+  const confirmed = confirmedSkillKeys();
   const seen = new Set();
   const lines = [];
 
   const hasEvidence = (skill) => {
+    if (confirmedForJd(skill, hay, confirmed)) return true;
     if (skill.bankBacked === false) return skillInEvidence(skill, terms);
     if (!evidenceOnly) return true;
     return skillInEvidence(skill, terms);

@@ -1057,7 +1057,8 @@ export function compose(jd, bank, plannerConfig = {}) {
           maxConcept,
           maxTag,
           keywordList,
-          atsCounts,
+          // Tracks can turn off the fixed SWE keyword list's steering (TRACKS.yaml ats_matrix).
+          atsCounts: cfg.ats_matrix === false ? null : atsCounts,
         },
       });
       absorbAtsFromAcs(picked);
@@ -1135,7 +1136,8 @@ export function compose(jd, bank, plannerConfig = {}) {
           maxConcept,
           maxTag,
           keywordList,
-          atsCounts,
+          // Tracks can turn off the fixed SWE keyword list's steering (TRACKS.yaml ats_matrix).
+          atsCounts: cfg.ats_matrix === false ? null : atsCounts,
         },
       });
       absorbAtsFromAcs(pickedAcs);

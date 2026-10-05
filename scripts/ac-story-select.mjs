@@ -525,6 +525,14 @@ export function selectStoryTriple({
     } else {
       acs = orderPackageBullets([], pkg.ids, roleAcs);
     }
+    // A track can ask for more bullets than a package holds (the AI track: Stony Brook 5, Wake Forest 4):
+    // keep the package's story and add the role's best other bullets for this JD; a longer package is cut.
+    if (acs.length > count) acs = acs.slice(0, count);
+    if (acs.length < count && typeof scoreAc === "function") {
+      const inPkg = new Set(acs.map((a) => a.id));
+      const extra = roleAcs.filter((a) => !inPkg.has(a.id)).map((a) => ({ a, s: scoreAc(a) })).sort((x, y) => y.s - x.s).slice(0, count - acs.length).map((x) => x.a);
+      acs = [...acs, ...extra];
+    }
     if (acs.length !== count) continue;
     candidates.push({
       acs,
