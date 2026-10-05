@@ -48,10 +48,10 @@ order: [forward-deployed, data-science, data-analytics, ai-engineer, software-en
 # The title shown at each employer, on every track. Stony Brook, the latest role, shows the role
 # being applied for: the resume's header title without seniority words (Senior, II, Intern...).
 # Titles name the role only: "Deep Learning" may be a skill, never part of a title.
-# Same as the resumes show today (2026-10-05); Accolite "Senior Software Developer" waits on Atishay's answer.
+# Atishay confirmed "Senior Software Developer" for Accolite on every track (2026-10-05).
 employer_titles:
   wake-forest: AI/ML Engineer
-  accolite: Senior Software Engineer
+  accolite: Senior Software Developer
 stony_brook_title_overrides:
   Data Scientist: Data Scientist (Research)
 
