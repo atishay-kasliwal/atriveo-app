@@ -201,27 +201,6 @@ export function deriveHeaderTitle(jd, composition, rawTitle) {
   return loadResumeProfile().title;
 }
 
-// A link as printed: "https://www.linkedin.com/in/x/" → "linkedin.com/in/x".
-const linkText = (url) => String(url).replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/+$/, "");
-// Characters that fit on the \small contact line; past this the portfolio is left out
-// (it's linked from LinkedIn and GitHub anyway).
-const CONTACT_LINE_CHARS = 110;
-
-/** Phone, email, LinkedIn, GitHub, the portfolio when it fits, and the city, on one line. */
-function contactLine(me, city) {
-  const link = (url) => [linkText(url), `\\href{${url}}{${esc(linkText(url))}}`];
-  const parts = (withPortfolio) => [
-    me.phone && [me.phone, esc(me.phone)],
-    me.email && [me.email, `\\href{mailto:${me.email}}{${esc(me.email)}}`],
-    me.linkedin && link(me.linkedin),
-    me.github && link(me.github),
-    withPortfolio && me.portfolio && link(me.portfolio),
-    city && [city, esc(city)],
-  ].filter(Boolean);
-  const fits = (list) => list.map(([text]) => text).join(" | ").length <= CONTACT_LINE_CHARS;
-  return (fits(parts(true)) ? parts(true) : parts(false)).map(([, tex]) => tex).join(" $|$\n    ");
-}
-
 export function assembleAcResume(composition, { headerTitle, skillsLines, bank, location, profile } = {}) {
   const bankDir = bank?.bank_dir || resolveBankDir();
   const me = profile || loadResumeProfile();
@@ -259,8 +238,8 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
       }));
       // The title line carries the title only: parsers file that whole line as the job title,
       // so a stack printed after it ("Software Engineer | FastAPI, Python") becomes part of it.
-      const stack = toolsFromBullets(bullets, null);
-      const displayTitle = roleTitle + (stack.length ? " | " + stack.join(", ") : "");
+      // The title line carries the title only (ATS readiness): a parser files that whole line as the job title.
+      const displayTitle = roleTitle;
       const items = bullets.map((b) => `        \\resumeItem{${esc(b.text)}}`).join("\n");
       return {
         order: meta.order || 0,
@@ -294,6 +273,8 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
 \\begin{document}
 ${header}
 
+${EDUCATION}
+
 \\section{Experience}
   \\resumeSubHeadingListStart
 ${expBlocks}
@@ -303,8 +284,6 @@ ${expBlocks}
   \\resumeSubHeadingListStart
 ${projBlocks}
   \\resumeSubHeadingListEnd
-
-${EDUCATION}
 
 \\section{Technical Skills}
  \\begin{itemize}[leftmargin=0.15in, label={}]
