@@ -814,6 +814,14 @@ export async function overviewSummary(db, { days = 30 } = {}) {
   const failed = byStatus.FAILED ?? 0;
   const cur = current[0];
   const attempt = cur ? (cur.attempts ?? []).filter((a) => !a.endedAt).pop() ?? (cur.attempts ?? []).at(-1) ?? null : null;
+  // LinkedIn postings (the engine never applies there): ones you marked applied, and ones waiting on Today.
+  const [linkedinApplied, linkedinWaiting] = await Promise.all([
+    db.collection("job_swipes").find({ direction: "applied" }, { projection: { _id: 0, applied_at: 1 } }).toArray(),
+    linkedinJobs(db).then((l) => l.length).catch(() => null),
+  ]);
+  const todayKey = dayKey(new Date().toISOString());
+  const linkedin = { applied: linkedinApplied.length, appliedToday: linkedinApplied.filter((a) => dayKey(a.applied_at) === todayKey).length, waiting: linkedinWaiting };
+
   return {
     ok: true,
     generatedAt: new Date().toISOString(),
@@ -857,6 +865,7 @@ export async function overviewSummary(db, { days = 30 } = {}) {
     attention,
     attentionTotal: (byStatus.NEEDS_REVIEW ?? 0) + (byStatus.FAILED ?? 0),
     queue,
+    linkedin,
   };
 }
 

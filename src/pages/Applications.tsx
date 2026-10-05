@@ -44,6 +44,8 @@ interface Analytics {
   /** The first rows of "Needs your attention"; attentionTotal counts them all (the rest load on "View all"). */
   attention: HistoryRow[];
   attentionTotal: number;
+  /** LinkedIn postings (never applied by the engine): marked applied (all, today) and waiting on Today. */
+  linkedin?: { applied: number; appliedToday: number; waiting: number | null };
   queue: HistoryRow[];
   accounts?: AccountRow[];
   byStatus?: Record<string, number>;
@@ -861,8 +863,8 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                 <Stat label="Jobs discovered" value={data.funnel[0]?.n ?? 0} sub={clock(data.lastAt?.discovered) ? `latest ${clock(data.lastAt?.discovered)}` : undefined} />
                 <Stat label="Matched / resume ready" value={data.funnel[1]?.n ?? 0} sub={clock(data.lastAt?.matched) ? `latest ${clock(data.lastAt?.matched)}` : undefined} />
                 <Stat label="Queued to apply" value={data.byStatus?.READY_TO_APPLY ?? 0} sub={clock(data.lastAt?.queued) ? `latest ${clock(data.lastAt?.queued)}` : undefined} />
-                <Stat label="Submitted today" value={today?.applied ?? 0} tone={today?.applied ? "good" : undefined} sub={[`${k.applied} total`, clock(data.lastAt?.applied) && `last ${clock(data.lastAt?.applied)}`, duration(data.lastAt?.avgApplyMs) && `avg ${duration(data.lastAt?.avgApplyMs)}`].filter(Boolean).join(" · ")} />
-                <Stat label="Need your review" value={k.needsReview} tone={k.needsReview ? "warn" : undefined} sub={clock(data.lastAt?.needsReview) ? `latest ${clock(data.lastAt?.needsReview)}` : undefined} />
+                <Stat label="Submitted today" value={(today?.applied ?? 0) + (data.linkedin?.appliedToday ?? 0)} tone={(today?.applied ?? 0) + (data.linkedin?.appliedToday ?? 0) ? "good" : undefined} sub={[data.linkedin?.applied ? `${k.applied + data.linkedin.applied} total (${data.linkedin.applied} on LinkedIn)` : `${k.applied} total`, clock(data.lastAt?.applied) && `last ${clock(data.lastAt?.applied)}`, duration(data.lastAt?.avgApplyMs) && `avg ${duration(data.lastAt?.avgApplyMs)}`].filter(Boolean).join(" · ")} />
+                <Stat label="Need your review" value={k.needsReview} tone={k.needsReview ? "warn" : undefined} sub={[data.linkedin?.waiting ? `+${data.linkedin.waiting} on LinkedIn` : null, clock(data.lastAt?.needsReview) ? `latest ${clock(data.lastAt?.needsReview)}` : null].filter(Boolean).join(" · ") || undefined} />
                 <Stat label="Failed" value={k.failed} tone={k.failed ? "bad" : undefined} sub={clock(data.lastAt?.failed) ? `latest ${clock(data.lastAt?.failed)}` : undefined} />
               </div>
             </section>
