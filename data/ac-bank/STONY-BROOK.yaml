@@ -48,7 +48,7 @@ confirmed_technology_context:
   llm: OpenAI GPT
   agents: LangChain debate system; MCP servers and function calling.
   modeling: PyTorch, TensorFlow, and scikit-learn were used for models.
-  conference_workflow: Hugging Face models run through AWS Bedrock when the conference goes live; do not describe this as live yet.
+  conference_workflow: Live (confirmed 2026-10-05). When a Fed press conference goes live, FinBERT and other Hugging Face models run on AWS Bedrock (A100 GPUs) with MLflow; about 110 Fed events a year since 2019. FinBERT may be named. No speed metric (hardware-dependent).
 
 metrics:
   fomc_history_years: 7
@@ -274,6 +274,13 @@ achievements:
     resume_bullet: >-
       Operated OpenAI GPT-backed macro analysis APIs in Python on AWS, serving 5 daily financial analysts with
       sub-minute response times.
+  - id: AC-199
+    engineering_identity: ml
+    theme: live-mlops
+    tier: A
+    resume_bullet: >-
+      Managed FinBERT sentiment models on AWS Bedrock A100 GPUs with MLflow, scoring 110+ Fed events
+      yearly since 2019 as each press conference goes live.
   - id: AC-021
     engineering_identity: backend
     theme: schema-validation

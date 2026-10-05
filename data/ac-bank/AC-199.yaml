@@ -1,0 +1,48 @@
+id: AC-199
+role: stony-brook
+slot_kind: experience
+engineering_identity: ml
+achievement_theme: live-mlops
+display_order: 19
+wow_score: 0.82
+metrics_claimed:
+  - fed_events_110_per_year
+  - since_2019
+concepts_claimed:
+  - mlops
+  - inference
+signature_technologies:
+  - FinBERT
+  - AWS Bedrock
+  - MLflow
+fact: >-
+  Live MLOps workflow (confirmed 2026-10-05): when a Federal Reserve press conference goes live, FinBERT and
+  other Hugging Face models run on AWS Bedrock (A100 GPUs) with MLflow tracking. About 110 Fed events a year
+  (press conferences, speeches, minutes) since 2019. Speed depended on hardware, so no time metric is claimed.
+capabilities:
+  ai: 84
+  ml: 88
+  cloud: 82
+  backend: 66
+  data: 70
+strength:
+  recruiter: 9
+ats_keywords:
+  - MLOps
+  - MLflow
+  - Hugging Face
+  - FinBERT
+  - AWS Bedrock
+  - NLP
+  - sentiment analysis
+facets:
+  ml:
+    phrase: live MLOps inference
+    keywords: [mlops, mlflow, hugging face, finbert, bedrock, inference, sentiment, nlp, gpu]
+variants:
+  - facet: ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Managed FinBERT sentiment models on AWS Bedrock A100 GPUs with MLflow, scoring 110+ Fed events
+      yearly since 2019 as each press conference goes live.

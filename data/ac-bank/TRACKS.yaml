@@ -59,9 +59,9 @@ stony_brook_title_overrides:
 # Skills section once it is listed here (and only when the JD asks for it); a bullet may name it
 # only at an employer listed for it. Names match data/ac-bank skill names (skills-library.mjs).
 confirmed_skills:
-  stony-brook: [PyTorch, TensorFlow, scikit-learn, LangGraph, Vector Databases]
+  stony-brook: [PyTorch, TensorFlow, scikit-learn, LangGraph, Vector Databases, Hugging Face, MLflow, MLOps, AWS Bedrock, FinBERT]
   wake-forest: [PyTorch, TensorFlow, scikit-learn, Vector Databases, Anthropic, N4ITK]
   # Used, employer not said yet: skills section only until he says where.
-  unplaced: [Pinecone, ChromaDB, Generative AI, Prompt Engineering, Function Calling, OpenAI, GitHub Copilot, Hugging Face, Git, NoSQL, MLOps, MCP, MLflow, Deep Learning]
+  unplaced: [Pinecone, ChromaDB, Generative AI, Prompt Engineering, Function Calling, OpenAI, GitHub Copilot, Git, NoSQL, MCP, Deep Learning]
   # Asked about and not confirmed: never claim.
   not_confirmed: [FAISS, Fine-tuning, LlamaIndex, Kubeflow, Milvus, Conversational AI]
