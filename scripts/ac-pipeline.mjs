@@ -16,8 +16,8 @@ import { buildComposeExplain } from "./ac-compose-explain.mjs";
 
 // Part of every resume cache key: bump it when the output changes for the same JD and bank
 // (2.1.0: role tracks, title-only experience lines, Education after the header; 2.1.1: AI track
-// Accolite 3 -> 2 so the page fits).
-export const PIPELINE_VERSION = "2.1.1";
+// Accolite 3 -> 2 so the page fits; 2.1.2: no ligatures in resume text).
+export const PIPELINE_VERSION = "2.1.2";
 
 export const PIPELINE_STEPS = [
   "load_bank",

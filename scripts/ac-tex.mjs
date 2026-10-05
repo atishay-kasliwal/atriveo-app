@@ -95,7 +95,10 @@ function esc(s) {
     .replace(/~/g, "\\textasciitilde{}")
     .replace(/\^/g, "\\textasciicircum{}")
     .replace(/→/g, "$\\to$").replace(/×/g, "$\\times$")
-    .replace(/[—–]/g, "-");
+    .replace(/[—–]/g, "-")
+    // No ligatures: the font draws "fi", "fl", "ff" as one glyph (ﬁ), which a parser reads as a different
+    // character, so "unified" no longer matches. A zero-width kern keeps the two letters (ATS readiness).
+    .replace(/f(?=[fil])/g, "f\\kern0pt{}");
 }
 
 function toolsFromBullets(bullets, roleSlug) {
