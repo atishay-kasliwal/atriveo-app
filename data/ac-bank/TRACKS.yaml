@@ -10,11 +10,12 @@ tracks:
     label: AI engineer
     # Title words that put a job on this track (ML engineer roles included).
     title_patterns: ['\bai\b', 'machine learning', '\bml\b', '\bllm', 'agentic', 'genai', 'generative', 'deep learning', '\bnlp\b', 'computer vision', 'mlops']
-    # Stony Brook and Wake Forest lead for AI; Accolite stays short.
+    # Stony Brook and Wake Forest lead for AI; Accolite stays short. 11 in all, as on every other
+    # track: with two projects, 12 pushed Technical Skills onto a second page (2026-10-05).
     experience_bullets:
       stony-brook: 5
       wake-forest: 4
-      accolite: 3
+      accolite: 2
     # The newest project first, the second by fit to the JD. Never the Java insurance platform.
     projects: [atriveo, mri-research, user-data-platform]
     # Bullets that claim the "ai" concept (every other track: planner default, 4).
