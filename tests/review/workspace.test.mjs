@@ -43,7 +43,7 @@ async function fixture(rows, action = () => ({ status: 200, body: { ok: true } }
     if (url.hostname === '127.0.0.1' && url.port === String(port)) return route.continue();
     return route.abort();
   });
-  await page.goto(`http://127.0.0.1:${port}/unanswered`);
+  await page.goto(`http://127.0.0.1:${port}/answers`);
   await page.getByText('One company. One complete form.', { exact: true }).waitFor();
   return { page, calls, errors, close: async () => { await browser.close(); await new Promise(resolve=>server.close(resolve)); } };
 }

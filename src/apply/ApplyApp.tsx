@@ -3,6 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import Applications from "../pages/Applications";
 import AdminLogin from "./AdminLogin";
 import ApplyHeader from "./ApplyHeader";
+import QuestionsPage from "./QuestionsPage";
 import ReadyPage from "./ReadyPage";
 import TodayPage from "./TodayPage";
 import UnansweredPage from "./UnansweredPage";
@@ -14,7 +15,9 @@ function Console() {
   if (loading) return <div className="apply-loading" aria-busy="true"><div className="spin" /></div>;
   if (!user) return <Navigate to="/login" replace />;
   const header = <ApplyHeader user={user} />;
-  if (path === "/unanswered") return <UnansweredPage header={header} />;
+  if (path === "/unanswered") return <QuestionsPage header={header} />;
+  // The full form view: every question of one application, drafts included.
+  if (path === "/answers") return <UnansweredPage header={header} />;
   if (path === "/ready" || path === "/review") return <ReadyPage header={header} />;
   if (path === "/stats" || path === "/overview") return <Applications header={header} />;
   return <TodayPage header={header} />;

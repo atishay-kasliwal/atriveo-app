@@ -65,3 +65,12 @@
 
 .td-fill-queue { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; }
 .td-fill-queue [role="status"] { max-width: 340px; overflow-wrap: anywhere; }
+
+/* To answer: one card per application, its unanswered questions scroll inside the card. */
+.qa-grid { grid-template-rows: minmax(0, 1fr); align-items: start; }
+.qa-card .td-body { gap: 12px; padding-right: 4px; }
+.qa-questions .apps-q label { display: flex; flex-direction: column; gap: 6px; }
+.qa-questions .apps-q :is(input, select, textarea) { width: 100%; }
+.td-strip li.td-strip-link { padding: 0; }
+.td-strip li.td-strip-link a { display: flex; align-items: baseline; gap: 7px; padding: 7px 12px; color: inherit; text-decoration: none; }
+.td-strip li.td-strip-link a:hover span { color: var(--primary); }

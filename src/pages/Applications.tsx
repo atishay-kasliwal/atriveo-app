@@ -318,7 +318,7 @@ function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) =
           scope={scopes[q.fingerprint] ?? defaultScope(q, row.company)} onScope={(sc) => setScopes((cur) => ({ ...cur, [q.fingerprint]: sc }))} />
       ))}
       <div className="apps-review-actions">
-        {(row.questions.some((q) => q.openEndedAssessment?.questionFamily) || row.questionReviewStatus === "complete") && <Link className="apps-btn-link" to="/unanswered">Review story answers and continue →</Link>}
+        {(row.questions.some((q) => q.openEndedAssessment?.questionFamily) || row.questionReviewStatus === "complete") && <Link className="apps-btn-link" to="/answers">Review story answers and continue →</Link>}
         {canApproveSubmit && (
           <button className="primary" disabled={busy} onClick={() => run({ action: "approve_submit", applicationId: row.id, expectedUpdatedAt: row.updatedAt }, "Approval queued. The worker will refill, validate, and submit if nothing changed.")}>Approve and submit</button>
         )}
@@ -669,7 +669,7 @@ function AttentionPanel({ rows, total, expanded, second, onToggle, onReview, onR
     <section className={`apps-panel is-attn ${rows.length ? "has-items" : ""}`} aria-labelledby={titleId}>
       <div className="apps-panel-head">
         <h2 id={titleId}>{second ? "More needing attention" : <>Needs your attention {total > 0 && <span className="apps-count warn">{total}</span>}</>}</h2>
-        {!second && <span className="apps-panel-links"><Link to="/unanswered">All questions on one page</Link><Link to="/ready">Ready to submit</Link></span>}
+        {!second && <span className="apps-panel-links"><Link to="/unanswered">Questions to answer</Link><Link to="/ready">Ready to submit</Link></span>}
       </div>
       {rows.length === 0 ? (
         <p className="apps-clear">{second ? "Nothing more." : "Nothing is waiting for you."}</p>

@@ -16,9 +16,12 @@ const readyRow = (id, company, extra = {}) => ({ id, company, companyKey: compan
 const queued = (id, company, n, extra = {}) => ({ id, company, title: 'Backend Engineer', updatedAt: at, n, readyForReview: Math.max(0, n - 1), needsInput: n ? 1 : 0, actionRequired: 0, ...extra });
 const view = { ok: true, generatedAt: at, killSwitch: null, worker: { online: true, updatedAt: at }, counts: { unanswered: 4, questions: 9, ready: 3 } };
 const READY = { ...view, ready: [readyRow('r1', 'Stripe'), readyRow('r2', 'Ramp'), readyRow('m1', 'Spotify', { ats: 'lever' })], manual: [{ ...readyRow('m1', 'Spotify', { ats: 'lever' }), openFill: null }], approved: [] };
-const UNANSWERED = { ...view, unanswered: [queued('u1', 'Rogo', 4), queued('u2', 'Vercel', 5), queued('c1', 'Anthropic', 0), queued('u3', 'Tailscale', 2)] };
+const UNANSWERED = { ...view, unanswered: [queued('u1', 'Rogo', 4), queued('u2', 'Vercel', 5), queued('c1', 'Anthropic', 0), queued('d1', 'Figma', 3, { readyForReview: 3, needsInput: 0 }), queued('u3', 'Tailscale', 2)] };
 // The sidecar sends the first cards (with each job's link) alongside the queue.
-const card = (q) => ({ ...q, ats: 'ashby', url: `https://jobs.example.test/${q.id}`, questions: [] });
+const question = (fieldKey, label, extra = {}) => ({ fieldKey, fingerprint: fieldKey, label, type: 'text', required: true, options: [], canonicalKey: null, sensitive: null, reason: 'UNKNOWN', detail: null, ...extra });
+// Rogo: one question with a suggestion (drafted) and one with nothing to start from.
+const QUESTIONS = { u1: [question('q1', 'Years of Python?', { answerProposal: { state: 'ready_for_review', answer: '5', family: 'x', source: 'bank', reason: 'r' } }), question('q2', 'Which team excites you?')] };
+const card = (q) => ({ ...q, ats: 'ashby', url: `https://jobs.example.test/${q.id}`, questions: QUESTIONS[q.id] ?? [] });
 UNANSWERED.cards = UNANSWERED.unanswered.map(card);
 
 async function fixture() {
@@ -54,12 +57,12 @@ test('Today shows what needs you, closest to submission first, five at a time, w
   try {
     await page.goto(`${f.base}/`);
     await page.getByRole('heading', { name: 'Today', exact: true }).waitFor();
-    await page.getByText('7 applications waiting for you', { exact: true }).waitFor();
+    await page.getByText('8 applications waiting for you', { exact: true }).waitFor();
     const order = await page.locator('.td-card .td-id strong').allTextContents();
-    assert.deepEqual(order, ['Spotify', 'Stripe', 'Ramp', 'Anthropic', 'Rogo'], 'you submit, approve, answers approved, then questions open');
+    assert.deepEqual(order, ['Spotify', 'Stripe', 'Ramp', 'Anthropic', 'Figma'], 'everything you can Open & Fill first; questions nobody answered last');
     assert.ok(await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight + 1), 'no page scroll');
     await page.getByRole('button', { name: 'Next applications' }).click();
-    assert.deepEqual(await page.locator('.td-card .td-id strong').allTextContents(), ['Vercel', 'Tailscale']);
+    assert.deepEqual(await page.locator('.td-card .td-id strong').allTextContents(), ['Rogo', 'Vercel', 'Tailscale']);
     assert.equal(calls.length, 0, 'looking sends nothing');
     assert.deepEqual(errors, []);
   } finally { await f.close(); }
@@ -83,29 +86,37 @@ test('each card runs only its own action; Approve all lists what goes out and wa
   } finally { await f.close(); }
 });
 
-test('Open & Fill on a card with open questions or approved answers opens its job page and sends nothing', async () => {
+test('Open & Fill on a drafted or approved card opens its job page and sends nothing', async () => {
   const f = await fixture(); const { page, calls } = f;
   try {
     await page.goto(`${f.base}/`);
-    const rogo = page.getByRole('article', { name: 'Rogo: Questions open' });
-    await rogo.getByRole('button', { name: 'Open & Fill' }).click();
-    await page.getByText(/Opened Rogo\. Click Apply with Atriveo/).waitFor();
+    const figma = page.getByRole('article', { name: 'Figma: Answers drafted' });
+    await figma.getByRole('button', { name: 'Open & Fill' }).click();
+    await page.getByText(/Opened Figma\. Click Apply with Atriveo/).waitFor();
     await page.getByRole('article', { name: 'Anthropic: Answers approved' }).getByRole('button', { name: 'Open & Fill' }).click();
     await page.getByText(/Opened Anthropic\./).waitFor();
-    assert.deepEqual(await page.evaluate(() => window.__opened), ['https://jobs.example.test/u1', 'https://jobs.example.test/c1']);
+    assert.deepEqual(await page.evaluate(() => window.__opened), ['https://jobs.example.test/d1', 'https://jobs.example.test/c1']);
     assert.equal(calls.length, 0, 'opening the job page changes nothing in the engine');
-    assert.equal(await rogo.count(), 0, 'the opened card slides out');
+    assert.equal(await figma.count(), 0, 'the opened card slides out');
   } finally { await f.close(); }
 });
 
-test('Answer here first opens that application in the answer view', async () => {
-  const f = await fixture(); const { page } = f;
+test('Answer opens To answer with only the questions nobody answered, and Save sends just those', async () => {
+  const f = await fixture(); const { page, calls } = f;
   try {
     await page.goto(`${f.base}/`);
-    await page.getByRole('article', { name: 'Rogo: Questions open' }).getByRole('button', { name: 'Answer here first' }).click();
+    await page.getByRole('button', { name: 'Next applications' }).click();
+    await page.getByRole('article', { name: 'Rogo: Needs your answers' }).getByRole('button', { name: /^Answer/ }).click();
     await page.waitForURL(/\/unanswered\?app=u1$/);
-    await page.getByText('One company. One complete form.', { exact: true }).waitFor();
-    assert.equal(await page.locator('.ar-company[aria-current="true"] strong').textContent(), 'Rogo');
+    const rogo = page.getByRole('article', { name: 'Rogo: 1 to answer' });
+    await rogo.waitFor();
+    assert.equal(await page.locator('.td-card .td-id strong').first().textContent(), 'Rogo', 'the application you came from is first');
+    assert.match(await rogo.innerText(), /Which team excites you\?/);
+    assert.doesNotMatch(await rogo.innerText(), /Years of Python/, 'a drafted answer is not shown here');
+    await rogo.getByRole('textbox').fill('Inference');
+    await rogo.getByRole('button', { name: 'Save 1 answer' }).click();
+    await page.getByText(/Saved Rogo\./).waitFor();
+    assert.deepEqual(calls, [{ action: 'answer', applicationId: 'u1', answers: [{ fingerprint: 'q2', label: 'Which team excites you?', type: 'text', canonicalKey: null, sensitive: null, value: 'Inference', scope: 'application' }] }]);
   } finally { await f.close(); }
 });
 

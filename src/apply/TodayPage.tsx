@@ -11,19 +11,21 @@ import "../styles/applications.css";
 import "./review-pages.css";
 import "./today.css";
 
-// Today: every application waiting for you, in one place, five at a time, closest to submission first. Every
-// card's main button is Open & Fill. A form the engine verified opens armed with those answers; any other
-// (questions still open, or answers approved but not yet filled) opens its job page, where Apply with Atriveo
-// (the toolbar button) fills it live and shows each answer in its side panel. You always click Submit.
+// Today: every application waiting for you, five at a time, the ones you can apply to now first. Their main
+// button is Open & Fill: a form the engine verified opens armed with those answers; any other (answers approved,
+// or every question answered or drafted) opens its job page, where Apply with Atriveo (the toolbar button) fills
+// it live and shows each answer, drafts included, in its side panel. You always click Submit. Applications with
+// a question nobody has answered come last and send you to To answer, which shows only those questions.
 
-type Kind = "you_submit" | "approve" | "fill" | "answer";
+type Kind = "you_submit" | "approve" | "fill" | "drafted" | "answer";
 interface Item { id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
 
 const STAGE: Record<Kind, { label: string; tone: string }> = {
   you_submit: { label: "You submit", tone: "go" },
   approve: { label: "Approve to submit", tone: "go" },
   fill: { label: "Answers approved", tone: "info" },
-  answer: { label: "Questions open", tone: "warn" },
+  drafted: { label: "Answers drafted", tone: "info" },
+  answer: { label: "Needs your answers", tone: "warn" },
 };
 
 /** Cards across, and rows that fit the window (a second row of five on a tall screen). */
@@ -62,9 +64,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const fromReady = (r: ReadyApp, kind: Kind): Item => ({ id: r.id, kind, company: r.company, title: r.title, ats: r.ats, url: r.url, updatedAt: r.updatedAt, priorityTags: r.priorityTags, ready: r });
     const fromQueue = (q: QueuedApp): Item => {
       const c = cards[q.id];
-      return { id: q.id, kind: q.n ? "answer" : "fill", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? null, url: c?.url, updatedAt: q.updatedAt, priorityTags: c?.priorityTags, queued: q };
+      return { id: q.id, kind: !q.n ? "fill" : (q.needsInput ?? 0) > 0 ? "answer" : "drafted", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? null, url: c?.url, updatedAt: q.updatedAt, priorityTags: c?.priorityTags, queued: q };
     };
-    const order: Kind[] = ["you_submit", "approve", "fill", "answer"];
+    const order: Kind[] = ["you_submit", "approve", "fill", "drafted", "answer"];
     const all = [
       ...manual.map((r) => fromReady(r, "you_submit")),
       ...(ready.data?.ready ?? []).filter((r) => !manualIds.has(r.id)).map((r) => fromReady(r, "approve")),
@@ -178,7 +180,6 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const q = item.queued;
     const r = item.ready as ManualApp | undefined;
     const drafted = q ? (q.readyForReview ?? q.suggestions ?? 0) : 0;
-    const needYou = q ? (q.needsInput ?? 0) + (q.actionRequired ?? 0) : 0;
     const isBusy = queueRunning || busy === item.id;
     return (
       <article key={item.id} className={`td-card is-${stage.tone}`} aria-label={`${item.company}: ${stage.label}`} aria-busy={isBusy}>
@@ -190,13 +191,13 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         <span className={`td-stage is-${stage.tone}`}>{stage.label}</span>
         <PriorityTags tags={item.priorityTags} />
         <div className="td-body">
+          {item.kind === "drafted" && q && <>
+            <p className="td-big">{drafted || q.n} answer{(drafted || q.n) === 1 ? "" : "s"} drafted</p>
+            <p className="td-note">Open & Fill fills them on the job page; check them in the side panel, then Submit.</p>
+          </>}
           {item.kind === "answer" && q && <>
-            <p className="td-big">{q.n} question{q.n === 1 ? "" : "s"}</p>
-            <ul className="td-facts">
-              <li><b>{drafted}</b> drafted for you</li>
-              <li className={needYou ? "warn" : ""}><b>{needYou}</b> need{needYou === 1 ? "s" : ""} your answer</li>
-            </ul>
-            <p className="td-note">Open & Fill fills it on the job page; check the answers in the side panel, then Submit.</p>
+            <p className="td-big">{q.needsInput} question{q.needsInput === 1 ? "" : "s"} to answer</p>
+            <p className="td-note">Nothing to start from yet. Answer {q.needsInput === 1 ? "it" : "them"}; then it moves up here for Open & Fill.</p>
           </>}
           {item.kind === "fill" && <p className="td-note">Every answer is approved. Open & Fill fills it on the job page; you check it and click Submit.</p>}
           {item.kind === "approve" && r && <>
@@ -211,14 +212,13 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {errors[item.id] && <p className="td-error" role="alert">{errors[item.id]}</p>}
         </div>
         <footer className="td-foot">
-          {(item.kind === "answer" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => openInBrowser(item)}>Open & Fill</button>}
+          {(item.kind === "drafted" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => openInBrowser(item)}>Open & Fill</button>}
+          {item.kind === "answer" && <button className="rv-primary" disabled={isBusy} onClick={() => navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer {item.queued?.needsInput ?? ""}</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
           {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}
           {item.kind === "approve" && ["greenhouse", "ashby", "lever", "workday"].includes(item.ats ?? "") && <button className="apps-btn" disabled={isBusy} onClick={() => void openFill(item)}>Open & Fill</button>}
           <div className="td-review-links">
-            {item.kind === "answer"
-              ? <button className="apps-btn" onClick={() => navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer here first</button>
-              : <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Review answers</button>}
+            {(item.kind === "approve" || item.kind === "you_submit") && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Review answers</button>}
             <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Review resume</button>
           </div>
           <div className="td-links">
@@ -237,10 +237,10 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       <div className="td-bar">
         <div className="td-title"><h1>Today</h1><span className="apps-muted">{loading ? "Loading…" : `${items.length} application${items.length === 1 ? "" : "s"} waiting for you`}</span></div>
         <ol className="td-strip" aria-label="Where your applications are">
-          <li><b>{count("answer")}</b><span>Questions open</span></li>
-          <li><b>{count("fill")}</b><span>Answers approved</span></li>
-          <li className="go"><b>{count("approve")}</b><span>Approve to submit</span></li>
           <li className="go"><b>{count("you_submit")}</b><span>You submit</span></li>
+          <li className="go"><b>{count("approve")}</b><span>Approve to submit</span></li>
+          <li className="go"><b>{count("fill") + count("drafted")}</b><span>Open & Fill</span></li>
+          <li className="td-strip-link"><Link to="/unanswered"><b>{count("answer")}</b><span>Need your answers →</span></Link></li>
         </ol>
         <div className="td-actions">
           {count("you_submit") > 0 && <><button className="apps-btn" disabled={queueRunning} onClick={() => setSelectedIds(items.filter(i => i.kind === "you_submit").map(i => i.id))}>Select all You submit ({count("you_submit")})</button><button className="apps-btn" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear selection</button><OpenFillQueue onRunning={setQueueRunning} selected={items.filter(i => i.kind === "you_submit" && selectedIds.includes(i.id))} onFinish={() => { void refreshReady(); }} /></>}
