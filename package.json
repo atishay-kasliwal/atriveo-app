@@ -23,6 +23,7 @@
     "tailor:worker:uninstall": "node scripts/uninstall-tailor-worker-service.mjs",
     "tailor:worker:restart": "node scripts/restart-tailor-worker-service.mjs",
     "resume:enqueue": "node --env-file=.env scripts/resume-enqueue.mjs",
+    "resume:recent": "node --env-file=.env scripts/resume-recent.mjs",
     "tailor:uninstall": "node scripts/uninstall-tailor-service.mjs",
     "ac:benchmark": "node scripts/ac-benchmark.mjs",
     "ac:review": "node scripts/ac-compose-review.mjs",
