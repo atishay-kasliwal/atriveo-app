@@ -11,8 +11,11 @@
 // run_at over every doc with that job_url. ATS boards (Greenhouse, Ashby, Lever) also give date_posted (the
 // posting's first-published day); boards are often discovered days after posting, so a job with a
 // date_posted before the cutoff's UTC day is older no matter when we first saw it. LinkedIn has no
-// date_posted, but it is scraped with hours_old 4, so its first sighting is within hours of posting.
-// A job is recent when first seen >= cutoff AND (no date_posted, or date_posted >= the cutoff's UTC day).
+// date_posted, and its "last 4 hours" search also returns old postings that were only relisted. LinkedIn
+// job ids are assigned in creation order, so any id at or below the highest id we had already seen before
+// the cutoff was created before the cutoff: such a job is a relisting, not a new posting.
+// A job is recent when first seen >= cutoff AND (no date_posted, or date_posted >= the cutoff's UTC day)
+// AND (not LinkedIn, or its id is above that floor).
 // Only scraped jobs (with a session_id) count; Apply-here pages from the extension are not jobs to build for.
 //
 // What it changes with --apply:
@@ -29,6 +32,11 @@ import { enqueueJob, PRIORITY_FRESH } from "./resume-queue.mjs";
 import { compileOwner } from "./worker-id.mjs";
 
 export const RECENT_SOURCE = "recent";
+
+function linkedinId(url) {
+  const m = /linkedin\.com\/jobs\/view\/(\d+)/.exec(url || "");
+  return m ? Number(m[1]) : null;
+}
 
 function time(v) {
   if (v instanceof Date) return v.getTime();
@@ -67,7 +75,13 @@ export async function queueRecentResumes({ db, hours = 24, owner = compileOwner(
   const rows = await jobRows(db);
 
   const seenInWindow = rows.filter((r) => r.firstSeen != null && r.firstSeen >= cutoff);
-  const recent = seenInWindow.filter((r) => !r.posted || r.posted >= cutoffDay);
+  let idFloor = null;
+  for (const r of rows) {
+    const id = linkedinId(r.job.job_url);
+    if (id != null && r.firstSeen != null && r.firstSeen < cutoff && (idFloor == null || id > idFloor)) idFloor = id;
+  }
+  const postedInWindow = seenInWindow.filter((r) => !r.posted || r.posted >= cutoffDay);
+  const recent = postedInWindow.filter((r) => { const id = linkedinId(r.job.job_url); return id == null || idFloor == null || id > idFloor; });
   const recentUrls = new Set(recent.map((r) => r.job.job_url));
   const touchedInWindow = new Set((await db.collection("jobs").distinct("job_url", { run_at: { $gte: new Date(cutoff) } })));
 
@@ -95,12 +109,14 @@ export async function queueRecentResumes({ db, hours = 24, owner = compileOwner(
   const summary = {
     cutoff: new Date(cutoff).toISOString(),
     cutoffDay,
-    field: "first sighting (min run_at per job_url), plus date_posted where the source gives it",
+    field: "first sighting (min run_at per job_url), plus date_posted (ATS boards) and the LinkedIn id floor",
     scrapedInWindow: touchedInWindow.size,
     firstSeenInWindow: seenInWindow.length,
     recent: recent.length,
     excludedRescraped: touchedInWindow.size - seenInWindow.length,
-    excludedPostedEarlier: seenInWindow.length - recent.length,
+    excludedPostedEarlier: seenInWindow.length - postedInWindow.length,
+    linkedinIdFloor: idFloor,
+    excludedRelisted: postedInWindow.length - recent.length,
     alreadyBuilt: buckets.built.length,
     building: buckets.building.length,
     permanentFail: buckets.permanentFail.length,
@@ -111,7 +127,7 @@ export async function queueRecentResumes({ db, hours = 24, owner = compileOwner(
   };
   log(`Cutoff ${summary.cutoff} (${hours} h) · posting day >= ${cutoffDay}`);
   log(`Scraped in window ${summary.scrapedInWindow} · first seen in window ${summary.firstSeenInWindow} · recent ${summary.recent}`);
-  log(`Excluded: ${summary.excludedRescraped} seen before the cutoff, ${summary.excludedPostedEarlier} posted before ${cutoffDay}`);
+  log(`Excluded: ${summary.excludedRescraped} seen before the cutoff, ${summary.excludedPostedEarlier} posted before ${cutoffDay}, ${summary.excludedRelisted} LinkedIn relistings (id <= ${idFloor ?? "none"})`);
   log(`Recent: ${summary.alreadyBuilt} already built (kept), ${summary.building} building now, ${summary.permanentFail} no-go/unsupported, ${summary.toQueue} ${apply ? "to queue" : "would queue"} for ${owner}`);
   log(`${apply ? "Dequeuing" : "Would dequeue"} ${olderQueued} older queued/stale resume(s)`);
   if (!apply) return { ...summary, queue: buckets.toQueue.map((r) => r.job.job_url) };

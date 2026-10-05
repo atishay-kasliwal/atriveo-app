@@ -37,22 +37,28 @@ test('queues only jobs first seen and posted inside the window; dequeues older o
       { job_url: 'old-built', company: 'H', title: 'SWE', score_pct: 85, ...at('2026-09-30T10:00:00'), resume: { status: 'success', pdf_path: '/x/h.pdf' } },
       { job_url: 'old-stuck', company: 'I', title: 'SWE', score_pct: 85, ...at('2026-09-30T10:00:00'), resume: { status: 'running', lease_until: new Date('2026-10-04T22:00:00Z') } },
       { job_url: 'no-go', company: 'J', title: 'SWE', score_pct: 85, ...at('2026-10-04T21:52:40'), resume: { status: 'failed', failure_reason: 'no-go' } },
+      // LinkedIn: id order is creation order. 'li/100' was seen before the cutoff, so 'li/90' is an old posting relisted today
+      { job_url: 'https://www.linkedin.com/jobs/view/100', company: 'L', title: 'SWE', score_pct: 10, ...at('2026-10-03T12:00:00') },
+      { job_url: 'https://www.linkedin.com/jobs/view/90', company: 'M', title: 'SWE', score_pct: 98, ...at('2026-10-04T21:52:40') },
+      { job_url: 'https://www.linkedin.com/jobs/view/101', company: 'N', title: 'SWE', score_pct: 40, ...at('2026-10-04T21:52:40') },
       { job_url: 'ext', company: 'K', title: 'x', source: 'extension', created_at: '2026-10-05T00:08:04Z' },
     ]);
     const quiet = () => {};
     const dry = await queueRecentResumes({ db, owner: 'oracle-atriveo', now, log: quiet });
     assert.equal(dry.cutoff, '2026-10-04T00:30:00.000Z');
-    assert.equal(dry.recent, 6);
+    assert.equal(dry.recent, 7);
+    assert.equal(dry.linkedinIdFloor, 100);
+    assert.equal(dry.excludedRelisted, 1);
     assert.equal(dry.excludedRescraped, 1);
     assert.equal(dry.excludedPostedEarlier, 1);
-    assert.deepEqual(dry.queue, ['fresh-strong', 'fresh-li', 'gh-new', 'mac-queued']);
+    assert.deepEqual(dry.queue, ['fresh-strong', 'fresh-li', 'gh-new', 'mac-queued', 'https://www.linkedin.com/jobs/view/101']);
     assert.equal(dry.olderDequeued, 2);
     assert.equal((await db.collection('jobs').findOne({ job_url: 'old-stuck' })).resume.status, 'running', 'dry run changes nothing');
 
     const res = await queueRecentResumes({ db, owner: 'oracle-atriveo', now, apply: true, log: quiet });
-    assert.equal(res.queued, 4);
+    assert.equal(res.queued, 5);
     assert.equal(res.olderDequeued, 2);
-    assert.equal(await db.collection('jobs').countDocuments(), 12, 'no job is deleted');
+    assert.equal(await db.collection('jobs').countDocuments(), 15, 'no job is deleted');
     const resume = async (u) => (await db.collection('jobs').find({ job_url: u }).toArray()).map((j) => j.resume?.status ?? null);
     assert.deepEqual(await resume('rescraped'), [null, null]);
     assert.deepEqual(await resume('old-stuck'), [null]);
@@ -63,7 +69,7 @@ test('queues only jobs first seen and posted inside the window; dequeues older o
     assert.equal(await claimNextJob(db, 'mac', 60), null, 'the Mac copy moved to this backend');
     const order = [];
     for (let j; (j = await claimNextJob(db, 'oracle-atriveo', 60));) order.push([j.job_url, j.resume.source]);
-    assert.deepEqual(order, [['fresh-strong', 'recent'], ['fresh-li', 'recent'], ['gh-new', 'recent'], ['mac-queued', 'recent']]);
+    assert.deepEqual(order, [['fresh-strong', 'recent'], ['fresh-li', 'recent'], ['gh-new', 'recent'], ['mac-queued', 'recent'], ['https://www.linkedin.com/jobs/view/101', 'recent']]);
   });
 });
 
