@@ -21,6 +21,17 @@ export async function dismissJobs(urls: string[]): Promise<{ dismissed: string[]
   return { dismissed, errors };
 }
 
+/** You applied to this job outside Atriveo's tracking (an On LinkedIn card): kept off Today. */
+export async function markJobsApplied(urls: string[]): Promise<{ marked: string[]; errors: string[] }> {
+  const marked: string[] = [], errors: string[] = [];
+  for (const jobUrl of urls) {
+    const res = await fetch(`${getTailorServerBase()}/applications/job-applied`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jobUrl }) });
+    const json = await res.json().catch(() => ({ ok: false }));
+    if (res.ok && json.ok) marked.push(jobUrl); else errors.push(json.error ?? `HTTP ${res.status}`);
+  }
+  return { marked, errors };
+}
+
 /** Discard these applications now (preview, then confirm exactly what the preview found). */
 export async function discardNow(ids: string[]): Promise<{ discarded: string[]; errors: string[] }> {
   const { targets } = (await request({ operation: "preview", ids })) as { targets: Array<{ id: string; updatedAt: string }> };

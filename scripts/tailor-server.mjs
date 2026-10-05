@@ -37,12 +37,12 @@ import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
-import { applicationsAnalytics, applicationDetail, dismissJob, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
+import { applicationsAnalytics, applicationDetail, dismissJob, linkJobToApplication, markJobApplied, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
 import { compileOwner } from "./worker-id.mjs";
-import { handleFillRoute, runManualFill } from "./fill-routes.mjs";
+import { handleFillRoute, isLocalExtensionRequest, runManualFill } from "./fill-routes.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
 import { listActiveWorkers } from "./worker-registry.mjs";
 import { buildCoverLetter } from "./cover-letter.mjs";
@@ -1698,6 +1698,32 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
       }
     })();
+    return;
+  }
+
+  // POST /applications/job-applied {jobUrl} — "Mark applied" on an On LinkedIn card.
+  // POST /applications/fill-link-job {applicationId, jobUrl} — from Atriveo Fill: the LinkedIn posting you opened
+  // from Today is the application you just started on the company's form.
+  if (req.method === "POST" && (pathname === "/applications/job-applied" || pathname === "/applications/fill-link-job")) {
+    // Like every fill route: the extension itself only (its own origin), never through the public relay.
+    if (pathname === "/applications/fill-link-job" && !isLocalExtensionRequest(req)) {
+      res.writeHead(403, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ ok: false, error: "Atriveo Fill only" }));
+    }
+    let raw = "";
+    req.on("data", (c) => { raw += c; if (raw.length > 10_000) req.destroy(); });
+    req.on("end", async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const body = JSON.parse(raw || "{}");
+        const data = await withMongo((db) => pathname === "/applications/job-applied" ? markJobApplied(db, body?.jobUrl) : linkJobToApplication(db, body?.applicationId, body?.jobUrl), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    });
     return;
   }
 

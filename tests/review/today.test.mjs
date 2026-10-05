@@ -256,15 +256,29 @@ test('LinkedIn postings show as On LinkedIn cards: the button opens the posting,
     await page.goto(`${f.base}/`);
     const card = page.getByRole('article', { name: 'Pendo: On LinkedIn' });
     await card.waitFor();
-    assert.equal(await card.getByRole('link', { name: 'Open on LinkedIn ↗' }).getAttribute('href'), 'https://www.linkedin.com/jobs/view/111');
+    assert.equal(await card.getByRole('link', { name: /Open on LinkedIn/ }).getAttribute('href'), 'https://www.linkedin.com/jobs/view/111');
     assert.match(await card.locator('.td-loc').textContent(), /Raleigh, NC/);
     // Its tailored resume opens straight from the file (no application to review).
-    await card.getByRole('button', { name: 'Resume' }).click();
+    await card.getByRole('button', { name: /Resume/ }).click();
     assert.match(await page.locator('.pdf-modal-overlay iframe, .pdf-modal-overlay embed, .pdf-modal-overlay object').first().getAttribute('src').catch(() => page.locator('.pdf-modal-overlay').innerHTML()), /serve-pdf\?path=.*Pendo/);
     await page.keyboard.press('Escape');
     await card.getByRole('button', { name: 'Discard' }).click();
     await page.getByText('Discarded 1').waitFor();
     assert.deepEqual(calls.filter((c) => c.dismiss), [{ dismiss: { jobUrl: 'https://www.linkedin.com/jobs/view/111' } }]);
     assert.ok(calls.every((c) => c.dismiss || c.action !== 'discard_applications'), 'a LinkedIn posting is not an application');
+  } finally { await f.close(); LINKEDIN = []; }
+});
+
+test('Mark applied on an On LinkedIn card records it and takes it off Today', async () => {
+  LINKEDIN = PENDO;
+  const f = await fixture(); const { page, calls } = f;
+  try {
+    await page.route('**/applications/job-applied', (route) => { calls.push({ applied: route.request().postDataJSON() }); return route.fulfill({ json: { ok: true } }); });
+    await page.goto(`${f.base}/`);
+    const card = page.getByRole('article', { name: 'Pendo: On LinkedIn' });
+    await card.getByRole('button', { name: /Mark applied/ }).click();
+    await page.getByText('Marked Pendo as applied.').waitFor();
+    assert.deepEqual(calls.filter((c) => c.applied), [{ applied: { jobUrl: 'https://www.linkedin.com/jobs/view/111' } }]);
+    assert.equal(await card.count(), 0);
   } finally { await f.close(); LINKEDIN = []; }
 });

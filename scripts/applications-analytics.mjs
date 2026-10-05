@@ -375,7 +375,7 @@ export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600
     db.collection("jobs").find({ run_at: { $gte: since }, job_url: /^https:\/\/(www\.)?linkedin\.com\//, "resume.status": "success" },
       { projection: { _id: 0, job_url: 1, company: 1, title: 1, location: 1, score_pct: 1, date_posted: 1, run_at: 1, "resume.pdf_path": 1 } }).toArray(),
     db.collection("applications").distinct("jobUrls"),
-    db.collection("job_swipes").distinct("job_url", { direction: "left" }),
+    db.collection("job_swipes").distinct("job_url", { direction: { $in: ["left", "applied"] } }),
   ]);
   const skip = new Set([...applied, ...dismissed]);
   const byUrl = new Map();
@@ -396,6 +396,26 @@ export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600
     }
   }
   return [...byUrl.values()].sort((a, b) => (b.foundAt ?? "").localeCompare(a.foundAt ?? "")).slice(0, limit);
+}
+
+/** You applied to this job outside Atriveo's tracking ("Mark applied" on an On LinkedIn card): kept off Today, counted. */
+export async function markJobApplied(db, jobUrl, now = new Date()) {
+  if (!/^https:\/\//.test(String(jobUrl || ""))) throw new Error("A job URL is required");
+  await db.collection("job_swipes").updateOne({ job_url: jobUrl },
+    { $set: { job_url: jobUrl, direction: "applied", swiped_at: now.toISOString(), applied_at: now.toISOString(), date: now.toISOString().slice(0, 10), source: "apply-console" } }, { upsert: true });
+  return { ok: true };
+}
+
+/**
+ * The LinkedIn posting you opened from Today, linked to the application Apply with Atriveo started on the
+ * company's form: the posting's URL joins the application's job URLs, so its On LinkedIn card leaves Today and
+ * your Submit (tracked by the extension) counts for it. Only an application that exists and isn't submitted yet.
+ */
+export async function linkJobToApplication(db, applicationId, jobUrl) {
+  if (!/^https:\/\/(www\.)?linkedin\.com\//.test(String(jobUrl || ""))) throw new Error("A LinkedIn job URL is required");
+  const r = await db.collection("applications").updateOne({ _id: String(applicationId || "") }, { $addToSet: { jobUrls: jobUrl } });
+  if (!r.matchedCount) throw new Error("Application not found");
+  return { ok: true, linked: r.modifiedCount > 0 };
 }
 
 /** Not interested in this job (Discard on a Today card that has no application): a left swipe, as the job feed records it. */

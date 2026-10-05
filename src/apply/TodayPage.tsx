@@ -5,9 +5,9 @@ import ApplicationReview from "./ApplicationReview";
 import PdfPreviewModal from "../components/PdfPreviewModal";
 import CompanyLogo from "../components/CompanyLogo";
 import { postAction, when } from "./engine";
-import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, extensionVersion } from "./openFill";
+import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, extensionVersion, noteLinkedinOpen } from "./openFill";
 import { blocking } from "./questionGroups";
-import { discardNow, dismissJobs } from "./discard";
+import { discardNow, dismissJobs, markJobsApplied } from "./discard";
 import { adjustCounts, loadCards, refreshLinkedin, refreshReady, refreshUnanswered, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
 import "../styles/applications.css";
 import "./review-pages.css";
@@ -251,6 +251,17 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     } finally { setBusy(null); setConfirmDiscard(false); }
   };
 
+  /** "Mark applied" on an On LinkedIn card (you applied without Atriveo's tracking): it leaves Today. */
+  const markApplied = async (item: Item) => {
+    setBusy(item.id);
+    const r = await markJobsApplied([item.id]).catch((e) => ({ marked: [] as string[], errors: [String(e)] }));
+    setBusy(null);
+    if (!r.marked.length) { setErrors((e) => ({ ...e, [item.id]: r.errors[0] ?? "Couldn't save" })); return; }
+    setDone((d) => ({ ...d, [item.id]: item.updatedAt }));
+    setNotice(`Marked ${item.company} as applied.`);
+    setTimeout(() => void refreshLinkedin(), 1500);
+  };
+
   const card = (item: Item) => {
     const stage = STAGE[item.kind];
     const q = item.queued;
@@ -285,7 +296,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {item.kind === "fill" && <p className="td-note">Every answer is approved. Atriveo fills it on the job page; you check, then Submit.</p>}
           {item.kind === "linkedin" && <>
             <p className="td-big">Resume ready</p>
-            <p className="td-note">Open it, click Apply on LinkedIn, then Atriveo → Apply on this page on the company's form. Atriveo never fills LinkedIn itself.</p>
+            <p className="td-note">Apply on LinkedIn, then Atriveo → Apply on this page on the company's form.</p>
           </>}
           {item.kind === "approve" && r && <>
             <p className="td-big">{r.answered} answers verified</p>
@@ -299,7 +310,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {errors[item.id] && <p className="td-error" role="alert">{errors[item.id]}</p>}
         </div>
         <footer className="td-foot">
-          {item.kind === "linkedin" && <a className="rv-primary td-linkedin" href={item.url} target="_blank" rel="noreferrer">Open on LinkedIn ↗</a>}
+          {item.kind === "linkedin" && <a className="td-cta td-cta-linkedin" href={item.url} target="_blank" rel="noreferrer" onClick={() => noteLinkedinOpen(item.url!, item.company, item.title)}>
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
+            Open on LinkedIn<span aria-hidden="true">↗</span></a>}
           {(item.kind === "drafted" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => void openInBrowser(item)}>{busy === item.id ? "Opening…" : "Open & Fill"}</button>}
           {item.kind === "answer" && <button className="rv-primary" disabled={isBusy} onClick={() => navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer {item.toAnswer ?? ""}</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
@@ -308,7 +321,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           <div className="td-review-links">
             {(item.kind === "approve" || item.kind === "you_submit") && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Answers</button>}
             {item.kind !== "linkedin" && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Resume</button>}
-            {item.kind === "linkedin" && item.resumePath && <button className="apps-btn" onClick={() => setPdf(item.resumePath!)}>Resume</button>}
+            {item.kind === "linkedin" && item.resumePath && <button className="td-ghost" onClick={() => setPdf(item.resumePath!)}><span aria-hidden="true">📄</span> Resume</button>}
+            {item.kind === "linkedin" && <button className="td-ghost td-applied" disabled={isBusy} onClick={() => void markApplied(item)}><span aria-hidden="true">✓</span> Mark applied</button>}
             {item.url && item.kind !== "linkedin" && <a className="apps-btn" href={item.url} target="_blank" rel="noreferrer">Job ↗</a>}
           </div>
           <div className="td-links">

@@ -9,6 +9,15 @@ export function extensionVersion(): string | null {
   return typeof document === "undefined" ? null : document.documentElement.getAttribute(EXTENSION_ATTRIBUTE);
 }
 
+/**
+ * You're opening this LinkedIn posting from Today: Atriveo Fill 0.8.1+ remembers it for an hour, so the
+ * application you start on the company's form (Apply on this page) is linked to it. Fire and forget.
+ */
+export function noteLinkedinOpen(url: string, company: string, title: string): void {
+  if (typeof window === "undefined" || !document.documentElement.hasAttribute("data-atriveo-fill-apply")) return;
+  window.postMessage({ source: "atriveo-dashboard", type: "linkedin-open", url, applicationId: url, company, title, nonce: `li-${Date.now()}` }, window.location.origin);
+}
+
 /** Atriveo Fill 0.5+: Open & Fill for any application (it opens the page and fills it by itself). */
 export function canApplyAnywhere(): boolean {
   return typeof document !== "undefined" && document.documentElement.hasAttribute("data-atriveo-fill-apply");

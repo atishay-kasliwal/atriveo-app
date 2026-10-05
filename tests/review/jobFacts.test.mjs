@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { MongoClient } from 'mongodb';
-import { dismissJob, reviewQueue } from '../../scripts/applications-analytics.mjs';
+import { dismissJob, linkJobToApplication, markJobApplied, reviewQueue } from '../../scripts/applications-analytics.mjs';
 
 // The review queue carries job-pipeline's facts for Today: best match score and earliest posting/found dates
 // across the jobs documents for the application's job_urls. Real in-memory Mongo.
@@ -50,5 +50,24 @@ test('LinkedIn postings with a resume and no application are listed until dismis
     await dismissJob(db, 'https://www.linkedin.com/jobs/view/1', now);
     ({ linkedin } = await reviewQueue(db, { view: 'linkedin', now }));
     assert.equal(linkedin.length, 0, 'dismissed: gone');
+  } finally { await client.close(); await mongo.stop(); }
+});
+
+test('Mark applied and an application linked to the posting both take a LinkedIn card off Today', async () => {
+  const mongo = await MongoMemoryServer.create();
+  const client = await MongoClient.connect(mongo.getUri());
+  try {
+    const db = client.db('t');
+    const now = new Date('2026-10-05T12:00:00.000Z');
+    const li = (n) => ({ job_url: `https://www.linkedin.com/jobs/view/${n}`, company: `Co ${n}`, title: 'AI Engineer', location: 'Raleigh, NC', score_pct: 60, run_at: new Date('2026-10-05T08:00:00Z'), resume: { status: 'success', pdf_path: `/r/${n}/A.pdf` } });
+    await db.collection('jobs').insertMany([li(1), li(2), li(3)]);
+    await db.collection('applications').insertOne({ _id: 'gh-7', jobUrls: ['https://job-boards.greenhouse.io/co2/jobs/7'] });
+    await markJobApplied(db, 'https://www.linkedin.com/jobs/view/1', now);
+    assert.deepEqual(await linkJobToApplication(db, 'gh-7', 'https://www.linkedin.com/jobs/view/2'), { ok: true, linked: true });
+    await assert.rejects(linkJobToApplication(db, 'gh-7', 'https://evil.example/x'), /LinkedIn/);
+    await assert.rejects(linkJobToApplication(db, 'nope', 'https://www.linkedin.com/jobs/view/3'), /not found/);
+    const { linkedin } = await reviewQueue(db, { view: 'linkedin', now });
+    assert.deepEqual(linkedin.map((j) => j.company), ['Co 3'], '#1 marked applied, #2 linked to its application');
+    assert.equal((await db.collection('job_swipes').findOne({ job_url: 'https://www.linkedin.com/jobs/view/1' })).direction, 'applied');
   } finally { await client.close(); await mongo.stop(); }
 });
