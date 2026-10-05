@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { getJson, postAction } from "./engine";
-import { armExtension } from "./openFill";
+import { applyWithExtension, armExtension, canQueueApply } from "./openFill";
 import { refreshReady, type ManualApp, type ReadyQueue } from "./reviewQueue";
 
-type Entry = Pick<ManualApp, "id" | "company">;
+/** A verified form (armed Open & Fill), or, with `url`, any other application Atriveo Fill opens and fills by itself. */
+type Entry = Pick<ManualApp, "id" | "company"> & { url?: string };
 const wait = () => new Promise<void>(resolve => setTimeout(resolve, 1000));
-export default function OpenFillQueue({ selected, onFinish, onRunning }: { selected: Entry[]; onFinish: () => void; onRunning: (running: boolean) => void }) {
+export default function OpenFillQueue({ selected, onFinish, onRunning, onFilled }: { selected: Entry[]; onFinish: () => void; onRunning: (running: boolean) => void; onFilled?: (id: string) => void }) {
   const [running, setRunning] = useState(false);
   const [message, setMessage] = useState("");
   const [paused, setPaused] = useState(false);
@@ -17,6 +18,9 @@ export default function OpenFillQueue({ selected, onFinish, onRunning }: { selec
     if (document.documentElement.getAttribute("data-atriveo-fill-queue") !== "1") {
       setMessage("Update Atriveo Fill to 0.2.2 and reload this dashboard to use the queue."); return;
     }
+    if (selected.some(j => j.url) && !canQueueApply()) {
+      setMessage("Reload Atriveo Fill 0.7.1 or newer in chrome://extensions, then refresh this page."); return;
+    }
     const jobs = [...selected];
     controls.current = { stop: false, pause: false, skip: false };
     setRunning(true); onRunning(true); setError(false); setPaused(false);
@@ -25,6 +29,16 @@ export default function OpenFillQueue({ selected, onFinish, onRunning }: { selec
       if (controls.current.stop) break;
       const job = jobs[i];
       try {
+        if (job.url) {
+          // Atriveo Fill opens it, reads it, fills what is ready and answers when done. The tab stays open for your Submit.
+          setMessage(`${i + 1}/${jobs.length} · Opening and filling ${job.company}. Submit remains yours.`);
+          const r = await applyWithExtension(job.url, job.id, 240_000, true);
+          if (controls.current.stop) break;
+          if (!r.ok) throw new Error(r.error || "Atriveo Fill didn't answer");
+          if (r.auto?.state !== "filled") throw new Error(r.auto?.message || "The fill didn't finish. Check its tab.");
+          onFilled?.(job.id);
+          continue;
+        }
         setMessage(`${i + 1}/${jobs.length} · Opening ${job.company}`);
         const fresh = await getJson<ReadyQueue>("/applications/review-queue?view=ready");
         if (controls.current.stop) break;
@@ -51,6 +65,7 @@ export default function OpenFillQueue({ selected, onFinish, onRunning }: { selec
         if (controls.current.stop) break;
         if (!complete) throw new Error("No completed fill report arrived. Check the form for verification, CAPTCHA, or errors.");
         void refreshReady();
+        onFilled?.(job.id);
       } catch (e) {
         setMessage(`${job.company}: ${e instanceof Error ? e.message : String(e)}`);
         setError(true); setPaused(true); controls.current.skip = false;

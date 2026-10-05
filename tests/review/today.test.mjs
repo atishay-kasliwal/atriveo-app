@@ -155,3 +155,30 @@ test('with Atriveo Fill 0.5, Open & Fill hands the job to the extension, which o
     assert.equal(calls.length, 0);
   } finally { await f.close(); }
 });
+
+test('Select all Open & Fill queues every fillable card and opens them one at a time through the extension', async () => {
+  const f = await fixture(); const { page, calls } = f;
+  try {
+    // Stand-in for Atriveo Fill 0.7.1: queue-capable, and each "apply" answers once its fill is done.
+    await page.addInitScript(() => {
+      window.__asked = [];
+      document.addEventListener('DOMContentLoaded', () => { document.documentElement.setAttribute('data-atriveo-fill-apply', '2'); document.documentElement.setAttribute('data-atriveo-fill-queue', '1'); });
+      window.addEventListener('message', (e) => {
+        if (e.data?.source !== 'atriveo-dashboard') return;
+        window.__asked.push({ type: e.data.type, applicationId: e.data.applicationId, wait: e.data.wait });
+        setTimeout(() => window.postMessage({ source: 'atriveo-fill', type: 'armed', nonce: e.data.nonce, reply: { ok: true, auto: { state: 'filled', message: 'Filled 3.' } } }, location.origin), 50);
+      });
+    });
+    await page.goto(`${f.base}/`);
+    await page.getByRole('button', { name: /^Select all Open & Fill \(\d+\)$/ }).click();
+    await page.getByRole('button', { name: /^Open & Fill selected \(\d+\)$/ }).click();
+    // Spotify (You submit) takes the verified path; this fake sidecar gives it no form, so the queue pauses on it.
+    await page.getByRole('button', { name: 'Skip & continue' }).click();
+    await page.getByText(/Queue finished/).waitFor();
+    const asked = await page.evaluate(() => window.__asked);
+    const applies = asked.filter((a) => a.type === 'apply');
+    assert.deepEqual(applies.map((a) => a.applicationId).sort(), ['c1', 'd1'], 'the approved and drafted cards, each through the extension');
+    assert.ok(applies.every((a) => a.wait === true), 'each waits for its fill before the next');
+    assert.ok(calls.every((c) => c.action !== 'approve_submit'), 'nothing is submitted or approved');
+  } finally { await f.close(); }
+});

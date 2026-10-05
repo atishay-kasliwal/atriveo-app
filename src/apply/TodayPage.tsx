@@ -5,7 +5,7 @@ import ApplicationReview from "./ApplicationReview";
 import CompanyLogo from "../components/CompanyLogo";
 import PriorityTags from "../components/PriorityTags";
 import { postAction, when } from "./engine";
-import { applyWithExtension, armExtension, canApplyAnywhere, extensionVersion } from "./openFill";
+import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, extensionVersion } from "./openFill";
 import { adjustCounts, loadCards, refreshReady, refreshUnanswered, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
 import "../styles/applications.css";
 import "./review-pages.css";
@@ -19,6 +19,9 @@ import "./today.css";
 
 type Kind = "you_submit" | "approve" | "fill" | "drafted" | "answer";
 interface Item { id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+
+/** Sites Atriveo Fill fills by itself (Apply with Atriveo, full support). */
+const AUTO_ATS = ["greenhouse", "lever", "ashby"];
 
 const STAGE: Record<Kind, { label: string; tone: string }> = {
   you_submit: { label: "You submit", tone: "go" },
@@ -84,9 +87,17 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const shownQueued = shown.flatMap((i) => i.queued ? [i.queued] : []);
   const shownKey = shownQueued.map((q) => `${q.id}@${q.updatedAt}`).join(",");
   useEffect(() => { if (shownQueued.length) void loadCards(shownQueued); }, [shownKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Every Open & Fill card's link too (a few dozen at most), so Select all covers every page.
+  const openFillQueued = items.flatMap((i) => (i.kind === "fill" || i.kind === "drafted") && i.queued ? [i.queued] : []);
+  const openFillKey = openFillQueued.map((q) => `${q.id}@${q.updatedAt}`).join(",");
+  useEffect(() => { if (openFillQueued.length) void loadCards(openFillQueued); }, [openFillKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const count = (k: Kind) => items.filter((i) => i.kind === k).length;
   const approvable = items.filter((i) => i.kind === "approve");
   const fillable = items.filter((i) => i.kind === "fill");
+  // The queue takes You submit (armed Open & Fill), and with Atriveo Fill 0.7.1 every other Open & Fill card it can fill by itself.
+  const selectable = (i: Item) => i.kind === "you_submit" || ((i.kind === "fill" || i.kind === "drafted") && Boolean(i.url) && AUTO_ATS.includes(i.ats ?? "") && canQueueApply());
+  const queueable = items.filter(selectable);
+  const queued = items.filter((i) => selectable(i) && selectedIds.includes(i.id)).map((i) => ({ id: i.id, company: i.company, ...(i.kind === "you_submit" ? {} : { url: i.url }) }));
   const worker = unanswered.data?.worker ?? ready.data?.worker ?? null;
 
   const finish = (item: Item, message: string, delta: Parameters<typeof adjustCounts>[0]) => {
@@ -135,7 +146,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
    * (Greenhouse, Lever, Ashby); older versions and other sites open the page for the toolbar button.
    */
   const openInBrowser = async (item: Item) => {
-    if (canApplyAnywhere() && item.url && ["greenhouse", "lever", "ashby"].includes(item.ats ?? "")) {
+    if (canApplyAnywhere() && item.url && AUTO_ATS.includes(item.ats ?? "")) {
       setBusy(item.id);
       setErrors((e) => ({ ...e, [item.id]: "" }));
       const res = await applyWithExtension(item.url, item.id);
@@ -194,7 +205,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     return (
       <article key={item.id} className={`td-card is-${stage.tone}`} aria-label={`${item.company}: ${stage.label}`} aria-busy={isBusy}>
         <header className="td-head">
-          {item.kind === "you_submit" && <input type="checkbox" disabled={queueRunning} aria-label={`Select ${item.company} ${item.title}`} checked={selectedIds.includes(item.id)} onChange={e => setSelectedIds(ids => e.target.checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} />}
+          {selectable(item) && <input type="checkbox" disabled={queueRunning} aria-label={`Select ${item.company} ${item.title}`} checked={selectedIds.includes(item.id)} onChange={e => setSelectedIds(ids => e.target.checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} />}
           <CompanyLogo company={item.company} size="sm" />
           <div className="td-id"><strong title={item.company}>{item.company}</strong><span title={item.title}>{item.title}</span></div>
         </header>
@@ -253,7 +264,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           <li className="td-strip-link"><Link to="/unanswered"><b>{count("answer")}</b><span>Need your answers →</span></Link></li>
         </ol>
         <div className="td-actions">
-          {count("you_submit") > 0 && <><button className="apps-btn" disabled={queueRunning} onClick={() => setSelectedIds(items.filter(i => i.kind === "you_submit").map(i => i.id))}>Select all You submit ({count("you_submit")})</button><button className="apps-btn" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear selection</button><OpenFillQueue onRunning={setQueueRunning} selected={items.filter(i => i.kind === "you_submit" && selectedIds.includes(i.id))} onFinish={() => { void refreshReady(); }} /></>}
+          {queueable.length > 0 && <><button className="apps-btn" disabled={queueRunning} onClick={() => setSelectedIds(queueable.map(i => i.id))}>Select all Open & Fill ({queueable.length})</button><button className="apps-btn" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear selection</button><OpenFillQueue onRunning={setQueueRunning} selected={queued} onFilled={(id) => { const it = items.find((i) => i.id === id); if (it) setDone((d) => ({ ...d, [id]: it.updatedAt })); setSelectedIds((ids) => ids.filter((x) => x !== id)); }} onFinish={() => { void refreshReady(); void refreshUnanswered(); }} /></>}
           {worker && <span className={`apps-state ${worker.online ? "" : "bad"}`}><i aria-hidden />{worker.online ? "Worker running" : "Worker offline"}</span>}
           {fillable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("fill")}>Fill and verify all {fillable.length}</button>}
           {approvable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("approve")}>Approve all {approvable.length} ready</button>}
