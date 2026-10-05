@@ -162,7 +162,6 @@ export default function QuestionsPage({ header }: { header?: React.ReactNode }) 
 /** One question (or one question many jobs ask): choices save on click, text on Enter. */
 function GroupRow({ g, busy, disabled, result, onSave, onSkip }: { g: Group; busy: boolean; disabled: boolean; result?: { ok: boolean; text: string }; onSave: (value: string) => void; onSkip: () => void }) {
   const [text, setText] = useState("");
-  const [confirmSkip, setConfirmSkip] = useState(false);
   const [more, setMore] = useState(false);
   const one = g.asked.length === 1 ? g.asked[0]! : null;
   const companies = [...new Set(g.asked.map((a) => a.app.company))];
@@ -200,10 +199,8 @@ function GroupRow({ g, busy, disabled, result, onSave, onSkip }: { g: Group; bus
           <span title={companies.join(", ")}>{one ? <>{one.app.company} · {one.app.title} · <a href={one.app.url} target="_blank" rel="noreferrer">Job ↗</a></> : `${companies.slice(0, 3).join(", ")}${companies.length > 3 ? ` +${companies.length - 3}` : ""}`}</span>
         </div>
         {!g.required && <em className="qs-opt">optional</em>}
-        {/* One job: skip at once. Several: confirm, since it drops every one of them. */}
-        {confirmSkip
-          ? <span className="qs-skip">Skip {companies.length} job{companies.length === 1 ? "" : "s"}? <button className="apps-link danger" disabled={off} onClick={onSkip}>Skip</button> <button className="apps-link" onClick={() => setConfirmSkip(false)}>Keep</button></span>
-          : <button className="apps-link qs-skip" disabled={off} title={`Skip ${one ? "this job" : `all ${companies.length} jobs that ask this`}`} onClick={() => one ? onSkip() : setConfirmSkip(true)}>{one ? "Skip job" : `Skip ${companies.length} jobs`}</button>}
+        {/* Skips every job that asks this question, in one click. */}
+        <button className="apps-link qs-skip" disabled={off} title={`Skip ${one ? "this job" : `all ${companies.length} jobs that ask this`}: they leave Today and To answer`} onClick={onSkip}>{one ? "Skip job" : `Skip all ${companies.length} jobs`}</button>
       </header>
       {input}
       {result && <p className={`qs-result ${result.ok ? "" : "is-bad"}`} role="status">{result.text}</p>}
