@@ -145,3 +145,11 @@
 .td-page .td-links .apps-link { font-size: 12.5px; font-weight: 550; padding: 4px 8px; border-radius: 7px; }
 .td-page .td-links .apps-link:hover { background: color-mix(in oklab, var(--accent-bg) 80%, transparent); text-decoration: none; }
 .td-page .td-links .td-discard:hover { color: #ef4444; background: color-mix(in oklab, #ef4444 10%, transparent); }
+/* Buttons that line up at any card width: drawn icons, one line, equal halves. */
+.td-cta { white-space: nowrap; }
+.td-cta svg { width: 16px; height: 16px; flex: none; }
+.td-cta .td-cta-ext { width: 14px; height: 14px; opacity: .85; }
+.td-cta span { opacity: 1; font-weight: 650; }
+.td-page .td-review-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; }
+.td-ghost { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1; }
+.td-ghost svg { width: 14px; height: 14px; flex: none; }

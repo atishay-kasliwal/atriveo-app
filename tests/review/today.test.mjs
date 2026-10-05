@@ -293,3 +293,17 @@ test('Mark applied on an On LinkedIn card records it and takes it off Today', as
     assert.equal(await card.count(), 0);
   } finally { await f.close(); LINKEDIN = []; }
 });
+
+test('Easy Apply LinkedIn postings carry a chip and sit after company-site ones', async () => {
+  LINKEDIN = [{ ...PENDO[0], id: 'https://www.linkedin.com/jobs/view/1', url: 'https://www.linkedin.com/jobs/view/1', company: 'Easyco', applyType: 'easy_apply' },
+    { ...PENDO[0], id: 'https://www.linkedin.com/jobs/view/2', url: 'https://www.linkedin.com/jobs/view/2', company: 'Siteco', applyType: 'offsite' }];
+  const f = await fixture(); const { page } = f;
+  try {
+    await page.goto(`${f.base}/`);
+    await page.getByRole('article', { name: 'Siteco: On LinkedIn' }).waitFor();
+    const names = await page.locator('.td-card .td-id strong').allTextContents();
+    assert.ok(names.indexOf('Siteco') < names.indexOf('Easyco') || !names.includes('Easyco'), 'company-site posting first');
+    if (names.includes('Easyco')) assert.equal(await page.getByRole('article', { name: 'Easyco: On LinkedIn' }).getByText('Easy Apply', { exact: true }).count(), 1);
+    assert.equal(await page.getByRole('article', { name: 'Siteco: On LinkedIn' }).getByText('Easy Apply', { exact: true }).count(), 0);
+  } finally { await f.close(); LINKEDIN = []; }
+});

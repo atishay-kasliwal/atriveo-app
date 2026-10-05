@@ -166,7 +166,7 @@ const unanswered = pageView<UnansweredQueue>(async (first) => {
 const ready = pageView<ReadyQueue>(() => getJson<ReadyQueue>("/applications/review-queue?view=ready"));
 
 /** A LinkedIn posting with a resume ready and no application (the engine never applies on LinkedIn). */
-export interface LinkedinJob { id: string; url: string; company: string; title: string; location: string | null; score: number | null; postedAt: string | null; foundAt: string | null; track: string | null; resumeFile: string | null; resumePath?: string | null }
+export interface LinkedinJob { id: string; url: string; company: string; title: string; location: string | null; score: number | null; postedAt: string | null; foundAt: string | null; track: string | null; resumeFile: string | null; resumePath?: string | null; applyType?: "offsite" | "easy_apply" | null }
 export interface LinkedinQueue { ok: boolean; generatedAt: string; linkedin: LinkedinJob[] }
 const linkedin = pageView<LinkedinQueue>(() => getJson<LinkedinQueue>("/applications/review-queue?view=linkedin"));
 /** Today's "On LinkedIn" cards: you open the posting, click Apply there, and Apply with Atriveo fills the company's form. */

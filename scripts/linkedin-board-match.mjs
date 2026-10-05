@@ -49,7 +49,8 @@ const db = client.db(process.env.MONGO_DB || undefined);
 try {
   const since = new Date(Date.now() - DAYS * 86_400_000);
   const docs = await db.collection("jobs").find(
-    { run_at: { $gte: since }, job_url: /^https:\/\/(www\.)?linkedin\.com\//, "resume.status": "success", $or: [{ job_url_direct: null }, { job_url_direct: { $exists: false } }] },
+    // Easy Apply jobs live on LinkedIn only; closed ones take nothing.
+    { run_at: { $gte: since }, job_url: /^https:\/\/(www\.)?linkedin\.com\//, "resume.status": "success", apply_type: { $nin: ["easy_apply", "closed"] }, $or: [{ job_url_direct: null }, { job_url_direct: { $exists: false } }] },
     { projection: { job_url: 1, company: 1, title: 1 } },
   ).toArray();
   const jobs = [...new Map(docs.map((d) => [d.job_url, d])).values()];

@@ -373,14 +373,14 @@ export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600
   const since = new Date(now.getTime() - days * 86_400_000);
   const [docs, applied, dismissed] = await Promise.all([
     db.collection("jobs").find({ run_at: { $gte: since }, job_url: /^https:\/\/(www\.)?linkedin\.com\//, "resume.status": "success" },
-      { projection: { _id: 0, job_url: 1, company: 1, title: 1, location: 1, score_pct: 1, date_posted: 1, run_at: 1, "resume.pdf_path": 1 } }).toArray(),
+      { projection: { _id: 0, job_url: 1, company: 1, title: 1, location: 1, score_pct: 1, date_posted: 1, run_at: 1, apply_type: 1, "resume.pdf_path": 1 } }).toArray(),
     db.collection("applications").distinct("jobUrls"),
     db.collection("job_swipes").distinct("job_url", { direction: { $in: ["left", "applied"] } }),
   ]);
   const skip = new Set([...applied, ...dismissed]);
   const byUrl = new Map();
   for (const d of docs) {
-    if (skip.has(d.job_url)) continue;
+    if (skip.has(d.job_url) || d.apply_type === "closed") continue;
     const found = isoOf(d.run_at), posted = isoOf(d.date_posted);
     const cur = byUrl.get(d.job_url);
     if (!cur) {
@@ -388,7 +388,9 @@ export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600
         score: typeof d.score_pct === "number" ? d.score_pct : null, postedAt: posted, foundAt: found, track: trackOf(d.title),
         resumeFile: d.resume?.pdf_path ? String(d.resume.pdf_path).split("/").slice(-2).join("/") : null,
         // The tailored resume itself (Today's Resume button shows it through /serve-pdf).
-        resumePath: d.resume?.pdf_path ?? null });
+        resumePath: d.resume?.pdf_path ?? null,
+        // "offsite" (the company's own form), "easy_apply" (LinkedIn's), or null until checked.
+        applyType: d.apply_type ?? null });
     } else {
       if (typeof d.score_pct === "number") cur.score = Math.max(cur.score ?? 0, d.score_pct);
       if (found && (!cur.foundAt || found < cur.foundAt)) cur.foundAt = found;

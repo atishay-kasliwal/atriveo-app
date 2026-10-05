@@ -20,7 +20,7 @@ import "./today.css";
 // a question nobody has answered come last and send you to To answer, which shows only those questions.
 
 type Kind = "you_submit" | "approve" | "fill" | "drafted" | "linkedin" | "answer";
-interface Item { resumePath?: string | null; track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+interface Item { easyApply?: boolean; resumePath?: string | null; track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
 
 /** The resume track's short name (TRACKS.yaml ids). */
 const TRACK_LABEL: Record<string, string> = { "software-engineer": "SWE", "ai-engineer": "AI", "data-science": "Data science", "data-analytics": "Analytics", "forward-deployed": "FDE" };
@@ -105,11 +105,12 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       ...(unanswered.data?.unanswered ?? []).map(fromQueue),
       // LinkedIn postings: no application (the engine never applies on LinkedIn); same score, place and age.
       ...(linkedin.data?.linkedin ?? []).map((l): Item => ({ id: l.id, kind: "linkedin", company: l.company, title: l.title, ats: null, url: l.url,
-        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null })),
+        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null, easyApply: l.applyType === "easy_apply" })),
     ];
     return all
       .filter((i) => done[i.id] !== i.updatedAt)
-      .sort((a, b) => Number(later.includes(a.id)) - Number(later.includes(b.id)) || order[a.kind] - order[b.kind]
+      // Easy Apply postings (LinkedIn's own form) come after everything you can fill on a company's site.
+      .sort((a, b) => Number(later.includes(a.id)) - Number(later.includes(b.id)) || (order[a.kind] + (a.easyApply ? 0.5 : 0)) - (order[b.kind] + (b.easyApply ? 0.5 : 0))
         || Number(inNC(b.location)) - Number(inNC(a.location)) || (b.age ?? "").localeCompare(a.age ?? "") || (b.score ?? -1) - (a.score ?? -1));
   }, [ready.data, unanswered.data, linkedin.data, cards, done, later]);
 
@@ -283,7 +284,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {item.location && <span className={`td-loc ${nc ? "is-nc" : ""}`} title={item.location}>{nc ? "★ " : ""}{item.location}</span>}
           {age && <span className="td-age" title={item.age ?? undefined}>{age}</span>}
         </div>
-        <div className="td-tags"><span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
+        <div className="td-tags"><span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
         <div className="td-body">
           {item.kind === "drafted" && q && <>
             <p className="td-big">{drafted || q.n} answer{(drafted || q.n) === 1 ? "" : "s"} drafted</p>
@@ -312,7 +313,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         <footer className="td-foot">
           {item.kind === "linkedin" && <a className="td-cta td-cta-linkedin" href={item.url} target="_blank" rel="noreferrer" onClick={() => noteLinkedinOpen(item.url!, item.company, item.title)}>
             <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
-            Open on LinkedIn<span aria-hidden="true">↗</span></a>}
+            <span>Open on LinkedIn</span><svg className="td-cta-ext" aria-hidden="true" viewBox="0 0 16 16"><path d="M6 3.5H3.5v9h9V10M9 3h4v4M13 3L7.5 8.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"/></svg></a>}
           {(item.kind === "drafted" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => void openInBrowser(item)}>{busy === item.id ? "Opening…" : "Open & Fill"}</button>}
           {item.kind === "answer" && <button className="rv-primary" disabled={isBusy} onClick={() => navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer {item.toAnswer ?? ""}</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
@@ -321,8 +322,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           <div className="td-review-links">
             {(item.kind === "approve" || item.kind === "you_submit") && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Answers</button>}
             {item.kind !== "linkedin" && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Resume</button>}
-            {item.kind === "linkedin" && item.resumePath && <button className="td-ghost" onClick={() => setPdf(item.resumePath!)}><span aria-hidden="true">📄</span> Resume</button>}
-            {item.kind === "linkedin" && <button className="td-ghost td-applied" disabled={isBusy} onClick={() => void markApplied(item)}><span aria-hidden="true">✓</span> Mark applied</button>}
+            {item.kind === "linkedin" && item.resumePath && <button className="td-ghost" onClick={() => setPdf(item.resumePath!)}><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M4 1.8h5.2L12.5 5v9.2H4zM9 1.8V5h3.5M6 8.2h4.5M6 10.8h4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round"/></svg>Resume</button>}
+            {item.kind === "linkedin" && <button className="td-ghost td-applied" disabled={isBusy} onClick={() => void markApplied(item)}><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round"/></svg>Mark applied</button>}
             {item.url && item.kind !== "linkedin" && <a className="apps-btn" href={item.url} target="_blank" rel="noreferrer">Job ↗</a>}
           </div>
           <div className="td-links">
