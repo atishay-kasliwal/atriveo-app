@@ -8,7 +8,7 @@
     "ats_posting_id": null,
     "company": "OpenAI",
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://jobs.ashbyhq.com/openai/bd190cad-99ec-4fe7-8f8f-de96b5aa5969",
     "level": "Entry",
     "location": "Seattle, WA",
     "max_exp": null,
@@ -49,6 +49,8 @@
       }
     },
     "force_recompile": true,
+    "job_url_direct_at": "2026-10-05T21:50:57.884Z",
+    "job_url_direct_from": "board-match",
     "ats_score": 60,
     "fit_score": 6
   },
@@ -61,7 +63,7 @@
     "ats_posting_id": null,
     "company": "OpenAI",
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://jobs.ashbyhq.com/openai/460b4295-3803-4dda-983d-3b0fea0b0fc4",
     "level": "Entry",
     "location": "Seattle, WA",
     "max_exp": null,
@@ -101,6 +103,8 @@
         "built_at": "2026-10-05T00:34:23.920Z"
       }
     },
+    "job_url_direct_at": "2026-10-05T21:50:57.918Z",
+    "job_url_direct_from": "board-match",
     "ats_score": 33,
     "fit_score": 6
   },
@@ -217,7 +221,7 @@
     "ats_posting_id": null,
     "company": "OpenAI",
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://jobs.ashbyhq.com/openai/577e6673-0a4a-491b-9a0d-facbdd3bdf3c",
     "level": "Entry",
     "location": "Seattle, WA",
     "max_exp": null,
@@ -257,6 +261,8 @@
         "built_at": "2026-10-05T17:50:29.652Z"
       }
     },
+    "job_url_direct_at": "2026-10-05T21:50:57.950Z",
+    "job_url_direct_from": "board-match",
     "ats_score": 25,
     "fit_score": 5
   },
@@ -269,7 +275,7 @@
     "ats_posting_id": null,
     "company": "OpenAI",
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://jobs.ashbyhq.com/openai/e90a44a7-fc2e-49bf-aec4-d43b9e3d8e92",
     "level": "Entry",
     "location": "Seattle, WA",
     "max_exp": null,
@@ -309,6 +315,8 @@
         "built_at": "2026-10-05T00:35:34.877Z"
       }
     },
+    "job_url_direct_at": "2026-10-05T21:50:57.973Z",
+    "job_url_direct_from": "board-match",
     "ats_score": 33,
     "fit_score": 3
   },
@@ -482,7 +490,7 @@
     "ats_posting_id": null,
     "company": "Anthropic",
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://job-boards.greenhouse.io/anthropic/jobs/5186067008",
     "level": "Entry",
     "location": "San Francisco, CA",
     "max_exp": null,
@@ -504,6 +512,8 @@
       "status": "success",
       "updated_at": "2026-10-05T00:33:14.109Z"
     },
+    "job_url_direct_at": "2026-10-05T21:50:58.385Z",
+    "job_url_direct_from": "board-match",
     "ats_score": 66,
     "fit_score": 8
   },
@@ -766,7 +776,7 @@
     "company": "Ramp",
     "competition_score": 0,
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://jobs.ashbyhq.com/ramp/42527ca9-03b9-499e-a5c4-18e4245af138",
     "level": "Entry",
     "location": "New York, NY",
     "max_exp": null,
@@ -785,6 +795,8 @@
     "site": "linkedin",
     "summary": "**About Ramp** Ramp is building the smart infrastructure for finance teams, embedded in the transaction flow of every dollar a business spends.",
     "title": "Software Engineer, Developer API",
+    "job_url_direct_at": "2026-10-05T21:51:00.933Z",
+    "job_url_direct_from": "board-match",
     "ats_score": 66,
     "fit_score": 4
   },
@@ -1887,7 +1899,7 @@
     "company": "Assort Health",
     "competition_score": 0,
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://jobs.ashbyhq.com/assorthealth/694e3f5a-c777-4db9-9b62-3db952e629fd",
     "level": "Entry",
     "location": "San Francisco, CA",
     "max_exp": null,
@@ -1915,6 +1927,8 @@
       "status": "success",
       "updated_at": "2026-10-05T00:33:15.879Z"
     },
+    "job_url_direct_at": "2026-10-05T21:50:59.874Z",
+    "job_url_direct_from": "board-match",
     "ats_score": 33,
     "fit_score": 6
   },
@@ -2408,7 +2422,7 @@
     "summary": "Pylon \u2014 the agentic support platform purpose\\-built for B2B.",
     "title": "Software Engineer, New Grad",
     "ats_score": 40,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4474223082",
@@ -3905,7 +3919,7 @@
     "summary": "We help make autonomous technologies more efficient, safer, and accessible.",
     "title": "Software Engineer, Autonomous Vehicles (Motion Planning)",
     "ats_score": 50,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4316998632",
@@ -4950,7 +4964,7 @@
     },
     "force_recompile": true,
     "ats_score": 28,
-    "fit_score": 2
+    "fit_score": 3
   },
   {
     "session_id": "2026-10-04T21:52:38Z",
@@ -5164,7 +5178,7 @@
     },
     "force_recompile": true,
     "ats_score": 0,
-    "fit_score": 2
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4475511585",
@@ -7456,7 +7470,7 @@
       "status": "NEEDS_REVIEW",
       "reviewReason": "UNKNOWN_QUESTION",
       "ats": "greenhouse",
-      "updatedAt": "2026-10-05T02:42:48.689Z"
+      "updatedAt": "2026-10-05T21:53:27.952Z"
     },
     "ats_score": 71,
     "fit_score": 6
@@ -8687,10 +8701,10 @@
     "application": {
       "applicationId": "e81f11e0-92ba-4927-82a6-7e41c89e4bbb",
       "applicationKey": "greenhouse:5252108007",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "UNKNOWN_QUESTION",
+      "status": "SKIPPED",
+      "reviewReason": null,
       "ats": "greenhouse",
-      "updatedAt": "2026-10-05T02:54:32.237Z"
+      "updatedAt": "2026-10-05T21:42:15.948Z"
     },
     "ats_score": 50,
     "fit_score": 8
@@ -8751,10 +8765,10 @@
     "application": {
       "applicationId": "4f6e3fbc-11a9-4142-8be8-42b85d7b8795",
       "applicationKey": "greenhouse:5255111007",
-      "status": "NEEDS_REVIEW",
-      "reviewReason": "UNKNOWN_QUESTION",
+      "status": "SKIPPED",
+      "reviewReason": null,
       "ats": "greenhouse",
-      "updatedAt": "2026-10-05T15:03:35.717Z"
+      "updatedAt": "2026-10-05T21:42:17.878Z"
     },
     "ats_score": 40,
     "fit_score": 6
