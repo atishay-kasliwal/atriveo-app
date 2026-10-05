@@ -27,5 +27,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Built REST CRUD APIs for patient records with Mongoose schemas and validation supporting 3 clinic user roles with
-      MongoDB in production.
+      Programmed REST CRUD APIs for patient records with Mongoose schemas and validation supporting 3 clinic
+      user roles with MongoDB in production.

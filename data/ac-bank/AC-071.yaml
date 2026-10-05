@@ -42,5 +42,5 @@ variants:
     emphasis: api
     strength: 8
     text: >-
-      Shipped Spring Boot a v1 REST query API with HATEOAS and OpenAPI for production insurance policy search over
-      Elasticsearch-backed documents.
+      Produced a Spring Boot v1 REST query API with HATEOAS and OpenAPI for production insurance policy search
+      over Elasticsearch-backed documents.

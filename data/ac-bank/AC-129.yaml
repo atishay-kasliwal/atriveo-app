@@ -25,5 +25,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Integrated Helmet and CORS hardening with CSRF middleware protecting 3 role-based clinic management routes in
-      production.
+      Integrated Helmet and CORS hardening with CSRF middleware protecting 3 role-based clinic management
+      routes in production.

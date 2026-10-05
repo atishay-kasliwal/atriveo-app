@@ -40,5 +40,5 @@ variants:
     emphasis: storage
     strength: 9
     text: >-
-      Built Python and MongoDB Atlas storage for 15K+ job descriptions across 4 collections with run history and per-run
-      JSON snapshots for production analytics.
+      Cataloged 15K+ job descriptions in Python and MongoDB Atlas storage across 4 collections with run
+      history and per-run JSON snapshots for production analytics.

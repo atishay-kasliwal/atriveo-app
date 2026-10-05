@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Eliminated recurring production incidents for 100K+ users by rearchitecting on Redis and Elasticsearch cutting P99
-      latency 40% after deployment.
+      Resolved recurring production incidents for 100K+ users by rearchitecting on Redis and Elasticsearch
+      cutting P99 latency 40% after deployment.

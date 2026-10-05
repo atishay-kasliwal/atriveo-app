@@ -1,5 +1,5 @@
 # Job Pipeline | Canonical achievement bank (review file)
-# Bank v50
+# Bank v52
 # Lint: npm run ac:bullet-lint -- --role job-pipeline
 
 role:
@@ -54,53 +54,53 @@ achievements:
   - id: AC-083
     theme: platform-ownership
     resume_bullet: >-
-      Built a Python automated job intelligence pipeline scraping LinkedIn via JobSpy
-      across 6 search terms with ~20 daily runs serving a live production dashboard.
+      Launched a Python automated job intelligence pipeline scraping LinkedIn via JobSpy across 6 search terms
+      with ~20 daily runs serving a live production dashboard.
   - id: AC-084
     theme: filter-cascade
     resume_bullet: >-
-      Engineered Python a 5-stage filter cascade removing ~75% of irrelevant listings
-      and surfacing ~109 high-signal early-career roles from ~480 raw jobs per run.
+      Devised a Python 5-stage filter cascade removing ~75% of irrelevant listings and surfacing ~109
+      high-signal early-career roles from ~480 raw jobs per run.
   - id: AC-085
     theme: keyword-scoring
     resume_bullet: >-
-      Built Python a keyword scoring engine with 30+ weighted tech terms ranking jobs by
-      stack fit for backend, ML, and data science roles.
+      Formulated a Python keyword scoring engine with 30+ weighted tech terms ranking jobs by stack fit for
+      backend, ML, and data science roles.
   - id: AC-086
     theme: h1b-pipeline
     resume_bullet: >-
-      Shipped Python an H1B-aware pipeline matching listings against 1,388 verified 2026
-      sponsors for sponsorship-focused early-career job search.
+      Introduced a Python H1B-aware pipeline matching listings against 1,388 verified 2026 sponsors for
+      sponsorship-focused early-career job search.
   - id: AC-087
     theme: mongodb-storage
     resume_bullet: >-
-      Built Python and MongoDB Atlas storage for 15K+ job descriptions across 4
-      collections with run history and per-run JSON snapshots for production analytics.
+      Cataloged 15K+ job descriptions in Python and MongoDB Atlas storage across 4 collections with run
+      history and per-run JSON snapshots for production analytics.
   - id: AC-088
     theme: multi-pipeline
     resume_bullet: >-
-      Built Python 5 curated pipelines covering 521 Top 500 tech firms, priority company
-      tiers, and keyword-ranked roles for targeted early-career job search.
+      Compiled 5 curated Python pipelines covering 521 Top 500 tech firms, priority company tiers, and
+      keyword-ranked roles for targeted early-career job search.
   - id: AC-089
     theme: github-deploy
     resume_bullet: >-
-      Deployed Python ~20 daily production dashboard updates via the GitHub Contents API
-      to GitHub Pages without CI runners for zero-downtime releases.
+      Published ~20 daily production dashboard updates with Python via the GitHub Contents API to GitHub Pages
+      without CI runners for zero-downtime releases.
   - id: AC-090
     theme: cron-automation
     resume_bullet: >-
-      Automated Python ~20 daily macOS cron runs completing full scrape-to-deploy in
-      under 15 minutes for production job intelligence delivery.
+      Scheduled ~20 daily Python macOS cron runs completing full scrape-to-deploy in under 15 minutes for
+      production job intelligence delivery.
   - id: AC-091
     theme: admin-analytics
     resume_bullet: >-
-      Built JavaScript admin analytics with hourly heatmaps and 7/14/30-day trend charts
-      tracking pipeline breakdown and the last 50 production runs.
+      Visualized pipeline health through JavaScript admin analytics with hourly heatmaps and 7/14/30-day trend
+      charts tracking pipeline breakdown and the last 50 production runs.
   - id: AC-092
     theme: ats-gap-analysis
     resume_bullet: >-
-      Integrated Python ATS resume gap analysis scoring top-ranked jobs against a stored
-      profile with 30+ keyword checks to surface gaps before applications.
+      Integrated Python ATS resume gap analysis scoring top-ranked jobs against a stored profile with 30+
+      keyword checks to surface gaps before applications.
 review_scores:
   ats: "9.5/10 — Python, MongoDB, pipeline, scraping, data engineering spread"
   recruiter: "9/10 — concrete metrics from README; distinct from Atriveo product bullets"

@@ -28,5 +28,5 @@ variants:
     emphasis: backend
     strength: 8
     text: >-
-      Designed PostgreSQL schemas and FastAPI APIs that synchronized centralized application
-      tracking with external job tracker integrations.
+      Modeled PostgreSQL schemas and FastAPI APIs that synchronized centralized application tracking with
+      external job tracker integrations.

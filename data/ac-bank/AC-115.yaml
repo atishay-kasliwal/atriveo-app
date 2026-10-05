@@ -27,5 +27,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Built Python and scikit-learn LASSO radiomics signature development with nomograms and risk stratification across
-      255-sample research cohorts.
+      Selected LASSO radiomics signatures in Python and scikit-learn with nomograms and risk stratification
+      across 255-sample research cohorts.

@@ -30,5 +30,5 @@ variants:
     emphasis: data
     strength: 8
     text: >-
-      Built Apache Airflow ETL pipelines integrating 10+ heterogeneous MRI scan types into
-      reproducible research-ready cohorts for brain tumor studies.
+      Consolidated 10+ heterogeneous MRI scan types with Apache Airflow ETL pipelines into reproducible
+      research-ready cohorts for brain tumor studies.

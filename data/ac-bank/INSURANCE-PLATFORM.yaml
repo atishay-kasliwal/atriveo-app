@@ -1,5 +1,5 @@
 # Insurance Microservices Platform | Canonical achievement bank (review file)
-# Bank v50
+# Bank v52
 # Lint: npm run ac:bullet-lint -- --role insurance-platform
 
 role:
@@ -68,54 +68,53 @@ achievements:
   - id: AC-063
     theme: platform-ownership
     resume_bullet: >-
-      Architected an event-driven insurance microservices platform on Java and Kafka,
-      transferring policy data from third-party providers to a payment gateway across 8
-      services.
+      Conceived an event-driven insurance microservices platform on Java and Kafka, transferring policy data
+      from third-party providers to a payment gateway across 8 services.
   - id: AC-064
     theme: kafka-ingestion
     resume_bullet: >-
-      Built a Kafka ingestion pipeline with Avro serialization and Confluent Schema
-      Registry, publishing insurance policy events to a 3-broker cluster.
+      Specified Avro schemas in Confluent Schema Registry for a Kafka ingestion pipeline publishing insurance
+      policy events to a 3-broker cluster.
   - id: AC-065
     theme: cqrs-events
     resume_bullet: >-
-      Implemented CQRS and event sourcing where write-side services publish insurance
-      domain events to Kafka across 8 loosely coupled microservices.
+      Adapted CQRS and event sourcing so write-side services publish insurance domain events to Kafka across 8
+      loosely coupled microservices.
   - id: AC-066
     theme: elastic-read-model
     resume_bullet: >-
-      Engineered a Kafka consumer service indexing insurance events into a 3-node
-      Elasticsearch cluster for low-latency policy search and retrieval.
+      Compiled insurance events into a 3-node Elasticsearch cluster with a Kafka consumer service for
+      low-latency policy search and retrieval.
   - id: AC-067
     theme: kafka-streams-analytics
     resume_bullet: >-
-      Built Kafka Streams topologies with persistent state stores on a 3-broker cluster,
-      powering real-time insurance policy analytics and interactive query APIs.
+      Composed Kafka Streams topologies with persistent state stores on a 3-broker cluster, powering real-time
+      insurance policy analytics and interactive query APIs.
   - id: AC-068
     theme: api-gateway-security
     resume_bullet: >-
-      Built a Spring Cloud API Gateway securing the platform with JWT authentication,
-      Redis token-bucket rate limiting at 5 req/s, and Resilience4j circuit breakers.
+      Regulated platform traffic through a Spring Cloud API Gateway with JWT authentication, Redis
+      token-bucket rate limiting at 5 req/s, and Resilience4j circuit breakers.
   - id: AC-069
     theme: service-discovery-config
     resume_bullet: >-
-      Deployed Netflix Eureka service discovery and a Spring Cloud Config Server with
-      encrypted secrets across 8 Docker Compose microservices.
+      Administered Netflix Eureka service discovery and a Spring Cloud Config Server with encrypted secrets
+      across 8 Docker Compose microservices.
   - id: AC-070
     theme: observability
     resume_bullet: >-
-      Integrated a Prometheus and Grafana observability stack with Zipkin tracing and
-      ELK logging across all 8 microservices via Spring Actuator metrics.
+      Monitored all 8 microservices with a Prometheus and Grafana observability stack, Zipkin tracing and ELK
+      logging via Spring Actuator metrics.
   - id: AC-071
     theme: query-api
     resume_bullet: >-
-      Shipped Spring Boot a v1 REST query API with HATEOAS and OpenAPI for production
-      insurance policy search over Elasticsearch-backed documents.
+      Produced a Spring Boot v1 REST query API with HATEOAS and OpenAPI for production insurance policy search
+      over Elasticsearch-backed documents.
   - id: AC-072
     theme: docker-orchestration
     resume_bullet: >-
-      Deployed 8 microservices with Docker Compose spanning 3-broker Kafka,
-      Elasticsearch, and Redis-backed monitoring stacks.
+      Arranged 8 microservices with Docker Compose spanning 3-broker Kafka, Elasticsearch, and Redis-backed
+      monitoring stacks.
 # ── JD selection guide (which 2 tend to win) ────────────────────────────────
 
 selection_examples:

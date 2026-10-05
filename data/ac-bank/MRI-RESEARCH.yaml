@@ -1,5 +1,5 @@
 # MRI Research Pipeline | Canonical achievement bank (review file)
-# Bank v50
+# Bank v52
 # Lint: npm run ac:bullet-lint -- --role mri-research
 # Distinct from Wake Forest clinical platform — research radiomics pipeline only
 
@@ -42,54 +42,53 @@ achievements:
   - id: AC-113
     theme: platform-ownership
     resume_bullet: >-
-      Built a modular Python radiomics research pipeline spanning 10 analysis modules
-      with publication-ready PDF reports.
+      Spearheaded a modular Python radiomics research pipeline spanning 10 analysis modules with
+      publication-ready PDF reports.
   - id: AC-114
     theme: survival
     resume_bullet: >-
-      Engineered Python Kaplan-Meier and Cox survival models using lifelines on
-      73-patient clinical research cohorts from 2020–2022.
+      Predicted survival with Python Kaplan-Meier and Cox models using lifelines on 73-patient clinical
+      research cohorts from 2020–2022.
   - id: AC-115
     theme: signature
     resume_bullet: >-
-      Built Python and scikit-learn LASSO radiomics signature development with nomograms
-      and risk stratification across 255-sample research cohorts.
+      Selected LASSO radiomics signatures in Python and scikit-learn with nomograms and risk stratification
+      across 255-sample research cohorts.
   - id: AC-116
     theme: xai
     resume_bullet: >-
-      Integrated Python SHAP and LIME explainability with permutation importance across
-      multimodal radiomics models on 255 samples in production.
+      Interpreted multimodal radiomics models with Python SHAP, LIME and permutation importance on 255 samples
+      in production.
   - id: AC-117
     theme: radiogenomics
     resume_bullet: >-
-      Built Python radiogenomics analysis correlating radiomics and genomics features
-      with mutation outcomes on 73-patient cohorts in production.
+      Investigated radiogenomics in Python correlating radiomics and genomics features with mutation outcomes
+      on 73-patient cohorts in production.
   - id: AC-118
     theme: multimodal
     resume_bullet: >-
-      Engineered Python multi-modal models combining radiomics, clinical, and genomics
-      features on 73-patient research cohorts for outcome prediction.
+      Synthesized radiomics, clinical, and genomics features into Python multi-modal models on 73-patient
+      research cohorts for outcome prediction.
   - id: AC-119
     theme: clustering
     resume_bullet: >-
-      Built Python UMAP and t-SNE clustering for unsupervised phenotype discovery across
-      255-sample radiomics research cohorts in production.
+      Discovered unsupervised phenotypes with Python UMAP and t-SNE clustering across 255-sample radiomics
+      research cohorts in production.
   - id: AC-120
     theme: datasets
     resume_bullet: >-
-      Built Python and pandas preprocessing pipelines for 255-sample radiomics cohorts
-      and 73 patient records across 2020–2022 datasets for clinical research analysis in
-      production workflows.
+      Prepared 255-sample radiomics cohorts and 73 patient records with Python and pandas preprocessing
+      pipelines across 2020–2022 datasets for clinical research analysis in production workflows.
   - id: AC-121
     theme: reporting
     resume_bullet: >-
-      Built Python PDF research reports with executive summaries across 10 module
-      visualizations for clinical research publication workflows.
+      Reported findings across 10 module visualizations in Python PDF research reports with executive
+      summaries for clinical research publication workflows.
   - id: AC-122
     theme: validation
     resume_bullet: >-
-      Implemented Python cross-validation pipelines with XGBoost and scikit-learn on
-      255-sample radiomics research cohorts.
+      Evaluated XGBoost and scikit-learn classifiers with Python cross-validation pipelines on 255-sample
+      radiomics research cohorts.
 selection_examples:
   ml_research_jd:
     typical_pick: [AC-113, AC-115]

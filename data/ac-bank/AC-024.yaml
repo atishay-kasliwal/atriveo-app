@@ -13,7 +13,7 @@ concepts_claimed:
 signature_technologies:
   - MCP
   - Python
-fact: MCP agent orchestration for multi-step financial tool-use workflows.
+fact: MCP servers and function calling orchestrated agents across multi-step financial tool-use workflows.
 capabilities:
   ai: 88
   backend: 76
@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Implemented MCP-based agent orchestration in Python across 3+ financial tool-use workflows connecting LLM agents
-      to external APIs with structured evaluation benchmarks.
+      Integrated LLM agents with external financial APIs through MCP servers and function calling in Python
+      across 3+ tool-use workflows with structured evaluation benchmarks.

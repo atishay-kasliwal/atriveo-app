@@ -31,5 +31,5 @@ variants:
     emphasis: pipeline
     strength: 9
     text: >-
-      Standardized 5 MRI modalities using Python and SimpleITK, enabling automated brain
-      tumor segmentation across heterogeneous clinical scans.
+      Standardized 5 MRI modalities using Python and SimpleITK, enabling automated brain tumor segmentation
+      across heterogeneous clinical scans.

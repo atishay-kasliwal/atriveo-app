@@ -44,5 +44,5 @@ variants:
     emphasis: platform
     strength: 10
     text: >-
-      Built a Python automated job intelligence pipeline scraping LinkedIn via JobSpy across 6 search terms with ~20
-      daily runs serving a live production dashboard.
+      Launched a Python automated job intelligence pipeline scraping LinkedIn via JobSpy across 6 search terms
+      with ~20 daily runs serving a live production dashboard.

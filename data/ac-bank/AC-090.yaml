@@ -38,5 +38,5 @@ variants:
     emphasis: automation
     strength: 8
     text: >-
-      Automated Python ~20 daily macOS cron runs completing full scrape-to-deploy in under 15 minutes for production job
-      intelligence delivery.
+      Scheduled ~20 daily Python macOS cron runs completing full scrape-to-deploy in under 15 minutes for
+      production job intelligence delivery.

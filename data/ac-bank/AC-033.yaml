@@ -37,7 +37,7 @@ variants:
     emphasis: ml
     strength: 10
     text: >-
-      Developed a Python brain tumor segmentation model achieving 90%+ mask accuracy replacing manual tumor outlining
-      for treating clinicians in production.
+      Attained 90%+ mask accuracy with a Python brain tumor segmentation model replacing manual tumor
+      outlining for treating clinicians in production.
 signature_technologies:
   - Python

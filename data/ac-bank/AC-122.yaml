@@ -27,5 +27,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Implemented Python cross-validation pipelines with XGBoost and scikit-learn on 255-sample radiomics research
-      cohorts.
+      Evaluated XGBoost and scikit-learn classifiers with Python cross-validation pipelines on 255-sample
+      radiomics research cohorts.

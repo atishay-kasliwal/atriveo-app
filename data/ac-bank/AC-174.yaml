@@ -14,6 +14,7 @@ concepts_claimed:
 signature_technologies:
   - AWS
   - Azure
+  - GCP
 fact: British Telecom commerce deployed across AWS Azure and GCP.
 capabilities:
   backend: 78
@@ -26,16 +27,18 @@ strength:
 ats_keywords:
   - AWS
   - Azure
+  - GCP
 facets:
   default:
     phrase: multi-cloud
     keywords:
       - aws
       - azure
+      - gcp
 variants:
   - facet: default
     emphasis: default
     strength: 8
     text: >-
-      Deployed British Telecom commerce on AWS and Azure across 3 enterprise regions sustaining telecom sales without
-      regional production downtime.
+      Broadened British Telecom commerce on AWS, Azure and GCP across 3 enterprise regions sustaining telecom sales
+      without regional production downtime.

@@ -28,5 +28,5 @@ variants:
     emphasis: architecture
     strength: 9
     text: >-
-      Implemented CQRS and event sourcing where write-side services publish insurance domain
-      events to Kafka across 8 loosely coupled microservices.
+      Adapted CQRS and event sourcing so write-side services publish insurance domain events to Kafka across 8
+      loosely coupled microservices.

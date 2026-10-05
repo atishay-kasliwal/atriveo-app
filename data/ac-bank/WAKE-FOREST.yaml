@@ -1,5 +1,5 @@
 # Wake Forest – CAIR | Canonical achievement bank (review file)
-# Bank v50
+# Bank v52
 # Lint: npm run ac:bullet-lint -- --role wake-forest
 
 role:
@@ -45,6 +45,13 @@ product:
     orchestration: [Apache Airflow]
     frontend: [React, TypeScript, Redux]
     domain: [MRI, brain tumor, radiomics, survival analysis, medical imaging]
+
+confirmed_technology_context:
+  retrieval: ChromaDB preceded Pinecone; ChromaDB remains for lower-cost workflows.
+  llm: Anthropic
+  agents: MCP servers and function calling.
+  modeling: PyTorch, TensorFlow, and scikit-learn were used for models.
+  conference_workflow: A similar model workflow existed; launch status and provider details are unconfirmed, so do not claim a live deployment.
 
 # ── Verified metrics (do not invent beyond this list) ───────────────────────
 
@@ -97,8 +104,8 @@ achievements:
     fact: End-to-end AI radiology platform in clinical use processing 10K+ brain MRI studies for a 20-person physician-research team.
     metrics_used: [10K+ studies, 3h→2min, 90%+ accuracy, 2min latency, clinical deployment]
     resume_bullet: >-
-      Architected a Python and GCP-based AI radiology platform that processed 10K+ brain
-      MRI studies and reduced tumor segmentation from 3 hours to 2 minutes.
+      Designed a Python and GCP-based AI radiology platform that processed 10K+ brain MRI studies and reduced
+      tumor segmentation from 3 hours to 2 minutes.
     review_notes: |
       Pinned first on every Wake Forest resume (headline bullet). Impossible-to-ignore summary
       — recruiter gets the full story in one scan. Say "Architected" only if you owned system design.
@@ -110,8 +117,8 @@ achievements:
     fact: SimpleITK pipelines standardizing 5 MRI modalities (T1, T2, DWI, heatmap, FLAIR) from 10+ scan types.
     metrics_used: [5 modalities, 10+ scan types]
     resume_bullet: >-
-      Standardized 5 MRI modalities using Python and SimpleITK, enabling automated brain
-      tumor segmentation across heterogeneous clinical scans.
+      Standardized 5 MRI modalities using Python and SimpleITK, enabling automated brain tumor segmentation
+      across heterogeneous clinical scans.
     review_notes: |
       Backend / data-engineering pick. Ends with outcome (segmentation + inference), not just infra.
 
@@ -122,8 +129,8 @@ achievements:
     fact: Brain tumor segmentation model at 90%+ mask accuracy across 10K+ multimodal clinical MRI studies.
     metrics_used: [90%+ accuracy, 10K+ studies]
     resume_bullet: >-
-      Developed a Python brain tumor segmentation model achieving 90%+ mask accuracy
-      replacing manual tumor outlining for treating clinicians in production.
+      Attained 90%+ mask accuracy with a Python brain tumor segmentation model replacing manual tumor
+      outlining for treating clinicians in production.
     review_notes: |
       Does not repeat 3h→2min (that lives in pinned AC-031). Compatible with AC-048 human-in-the-loop.
 
@@ -134,8 +141,8 @@ achievements:
     fact: Apache Airflow ETL workflows processing 10+ heterogeneous MRI scan types into research-ready datasets.
     metrics_used: [10+ scan types]
     resume_bullet: >-
-      Built Apache Airflow ETL pipelines integrating 10+ heterogeneous MRI scan types
-      into reproducible research-ready cohorts for brain tumor studies.
+      Consolidated 10+ heterogeneous MRI scan types with Apache Airflow ETL pipelines into reproducible
+      research-ready cohorts for brain tumor studies.
     review_notes: |
       Data-engineering pick. Airflow is the signature orchestration anchor for ETL JDs.
 
@@ -146,8 +153,8 @@ achievements:
     fact: PyRadiomics extraction of 200+ quantitative biomarkers from segmented brain tumors.
     metrics_used: [200+ features]
     resume_bullet: >-
-      Developed a PyRadiomics feature extraction pipeline that generated 200+
-      quantitative biomarkers for prognosis modeling and clinical research.
+      Derived 200+ quantitative biomarkers with a PyRadiomics feature extraction pipeline for prognosis
+      modeling and clinical research.
     review_notes: |
       ML / research JD pick. Pairs well with AC-033 or AC-046.
 
@@ -155,12 +162,11 @@ achievements:
     display_order: 6
     theme: patient-similarity
     skills: [ML, retrieval, analytics]
-    fact: Patient similarity engine over 5–10 years and 10K+ historical MRI cases for treating physicians.
+    fact: Patient similarity engine over 5–10 years and 10K+ historical MRI cases for treating physicians; retrieval moved from ChromaDB to Pinecone, with ChromaDB retained for lower-cost workflows.
     metrics_used: [5–10 years, 10K+ cases]
     resume_bullet: >-
-      Built Python a patient similarity retrieval engine over 5 to 10 years of
-      historical MRI data, helping physicians compare disease patterns and treatment
-      outcomes.
+      Enabled physicians to compare disease patterns and outcomes using Python and Pinecone patient similarity
+      retrieval across 5 to 10 years of historical MRI data.
     review_notes: |
       Retrieval / recommendation story. Distinct from radiomics and survival.
 
@@ -171,8 +177,8 @@ achievements:
     fact: Radiomics-driven survival analysis surfacing prognosis insights to speed clinical decision-making.
     metrics_used: [clinical decision-making impact — qualitative]
     resume_bullet: >-
-      Integrated Python radiomics-driven survival models that surfaced prognosis
-      insights at review, accelerating clinical decision-making for treating physicians.
+      Introduced Python radiomics-driven survival models that surfaced prognosis insights at review,
+      accelerating clinical decision-making for treating physicians.
     review_notes: |
       No hard time-saved metric yet. Add if you have one (e.g. "cut prognosis review from X to Y").
 
@@ -183,8 +189,8 @@ achievements:
     fact: React and TypeScript clinician dashboard with Redux for a 20-person team reviewing MRIs and AI segmentations.
     metrics_used: [team of 20]
     resume_bullet: >-
-      Built a React and TypeScript clinician dashboard for a 20-person research team to
-      review MRIs, prior studies, and AI segmentations with interactive mask refinement.
+      Visualized MRIs, prior studies, and AI segmentations for a 20-person research team in a React and
+      TypeScript clinician dashboard with interactive mask refinement.
     review_notes: |
       Frontend / full-stack pick. React + TypeScript in bullet; Redux in ATS keywords and stack.
 
@@ -195,8 +201,8 @@ achievements:
     fact: Human-in-the-loop mask correction preserving 90%+ automation while letting physicians fix edge cases.
     metrics_used: [2-minute segmentation, expert oversight]
     resume_bullet: >-
-      Implemented Python human-in-the-loop mask review so physicians could correct AI
-      segmentations on edge cases improving clinical trust in production workflows.
+      Instituted Python human-in-the-loop mask review so physicians could correct AI segmentations on edge
+      cases improving clinical trust in production workflows.
     review_notes: |
       Production AI story — not just a model. Overlaps AC-047; composer treats as separate theme.
 
@@ -207,8 +213,8 @@ achievements:
     fact: GCP clinical pipeline delivering clinician-ready MRI insights within 2 minutes of upload.
     metrics_used: [2 min latency, clinical production, GCP]
     resume_bullet: >-
-      Deployed the imaging pipeline on GCP in clinical production, delivering
-      clinician-ready insights within 2 minutes of MRI upload.
+      Expedited clinician-ready insights to within 2 minutes of MRI upload by running the imaging pipeline on
+      GCP in clinical production.
     review_notes: |
       Cloud / infra pick. Strong for backend and platform JDs.
 

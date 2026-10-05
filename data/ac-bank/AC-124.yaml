@@ -27,5 +27,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Implemented JWT authentication with bcrypt hashing securing registration and login for 3 clinic user roles in
-      production.
+      Implemented JWT authentication with bcrypt hashing securing registration and login for 3 clinic user
+      roles in production.

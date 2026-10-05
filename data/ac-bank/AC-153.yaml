@@ -29,5 +29,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Built Python a FastAPI external-agent sample exercising the full /api/v1 consent flow with client-side X25519 and
-      AES-GCM decryption.
+      Demonstrated the full /api/v1 consent flow in a Python FastAPI external-agent sample with client-side
+      X25519 and AES-GCM decryption.

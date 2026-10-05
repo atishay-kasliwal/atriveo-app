@@ -38,5 +38,5 @@ variants:
     emphasis: deploy
     strength: 8
     text: >-
-      Deployed Python ~20 daily production dashboard updates via the GitHub Contents API to GitHub Pages without CI
-      runners for zero-downtime releases.
+      Published ~20 daily production dashboard updates with Python via the GitHub Contents API to GitHub Pages
+      without CI runners for zero-downtime releases.

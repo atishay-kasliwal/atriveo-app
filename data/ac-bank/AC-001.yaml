@@ -42,5 +42,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Built a FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis from 3 days to under 20 minutes and
+      Constructed an event-driven FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis from 3 days to under 20 minutes and
       reaching approximately 68% directional accuracy across 13 sessions.

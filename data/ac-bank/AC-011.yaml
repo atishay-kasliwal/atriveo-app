@@ -36,5 +36,5 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Implemented Python and LangChain vector retrieval evaluation measuring semantic search quality across 200K+
+      Tested vector retrieval in Python and LangChain, measuring semantic search quality across 200K+
       financial document corpora for production RAG tuning.

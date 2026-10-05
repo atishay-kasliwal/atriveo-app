@@ -25,5 +25,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Built Python radiogenomics analysis correlating radiomics and genomics features with mutation outcomes on
-      73-patient cohorts in production.
+      Investigated radiogenomics in Python correlating radiomics and genomics features with mutation outcomes
+      on 73-patient cohorts in production.

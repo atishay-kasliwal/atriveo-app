@@ -37,5 +37,5 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Built Python and FastAPI schema validation across 200K+ financial transcripts ensuring structured LLM inputs for
-      news and FOMC document feeds in production pipelines.
+      Validated 200K+ financial transcripts with Python and FastAPI schema checks ensuring structured LLM
+      inputs for news and FOMC document feeds in production pipelines.

@@ -27,5 +27,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Built Swagger OpenAPI docs on Express.js for auth and patient REST endpoints on the clinic API serving 3 user
-      roles in production.
+      Authored Swagger OpenAPI docs on Express.js for auth and patient REST endpoints on the clinic API
+      serving 3 user roles in production.

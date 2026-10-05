@@ -25,5 +25,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Implemented centralized error handling and JWT auth middleware across Express layers securing the clinic API for 3
+      Centralized error handling and JWT auth middleware across Express layers securing the clinic API for 3
       roles with Express.js in production.

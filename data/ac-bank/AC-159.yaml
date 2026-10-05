@@ -27,5 +27,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Shipped FastAPI mock-mode /ask endpoints verifying the decryption contract locally in 1.3 ms without developer
+      Proved the decryption contract locally in 1.3 ms with FastAPI mock-mode /ask endpoints and no developer
       tokens.

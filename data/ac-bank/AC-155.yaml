@@ -26,5 +26,5 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Built Python documentation of 4 trust invariants covering BYOK key boundaries, scoped consent tokens, and
-      append-only audit receipts.
+      Documented 4 trust invariants for the Python platform covering BYOK key boundaries, scoped consent
+      tokens, and append-only audit receipts.
