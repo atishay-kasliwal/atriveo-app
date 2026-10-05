@@ -201,3 +201,23 @@ test('Select all Open & Fill queues every fillable card and opens them one at a 
     assert.ok(calls.every((c) => c.action !== 'approve_submit'), 'nothing is submitted or approved');
   } finally { await f.close(); }
 });
+
+test('Skip on a question skips its job; on a shared question, every job that asks it after a confirm', async () => {
+  const f = await fixture(); const { page, calls } = f;
+  try {
+    await page.goto(`${f.base}/unanswered`);
+    const single = page.getByRole('region', { name: 'Only for one job' });
+    await single.getByRole('article', { name: 'Why Vercel?' }).getByRole('button', { name: 'Skip job' }).click();
+    await page.getByText('1 job skipped').waitFor();
+    assert.deepEqual(calls.at(-1), { action: 'skip', applicationId: 'u2', note: 'skipped on To answer: Why Vercel?' });
+    // Vercel is gone everywhere: the shared question now lists only Rogo and Tailscale.
+    const heard = page.getByRole('region', { name: 'Asked by several jobs' }).getByRole('article', { name: 'How did you hear about us?' });
+    assert.equal(await heard.locator('.qs-count').textContent(), '2');
+    await heard.getByRole('button', { name: 'Skip 2 jobs' }).click();
+    assert.equal(calls.filter((c) => c.action === 'skip').length, 1, 'nothing more until you confirm');
+    await heard.getByRole('button', { name: 'Skip', exact: true }).click();
+    await page.getByText('3 jobs skipped').waitFor();
+    assert.deepEqual(calls.filter((c) => c.action === 'skip').map((c) => c.applicationId).sort(), ['u1', 'u2', 'u3']);
+    assert.ok(calls.every((c) => c.action === 'skip'), 'skipping answers nothing');
+  } finally { await f.close(); }
+});

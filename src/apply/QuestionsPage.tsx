@@ -29,14 +29,18 @@ export default function QuestionsPage({ header }: { header?: React.ReactNode }) 
   const [busy, setBusy] = useState<string | null>(null);
   const [results, setResults] = useState<Record<string, { ok: boolean; text: string }>>({});
   const [cleared, setCleared] = useState({ questions: 0, jobs: new Set<string>() });
+  // Jobs you skipped from a question: all their questions leave the page.
+  const [skipped, setSkipped] = useState<Record<string, true>>({});
+  const [skippedCount, setSkippedCount] = useState(0);
   const list = useRef<HTMLDivElement>(null);
 
   // Every application with a question waiting for you; their questions load in the background.
   const rows = useMemo(() => (data?.unanswered ?? []).filter((q) => (q.needsInput ?? 0) > 0), [data]);
   const rowsKey = rows.map((r) => `${r.id}@${r.updatedAt}`).join(",");
   useEffect(() => { if (rows.length) void loadCards(rows); }, [rowsKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  const apps = useMemo(() => rows.flatMap((r) => { const c = cards[r.id]; return c && c.updatedAt >= r.updatedAt ? [c] : []; }), [rows, cards]);
-  const loading = rows.length - apps.length;
+  const loaded = useMemo(() => rows.flatMap((r) => { const c = cards[r.id]; return c && c.updatedAt >= r.updatedAt ? [c] : []; }), [rows, cards]);
+  const loading = rows.length - loaded.length;
+  const apps = useMemo(() => loaded.filter((a) => !skipped[a.id]), [loaded, skipped]);
 
   const groups = useMemo(() => {
     const open = apps.map((a) => ({ ...a, questions: a.questions.filter((q) => !answered[keyOf(a, q)]) }));
@@ -95,7 +99,27 @@ export default function QuestionsPage({ header }: { header?: React.ReactNode }) 
     setTimeout(() => void refreshUnanswered(), 2000);
   };
 
-  const row = (g: Group) => <GroupRow key={g.key} g={g} busy={busy === g.key} disabled={busy !== null && busy !== g.key} result={results[g.key]} onSave={(v) => void save(g, v)} />;
+  /** Skip every job that asks this question (the engine's `skip`: the job is dropped, nothing is sent to it). */
+  const skip = async (g: Group) => {
+    if (busy) return;
+    const jobs = [...new Map(g.asked.map(({ app }) => [app.id, app])).values()];
+    setBusy(g.key);
+    const done: string[] = [];
+    let failed = 0;
+    for (let i = 0; i < jobs.length; i += 3) {
+      await Promise.all(jobs.slice(i, i + 3).map(async (app) => {
+        const res = await postAction({ action: "skip", applicationId: app.id, note: `skipped on To answer: ${g.label}`.slice(0, 300) }).catch(() => ({ ok: false }));
+        if (res.ok) done.push(app.id); else failed += 1;
+      }));
+    }
+    setBusy(null);
+    setSkipped((s) => ({ ...s, ...Object.fromEntries(done.map((id) => [id, true as const])) }));
+    setSkippedCount((n) => n + done.length);
+    if (failed) setResults((r) => ({ ...r, [g.key]: { ok: false, text: `${failed} job${failed === 1 ? "" : "s"} couldn't be skipped` } }));
+    focusNext(g.key);
+    setTimeout(() => void refreshUnanswered(), 2000);
+  };
+  const row = (g: Group) => <GroupRow key={g.key} g={g} busy={busy === g.key} disabled={busy !== null && busy !== g.key} result={results[g.key]} onSave={(v) => void save(g, v)} onSkip={() => void skip(g)} />;
 
   return (
     <div className="rv-page td-page qs-page">
@@ -108,7 +132,7 @@ export default function QuestionsPage({ header }: { header?: React.ReactNode }) 
               : `${left} question${left === 1 ? "" : "s"} · ${blocked} job${blocked === 1 ? "" : "s"} waiting on you${loading > 0 ? ` · loading ${loading} more…` : ""}`}
           </span>
         </div>
-        {cleared.questions > 0 && <span className="qs-cleared">✓ {cleared.questions} answered for {cleared.jobs.size} job{cleared.jobs.size === 1 ? "" : "s"} this session</span>}
+        {(cleared.questions > 0 || skippedCount > 0) && <span className="qs-cleared">{cleared.questions > 0 ? `✓ ${cleared.questions} answered for ${cleared.jobs.size} job${cleared.jobs.size === 1 ? "" : "s"} this session` : ""}{cleared.questions > 0 && skippedCount > 0 ? " · " : ""}{skippedCount > 0 ? `${skippedCount} job${skippedCount === 1 ? "" : "s"} skipped` : ""}</span>}
         <div className="td-actions">
           {resumeCount > 0 && <span className="apps-muted" title="Company, title, dates, education: Atriveo Fill copies them from your resume on the job page.">{resumeCount} resume fields left to Atriveo Fill</span>}
           <label className="qs-toggle"><input type="checkbox" checked={optional} onChange={(e) => setOptional(e.target.checked)} /> Show optional{optionalCount ? ` (${optionalCount})` : ""}</label>
@@ -136,8 +160,9 @@ export default function QuestionsPage({ header }: { header?: React.ReactNode }) 
 }
 
 /** One question (or one question many jobs ask): choices save on click, text on Enter. */
-function GroupRow({ g, busy, disabled, result, onSave }: { g: Group; busy: boolean; disabled: boolean; result?: { ok: boolean; text: string }; onSave: (value: string) => void }) {
+function GroupRow({ g, busy, disabled, result, onSave, onSkip }: { g: Group; busy: boolean; disabled: boolean; result?: { ok: boolean; text: string }; onSave: (value: string) => void; onSkip: () => void }) {
   const [text, setText] = useState("");
+  const [confirmSkip, setConfirmSkip] = useState(false);
   const [more, setMore] = useState(false);
   const one = g.asked.length === 1 ? g.asked[0]! : null;
   const companies = [...new Set(g.asked.map((a) => a.app.company))];
@@ -175,6 +200,10 @@ function GroupRow({ g, busy, disabled, result, onSave }: { g: Group; busy: boole
           <span title={companies.join(", ")}>{one ? <>{one.app.company} · {one.app.title} · <a href={one.app.url} target="_blank" rel="noreferrer">Job ↗</a></> : `${companies.slice(0, 3).join(", ")}${companies.length > 3 ? ` +${companies.length - 3}` : ""}`}</span>
         </div>
         {!g.required && <em className="qs-opt">optional</em>}
+        {/* One job: skip at once. Several: confirm, since it drops every one of them. */}
+        {confirmSkip
+          ? <span className="qs-skip">Skip {companies.length} job{companies.length === 1 ? "" : "s"}? <button className="apps-link danger" disabled={off} onClick={onSkip}>Skip</button> <button className="apps-link" onClick={() => setConfirmSkip(false)}>Keep</button></span>
+          : <button className="apps-link qs-skip" disabled={off} title={`Skip ${one ? "this job" : `all ${companies.length} jobs that ask this`}`} onClick={() => one ? onSkip() : setConfirmSkip(true)}>{one ? "Skip job" : `Skip ${companies.length} jobs`}</button>}
       </header>
       {input}
       {result && <p className={`qs-result ${result.ok ? "" : "is-bad"}`} role="status">{result.text}</p>}
