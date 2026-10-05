@@ -45,6 +45,8 @@ dotenv.config();
 
 const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || path.join(os.homedir(), "Documents", "tailored-resumes");
 const POLL_MS = Number(process.env.WORKER_POLL_MS || 30_000);
+// A lane: only jobs at or above this priority (e.g. 1001, the extension's Tailor), so they never wait behind bulk work.
+const MIN_PRIORITY = process.env.RESUME_MIN_PRIORITY ? Number(process.env.RESUME_MIN_PRIORITY) : null;
 const LEASE_SEC = Number(process.env.WORKER_LEASE_SEC || 900);
 const HEARTBEAT_MS = Number(process.env.WORKER_HEARTBEAT_MS || 30_000);
 const LEASE_RENEW_MS = Number(process.env.WORKER_LEASE_RENEW_MS || Math.min(120_000, (LEASE_SEC * 1000) / 4));
@@ -99,7 +101,7 @@ async function processOneJob(db) {
     return false;
   }
 
-  const jobDoc = await claimNextJob(db, WORKER_ID, LEASE_SEC);
+  const jobDoc = await claimNextJob(db, WORKER_ID, LEASE_SEC, { minPriority: MIN_PRIORITY });
   if (!jobDoc?.job_url) return false;
 
   const jobUrl = jobDoc.job_url;

@@ -403,7 +403,11 @@ export async function enqueueFreshSessionJobs(db, { limit = null, minScore = 0, 
   return results;
 }
 
-export async function claimNextJob(db, workerId, leaseSec = 900) {
+/**
+ * Claim this machine's next queued resume, best priority first. `minPriority` makes a lane: the fast lane
+ * (RESUME_MIN_PRIORITY=1001) takes only requests from the extension and the portal, beside the main worker.
+ */
+export async function claimNextJob(db, workerId, leaseSec = 900, { minPriority = null } = {}) {
   const now = new Date();
   const leaseUntil = new Date(now.getTime() + leaseSec * 1000);
 
@@ -414,6 +418,7 @@ export async function claimNextJob(db, workerId, leaseSec = 900) {
       // when this worker is idle — the requesting machine is the one that can
       // hand the finished PDF back to its user.
       "resume.owner": workerId,
+      ...(minPriority != null ? { "resume.priority": { $gte: minPriority } } : {}),
       $or: [
         { "resume.lease_until": null },
         { "resume.lease_until": { $lt: now } },
