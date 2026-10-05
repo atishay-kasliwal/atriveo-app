@@ -386,7 +386,9 @@ export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600
     if (!cur) {
       byUrl.set(d.job_url, { id: d.job_url, url: d.job_url, company: d.company ?? "", title: d.title ?? "", location: d.location ?? null,
         score: typeof d.score_pct === "number" ? d.score_pct : null, postedAt: posted, foundAt: found, track: trackOf(d.title),
-        resumeFile: d.resume?.pdf_path ? String(d.resume.pdf_path).split("/").slice(-2).join("/") : null });
+        resumeFile: d.resume?.pdf_path ? String(d.resume.pdf_path).split("/").slice(-2).join("/") : null,
+        // The tailored resume itself (Today's Resume button shows it through /serve-pdf).
+        resumePath: d.resume?.pdf_path ?? null });
     } else {
       if (typeof d.score_pct === "number") cur.score = Math.max(cur.score ?? 0, d.score_pct);
       if (found && (!cur.foundAt || found < cur.foundAt)) cur.foundAt = found;

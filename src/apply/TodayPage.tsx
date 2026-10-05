@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OpenFillQueue from "./OpenFillQueue";
 import ApplicationReview from "./ApplicationReview";
+import PdfPreviewModal from "../components/PdfPreviewModal";
 import CompanyLogo from "../components/CompanyLogo";
 import { postAction, when } from "./engine";
 import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, extensionVersion } from "./openFill";
@@ -19,7 +20,7 @@ import "./today.css";
 // a question nobody has answered come last and send you to To answer, which shows only those questions.
 
 type Kind = "you_submit" | "approve" | "fill" | "drafted" | "linkedin" | "answer";
-interface Item { track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+interface Item { resumePath?: string | null; track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
 
 /** The resume track's short name (TRACKS.yaml ids). */
 const TRACK_LABEL: Record<string, string> = { "software-engineer": "SWE", "ai-engineer": "AI", "data-science": "Data science", "data-analytics": "Analytics", "forward-deployed": "FDE" };
@@ -78,6 +79,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const [notice, setNotice] = useState("");
   const [confirmAll, setConfirmAll] = useState<"approve" | "fill" | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+  // The tailored resume of a card with no application (On LinkedIn), shown from its file.
+  const [pdf, setPdf] = useState<string | null>(null);
   useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(""), 7000); return () => clearTimeout(t); }, [notice]);
 
   const items = useMemo<Item[]>(() => {
@@ -102,7 +105,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       ...(unanswered.data?.unanswered ?? []).map(fromQueue),
       // LinkedIn postings: no application (the engine never applies on LinkedIn); same score, place and age.
       ...(linkedin.data?.linkedin ?? []).map((l): Item => ({ id: l.id, kind: "linkedin", company: l.company, title: l.title, ats: null, url: l.url,
-        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt })),
+        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null })),
     ];
     return all
       .filter((i) => done[i.id] !== i.updatedAt)
@@ -305,6 +308,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           <div className="td-review-links">
             {(item.kind === "approve" || item.kind === "you_submit") && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Answers</button>}
             {item.kind !== "linkedin" && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Resume</button>}
+            {item.kind === "linkedin" && item.resumePath && <button className="apps-btn" onClick={() => setPdf(item.resumePath!)}>Resume</button>}
             {item.url && item.kind !== "linkedin" && <a className="apps-btn" href={item.url} target="_blank" rel="noreferrer">Job ↗</a>}
           </div>
           <div className="td-links">
@@ -366,6 +370,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           </div>
         );
       })()}
+      {pdf && <PdfPreviewModal pdfPath={pdf} onClose={() => setPdf(null)} />}
       {review && <ApplicationReview key={`${review.id}:${review.mode}`} application={review} onClose={() => setReview(null)} />}
       {notice && <div className="apps-toast" role="status"><span>{notice}</span><button type="button" className="apps-toast-close" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
     </div>

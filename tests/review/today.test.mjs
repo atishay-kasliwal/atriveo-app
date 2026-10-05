@@ -16,7 +16,7 @@ const readyRow = (id, company, extra = {}) => ({ id, company, companyKey: compan
 const queued = (id, company, n, extra = {}) => ({ id, company, title: 'Backend Engineer', updatedAt: at, n, readyForReview: Math.max(0, n - 1), needsInput: n ? 1 : 0, actionRequired: 0, ...extra });
 // A LinkedIn posting with a resume ready and no application (only the LinkedIn test lists it).
 let LINKEDIN = [];
-const PENDO = [{ id: 'https://www.linkedin.com/jobs/view/111', url: 'https://www.linkedin.com/jobs/view/111', company: 'Pendo', title: 'Software Engineer', location: 'Raleigh, NC', score: 66, postedAt: null, foundAt: at, track: 'software-engineer', resumeFile: 'Pendo/Jane Doe.pdf' }];
+const PENDO = [{ id: 'https://www.linkedin.com/jobs/view/111', url: 'https://www.linkedin.com/jobs/view/111', company: 'Pendo', title: 'Software Engineer', location: 'Raleigh, NC', score: 66, postedAt: null, foundAt: at, track: 'software-engineer', resumeFile: 'Pendo/Jane Doe.pdf', resumePath: '/Users/x/Documents/tailored-resumes/Pendo/Jane Doe.pdf' }];
 const view = { ok: true, generatedAt: at, killSwitch: null, worker: { online: true, updatedAt: at }, counts: { unanswered: 4, questions: 9, ready: 3 } };
 const READY = { ...view, ready: [readyRow('r1', 'Stripe'), readyRow('r2', 'Ramp'), readyRow('m1', 'Spotify', { ats: 'lever' })], manual: [{ ...readyRow('m1', 'Spotify', { ats: 'lever' }), openFill: null }], approved: [] };
 const UNANSWERED = { ...view, unanswered: [queued('u1', 'Rogo', 4), queued('u2', 'Vercel', 5), queued('c1', 'Anthropic', 0), queued('d1', 'Figma', 3, { readyForReview: 3, needsInput: 0 }), queued('u3', 'Tailscale', 2)] };
@@ -258,7 +258,10 @@ test('LinkedIn postings show as On LinkedIn cards: the button opens the posting,
     await card.waitFor();
     assert.equal(await card.getByRole('link', { name: 'Open on LinkedIn ↗' }).getAttribute('href'), 'https://www.linkedin.com/jobs/view/111');
     assert.match(await card.locator('.td-loc').textContent(), /Raleigh, NC/);
-    assert.equal(await card.getByRole('button', { name: 'Resume' }).count(), 0, 'no application, so no resume review here');
+    // Its tailored resume opens straight from the file (no application to review).
+    await card.getByRole('button', { name: 'Resume' }).click();
+    assert.match(await page.locator('.pdf-modal-overlay iframe, .pdf-modal-overlay embed, .pdf-modal-overlay object').first().getAttribute('src').catch(() => page.locator('.pdf-modal-overlay').innerHTML()), /serve-pdf\?path=.*Pendo/);
+    await page.keyboard.press('Escape');
     await card.getByRole('button', { name: 'Discard' }).click();
     await page.getByText('Discarded 1').waitFor();
     assert.deepEqual(calls.filter((c) => c.dismiss), [{ dismiss: { jobUrl: 'https://www.linkedin.com/jobs/view/111' } }]);
