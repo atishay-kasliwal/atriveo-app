@@ -5,7 +5,7 @@ import ApplicationReview from "./ApplicationReview";
 import CompanyLogo from "../components/CompanyLogo";
 import PriorityTags from "../components/PriorityTags";
 import { postAction, when } from "./engine";
-import { armExtension, extensionVersion } from "./openFill";
+import { applyWithExtension, armExtension, canApplyAnywhere, extensionVersion } from "./openFill";
 import { adjustCounts, loadCards, refreshReady, refreshUnanswered, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
 import "../styles/applications.css";
 import "./review-pages.css";
@@ -131,10 +131,20 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   };
 
   /**
-   * Open & Fill for a form the engine hasn't verified: open its job page. Apply with Atriveo (the toolbar
-   * button there) takes it over from the worker, fills it, and lists every answer in its side panel.
+   * Open & Fill for a form the engine hasn't verified. Atriveo Fill 0.5+ opens it and fills it by itself
+   * (Greenhouse, Lever, Ashby); older versions and other sites open the page for the toolbar button.
    */
-  const openInBrowser = (item: Item) => {
+  const openInBrowser = async (item: Item) => {
+    if (canApplyAnywhere() && item.url && ["greenhouse", "lever", "ashby"].includes(item.ats ?? "")) {
+      setBusy(item.id);
+      setErrors((e) => ({ ...e, [item.id]: "" }));
+      const res = await applyWithExtension(item.url, item.id);
+      setBusy(null);
+      if (!res.ok) { setErrors((e) => ({ ...e, [item.id]: res.error ?? "Atriveo Fill didn't answer" })); return; }
+      setDone((d) => ({ ...d, [item.id]: item.updatedAt }));
+      setNotice(`Opened ${item.company}. Atriveo is filling it now; check the page and click Submit. The Atriveo icon shows what it did.`);
+      return;
+    }
     const [major = 0, minor = 0] = (extensionVersion() ?? "0.0.0").split(".").map(Number);
     if (major * 1000 + minor < 4) {
       setErrors((e) => ({ ...e, [item.id]: "Needs Atriveo Fill 0.4 or newer: reload it in chrome://extensions, then refresh this page." }));
@@ -212,7 +222,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {errors[item.id] && <p className="td-error" role="alert">{errors[item.id]}</p>}
         </div>
         <footer className="td-foot">
-          {(item.kind === "drafted" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => openInBrowser(item)}>Open & Fill</button>}
+          {(item.kind === "drafted" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => void openInBrowser(item)}>{busy === item.id ? "Opening…" : "Open & Fill"}</button>}
           {item.kind === "answer" && <button className="rv-primary" disabled={isBusy} onClick={() => navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer {item.queued?.needsInput ?? ""}</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
           {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}

@@ -133,3 +133,25 @@ test('Fill and verify all lists the approved forms and starts them only on confi
     assert.deepEqual(calls, [{ action: 'continue_application', applicationId: 'c1', expectedUpdatedAt: at }]);
   } finally { await f.close(); }
 });
+
+test('with Atriveo Fill 0.5, Open & Fill hands the job to the extension, which opens and fills it', async () => {
+  const f = await fixture(); const { page, calls } = f;
+  try {
+    // Stand-in for the extension's dashboard script: answers "apply" like 0.5 does.
+    await page.addInitScript(() => {
+      window.__asked = [];
+      document.addEventListener('DOMContentLoaded', () => document.documentElement.setAttribute('data-atriveo-fill-apply', '1'));
+      window.addEventListener('message', (e) => {
+        if (e.data?.source !== 'atriveo-dashboard') return;
+        window.__asked.push({ type: e.data.type, url: e.data.url, applicationId: e.data.applicationId });
+        window.postMessage({ source: 'atriveo-fill', type: 'armed', nonce: e.data.nonce, reply: { ok: true } }, location.origin);
+      });
+    });
+    await page.goto(`${f.base}/`);
+    await page.getByRole('article', { name: 'Figma: Answers drafted' }).getByRole('button', { name: 'Open & Fill' }).click();
+    await page.getByText(/Opened Figma\. Atriveo is filling it now/).waitFor();
+    assert.deepEqual(await page.evaluate(() => window.__asked), [{ type: 'apply', url: 'https://jobs.example.test/d1', applicationId: 'd1' }]);
+    assert.deepEqual(await page.evaluate(() => window.__opened), [], 'the extension opens the tab, not the page');
+    assert.equal(calls.length, 0);
+  } finally { await f.close(); }
+});

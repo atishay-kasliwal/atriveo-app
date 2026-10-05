@@ -9,8 +9,18 @@ export function extensionVersion(): string | null {
   return typeof document === "undefined" ? null : document.documentElement.getAttribute(EXTENSION_ATTRIBUTE);
 }
 
+/** Atriveo Fill 0.5+: Open & Fill for any application (it opens the page and fills it by itself). */
+export function canApplyAnywhere(): boolean {
+  return typeof document !== "undefined" && document.documentElement.hasAttribute("data-atriveo-fill-apply");
+}
+
+/** Open this application in a new tab and have Atriveo Fill read and fill it. Never submits. */
+export function applyWithExtension(url: string, applicationId: string, timeoutMs = 5_000): Promise<{ ok: boolean; error?: string }> {
+  return armExtension(url, applicationId, timeoutMs, false, "apply");
+}
+
 /** Ask the extension to fill this posting when it opens (15 minutes). */
-export function armExtension(url: string, applicationId: string, timeoutMs = 3_000, openTab = false): Promise<{ ok: boolean; error?: string }> {
+export function armExtension(url: string, applicationId: string, timeoutMs = 3_000, openTab = false, type: "arm" | "apply" = "arm"): Promise<{ ok: boolean; error?: string }> {
   const nonce = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   return new Promise((resolve) => {
     const done = (r: { ok: boolean; error?: string }) => { clearTimeout(timer); window.removeEventListener("message", onReply); resolve(r); };
@@ -21,6 +31,6 @@ export function armExtension(url: string, applicationId: string, timeoutMs = 3_0
       done(d.reply?.ok ? { ok: true } : { ok: false, error: d.reply?.error ?? "Atriveo Fill refused" });
     };
     window.addEventListener("message", onReply);
-    window.postMessage({ source: "atriveo-dashboard", type: "arm", url, applicationId, nonce, openTab }, window.location.origin);
+    window.postMessage({ source: "atriveo-dashboard", type, url, applicationId, nonce, openTab }, window.location.origin);
   });
 }
