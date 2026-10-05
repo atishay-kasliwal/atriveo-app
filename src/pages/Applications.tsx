@@ -628,11 +628,11 @@ function ReviewDrawer({ row, onClose, onDone }: { row: HistoryRow; onClose: () =
   );
 }
 
-const OPS_PREVIEW = 4;
+const OPS_PREVIEW = 6;
 const HISTORY_PAGE = 25;
 const OPS_VISIBLE = 10;
 
-/** Rows for the two ops panels: 4 collapsed; expanded shows 10 and scrolls the rest. */
+/** Rows for each attention column: 6 collapsed; expanded shows 10 and scrolls the rest. */
 function OpsRows({ expanded, children }: { expanded: boolean; children: React.ReactNode[] }) {
   const ref = useRef<HTMLUListElement>(null);
   const scrolls = expanded && children.length > OPS_VISIBLE;
@@ -662,57 +662,17 @@ function OpsRows({ expanded, children }: { expanded: boolean; children: React.Re
   return <ul ref={ref} className={`apps-rows ${scrolls ? "is-scroll" : ""}`}>{expanded ? children : children.slice(0, OPS_PREVIEW)}</ul>;
 }
 
-function QueuePanel({ rows, expanded, onToggle, onHistory }: { rows: HistoryRow[]; expanded: boolean; onToggle: () => void; onHistory: (id: string) => void }) {
-  const firstQueued = rows.find((h) => h.status === "READY_TO_APPLY")?.id;
+/** One column of "Needs your attention". The second column continues the first's list, so it has no header links. */
+function AttentionPanel({ rows, total, expanded, second, onToggle, onReview, onRetry, onHistory }: { rows: HistoryRow[]; total: number; expanded: boolean; second?: boolean; onToggle: () => void; onReview: (id: string) => void; onRetry: (id: string) => void; onHistory: (id: string) => void }) {
+  const titleId = second ? "attn-title-2" : "attn-title";
   return (
-    <section className="apps-panel" aria-labelledby="queue-title">
+    <section className={`apps-panel is-attn ${rows.length ? "has-items" : ""}`} aria-labelledby={titleId}>
       <div className="apps-panel-head">
-        <h2 id="queue-title">Apply queue {rows.length > 0 && <span className="apps-count">{rows.length}</span>}</h2>
+        <h2 id={titleId}>{second ? "More needing attention" : <>Needs your attention {total > 0 && <span className="apps-count warn">{total}</span>}</>}</h2>
+        {!second && <span className="apps-panel-links"><Link to="/unanswered">All questions on one page</Link><Link to="/ready">Ready to submit</Link></span>}
       </div>
       {rows.length === 0 ? (
-        <p className="apps-clear">Nothing is queued. See “Why jobs aren't being applied” below for the current reasons.</p>
-      ) : (
-        <>
-          <OpsRows expanded={expanded}>
-            {rows.map((h) => {
-              const active = h.status === "APPLYING" || h.status === "SUBMITTING";
-              return (
-                <li key={h.id}>
-                  <CompanyLogo company={h.company} size="sm" />
-                  <div className="apps-row-id">
-                    <strong>{h.company}</strong>
-                    <span>{h.title} · {when(h.updatedAt)}</span>
-                  </div>
-                  <span className={`apps-tag ${active ? "active" : ""}`}>
-                    {active && <span className="apps-pulse" aria-hidden />}
-                    {active ? STATUS_META[h.status].label : h.id === firstQueued ? "Next up" : "Queued"}
-                  </span>
-                  <span className="apps-row-act">
-                    <button className="apps-link" onClick={() => onHistory(h.id)}>History</button>
-                    <a className="apps-btn-link" href={h.url} target="_blank" rel="noreferrer">Open ↗</a>
-                  </span>
-                </li>
-              );
-            })}
-          </OpsRows>
-          {rows.length > OPS_PREVIEW && (
-            <button className="apps-link" onClick={onToggle}>{expanded ? "Show fewer" : `View full queue (${rows.length})`}</button>
-          )}
-        </>
-      )}
-    </section>
-  );
-}
-
-function AttentionPanel({ rows, total, expanded, onToggle, onReview, onRetry, onHistory }: { rows: HistoryRow[]; total: number; expanded: boolean; onToggle: () => void; onReview: (id: string) => void; onRetry: (id: string) => void; onHistory: (id: string) => void }) {
-  return (
-    <section className={`apps-panel is-attn ${rows.length ? "has-items" : ""}`} aria-labelledby="attn-title">
-      <div className="apps-panel-head">
-        <h2 id="attn-title">Needs your attention {total > 0 && <span className="apps-count warn">{total}</span>}</h2>
-        <span className="apps-panel-links"><Link to="/unanswered">All questions on one page</Link><Link to="/ready">Ready to submit</Link></span>
-      </div>
-      {rows.length === 0 ? (
-        <p className="apps-clear">Nothing is waiting for you.</p>
+        <p className="apps-clear">{second ? "Nothing more." : "Nothing is waiting for you."}</p>
       ) : (
         <>
           <OpsRows expanded={expanded}>
@@ -736,7 +696,7 @@ function AttentionPanel({ rows, total, expanded, onToggle, onReview, onRetry, on
               );
             })}
           </OpsRows>
-          {total > OPS_PREVIEW && (
+          {!second && total > 2 * OPS_PREVIEW && (
             <button className="apps-link" onClick={onToggle}>{expanded ? "Show fewer" : `View all needing review (${total})`}</button>
           )}
         </>
@@ -832,6 +792,8 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
     return () => { live = false; };
   }, [opsExpanded, data]);
   const attention = opsExpanded && allAttention ? allAttention : data?.attention ?? [];
+  // Two columns: collapsed, each shows OPS_PREVIEW rows; expanded, the list splits in half.
+  const attentionSplit = opsExpanded ? Math.ceil(attention.length / 2) : OPS_PREVIEW;
 
   // In-flight first, then queued in the order the worker claims them (priority, then oldest first).
   const queue = useMemo(() => {
@@ -906,8 +868,8 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
             </section>
 
             <div className="apps-ops">
-              <QueuePanel rows={queue} expanded={opsExpanded} onToggle={() => setOpsExpanded((v) => !v)} onHistory={setHistoryId} />
-              <AttentionPanel rows={attention} total={data.attentionTotal} expanded={opsExpanded} onToggle={() => setOpsExpanded((v) => !v)} onReview={setOpenId} onRetry={retry} onHistory={setHistoryId} />
+              <AttentionPanel rows={attention.slice(0, attentionSplit)} total={data.attentionTotal} expanded={opsExpanded} onToggle={() => setOpsExpanded((v) => !v)} onReview={setOpenId} onRetry={retry} onHistory={setHistoryId} />
+              <AttentionPanel second rows={attention.slice(attentionSplit)} total={data.attentionTotal} expanded={opsExpanded} onToggle={() => setOpsExpanded((v) => !v)} onReview={setOpenId} onRetry={retry} onHistory={setHistoryId} />
             </div>
 
             <section className="apps-insights" aria-labelledby="ins-title">
