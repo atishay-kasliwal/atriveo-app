@@ -46,6 +46,8 @@ interface Analytics {
   attentionTotal: number;
   /** LinkedIn postings (never applied by the engine): marked applied (all, today) and waiting on Today. */
   linkedin?: { applied: number; appliedToday: number; waiting: number | null };
+  /** Totals for the chosen date range (the Stats tiles). */
+  range?: { from: string; to: string; days: number; discovered: number; matched: number; queued: number; applied: number; needsReview: number; failed: number; skipped: number; linkedinApplied: number };
   queue: HistoryRow[];
   accounts?: AccountRow[];
   byStatus?: Record<string, number>;
@@ -707,9 +709,30 @@ function AttentionPanel({ rows, total, expanded, second, onToggle, onReview, onR
   );
 }
 
+// --- Date range (your time zone) ------------------------------------------------------------------
+type RangeKey = "today" | "yesterday" | "7" | "30" | "90" | "all" | "custom";
+const RANGES: Array<[RangeKey, string]> = [["today", "Today"], ["yesterday", "Yesterday"], ["7", "7 days"], ["30", "30 days"], ["90", "90 days"], ["all", "All time"], ["custom", "Custom"]];
+const etDay = (offsetDays = 0) => new Date(Date.now() - offsetDays * 86_400_000).toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+function rangeDates(key: RangeKey, custom: { from: string; to: string }): { from: string; to: string } {
+  switch (key) {
+    case "today": return { from: etDay(0), to: etDay(0) };
+    case "yesterday": return { from: etDay(1), to: etDay(1) };
+    case "7": return { from: etDay(6), to: etDay(0) };
+    case "90": return { from: etDay(89), to: etDay(0) };
+    case "all": return { from: etDay(399), to: etDay(0) };
+    case "custom": return custom.from && custom.to && custom.from <= custom.to ? custom : { from: etDay(29), to: etDay(0) };
+    default: return { from: etDay(29), to: etDay(0) };
+  }
+}
+const loadRange = (): RangeKey => { try { const v = localStorage.getItem("stats-range") as RangeKey | null; return v && RANGES.some(([k]) => k === v) ? v : "today"; } catch { return "today"; } };
+
 /** The Applications console. Lives on apply.atriveo.com; the site supplies its own header. */
 export default function Applications({ header }: { header?: React.ReactNode }) {
-  const [days, setDays] = useState(30);
+  // One date range for the whole page: tiles, charts and insights (remembered in this browser).
+  const [rangeKey, setRangeKey] = useState<RangeKey>(loadRange);
+  const [custom, setCustom] = useState({ from: etDay(6), to: etDay(0) });
+  const { from: rangeFrom, to: rangeTo } = rangeDates(rangeKey, custom);
+  const pickRange = (k: RangeKey) => { setRangeKey(k); try { localStorage.setItem("stats-range", k); } catch { /* private window */ } };
   const [data, setData] = useState<Analytics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Status | "ALL">("ALL");
@@ -721,7 +744,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch(`${getTailorServerBase()}/applications/analytics?view=summary&days=${days}`, { credentials: "include", cache: "no-store" });
+      const res = await fetch(`${getTailorServerBase()}/applications/analytics?view=summary&from=${rangeFrom}&to=${rangeTo}`, { credentials: "include", cache: "no-store" });
       const json = await res.json();
       if (!res.ok || json.ok === false) throw new Error(json.error || `HTTP ${res.status}`);
       setData(json);
@@ -729,7 +752,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
-  }, [days]);
+  }, [rangeFrom, rangeTo]);
 
   useEffect(() => {
     void load();
@@ -811,9 +834,11 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
   const done = (msg: string) => { setNotice(msg); setOpenId(null); void load(); };
 
   const k = data?.kpis;
+  const r = data?.range;
+  const rangeLabel = rangeKey === "custom" ? `${rangeFrom.slice(5)} – ${rangeTo.slice(5)}` : (RANGES.find(([key]) => key === rangeKey)?.[1] ?? "");
+  const submitted = (r?.applied ?? 0) + (r?.linkedinApplied ?? 0);
   const cur = data?.current ?? null;
   const working = Boolean(cur);
-  const today = data?.daily.at(-1);
   const needsVerify = (data?.accounts ?? []).filter((a) => a.status === "verify_email").length;
 
   return (
@@ -843,7 +868,15 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                     </span>
                   )}
                 </div>
-                <button className="apps-refresh" onClick={() => void load()} aria-label="Refresh now">Dashboard refreshed {when(data.generatedAt)} <span aria-hidden>↻</span></button>
+                <div className="apps-daterange" role="group" aria-label="Date range">
+                  {RANGES.map(([k, label]) => <button key={k} className={k === rangeKey ? "active" : ""} aria-pressed={k === rangeKey} onClick={() => pickRange(k)}>{label}</button>)}
+                  {rangeKey === "custom" && <span className="apps-daterange-custom">
+                    <input type="date" aria-label="From" value={custom.from} max={custom.to || etDay(0)} onChange={(e) => setCustom((c) => ({ ...c, from: e.target.value }))} />
+                    <span aria-hidden>→</span>
+                    <input type="date" aria-label="To" value={custom.to} min={custom.from} max={etDay(0)} onChange={(e) => setCustom((c) => ({ ...c, to: e.target.value }))} />
+                  </span>}
+                </div>
+                <button className="apps-refresh" onClick={() => void load()} aria-label="Refresh now">Refreshed {when(data.generatedAt)} <span aria-hidden>↻</span></button>
               </div>
               {cur && (
                 <div className="apps-now">
@@ -860,12 +893,13 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                 </div>
               )}
               <div className="apps-stats">
-                <Stat label="Jobs discovered" value={data.funnel[0]?.n ?? 0} sub={clock(data.lastAt?.discovered) ? `latest ${clock(data.lastAt?.discovered)}` : undefined} />
-                <Stat label="Matched / resume ready" value={data.funnel[1]?.n ?? 0} sub={clock(data.lastAt?.matched) ? `latest ${clock(data.lastAt?.matched)}` : undefined} />
-                <Stat label="Queued to apply" value={data.byStatus?.READY_TO_APPLY ?? 0} sub={clock(data.lastAt?.queued) ? `latest ${clock(data.lastAt?.queued)}` : undefined} />
-                <Stat label="Submitted today" value={(today?.applied ?? 0) + (data.linkedin?.appliedToday ?? 0)} tone={(today?.applied ?? 0) + (data.linkedin?.appliedToday ?? 0) ? "good" : undefined} sub={[data.linkedin?.applied ? `${k.applied + data.linkedin.applied} total (${data.linkedin.applied} on LinkedIn)` : `${k.applied} total`, clock(data.lastAt?.applied) && `last ${clock(data.lastAt?.applied)}`, duration(data.lastAt?.avgApplyMs) && `avg ${duration(data.lastAt?.avgApplyMs)}`].filter(Boolean).join(" · ")} />
-                <Stat label="Need your review" value={k.needsReview} tone={k.needsReview ? "warn" : undefined} sub={[data.linkedin?.waiting ? `+${data.linkedin.waiting} on LinkedIn` : null, clock(data.lastAt?.needsReview) ? `latest ${clock(data.lastAt?.needsReview)}` : null].filter(Boolean).join(" · ") || undefined} />
-                <Stat label="Failed" value={k.failed} tone={k.failed ? "bad" : undefined} sub={clock(data.lastAt?.failed) ? `latest ${clock(data.lastAt?.failed)}` : undefined} />
+                {/* Every tile counts what happened in the chosen range; "now" lines are the current state. */}
+                <Stat label={`Jobs discovered · ${rangeLabel}`} value={r?.discovered ?? data.funnel[0]?.n ?? 0} sub={[`${data.funnel[0]?.n ?? 0} all-time`, clock(data.lastAt?.discovered) && `latest ${clock(data.lastAt?.discovered)}`].filter(Boolean).join(" · ")} />
+                <Stat label={`Resumes built · ${rangeLabel}`} value={r?.matched ?? data.funnel[1]?.n ?? 0} sub={[`${data.funnel[1]?.n ?? 0} ready all-time`, clock(data.lastAt?.matched) && `latest ${clock(data.lastAt?.matched)}`].filter(Boolean).join(" · ")} />
+                <Stat label={`Queued · ${rangeLabel}`} value={r?.queued ?? 0} sub={`${data.byStatus?.READY_TO_APPLY ?? 0} in the queue now`} />
+                <Stat label={`Submitted · ${rangeLabel}`} value={submitted} tone={submitted ? "good" : undefined} sub={[r?.linkedinApplied ? `${r.linkedinApplied} on LinkedIn` : null, `${k.applied + (data.linkedin?.applied ?? 0)} all-time`, clock(data.lastAt?.applied) && `last ${clock(data.lastAt?.applied)}`, duration(data.lastAt?.avgApplyMs) && `avg ${duration(data.lastAt?.avgApplyMs)}`].filter(Boolean).join(" · ")} />
+                <Stat label={`Sent to review · ${rangeLabel}`} value={r?.needsReview ?? k.needsReview} tone={(r?.needsReview ?? k.needsReview) ? "warn" : undefined} sub={[`${k.needsReview} waiting now`, data.linkedin?.waiting ? `+${data.linkedin.waiting} on LinkedIn` : null].filter(Boolean).join(" · ")} />
+                <Stat label={`Failed · ${rangeLabel}`} value={r?.failed ?? k.failed} tone={(r?.failed ?? k.failed) ? "bad" : undefined} sub={[`${k.failed} all-time`, clock(data.lastAt?.failed) && `latest ${clock(data.lastAt?.failed)}`].filter(Boolean).join(" · ")} />
               </div>
             </section>
 
@@ -877,9 +911,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
             <section className="apps-insights" aria-labelledby="ins-title">
               <div className="apps-insights-head">
                 <h2 id="ins-title">Application insights</h2>
-                <div className="apps-range" role="group" aria-label="Time range">
-                  {[14, 30, 90].map((d) => <button key={d} className={d === days ? "active" : ""} onClick={() => setDays(d)}>{d}d</button>)}
-                </div>
+                <span className="apps-muted">{rangeLabel === "Today" || rangeLabel === "Yesterday" ? rangeLabel : `${rangeFrom} → ${rangeTo}`} · set at the top</span>
               </div>
 
               {data.inbox && (

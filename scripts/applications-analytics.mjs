@@ -722,11 +722,24 @@ const OUTCOME_AT = { $switch: { branches: [
 const dayOf = (field) => ({ $dateToString: { date: { $toDate: field }, format: "%Y-%m-%d", timezone: TZ } });
 
 /** The Overview without its history: the same numbers as the full response, computed in Mongo. */
-export async function overviewSummary(db, { days = 30 } = {}) {
+/** The day keys (YYYY-MM-DD, America/New_York) from `from` to `to`, inclusive; at most 400. */
+function daysBetween(from, to) {
+  const out = [];
+  for (let t = Date.parse(`${from}T12:00:00Z`); out.length < 400 && dayKey(new Date(t).toISOString()) <= to; t += 86_400_000) out.push(dayKey(new Date(t).toISOString()));
+  return out;
+}
+
+/**
+ * The Stats page. `from`/`to` (YYYY-MM-DD, your time zone) choose its date range: the daily series and every
+ * range total (`range`) cover those days. Without them, the last `days` days ending today.
+ */
+export async function overviewSummary(db, { days = 30, from = null, to = null } = {}) {
   const apps = db.collection("applications");
   const inboxSince = new Date(Date.now() - 60 * 86_400_000).toISOString();
+  const rangeDays = from && to ? daysBetween(from, to) : null;
+  if (rangeDays) days = rangeDays.length;
   // A day of margin either side; the day keys below decide what counts.
-  const windowSince = new Date(Date.now() - (days + 1) * 86_400_000).toISOString();
+  const windowSince = new Date((rangeDays ? Date.parse(`${rangeDays[0]}T00:00:00Z`) : Date.now()) - (rangeDays ? 1 : days + 1) * 86_400_000).toISOString();
   const [statusRows, atsRows, reasonRows, failureRows, pendingRows, patternRows, control, boardRows, siteRows, resumeReady, discovered, accountRows, workerDocs, inboxRows, queueReportDoc,
     timeline, recent, current, attention, queue, lastJob, lastResume] = await Promise.all([
     apps.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]).toArray(),
@@ -779,7 +792,7 @@ export async function overviewSummary(db, { days = 30 } = {}) {
   const byStatus = Object.fromEntries(statusRows.map((r) => [r._id, r.n]));
   const total = statusRows.reduce((s, r) => s + r.n, 0);
   const today = new Date();
-  const daysList = Array.from({ length: days }, (_, i) => dayKey(new Date(today.getTime() - (days - 1 - i) * 86_400_000).toISOString()));
+  const daysList = rangeDays ?? Array.from({ length: days }, (_, i) => dayKey(new Date(today.getTime() - (days - 1 - i) * 86_400_000).toISOString()));
   const daily = new Map(daysList.map((d) => [d, { day: d, queued: 0, applied: 0, needsReview: 0, failed: 0, skipped: 0 }]));
   const { last, queued, outcomes } = timeline[0];
   for (const r of queued) { const d = daily.get(r._id); if (d) d.queued += r.n; }
@@ -815,12 +828,26 @@ export async function overviewSummary(db, { days = 30 } = {}) {
   const cur = current[0];
   const attempt = cur ? (cur.attempts ?? []).filter((a) => !a.endedAt).pop() ?? (cur.attempts ?? []).at(-1) ?? null : null;
   // LinkedIn postings (the engine never applies there): ones you marked applied, and ones waiting on Today.
-  const [linkedinApplied, linkedinWaiting] = await Promise.all([
+  const rangeFrom = daysList[0], rangeTo = daysList[daysList.length - 1];
+  const inDays = { $gte: rangeFrom, $lte: rangeTo };
+  const [linkedinApplied, linkedinWaiting, discoveredIn, matchedIn] = await Promise.all([
     db.collection("job_swipes").find({ direction: "applied" }, { projection: { _id: 0, applied_at: 1 } }).toArray(),
     linkedinJobs(db).then((l) => l.length).catch(() => null),
+    // Jobs first found in the range (job-pipeline keeps a document per session: the earliest run_at counts).
+    db.collection("jobs").aggregate([{ $group: { _id: "$job_url", first: { $min: "$run_at" } } }, { $match: { first: { $ne: null } } }, { $project: { day: dayOf("$first") } }, { $match: { day: inDays } }, { $count: "n" }]).toArray(),
+    // Resumes finished in the range.
+    db.collection("jobs").aggregate([{ $match: { "resume.status": "success", "resume.updated_at": { $ne: null } } }, { $group: { _id: "$job_url", at: { $max: "$resume.updated_at" } } }, { $project: { day: dayOf("$at") } }, { $match: { day: inDays } }, { $count: "n" }]).toArray(),
   ]);
   const todayKey = dayKey(new Date().toISOString());
   const linkedin = { applied: linkedinApplied.length, appliedToday: linkedinApplied.filter((a) => dayKey(a.applied_at) === todayKey).length, waiting: linkedinWaiting };
+  // Totals for the chosen days (the Stats tiles): what happened in the range, LinkedIn included.
+  const sum = (key) => daysList.reduce((n, d) => n + (daily.get(d)?.[key] ?? 0), 0);
+  const range = {
+    from: rangeFrom, to: rangeTo, days: daysList.length,
+    discovered: discoveredIn[0]?.n ?? 0, matched: matchedIn[0]?.n ?? 0,
+    queued: sum("queued"), applied: sum("applied"), needsReview: sum("needsReview"), failed: sum("failed"), skipped: sum("skipped"),
+    linkedinApplied: linkedinApplied.filter((a) => { const d = dayKey(a.applied_at); return d && d >= rangeFrom && d <= rangeTo; }).length,
+  };
 
   return {
     ok: true,
@@ -866,6 +893,7 @@ export async function overviewSummary(db, { days = 30 } = {}) {
     attentionTotal: (byStatus.NEEDS_REVIEW ?? 0) + (byStatus.FAILED ?? 0),
     queue,
     linkedin,
+    range,
   };
 }
 

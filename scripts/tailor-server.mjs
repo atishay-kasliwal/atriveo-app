@@ -1798,9 +1798,12 @@ const server = http.createServer(async (req, res) => {
       try {
         if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
         const params = new URL(req.url, "http://x").searchParams;
-        const days = Math.min(Math.max(Number(params.get("days")) || 30, 7), 180);
+        const days = Math.min(Math.max(Number(params.get("days")) || 30, 1), 400);
+        // A date range (YYYY-MM-DD, America/New_York days) for the Stats page; otherwise the last `days` days.
+        const day = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || "")) ? String(v) : null);
+        const from = day(params.get("from")), to = day(params.get("to"));
         const view = params.get("view");
-        const data = await withMongo((db) => view === "summary" ? overviewSummary(db, { days })
+        const data = await withMongo((db) => view === "summary" ? overviewSummary(db, from && to && from <= to ? { from, to } : { days })
           : view === "history" ? overviewHistory(db, {
             status: String(params.get("status") || "ALL").slice(0, 120), q: String(params.get("q") || ""),
             skip: Math.min(Math.max(Number(params.get("skip")) || 0, 0), 100_000), limit: Math.min(Math.max(Number(params.get("limit")) || 25, 1), 500),

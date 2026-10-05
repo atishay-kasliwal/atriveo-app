@@ -55,6 +55,17 @@ test('the Overview summary has the full response\'s numbers; history pages, filt
     for (const k of ['kpis', 'funnel', 'byStatus', 'daily', 'reviewReasons', 'failureCodes', 'formTrust', 'killSwitch', 'current', 'lastActivityAt', 'lastAt', 'worker'])
       assert.deepEqual(summary[k], full[k], k);
     assert.deepEqual(sorted(summary.byAts, 'ats'), sorted(full.byAts, 'ats'));
+    // A date range: the daily series and the range totals cover exactly those days; the 30-day totals equal the series.
+    const sumOf = (rows, key) => rows.reduce((n, d) => n + d[key], 0);
+    assert.equal(summary.range.applied, sumOf(summary.daily, 'applied'));
+    assert.equal(summary.range.failed, sumOf(summary.daily, 'failed'));
+    const lastWeek = summary.daily.slice(-7);
+    const week = await overviewSummary(db, { from: lastWeek[0].day, to: lastWeek[6].day });
+    assert.equal(week.daily.length, 7);
+    assert.deepEqual(week.daily.map((d) => d.day), lastWeek.map((d) => d.day));
+    assert.equal(week.range.applied, sumOf(lastWeek, 'applied'));
+    assert.equal(week.range.needsReview, sumOf(lastWeek, 'needsReview'));
+    assert.ok(week.range.discovered <= summary.range.discovered && week.range.matched <= summary.range.matched);
     assert.deepEqual(sorted(summary.discovery.boards, 'ats'), sorted(full.discovery.boards, 'ats'));
     assert.deepEqual(sorted(summary.discovery.jobsBySite, 'site'), sorted(full.discovery.jobsBySite, 'site'));
     // Ties in question counts come back in any order from the full response; the summary breaks them by label.
