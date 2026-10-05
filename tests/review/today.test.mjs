@@ -192,16 +192,27 @@ test('Select all Open & Fill queues every fillable card and opens them one at a 
         setTimeout(() => window.postMessage({ source: 'atriveo-fill', type: 'armed', nonce: e.data.nonce, reply: { ok: true, auto: { state: 'filled', message: 'Filled 3.' } } }, location.origin), 50);
       });
     });
+    // The application's status: still in review until you submit it (submitted is APPLIED).
+    const status = {};
+    await page.route('**/applications/detail?**', (route) => route.fulfill({ json: { ok: true, status: status[new URL(route.request().url()).searchParams.get('id')] ?? 'NEEDS_REVIEW' } }));
     await page.goto(`${f.base}/`);
     await page.getByRole('button', { name: /^Select all Open & Fill \(\d+\)$/ }).click();
     await page.getByRole('button', { name: /^Open & Fill selected \(\d+\)$/ }).click();
     // Spotify (You submit) takes the verified path; this fake sidecar gives it no form, so the queue pauses on it.
     await page.getByRole('button', { name: 'Skip & continue' }).click();
+    const applies = async () => (await page.evaluate(() => window.__asked)).filter((a) => a.type === 'apply').map((a) => a.applicationId);
+    // The first is filled: the queue waits for your Submit; nothing else opens meanwhile.
+    await page.getByRole('button', { name: 'Next ›' }).waitFor();
+    const first = (await applies())[0];
+    await page.waitForTimeout(5000);
+    assert.deepEqual(await applies(), [first], 'the next one waits until this one is submitted');
+    // You submit it: the queue moves on by itself to the second, which you move past with Next.
+    status[first] = 'APPLIED';
+    await page.waitForFunction((n) => window.__asked.filter((a) => a.type === 'apply').length === n, 2, { timeout: 15_000 });
+    await page.getByRole('button', { name: 'Next ›' }).click();
     await page.getByText(/Queue finished/).waitFor();
-    const asked = await page.evaluate(() => window.__asked);
-    const applies = asked.filter((a) => a.type === 'apply');
-    assert.deepEqual(applies.map((a) => a.applicationId).sort(), ['c1', 'd1'], 'the approved and drafted cards, each through the extension');
-    assert.ok(applies.every((a) => a.wait === true), 'each waits for its fill before the next');
+    assert.deepEqual((await applies()).sort(), ['c1', 'd1'], 'the approved and drafted cards, each through the extension');
+    assert.ok((await page.evaluate(() => window.__asked)).filter((a) => a.type === 'apply').every((a) => a.wait === true), 'each waits for its fill before the next');
     assert.ok(calls.every((c) => c.action !== 'approve_submit'), 'nothing is submitted or approved');
   } finally { await f.close(); }
 });

@@ -11,7 +11,24 @@ export default function OpenFillQueue({ selected, onFinish, onRunning, onFilled 
   const [message, setMessage] = useState("");
   const [paused, setPaused] = useState(false);
   const [error, setError] = useState(false);
-  const controls = useRef({ stop: false, pause: false, skip: false });
+  const controls = useRef({ stop: false, pause: false, skip: false, next: false });
+  // The application the queue waits on: you finish it and click Submit (or press Next) before the next one opens.
+  const [waitingOn, setWaitingOn] = useState<string | null>(null);
+
+  /** Until this application is submitted (or skipped), or you press Next / Stop. Checks every few seconds. */
+  async function untilSubmitted(job: Entry, intro: string): Promise<void> {
+    controls.current.next = false;
+    setWaitingOn(job.company);
+    setMessage(`${intro} Finish it and click Submit; the next one opens once it's submitted, or press Next.`);
+    let n = 0;
+    while (!controls.current.stop && !controls.current.next) {
+      await wait();
+      if ((n += 1) % 4) continue;
+      const d = await getJson<{ status?: string }>(`/applications/detail?id=${encodeURIComponent(job.id)}`).catch(() => null);
+      if (d?.status === "APPLIED" || d?.status === "SKIPPED") break;
+    }
+    setWaitingOn(null);
+  }
   useEffect(() => () => { controls.current.stop = true; }, []);
   async function start() {
     if (running) return;
@@ -22,7 +39,7 @@ export default function OpenFillQueue({ selected, onFinish, onRunning, onFilled 
       setMessage("Reload Atriveo Fill 0.7.1 or newer in chrome://extensions, then refresh this page."); return;
     }
     const jobs = [...selected];
-    controls.current = { stop: false, pause: false, skip: false };
+    controls.current = { stop: false, pause: false, skip: false, next: false };
     setRunning(true); onRunning(true); setError(false); setPaused(false);
     for (let i = 0; i < jobs.length && !controls.current.stop; i++) {
       while (controls.current.pause && !controls.current.stop) await wait();
@@ -35,7 +52,9 @@ export default function OpenFillQueue({ selected, onFinish, onRunning, onFilled 
           const r = await applyWithExtension(job.url, job.id, 240_000, true);
           if (controls.current.stop) break;
           if (!r.ok) throw new Error(r.error || "Atriveo Fill didn't answer");
-          if (r.auto?.state !== "filled") throw new Error(r.auto?.message || "The fill didn't finish. Check its tab.");
+          // Filled or not, the form stays open for you: answers it couldn't fill and the resume are yours to finish.
+          await untilSubmitted(job, `${i + 1}/${jobs.length} · ${job.company}: ${r.auto?.message ?? "open in its tab."}`);
+          if (controls.current.stop) break;
           onFilled?.(job.id);
           continue;
         }
@@ -58,13 +77,14 @@ export default function OpenFillQueue({ selected, onFinish, onRunning, onFilled 
           const next = await getJson<ReadyQueue>("/applications/review-queue?view=ready");
           const result = next.manual?.find(a => a.id === job.id)?.openFill;
           if (result?.armedAt && result.armedAt !== current.openFill?.armedAt && result.filledAt && Date.parse(result.filledAt) >= Date.parse(result.armedAt)) {
-            if (result.toCheck !== 0) throw new Error("The form needs your attention. Check its tab before continuing.");
             complete = true; break;
           }
         }
         if (controls.current.stop) break;
         if (!complete) throw new Error("No completed fill report arrived. Check the form for verification, CAPTCHA, or errors.");
         void refreshReady();
+        await untilSubmitted(job, `${i + 1}/${jobs.length} · ${job.company} is filled.`);
+        if (controls.current.stop) break;
         onFilled?.(job.id);
       } catch (e) {
         setMessage(`${job.company}: ${e instanceof Error ? e.message : String(e)}`);
@@ -81,6 +101,7 @@ export default function OpenFillQueue({ selected, onFinish, onRunning, onFilled 
   return <div className="td-fill-queue">
     {!running && <button className="apps-btn" disabled={!selected.length} onClick={() => void start()}>Open & Fill selected ({selected.length})</button>}
     {running && <>
+      {waitingOn && <button className="rv-primary td-next" onClick={() => { controls.current.next = true; }} title={`Move on without waiting for ${waitingOn} to be submitted`}>Next ›</button>}
       {!error && <button className="apps-btn" onClick={() => { controls.current.pause = !controls.current.pause; setPaused(controls.current.pause); }}>{paused ? "Resume queue" : "Pause after current"}</button>}
       {error && <button className="apps-btn" onClick={() => { controls.current.skip = true; }}>Skip & continue</button>}
       <button className="apps-btn" onClick={() => { controls.current.stop = true; }}>Stop queue</button>
