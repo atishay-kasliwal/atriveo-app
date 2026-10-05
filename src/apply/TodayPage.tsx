@@ -19,7 +19,10 @@ import "./today.css";
 // a question nobody has answered come last and send you to To answer, which shows only those questions.
 
 type Kind = "you_submit" | "approve" | "fill" | "drafted" | "answer";
-interface Item { toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+interface Item { track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+
+/** The resume track's short name (TRACKS.yaml ids). */
+const TRACK_LABEL: Record<string, string> = { "software-engineer": "SWE", "ai-engineer": "AI", "data-science": "Data science", "data-analytics": "Analytics", "forward-deployed": "FDE" };
 
 /** A North Carolina job (they come first). */
 const NC = /\b(NC|North Carolina|Raleigh|Durham|Charlotte|Cary|Chapel Hill|Morrisville|Research Triangle|RTP|Greensboro|Winston[- ]Salem|Wilmington|Apex)\b/i;
@@ -79,14 +82,14 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const manual = ready.data?.manual ?? [];
     const manualIds = new Set(manual.map((r) => r.id));
     const fromReady = (r: ReadyApp, kind: Kind): Item => ({ id: r.id, kind, company: r.company, title: r.title, ats: r.ats, url: r.url, updatedAt: r.updatedAt, priorityTags: r.priorityTags, ready: r,
-      location: r.location, score: r.score ?? null, age: r.postedAt ?? r.foundAt ?? r.createdAt ?? null });
+      location: r.location, score: r.score ?? null, track: r.track ?? null, age: r.postedAt ?? r.foundAt ?? r.createdAt ?? null });
     const fromQueue = (q: QueuedApp): Item => {
       const c = cards[q.id];
       // Only required questions nobody answered hold it back (optional ones and resume fields are left to the page).
       const current = c && c.updatedAt >= q.updatedAt ? c : null;
       const toAnswer = current ? current.questions.filter(blocking).length : q.needsInput ?? 0;
       return { toAnswer, id: q.id, kind: !q.n ? "fill" : toAnswer > 0 ? "answer" : "drafted", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? null, url: c?.url, updatedAt: q.updatedAt, priorityTags: q.priorityTags ?? c?.priorityTags, queued: q,
-        location: q.location ?? c?.location ?? null, score: q.score ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null };
+        location: q.location ?? c?.location ?? null, score: q.score ?? null, track: q.track ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null };
     };
     // What you can act on now comes first (Open & Fill: approved or drafted alike), then what needs answers;
     // within each, North Carolina first, then the newest posting, then the best match.
@@ -256,7 +259,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {item.location && <span className={`td-loc ${nc ? "is-nc" : ""}`} title={item.location}>{nc ? "★ " : ""}{item.location}</span>}
           {age && <span className="td-age" title={item.age ?? undefined}>{age}</span>}
         </div>
-        <div className="td-tags"><span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
+        <div className="td-tags"><span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
         <div className="td-body">
           {item.kind === "drafted" && q && <>
             <p className="td-big">{drafted || q.n} answer{(drafted || q.n) === 1 ? "" : "s"} drafted</p>

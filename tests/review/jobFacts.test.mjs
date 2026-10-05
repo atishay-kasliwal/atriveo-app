@@ -31,5 +31,6 @@ test('unanswered rows carry score, postedAt and foundAt from jobs, and no job_ur
     assert.equal(r.foundAt, '2026-09-30T05:00:00.000Z');
     assert.equal(r.location, 'Raleigh, NC');
     assert.equal(r.jobUrls, undefined);
+    assert.equal(r.track, 'software-engineer', 'its title (Engineer) puts it on the software engineer track');
   } finally { await client.close(); await mongo.stop(); }
 });

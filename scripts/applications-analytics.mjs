@@ -4,6 +4,7 @@
 // at GET /applications/analytics (behind the site login via the /tailor relay).
 
 import fs from "node:fs";
+import { classifyTrack, loadTracks } from "./ac-tracks.mjs";
 
 const TZ = "America/New_York";
 const dayKey = (iso) => (iso ? new Date(iso).toLocaleString("sv-SE", { timeZone: TZ }).slice(0, 10) : null);
@@ -205,10 +206,15 @@ const IN_BROWSER = { owner: "extension", status: "NEEDS_REVIEW" };
 /** Applications open in your browser, newest first. */
 const inBrowserRows = async (apps, now) => (await apps.aggregate([{ $match: IN_BROWSER }, { $sort: { updatedAt: -1 } }, { $limit: 100 }, reviewRow(false)]).toArray()).map((r) => inBrowserRow(r, now));
 
+/** The resume track a job's title puts it on (TRACKS.yaml), or null. */
+let tracksDoc = null;
+const trackOf = (title) => { try { tracksDoc ??= loadTracks(); return classifyTrack(title, tracksDoc); } catch { return null; } };
+
 const rowBase = (r) => ({
   id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
   url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, priorityTags: r.priorityTags ?? [], updatedAt: r.updatedAt,
   createdAt: r.createdAt ?? null, score: r.score ?? null, postedAt: r.postedAt ?? null, foundAt: r.foundAt ?? null,
+  track: trackOf(r.title),
 });
 
 /**
@@ -241,6 +247,7 @@ async function addJobFacts(db, rows) {
       if (f.foundAt && (!r.foundAt || f.foundAt < r.foundAt)) r.foundAt = f.foundAt;
     }
     r.score ??= null; r.postedAt ??= null; r.foundAt ??= null;
+    r.track = trackOf(r.title);
     delete r.jobUrls;
   }
   return rows;

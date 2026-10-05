@@ -115,3 +115,9 @@
 .td-links .td-discard:hover { color: var(--red, #ef4444); }
 .td-confirm { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
 .td-strip li { backdrop-filter: blur(6px); }
+.td-track { font-size: 10.5px; font-weight: 700; letter-spacing: .03em; padding: 3px 8px; border-radius: 999px; border: 1px solid currentColor; }
+.td-track.is-ai-engineer { color: #a78bfa; }
+.td-track.is-software-engineer { color: #60a5fa; }
+.td-track.is-data-science { color: #34d399; }
+.td-track.is-data-analytics { color: #fbbf24; }
+.td-track.is-forward-deployed { color: #f472b6; }
