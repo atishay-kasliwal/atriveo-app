@@ -172,6 +172,8 @@ async function processOneJob(db) {
         score_pct: jobDoc.score_pct ?? null,
         // Drives the resume header city — see ac-header-location.mjs.
         location: jobDoc.location ?? jobDoc.resume?.location ?? null,
+        // A job flagged for a fresh build (e.g. after a template fix) skips the resume cache.
+        force_recompile: jobDoc.force_recompile === true,
       },
       seq,
       dateDir,

@@ -14,7 +14,9 @@ import { scoreResumeCandidate } from "./ac-artifacts.mjs";
 import { optimizeResumeGlobally } from "./ac-global-optimize.mjs";
 import { buildComposeExplain } from "./ac-compose-explain.mjs";
 
-export const PIPELINE_VERSION = "2.0.0";
+// Part of every resume cache key: bump it when the output changes for the same JD and bank
+// (2.1.0: role tracks, title-only experience lines, Education after the header).
+export const PIPELINE_VERSION = "2.1.0";
 
 export const PIPELINE_STEPS = [
   "load_bank",
