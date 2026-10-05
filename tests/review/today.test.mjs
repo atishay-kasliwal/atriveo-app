@@ -219,3 +219,27 @@ test('Skip on a question skips its job; on a shared question, every job that ask
     assert.ok(calls.every((c) => c.action === 'skip'), 'skipping answers nothing');
   } finally { await f.close(); }
 });
+
+test('within Open & Fill: North Carolina first, then the newest posting; score and age on the card; Discard', async () => {
+  const saved = UNANSWERED.unanswered.map((q) => ({ ...q }));
+  Object.assign(UNANSWERED.unanswered.find((q) => q.id === 'c1'), { location: 'New York, NY', postedAt: '2026-10-04T10:00:00.000Z', score: 72 });
+  Object.assign(UNANSWERED.unanswered.find((q) => q.id === 'd1'), { location: 'Raleigh, NC', postedAt: '2026-09-20T10:00:00.000Z', score: 20 });
+  const f = await fixture(); const { page, calls } = f;
+  try {
+    await page.route('**/applications/action', (route) => {
+      const body = route.request().postDataJSON(); calls.push(body);
+      return route.fulfill({ json: body.operation === 'preview' ? { ok: true, targets: body.ids.map((id) => ({ id, updatedAt: at })) } : { ok: true, discarded: body.targets.map((t) => t.id), errors: [] } });
+    });
+    await page.goto(`${f.base}/`);
+    await page.getByRole('heading', { name: 'Today', exact: true }).waitFor();
+    const names = await page.locator('.td-card .td-id strong').allTextContents();
+    assert.deepEqual(names.slice(3, 5), ['Figma', 'Anthropic'], 'the North Carolina job comes before a newer New York one');
+    const anthropic = page.getByRole('article', { name: 'Anthropic: Answers approved' });
+    assert.equal(await anthropic.locator('.td-score').textContent(), '72');
+    assert.match(await page.getByRole('article', { name: 'Figma: Answers drafted' }).locator('.td-loc').textContent(), /★ Raleigh, NC/);
+    await anthropic.getByRole('button', { name: 'Discard' }).click();
+    await page.getByText('Discarded 1').waitFor();
+    assert.deepEqual(calls.filter((c) => c.action === 'discard_applications').map((c) => c.operation), ['preview', 'confirm']);
+    assert.equal(await anthropic.count(), 0, 'a discarded card leaves Today');
+  } finally { await f.close(); UNANSWERED.unanswered.splice(0, UNANSWERED.unanswered.length, ...saved); }
+});

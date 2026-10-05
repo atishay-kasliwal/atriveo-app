@@ -34,6 +34,9 @@ interface Row {
   url: string; priority: number; updatedAt: string;
   /** Why it sits where it does in the application order (job-pipeline priority tags). */
   priorityTags?: string[];
+  createdAt?: string | null;
+  /** job-pipeline's match score (score_pct), when the posting went up, and when the pipeline found it. */
+  score?: number | null; postedAt?: string | null; foundAt?: string | null;
 }
 export interface UnansweredApp extends Row { reviewStage?: "questions" | "final_form" | null; reviewReason: string | null; questionReviewStatus: "open" | "complete" | null; questions: PendingQ[] }
 export interface ReadyApp extends Row {
@@ -53,7 +56,7 @@ export interface ApprovedApp extends Row {
   submittedAt: string | null; approvedAt: string | null;
 }
 /** An application blocked on questions, in the Unanswered page's order; its card loads when it's needed. */
-export interface QueuedApp { company?: string; title?: string; id: string; updatedAt: string; n: number; suggestions?: number; readyForReview?: number; needsInput?: number; actionRequired?: number }
+export interface QueuedApp { location?: string | null; createdAt?: string | null; priorityTags?: string[]; score?: number | null; postedAt?: string | null; foundAt?: string | null; company?: string; title?: string; id: string; updatedAt: string; n: number; suggestions?: number; readyForReview?: number; needsInput?: number; actionRequired?: number }
 
 interface View extends EngineState { ok: boolean; generatedAt: string; counts: Counts }
 export interface UnansweredQueue extends View { unanswered: QueuedApp[] }

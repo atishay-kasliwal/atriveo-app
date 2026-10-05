@@ -147,7 +147,7 @@ const size = (path) => ({ $size: { $ifNull: [path, []] } });
  */
 const reviewRow = (withQuestions) => ({
   $project: {
-    company: 1, companyKey: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, priorityTags: 1, applyUrl: 1, finalUrl: 1, createdAt: 1, updatedAt: 1,
+    company: 1, companyKey: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, priorityTags: 1, applyUrl: 1, finalUrl: 1, createdAt: 1, updatedAt: 1, jobUrls: 1,
     "resume.fileName": 1, "resume.sha256": 1, "failure.code": 1,
     "submission.attemptedAt": 1, "submission.submittedAt": 1, "submission.validation.passed": 1, "submission.formSignature": 1,
     "submission.approvalRequestedAt": 1, "submission.approvalInAttemptAt": 1, "submission.certification.status": 1,
@@ -208,7 +208,43 @@ const inBrowserRows = async (apps, now) => (await apps.aggregate([{ $match: IN_B
 const rowBase = (r) => ({
   id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
   url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, priorityTags: r.priorityTags ?? [], updatedAt: r.updatedAt,
+  createdAt: r.createdAt ?? null, score: r.score ?? null, postedAt: r.postedAt ?? null, foundAt: r.foundAt ?? null,
 });
+
+/**
+ * The job-pipeline facts behind each application (Today sorts and shows them): match score (score_pct), when the
+ * posting went up (date_posted) and when the pipeline first found it (run_at). Read from `jobs` by the
+ * application's job_urls in one query; several documents per URL keep the best score and the earliest dates.
+ * Sets score / postedAt / foundAt on each row and drops jobUrls.
+ */
+const isoOf = (v) => { if (!v || v === "null") return null; const d = new Date(v); return Number.isNaN(d.getTime()) ? null : d.toISOString(); };
+async function addJobFacts(db, rows) {
+  const urls = [...new Set(rows.flatMap((r) => r.jobUrls ?? []))];
+  const facts = new Map();
+  if (urls.length) {
+    const docs = await db.collection("jobs").find({ job_url: { $in: urls } }, { projection: { _id: 0, job_url: 1, score_pct: 1, date_posted: 1, run_at: 1 } }).toArray();
+    for (const j of docs) {
+      const f = facts.get(j.job_url) ?? { score: null, postedAt: null, foundAt: null };
+      if (typeof j.score_pct === "number") f.score = Math.max(f.score ?? 0, j.score_pct);
+      const posted = isoOf(j.date_posted), found = isoOf(j.run_at);
+      if (posted && (!f.postedAt || posted < f.postedAt)) f.postedAt = posted;
+      if (found && (!f.foundAt || found < f.foundAt)) f.foundAt = found;
+      facts.set(j.job_url, f);
+    }
+  }
+  for (const r of rows) {
+    for (const u of r.jobUrls ?? []) {
+      const f = facts.get(u);
+      if (!f) continue;
+      if (f.score !== null) r.score = Math.max(r.score ?? 0, f.score);
+      if (f.postedAt && (!r.postedAt || f.postedAt < r.postedAt)) r.postedAt = f.postedAt;
+      if (f.foundAt && (!r.foundAt || f.foundAt < r.foundAt)) r.foundAt = f.foundAt;
+    }
+    r.score ??= null; r.postedAt ??= null; r.foundAt ??= null;
+    delete r.jobUrls;
+  }
+  return rows;
+}
 
 async function engineState(db) {
   const [control, workerDocs] = await Promise.all([
@@ -229,14 +265,14 @@ const categoryCount = category => ({ $size: { $filter: { input: { $ifNull: ["$re
 const unansweredOrder = (apps) => apps.aggregate([
   { $match: BLOCKED },
   { $project: {
-    updatedAt: 1, company: 1, title: 1,
+    updatedAt: 1, company: 1, title: 1, location: 1, createdAt: 1, priorityTags: 1, jobUrls: 1,
     n: { $size: "$review.pending" },
     suggestions: categoryCount("readyForReview"),
     readyForReview: categoryCount("readyForReview"), needsInput: categoryCount("needsInput"), actionRequired: categoryCount("actionRequired"),
     rank: { $ifNull: ["$priority", 0] },
   } },
   { $sort: { suggestions: -1, n: 1, rank: -1, updatedAt: 1, _id: 1 } },
-  { $project: { _id: 0, id: "$_id", updatedAt: 1, company: 1, title: 1, n: 1, suggestions: 1, readyForReview: 1, needsInput: 1, actionRequired: 1 } },
+  { $project: { _id: 0, id: "$_id", updatedAt: 1, company: 1, title: 1, location: 1, createdAt: 1, priorityTags: 1, jobUrls: 1, n: 1, suggestions: 1, readyForReview: 1, needsInput: 1, actionRequired: 1 } },
 ]).toArray();
 
 /** The cards (questions included) of these applications, in this order; any no longer blocked are left out. */
@@ -333,15 +369,18 @@ export async function reviewQueue(db, { view = "full", cards = 0, ids = [], now 
     }
     case "unanswered": {
       const [engine, order, ready] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps)]);
+      await addJobFacts(db, order);
       const first = await unansweredCards(apps, order.slice(0, cards).map((r) => r.id));
       return { ok: true, generatedAt, ...engine, counts: countsOf(order, ready), unanswered: order, cards: first };
     }
     case "ready": {
       const [engine, totals, ready, approved, inBrowser] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps), approvals(apps, now), inBrowserRows(apps, now)]);
+      await addJobFacts(db, ready);
       return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length, inBrowser: inBrowser.length }, ...readyLists(ready, approved, now), inBrowser };
     }
     case "full": {
       const [engine, order, ready, approved, inBrowser] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps), approvals(apps, now), inBrowserRows(apps, now)]);
+      await addJobFacts(db, [...order, ...ready]);
       const unanswered = await unansweredCards(apps, order.map((r) => r.id));
       return { ok: true, generatedAt, ...engine, counts: { ...countsOf(order, ready), inBrowser: inBrowser.length }, unanswered, ...readyLists(ready, approved, now), inBrowser };
     }

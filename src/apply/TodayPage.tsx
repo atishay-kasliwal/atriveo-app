@@ -3,10 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import OpenFillQueue from "./OpenFillQueue";
 import ApplicationReview from "./ApplicationReview";
 import CompanyLogo from "../components/CompanyLogo";
-import PriorityTags from "../components/PriorityTags";
 import { postAction, when } from "./engine";
 import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, extensionVersion } from "./openFill";
 import { blocking } from "./questionGroups";
+import { discardNow } from "./discard";
 import { adjustCounts, loadCards, refreshReady, refreshUnanswered, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
 import "../styles/applications.css";
 import "./review-pages.css";
@@ -19,7 +19,19 @@ import "./today.css";
 // a question nobody has answered come last and send you to To answer, which shows only those questions.
 
 type Kind = "you_submit" | "approve" | "fill" | "drafted" | "answer";
-interface Item { toAnswer?: number; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+interface Item { toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+
+/** A North Carolina job (they come first). */
+const NC = /\b(NC|North Carolina|Raleigh|Durham|Charlotte|Cary|Chapel Hill|Morrisville|Research Triangle|RTP|Greensboro|Winston[- ]Salem|Wilmington|Apex)\b/i;
+export const inNC = (location?: string | null) => Boolean(location && NC.test(location));
+
+/** "3h", "2d", "5w": how long ago the posting went up (or was found). */
+function ago(iso?: string | null): string | null {
+  if (!iso) return null;
+  const h = (Date.now() - Date.parse(iso)) / 3_600_000;
+  if (!Number.isFinite(h)) return null;
+  return h < 1 ? "just now" : h < 24 ? `${Math.floor(h)}h ago` : h < 24 * 14 ? `${Math.floor(h / 24)}d ago` : `${Math.floor(h / 24 / 7)}w ago`;
+}
 
 /** Sites Atriveo Fill fills by itself (Apply with Atriveo, full support). */
 const AUTO_ATS = ["greenhouse", "lever", "ashby"];
@@ -60,20 +72,25 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
   const [confirmAll, setConfirmAll] = useState<"approve" | "fill" | null>(null);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
   useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(""), 7000); return () => clearTimeout(t); }, [notice]);
 
   const items = useMemo<Item[]>(() => {
     const manual = ready.data?.manual ?? [];
     const manualIds = new Set(manual.map((r) => r.id));
-    const fromReady = (r: ReadyApp, kind: Kind): Item => ({ id: r.id, kind, company: r.company, title: r.title, ats: r.ats, url: r.url, updatedAt: r.updatedAt, priorityTags: r.priorityTags, ready: r });
+    const fromReady = (r: ReadyApp, kind: Kind): Item => ({ id: r.id, kind, company: r.company, title: r.title, ats: r.ats, url: r.url, updatedAt: r.updatedAt, priorityTags: r.priorityTags, ready: r,
+      location: r.location, score: r.score ?? null, age: r.postedAt ?? r.foundAt ?? r.createdAt ?? null });
     const fromQueue = (q: QueuedApp): Item => {
       const c = cards[q.id];
       // Only required questions nobody answered hold it back (optional ones and resume fields are left to the page).
       const current = c && c.updatedAt >= q.updatedAt ? c : null;
       const toAnswer = current ? current.questions.filter(blocking).length : q.needsInput ?? 0;
-      return { toAnswer, id: q.id, kind: !q.n ? "fill" : toAnswer > 0 ? "answer" : "drafted", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? null, url: c?.url, updatedAt: q.updatedAt, priorityTags: c?.priorityTags, queued: q };
+      return { toAnswer, id: q.id, kind: !q.n ? "fill" : toAnswer > 0 ? "answer" : "drafted", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? null, url: c?.url, updatedAt: q.updatedAt, priorityTags: q.priorityTags ?? c?.priorityTags, queued: q,
+        location: q.location ?? c?.location ?? null, score: q.score ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null };
     };
-    const order: Kind[] = ["you_submit", "approve", "fill", "drafted", "answer"];
+    // What you can act on now comes first (Open & Fill: approved or drafted alike), then what needs answers;
+    // within each, North Carolina first, then the newest posting, then the best match.
+    const order: Record<Kind, number> = { you_submit: 0, approve: 1, fill: 2, drafted: 2, answer: 3 };
     const all = [
       ...manual.map((r) => fromReady(r, "you_submit")),
       ...(ready.data?.ready ?? []).filter((r) => !manualIds.has(r.id)).map((r) => fromReady(r, "approve")),
@@ -81,7 +98,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     ];
     return all
       .filter((i) => done[i.id] !== i.updatedAt)
-      .sort((a, b) => Number(later.includes(a.id)) - Number(later.includes(b.id)) || order.indexOf(a.kind) - order.indexOf(b.kind));
+      .sort((a, b) => Number(later.includes(a.id)) - Number(later.includes(b.id)) || order[a.kind] - order[b.kind]
+        || Number(inNC(b.location)) - Number(inNC(a.location)) || (b.age ?? "").localeCompare(a.age ?? "") || (b.score ?? -1) - (a.score ?? -1));
   }, [ready.data, unanswered.data, cards, done, later]);
 
   const pages = Math.max(1, Math.ceil(items.length / perPage));
@@ -201,31 +219,54 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     void refreshReady();
   };
 
+  /** Discard: the engine marks it skipped (history kept); active approvals and attempted submissions are refused. */
+  const discard = async (ids: string[]) => {
+    if (!ids.length) return;
+    setBusy(ids.length === 1 ? ids[0]! : "discard");
+    try {
+      const r = await discardNow(ids);
+      const gone = new Set(r.discarded);
+      setDone((d) => ({ ...d, ...Object.fromEntries(items.filter((i) => gone.has(i.id)).map((i) => [i.id, i.updatedAt])) }));
+      setSelectedIds((s) => s.filter((id) => !gone.has(id)));
+      setNotice(`Discarded ${gone.size}${r.errors.length ? ` · ${r.errors.length} kept: ${r.errors[0]}` : ""}`);
+      setTimeout(() => { void refreshReady(); void refreshUnanswered(); }, 1500);
+    } catch (e) {
+      setNotice(e instanceof Error ? e.message : String(e));
+    } finally { setBusy(null); setConfirmDiscard(false); }
+  };
+
   const card = (item: Item) => {
     const stage = STAGE[item.kind];
     const q = item.queued;
     const r = item.ready as ManualApp | undefined;
     const drafted = q ? (q.readyForReview ?? q.suggestions ?? 0) : 0;
     const isBusy = queueRunning || busy === item.id;
+    const nc = inNC(item.location);
+    const age = ago(item.age);
+    const tags = (item.priorityTags ?? []).filter((t) => !item.location?.includes(t));
     return (
-      <article key={item.id} className={`td-card is-${stage.tone}`} aria-label={`${item.company}: ${stage.label}`} aria-busy={isBusy}>
+      <article key={item.id} className={`td-card is-${stage.tone} ${selectedIds.includes(item.id) ? "is-selected" : ""}`} aria-label={`${item.company}: ${stage.label}`} aria-busy={isBusy}>
         <header className="td-head">
-          {selectable(item) && <input type="checkbox" disabled={queueRunning} aria-label={`Select ${item.company} ${item.title}`} checked={selectedIds.includes(item.id)} onChange={e => setSelectedIds(ids => e.target.checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} />}
+          <input type="checkbox" className="td-check" disabled={queueRunning} aria-label={`Select ${item.company} ${item.title}`} checked={selectedIds.includes(item.id)} onChange={e => setSelectedIds(ids => e.target.checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} />
           <CompanyLogo company={item.company} size="sm" />
           <div className="td-id"><strong title={item.company}>{item.company}</strong><span title={item.title}>{item.title}</span></div>
+          {item.score != null && <span className={`td-score ${item.score >= 60 ? "is-high" : item.score >= 35 ? "is-mid" : ""}`} style={{ ["--pct" as string]: `${Math.min(100, item.score)}%` }} title={`Match score ${item.score}%`}><b>{item.score}</b></span>}
         </header>
-        <span className={`td-stage is-${stage.tone}`}>{stage.label}</span>
-        <PriorityTags tags={item.priorityTags} />
+        <div className="td-meta">
+          {item.location && <span className={`td-loc ${nc ? "is-nc" : ""}`} title={item.location}>{nc ? "★ " : ""}{item.location}</span>}
+          {age && <span className="td-age" title={item.age ?? undefined}>{age}</span>}
+        </div>
+        <div className="td-tags"><span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
         <div className="td-body">
           {item.kind === "drafted" && q && <>
             <p className="td-big">{drafted || q.n} answer{(drafted || q.n) === 1 ? "" : "s"} drafted</p>
-            <p className="td-note">Open & Fill fills them on the job page; check them in the side panel, then Submit.</p>
+            <p className="td-note">Atriveo fills them on the job page; you check, then Submit.</p>
           </>}
           {item.kind === "answer" && q && <>
             <p className="td-big">{item.toAnswer} question{item.toAnswer === 1 ? "" : "s"} to answer</p>
-            <p className="td-note">Nothing to start from yet. Answer {item.toAnswer === 1 ? "it" : "them"}; then it moves up here for Open & Fill.</p>
+            <p className="td-note">Answer {item.toAnswer === 1 ? "it" : "them"} once; then it moves up for Open & Fill.</p>
           </>}
-          {item.kind === "fill" && <p className="td-note">Every answer is approved. Open & Fill fills it on the job page; you check it and click Submit.</p>}
+          {item.kind === "fill" && <p className="td-note">Every answer is approved. Atriveo fills it on the job page; you check, then Submit.</p>}
           {item.kind === "approve" && r && <>
             <p className="td-big">{r.answered} answers verified</p>
             <p className="td-note">Filled {when(r.filledAt)}{r.resumeFile ? ` · ${r.resumeFile}` : ""}.</p>
@@ -244,12 +285,14 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}
           {item.kind === "approve" && ["greenhouse", "ashby", "lever", "workday"].includes(item.ats ?? "") && <button className="apps-btn" disabled={isBusy} onClick={() => void openFill(item)}>Open & Fill</button>}
           <div className="td-review-links">
-            {(item.kind === "approve" || item.kind === "you_submit") && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Review answers</button>}
-            <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Review resume</button>
+            {(item.kind === "approve" || item.kind === "you_submit") && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Answers</button>}
+            <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Resume</button>
+            {item.url && <a className="apps-btn" href={item.url} target="_blank" rel="noreferrer">Job ↗</a>}
           </div>
           <div className="td-links">
             <button className="apps-link" disabled={isBusy} onClick={() => setLater((l) => [...l.filter((id) => id !== item.id), item.id])}>Later</button>
             {(item.kind === "approve" || item.kind === "you_submit") && <Link to={`/ready?app=${encodeURIComponent(item.id)}`}>Details</Link>}
+            <button className="apps-link td-discard" disabled={isBusy} onClick={() => void discard([item.id])}>Discard</button>
           </div>
         </footer>
       </article>
@@ -269,7 +312,10 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           <li className="td-strip-link"><Link to="/unanswered"><b>{count("answer")}</b><span>Need your answers →</span></Link></li>
         </ol>
         <div className="td-actions">
-          {queueable.length > 0 && <><button className="apps-btn" disabled={queueRunning} onClick={() => setSelectedIds(queueable.map(i => i.id))}>Select all Open & Fill ({queueable.length})</button><button className="apps-btn" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear selection</button><OpenFillQueue onRunning={setQueueRunning} selected={queued} onFilled={(id) => { const it = items.find((i) => i.id === id); if (it) setDone((d) => ({ ...d, [id]: it.updatedAt })); setSelectedIds((ids) => ids.filter((x) => x !== id)); }} onFinish={() => { void refreshReady(); void refreshUnanswered(); }} /></>}
+          {selectedIds.length > 0 && (confirmDiscard
+            ? <span className="td-confirm">Discard {selectedIds.length}? <button className="apps-btn danger" disabled={busy !== null} onClick={() => void discard(selectedIds)}>Discard</button><button className="apps-link" onClick={() => setConfirmDiscard(false)}>Cancel</button></span>
+            : <button className="apps-btn" disabled={queueRunning || busy !== null} onClick={() => setConfirmDiscard(true)}>Discard selected ({selectedIds.length})</button>)}
+          {queueable.length > 0 && <><button className="apps-btn" disabled={queueRunning} onClick={() => setSelectedIds(queueable.map(i => i.id))}>Select all Open & Fill ({queueable.length})</button><button className="apps-btn" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear</button><OpenFillQueue onRunning={setQueueRunning} selected={queued} onFilled={(id) => { const it = items.find((i) => i.id === id); if (it) setDone((d) => ({ ...d, [id]: it.updatedAt })); setSelectedIds((ids) => ids.filter((x) => x !== id)); }} onFinish={() => { void refreshReady(); void refreshUnanswered(); }} /></>}
           {worker && <span className={`apps-state ${worker.online ? "" : "bad"}`}><i aria-hidden />{worker.online ? "Worker running" : "Worker offline"}</span>}
           {fillable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("fill")}>Fill and verify all {fillable.length}</button>}
           {approvable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("approve")}>Approve all {approvable.length} ready</button>}
