@@ -6,24 +6,24 @@ import CompanyLogo from "../components/CompanyLogo";
 import PriorityTags from "../components/PriorityTags";
 import { postAction, when } from "./engine";
 import { armExtension, extensionVersion } from "./openFill";
-import { adjustCounts, refreshReady, refreshUnanswered, useReadyQueue, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
+import { adjustCounts, loadCards, refreshReady, refreshUnanswered, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
 import "../styles/applications.css";
 import "./review-pages.css";
 import "./today.css";
 
-// Today: every application waiting for you, in one place, five at a time. Each card shows the one thing it
-// needs next, closest to submission first: submit it yourself (Open & Fill), approve the submission, start
-// filling a form whose answers you approved, or review its answers. Long forms open in the answer view;
-// everything else happens on the card. Nothing is submitted from here without your click on that card.
+// Today: every application waiting for you, in one place, five at a time, closest to submission first. Every
+// card's main button is Open & Fill. A form the engine verified opens armed with those answers; any other
+// (questions still open, or answers approved but not yet filled) opens its job page, where Apply with Atriveo
+// (the toolbar button) fills it live and shows each answer in its side panel. You always click Submit.
 
 type Kind = "you_submit" | "approve" | "fill" | "answer";
-interface Item { id: string; kind: Kind; company: string; title: string; ats: string | null; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+interface Item { id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
 
 const STAGE: Record<Kind, { label: string; tone: string }> = {
   you_submit: { label: "You submit", tone: "go" },
   approve: { label: "Approve to submit", tone: "go" },
   fill: { label: "Answers approved", tone: "info" },
-  answer: { label: "Review answers", tone: "warn" },
+  answer: { label: "Questions open", tone: "warn" },
 };
 
 /** Cards across, and rows that fit the window (a second row of five on a tall screen). */
@@ -40,6 +40,7 @@ function useLayout() {
 export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const unanswered = useUnansweredQueue(60_000);
   const ready = useReadyQueue(60_000);
+  const { cards } = useUnansweredCards();
   const navigate = useNavigate();
   const { columns, rows } = useLayout();
   const perPage = columns * rows;
@@ -58,8 +59,11 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const items = useMemo<Item[]>(() => {
     const manual = ready.data?.manual ?? [];
     const manualIds = new Set(manual.map((r) => r.id));
-    const fromReady = (r: ReadyApp, kind: Kind): Item => ({ id: r.id, kind, company: r.company, title: r.title, ats: r.ats, updatedAt: r.updatedAt, priorityTags: r.priorityTags, ready: r });
-    const fromQueue = (q: QueuedApp): Item => ({ id: q.id, kind: q.n ? "answer" : "fill", company: q.company ?? "Loading…", title: q.title ?? "", ats: null, updatedAt: q.updatedAt, queued: q });
+    const fromReady = (r: ReadyApp, kind: Kind): Item => ({ id: r.id, kind, company: r.company, title: r.title, ats: r.ats, url: r.url, updatedAt: r.updatedAt, priorityTags: r.priorityTags, ready: r });
+    const fromQueue = (q: QueuedApp): Item => {
+      const c = cards[q.id];
+      return { id: q.id, kind: q.n ? "answer" : "fill", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? null, url: c?.url, updatedAt: q.updatedAt, priorityTags: c?.priorityTags, queued: q };
+    };
     const order: Kind[] = ["you_submit", "approve", "fill", "answer"];
     const all = [
       ...manual.map((r) => fromReady(r, "you_submit")),
@@ -69,11 +73,15 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     return all
       .filter((i) => done[i.id] !== i.updatedAt)
       .sort((a, b) => Number(later.includes(a.id)) - Number(later.includes(b.id)) || order.indexOf(a.kind) - order.indexOf(b.kind));
-  }, [ready.data, unanswered.data, done, later]);
+  }, [ready.data, unanswered.data, cards, done, later]);
 
   const pages = Math.max(1, Math.ceil(items.length / perPage));
   const current = Math.min(page, pages - 1);
   const shown = items.slice(current * perPage, (current + 1) * perPage);
+  // The job links of the cards on screen (questions load with them; a page of ten at a time).
+  const shownQueued = shown.flatMap((i) => i.queued ? [i.queued] : []);
+  const shownKey = shownQueued.map((q) => `${q.id}@${q.updatedAt}`).join(",");
+  useEffect(() => { if (shownQueued.length) void loadCards(shownQueued); }, [shownKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const count = (k: Kind) => items.filter((i) => i.kind === k).length;
   const approvable = items.filter((i) => i.kind === "approve");
   const fillable = items.filter((i) => i.kind === "fill");
@@ -118,6 +126,22 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     if (tab) { tab.opener = null; tab.location.href = res.url; } else window.open(res.url, "_blank", "noopener");
     setNotice(`Opened ${item.company}. Atriveo Fill fills it and stops; review it and click Submit yourself.`);
     setTimeout(() => void refreshReady(), 1500);
+  };
+
+  /**
+   * Open & Fill for a form the engine hasn't verified: open its job page. Apply with Atriveo (the toolbar
+   * button there) takes it over from the worker, fills it, and lists every answer in its side panel.
+   */
+  const openInBrowser = (item: Item) => {
+    const [major = 0, minor = 0] = (extensionVersion() ?? "0.0.0").split(".").map(Number);
+    if (major * 1000 + minor < 4) {
+      setErrors((e) => ({ ...e, [item.id]: "Needs Atriveo Fill 0.4 or newer: reload it in chrome://extensions, then refresh this page." }));
+      return;
+    }
+    if (!item.url) { setErrors((e) => ({ ...e, [item.id]: "Still loading this job's link; try again in a moment." })); return; }
+    window.open(item.url, "_blank", "noopener");
+    setDone((d) => ({ ...d, [item.id]: item.updatedAt }));
+    setNotice(`Opened ${item.company}. Click Apply with Atriveo in Chrome's toolbar there: it fills the form and lists every answer in its side panel. You click Submit.`);
   };
 
   /** Start filling every application whose answers you approved. Filling checks the form; it never submits. */
@@ -172,9 +196,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
               <li><b>{drafted}</b> drafted for you</li>
               <li className={needYou ? "warn" : ""}><b>{needYou}</b> need{needYou === 1 ? "s" : ""} your answer</li>
             </ul>
-            <p className="td-note">Check the drafts, answer the rest, then Approve all & fill.</p>
+            <p className="td-note">Open & Fill fills it on the job page; check the answers in the side panel, then Submit.</p>
           </>}
-          {item.kind === "fill" && <p className="td-note">Every answer is approved. Filling checks each one on the form; it never submits.</p>}
+          {item.kind === "fill" && <p className="td-note">Every answer is approved. Open & Fill fills it on the job page; you check it and click Submit.</p>}
           {item.kind === "approve" && r && <>
             <p className="td-big">{r.answered} answers verified</p>
             <p className="td-note">Filled {when(r.filledAt)}{r.resumeFile ? ` · ${r.resumeFile}` : ""}.</p>
@@ -187,13 +211,14 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {errors[item.id] && <p className="td-error" role="alert">{errors[item.id]}</p>}
         </div>
         <footer className="td-foot">
-          {item.kind === "answer" && <button className="rv-primary" disabled={isBusy} onClick={() => navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Review answers</button>}
-          {item.kind === "fill" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "continue_application" }, () => finish(item, `Filling ${item.company} now. It moves on once every answer checks out. Nothing is submitted.`, {}))}>{isBusy ? "Starting…" : "Fill and verify"}</button>}
+          {(item.kind === "answer" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => openInBrowser(item)}>Open & Fill</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
           {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}
           {item.kind === "approve" && ["greenhouse", "ashby", "lever", "workday"].includes(item.ats ?? "") && <button className="apps-btn" disabled={isBusy} onClick={() => void openFill(item)}>Open & Fill</button>}
           <div className="td-review-links">
-            {item.kind !== "answer" && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Review answers</button>}
+            {item.kind === "answer"
+              ? <button className="apps-btn" onClick={() => navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer here first</button>
+              : <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Review answers</button>}
             <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Review resume</button>
           </div>
           <div className="td-links">
@@ -212,7 +237,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       <div className="td-bar">
         <div className="td-title"><h1>Today</h1><span className="apps-muted">{loading ? "Loading…" : `${items.length} application${items.length === 1 ? "" : "s"} waiting for you`}</span></div>
         <ol className="td-strip" aria-label="Where your applications are">
-          <li><b>{count("answer")}</b><span>Review answers</span></li>
+          <li><b>{count("answer")}</b><span>Questions open</span></li>
           <li><b>{count("fill")}</b><span>Answers approved</span></li>
           <li className="go"><b>{count("approve")}</b><span>Approve to submit</span></li>
           <li className="go"><b>{count("you_submit")}</b><span>You submit</span></li>

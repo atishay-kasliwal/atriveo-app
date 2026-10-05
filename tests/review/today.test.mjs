@@ -16,7 +16,10 @@ const readyRow = (id, company, extra = {}) => ({ id, company, companyKey: compan
 const queued = (id, company, n, extra = {}) => ({ id, company, title: 'Backend Engineer', updatedAt: at, n, readyForReview: Math.max(0, n - 1), needsInput: n ? 1 : 0, actionRequired: 0, ...extra });
 const view = { ok: true, generatedAt: at, killSwitch: null, worker: { online: true, updatedAt: at }, counts: { unanswered: 4, questions: 9, ready: 3 } };
 const READY = { ...view, ready: [readyRow('r1', 'Stripe'), readyRow('r2', 'Ramp'), readyRow('m1', 'Spotify', { ats: 'lever' })], manual: [{ ...readyRow('m1', 'Spotify', { ats: 'lever' }), openFill: null }], approved: [] };
-const UNANSWERED = { ...view, unanswered: [queued('u1', 'Rogo', 4), queued('u2', 'Vercel', 5), queued('c1', 'Anthropic', 0), queued('u3', 'Tailscale', 2)], cards: [] };
+const UNANSWERED = { ...view, unanswered: [queued('u1', 'Rogo', 4), queued('u2', 'Vercel', 5), queued('c1', 'Anthropic', 0), queued('u3', 'Tailscale', 2)] };
+// The sidecar sends the first cards (with each job's link) alongside the queue.
+const card = (q) => ({ ...q, ats: 'ashby', url: `https://jobs.example.test/${q.id}`, questions: [] });
+UNANSWERED.cards = UNANSWERED.unanswered.map(card);
 
 async function fixture() {
   const server = http.createServer((req, res) => {
@@ -35,12 +38,14 @@ async function fixture() {
     if (url.pathname === '/api/auth/me') return route.fulfill({ json: { user: { id: 1, name: 'Atishay', email: 'test@example.test' } } });
     if (url.pathname === '/applications/review-queue') {
       const v = url.searchParams.get('view');
-      return route.fulfill({ json: v === 'ready' ? READY : v === 'counts' ? view : v === 'cards' ? { ok: true, generatedAt: at, cards: [] } : UNANSWERED });
+      return route.fulfill({ json: v === 'ready' ? READY : v === 'counts' ? view : v === 'cards' ? { ok: true, generatedAt: at, cards: UNANSWERED.cards.filter((c) => (url.searchParams.get('ids') ?? '').split(',').includes(c.id)) } : UNANSWERED });
     }
     if (url.pathname === '/applications/action') { calls.push(route.request().postDataJSON()); return route.fulfill({ json: { ok: true } }); }
     if (url.hostname === '127.0.0.1' && url.port === String(port)) return route.continue();
     return route.abort();
   });
+  // Atriveo Fill 0.4 is installed; record the tabs the page opens instead of opening them.
+  await page.addInitScript(() => { document.addEventListener('DOMContentLoaded', () => document.documentElement.setAttribute('data-atriveo-fill', '0.4.2')); window.__opened = []; window.open = (u) => { window.__opened.push(String(u)); return null; }; });
   return { page, calls, errors, base: `http://127.0.0.1:${port}`, close: async () => { await browser.close(); await new Promise((r) => server.close(r)); } };
 }
 
@@ -51,7 +56,7 @@ test('Today shows what needs you, closest to submission first, five at a time, w
     await page.getByRole('heading', { name: 'Today', exact: true }).waitFor();
     await page.getByText('7 applications waiting for you', { exact: true }).waitFor();
     const order = await page.locator('.td-card .td-id strong').allTextContents();
-    assert.deepEqual(order, ['Spotify', 'Stripe', 'Ramp', 'Anthropic', 'Rogo'], 'you submit, approve, answers approved, then review answers');
+    assert.deepEqual(order, ['Spotify', 'Stripe', 'Ramp', 'Anthropic', 'Rogo'], 'you submit, approve, answers approved, then questions open');
     assert.ok(await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight + 1), 'no page scroll');
     await page.getByRole('button', { name: 'Next applications' }).click();
     assert.deepEqual(await page.locator('.td-card .td-id strong').allTextContents(), ['Vercel', 'Tailscale']);
@@ -67,9 +72,6 @@ test('each card runs only its own action; Approve all lists what goes out and wa
     await page.getByRole('article', { name: 'Stripe: Approve to submit' }).getByRole('button', { name: 'Approve submit' }).click();
     await page.getByText(/Approved Stripe\./).waitFor();
     assert.deepEqual(calls.at(-1), { action: 'approve_submit', applicationId: 'r1', expectedUpdatedAt: at });
-    await page.getByRole('article', { name: 'Anthropic: Answers approved' }).getByRole('button', { name: 'Fill and verify' }).click();
-    await page.getByText(/Filling Anthropic now/).waitFor();
-    assert.deepEqual(calls.at(-1), { action: 'continue_application', applicationId: 'c1', expectedUpdatedAt: at });
     await page.getByRole('button', { name: /^Approve all \d+ ready$/ }).click();
     const dialog = page.getByRole('dialog'); await dialog.waitFor();
     assert.match(await dialog.innerText(), /Ramp/);
@@ -81,11 +83,26 @@ test('each card runs only its own action; Approve all lists what goes out and wa
   } finally { await f.close(); }
 });
 
-test('Review answers opens that application in the answer view', async () => {
+test('Open & Fill on a card with open questions or approved answers opens its job page and sends nothing', async () => {
+  const f = await fixture(); const { page, calls } = f;
+  try {
+    await page.goto(`${f.base}/`);
+    const rogo = page.getByRole('article', { name: 'Rogo: Questions open' });
+    await rogo.getByRole('button', { name: 'Open & Fill' }).click();
+    await page.getByText(/Opened Rogo\. Click Apply with Atriveo/).waitFor();
+    await page.getByRole('article', { name: 'Anthropic: Answers approved' }).getByRole('button', { name: 'Open & Fill' }).click();
+    await page.getByText(/Opened Anthropic\./).waitFor();
+    assert.deepEqual(await page.evaluate(() => window.__opened), ['https://jobs.example.test/u1', 'https://jobs.example.test/c1']);
+    assert.equal(calls.length, 0, 'opening the job page changes nothing in the engine');
+    assert.equal(await rogo.count(), 0, 'the opened card slides out');
+  } finally { await f.close(); }
+});
+
+test('Answer here first opens that application in the answer view', async () => {
   const f = await fixture(); const { page } = f;
   try {
     await page.goto(`${f.base}/`);
-    await page.getByRole('article', { name: 'Rogo: Review answers' }).getByRole('button', { name: 'Review answers' }).click();
+    await page.getByRole('article', { name: 'Rogo: Questions open' }).getByRole('button', { name: 'Answer here first' }).click();
     await page.waitForURL(/\/unanswered\?app=u1$/);
     await page.getByText('One company. One complete form.', { exact: true }).waitFor();
     assert.equal(await page.locator('.ar-company[aria-current="true"] strong').textContent(), 'Rogo');
