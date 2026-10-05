@@ -418,6 +418,20 @@ export async function linkJobToApplication(db, applicationId, jobUrl) {
   return { ok: true, linked: r.modifiedCount > 0 };
 }
 
+/**
+ * The company's own Apply link for a LinkedIn job, seen by Atriveo Fill when LinkedIn opened it in your browser.
+ * Saved as the job's job_url_direct (what the pipeline applies to) unless it already has one.
+ */
+export async function saveLinkedinDirect(db, jobUrl, directUrl, now = new Date()) {
+  if (!/^https:\/\/(www\.)?linkedin\.com\/jobs\/view\/\d+$/.test(String(jobUrl || ""))) throw new Error("A LinkedIn job URL is required");
+  let u;
+  try { u = new URL(String(directUrl || "")); } catch { throw new Error("A company URL is required"); }
+  if (u.protocol !== "https:" || /(^|\.)linkedin\.com$/.test(u.hostname)) throw new Error("Not a company URL");
+  const r = await db.collection("jobs").updateMany({ job_url: jobUrl, $or: [{ job_url_direct: null }, { job_url_direct: { $exists: false } }] },
+    { $set: { job_url_direct: u.href, job_url_direct_from: "your-browser", job_url_direct_at: now.toISOString() } });
+  return { ok: true, saved: r.modifiedCount };
+}
+
 /** Not interested in this job (Discard on a Today card that has no application): a left swipe, as the job feed records it. */
 export async function dismissJob(db, jobUrl, now = new Date()) {
   if (!/^https:\/\//.test(String(jobUrl || ""))) throw new Error("A job URL is required");

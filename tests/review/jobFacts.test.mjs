@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { MongoClient } from 'mongodb';
-import { dismissJob, linkJobToApplication, markJobApplied, reviewQueue } from '../../scripts/applications-analytics.mjs';
+import { dismissJob, linkJobToApplication, markJobApplied, reviewQueue, saveLinkedinDirect } from '../../scripts/applications-analytics.mjs';
 
 // The review queue carries job-pipeline's facts for Today: best match score and earliest posting/found dates
 // across the jobs documents for the application's job_urls. Real in-memory Mongo.
@@ -69,5 +69,20 @@ test('Mark applied and an application linked to the posting both take a LinkedIn
     const { linkedin } = await reviewQueue(db, { view: 'linkedin', now });
     assert.deepEqual(linkedin.map((j) => j.company), ['Co 3'], '#1 marked applied, #2 linked to its application');
     assert.equal((await db.collection('job_swipes').findOne({ job_url: 'https://www.linkedin.com/jobs/view/1' })).direction, 'applied');
+  } finally { await client.close(); await mongo.stop(); }
+});
+
+test('the company Apply link seen in your browser is saved on the LinkedIn job, once, and never a LinkedIn or plain-http link', async () => {
+  const mongo = await MongoMemoryServer.create();
+  const client = await MongoClient.connect(mongo.getUri());
+  try {
+    const db = client.db('t');
+    const url = 'https://www.linkedin.com/jobs/view/77';
+    await db.collection('jobs').insertMany([{ job_url: url, run_at: new Date() }, { job_url: url, run_at: new Date(), job_url_direct: null }]);
+    assert.deepEqual(await saveLinkedinDirect(db, url, 'https://job-boards.greenhouse.io/acme/jobs/1'), { ok: true, saved: 2 });
+    assert.deepEqual(await saveLinkedinDirect(db, url, 'https://job-boards.greenhouse.io/acme/jobs/2'), { ok: true, saved: 0 }, 'an existing link is kept');
+    await assert.rejects(saveLinkedinDirect(db, url, 'https://www.linkedin.com/jobs/view/externalApply/77'), /Not a company URL/);
+    await assert.rejects(saveLinkedinDirect(db, url, 'http://acme.example/apply'), /Not a company URL/);
+    assert.equal((await db.collection('jobs').findOne({ job_url: url })).job_url_direct, 'https://job-boards.greenhouse.io/acme/jobs/1');
   } finally { await client.close(); await mongo.stop(); }
 });
