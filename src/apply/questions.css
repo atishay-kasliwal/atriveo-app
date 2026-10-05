@@ -1,0 +1,35 @@
+/* To answer: two columns that scroll inside the screen (no page scroll); one row per question. */
+.qs-page { overflow: hidden; }
+.qs-cleared { font-size: 13px; color: var(--green, #2faa4a); font-weight: 600; }
+.qs-toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted-fg); cursor: pointer; }
+.qs-columns { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; padding: 4px 20px 16px; }
+.qs-col { min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.qs-col h2 { font-size: 14px; display: flex; gap: 8px; align-items: baseline; }
+.qs-col h2 .apps-muted { font-weight: 400; font-size: 12.5px; }
+.qs-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 8px; padding-right: 6px; scrollbar-width: thin; }
+.qs-empty { padding: 20px 4px; }
+.qs-row { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid var(--border-col); border-left: 3px solid var(--amber, #e0a526); border-radius: var(--r, 10px); background: var(--card-bg); animation: td-in .2s ease-out; }
+.qs-row.is-optional { border-left-color: var(--border-col); }
+.qs-row[aria-busy="true"] { opacity: .7; }
+.qs-row:focus-within { border-color: var(--primary); border-left-color: var(--primary); }
+.qs-row-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.qs-row-id { min-width: 0; display: flex; flex-direction: column; flex: 1; }
+.qs-row-id strong { font-size: 14px; font-weight: 600; line-height: 1.35; }
+.qs-row-id span { font-size: 12px; color: var(--muted-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qs-count { flex: 0 0 auto; min-width: 34px; height: 30px; padding: 0 8px; display: grid; place-items: center; border-radius: 8px; background: var(--accent-bg); color: var(--amber, #e0a526); font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+.qs-opt { font-style: normal; font-size: 11px; color: var(--muted-fg); border: 1px solid var(--border-col); border-radius: 999px; padding: 1px 7px; }
+.qs-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.qs-chip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--border-col); background: var(--accent-bg); color: var(--foreground); font: inherit; font-size: 12.5px; cursor: pointer; }
+.qs-chip:hover:not(:disabled), .qs-chip:focus-visible { border-color: var(--primary); color: var(--primary); outline: none; }
+.qs-chip:disabled { opacity: .5; cursor: default; }
+.qs-chip.is-more { background: transparent; color: var(--muted-fg); }
+.qs-field { display: flex; gap: 8px; align-items: flex-start; }
+.qs-field > input, .qs-field > textarea, .qs-field .apps-q { flex: 1; min-width: 0; }
+.qs-field > input, .qs-field > textarea { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-col); background: var(--background, transparent); color: var(--foreground); font: inherit; font-size: 13px; resize: vertical; }
+.qs-field > input:focus, .qs-field > textarea:focus { outline: none; border-color: var(--primary); }
+.qs-field .rv-primary { flex: 0 0 auto; white-space: nowrap; }
+.qs-field .apps-q label { display: flex; flex-direction: column; gap: 6px; }
+.qs-field .apps-q-label { display: none; }
+.qs-result { margin: 0; font-size: 12.5px; color: var(--green, #2faa4a); }
+.qs-result.is-bad { color: var(--amber, #e0a526); }
+@media (max-width: 1100px) { .qs-columns { grid-template-columns: minmax(0, 1fr); overflow-y: auto; } .qs-page { overflow: auto; } .qs-list { overflow: visible; } }

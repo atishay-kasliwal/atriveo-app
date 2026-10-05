@@ -1,142 +1,183 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import CompanyLogo from "../components/CompanyLogo";
 import QuestionField from "./QuestionField";
-import { answerFor, postAction, proposalText, reviewCategory, type PendingQ } from "./engine";
-import { loadCards, refreshUnanswered, useUnansweredCards, useUnansweredQueue, type QueuedApp, type UnansweredApp } from "./reviewQueue";
+import { answerFor, postAction, type PendingQ } from "./engine";
+import { blocking, buildGroups, isResumeField, needsYourAnswer, valueFor, type Group } from "./questionGroups";
+import { loadCards, refreshUnanswered, useUnansweredCards, useUnansweredQueue, type UnansweredApp } from "./reviewQueue";
 import "../styles/applications.css";
 import "./review-pages.css";
 import "./today.css";
+import "./questions.css";
 
-// To answer: only the questions nobody has answered yet: no profile answer, no suggestion, no draft. One card
-// per application, five at a time. Save remembers your answers for that application (the engine's `answer`
-// action) and sends it back to be filled with them; Apply with Atriveo uses them too. Drafted answers are
-// not shown here: you check those in the extension's side panel when you Open & Fill.
+// To answer: only questions nobody has answered (no profile answer, suggestion or draft), grouped so a question
+// several jobs ask is answered once. A choice saves on click, text on Enter; the answer goes to every job that
+// asked (each one's own matching option), through the engine's `answer` action, which also remembers it for
+// future applications. Drafted answers aren't here: you check those in Atriveo Fill's side panel.
 
-/** Nothing to start from: no answer, suggestion or draft. Attachments and unreadable fields are left to the page. */
-export function needsYourAnswer(q: PendingQ): boolean {
-  return reviewCategory(q) === "needs_input" && !proposalText(q).trim() && !q.userDraft?.trim() && !q.openEndedUserReview?.draftAnswer?.trim();
-}
+export { needsYourAnswer };
 
-function useColumns() {
-  const pick = () => window.innerWidth >= 1400 ? 5 : window.innerWidth >= 1100 ? 4 : window.innerWidth >= 760 ? 2 : 1;
-  const [n, setN] = useState(pick);
-  useEffect(() => { const f = () => setN(pick()); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
-  return n;
-}
+const CHIPS = 8;
+const keyOf = (app: UnansweredApp, q: PendingQ) => `${app.id}:${q.fieldKey ?? q.fingerprint}`;
 
 export default function QuestionsPage({ header }: { header?: React.ReactNode }) {
   const { data, error } = useUnansweredQueue(60_000);
   const { cards, error: cardsError } = useUnansweredCards();
-  const columns = useColumns();
-  // Opened from a Today card: that application comes first.
+  // Opened from a Today card: that application's questions come first.
   const [first] = useState(() => new URLSearchParams(window.location.search).get("app"));
-  const [page, setPage] = useState(0);
-  const [values, setValues] = useState<Record<string, string>>({});
-  const [done, setDone] = useState<Record<string, string>>({});
-  const [later, setLater] = useState<string[]>([]);
+  const [optional, setOptional] = useState(false);
+  const [answered, setAnswered] = useState<Record<string, true>>({});
   const [busy, setBusy] = useState<string | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [confirmSkip, setConfirmSkip] = useState<string | null>(null);
-  const [notice, setNotice] = useState("");
-  useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(""), 7000); return () => clearTimeout(t); }, [notice]);
+  const [results, setResults] = useState<Record<string, { ok: boolean; text: string }>>({});
+  const [cleared, setCleared] = useState({ questions: 0, jobs: new Set<string>() });
+  const list = useRef<HTMLDivElement>(null);
 
-  // Applications with at least one question waiting for you to type, fewest first: quick ones clear fast.
-  const rows = useMemo<QueuedApp[]>(() => (data?.unanswered ?? [])
-    .filter((q) => (q.needsInput ?? 0) > 0 && done[q.id] !== q.updatedAt)
-    .filter((q) => { const c = cards[q.id]; return !c || c.updatedAt < q.updatedAt || c.questions.some(needsYourAnswer); })
-    .sort((a, b) => Number(b.id === first) - Number(a.id === first) || Number(later.includes(a.id)) - Number(later.includes(b.id)) || (a.needsInput ?? 0) - (b.needsInput ?? 0)),
-  [data, cards, done, later, first]);
-  const pages = Math.max(1, Math.ceil(rows.length / columns));
-  const current = Math.min(page, pages - 1);
-  const shown = rows.slice(current * columns, (current + 1) * columns);
-  const shownKey = shown.map((q) => `${q.id}@${q.updatedAt}`).join(",");
-  // The next page too, so moving on doesn't wait on the slow link.
-  const nextPage = rows.slice((current + 1) * columns, (current + 2) * columns);
-  useEffect(() => { void loadCards([...shown, ...nextPage]); }, [shownKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  const questionsLeft = rows.reduce((n, q) => n + (q.needsInput ?? 0), 0);
+  // Every application with a question waiting for you; their questions load in the background.
+  const rows = useMemo(() => (data?.unanswered ?? []).filter((q) => (q.needsInput ?? 0) > 0), [data]);
+  const rowsKey = rows.map((r) => `${r.id}@${r.updatedAt}`).join(",");
+  useEffect(() => { if (rows.length) void loadCards(rows); }, [rowsKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  const apps = useMemo(() => rows.flatMap((r) => { const c = cards[r.id]; return c && c.updatedAt >= r.updatedAt ? [c] : []; }), [rows, cards]);
+  const loading = rows.length - apps.length;
 
-  const key = (app: UnansweredApp, q: PendingQ) => `${app.id}:${q.fieldKey ?? q.fingerprint}`;
-  const save = async (app: UnansweredApp, open: PendingQ[]) => {
-    const typed = open.filter((q) => values[key(app, q)]?.trim());
-    if (!typed.length) return;
-    setBusy(app.id);
-    setErrors((e) => ({ ...e, [app.id]: "" }));
-    const res = await postAction({ action: "answer", applicationId: app.id, answers: typed.map((q) => answerFor(q, values[key(app, q)]!.trim(), "application")) });
-    setBusy(null);
-    if (!res.ok) { setErrors((e) => ({ ...e, [app.id]: res.error ?? "Couldn't save" })); return; }
-    const row = rows.find((r) => r.id === app.id);
-    if (row) setDone((d) => ({ ...d, [app.id]: row.updatedAt }));
-    const left = open.length - typed.length;
-    setNotice(left ? `Saved ${typed.length} for ${app.company}. ${left} still open: it comes back here.` : `Saved ${app.company}. It's filled again with your answers and shows up on Today.`);
-    setTimeout(() => void refreshUnanswered(), 1500);
-  };
-  const skip = async (app: UnansweredApp) => {
-    setConfirmSkip(null);
-    setBusy(app.id);
-    const res = await postAction({ action: "skip", applicationId: app.id, note: "skipped on To answer" });
-    setBusy(null);
-    if (!res.ok) { setErrors((e) => ({ ...e, [app.id]: res.error ?? "Couldn't skip" })); return; }
-    const row = rows.find((r) => r.id === app.id);
-    if (row) setDone((d) => ({ ...d, [app.id]: row.updatedAt }));
-    setNotice(`Skipped ${app.company}.`);
-  };
+  const groups = useMemo(() => {
+    const open = apps.map((a) => ({ ...a, questions: a.questions.filter((q) => !answered[keyOf(a, q)]) }));
+    const all = buildGroups(open, optional);
+    return first ? [...all].sort((a, b) => Number(b.asked.some((x) => x.app.id === first)) - Number(a.asked.some((x) => x.app.id === first))) : all;
+  }, [apps, answered, optional, first]);
+  const shared = groups.filter((g) => g.asked.length > 1);
+  const single = groups.filter((g) => g.asked.length === 1);
+  const open = (a: UnansweredApp) => a.questions.filter((q) => !answered[keyOf(a, q)]);
+  const left = groups.reduce((n, g) => n + g.asked.length, 0);
+  const optionalCount = apps.reduce((n, a) => n + open(a).filter((q) => needsYourAnswer(q) && !q.required && !isResumeField(q)).length, 0);
+  const resumeCount = apps.reduce((n, a) => n + open(a).filter((q) => needsYourAnswer(q) && isResumeField(q)).length, 0);
+  const blocked = apps.filter((a) => open(a).some(blocking)).length;
 
-  const card = (row: QueuedApp) => {
-    const app = cards[row.id];
-    if (!app || app.updatedAt < row.updatedAt) {
-      return <article key={row.id} className="td-card is-warn" aria-busy="true"><div className="td-head"><CompanyLogo company={row.company ?? ""} size="sm" /><div className="td-id"><strong>{row.company ?? "Loading…"}</strong><span>{row.title ?? ""}</span></div></div><p className="td-note">Loading its questions…</p></article>;
+  /** Move to the next row's input once a row is saved (keyboard flow). */
+  const focusNext = (from: string) => requestAnimationFrame(() => {
+    const rowsEl = [...(list.current?.querySelectorAll<HTMLElement>("[data-row]") ?? [])];
+    const at = rowsEl.findIndex((r) => r.dataset.row === from);
+    const next = rowsEl.slice(Math.max(0, at)).find((r) => r.dataset.row !== from) ?? rowsEl[0];
+    next?.querySelector<HTMLElement>("input, textarea, select, button.qs-chip")?.focus();
+  });
+
+  /** One answer for the whole group: each job gets its own matching option; the rest stay for a different answer. */
+  const save = async (g: Group, value: string) => {
+    if (busy) return;
+    const byApp = new Map<string, { app: UnansweredApp; answers: ReturnType<typeof answerFor>[]; keys: string[] }>();
+    let unmatched = 0;
+    for (const { app, q } of g.asked) {
+      const v = valueFor(q, value);
+      if (v === null) { unmatched += 1; continue; }
+      const e = byApp.get(app.id) ?? { app, answers: [], keys: [] };
+      // Sensitive answers stay with each application; everything else is remembered for future ones too.
+      e.answers.push(answerFor(q, v, q.sensitive ? "application" : "global"));
+      e.keys.push(keyOf(app, q));
+      byApp.set(app.id, e);
     }
-    const open = app.questions.filter(needsYourAnswer);
-    const typed = open.filter((q) => values[key(app, q)]?.trim()).length;
-    const isBusy = busy === app.id;
-    return (
-      <article key={row.id} className="td-card is-warn qa-card" aria-label={`${app.company}: ${open.length} to answer`} aria-busy={isBusy}>
-        <header className="td-head">
-          <CompanyLogo company={app.company} size="sm" />
-          <div className="td-id"><strong title={app.company}>{app.company}</strong><span title={app.title}>{app.title}</span></div>
-        </header>
-        <span className="td-stage is-warn">{open.length} to answer</span>
-        <div className="td-body qa-questions">
-          {open.map((q) => (
-            <QuestionField key={key(app, q)} hideScope q={q} appId={app.id} company={app.company} value={values[key(app, q)] ?? ""} scope="application"
-              onValue={(v) => setValues((s) => ({ ...s, [key(app, q)]: v }))} onScope={() => {}} />
-          ))}
-          {errors[app.id] && <p className="td-error" role="alert">{errors[app.id]}</p>}
-        </div>
-        <footer className="td-foot">
-          <button className="rv-primary" disabled={isBusy || !typed} onClick={() => void save(app, open)}>{isBusy ? "Saving…" : typed ? `Save ${typed} answer${typed === 1 ? "" : "s"}` : "Type an answer"}</button>
-          <div className="td-links">
-            <button className="apps-link" disabled={isBusy} onClick={() => setLater((l) => [...l.filter((id) => id !== app.id), app.id])}>Later</button>
-            {confirmSkip === app.id
-              ? <span>Skip this job? <button className="apps-link" onClick={() => void skip(app)}>Skip</button> <button className="apps-link" onClick={() => setConfirmSkip(null)}>Keep</button></span>
-              : <button className="apps-link" disabled={isBusy} onClick={() => setConfirmSkip(app.id)}>Skip job</button>}
-            <a href={app.url} target="_blank" rel="noreferrer">Job ↗</a>
-          </div>
-        </footer>
-      </article>
-    );
+    if (!byApp.size) { setResults((r) => ({ ...r, [g.key]: { ok: false, text: "None of these jobs offers that choice." } })); return; }
+    setBusy(g.key);
+    const jobs = [...byApp.values()];
+    let saved = 0, failed = 0;
+    const done: string[] = [];
+    // A few at a time: each save runs the engine once for that application.
+    for (let i = 0; i < jobs.length; i += 3) {
+      await Promise.all(jobs.slice(i, i + 3).map(async (j) => {
+        const res = await postAction({ action: "answer", applicationId: j.app.id, answers: j.answers }).catch(() => ({ ok: false }));
+        if (res.ok) { saved += 1; done.push(...j.keys); } else failed += 1;
+      }));
+      setResults((r) => ({ ...r, [g.key]: { ok: true, text: `Saving… ${saved + failed} of ${jobs.length}` } }));
+    }
+    setBusy(null);
+    setAnswered((a) => ({ ...a, ...Object.fromEntries(done.map((k) => [k, true as const])) }));
+    setCleared((c) => ({ questions: c.questions + done.length, jobs: new Set([...c.jobs, ...jobs.map((j) => j.app.id)]) }));
+    const rest = [unmatched && `${unmatched} need a different choice`, failed && `${failed} couldn't be saved`].filter(Boolean).join(" · ");
+    setResults((r) => ({ ...r, [g.key]: { ok: !failed, text: `Saved for ${saved} job${saved === 1 ? "" : "s"}${rest ? ` · ${rest}` : ""}` } }));
+    focusNext(g.key);
+    setTimeout(() => void refreshUnanswered(), 2000);
   };
+
+  const row = (g: Group) => <GroupRow key={g.key} g={g} busy={busy === g.key} disabled={busy !== null && busy !== g.key} result={results[g.key]} onSave={(v) => void save(g, v)} />;
 
   return (
-    <div className="rv-page td-page">
+    <div className="rv-page td-page qs-page">
       {header}
       <div className="td-bar">
-        <div className="td-title"><h1>To answer</h1><span className="apps-muted">{!data ? "Loading…" : rows.length ? `${questionsLeft} question${questionsLeft === 1 ? "" : "s"} in ${rows.length} application${rows.length === 1 ? "" : "s"}. Only ones with no answer yet.` : "Nothing left to answer"}</span></div>
+        <div className="td-title">
+          <h1>To answer</h1>
+          <span className="apps-muted">
+            {!data ? "Loading…" : !rows.length ? "Nothing left to answer"
+              : `${left} question${left === 1 ? "" : "s"} · ${blocked} job${blocked === 1 ? "" : "s"} waiting on you${loading > 0 ? ` · loading ${loading} more…` : ""}`}
+          </span>
+        </div>
+        {cleared.questions > 0 && <span className="qs-cleared">✓ {cleared.questions} answered for {cleared.jobs.size} job{cleared.jobs.size === 1 ? "" : "s"} this session</span>}
+        <div className="td-actions">
+          {resumeCount > 0 && <span className="apps-muted" title="Company, title, dates, education: Atriveo Fill copies them from your resume on the job page.">{resumeCount} resume fields left to Atriveo Fill</span>}
+          <label className="qs-toggle"><input type="checkbox" checked={optional} onChange={(e) => setOptional(e.target.checked)} /> Show optional{optionalCount ? ` (${optionalCount})` : ""}</label>
+        </div>
       </div>
       {(error || cardsError) && <p className="ar-error" role="alert">{error || cardsError}</p>}
-      <main className="td-grid qa-grid" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
-        {!data && <div className="td-empty">Loading your questions…</div>}
-        {data && !rows.length && <div className="td-empty"><strong>Every question has an answer.</strong><span>Go to Today and Open & Fill; you check any drafted answers in the side panel.</span></div>}
-        {shown.map(card)}
+      <main className="qs-columns" ref={list}>
+        <section className="qs-col" aria-label="Asked by several jobs">
+          <h2>Asked by several jobs <span className="apps-muted">answer once · saved for all of them and remembered</span></h2>
+          <div className="qs-list">
+            {shared.map(row)}
+            {!shared.length && <p className="apps-muted qs-empty">{apps.length ? "No question is shared by several jobs right now." : "Loading questions…"}</p>}
+          </div>
+        </section>
+        <section className="qs-col" aria-label="Only for one job">
+          <h2>Only for one job <span className="apps-muted">{single.length}</span></h2>
+          <div className="qs-list">
+            {single.map(row)}
+            {!single.length && <p className="apps-muted qs-empty">{apps.length ? "Nothing job-specific left." : "Loading questions…"}</p>}
+          </div>
+        </section>
       </main>
-      {rows.length > columns && (
-        <nav className="td-pager" aria-label="More applications">
-          <button className="apps-btn" disabled={current === 0} onClick={() => setPage(current - 1)} aria-label="Previous applications">←</button>
-          <span>{current * columns + 1}–{Math.min((current + 1) * columns, rows.length)} of {rows.length}</span>
-          <button className="apps-btn" disabled={current + 1 >= pages} onClick={() => setPage(current + 1)} aria-label="Next applications">→</button>
-        </nav>
-      )}
-      {notice && <div className="apps-toast" role="status"><span>{notice}</span><button type="button" className="apps-toast-close" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
     </div>
+  );
+}
+
+/** One question (or one question many jobs ask): choices save on click, text on Enter. */
+function GroupRow({ g, busy, disabled, result, onSave }: { g: Group; busy: boolean; disabled: boolean; result?: { ok: boolean; text: string }; onSave: (value: string) => void }) {
+  const [text, setText] = useState("");
+  const [more, setMore] = useState(false);
+  const one = g.asked.length === 1 ? g.asked[0]! : null;
+  const companies = [...new Set(g.asked.map((a) => a.app.company))];
+  const long = g.key.startsWith("long:");
+  const multiline = g.asked.some(({ q }) => q.type === "textarea");
+  const off = busy || disabled;
+
+  let input: React.ReactNode;
+  if (long && one) {
+    input = <div className="qs-field"><QuestionField hideScope q={one.q} appId={one.app.id} company={one.app.company} value={text} scope="application" onValue={setText} onScope={() => {}} /><button className="rv-primary" disabled={off || !text} onClick={() => onSave(text)}>Save</button></div>;
+  } else if (g.kind === "check") {
+    input = <div className="qs-chips"><button className="qs-chip" disabled={off} onClick={() => onSave("true")}>Check it ✓</button><button className="qs-chip" disabled={off} onClick={() => onSave("false")}>Leave unchecked</button></div>;
+  } else if (g.kind === "choice") {
+    const shown = more ? g.choices : g.choices.slice(0, CHIPS);
+    input = <div className="qs-chips">
+      {shown.map((c) => <button key={c} className="qs-chip" disabled={off} title={c} onClick={() => onSave(c)}>{c}</button>)}
+      {g.choices.length > CHIPS && <button className="qs-chip is-more" disabled={off} onClick={() => setMore(!more)}>{more ? "Fewer" : `+${g.choices.length - CHIPS} more`}</button>}
+    </div>;
+  } else {
+    const submit = () => { if (text.trim()) onSave(text.trim()); };
+    input = <form className="qs-field" onSubmit={(e) => { e.preventDefault(); submit(); }}>
+      {multiline
+        ? <textarea rows={3} value={text} disabled={off} placeholder="Your answer · ⌘↵ to save" onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submit(); } }} />
+        : <input value={text} disabled={off} placeholder="Your answer · ↵ to save" onChange={(e) => setText(e.target.value)} />}
+      <button className="rv-primary" type="submit" disabled={off || !text.trim()}>{busy ? "Saving…" : g.asked.length > 1 ? `Save for ${g.asked.length}` : "Save"}</button>
+    </form>;
+  }
+
+  return (
+    <article className={`qs-row ${g.required ? "" : "is-optional"}`} data-row={g.key} aria-label={g.label} aria-busy={busy}>
+      <header className="qs-row-head">
+        {one ? <CompanyLogo company={one.app.company} size="sm" /> : <span className="qs-count" title={companies.join(", ")}>{g.asked.length}</span>}
+        <div className="qs-row-id">
+          <strong title={g.label}>{g.label}{g.required ? " *" : ""}</strong>
+          <span title={companies.join(", ")}>{one ? <>{one.app.company} · {one.app.title} · <a href={one.app.url} target="_blank" rel="noreferrer">Job ↗</a></> : `${companies.slice(0, 3).join(", ")}${companies.length > 3 ? ` +${companies.length - 3}` : ""}`}</span>
+        </div>
+        {!g.required && <em className="qs-opt">optional</em>}
+      </header>
+      {input}
+      {result && <p className={`qs-result ${result.ok ? "" : "is-bad"}`} role="status">{result.text}</p>}
+    </article>
   );
 }

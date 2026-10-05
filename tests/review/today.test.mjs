@@ -20,7 +20,13 @@ const UNANSWERED = { ...view, unanswered: [queued('u1', 'Rogo', 4), queued('u2',
 // The sidecar sends the first cards (with each job's link) alongside the queue.
 const question = (fieldKey, label, extra = {}) => ({ fieldKey, fingerprint: fieldKey, label, type: 'text', required: true, options: [], canonicalKey: null, sensitive: null, reason: 'UNKNOWN', detail: null, ...extra });
 // Rogo: one question with a suggestion (drafted) and one with nothing to start from.
-const QUESTIONS = { u1: [question('q1', 'Years of Python?', { answerProposal: { state: 'ready_for_review', answer: '5', family: 'x', source: 'bank', reason: 'r' } }), question('q2', 'Which team excites you?')] };
+// Rogo, Vercel, Tailscale share "How did you hear about us?" (each its own options) and each has its own question.
+const heard = (options) => question('hear', 'How did you hear about us?', { type: 'select', options });
+const QUESTIONS = {
+  u1: [question('q1', 'Years of Python?', { answerProposal: { state: 'ready_for_review', answer: '5', family: 'x', source: 'bank', reason: 'r' } }), question('q2', 'Which team excites you?'), heard(['LinkedIn', 'Other']), question('co', 'Company name')],
+  u2: [heard(['Linkedin Jobs', 'Referral']), question('q3', 'Why Vercel?', { type: 'textarea' }), question('opt', 'Twitter', { required: false })],
+  u3: [heard(['Job board', 'Friend']), question('q4', 'Where are you based?')],
+};
 const card = (q) => ({ ...q, ats: 'ashby', url: `https://jobs.example.test/${q.id}`, questions: QUESTIONS[q.id] ?? [] });
 UNANSWERED.cards = UNANSWERED.unanswered.map(card);
 
@@ -101,22 +107,35 @@ test('Open & Fill on a drafted or approved card opens its job page and sends not
   } finally { await f.close(); }
 });
 
-test('Answer opens To answer with only the questions nobody answered, and Save sends just those', async () => {
+test('Answer opens To answer: each question once, shared ones saved for every job, nothing already drafted', async () => {
   const f = await fixture(); const { page, calls } = f;
   try {
     await page.goto(`${f.base}/`);
     await page.getByRole('button', { name: 'Next applications' }).click();
     await page.getByRole('article', { name: 'Rogo: Needs your answers' }).getByRole('button', { name: /^Answer/ }).click();
     await page.waitForURL(/\/unanswered\?app=u1$/);
-    const rogo = page.getByRole('article', { name: 'Rogo: 1 to answer' });
-    await rogo.waitFor();
-    assert.equal(await page.locator('.td-card .td-id strong').first().textContent(), 'Rogo', 'the application you came from is first');
-    assert.match(await rogo.innerText(), /Which team excites you\?/);
-    assert.doesNotMatch(await rogo.innerText(), /Years of Python/, 'a drafted answer is not shown here');
-    await rogo.getByRole('textbox').fill('Inference');
-    await rogo.getByRole('button', { name: 'Save 1 answer' }).click();
-    await page.getByText(/Saved Rogo\./).waitFor();
-    assert.deepEqual(calls, [{ action: 'answer', applicationId: 'u1', answers: [{ fingerprint: 'q2', label: 'Which team excites you?', type: 'text', canonicalKey: null, sensitive: null, value: 'Inference', scope: 'application' }] }]);
+    const shared = page.getByRole('region', { name: 'Asked by several jobs' });
+    const heard = shared.getByRole('article', { name: 'How did you hear about us?' });
+    await heard.waitFor();
+    assert.equal(await heard.locator('.qs-count').textContent(), '3');
+    const text = await page.locator('.qs-columns').innerText();
+    assert.doesNotMatch(text, /Years of Python/, 'a drafted answer is not shown');
+    assert.doesNotMatch(text, /Company name/, 'resume fields are left to Atriveo Fill');
+    assert.doesNotMatch(text, /Twitter/, 'optional questions are hidden until asked for');
+    // One click on a choice: saved for each job with its own matching option; Tailscale offers none.
+    await heard.getByRole('button', { name: 'LinkedIn', exact: true }).click();
+    await page.getByText('Saved for 2 jobs · 1 need a different choice').waitFor();
+    const answers = calls.filter((c) => c.action === 'answer');
+    assert.deepEqual(answers.map((c) => [c.applicationId, c.answers[0].value, c.answers[0].scope]).sort(), [['u1', 'LinkedIn', 'global'], ['u2', 'Linkedin Jobs', 'global']]);
+    // A job-specific question: type and press Enter.
+    const single = page.getByRole('region', { name: 'Only for one job' });
+    await single.getByRole('article', { name: 'Which team excites you?' }).getByRole('textbox').fill('Inference');
+    await page.keyboard.press('Enter');
+    await page.getByText('✓ 3 answered for 2 jobs this session').waitFor();
+    assert.equal(await single.getByRole('article', { name: 'Which team excites you?' }).count(), 0, 'an answered question leaves the list');
+    assert.deepEqual(calls.at(-1), { action: 'answer', applicationId: 'u1', answers: [{ fingerprint: 'q2', label: 'Which team excites you?', type: 'text', canonicalKey: null, sensitive: null, value: 'Inference', scope: 'global' }] });
+    await page.getByLabel(/Show optional/).check();
+    await single.getByRole('article', { name: 'Twitter' }).waitFor();
   } finally { await f.close(); }
 });
 

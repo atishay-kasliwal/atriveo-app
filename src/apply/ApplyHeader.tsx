@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import ApplyLogo from "./ApplyLogo";
-import { useReviewCounts } from "./reviewQueue";
+import { blocking } from "./questionGroups";
+import { useReviewCounts, useUnansweredCards, useUnansweredQueue } from "./reviewQueue";
 import type { User } from "../types";
 
 async function signOut() {
@@ -12,6 +13,12 @@ export default function ApplyHeader({ user }: { user: User }) {
   const initial = (user.name || user.email || "A").trim().charAt(0).toUpperCase();
   const path = useLocation().pathname.replace(/\/+$/, "");
   const counts = useReviewCounts();
+  // Required questions nobody answered, once every application's questions have loaded (else the server's count).
+  const queue = useUnansweredQueue(60_000);
+  const { cards } = useUnansweredCards();
+  const waitingRows = (queue.data?.unanswered ?? []).filter((r) => (r.needsInput ?? 0) > 0);
+  const loaded = waitingRows.every((r) => cards[r.id] && cards[r.id]!.updatedAt >= r.updatedAt);
+  const toAnswer = queue.data && loaded ? waitingRows.reduce((n, r) => n + cards[r.id]!.questions.filter(blocking).length, 0) : counts?.needsInput;
   const page = path === "/stats" || path === "/overview" ? "stats" : path === "/unanswered" ? "answer" : path === "/answers" || path === "/ready" || path === "/review" ? "work" : "today";
   const waiting = counts ? counts.unanswered + counts.ready : null;
   return (
@@ -25,7 +32,7 @@ export default function ApplyHeader({ user }: { user: User }) {
           Today{waiting !== null ? <span className="apps-nav-n">{waiting}</span> : null}
         </Link>
         <Link to="/unanswered" aria-current={page === "answer" ? "page" : undefined}>
-          To answer{counts?.needsInput !== undefined ? <span className="apps-nav-n">{counts.needsInput}</span> : null}
+          To answer{toAnswer !== undefined ? <span className="apps-nav-n">{toAnswer}</span> : null}
         </Link>
         <Link to="/stats" aria-current={page === "stats" ? "page" : undefined}>Stats</Link>
       </nav>

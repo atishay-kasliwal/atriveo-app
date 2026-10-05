@@ -6,6 +6,7 @@ import CompanyLogo from "../components/CompanyLogo";
 import PriorityTags from "../components/PriorityTags";
 import { postAction, when } from "./engine";
 import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, extensionVersion } from "./openFill";
+import { blocking } from "./questionGroups";
 import { adjustCounts, loadCards, refreshReady, refreshUnanswered, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
 import "../styles/applications.css";
 import "./review-pages.css";
@@ -18,7 +19,7 @@ import "./today.css";
 // a question nobody has answered come last and send you to To answer, which shows only those questions.
 
 type Kind = "you_submit" | "approve" | "fill" | "drafted" | "answer";
-interface Item { id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+interface Item { toAnswer?: number; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
 
 /** Sites Atriveo Fill fills by itself (Apply with Atriveo, full support). */
 const AUTO_ATS = ["greenhouse", "lever", "ashby"];
@@ -67,7 +68,10 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const fromReady = (r: ReadyApp, kind: Kind): Item => ({ id: r.id, kind, company: r.company, title: r.title, ats: r.ats, url: r.url, updatedAt: r.updatedAt, priorityTags: r.priorityTags, ready: r });
     const fromQueue = (q: QueuedApp): Item => {
       const c = cards[q.id];
-      return { id: q.id, kind: !q.n ? "fill" : (q.needsInput ?? 0) > 0 ? "answer" : "drafted", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? null, url: c?.url, updatedAt: q.updatedAt, priorityTags: c?.priorityTags, queued: q };
+      // Only required questions nobody answered hold it back (optional ones and resume fields are left to the page).
+      const current = c && c.updatedAt >= q.updatedAt ? c : null;
+      const toAnswer = current ? current.questions.filter(blocking).length : q.needsInput ?? 0;
+      return { toAnswer, id: q.id, kind: !q.n ? "fill" : toAnswer > 0 ? "answer" : "drafted", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? null, url: c?.url, updatedAt: q.updatedAt, priorityTags: c?.priorityTags, queued: q };
     };
     const order: Kind[] = ["you_submit", "approve", "fill", "drafted", "answer"];
     const all = [
@@ -87,8 +91,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const shownQueued = shown.flatMap((i) => i.queued ? [i.queued] : []);
   const shownKey = shownQueued.map((q) => `${q.id}@${q.updatedAt}`).join(",");
   useEffect(() => { if (shownQueued.length) void loadCards(shownQueued); }, [shownKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  // Every Open & Fill card's link too (a few dozen at most), so Select all covers every page.
-  const openFillQueued = items.flatMap((i) => (i.kind === "fill" || i.kind === "drafted") && i.queued ? [i.queued] : []);
+  // Every queued card's questions and link (Select all covers every page; a card whose only open questions are
+  // optional or resume fields moves up to Open & Fill once they load).
+  const openFillQueued = items.flatMap((i) => i.queued ? [i.queued] : []);
   const openFillKey = openFillQueued.map((q) => `${q.id}@${q.updatedAt}`).join(",");
   useEffect(() => { if (openFillQueued.length) void loadCards(openFillQueued); }, [openFillKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const count = (k: Kind) => items.filter((i) => i.kind === k).length;
@@ -217,8 +222,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
             <p className="td-note">Open & Fill fills them on the job page; check them in the side panel, then Submit.</p>
           </>}
           {item.kind === "answer" && q && <>
-            <p className="td-big">{q.needsInput} question{q.needsInput === 1 ? "" : "s"} to answer</p>
-            <p className="td-note">Nothing to start from yet. Answer {q.needsInput === 1 ? "it" : "them"}; then it moves up here for Open & Fill.</p>
+            <p className="td-big">{item.toAnswer} question{item.toAnswer === 1 ? "" : "s"} to answer</p>
+            <p className="td-note">Nothing to start from yet. Answer {item.toAnswer === 1 ? "it" : "them"}; then it moves up here for Open & Fill.</p>
           </>}
           {item.kind === "fill" && <p className="td-note">Every answer is approved. Open & Fill fills it on the job page; you check it and click Submit.</p>}
           {item.kind === "approve" && r && <>
@@ -234,7 +239,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         </div>
         <footer className="td-foot">
           {(item.kind === "drafted" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => void openInBrowser(item)}>{busy === item.id ? "Opening…" : "Open & Fill"}</button>}
-          {item.kind === "answer" && <button className="rv-primary" disabled={isBusy} onClick={() => navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer {item.queued?.needsInput ?? ""}</button>}
+          {item.kind === "answer" && <button className="rv-primary" disabled={isBusy} onClick={() => navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer {item.toAnswer ?? ""}</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
           {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}
           {item.kind === "approve" && ["greenhouse", "ashby", "lever", "workday"].includes(item.ats ?? "") && <button className="apps-btn" disabled={isBusy} onClick={() => void openFill(item)}>Open & Fill</button>}
