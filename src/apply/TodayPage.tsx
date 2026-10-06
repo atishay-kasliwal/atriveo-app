@@ -23,7 +23,7 @@ import "./today.css";
 // a question nobody has answered come last and send you to To answer, which shows only those questions.
 
 type Kind = "you_submit" | "approve" | "fill" | "drafted" | "linkedin" | "answer";
-interface Item { easyApply?: boolean; resumePath?: string | null; track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+interface Item { resumeReady?: boolean; easyApply?: boolean; resumePath?: string | null; track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
 
 /** The resume track's short name (TRACKS.yaml ids). */
 const TRACK_LABEL: Record<string, string> = { "software-engineer": "SWE", "ai-engineer": "AI", "data-analytics": "Data Analyst", "data-science": "DS", "forward-deployed": "FDE" };
@@ -146,14 +146,14 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const manual = ready.data?.manual ?? [];
     const manualIds = new Set(manual.map((r) => r.id));
     const fromReady = (r: ReadyApp, kind: Kind): Item => ({ id: r.id, kind, company: r.company, title: r.title, ats: r.ats, url: r.url, updatedAt: r.updatedAt, priorityTags: r.priorityTags, ready: r,
-      location: r.location, score: r.score ?? null, track: r.track ?? null, age: r.postedAt ?? r.foundAt ?? r.createdAt ?? null });
+      location: r.location, score: r.score ?? null, track: r.track ?? null, age: r.postedAt ?? r.foundAt ?? r.createdAt ?? null, resumeReady: r.resumeReady });
     const fromQueue = (q: QueuedApp): Item => {
       const c = cards[q.id];
       // Only required questions nobody answered hold it back (optional ones and resume fields are left to the page).
       const current = c && c.updatedAt >= q.updatedAt ? c : null;
       const toAnswer = current ? current.questions.filter(blocking).length : q.needsInput ?? 0;
       return { toAnswer, id: q.id, kind: !q.n ? "fill" : toAnswer > 0 ? "answer" : "drafted", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? null, url: c?.url, updatedAt: q.updatedAt, priorityTags: q.priorityTags ?? c?.priorityTags, queued: q,
-        location: q.location ?? c?.location ?? null, score: q.score ?? null, track: q.track ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null };
+        location: q.location ?? c?.location ?? null, score: q.score ?? null, track: q.track ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null, resumeReady: q.resumeReady };
     };
     // What you can act on now comes first (Open & Fill: approved or drafted alike), then what needs answers;
     // within each, North Carolina first, then the newest posting, then the best match.
@@ -164,12 +164,13 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       ...(unanswered.data?.unanswered ?? []).map(fromQueue),
       // LinkedIn postings: no application (the engine never applies on LinkedIn); same score, place and age.
       ...(linkedin.data?.linkedin ?? []).map((l): Item => ({ id: l.id, kind: "linkedin", company: l.company, title: l.title, ats: null, url: l.url,
-        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null, easyApply: l.applyType === "easy_apply" })),
+        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null, easyApply: l.applyType === "easy_apply", resumeReady: l.resumeReady })),
     ];
     return all
       .filter((i) => done[i.id] !== i.updatedAt && !skipped(i.company))
       // Easy Apply postings (LinkedIn's own form) come after everything you can fill on a company's site.
-      .sort((a, b) => Number(later.includes(a.id)) - Number(later.includes(b.id)) || (order[a.kind] + (a.easyApply ? 0.5 : 0)) - (order[b.kind] + (b.easyApply ? 0.5 : 0))
+      // Ready to apply first: a card whose resume isn't on the server yet waits behind every one that is.
+      .sort((a, b) => Number(later.includes(a.id)) - Number(later.includes(b.id)) || Number(a.resumeReady === false) - Number(b.resumeReady === false) || (order[a.kind] + (a.easyApply ? 0.5 : 0)) - (order[b.kind] + (b.easyApply ? 0.5 : 0))
         || Number(inNC(b.location)) - Number(inNC(a.location)) || (b.age ?? "").localeCompare(a.age ?? "") || (b.score ?? -1) - (a.score ?? -1));
   }, [ready.data, unanswered.data, linkedin.data, cards, done, later, exclusions]); // eslint-disable-line react-hooks/exhaustive-deps
   // Counts on each pill: a track's count follows the chosen kind, and a kind's count follows the chosen track.
@@ -402,7 +403,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {age && <span className={`td-age ${hours < 1 ? "is-new" : ""}`} title={item.age ?? undefined}>{age}</span>}
           {fresh != null && <span className={`td-fresh ${fresh > 0.66 ? "is-fresh" : fresh > 0.33 ? "is-mid" : "is-stale"}`} title={fresh > 0 ? "Freshness: drains over 3 days; early applicants are seen first" : "Over 3 days old"}><i style={{ width: `${Math.round(fresh * 100)}%` }} /></span>}
         </div>
-        <div className="td-tags">{(item.score ?? 0) >= 80 && <span className="td-top" title="80+ match: worth applying first">★ Top match</span>}<span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
+        <div className="td-tags">{(item.score ?? 0) >= 80 && <span className="td-top" title="80+ match: worth applying first">★ Top match</span>}<span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{item.resumeReady === false && <span className="td-tag td-notready" title="The tailored resume isn't on the server yet (still building, or syncing from your Mac). This card moves up once it's ready.">Resume not ready</span>}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
         <div className="td-body">
           {item.kind === "drafted" && q && <>
             <p className="td-big">{drafted || q.n} answer{(drafted || q.n) === 1 ? "" : "s"} drafted</p>

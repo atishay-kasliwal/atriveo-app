@@ -215,6 +215,8 @@ const rowBase = (r) => ({
   url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, priorityTags: r.priorityTags ?? [], updatedAt: r.updatedAt,
   createdAt: r.createdAt ?? null, score: r.score ?? null, postedAt: r.postedAt ?? null, foundAt: r.foundAt ?? null,
   track: trackOf(r.title),
+  // Its resume file is here, so Fill can attach it now (Today puts these first).
+  resumeReady: Boolean(r.resume?.path && fs.existsSync(r.resume.path)),
 });
 
 /**
@@ -248,6 +250,7 @@ async function addJobFacts(db, rows) {
     }
     r.score ??= null; r.postedAt ??= null; r.foundAt ??= null;
     r.track = trackOf(r.title);
+    if ("resumePath" in r) { r.resumeReady = Boolean(r.resumePath && fs.existsSync(r.resumePath)); delete r.resumePath; }
     delete r.jobUrls;
   }
   return rows;
@@ -272,14 +275,14 @@ const categoryCount = category => ({ $size: { $filter: { input: { $ifNull: ["$re
 const unansweredOrder = (apps) => apps.aggregate([
   { $match: BLOCKED },
   { $project: {
-    updatedAt: 1, company: 1, title: 1, location: 1, createdAt: 1, priorityTags: 1, jobUrls: 1,
+    updatedAt: 1, company: 1, title: 1, location: 1, createdAt: 1, priorityTags: 1, jobUrls: 1, resumePath: "$resume.path",
     n: { $size: "$review.pending" },
     suggestions: categoryCount("readyForReview"),
     readyForReview: categoryCount("readyForReview"), needsInput: categoryCount("needsInput"), actionRequired: categoryCount("actionRequired"),
     rank: { $ifNull: ["$priority", 0] },
   } },
   { $sort: { suggestions: -1, n: 1, rank: -1, updatedAt: 1, _id: 1 } },
-  { $project: { _id: 0, id: "$_id", updatedAt: 1, company: 1, title: 1, location: 1, createdAt: 1, priorityTags: 1, jobUrls: 1, n: 1, suggestions: 1, readyForReview: 1, needsInput: 1, actionRequired: 1 } },
+  { $project: { _id: 0, id: "$_id", updatedAt: 1, company: 1, title: 1, location: 1, createdAt: 1, priorityTags: 1, jobUrls: 1, resumePath: 1, n: 1, suggestions: 1, readyForReview: 1, needsInput: 1, actionRequired: 1 } },
 ]).toArray();
 
 /** The cards (questions included) of these applications, in this order; any no longer blocked are left out. */
@@ -389,6 +392,8 @@ export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600
         resumeFile: d.resume?.pdf_path ? String(d.resume.pdf_path).split("/").slice(-2).join("/") : null,
         // The tailored resume itself (Today's Resume button shows it through /serve-pdf).
         resumePath: d.resume?.pdf_path ?? null,
+        // The file is on this machine, so Apply with Atriveo can attach it now.
+        resumeReady: Boolean(d.resume?.pdf_path && fs.existsSync(d.resume.pdf_path)),
         // "offsite" (the company's own form), "easy_apply" (LinkedIn's), or null until checked.
         applyType: d.apply_type ?? null });
     } else {
