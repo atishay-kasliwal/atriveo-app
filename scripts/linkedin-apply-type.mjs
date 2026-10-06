@@ -13,7 +13,8 @@
 import { MongoClient } from "mongodb";
 
 const DAYS = Number(process.argv.find((a) => a.startsWith("--days="))?.slice(7) || 3);
-const LIMIT = Number(process.argv.find((a) => a.startsWith("--limit="))?.slice(8) || 400);
+// Gentle on purpose (it runs from your own connection): at most 60 an hour, 3-5 s apart, and it stops at a 429.
+const LIMIT = Number(process.argv.find((a) => a.startsWith("--limit="))?.slice(8) || 60);
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129 Safari/537.36";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -45,7 +46,7 @@ if (process.argv[1]?.endsWith("linkedin-apply-type.mjs")) {
         counts[type]++;
         await db.collection("jobs").updateMany({ job_url: url }, { $set: { apply_type: type, apply_type_at: new Date().toISOString() } });
       } else counts.unread++;
-      await sleep(1200 + Math.random() * 800);
+      await sleep(3000 + Math.random() * 2000);
     }
     console.log(`${urls.length} LinkedIn jobs · offsite ${counts.offsite} · Easy Apply ${counts.easy_apply} · closed ${counts.closed} · unread ${counts.unread} · ${Math.round((Date.now() - started) / 1000)}s`);
   } finally {
