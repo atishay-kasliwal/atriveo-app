@@ -16,7 +16,7 @@
 .td-card.is-info { border-top: 3px solid var(--primary); }
 .td-card.is-warn { border-top: 3px solid var(--amber, #e0a526); }
 .td-card[aria-busy="true"] { opacity: .65; }
-.td-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.td-head { display: flex; align-items: center; gap: 10px; min-width: 0; position: static; z-index: auto; background: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
 .td-id { min-width: 0; display: flex; flex-direction: column; }
 .td-id strong { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .td-id span { font-size: 12.5px; color: var(--muted-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -257,12 +257,14 @@
 .td-resumes .td-dot { background: var(--tr); }
 .td-resumes .tr-software-engineer { --tr: #60a5fa; } .td-resumes .tr-ai-engineer { --tr: #a78bfa; } .td-resumes .tr-data-analytics { --tr: #fbbf24; }
 .td-resumes .tr-data-science { --tr: #34d399; } .td-resumes .tr-forward-deployed { --tr: #f472b6; }
-.td-resume-acts { display: inline-flex; align-items: center; gap: 8px; }
+.td-resume-acts { display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.td-resume-acts [role="status"], .td-resume-acts [role="alert"] { flex-basis: 100%; font-size: 11px; overflow-wrap: anywhere; }
 .td-resume-acts .apps-btn { height: 28px; padding: 0 10px; font-size: 12px; display: inline-flex; align-items: center; text-decoration: none; }
 .td-resumes > p { margin: 0 0 8px; }
-.td-skip-pop.td-resumes { left: 0; right: auto; width: 300px; }
+.td-skip-pop.td-resumes { left: 0; right: auto; width: min(320px, calc(100vw - 40px)); box-sizing: border-box; background: var(--popover-bg, var(--card-bg)); }
 /* The bar (and its popups) above the cards, whose headers make their own layers. */
 .td-page .td-bar { position: relative; z-index: 30; }
+.td-page .td-grid { position: relative; z-index: 0; isolation: isolate; }
 /* Streak, sprint and top matches. */
 .td-streak { white-space: nowrap; font-weight: 650; color: #fb923c; }
 .td-sprint { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--foreground); background: none; border: 1px solid var(--border-col); cursor: pointer; }
