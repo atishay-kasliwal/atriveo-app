@@ -153,3 +153,6 @@
 .td-page .td-review-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; }
 .td-ghost { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1; }
 .td-ghost svg { width: 14px; height: 14px; flex: none; }
+/* The page's link colour (.rv-page a) outranks .td-cta: keep the button's label and icons solid white. */
+.td-page a.td-cta, .td-page a.td-cta:hover, .td-page a.td-cta:visited { color: #fff; text-decoration: none; }
+.td-page a.td-cta span, .td-page a.td-cta svg { color: #fff; opacity: 1; }
