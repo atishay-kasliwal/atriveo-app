@@ -10,6 +10,7 @@ import { blocking } from "./questionGroups";
 import { discardNow, dismissJobs, markJobsApplied } from "./discard";
 import { adjustCounts, loadCards, refreshLinkedin, refreshReady, refreshUnanswered, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
 import { GOALS, readPref, useAppliedToday, writePref } from "./todayGoal";
+import { useExclusions } from "../hooks/useExclusions";
 import "../styles/applications.css";
 import "./review-pages.css";
 import "./today.css";
@@ -94,7 +95,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const [review, setReview] = useState<{ id: string; updatedAt: string; company: string; mode: "answers" | "resume" } | null>(null);
   const [page, setPage] = useState(0);
   const [done, setDone] = useState<Record<string, string>>({});
-  const [later, setLater] = useState<string[]>([]);
+  // Later is remembered in this browser for a week, so a refresh keeps those cards at the end.
+  const [laterAt, setLaterAt] = useState<Record<string, number>>(() => Object.fromEntries(Object.entries(readPref<Record<string, number>>("later", {})).filter(([, at]) => at > Date.now() - 7 * 86_400_000)));
+  const later = useMemo(() => Object.keys(laterAt), [laterAt]);
   const [busy, setBusy] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
@@ -107,6 +110,11 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const [goal, setGoal] = useState<number>(() => { const g = readPref<number>("goal", 15); return GOALS.includes(g) ? g : 15; });
   const [focus, setFocus] = useState(0);
   const goalDay = useAppliedToday();
+  // Companies you don't want now (your account's list, shared with the job feed's Settings): their cards stay off Today until you remove them.
+  const { exclusions, excludeCompany, removeExclusion } = useExclusions();
+  const [skipOpen, setSkipOpen] = useState(false);
+  const [skipDraft, setSkipDraft] = useState("");
+  const skipped = (company: string) => { const co = company.toLowerCase(); return exclusions.companies.some((c) => co.includes(c)); };
   // A new mood starts at the top: first page, first card, nothing selected.
   const pick = (next: { track?: TrackFilter; kind?: KindFilter }) => {
     if (next.track !== undefined) { setTrack(next.track); writePref("track", next.track); }
@@ -140,11 +148,11 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null, easyApply: l.applyType === "easy_apply" })),
     ];
     return all
-      .filter((i) => done[i.id] !== i.updatedAt)
+      .filter((i) => done[i.id] !== i.updatedAt && !skipped(i.company))
       // Easy Apply postings (LinkedIn's own form) come after everything you can fill on a company's site.
       .sort((a, b) => Number(later.includes(a.id)) - Number(later.includes(b.id)) || (order[a.kind] + (a.easyApply ? 0.5 : 0)) - (order[b.kind] + (b.easyApply ? 0.5 : 0))
         || Number(inNC(b.location)) - Number(inNC(a.location)) || (b.age ?? "").localeCompare(a.age ?? "") || (b.score ?? -1) - (a.score ?? -1));
-  }, [ready.data, unanswered.data, linkedin.data, cards, done, later]);
+  }, [ready.data, unanswered.data, linkedin.data, cards, done, later, exclusions]); // eslint-disable-line react-hooks/exhaustive-deps
   // Counts on each pill: a track's count follows the chosen kind, and a kind's count follows the chosen track.
   const inTrack = (i: Item, t: TrackFilter) => t === "all" || t === "mixed" || i.track === t;
   const inKind = (i: Item, k: KindFilter) => k === "all" || KIND_OF[i.kind] === k;
@@ -309,7 +317,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   };
 
   const focused = Math.min(focus, Math.max(0, shown.length - 1));
-  const later_ = (item: Item) => setLater((l) => [...l.filter((id) => id !== item.id), item.id]);
+  const later_ = (item: Item) => setLaterAt((l) => { const next = { ...l, [item.id]: Date.now() }; writePref("later", next); return next; });
+  const skipCompany = (company: string) => { excludeCompany(company); setNotice(`Skipping ${company}: its jobs stay off Today until you remove it from Skipped companies.`); };
   /** O: the card's main way in (LinkedIn posting, Open & Fill); nothing for cards that need answers or approval. */
   const openCard = (item: Item) => {
     if (item.kind === "linkedin" && item.url) { noteLinkedinOpen(item.url, item.company, item.title); window.open(item.url, "_blank", "noreferrer"); }
@@ -339,6 +348,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       case "l": case "L": if (item) later_(item); else return; break;
       case "d": case "D": if (item && busy !== item.id) void discard([item.id]); else return; break;
       case "o": case "O": if (item) openCard(item); else return; break;
+      case "s": case "S": if (item) skipCompany(item.company); else return; break;
       default: return;
     }
     e.preventDefault();
@@ -362,6 +372,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           <input type="checkbox" className="td-check" disabled={queueRunning} aria-label={`Select ${item.company} ${item.title}`} checked={selectedIds.includes(item.id)} onChange={e => setSelectedIds(ids => e.target.checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} />
           <CompanyLogo company={item.company} size="sm" />
           <div className="td-id"><strong title={item.company}>{item.company}</strong><span title={item.title}>{item.title}</span></div>
+          <button type="button" className="td-skip-co" disabled={isBusy} title={`Skip ${item.company}: hide its jobs until you remove it from Skipped companies (S)`} aria-label={`Skip ${item.company}`} onClick={() => skipCompany(item.company)}><svg aria-hidden="true" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" strokeWidth="1.5"/><path d="M4.1 11.9l7.8-7.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg></button>
           {item.score != null && <span className={`td-score ${item.score >= 60 ? "is-high" : item.score >= 35 ? "is-mid" : ""}`} style={{ ["--pct" as string]: `${Math.min(100, item.score)}%` }} title={`Match score ${item.score}%`}><b>{item.score}</b></span>}
         </header>
         <div className="td-meta">
@@ -434,6 +445,17 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {(Object.keys(KIND_LABEL) as Array<Exclude<KindFilter, "all">>).map((k) => (
             <button key={k} type="button" className={`td-kind ${kind === k ? "is-on" : ""}`} aria-pressed={kind === k} onClick={() => pick({ kind: kind === k ? "all" : k })}>{KIND_LABEL[k]} <b>{kindCount(k)}</b></button>
           ))}
+          <span className="td-skiplist">
+            <button type="button" className={`td-kind ${skipOpen ? "is-on" : ""}`} aria-expanded={skipOpen} onClick={() => setSkipOpen((o) => !o)}>Skipped companies <b>{exclusions.companies.length}</b></button>
+            {skipOpen && <div className="td-skip-pop" role="dialog" aria-label="Skipped companies">
+              <form onSubmit={(e) => { e.preventDefault(); if (skipDraft.trim()) { excludeCompany(skipDraft); setSkipDraft(""); } }}>
+                <input value={skipDraft} onChange={(e) => setSkipDraft(e.target.value)} placeholder="Add a company…" aria-label="Company to skip" autoFocus />
+                <button type="submit" className="apps-btn" disabled={!skipDraft.trim()}>Skip</button>
+              </form>
+              {exclusions.companies.length ? <ul>{exclusions.companies.map((c) => <li key={c}><span>{c}</span><button type="button" className="apps-link" aria-label={`Stop skipping ${c}`} onClick={() => removeExclusion("company", c)}>Remove</button></li>)}</ul>
+                : <p className="apps-muted">No companies skipped. Use Skip company on a card (or S), or add one here.</p>}
+            </div>}
+          </span>
           {(track !== "all" || kind !== "all") && <button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all" })}>Clear filters</button>}
         </div>
         <div className="td-actions">
@@ -463,7 +485,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         {shown.map((item, index) => card(item, index))}
       </main>
       <div className="td-bottom">
-      <aside className="td-keys" aria-label="Keyboard shortcuts"><span><kbd>1</kbd>–<kbd>7</kbd> track</span><span><kbd>←</kbd><kbd>→</kbd> move</span><span><kbd>O</kbd> open</span><span><kbd>A</kbd> mark applied</span><span><kbd>L</kbd> later</span><span><kbd>D</kbd> discard</span></aside>
+      <aside className="td-keys" aria-label="Keyboard shortcuts"><span><kbd>1</kbd>–<kbd>7</kbd> track</span><span><kbd>←</kbd><kbd>→</kbd> move</span><span><kbd>O</kbd> open</span><span><kbd>A</kbd> mark applied</span><span><kbd>L</kbd> later</span><span><kbd>S</kbd> skip company</span><span><kbd>D</kbd> discard</span></aside>
       {items.length > perPage && (
         <nav className="td-pager" aria-label="More applications">
           <button className="apps-btn" disabled={current === 0} onClick={() => setPage(current - 1)} aria-label="Previous applications">←</button>

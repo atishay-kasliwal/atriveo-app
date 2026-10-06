@@ -236,3 +236,18 @@
 .td-meta .td-fresh i { min-width: 3px; }
 .td-meta .td-loc { flex: 0 1 auto; }
 .td-keys { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border-col); }
+
+/* Skipped companies: a small list under its button; Skip company on each card. */
+.td-skiplist { position: relative; }
+.td-skip-pop { position: absolute; right: 0; top: calc(100% + 6px); z-index: 40; width: 280px; max-height: 360px; overflow: auto; padding: 12px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--border-col); box-shadow: 0 16px 40px -12px rgb(0 0 0 / 70%); }
+.td-skip-pop form { display: flex; gap: 6px; margin-bottom: 10px; }
+.td-skip-pop input { flex: 1; min-width: 0; height: 32px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--border-col); background: var(--background, transparent); color: var(--foreground); font: inherit; font-size: 13px; }
+.td-skip-pop ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.td-skip-pop li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 8px; border-radius: 7px; font-size: 13px; text-transform: capitalize; }
+.td-skip-pop li:hover { background: var(--accent-bg); }
+.td-skip-pop li .apps-link { text-transform: none; font-size: 12px; }
+.td-skip-pop p { margin: 0; font-size: 12.5px; }
+.td-skip-co { flex: none; display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border-radius: 7px; border: 1px solid transparent; background: none; color: var(--muted-fg); cursor: pointer; opacity: .55; transition: opacity .12s ease, color .12s ease, border-color .12s ease; }
+.td-skip-co svg { width: 15px; height: 15px; }
+.td-card:hover .td-skip-co, .td-card.is-focused .td-skip-co, .td-skip-co:focus-visible { opacity: 1; }
+.td-skip-co:hover:not(:disabled) { color: #ef4444; border-color: color-mix(in oklab, #ef4444 40%, var(--border-col)); }
