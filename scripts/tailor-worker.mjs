@@ -16,6 +16,7 @@
  */
 
 import dotenv from "dotenv";
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -186,6 +187,11 @@ async function processOneJob(db) {
     );
 
     const success = result.status === "ok" && result.pdfPath;
+    // On the Mac, send the new PDF to Oracle now (the resume sync, launchd com.atriveo.resume-sync) instead of
+    // waiting up to 10 minutes: Apply with Atriveo attaches it from there. A sync already running is left alone.
+    if (success && process.platform === "darwin") {
+      spawn("launchctl", ["kickstart", `gui/${process.getuid?.() ?? ""}/com.atriveo.resume-sync`], { stdio: "ignore" }).on("error", () => {}).unref();
+    }
     const fingerprint = result.fingerprint || null;
     const manifest = fingerprint ? readManifest(fingerprint) : null;
     // no-go and unsupported-jd are deterministic on JD content — retrying
