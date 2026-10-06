@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { IN_BROWSER_LABEL, inBrowserSummary } from "./InBrowser";
 import { createPortal } from "react-dom";
 import PdfPreviewModal from "../components/PdfPreviewModal";
+import ResumeDownloadLink from "../components/ResumeDownloadLink";
 import { getTailorServerBase } from "../utils/tailorServer";
 import { loadDetail, type Detail, type ResumeReport } from "./detail";
 import { humanize, when } from "./engine";
@@ -128,7 +129,7 @@ export default function ApplicationDetail({ id, version }: { id: string; version
                   {detail.resume.path && (
                     <div className="apps-resume-open">
                       <button type="button" className="apps-btn accent" onClick={() => openResume(detail.resume.path!)} title={detail.resume.path}>Open resume</button>
-                      <a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(detail.resume.path)}&dl=1`} download="Atishay Kasliwal.pdf">Download</a>
+                      <ResumeDownloadLink className="apps-link" pdfPath={detail.resume.path} />
                     </div>
                   )}
                 </div>

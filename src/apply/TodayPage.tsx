@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import OpenFillQueue from "./OpenFillQueue";
 import ApplicationReview from "./ApplicationReview";
 import AnswerModal from "./AnswerModal";
+import ResumeDownloadLink from "../components/ResumeDownloadLink";
 import PdfPreviewModal from "../components/PdfPreviewModal";
 import CompanyLogo from "../components/CompanyLogo";
 import { postAction, when } from "./engine";
@@ -491,7 +492,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
               <p className="apps-muted">General resume for each track (not tailored to a job).</p>
               <ul>{GENERAL_RESUMES.map((g) => { const p = generalPath(g.folder); const url = p ? `${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(p)}` : null; return (
                 <li key={g.track} className={`tr-${g.track}`}><span><i className="td-dot" aria-hidden="true" style={{ ["--td-c" as string]: `var(--tr)` }} />{TRACK_LABEL[g.track]}</span>
-                  {url ? <span className="td-resume-acts"><button type="button" className="apps-link" onClick={() => { setPdf(p); setResumesOpen(false); }}>View</button><a className="apps-btn" href={`${url}&dl=1`} download={`Atishay Kasliwal - ${g.folder}.pdf`}>Download</a></span> : <span className="apps-muted">Loading…</span>}
+                  {url ? <span className="td-resume-acts"><button type="button" className="apps-link" onClick={() => { setPdf(p); setResumesOpen(false); }}>View</button><ResumeDownloadLink className="apps-btn" pdfPath={p!} /></span> : <span className="apps-muted">Loading…</span>}
                 </li>); })}</ul>
             </div>}
           </span>

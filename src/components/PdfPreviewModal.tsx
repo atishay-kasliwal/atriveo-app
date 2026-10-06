@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { getTailorServerBase } from "../utils/tailorServer";
+import ResumeDownloadLink from "./ResumeDownloadLink";
 
 interface Props {
   pdfPath: string;
@@ -10,7 +11,6 @@ export default function PdfPreviewModal({ pdfPath, onClose }: Props) {
   const base = getTailorServerBase();
   const encoded = encodeURIComponent(pdfPath);
   const inlineUrl = `${base}/serve-pdf?path=${encoded}`;
-  const downloadUrl = `${base}/serve-pdf?path=${encoded}&dl=1`;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -24,13 +24,7 @@ export default function PdfPreviewModal({ pdfPath, onClose }: Props) {
         <div className="pdf-modal-bar">
           <span className="pdf-modal-title">Atishay Kasliwal.pdf</span>
           <div className="pdf-modal-actions">
-            <a
-              className="pdf-modal-btn"
-              href={downloadUrl}
-              download="Atishay Kasliwal.pdf"
-            >
-              Download
-            </a>
+            <ResumeDownloadLink className="pdf-modal-btn" pdfPath={pdfPath} />
             <button type="button" className="pdf-modal-close" onClick={onClose}>✕</button>
           </div>
         </div>

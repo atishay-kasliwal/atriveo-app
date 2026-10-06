@@ -15,6 +15,7 @@
  * No external dependencies — Node built-ins only.
  */
 import { handleMuse } from "./muse-http.mjs";
+import { resumeDownloadPath } from "./resume-download.mjs";
 import http from "node:http";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
@@ -2198,6 +2199,8 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, {
         "Content-Type": "application/pdf",
         "Content-Length": data.length,
+        "X-Resume-Download-Path": resumeDownloadPath(pdfPath, data),
+        "Access-Control-Expose-Headers": "X-Resume-Download-Path",
         "Content-Disposition": isDownload
           ? 'attachment; filename="Atishay Kasliwal.pdf"'
           : 'inline; filename="Atishay Kasliwal.pdf"',
