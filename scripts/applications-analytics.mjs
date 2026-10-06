@@ -251,6 +251,7 @@ async function addJobFacts(db, rows) {
     r.score ??= null; r.postedAt ??= null; r.foundAt ??= null;
     r.track = trackOf(r.title);
     if ("resumePath" in r) { r.resumeReady = Boolean(r.resumePath && fs.existsSync(r.resumePath)); delete r.resumePath; }
+    if (r.resumeReady === false) r._jobUrls = r.jobUrls ?? [];
     delete r.jobUrls;
   }
   return rows;
@@ -372,6 +373,53 @@ const countsOf = (order, ready) => ({ unanswered: order.length, questions: order
  * cards. The engine never applies on LinkedIn (you click Apply there, then Apply with Atriveo fills the company's
  * form). Jobs that already have an application, or that you discarded (job_swipes direction "left"), are left out.
  */
+/** Rounded the way a person plans: 2, 5, 10, 20, 30, 40 minutes, then hours. */
+const ETA_STEPS = [2, 5, 10, 20, 30, 40, 60];
+const roundEta = (m) => ETA_STEPS.find((s) => m <= s) ?? Math.ceil(m / 60) * 60;
+
+/**
+ * When a card's resume should be ready (Today's "Resume in ~10 min"), for the cards whose file isn't here yet:
+ *   syncing     built, on its way from the machine that built it (about a minute)
+ *   building    a worker is on it now: about one resume's time
+ *   queued      the jobs ahead of it in its worker's queue (priority, then score), at that worker's recent pace
+ *   failed / not_queued   no estimate
+ * Pace: the median gap between that worker's resumes in the last 3 hours (gaps over 30 minutes are idle time).
+ */
+export async function addResumeEta(db, rows, now = new Date()) {
+  const want = rows.filter((r) => r.resumeReady === false);
+  if (want.length) {
+    const urlsOf = (r) => r._jobUrls ?? (r.url ? [r.url] : []);
+    const jobs = db.collection("jobs");
+    const [docs, recent] = await Promise.all([
+      jobs.find({ job_url: { $in: [...new Set(want.flatMap(urlsOf))] } }, { projection: { _id: 0, job_url: 1, score_pct: 1, "resume.status": 1, "resume.owner": 1, "resume.priority": 1, "resume.updated_at": 1 } }).toArray(),
+      jobs.find({ "resume.status": "success", "resume.updated_at": { $gte: new Date(now.getTime() - 3 * 3_600_000).toISOString() } }, { projection: { _id: 0, "resume.owner": 1, "resume.updated_at": 1 } }).toArray(),
+    ]);
+    const done = new Map();
+    for (const d of recent) done.set(d.resume.owner, [...(done.get(d.resume.owner) ?? []), Date.parse(d.resume.updated_at)]);
+    const pace = (owner) => {
+      const t = (done.get(owner) ?? []).filter(Number.isFinite).sort((a, b) => a - b);
+      const gaps = t.slice(1).map((x, i) => (x - t[i]) / 60_000).filter((g) => g > 0 && g <= 30).sort((a, b) => a - b);
+      return gaps.length ? Math.min(30, Math.max(1, gaps[Math.floor(gaps.length / 2)])) : 5;
+    };
+    const RANK = { success: 0, running: 1, queued: 2, failed: 3 };
+    const byUrl = new Map();
+    for (const d of docs) { const cur = byUrl.get(d.job_url); if (!cur || (RANK[d.resume?.status] ?? 9) < (RANK[cur.resume?.status] ?? 9)) byUrl.set(d.job_url, d); }
+    for (const r of want) {
+      const d = urlsOf(r).map((u) => byUrl.get(u)).filter(Boolean).sort((a, b) => (RANK[a.resume?.status] ?? 9) - (RANK[b.resume?.status] ?? 9))[0];
+      const st = d?.resume?.status;
+      if (st === "success") r.resumeEta = { state: "syncing", minutes: 2 };
+      else if (st === "running") r.resumeEta = { state: "building", minutes: roundEta(pace(d.resume.owner)) };
+      else if (st === "queued") {
+        const p = d.resume.priority ?? 0, sc = d.score_pct ?? 0;
+        const ahead = await jobs.countDocuments({ "resume.status": "queued", "resume.owner": d.resume.owner, $or: [{ "resume.priority": { $gt: p } }, { "resume.priority": p, score_pct: { $gt: sc } }] });
+        r.resumeEta = { state: "queued", ahead, minutes: roundEta((ahead + 1) * pace(d.resume.owner)) };
+      } else r.resumeEta = { state: st === "failed" ? "failed" : "not_queued", minutes: null };
+    }
+  }
+  for (const r of rows) delete r._jobUrls;
+  return rows;
+}
+
 export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600 } = {}) {
   const since = new Date(now.getTime() - days * 86_400_000);
   const [docs, applied, dismissed] = await Promise.all([
@@ -454,7 +502,7 @@ export async function reviewQueue(db, { view = "full", cards = 0, ids = [], now 
     case "cards":
       return { ok: true, generatedAt, cards: await unansweredCards(apps, ids) };
     case "linkedin":
-      return { ok: true, generatedAt, linkedin: await linkedinJobs(db, { now }) };
+      return { ok: true, generatedAt, linkedin: await addResumeEta(db, await linkedinJobs(db, { now }), now) };
     case "counts": {
       const [engine, totals, ready] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps)]);
       return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length } };
@@ -462,6 +510,7 @@ export async function reviewQueue(db, { view = "full", cards = 0, ids = [], now 
     case "unanswered": {
       const [engine, order, ready] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps)]);
       await addJobFacts(db, order);
+      await addResumeEta(db, order, now);
       const first = await unansweredCards(apps, order.slice(0, cards).map((r) => r.id));
       return { ok: true, generatedAt, ...engine, counts: countsOf(order, ready), unanswered: order, cards: first };
     }
@@ -473,6 +522,7 @@ export async function reviewQueue(db, { view = "full", cards = 0, ids = [], now 
     case "full": {
       const [engine, order, ready, approved, inBrowser] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps), approvals(apps, now), inBrowserRows(apps, now)]);
       await addJobFacts(db, [...order, ...ready]);
+      await addResumeEta(db, order, now);
       const unanswered = await unansweredCards(apps, order.map((r) => r.id));
       return { ok: true, generatedAt, ...engine, counts: { ...countsOf(order, ready), inBrowser: inBrowser.length }, unanswered, ...readyLists(ready, approved, now), inBrowser };
     }

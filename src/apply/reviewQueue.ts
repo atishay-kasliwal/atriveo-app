@@ -60,7 +60,9 @@ export interface ApprovedApp extends Row {
   submittedAt: string | null; approvedAt: string | null;
 }
 /** An application blocked on questions, in the Unanswered page's order; its card loads when it's needed. */
-export interface QueuedApp { resumeReady?: boolean; track?: string | null; location?: string | null; createdAt?: string | null; priorityTags?: string[]; score?: number | null; postedAt?: string | null; foundAt?: string | null; company?: string; title?: string; id: string; updatedAt: string; n: number; suggestions?: number; readyForReview?: number; needsInput?: number; actionRequired?: number }
+/** When a resume that isn't here yet should be (the server's estimate; minutes rounded to 2, 5, 10, 20, 30, 40, 60…). */
+export interface ResumeEta { state: "syncing" | "building" | "queued" | "failed" | "not_queued"; minutes: number | null; ahead?: number }
+export interface QueuedApp { resumeEta?: ResumeEta; resumeReady?: boolean; track?: string | null; location?: string | null; createdAt?: string | null; priorityTags?: string[]; score?: number | null; postedAt?: string | null; foundAt?: string | null; company?: string; title?: string; id: string; updatedAt: string; n: number; suggestions?: number; readyForReview?: number; needsInput?: number; actionRequired?: number }
 
 interface View extends EngineState { ok: boolean; generatedAt: string; counts: Counts }
 export interface UnansweredQueue extends View { unanswered: QueuedApp[] }
@@ -168,7 +170,7 @@ const unanswered = pageView<UnansweredQueue>(async (first) => {
 const ready = pageView<ReadyQueue>(() => getJson<ReadyQueue>("/applications/review-queue?view=ready"));
 
 /** A LinkedIn posting with a resume ready and no application (the engine never applies on LinkedIn). */
-export interface LinkedinJob { resumeReady?: boolean; id: string; url: string; company: string; title: string; location: string | null; score: number | null; postedAt: string | null; foundAt: string | null; track: string | null; resumeFile: string | null; resumePath?: string | null; applyType?: "offsite" | "easy_apply" | null }
+export interface LinkedinJob { resumeEta?: ResumeEta; resumeReady?: boolean; id: string; url: string; company: string; title: string; location: string | null; score: number | null; postedAt: string | null; foundAt: string | null; track: string | null; resumeFile: string | null; resumePath?: string | null; applyType?: "offsite" | "easy_apply" | null }
 export interface LinkedinQueue { ok: boolean; generatedAt: string; linkedin: LinkedinJob[] }
 const linkedin = pageView<LinkedinQueue>(() => getJson<LinkedinQueue>("/applications/review-queue?view=linkedin"));
 /** Today's "On LinkedIn" cards: you open the posting, click Apply there, and Apply with Atriveo fills the company's form. */

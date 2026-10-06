@@ -9,7 +9,7 @@ import { postAction, when } from "./engine";
 import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, extensionVersion, noteLinkedinOpen } from "./openFill";
 import { blocking } from "./questionGroups";
 import { discardNow, dismissJobs, markJobsApplied } from "./discard";
-import { adjustCounts, loadCards, refreshLinkedin, refreshReady, refreshUnanswered, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
+import { adjustCounts, loadCards, refreshLinkedin, refreshReady, refreshUnanswered, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp, type ResumeEta } from "./reviewQueue";
 import { GOALS, readPref, streakOf, useApplyHistory, useAppliedToday, useSprint, writePref } from "./todayGoal";
 import { useExclusions } from "../hooks/useExclusions";
 import { getTailorServerBase } from "../utils/tailorServer";
@@ -24,7 +24,7 @@ import "./today.css";
 // a question nobody has answered come last and send you to To answer, which shows only those questions.
 
 type Kind = "you_submit" | "approve" | "fill" | "drafted" | "linkedin" | "answer";
-interface Item { resumeReady?: boolean; easyApply?: boolean; resumePath?: string | null; track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+interface Item { resumeEta?: ResumeEta; resumeReady?: boolean; easyApply?: boolean; resumePath?: string | null; track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
 
 /** The resume track's short name (TRACKS.yaml ids). */
 const TRACK_LABEL: Record<string, string> = { "software-engineer": "SWE", "ai-engineer": "AI", "data-analytics": "Data Analyst", "data-science": "DS", "forward-deployed": "FDE" };
@@ -51,6 +51,19 @@ const GENERAL_RESUMES: Array<{ track: keyof typeof TRACK_LABEL; folder: string }
   { track: "software-engineer", folder: "Software Engineer" }, { track: "ai-engineer", folder: "AI Engineer" }, { track: "data-analytics", folder: "Data Analyst" },
   { track: "data-science", folder: "Data Scientist" }, { track: "forward-deployed", folder: "Forward Deployed Engineer" },
 ];
+
+/** "Resume in ~10 min": the server's estimate for a resume that isn't ready yet. */
+function etaLabel(eta?: ResumeEta): { text: string; title: string } {
+  const t = (m: number | null) => (m == null ? "" : m >= 60 ? `~${Math.round(m / 60)} h` : `~${m} min`);
+  switch (eta?.state) {
+    case "syncing": return { text: "Resume syncing · ~1 min", title: "Built; on its way to the server so Fill can attach it." };
+    case "building": return { text: `Resume building · ${t(eta.minutes)}`, title: "A resume worker is building it now (time from its recent pace)." };
+    case "queued": return { text: `Resume in ${t(eta.minutes)}`, title: `${eta.ahead ?? 0} ahead of it in the resume queue, at the worker's recent pace.` };
+    case "failed": return { text: "Resume failed", title: "The resume couldn't be built. Request it again from the Atriveo panel, or use a general resume." };
+    case "not_queued": return { text: "Resume not queued", title: "No resume is queued for this job yet." };
+    default: return { text: "Resume not ready", title: "The tailored resume isn't on the server yet. This card moves up once it's ready." };
+  }
+}
 
 /** Postings older than this have no freshness left on the bar. */
 const FRESH_HOURS = 72;
@@ -156,7 +169,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       const current = c && c.updatedAt >= q.updatedAt ? c : null;
       const toAnswer = current ? current.questions.filter(blocking).length : q.needsInput ?? 0;
       return { toAnswer, id: q.id, kind: !q.n ? "fill" : toAnswer > 0 ? "answer" : "drafted", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? null, url: c?.url, updatedAt: q.updatedAt, priorityTags: q.priorityTags ?? c?.priorityTags, queued: q,
-        location: q.location ?? c?.location ?? null, score: q.score ?? null, track: q.track ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null, resumeReady: q.resumeReady };
+        location: q.location ?? c?.location ?? null, score: q.score ?? null, track: q.track ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null, resumeReady: q.resumeReady, resumeEta: q.resumeEta };
     };
     // What you can act on now comes first (Open & Fill: approved or drafted alike), then what needs answers;
     // within each, North Carolina first, then the newest posting, then the best match.
@@ -167,7 +180,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       ...(unanswered.data?.unanswered ?? []).map(fromQueue),
       // LinkedIn postings: no application (the engine never applies on LinkedIn); same score, place and age.
       ...(linkedin.data?.linkedin ?? []).map((l): Item => ({ id: l.id, kind: "linkedin", company: l.company, title: l.title, ats: null, url: l.url,
-        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null, easyApply: l.applyType === "easy_apply", resumeReady: l.resumeReady })),
+        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null, easyApply: l.applyType === "easy_apply", resumeReady: l.resumeReady, resumeEta: l.resumeEta })),
     ];
     return all
       .filter((i) => done[i.id] !== i.updatedAt && !skipped(i.company))
@@ -406,7 +419,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {age && <span className={`td-age ${hours < 1 ? "is-new" : ""}`} title={item.age ?? undefined}>{age}</span>}
           {fresh != null && <span className={`td-fresh ${fresh > 0.66 ? "is-fresh" : fresh > 0.33 ? "is-mid" : "is-stale"}`} title={fresh > 0 ? "Freshness: drains over 3 days; early applicants are seen first" : "Over 3 days old"}><i style={{ width: `${Math.round(fresh * 100)}%` }} /></span>}
         </div>
-        <div className="td-tags">{(item.score ?? 0) >= 80 && <span className="td-top" title="80+ match: worth applying first">★ Top match</span>}<span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{item.resumeReady === false && <span className="td-tag td-notready" title="The tailored resume isn't on the server yet (still building, or syncing from your Mac). This card moves up once it's ready.">Resume not ready</span>}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
+        <div className="td-tags">{(item.score ?? 0) >= 80 && <span className="td-top" title="80+ match: worth applying first">★ Top match</span>}<span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{item.resumeReady === false && (() => { const e = etaLabel(item.resumeEta); return <span className="td-tag td-notready" title={`${e.title} It moves up once the resume is ready.`}>{e.text}</span>; })()}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
         <div className="td-body">
           {item.kind === "drafted" && q && <>
             <p className="td-big">{drafted || q.n} answer{(drafted || q.n) === 1 ? "" : "s"} drafted</p>
