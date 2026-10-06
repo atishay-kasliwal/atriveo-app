@@ -451,3 +451,12 @@
 .apps-daterange button.active { background: var(--card-bg); color: var(--foreground); box-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 0 0 1px var(--border-col); font-weight: 600; }
 .apps-daterange-custom { display: inline-flex; align-items: center; gap: 6px; padding: 0 4px; font-size: 12.5px; color: var(--muted-fg); }
 .apps-daterange-custom input { font: inherit; font-size: 12.5px; padding: 3px 6px; border-radius: 6px; border: 1px solid var(--border-col); background: var(--card-bg); color: var(--foreground); color-scheme: dark; }
+
+/* Applied per day, last 12 weeks (ApplyHeatmap). */
+.apps-heatmap { margin: 4px 0 14px; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; }
+.apps-heatmap figcaption b { font-size: 13.5px; }
+.apps-heatmap-grid { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 12px); grid-auto-columns: 12px; gap: 3px; }
+.apps-heatmap-grid i { border-radius: 3px; background: color-mix(in oklab, var(--border-col) 70%, transparent); }
+.apps-heatmap-grid i.pad { background: none; }
+.apps-heatmap-grid i.l1 { background: #14532d; } .apps-heatmap-grid i.l2 { background: #15803d; }
+.apps-heatmap-grid i.l3 { background: #22c55e; } .apps-heatmap-grid i.l4 { background: #86efac; }

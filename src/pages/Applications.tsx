@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import ApplyHeatmap from "../components/ApplyHeatmap";
 import { IN_BROWSER_LABEL, InBrowserActions, inBrowserSummary } from "../apply/InBrowser";
 import type { InBrowserApp } from "../apply/reviewQueue";
 import { Link } from "react-router-dom";
@@ -901,6 +902,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                 <Stat label={`Sent to review · ${rangeLabel}`} value={r?.needsReview ?? k.needsReview} tone={(r?.needsReview ?? k.needsReview) ? "warn" : undefined} sub={[`${k.needsReview} waiting now`, data.linkedin?.waiting ? `+${data.linkedin.waiting} on LinkedIn` : null].filter(Boolean).join(" · ")} />
                 <Stat label={`Failed · ${rangeLabel}`} value={r?.failed ?? k.failed} tone={(r?.failed ?? k.failed) ? "bad" : undefined} sub={[`${k.failed} all-time`, clock(data.lastAt?.failed) && `latest ${clock(data.lastAt?.failed)}`].filter(Boolean).join(" · ")} />
               </div>
+              <ApplyHeatmap />
             </section>
 
             <div className="apps-ops">

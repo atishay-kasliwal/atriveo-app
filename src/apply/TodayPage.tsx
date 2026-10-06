@@ -9,7 +9,7 @@ import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, exte
 import { blocking } from "./questionGroups";
 import { discardNow, dismissJobs, markJobsApplied } from "./discard";
 import { adjustCounts, loadCards, refreshLinkedin, refreshReady, refreshUnanswered, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
-import { GOALS, readPref, useAppliedToday, writePref } from "./todayGoal";
+import { GOALS, readPref, streakOf, useApplyHistory, useAppliedToday, useSprint, writePref } from "./todayGoal";
 import { useExclusions } from "../hooks/useExclusions";
 import { getTailorServerBase } from "../utils/tailorServer";
 import "../styles/applications.css";
@@ -117,6 +117,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const [goal, setGoal] = useState<number>(() => { const g = readPref<number>("goal", 15); return GOALS.includes(g) ? g : 15; });
   const [focus, setFocus] = useState(0);
   const goalDay = useAppliedToday();
+  const history = useApplyHistory(84);
+  const streak = history ? streakOf(history, goalDay.applied ?? 0) : null;
+  const sprint = useSprint(goalDay.applied);
   // Companies you don't want now (your account's list, shared with the job feed's Settings): their cards stay off Today until you remove them.
   const { exclusions, excludeCompany, removeExclusion } = useExclusions();
   const [skipOpen, setSkipOpen] = useState(false);
@@ -378,7 +381,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const hours = item.age ? (Date.now() - Date.parse(item.age)) / 3_600_000 : NaN;
     const fresh = Number.isFinite(hours) ? Math.max(0, Math.min(1, 1 - hours / FRESH_HOURS)) : null;
     return (
-      <article key={item.id} onMouseDown={() => setFocus(index)} className={`td-card is-${stage.tone} ${item.track && TRACK_LABEL[item.track] ? `tr-${item.track}` : ""} ${selectedIds.includes(item.id) ? "is-selected" : ""} ${index === focused ? "is-focused" : ""}`} aria-label={`${item.company}: ${stage.label}`} aria-busy={isBusy}>
+      <article key={item.id} onMouseDown={() => setFocus(index)} className={`td-card is-${stage.tone} ${item.track && TRACK_LABEL[item.track] ? `tr-${item.track}` : ""} ${selectedIds.includes(item.id) ? "is-selected" : ""} ${index === focused ? "is-focused" : ""} ${(item.score ?? 0) >= 80 ? "is-top" : ""}`} aria-label={`${item.company}: ${stage.label}`} aria-busy={isBusy}>
         <header className="td-head">
           <input type="checkbox" className="td-check" disabled={queueRunning} aria-label={`Select ${item.company} ${item.title}`} checked={selectedIds.includes(item.id)} onChange={e => setSelectedIds(ids => e.target.checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} />
           <CompanyLogo company={item.company} size="sm" />
@@ -391,7 +394,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {age && <span className={`td-age ${hours < 1 ? "is-new" : ""}`} title={item.age ?? undefined}>{age}</span>}
           {fresh != null && <span className={`td-fresh ${fresh > 0.66 ? "is-fresh" : fresh > 0.33 ? "is-mid" : "is-stale"}`} title={fresh > 0 ? "Freshness: drains over 3 days; early applicants are seen first" : "Over 3 days old"}><i style={{ width: `${Math.round(fresh * 100)}%` }} /></span>}
         </div>
-        <div className="td-tags"><span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
+        <div className="td-tags">{(item.score ?? 0) >= 80 && <span className="td-top" title="80+ match: worth applying first">★ Top match</span>}<span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
         <div className="td-body">
           {item.kind === "drafted" && q && <>
             <p className="td-big">{drafted || q.n} answer{(drafted || q.n) === 1 ? "" : "s"} drafted</p>
@@ -497,7 +500,11 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {Array.from({ length: Math.floor((goal - 1) / 5) }, (_, n) => <s key={n} className={(goalDay.applied ?? 0) >= (n + 1) * 5 ? "is-hit" : ""} style={{ left: `${((n + 1) * 5 / goal) * 100}%` }} />)}
         </div>
         <span className="td-goal-left">{goalDay.applied == null ? "Loading…" : goalDay.applied >= goal ? "Goal reached 🎉" : `${goal - goalDay.applied} to go`}</span>
-        {goalDay.combo >= 2 && <span key={goalDay.combo} className="td-combo" title="Applied within 3 minutes of each other">🔥 ×{goalDay.combo}</span>}
+        {goalDay.combo >= 2 && <span key={goalDay.combo} className="td-combo" title="Applied within 3 minutes of each other">⚡ ×{goalDay.combo}</span>}
+        {streak != null && streak > 0 && <span className="td-streak" title="Days in a row with an application (weekends don't break it). Full history on Stats.">🔥 {streak}-day streak</span>}
+        {sprint.running
+          ? <span className="td-sprint is-on" title="Applications in this 25-minute sprint">⏱ {Math.floor(sprint.left / 60_000)}:{String(Math.floor((sprint.left % 60_000) / 1000)).padStart(2, "0")} · <b>{sprint.count}</b> applied{sprint.best ? ` · best ${sprint.best}` : ""}<button type="button" className="apps-link" onClick={sprint.stop}>End</button></span>
+          : <button type="button" className="td-sprint" disabled={goalDay.applied == null} onClick={sprint.start} title="25 minutes: count how many you apply to">⏱ Sprint{sprint.best ? ` · best ${sprint.best}` : ""}</button>}
       </div>
       {(unanswered.error || ready.error) && <p className="ar-error" role="alert">{unanswered.error || ready.error}</p>}
       <main className="td-grid" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}>
