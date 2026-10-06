@@ -1,0 +1,24 @@
+AI Engineer
+
+About the role
+We are hiring an AI Engineer to build and ship production machine learning and LLM features.
+You will own models and agentic workflows end to end, from data and evaluation through
+deployment and monitoring.
+
+What you will do
+- Build LLM applications with retrieval-augmented generation (RAG), prompt engineering,
+  function calling and multi-agent workflows using LangChain and LangGraph.
+- Work with OpenAI and Anthropic models, and open models from Hugging Face; build vector
+  search with Pinecone or ChromaDB.
+- Train, fine-tune and evaluate models in Python with PyTorch, TensorFlow and scikit-learn.
+- Deploy models and services on AWS (Bedrock, SageMaker, Lambda) with Docker and CI/CD, and
+  track experiments and models with MLflow (MLOps).
+- Build Python APIs with FastAPI, and data pipelines with SQL and NoSQL stores.
+- Design evaluation sets and metrics, measure accuracy, latency and cost, and improve them.
+- Collaborate with product and research partners and write clear documentation.
+
+Qualifications
+- Bachelor's or Master's degree in Computer Science, AI, Data Science, or a related field.
+- Strong Python, machine learning fundamentals, deep learning and NLP.
+- Experience shipping LLM or generative AI features to production.
+- Git, testing and code review in an agile team.

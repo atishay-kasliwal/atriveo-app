@@ -1,0 +1,27 @@
+Software Engineer
+
+About the role
+We are hiring a Software Engineer to design, build, and operate production
+systems across backend services, data pipelines, and applied AI features. You
+will own features end to end, from API design through deployment and on-call.
+
+What you will do
+- Build and scale backend services and REST and GraphQL APIs in Python and Java
+  (FastAPI, Spring Boot) with strong reliability, latency, and uptime targets.
+- Design event-driven and distributed systems using Kafka, Redis, and
+  PostgreSQL or DynamoDB, and optimize them for throughput and cost.
+- Build data pipelines and ETL workflows that process large volumes of records,
+  with testing, validation, and monitoring.
+- Ship applied machine learning and LLM features, including retrieval (RAG),
+  evaluation, and model-serving workflows, in Python and PyTorch.
+- Deploy on AWS or GCP with Docker, Terraform, and CI/CD, and instrument
+  services with Prometheus, CloudWatch, or Grafana to reduce incidents and MTTR.
+- Build internal tools and full-stack features with TypeScript and React when needed.
+- Write clean, tested code, review pull requests, and collaborate with product
+  and data partners in an agile team.
+
+Qualifications
+- Bachelor's or Master's degree in Computer Science, Data Science, or a related field.
+- Experience with Python and Java, SQL, data structures, algorithms, and system design.
+- Hands-on experience with cloud platforms, microservices, and production operations.
+- Familiarity with machine learning, LLMs, and data engineering is a plus.

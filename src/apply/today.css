@@ -251,3 +251,13 @@
 .td-skip-co svg { width: 15px; height: 15px; }
 .td-card:hover .td-skip-co, .td-card.is-focused .td-skip-co, .td-skip-co:focus-visible { opacity: 1; }
 .td-skip-co:hover:not(:disabled) { color: #ef4444; border-color: color-mix(in oklab, #ef4444 40%, var(--border-col)); }
+.td-kind svg { flex: none; }
+.td-resumes li { text-transform: none; }
+.td-resumes li > span:first-child { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.td-resumes .td-dot { background: var(--tr); }
+.td-resumes .tr-software-engineer { --tr: #60a5fa; } .td-resumes .tr-ai-engineer { --tr: #a78bfa; } .td-resumes .tr-data-analytics { --tr: #fbbf24; }
+.td-resumes .tr-data-science { --tr: #34d399; } .td-resumes .tr-forward-deployed { --tr: #f472b6; }
+.td-resume-acts { display: inline-flex; align-items: center; gap: 8px; }
+.td-resume-acts .apps-btn { height: 28px; padding: 0 10px; font-size: 12px; display: inline-flex; align-items: center; text-decoration: none; }
+.td-resumes > p { margin: 0 0 8px; }
+.td-skip-pop.td-resumes { left: 0; right: auto; width: 300px; }

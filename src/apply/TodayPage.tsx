@@ -11,6 +11,7 @@ import { discardNow, dismissJobs, markJobsApplied } from "./discard";
 import { adjustCounts, loadCards, refreshLinkedin, refreshReady, refreshUnanswered, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp } from "./reviewQueue";
 import { GOALS, readPref, useAppliedToday, writePref } from "./todayGoal";
 import { useExclusions } from "../hooks/useExclusions";
+import { getTailorServerBase } from "../utils/tailorServer";
 import "../styles/applications.css";
 import "./review-pages.css";
 import "./today.css";
@@ -43,6 +44,12 @@ function interleave<T extends { track?: string | null }>(list: T[]): T[] {
   for (let round = 0; out.length < list.length; round++) for (const g of groups.values()) if (g[round]) out.push(g[round]!);
   return out;
 }
+
+/** General resumes, one per track (scripts/general-resumes.mjs builds them into the resume folder's general/). */
+const GENERAL_RESUMES: Array<{ track: keyof typeof TRACK_LABEL; folder: string }> = [
+  { track: "software-engineer", folder: "Software Engineer" }, { track: "ai-engineer", folder: "AI Engineer" }, { track: "data-analytics", folder: "Data Analyst" },
+  { track: "data-science", folder: "Data Scientist" }, { track: "forward-deployed", folder: "Forward Deployed Engineer" },
+];
 
 /** Postings older than this have no freshness left on the bar. */
 const FRESH_HOURS = 72;
@@ -113,6 +120,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   // Companies you don't want now (your account's list, shared with the job feed's Settings): their cards stay off Today until you remove them.
   const { exclusions, excludeCompany, removeExclusion } = useExclusions();
   const [skipOpen, setSkipOpen] = useState(false);
+  const [resumesOpen, setResumesOpen] = useState(false);
   const [skipDraft, setSkipDraft] = useState("");
   const skipped = (company: string) => { const co = company.toLowerCase(); return exclusions.companies.some((c) => co.includes(c)); };
   // A new mood starts at the top: first page, first card, nothing selected.
@@ -164,6 +172,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     return [...interleave(list.filter((i) => !later.includes(i.id))), ...later_];
   }, [everything, track, kind, later]);
 
+  // The resume folder, from any tailored resume's path (general resumes sit in its general/ folder).
+  const resumeRoot = useMemo(() => { const p = (linkedin.data?.linkedin ?? []).find((l) => l.resumePath?.includes("/tailored-resumes/"))?.resumePath; return p ? p.slice(0, p.indexOf("/tailored-resumes/") + "/tailored-resumes".length) : null; }, [linkedin.data]);
+  const generalPath = (folder: string) => resumeRoot ? `${resumeRoot}/general/${folder}/Atishay Kasliwal.pdf` : null;
   const pages = Math.max(1, Math.ceil(items.length / perPage));
   const current = Math.min(page, pages - 1);
   const shown = items.slice(current * perPage, (current + 1) * perPage);
@@ -446,7 +457,18 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
             <button key={k} type="button" className={`td-kind ${kind === k ? "is-on" : ""}`} aria-pressed={kind === k} onClick={() => pick({ kind: kind === k ? "all" : k })}>{KIND_LABEL[k]} <b>{kindCount(k)}</b></button>
           ))}
           <span className="td-skiplist">
-            <button type="button" className={`td-kind ${skipOpen ? "is-on" : ""}`} aria-expanded={skipOpen} onClick={() => setSkipOpen((o) => !o)}>Skipped companies <b>{exclusions.companies.length}</b></button>
+            <button type="button" className={`td-kind ${resumesOpen ? "is-on" : ""}`} aria-expanded={resumesOpen} onClick={() => { setResumesOpen((o) => !o); setSkipOpen(false); }}>
+              <svg aria-hidden="true" viewBox="0 0 16 16" width="14" height="14"><path d="M4 1.8h5.2L12.5 5v9.2H4zM9 1.8V5h3.5M6 8.2h4.5M6 10.8h4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round"/></svg>Resumes</button>
+            {resumesOpen && <div className="td-skip-pop td-resumes" role="dialog" aria-label="General resumes">
+              <p className="apps-muted">General resume for each track (not tailored to a job).</p>
+              <ul>{GENERAL_RESUMES.map((g) => { const p = generalPath(g.folder); const url = p ? `${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(p)}` : null; return (
+                <li key={g.track} className={`tr-${g.track}`}><span><i className="td-dot" aria-hidden="true" style={{ ["--td-c" as string]: `var(--tr)` }} />{TRACK_LABEL[g.track]}</span>
+                  {url ? <span className="td-resume-acts"><button type="button" className="apps-link" onClick={() => { setPdf(p); setResumesOpen(false); }}>View</button><a className="apps-btn" href={`${url}&dl=1`} download={`Atishay Kasliwal - ${g.folder}.pdf`}>Download</a></span> : <span className="apps-muted">Loading…</span>}
+                </li>); })}</ul>
+            </div>}
+          </span>
+          <span className="td-skiplist">
+            <button type="button" className={`td-kind ${skipOpen ? "is-on" : ""}`} aria-expanded={skipOpen} onClick={() => { setSkipOpen((o) => !o); setResumesOpen(false); }}>Skipped companies <b>{exclusions.companies.length}</b></button>
             {skipOpen && <div className="td-skip-pop" role="dialog" aria-label="Skipped companies">
               <form onSubmit={(e) => { e.preventDefault(); if (skipDraft.trim()) { excludeCompany(skipDraft); setSkipDraft(""); } }}>
                 <input value={skipDraft} onChange={(e) => setSkipDraft(e.target.value)} placeholder="Add a company…" aria-label="Company to skip" autoFocus />
