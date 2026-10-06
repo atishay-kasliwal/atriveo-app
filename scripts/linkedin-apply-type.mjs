@@ -33,7 +33,7 @@ if (process.argv[1]?.endsWith("linkedin-apply-type.mjs")) {
   const db = client.db(process.env.MONGO_DB || undefined);
   try {
     const since = new Date(Date.now() - DAYS * 86_400_000);
-    const urls = (await db.collection("jobs").distinct("job_url", { run_at: { $gte: since }, job_url: /^https:\/\/(www\.)?linkedin\.com\/jobs\/view\/\d+/, apply_type: { $exists: false } })).slice(0, LIMIT);
+    const urls = (await db.collection("jobs").distinct("job_url", { run_at: { $gte: since }, job_url: /^https:\/\/(www\.)?linkedin\.com\/jobs\/view\/\d+/, apply_type: { $exists: false }, "resume.status": "success" })).slice(0, LIMIT); // the ones on Today
     const counts = { offsite: 0, easy_apply: 0, closed: 0, unread: 0 };
     const started = Date.now();
     for (const url of urls) {
