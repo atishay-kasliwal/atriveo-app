@@ -182,9 +182,8 @@
 .td-goal-n b { font-size: 22px; color: #22c55e; font-variant-numeric: tabular-nums; }
 .td-goal-n button { font: inherit; font-size: 22px; font-weight: 700; color: #22c55e; background: none; border: 0; padding: 0; cursor: pointer; border-bottom: 1px dashed color-mix(in oklab, #22c55e 50%, transparent); }
 .td-goal-bar { flex: 1; height: 8px; border-radius: 999px; background: color-mix(in oklab, var(--border-col) 70%, transparent); overflow: hidden; }
-.td-goal-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #16a34a, #4ade80); transition: width .5s cubic-bezier(.2, .8, .2, 1); }
-.td-goal-bar.is-done i { background: linear-gradient(90deg, #22c55e, #facc15, #22c55e); background-size: 200% 100%; animation: td-shine 2.5s linear infinite; }
-@keyframes td-shine { to { background-position: -200% 0; } }
+.td-goal-bar i { display: block; height: 100%; border-radius: inherit; background: #22c55e; transition: width .5s cubic-bezier(.2, .8, .2, 1); }
+.td-goal-bar.is-done i { background: #facc15; }
 .td-goal-left { white-space: nowrap; }
 .td-combo { white-space: nowrap; font-weight: 700; color: #fb923c; animation: td-pop .35s cubic-bezier(.2, 1.6, .4, 1); }
 @keyframes td-pop { from { transform: scale(.4); opacity: 0; } }
@@ -202,4 +201,38 @@
 .td-keys { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted-fg); }
 .td-keys kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; margin-right: 3px; border-radius: 5px; font: inherit; font-size: 11px; font-weight: 650; color: var(--foreground); background: var(--accent-bg); border: 1px solid var(--border-col); }
 @media (max-width: 1100px) { .td-keys { display: none; } .td-kinds { margin-left: 0; } }
-@media (prefers-reduced-motion: reduce) { .td-goal-bar i, .td-combo, .td-goal-bar.is-done i { transition: none; animation: none; } }
+@media (prefers-reduced-motion: reduce) { .td-goal-bar i, .td-combo { transition: none; animation: none; } }
+
+/* --- Flat finish: no gradients, every card the same size, track colour as a solid accent -------------- */
+.td-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--td-c); flex: none; }
+.td-mood.is-on { background: color-mix(in oklab, var(--td-c) 20%, var(--card-bg)); box-shadow: 0 0 0 1px var(--td-c); }
+.td-mood.is-all.is-on { --td-c: #3b82f6; }
+
+.td-goal { margin: 0 20px 12px; padding: 10px 16px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--border-col); }
+.td-goal-bar { position: relative; height: 10px; overflow: visible; background: rgb(255 255 255 / 7%); }
+.td-goal-bar s { position: absolute; top: -3px; width: 2px; height: 16px; border-radius: 2px; background: rgb(255 255 255 / 16%); transform: translateX(-1px); }
+.td-goal-bar s.is-hit { background: #86efac; }
+.td-combo { padding: 3px 10px; border-radius: 999px; background: rgb(251 146 60 / 15%); border: 1px solid rgb(251 146 60 / 45%); }
+
+/* Cards: one flat surface, all the same height (each fills its row; spare height sits above the buttons). */
+.td-card { --tr: #6366f1; }
+.td-card.tr-software-engineer { --tr: #60a5fa; }
+.td-card.tr-ai-engineer { --tr: #a78bfa; }
+.td-card.tr-data-analytics { --tr: #fbbf24; }
+.td-card.tr-data-science { --tr: #34d399; }
+.td-card.tr-forward-deployed { --tr: #f472b6; }
+.td-page .td-grid { align-items: stretch; }
+.td-page .td-grid .td-card { max-height: none; height: 100%; }
+.td-page .td-card { background: var(--card-bg); border: 1px solid var(--border-col); box-shadow: none; transform: none; }
+.td-page .td-card::before { background: var(--tr); }
+.td-page .td-card:hover { transform: none; border-color: color-mix(in oklab, var(--tr) 50%, var(--border-col)); box-shadow: none; }
+.td-page .td-card.is-focused { border-color: var(--tr); box-shadow: 0 0 0 2px color-mix(in oklab, var(--tr) 45%, transparent); }
+.td-page .td-cta, .td-page .td-cta-linkedin { background: #0a66c2; box-shadow: none; }
+.td-page .td-cta:hover { filter: brightness(1.1); transform: none; box-shadow: none; }
+.td-page .td-foot .rv-primary { box-shadow: none; }
+
+/* Freshness inline with place and age. */
+.td-meta .td-fresh { flex: 1 1 40px; max-width: 90px; margin-left: auto; height: 4px; background: rgb(255 255 255 / 9%); }
+.td-meta .td-fresh i { min-width: 3px; }
+.td-meta .td-loc { flex: 0 1 auto; }
+.td-keys { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border-col); }

@@ -357,7 +357,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const hours = item.age ? (Date.now() - Date.parse(item.age)) / 3_600_000 : NaN;
     const fresh = Number.isFinite(hours) ? Math.max(0, Math.min(1, 1 - hours / FRESH_HOURS)) : null;
     return (
-      <article key={item.id} onMouseDown={() => setFocus(index)} className={`td-card is-${stage.tone} ${selectedIds.includes(item.id) ? "is-selected" : ""} ${index === focused ? "is-focused" : ""}`} aria-label={`${item.company}: ${stage.label}`} aria-busy={isBusy}>
+      <article key={item.id} onMouseDown={() => setFocus(index)} className={`td-card is-${stage.tone} ${item.track && TRACK_LABEL[item.track] ? `tr-${item.track}` : ""} ${selectedIds.includes(item.id) ? "is-selected" : ""} ${index === focused ? "is-focused" : ""}`} aria-label={`${item.company}: ${stage.label}`} aria-busy={isBusy}>
         <header className="td-head">
           <input type="checkbox" className="td-check" disabled={queueRunning} aria-label={`Select ${item.company} ${item.title}`} checked={selectedIds.includes(item.id)} onChange={e => setSelectedIds(ids => e.target.checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} />
           <CompanyLogo company={item.company} size="sm" />
@@ -367,8 +367,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         <div className="td-meta">
           {item.location && <span className={`td-loc ${nc ? "is-nc" : ""}`} title={item.location}>{nc ? "★ " : ""}{item.location}</span>}
           {age && <span className={`td-age ${hours < 1 ? "is-new" : ""}`} title={item.age ?? undefined}>{age}</span>}
+          {fresh != null && <span className={`td-fresh ${fresh > 0.66 ? "is-fresh" : fresh > 0.33 ? "is-mid" : "is-stale"}`} title={fresh > 0 ? "Freshness: drains over 3 days; early applicants are seen first" : "Over 3 days old"}><i style={{ width: `${Math.round(fresh * 100)}%` }} /></span>}
         </div>
-        {fresh != null && <div className={`td-fresh ${fresh > 0.66 ? "is-fresh" : fresh > 0.33 ? "is-mid" : "is-stale"}`} title={fresh > 0 ? "Freshness: drains over 3 days; early applicants are seen first" : "Over 3 days old"}><i style={{ width: `${Math.round(fresh * 100)}%` }} /></div>}
         <div className="td-tags"><span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
         <div className="td-body">
           {item.kind === "drafted" && q && <>
@@ -426,7 +426,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         <div className="td-moods" role="group" aria-label="Track">
           {TRACK_FILTERS.map((t, n) => (
             <button key={t} type="button" className={`td-mood is-${t} ${track === t ? "is-on" : ""}`} aria-pressed={track === t} title={`Key ${n + 1}${t === "mixed" ? ": the tracks in turn" : ""}`} onClick={() => pick({ track: t })}>
-              {t === "mixed" ? <><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M2 4.5h3c2.5 0 3.5 7 6 7h3M12 9.5l2 2-2 2M2 11.5h3c1 0 1.7-1 2.3-2.3M8.7 6.3c.6-1.1 1.3-1.8 2.3-1.8h3M12 2.5l2 2-2 2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>Mixed</> : <>{t === "all" ? "All" : TRACK_LABEL[t]}<b>{trackCount(t)}</b></>}
+              {t === "mixed" ? <><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M2 4.5h3c2.5 0 3.5 7 6 7h3M12 9.5l2 2-2 2M2 11.5h3c1 0 1.7-1 2.3-2.3M8.7 6.3c.6-1.1 1.3-1.8 2.3-1.8h3M12 2.5l2 2-2 2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>Mixed</> : <>{t !== "all" && <i className="td-dot" aria-hidden="true" />}{t === "all" ? "All" : TRACK_LABEL[t]}<b>{trackCount(t)}</b></>}
             </button>
           ))}
         </div>
@@ -448,7 +448,10 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       </div>
       <div className="td-goal" aria-label={`Applied today: ${goalDay.applied ?? "loading"} of ${goal}`}>
         <span className="td-goal-n"><b>{goalDay.applied ?? "–"}</b> / <button type="button" title="Daily goal: click to change" onClick={() => { const g = GOALS[(GOALS.indexOf(goal) + 1) % GOALS.length]!; setGoal(g); writePref("goal", g); }}>{goal}</button> applied today</span>
-        <div className={`td-goal-bar ${(goalDay.applied ?? 0) >= goal ? "is-done" : ""}`}><i style={{ width: `${Math.min(100, ((goalDay.applied ?? 0) / goal) * 100)}%` }} /></div>
+        <div className={`td-goal-bar ${(goalDay.applied ?? 0) >= goal ? "is-done" : ""}`}>
+          <i style={{ width: `${Math.min(100, ((goalDay.applied ?? 0) / goal) * 100)}%` }} />
+          {Array.from({ length: Math.floor((goal - 1) / 5) }, (_, n) => <s key={n} className={(goalDay.applied ?? 0) >= (n + 1) * 5 ? "is-hit" : ""} style={{ left: `${((n + 1) * 5 / goal) * 100}%` }} />)}
+        </div>
         <span className="td-goal-left">{goalDay.applied == null ? "Loading…" : goalDay.applied >= goal ? "Goal reached 🎉" : `${goal - goalDay.applied} to go`}</span>
         {goalDay.combo >= 2 && <span key={goalDay.combo} className="td-combo" title="Applied within 3 minutes of each other">🔥 ×{goalDay.combo}</span>}
       </div>
