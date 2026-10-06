@@ -261,3 +261,5 @@
 .td-resume-acts .apps-btn { height: 28px; padding: 0 10px; font-size: 12px; display: inline-flex; align-items: center; text-decoration: none; }
 .td-resumes > p { margin: 0 0 8px; }
 .td-skip-pop.td-resumes { left: 0; right: auto; width: 300px; }
+/* The bar (and its popups) above the cards, whose headers make their own layers. */
+.td-page .td-bar { position: relative; z-index: 30; }
