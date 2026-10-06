@@ -25,3 +25,17 @@ test('a lane with minPriority claims only jobs at or above it; the main worker t
     assert.equal((await claimNextJob(db, 'oracle', 900)).job_url, 'bulk-2');
   } finally { await client.close(); await mongo.stop(); }
 });
+
+test('jobs at a company you skip (company_rules) stay queued, unbuilt, until it is removed', async () => {
+  const mongo = await MongoMemoryServer.create();
+  const client = await MongoClient.connect(mongo.getUri());
+  try {
+    const db = client.db('t');
+    await db.collection('jobs').insertMany([{ ...queued('skip-me', 1000), company: 'Ampcus Inc' }, { ...queued('keep', 500), company: 'Ampcus Incorporated Labs' }]);
+    await db.collection('company_rules').insertOne({ _id: 'ampcus', names: ['ampcus inc'], keys: ['ampcus'], mode: 'manual' });
+    assert.equal((await claimNextJob(db, 'oracle', 900)).job_url, 'keep');
+    assert.equal(await claimNextJob(db, 'oracle', 900), null);
+    await db.collection('company_rules').deleteMany({});
+    assert.equal((await claimNextJob(db, 'oracle', 900)).job_url, 'skip-me');
+  } finally { await client.close(); await mongo.stop(); }
+});

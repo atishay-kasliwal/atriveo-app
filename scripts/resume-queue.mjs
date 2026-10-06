@@ -407,12 +407,24 @@ export async function enqueueFreshSessionJobs(db, { limit = null, minScore = 0, 
  * Claim this machine's next queued resume, best priority first. `minPriority` makes a lane: the fast lane
  * (RESUME_MIN_PRIORITY=1001) takes only requests from the extension and the portal, beside the main worker.
  */
+/**
+ * Companies you skip (Mongo company_rules, written by Today's Skip company and `npm run apply:manual` in
+ * playatriveo): their jobs stay queued, unbuilt, until the company is removed. Matched by name, any case.
+ */
+async function skippedCompanyFilter(db) {
+  const rules = await db.collection("company_rules").find({}, { projection: { names: 1 } }).toArray().catch(() => []);
+  const names = [...new Set(rules.flatMap((r) => r.names ?? []).map((n) => String(n).trim()).filter(Boolean))];
+  return names.length ? { $nor: names.map((n) => ({ company: { $regex: `^${n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" } })) } : {};
+}
+
 export async function claimNextJob(db, workerId, leaseSec = 900, { minPriority = null } = {}) {
   const now = new Date();
   const leaseUntil = new Date(now.getTime() + leaseSec * 1000);
+  const skipped = await skippedCompanyFilter(db);
 
   const result = await db.collection("jobs").findOneAndUpdate(
     {
+      ...skipped,
       "resume.status": "queued",
       // Only this machine's work. A job enqueued elsewhere is left alone even
       // when this worker is idle — the requesting machine is the one that can

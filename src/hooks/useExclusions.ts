@@ -41,6 +41,8 @@ export function useExclusions() {
   const uid = user?.email ?? "anon";
 
   const [exclusions, setExclusions] = useState<Exclusions>(empty);
+  // True once your account's list has been read (or couldn't be): before that the list is only a cache.
+  const [loaded, setLoaded] = useState(false);
 
   // On auth resolved: load cache instantly, then pull server state
   useEffect(() => {
@@ -65,7 +67,8 @@ export function useExclusions() {
             persist(uid, data);
           }
         })
-        .catch(() => { /* stick with localStorage on network error */ });
+        .catch(() => { /* stick with localStorage on network error */ })
+        .finally(() => setLoaded(true));
     }
   }, [uid, authLoading]);
 
@@ -111,5 +114,5 @@ export function useExclusions() {
     );
   }, [exclusions]);
 
-  return { exclusions, excludeCompany, excludeKeyword, removeExclusion, isExcluded };
+  return { exclusions, loaded, excludeCompany, excludeKeyword, removeExclusion, isExcluded };
 }

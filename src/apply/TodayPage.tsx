@@ -121,10 +121,18 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const streak = history ? streakOf(history, goalDay.applied ?? 0) : null;
   const sprint = useSprint(goalDay.applied);
   // Companies you don't want now (your account's list, shared with the job feed's Settings): their cards stay off Today until you remove them.
-  const { exclusions, excludeCompany, removeExclusion } = useExclusions();
+  const { exclusions, loaded: skipsLoaded, excludeCompany, removeExclusion } = useExclusions();
   const [skipOpen, setSkipOpen] = useState(false);
   const [resumesOpen, setResumesOpen] = useState(false);
   const [skipDraft, setSkipDraft] = useState("");
+  // The engine and resume workers skip the same companies (company rules), so nothing more is queued or applied to.
+  const skipKey = JSON.stringify(exclusions.companies);
+  const [syncedSkips, setSyncedSkips] = useState<string | null>(null);
+  useEffect(() => {
+    if (!skipsLoaded || skipKey === syncedSkips) return;
+    const t = setTimeout(() => { void postAction({ action: "skip_companies", companies: exclusions.companies }).then((r) => { if (r.ok) setSyncedSkips(skipKey); }); }, 1500);
+    return () => clearTimeout(t);
+  }, [skipKey, syncedSkips, skipsLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
   const skipped = (company: string) => { const co = company.toLowerCase(); return exclusions.companies.some((c) => co.includes(c)); };
   // A new mood starts at the top: first page, first card, nothing selected.
   const pick = (next: { track?: TrackFilter; kind?: KindFilter }) => {
