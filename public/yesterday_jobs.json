@@ -1937,7 +1937,7 @@
     "apply_type": "easy_apply",
     "apply_type_at": "2026-10-05T22:41:48.498Z",
     "ats_score": 71,
-    "fit_score": 22
+    "fit_score": 21
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4474282392",
@@ -3510,7 +3510,7 @@
       "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-05/Ampstek (5thOctober)"
     },
     "ats_score": 50,
-    "fit_score": 3
+    "fit_score": 2
   },
   {
     "session_id": "2026-10-05T16:01:40Z",
@@ -5990,7 +5990,7 @@
     "company": "Tech Jobs for Good",
     "competition_score": 0,
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://techjobsforgood.com/jobs/36611/?ref=homepage",
     "level": "Entry",
     "location": "Durham, NC",
     "max_exp": 6.0,
@@ -6036,6 +6036,8 @@
         "built_at": "2026-10-05T17:48:43.684Z"
       }
     },
+    "job_url_direct_at": "2026-10-06T15:24:54.194Z",
+    "job_url_direct_from": "your-browser",
     "ats_score": 58,
     "fit_score": 10
   },
@@ -7656,10 +7658,10 @@
     "application": {
       "applicationId": "5c8745ff-7a1d-4ef0-852c-c74e298a3910",
       "applicationKey": "ashby:fc1b7aa0-98e0-41c7-befb-1198f91fc9ac",
-      "status": "READY_TO_APPLY",
-      "reviewReason": null,
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
       "ats": "ashby",
-      "updatedAt": "2026-10-06T15:21:52.037Z"
+      "updatedAt": "2026-10-06T15:24:02.261Z"
     },
     "ats_score": 40,
     "fit_score": 3
@@ -7910,7 +7912,7 @@
     "apply_type": "easy_apply",
     "apply_type_at": "2026-10-05T22:38:54.193Z",
     "ats_score": 50,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473668390",
@@ -8478,7 +8480,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-05T22:27:25.512Z",
     "ats_score": 33,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-10-05T18:58:25Z",
@@ -9729,6 +9731,8 @@
         "built_at": "2026-10-05T19:01:51.201Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-06T15:58:47.792Z",
     "ats_score": 50,
     "fit_score": 5
   },
@@ -10042,7 +10046,7 @@
       }
     },
     "ats_score": 62,
-    "fit_score": 3
+    "fit_score": 2
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4474289686",
@@ -11537,6 +11541,8 @@
         "built_at": "2026-10-05T21:01:17.528Z"
       }
     },
+    "apply_type": "closed",
+    "apply_type_at": "2026-10-06T15:58:08.594Z",
     "ats_score": 40,
     "fit_score": 5
   },
@@ -12033,6 +12039,8 @@
         "built_at": "2026-10-05T21:02:05.832Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-06T15:58:03.658Z",
     "ats_score": 44,
     "fit_score": 13
   },
@@ -12213,6 +12221,8 @@
         "built_at": "2026-10-05T21:02:27.694Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-06T15:57:50.011Z",
     "ats_score": 60,
     "fit_score": 22
   },
@@ -13369,6 +13379,8 @@
         "built_at": "2026-10-05T21:04:24.397Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-06T15:57:54.425Z",
     "ats_score": 38,
     "fit_score": 9
   },
@@ -15729,6 +15741,8 @@
         "built_at": "2026-10-05T22:01:27.647Z"
       }
     },
+    "apply_type": "closed",
+    "apply_type_at": "2026-10-06T15:58:12.385Z",
     "ats_score": 40,
     "fit_score": 6
   },
@@ -16213,6 +16227,8 @@
         "built_at": "2026-10-05T22:02:14.767Z"
       }
     },
+    "apply_type": "closed",
+    "apply_type_at": "2026-10-06T15:58:19.980Z",
     "ats_score": 66,
     "fit_score": 5
   },
@@ -16333,6 +16349,8 @@
         "built_at": "2026-10-05T22:02:31.457Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-06T15:58:23.386Z",
     "ats_score": 33,
     "fit_score": 8
   },
@@ -17327,6 +17345,8 @@
         "built_at": "2026-10-05T22:05:53.350Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-06T15:57:59.469Z",
     "ats_score": 53,
     "fit_score": 6
   },
@@ -18561,6 +18581,8 @@
         "built_at": "2026-10-06T01:13:36.913Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-06T15:58:51.433Z",
     "ats_score": 75,
     "fit_score": 2
   },
@@ -20535,6 +20557,8 @@
         "built_at": "2026-10-06T01:16:51.783Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-06T15:58:59.040Z",
     "ats_score": 40,
     "fit_score": 5
   },
@@ -20655,6 +20679,8 @@
         "built_at": "2026-10-06T01:17:05.781Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-06T15:58:32.301Z",
     "ats_score": 34,
     "fit_score": 7
   },
@@ -21078,7 +21104,7 @@
       }
     },
     "ats_score": 44,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-10-06T01:11:30Z",
@@ -21439,6 +21465,8 @@
         "built_at": "2026-10-06T01:18:09.398Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-06T15:59:03.363Z",
     "ats_score": 50,
     "fit_score": 5
   },
@@ -23172,6 +23200,8 @@
         "built_at": "2026-10-06T02:05:17.394Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-06T15:58:55.238Z",
     "ats_score": 66,
     "fit_score": 13
   },
@@ -23293,6 +23323,8 @@
         "built_at": "2026-10-06T02:05:30.026Z"
       }
     },
+    "apply_type": "closed",
+    "apply_type_at": "2026-10-06T15:57:45.752Z",
     "ats_score": 55,
     "fit_score": 12
   },
@@ -23551,7 +23583,7 @@
       "status": "FAILED",
       "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-06T15:22:48.741Z"
+      "updatedAt": "2026-10-06T15:53:12.738Z"
     },
     "ats_score": 33,
     "fit_score": 5
@@ -23673,6 +23705,8 @@
         "built_at": "2026-10-06T02:05:58.684Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-06T15:58:27.282Z",
     "ats_score": 50,
     "fit_score": 6
   },
@@ -24142,6 +24176,8 @@
         "built_at": "2026-10-06T02:06:37.798Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-06T15:58:15.876Z",
     "ats_score": 57,
     "fit_score": 5
   },
@@ -24575,6 +24611,8 @@
         "built_at": "2026-10-06T02:07:13.947Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-06T15:58:37.544Z",
     "ats_score": 40,
     "fit_score": 4
   },
