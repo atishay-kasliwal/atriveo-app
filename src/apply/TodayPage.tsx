@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OpenFillQueue from "./OpenFillQueue";
 import ApplicationReview from "./ApplicationReview";
+import AnswerModal from "./AnswerModal";
 import PdfPreviewModal from "../components/PdfPreviewModal";
 import CompanyLogo from "../components/CompanyLogo";
 import { postAction, when } from "./engine";
@@ -112,6 +113,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   // The tailored resume of a card with no application (On LinkedIn), shown from its file.
   const [pdf, setPdf] = useState<string | null>(null);
+  // Answer on a card: its questions in a pop-up (To answer stays for answering many jobs at once).
+  const [answering, setAnswering] = useState<string | null>(null);
   const [track, setTrack] = useState<TrackFilter>(() => { const t = readPref<string>("track", "all"); return (TRACK_FILTERS as string[]).includes(t) ? t as TrackFilter : "all"; });
   const [kind, setKind] = useState<KindFilter>(() => { const k = readPref<string>("kind", "all"); return ["all", "fill", "linkedin", "answer"].includes(k) ? k as KindFilter : "all"; });
   const [goal, setGoal] = useState<number>(() => { const g = readPref<number>("goal", 15); return GOALS.includes(g) ? g : 15; });
@@ -351,7 +354,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   // Keys: 1–7 pick a track, ←/→ (↑/↓ by row) move between cards and pages, A/L/D/O act on the outlined card.
   const keys = useRef<(e: KeyboardEvent) => void>(() => {});
   keys.current = (e: KeyboardEvent) => {
-    if (e.metaKey || e.ctrlKey || e.altKey || review || pdf || confirmAll || queueRunning) return;
+    if (e.metaKey || e.ctrlKey || e.altKey || review || pdf || confirmAll || queueRunning || answering) return;
     const el = e.target as HTMLElement | null;
     if (el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName))) return;
     const n = Number(e.key);
@@ -430,7 +433,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
             <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
             <span>Open on LinkedIn</span><svg className="td-cta-ext" aria-hidden="true" viewBox="0 0 16 16"><path d="M6 3.5H3.5v9h9V10M9 3h4v4M13 3L7.5 8.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"/></svg></a>}
           {(item.kind === "drafted" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => void openInBrowser(item)}>{busy === item.id ? "Opening…" : "Open & Fill"}</button>}
-          {item.kind === "answer" && <button className="rv-primary" disabled={isBusy} onClick={() => navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer {item.toAnswer ?? ""}</button>}
+          {item.kind === "answer" && <button className="rv-primary" disabled={isBusy} onClick={() => cards[item.id] ? setAnswering(item.id) : navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer {item.toAnswer ?? ""}</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
           {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}
           {item.kind === "approve" && ["greenhouse", "ashby", "lever", "workday"].includes(item.ats ?? "") && <button className="apps-btn" disabled={isBusy} onClick={() => void openFill(item)}>Open & Fill</button>}
@@ -545,6 +548,12 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           </div>
         );
       })()}
+      {answering && cards[answering] && <AnswerModal app={cards[answering]!} onClose={() => setAnswering(null)} onSaved={(n) => {
+        const it = everything.find((i) => i.id === answering);
+        setAnswering(null);
+        setNotice(`Saved ${n} answer${n === 1 ? "" : "s"}${it ? ` for ${it.company}` : ""}. It moves up for Open & Fill once the engine checks them.`);
+        setTimeout(() => { void refreshUnanswered(); if (it?.queued) void loadCards([it.queued]); }, 1500);
+      }} />}
       {pdf && <PdfPreviewModal pdfPath={pdf} onClose={() => setPdf(null)} />}
       {review && <ApplicationReview key={`${review.id}:${review.mode}`} application={review} onClose={() => setReview(null)} />}
       {notice && <div className="apps-toast" role="status"><span>{notice}</span><button type="button" className="apps-toast-close" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
