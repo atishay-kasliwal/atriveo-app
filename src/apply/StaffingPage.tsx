@@ -38,7 +38,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
   const sources = status?.sources ?? [];
   const selectedJobs = jobs.filter(j => filter === "all" || j.source_id === filter);
   return <div className="rv-page staffing-page">{header}<main className="staffing-main">
-    <div className="staffing-title"><div><h1>Staffing sources</h1><p>40 company job boards · {status?.schedule.label ?? "Daily at 7:00 a.m. Eastern"}</p></div><button className="apps-btn accent" disabled={busy || running || !status} onClick={() => void action("run", {})}>{running ? "Crawl running…" : "Run daily crawl now"}</button></div>
+    <div className="staffing-title"><div><h1>Staffing sources</h1><p>{status?.sources.length ?? "…"} job sources · {status?.schedule.label ?? "Daily at 7:00 a.m. Eastern"}</p></div><button className="apps-btn accent" disabled={busy || running || !status} onClick={() => void action("run", {})}>{running ? "Crawl running…" : "Run daily crawl now"}</button></div>
     {error && <p className="staffing-error" role="alert">{error} <button className="apps-link" onClick={() => void refresh()}>Retry</button></p>}
     {note && <p role="status">{note}</p>}
     <div className="staffing-kpis"><span><b>{sources.filter(s => s.enabled).length}</b> enabled sources</span><span><b>{sources.filter(s => s.status === "ready").length}</b> readable boards</span><span><b>{status?.total_jobs ?? 0}</b> unique matching jobs</span><span>Next daily run <b>{when(status?.schedule.next_at ?? null)}</b></span></div>
