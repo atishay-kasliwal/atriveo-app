@@ -565,7 +565,7 @@
       }
     },
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4476177880",
@@ -2593,7 +2593,7 @@
       "updatedAt": "2026-10-06T16:07:00.689Z"
     },
     "ats_score": 42,
-    "fit_score": 10
+    "fit_score": 11
   },
   {
     "session_id": "2026-10-06T15:22:58Z",
@@ -12234,7 +12234,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-06T18:55:19.099Z",
     "ats_score": 52,
-    "fit_score": 10
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4420488705",
@@ -12670,7 +12670,7 @@
       "updatedAt": "2026-10-07T00:59:56.839Z"
     },
     "ats_score": 75,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "job_url": "https://job-boards.greenhouse.io/inflect/jobs/4719415006",
@@ -14701,7 +14701,7 @@
     "apply_type": "easy_apply",
     "apply_type_at": "2026-10-06T19:55:34.521Z",
     "ats_score": 55,
-    "fit_score": 14
+    "fit_score": 13
   },
   {
     "session_id": "2026-10-06T19:00:29Z",
@@ -15420,7 +15420,7 @@
     "company": "Tenstorrent",
     "competition_score": 0,
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://job-boards.greenhouse.io/tenstorrent/jobs/5257595007",
     "level": "Entry",
     "location": "Santa Clara, CA",
     "max_exp": null,
@@ -15466,6 +15466,18 @@
         "built_at": "2026-10-06T19:03:37.078Z"
       }
     },
+    "job_url_direct_at": "2026-10-07T16:02:55.232Z",
+    "job_url_direct_from": "board-match",
+    "application": {
+      "applicationId": "87633857-de51-446a-8724-af66801fd770",
+      "applicationKey": "greenhouse:5257595007",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-07T16:04:53.375Z"
+    },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-07T16:56:10.212Z",
     "ats_score": 57,
     "fit_score": 6
   },
@@ -28955,7 +28967,7 @@
       }
     },
     "ats_score": 45,
-    "fit_score": 10
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4473672802",
@@ -32288,7 +32300,7 @@
       "updatedAt": "2026-10-07T02:03:38.910Z"
     },
     "ats_score": 44,
-    "fit_score": 10
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4475119828",
@@ -33397,7 +33409,7 @@
       }
     },
     "ats_score": 75,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4475108808",
