@@ -14,6 +14,7 @@
  *
  * No external dependencies — Node built-ins only.
  */
+import { handleStaffing } from "./staffing-routes.mjs";
 import { handleMuse } from "./muse-http.mjs";
 import { resumeDownloadPath } from "./resume-download.mjs";
 import http from "node:http";
@@ -1145,6 +1146,7 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(401, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({ ok: false, error: "Unauthorized" }));
   }
+  if (await handleStaffing(req, res, reqUrl)) return;
   // Open & Fill: the Atriveo Fill extension on this Mac only (never through the relay); see fill-routes.mjs.
   if (await handleFillRoute(req, res, reqUrl, (request) => runManualFill(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo"), request), APPLY_HERE_DOCS)) return;
 

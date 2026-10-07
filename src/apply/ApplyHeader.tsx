@@ -28,12 +28,13 @@ export default function ApplyHeader({ user }: { user: User }) {
         <span className="apply-brand-by">by Atriveo</span>
       </a>
       <nav className="apply-nav" aria-label="Console">
-        <Link to="/" aria-current={page === "today" ? "page" : undefined}>
+        <Link to="/" aria-current={page === "today" && path !== "/staffing" ? "page" : undefined}>
           Today{waiting !== null ? <span className="apps-nav-n">{waiting}</span> : null}
         </Link>
         <Link to="/unanswered" aria-current={page === "answer" ? "page" : undefined}>
           To answer{toAnswer !== undefined ? <span className="apps-nav-n">{toAnswer}</span> : null}
         </Link>
+        <Link to="/staffing" aria-current={path === "/staffing" ? "page" : undefined}>Staffing</Link>
         <Link to="/stats" aria-current={page === "stats" ? "page" : undefined}>Stats</Link>
       </nav>
       <div className="apply-header-right">
