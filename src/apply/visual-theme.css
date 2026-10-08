@@ -1,0 +1,53 @@
+/* Shared application UI. Resume documents render in their own unchanged iframe. */
+@font-face { font-family:'Atriveo Sans';src:url('/fonts/dm-sans-variable.ttf') format('truetype');font-style:normal;font-weight:100 1000;font-display:swap; }
+body.apply-console {
+ --background:#101113;--foreground:#eceef1;--card-bg:#17191c;--popover-bg:#1b1d21;
+ --secondary-bg:#202328;--muted-bg:#202328;--muted-fg:#a3a9b2;--accent-bg:#24272c;
+ --border-col:#2b2e34;--input-bg:#141619;--surface-elev:#1c1f23;--primary:#83adf0;
+ --bg:var(--background);--surface:var(--card-bg);--surface-2:var(--secondary-bg);--border:var(--border-col);--text:var(--foreground);--text-2:#c2c7cf;--muted:var(--muted-fg);
+ --font-display:'Atriveo Sans',system-ui,sans-serif;--font-stat:var(--font-display);
+ font-family:'Atriveo Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+ font-size:14px;line-height:1.55;letter-spacing:0;font-optical-sizing:auto;-webkit-font-smoothing:antialiased;
+ background:var(--background);color:var(--foreground);
+}
+body.apply-console :is(button,input,textarea,select) { font-family:inherit;letter-spacing:0; }
+body.apply-console :is(h1,h2,h3) { letter-spacing:-.025em;font-weight:600;line-height:1.25; }
+body.apply-console :is(.apply-nav a,.apps-btn,.rv-primary,.apply-signout) { font-weight:500; }
+body.apply-console .apply-header { background:var(--background);border-bottom:1px solid var(--border-col); }
+body.apply-console .apply-nav a[aria-current='page'] { box-shadow:none;background:#202a39;color:#bad2f8; }
+body.apply-console :is(.rv-primary,.td-cta-linkedin) { background:#3269c3;color:#fff;box-shadow:none;border:1px solid transparent; }
+body.apply-console .rv-primary:hover:not(:disabled) { background:#3b75d3; }
+body.apply-console :is(.td-stage,.ar-eyebrow,.rb-eyebrow,.rb-group) { text-transform:none;letter-spacing:.015em;font-weight:500; }
+body.apply-console :is(.td-id strong,.staffing-match h3,.rb-which>b) { font-weight:600;letter-spacing:-.02em; }
+body.apply-console :is(.apps-btn,.apply-signout) { border-radius:9px; }
+body.apply-console :is(button,a,input,textarea,select):focus-visible { outline:2px solid #83adf0;outline-offset:3px; }
+body.apply-console .rb-main { gap:24px;padding:20px 24px 16px; }
+body.apply-console .rb-editor { gap:14px; }
+body.apply-console .rb-which { font-size:17px;gap:8px 14px; }
+body.apply-console .rb-which span { font-size:12px; }
+body.apply-console .rb-group { margin-top:10px;font-size:14px;color:#c9ced5; }
+body.apply-console .rb-headline { padding:6px;background:var(--card-bg); }
+body.apply-console .rb-headline label { gap:5px;padding:8px 12px; }
+body.apply-console .rb-headline input { font-size:14px; }
+body.apply-console .rb-sec { border-radius:14px;padding-top:0;overflow:hidden; }
+body.apply-console .rb-sec>header { padding:14px 16px 12px 10px;background:transparent; }
+body.apply-console .rb-sec-title { flex-wrap:wrap;gap:3px 10px; }
+body.apply-console .rb-sec-title b { font-size:15px;font-weight:600; }
+body.apply-console .rb-sec-title span { font-size:12px; }
+body.apply-console .rb-sec-count { font-size:11px;color:#959ca7; }
+body.apply-console .rb-tools { margin-bottom:10px; }
+body.apply-console .rb-b { padding:13px 16px 13px 10px;border-top-color:#ffffff08; }
+body.apply-console .rb-b p { font-size:14.5px;line-height:1.7;color:#d5dae1; }
+body.apply-console .rb-verb { font-weight:500;color:#eceef1; }
+body.apply-console .rb-b:hover { background:#ffffff03; }
+body.apply-console .rb-tools-bar { border:1px solid var(--border-col);box-shadow:none; }
+body.apply-console .rb-add { padding-top:14px;padding-bottom:14px; }
+body.apply-console .rb-ai-panel { background:#17191c;box-shadow:0 20px 65px #0006; }
+body.apply-console .rb-ai-panel>header { background:none;border-bottom:1px solid var(--border-col);padding-bottom:14px; }
+body.apply-console .rb-ai-panel h2 { font-size:22px; }
+body.apply-console .rb-ai-panel p { font-size:14px;line-height:1.65;color:#cbd1d9; }
+body.apply-console .rb-ai-float { font-weight:500;font-size:14px;background:#285aab;border-color:#497ac7;box-shadow:0 5px 20px #0004; }
+body.apply-console .rb-ai-new { background:#202a38;border-left-width:2px; }
+body.apply-console .rb-ai-progress { background:#1b2028; }
+@media(max-width:900px){body.apply-console .apply-header{padding-inline:16px;}body.apply-console .rb-main{padding:16px;gap:16px;}body.apply-console .rb-ai-panel p{font-size:14px;}}
+@media(prefers-reduced-motion:reduce){body.apply-console *{scroll-behavior:auto;}}

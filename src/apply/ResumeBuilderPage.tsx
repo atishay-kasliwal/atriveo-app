@@ -596,7 +596,6 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
                   {dropHere && <li className="rb-drop" aria-hidden />}
                   <li data-key={key} tabIndex={0}
                     className={["rb-b", dup ? "is-dup" : "", hover === key ? "is-linked" : "", flash === key ? "is-flash" : "", isWriting ? "is-writing" : "", drag?.si === si && drag.bi === bi && drag.over != null ? "is-dragging" : ""].join(" ")}
-                    title={`${b.ac_id}${b.facet && b.facet !== "default" ? ` · ${b.facet}` : ""}`}
                     draggable={Boolean(drag?.armed && drag.si === si && drag.bi === bi)}
                     onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", key); setDrag({ si, bi, armed: true, over: bi }); }}
                     onDragOver={(e) => { if (drag?.si !== si) return; e.preventDefault(); const r = e.currentTarget.getBoundingClientRect(); const over = e.clientY < r.top + r.height / 2 ? bi : bi + 1; if (drag.over !== over) setDrag({ ...drag, over }); }}
