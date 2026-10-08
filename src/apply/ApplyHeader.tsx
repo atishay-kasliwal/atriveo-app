@@ -40,7 +40,7 @@ export default function ApplyHeader({ user }: { user: User }) {
       </nav>
       <div className="apply-header-right">
         <a className="apply-ext" href="https://application.atriveo.com" target="_blank" rel="noreferrer">Job feed ↗</a>
-        <span className="apply-user" title={user.email}><span className="apply-avatar" aria-hidden>{initial}</span><span className="apply-user-name">{user.name || user.email}</span></span>
+        <span className="apply-user" title={user.email}><span className="apply-avatar" aria-hidden>{initial}</span></span>
         <button type="button" className="apply-signout" onClick={() => void signOut()}>Sign out</button>
       </div>
     </div>
