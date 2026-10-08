@@ -1,7 +1,9 @@
-version: 56
+version: 57
 updated_at: "2026-10-08"
 note: "Harvard action verbs and unique resume openings; confirmed SBU/Wake Forest technology context. Resume scope remains Atriveo+Insurance."
 
 user_update: "Added 12 user-provided Deloitte production ML and data-workflow variants; existing variants retained."
 
 validation_update: "Corrected all 12 production-ml variants for unique action verbs, length, punctuation and signature technology rules."
+
+production_ml_review: "v57: production-ml variants chosen only for production-ML / MLOps / healthcare-ML postings (distinctive facet keywords; they had replaced stronger originals on up to 62% of postings); slashes replaced with words; CI/CD and Lambda variants keep their metrics."

@@ -44,11 +44,16 @@ facets:
   production-ml:
     phrase: production ML and data workflows
     keywords:
-      - production
-      - healthcare
+      - mlops
+      - model deployment
+      - ml pipelines
+      - machine learning pipelines
+      - productionize
+      - model monitoring
+      - data quality
       - reproducibility
-      - validation
-      - clinical
+      - healthcare
+      - medical imaging
 variants:
   - facet: cloud
     emphasis: cloud

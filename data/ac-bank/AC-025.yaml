@@ -39,10 +39,14 @@ facets:
   production-ml:
     phrase: production ML and data workflows
     keywords:
-      - rag
-      - langchain
-      - pinecone
-      - aws
+      - mlops
+      - model deployment
+      - ml pipelines
+      - machine learning pipelines
+      - productionize
+      - model monitoring
+      - data quality
+      - reproducibility
 variants:
   - facet: default
     emphasis: default
@@ -54,5 +58,5 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Engineered production RAG and LLM workflows using LangChain/Pinecone on AWS, improving macro analysis
+      Engineered production RAG and LLM workflows with LangChain and Pinecone on AWS, improving macro analysis
       evaluation accuracy by 18%.

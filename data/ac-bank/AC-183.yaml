@@ -35,8 +35,12 @@ facets:
   production-ml:
     phrase: production ML and data workflows
     keywords:
-      - react
-      - mongodb
+      - mlops
+      - model deployment
+      - ml pipelines
+      - release management
+      - production support
+      - reproducibility
 variants:
   - facet: default
     emphasis: default
@@ -48,5 +52,5 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Overhauled Oracle CRM into a React/MongoDB operations platform supporting onboarding, timesheets and
+      Overhauled Oracle CRM into a React and MongoDB operations platform supporting onboarding, timesheets and
       performance workflows for 3,000 employees.

@@ -35,9 +35,12 @@ facets:
   production-ml:
     phrase: production ML and data workflows
     keywords:
-      - testing
-      - release
-      - production
+      - mlops
+      - model deployment
+      - ml pipelines
+      - release management
+      - production support
+      - reproducibility
 variants:
   - facet: default
     emphasis: default
@@ -49,6 +52,5 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Installed Docker/Kubernetes CI/CD workflows for distributed enterprise applications, supporting
-      automated testing and release management with troubleshooting and production support across 20
-      engineers.
+      Installed Docker and Kubernetes CI/CD with automated testing across 20 engineers, cutting release cycles
+      from 6 hours to 90 seconds for distributed enterprise applications.

@@ -38,14 +38,19 @@ function main() {
   console.log(`Bullet lint — bank v${bank.bank_version}${roleFilter ? ` · ${roleFilter}` : ""}\n`);
 
   let fail = 0;
+  // Every wording of every bullet: the composer may pick any of them (by facet), so each has to pass. A wording that
+  // names different tools from the entry's first one declares its own signature_technologies.
   for (const ac of acs.sort((a, b) => (a.display_order ?? 99) - (b.display_order ?? 99))) {
-    const text = ac.variants[0].text.replace(/\s+/g, " ").trim();
-    const { issues, score } = lintBullet(ac, text);
-    const ok = score >= 9.5 && issues.length === 0;
-    if (!ok) fail += 1;
-    console.log(`${ok ? "✓" : "✗"} ${ac.id} (${score}/10, ${wordCount(text)}w) ${ac.achievement_theme || ac.role}`);
-    console.log(`  ${text.slice(0, 120)}${text.length > 120 ? "…" : ""}`);
-    if (issues.length) console.log(`  → ${issues.join("; ")}`);
+    ac.variants.forEach((v, i) => {
+      if (!v?.text) return;
+      const text = v.text.replace(/\s+/g, " ").trim();
+      const { issues, score } = lintBullet({ ...ac, signature_technologies: v.signature_technologies ?? ac.signature_technologies }, text);
+      const ok = score >= 9.5 && issues.length === 0;
+      if (!ok) fail += 1;
+      console.log(`${ok ? "✓" : "✗"} ${ac.id}${i ? `[${v.facet ?? i}]` : ""} (${score}/10, ${wordCount(text)}w) ${ac.achievement_theme || ac.role}`);
+      console.log(`  ${text.slice(0, 120)}${text.length > 120 ? "…" : ""}`);
+      if (issues.length) console.log(`  → ${issues.join("; ")}`);
+    });
   }
 
   if (roleFilter === "wake-forest" && pkgName) {

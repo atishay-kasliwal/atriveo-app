@@ -50,9 +50,12 @@ facets:
   production-ml:
     phrase: production ML and data workflows
     keywords:
-      - production
-      - java
-      - aws
+      - mlops
+      - model deployment
+      - ml pipelines
+      - release management
+      - production support
+      - reproducibility
 variants:
   - facet: default
     emphasis: default
@@ -64,5 +67,5 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Provided production Java/AWS systems for Fortune 500 clients including Fidelity, British Telecom and
-      T-Mobile across insurance/telecommunications commerce and enterprise operations.
+      Delivered production Java systems on AWS for Fortune 500 clients Fidelity, British Telecom and T-Mobile,
+      spanning insurance exchange and telecom commerce.

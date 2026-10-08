@@ -35,7 +35,14 @@ facets:
   production-ml:
     phrase: production ML and data workflows
     keywords:
-      - langchain
+      - mlops
+      - model deployment
+      - ml pipelines
+      - machine learning pipelines
+      - productionize
+      - model monitoring
+      - data quality
+      - reproducibility
 variants:
   - facet: default
     emphasis: default
@@ -47,5 +54,5 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Orchestrated and evaluated a Python/LangChain 3-agent reinforcement learning system across 30 S&P 500
-      stocks on 7d/30d/90d forecasting windows, achieving 60% directional accuracy.
+      Orchestrated a Python and LangChain 3-agent reinforcement learning system across 30 S&P 500 stocks over 7,
+      30 and 90-day forecasting windows, achieving 60% directional accuracy.

@@ -35,10 +35,12 @@ facets:
   production-ml:
     phrase: production ML and data workflows
     keywords:
-      - aws
-      - sqs
-      - mongodb
-      - production
+      - mlops
+      - model deployment
+      - ml pipelines
+      - release management
+      - production support
+      - reproducibility
 variants:
   - facet: default
     emphasis: default
@@ -50,5 +52,5 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Upgraded scalable backend/data workflows across AWS Lambda/SQS and MongoDB enterprise APIs, supporting
-      3,000 employees in production.
+      Upgraded timesheet submission to event-driven AWS Lambda and SQS workflows in production, eliminating
+      manual weekly filing for 3,000 employees.

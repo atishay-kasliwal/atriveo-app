@@ -35,8 +35,14 @@ facets:
   production-ml:
     phrase: production ML and data workflows
     keywords:
-      - python
-      - rag
+      - mlops
+      - model deployment
+      - ml pipelines
+      - machine learning pipelines
+      - productionize
+      - model monitoring
+      - data quality
+      - reproducibility
 variants:
   - facet: default
     emphasis: default
@@ -48,5 +54,5 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Led an AI-powered financial intelligence platform over 7 years of FOMC data using Python with RAG/vector
-      retrieval and multi-agent reasoning, reducing macro analysis from 3 days to under 20 minutes.
+      Led an AI-powered financial intelligence platform over 7 years of FOMC data using Python, RAG retrieval
+      and multi-agent reasoning, reducing macro analysis from 3 days to under 20 minutes.

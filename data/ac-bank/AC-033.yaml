@@ -39,8 +39,16 @@ facets:
   production-ml:
     phrase: production ML and data workflows
     keywords:
-      - pytorch
-      - clinical
+      - mlops
+      - model deployment
+      - ml pipelines
+      - machine learning pipelines
+      - productionize
+      - model monitoring
+      - data quality
+      - reproducibility
+      - healthcare
+      - medical imaging
 variants:
   - facet: ml
     emphasis: ml
