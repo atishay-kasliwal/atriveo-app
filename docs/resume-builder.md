@@ -16,9 +16,21 @@ Started 2026-10-08. Status: **Phase 1 built, plus writing your own bullets and t
 
 In the editor:
 
-- **Bullets**: move (↑ ↓), **Swap…** for another bullet of the same employer or project (also another version of
-  the same bullet, marked ↺), **✕** remove, **+ Add a bullet from the bank**.
-- **Projects**: **Remove project**, **+ Add a project**, and the **tools after the name** ("Atriveo | FastAPI,
+- **Bullets** are quiet rows: the verb in bold, the lines it prints on the right ("2 lines"). Hover (or focus) one
+  for its toolbar: **✎** edit the wording (or Enter, or double-click), **⇄** swap, **✕** remove. Drag the **⋮⋮**
+  grip to reorder, or Alt+↑ / Alt+↓ on a focused bullet. A verb shown in amber opens another bullet too.
+- **+ Add bullet** and **⇄ Swap** open the **bullet picker**: your bank's bullets for that employer or project in full
+  (searchable), with how many lines each prints and, for a swap, what it does to the room ("saves 1 line", "+1
+  line", "same length"); "another version" marks a different wording of the same bullet, "verb already used" one
+  whose verb is on the resume. Add also has **Write new** (the writer, saved to your bank).
+- **Linked to the page**: hovering a bullet highlights it on the page and the other way round; clicking a line on
+  the page brings it into view in the editor (header → Title, a skills line → that line).
+- **Sections** fold (▾) and show their bullets and lines; **Remove** (projects) shows on hover.
+- **Undo** (⌘Z outside a text box) steps back through changes; **⌘S** saves; **Esc** closes the picker or writer.
+- **On a phone** (≤900px wide) the screen is the page alone: tap a line to edit it in a sheet (a bullet: the writer
+  plus Swap, ↑ ↓, + Below, Remove; a company or project line: its tools and + Add bullet; the header; a skills line).
+  The bar at the bottom has Undo, ⋯ (open or download the PDF, discard, revert, add a project) and Save.
+- **Projects**: **Remove**, **+ Add a project**, and the **tools after the name** (chips; click to edit) ("Atriveo | FastAPI,
   Docker…"). Until you type in it, the tools line is picked from the project's bullets (as in generated resumes) and
   follows your swaps; once you type, your list is printed (up to 8). **Auto** goes back to the automatic one.
 - **Employers' tools** (optional): **Tools after the name** under each employer prints "Accolite Digital | *Java,
@@ -141,6 +153,7 @@ folders are new files, so nothing is ever overwritten).
 | 2026-10-08 | **Project tools lines, header email and location are editable** (user asked). The tools line stays automatic until you type in it. |
 | 2026-10-08 | **Live preview with Paged.js** (user asked), next to the compiled PDF. The PDF stays the one that's sent and that gates Save; making HTML the real renderer would be a separate decision. |
 | 2026-10-08 | **One screen**: header bar removed, its buttons moved into the preview toolbar; the page is scaled to fit whole; a "room for N more lines" chip (user asked). Room is measured on the Live preview, not the PDF. |
+| 2026-10-08 | **Editor polish + phone view** (user asked): controls on hover, picker with line counts, editor and page linked, undo, drag; phones edit by tapping the page (a sheet for typing: the page redraws on each change, which would drop the keyboard). The live preview squeezes its gaps when the PDF says "full", as TeX does. |
 | 2026-10-08 | **Employers' tools line** (user asked): optional, set per resume in the builder, on the company line (not the title line, for parsers); generated resumes unchanged. New macro `\resumeSubheadingTools` in `scripts/ac-tex.mjs`. |
 | 2026-10-08 | **Room measured on the compiled PDF** (exact, includes TeX's squeeze); the live estimate only fills in while compiling. |
 | 2026-10-08 | **Three ways to write**: this resume only, reword for the bank, new bullet (always to the bank). Bank bullets keep the bank's rules, including a verb of their own. |

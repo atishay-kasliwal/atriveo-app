@@ -1,33 +1,133 @@
-/* Resume builder: content on the left (scrolls), the whole page on the right (fits, never scrolls); the page itself
-   never scrolls. The buttons sit in the preview's toolbar. */
+/* Resume builder: the editor on the left (scrolls), the whole page on the right (fits, never scrolls); the page
+   itself never scrolls. Flat: one surface per section, rows divided by hairlines, controls only on hover or focus.
+   Phones (≤900px): the page only, a sheet for what you tap, a bar at the bottom. */
 .rb-page { overflow: hidden; }
-.rb-which { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: 14px; }
+.rb-main { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; padding: 14px 20px 14px; }
+
+/* Editor column */
+.rb-editor { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 0 8px 40px 0; scroll-padding: 80px; }
+.rb-which { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: 15px; }
+.rb-which span { font-size: 13px; color: var(--muted-fg); }
+.rb-group { margin: 12px 0 0; font-size: 11px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-fg); }
+
+/* Header line: three quiet fields, borders only on hover and focus. */
+.rb-headline { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 2px; padding: 4px; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); }
+.rb-headline label { display: flex; flex-direction: column; gap: 2px; padding: 6px 10px; border-radius: 8px; }
+.rb-headline label:focus-within { background: color-mix(in oklab, var(--accent-bg) 60%, transparent); }
+.rb-headline span { font-size: 11px; color: var(--muted-fg); }
+.rb-headline input { font: inherit; font-size: 14px; color: var(--foreground); background: none; border: 0; padding: 0; outline: none; min-width: 0; }
+
+/* A section: one surface. */
+.rb-sec { border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); padding: 4px 0 6px; transition: box-shadow .3s; }
+.rb-sec.is-flash { box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 55%, transparent); }
+.rb-sec > header { display: flex; align-items: center; gap: 8px; padding: 8px 14px 6px 6px; }
+.rb-fold { width: 24px; height: 24px; border: 0; background: none; color: var(--muted-fg); cursor: pointer; border-radius: 6px; font-size: 12px; }
+.rb-fold:hover { background: var(--accent-bg); color: var(--foreground); }
+.rb-sec-title { display: flex; align-items: baseline; gap: 10px; min-width: 0; flex: 1; }
+.rb-sec-title b { font-size: 14.5px; white-space: nowrap; }
+.rb-sec-title span { font-size: 12.5px; color: var(--muted-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb-sec-count { font-size: 12px; color: var(--muted-fg); white-space: nowrap; }
+.rb-sec-remove { font-size: 12px; opacity: 0; } .rb-sec:hover .rb-sec-remove, .rb-sec-remove:focus { opacity: 1; }
+
+/* Tools after the name: chips; click to edit as text. */
+.rb-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin: 0 14px 6px 38px; padding: 3px 0; border: 0; background: none; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.rb-tools em { font-style: normal; font-size: 11px; color: var(--muted-fg); margin-left: 2px; }
+.rb-chip { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border-col); color: var(--foreground); background: color-mix(in oklab, var(--accent-bg) 50%, transparent); }
+.rb-tools:hover .rb-chip { border-color: color-mix(in oklab, var(--primary) 50%, var(--border-col)); }
+.rb-chip-add { font-size: 12px; color: var(--muted-fg); } .rb-tools:hover .rb-chip-add { color: var(--primary); }
+.rb-tools.is-editing { cursor: default; gap: 10px; flex-wrap: nowrap; }
+.rb-tools.is-editing input { flex: 1; min-width: 0; font: inherit; font-size: 13px; color: var(--foreground); background: var(--background, transparent); border: 1px solid var(--primary); border-radius: 8px; padding: 6px 10px; outline: none; }
+.rb-tools.is-editing .apps-link { font-size: 12px; white-space: nowrap; }
+
+/* Bullets: rows with hairlines; grip, lines and the toolbar show on hover or focus. */
+.rb-bullets { list-style: none; margin: 0; padding: 0; }
+.rb-b { position: relative; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: start; gap: 4px; padding: 9px 14px 9px 10px; border-top: 1px solid color-mix(in oklab, var(--border-col) 70%, transparent); outline: none; transition: background .15s; }
+.rb-b:hover, .rb-b:focus-visible, .rb-b.is-linked { background: color-mix(in oklab, var(--accent-bg) 55%, transparent); }
+.rb-b:focus-visible { box-shadow: inset 2px 0 0 var(--primary); }
+.rb-b.is-flash { background: color-mix(in oklab, var(--primary) 16%, transparent); }
+.rb-b.is-dragging { opacity: .4; }
+.rb-b.is-writing { display: block; padding: 10px 14px 12px 38px; background: color-mix(in oklab, var(--accent-bg) 40%, transparent); }
+.rb-b p { margin: 0; font-size: 14px; line-height: 1.6; max-width: 72ch; }
+.rb-verb { font-weight: 650; }
+.rb-b.is-dup .rb-verb { color: #fbbf24; }
+.rb-grip { align-self: center; font-size: 11px; letter-spacing: -2px; color: var(--muted-fg); cursor: grab; opacity: 0; user-select: none; text-align: center; }
+.rb-b:hover .rb-grip, .rb-b:focus-visible .rb-grip { opacity: .8; }
+.rb-lines { font-size: 11px; color: var(--muted-fg); white-space: nowrap; padding-top: 4px; min-width: 44px; text-align: right; }
+.rb-b:hover .rb-lines, .rb-b:focus-within .rb-lines { visibility: hidden; }
+.rb-tools-bar { position: absolute; right: 10px; top: 6px; display: flex; gap: 2px; padding: 2px; border-radius: 8px; border: 1px solid var(--border-col); background: var(--card-bg); opacity: 0; pointer-events: none; transition: opacity .12s; }
+.rb-b:hover .rb-tools-bar, .rb-b:focus-within .rb-tools-bar { opacity: 1; pointer-events: auto; }
+.rb-tools-bar button { width: 28px; height: 26px; display: grid; place-items: center; border: 0; border-radius: 6px; background: none; color: var(--foreground); cursor: pointer; font-size: 13px; }
+.rb-tools-bar button:hover { background: var(--accent-bg); } .rb-tools-bar button:disabled { opacity: .35; cursor: default; }
+.rb-tools-bar .rb-del:hover, .rb-del:hover { color: #ef4444; }
+.rb-drop { height: 2px; margin: -1px 14px; background: var(--primary); border-radius: 2px; list-style: none; }
+.rb-tag { display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 500; padding: 0 7px; border-radius: 999px; border: 1px solid var(--border-col); color: var(--muted-fg); vertical-align: 1px; line-height: 18px; }
+.rb-tag.is-warn { color: #fbbf24; border-color: color-mix(in oklab, #f59e0b 45%, var(--border-col)); }
+.rb-add-b { margin: 6px 14px 4px 38px; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--primary); background: none; border: 0; padding: 4px 0; cursor: pointer; }
+.rb-add-b:hover { text-decoration: underline; } .rb-add-b:disabled { opacity: .5; cursor: default; }
+.rb-add-proj { align-self: flex-start; height: 32px; font: inherit; font-size: 12.5px; color: var(--foreground); background: var(--card-bg); border: 1px dashed var(--border-col); border-radius: 8px; padding: 0 10px; cursor: pointer; }
+.rb-skills { display: flex; flex-direction: column; gap: 6px; padding: 8px 14px; font-size: 12px; color: var(--muted-fg); }
+.rb-skills code { font-size: 11.5px; }
+.rb-skills textarea { font: 13px/1.6 ui-monospace, Menlo, monospace; color: var(--foreground); background: none; border: 1px solid transparent; border-radius: 8px; padding: 6px 8px; margin: 0 -8px; resize: vertical; outline: none; }
+.rb-skills textarea:hover { border-color: var(--border-col); } .rb-skills textarea:focus { border-color: var(--primary); }
+.rb-keys { font-size: 11.5px; color: var(--muted-fg); margin: 8px 0 0; }
+
+/* Writing a bullet: your words, the rules' verdict, and where it goes. */
+.rb-writer { display: flex; flex-direction: column; gap: 8px; }
+.rb-writer textarea { font: inherit; font-size: 14px; line-height: 1.55; color: var(--foreground); background: var(--card-bg); border: 1px solid var(--primary); border-radius: 8px; padding: 8px 10px; resize: vertical; outline: none; }
+.rb-verdict { font-size: 12px; display: flex; flex-direction: column; gap: 4px; } .rb-verdict ul { margin: 0; padding-left: 18px; color: #fcd34d; } .rb-verdict li.is-bank { color: #fdba74; }
+.rb-words { font-size: 11.5px; color: var(--muted-fg); } .rb-words.is-off { color: #fcd34d; }
+.rb-ok { color: #22c55e; font-weight: 600; }
+.rb-verbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 2px; }
+.rb-verbs button { font: inherit; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border-col); background: none; color: var(--foreground); cursor: pointer; }
+.rb-verbs button:hover { border-color: var(--primary); }
+.rb-writer-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* Preview column: one toolbar, then the page. */
+.rb-preview { min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.rb-preview iframe { flex: 1 1 auto; min-height: 0; width: 100%; border: 1px solid var(--border-col); border-radius: 10px; background: #525659; }
+.rb-preview iframe.rb-live { background: #2b2d31; }
+.rb-page-hint { margin: -4px 0 0; font-size: 11.5px; color: var(--muted-fg); text-align: center; }
+.rb-viewbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12.5px; }
+.rb-tabs { display: inline-flex; border: 1px solid var(--border-col); border-radius: 8px; overflow: hidden; }
+.rb-tabs button { font: inherit; font-size: 12.5px; padding: 4px 12px; background: none; border: 0; color: var(--muted-fg); cursor: pointer; }
+.rb-tabs button.is-on { background: var(--accent-bg); color: var(--foreground); font-weight: 600; }
+.rb-pages { display: inline-flex; align-items: center; gap: 6px; color: #86efac; font-weight: 600; white-space: nowrap; }
+.rb-pages i { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; }
+.rb-pages.is-full { color: #93c5fd; } .rb-pages.is-full i { background: #60a5fa; }
+.rb-pages.is-over { color: #fcd34d; } .rb-pages.is-over i { background: #f59e0b; }
+.rb-pdf-status { color: var(--muted-fg); white-space: nowrap; }
+.rb-saved { color: #22c55e; font-weight: 600; white-space: nowrap; }
+.rb-match { font-size: 13px; color: var(--muted-fg); white-space: nowrap; } .rb-match b { color: var(--foreground); }
 .rb-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .rb-actions :is(.apps-btn, .rv-primary) { height: 30px; padding: 0 12px; font-size: 12.5px; }
 .rb-actions a.apps-btn { text-decoration: none; display: inline-flex; align-items: center; }
-.rb-match { font-size: 13px; color: var(--muted-fg); white-space: nowrap; } .rb-match b { color: var(--foreground); }
-.rb-main { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 12px 20px 14px; }
-.rb-editor { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 6px; }
-.rb-field { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--muted-fg); }
-.rb-field :is(input, textarea) { font: inherit; font-size: 13.5px; color: var(--foreground); background: var(--card-bg); border: 1px solid var(--border-col); border-radius: 8px; padding: 8px 10px; }
-.rb-field textarea { resize: vertical; font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; }
-.rb-section { border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-.rb-section > header { display: flex; align-items: baseline; gap: 10px; } .rb-section > header .apps-link { margin-left: auto; font-size: 12px; }
-.rb-section ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.rb-section li { padding: 8px 10px; border-radius: 8px; background: color-mix(in oklab, var(--accent-bg) 45%, transparent); border: 1px solid transparent; }
-.rb-section li.is-dup { border-color: #f59e0b; }
-.rb-section li p { margin: 0 0 6px; font-size: 13px; line-height: 1.45; }
-.rb-row { display: flex; align-items: center; gap: 6px; }
-.rb-id { font: 11px ui-monospace, Menlo, monospace; color: var(--muted-fg); margin-right: auto; }
-.rb-icon { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; border: 1px solid var(--border-col); background: none; color: var(--foreground); cursor: pointer; font-size: 12px; }
-.rb-icon:disabled { opacity: .35; cursor: default; } .rb-del:hover { color: #ef4444; border-color: #ef4444; }
-.rb-row select, .rb-add { max-width: 220px; height: 26px; font: inherit; font-size: 12px; color: var(--foreground); background: var(--card-bg); border: 1px solid var(--border-col); border-radius: 6px; }
-.rb-add { max-width: none; height: 30px; }
-.rb-preview { min-height: 0; display: flex; flex-direction: column; gap: 10px; }
-.rb-preview iframe { flex: 1 1 auto; min-height: 0; width: 100%; border: 1px solid var(--border-col); border-radius: 10px; background: #525659; }
 .rb-checks { font-size: 12.5px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-col); }
-.rb-checks.ok { border-color: color-mix(in oklab, #22c55e 50%, var(--border-col)); color: #86efac; } .rb-checks.ok b { color: #22c55e; margin-right: 6px; }
 .rb-checks.bad { border-color: #f59e0b; color: #fcd34d; } .rb-checks.bad ul { margin: 4px 0 0; padding-left: 18px; }
+
+/* The bullet picker (a dialog on desktop, a sheet on phones). */
+.rb-modal-back, .rb-sheet-back { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 60; }
+.rb-modal { position: fixed; z-index: 61; left: 50%; top: 8vh; transform: translateX(-50%); width: min(760px, calc(100vw - 32px)); max-height: 84vh; display: flex; flex-direction: column; border: 1px solid var(--border-col); border-radius: 14px; background: var(--card-bg); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.rb-picker-body { display: flex; flex-direction: column; gap: 10px; padding: 16px; min-height: 0; flex: 1; }
+.rb-picker-body > header { display: flex; align-items: flex-start; gap: 12px; }
+.rb-picker-body > header > div { flex: 1; min-width: 0; }
+.rb-picker-body > header b { font-size: 15px; }
+.rb-picker-cur { margin: 6px 0 0; font-size: 13px; line-height: 1.5; color: var(--muted-fg); padding-left: 10px; border-left: 2px solid var(--border-col); }
+.rb-x { width: 30px; height: 30px; border: 0; border-radius: 8px; background: none; color: var(--muted-fg); font-size: 20px; cursor: pointer; } .rb-x:hover { background: var(--accent-bg); color: var(--foreground); }
+.rb-seg { display: inline-flex; align-self: flex-start; border: 1px solid var(--border-col); border-radius: 8px; overflow: hidden; }
+.rb-seg button { font: inherit; font-size: 12.5px; padding: 5px 14px; background: none; border: 0; color: var(--muted-fg); cursor: pointer; }
+.rb-seg button.is-on { background: var(--accent-bg); color: var(--foreground); font-weight: 600; }
+.rb-search { font: inherit; font-size: 13.5px; color: var(--foreground); background: none; border: 1px solid var(--border-col); border-radius: 8px; padding: 8px 10px; outline: none; } .rb-search:focus { border-color: var(--primary); }
+.rb-options { list-style: none; margin: 0; padding: 0; overflow-y: auto; min-height: 0; flex: 1; border: 1px solid var(--border-col); border-radius: 10px; }
+.rb-options li + li { border-top: 1px solid color-mix(in oklab, var(--border-col) 70%, transparent); }
+.rb-options button { display: flex; flex-direction: column; gap: 4px; width: 100%; text-align: left; font: inherit; color: var(--foreground); background: none; border: 0; padding: 10px 12px; cursor: pointer; }
+.rb-options button:hover, .rb-options button:focus-visible { background: color-mix(in oklab, var(--accent-bg) 60%, transparent); outline: none; }
+.rb-opt-text { font-size: 13.5px; line-height: 1.55; }
+.rb-opt-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11.5px; color: var(--muted-fg); }
+.rb-opt-meta .rb-tag { margin-left: 0; }
+.rb-opt-meta .is-good { color: #22c55e; } .rb-opt-meta .is-warn { color: #fbbf24; }
+.rb-none { padding: 14px 12px; font-size: 13px; }
+
+/* Start screen */
 .rb-start { padding: 40px 20px; max-width: 760px; display: flex; flex-direction: column; gap: 12px; }
 .rb-tracks { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
 .rb-track { display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 12px; border: 1px solid var(--border-col); background: var(--card-bg); color: var(--foreground); text-decoration: none; font-weight: 650; }
@@ -36,29 +136,32 @@
 .rb-track.tr-software-engineer { --tr: #60a5fa; } .rb-track.tr-ai-engineer { --tr: #a78bfa; } .rb-track.tr-data-analytics { --tr: #fbbf24; } .rb-track.tr-data-science { --tr: #34d399; } .rb-track.tr-forward-deployed { --tr: #f472b6; }
 .rb-soon { font-size: 12.5px; }
 .td-page a.td-edit { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
-@media (max-width: 900px) { .rb-page { overflow: auto; } .rb-main { grid-template-columns: 1fr; } .rb-preview iframe { height: 70vh; } }
-.rb-head { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 10px; }
-.rb-stack span { display: flex; align-items: center; gap: 8px; }
-.rb-stack em { font-style: normal; opacity: .75; }
-.rb-stack .apps-link { font-size: 12px; }
-.rb-viewbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12.5px; }
-.rb-tabs { display: inline-flex; border: 1px solid var(--border-col); border-radius: 8px; overflow: hidden; }
-.rb-tabs button { font: inherit; font-size: 12.5px; padding: 4px 12px; background: none; border: 0; color: var(--muted-fg); cursor: pointer; }
-.rb-tabs button.is-on { background: var(--accent-bg); color: var(--foreground); font-weight: 600; }
-.rb-pages { display: inline-flex; align-items: center; gap: 6px; color: #86efac; font-weight: 600; }
-.rb-pages i { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; }
-.rb-pages.is-full { color: #93c5fd; } .rb-pages.is-full i { background: #60a5fa; }
-.rb-pages.is-over { color: #fcd34d; } .rb-pages.is-over i { background: #f59e0b; }
-.rb-preview iframe.rb-live { background: #3a3d42; }
-/* Writing a bullet: your words, the rules' verdict, and where it goes. */
-.rb-writer { display: flex; flex-direction: column; gap: 8px; }
-.rb-writer textarea { font: inherit; font-size: 13px; line-height: 1.45; color: var(--foreground); background: var(--card-bg); border: 1px solid var(--primary); border-radius: 8px; padding: 8px 10px; resize: vertical; }
-.rb-verdict { font-size: 12px; } .rb-verdict ul { margin: 0; padding-left: 18px; color: #fcd34d; } .rb-verdict li.is-bank { color: #fdba74; }
-.rb-ok { color: #22c55e; font-weight: 600; }
-.rb-verbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
-.rb-verbs button { font: inherit; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border-col); background: none; color: var(--foreground); cursor: pointer; }
-.rb-verbs button:hover { border-color: var(--primary); }
-.rb-writer-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.rb-new { align-self: flex-start; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--primary); background: none; border: 1px dashed color-mix(in oklab, var(--primary) 60%, var(--border-col)); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
-.rb-new:disabled { opacity: .5; cursor: default; }
-.rb-custom { font-style: normal; color: #fbbf24; }
+
+/* Phones: the page, tap to edit. */
+.rb-phone { display: flex; flex-direction: column; height: 100dvh; }
+.rb-ph-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; font-size: 13px; }
+.rb-ph-top b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb-ph-top .rb-pages { font-size: 12px; }
+.rb-phone > .rb-checks { margin: 0 12px 6px; }
+.rb-ph-page { flex: 1 1 auto; min-height: 0; padding: 0 8px; display: flex; }
+.rb-ph-page iframe { flex: 1; width: 100%; border: 0; border-radius: 10px; background: #2b2d31; }
+.rb-ph-hint { margin: 4px 0; text-align: center; font-size: 11.5px; color: var(--muted-fg); }
+.rb-ph-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border-col); background: var(--card-bg); }
+.rb-ph-bar .rb-pdf-status, .rb-ph-bar .rb-saved { flex: 1; text-align: center; font-size: 12px; }
+.rb-ph-bar :is(.apps-btn, .rv-primary) { min-height: 40px; padding: 0 14px; }
+.rb-sheet { position: fixed; z-index: 61; left: 0; right: 0; bottom: 0; max-height: 88dvh; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 8px 16px calc(16px + env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0; border-top: 1px solid var(--border-col); background: var(--card-bg); box-shadow: 0 -12px 40px rgba(0,0,0,.45); animation: rb-up .18s ease-out; }
+@keyframes rb-up { from { transform: translateY(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+.rb-sheet-grab { align-self: center; width: 40px; height: 4px; border-radius: 2px; background: var(--border-col); }
+.rb-sheet-head { display: flex; flex-direction: column; gap: 2px; } .rb-sheet-head b { font-size: 15px; } .rb-sheet-head span { font-size: 12.5px; color: var(--muted-fg); }
+.rb-sheet-label { font-size: 12px; color: var(--muted-fg); }
+.rb-sheet-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.rb-sheet-acts .apps-btn { min-height: 40px; }
+.rb-sheet .rb-tools { margin: 0; }
+.rb-sheet .rb-picker-body { padding: 4px 0; }
+.rb-sheet .rb-options { max-height: 60dvh; }
+.rb-sheet :is(input, textarea) { font-size: 16px !important; } /* iOS zooms into anything smaller */
+.rb-sheet .rb-headline { grid-template-columns: 1fr; }
+.rb-sheet .rb-skills { padding: 0; }
+.rb-sheet-done { min-height: 42px; }
+.rb-menu { display: flex; flex-direction: column; gap: 8px; }
+.rb-menu .apps-btn { min-height: 42px; text-decoration: none; display: flex; align-items: center; justify-content: center; }
