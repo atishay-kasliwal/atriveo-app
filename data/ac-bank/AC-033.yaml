@@ -52,8 +52,8 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Trained and evaluated a PyTorch deep learning segmentation model on N4ITK bias corrected MRI, achieving
-      90%+ mask accuracy for clinical tumor outlining.
+      Attained 90%+ mask accuracy by training and evaluating a PyTorch segmentation model on N4ITK
+      bias-corrected MRI for clinical tumor outlining.
 signature_technologies:
   - PyTorch
   - N4ITK

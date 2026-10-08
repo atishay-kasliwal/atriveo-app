@@ -57,6 +57,6 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Developed an event driven FastAPI pipeline on AWS for data ingestion, preprocessing, model inference,
-      validation, and performance reporting across 13 evaluation sessions, achieving approximately 68%
-      directional accuracy.
+      Constructed an event-driven FastAPI pipeline on AWS covering ingestion, preprocessing and inference with
+      validation/performance reporting across 13 evaluation sessions, achieving approximately 68% directional
+      accuracy.

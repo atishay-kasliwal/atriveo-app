@@ -60,5 +60,5 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Developed a Python and GCP based healthcare AI pipeline processing 10K+ brain MRI studies, reducing
-      automated tumor segmentation from 3 hours to 2 minutes.
+      Created a Python/GCP healthcare AI pipeline processing 10K+ brain MRI studies, reducing automated tumor
+      segmentation from 3 hours to 2 minutes.

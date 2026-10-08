@@ -47,5 +47,5 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Developed and evaluated a LangChain 3 agent reinforcement learning system across 30 S&P 500 stocks and
-      7d, 30d, and 90d forecasting windows, achieving 60% directional accuracy.
+      Orchestrated and evaluated a Python/LangChain 3-agent reinforcement learning system across 30 S&P 500
+      stocks on 7d/30d/90d forecasting windows, achieving 60% directional accuracy.

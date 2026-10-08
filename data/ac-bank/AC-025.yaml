@@ -54,5 +54,5 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Productionized RAG and LLM workflows using LangChain, Pinecone, and AWS, improving macro analysis
+      Engineered production RAG and LLM workflows using LangChain/Pinecone on AWS, improving macro analysis
       evaluation accuracy by 18%.

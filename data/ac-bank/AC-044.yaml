@@ -50,5 +50,5 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Built reusable preprocessing, feature extraction, and validation workflows across medical imaging data,
-      generating 200+ PyRadiomics biomarkers for prognosis modeling.
+      Derived 200+ PyRadiomics biomarkers for prognosis modeling through reusable medical-imaging
+      preprocessing, feature extraction and validation workflows.
