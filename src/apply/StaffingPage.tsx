@@ -4,7 +4,7 @@ import { getTailorServerBase } from "../utils/tailorServer";
 import "./staffing.css";
 
 type Source = { _id: string; name: string; url: string; tier: number; enabled: boolean; status: string; detail: string; last_checked_at?: string; matching_jobs?: number; connector_state?: string; limited?: boolean; parse_errors?: number; errors?: number };
-type Run = { _id: string; status: string; started_at: string; jobs_seen: number; new_jobs: number; published_jobs?: number; error?: string };
+type Run = { _id: string; status: string; started_at: string; finished_at?: string; jobs_seen: number; new_jobs: number; published_jobs?: number; error?: string };
 type Job = { _id: string; company: string; title: string; location: string; job_url: string; summary: string; source_id: string; first_seen_at: string };
 type Status = { sources: Source[]; runs: Run[]; schedule: { label: string; next_at: string }; total_jobs: number };
 const LABELS: Record<string, string> = { access_pending: "Needs provider access", not_checked: "Not checked yet", running: "Checking", ready: "Jobs readable", needs_connector: "Needs connector", blocked: "Access blocked", failed: "Check failed" };
@@ -35,6 +35,9 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
     finally { setBusy(false); }
   }
   const running = status?.runs[0]?.status === "running";
+  const lastCrawl = status?.runs.find(r => r.status !== "running");
+  const crawlTime = lastCrawl && (lastCrawl.finished_at || lastCrawl.started_at);
+  const crawlLabels: Record<string, string> = { done: "Completed", completed: "Completed", finished: "Completed", success: "Completed", partial: "Partial crawl", failed: "Failed", interrupted: "Interrupted" };
   const sources = status?.sources ?? [];
   const selectedJobs = jobs.filter(j => filter === "all" || j.source_id === filter);
   return <div className="rv-page staffing-page">{header}<main className="staffing-main">
@@ -42,6 +45,11 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
     {error && <p className="staffing-error" role="alert">{error} <button className="apps-link" onClick={() => void refresh()}>Retry</button></p>}
     {note && <p role="status">{note}</p>}
     <div className="staffing-kpis"><span><b>{sources.filter(s => s.enabled).length}</b> enabled sources</span><span><b>{sources.filter(s => s.status === "ready").length}</b> readable boards</span><span><b>{sources.filter(s => (s.status === "blocked" || s.status === "access_pending")).length}</b> access restricted</span><span><b>{status?.total_jobs ?? 0}</b> unique matching jobs</span><span>Next daily run <b>{when(status?.schedule.next_at ?? null)}</b></span></div>
+    <div className="staffing-last-crawl" aria-label="Last crawl">
+      <div><strong>Last crawl</strong> {crawlTime ? <time dateTime={crawlTime}>{new Date(crawlTime).toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" })}</time> : status ? "No completed crawl yet" : "Loading…"}</div>
+      {lastCrawl && <div className="apps-muted">{crawlLabels[lastCrawl.status] || lastCrawl.status} · {lastCrawl.jobs_seen ?? 0} matching listings · {lastCrawl.new_jobs ?? 0} new · {lastCrawl.published_jobs ?? 0} eligible for feed{lastCrawl.error && <span className="staffing-error" role="alert"> · {lastCrawl.error}</span>}</div>}
+      {running && <div className="apps-muted" role="status">A new crawl is running. This shows the previous crawl until it finishes.</div>}
+    </div>
     <p className="apps-muted">Relevant jobs appear below. Jobs that pass your existing eligibility and scoring rules also enter the job feed. Duplicate listings are grouped; no applications are submitted.</p>
     <section aria-label="Staffing company sources" className="staffing-sources">{!status && !error && <p>Loading sources…</p>}{[1, 2, 3].map(tier => <div className="staffing-tier" key={tier}><h2>Tier {tier}</h2>{sources.filter(s => s.tier === tier).map(s => <article className="staffing-source" key={s._id}>
       <div className="staffing-source-top"><a href={s.url} target="_blank" rel="noreferrer">{s.name} ↗</a><label><input type="checkbox" checked={s.enabled} disabled={busy} onChange={e => void action("source", { sourceId: s._id, enabled: e.target.checked })} />Enabled</label></div>
