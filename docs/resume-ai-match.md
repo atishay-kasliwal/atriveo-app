@@ -82,3 +82,11 @@ Manual Edit opens the existing editor rather than saving an AI proposal automati
 ## Live subscription verification
 
 Claude Code and Codex each returned valid structured JSON using the already signed-in subscription accounts. A full local optimizer run then used Claude for optimization and Codex for evidence verification, with the existing resume/JD fixture and in-memory persistence. It returned two validated changes and rejected four proposals. Estimated JD Match stayed 56 → 56; no score increase was manufactured. The local result is stored at /private/tmp/resume-ai-subscription-example.json. Nothing was saved to the resume or production.
+
+## Production deployment: Mac subscription worker
+
+Deployed at the user's explicit request after the local-only review. The user selected the Mac worker option. The website/dashboard runs on Oracle; subscription inference executes on the user's Mac through its existing Claude Code/Codex logins. No subscription credentials were moved to Oracle.
+
+Authenticated background-job endpoints prevent long model calls from holding a Cloudflare request open. The Mac polls for inference work across a localhost-only SSH tunnel, sends structured results back, and the Oracle backend performs all evidence/content validation. Worker heartbeat and offline errors explain when the Mac is unavailable. Temporary job/request records have TTL indexes.
+
+The Mac worker and SSH relay are user LaunchAgents: com.atriveo.resume-ai-worker and com.atriveo.resume-ai-tunnel. They start at user login and restart after failures. Runtime scripts live in ~/.playatriveo/resume-ai-worker; relay configuration is stored in a mode-0600 file. Phones can use the live website while the Mac remains awake and connected. Normal laptop sleep or shutdown stops inference; the dashboard and existing resumes remain available.
