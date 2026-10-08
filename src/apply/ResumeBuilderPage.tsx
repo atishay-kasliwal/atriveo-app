@@ -29,6 +29,7 @@ interface Loaded {
 }
 interface AiSuggestion extends ContentChange { id: string; bi: number; suggested: string; reason: string; requirements: string[]; evidence_source: string[] }
 interface AiAnalysis { id: string; score: number; original_match_score: number; optimized_match_score: number; subscores: Record<string, number>; requirements: Array<{requirement: string; importance: string; status: "STRONG" | "PARTIAL" | "MISSING"; evidence: string}>; suggestions: AiSuggestion[]; atsProblems: string[]; resumeVersion: string; jdVersion: string; rejected: Array<{section:string;reason:string}> }
+interface AiPending { requestId:string; mode:"rewrite"|"question"; provider:string; instruction:string; source:Source; sections:Section[]; headerTitle:string; skills:string[]; sessionId:string; startedAt:number; input:string; baseline:string; doneIds?:string[]; draft?:{sections:Section[];skills:string}; }
 interface Draft { draftId: string; pdfPath: string; pages: number | null; room?: number | null; problems: string[]; jdMatch: { before: number | null; after: number | null; missing: string[] } | null; stacks?: Record<string, string[]> }
 /** Writing a bullet: rewording one (bi) or a new one (bi = -1, inserted at `at`) in section si. */
 interface Writing { si: number; bi: number; at?: number; text: string; issues: string[] | null; verbs: string[]; busy: boolean; error: string }
@@ -143,11 +144,13 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const [aiOpen, setAiOpen] = useState(false);
   const [aiJdStale, setAiJdStale] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
+  const [aiStage,setAiStage]=useState("sending");
+  const [aiStarted,setAiStarted]=useState(0);
+  const [aiElapsed,setAiElapsed]=useState(0);
   const [aiError, setAiError] = useState("");
   const [ai, setAi] = useState<AiAnalysis | null>(null);
   const [aiInput, setAiInput] = useState("");
   const [aiReview, setAiReview] = useState(false);
-  const [aiBatch, setAiBatch] = useState(false);
   const [aiDone, setAiDone] = useState<string[]>([]);
   const aiGeneration = useRef(0);
   const aiEntryReviewed=useRef<string|null>(null);
@@ -278,47 +281,55 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     return ()=>{active=false;clearInterval(timer);};
   },[aiOpen,ai?.id,loaded?.source]);
   const aiSnapshot = (x: Section[], skillInput = skills) => JSON.stringify({ sections: x, title, skills: skillInput });
-  const runAi = async (x = sections, batch = false, skillInput = skills) => {
-    if (!loaded) return;
-    const generation = ++aiGeneration.current;
-    setAiOpen(true); setAiBusy(true); setAiError("");
+  const aiStorageKey=`atriveo-ai-request:${query}`;
+  const persistAi=(request:AiPending)=>{try{localStorage.setItem(aiStorageKey,JSON.stringify(request));}catch{}};
+  const readAiRequest=():AiPending|null=>{try{const r=JSON.parse(localStorage.getItem(aiStorageKey)||"null");return r&&Date.now()-r.startedAt<86400000?r:null;}catch{return null;}};
+  useEffect(()=>{if(!aiBusy)return;const timer=setInterval(()=>setAiElapsed(Math.max(0,Math.floor((Date.now()-aiStarted)/1000))),1000);return()=>clearInterval(timer);},[aiBusy,aiStarted]);
+  const trackAi=async (request:AiPending)=>{
+    const generation=++aiGeneration.current;
+    setAiOpen(true);setAiBusy(true);setAiError("");setAiStarted(request.startedAt);setAiElapsed(Math.max(0,Math.floor((Date.now()-request.startedAt)/1000)));setAiStage("sending");setAiProvider(request.provider);setAiHelpMode(request.mode);setAiInstruction(request.instruction);
     try {
-      let r = await call<{analysis?: AiAnalysis; jobId?: string}>("ai-match", { sessionId:aiUsageSession(), source: loaded.source, provider: aiProvider, instruction: aiInstruction, sections: x, headerTitle: title, skills: skillInput.split("\n") });
-      while (!r.analysis && r.jobId) {
-        await new Promise(resolve => setTimeout(resolve,2500));
-        if (generation !== aiGeneration.current) return;
-        const result=await call<{status:string;analysis?:AiAnalysis;error?:string}>("ai-result",{jobId:r.jobId});
-        if(result.status === "failed")throw new Error(result.error || "AI request failed");
-        if(result.analysis)r={analysis:result.analysis};
+      const submitted=await call<{jobId?:string;analysis?:AiAnalysis & {answer?:string}}>("ai-match",request);
+      setAiStage("queued");
+      let analysis=submitted.analysis;
+      while(!analysis&&submitted.jobId){
+        if(generation!==aiGeneration.current)return;
+        try{
+          const result=await call<{status:string;stage?:string;workerOnline?:boolean;analysis?:AiAnalysis & {answer?:string};error?:string}>("ai-result",{jobId:submitted.jobId});
+          if(result.status==="failed")throw new Error(result.error||"AI request failed");
+          setAiStage(result.workerOnline===false?"offline":result.stage||"thinking");analysis=result.analysis;
+        }catch(e){if(e instanceof Error&&/fetch|network|HTTP 5|Failed to fetch/i.test(e.message)){setAiStage("reconnecting");}else throw e;}
+        if(!analysis)await new Promise(resolve=>setTimeout(resolve,2500));
       }
-      if (generation !== aiGeneration.current) return;
-      if (!r.analysis) throw new Error("AI returned no analysis");
-      setAi(r.analysis); setAiJdStale(false); setAiInput(aiSnapshot(x, skillInput)); setAiDone([]); setAiReview(batch); setAiBatch(batch);
-    } catch (e) { if (generation === aiGeneration.current) setAiError(e instanceof Error ? e.message : String(e)); }
-    finally { if (generation === aiGeneration.current) setAiBusy(false); }
+      if(generation!==aiGeneration.current)return;
+      if(!analysis)throw new Error("AI returned no result");
+      setAiStage("ready");
+      if(request.mode==="question")setAiAnswer(analysis.answer||"");
+      else {setAi(analysis);setAiJdStale(false);setAiInput(request.input);setAiDone(request.doneIds||[]);setAiReview(true);}
+    }catch(e){if(generation===aiGeneration.current){setAiStage("failed");setAiError(e instanceof Error?e.message:String(e));}}
+    finally{if(generation===aiGeneration.current)setAiBusy(false);}
   };
-  useEffect(() => {
-    if(!loaded||params.get("ai")!=="review"||aiEntryReviewed.current===query)return;
+  const startAi=(mode:"rewrite"|"question",x=sections,skillInput=skills)=>{
+    if(!loaded)return;
+    const request:AiPending={requestId:crypto.randomUUID(),mode,provider:aiProvider,instruction:aiInstruction,source:loaded.source,sections:x,headerTitle:title,skills:skillInput.split("\n"),sessionId:aiUsageSession(),startedAt:Date.now(),input:aiSnapshot(x,skillInput),baseline:JSON.stringify({sections:loaded.sections,title:loaded.headerTitle||"",skills:loaded.skills.join("\n")})};
+    persistAi(request);void trackAi(request);
+  };
+  const runAi=async(x=sections,_batch=false,skillInput=skills)=>startAi("rewrite",x,skillInput);
+  const askAi=async()=>{if(aiInstruction.trim()){setAiAnswer("");startAi("question");}};
+  useEffect(()=>{
+    if(!loaded||aiEntryReviewed.current===query)return;
     aiEntryReviewed.current=query;
-    setAiHelpMode("rewrite");
-    void runAi(loaded.sections,true,loaded.skills.join("\n"));
+    const request=readAiRequest();
+    if(request){
+      const current=JSON.stringify({sections:loaded.sections,title:loaded.headerTitle||"",skills:loaded.skills.join("\n")});
+      if(current===request.baseline){setSections(request.draft?.sections||request.sections);setSkills(request.draft?.skills||request.skills.join("\n"));setTitle(request.headerTitle);setDirty(Boolean(request.draft||request.input!==current));}
+      void trackAi(request);
+    }else if(params.get("ai")==="review")startAi("rewrite",loaded.sections,loaded.skills.join("\n"));
   },[loaded,query,params]);
-  const askAi = async () => {
-    if (!loaded || !aiInstruction.trim()) return;
-    const generation = ++aiGeneration.current;
-    setAiBusy(true); setAiError(""); setAiAnswer("");
-    try {
-      const request = await call<{jobId:string}>("ai-match", {sessionId:aiUsageSession(), source:loaded.source, provider:aiProvider, mode:"question", instruction:aiInstruction, sections, headerTitle:title, skills:skills.split("\n")});
-      while (generation === aiGeneration.current) {
-        await new Promise(resolve=>setTimeout(resolve,2500));
-        const result=await call<{status:string;analysis?:{answer:string};error?:string}>("ai-result",{jobId:request.jobId});
-        if (generation !== aiGeneration.current) return;
-        if(result.status==="failed")throw new Error(result.error||"AI request failed");
-        if(result.analysis){setAiAnswer(result.analysis.answer);break;}
-      }
-    } catch(e) {if(generation===aiGeneration.current)setAiError(e instanceof Error?e.message:String(e));}
-    finally {if(generation===aiGeneration.current)setAiBusy(false);}
-  };
+  useEffect(()=>{
+    if(!ai||aiBusy||!dirty)return;
+    const request=readAiRequest();if(request)persistAi({...request,draft:{sections,skills}});
+  },[sections,skills,dirty,aiBusy,ai?.id]);
   const aiDecision = async (suggestion: AiSuggestion, decision: "accepted" | "rejected" | "edited") => {
     if (!ai) return;
     await call("ai-decision", { analysisId: ai.id, suggestionId: suggestion.id, decision, resumeVersion: ai.resumeVersion });
@@ -334,7 +345,8 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
       remember(); setSections(next.sections); setSkills(next.skills); setDirty(true);
       setAiDone(d => [...d, ...proposals.map(s => s.id)]);
       setNotice("Optimized content applied. Review the preview, then Save when ready.");
-      await runAi(next.sections, false, next.skills);
+      const input=aiSnapshot(next.sections,next.skills);setAiInput(input);setAiBusy(false);
+      const request=readAiRequest();if(request)persistAi({...request,input,doneIds:[...aiDone,...proposals.map(s=>s.id)],draft:next});
     } catch (e) { setAiError(e instanceof Error ? e.message : String(e)); setAiBusy(false); }
   };
   const writer = (w: Writing, isNew: boolean) => {
@@ -631,18 +643,19 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const pendingAi = ai?.suggestions.filter(s => !aiDone.includes(s.id)) ?? [];
   const aiButton = loaded && !aiOpen && <button className="rb-ai-float" aria-label="AI Help" aria-haspopup="dialog" onClick={() => setAiOpen(true)}><span aria-hidden="true">✦</span> AI Help</button>;
   const aiPanel = aiOpen && <><div className="rb-modal-back" onClick={() => setAiOpen(false)} /><section className="rb-ai-panel" role="dialog" aria-modal="true" aria-label="AI resume match"><header><h2>AI Help</h2><button className="rb-x" aria-label="Close AI Match" onClick={() => setAiOpen(false)}>×</button></header>
-    <label className="rb-ai-provider">AI provider <select value={aiProvider} disabled={aiBusy} onChange={e => { setAiProvider(e.target.value); setAi(null); setAiError(""); }}><option value="claude">Claude subscription</option><option value="codex">Codex / ChatGPT subscription</option><option value="claude-codex">Claude writes · Codex checks</option></select></label>
+    <details className="rb-ai-settings" open={!aiBusy && !ai}><summary>AI provider & request</summary><label className="rb-ai-provider">AI provider <select value={aiProvider} disabled={aiBusy} onChange={e => { setAiProvider(e.target.value); setAi(null); setAiError(""); }}><option value="claude">Claude subscription</option><option value="codex">Codex / ChatGPT subscription</option><option value="claude-codex">Claude writes · Codex checks</option></select></label>
     <div className="rb-ai-help-tabs"><button className={aiHelpMode === "rewrite" ? "rv-primary" : "apps-btn"} disabled={aiBusy} onClick={() => {setAiHelpMode("rewrite");setAiError("");}}>Improve resume</button><button className={aiHelpMode === "question" ? "rv-primary" : "apps-btn"} disabled={aiBusy} onClick={() => {setAiHelpMode("question");setAiError("");}}>Ask a question</button></div>
     <label className="rb-ai-prompt">{aiHelpMode === "question" ? "What would you like to know?" : "What should AI improve?"}<textarea value={aiInstruction} maxLength={2000} disabled={aiBusy} onChange={e => setAiInstruction(e.target.value)} placeholder={aiHelpMode === "question" ? "Which experience best shows my healthcare AI work?" : "Optional: make my bullets clearer and highlight backend experience"} /></label>
     {aiHelpMode === "question" ? <><button className="rv-primary" disabled={aiBusy || !aiInstruction.trim()} onClick={() => void askAi()}>Ask AI</button>{aiAnswer && <p className="rb-ai-answer" role="status">{aiAnswer}</p>}</> : !aiBusy && <button className="rv-primary" onClick={() => void runAi()}>{loaded?.jd ? "Match this job & improve" : "Improve my general resume"}</button>}
 
-    {aiBusy && <p role="status">{aiHelpMode === "question" ? "AI is reading your resume…" : "AI is improving your resume…"}</p>}{aiError && <p className="td-error" role="alert">{aiError}<button className="apps-link" onClick={() => { if(aiHelpMode === "question") void askAi(); else void runAi(); }}>Retry</button></p>}
+    </details>{aiBusy && <div className="rb-ai-progress" role="status" aria-live="polite"><span className="rb-ai-spinner" aria-hidden="true"/><div><strong>{({sending:"Sending your request…",reading:"Reading your current resume…",queued:"Request received · waiting for your Mac…",thinking:`${aiProvider === "codex" ? "Codex" : "Claude"} is thinking…`,checking:"Checking proposed changes…",verifying:"Validating changes against your evidence…",offline:"Waiting for your Mac to reconnect…",reconnecting:"Reconnecting · your request is still saved"} as Record<string,string>)[aiStage]||"AI is working…"}</strong><small>{aiElapsed}s elapsed · You can refresh and return to this request.</small><div className="rb-ai-pulse" aria-hidden="true"/></div></div>}{aiError && <p className="td-error" role="alert">{aiError}<button className="apps-link" onClick={() => { if(aiHelpMode === "question") void askAi(); else void runAi(); }}>Retry</button></p>}
     {ai && aiHelpMode === "rewrite" && <><div className="rb-ai-score">{loaded?.jd ? <strong>{ai.original_match_score} → {ai.optimized_match_score}<small>/100</small></strong> : <strong style={{fontSize:24}}>Resume improvements</strong>}<span>{aiStale ? "Content or JD changed · refresh required" : "AI estimate of evidence fit"}</span></div><div className="rb-ai-metrics">{Object.entries(ai.subscores).map(([k,v]) => <div key={k}><span>{k[0].toUpperCase()+k.slice(1)}</span><b>{v}</b><progress value={v} max={100} /></div>)}</div>
     {aiStale && <button className="apps-btn" disabled={aiBusy} onClick={() => void runAi()}>Refresh match</button>}
     {!aiReview ? <><h3>Biggest gaps</h3><ul>{ai.requirements.filter(r => r.status !== "STRONG").slice(0,5).map(r => <li key={r.requirement}><b>{r.requirement}</b><small>{r.status === "MISSING" ? "No supporting evidence" : "Could be clearer"}</small></li>)}</ul><button className="rv-primary" disabled={aiBusy || aiStale || !pendingAi.length} onClick={() => setAiReview(true)}>Review Changes ({pendingAi.length})</button><button className="apps-btn" disabled={aiBusy} onClick={() => void runAi(sections,true)}>Optimize Resume</button><details><summary>Strong matches, partial matches & missing requirements</summary>{ai.requirements.map(r => <p key={r.requirement}><b>{r.status} · {r.requirement}</b><br />{r.evidence}</p>)}{ai.atsProblems.map(p => <p key={p}>{p}</p>)}</details></> : <>
-    {(aiBatch ? pendingAi : pendingAi.slice(0,1)).map(s => <article className="rb-ai-diff" key={s.id}><h3>{s.kind === "skills" ? "Technical Skills" : sections[s.si]?.label}</h3><small>CURRENT</small><p>{s.current}</p><small>SUGGESTED</small><p className="rb-ai-new">{s.suggested}</p><p>{s.reason}</p><small>JD requirements: {s.requirements.join(" · ") || "Skills relevance"}</small><details><summary>Evidence used</summary>{s.evidence_source.map(e => <p key={e}>{e}</p>)}</details><div><button className="apps-btn" disabled={aiBusy} onClick={() => { void aiDecision(s,"rejected").then(() => setAiDone(d => [...d,s.id])).catch(e => setAiError(String(e.message))); }}>Keep current</button><button className="rv-primary" disabled={aiBusy || aiStale} onClick={() => void applyAi([s])}>Apply</button><button className="apps-btn" disabled={aiBusy || aiStale} onClick={() => { void aiDecision(s,"edited").then(() => { setAiOpen(false); if (s.kind === "skills") { if (phone) setSheet({kind:"skills",line:0}); else skillsRef.current?.focus(); } else { const proposed = s.bullets?.[0]; if (proposed) { setWriting({si:s.si,bi:0,text:proposed.text,issues:null,verbs:[],busy:false,error:""}); if (phone) setSheet({kind:"bullet",si:s.si,bi:0}); else editorRef.current?.querySelector(`[data-section="${s.si}"]`)?.scrollIntoView(); } } }).catch(e => setAiError(String(e.message))); }}>Edit</button></div></article>)}
-    {!pendingAi.length && <p>No remaining rewrites. You can review the preview and save.</p>}{aiBatch && pendingAi.length>0 && <button className="rv-primary" disabled={aiBusy || aiStale} onClick={() => void applyAi(pendingAi)}>Apply All ({pendingAi.length})</button>}<button className="apps-btn" disabled={aiBusy} onClick={() => void runAi(sections,true)}>Optimize Resume</button></>}
-    <button className="apps-link" onClick={() => { setAiBatch(false); setAiReview(true); }}>Review Individually</button><button className="apps-link" onClick={() => setAiOpen(false)}>Cancel</button><p className="apps-muted">Only Experience, Technical Skills and Projects can change. Suggestions change your draft only. Save approves the final PDF.</p></>}
+    {pendingAi.length>0 && <button className="rv-primary" disabled={aiBusy || aiStale} onClick={() => void applyAi(pendingAi)}>Apply All ({pendingAi.length})</button>}
+    {pendingAi.map(s => <article className="rb-ai-diff" key={s.id}><h3>{s.kind === "skills" ? "Technical Skills" : sections[s.si]?.label}</h3><div className="rb-ai-compare"><div><small>CURRENT</small><p>{s.current}</p></div><div><small>SUGGESTED</small><p className="rb-ai-new">{s.suggested}</p></div></div><p>{s.reason}</p><small>JD requirements: {s.requirements.join(" · ") || "Skills relevance"}</small><details><summary>Evidence used</summary>{s.evidence_source.map(e => <p key={e}>{e}</p>)}</details><div><button className="apps-btn" disabled={aiBusy} onClick={() => { void aiDecision(s,"rejected").then(() => setAiDone(d => {const ids=[...d,s.id];const request=readAiRequest();if(request)persistAi({...request,doneIds:ids});return ids;})).catch(e => setAiError(String(e.message))); }}>Keep current</button><button className="rv-primary" disabled={aiBusy || aiStale} onClick={() => void applyAi([s])}>Apply</button><button className="apps-btn" disabled={aiBusy || aiStale} onClick={() => { void aiDecision(s,"edited").then(() => { setAiOpen(false); if (s.kind === "skills") { if (phone) setSheet({kind:"skills",line:0}); else skillsRef.current?.focus(); } else { const proposed = s.bullets?.[0]; if (proposed) { setWriting({si:s.si,bi:0,text:proposed.text,issues:null,verbs:[],busy:false,error:""}); if (phone) setSheet({kind:"bullet",si:s.si,bi:0}); else editorRef.current?.querySelector(`[data-section="${s.si}"]`)?.scrollIntoView(); } } }).catch(e => setAiError(String(e.message))); }}>Edit</button></div></article>)}
+    {!pendingAi.length && <p>No remaining rewrites. You can review the preview and save.</p>}<button className="apps-btn" disabled={aiBusy} onClick={() => void runAi(sections,true)}>Optimize Resume</button></>}
+    <button className="apps-link" onClick={() => { setAiReview(true); }}>Review Individually</button><button className="apps-link" onClick={() => setAiOpen(false)}>Cancel</button><p className="apps-muted">Only Experience, Technical Skills and Projects can change. Suggestions change your draft only. Save approves the final PDF.</p></>}
   </section></>;
 
   // Phones: the page, a sheet for what you tap, and a bar with the room and Save.

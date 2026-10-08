@@ -52,7 +52,7 @@ export async function analyzeResume(db, body, { generate, load=loadResume, bank=
   const provider=body.provider||process.env.RESUME_AI_PROVIDER||"claude";
   if(!AI_PROVIDERS.includes(provider))throw new BuilderError("Choose Claude, Codex, or Claude + Codex");
   generate=generate||((request)=>process.env.RESUME_AI_REMOTE_WORKER === "mac" ? queueInference(db,provider,request) : subscriptionGenerate(provider,request));
-  const baseGenerate=generate;generate=request=>baseGenerate({...request,sessionId:typeof body.sessionId==='string'?body.sessionId.slice(0,100):''});
+  const baseGenerate=generate;generate=request=>baseGenerate({...request,sessionId:typeof body.sessionId==='string'?body.sessionId.slice(0,100):'',parentJobId:body.parentJobId});
   const source=body.source||{};
   const loaded=await load(db,{jobUrl:source.jobUrl,track:source.track,pasted:source.pasted});
   const fullJd=loaded.source.kind==='pasted'?(await db.collection('builder_resumes').findOne({_id:loaded.source.pasted}))?.jd:loaded.source.kind==='job'?(await db.collection('descriptions').findOne({job_url:loaded.source.jobUrl}))?.description:null;
@@ -122,14 +122,16 @@ export async function resumeAiVersion(db, body) {
 }
 
 export async function enqueueResumeAi(db,body) {
-  const jobId=crypto.randomUUID();
-  await db.collection('resume_ai_jobs').insertOne({_id:jobId,status:'running',createdAt:new Date(),expiresAt:new Date(Date.now()+86400000)});
-  void analyzeResume(db,body).then(r=>db.collection('resume_ai_jobs').updateOne({_id:jobId},{$set:{status:'done',analysis:r.analysis}})).catch(e=>db.collection('resume_ai_jobs').updateOne({_id:jobId},{$set:{status:'failed',error:e.message||'AI could not complete this request'}})).catch(()=>{});
+  const jobId=typeof body.requestId==='string'&&/^[a-f0-9-]{36}$/i.test(body.requestId)?body.requestId:crypto.randomUUID();
+  if(await db.collection('resume_ai_jobs').findOne({_id:jobId}))return {ok:true,jobId};
+  try {await db.collection('resume_ai_jobs').insertOne({_id:jobId,status:'running',stage:'reading',provider:body.provider||'claude',createdAt:new Date(),updatedAt:new Date(),expiresAt:new Date(Date.now()+86400000)});}catch(e){if(e.code===11000)return {ok:true,jobId};throw e;}
+  void analyzeResume(db,{...body,parentJobId:jobId}).then(r=>db.collection('resume_ai_jobs').updateOne({_id:jobId},{$set:{status:'done',stage:'ready',updatedAt:new Date(),analysis:r.analysis}})).catch(e=>db.collection('resume_ai_jobs').updateOne({_id:jobId},{$set:{status:'failed',stage:'failed',updatedAt:new Date(),error:e.message||'AI could not complete this request'}})).catch(()=>{});
   return {ok:true,jobId};
 }
 export async function resumeAiResult(db,body) {
   const row=await db.collection('resume_ai_jobs').findOne({_id:String(body.jobId||'')});
   if(!row)throw new BuilderError('Analysis job not found');
   if(row.status==='running'&&Date.now()-new Date(row.createdAt).getTime()>8*60000)return {ok:true,status:'failed',error:'The AI worker stopped or timed out. Retry.'};
-  return {ok:true,status:row.status,analysis:row.analysis,error:row.error};
+  const worker=await db.collection('resume_ai_worker').findOne({_id:'mac'});
+  return {ok:true,status:row.status,stage:row.stage,provider:row.provider,createdAt:row.createdAt,updatedAt:row.updatedAt,workerOnline:Boolean(worker&&Date.now()-new Date(worker.at).getTime()<60000),analysis:row.analysis,error:row.error};
 }

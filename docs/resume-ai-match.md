@@ -108,3 +108,13 @@ AI Help passes a per-tab session ID. The worker extracts measured token counts f
 Today and staffing cards now expose Review with AI. The action links to the existing resume editor with ai=review and the same job/application/pasted identity used for editing. After loading current resume content, the editor starts one AI analysis and opens the proposed changes. It does not apply or save them. Staffing jobs without resumes use the existing prepare operation first and then open the returned builder ID; daily cards marked resumeReady=false show the review action disabled until a resume exists. Existing Apply/Apply All, preview, Undo and Save behavior remains authoritative.
 
 Checks include direct deep-link review, existing staffing resume navigation and missing staffing resume preparation before navigation, with no Save calls on entry.
+
+## Request progress and refresh recovery
+
+AI jobs accept a client UUID as requestId. Repeated submissions with the same ID return the existing job rather than starting inference again; unique inserts handle racing requests. Jobs report reading, queued, thinking, checking/verifying, ready or failed based on actual server/worker events. Status includes worker availability. The UI shows provider activity, an animated indicator, elapsed time and reconnection/offline states; it does not expose private model reasoning or fabricate percentage completion.
+
+The browser stores the submitted request per resume for up to 24 hours and reconnects to its existing server job after refresh. Approved draft content and dismissed/applied IDs are retained locally. Stored content is restored only if the underlying saved resume still matches the original baseline; changed content/JDs continue to block stale application. Browser storage clearing or a different browser does not recover this local review. Server results expire after 24 hours.
+
+Results open directly as current/suggested comparisons with per-change Apply and a top Apply All. Applying changes no longer generates another AI analysis. Save remains required for the final PDF. Request settings collapse during work and after suggestions are ready.
+
+Validation: 39 tests pass, including pending-review refresh, stable request IDs, real worker stages, one-click approval with no follow-up generation, approved draft recovery, and no automatic Save.
