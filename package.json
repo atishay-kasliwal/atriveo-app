@@ -34,6 +34,7 @@
     "ac:golden": "node scripts/ac-golden.mjs",
     "ac:golden:update": "node scripts/ac-golden.mjs --update",
     "ac:bullet-lint": "node scripts/ac-bullet-lint.mjs",
+    "bank:export": "node scripts/export-bank-overlay.mjs",
     "ac:ats-enforce": "node scripts/ac-ats-enforce.mjs && node scripts/ac-ats-manual-fixes.mjs",
     "ac:ats-audit": "node scripts/ac-ats-enforce.mjs --dry-run",
     "ac:jd-skills": "node scripts/ac-jd-skills.mjs",

@@ -9,7 +9,8 @@
 // Then it runs the bank lint on the result (git only, no overlay) and shows the diff. You commit.
 // Safe to run again: what's already in git is skipped, and once in git the overlay's copy changes nothing.
 //
-//   node --env-file=.env.tailor --env-file=.env scripts/export-bank-overlay.mjs [--prune] [--dry-run]
+//   npm run bank:export -- [--dry-run] [--prune]
+//   (finds MONGO_URI in .env.tailor / .env here, or in ~/atriveo-app's when run from another worktree)
 //     --prune     also delete overlay entries that are now in git (asks nothing; only exact matches)
 //     --dry-run   show what would change, write nothing
 //     --from F    read the overlay from a JSON file ({ entries }) instead of Mongo (tests)
@@ -125,6 +126,12 @@ async function main() {
   let entries, client = null, db = null;
   if (from) entries = JSON.parse(fs.readFileSync(from, "utf8")).entries ?? [];
   else {
+    // The Mongo settings: already in the environment, or the .env files here, or the main checkout's.
+    for (const dir of [ROOT, path.join(os.homedir(), "atriveo-app")]) {
+      if (process.env.MONGO_URI) break;
+      for (const f of [".env.tailor", ".env"]) { try { process.loadEnvFile(path.join(dir, f)); } catch { /* not there */ } }
+    }
+    if (!process.env.MONGO_URI) throw new Error("No MONGO_URI: run from ~/atriveo-app, or pass --env-file.");
     const { connectMongo, getDb } = await import("./mongo-client.mjs");
     client = await connectMongo({ appName: "export-bank-overlay" });
     db = getDb(client);

@@ -194,8 +194,8 @@ folders are new files, so nothing is ever overwritten).
 - **A rule for bullets** (e.g. allow a repeated verb): bank rules in `scripts/ac-bullet-rules.mjs` (the lint uses
   them too); what the builder adds (bank-wide verb, per-resume checks) in `checkText()` / `validate()` in
   `scripts/resume-builder.mjs`.
-- **Export your bullets to git**: `node --env-file=.env.tailor --env-file=.env scripts/export-bank-overlay.mjs`
-  (`--dry-run` to see first). It writes the YAML, runs the bank lint on the result (git only) and prints the diff
+- **Export your bullets to git**: `npm run bank:export` (`npm run bank:export -- --dry-run` to see first), from
+  ~/atriveo-app or a worktree (it finds the Mongo settings in ~/atriveo-app's `.env` files). It writes the YAML, runs the bank lint on the result (git only) and prints the diff
   stat; review with `git diff data/ac-bank`, then commit and deploy the bank as usual. Run it again any time: what's
   in git already is skipped. `--prune` then deletes the overlay entries that are in git word for word (optional:
   once in git, the overlay's copy changes nothing). A lint failure means a bullet breaks a bank rule that changed
