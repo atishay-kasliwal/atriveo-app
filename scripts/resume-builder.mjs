@@ -17,7 +17,10 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { loadBank } from "./ac-bank.mjs";
-import { assembleAcResume, toolsFromBullets } from "./ac-tex.mjs";
+import { assembleAcResume, EDUCATION_ROWS, toolsFromBullets } from "./ac-tex.mjs";
+import { displayUrl } from "./ats/patterns.mjs";
+import { employerTitle, loadTracks } from "./ac-tracks.mjs";
+import { resolveExperienceMeta, resolveProjectMeta, sortProjectsByRecency } from "./ac-role-meta.mjs";
 import { jdSkillMatch, loadSkills } from "./ac-jd-skills.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
@@ -73,6 +76,27 @@ function bankOptions(bank) {
   return out;
 }
 
+/**
+ * The template's fixed parts, for the page's live preview (HTML in the same layout as the PDF): your name and links,
+ * education, each employer's dates, place and title, each project's dates and order. Stony Brook's title follows the
+ * header title (sbTitleOverrides, levelWords: as ac-tracks.employerTitle does).
+ */
+function layoutOf(bank) {
+  const me = loadResumeProfile();
+  const kinds = roleKind(bank);
+  const exp = Object.keys(kinds).filter((r) => kinds[r] === "experience");
+  const projs = Object.keys(kinds).filter((r) => kinds[r] === "project");
+  const ranked = sortProjectsByRecency(projs.map((role) => ({ role }))).map((p) => p.role);
+  return {
+    name: me.name, phone: me.phone || null, linkedin: me.linkedin ? displayUrl(me.linkedin) : null, github: me.github ? displayUrl(me.github) : null,
+    education: EDUCATION_ROWS,
+    roles: Object.fromEntries(exp.map((r) => { const m = resolveExperienceMeta(r); return [r, { name: labelOf(r), dates: m.dates, place: m.loc, order: m.order || 0,
+      title: r === "stony-brook" ? null : employerTitle(r, null) || (r === "wake-forest" ? "AI/ML Engineer" : m.title) }]; })),
+    projects: Object.fromEntries(projs.map((r) => [r, { name: labelOf(r), dates: resolveProjectMeta(r).dates, rank: ranked.indexOf(r) }])),
+    sbTitleOverrides: loadTracks().stony_brook_title_overrides ?? {},
+  };
+}
+
 const roleKind = (bank) => Object.fromEntries(bank.acs.filter((a) => a.role).map((a) => [a.role, a.slot_kind === "project" ? "project" : "experience"]));
 const labelOf = (role) => ROLE_SLUG_TO_NAME[role] || PROJECT_SLUG_TO_NAME[role] || role;
 
@@ -126,6 +150,7 @@ export async function loadResume(db, { jobUrl = null, track = null, appId = null
     roles: Object.entries(kinds).map(([role, kind]) => ({ role, kind, label: labelOf(role) })),
     current: { pdfPath: path.join(dir, PDF), edited: Boolean(generated), generatedPdfPath: generated },
     jd: jd ? jd.slice(0, 20_000) : null,
+    layout: layoutOf(bank),
   };
 }
 

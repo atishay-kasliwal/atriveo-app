@@ -44,10 +44,14 @@ const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 // Education keeps each school's city and dates on its own lines, left-aligned. With the city and
 // dates right-aligned, column-aware text extractors (poppler's default mode, pdfminer) read both
 // schools first and both date ranges after them, so a parser can pin dates on the wrong school.
+/** Education, as printed (the resume builder's live preview reads these rows too). */
+export const EDUCATION_ROWS = [
+  { school: "Stony Brook University", place: "Stony Brook, New York", degree: "Master of Science in Data Science", dates: "Aug. 2024 -- May 2026" },
+  { school: "Symbiosis University of Applied Sciences", place: "Indore, Madhya Pradesh", degree: "Bachelor of Technology in Computer Science and Information Technology", dates: "Aug. 2018 -- May 2022" },
+];
 const EDUCATION = `\\section{Education}
   \\resumeSubHeadingListStart
-    \\resumeEducation{Stony Brook University}{Stony Brook, New York}{Master of Science in Data Science}{Aug. 2024 -- May 2026}
-    \\resumeEducation{Symbiosis University of Applied Sciences}{Indore, Madhya Pradesh}{Bachelor of Technology in Computer Science and Information Technology}{Aug. 2018 -- May 2022}
+${EDUCATION_ROWS.map((e) => `    \\resumeEducation{${e.school}}{${e.place}}{${e.degree}}{${e.dates}}`).join("\n")}
   \\resumeSubHeadingListEnd`;
 
 // Stack shown after a project's name when its bullets name fewer than five tools.

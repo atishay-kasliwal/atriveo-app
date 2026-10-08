@@ -41,3 +41,11 @@
 .rb-stack span { display: flex; align-items: center; gap: 8px; }
 .rb-stack em { font-style: normal; opacity: .75; }
 .rb-stack .apps-link { font-size: 12px; }
+.rb-viewbar { display: flex; align-items: center; gap: 14px; font-size: 12.5px; }
+.rb-tabs { display: inline-flex; border: 1px solid var(--border-col); border-radius: 8px; overflow: hidden; }
+.rb-tabs button { font: inherit; font-size: 12.5px; padding: 4px 12px; background: none; border: 0; color: var(--muted-fg); cursor: pointer; }
+.rb-tabs button.is-on { background: var(--accent-bg); color: var(--foreground); font-weight: 600; }
+.rb-pages { display: inline-flex; align-items: center; gap: 6px; color: #86efac; font-weight: 600; }
+.rb-pages i { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; }
+.rb-pages.is-over { color: #fcd34d; } .rb-pages.is-over i { background: #f59e0b; }
+.rb-preview iframe.rb-live { background: #3a3d42; }

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getTailorServerBase } from "../utils/tailorServer";
 import { TRACK_LABEL } from "./tracks";
+import ResumeLivePreview, { type Layout } from "./ResumeLivePreview";
 import "./resume-builder.css";
 
 // Resume builder (/resume_builder): edit a resume's content (bullets, title, skills); the template never changes.
@@ -15,7 +16,7 @@ type Source = { kind: "job"; jobUrl: string; company: string; title: string; loc
 interface Loaded {
   source: Source; headerTitle: string | null; email: string; city: string; skills: string[]; sections: Section[];
   options: Record<string, Bullet[]>; roles: Array<{ role: string; kind: "experience" | "project"; label: string }>;
-  current: { pdfPath: string; edited: boolean; generatedPdfPath: string | null }; jd: string | null;
+  current: { pdfPath: string; edited: boolean; generatedPdfPath: string | null }; jd: string | null; layout: Layout;
 }
 interface Draft { draftId: string; pdfPath: string; pages: number | null; problems: string[]; jdMatch: { before: number | null; after: number | null; missing: string[] } | null; stacks?: Record<string, string[]> }
 
@@ -47,6 +48,9 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
   const [dirty, setDirty] = useState(false);
+  // Live: the HTML preview (instant, Paged.js); PDF: the compiled file that is sent.
+  const [view, setView] = useState<"live" | "pdf">("live");
+  const [livePages, setLivePages] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     if (!query) return;
@@ -112,6 +116,8 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   }
 
   const preview = draft?.pdfPath || loaded?.current.pdfPath || null;
+  const skillLines = skills.split("\n").map((l) => l.trim()).filter(Boolean);
+  const liveSections = sections.map((s) => ({ role: s.role, kind: s.kind, bullets: s.bullets, tools: s.kind === "project" ? s.stack ?? draft?.stacks?.[s.role] ?? s.stackAuto ?? [] : undefined }));
   const canSave = Boolean(dirty && draft?.draftId && !draft.problems.length && !rendering && !saving);
   const addable = (role: string) => (loaded?.options[role] ?? []).filter((o) => !used.has(o.ac_id));
   const projects = (loaded?.roles ?? []).filter((r) => r.kind === "project" && !sections.some((s) => s.role === r.role));
@@ -183,7 +189,18 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
             {draft && (draft.problems.length > 0
               ? <div className="rb-checks bad" role="alert"><b>Can't save yet</b><ul>{draft.problems.map((p) => <li key={p}>{p}</li>)}</ul></div>
               : <div className="rb-checks ok"><b>Ready to save</b> One page · every bullet from your bank · no repeated opening verb{draft.jdMatch ? ` · JD match ${draft.jdMatch.before ?? "–"} → ${draft.jdMatch.after ?? "–"}` : ""}</div>)}
-            {preview && <iframe key={preview} title="Resume preview" src={pdfUrl(preview)} />}
+            <div className="rb-viewbar">
+              <span className="rb-tabs" role="tablist">
+                <button role="tab" aria-selected={view === "live"} className={view === "live" ? "is-on" : ""} onClick={() => setView("live")}>Live</button>
+                <button role="tab" aria-selected={view === "pdf"} className={view === "pdf" ? "is-on" : ""} onClick={() => setView("pdf")}>PDF</button>
+              </span>
+              <span className={`rb-pages ${livePages != null && livePages > 1 ? "is-over" : ""}`} title="The live preview's pages (close to the PDF; the PDF decides)">
+                <i />Live {livePages == null ? "…" : `${livePages} page${livePages === 1 ? "" : "s"} ${livePages === 1 ? "✓" : "⚠"}`}</span>
+              <span className="apps-muted" title="The compiled PDF, the one Fill sends">PDF {rendering ? "checking…" : draft?.pages ? `${draft.pages} page${draft.pages === 1 ? "" : "s"} ${draft.pages === 1 ? "✓" : "⚠"}` : dirty ? "…" : "saved"}</span>
+            </div>
+            {view === "live"
+              ? <ResumeLivePreview layout={loaded.layout} title={title} email={email} city={city} sections={liveSections} skills={skillLines} onPages={setLivePages} />
+              : preview && <iframe key={preview} title="Resume PDF" src={pdfUrl(preview)} />}
           </section>
         </main>
       )}
