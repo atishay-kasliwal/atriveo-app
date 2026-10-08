@@ -134,6 +134,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const [kind, setKind] = useState<KindFilter>(() => { const k = readPref<string>("kind", "all"); return ["all", "fill", "linkedin", "answer"].includes(k) ? k as KindFilter : "all"; });
   const [goal, setGoal] = useState<number>(() => { const g = readPref<number>("goal", 15); return GOALS.includes(g) ? g : 15; });
   const [focus, setFocus] = useState(0);
+  // Search: cards whose company (or job title) has these words, on top of the track and kind filters.
+  const [query, setQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
   const goalDay = useAppliedToday();
   const history = useApplyHistory(84);
   const streak = history ? streakOf(history, goalDay.applied ?? 0) : null;
@@ -153,9 +156,10 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   }, [skipKey, syncedSkips, skipsLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
   const skipped = (company: string) => { const co = company.toLowerCase(); return exclusions.companies.some((c) => co.includes(c)); };
   // A new mood starts at the top: first page, first card, nothing selected.
-  const pick = (next: { track?: TrackFilter; kind?: KindFilter }) => {
+  const pick = (next: { track?: TrackFilter; kind?: KindFilter; query?: string }) => {
     if (next.track !== undefined) { setTrack(next.track); writePref("track", next.track); }
     if (next.kind !== undefined) { setKind(next.kind); writePref("kind", next.kind); }
+    if (next.query !== undefined) setQuery(next.query);
     setPage(0); setFocus(0); setSelectedIds([]);
   };
   useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(""), 7000); return () => clearTimeout(t); }, [notice]);
@@ -194,13 +198,16 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   // Counts on each pill: a track's count follows the chosen kind, and a kind's count follows the chosen track.
   const inTrack = (i: Item, t: TrackFilter) => t === "all" || t === "mixed" || i.track === t;
   const inKind = (i: Item, k: KindFilter) => k === "all" || KIND_OF[i.kind] === k;
+  // Every word has to appear in the company or the title ("goo eng" finds Google's engineer jobs).
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const found = useMemo(() => words.length ? everything.filter((i) => { const text = `${i.company} ${i.title}`.toLowerCase(); return words.every((w) => text.includes(w)); }) : everything, [everything, query]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = useMemo(() => {
-    const list = everything.filter((i) => inTrack(i, track) && inKind(i, kind));
+    const list = found.filter((i) => inTrack(i, track) && inKind(i, kind));
     if (track !== "mixed") return list;
     // Mixed keeps Later cards last.
     const later_ = list.filter((i) => later.includes(i.id));
     return [...interleave(list.filter((i) => !later.includes(i.id))), ...later_];
-  }, [everything, track, kind, later]);
+  }, [found, track, kind, later]);
 
   // The resume folder, from any tailored resume's path (general resumes sit in its general/ folder).
   const resumeRoot = useMemo(() => { const p = (linkedin.data?.linkedin ?? []).find((l) => l.resumePath?.includes("/tailored-resumes/"))?.resumePath; return p ? p.slice(0, p.indexOf("/tailored-resumes/") + "/tailored-resumes".length) : null; }, [linkedin.data]);
@@ -217,8 +224,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const openFillQueued = items.flatMap((i) => i.queued ? [i.queued] : []);
   const openFillKey = openFillQueued.map((q) => `${q.id}@${q.updatedAt}`).join(",");
   useEffect(() => { if (openFillQueued.length) void loadCards(openFillQueued); }, [openFillKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  const kindCount = (k: KindFilter) => everything.filter((i) => inTrack(i, track) && inKind(i, k)).length;
-  const trackCount = (t: TrackFilter) => everything.filter((i) => inTrack(i, t) && inKind(i, kind)).length;
+  const kindCount = (k: KindFilter) => found.filter((i) => inTrack(i, track) && inKind(i, k)).length;
+  const trackCount = (t: TrackFilter) => found.filter((i) => inTrack(i, t) && inKind(i, kind)).length;
   const approvable = items.filter((i) => i.kind === "approve");
   const fillable = items.filter((i) => i.kind === "fill");
   // The queue takes You submit (armed Open & Fill), and with Atriveo Fill 0.7.1 every other Open & Fill card it can fill by itself.
@@ -390,6 +397,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       case "d": case "D": if (item && busy !== item.id) void discard([item.id]); else return; break;
       case "o": case "O": if (item) openCard(item); else return; break;
       case "s": case "S": if (item) skipCompany(item.company); else return; break;
+      case "/": searchRef.current?.focus(); break;
       default: return;
     }
     e.preventDefault();
@@ -476,6 +484,13 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       {header}
       <div className="td-bar">
         <div className="td-title"><h1>Today</h1><span className="apps-muted">{loading ? "Loading…" : `${everything.length} application${everything.length === 1 ? "" : "s"} waiting for you`}</span></div>
+        <form className="td-search" role="search" onSubmit={(e) => { e.preventDefault(); searchRef.current?.blur(); }}>
+          <svg aria-hidden="true" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" strokeWidth="1.5"/><path d="M10.4 10.4L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          <input ref={searchRef} type="search" value={query} placeholder="Search company or role" aria-label="Search company or role" autoComplete="off" spellCheck={false} enterKeyHint="search"
+            onChange={(e) => pick({ query: e.target.value })} onKeyDown={(e) => { if (e.key === "Escape") { pick({ query: "" }); e.currentTarget.blur(); } }} />
+          {query ? <button type="button" className="td-search-clear" aria-label="Clear search" onClick={() => { pick({ query: "" }); searchRef.current?.focus(); }}>×</button> : <kbd aria-hidden="true">/</kbd>}
+          {words.length > 0 && !loading && <span className="td-search-n" role="status">{found.length} found</span>}
+        </form>
         <div className="td-moods" role="group" aria-label="Track">
           {TRACK_FILTERS.map((t, n) => (
             <button key={t} type="button" className={`td-mood is-${t} ${track === t ? "is-on" : ""}`} aria-pressed={track === t} title={`Key ${n + 1}${t === "mixed" ? ": the tracks in turn" : ""}`} onClick={() => pick({ track: t })}>
@@ -509,7 +524,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
                 : <p className="apps-muted">No companies skipped. Use Skip company on a card (or S), or add one here.</p>}
             </div>}
           </span>
-          {(track !== "all" || kind !== "all") && <button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all" })}>Clear filters</button>}
+          {(track !== "all" || kind !== "all" || query) && <button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all", query: "" })}>Clear filters</button>}
         </div>
         <div className="td-actions">
           {selectedIds.length > 0 && (confirmDiscard
@@ -537,12 +552,12 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       {(unanswered.error || ready.error) && <p className="ar-error" role="alert">{unanswered.error || ready.error}</p>}
       <main className="td-grid" style={mobile ? undefined : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}>
         {loading && <div className="td-empty">Loading your applications…</div>}
-        {!loading && !items.length && everything.length > 0 && <div className="td-empty"><strong>Nothing here for this filter.</strong><button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all" })}>Show everything</button></div>}
+        {!loading && !items.length && everything.length > 0 && <div className="td-empty"><strong>{words.length && !found.length ? `No company or role matches “${query.trim()}”.` : "Nothing here for this filter."}</strong>{words.length > 0 && !found.length && <span>Skipped companies stay hidden; jobs you already applied to or discarded aren't on Today.</span>}<button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all", query: "" })}>Show everything</button></div>}
         {!loading && !everything.length && <div className="td-empty"><strong>Nothing is waiting for you.</strong><span>New applications show up here once their questions are collected.</span></div>}
         {shown.map((item, index) => card(item, index))}
       </main>
       <div className="td-bottom">
-      <aside className="td-keys" aria-label="Keyboard shortcuts"><span><kbd>1</kbd>–<kbd>7</kbd> track</span><span><kbd>←</kbd><kbd>→</kbd> move</span><span><kbd>O</kbd> open</span><span><kbd>A</kbd> mark applied</span><span><kbd>L</kbd> later</span><span><kbd>S</kbd> skip company</span><span><kbd>D</kbd> discard</span></aside>
+      <aside className="td-keys" aria-label="Keyboard shortcuts"><span><kbd>1</kbd>–<kbd>7</kbd> track</span><span><kbd>←</kbd><kbd>→</kbd> move</span><span><kbd>O</kbd> open</span><span><kbd>A</kbd> mark applied</span><span><kbd>L</kbd> later</span><span><kbd>S</kbd> skip company</span><span><kbd>D</kbd> discard</span><span><kbd>/</kbd> search</span></aside>
       {items.length > perPage && (
         <nav className="td-pager" aria-label="More applications">
           <button className="apps-btn" disabled={current === 0} onClick={() => setPage(current - 1)} aria-label="Previous applications">←</button>

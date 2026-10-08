@@ -324,3 +324,25 @@ test('Easy Apply LinkedIn postings carry a chip and sit after company-site ones'
     assert.equal(await page.getByRole('article', { name: 'Siteco: On LinkedIn' }).getByText('Easy Apply', { exact: true }).count(), 0);
   } finally { await f.close(); LINKEDIN = []; }
 });
+
+test('Search narrows Today to a company or role as you type; / jumps in, Esc clears', async () => {
+  const f = await fixture(); const { page, calls, errors } = f;
+  try {
+    await page.goto(`${f.base}/`);
+    await page.getByText('8 applications waiting for you', { exact: true }).waitFor();
+    const names = () => page.locator('.td-card .td-id strong').allTextContents();
+    await page.keyboard.press('/');
+    await page.keyboard.type('ramp');
+    assert.deepEqual(await names(), ['Ramp']);
+    await page.getByText('1 found', { exact: true }).waitFor();
+    // Every word must match the company or the title.
+    await page.getByRole('searchbox', { name: 'Search company or role' }).fill('backend v');
+    assert.deepEqual(await names(), ['Vercel']);
+    await page.getByRole('searchbox', { name: 'Search company or role' }).fill('nobody');
+    await page.getByText('No company or role matches “nobody”.').waitFor();
+    await page.keyboard.press('Escape');
+    assert.equal((await names()).length, 5, 'Esc clears the search');
+    assert.equal(calls.filter((c) => c.action !== 'skip_companies').length, 0, 'searching sends nothing');
+    assert.deepEqual(errors, []);
+  } finally { await f.close(); }
+});
