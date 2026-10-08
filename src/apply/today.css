@@ -287,3 +287,69 @@
 .td-answer :is(input, textarea, select) { width: 100%; }
 .td-answer .td-modal-actions { align-items: center; }
 .td-answer .td-modal-actions .apps-muted { margin-right: auto; font-size: 12.5px; }
+
+/* --- Phones: filters on two swipeable lines, a one-line goal, and a scrolling list of compact cards ------ */
+@media (max-width: 759px) {
+  .td-page { overflow: visible; }
+  .td-page .td-bar { display: flex; flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: 8px; padding: 10px 0 8px; }
+  .td-title { flex-direction: row; align-items: baseline; gap: 10px; min-width: 0; padding: 0 16px; }
+  .td-title h1 { font-size: 20px; }
+  .td-title .apps-muted { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Each filter group is one line you swipe sideways; the page itself never scrolls sideways. */
+  .td-moods, .td-kinds, .td-actions { flex-wrap: nowrap; gap: 6px; margin: 0; padding: 0 16px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .td-moods::-webkit-scrollbar, .td-kinds::-webkit-scrollbar, .td-actions::-webkit-scrollbar { display: none; }
+  .td-mood, .td-kind { flex: none; white-space: nowrap; height: 32px; padding: 0 12px; gap: 6px; font-size: 13px; }
+  .td-kind { border-radius: 999px; }
+  .td-kinds > .apps-link { flex: none; white-space: nowrap; }
+  .td-actions { align-items: center; }
+  .td-actions > * { flex: none; }
+  .td-actions .apps-btn { white-space: nowrap; height: 32px; min-height: 32px; padding: 0 12px; font-size: 12.5px; }
+  .td-actions:not(:has(> :not(.td-desk, .td-fill-queue))) { display: none; }
+  /* Selecting and queueing Open & Fill needs Chrome with Atriveo Fill on a computer. */
+  .td-desk, .td-fill-queue, .td-head .td-check { display: none; }
+  /* Resumes and Skipped companies open as a sheet at the bottom of the screen. */
+  .td-skip-pop, .td-skip-pop.td-resumes { position: fixed; left: 12px; right: 12px; top: auto; bottom: calc(12px + env(safe-area-inset-bottom)); width: auto; max-height: 60dvh; z-index: 60; }
+  .td-skip-pop input { font-size: 16px; height: 40px; }
+
+  .td-goal { margin: 0 16px 10px; padding: 8px 12px; gap: 10px; font-size: 12.5px; }
+  .td-goal-n { font-size: 13px; }
+  .td-goal-n b, .td-goal-n button { font-size: 17px; }
+  .td-goal-left, .td-sprint { display: none; }
+  .td-streak, .td-combo { font-size: 12px; }
+
+  .td-page .td-grid { display: flex; flex-direction: column; gap: 10px; padding: 0 16px 12px; overflow: visible; }
+  .td-page .td-grid .td-card { height: auto; }
+  /* Card: name row, then place · age beside the tags on one line, then the buttons. */
+  .td-page .td-card { display: grid; grid-template-columns: fit-content(62%) minmax(0, 1fr); column-gap: 10px; row-gap: 8px; padding: 12px; border-radius: 12px; animation: none; }
+  .td-card > :not(.td-meta, .td-tags) { grid-column: 1 / -1; }
+  .td-card > .td-meta:empty + .td-tags { grid-column: 1 / -1; }
+  .td-meta .td-fresh { display: none; }
+  .td-page .td-card.is-focused { border-color: var(--border-col); box-shadow: none; }
+  .td-page .td-card.is-top { border-color: color-mix(in oklab, #facc15 55%, var(--border-col)); }
+  .td-id strong { font-size: 15px; }
+  .td-score { width: 34px; height: 34px; }
+  .td-score b { width: 27px; height: 27px; font-size: 11px; }
+  .td-skip-co { opacity: 1; width: 32px; height: 32px; }
+  .td-meta { font-size: 12px; }
+  /* Tags on one line; what is cut off is the least important. */
+  .td-tags { flex-wrap: nowrap; overflow: hidden; gap: 5px; }
+  .td-tags > * { flex: none; }
+  .td-body { overflow: visible; gap: 2px; }
+  .td-body:not(:has(> *)) { display: none; }
+  .td-big { font-size: 14px; }
+  .td-body .td-note:not(.warn) { display: none; }
+  /* Main button on its own line, then the small ones and Later / Discard on one line. */
+  /* The site-wide footer rule (padding, rule line, monospace) isn't for a card's buttons. */
+  .td-page .td-foot { padding: 0; border: 0; font-family: inherit; font-size: inherit; text-align: start; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .td-foot > .rv-primary, .td-foot > .td-cta { flex: 1 0 100%; height: 42px; }
+  /* Approve cards' second Open & Fill needs the desktop extension; Approve submit stays. */
+  .td-foot > .apps-btn { display: none; }
+  .td-page .td-review-links { flex: 1 1 0; min-width: 0; display: flex; gap: 6px; }
+  .td-page .td-review-links > * { flex: 1 1 0; min-width: 0; height: 34px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .td-page .td-links { flex: none; gap: 2px; padding: 0; }
+  .td-page .td-links a { display: none; }
+  .td-page .td-links .apps-link { height: 34px; padding: 0 8px; display: inline-flex; align-items: center; }
+
+  .td-bottom { padding: 4px 16px calc(16px + env(safe-area-inset-bottom)); }
+  .td-pager .apps-btn { min-width: 44px; min-height: 40px; }
+}

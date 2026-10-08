@@ -93,11 +93,12 @@ const STAGE: Record<Kind, { label: string; tone: string }> = {
   answer: { label: "Needs your answers", tone: "warn" },
 };
 
-/** Cards across, and rows that fit the window (a second row of five on a tall screen). */
+/** Cards across, and rows that fit the window (a second row of five on a tall screen); a phone scrolls a list of compact cards. */
 function useLayout() {
   const pick = () => ({
+    mobile: window.innerWidth < 760,
     columns: window.innerWidth >= 1400 ? 5 : window.innerWidth >= 1100 ? 4 : window.innerWidth >= 760 ? 2 : 1,
-    rows: window.innerWidth >= 760 && window.innerHeight >= 860 ? 2 : 1,
+    rows: window.innerWidth < 760 ? 12 : window.innerHeight >= 860 ? 2 : 1,
   });
   const [n, setN] = useState(pick);
   useEffect(() => { const f = () => setN(pick()); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
@@ -110,7 +111,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const linkedin = useLinkedinQueue(300_000);
   const { cards } = useUnansweredCards();
   const navigate = useNavigate();
-  const { columns, rows } = useLayout();
+  const { mobile, columns, rows } = useLayout();
   const perPage = columns * rows;
   const [queueRunning, setQueueRunning] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -514,7 +515,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {selectedIds.length > 0 && (confirmDiscard
             ? <span className="td-confirm">Discard {selectedIds.length}? <button className="apps-btn danger" disabled={busy !== null} onClick={() => void discard(selectedIds)}>Discard</button><button className="apps-link" onClick={() => setConfirmDiscard(false)}>Cancel</button></span>
             : <button className="apps-btn" disabled={queueRunning || busy !== null} onClick={() => setConfirmDiscard(true)}>Discard selected ({selectedIds.length})</button>)}
-          {queueable.length > 0 && <><button className="apps-btn" disabled={queueRunning} onClick={() => setSelectedIds(queueable.map(i => i.id))}>Select all Open & Fill ({queueable.length})</button><button className="apps-btn" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear</button><OpenFillQueue onRunning={setQueueRunning} selected={queued} onFilled={(id) => { const it = everything.find((i) => i.id === id); if (it) setDone((d) => ({ ...d, [id]: it.updatedAt })); setSelectedIds((ids) => ids.filter((x) => x !== id)); }} onFinish={() => { void refreshReady(); void refreshUnanswered(); }} /></>}
+          {queueable.length > 0 && <><button className="apps-btn td-desk" disabled={queueRunning} onClick={() => setSelectedIds(queueable.map(i => i.id))}>Select all Open & Fill ({queueable.length})</button><button className="apps-btn td-desk" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear</button><OpenFillQueue onRunning={setQueueRunning} selected={queued} onFilled={(id) => { const it = everything.find((i) => i.id === id); if (it) setDone((d) => ({ ...d, [id]: it.updatedAt })); setSelectedIds((ids) => ids.filter((x) => x !== id)); }} onFinish={() => { void refreshReady(); void refreshUnanswered(); }} /></>}
           {worker && <span className={`apps-state ${worker.online ? "" : "bad"}`}><i aria-hidden />{worker.online ? "Worker running" : "Worker offline"}</span>}
           {fillable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("fill")}>Fill and verify all {fillable.length}</button>}
           {approvable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("approve")}>Approve all {approvable.length} ready</button>}
@@ -534,7 +535,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           : <button type="button" className="td-sprint" disabled={goalDay.applied == null} onClick={sprint.start} title="25 minutes: count how many you apply to">⏱ Sprint{sprint.best ? ` · best ${sprint.best}` : ""}</button>}
       </div>
       {(unanswered.error || ready.error) && <p className="ar-error" role="alert">{unanswered.error || ready.error}</p>}
-      <main className="td-grid" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}>
+      <main className="td-grid" style={mobile ? undefined : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}>
         {loading && <div className="td-empty">Loading your applications…</div>}
         {!loading && !items.length && everything.length > 0 && <div className="td-empty"><strong>Nothing here for this filter.</strong><button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all" })}>Show everything</button></div>}
         {!loading && !everything.length && <div className="td-empty"><strong>Nothing is waiting for you.</strong><span>New applications show up here once their questions are collected.</span></div>}
