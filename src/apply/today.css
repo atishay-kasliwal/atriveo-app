@@ -347,6 +347,9 @@
   .td-page .td-review-links { flex: 1 1 0; min-width: 0; display: flex; gap: 6px; }
   .td-page .td-review-links > * { flex: 1 1 0; min-width: 0; height: 34px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .td-page .td-links { flex: none; gap: 2px; padding: 0; }
+  /* Four small buttons (Answers, Resume, Edit, Job) take their own line; Later and Discard go under them. */
+  .td-page .td-review-links:has(> :nth-child(4)) { flex-basis: 100%; }
+  .td-page .td-review-links:has(> :nth-child(4)) + .td-links { margin-left: auto; }
   .td-page .td-links a { display: none; }
   .td-page .td-links .apps-link { height: 34px; padding: 0 8px; display: inline-flex; align-items: center; }
 
