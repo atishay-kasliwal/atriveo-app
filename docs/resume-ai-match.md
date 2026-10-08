@@ -118,3 +118,13 @@ The browser stores the submitted request per resume for up to 24 hours and recon
 Results open directly as current/suggested comparisons with per-change Apply and a top Apply All. Applying changes no longer generates another AI analysis. Save remains required for the final PDF. Request settings collapse during work and after suggestions are ready.
 
 Validation: 39 tests pass, including pending-review refresh, stable request IDs, real worker stages, one-click approval with no follow-up generation, approved draft recovery, and no automatic Save.
+
+## Plain-language section review
+
+The review now summarizes Experience, Technical Skills and Projects individually from validated proposals and rejected proposal records. It distinguishes changes ready, changes blocked, current wording kept and already reviewed. No returned changes is explicitly not a correctness guarantee. Blocked evidence-targeting, unsupported-skill and bullet-rule proposals have short explanations. Each suggestion identifies its section type. The overall summary counts clearly supported job requirements; estimated alignment and separate section ratings are folded into details and never presented as an ATS acceptance guarantee.
+
+The inspected 42→48 Codex review had two validated project changes, three blocked Experience proposals (two missing-requirement targets and one conjunction-rule violation), and a blocked unsupported Technical Skills proposal. All three sections were proposed for; validation previously hid the blocked outcomes from the main UI.
+
+New reviews explicitly consider all three sections and split compound requirements into atomic facts. Locked education is included as context for degree requirement assessment; it remains outside the editable content boundary. Existing reviews display the summary immediately but their original scores/requirements are not silently regenerated.
+
+Validation: 43 tests pass, including project-only result explanations, unchanged section disclaimers, reviewed state and all-three-section dashboard presentation.

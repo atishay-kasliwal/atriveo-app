@@ -1,0 +1,1 @@
+export function resumeReviewSummary(analysis:{suggestions:Array<{kind:string;si:number;id?:string}>;rejected?:Array<{section:string;reason:string}>},sections:Array<{kind:string;role:string}>,doneIds?:string[]):Array<{kind:string;label:string;count:number;reviewed:number;blocked:number;status:string;explanation:string;reasons:string[]}>;
