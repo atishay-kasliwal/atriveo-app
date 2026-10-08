@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getTailorServerBase } from "../utils/tailorServer";
 import { TRACK_LABEL } from "./tracks";
-import ResumeLivePreview, { type Layout } from "./ResumeLivePreview";
+import ResumeLivePreview, { type Layout, type LiveFit } from "./ResumeLivePreview";
 import "./resume-builder.css";
 
 // Resume builder (/resume_builder): edit a resume's content (bullets, title, skills); the template never changes.
@@ -51,7 +51,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const [dirty, setDirty] = useState(false);
   // Live: the HTML preview (instant, Paged.js); PDF: the compiled file that is sent.
   const [view, setView] = useState<"live" | "pdf">("live");
-  const [livePages, setLivePages] = useState<number | null>(null);
+  const [fit, setFit] = useState<LiveFit | null>(null);
   // Writing a bullet: rewording one (bi) or a new one (bi = -1) in section si, with the rules' verdict as you type.
   const [writing, setWriting] = useState<{ si: number; bi: number; text: string; issues: string[] | null; verbs: string[]; busy: boolean; error: string } | null>(null);
 
@@ -179,6 +179,11 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const preview = draft?.pdfPath || loaded?.current.pdfPath || null;
   const skillLines = skills.split("\n").map((l) => l.trim()).filter(Boolean);
   const liveSections = sections.map((s) => ({ role: s.role, kind: s.kind, bullets: s.bullets, tools: s.kind === "project" ? s.stack ?? draft?.stacks?.[s.role] ?? s.stackAuto ?? [] : undefined }));
+  // "Room for 2 more lines": a line is a bullet's line (a bullet is usually two).
+  const room = !fit ? null
+    : fit.pages > 1 ? { tone: "over", label: `${fit.pages} pages ⚠ · ${-fit.lines} line${fit.lines === -1 ? "" : "s"} over` }
+    : fit.lines >= 2 ? { tone: "ok", label: `1 page ✓ · room for ${fit.lines} more line${fit.lines === 1 ? "" : "s"}` }
+    : { tone: "full", label: `1 page ✓ · full${fit.lines === 1 ? " (1 line left)" : ""}` };
   const canSave = Boolean(dirty && draft?.draftId && !draft.problems.length && !rendering && !saving);
   const addable = (role: string) => (loaded?.options[role] ?? []).filter((o) => !used.has(o.ac_id));
   const projects = (loaded?.roles ?? []).filter((r) => r.kind === "project" && !sections.some((s) => s.role === r.role));
@@ -186,25 +191,15 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   return (
     <div className="rv-page rb-page">
       {header}
-      <div className="rb-bar">
-        <div className="rb-title">
-          <h1>{loaded ? (loaded.source.kind === "job" ? loaded.source.company : `${TRACK_LABEL[loaded.source.track] ?? loaded.source.track} general resume`) : "Resume builder"}</h1>
-          <span className="apps-muted">{loaded?.source.kind === "job" ? loaded.source.title : "Not tailored to a job"}{loaded?.current.edited ? " · edited" : " · generated"}</span>
-        </div>
-        <div className="rb-actions">
-          {draft?.jdMatch && <span className="rb-match" title={draft.jdMatch.missing.length ? `Still missing: ${draft.jdMatch.missing.join(", ")}` : "Every skill this job names is on it"}>JD match {draft.jdMatch.before ?? "–"} → <b>{draft.jdMatch.after ?? "–"}</b></span>}
-          {rendering && <span className="apps-muted">Rendering…</span>}
-          {loaded?.current.edited && <button className="apps-btn" disabled={saving} onClick={() => void revert()}>Revert to generated</button>}
-          {loaded && <a className="apps-btn" href={pdfUrl(loaded.current.pdfPath, true)}>Download saved</a>}
-          <button className="apps-btn" disabled={!dirty || saving} onClick={() => void load()}>Discard changes</button>
-          <button className="rv-primary" disabled={!canSave} onClick={() => void save()}>{saving ? "Saving…" : "Save"}</button>
-        </div>
-      </div>
       {error && <p className="ar-error" role="alert">{error}</p>}
       {!loaded && !error && <div className="td-empty">Loading the resume…</div>}
       {loaded && (
         <main className="rb-main">
           <section className="rb-editor" aria-label="Resume content">
+            <div className="rb-which">
+              <b>{loaded.source.kind === "job" ? loaded.source.company : `${TRACK_LABEL[loaded.source.track] ?? loaded.source.track} general resume`}</b>
+              <span className="apps-muted">{loaded.source.kind === "job" ? loaded.source.title : "Not tailored to a job"}{loaded.current.edited ? " · edited" : " · generated"}</span>
+            </div>
             <div className="rb-head">
               <label className="rb-field"><span>Title</span><input value={title} maxLength={60} onChange={(e) => { setTitle(e.target.value); setDirty(true); }} /></label>
               <label className="rb-field"><span>Email</span><input type="email" value={email} maxLength={80} onChange={(e) => { setEmail(e.target.value); setDirty(true); }} /></label>
@@ -250,21 +245,26 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
             <label className="rb-field"><span>Technical skills (one line each, “Category: a, b, c”)</span><textarea rows={6} value={skills} onChange={(e) => { setSkills(e.target.value); setDirty(true); }} /></label>
           </section>
           <section className="rb-preview" aria-label="Preview">
-            {draft && (draft.problems.length > 0
-              ? <div className="rb-checks bad" role="alert"><b>Can't save yet</b><ul>{draft.problems.map((p) => <li key={p}>{p}</li>)}</ul></div>
-              : <div className="rb-checks ok"><b>Ready to save</b> One page · every bullet from your bank · no repeated opening verb{draft.jdMatch ? ` · JD match ${draft.jdMatch.before ?? "–"} → ${draft.jdMatch.after ?? "–"}` : ""}</div>)}
             <div className="rb-viewbar">
               <span className="rb-tabs" role="tablist">
                 <button role="tab" aria-selected={view === "live"} className={view === "live" ? "is-on" : ""} onClick={() => setView("live")}>Live</button>
                 <button role="tab" aria-selected={view === "pdf"} className={view === "pdf" ? "is-on" : ""} onClick={() => setView("pdf")}>PDF</button>
               </span>
-              <span className={`rb-pages ${livePages != null && livePages > 1 ? "is-over" : ""}`} title="The live preview's pages (close to the PDF; the PDF decides)">
-                <i />Live {livePages == null ? "…" : `${livePages} page${livePages === 1 ? "" : "s"} ${livePages === 1 ? "✓" : "⚠"}`}</span>
+              <span className={`rb-pages ${room ? `is-${room.tone}` : ""}`} title="From the live preview: about 16px per bullet line, and a bullet is usually two lines. Close to the PDF; the PDF decides.">
+                <i />{room ? room.label : "Measuring…"}</span>
               <span className="apps-muted" title="The compiled PDF, the one Fill sends">PDF {rendering ? "checking…" : draft?.pages ? `${draft.pages} page${draft.pages === 1 ? "" : "s"} ${draft.pages === 1 ? "✓" : "⚠"}` : dirty ? "…" : "saved"}</span>
+              {draft?.jdMatch && <span className="rb-match" title={draft.jdMatch.missing.length ? `Still missing: ${draft.jdMatch.missing.join(", ")}` : "Every skill this job names is on it"}>JD {draft.jdMatch.before ?? "–"} → <b>{draft.jdMatch.after ?? "–"}</b></span>}
+              <span className="rb-actions">
+                {loaded.current.edited && <button className="apps-btn" disabled={saving} onClick={() => void revert()} title="Back to the generated resume">Revert</button>}
+                <a className="apps-btn" href={pdfUrl(loaded.current.pdfPath, true)} title="Download the saved PDF">Download</a>
+                <button className="apps-btn" disabled={!dirty || saving} onClick={() => void load()}>Discard</button>
+                <button className="rv-primary" disabled={!canSave} onClick={() => void save()} title={draft && !draft.problems.length ? "One page · every bullet from your bank · no repeated opening verb" : undefined}>{saving ? "Saving…" : "Save"}</button>
+              </span>
             </div>
+            {draft && draft.problems.length > 0 && <div className="rb-checks bad" role="alert"><b>Can't save yet</b><ul>{draft.problems.map((p) => <li key={p}>{p}</li>)}</ul></div>}
             {view === "live"
-              ? <ResumeLivePreview layout={loaded.layout} title={title} email={email} city={city} sections={liveSections} skills={skillLines} onPages={setLivePages} />
-              : preview && <iframe key={preview} title="Resume PDF" src={pdfUrl(preview)} />}
+              ? <ResumeLivePreview layout={loaded.layout} title={title} email={email} city={city} sections={liveSections} skills={skillLines} onFit={setFit} />
+              : preview && <iframe key={preview} title="Resume PDF" src={`${pdfUrl(preview)}#view=Fit&toolbar=0&navpanes=0`} />}
           </section>
         </main>
       )}

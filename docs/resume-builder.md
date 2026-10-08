@@ -42,11 +42,16 @@ one to swap it in). A this-resume-only edit needs a verb not used elsewhere on t
 
 ### Live preview
 
-Two tabs over the preview: **Live** (default) and **PDF**.
+One toolbar over the preview holds everything: **Live** / **PDF** tabs, the page chip, the PDF's page count, JD match,
+and the buttons (**Revert**, **Download** the saved PDF, **Discard**, **Save**). There's no header bar; which resume
+you're editing is the small line at the top of the left column. The whole page is always in view (scaled to fit the
+column's width and height), so nothing scrolls on the right.
 
 - **Live** is the resume as HTML in the template's layout (Letter, 0.5in margins, 11pt Computer Modern), paginated
-  in the browser by [Paged.js](https://github.com/pagedjs/pagedjs). It updates as you type and shows
-  **Live 1 page ✓** or **Live 2 pages ⚠**. It mirrors the LaTeX template closely, not to the pixel.
+  in the browser by [Paged.js](https://github.com/pagedjs/pagedjs). It updates as you type. The chip says how much
+  room is left: **1 page ✓ · room for 3 more lines** (green), **1 page ✓ · full** (blue, 0–1 lines left), or
+  **2 pages ⚠ · 2 lines over** (amber). A line is a bullet's line (10pt × 1.2 = 16px); most bullets are two lines.
+  It measures the lowest line of text on the last page, so it mirrors the LaTeX template closely, not to the pixel.
 - **PDF** is the compiled resume, the file Fill sends. It recompiles about a second after you stop, and its page count
   (**PDF 1 page ✓**) is the one that decides Save.
 
@@ -125,6 +130,7 @@ folders are new files, so nothing is ever overwritten).
 | 2026-10-08 | Auto-filled metadata of a typed bullet (technologies, keywords) is shown collapsed and editable (Phase 2). |
 | 2026-10-08 | **Project tools lines, header email and location are editable** (user asked). The tools line stays automatic until you type in it. |
 | 2026-10-08 | **Live preview with Paged.js** (user asked), next to the compiled PDF. The PDF stays the one that's sent and that gates Save; making HTML the real renderer would be a separate decision. |
+| 2026-10-08 | **One screen**: header bar removed, its buttons moved into the preview toolbar; the page is scaled to fit whole; a "room for N more lines" chip (user asked). Room is measured on the Live preview, not the PDF. |
 | 2026-10-08 | **Three ways to write**: this resume only, reword for the bank, new bullet (always to the bank). Bank bullets keep the bank's rules, including a verb of their own. |
 
 ## Phases

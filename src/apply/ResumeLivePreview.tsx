@@ -41,8 +41,8 @@ ul { margin: 1pt 0 3pt; padding-left: 0.3in; }
 li { font-size: 10pt; margin: 0; }
 .proj { font-size: 10pt; } .proj em { font-style: italic; }
 .skills { margin-left: 0.15in; font-size: 10pt; }
-.pagedjs_page { background: #fff; box-shadow: 0 2px 14px rgba(0,0,0,.45); margin: 0 auto 18px; }
-@media screen { body { background: #3a3d42; padding: 14px 0; } }
+.pagedjs_page { background: #fff; box-shadow: 0 2px 14px rgba(0,0,0,.45); margin: 0 auto 12px; }
+@media screen { body { background: #3a3d42; padding: 10px 0; } }
 `;
 
 function resumeHtml(layout: Layout, p: { title: string; email: string; city: string; sections: PreviewSection[]; skills: string[] }) {
@@ -69,9 +69,12 @@ function resumeHtml(layout: Layout, p: { title: string; email: string; city: str
     <h2>Education</h2>${edu}<h2>Experience</h2>${exp}<h2>Projects</h2>${proj}<h2>Technical Skills</h2><div class="skills">${skills}</div>`;
 }
 
-/** Renders the resume live; calls onPages with the page count after each render. */
-export default function ResumeLivePreview({ layout, title, email, city, sections, skills, onPages }: {
-  layout: Layout; title: string; email: string; city: string; sections: PreviewSection[]; skills: string[]; onPages: (n: number) => void;
+/** The page count and the room left: lines free on the last page (negative: lines past one page). */
+export interface LiveFit { pages: number; lines: number }
+
+/** Renders the resume live, the whole page in view; calls onFit after each render. */
+export default function ResumeLivePreview({ layout, title, email, city, sections, skills, onFit }: {
+  layout: Layout; title: string; email: string; city: string; sections: PreviewSection[]; skills: string[]; onFit: (f: LiveFit) => void;
 }) {
   const body = useMemo(() => resumeHtml(layout, { title, email, city, sections, skills }), [layout, title, email, city, sections, skills]);
   const [doc, setDoc] = useState("");
@@ -81,19 +84,41 @@ export default function ResumeLivePreview({ layout, title, email, city, sections
     const t = setTimeout(() => {
       const n = ++id.current;
       setDoc(`<!doctype html><html><head><meta charset="utf-8"><style>${CSS}</style><script>
+        // A bullet line is 10pt at 1.2 line height = 16px. Measured before zooming, in CSS pixels.
+        const used = (page) => {
+          const box = page.querySelector(".pagedjs_page_content");
+          if (!box) return 0;
+          // The lowest line of text (Paged.js's wrapper boxes can stretch to the page's height).
+          const rows = [...box.querySelectorAll("li, .row, .skills > div, .name, .contact, h2")];
+          const bottom = Math.max(0, ...rows.map((el) => el.getBoundingClientRect().bottom - box.getBoundingClientRect().top));
+          return bottom;
+        };
+        const fit = () => {
+          const pg = document.querySelector(".pagedjs_page");
+          if (!pg) return;
+          const { width, height } = pg.getBoundingClientRect();
+          const z = parseFloat(document.body.style.zoom || "1");
+          // The whole first page in view: as wide and as tall as the frame allows.
+          document.body.style.zoom = Math.min(1.6, (window.innerWidth - 20) / (width / z), (window.innerHeight - 20) / (height / z));
+        };
+        window.addEventListener("resize", fit);
         window.PagedConfig = { auto: true, after: (flow) => {
-          const w = document.querySelector(".pagedjs_page")?.getBoundingClientRect().width || 816;
-          document.body.style.zoom = Math.min(1, (window.innerWidth - 24) / w);
-          parent.postMessage({ type: "rb-pages", id: ${n}, pages: flow.total }, "*");
+          const pages = [...document.querySelectorAll(".pagedjs_page")];
+          const box = pages[0]?.querySelector(".pagedjs_page_content")?.getBoundingClientRect().height || 960;
+          const lines = pages.length <= 1
+            ? Math.floor((box - used(pages[0])) / 16)
+            : -Math.ceil(pages.slice(1).reduce((n, p) => n + used(p), 0) / 16);
+          fit();
+          parent.postMessage({ type: "rb-pages", id: ${n}, pages: flow.total, lines }, "*");
         } };
       </script><script src="${pagedPolyfill}"></script></head><body>${body}</body></html>`);
     }, 150);
     return () => clearTimeout(t);
   }, [body]);
   useEffect(() => {
-    const on = (e: MessageEvent) => { if (e.data?.type === "rb-pages" && e.data.id === id.current) onPages(e.data.pages); };
+    const on = (e: MessageEvent) => { if (e.data?.type === "rb-pages" && e.data.id === id.current) onFit({ pages: e.data.pages, lines: e.data.lines }); };
     window.addEventListener("message", on);
     return () => window.removeEventListener("message", on);
-  }, [onPages]);
+  }, [onFit]);
   return <iframe className="rb-live" title="Live resume preview" sandbox="allow-scripts allow-same-origin" srcDoc={doc} />;
 }

@@ -1,12 +1,12 @@
-/* Resume builder: content on the left (scrolls), the real PDF on the right; the page itself never scrolls. */
+/* Resume builder: content on the left (scrolls), the whole page on the right (fits, never scrolls); the page itself
+   never scrolls. The buttons sit in the preview's toolbar. */
 .rb-page { overflow: hidden; }
-.rb-bar { flex: 0 0 auto; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 14px 20px 10px; }
-.rb-title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.rb-title h1 { font-size: 22px; margin: 0; }
-.rb-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rb-which { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: 14px; }
+.rb-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.rb-actions :is(.apps-btn, .rv-primary) { height: 30px; padding: 0 12px; font-size: 12.5px; }
 .rb-actions a.apps-btn { text-decoration: none; display: inline-flex; align-items: center; }
 .rb-match { font-size: 13px; color: var(--muted-fg); white-space: nowrap; } .rb-match b { color: var(--foreground); }
-.rb-main { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 0 20px 14px; }
+.rb-main { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 12px 20px 14px; }
 .rb-editor { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 6px; }
 .rb-field { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--muted-fg); }
 .rb-field :is(input, textarea) { font: inherit; font-size: 13.5px; color: var(--foreground); background: var(--card-bg); border: 1px solid var(--border-col); border-radius: 8px; padding: 8px 10px; }
@@ -41,12 +41,13 @@
 .rb-stack span { display: flex; align-items: center; gap: 8px; }
 .rb-stack em { font-style: normal; opacity: .75; }
 .rb-stack .apps-link { font-size: 12px; }
-.rb-viewbar { display: flex; align-items: center; gap: 14px; font-size: 12.5px; }
+.rb-viewbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12.5px; }
 .rb-tabs { display: inline-flex; border: 1px solid var(--border-col); border-radius: 8px; overflow: hidden; }
 .rb-tabs button { font: inherit; font-size: 12.5px; padding: 4px 12px; background: none; border: 0; color: var(--muted-fg); cursor: pointer; }
 .rb-tabs button.is-on { background: var(--accent-bg); color: var(--foreground); font-weight: 600; }
 .rb-pages { display: inline-flex; align-items: center; gap: 6px; color: #86efac; font-weight: 600; }
 .rb-pages i { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; }
+.rb-pages.is-full { color: #93c5fd; } .rb-pages.is-full i { background: #60a5fa; }
 .rb-pages.is-over { color: #fcd34d; } .rb-pages.is-over i { background: #f59e0b; }
 .rb-preview iframe.rb-live { background: #3a3d42; }
 /* Writing a bullet: your words, the rules' verdict, and where it goes. */
