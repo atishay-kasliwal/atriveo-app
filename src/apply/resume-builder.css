@@ -37,3 +37,7 @@
 .rb-soon { font-size: 12.5px; }
 .td-page a.td-edit { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
 @media (max-width: 900px) { .rb-page { overflow: auto; } .rb-main { grid-template-columns: 1fr; } .rb-preview iframe { height: 70vh; } }
+.rb-head { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 10px; }
+.rb-stack span { display: flex; align-items: center; gap: 8px; }
+.rb-stack em { font-style: normal; opacity: .75; }
+.rb-stack .apps-link { font-size: 12px; }

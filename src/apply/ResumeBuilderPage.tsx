@@ -9,14 +9,15 @@ import "./resume-builder.css";
 // Design and decisions: docs/resume-builder.md. Server: scripts/resume-builder.mjs (/resume-builder/* routes).
 
 interface Bullet { ac_id: string; facet: string | null; text: string }
-interface Section { role: string; kind: "experience" | "project"; label: string; bullets: Bullet[] }
+/** A project's tools line ("Atriveo | FastAPI, Docker…"): stack = yours; null = picked from its bullets (stackAuto). */
+interface Section { role: string; kind: "experience" | "project"; label: string; bullets: Bullet[]; stack?: string[] | null; stackAuto?: string[] }
 type Source = { kind: "job"; jobUrl: string; company: string; title: string; location: string | null } | { kind: "track"; track: string; company: string; title: string; location: null };
 interface Loaded {
-  source: Source; headerTitle: string | null; skills: string[]; sections: Section[];
+  source: Source; headerTitle: string | null; email: string; city: string; skills: string[]; sections: Section[];
   options: Record<string, Bullet[]>; roles: Array<{ role: string; kind: "experience" | "project"; label: string }>;
   current: { pdfPath: string; edited: boolean; generatedPdfPath: string | null }; jd: string | null;
 }
-interface Draft { draftId: string; pdfPath: string; pages: number | null; problems: string[]; jdMatch: { before: number | null; after: number | null; missing: string[] } | null }
+interface Draft { draftId: string; pdfPath: string; pages: number | null; problems: string[]; jdMatch: { before: number | null; after: number | null; missing: string[] } | null; stacks?: Record<string, string[]> }
 
 const GENERAL = ["software-engineer", "ai-engineer", "data-analytics", "data-science", "forward-deployed"];
 const base = () => `${getTailorServerBase()}/resume-builder`;
@@ -35,6 +36,10 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [error, setError] = useState("");
   const [title, setTitle] = useState("");
+  const [email, setEmail] = useState("");
+  const [city, setCity] = useState("");
+  // What you're typing in each project's tools box (kept as typed, so commas stay while you type).
+  const [stackText, setStackText] = useState<Record<string, string>>({});
   const [skills, setSkills] = useState("");
   const [sections, setSections] = useState<Section[]>([]);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -48,13 +53,13 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     setError(""); setLoaded(null); setDraft(null); setDirty(false);
     try {
       const r = await call<Loaded>(`load?${query}`);
-      setLoaded(r); setTitle(r.headerTitle ?? ""); setSkills(r.skills.join("\n")); setSections(r.sections);
+      setStackText({}); setLoaded(r); setTitle(r.headerTitle ?? ""); setEmail(r.email); setCity(r.city); setSkills(r.skills.join("\n")); setSections(r.sections);
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
   }, [query]);
   useEffect(() => { void load(); }, [load]);
 
   // Edits re-render the preview a moment after you stop (each render compiles the real template).
-  const edit = useMemo(() => loaded && { source: loaded.source, headerTitle: title, skills: skills.split("\n").map((s) => s.trim()).filter(Boolean), sections }, [loaded, title, skills, sections]);
+  const edit = useMemo(() => loaded && { source: loaded.source, headerTitle: title, email, city, skills: skills.split("\n").map((s) => s.trim()).filter(Boolean), sections }, [loaded, title, email, city, skills, sections]);
   const seq = useRef(0);
   useEffect(() => {
     if (!edit || !dirty) return;
@@ -133,11 +138,20 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
       {loaded && (
         <main className="rb-main">
           <section className="rb-editor" aria-label="Resume content">
-            <label className="rb-field"><span>Title (header)</span><input value={title} maxLength={60} onChange={(e) => { setTitle(e.target.value); setDirty(true); }} /></label>
+            <div className="rb-head">
+              <label className="rb-field"><span>Title</span><input value={title} maxLength={60} onChange={(e) => { setTitle(e.target.value); setDirty(true); }} /></label>
+              <label className="rb-field"><span>Email</span><input type="email" value={email} maxLength={80} onChange={(e) => { setEmail(e.target.value); setDirty(true); }} /></label>
+              <label className="rb-field"><span>Location</span><input value={city} maxLength={40} placeholder="City, ST" onChange={(e) => { setCity(e.target.value); setDirty(true); }} /></label>
+            </div>
             {sections.map((s, si) => (
               <div key={s.role} className="rb-section">
                 <header><b>{s.label}</b><span className="apps-muted">{s.kind === "project" ? "Project" : "Experience"} · {s.bullets.length} bullet{s.bullets.length === 1 ? "" : "s"}</span>
                   {s.kind === "project" && <button className="apps-link" onClick={() => change((x) => x.filter((_, i) => i !== si))}>Remove project</button>}</header>
+                {s.kind === "project" && (() => {
+                  const shown = s.stack ?? draft?.stacks?.[s.role] ?? s.stackAuto ?? [];
+                  return <label className="rb-field rb-stack"><span>Tools after the name {s.stack ? <button type="button" className="apps-link" onClick={() => { setStackText((t) => { const n = { ...t }; delete n[s.role]; return n; }); change((x) => { x[si]!.stack = null; return x; }); }}>Auto</button> : <em>automatic, from the bullets</em>}</span>
+                    <input value={stackText[s.role] ?? shown.join(", ")} placeholder="FastAPI, Docker, PostgreSQL" onChange={(e) => { const v = e.target.value; setStackText((t) => ({ ...t, [s.role]: v })); change((x) => { const list = v.split(",").map((t) => t.trim()).filter(Boolean); x[si]!.stack = list.length ? list : null; return x; }); }} /></label>;
+                })()}
                 <ol>{s.bullets.map((b, bi) => (
                   <li key={`${b.ac_id}:${bi}`} className={(verbs.get(verb(b.text)) ?? 0) > 1 ? "is-dup" : ""}>
                     <p>{b.text}</p>

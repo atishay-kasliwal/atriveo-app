@@ -17,8 +17,10 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { loadBank } from "./ac-bank.mjs";
-import { assembleAcResume } from "./ac-tex.mjs";
+import { assembleAcResume, toolsFromBullets } from "./ac-tex.mjs";
 import { jdSkillMatch, loadSkills } from "./ac-jd-skills.mjs";
+import { resolveHeaderLocation } from "./ac-header-location.mjs";
+import { loadResumeProfile } from "./resume-profile.mjs";
 import { PROJECT_SLUG_TO_NAME, ROLE_SLUG_TO_NAME } from "./ac-role-meta.mjs";
 
 export const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || path.join(os.homedir(), "Documents", "tailored-resumes");
@@ -43,16 +45,18 @@ const openingVerb = (text) => (String(text).trim().match(/^([A-Za-z]+)/) || [])[
 const EDIT_FILE = "builder.json";
 function compositionAt(dir) {
   const edit = readJson(path.join(dir, EDIT_FILE));
-  if (edit?.sections) return { headerTitle: edit.headerTitle, skills: edit.skills, sections: edit.sections, location: edit.location ?? null };
+  if (edit?.sections) return { headerTitle: edit.headerTitle, skills: edit.skills, sections: edit.sections, location: edit.location ?? null, email: edit.email ?? null, city: edit.city ?? null };
   const run = readJson(path.join(dir, "composition.json"));
   if (!run?.composition) throw new BuilderError("This resume has no composition to edit (built before the builder existed). Rebuild it first.");
   const c = run.composition;
-  const sec = (kind) => (b) => ({ role: b.role, kind, bullets: (b.bullets || []).map((x) => ({ ac_id: x.ac_id, facet: x.facet ?? null, text: x.text })) });
+  const sec = (kind) => (b) => ({ role: b.role, kind, bullets: (b.bullets || []).map((x) => ({ ac_id: x.ac_id, facet: x.facet ?? null, text: x.text })), ...(kind === "project" ? { stack: null } : {}) });
   return {
     headerTitle: run.header_title ?? null,
     skills: run.skills ?? c.skills ?? [],
     sections: [...(c.experience || []).map(sec("experience")), ...(c.projects || []).map(sec("project"))],
     location: null,
+    email: null,
+    city: null,
   };
 }
 
@@ -106,12 +110,17 @@ export async function loadResume(db, { jobUrl = null, track = null, appId = null
   if (!fs.existsSync(path.join(dir, PDF))) throw new BuilderError("The resume file isn't on this server yet.");
   const c = compositionAt(dir);
   const kinds = roleKind(bank);
+  // The header's email and city as this resume prints them (yours if you changed them, else the profile's / the posting's).
+  const me = loadResumeProfile();
   return {
     ok: true,
     source,
     headerTitle: c.headerTitle,
+    email: c.email ?? me.email ?? "",
+    city: c.city ?? resolveHeaderLocation(source.location, me.location) ?? "",
     skills: c.skills,
-    sections: c.sections.map((s) => ({ ...s, label: labelOf(s.role) })),
+    // A project's tools line: yours (stack set) or the one the bullets give (stackAuto), as the PDF shows it.
+    sections: c.sections.map((s) => ({ ...s, label: labelOf(s.role), ...(s.kind === "project" ? { stack: s.stack ?? null, stackAuto: toolsFromBullets(s.bullets, s.role) } : {}) })),
     options: bankOptions(bank),
     // Projects you could add (every project with bank bullets).
     roles: Object.entries(kinds).map(([role, kind]) => ({ role, kind, label: labelOf(role) })),
@@ -158,15 +167,26 @@ export async function renderDraft(db, edit) {
   const base = await loadResume(db, edit.source);
   const clean = {
     headerTitle: String(edit.headerTitle || base.headerTitle || "").trim().slice(0, 60),
+    email: String(edit.email ?? base.email ?? "").trim().slice(0, 80),
+    city: String(edit.city ?? base.city ?? "").trim().slice(0, 40),
     skills: (edit.skills || []).map((s) => String(s).trim()).filter((s) => s.includes(":")).slice(0, 8),
-    sections: (edit.sections || []).map((s) => ({ role: s.role, kind: s.kind === "project" ? "project" : "experience", bullets: (s.bullets || []).map((b) => ({ ac_id: String(b.ac_id), facet: b.facet ?? null, text: String(b.text || "").replace(/\s+/g, " ").trim() })) })),
+    sections: (edit.sections || []).map((s) => {
+      const kind = s.kind === "project" ? "project" : "experience";
+      const bullets = (s.bullets || []).map((b) => ({ ac_id: String(b.ac_id), facet: b.facet ?? null, text: String(b.text || "").replace(/\s+/g, " ").trim() }));
+      // Your tools line for a project (up to 8, short names); none = picked from its bullets, as generated resumes do.
+      const stack = kind === "project" && Array.isArray(s.stack) ? [...new Set(s.stack.map((t) => String(t).trim().slice(0, 30)).filter(Boolean))].slice(0, 8) : [];
+      return { role: s.role, kind, bullets, ...(kind === "project" ? { stack: stack.length ? stack : null } : {}) };
+    }),
   };
   const problems = validate(clean, bank);
+  if (clean.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean.email)) problems.push(`"${clean.email}" isn't an email address`);
   const composition = {
     experience: clean.sections.filter((s) => s.kind === "experience").map((s) => ({ role: s.role, bullets: s.bullets })),
-    projects: clean.sections.filter((s) => s.kind === "project").map((s) => ({ role: s.role, bullets: s.bullets })),
+    projects: clean.sections.filter((s) => s.kind === "project").map((s) => ({ role: s.role, bullets: s.bullets, stack: s.stack })),
   };
-  const tex = assembleAcResume(composition, { headerTitle: clean.headerTitle, skillsLines: clean.skills, bank, location: base.source.location });
+  const me = loadResumeProfile();
+  const tex = assembleAcResume(composition, { headerTitle: clean.headerTitle, skillsLines: clean.skills, bank, location: base.source.location,
+    profile: { ...me, email: clean.email || me.email }, city: clean.city || null });
   const draftId = crypto.createHash("sha256").update(JSON.stringify([edit.source, tex])).digest("hex").slice(0, 16);
   const dir = path.join(OUT_ROOT, ".builder-drafts", draftId);
   fs.mkdirSync(dir, { recursive: true });
@@ -187,7 +207,9 @@ export async function renderDraft(db, edit) {
     const after = jdSkillMatch(base.jd, textOf(clean), skills);
     jdMatch = { before: before.score, after: after.score, missing: after.missing.slice(0, 8).map((m) => m.skill) };
   }
-  return { ok: true, draftId, pdfPath, pages, problems, jdMatch };
+  // Each project's tools line as this draft prints it (the page shows the automatic one while you haven't set yours).
+  const stacks = Object.fromEntries(clean.sections.filter((s) => s.kind === "project").map((s) => [s.role, s.stack ?? toolsFromBullets(s.bullets, s.role)]));
+  return { ok: true, draftId, pdfPath, pages, problems, jdMatch, stacks };
 }
 
 const nextEditDir = (runDir) => {

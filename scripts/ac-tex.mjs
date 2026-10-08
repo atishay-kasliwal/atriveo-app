@@ -101,7 +101,7 @@ function esc(s) {
     .replace(/f(?=[fil])/g, "f\\kern0pt{}");
 }
 
-function toolsFromBullets(bullets, roleSlug) {
+export function toolsFromBullets(bullets, roleSlug) {
   const text = bullets.map((b) => b.text || "").join(" ");
   const out = [];
   for (const [name, re] of TOOL_PATTERNS) {
@@ -204,13 +204,14 @@ export function deriveHeaderTitle(jd, composition, rawTitle) {
   return loadResumeProfile().title;
 }
 
-export function assembleAcResume(composition, { headerTitle, skillsLines, bank, location, profile } = {}) {
+export function assembleAcResume(composition, { headerTitle, skillsLines, bank, location, profile, city: cityAsWritten } = {}) {
   const bankDir = bank?.bank_dir || resolveBankDir();
   const me = profile || loadResumeProfile();
   const title = stripBanned(headerTitle || me.title);
   // Header city follows the posting so the resume reads local to the team;
   // a posting with no location — or several — falls back to the home city.
-  const city = resolveHeaderLocation(location, me.location);
+  // The resume builder may set the header city as written (city); otherwise it follows the posting.
+  const city = cityAsWritten || resolveHeaderLocation(location, me.location);
   // Profile links show their address, not a label: extracted text keeps only what is printed,
   // so a link drawn as "Linkedin" reaches a parser without its URL.
   const link = (url) => `\\href{${url}}{${esc(displayUrl(url))}}`;
@@ -261,7 +262,8 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
       const name = PROJECT_SLUG_TO_NAME[project.role] || project.role;
       const meta = resolveProjectMeta(project.role, bankDir);
       const bullets = (project.bullets || []).map((b) => ({ text: bulletText(b) }));
-      const stack = toolsFromBullets(bullets, project.role);
+      // The resume builder may set a project's tools line (project.stack); otherwise it comes from the bullets.
+      const stack = project.stack?.length ? project.stack : toolsFromBullets(bullets, project.role);
       const items = bullets.map((b) => `      \\resumeItem{${esc(b.text)}}`).join("\n");
       return `    \\resumeProjectHeading{\\textbf{${esc(name)}}${stack.length ? " $|$ \\emph{" + esc(stack.join(", ")) + "}" : ""}}{${meta.dates}}\n    \\resumeItemListStart\n${items}\n    \\resumeItemListEnd`;
     })

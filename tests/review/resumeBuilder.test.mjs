@@ -46,6 +46,21 @@ test('load → swap a bullet → render one page → save repoints the job and i
     assert.equal(draft.pages, 1);
     assert.ok(typeof draft.jdMatch.before === 'number' && typeof draft.jdMatch.after === 'number');
 
+    // The header's email and city, and a project's tools line, are yours to set; a bad email is refused.
+    assert.ok(r.email !== undefined && r.city);
+    const proj = structuredClone(r.sections);
+    proj.find((s) => s.role === 'atriveo').stack = ['Go', 'Rust'];
+    const custom = await renderDraft(db, { source: r.source, headerTitle: r.headerTitle, email: 'me@example.com', city: 'Charlotte, NC', skills: r.skills, sections: proj });
+    assert.deepEqual(custom.problems, []);
+    const tex = fs.readFileSync(path.join(path.dirname(custom.pdfPath), 'resume.tex'), 'utf8');
+    assert.match(tex, /me@example\.com/);
+    assert.match(tex, /Charlotte, NC/);
+    assert.match(tex, /\\textbf\{Atriveo\} \$\|\$ \\emph\{Go, Rust\}/);
+    assert.deepEqual(custom.stacks.atriveo, ['Go', 'Rust']);
+    assert.ok(draft.stacks.atriveo.length > 0, 'without yours, the tools come from the bullets');
+    const badEmail = await renderDraft(db, { source: r.source, headerTitle: r.headerTitle, email: 'not-an-email', skills: r.skills, sections: r.sections });
+    assert.ok(badEmail.problems.some((p) => /isn't an email/.test(p)));
+
     // A repeated opening verb and a bullet from another employer are refused.
     const bad = structuredClone(r.sections);
     bad[0].bullets.push(r.options['accolite'][0]);

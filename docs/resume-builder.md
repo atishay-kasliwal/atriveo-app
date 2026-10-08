@@ -18,8 +18,12 @@ In the editor:
 
 - **Bullets**: move (↑ ↓), **Swap…** for another bullet of the same employer or project (also another version of
   the same bullet, marked ↺), **✕** remove, **+ Add a bullet from the bank**.
-- **Projects**: **Remove project**, **+ Add a project**.
-- **Title** (header) and **Technical skills** (one line each, `Category: a, b, c`).
+- **Projects**: **Remove project**, **+ Add a project**, and the **tools after the name** ("Atriveo | FastAPI,
+  Docker…"). Until you type in it, the tools line is picked from the project's bullets (as in generated resumes) and
+  follows your swaps; once you type, your list is printed (up to 8). **Auto** goes back to the automatic one.
+- **Header**: **Title**, **Email** and **Location** (printed as you write it, e.g. "Charlotte, NC"). They start as
+  the resume prints them: your profile's email, and the posting's city (home city when it names none).
+- **Technical skills** (one line each, `Category: a, b, c`).
 - The preview re-renders about a second after you stop editing. **Save** turns on when the draft passes every check.
 
 ## Checks (every render; Save is refused unless all pass)
@@ -28,6 +32,7 @@ In the editor:
 - **Every bullet is from your bank**, under its own employer or project, and its text is one of that bullet's bank
   versions (Phase 1 has no free text).
 - **No repeated opening verb** (the same rule the pipeline enforces: `assertUniqueCompositionVerbs`).
+- **Email** looks like an email address.
 - **JD skill match before → after** (jobs only; `ac-jd-skills.mjs`): shown, not enforced. Hover it for the skills
   the job names that the resume still misses.
 
@@ -45,7 +50,10 @@ Today card / track ──► GET  /tailor/resume-builder/load      loadResume() 
   `header_title`, `skills`); a saved edit keeps it in `builder.json`.
 - Rendering calls `assembleAcResume()` (scripts/ac-tex.mjs), the same function every generated resume goes through,
   then `tectonic resume.tex`. Nothing in the builder writes LaTeX itself.
-- The header city follows the job's location, as in generated resumes.
+- The header city follows the job's location, as in generated resumes, unless you set one.
+- Two options of `assembleAcResume` exist for the builder only (the pipeline never sets them, so generated resumes
+  are unchanged): `city` (the header city as written) and `project.stack` (a project's tools line). Email goes in
+  through the `profile` option (your profile with that email).
 
 ### Where things are stored
 
@@ -65,6 +73,7 @@ folders are new files, so nothing is ever overwritten).
 | File | Role |
 |---|---|
 | `scripts/resume-builder.mjs` | load / render / save / revert, the checks, `GENERAL_RESUMES` (track → folder) |
+| `scripts/ac-tex.mjs` | the renderer; `city` and `project.stack` options used only by the builder; `toolsFromBullets` exported |
 | `scripts/tailor-server.mjs` | the `/resume-builder/*` routes (search "Resume builder") |
 | `src/apply/ResumeBuilderPage.tsx` + `resume-builder.css` | the page |
 | `src/apply/ApplyApp.tsx`, `ApplyHeader.tsx` | route `/resume_builder`, the **Resumes** tab |
@@ -84,11 +93,13 @@ folders are new files, so nothing is ever overwritten).
 | 2026-10-08 | **A saved edit becomes the resume Fill attaches**; the generated one is kept for Revert. |
 | 2026-10-08 | Edits are saved as **new files** (`edits/<n>/`), never over the generated PDF, because the Mac↔Oracle sync never overwrites. |
 | 2026-10-08 | Auto-filled metadata of a typed bullet (technologies, keywords) is shown collapsed and editable (Phase 2). |
+| 2026-10-08 | **Project tools lines, header email and location are editable** (user asked). The tools line stays automatic until you type in it. |
 
 ## Phases
 
 1. **Edit with your bank** (built 2026-10-08): from a Today card or a track's general resume; move / swap / remove /
-   add bank bullets, add or remove projects, edit title and skills; live preview; checks; save; revert.
+   add bank bullets, add or remove projects, project tools lines, title / email / location, skills; live preview;
+   checks; save; revert.
 2. **New words**: paste a job description to start a resume; write a new bullet (lint rules from
    `ac-bullet-lint.mjs`: approved action verb, not Built/Developed/Trained, 12–35 words, ≤3 technologies, no
    "research" at Stony Brook). It's saved to the bank (Mongo, copied next to the git bank before each build so
