@@ -136,6 +136,9 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const query = ["app", "job", "track", "pasted"].map((k) => params.get(k) ? `${k}=${encodeURIComponent(params.get(k)!)}` : null).find(Boolean) ?? null;
   const phone = useMedia("(max-width: 900px)");
   const [aiProvider, setAiProvider] = useState("claude");
+  const [aiHelpMode, setAiHelpMode] = useState("rewrite");
+  const [aiInstruction, setAiInstruction] = useState("");
+  const [aiAnswer, setAiAnswer] = useState("");
   const [aiOpen, setAiOpen] = useState(false);
   const [aiJdStale, setAiJdStale] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
@@ -278,7 +281,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     const generation = ++aiGeneration.current;
     setAiOpen(true); setAiBusy(true); setAiError("");
     try {
-      let r = await call<{analysis?: AiAnalysis; jobId?: string}>("ai-match", { source: loaded.source, provider: aiProvider, sections: x, headerTitle: title, skills: skillInput.split("\n") });
+      let r = await call<{analysis?: AiAnalysis; jobId?: string}>("ai-match", { source: loaded.source, provider: aiProvider, instruction: aiInstruction, sections: x, headerTitle: title, skills: skillInput.split("\n") });
       while (!r.analysis && r.jobId) {
         await new Promise(resolve => setTimeout(resolve,2500));
         if (generation !== aiGeneration.current) return;
@@ -291,6 +294,22 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
       setAi(r.analysis); setAiJdStale(false); setAiInput(aiSnapshot(x, skillInput)); setAiDone([]); setAiReview(batch); setAiBatch(batch);
     } catch (e) { if (generation === aiGeneration.current) setAiError(e instanceof Error ? e.message : String(e)); }
     finally { if (generation === aiGeneration.current) setAiBusy(false); }
+  };
+  const askAi = async () => {
+    if (!loaded || !aiInstruction.trim()) return;
+    const generation = ++aiGeneration.current;
+    setAiBusy(true); setAiError(""); setAiAnswer("");
+    try {
+      const request = await call<{jobId:string}>("ai-match", {source:loaded.source, provider:aiProvider, mode:"question", instruction:aiInstruction, sections, headerTitle:title, skills:skills.split("\n")});
+      while (generation === aiGeneration.current) {
+        await new Promise(resolve=>setTimeout(resolve,2500));
+        const result=await call<{status:string;analysis?:{answer:string};error?:string}>("ai-result",{jobId:request.jobId});
+        if (generation !== aiGeneration.current) return;
+        if(result.status==="failed")throw new Error(result.error||"AI request failed");
+        if(result.analysis){setAiAnswer(result.analysis.answer);break;}
+      }
+    } catch(e) {if(generation===aiGeneration.current)setAiError(e instanceof Error?e.message:String(e));}
+    finally {if(generation===aiGeneration.current)setAiBusy(false);}
   };
   const aiDecision = async (suggestion: AiSuggestion, decision: "accepted" | "rejected" | "edited") => {
     if (!ai) return;
@@ -602,12 +621,15 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
 
   const aiStale = Boolean(ai && (aiJdStale || aiInput !== aiSnapshot(sections)));
   const pendingAi = ai?.suggestions.filter(s => !aiDone.includes(s.id)) ?? [];
-  const aiButton = <button className="apps-btn" disabled={aiBusy || !loaded?.jd} title={loaded?.jd ? "Analyze and rewrite for this job" : "Open a resume with a job description"} onClick={() => { setAiOpen(true); if (!ai) void runAi(); }}>✦ AI Match</button>;
-  const aiPanel = aiOpen && <><div className="rb-modal-back" onClick={() => setAiOpen(false)} /><section className="rb-ai-panel" role="dialog" aria-modal="true" aria-label="AI resume match"><header><h2>JD Match</h2><button className="rb-x" aria-label="Close AI Match" onClick={() => setAiOpen(false)}>×</button></header>
+  const aiButton = loaded && !aiOpen && <button className="rb-ai-float" aria-label="AI Help" aria-haspopup="dialog" onClick={() => setAiOpen(true)}><span aria-hidden="true">✦</span> AI Help</button>;
+  const aiPanel = aiOpen && <><div className="rb-modal-back" onClick={() => setAiOpen(false)} /><section className="rb-ai-panel" role="dialog" aria-modal="true" aria-label="AI resume match"><header><h2>AI Help</h2><button className="rb-x" aria-label="Close AI Match" onClick={() => setAiOpen(false)}>×</button></header>
     <label className="rb-ai-provider">AI provider <select value={aiProvider} disabled={aiBusy} onChange={e => { setAiProvider(e.target.value); setAi(null); setAiError(""); }}><option value="claude">Claude subscription</option><option value="codex">Codex / ChatGPT subscription</option><option value="claude-codex">Claude writes · Codex checks</option></select></label>
-    {!ai && !aiBusy && <button className="rv-primary" onClick={() => void runAi()}>Analyze & Optimize</button>}
-    {aiBusy && <p role="status">AI is optimizing Experience, Technical Skills and Projects…</p>}{aiError && <p className="td-error" role="alert">{aiError}<button className="apps-link" onClick={() => void runAi()}>Retry</button></p>}
-    {ai && <><div className="rb-ai-score"><strong>{ai.original_match_score} → {ai.optimized_match_score}<small>/100</small></strong><span>{aiStale ? "Content or JD changed · refresh required" : "AI estimate of evidence fit"}</span></div><div className="rb-ai-metrics">{Object.entries(ai.subscores).map(([k,v]) => <div key={k}><span>{k[0].toUpperCase()+k.slice(1)}</span><b>{v}</b><progress value={v} max={100} /></div>)}</div>
+    <div className="rb-ai-help-tabs"><button className={aiHelpMode === "rewrite" ? "rv-primary" : "apps-btn"} disabled={aiBusy} onClick={() => {setAiHelpMode("rewrite");setAiError("");}}>Improve resume</button><button className={aiHelpMode === "question" ? "rv-primary" : "apps-btn"} disabled={aiBusy} onClick={() => {setAiHelpMode("question");setAiError("");}}>Ask a question</button></div>
+    <label className="rb-ai-prompt">{aiHelpMode === "question" ? "What would you like to know?" : "What should AI improve?"}<textarea value={aiInstruction} maxLength={2000} disabled={aiBusy} onChange={e => setAiInstruction(e.target.value)} placeholder={aiHelpMode === "question" ? "Which experience best shows my healthcare AI work?" : "Optional: make my bullets clearer and highlight backend experience"} /></label>
+    {aiHelpMode === "question" ? <><button className="rv-primary" disabled={aiBusy || !aiInstruction.trim()} onClick={() => void askAi()}>Ask AI</button>{aiAnswer && <p className="rb-ai-answer" role="status">{aiAnswer}</p>}</> : !aiBusy && <button className="rv-primary" onClick={() => void runAi()}>{loaded?.jd ? "Match this job & improve" : "Improve my general resume"}</button>}
+
+    {aiBusy && <p role="status">{aiHelpMode === "question" ? "AI is reading your resume…" : "AI is improving your resume…"}</p>}{aiError && <p className="td-error" role="alert">{aiError}<button className="apps-link" onClick={() => { if(aiHelpMode === "question") void askAi(); else void runAi(); }}>Retry</button></p>}
+    {ai && aiHelpMode === "rewrite" && <><div className="rb-ai-score">{loaded?.jd ? <strong>{ai.original_match_score} → {ai.optimized_match_score}<small>/100</small></strong> : <strong style={{fontSize:24}}>Resume improvements</strong>}<span>{aiStale ? "Content or JD changed · refresh required" : "AI estimate of evidence fit"}</span></div><div className="rb-ai-metrics">{Object.entries(ai.subscores).map(([k,v]) => <div key={k}><span>{k[0].toUpperCase()+k.slice(1)}</span><b>{v}</b><progress value={v} max={100} /></div>)}</div>
     {aiStale && <button className="apps-btn" disabled={aiBusy} onClick={() => void runAi()}>Refresh match</button>}
     {!aiReview ? <><h3>Biggest gaps</h3><ul>{ai.requirements.filter(r => r.status !== "STRONG").slice(0,5).map(r => <li key={r.requirement}><b>{r.requirement}</b><small>{r.status === "MISSING" ? "No supporting evidence" : "Could be clearer"}</small></li>)}</ul><button className="rv-primary" disabled={aiBusy || aiStale || !pendingAi.length} onClick={() => setAiReview(true)}>Review Changes ({pendingAi.length})</button><button className="apps-btn" disabled={aiBusy} onClick={() => void runAi(sections,true)}>Optimize Resume</button><details><summary>Strong matches, partial matches & missing requirements</summary>{ai.requirements.map(r => <p key={r.requirement}><b>{r.status} · {r.requirement}</b><br />{r.evidence}</p>)}{ai.atsProblems.map(p => <p key={p}>{p}</p>)}</details></> : <>
     {(aiBatch ? pendingAi : pendingAi.slice(0,1)).map(s => <article className="rb-ai-diff" key={s.id}><h3>{s.kind === "skills" ? "Technical Skills" : sections[s.si]?.label}</h3><small>CURRENT</small><p>{s.current}</p><small>SUGGESTED</small><p className="rb-ai-new">{s.suggested}</p><p>{s.reason}</p><small>JD requirements: {s.requirements.join(" · ") || "Skills relevance"}</small><details><summary>Evidence used</summary>{s.evidence_source.map(e => <p key={e}>{e}</p>)}</details><div><button className="apps-btn" disabled={aiBusy} onClick={() => { void aiDecision(s,"rejected").then(() => setAiDone(d => [...d,s.id])).catch(e => setAiError(String(e.message))); }}>Keep current</button><button className="rv-primary" disabled={aiBusy || aiStale} onClick={() => void applyAi([s])}>Apply</button><button className="apps-btn" disabled={aiBusy || aiStale} onClick={() => { void aiDecision(s,"edited").then(() => { setAiOpen(false); if (s.kind === "skills") { if (phone) setSheet({kind:"skills",line:0}); else skillsRef.current?.focus(); } else { const proposed = s.bullets?.[0]; if (proposed) { setWriting({si:s.si,bi:0,text:proposed.text,issues:null,verbs:[],busy:false,error:""}); if (phone) setSheet({kind:"bullet",si:s.si,bi:0}); else editorRef.current?.querySelector(`[data-section="${s.si}"]`)?.scrollIntoView(); } } }).catch(e => setAiError(String(e.message))); }}>Edit</button></div></article>)}
@@ -621,7 +643,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     const s = t && (t.kind === "bullet" || t.kind === "section") ? sections[t.si] : undefined;
     return (
       <div className="rv-page rb-page rb-phone">
-        {header}{aiPanel}
+        {header}{aiPanel}{aiButton}
         {error && <p className="ar-error" role="alert">{error}</p>}
         {!loaded && !error && <div className="td-empty">Loading the resume…</div>}
         {loaded && <>
@@ -630,7 +652,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
           <div className="rb-ph-page">{livePreview}</div>
           <p className="rb-ph-hint">Tap any line to edit it.</p>
           <div className="rb-ph-bar">
-            {undoBtn}{aiButton}
+            {undoBtn}
             <button className="apps-btn" onClick={() => { setWriting(null); setPicker(null); setSheet({ kind: "menu" }); }} aria-label="More">⋯</button>
             {savedAt ? <span className="rb-saved">Saved ✓</span> : pdfStatus}
             {saveBtn}
@@ -678,7 +700,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
 
   return (
     <div className="rv-page rb-page">
-      {header}{aiPanel}
+      {header}{aiPanel}{aiButton}
       {error && <p className="ar-error" role="alert">{error}</p>}
       {!loaded && !error && <div className="td-empty">Loading the resume…</div>}
       {loaded && (
@@ -708,7 +730,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
                 <button role="tab" aria-selected={view === "live"} className={view === "live" ? "is-on" : ""} onClick={() => setView("live")}>Live</button>
                 <button role="tab" aria-selected={view === "pdf"} className={view === "pdf" ? "is-on" : ""} onClick={() => setView("pdf")}>PDF</button>
               </span>
-              {aiButton}{roomChip}
+              {roomChip}
               {savedAt ? <span className="rb-saved">Saved ✓</span> : pdfStatus}
               {draft?.jdMatch && <span className="rb-match" title={draft.jdMatch.missing.length ? `Still missing: ${draft.jdMatch.missing.join(", ")}` : "Every skill this job names is on it"}>JD {draft.jdMatch.before ?? "–"} → <b>{draft.jdMatch.after ?? "–"}</b></span>}
               <span className="rb-actions">

@@ -45,3 +45,20 @@ test('full original fixture JD reaches analysis without replacement or truncatio
  const out=await analyzeResume(db,{source:{jobUrl:'fixture'},sections,skills},{bank,load:async()=>({jd:'short fallback',source:{kind:'job',jobUrl:'fixture'},roles:sections}),generate:async({user})=>{captured=JSON.parse(user);return{subscores:{skills:80,experience:80,keywords:80,evidence:80},requirements:[],sectionChanges:[],skills_changes:{reason:'Keep current supported skills',groups:[]},atsProblems:[]};}});
  assert.equal(captured.jd,jd);assert.deepEqual(captured.resume.sections,sections);assert.deepEqual(out.analysis.optimized_resume.technicalSkills,skills);
 });
+
+test('general resumes can optimize without JD; version checks remain tied to original context',async()=>{
+ const {versionOf,recordAiDecision}=await import('../../scripts/resume-ai.mjs');let inserted;
+ const loaded={source:{kind:'track',track:'data-analyst'},jd:null,roles:sections};
+ const db={collection:name=>({findOne:async()=>name==='resume_ai_analysis'?inserted:null,insertOne:async doc=>{inserted=doc;},updateOne:async()=>{}})};
+ const out=await analyzeResume(db,{source:loaded.source,sections,skills,instruction:'Improve clarity'},{bank,load:async()=>loaded,generate:async({user})=>{const data=JSON.parse(user);assert.match(data.jd,/no target job/);assert.equal(data.userRequest,'Improve clarity');return{subscores:{skills:80,experience:80,keywords:80,evidence:80},requirements:[],sectionChanges:[],skills_changes:{reason:'Keep skills',groups:[]},atsProblems:[]};}});
+ assert.equal(out.analysis.general,true);assert.equal(out.analysis.jdVersion,versionOf(null));
+ inserted.suggestions=[{id:'test'}];assert.deepEqual(await recordAiDecision(db,{analysisId:inserted.id,suggestionId:'test',decision:'accepted',resumeVersion:inserted.resumeVersion},{load:async()=>loaded}),{ok:true});
+});
+test('resume questions return advice only and reject unknown citations',async()=>{
+ const loaded={source:{kind:'track',track:'data-analyst'},jd:null,roles:sections};let writes=0;
+ const db={collection:()=>({insertOne:async()=>writes++})};
+ const body={source:loaded.source,sections,skills,mode:'question',instruction:'What healthcare experience do I have?'};
+ const options={bank,load:async()=>loaded,generate:async()=>({answer:'Your Wake Forest role includes medical imaging.',evidence_source:[evidence.find(e=>e.role==='wake-forest').id]})};
+ const out=await analyzeResume(db,body,options);assert.match(out.analysis.answer,/Wake Forest/);assert.equal(writes,0);assert.equal(out.analysis.suggestions,undefined);
+ await assert.rejects(analyzeResume(db,body,{...options,generate:async()=>({answer:'Invented',evidence_source:['unknown']})}),/unknown evidence/);
+});

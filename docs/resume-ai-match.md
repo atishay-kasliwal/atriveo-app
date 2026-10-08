@@ -90,3 +90,9 @@ Deployed at the user's explicit request after the local-only review. The user se
 Authenticated background-job endpoints prevent long model calls from holding a Cloudflare request open. The Mac polls for inference work across a localhost-only SSH tunnel, sends structured results back, and the Oracle backend performs all evidence/content validation. Worker heartbeat and offline errors explain when the Mac is unavailable. Temporary job/request records have TTL indexes.
 
 The Mac worker and SSH relay are user LaunchAgents: com.atriveo.resume-ai-worker and com.atriveo.resume-ai-tunnel. They start at user login and restart after failures. Runtime scripts live in ~/.playatriveo/resume-ai-worker; relay configuration is stored in a mode-0600 file. Phones can use the live website while the Mac remains awake and connected. Normal laptop sleep or shutdown stops inference; the dashboard and existing resumes remain available.
+
+## Floating resume help
+
+The editor now has a fixed AI Help button on desktop and mobile, above the mobile Save bar. Improve resume works with general resumes as well as job-tailored resumes; an optional instruction steers evidence-based rewriting. Without a JD, the panel labels the result as resume improvements rather than a job-match score. Ask a question uses the current draft and approved evidence, returns advisory text, validates cited evidence IDs, and does not change or save resume content. Both paths reuse the subscription worker and background-job polling. General-resume decision checks use a null JD version rather than querying an undefined job URL.
+
+Validation: 28 optimizer/provider/editor tests pass, including a mobile general-resume question flow without decision or Save calls. Backend image: atriveo-dashboard:resume-ai-help-v2.

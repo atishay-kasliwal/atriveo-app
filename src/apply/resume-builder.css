@@ -280,3 +280,8 @@
 .rb-ai-diff > p { white-space: pre-wrap; }
 
 .rb-ai-provider { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }.rb-ai-provider select { background: var(--card-bg); color: var(--foreground); padding: 10px; border: 1px solid var(--border-col); border-radius: 8px; font: inherit; }
+
+.rb-ai-float { position: fixed; right: 24px; bottom: 24px; z-index: 45; display: flex; align-items: center; gap: 10px; padding: 14px 22px; min-height: 52px; border: 1px solid #79afff; border-radius: 999px; background: #246be8; color: white; font: inherit; font-weight: 650; cursor: pointer; box-shadow: 0 8px 30px #0005; }
+.rb-ai-float:hover { background: #185bd0; }.rb-ai-float:focus-visible { outline: 3px solid #b9d7ff; outline-offset: 4px; }.rb-ai-float span { font-size: 22px; }
+.rb-ai-help-tabs { display: flex; gap: 8px; }.rb-ai-prompt { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }.rb-ai-prompt textarea { min-height: 90px; resize: vertical; padding: 12px; background: var(--card-bg); color: inherit; border: 1px solid var(--border-col); border-radius: 10px; font: inherit; }.rb-ai-answer { white-space: pre-wrap; padding: 14px; border-radius: 10px; background: color-mix(in srgb, var(--primary) 10%, transparent); }
+@media (max-width: 900px) { .rb-ai-float { right: 16px; bottom: calc(84px + env(safe-area-inset-bottom)); padding: 12px 18px; }.rb-ai-panel { right: 8px; width: calc(100vw - 16px); } }
