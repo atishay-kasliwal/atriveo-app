@@ -10,7 +10,7 @@ import { readinessFor } from "./cli.mjs";
 import { scoreAts } from "./score.mjs";
 
 export function loadBank(dir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../data/ac-bank")) {
-  return fs.readdirSync(dir).filter((f) => /^AC-\d+\.yaml$/.test(f)).sort().flatMap((f) => {
+  return fs.readdirSync(dir).filter((f) => /^AC-U?\d+\.yaml$/.test(f)).sort().flatMap((f) => {
     try { return [yaml.load(fs.readFileSync(path.join(dir, f), "utf8"))]; } catch { return []; }
   });
 }

@@ -116,7 +116,7 @@ function checkAcBank() {
     bad("AC bank missing", bankDir, "sync accomplishments into data/ac-bank");
     return;
   }
-  const acFiles = fs.readdirSync(bankDir).filter((f) => /^AC-\d+\.yaml$/.test(f));
+  const acFiles = fs.readdirSync(bankDir).filter((f) => /^AC-U?\d+\.yaml$/.test(f));
   ok("AC bank present", `${acFiles.length} accomplishment file(s)`);
   if (acFiles.length < 30) {
     warn("Seed bank only", `${acFiles.length} ACs — sync full library for better beam diversity`, "copy ACs from Desktop/June/Resume claude/Memory/ACCOMPLISHMENTS");

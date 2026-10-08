@@ -127,8 +127,30 @@
 .rb-opt-meta .is-good { color: #22c55e; } .rb-opt-meta .is-warn { color: #fbbf24; }
 .rb-none { padding: 14px 12px; font-size: 13px; }
 
-/* Start screen */
-.rb-start { padding: 40px 20px; max-width: 760px; display: flex; flex-direction: column; gap: 12px; }
+/* Start screen: paste a job description, your resumes, the general ones. */
+.rb-start-page { overflow-y: auto; }
+.rb-start { padding: 32px 20px 60px; max-width: 860px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+.rb-start h1 { margin: 0; font-size: 24px; }
+.rb-start h2 { margin: 0 0 6px; font-size: 13px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); }
+.rb-start p { margin: 0 0 10px; font-size: 13px; }
+.rb-paste { display: flex; flex-direction: column; gap: 10px; padding: 18px; border: 1px solid var(--border-col); border-radius: 14px; background: var(--card-bg); }
+.rb-paste p { margin: 0; }
+.rb-paste textarea { font: inherit; font-size: 13.5px; line-height: 1.55; color: var(--foreground); background: none; border: 1px solid var(--border-col); border-radius: 10px; padding: 10px 12px; resize: vertical; outline: none; min-height: 140px; }
+.rb-paste textarea:focus, .rb-paste input:focus { border-color: var(--primary); }
+.rb-paste-fields { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 10px; }
+.rb-paste-fields label { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--muted-fg); }
+.rb-paste-fields input { font: inherit; font-size: 13.5px; color: var(--foreground); background: none; border: 1px solid var(--border-col); border-radius: 8px; padding: 7px 10px; outline: none; min-width: 0; }
+.rb-paste-acts { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12.5px; }
+.rb-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); }
+.rb-list li { display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
+.rb-list li + li { border-top: 1px solid color-mix(in oklab, var(--border-col) 70%, transparent); }
+.rb-list-main { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 10px; color: var(--foreground); text-decoration: none; }
+.rb-list-main span { font-size: 13px; color: var(--muted-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb-list-meta { font-size: 12px; color: var(--muted-fg); white-space: nowrap; }
+.rb-list-acts { display: flex; align-items: center; gap: 8px; }
+.rb-list-acts .apps-btn { height: 30px; padding: 0 12px; font-size: 12.5px; text-decoration: none; display: inline-flex; align-items: center; }
+.rb-back { margin-left: auto; font-size: 12.5px; color: var(--primary); text-decoration: none; } .rb-back:hover { text-decoration: underline; }
+@media (max-width: 700px) { .rb-paste-fields { grid-template-columns: 1fr; } .rb-list li { flex-wrap: wrap; } .rb-list-main { flex-basis: 100%; flex-direction: column; gap: 2px; } }
 .rb-tracks { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
 .rb-track { display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 12px; border: 1px solid var(--border-col); background: var(--card-bg); color: var(--foreground); text-decoration: none; font-weight: 650; }
 .rb-track span { font-size: 12px; font-weight: 400; color: var(--muted-fg); }

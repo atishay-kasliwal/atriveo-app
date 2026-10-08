@@ -12,7 +12,7 @@ Started 2026-10-08. Status: **Phase 1 built, plus writing your own bullets and t
 |---|---|---|
 | A Today card | **Edit** on the card (next to Resume) | The edited PDF becomes that job's resume: Fill, Easy Apply and the Resume button use it. **Revert to generated** undoes it. |
 | A track's general resume | Today → **Resumes** → Edit, or the **Resumes** tab → pick SWE / AI / Data Analyst / DS / FDE | Replaces that general resume (Today's Resumes menu serves it). The generated one is kept for **Revert**. |
-| A job description you paste | *Phase 2* | |
+| A job description you paste | **Resumes** → **Start from a job description**: paste the posting; company, role title and location fill in from the text (`guessPosting`; correct them if needed; the title is required, since it steers the track and prints in the header) → **Build resume** | Built by the same pipeline as Today's resumes (`tailorOneAc`: track, bank bullets, skills; a borderline fit still builds, an eligibility block is refused with its reason), about 10 seconds, then opens in the editor with JD match. Saving edits it in place (**Revert** keeps the built one). Listed under **Your resumes** (Edit / Download / Delete). **Standalone**: never a job, never on Today, never queued. |
 
 In the editor:
 
@@ -115,6 +115,8 @@ Today card / track ──► GET  /tailor/resume-builder/load      loadResume() 
 | A job's saved edit | `<generated run folder>/edits/<n>/Atishay Kasliwal.pdf` (+ `builder.json`, `resume.tex`); always under the generated run, never nested in another edit |
 | Which PDF a job uses | Mongo `jobs.resume.pdf_path` (all documents of that job URL); `resume.generated_pdf_path` = the generated one while an edit is in use; `resume.edited_at` |
 | Its applications | `applications.resume.path` follows the job (not for APPLIED/SUBMITTING ones); `resume.sha256` is cleared so the file is verified again before it's attached; a pinned choice (`extension.resumeChoice`) is cleared |
+| A pasted resume | `tailored-resumes/pasted/<id>/` (PDF + `composition.json` + `resume.tex`; after an edit `builder.json`, the built one in `generated/`); Mongo `builder_resumes` `{ _id: id, company, title, location, jd, edited, createdAt, updatedAt }`. Built in `pasted/.build/<id>/` (deleted after). |
+| Your bullets in git | `scripts/export-bank-overlay.mjs` (below) writes them into `data/ac-bank`: a new one as `AC-U001.yaml` (`provenance.level: USER_WRITTEN`), a reword into that variant's `text` with the old wording in `earlier_texts` (the builder accepts both, like the overlay's `previous`). Bank file names are `AC-<n>.yaml` or `AC-U<n>.yaml` (`loadBank`, role meta, doctor, match-cli). |
 | A track's edited general resume | `tailored-resumes/general/<Track>/` (PDF + `builder.json` + `resume.tex`); the generated one in `general/<Track>/generated/` |
 
 Edits are made on the Oracle server (the dashboard container). The resume sync copies new files to the Mac (`edits/`
@@ -125,6 +127,7 @@ folders are new files, so nothing is ever overwritten).
 | File | Role |
 |---|---|
 | `scripts/resume-builder.mjs` | load / render / save / revert, the checks, `checkText` / `saveBullet` / `freeVerbs` (your bullets), `GENERAL_RESUMES` (track → folder) |
+| `scripts/export-bank-overlay.mjs` | your bullets from Mongo into `data/ac-bank` YAML (then the lint, then you commit) |
 | `scripts/ac-bank-overlay.mjs` | your bullets: Mongo `bank_overlay` ↔ local copy, merged by `loadBank()` (`scripts/ac-bank.mjs`) |
 | `scripts/ac-bullet-rules.mjs` | the bullet rules, shared by `ac-bullet-lint.mjs` and the builder |
 | `scripts/tailor-worker.mjs` | refreshes your bullets (`syncOverlay`) before each build |
@@ -153,6 +156,8 @@ folders are new files, so nothing is ever overwritten).
 | 2026-10-08 | **Project tools lines, header email and location are editable** (user asked). The tools line stays automatic until you type in it. |
 | 2026-10-08 | **Live preview with Paged.js** (user asked), next to the compiled PDF. The PDF stays the one that's sent and that gates Save; making HTML the real renderer would be a separate decision. |
 | 2026-10-08 | **One screen**: header bar removed, its buttons moved into the preview toolbar; the page is scaled to fit whole; a "room for N more lines" chip (user asked). Room is measured on the Live preview, not the PDF. |
+| 2026-10-08 | **Pasted JD → resume, standalone** (user chose): not a job, so a hand-pasted posting never enters dedup, skip rules or the queue. Built fresh (the compile cache's copy lacks the composition the builder edits). |
+| 2026-10-08 | **Export bullets to git** as a script you run and commit, not automatic: the bank is truth-only and reviewed; the overlay keeps working until then. |
 | 2026-10-08 | **Editor polish + phone view** (user asked): controls on hover, picker with line counts, editor and page linked, undo, drag; phones edit by tapping the page (a sheet for typing: the page redraws on each change, which would drop the keyboard). The live preview squeezes its gaps when the PDF says "full", as TeX does. |
 | 2026-10-08 | **Employers' tools line** (user asked): optional, set per resume in the builder, on the company line (not the title line, for parsers); generated resumes unchanged. New macro `\resumeSubheadingTools` in `scripts/ac-tex.mjs`. |
 | 2026-10-08 | **Room measured on the compiled PDF** (exact, includes TeX's squeeze); the live estimate only fills in while compiling. |
@@ -164,8 +169,8 @@ folders are new files, so nothing is ever overwritten).
    add bank bullets, add or remove projects, project tools lines, title / email / location, skills; live preview;
    checks; save; revert.
 2. **Your words** (built 2026-10-08, pulled forward): this-resume-only edits, rewording for the bank, new bullets
-   saved to the bank, live rule checks with free-verb suggestions; Paged.js live preview. **Still to come:** paste a
-   job description to start a resume; a script that exports your bullets into `data/ac-bank` YAML for git.
+   saved to the bank, live rule checks with free-verb suggestions; Paged.js live preview; a resume from a pasted job
+   description (standalone); `scripts/export-bank-overlay.mjs` exports your bullets into `data/ac-bank` YAML for git.
 3. **Evaluation view** (below).
 
 ## Evaluation
@@ -189,6 +194,12 @@ folders are new files, so nothing is ever overwritten).
 - **A rule for bullets** (e.g. allow a repeated verb): bank rules in `scripts/ac-bullet-rules.mjs` (the lint uses
   them too); what the builder adds (bank-wide verb, per-resume checks) in `checkText()` / `validate()` in
   `scripts/resume-builder.mjs`.
+- **Export your bullets to git**: `node --env-file=.env.tailor --env-file=.env scripts/export-bank-overlay.mjs`
+  (`--dry-run` to see first). It writes the YAML, runs the bank lint on the result (git only) and prints the diff
+  stat; review with `git diff data/ac-bank`, then commit and deploy the bank as usual. Run it again any time: what's
+  in git already is skipped. `--prune` then deletes the overlay entries that are in git word for word (optional:
+  once in git, the overlay's copy changes nothing). A lint failure means a bullet breaks a bank rule that changed
+  since you saved it; fix the YAML before committing.
 - **Undo a bank reword**: delete its `bank_overlay` document (`AC-xxx:<facet>`); its `previous` field has the old
   wording. A new bullet: delete `AC-Uxxx` (resumes that use it keep their PDF; re-opening them in the builder flags it).
 - **How the Live tab looks**: the `CSS` in `src/apply/ResumeLivePreview.tsx` (sizes in pt, as in the LaTeX template).

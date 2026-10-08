@@ -11,6 +11,8 @@
 //   saveDraft    keeps a draft: a job gets <run dir>/edits/<n>/ and its resume (and its applications') point there;
 //                a track's general resume is replaced in place, the generated one kept in generated/
 //   revertJob    a job back to its generated resume
+//   startPasted  a resume from a job description you paste: the pipeline's own build (tailorOneAc), kept under
+//                OUT_ROOT/pasted/<id>/ and listed in Mongo builder_resumes; standalone (never a job, never on Today)
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
@@ -110,8 +112,103 @@ async function jobDoc(db, jobUrl) {
 }
 const jdOf = async (db, jobUrl) => (await db.collection("descriptions").findOne({ job_url: jobUrl }, { projection: { description: 1 } }))?.description ?? null;
 
+// ── Resumes from a pasted job description ─────────────────────────────────────────────────────────────────────
+
+export const PASTED_COLLECTION = "builder_resumes";
+const pastedDir = (id) => path.join(OUT_ROOT, "pasted", String(id).replace(/[^a-f0-9]/g, ""));
+/** A track's general resume or a pasted resume: both live in one folder, edits replace the PDF in place. */
+const folderOf = (source) => source.kind === "track" ? (GENERAL_RESUMES[source.track] ? path.join(OUT_ROOT, "general", GENERAL_RESUMES[source.track].folder) : null)
+  : source.kind === "pasted" ? pastedDir(source.pasted) : null;
+
+// A role as a posting's heading writes it: a capitalised role noun ("Senior Data Engineer", not "a full-stack engineer").
+const ROLE_WORDS = /\b(Engineer|Developer|Scientist|Analyst|Architect|Manager|Specialist|Consultant|Intern|Designer|Researcher|Administrator|Programmer)s?\b/;
+const NOT_A_NAME = /^(the|our|this|us|you|your|role|team|job|company|position|opportunity|we|it)$/i;
+const US_STATES = new Set("AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY".split(" "));
+const tidy = (v, n) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, n);
+
+/** Company, role title and location as the posting's text gives them (a first guess you can correct). */
+export function guessPosting(jd) {
+  // Plain text: no HTML tags, no Markdown escapes ("Software Engineer\-React").
+  const text = String(jd || "").replace(/\r/g, "").replace(/<\/(p|div|li|h\d)>|<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/\\([-+()#*_.!\[\]|\\])/g, "$1");
+  const lines = text.split("\n").map((l) => l.replace(/^[#*\s-]+|[*\s]+$/g, "").trim()).filter(Boolean).slice(0, 60);
+  const label = (re) => { for (const l of lines) { const m = l.match(re); if (m?.[1]?.trim()) return m[1].trim(); } return ""; };
+  let title = label(/^(?:job\s*title|title|position|role(?:\s*name)?|job)\s*[:\-–]\s*(.{3,90})$/i);
+  // The first short line naming a role, that isn't a requirement ("4+ years of software engineering…") or a sentence.
+  if (!title) title = lines.find((l) => l.length <= 90 && l.split(/\s+/).length <= 12 && ROLE_WORDS.test(l) && !/[:.?!]$/.test(l)
+    && !/^[\d\\(+]/.test(l) && !/https?:|www\./i.test(l) && !/\b(years?|experience|degree|you|we|our|will|with|ability|skills?|interview|compensation|salary|benefits|description|pay)\b/i.test(l) && /^[A-Z]/.test(l) && !/^(about|as a|in this|the|a|an|track \d)\b/i.test(l)) ?? "";
+  title = title.replace(/\s+(?:at|@)\s+.+$/i, "").replace(/\s*[|(].*$/, "").replace(/[\\\s]+$/, "").trim();
+  let company = label(/^(?:company|employer|organization)\s*[:\-–]\s*(.{2,60})$/i);
+  // A name: capitalised words on one line ("Amazon Web Services", "Bank of America").
+  const name = "([A-Z][\\w&.'’-]*(?:[ \\t]+(?:[A-Z][\\w&.'’-]*|of|and|&)){0,4})";
+  const patterns = [
+    [new RegExp(`${name}[ \\t]+(?:is|are)[ \\t]+(?:an|a|proud to be an?)[ \\t]+equal[ \\t]+(?:opportunity|employment)`), text], // most postings end with this
+    [new RegExp(`\\bAbout[ \\t]+${name}`), text.slice(0, 6000)],
+    [new RegExp(`\\b(?:[Aa]t|[Jj]oin|[Ww]elcome to|[Ww]hy)[ \\t]+${name}[,.!?]`), text.slice(0, 6000)],
+    [new RegExp(`(?:^|\\n)${name}[ \\t]+is[ \\t]+(?:a|an|the|hiring)\\b`), text.slice(0, 6000)],
+  ];
+  for (const [re, hay] of patterns) {
+    if (company) break;
+    const m = hay.match(re);
+    const c = m?.[1]?.replace(/\s+(?:and|of|&)$/i, "").trim();
+    if (c && !NOT_A_NAME.test(c.split(/\s+/)[0])) company = c;
+  }
+  let location = label(/^(?:location|locations|office|based in)\s*[:\-–]\s*(.{2,60})$/i);
+  if (!location) {
+    for (const m of text.slice(0, 6000).matchAll(/\b([A-Z][a-zA-Z.]+(?:[ \t][A-Z][a-zA-Z.]+){0,2}),[ \t]?([A-Z]{2})\b/g)) if (US_STATES.has(m[2]) && !/^(USA?|United States)$/i.test(m[1])) { location = `${m[1]}, ${m[2]}`; break; }
+  }
+  if (!location && /\bremote\b/i.test(text.slice(0, 3000))) location = "Remote";
+  location = location.replace(/\s*\(.*$/, "").replace(/\s+\d{5}(?:-\d{4})?\b.*$/, "");
+  return { company: tidy(company, 60), title: tidy(title, 90), location: tidy(location, 60) };
+}
+
+/** Build a resume for a pasted job description; returns { source } to open in the builder. */
+export async function startPasted(db, { jd, company = "", title = "", location = "" } = {}) {
+  const text = String(jd || "").replace(/\r/g, "").trim().slice(0, 30_000);
+  if (text.length < 300) throw new BuilderError("Paste the whole job description: a few paragraphs at least.");
+  const g = guessPosting(text);
+  // The title steers the track and prints in the header, so it's never made up.
+  const posting = { company: tidy(company, 60) || g.company || "Pasted job", title: tidy(title, 90) || g.title, location: tidy(location, 60) || g.location || null };
+  if (!posting.title) throw new BuilderError("Add the role title (the posting's text doesn't say it).");
+  await syncOverlay(db);
+  const id = crypto.randomBytes(5).toString("hex");
+  // Its own build folder, built fresh: a cached compile is copied in without the composition the builder edits.
+  const buildDir = path.join(OUT_ROOT, "pasted", ".build", id);
+  fs.mkdirSync(buildDir, { recursive: true });
+  // The pipeline that builds Today's resumes: track, bullets and skills chosen for this posting. You chose it, so a
+  // borderline fit still builds; a posting you can't apply to (eligibility) is refused with its reason.
+  const { tailorOneAc } = await import("./tailor-ac.mjs");
+  const result = await tailorOneAc({ ...posting, job_url: `pasted:${id}`, jd: text, force_borderline: true }, 1, buildDir, { sendPhase: () => {}, log: () => {} }, { planner: "v2", forceRecompile: true });
+  try {
+    if (result.status !== "ok" || !result.pdfPath || !fs.existsSync(result.pdfPath)) throw new BuilderError(result.error ? `Couldn't build it: ${result.error}` : `Couldn't build it (${result.status}).`);
+    const dir = pastedDir(id);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.copyFileSync(result.pdfPath, path.join(dir, PDF));
+    for (const f of ["composition.json", "resume.tex"]) fs.copyFileSync(path.join(path.dirname(result.pdfPath), f), path.join(dir, f));
+  } finally {
+    fs.rmSync(buildDir, { recursive: true, force: true });
+  }
+  const at = new Date().toISOString();
+  await db.collection(PASTED_COLLECTION).insertOne({ _id: id, ...posting, jd: text, edited: false, createdAt: at, updatedAt: at });
+  return { ok: true, source: { kind: "pasted", pasted: id, company: posting.company, title: posting.title, location: posting.location } };
+}
+
+/** Your pasted resumes, newest first. */
+export async function listPasted(db) {
+  const docs = await db.collection(PASTED_COLLECTION).find({}, { projection: { jd: 0 } }).sort({ createdAt: -1 }).limit(50).toArray();
+  return { ok: true, resumes: docs.map((d) => ({ id: d._id, company: d.company, title: d.title, location: d.location ?? null, edited: Boolean(d.edited), createdAt: d.createdAt, updatedAt: d.updatedAt, pdfPath: fs.existsSync(path.join(pastedDir(d._id), PDF)) ? path.join(pastedDir(d._id), PDF) : null })) };
+}
+
+/** Delete a pasted resume (its record and its folder). */
+export async function deletePasted(db, id) {
+  const dir = pastedDir(id);
+  if (!String(id || "").match(/^[a-f0-9]{10}$/)) throw new BuilderError("Unknown resume");
+  await db.collection(PASTED_COLLECTION).deleteOne({ _id: id });
+  fs.rmSync(dir, { recursive: true, force: true });
+  return { ok: true };
+}
+
 /** What the builder opens: { source, headerTitle, skills, sections, options, roles, current, jd }. */
-export async function loadResume(db, { jobUrl = null, track = null, appId = null } = {}) {
+export async function loadResume(db, { jobUrl = null, track = null, appId = null, pasted = null } = {}) {
   if (db) await syncOverlay(db);
   // An application (a Today card) edits the resume of its job: the first of its job URLs that has one.
   if (!jobUrl && appId) {
@@ -129,11 +226,18 @@ export async function loadResume(db, { jobUrl = null, track = null, appId = null
     generated = doc.resume.generated_pdf_path ?? null;
     source = { kind: "job", jobUrl, company: doc.company ?? "", title: doc.title ?? "", location: doc.location ?? null };
     jd = await jdOf(db, jobUrl);
+  } else if (pasted) {
+    const doc = await db.collection(PASTED_COLLECTION).findOne({ _id: String(pasted) });
+    if (!doc) throw new BuilderError("That resume was deleted.");
+    dir = pastedDir(doc._id);
+    generated = fs.existsSync(path.join(dir, "generated", PDF)) ? path.join(dir, "generated", PDF) : null;
+    source = { kind: "pasted", pasted: doc._id, company: doc.company ?? "", title: doc.title ?? "", location: doc.location ?? null };
+    jd = doc.jd ?? null;
   } else if (track && GENERAL_RESUMES[track]) {
     dir = path.join(OUT_ROOT, "general", GENERAL_RESUMES[track].folder);
     generated = fs.existsSync(path.join(dir, "generated", PDF)) ? path.join(dir, "generated", PDF) : null;
     source = { kind: "track", track, company: "", title: GENERAL_RESUMES[track].title, location: null };
-  } else throw new BuilderError("Open a job's resume or a track's general resume.");
+  } else throw new BuilderError("Open a job's resume, a track's general resume or a pasted one.");
   if (!fs.existsSync(path.join(dir, PDF))) throw new BuilderError("The resume file isn't on this server yet.");
   const c = compositionAt(dir);
   const kinds = roleKind(bank);
@@ -287,7 +391,8 @@ function validate(edit, bank) {
       const ac = byId.get(b.ac_id);
       if (!ac) { problems.push(`${b.ac_id} isn't in the bank`); continue; }
       if (ac.role !== s.role) problems.push(`${b.ac_id} belongs to ${labelOf(ac.role)}, not ${labelOf(s.role)}`);
-      const versions = [...(ac.variants || []).map((v) => String(v.text).replace(/\s+/g, " ").trim()), ...(earlier.get(b.ac_id) ?? [])];
+      // Earlier wordings: in the overlay (previous) or, once exported to git, the variant's earlier_texts.
+      const versions = [...(ac.variants || []).flatMap((v) => [v.text, ...(v.earlier_texts ?? [])]).map((t) => String(t).replace(/\s+/g, " ").trim()), ...(earlier.get(b.ac_id) ?? [])];
       if (!versions.includes(b.text.trim())) problems.push(`${b.ac_id}'s text isn't one of its bank versions`);
       const verb = openingVerb(b.text);
       if (seen.has(verb)) problems.push(`"${verb}" opens two bullets (${seen.get(verb)} and ${b.ac_id})`);
@@ -391,15 +496,15 @@ export async function saveDraft(db, { source, draftId }) {
     await pointJobAt(db, source.jobUrl, pdfPath, generated);
     return { ok: true, pdfPath };
   }
-  const g = GENERAL_RESUMES[source.track];
-  if (!g) throw new BuilderError("Unknown track");
-  const dir = path.join(OUT_ROOT, "general", g.folder);
+  const dir = folderOf(source);
+  if (!dir) throw new BuilderError("Unknown resume");
   // The first edit keeps the generated resume in generated/ (Revert puts it back).
   if (!fs.existsSync(path.join(dir, "generated", PDF))) {
     fs.mkdirSync(path.join(dir, "generated"), { recursive: true });
     for (const f of [PDF, "composition.json", "resume.tex"]) if (fs.existsSync(path.join(dir, f))) fs.copyFileSync(path.join(dir, f), path.join(dir, "generated", f));
   }
   for (const f of [PDF, EDIT_FILE, "resume.tex"]) fs.copyFileSync(path.join(draft, f), path.join(dir, f));
+  if (source.kind === "pasted") await db.collection(PASTED_COLLECTION).updateOne({ _id: source.pasted }, { $set: { edited: true, updatedAt: new Date().toISOString() } });
   return { ok: true, pdfPath: path.join(dir, PDF) };
 }
 
@@ -412,11 +517,11 @@ export async function revertResume(db, source) {
     await pointJobAt(db, source.jobUrl, generated, null);
     return { ok: true, pdfPath: generated };
   }
-  const g = GENERAL_RESUMES[source.track];
-  const dir = g && path.join(OUT_ROOT, "general", g.folder);
+  const dir = folderOf(source);
   if (!dir || !fs.existsSync(path.join(dir, "generated", PDF))) throw new BuilderError("No generated resume to go back to.");
   for (const f of [PDF, "composition.json", "resume.tex"]) if (fs.existsSync(path.join(dir, "generated", f))) fs.copyFileSync(path.join(dir, "generated", f), path.join(dir, f));
   fs.rmSync(path.join(dir, EDIT_FILE), { force: true });
   fs.rmSync(path.join(dir, "generated"), { recursive: true, force: true });
+  if (source.kind === "pasted") await db.collection(PASTED_COLLECTION).updateOne({ _id: source.pasted }, { $set: { edited: false, updatedAt: new Date().toISOString() } });
   return { ok: true, pdfPath: path.join(dir, PDF) };
 }

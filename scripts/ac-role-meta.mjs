@@ -135,7 +135,7 @@ function readRoleYamlDates(bankDir = resolveBankDir()) {
   const byEmployer = {};
   const bySlug = {};
   for (const file of fs.readdirSync(bankDir)) {
-    if (!file.endsWith(".yaml") || /^AC-\d+\.yaml$/.test(file)) continue;
+    if (!file.endsWith(".yaml") || /^AC-U?\d+\.yaml$/.test(file)) continue;
     let doc;
     try {
       doc = yaml.load(fs.readFileSync(path.join(bankDir, file), "utf8"));

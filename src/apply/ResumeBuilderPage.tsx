@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { getTailorServerBase } from "../utils/tailorServer";
 import { TRACK_LABEL } from "./tracks";
 import ResumeLivePreview, { sbTitle, type Layout, type LiveFit, type PageTarget } from "./ResumeLivePreview";
@@ -16,7 +16,10 @@ interface Bullet { ac_id: string; facet: string | null; text: string; custom?: b
 /** The tools line after the name ("Atriveo | FastAPI, Docker…"): stack = yours. null: a project's is picked from its
  *  bullets (stackAuto); an employer prints none, and stackAuto is only offered as a suggestion. */
 interface Section { role: string; kind: "experience" | "project"; label: string; bullets: Bullet[]; stack?: string[] | null; stackAuto?: string[] }
-type Source = { kind: "job"; jobUrl: string; company: string; title: string; location: string | null } | { kind: "track"; track: string; company: string; title: string; location: null };
+type Source = { kind: "job"; jobUrl: string; company: string; title: string; location: string | null } | { kind: "track"; track: string; company: string; title: string; location: null }
+  | { kind: "pasted"; pasted: string; company: string; title: string; location: string | null };
+/** A resume built from a job description you pasted (standalone: not a job, not on Today). */
+interface Pasted { id: string; company: string; title: string; location: string | null; edited: boolean; createdAt: string; updatedAt: string; pdfPath: string | null }
 interface Loaded {
   source: Source; headerTitle: string | null; email: string; city: string; skills: string[]; sections: Section[];
   options: Record<string, Bullet[]>; roles: Array<{ role: string; kind: "experience" | "project"; label: string }>;
@@ -44,6 +47,81 @@ const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
 /** The bullet's text with its opening verb set apart (the verb is what the rules and a reader look at first). */
 const Text = ({ t }: { t: string }) => { const m = t.match(/^(\s*[A-Za-z]+)(.*)$/s); return m ? <><b className="rb-verb">{m[1]}</b>{m[2]}</> : <>{t}</>; };
 
+const when = (iso: string) => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString(undefined, { month: "short", day: "numeric" }); };
+
+/** The start screen: paste a job description to build a resume for it, your pasted resumes, the general ones. */
+function StartScreen() {
+  const navigate = useNavigate();
+  const [jd, setJd] = useState("");
+  const [fields, setFields] = useState({ company: "", title: "", location: "" });
+  const [touched, setTouched] = useState<Set<string>>(new Set());
+  const [building, setBuilding] = useState(false);
+  const [error, setError] = useState("");
+  const [list, setList] = useState<Pasted[] | null>(null);
+  const refresh = useCallback(() => { call<{ resumes: Pasted[] }>("pasted").then((r) => setList(r.resumes), () => setList([])); }, []);
+  useEffect(() => { refresh(); }, [refresh]);
+  // A first guess at company, title and location from the text; never over what you typed.
+  useEffect(() => {
+    if (jd.trim().length < 80) return;
+    const t = setTimeout(() => {
+      call<{ company: string; title: string; location: string }>("guess", { jd }).then((g) => setFields((f) => ({
+        company: touched.has("company") ? f.company : g.company, title: touched.has("title") ? f.title : g.title, location: touched.has("location") ? f.location : g.location,
+      })), () => {});
+    }, 400);
+    return () => clearTimeout(t);
+  }, [jd]); // eslint-disable-line react-hooks/exhaustive-deps
+  const set = (k: keyof typeof fields, v: string) => { setFields((f) => ({ ...f, [k]: v })); setTouched((t) => new Set(t).add(k)); };
+  const tooShort = jd.trim().length < 300;
+  const build = async () => {
+    setBuilding(true); setError("");
+    try { const r = await call<{ source: { pasted: string } }>("start", { jd, ...fields }); navigate(`/resume_builder?pasted=${r.source.pasted}`); }
+    catch (e) { setError(e instanceof Error ? e.message : String(e)); setBuilding(false); }
+  };
+  const remove = async (p: Pasted) => {
+    if (!window.confirm(`Delete the ${p.company} resume? This can't be undone.`)) return;
+    try { await call("delete", { id: p.id }); refresh(); } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+  };
+  return (
+    <div className="rb-start">
+      <h1>Resume builder</h1>
+      <section className="rb-paste" aria-label="Start from a job description">
+        <h2>Start from a job description</h2>
+        <p className="apps-muted">Paste the posting. Your resume is built the way Today's are (track, bullets from your bank, skills), then opens here to edit. It stays here: it isn't added to Today.</p>
+        <textarea rows={8} value={jd} disabled={building} placeholder="Paste the whole job description: title, company, responsibilities, requirements…" onChange={(e) => setJd(e.target.value)} />
+        <div className="rb-paste-fields">
+          <label><span>Company</span><input value={fields.company} disabled={building} placeholder="From the text" onChange={(e) => set("company", e.target.value)} /></label>
+          <label><span>Role title</span><input value={fields.title} disabled={building} placeholder="Needed if the text doesn't say it" onChange={(e) => set("title", e.target.value)} /></label>
+          <label><span>Location</span><input value={fields.location} disabled={building} placeholder="City, ST (optional)" onChange={(e) => set("location", e.target.value)} /></label>
+        </div>
+        <div className="rb-paste-acts">
+          <button className="rv-primary" disabled={building || tooShort || !fields.title.trim()} onClick={() => void build()}>{building ? "Building your resume…" : "Build resume"}</button>
+          <span className="apps-muted">{building ? "Choosing bullets and compiling: usually under half a minute." : tooShort && jd.trim() ? "A few paragraphs at least." : !fields.title.trim() && !tooShort ? "Add the role title." : ""}</span>
+        </div>
+        {error && <p className="td-error" role="alert">{error}</p>}
+      </section>
+      {list && list.length > 0 && <section aria-label="Your resumes">
+        <h2>Your resumes</h2>
+        <ul className="rb-list">{list.map((p) => (
+          <li key={p.id}>
+            <Link to={`/resume_builder?pasted=${p.id}`} className="rb-list-main"><b>{p.company}</b><span>{p.title}{p.location ? ` · ${p.location}` : ""}</span></Link>
+            <span className="rb-list-meta">{when(p.updatedAt || p.createdAt)}{p.edited ? " · edited" : ""}</span>
+            <span className="rb-list-acts">
+              <Link className="apps-btn" to={`/resume_builder?pasted=${p.id}`}>Edit</Link>
+              {p.pdfPath && <a className="apps-btn" href={pdfUrl(p.pdfPath, true)}>Download</a>}
+              <button className="apps-link rb-del" onClick={() => void remove(p)}>Delete</button>
+            </span>
+          </li>
+        ))}</ul>
+      </section>}
+      <section aria-label="General resumes">
+        <h2>General resumes</h2>
+        <p className="apps-muted">Or edit a track's general resume (a Today card's resume opens from the card: Resume → Edit).</p>
+        <div className="rb-tracks">{GENERAL.map((t) => <Link key={t} className={`rb-track tr-${t}`} to={`/resume_builder?track=${t}`}><i />{TRACK_LABEL[t]}<span>General resume</span></Link>)}</div>
+      </section>
+    </div>
+  );
+}
+
 function useMedia(q: string) {
   const [on, setOn] = useState(() => typeof window !== "undefined" && window.matchMedia(q).matches);
   useEffect(() => { const m = window.matchMedia(q); const f = () => setOn(m.matches); m.addEventListener("change", f); return () => m.removeEventListener("change", f); }, [q]);
@@ -52,7 +130,7 @@ function useMedia(q: string) {
 
 export default function ResumeBuilderPage({ header }: { header?: React.ReactNode }) {
   const [params] = useSearchParams();
-  const query = params.get("app") ? `app=${encodeURIComponent(params.get("app")!)}` : params.get("job") ? `job=${encodeURIComponent(params.get("job")!)}` : params.get("track") ? `track=${encodeURIComponent(params.get("track")!)}` : null;
+  const query = ["app", "job", "track", "pasted"].map((k) => params.get(k) ? `${k}=${encodeURIComponent(params.get(k)!)}` : null).find(Boolean) ?? null;
   const phone = useMedia("(max-width: 900px)");
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [error, setError] = useState("");
@@ -268,16 +346,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   };
 
   if (!query) {
-    return (
-      <div className="rv-page rb-page">{header}
-        <div className="rb-start">
-          <h1>Resume builder</h1>
-          <p className="apps-muted">Change a resume's bullets, title and skills; the template stays the same. Open one from a Today card (Resume → Edit), or edit a track's general resume:</p>
-          <div className="rb-tracks">{GENERAL.map((t) => <Link key={t} className={`rb-track tr-${t}`} to={`/resume_builder?track=${t}`}><i />{TRACK_LABEL[t]}<span>General resume</span></Link>)}</div>
-          <p className="apps-muted rb-soon">Coming next: start from a job description you paste.</p>
-        </div>
-      </div>
-    );
+    return <div className="rv-page rb-page rb-start-page">{header}<StartScreen /></div>;
   }
 
   const preview = draft?.pdfPath || loaded?.current.pdfPath || null;
@@ -295,7 +364,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   if (pdfRoom) squeezeRef.current = pdfRoom.pages === 1 && pdfRoom.lines <= 0;
   const roomChip = <span className={`rb-pages ${room ? `is-${room.tone}` : ""}`} title={pdfRoom ? "Measured on the compiled PDF. A line is one line of a bullet; most bullets are two." : "Estimated on the live preview (~) until the PDF compiles. A line is one line of a bullet; most bullets are two."}><i />{room ? room.label : "Measuring…"}</span>;
   const projects = (loaded?.roles ?? []).filter((r) => r.kind === "project" && !sections.some((s) => s.role === r.role));
-  const resumeName = loaded ? (loaded.source.kind === "job" ? loaded.source.company : `${TRACK_LABEL[loaded.source.track] ?? loaded.source.track} general resume`) : "";
+  const resumeName = !loaded ? "" : loaded.source.kind === "track" ? `${TRACK_LABEL[loaded.source.track] ?? loaded.source.track} general resume` : loaded.source.company;
   const metaOf = (s: Section) => {
     const L = loaded!.layout;
     if (s.kind === "project") return (L.projects[s.role]?.dates ?? "").replace(/--/g, "–");
@@ -540,7 +609,8 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
           <section className="rb-editor" aria-label="Resume content" ref={editorRef}>
             <div className="rb-which">
               <b>{resumeName}</b>
-              <span>{loaded.source.kind === "job" ? loaded.source.title : "Not tailored to a job"}{loaded.current.edited ? " · edited" : " · generated"}</span>
+              <span>{loaded.source.kind === "track" ? "Not tailored to a job" : loaded.source.title}{loaded.source.kind === "pasted" ? " · from a pasted job description" : ""}{loaded.current.edited ? " · edited" : " · generated"}</span>
+              <Link className="rb-back" to="/resume_builder">All resumes</Link>
             </div>
             {headerFields}
             <h3 className="rb-group">Experience</h3>

@@ -55,7 +55,7 @@ const GENERIC_ATS_WORDS = new Set([
 export function loadBank(dir = BANK_DIR) {
   const bankDir = dir || resolveBankDir();
   const gitAcs = fs.readdirSync(bankDir)
-    .filter((f) => /^AC-\d+\.yaml$/.test(f))
+    .filter((f) => /^AC-U?\d+\.yaml$/.test(f))
     .map((f) => yaml.load(fs.readFileSync(path.join(bankDir, f), "utf8")))
     .filter(Boolean);
   // Bullets you wrote or reworded in the resume builder (ac-bank-overlay.mjs), on the real bank only.
