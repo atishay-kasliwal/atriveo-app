@@ -96,3 +96,9 @@ The Mac worker and SSH relay are user LaunchAgents: com.atriveo.resume-ai-worker
 The editor now has a fixed AI Help button on desktop and mobile, above the mobile Save bar. Improve resume works with general resumes as well as job-tailored resumes; an optional instruction steers evidence-based rewriting. Without a JD, the panel labels the result as resume improvements rather than a job-match score. Ask a question uses the current draft and approved evidence, returns advisory text, validates cited evidence IDs, and does not change or save resume content. Both paths reuse the subscription worker and background-job polling. General-resume decision checks use a null JD version rather than querying an undefined job URL.
 
 Validation: 28 optimizer/provider/editor tests pass, including a mobile general-resume question flow without decision or Save calls. Backend image: atriveo-dashboard:resume-ai-help-v2.
+
+## Dashboard AI usage
+
+The header displays Codex allowance remaining; its panel includes provider windows and reset times from the official Codex app-server account/rateLimits/read method. The Mac refreshes this read every minute and after inference; the browser refreshes every 30 seconds. Stale/offline values are identified. No OAuth secrets leave the CLI. Claude allowance is not exposed by this connection, so its panel links to claude.ai/settings/usage.
+
+AI Help passes a per-tab session ID. The worker extracts measured token counts from Claude result usage and Codex turn.completed JSON events, separately from structured resume content. Completion records are idempotently upserted by inference ID and expire after 30 days. Claude cache input is included in input totals; Codex cached input is already part of input and is not added again. Session tokens cover measured completed calls after tracking was added, not other apps/devices or the remaining subscription allowance. The panel does not display API dollar estimates for subscription calls.

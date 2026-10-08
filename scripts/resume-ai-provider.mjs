@@ -13,7 +13,7 @@ export function cliEnvironment(input=process.env) {
 }
 export function commandFor(provider,{schemaFile,resultFile,schema,system}) {
   if(provider==='claude')return {command:'claude',args:['--print','--output-format','json','--json-schema',JSON.stringify(schema),'--system-prompt',system,'--tools','','--disable-slash-commands','--strict-mcp-config','--mcp-config','{"mcpServers":{}}','--setting-sources','','--no-session-persistence','--permission-mode','dontAsk']};
-  if(provider==='codex')return {command:'codex',args:['exec','--ignore-user-config','--ignore-rules','--ephemeral','--skip-git-repo-check','--sandbox','read-only','-c','approval_policy="never"','-c','features.shell_tool=false','--output-schema',schemaFile,'--output-last-message',resultFile,'-']};
+  if(provider==='codex')return {command:'codex',args:['exec','--json','--ignore-user-config','--ignore-rules','--ephemeral','--skip-git-repo-check','--sandbox','read-only','-c','approval_policy="never"','-c','features.shell_tool=false','--output-schema',schemaFile,'--output-last-message',resultFile,'-']};
   throw Error('Choose Claude, Codex, or Claude + Codex');
 }
 async function run(command,args,{cwd,input,timeoutMs=180000}) {
@@ -28,7 +28,7 @@ async function run(command,args,{cwd,input,timeoutMs=180000}) {
     child.stdin.on('error',()=>{});child.stdin.end(input);
   });
 }
-export async function subscriptionGenerate(provider, request, {runner=run}={}) {
+export async function subscriptionGenerate(provider, request, {runner=run,onUsage=()=>{}}={}) {
   const selected=provider==='claude-codex'?(request.purpose==='verify'?'codex':'claude'):provider;
   if(!AI_PROVIDERS.includes(provider))throw Error('Unknown AI provider');
   const dir=await fs.mkdtemp(path.join(os.tmpdir(),'atriveo-resume-ai-'));
@@ -38,9 +38,10 @@ export async function subscriptionGenerate(provider, request, {runner=run}={}) {
     const c=commandFor(selected,{schemaFile,resultFile,schema:request.schema,system:request.system});
     const input=selected==='claude'?request.user:`${request.system}\nReturn only the required structured JSON. Do not use tools, browse, inspect files, or modify anything.\nINPUT DATA\n${request.user}`;
     const stdout=await runner(c.command,c.args,{cwd:dir,input});
-    if(selected==='codex')return JSON.parse(await fs.readFile(resultFile,'utf8'));
+    if(selected==='codex'){for(const line of stdout.split('\n')){try{const event=JSON.parse(line);if(event.type==='turn.completed'&&event.usage)onUsage(selected,event.usage);}catch{}}return JSON.parse(await fs.readFile(resultFile,'utf8'));}
     const data=JSON.parse(stdout);
     if(data.is_error)throw Error('Claude subscription request failed. Check usage and retry.');
+    if(data.usage)onUsage(selected,data.usage);
     if(data.structured_output)return data.structured_output;
     throw Error('Claude did not return structured content. Retry the request.');
   }finally{await fs.rm(dir,{recursive:true,force:true});}

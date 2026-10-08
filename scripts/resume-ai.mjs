@@ -52,6 +52,7 @@ export async function analyzeResume(db, body, { generate, load=loadResume, bank=
   const provider=body.provider||process.env.RESUME_AI_PROVIDER||"claude";
   if(!AI_PROVIDERS.includes(provider))throw new BuilderError("Choose Claude, Codex, or Claude + Codex");
   generate=generate||((request)=>process.env.RESUME_AI_REMOTE_WORKER === "mac" ? queueInference(db,provider,request) : subscriptionGenerate(provider,request));
+  const baseGenerate=generate;generate=request=>baseGenerate({...request,sessionId:typeof body.sessionId==='string'?body.sessionId.slice(0,100):''});
   const source=body.source||{};
   const loaded=await load(db,{jobUrl:source.jobUrl,track:source.track,pasted:source.pasted});
   const fullJd=loaded.source.kind==='pasted'?(await db.collection('builder_resumes').findOne({_id:loaded.source.pasted}))?.jd:loaded.source.kind==='job'?(await db.collection('descriptions').findOne({job_url:loaded.source.jobUrl}))?.description:null;

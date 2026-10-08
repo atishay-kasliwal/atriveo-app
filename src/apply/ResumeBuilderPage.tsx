@@ -1,3 +1,4 @@
+import {aiUsageSession} from './AiUsage';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { getTailorServerBase } from "../utils/tailorServer";
@@ -281,7 +282,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     const generation = ++aiGeneration.current;
     setAiOpen(true); setAiBusy(true); setAiError("");
     try {
-      let r = await call<{analysis?: AiAnalysis; jobId?: string}>("ai-match", { source: loaded.source, provider: aiProvider, instruction: aiInstruction, sections: x, headerTitle: title, skills: skillInput.split("\n") });
+      let r = await call<{analysis?: AiAnalysis; jobId?: string}>("ai-match", { sessionId:aiUsageSession(), source: loaded.source, provider: aiProvider, instruction: aiInstruction, sections: x, headerTitle: title, skills: skillInput.split("\n") });
       while (!r.analysis && r.jobId) {
         await new Promise(resolve => setTimeout(resolve,2500));
         if (generation !== aiGeneration.current) return;
@@ -300,7 +301,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     const generation = ++aiGeneration.current;
     setAiBusy(true); setAiError(""); setAiAnswer("");
     try {
-      const request = await call<{jobId:string}>("ai-match", {source:loaded.source, provider:aiProvider, mode:"question", instruction:aiInstruction, sections, headerTitle:title, skills:skills.split("\n")});
+      const request = await call<{jobId:string}>("ai-match", {sessionId:aiUsageSession(), source:loaded.source, provider:aiProvider, mode:"question", instruction:aiInstruction, sections, headerTitle:title, skills:skills.split("\n")});
       while (generation === aiGeneration.current) {
         await new Promise(resolve=>setTimeout(resolve,2500));
         const result=await call<{status:string;analysis?:{answer:string};error?:string}>("ai-result",{jobId:request.jobId});

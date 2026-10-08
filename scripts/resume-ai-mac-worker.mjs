@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { subscriptionGenerate } from './resume-ai-provider.mjs';
+import {normalizeUsage,readCodexLimits} from './resume-ai-usage.mjs';
+let codexLimits=null,lastLimits=0;
 const config=JSON.parse(fs.readFileSync(path.join(os.homedir(),'.playatriveo','resume-ai-worker.json'),'utf8'));
 let stopped=false;process.on('SIGTERM',()=>stopped=true);process.on('SIGINT',()=>stopped=true);
 async function call(op,body={}) {
@@ -11,12 +13,14 @@ async function call(op,body={}) {
 console.log('Mac subscription AI worker started.');
 while(!stopped){
   try {
-    const {job}=await call('ai-worker-claim');
+    if(Date.now()-lastLimits>60000){lastLimits=Date.now();try{codexLimits=await readCodexLimits();}catch{}}
+    const {job}=await call('ai-worker-claim',{codexLimits});
     if(job){
-      let completion;
+      let completion;const usage=[];
       const heartbeat=setInterval(()=>void call('ai-worker-claim',{heartbeatOnly:true}).catch(()=>{}),15000);
-      try{completion={id:job.id,result:await subscriptionGenerate(job.provider,job.request)};}catch(e){completion={id:job.id,error:e.message};}finally{clearInterval(heartbeat);}
-      await call('ai-worker-complete',completion);
+      try{completion={id:job.id,result:await subscriptionGenerate(job.provider,job.request,{onUsage:(provider,data)=>{const item=normalizeUsage(provider,data);if(item)usage.push(item);}})};}catch(e){completion={id:job.id,error:e.message};}finally{clearInterval(heartbeat);}
+      await call('ai-worker-complete',{...completion,usage});
+      lastLimits=0;
       console.log(completion.error?'AI request failed.':'AI request completed.');
     }
   }catch{console.log('Waiting for the secure server relay.');}

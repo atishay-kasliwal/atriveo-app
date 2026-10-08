@@ -1,3 +1,4 @@
+import {dashboardAiUsage} from './resume-ai-usage.mjs';
 #!/usr/bin/env node
 import { claimInference, completeInference } from './resume-ai-queue.mjs';
 import { analyzeResume, recordAiDecision, resumeAiVersion, enqueueResumeAi, resumeAiResult } from './resume-ai.mjs';
@@ -1698,6 +1699,7 @@ const server = http.createServer(async (req, res) => {
     const run = (body) => withMongo((db) => op === "load" ? loadResume(db, { jobUrl: body.job || null, track: body.track || null, appId: body.app || null, pasted: body.pasted || null })
       : op === "pasted" ? listPasted(db)
       : op === "guess" ? Promise.resolve({ ok: true, ...guessPosting(body.jd) })
+      : op === "ai-usage" ? dashboardAiUsage(db,body)
       : op === "ai-worker-claim" ? claimInference(db,body)
       : op === "ai-worker-complete" ? completeInference(db,body)
       : op === "ai-version" ? resumeAiVersion(db, body)
@@ -1718,7 +1720,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     if (req.method === "GET" && op === "pasted") { void run({}); return; }
-    if (req.method === "POST" && ["render", "save", "revert", "bullet", "check", "guess", "start", "delete", "ai-match", "ai-decision", "ai-version", "ai-result", "ai-worker-claim", "ai-worker-complete"].includes(op)) {
+    if (req.method === "POST" && ["render", "save", "revert", "bullet", "check", "guess", "start", "delete", "ai-match", "ai-decision", "ai-version", "ai-result", "ai-worker-claim", "ai-worker-complete", "ai-usage"].includes(op)) {
       let raw = "";
       req.on("data", (c) => { raw += c; if (raw.length > 200_000) req.destroy(); });
       req.on("end", () => { let body; try { body = JSON.parse(raw || "{}"); } catch { return reply(400, { ok: false, error: "Bad JSON" }); } void run(body); });
