@@ -4,7 +4,8 @@
 |---|---|---|
 | **V1:** a Chrome extension captures each application as you apply (JD, resume used); Gmail integration updates its status, replacing spreadsheet tracking | you, 2026-10-08 | confirmed |
 | **V2:** job boards were sponsored and stale, so it found jobs directly when listed, with timestamps and email alerts | you | confirmed |
-| **V3:** multi-user with friends, gamified weekly challenges (most applications, best resumes and ATS scores) | you | confirmed; **how many friends, for how long?** |
+| **V3:** multi-user with friends, gamified weekly challenges (most applications, best resumes and ATS scores); still enrolling users, almost a year now | you, 2026-10-08 | confirmed |
+| Users: **~1,000** (voice note: "approximately thousand friends") | you | **needs confirmation: about 1,000 users, or about 10 friends?** |
 | **Now:** company boards monitored: **8,125** (Greenhouse 4,809, Ashby 3,287, Lever 29) | Mongo `ats_boards`, 2026-10-08 | confirmed (data) |
 | **6,564** jobs discovered from **2,209** companies; 5,930 full job descriptions (Sep 29 – Oct 8, 2026) | Mongo `jobs`, `descriptions` | confirmed (data) |
 | **2,216** tailored resumes, one per job | Mongo `jobs.resume` | confirmed (data) |
