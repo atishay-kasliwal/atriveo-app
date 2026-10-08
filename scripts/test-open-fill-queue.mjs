@@ -12,7 +12,7 @@ fs.writeFileSync(entry,`import {createRoot} from 'react-dom/client';import OpenF
 let browser;
 try {
  await build({entryPoints:[entry],bundle:true,jsx:'automatic',format:'iife',outfile:path.join(temp,'queue.js'),define:{'import.meta.env':'{}'}});
- browser=await chromium.launch({channel:'chrome',headless:true});
+ browser=await chromium.launch({headless:true});
  for(const scenario of ['success','failure','stop','old-extension']) {
   const page=await browser.newPage();const actions=[];let active=null;let polls=0;
   await page.route('**/*',async route=>{

@@ -41,7 +41,7 @@ async function fixture() {
   });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const port = server.address().port;
-  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1600, height: 800 } });
   const calls = [], errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
