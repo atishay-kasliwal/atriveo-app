@@ -264,3 +264,19 @@
  .rb-start .rb-track span { display: none; }
  .rb-general .rb-section-heading { margin-bottom: 10px; }
 }
+
+.rb-ai-panel { position: fixed; z-index: 61; top: 6vh; right: 24px; width: min(500px, calc(100vw - 32px)); max-height: 88dvh; overflow-y: auto; box-sizing: border-box; background: var(--card-bg); border: 1px solid var(--border-col); border-radius: 16px; padding: 20px; box-shadow: 0 24px 80px #0008; display: flex; flex-direction: column; gap: 16px; }
+.rb-ai-panel header { display: flex; align-items: center; justify-content: space-between; }
+.rb-ai-panel h2, .rb-ai-panel h3, .rb-ai-panel p { margin: 0; }
+.rb-ai-panel p { font-size: 13px; line-height: 1.65; }
+.rb-ai-score { display: flex; flex-direction: column; gap: 6px; }
+.rb-ai-score strong { font-size: 40px; }.rb-ai-score small { font-size: 18px; color: var(--muted-fg); }
+.rb-ai-score span, .rb-ai-panel small { color: var(--muted-fg); font-size: 12px; }
+.rb-ai-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }.rb-ai-metrics > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 13px; }.rb-ai-metrics progress { width: 100%; height: 6px; accent-color: var(--primary); }
+.rb-ai-panel ul { margin: 0; padding-left: 20px; }.rb-ai-panel li { margin-bottom: 12px; font-size: 13px; }.rb-ai-panel li small { display: block; margin-top: 3px; }
+.rb-ai-diff { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--border-col); padding-top: 16px; }.rb-ai-new { background: color-mix(in srgb, var(--primary) 10%, transparent); border-left: 3px solid var(--primary); padding: 12px; }.rb-ai-diff > div { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 700px) { .rb-ai-panel { bottom: 0; top: auto; right: 0; width: 100%; max-height: 90dvh; border-radius: 16px 16px 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); } }
+
+.rb-ai-diff > p { white-space: pre-wrap; }
+
+.rb-ai-provider { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }.rb-ai-provider select { background: var(--card-bg); color: var(--foreground); padding: 10px; border: 1px solid var(--border-col); border-radius: 8px; font: inherit; }

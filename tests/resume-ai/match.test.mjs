@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { validateMatch, versionOf } from '../../scripts/resume-ai.mjs';
+const current='Built Python pipelines processing 10K+ records with 90% accuracy.';
+const sections=[{role:'wake-forest',bullets:[{text:current}]}];
+const analysis = suggested => ({score:80,subscores:{skills:80,experience:80,keywords:80,evidence:80},requirements:[{requirement:'Python pipelines',status:'STRONG',evidence:current}],atsProblems:[],suggestions:[{si:0,bi:0,current,suggested,reason:'Clearer implementation.',requirements:['Python pipelines']}]});
+test('returns rewritten text, not generic advice',()=>assert.equal(validateMatch(analysis('Developed Python data pipelines processing 10K+ records with 90% accuracy.'),sections).suggestions.length,1));
+test('rejects invented or removed metrics',()=>{for(const text of ['Built Python pipelines processing 20K+ records with 90% accuracy.','Built Python pipelines processing 10K+ records.'])assert.equal(validateMatch(analysis(text),sections).suggestions.length,0);});
+test('rejects unsupported technology',()=>assert.equal(validateMatch(analysis('Built Python and MLflow pipelines processing 10K+ records with 90% accuracy.'),sections).suggestions.length,0));
+test('rejects stale bullet and missing requirement rewrites',()=>{const a=analysis('Developed Python pipelines processing 10K+ records with 90% accuracy.');a.suggestions[0].current='stale';assert.equal(validateMatch(a,sections).suggestions.length,0);a.suggestions[0].current=current;a.requirements[0].status='MISSING';assert.equal(validateMatch(a,sections).suggestions.length,0);});
+test('invalid model output fails visibly',()=>assert.throws(()=>validateMatch({score:101},sections)));
+test('version changes with resume and JD',()=>{assert.notEqual(versionOf(sections),versionOf([{bullets:[{text:'edited'}]}]));assert.notEqual(versionOf('JD one'),versionOf('JD two'));});
