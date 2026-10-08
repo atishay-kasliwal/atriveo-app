@@ -39,6 +39,7 @@ import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
+import { BuilderError, loadResume, renderDraft, revertResume, saveDraft } from "./resume-builder.mjs";
 import { applicationsAnalytics, applicationDetail, dismissJob, linkJobToApplication, markJobApplied, saveLinkedinDirect, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
@@ -1685,6 +1686,29 @@ const server = http.createServer(async (req, res) => {
   // and the header counts, each reading only what it shows (read-only, no cap; see reviewQueue).
   // &cards=N with view=unanswered: the first N cards too. &ids=a,b with view=cards: those cards.
   // No view: everything at once; ?counts=1 is view=counts (consoles loaded before the views).
+  // Resume builder (docs/resume-builder.md): GET load ?job=<job_url> | ?app=<application id> | ?track=<track>; POST render | save | revert.
+  if (pathname.startsWith("/resume-builder/")) {
+    const op = pathname.slice("/resume-builder/".length);
+    const reply = (code, data) => { res.writeHead(code, { "Content-Type": "application/json", "Cache-Control": "no-store" }); res.end(JSON.stringify(data)); };
+    const run = (body) => withMongo((db) => op === "load" ? loadResume(db, { jobUrl: body.job || null, track: body.track || null, appId: body.app || null })
+      : op === "render" ? renderDraft(db, body)
+      : op === "save" ? saveDraft(db, body)
+      : revertResume(db, body.source), { appName: "AtriveoTailorServer" })
+      .then((data) => reply(200, data), (e) => reply(e instanceof BuilderError ? 400 : 500, { ok: false, error: String(e.message || e) }));
+    if (req.method === "GET" && op === "load") {
+      const params = new URL(req.url, "http://x").searchParams;
+      void run({ job: params.get("job"), track: params.get("track"), app: params.get("app") });
+      return;
+    }
+    if (req.method === "POST" && ["render", "save", "revert"].includes(op)) {
+      let raw = "";
+      req.on("data", (c) => { raw += c; if (raw.length > 200_000) req.destroy(); });
+      req.on("end", () => { let body; try { body = JSON.parse(raw || "{}"); } catch { return reply(400, { ok: false, error: "Bad JSON" }); } void run(body); });
+      return;
+    }
+    return reply(404, { ok: false, error: "Unknown resume builder request" });
+  }
+
   if (req.method === "GET" && pathname === "/applications/review-queue") {
     (async () => {
       try {

@@ -13,6 +13,7 @@ import { discardNow, dismissJobs, markJobsApplied } from "./discard";
 import { adjustCounts, loadCards, refreshLinkedin, refreshReady, refreshUnanswered, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp, type ResumeEta } from "./reviewQueue";
 import { GOALS, readPref, streakOf, useApplyHistory, useAppliedToday, useSprint, writePref } from "./todayGoal";
 import { useExclusions } from "../hooks/useExclusions";
+import { TRACK_LABEL } from "./tracks";
 import { getTailorServerBase } from "../utils/tailorServer";
 import "../styles/applications.css";
 import "./review-pages.css";
@@ -27,8 +28,7 @@ import "./today.css";
 type Kind = "you_submit" | "approve" | "fill" | "drafted" | "linkedin" | "answer";
 interface Item { resumeEta?: ResumeEta; resumeReady?: boolean; easyApply?: boolean; resumePath?: string | null; track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
 
-/** The resume track's short name (TRACKS.yaml ids). */
-const TRACK_LABEL: Record<string, string> = { "software-engineer": "SWE", "ai-engineer": "AI", "data-analytics": "Data Analyst", "data-science": "DS", "forward-deployed": "FDE" };
+
 
 /** The mood bar: one track at a time (keys 1–7), or Mixed, which takes the tracks in turn. */
 type TrackFilter = "all" | "mixed" | keyof typeof TRACK_LABEL;
@@ -454,6 +454,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           <div className="td-review-links">
             {(item.kind === "approve" || item.kind === "you_submit") && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Answers</button>}
             {item.kind !== "linkedin" && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Resume</button>}
+            {item.resumeReady !== false && <Link className="apps-btn td-edit" title="Edit this resume (same template)" to={`/resume_builder?${item.kind === "linkedin" ? `job=${encodeURIComponent(item.id)}` : `app=${encodeURIComponent(item.id)}`}`}>Edit</Link>}
             {item.kind === "linkedin" && item.resumePath && <button className="td-ghost" onClick={() => setPdf(item.resumePath!)}><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M4 1.8h5.2L12.5 5v9.2H4zM9 1.8V5h3.5M6 8.2h4.5M6 10.8h4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round"/></svg>Resume</button>}
             {item.kind === "linkedin" && <button className="td-ghost td-applied" disabled={isBusy} onClick={() => void markApplied(item)}><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round"/></svg>Mark applied</button>}
             {item.url && item.kind !== "linkedin" && <a className="apps-btn" href={item.url} target="_blank" rel="noreferrer">Job ↗</a>}
@@ -492,7 +493,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
               <p className="apps-muted">General resume for each track (not tailored to a job).</p>
               <ul>{GENERAL_RESUMES.map((g) => { const p = generalPath(g.folder); const url = p ? `${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(p)}` : null; return (
                 <li key={g.track} className={`tr-${g.track}`}><span><i className="td-dot" aria-hidden="true" style={{ ["--td-c" as string]: `var(--tr)` }} />{TRACK_LABEL[g.track]}</span>
-                  {url ? <span className="td-resume-acts"><button type="button" className="apps-link" onClick={() => { setPdf(p); setResumesOpen(false); }}>View</button><ResumeDownloadLink className="apps-btn" pdfPath={p!} /></span> : <span className="apps-muted">Loading…</span>}
+                  {url ? <span className="td-resume-acts"><button type="button" className="apps-link" onClick={() => { setPdf(p); setResumesOpen(false); }}>View</button><Link className="apps-link" to={`/resume_builder?track=${g.track}`}>Edit</Link><ResumeDownloadLink className="apps-btn" pdfPath={p!} /></span> : <span className="apps-muted">Loading…</span>}
                 </li>); })}</ul>
             </div>}
           </span>

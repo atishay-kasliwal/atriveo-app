@@ -1,0 +1,39 @@
+/* Resume builder: content on the left (scrolls), the real PDF on the right; the page itself never scrolls. */
+.rb-page { overflow: hidden; }
+.rb-bar { flex: 0 0 auto; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 14px 20px 10px; }
+.rb-title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rb-title h1 { font-size: 22px; margin: 0; }
+.rb-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rb-actions a.apps-btn { text-decoration: none; display: inline-flex; align-items: center; }
+.rb-match { font-size: 13px; color: var(--muted-fg); white-space: nowrap; } .rb-match b { color: var(--foreground); }
+.rb-main { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 0 20px 14px; }
+.rb-editor { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 6px; }
+.rb-field { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--muted-fg); }
+.rb-field :is(input, textarea) { font: inherit; font-size: 13.5px; color: var(--foreground); background: var(--card-bg); border: 1px solid var(--border-col); border-radius: 8px; padding: 8px 10px; }
+.rb-field textarea { resize: vertical; font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; }
+.rb-section { border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.rb-section > header { display: flex; align-items: baseline; gap: 10px; } .rb-section > header .apps-link { margin-left: auto; font-size: 12px; }
+.rb-section ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.rb-section li { padding: 8px 10px; border-radius: 8px; background: color-mix(in oklab, var(--accent-bg) 45%, transparent); border: 1px solid transparent; }
+.rb-section li.is-dup { border-color: #f59e0b; }
+.rb-section li p { margin: 0 0 6px; font-size: 13px; line-height: 1.45; }
+.rb-row { display: flex; align-items: center; gap: 6px; }
+.rb-id { font: 11px ui-monospace, Menlo, monospace; color: var(--muted-fg); margin-right: auto; }
+.rb-icon { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; border: 1px solid var(--border-col); background: none; color: var(--foreground); cursor: pointer; font-size: 12px; }
+.rb-icon:disabled { opacity: .35; cursor: default; } .rb-del:hover { color: #ef4444; border-color: #ef4444; }
+.rb-row select, .rb-add { max-width: 220px; height: 26px; font: inherit; font-size: 12px; color: var(--foreground); background: var(--card-bg); border: 1px solid var(--border-col); border-radius: 6px; }
+.rb-add { max-width: none; height: 30px; }
+.rb-preview { min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.rb-preview iframe { flex: 1 1 auto; min-height: 0; width: 100%; border: 1px solid var(--border-col); border-radius: 10px; background: #525659; }
+.rb-checks { font-size: 12.5px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-col); }
+.rb-checks.ok { border-color: color-mix(in oklab, #22c55e 50%, var(--border-col)); color: #86efac; } .rb-checks.ok b { color: #22c55e; margin-right: 6px; }
+.rb-checks.bad { border-color: #f59e0b; color: #fcd34d; } .rb-checks.bad ul { margin: 4px 0 0; padding-left: 18px; }
+.rb-start { padding: 40px 20px; max-width: 760px; display: flex; flex-direction: column; gap: 12px; }
+.rb-tracks { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.rb-track { display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 12px; border: 1px solid var(--border-col); background: var(--card-bg); color: var(--foreground); text-decoration: none; font-weight: 650; }
+.rb-track span { font-size: 12px; font-weight: 400; color: var(--muted-fg); }
+.rb-track i { width: 8px; height: 8px; border-radius: 50%; background: var(--tr, var(--primary)); }
+.rb-track.tr-software-engineer { --tr: #60a5fa; } .rb-track.tr-ai-engineer { --tr: #a78bfa; } .rb-track.tr-data-analytics { --tr: #fbbf24; } .rb-track.tr-data-science { --tr: #34d399; } .rb-track.tr-forward-deployed { --tr: #f472b6; }
+.rb-soon { font-size: 12.5px; }
+.td-page a.td-edit { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+@media (max-width: 900px) { .rb-page { overflow: auto; } .rb-main { grid-template-columns: 1fr; } .rb-preview iframe { height: 70vh; } }

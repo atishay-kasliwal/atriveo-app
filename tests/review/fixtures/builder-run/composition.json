@@ -1,0 +1,123 @@
+{
+ "header_title": "Backend Engineer",
+ "skills": [
+  "Cloud & DevOps: CI/CD, Git, AWS, Azure, Docker, Kubernetes, GCP, Observability, Serverless",
+  "Languages: SQL, Python, Java, TypeScript, JavaScript, CSS, Shell Scripting, GraphQL",
+  "Backend Frameworks: REST APIs, Spring Boot, Node.js, FastAPI, Kafka, Authentication, OAuth",
+  "Software Engineering: Microservices, Event-Driven Architecture, API Design",
+  "Databases: PostgreSQL, MongoDB, Redis, NoSQL, Caching"
+ ],
+ "composition": {
+  "experience": [
+   {
+    "role": "stony-brook",
+    "bullets": [
+     {
+      "ac_id": "AC-026",
+      "facet": "default",
+      "text": "Led development of AI-powered financial intelligence over 7 years of FOMC history using Python pipelines, multi-agent reasoning and retrieval to cut macro analysis from 3 days to under 20 minutes."
+     },
+     {
+      "ac_id": "AC-001",
+      "facet": "default",
+      "text": "Constructed an event-driven FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis from 3 days to under 20 minutes and reaching approximately 68% directional accuracy across 13 sessions."
+     },
+     {
+      "ac_id": "AC-002",
+      "facet": "default",
+      "text": "Processed 200K+ financial records in real time through a Python and Kafka NLP pipeline on AWS, delivering 27% portfolio return and $2.6K backtesting profit."
+     },
+     {
+      "ac_id": "AC-003",
+      "facet": "default",
+      "text": "Programmed FastAPI ingestion APIs on AWS loading 200K+ financial records into macro analytics pipelines with validated schemas for downstream NLP and forecasting."
+     }
+    ]
+   },
+   {
+    "role": "wake-forest",
+    "bullets": [
+     {
+      "ac_id": "AC-031",
+      "facet": "platform",
+      "text": "Designed a Python and GCP-based AI radiology platform that processed 10K+ brain MRI studies and reduced tumor segmentation from 3 hours to 2 minutes."
+     },
+     {
+      "ac_id": "AC-047",
+      "facet": "frontend",
+      "text": "Visualized MRIs, prior studies, and AI segmentations for a 20-person research team in a React and TypeScript clinician dashboard with interactive mask refinement."
+     },
+     {
+      "ac_id": "AC-033",
+      "facet": "ml",
+      "text": "Attained 90%+ mask accuracy with a PyTorch brain tumor segmentation model on N4ITK bias-corrected MRI, replacing manual tumor outlining for treating clinicians in production."
+     }
+    ]
+   },
+   {
+    "role": "accolite",
+    "bullets": [
+     {
+      "ac_id": "AC-198",
+      "facet": "default",
+      "text": "Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees."
+     },
+     {
+      "ac_id": "AC-191",
+      "facet": "default",
+      "text": "Installed Jenkins, Docker and Kubernetes CI/CD across 20 engineers cutting release cycles from 6 hours to 90 seconds with 20+ monthly production releases."
+     },
+     {
+      "ac_id": "AC-183",
+      "facet": "default",
+      "text": "Overhauled Oracle CRM into an in-house operations platform on React and MongoDB serving onboarding timesheets and reviews for 3,000 employees in production."
+     },
+     {
+      "ac_id": "AC-185",
+      "facet": "default",
+      "text": "Organized hierarchical org views on React and MongoDB letting managers approve reviews and timesheets across 10 direct reports in production."
+     }
+    ]
+   }
+  ],
+  "projects": [
+   {
+    "role": "atriveo",
+    "bullets": [
+     {
+      "ac_id": "AC-053",
+      "facet": "backend",
+      "text": "Implemented FastAPI and PostgreSQL services powering application tracking, search APIs, and production data synchronization across the platform."
+     },
+     {
+      "ac_id": "AC-057",
+      "facet": "cloud",
+      "text": "Maintained 99.9% uptime across 2K+ daily production queries by running the platform on Cloudflare Pages and Workers with Docker."
+     }
+    ]
+   },
+   {
+    "role": "insurance-platform",
+    "bullets": [
+     {
+      "ac_id": "AC-071",
+      "facet": "api",
+      "text": "Produced a Spring Boot v1 REST query API with HATEOAS and OpenAPI for production insurance policy search over Elasticsearch-backed documents."
+     },
+     {
+      "ac_id": "AC-066",
+      "facet": "data-pipeline",
+      "text": "Compiled insurance events into a 3-node Elasticsearch cluster with a Kafka consumer service for low-latency policy search and retrieval."
+     }
+    ]
+   }
+  ],
+  "skills": [
+   "Cloud & DevOps: CI/CD, Git, AWS, Azure, Docker, Kubernetes, GCP, Observability, Serverless",
+   "Languages: SQL, Python, Java, TypeScript, JavaScript, CSS, Shell Scripting, GraphQL",
+   "Backend Frameworks: REST APIs, Spring Boot, Node.js, FastAPI, Kafka, Authentication, OAuth",
+   "Software Engineering: Microservices, Event-Driven Architecture, API Design",
+   "Databases: PostgreSQL, MongoDB, Redis, NoSQL, Caching"
+  ]
+ }
+}

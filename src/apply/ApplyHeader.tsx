@@ -35,6 +35,7 @@ export default function ApplyHeader({ user }: { user: User }) {
           To answer{toAnswer !== undefined ? <span className="apps-nav-n">{toAnswer}</span> : null}
         </Link>
         <Link to="/staffing" aria-current={path === "/staffing" ? "page" : undefined}>Staffing</Link>
+        <Link to="/resume_builder" aria-current={path === "/resume_builder" ? "page" : undefined}>Resumes</Link>
         <Link to="/stats" aria-current={page === "stats" ? "page" : undefined}>Stats</Link>
       </nav>
       <div className="apply-header-right">

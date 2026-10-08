@@ -3,25 +3,19 @@
 //
 //   node --env-file=.env.tailor --env-file=.env scripts/general-resumes.mjs [track …]
 //
-// Output: OUT_ROOT/general/<Track>/Atishay Kasliwal.pdf and OUT_ROOT/general/manifest.json
+// Output: OUT_ROOT/general/<Track>/Atishay Kasliwal.pdf (with its composition.json and resume.tex, so the resume
+// builder can edit it) and OUT_ROOT/general/manifest.json
 // (OUT_ROOT = TAILOR_OUT_ROOT or ~/Documents/tailored-resumes; the resume sync copies it to Oracle).
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { GENERAL_RESUMES as TRACKS } from "./resume-builder.mjs";
 import { tailorOneAc } from "./tailor-ac.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || path.join(os.homedir(), "Documents", "tailored-resumes");
 const GENERAL = path.join(OUT_ROOT, "general");
 
-// The header title each general resume shows (the track's role, no seniority).
-const TRACKS = {
-  "software-engineer": { label: "SWE", title: "Software Engineer", folder: "Software Engineer" },
-  "ai-engineer": { label: "AI", title: "AI Engineer", folder: "AI Engineer" },
-  "data-analytics": { label: "Data Analyst", title: "Data Analyst", folder: "Data Analyst" },
-  "data-science": { label: "DS", title: "Data Scientist", folder: "Data Scientist" },
-  "forward-deployed": { label: "FDE", title: "Forward Deployed Engineer", folder: "Forward Deployed Engineer" },
-};
 
 const wanted = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(TRACKS);
 const manifestPath = path.join(GENERAL, "manifest.json");
@@ -40,6 +34,10 @@ for (const track of wanted) {
   const dest = path.join(GENERAL, t.folder, "Atishay Kasliwal.pdf");
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.copyFileSync(result.pdfPath, dest);
+  // A rebuild replaces an edit made in the builder (builder.json) with the freshly generated resume.
+  for (const f of ["composition.json", "resume.tex"]) fs.copyFileSync(path.join(path.dirname(result.pdfPath), f), path.join(GENERAL, t.folder, f));
+  fs.rmSync(path.join(GENERAL, t.folder, "builder.json"), { force: true });
+  fs.rmSync(path.join(GENERAL, t.folder, "generated"), { recursive: true, force: true });
   manifest.resumes[track] = { label: t.label, title: t.title, path: dest, builtAt: new Date().toISOString(), source: result.pdfPath };
   console.log(`✓ ${track} → ${dest}`);
 }

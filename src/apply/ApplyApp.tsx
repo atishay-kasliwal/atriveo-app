@@ -5,6 +5,7 @@ import AdminLogin from "./AdminLogin";
 import ApplyHeader from "./ApplyHeader";
 import QuestionsPage from "./QuestionsPage";
 import ReadyPage from "./ReadyPage";
+import ResumeBuilderPage from "./ResumeBuilderPage";
 import StaffingPage from "./StaffingPage";
 import TodayPage from "./TodayPage";
 import UnansweredPage from "./UnansweredPage";
@@ -17,6 +18,7 @@ function Console() {
   if (!user) return <Navigate to="/login" replace />;
   const header = <ApplyHeader user={user} />;
   if (path === "/staffing") return <StaffingPage header={header} />;
+  if (path === "/resume_builder") return <ResumeBuilderPage header={header} />;
   if (path === "/unanswered") return <QuestionsPage header={header} />;
   // The full form view: every question of one application, drafts included.
   if (path === "/answers") return <UnansweredPage header={header} />;
