@@ -54,7 +54,11 @@ const LEVEL_WORDS = /\b(?:senior|sr|staff|lead|principal|junior|jr|associate|ent
 export function employerTitle(roleSlug, headerTitle, doc = loadTracks()) {
   if (roleSlug === "stony-brook") {
     const role = String(headerTitle || "").replace(LEVEL_WORDS, " ").replace(/[\s,–—-]+$/, "").replace(/\s+/g, " ").trim();
-    return role ? doc.stony_brook_title_overrides?.[role] ?? role : null;
+    if (!role) return null;
+    const exact = doc.stony_brook_title_overrides?.[role];
+    if (exact) return exact;
+    const pattern = (doc.stony_brook_title_patterns || []).find((p) => p?.match && role.toLowerCase().includes(String(p.match).toLowerCase()));
+    return pattern?.title ?? role;
   }
   return doc.employer_titles?.[roleSlug] ?? null;
 }

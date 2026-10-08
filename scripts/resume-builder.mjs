@@ -98,6 +98,7 @@ function layoutOf(bank) {
       title: r === "stony-brook" ? null : employerTitle(r, null) || (r === "wake-forest" ? "AI/ML Engineer" : m.title) }]; })),
     projects: Object.fromEntries(projs.map((r) => [r, { name: labelOf(r), dates: resolveProjectMeta(r).dates, rank: ranked.indexOf(r) }])),
     sbTitleOverrides: loadTracks().stony_brook_title_overrides ?? {},
+    sbTitlePatterns: loadTracks().stony_brook_title_patterns ?? [],
   };
 }
 

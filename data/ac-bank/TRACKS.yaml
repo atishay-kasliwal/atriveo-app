@@ -54,6 +54,13 @@ employer_titles:
   accolite: Senior Software Developer
 stony_brook_title_overrides:
   Data Scientist: Data Scientist (Research)
+# A header title containing one of these (any case) prints this title at Stony Brook, when no exact override above
+# matches. FDE postings word the title many ways ("Forward Deployed Software Engineer", "AI Forward Deployed
+# Engineer"). 2026-10-08, Atishay: Stony Brook is "AI Engineer" on FDE resumes, since FDE is a company title and the
+# work there sat between AI and software engineering (docs/resume-tracks/fde.md).
+stony_brook_title_patterns:
+  - match: forward deployed
+    title: AI Engineer
 
 # Skills Atishay confirmed using (2026-10-01). Truth rule: a skill may appear in the Technical
 # Skills section once it is listed here (and only when the JD asks for it); a bullet may name it

@@ -13,6 +13,8 @@ export interface Layout {
   roles: Record<string, { name: string; dates: string; place: string; order: number; title: string | null }>;
   projects: Record<string, { name: string; dates: string; rank: number }>;
   sbTitleOverrides: Record<string, string>;
+  /** A header title containing `match` prints `title` at Stony Brook (TRACKS.yaml stony_brook_title_patterns). */
+  sbTitlePatterns?: Array<{ match: string; title: string }>;
 }
 /** si: the section's place in the editor, so a line on the page maps back to it. */
 export interface PreviewSection { si: number; role: string; kind: "experience" | "project"; bullets: Array<{ text: string }>; tools?: string[] }
@@ -23,9 +25,9 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 const dates = (s: string) => esc(s).replace(/--/g, "–");
 // As ac-tracks.employerTitle: Stony Brook shows the header title without seniority words.
 const LEVEL_WORDS = /\b(?:senior|sr|staff|lead|principal|junior|jr|associate|entry level|new grad(?:uate)?|graduate|intern(?:ship)?|[ivx]+|\d+)\b\.?/gi;
-export const sbTitle = (title: string, overrides: Record<string, string>) => {
+export const sbTitle = (title: string, overrides: Record<string, string>, patterns: Array<{ match: string; title: string }> = []) => {
   const role = title.replace(LEVEL_WORDS, " ").replace(/[\s,–—-]+$/, "").replace(/\s+/g, " ").trim();
-  return overrides[role] ?? role;
+  return overrides[role] ?? patterns.find((p) => role.toLowerCase().includes(p.match.toLowerCase()))?.title ?? role;
 };
 
 const CSS = `
@@ -62,7 +64,7 @@ function resumeHtml(layout: Layout, p: { title: string; email: string; city: str
     .sort((a, b) => (layout.roles[b.role]?.order ?? 0) - (layout.roles[a.role]?.order ?? 0))
     .map((s) => {
       const m = layout.roles[s.role] ?? { name: s.role, dates: "", place: "", order: 0, title: null };
-      const title = s.role === "stony-brook" ? sbTitle(p.title, layout.sbTitleOverrides) : m.title ?? "";
+      const title = s.role === "stony-brook" ? sbTitle(p.title, layout.sbTitleOverrides, layout.sbTitlePatterns) : m.title ?? "";
       return `<div class="entry"><div class="row" data-s="${s.si}"><span class="head"><b>${esc(m.name)}</b>${s.tools?.length ? ` | <em class="tools">${esc(s.tools.join(", "))}</em>` : ""}</span><span>${dates(m.dates)}</span></div>
         <div class="row sub" data-s="${s.si}"><span>${esc(title)}</span><span>${esc(m.place)}</span></div>
         ${items(s)}</div>`;
