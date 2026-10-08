@@ -563,11 +563,22 @@ function Stat({ label, value, tone, sub }: { label: string; value: string | numb
 }
 
 function Section({ title, hint, meta, children }: { title: string; hint: string; meta?: React.ReactNode; children: React.ReactNode }) {
+  const icons: Record<string, string> = {
+    "Employer responses": "M4 6h16v12H4z M4 6l8 7 8-7",
+    "Why jobs aren't being applied": "M12 8v5 M12 16h.01 M12 3L2 20h20z",
+    "Pipeline": "M4 5h16 M7 12h10 M10 19h4",
+    "Application history": "M5 5h14v16H5z M8 9h8 M8 13h8 M8 17h5",
+    "ATS performance": "M5 20V12 M12 20V4 M19 20V8",
+    "Questions & learned answers": "M9 8a3 3 0 116 0c0 2-3 2-3 5 M12 17h.01 M4 3h16v18H4z",
+    "Failures": "M8 8l8 8 M16 8l-8 8 M12 2a10 10 0 100 20 10 10 0 000-20",
+    "Employer accounts": "M16 8a4 4 0 11-8 0 4 4 0 018 0 M4 21v-2a8 8 0 0116 0v2",
+  };
+  const labels: Record<string, string> = { "Why jobs aren't being applied": "Queue blockers", "Questions & learned answers": "Questions", "ATS performance": "Platforms", "Employer accounts": "Accounts" };
   return (
     <details className="apps-section">
       <summary>
-        <span className="apps-chev" aria-hidden>›</span>
-        <span className="apps-section-title">{title}</span>
+        <span className="apps-insight-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d={icons[title] || icons["Application history"]} /></svg></span><span className="apps-chev" aria-hidden>›</span>
+        <span className="apps-section-title">{labels[title] || title}</span>
         <span className="apps-section-hint">{hint}</span>
         <span className="apps-section-meta">{meta}</span>
       </summary>
@@ -913,7 +924,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
             <section className="apps-insights" aria-labelledby="ins-title">
               <div className="apps-insights-head">
                 <h2 id="ins-title">Application insights</h2>
-                <span className="apps-muted">{rangeLabel === "Today" || rangeLabel === "Yesterday" ? rangeLabel : `${rangeFrom} → ${rangeTo}`} · set at the top</span>
+                <span className="apps-muted">{rangeLabel === "Today" || rangeLabel === "Yesterday" ? rangeLabel : `${rangeFrom} → ${rangeTo}`}</span>
               </div>
 
               {data.inbox && (
