@@ -27,3 +27,13 @@
 .staffing-last-crawl { border: 1px solid var(--border-col); background: var(--card-bg); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; overflow-wrap: anywhere; }
 .staffing-last-crawl strong { margin-right: 8px; }
 .staffing-last-crawl > div + div { margin-top: 6px; font-size: 13px; }
+
+.staffing-carousel-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.staffing-carousel { overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; }
+.staffing-carousel-track { display: flex; gap: 16px; }
+.staffing-job-card { flex: 0 0 min(340px, 85vw); box-sizing: border-box; display: flex; flex-direction: column; padding: 18px; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); scroll-snap-align: start; }
+.staffing-job-card h3 { font-size: 18px; margin: 10px 0; overflow-wrap: anywhere; }
+.staffing-job-card p { font-size: 13px; color: var(--muted-fg); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.staffing-job-dates { display: flex; flex-direction: column; gap: 5px; margin-top: auto; padding: 12px 0; color: var(--muted-fg); }
+.staffing-job-card > a { align-self: flex-start; }
+@media (prefers-reduced-motion: reduce) { .staffing-carousel { scroll-behavior: auto; } }

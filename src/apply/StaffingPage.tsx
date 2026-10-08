@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getJson, when } from "./engine";
 import { getTailorServerBase } from "../utils/tailorServer";
 import "./staffing.css";
 
 type Source = { _id: string; name: string; url: string; tier: number; enabled: boolean; status: string; detail: string; last_checked_at?: string; matching_jobs?: number; connector_state?: string; limited?: boolean; parse_errors?: number; errors?: number };
 type Run = { _id: string; status: string; started_at: string; finished_at?: string; jobs_seen: number; new_jobs: number; published_jobs?: number; error?: string };
-type Job = { _id: string; company: string; title: string; location: string; job_url: string; summary: string; source_id: string; first_seen_at: string };
+type Job = { _id: string; company: string; title: string; location: string; job_url: string; summary: string; source_id: string; first_seen_at: string; observed_at?: string };
 type Status = { sources: Source[]; runs: Run[]; schedule: { label: string; next_at: string }; total_jobs: number };
 const LABELS: Record<string, string> = { access_pending: "Needs provider access", not_checked: "Not checked yet", running: "Checking", ready: "Jobs readable", needs_connector: "Needs connector", blocked: "Access blocked", failed: "Check failed" };
 
 export default function StaffingPage({ header }: { header?: React.ReactNode }) {
+  const carousel = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<Status | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState("");
@@ -51,14 +52,14 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
       {running && <div className="apps-muted" role="status">A new crawl is running. This shows the previous crawl until it finishes.</div>}
     </div>
     <p className="apps-muted">Relevant jobs appear below. Jobs that pass your existing eligibility and scoring rules also enter the job feed. Duplicate listings are grouped; no applications are submitted.</p>
+    <section className="staffing-results" aria-label="Collected jobs">
+      <div className="staffing-title"><h2>Collected jobs <small className="apps-muted">({selectedJobs.length})</small></h2><div className="staffing-carousel-controls"><label>Source <select value={filter} onChange={e => { setFilter(e.target.value); carousel.current?.scrollTo({ left: 0 }); }}><option value="all">All companies</option>{sources.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}</select></label><button className="apps-btn" aria-label="Previous jobs" onClick={() => carousel.current?.scrollBy({ left: -carousel.current.clientWidth, behavior: "smooth" })}>←</button><button className="apps-btn" aria-label="Next jobs" onClick={() => carousel.current?.scrollBy({ left: carousel.current.clientWidth, behavior: "smooth" })}>→</button></div></div>
+      {!selectedJobs.length ? <p className="apps-muted">{!status ? "Loading jobs…" : "No collected jobs for this selection yet."}</p> : <div className="staffing-carousel" ref={carousel} tabIndex={0} aria-label="Job cards; scroll to browse"><div className="staffing-carousel-track">{selectedJobs.map(j => <article className="staffing-job-card" key={j._id}><small className="apps-muted">{sources.find(s => s._id === j.source_id)?.name || j.company}</small><h3>{j.title}</h3><div className="apps-muted">{j.company} · {j.location || "Location not specified"}</div><p>{j.summary}</p><div className="staffing-job-dates"><small>Found <time dateTime={j.first_seen_at}>{when(j.first_seen_at)}</time></small>{j.observed_at && <small>Last seen <time dateTime={j.observed_at}>{when(j.observed_at)}</time></small>}</div><a className="apps-btn" href={j.job_url} target="_blank" rel="noreferrer">View job ↗</a></article>)}</div></div>}
+    </section>
     <section aria-label="Staffing company sources" className="staffing-sources">{!status && !error && <p>Loading sources…</p>}{[1, 2, 3].map(tier => <div className="staffing-tier" key={tier}><h2>Tier {tier}</h2>{sources.filter(s => s.tier === tier).map(s => <article className="staffing-source" key={s._id}>
       <div className="staffing-source-top"><a href={s.url} target="_blank" rel="noreferrer">{s.name} ↗</a><label><input type="checkbox" checked={s.enabled} disabled={busy} onChange={e => void action("source", { sourceId: s._id, enabled: e.target.checked })} />Enabled</label></div>
       <span className={`staffing-state is-${s.status}`}>{s.status === "ready" && (s.limited || s.errors) ? "Jobs readable · partial crawl" : LABELS[s.status] || s.status}</span>{s.connector_state === "access_pending" && s.status !== "ready" && <small className="apps-muted">Awaiting provider access</small>}<p>{s.detail}</p><div className="staffing-source-bottom"><small>{s.last_checked_at ? `Checked ${when(s.last_checked_at)}` : "Awaiting first run"}</small><button className="apps-link" disabled={busy || running || !s.enabled} onClick={() => void action("run", { sourceIds: [s._id] })}>Check source</button></div>
     </article>)}</div>)}</section>
-    <section className="staffing-results"><div className="staffing-title"><h2>Collected jobs</h2><label>Source <select value={filter} onChange={e => setFilter(e.target.value)}><option value="all">All companies</option>{sources.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}</select></label></div>
-      {!selectedJobs.length ? <p className="apps-muted">{running ? "The first crawl is running. Readable jobs will appear here." : "No collected jobs for this selection yet. Source cards show which boards need attention."}</p> : selectedJobs.map(j => <article className="staffing-job" key={j._id}><div><b>{j.title}</b><span>{j.company} · {j.location || "Location not specified"}</span><p>{j.summary}</p></div><a className="apps-btn" href={j.job_url} target="_blank" rel="noreferrer">View job ↗</a></article>)}
-      {jobs.length >= 200 && <p className="apps-muted">Showing the latest 200 jobs.</p>}
-    </section>
     <section><h2>Recent runs</h2>{status?.runs.map(r => <p className="staffing-run" key={r._id}><b>{r.status}</b> · {when(r.started_at)} · {r.jobs_seen} matching listings · {r.new_jobs} new · {r.published_jobs ?? 0} eligible for feed {r.error && <span role="alert">{r.error}</span>}</p>)}</section>
   </main></div>;
 }
