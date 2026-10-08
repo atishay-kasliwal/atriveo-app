@@ -21,6 +21,10 @@ In the editor:
 - **Projects**: **Remove project**, **+ Add a project**, and the **tools after the name** ("Atriveo | FastAPI,
   Docker…"). Until you type in it, the tools line is picked from the project's bullets (as in generated resumes) and
   follows your swaps; once you type, your list is printed (up to 8). **Auto** goes back to the automatic one.
+- **Employers' tools** (optional): **Tools after the name** under each employer prints "Accolite Digital | *Java,
+  AWS…*" on the **company line**, never the title line (a parser files the whole title line as the job title). Empty
+  by default, as generated resumes print none; **Use Java, AWS…** fills it with the tools the bullets name, **Clear**
+  removes it. The line shrinks to fit the width, like a project's.
 - **Header**: **Title**, **Email** and **Location** (printed as you write it, e.g. "Charlotte, NC"). They start as
   the resume prints them: your profile's email, and the posting's city (home city when it names none).
 - **Technical skills** (one line each, `Category: a, b, c`).
@@ -48,10 +52,16 @@ you're editing is the small line at the top of the left column. The whole page i
 column's width and height), so nothing scrolls on the right.
 
 - **Live** is the resume as HTML in the template's layout (Letter, 0.5in margins, 11pt Computer Modern), paginated
-  in the browser by [Paged.js](https://github.com/pagedjs/pagedjs). It updates as you type. The chip says how much
-  room is left: **1 page ✓ · room for 3 more lines** (green), **1 page ✓ · full** (blue, 0–1 lines left), or
-  **2 pages ⚠ · 2 lines over** (amber). A line is a bullet's line (10pt × 1.2 = 16px); most bullets are two lines.
-  It measures the lowest line of text on the last page, so it mirrors the LaTeX template closely, not to the pixel.
+  in the browser by [Paged.js](https://github.com/pagedjs/pagedjs). It updates as you type, and mirrors the LaTeX
+  template closely, not to the pixel.
+- **The room chip**: **1 page ✓ · room for 3 more lines** (green), **1 page ✓ · full** (blue, 0–1 lines left), or
+  **2 pages ⚠ · 2 lines over** (amber). A line is one line of a bullet (10pt type, 12pt apart); most bullets are two.
+  It's measured on the **compiled PDF** (`pageRoom`: the lowest word's box from `pdftotext -bbox`, against the 0.5in
+  bottom margin), for the saved resume at load and for each draft. While a draft compiles it shows the live preview's
+  estimate, marked **~**.
+  - *Why removing a bullet can still say "full"*: when a page is slightly too long, TeX squeezes the small gaps between
+    bullets to keep it on one page. Removing one bullet then only un-squeezes it. The live preview doesn't squeeze, so
+    it may say "~1 line over" for a page the PDF fits.
 - **PDF** is the compiled resume, the file Fill sends. It recompiles about a second after you stop, and its page count
   (**PDF 1 page ✓**) is the one that decides Save.
 
@@ -131,6 +141,8 @@ folders are new files, so nothing is ever overwritten).
 | 2026-10-08 | **Project tools lines, header email and location are editable** (user asked). The tools line stays automatic until you type in it. |
 | 2026-10-08 | **Live preview with Paged.js** (user asked), next to the compiled PDF. The PDF stays the one that's sent and that gates Save; making HTML the real renderer would be a separate decision. |
 | 2026-10-08 | **One screen**: header bar removed, its buttons moved into the preview toolbar; the page is scaled to fit whole; a "room for N more lines" chip (user asked). Room is measured on the Live preview, not the PDF. |
+| 2026-10-08 | **Employers' tools line** (user asked): optional, set per resume in the builder, on the company line (not the title line, for parsers); generated resumes unchanged. New macro `\resumeSubheadingTools` in `scripts/ac-tex.mjs`. |
+| 2026-10-08 | **Room measured on the compiled PDF** (exact, includes TeX's squeeze); the live estimate only fills in while compiling. |
 | 2026-10-08 | **Three ways to write**: this resume only, reword for the bank, new bullet (always to the bank). Bank bullets keep the bank's rules, including a verb of their own. |
 
 ## Phases

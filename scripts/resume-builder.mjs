@@ -54,7 +54,7 @@ function compositionAt(dir) {
   const run = readJson(path.join(dir, "composition.json"));
   if (!run?.composition) throw new BuilderError("This resume has no composition to edit (built before the builder existed). Rebuild it first.");
   const c = run.composition;
-  const sec = (kind) => (b) => ({ role: b.role, kind, bullets: (b.bullets || []).map((x) => ({ ac_id: x.ac_id, facet: x.facet ?? null, text: x.text })), ...(kind === "project" ? { stack: null } : {}) });
+  const sec = (kind) => (b) => ({ role: b.role, kind, bullets: (b.bullets || []).map((x) => ({ ac_id: x.ac_id, facet: x.facet ?? null, text: x.text })), stack: null });
   return {
     headerTitle: run.header_title ?? null,
     skills: run.skills ?? c.skills ?? [],
@@ -147,11 +147,11 @@ export async function loadResume(db, { jobUrl = null, track = null, appId = null
     city: c.city ?? resolveHeaderLocation(source.location, me.location) ?? "",
     skills: c.skills,
     // A project's tools line: yours (stack set) or the one the bullets give (stackAuto), as the PDF shows it.
-    sections: c.sections.map((s) => ({ ...s, label: labelOf(s.role), ...(s.kind === "project" ? { stack: s.stack ?? null, stackAuto: toolsFromBullets(s.bullets, s.role) } : {}) })),
+    sections: c.sections.map((s) => ({ ...s, label: labelOf(s.role), stack: s.stack ?? null, stackAuto: toolsFromBullets(s.bullets, s.role) })),
     options: bankOptions(bank),
     // Projects you could add (every project with bank bullets).
     roles: Object.entries(kinds).map(([role, kind]) => ({ role, kind, label: labelOf(role) })),
-    current: { pdfPath: path.join(dir, PDF), edited: Boolean(generated), generatedPdfPath: generated },
+    current: { pdfPath: path.join(dir, PDF), edited: Boolean(generated), generatedPdfPath: generated, pages: pageCount(path.join(dir, PDF)), room: pageRoom(path.join(dir, PDF)) },
     jd: jd ? jd.slice(0, 20_000) : null,
     layout: layoutOf(bank),
   };
@@ -251,6 +251,21 @@ function pageCount(pdfPath) {
   return Number.isInteger(n) && n > 0 ? n : null;
 }
 
+/** Room on the page, in bullet lines (10pt type on a 12pt baseline): lines free under the last text of a one-page
+ *  resume, or negative, the lines past the first page. From the words' boxes (pdftotext -bbox); null when unreadable.
+ *  The template's margins are 0.5in (36pt). */
+export function pageRoom(pdfPath) {
+  const r = spawnSync("pdftotext", ["-bbox", pdfPath, "-"], { encoding: "utf8", maxBuffer: 16 << 20 });
+  if (r.status !== 0 || !r.stdout) return null;
+  const pages = r.stdout.split("<page ").slice(1).map((pg) => ({
+    height: Number(pg.match(/height="([\d.]+)"/)?.[1]),
+    bottom: Math.max(0, ...[...pg.matchAll(/yMax="([\d.]+)"/g)].map((m) => Number(m[1]))),
+  }));
+  if (!pages.length || !pages[0].height) return null;
+  if (pages.length === 1) return Math.floor((pages[0].height - 36 - pages[0].bottom) / 12);
+  return -Math.ceil(pages.slice(1).reduce((n, p) => n + Math.max(0, p.bottom - 36), 0) / 12);
+}
+
 /** The edit, checked against the bank: known bullets only (Phase 1), each section's own, no repeated opening verb. */
 function validate(edit, bank) {
   const byId = new Map(bank.acs.map((a) => [a.id, a]));
@@ -298,15 +313,16 @@ export async function renderDraft(db, edit) {
     sections: (edit.sections || []).map((s) => {
       const kind = s.kind === "project" ? "project" : "experience";
       const bullets = (s.bullets || []).map((b) => ({ ac_id: String(b.ac_id), facet: b.facet ?? null, text: String(b.text || "").replace(/\s+/g, " ").trim(), ...(b.custom ? { custom: true } : {}) }));
-      // Your tools line for a project (up to 8, short names); none = picked from its bullets, as generated resumes do.
-      const stack = kind === "project" && Array.isArray(s.stack) ? [...new Set(s.stack.map((t) => String(t).trim().slice(0, 30)).filter(Boolean))].slice(0, 8) : [];
-      return { role: s.role, kind, bullets, ...(kind === "project" ? { stack: stack.length ? stack : null } : {}) };
+      // Your tools line (up to 8, short names). None: a project's comes from its bullets, as generated resumes do;
+      // an employer prints none.
+      const stack = Array.isArray(s.stack) ? [...new Set(s.stack.map((t) => String(t).trim().slice(0, 30)).filter(Boolean))].slice(0, 8) : [];
+      return { role: s.role, kind, bullets, stack: stack.length ? stack : null };
     }),
   };
   const problems = validate(clean, bank);
   if (clean.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean.email)) problems.push(`"${clean.email}" isn't an email address`);
   const composition = {
-    experience: clean.sections.filter((s) => s.kind === "experience").map((s) => ({ role: s.role, bullets: s.bullets })),
+    experience: clean.sections.filter((s) => s.kind === "experience").map((s) => ({ role: s.role, bullets: s.bullets, stack: s.stack })),
     projects: clean.sections.filter((s) => s.kind === "project").map((s) => ({ role: s.role, bullets: s.bullets, stack: s.stack })),
   };
   const me = loadResumeProfile();
@@ -333,8 +349,8 @@ export async function renderDraft(db, edit) {
     jdMatch = { before: before.score, after: after.score, missing: after.missing.slice(0, 8).map((m) => m.skill) };
   }
   // Each project's tools line as this draft prints it (the page shows the automatic one while you haven't set yours).
-  const stacks = Object.fromEntries(clean.sections.filter((s) => s.kind === "project").map((s) => [s.role, s.stack ?? toolsFromBullets(s.bullets, s.role)]));
-  return { ok: true, draftId, pdfPath, pages, problems, jdMatch, stacks };
+  const stacks = Object.fromEntries(clean.sections.map((s) => [s.role, s.stack ?? (s.kind === "project" ? toolsFromBullets(s.bullets, s.role) : [])]));
+  return { ok: true, draftId, pdfPath, pages, room: pages ? pageRoom(pdfPath) : null, problems, jdMatch, stacks };
 }
 
 const nextEditDir = (runDir) => {

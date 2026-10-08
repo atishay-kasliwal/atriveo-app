@@ -11,15 +11,16 @@ import "./resume-builder.css";
 
 /** custom: your wording for this resume only (not in the bank). */
 interface Bullet { ac_id: string; facet: string | null; text: string; custom?: boolean }
-/** A project's tools line ("Atriveo | FastAPI, Docker…"): stack = yours; null = picked from its bullets (stackAuto). */
+/** The tools line after the name ("Atriveo | FastAPI, Docker…"): stack = yours. null: a project's is picked from its
+ *  bullets (stackAuto); an employer prints none, and stackAuto is only offered as a suggestion. */
 interface Section { role: string; kind: "experience" | "project"; label: string; bullets: Bullet[]; stack?: string[] | null; stackAuto?: string[] }
 type Source = { kind: "job"; jobUrl: string; company: string; title: string; location: string | null } | { kind: "track"; track: string; company: string; title: string; location: null };
 interface Loaded {
   source: Source; headerTitle: string | null; email: string; city: string; skills: string[]; sections: Section[];
   options: Record<string, Bullet[]>; roles: Array<{ role: string; kind: "experience" | "project"; label: string }>;
-  current: { pdfPath: string; edited: boolean; generatedPdfPath: string | null }; jd: string | null; layout: Layout;
+  current: { pdfPath: string; edited: boolean; generatedPdfPath: string | null; pages?: number | null; room?: number | null }; jd: string | null; layout: Layout;
 }
-interface Draft { draftId: string; pdfPath: string; pages: number | null; problems: string[]; jdMatch: { before: number | null; after: number | null; missing: string[] } | null; stacks?: Record<string, string[]> }
+interface Draft { draftId: string; pdfPath: string; pages: number | null; room?: number | null; problems: string[]; jdMatch: { before: number | null; after: number | null; missing: string[] } | null; stacks?: Record<string, string[]> }
 
 const GENERAL = ["software-engineer", "ai-engineer", "data-analytics", "data-science", "forward-deployed"];
 const base = () => `${getTailorServerBase()}/resume-builder`;
@@ -46,6 +47,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const [sections, setSections] = useState<Section[]>([]);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [rendering, setRendering] = useState(false);
+  const [draftOf, setDraftOf] = useState<unknown>(null); // the edit the draft was compiled from
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -73,7 +75,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     const n = ++seq.current;
     const t = setTimeout(async () => {
       setRendering(true);
-      try { const d = await call<Draft>("render", edit); if (n === seq.current) setDraft(d); }
+      try { const d = await call<Draft>("render", edit); if (n === seq.current) { setDraft(d); setDraftOf(edit); } }
       catch (e) { if (n === seq.current) setDraft({ draftId: "", pdfPath: "", pages: null, problems: [e instanceof Error ? e.message : String(e)], jdMatch: null }); }
       finally { if (n === seq.current) setRendering(false); }
     }, 900);
@@ -178,12 +180,17 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
 
   const preview = draft?.pdfPath || loaded?.current.pdfPath || null;
   const skillLines = skills.split("\n").map((l) => l.trim()).filter(Boolean);
-  const liveSections = sections.map((s) => ({ role: s.role, kind: s.kind, bullets: s.bullets, tools: s.kind === "project" ? s.stack ?? draft?.stacks?.[s.role] ?? s.stackAuto ?? [] : undefined }));
+  const liveSections = sections.map((s) => ({ role: s.role, kind: s.kind, bullets: s.bullets, tools: s.kind === "project" ? s.stack ?? draft?.stacks?.[s.role] ?? s.stackAuto ?? [] : s.stack ?? [] }));
   // "Room for 2 more lines": a line is a bullet's line (a bullet is usually two).
-  const room = !fit ? null
-    : fit.pages > 1 ? { tone: "over", label: `${fit.pages} pages ⚠ · ${-fit.lines} line${fit.lines === -1 ? "" : "s"} over` }
-    : fit.lines >= 2 ? { tone: "ok", label: `1 page ✓ · room for ${fit.lines} more line${fit.lines === 1 ? "" : "s"}` }
-    : { tone: "full", label: `1 page ✓ · full${fit.lines === 1 ? " (1 line left)" : ""}` };
+  // The compiled PDF's measure once it's in for this edit (exact); the live preview's while it compiles (about).
+  const pdfRoom = !dirty ? (loaded?.current.room != null && loaded.current.pages ? { pages: loaded.current.pages, lines: loaded.current.room } : null)
+    : draftOf === edit && draft?.room != null && draft.pages ? { pages: draft.pages, lines: draft.room } : null;
+  const roomOf = (f: LiveFit, about: string) => f.pages > 1 ? { tone: "over", label: `${f.pages} pages ⚠ · ${about}${-f.lines} line${f.lines === -1 ? "" : "s"} over` }
+    : f.lines >= 2 ? { tone: "ok", label: `1 page ✓ · room for ${about}${f.lines} more lines` }
+    : { tone: "full", label: `1 page ✓ · full${f.lines === 1 ? " (1 line left)" : ""}` };
+  const room = pdfRoom ? roomOf(pdfRoom, "") : fit ? roomOf(fit, "~") : null;
+  // An employer's suggested tools: the ones its bullets name (as a project's automatic line), at load.
+  const toolsSuggestion = (s: Section) => s.stackAuto ?? [];
   const canSave = Boolean(dirty && draft?.draftId && !draft.problems.length && !rendering && !saving);
   const addable = (role: string) => (loaded?.options[role] ?? []).filter((o) => !used.has(o.ac_id));
   const projects = (loaded?.roles ?? []).filter((r) => r.kind === "project" && !sections.some((s) => s.role === r.role));
@@ -209,6 +216,14 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
               <div key={s.role} className="rb-section">
                 <header><b>{s.label}</b><span className="apps-muted">{s.kind === "project" ? "Project" : "Experience"} · {s.bullets.length} bullet{s.bullets.length === 1 ? "" : "s"}</span>
                   {s.kind === "project" && <button className="apps-link" onClick={() => change((x) => x.filter((_, i) => i !== si))}>Remove project</button>}</header>
+                {s.kind === "experience" && (() => {
+                  const setStack = (v: string) => { setStackText((t) => ({ ...t, [s.role]: v })); change((x) => { const list = v.split(",").map((t) => t.trim()).filter(Boolean); x[si]!.stack = list.length ? list : null; return x; }); };
+                  const suggested = toolsSuggestion(s);
+                  return <label className="rb-field rb-stack"><span>Tools after the name <em>optional, on the company line</em>
+                    {!s.stack && suggested.length > 0 && <button type="button" className="apps-link" onClick={() => setStack(suggested.join(", "))}>Use {suggested.slice(0, 3).join(", ")}{suggested.length > 3 ? "…" : ""}</button>}
+                    {s.stack && <button type="button" className="apps-link" onClick={() => setStack("")}>Clear</button>}</span>
+                    <input value={stackText[s.role] ?? (s.stack ?? []).join(", ")} placeholder={suggested.length ? suggested.join(", ") : "Python, FastAPI, AWS"} onChange={(e) => setStack(e.target.value)} /></label>;
+                })()}
                 {s.kind === "project" && (() => {
                   const shown = s.stack ?? draft?.stacks?.[s.role] ?? s.stackAuto ?? [];
                   return <label className="rb-field rb-stack"><span>Tools after the name {s.stack ? <button type="button" className="apps-link" onClick={() => { setStackText((t) => { const n = { ...t }; delete n[s.role]; return n; }); change((x) => { x[si]!.stack = null; return x; }); }}>Auto</button> : <em>automatic, from the bullets</em>}</span>
@@ -250,7 +265,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
                 <button role="tab" aria-selected={view === "live"} className={view === "live" ? "is-on" : ""} onClick={() => setView("live")}>Live</button>
                 <button role="tab" aria-selected={view === "pdf"} className={view === "pdf" ? "is-on" : ""} onClick={() => setView("pdf")}>PDF</button>
               </span>
-              <span className={`rb-pages ${room ? `is-${room.tone}` : ""}`} title="From the live preview: about 16px per bullet line, and a bullet is usually two lines. Close to the PDF; the PDF decides.">
+              <span className={`rb-pages ${room ? `is-${room.tone}` : ""}`} title={pdfRoom ? "Measured on the compiled PDF. A line is one line of a bullet; most bullets are two." : "Estimated on the live preview (~) until the PDF compiles. A line is one line of a bullet; most bullets are two."}>
                 <i />{room ? room.label : "Measuring…"}</span>
               <span className="apps-muted" title="The compiled PDF, the one Fill sends">PDF {rendering ? "checking…" : draft?.pages ? `${draft.pages} page${draft.pages === 1 ? "" : "s"} ${draft.pages === 1 ? "✓" : "⚠"}` : dirty ? "…" : "saved"}</span>
               {draft?.jdMatch && <span className="rb-match" title={draft.jdMatch.missing.length ? `Still missing: ${draft.jdMatch.missing.join(", ")}` : "Every skill this job names is on it"}>JD {draft.jdMatch.before ?? "–"} → <b>{draft.jdMatch.after ?? "–"}</b></span>}

@@ -44,12 +44,15 @@ test('load → swap a bullet → render one page → save repoints the job and i
     const draft = await renderDraft(db, { source: r.source, headerTitle: r.headerTitle, skills: r.skills, sections: r.sections });
     assert.deepEqual(draft.problems, []);
     assert.equal(draft.pages, 1);
+    assert.ok(Number.isInteger(draft.room) && draft.room >= 0, 'a one-page draft reports the lines left under its last text');
+    assert.ok('room' in r.current, 'the saved resume reports its room at load (null here: the fixture PDF is a stub)');
     assert.ok(typeof draft.jdMatch.before === 'number' && typeof draft.jdMatch.after === 'number');
 
     // The header's email and city, and a project's tools line, are yours to set; a bad email is refused.
     assert.ok(r.email !== undefined && r.city);
     const proj = structuredClone(r.sections);
     proj.find((s) => s.role === 'atriveo').stack = ['Go', 'Rust'];
+    proj.find((s) => s.role === 'accolite').stack = ['Java', 'Spring Boot'];
     const custom = await renderDraft(db, { source: r.source, headerTitle: r.headerTitle, email: 'me@example.com', city: 'Charlotte, NC', skills: r.skills, sections: proj });
     assert.deepEqual(custom.problems, []);
     const tex = fs.readFileSync(path.join(path.dirname(custom.pdfPath), 'resume.tex'), 'utf8');
@@ -58,6 +61,11 @@ test('load → swap a bullet → render one page → save repoints the job and i
     assert.match(tex, /\\textbf\{Atriveo\} \$\|\$ \\emph\{Go, Rust\}/);
     assert.deepEqual(custom.stacks.atriveo, ['Go', 'Rust']);
     assert.ok(draft.stacks.atriveo.length > 0, 'without yours, the tools come from the bullets');
+    // An employer's tools go on the company line, never the title line; without yours it prints none.
+    assert.match(tex, /\\resumeSubheadingTools\{\\textbf\{Accolite Digital\} \$\|\$ \\emph\{\\small Java, Spring Boot\}\}/);
+    assert.equal(custom.pages, 1);
+    assert.deepEqual(draft.stacks.accolite, []);
+    assert.doesNotMatch(fs.readFileSync(path.join(path.dirname(draft.pdfPath), 'resume.tex'), 'utf8'), /\\resumeSubheadingTools\{/);
     const badEmail = await renderDraft(db, { source: r.source, headerTitle: r.headerTitle, email: 'not-an-email', skills: r.skills, sections: r.sections });
     assert.ok(badEmail.problems.some((p) => /isn't an email/.test(p)));
 

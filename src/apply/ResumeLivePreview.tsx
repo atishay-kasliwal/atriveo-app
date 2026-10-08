@@ -40,6 +40,8 @@ h2 { font-size: 12pt; font-weight: normal; margin: 4pt 0 3pt; padding-bottom: 1p
 ul { margin: 1pt 0 3pt; padding-left: 0.3in; }
 li { font-size: 10pt; margin: 0; }
 .proj { font-size: 10pt; } .proj em { font-style: italic; }
+.tools { font-size: 10pt; }
+.row > .head { white-space: nowrap; min-width: 0; overflow: hidden; } /* as the PDF: a long name | tools line never wraps */
 .skills { margin-left: 0.15in; font-size: 10pt; }
 .pagedjs_page { background: #fff; box-shadow: 0 2px 14px rgba(0,0,0,.45); margin: 0 auto 12px; }
 @media screen { body { background: #3a3d42; padding: 10px 0; } }
@@ -52,7 +54,7 @@ function resumeHtml(layout: Layout, p: { title: string; email: string; city: str
     .map((s) => {
       const m = layout.roles[s.role] ?? { name: s.role, dates: "", place: "", order: 0, title: null };
       const title = s.role === "stony-brook" ? sbTitle(p.title, layout.sbTitleOverrides) : m.title ?? "";
-      return `<div class="entry"><div class="row"><b>${esc(m.name)}</b><span>${dates(m.dates)}</span></div>
+      return `<div class="entry"><div class="row"><span class="head"><b>${esc(m.name)}</b>${s.tools?.length ? ` | <em class="tools">${esc(s.tools.join(", "))}</em>` : ""}</span><span>${dates(m.dates)}</span></div>
         <div class="row sub"><span>${esc(title)}</span><span>${esc(m.place)}</span></div>
         <ul>${s.bullets.map((b) => `<li>${esc(b.text)}</li>`).join("")}</ul></div>`;
     }).join("");
