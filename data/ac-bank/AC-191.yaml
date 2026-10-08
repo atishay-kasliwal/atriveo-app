@@ -32,6 +32,12 @@ facets:
     keywords:
       - docker
       - kubernetes
+  production-ml:
+    phrase: production ML and data workflows
+    keywords:
+      - testing
+      - release
+      - production
 variants:
   - facet: default
     emphasis: default
@@ -39,3 +45,9 @@ variants:
     text: >-
       Installed Jenkins, Docker and Kubernetes CI/CD across 20 engineers cutting release cycles from 6 hours
       to 90 seconds with 20+ monthly production releases.
+  - facet: production-ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Contributed to CI/CD, automated testing, release management, troubleshooting, and production support
+      across distributed enterprise applications.

@@ -4,9 +4,14 @@ slot_kind: experience
 achievement_theme: radiomics
 display_order: 5
 wow_score: 0.72
-metrics_claimed: [200plus_features]
-concepts_claimed: [radiomics, biomarkers, features]
-signature_technologies: [PyRadiomics]
+metrics_claimed:
+  - 200plus_features
+concepts_claimed:
+  - radiomics
+  - biomarkers
+  - features
+signature_technologies:
+  - PyRadiomics
 fact: PyRadiomics extraction of 200+ quantitative biomarkers from segmented brain tumors.
 capabilities:
   ml: 90
@@ -23,7 +28,17 @@ ats_keywords:
 facets:
   ml:
     phrase: radiomic biomarkers
-    keywords: [radiomic, pyradiomic, biomarker, feature, tumor]
+    keywords:
+      - radiomic
+      - pyradiomic
+      - biomarker
+      - feature
+      - tumor
+  production-ml:
+    phrase: production ML and data workflows
+    keywords:
+      - preprocessing
+      - validation
 variants:
   - facet: ml
     emphasis: ml
@@ -31,3 +46,9 @@ variants:
     text: >-
       Derived 200+ quantitative biomarkers with a PyRadiomics feature extraction pipeline for prognosis
       modeling and clinical research.
+  - facet: production-ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Built reusable preprocessing, feature extraction, and validation workflows across medical imaging data,
+      generating 200+ PyRadiomics biomarkers for prognosis modeling.

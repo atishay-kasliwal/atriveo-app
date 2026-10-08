@@ -17,7 +17,7 @@ signature_technologies:
 fact: Earlier 13-session FedTalk evaluation — 3+ days to under 20 minutes at 67.7% directional accuracy.
 provenance:
   level: USER_CONFIRMED
-  confirmed_at: 2026-10-02
+  confirmed_at: 2026-10-02T00:00:00.000Z
   context: Earlier FedTalk/FOMC experiment; not the universal or current accuracy of all versions.
 capabilities:
   ai: 85
@@ -37,10 +37,26 @@ facets:
     keywords:
       - fastapi
       - aws
+  production-ml:
+    phrase: production ML and data workflows
+    keywords:
+      - fastapi
+      - aws
+      - ingestion
+      - preprocessing
+      - validation
+      - reporting
 variants:
   - facet: default
     emphasis: default
     strength: 9
     text: >-
-      Constructed an event-driven FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis from 3 days to under 20 minutes and
-      reaching approximately 68% directional accuracy across 13 sessions.
+      Constructed an event-driven FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis from 3
+      days to under 20 minutes and reaching approximately 68% directional accuracy across 13 sessions.
+  - facet: production-ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Developed an event driven FastAPI pipeline on AWS for data ingestion, preprocessing, model inference,
+      validation, and performance reporting across 13 evaluation sessions, achieving approximately 68%
+      directional accuracy.

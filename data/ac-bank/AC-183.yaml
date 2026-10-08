@@ -32,6 +32,11 @@ facets:
     keywords:
       - mongodb
       - react
+  production-ml:
+    phrase: production ML and data workflows
+    keywords:
+      - react
+      - mongodb
 variants:
   - facet: default
     emphasis: default
@@ -39,3 +44,9 @@ variants:
     text: >-
       Overhauled Oracle CRM into an in-house operations platform on React and MongoDB serving onboarding
       timesheets and reviews for 3,000 employees in production.
+  - facet: production-ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Reengineered an Oracle CRM into a React and MongoDB operations platform supporting onboarding,
+      timesheets, and performance workflows for 3,000 employees.

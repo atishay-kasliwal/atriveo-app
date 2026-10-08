@@ -14,7 +14,9 @@ signature_technologies:
   - LangChain
   - Pinecone
   - AWS
-fact: Production RAG with LangChain and AWS — 18% accuracy lift in evaluations; retrieval moved from ChromaDB to Pinecone, while ChromaDB remains in lower-cost workflows.
+fact: >-
+  Production RAG with LangChain and AWS — 18% accuracy lift in evaluations; retrieval moved from ChromaDB to
+  Pinecone, while ChromaDB remains in lower-cost workflows.
 capabilities:
   ai: 90
   backend: 78
@@ -34,6 +36,13 @@ facets:
     keywords:
       - langchain
       - pinecone
+  production-ml:
+    phrase: production ML and data workflows
+    keywords:
+      - rag
+      - langchain
+      - pinecone
+      - aws
 variants:
   - facet: default
     emphasis: default
@@ -41,3 +50,9 @@ variants:
     text: >-
       Engineered production RAG with LangChain and Pinecone retrieval on AWS, delivering 18% accuracy lift in
       macro analysis evaluations.
+  - facet: production-ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Productionized RAG and LLM workflows using LangChain, Pinecone, and AWS, improving macro analysis
+      evaluation accuracy by 18%.

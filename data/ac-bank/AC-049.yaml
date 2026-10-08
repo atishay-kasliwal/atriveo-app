@@ -3,10 +3,17 @@ role: wake-forest
 slot_kind: experience
 achievement_theme: cloud-deployment
 display_order: 10
-wow_score: 0.80
-metrics_claimed: [latency_2min, clinical_production]
-concepts_claimed: [gcp, cloud, automation, deployment]
-signature_technologies: [GCP]
+wow_score: 0.8
+metrics_claimed:
+  - latency_2min
+  - clinical_production
+concepts_claimed:
+  - gcp
+  - cloud
+  - automation
+  - deployment
+signature_technologies:
+  - GCP
 fact: GCP clinical pipeline delivering clinician-ready MRI insights within 2 minutes of upload.
 capabilities:
   cloud: 92
@@ -26,7 +33,22 @@ ats_keywords:
 facets:
   cloud:
     phrase: GCP imaging pipeline
-    keywords: [gcp, cloud, deploy, automation, ingestion, orchestration, clinical]
+    keywords:
+      - gcp
+      - cloud
+      - deploy
+      - automation
+      - ingestion
+      - orchestration
+      - clinical
+  production-ml:
+    phrase: production ML and data workflows
+    keywords:
+      - production
+      - healthcare
+      - reproducibility
+      - validation
+      - clinical
 variants:
   - facet: cloud
     emphasis: cloud
@@ -34,3 +56,9 @@ variants:
     text: >-
       Expedited clinician-ready insights to within 2 minutes of MRI upload by running the imaging pipeline on
       GCP in clinical production.
+  - facet: production-ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Supported production integration of healthcare ML workflows with attention to reproducibility, data
+      quality, model validation, and clinical reliability.

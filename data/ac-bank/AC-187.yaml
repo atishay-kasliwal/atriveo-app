@@ -32,6 +32,13 @@ facets:
     keywords:
       - aws lambda
       - sqs
+  production-ml:
+    phrase: production ML and data workflows
+    keywords:
+      - aws
+      - sqs
+      - mongodb
+      - production
 variants:
   - facet: default
     emphasis: default
@@ -39,3 +46,9 @@ variants:
     text: >-
       Upgraded timesheet submission to AWS Lambda and SQS for 3,000 employees eliminating manual weekly filing
       across production operations.
+  - facet: production-ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Built scalable backend and data workflows across AWS Lambda, SQS, MongoDB, and enterprise APIs
+      supporting 3,000 employees in production.

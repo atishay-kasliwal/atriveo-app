@@ -32,6 +32,10 @@ facets:
     keywords:
       - python
       - langchain
+  production-ml:
+    phrase: production ML and data workflows
+    keywords:
+      - langchain
 variants:
   - facet: default
     emphasis: default
@@ -39,3 +43,9 @@ variants:
     text: >-
       Orchestrated a Python and LangChain 3-agent RL debate system achieving 60% directional accuracy across
       30 S&P 500 stocks on 7d 30d and 90d forecasting windows in production.
+  - facet: production-ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Developed and evaluated a LangChain 3 agent reinforcement learning system across 30 S&P 500 stocks and
+      7d, 30d, and 90d forecasting windows, achieving 60% directional accuracy.

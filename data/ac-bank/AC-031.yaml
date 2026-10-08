@@ -4,10 +4,21 @@ slot_kind: experience
 achievement_theme: product-ownership
 display_order: 1
 wow_score: 0.88
-metrics_claimed: [10k_studies, time_3h_2min]
-concepts_claimed: [platform, segmentation, radiomics, upload, clinical]
-signature_technologies: [Python, GCP]
-fact: AI clinical decision support platform — 10K+ MRIs, 3h→2min segmentation at 90%+, 2min upload-to-insight, 20-person clinical team.
+metrics_claimed:
+  - 10k_studies
+  - time_3h_2min
+concepts_claimed:
+  - platform
+  - segmentation
+  - radiomics
+  - upload
+  - clinical
+signature_technologies:
+  - Python
+  - GCP
+fact: >-
+  AI clinical decision support platform — 10K+ MRIs, 3h→2min segmentation at 90%+, 2min upload-to-insight,
+  20-person clinical team.
 capabilities:
   ml: 90
   backend: 84
@@ -26,7 +37,18 @@ ats_keywords:
 facets:
   platform:
     phrase: clinical decision support platform
-    keywords: [platform, clinical, decision, radiology, end-to-end]
+    keywords:
+      - platform
+      - clinical
+      - decision
+      - radiology
+      - end-to-end
+  production-ml:
+    phrase: production ML and data workflows
+    keywords:
+      - python
+      - gcp
+      - healthcare
 variants:
   - facet: platform
     emphasis: platform
@@ -34,3 +56,9 @@ variants:
     text: >-
       Designed a Python and GCP-based AI radiology platform that processed 10K+ brain MRI studies and reduced
       tumor segmentation from 3 hours to 2 minutes.
+  - facet: production-ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Developed a Python and GCP based healthcare AI pipeline processing 10K+ brain MRI studies, reducing
+      automated tumor segmentation from 3 hours to 2 minutes.

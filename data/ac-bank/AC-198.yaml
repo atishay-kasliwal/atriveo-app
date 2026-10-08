@@ -15,8 +15,8 @@ signature_technologies:
   - Java
   - AWS
 fact: >-
-  Accolite scope thesis — 3 years owning Fortune 500 delivery across secure insurance exchange, telecom commerce, and
-  Oracle CRM replacement for 3,000 employees.
+  Accolite scope thesis — 3 years owning Fortune 500 delivery across secure insurance exchange, telecom
+  commerce, and Oracle CRM replacement for 3,000 employees.
 capabilities:
   backend: 88
   frontend: 85
@@ -47,6 +47,12 @@ facets:
       - react
       - angular
       - aws
+  production-ml:
+    phrase: production ML and data workflows
+    keywords:
+      - production
+      - java
+      - aws
 variants:
   - facet: default
     emphasis: default
@@ -54,3 +60,9 @@ variants:
     text: >-
       Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning
       secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees.
+  - facet: production-ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Delivered production Java and AWS systems for Fortune 500 clients including Fidelity, British Telecom,
+      and T Mobile across insurance, telecommunications, commerce, and enterprise operations.
