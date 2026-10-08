@@ -150,6 +150,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const [aiBatch, setAiBatch] = useState(false);
   const [aiDone, setAiDone] = useState<string[]>([]);
   const aiGeneration = useRef(0);
+  const aiEntryReviewed=useRef<string|null>(null);
   const latestAiContent = useRef("");
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [error, setError] = useState("");
@@ -296,6 +297,12 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     } catch (e) { if (generation === aiGeneration.current) setAiError(e instanceof Error ? e.message : String(e)); }
     finally { if (generation === aiGeneration.current) setAiBusy(false); }
   };
+  useEffect(() => {
+    if(!loaded||params.get("ai")!=="review"||aiEntryReviewed.current===query)return;
+    aiEntryReviewed.current=query;
+    setAiHelpMode("rewrite");
+    void runAi(loaded.sections,true,loaded.skills.join("\n"));
+  },[loaded,query,params]);
   const askAi = async () => {
     if (!loaded || !aiInstruction.trim()) return;
     const generation = ++aiGeneration.current;

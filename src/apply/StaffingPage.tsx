@@ -1,3 +1,4 @@
+import {useNavigate} from 'react-router-dom';
 import { useEffect, useRef, useState } from "react";
 import { getJson, when } from "./engine";
 import { getTailorServerBase } from "../utils/tailorServer";
@@ -12,6 +13,7 @@ type Status = { sources: Source[]; runs: Run[]; schedule: { label: string; next_
 const LABELS: Record<string, string> = { access_pending: "Needs provider access", not_checked: "Not checked yet", running: "Checking", ready: "Jobs readable", needs_connector: "Needs connector", blocked: "Access blocked", failed: "Check failed" };
 
 export default function StaffingPage({ header }: { header?: React.ReactNode }) {
+  const navigate=useNavigate();
   const refreshSequence = useRef(0);
   const dialogRef = useRef<HTMLElement>(null);
   const [view, setView] = useState("recommended");
@@ -77,6 +79,14 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
     setPreparing(j._id); setError("");
     try { await request("prepare", { id: j._id }); setNote("Resume ready. Open & Fill to start your application."); await refresh(); } catch (e) { setError(String(e instanceof Error ? e.message : e)); } finally { setPreparing(""); }
   }
+  async function reviewWithAi(j: Job) {
+    setPreparing(j._id); setError("");
+    try {
+      const ready=j.resume?j:await request("prepare",{id:j._id});
+      const builderId=ready.builder_id||j.builder_id;
+      navigate(`/resume_builder?${builderId?`pasted=${encodeURIComponent(builderId)}`:`job=${encodeURIComponent(j.job_url)}`}&ai=review`);
+    } catch(e) {setError(e instanceof Error?e.message:String(e));} finally {setPreparing("");}
+  }
   async function open(j: Job) {
     setError("");
     if (!canApplyAnywhere()) { setNote("Open the job in Chrome with Atriveo Fill installed to fill the application."); window.open(j.job_url, "_blank", "noopener,noreferrer"); return; }
@@ -98,7 +108,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
     <section className="staffing-shortlist" aria-label="Job shortlist">
       {!workspace ? <p>Finding your matches…</p> : !selectedJobs.length ? <p className="apps-muted">{view === "recommended" ? "You’re caught up. Browse all jobs or add a posting you like." : "No jobs here yet."}</p> : selectedJobs.map(j => <article className="staffing-match" key={j._id}>
         <div className="staffing-match-main"><button className="staffing-job-title" onClick={() => void inspect(j)}>{j.title}</button><p>{j.company} · {j.location || "Location not specified"}</p><div className="staffing-match-facts">{j.reasons.length > 0 && <span>Skills in posting: {j.reasons.join(" · ")}</span>}{j.warning && <span className="staffing-error">{j.warning}</span>}<small>{j.resume ? "✓ Resume ready" : "Resume needed"} · Found {when(j.first_seen_at)}</small></div></div>
-        <div className="staffing-match-actions">{j.state !== "applied" && <><button className="rv-primary" disabled={Boolean(preparing) || busy} onClick={() => void (j.resume ? open(j) : prepare(j))}>{preparing === j._id ? "Preparing…" : j.resume ? "Open & Fill" : "Create resume"}</button><div><button className="apps-link" disabled={busy} onClick={() => void decide(j, j.state === "saved" ? "new" : "saved")}>{j.state === "saved" ? "Unsave" : "Save"}</button><button className="apps-link" disabled={busy} onClick={() => void decide(j, "passed")}>Pass</button><button className="apps-link" disabled={busy} onClick={() => void decide(j, "applied")}>Mark applied</button></div></>}{j.resume && <a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(j.resume)}&dl=1`}>Download resume</a>}</div>
+        <div className="staffing-match-actions">{j.state !== "applied" && <><button className="rv-primary" disabled={Boolean(preparing) || busy} onClick={() => void (j.resume ? open(j) : prepare(j))}>{preparing === j._id ? "Preparing…" : j.resume ? "Open & Fill" : "Create resume"}</button><div><button className="apps-link" disabled={busy} onClick={() => void decide(j, j.state === "saved" ? "new" : "saved")}>{j.state === "saved" ? "Unsave" : "Save"}</button><button className="apps-link" disabled={busy} onClick={() => void decide(j, "passed")}>Pass</button><button className="apps-link" disabled={busy} onClick={() => void decide(j, "applied")}>Mark applied</button></div></>}{j.resume && <a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(j.resume)}&dl=1`}>Download resume</a>}<button className="apps-btn staffing-ai-review" disabled={Boolean(preparing)||busy} onClick={()=>void reviewWithAi(j)} title={j.resume?"Review this resume against the job description":"Create this job’s resume, then review it with AI"}>✦ Review with AI</button></div>
       </article>)}
     </section>
     {workspace && workspace.total > 10 && <div className="staffing-pagination"><button className="apps-btn" disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - 10))}>Previous</button><small>{offset + 1}–{Math.min(offset + 10, workspace.total)} of {workspace.total}</small><button className="apps-btn" disabled={offset + 10 >= workspace.total} onClick={() => setOffset(offset + 10)}>Next ten →</button></div>}

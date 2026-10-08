@@ -374,3 +374,4 @@
   .td-search-clear { width: 32px; height: 32px; }
   .td-search-n { position: static; flex: none; }
 }
+.td-ai-review { display:flex;align-items:center;justify-content:center;min-height:38px;text-decoration:none;border:1px solid color-mix(in srgb,var(--primary) 35%,var(--border-col));color:var(--primary); }

@@ -102,3 +102,9 @@ Validation: 28 optimizer/provider/editor tests pass, including a mobile general-
 The header displays Codex allowance remaining; its panel includes provider windows and reset times from the official Codex app-server account/rateLimits/read method. The Mac refreshes this read every minute and after inference; the browser refreshes every 30 seconds. Stale/offline values are identified. No OAuth secrets leave the CLI. Claude allowance is not exposed by this connection, so its panel links to claude.ai/settings/usage.
 
 AI Help passes a per-tab session ID. The worker extracts measured token counts from Claude result usage and Codex turn.completed JSON events, separately from structured resume content. Completion records are idempotently upserted by inference ID and expire after 30 days. Claude cache input is included in input totals; Codex cached input is already part of input and is not added again. Session tokens cover measured completed calls after tracking was added, not other apps/devices or the remaining subscription allowance. The panel does not display API dollar estimates for subscription calls.
+
+## Review from job cards
+
+Today and staffing cards now expose Review with AI. The action links to the existing resume editor with ai=review and the same job/application/pasted identity used for editing. After loading current resume content, the editor starts one AI analysis and opens the proposed changes. It does not apply or save them. Staffing jobs without resumes use the existing prepare operation first and then open the returned builder ID; daily cards marked resumeReady=false show the review action disabled until a resume exists. Existing Apply/Apply All, preview, Undo and Save behavior remains authoritative.
+
+Checks include direct deep-link review, existing staffing resume navigation and missing staffing resume preparation before navigation, with no Save calls on entry.
