@@ -1,6 +1,8 @@
+import { handleWorkspace } from './staffing-workspace.mjs';
 /** Proxy only fixed private crawler endpoints; the sidecar's existing authentication runs first. */
 export async function handleStaffing(req, res, url, { base = process.env.STAFFING_SERVICE_URL || 'http://atriveo-staffing:8791', token = process.env.TAILOR_TOKEN || '', fetcher = fetch } = {}) {
   if (!url.pathname.startsWith('/staffing/')) return false;
+  if (await handleWorkspace(req, res, url)) return true;
   const routes = { 'GET /staffing/status': '/status', 'GET /staffing/jobs': '/jobs', 'POST /staffing/run': '/run', 'POST /staffing/source': '/source' };
   const target = routes[`${req.method} ${url.pathname}`];
   res.setHeader('Content-Type', 'application/json');

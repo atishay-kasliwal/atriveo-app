@@ -37,3 +37,29 @@
 .staffing-job-dates { display: flex; flex-direction: column; gap: 5px; margin-top: auto; padding: 12px 0; color: var(--muted-fg); }
 .staffing-job-card > a { align-self: flex-start; }
 @media (prefers-reduced-motion: reduce) { .staffing-carousel { scroll-behavior: auto; } }
+
+.staffing-views, .staffing-search, .staffing-pagination { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; align-items: center; }
+.staffing-views small { margin-left: 6px; opacity: .7; }
+.staffing-search input, .staffing-search select, .staffing-detail input, .staffing-detail textarea { background: var(--card-bg); color: var(--foreground); border: 1px solid var(--border-col); padding: 12px; border-radius: 10px; font: inherit; min-width: 0; }
+.staffing-search input { flex: 1; }
+.staffing-match { display: flex; justify-content: space-between; gap: 20px; padding: 20px; border: 1px solid var(--border-col); background: var(--card-bg); border-radius: 14px; margin-bottom: 12px; }
+.staffing-match-main { min-width: 0; }
+.staffing-job-title { font: inherit; font-size: 18px; font-weight: 650; color: var(--foreground); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
+.staffing-match-main p { color: var(--muted-fg); margin: 6px 0 12px; font-size: 13px; }
+.staffing-match-facts { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.staffing-match-facts small { color: var(--muted-fg); }
+.staffing-match-actions { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; flex-shrink: 0; }
+.staffing-match-actions > div { display: flex; gap: 14px; font-size: 12px; }
+.staffing-match-actions .rv-primary { min-height: 44px; padding: 10px 20px; }
+.staffing-pagination { justify-content: center; }
+.staffing-source-details { border-top: 1px solid var(--border-col); margin-top: 24px; padding-top: 20px; }
+.staffing-source-details > summary { cursor: pointer; font-weight: 600; }
+.staffing-source-details > summary small { font-weight: 400; color: var(--muted-fg); margin-left: 12px; }
+.staffing-modal-back { position: fixed; inset: 0; background: #0009; z-index: 100; display: flex; justify-content: flex-end; }
+.staffing-detail { width: min(600px, 100%); padding: 24px; box-sizing: border-box; background: var(--background); overflow-y: auto; }
+.staffing-close { float: right; }
+.staffing-description { white-space: pre-wrap; line-height: 1.7; font-size: 14px; margin-top: 24px; }
+.staffing-detail form, .staffing-detail label { display: flex; flex-direction: column; gap: 10px; }
+.staffing-detail form { gap: 16px; }
+.staffing-detail textarea { min-height: 180px; }
+@media (max-width: 640px) { .staffing-match { flex-direction: column; padding: 16px; gap: 16px; } .staffing-match-actions { align-items: stretch; } .staffing-match-actions > div { justify-content: space-between; } .staffing-source-details > summary small { display: block; margin: 8px 0; } .staffing-detail :is(input, textarea) { font-size: 16px; } }
