@@ -111,13 +111,30 @@ test('Open & Fill on a drafted or approved card opens its job page and sends not
   } finally { await f.close(); }
 });
 
-test('Answer opens To answer: each question once, shared ones saved for every job, nothing already drafted', async () => {
+test('Answer on a card opens only the questions you must answer in a pop-up on Today; Cancel saves nothing', async () => {
   const f = await fixture(); const { page, calls } = f;
   try {
     await page.goto(`${f.base}/`);
     await page.getByRole('button', { name: 'Next applications' }).click();
     await page.getByRole('article', { name: 'Rogo: Needs your answers' }).getByRole('button', { name: /^Answer/ }).click();
-    await page.waitForURL(/\/unanswered\?app=u1$/);
+    const pop = page.getByRole('dialog', { name: "Answer Rogo's questions" });
+    await pop.waitFor();
+    assert.ok(!page.url().includes('/unanswered'), 'you stay on Today');
+    const text = await pop.innerText();
+    assert.match(text, /How did you hear about us\?/);
+    assert.doesNotMatch(text, /Years of Python/, 'a drafted answer is not asked again');
+    assert.doesNotMatch(text, /Company name/, 'resume fields are left to Atriveo Fill');
+    assert.doesNotMatch(text, /Twitter/, 'optional questions are left out');
+    await pop.getByRole('button', { name: 'Cancel' }).click();
+    await pop.waitFor({ state: 'detached' });
+    assert.equal(calls.filter((c) => c.action === 'answer').length, 0, 'Cancel saves nothing');
+  } finally { await f.close(); }
+});
+
+test('To answer: each question once, shared ones saved for every job, nothing already drafted', async () => {
+  const f = await fixture(); const { page, calls } = f;
+  try {
+    await page.goto(`${f.base}/unanswered?app=u1`);
     const shared = page.getByRole('region', { name: 'Asked by several jobs' });
     const heard = shared.getByRole('article', { name: 'How did you hear about us?' });
     await heard.waitFor();
