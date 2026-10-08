@@ -226,3 +226,41 @@
 
 .rb-start .apps-muted { color: color-mix(in srgb, var(--foreground) 65%, var(--muted-fg)); }
 @media (prefers-reduced-motion: reduce) { .rb-start .rb-track { transition: none; } }
+
+/* Keep the starting choices in one compact desktop workspace. */
+.rb-start { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; padding: 24px 24px 28px; max-width: 1180px; align-items: start; }
+.rb-start-heading { grid-column: 1 / -1; background: transparent; padding: 0; margin: 0; }
+.rb-start-heading .rb-eyebrow { display: none; }
+.rb-start h1 { font-size: 28px; margin: 0 0 6px; }
+.rb-start-heading p { font-size: 14px; }
+.rb-paste { gap: 12px; padding: 20px; }
+.rb-paste .rb-step, .rb-general .rb-step { display: none; }
+.rb-start h2 { font-size: 17px; }
+.rb-paste textarea { min-height: 160px; height: clamp(150px, 25vh, 230px); font-size: 14px; }
+.rb-paste-fields { gap: 10px; }
+.rb-paste-fields input { min-height: 42px; padding: 10px; font-size: 14px; }
+.rb-paste-acts { gap: 10px; }
+.rb-paste-acts .rv-primary { min-height: 44px; padding: 10px 18px; font-size: 14px; }
+.rb-paste-acts > span { font-size: 12px; }
+.rb-general { grid-column: 2; grid-row: 2; }
+.rb-general .rb-section-heading { margin: 4px 0 14px; }
+.rb-start .rb-tracks { grid-template-columns: 1fr; gap: 8px; }
+.rb-start .rb-track { padding: 12px 16px; display: grid; grid-template-columns: 10px 1fr; align-items: center; gap: 6px 12px; }
+.rb-start .rb-track strong { font-size: 14px; }
+.rb-start .rb-track span { grid-column: 2; font-size: 12px; }
+.rb-start > section[aria-label="Your resumes"] { grid-column: 1 / -1; }
+@media (max-width: 700px) {
+ .rb-start { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
+ .rb-general { grid-column: 1; grid-row: auto; }
+ .rb-start h1 { font-size: 24px; }
+ .rb-paste { padding: 16px; gap: 10px; }
+ .rb-paste textarea { min-height: 110px; height: 130px; font-size: 16px; }
+ .rb-paste-fields { grid-template-columns: 1fr 1fr; gap: 10px; }
+ .rb-paste-fields label:last-child { grid-column: 1 / -1; }
+ .rb-paste-fields input { font-size: 16px; }
+ .rb-paste-acts > span:empty { display: none; }
+ .rb-start .rb-tracks { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+ .rb-start .rb-track { display: flex; padding: 12px; gap: 8px; }
+ .rb-start .rb-track span { display: none; }
+ .rb-general .rb-section-heading { margin-bottom: 10px; }
+}

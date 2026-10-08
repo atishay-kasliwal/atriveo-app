@@ -83,11 +83,11 @@ function StartScreen() {
   };
   return (
     <div className="rb-start">
-      <header className="rb-start-heading"><span className="rb-eyebrow">YOUR NEXT APPLICATION</span><h1>A resume for your next role.</h1><p>Build from a job description, or start with one of your general resumes.</p></header>
+      <header className="rb-start-heading"><span className="rb-eyebrow">YOUR NEXT APPLICATION</span><h1>Resume builder</h1><p>Paste a job description or choose a general resume.</p></header>
       <section className="rb-paste" aria-label="Start from a job description">
-        <div className="rb-section-heading"><span className="rb-step" aria-hidden="true">01</span><div><h2>Start with a job description</h2><p>Paste the posting. Make it yours.</p></div></div>
-        <p className="apps-muted">We’ll choose relevant experience and skills for this role. You can review and edit your resume before downloading.</p>
-        <label className="rb-jd-label" htmlFor="rb-job-description">Job description</label><textarea id="rb-job-description" rows={8} value={jd} disabled={building} placeholder="Paste the whole job description: title, company, responsibilities, requirements…" onChange={(e) => setJd(e.target.value)} />
+        <div className="rb-section-heading"><span className="rb-step" aria-hidden="true">01</span><div><h2>Start with a job description</h2></div></div>
+
+        <label className="rb-jd-label" htmlFor="rb-job-description">Job description</label><textarea id="rb-job-description" rows={5} value={jd} disabled={building} placeholder="Paste the whole job description: title, company, responsibilities, requirements…" onChange={(e) => setJd(e.target.value)} />
         <div className="rb-paste-fields">
           <label><span>Company</span><input value={fields.company} disabled={building} placeholder="e.g. Acme" onChange={(e) => set("company", e.target.value)} /></label>
           <label><span>Role title</span><input value={fields.title} disabled={building} placeholder="e.g. Software Engineer" onChange={(e) => set("title", e.target.value)} /></label>
@@ -114,8 +114,8 @@ function StartScreen() {
         ))}</ul>
       </section>}
       <section className="rb-general" aria-label="General resumes">
-        <div className="rb-section-heading"><span className="rb-step" aria-hidden="true">02</span><div><h2>Start with a general resume</h2><p>Choose your track to review and edit.</p></div></div>
-        <p className="apps-muted">For a resume from Today, open its card and choose Resume → Edit.</p>
+        <div className="rb-section-heading"><span className="rb-step" aria-hidden="true">02</span><div><h2>Start with a general resume</h2></div></div>
+
         <div className="rb-tracks">{GENERAL.map((t) => <Link key={t} className={`rb-track tr-${t}`} to={`/resume_builder?track=${t}`}><i /><strong>{TRACK_LABEL[t]}</strong><span>Edit resume <b aria-hidden="true">↗</b></span></Link>)}</div>
       </section>
     </div>

@@ -62,3 +62,24 @@
   .apply-nav::-webkit-scrollbar { display: none; }
   .apply-nav a { min-height: 40px; font-size: 13.5px; }
 }
+
+/* Clear primary navigation with consistent spacing and count badges. */
+.apply-header { min-height: 64px; height: auto; padding: 0 24px; gap: 20px; flex-shrink: 0; }
+.apply-brand { flex-shrink: 0; }
+.apply-nav { margin: 0 auto 0 12px; gap: 4px; padding: 8px 0; }
+.apply-nav a { min-height: 40px; box-sizing: border-box; padding: 8px 12px; border-radius: 10px; font-weight: 550; color: var(--muted-fg); }
+.apply-nav a[aria-current="page"] { color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, var(--card-bg)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 20%, transparent); }
+.apply-nav-n { font-size: 10px; padding: 2px 5px; line-height: 1.3; }
+.apply-header-right { gap: 12px; }
+.apply-signout { min-height: 36px; }
+@media (max-width: 1100px) { .apply-user-name, .apply-brand-by { display: none; } .apply-header { gap: 10px; padding: 0 16px; } }
+@media (max-width: 760px) {
+ .apply-header { flex-wrap: wrap; row-gap: 0; min-height: 0; padding: 0 12px; }
+ .apply-brand, .apply-header-right { height: 46px; }
+ .apply-header-right { margin-left: auto; gap: 10px; font-size: 12px; }
+ .apply-nav { order: 3; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); flex: 1 0 100%; margin: 0; padding: 0 0 8px; gap: 3px; overflow: visible; }
+ .apply-nav a { flex-direction: column; justify-content: center; gap: 3px; min-height: 46px; font-size: 11px; padding: 6px 2px; }
+ .apply-nav-n { min-width: 0; font-size: 9px; }
+ .apply-avatar { width: 26px; height: 26px; font-size: 12px; }
+ .apply-signout { min-height: 32px; font-size: 11px; padding: 4px 8px; }
+}
