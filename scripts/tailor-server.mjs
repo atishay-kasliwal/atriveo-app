@@ -1,5 +1,5 @@
-import {dashboardAiUsage} from './resume-ai-usage.mjs';
 #!/usr/bin/env node
+import {dashboardAiUsage} from './resume-ai-usage.mjs';
 import { claimInference, completeInference } from './resume-ai-queue.mjs';
 import { analyzeResume, recordAiDecision, resumeAiVersion, enqueueResumeAi, resumeAiResult } from './resume-ai.mjs';
 /**
