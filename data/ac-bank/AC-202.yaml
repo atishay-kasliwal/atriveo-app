@@ -1,0 +1,51 @@
+# FDE-only bullet (tracks: forward-deployed), docs/resume-tracks/fde.md, 2026-10-08.
+id: AC-202
+role: wake-forest
+slot_kind: experience
+engineering_identity: ml
+achievement_theme: fde-clinical-workflow
+display_order: 1
+wow_score: 0.85
+tracks:
+  - forward-deployed
+metrics_claimed:
+  - time_1h_1min
+  - team_20_2
+concepts_claimed:
+  - customer
+  - workflow
+  - clinical
+signature_technologies: []
+fact: >-
+  Manual workflow: residents converted planes to DWI/T2 and hand-masked tumors across ~5 scans per patient (~1
+  hour); automated to under 1 minute. Team: ~20 residents and 2 lead doctors.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: FDE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 80
+  backend: 70
+  data: 80
+  cloud: 65
+  ml: 85
+  frontend: 50
+strength:
+  recruiter: 9
+ats_keywords:
+  - Healthcare
+facets:
+  fde:
+    phrase: clinical workflow
+    keywords:
+      - clinical
+      - workflow
+      - healthcare
+      - clinicians
+variants:
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    text: >-
+      Collaborated with 20 residents and 2 lead doctors on their manual MRI masking workflow, automating plane
+      conversion and tumor masking from about 1 hour to under 1 minute.

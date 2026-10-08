@@ -9,7 +9,8 @@ import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { loadBank } from "./ac-bank.mjs";
 import { scoreStoryTriple } from "./ac-story-select.mjs";
-import { countSignatureTech, lintBullet, openingVerb, resumeRoles, ROLE_ATS_TECH, sharedOpeningVerbs, techPattern, wordCount } from "./ac-bullet-rules.mjs";
+import { countSignatureTech, lintBullet, openingVerb, resumeRoles, ROLE_ATS_TECH, sharedOpeningVerbsByTrack, techPattern, wordCount } from "./ac-bullet-rules.mjs";
+import { loadTracks } from "./ac-tracks.mjs";
 
 function metricOverlap(acs) {
   const seen = new Map();
@@ -120,10 +121,11 @@ function main() {
   if (!roleFilter) {
     const roles = resumeRoles(bank.bank_dir);
     const active = bank.acs.filter((a) => a.variants?.[0]?.text && a.visibility?.default !== false);
-    const shared = sharedOpeningVerbs(active, roles);
+    // Per track: a bullet tagged for one track never shares a resume with another track's (ac-tracks bankForTrack).
+    const shared = sharedOpeningVerbsByTrack(active, roles, loadTracks(bank.bank_dir));
     console.log(`\nUnique opening verbs across resume roles (${[...roles].join(", ")}):`);
     if (shared.length) {
-      for (const { verb, ids } of shared) console.log(`  ✗ "${verb}" opens ${ids.join(", ")}`);
+      for (const { verb, ids, track } of shared) console.log(`  ✗ "${verb}" opens ${ids.join(", ")} (${track})`);
       fail += shared.length;
     } else {
       console.log("  ✓ every bullet that can share a resume opens with its own verb");

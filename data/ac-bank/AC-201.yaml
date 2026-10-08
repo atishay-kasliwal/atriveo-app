@@ -1,0 +1,49 @@
+# FDE-only bullet (tracks: forward-deployed), docs/resume-tracks/fde.md, 2026-10-08.
+id: AC-201
+role: stony-brook
+slot_kind: experience
+engineering_identity: ai
+achievement_theme: fde-reuse
+display_order: 4
+wow_score: 0.85
+tracks:
+  - forward-deployed
+metrics_claimed:
+  - nasdaq_100
+concepts_claimed:
+  - reuse
+  - generalization
+signature_technologies: []
+fact: >-
+  Reused the FOMC pipeline beyond press conferences: non-conference trading days without video, audio or
+  transcript, and the NASDAQ-100 beyond the S&P 500; accuracy somewhat lower without the three signals (13-15%
+  vs 17% on the user's measure; exact figures kept for interviews).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: FDE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 80
+  backend: 65
+  data: 80
+  cloud: 60
+  ml: 80
+  frontend: 40
+strength:
+  recruiter: 9
+ats_keywords:
+  - Machine Learning
+facets:
+  fde:
+    phrase: reusable pipeline
+    keywords:
+      - reusable
+      - repeatable
+      - generalize
+variants:
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    text: >-
+      Adapted the FOMC pipeline beyond press conferences to NASDAQ-100 trading days without video or
+      transcripts, reusing the same agents at slightly lower accuracy than the full multimodal model.

@@ -21,7 +21,7 @@ import { spawnSync } from "node:child_process";
 import { loadBank } from "./ac-bank.mjs";
 import { assembleAcResume, EDUCATION_ROWS, toolsFromBullets } from "./ac-tex.mjs";
 import { displayUrl } from "./ats/patterns.mjs";
-import { employerTitle, loadTracks } from "./ac-tracks.mjs";
+import { bankForTrack, classifyTrack, employerTitle, loadTracks } from "./ac-tracks.mjs";
 import { resolveExperienceMeta, resolveProjectMeta, sortProjectsByRecency } from "./ac-role-meta.mjs";
 import { jdSkillMatch, loadSkills } from "./ac-jd-skills.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
@@ -253,7 +253,8 @@ export async function loadResume(db, { jobUrl = null, track = null, appId = null
     skills: c.skills,
     // A project's tools line: yours (stack set) or the one the bullets give (stackAuto), as the PDF shows it.
     sections: c.sections.map((s) => ({ ...s, label: labelOf(s.role), stack: s.stack ?? null, stackAuto: toolsFromBullets(s.bullets, s.role) })),
-    options: bankOptions(bank),
+    // Bullets this resume's track may use: a track's own bullets (tracks: [...]) only on that track's resumes.
+    options: bankOptions(bankForTrack(bank, classifyTrack(c.headerTitle || source.title))),
     // Projects you could add (every project with bank bullets).
     roles: Object.entries(kinds).map(([role, kind]) => ({ role, kind, label: labelOf(role) })),
     current: { pdfPath: path.join(dir, PDF), edited: Boolean(generated), generatedPdfPath: generated, pages: pageCount(path.join(dir, PDF)), room: pageRoom(path.join(dir, PDF)) },

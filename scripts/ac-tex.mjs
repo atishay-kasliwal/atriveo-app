@@ -321,8 +321,10 @@ export function compactCompositionForTex(result) {
     coverage: result.coverage,
     planner_config: result.planner_config,
     selection_trace: result.selection_trace,
+    // A tools line set on a section (a track's project_stacks, or the resume builder) travels with it.
     experience: result.experience.map((role) => ({
       role: role.role,
+      ...(role.stack?.length ? { stack: role.stack } : {}),
       bullets: role.bullets.map(({ ac, face }) => ({
         ac_id: ac.id,
         facet: face.facet,
@@ -331,6 +333,7 @@ export function compactCompositionForTex(result) {
     })),
     projects: result.projects.map((project) => ({
       role: project.role,
+      ...(project.stack?.length ? { stack: project.stack } : {}),
       bullets: project.bullets.map(({ ac, face }) => ({
         ac_id: ac.id,
         facet: face.facet,

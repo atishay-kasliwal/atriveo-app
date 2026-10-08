@@ -22,6 +22,29 @@ export function classifyTrack(title, doc = loadTracks()) {
   return null;
 }
 
+/**
+ * The bank as one track sees it. An entry or wording with `tracks: [...]` exists only on those tracks; untagged ones
+ * are on every track. track null (a title on no track) sees only untagged ones.
+ */
+export function bankForTrack(bank, track) {
+  const on = (x) => !Array.isArray(x?.tracks) || (track != null && x.tracks.includes(track));
+  let changed = false;
+  const acs = [];
+  for (const ac of bank.acs) {
+    if (!on(ac)) { changed = true; continue; }
+    const variants = (ac.variants || []).filter(on);
+    if (variants.length !== (ac.variants || []).length) changed = true;
+    if (!variants.length) continue;
+    acs.push(variants.length === (ac.variants || []).length ? ac : { ...ac, variants });
+  }
+  return changed ? { ...bank, acs } : bank;
+}
+
+/** A track's pinned bullet set (TRACKS.yaml tracks.<id>.pinned), or null. */
+export function trackPins(track, doc = loadTracks()) {
+  return track ? doc.tracks?.[track]?.pinned ?? null : null;
+}
+
 /** Planner settings a track changes, applied over the planner's own (see buildPlannerRuntimeConfig). */
 export function trackPlannerOverrides(runtime, title, doc = loadTracks()) {
   const id = classifyTrack(title, doc);

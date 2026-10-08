@@ -19,6 +19,7 @@ import { loadBank } from "./ac-bank.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
 import { scoreAndSaveRun } from "./ats/persist.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
+import { classifyTrack, trackPins } from "./ac-tracks.mjs";
 import {
   createArtifactRun,
   advanceArtifactStage,
@@ -239,8 +240,18 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     const reason = jdGate.user_message || jdGate.message;
     onLog?.("warn", `Unsupported JD · ${reason}`);
     onLog?.("step", "Building the basic resume instead");
-    composeJd = fs.readFileSync(BASELINE_JD_PATH, "utf8");
-    composeTitle = loadResumeProfile().title || "Software Engineer";
+    // A title on a track with a tested bullet set (TRACKS.yaml pinned, e.g. FDE) keeps its track: that track's
+    // baseline JD and the posting's title, so it still gets the tested set. FDE postings often fail the fit check
+    // (customer, travel and discovery language), which used to give them a generic SWE resume.
+    const track = classifyTrack(role);
+    const trackJd = track && trackPins(track) ? path.join(ROOT, "data", "baseline-jds", `${track}.txt`) : null;
+    if (trackJd && fs.existsSync(trackJd)) {
+      composeJd = fs.readFileSync(trackJd, "utf8");
+      composeTitle = role;
+    } else {
+      composeJd = fs.readFileSync(BASELINE_JD_PATH, "utf8");
+      composeTitle = loadResumeProfile().title || "Software Engineer";
+    }
     composeGate = assessJdGate(composeJd, { title: composeTitle });
     result.fallback = "basic";
     result.fallback_reason = reason;

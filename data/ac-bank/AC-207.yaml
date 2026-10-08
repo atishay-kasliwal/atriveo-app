@@ -1,0 +1,52 @@
+# FDE-only bullet (tracks: forward-deployed), docs/resume-tracks/fde.md, 2026-10-08.
+id: AC-207
+role: atriveo
+slot_kind: project
+engineering_identity: platform
+achievement_theme: fde-founder
+display_order: 1
+wow_score: 0.85
+tracks:
+  - forward-deployed
+metrics_claimed:
+  - users_1k
+  - year_1
+concepts_claimed:
+  - customer
+  - product
+signature_technologies: []
+fact: >-
+  Started as a Chrome extension that captures applications (JD, resume used) with Gmail-synced status, replacing
+  spreadsheets; then direct job discovery with alerts; then multi-user weekly challenges. ~1,000 users over
+  almost a year, still enrolling.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: FDE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 70
+  backend: 80
+  data: 70
+  cloud: 75
+  ml: 50
+  frontend: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Chrome Extension
+facets:
+  fde:
+    phrase: founded product
+    keywords:
+      - founder
+      - zero to one
+      - 0 to 1
+      - users
+      - product
+variants:
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    text: >-
+      Founded Atriveo to fix manual job-application tracking, shipping a Chrome extension with Gmail-synced
+      status to 1K users over a year before adding fresh job discovery and weekly challenges.

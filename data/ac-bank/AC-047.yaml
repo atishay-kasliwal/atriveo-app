@@ -35,3 +35,12 @@ variants:
     text: >-
       Visualized MRIs, prior studies, and AI segmentations for a 20-person research team in a React and
       TypeScript clinician dashboard with interactive mask refinement.
+  # FDE wording (docs/resume-tracks/fde.md), only on Forward deployed resumes.
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    tracks:
+      - forward-deployed
+    text: >-
+      Visualized MRIs, prior studies and AI segmentations for 20 residents with 2 lead doctors in a React and
+      TypeScript clinician dashboard with interactive mask refinement.

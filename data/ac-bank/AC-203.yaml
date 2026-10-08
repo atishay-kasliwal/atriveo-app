@@ -1,0 +1,52 @@
+# FDE-only bullet (tracks: forward-deployed), docs/resume-tracks/fde.md, 2026-10-08.
+id: AC-203
+role: wake-forest
+slot_kind: experience
+engineering_identity: ml
+achievement_theme: fde-imaging-data
+display_order: 2
+wow_score: 0.85
+tracks:
+  - forward-deployed
+metrics_claimed:
+  - scans_50k
+  - tb_2
+concepts_claimed:
+  - data
+  - pipeline
+signature_technologies:
+  - PyTorch
+fact: >-
+  ~50,000 MRI scans (~2 TB); DICOM to NIfTI conversion, skull stripping, motion rejection; PyTorch segmentation;
+  ITK-SNAP review.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: FDE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 65
+  data: 90
+  cloud: 65
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - PyTorch
+  - Data Pipelines
+facets:
+  fde:
+    phrase: medical imaging data
+    keywords:
+      - data quality
+      - medical imaging
+      - dicom
+      - pipelines
+variants:
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    text: >-
+      Standardized 50K MRI scans (2 TB) by converting DICOM to NIfTI with skull stripping and motion rejection
+      before PyTorch segmentation and ITK-SNAP review.

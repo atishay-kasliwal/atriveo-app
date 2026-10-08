@@ -1,0 +1,51 @@
+# FDE-only bullet (tracks: forward-deployed), docs/resume-tracks/fde.md, 2026-10-08.
+id: AC-205
+role: accolite
+slot_kind: experience
+engineering_identity: platform
+achievement_theme: fde-client-demos
+display_order: 1
+wow_score: 0.85
+tracks:
+  - forward-deployed
+metrics_claimed:
+  - demos_75
+  - years_3
+concepts_claimed:
+  - customer
+  - requirements
+signature_technologies: []
+fact: >-
+  Demos every other week for 3 years (~78) to Fidelity, British Telecom and T-Mobile engineers, managers,
+  executives and leadership; gathered requirements from the client teams.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: FDE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 30
+  backend: 80
+  data: 50
+  cloud: 70
+  ml: 20
+  frontend: 70
+strength:
+  recruiter: 9
+ats_keywords:
+  - Stakeholder Management
+facets:
+  fde:
+    phrase: client demos
+    keywords:
+      - customers
+      - clients
+      - executives
+      - stakeholders
+      - requirements
+variants:
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    text: >-
+      Presented 75+ biweekly demos to Fidelity, British Telecom and T-Mobile engineers through executives over 3
+      years, turning gathered requirements into each release.

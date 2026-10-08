@@ -1,0 +1,49 @@
+# FDE-only bullet (tracks: forward-deployed), docs/resume-tracks/fde.md, 2026-10-08.
+id: AC-209
+role: atriveo
+slot_kind: project
+engineering_identity: platform
+achievement_theme: fde-messy-systems
+display_order: 3
+wow_score: 0.85
+tracks:
+  - forward-deployed
+metrics_claimed:
+  - applications_893
+concepts_claimed:
+  - reliability
+  - human-in-the-loop
+signature_technologies: []
+fact: >-
+  Handled Ashby form changes, Greenhouse email verification, dynamic questions and spam blocks; final submission
+  and open-ended answers kept human-controlled; 893 applications processed (Mongo, 2026-10-08).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: FDE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 70
+  backend: 80
+  data: 60
+  cloud: 70
+  ml: 40
+  frontend: 60
+strength:
+  recruiter: 9
+ats_keywords:
+  - Browser Automation
+facets:
+  fde:
+    phrase: messy external systems
+    keywords:
+      - debugging
+      - reliability
+      - human in the loop
+      - automation
+variants:
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    text: >-
+      Reinforced browser automation against Ashby form changes, Greenhouse email verification and spam blocks
+      while keeping final submission and open answers under human review across 893 applications.

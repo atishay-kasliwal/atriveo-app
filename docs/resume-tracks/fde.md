@@ -147,15 +147,61 @@ Each layer gets its own bullets. **Two bullets on one resume never tell the same
 The current FDE resume leads with Stony Brook, the weakest FDE story, and tells it twice. It also lists Wake Forest's
 platform as tech, not as a clinical deployment.
 
-## 6. Next steps (FDE)
+## 6. Result and how it ships (2026-10-08)
 
-1. **Facts:** fill the missing cells, Stony Brook layers 1 and 4 and Accolite layer 1, then confirm the Wake Forest
-   and Atriveo fact sheets.
-2. **Bullets:** 2–3 candidates per cell from the confirmed facts, scored by lint, the rules above, keyword coverage
-   of the 263 postings, and distinctness.
-3. **Test:** old versus new FDE resume against 30 held-out FDE postings (keyword match, ATS readiness, blind
-   pairwise review), then your read.
-4. **Ship:** FDE bullets tagged `tracks: [fde]` in the bank; rebuild the FDE general resume.
+**Test.** The new FDE resume was compared with the previous FDE general resume on 30 FDE postings, picked at random
+from the 263 with a fixed seed, one per company. Each round used a fresh blind reviewer (a model playing the FDE
+hiring manager), with labels swapped between rounds.
+
+| Round | New resume preferred | Changed before the round |
+|---|---|---|
+| 1 | 25 / 30 | first draft |
+| 2 | 26 / 30 | React dashboard back; "vs 50% chance"; Atriveo's real tools line |
+| 3 | **27 / 30 (90%)** | Kafka and Docker/Kubernetes named where real; "year-long review" no longer reads as your tenure |
+
+- **Keyword match** (the builder's JD match) is equal: 59.7 vs 59.7.
+- **The three losses** were all slight: a .NET enterprise role, a senior infrastructure strategist, a data engineer.
+- **The bar is 90%+.** A role ships only at or above it.
+
+**The tested set:**
+
+| Employer / project | Bullets |
+|---|---|
+| Stony Brook (title **AI Engineer** on FDE resumes) | AC-200 users, AC-004:fde live Kafka feed, AC-001:fde validation, AC-201 reuse |
+| Wake Forest | AC-202 workflow, AC-203 imaging data, AC-204 adoption, AC-047:fde dashboard |
+| Accolite | AC-205 client demos, AC-171 BT APIs, AC-206 production fixes |
+| Atriveo | AC-207 founder, AC-208 integrations, AC-209 messy systems (tools: TypeScript, React, Node.js, MongoDB, Playwright, Docker) |
+| Insurance platform | AC-066 |
+
+**How it works:**
+- **FDE-only entries.** AC-200…AC-209, and the `fde` wordings of AC-001, AC-004 and AC-047, carry
+  `tracks: [forward-deployed]`. `bankForTrack` (scripts/ac-tracks.mjs) hides them from every other track. The
+  builder's bullet options follow the resume's track.
+- **The pinned set.** `TRACKS.yaml` `tracks.forward-deployed.pinned` lists it. `applyTrackPins`
+  (scripts/ac-pipeline.mjs) puts exactly these bullets on every FDE job's resume, then rebuilds skills, coverage
+  and scores for that JD.
+- **Composing.** The pipeline composes on the shared bank, because compose refuses repeated opening verbs and a
+  track's bullets may share a verb with a shared one.
+- **FDE postings that fail the fit check** (43 of 263, 16%: customer, travel and discovery language) used to get the
+  generic SWE "basic resume". They now get the FDE baseline JD under their own title, and so the tested set
+  (scripts/tailor-ac.mjs).
+- **Stony Brook's title.** `TRACKS.yaml` `stony_brook_title_patterns`: "forward deployed" prints AI Engineer.
+- **Lint.** Opening verbs must be unique per track (the pinned set, where a track has one). See
+  `sharedOpeningVerbsByTrack`.
+- **Tests.** `tests/review/trackPins.test.mjs`.
+
+**Changing the FDE set:**
+1. Edit the bullet in its YAML.
+2. Run `npm run ac:bullet-lint`.
+3. Re-run the 30-posting test.
+4. Ship only at 90%+.
+
+To swap a bullet, change the id in `TRACKS.yaml` `pinned`, then do the same checks.
+
+**Not yet covered:**
+- Interview prep for "~99% agreement" vs "90%+", and "1 h → 1 min" vs "3 h → 2 min" (different measures).
+- Lines the reviewer flagged on other roles' resumes: "27% portfolio return", "99.9% uptime", the duplicate FOMC
+  bullets. Those get fixed in their role's round.
 
 ## Sources
 

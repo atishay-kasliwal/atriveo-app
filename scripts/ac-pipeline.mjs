@@ -13,12 +13,13 @@ import { acTier } from "./ac-bank.mjs";
 import { scoreResumeCandidate } from "./ac-artifacts.mjs";
 import { optimizeResumeGlobally } from "./ac-global-optimize.mjs";
 import { buildComposeExplain } from "./ac-compose-explain.mjs";
+import { bankForTrack, classifyTrack, trackPins } from "./ac-tracks.mjs";
 
 // Part of every resume cache key: bump it when the output changes for the same JD and bank
 // (2.1.0: role tracks, title-only experience lines, Education after the header; 2.1.1: AI track
 // Accolite 3 -> 2 so the page fits; 2.1.2: no ligatures in resume text; 2.1.3: Accolite title
 // "Senior Software Developer").
-export const PIPELINE_VERSION = "2.1.3";
+export const PIPELINE_VERSION = "2.2.0";
 
 export const PIPELINE_STEPS = [
   "load_bank",
@@ -171,6 +172,42 @@ function applyGlobalOptimize(candidate, { bank, jd, planner, meta, pages, cfg })
   };
 }
 
+/**
+ * A track with a pinned set (TRACKS.yaml tracks.<id>.pinned) uses exactly those bullets: the set that was tested for
+ * that role (docs/resume-tracks/). They replace what the pipeline chose; skills, coverage and scores are rebuilt for
+ * this JD. "AC-001:fde" is that entry's wording with facet fde; a bare id is its first wording.
+ */
+function applyTrackPins(candidate, { trackBank, jd, planner, meta, pages }) {
+  const track = classifyTrack(meta.title);
+  const pins = trackPins(track);
+  if (!pins || !candidate?.composition) return candidate;
+  const byId = new Map(trackBank.acs.map((a) => [a.id, a]));
+  const resolve = (ref) => {
+    const [id, facet] = String(ref).split(":");
+    const ac = byId.get(id);
+    const face = ac && (facet ? ac.variants.find((v) => v.facet === facet) : ac.variants[0]);
+    if (!face) throw new Error(`Track ${track}: pinned bullet ${ref} isn't in its bank`);
+    return { ac, face };
+  };
+  const section = (rows = {}, stacks = {}) => Object.entries(rows).map(([role, refs]) => ({
+    role, bullets: refs.map(resolve), ...(stacks[role]?.length ? { stack: stacks[role] } : {}),
+  }));
+  const composition = { ...candidate.composition, experience: section(pins.experience), projects: section(pins.projects, pins.project_stacks) };
+  const runtime = buildPlannerRuntimeConfig(planner, { jd, bank: trackBank, company: meta.company, title: meta.title });
+  runtime.narrative_first = loadPlannerConfig(planner).narrative_first !== false;
+  enrichComposition(composition, trackBank, jd, runtime);
+  const rescored = scoreCandidate({ composition, bank: trackBank, jd, title: meta.title, location: meta.location, pages });
+  return {
+    ...rescored,
+    variant_id: "track-pinned",
+    variant_label: `${track} pinned set`,
+    beam_variant: candidate.beam_variant ?? candidate.variant_id,
+    contribution_pruned: [],
+    global_optimize: candidate.global_optimize,
+    pinned_track: track,
+  };
+}
+
 function gateBlocksCompose(gate, { forceBorderline = false } = {}) {
   if (!gate) return false;
   if (gate.outcome === "blocked" || gate.outcome === "unsupported") return true;
@@ -178,7 +215,7 @@ function gateBlocksCompose(gate, { forceBorderline = false } = {}) {
   return false;
 }
 
-function singleCompose({ jd, bank, planner, meta, pages = 1, jdGate = null, forceBorderline = false }) {
+function singleCompose({ jd, bank, trackBank = bank, planner, meta, pages = 1, jdGate = null, forceBorderline = false }) {
   const gate = jdGate || assessJdGate(jd, { title: meta.title, forceBorderline });
   if (gateBlocksCompose(gate, { forceBorderline })) {
     return {
@@ -221,6 +258,7 @@ function singleCompose({ jd, bank, planner, meta, pages = 1, jdGate = null, forc
   finalized = applyGlobalOptimize(finalized, {
     bank, jd, planner, meta, pages, cfg,
   });
+  finalized = applyTrackPins(finalized, { trackBank, jd, planner, meta, pages });
   return {
     pipeline_version: PIPELINE_VERSION,
     pipeline_steps: PIPELINE_STEPS,
@@ -246,7 +284,12 @@ export function generateResume({
   strictJdGate = false,
   jdGate = null,
 }) {
-  const loadedBank = bank || loadBank();
+  // The job's track sees its own bullets (bankForTrack). Compose runs on the bullets every track shares: a track's
+  // own bullets may open with a verb a shared one uses, and compose refuses repeated verbs. A track with a pinned set
+  // then takes its bullets from its own bank (applyTrackPins); other tracks keep the shared composition.
+  const fullBank = bank || loadBank();
+  const trackBank = bankForTrack(fullBank, classifyTrack(meta.title));
+  const loadedBank = bankForTrack(fullBank, null);
   const gate = jdGate || assessJdGate(jd, {
     title: meta.title,
     forceBorderline,
@@ -270,7 +313,7 @@ export function generateResume({
 
   if (!shouldUseBeam(planner, cfg)) {
     return singleCompose({
-      jd, bank: loadedBank, planner, meta, pages, jdGate: gate, forceBorderline,
+      jd, bank: loadedBank, trackBank, planner, meta, pages, jdGate: gate, forceBorderline,
     });
   }
 
@@ -294,6 +337,7 @@ export function generateResume({
   finalized = applyGlobalOptimize(finalized, {
     bank: loadedBank, jd, planner, meta, pages, cfg,
   });
+  finalized = applyTrackPins(finalized, { trackBank, jd, planner, meta, pages });
 
   return {
     pipeline_version: PIPELINE_VERSION,

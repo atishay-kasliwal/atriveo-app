@@ -36,6 +36,20 @@ tracks:
   forward-deployed:
     label: Forward deployed
     title_patterns: ['forward.?deploy', 'deployment strategist', 'solutions? engineer', 'customer engineer', 'field engineer', 'implementation engineer']
+    # The tested FDE set (docs/resume-tracks/fde.md: preferred on 27 of 30 real FDE postings in a blind review against
+    # the previous FDE resume). Every FDE resume uses exactly these bullets; tailoring still sets the skills section.
+    # "AC-001:fde" is that entry's wording with facet fde; a bare id is its first wording.
+    pinned:
+      experience:
+        stony-brook: [AC-200, AC-004:fde, AC-001:fde, AC-201]
+        wake-forest: [AC-202, AC-203, AC-204, AC-047:fde]
+        accolite: [AC-205, AC-171, AC-206]
+      projects:
+        atriveo: [AC-207, AC-208, AC-209]
+        insurance-platform: [AC-066]
+      # The tools after a project's name (else picked from its bullets).
+      project_stacks:
+        atriveo: [TypeScript, React, Node.js, MongoDB, Playwright, Docker]
 
   software-engineer:
     label: Software engineer

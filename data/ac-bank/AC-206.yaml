@@ -1,0 +1,55 @@
+# FDE-only bullet (tracks: forward-deployed), docs/resume-tracks/fde.md, 2026-10-08.
+id: AC-206
+role: accolite
+slot_kind: experience
+engineering_identity: platform
+achievement_theme: fde-production-fixes
+display_order: 3
+wow_score: 0.85
+tracks:
+  - forward-deployed
+metrics_claimed:
+  - fixes_75
+  - years_3
+concepts_claimed:
+  - reliability
+  - production
+signature_technologies:
+  - Java
+  - Docker
+  - Kubernetes
+fact: >-
+  Weekly QA triage; at least one production fix every sprint, before and after deployments, for 3 years (~75+);
+  releases on Docker and Kubernetes.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: FDE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 20
+  backend: 85
+  data: 50
+  cloud: 80
+  ml: 10
+  frontend: 50
+strength:
+  recruiter: 9
+ats_keywords:
+  - Java
+  - Docker
+  - Kubernetes
+facets:
+  fde:
+    phrase: production support
+    keywords:
+      - production support
+      - debugging
+      - troubleshooting
+      - incidents
+variants:
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    text: >-
+      Resolved 75+ production and QA defects across Java client releases on Docker and Kubernetes over 3 years,
+      fixing at least one issue every sprint before each deployment.

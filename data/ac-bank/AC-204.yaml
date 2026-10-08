@@ -1,0 +1,51 @@
+# FDE-only bullet (tracks: forward-deployed), docs/resume-tracks/fde.md, 2026-10-08.
+id: AC-204
+role: wake-forest
+slot_kind: experience
+engineering_identity: ml
+achievement_theme: fde-adoption
+display_order: 3
+wow_score: 0.85
+tracks:
+  - forward-deployed
+metrics_claimed:
+  - agreement_99
+concepts_claimed:
+  - adoption
+  - evaluation
+  - clinical
+signature_technologies: []
+fact: >-
+  ~99% agreement with physician-created ground truth on tumor location, segmentation and masking (separate from
+  the 90%+ mask accuracy); clinicians reviewed outcomes for a year; the hospital still uses the pipeline for the
+  time it saves.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: FDE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 80
+  backend: 60
+  data: 75
+  cloud: 60
+  ml: 85
+  frontend: 40
+strength:
+  recruiter: 9
+ats_keywords:
+  - Evaluation
+facets:
+  fde:
+    phrase: clinical adoption
+    keywords:
+      - evaluation
+      - adoption
+      - production
+      - clinicians
+variants:
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    text: >-
+      Earned approximately 99% agreement with physician ground truth in clinician review, and the hospital still
+      runs the pipeline in its workflow for the time it saves.

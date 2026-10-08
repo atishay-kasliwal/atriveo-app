@@ -126,14 +126,43 @@ export function resumeRoles(bankDir) {
  * verb here would fail that resume's build.
  */
 export function sharedOpeningVerbs(acs, roles) {
+  return sharedVerbsIn(acs.filter((a) => roles.has(a.role)).flatMap((ac) => (ac.variants || []).map((v) => [ac, v])));
+}
+
+function sharedVerbsIn(pairs) {
   const byVerb = new Map();
-  for (const ac of acs.filter((a) => roles.has(a.role))) {
-    for (const v of ac.variants || []) {
-      const verb = openingVerb(v.text);
-      if (!byVerb.has(verb)) byVerb.set(verb, new Set());
-      byVerb.get(verb).add(ac.id);
-    }
+  for (const [ac, v] of pairs) {
+    const verb = openingVerb(v.text);
+    if (!byVerb.has(verb)) byVerb.set(verb, new Set());
+    byVerb.get(verb).add(ac.id);
   }
   return [...byVerb].filter(([, ids]) => ids.size > 1).map(([verb, ids]) => ({ verb, ids: [...ids] }));
+}
+
+/**
+ * The same check per track (TRACKS.yaml): what one resume can hold is the track's pinned set when it has one, else
+ * the bullets on that track (untagged, or tagged with it) at the resume roles. A title on no track sees the untagged
+ * ones. Returns [{ verb, ids, track }].
+ */
+export function sharedOpeningVerbsByTrack(acs, roles, tracksDoc) {
+  const out = [];
+  const on = (x, t) => !Array.isArray(x?.tracks) || (t != null && x.tracks.includes(t));
+  const byId = new Map(acs.map((a) => [a.id, a]));
+  for (const track of [...Object.keys(tracksDoc?.tracks || {}), null]) {
+    const pins = track ? tracksDoc.tracks[track]?.pinned : null;
+    let pairs;
+    if (pins) {
+      pairs = [...Object.values(pins.experience || {}), ...Object.values(pins.projects || {})].flat().map((ref) => {
+        const [id, facet] = String(ref).split(":");
+        const ac = byId.get(id);
+        const v = ac && (facet ? ac.variants.find((x) => x.facet === facet) : ac.variants[0]);
+        return ac && v ? [ac, v] : null;
+      }).filter(Boolean);
+    } else {
+      pairs = acs.filter((a) => roles.has(a.role) && on(a, track)).flatMap((ac) => (ac.variants || []).filter((v) => on(v, track)).map((v) => [ac, v]));
+    }
+    for (const s of sharedVerbsIn(pairs)) out.push({ ...s, track: track ?? "untracked" });
+  }
+  return out;
 }
 

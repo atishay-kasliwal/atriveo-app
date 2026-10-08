@@ -1,0 +1,37 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// Role tracks (docs/resume-tracks/): a bullet tagged for one track exists only there, and a track with a pinned set
+// (TRACKS.yaml, FDE first) gets exactly its tested bullets, whatever the pipeline chose.
+process.env.AC_BANK_OVERLAY = '/nonexistent';
+const { loadBank } = await import('../../scripts/ac-bank.mjs');
+const { bankForTrack, classifyTrack, trackPins, employerTitle } = await import('../../scripts/ac-tracks.mjs');
+const { generateResume } = await import('../../scripts/ac-pipeline.mjs');
+const ROOT = path.join(import.meta.dirname, '..', '..');
+const jd = (t) => fs.readFileSync(path.join(ROOT, 'data', 'baseline-jds', `${t}.txt`), 'utf8');
+// "AC-001:fde" when the bullet is a later wording of its entry; a bare id when it's the entry's first wording.
+const ids = (comp) => [...comp.experience, ...comp.projects].flatMap((s) => s.bullets.map(({ ac, face }) => (ac.variants[0] === face ? ac.id : `${ac.id}:${face.facet}`)));
+
+test('a track sees its own bullets; others and untracked titles never do', () => {
+  const bank = loadBank();
+  const fdeOnly = (b) => b.acs.filter((a) => a.tracks?.includes('forward-deployed') || a.variants.some((v) => v.tracks?.includes('forward-deployed')));
+  assert.ok(fdeOnly(bankForTrack(bank, 'forward-deployed')).length >= 13);
+  for (const t of ['software-engineer', 'ai-engineer', 'data-science', 'data-analytics', null]) assert.equal(fdeOnly(bankForTrack(bank, t)).length, 0, String(t));
+  assert.equal(classifyTrack('Forward Deployed Software Engineer - SF'), 'forward-deployed');
+  assert.equal(employerTitle('stony-brook', 'Senior Forward Deployed Engineer'), 'AI Engineer');
+});
+
+test('an FDE title gets exactly the pinned set; a SWE title gets no FDE-only bullet', { timeout: 120_000 }, () => {
+  const pins = trackPins('forward-deployed');
+  const expected = [...Object.values(pins.experience), ...Object.values(pins.projects)].flat();
+  const fde = generateResume({ jd: jd('forward-deployed'), meta: { title: 'Forward Deployed Engineer', company: 'Test' } });
+  assert.equal(fde.result.pinned_track, 'forward-deployed');
+  assert.deepEqual(ids(fde.result.composition).sort(), expected.sort());
+  assert.deepEqual(fde.result.composition.projects.find((p) => p.role === 'atriveo').stack, pins.project_stacks.atriveo);
+  assert.ok(fde.result.composition.skills.length > 0, 'skills are rebuilt for the JD');
+  const swe = generateResume({ jd: jd('software-engineer'), meta: { title: 'Software Engineer', company: 'Test' } });
+  assert.equal(swe.result.pinned_track, undefined);
+  assert.equal(ids(swe.result.composition).filter((x) => /^AC-20\d$|:fde$/.test(x)).length, 0);
+});

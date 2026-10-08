@@ -1,0 +1,51 @@
+# FDE-only bullet (tracks: forward-deployed), docs/resume-tracks/fde.md, 2026-10-08.
+id: AC-200
+role: stony-brook
+slot_kind: experience
+engineering_identity: ai
+achievement_theme: fde-users
+display_order: 1
+wow_score: 0.85
+tracks:
+  - forward-deployed
+metrics_claimed:
+  - users_20_30
+  - 3d_20m
+concepts_claimed:
+  - customer
+  - workflow
+signature_technologies: []
+fact: >-
+  Built from a professor's lab idea; used daily by 20-30 analysts, hedge fund users, researchers and university
+  collaborators; macro analysis 3 days to under 20 minutes.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: FDE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 85
+  backend: 75
+  data: 80
+  cloud: 70
+  ml: 75
+  frontend: 50
+strength:
+  recruiter: 9
+ats_keywords:
+  - AI
+  - LLM
+facets:
+  fde:
+    phrase: daily analyst users
+    keywords:
+      - customers
+      - stakeholders
+      - analysts
+      - end users
+variants:
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    text: >-
+      Launched a daily FOMC press-conference analysis tool from a professor's lab idea for 20-30 analysts, hedge
+      fund users and university collaborators, cutting macro analysis from 3 days to under 20 minutes.

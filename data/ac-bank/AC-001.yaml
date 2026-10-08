@@ -61,3 +61,15 @@ variants:
     text: >-
       Constructed an event-driven FastAPI pipeline on AWS for data ingestion, preprocessing and model inference
       with performance reporting, reaching approximately 68% directional accuracy across 13 evaluation sessions.
+  # FDE wording (docs/resume-tracks/fde.md), only on Forward deployed resumes.
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    tracks:
+      - forward-deployed
+    signature_technologies:
+      - LangChain
+      - Pinecone
+    text: >-
+      Validated the multi-agent pipeline across 13 live sessions at approximately 68% directional accuracy (vs 50%
+      chance), then hardened retrieval with LangChain and Pinecone for an 18% evaluation accuracy lift.

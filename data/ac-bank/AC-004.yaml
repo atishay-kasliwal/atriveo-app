@@ -39,3 +39,16 @@ variants:
     text: >-
       Streamlined event-driven Kafka pipelines moving FOMC releases to Python inference workflows within
       minutes instead of multi-day manual analysis cycles.
+  # FDE wording (docs/resume-tracks/fde.md), only on Forward deployed resumes.
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    tracks:
+      - forward-deployed
+    signature_technologies:
+      - Kafka
+      - FinBERT
+      - AWS
+    text: >-
+      Integrated live video, audio and transcript signals from FOMC press conferences through Kafka into FinBERT
+      and LLM agents on AWS, giving a trading team market reads within minutes.
