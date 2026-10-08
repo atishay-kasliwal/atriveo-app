@@ -191,13 +191,17 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const skillsRef = useRef<HTMLTextAreaElement>(null);
   const editorRef = useRef<HTMLElement>(null);
 
+  const loadedQuery=useRef<string|null>(null);
+  const loadGeneration=useRef(0);
   const load = useCallback(async () => {
     if (!query) return;
+    const generation=++loadGeneration.current;loadedQuery.current=null;setAiAnswer("");
     aiGeneration.current++; setAi(null); setAiJdStale(false); setAiDone([]); setAiError(""); setAiBusy(false);
     setError(""); setLoaded(null); setDraft(null); setDirty(false); setWriting(null); setPicker(null); setSheet(null);
     history.current = []; setHistoryLen(0);
     try {
       const r = await call<Loaded>(`load?${query}`);
+      if(generation!==loadGeneration.current)return;loadedQuery.current=query;
       setStackText({}); setLoaded(r); setTitle(r.headerTitle ?? ""); setEmail(r.email); setCity(r.city); setSkills(r.skills.join("\n")); setSections(r.sections);
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
   }, [query]);
@@ -317,7 +321,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const runAi=async(x=sections,_batch=false,skillInput=skills)=>startAi("rewrite",x,skillInput);
   const askAi=async()=>{if(aiInstruction.trim()){setAiAnswer("");startAi("question");}};
   useEffect(()=>{
-    if(!loaded||aiEntryReviewed.current===query)return;
+    if(!loaded||loadedQuery.current!==query||aiEntryReviewed.current===query)return;
     aiEntryReviewed.current=query;
     const request=readAiRequest();
     if(request){
@@ -327,7 +331,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     }else if(params.get("ai")==="review")startAi("rewrite",loaded.sections,loaded.skills.join("\n"));
   },[loaded,query,params]);
   useEffect(()=>{
-    if(!ai||aiBusy||!dirty)return;
+    if(!ai||aiBusy||!dirty||loadedQuery.current!==query)return;
     const request=readAiRequest();if(request)persistAi({...request,draft:{sections,skills}});
   },[sections,skills,dirty,aiBusy,ai?.id]);
   const aiDecision = async (suggestion: AiSuggestion, decision: "accepted" | "rejected" | "edited") => {
