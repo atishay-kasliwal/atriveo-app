@@ -178,7 +178,7 @@ function EmployerResponses({ inbox, onDone }: { inbox: InboxSummary; onDone: (me
           ))}
         </ul>
         </div>
-        <div className="apps-table-wrap apps-only-wide">
+        <details className="apps-more-details apps-full-table"><summary>View full table</summary><div className="apps-table-wrap apps-only-wide">
           <table className="apps-table">
             <thead><tr><th>Received</th><th>Company</th><th>Role</th><th>Result</th><th>Recorded in</th></tr></thead>
             <tbody>{inbox.recent.map((m) => (
@@ -191,7 +191,7 @@ function EmployerResponses({ inbox, onDone }: { inbox: InboxSummary; onDone: (me
               </tr>
             ))}</tbody>
           </table>
-        </div>
+        </div></details>
         </>
       )}
     </>
@@ -199,28 +199,13 @@ function EmployerResponses({ inbox, onDone }: { inbox: InboxSummary; onDone: (me
 }
 
 function QueueReasons({ report }: { report: QueueReport }) {
-  return (
-    <>
-      <p className="apps-muted">
-        {report.resumeReady} jobs have a finished resume. Auto-queue is <strong>{report.autoQueue ? "on" : "off"}</strong>
-        {report.queued ? ` · ${report.queued} in the engine's queue${report.waitingForCompanySlot ? ` (${report.waitingForCompanySlot} waiting for the company's daily slot)` : ""}` : ""}
-        {" · "}as of {when(report.generatedAt)}
-      </p>
-      <div className="apps-table-wrap">
-        <table className="apps-table">
-          <thead><tr><th>Jobs</th><th>Reason</th><th className="apps-hide-narrow">For example</th></tr></thead>
-          <tbody>{report.reasons.map((r) => (
-            <tr key={r.code}>
-              <td>{r.n}</td>
-              <td>{r.code === "READY" && !report.autoQueue ? `${r.label} (auto-queue is off)` : r.label}</td>
-              <td className="apps-detail apps-hide-narrow">{r.examples.map((e) => `${e.company} · ${e.title}`).join("; ")}</td>
-            </tr>
-          ))}</tbody>
-        </table>
-      </div>
-      {report.youApply && report.youApply.length > 0 && <YouApplyPile jobs={report.youApply} />}
-    </>
-  );
+  return <>
+    <div className="apps-simple-metrics"><div><b>{report.resumeReady}</b><span>Resumes ready</span></div><div><b>{report.queued}</b><span>In the queue</span></div><div><b>{report.autoQueue ? "On" : "Off"}</b><span>Automatic queue</span></div></div>
+    <h3>What’s holding jobs back?</h3>
+    <BarList rows={report.reasons.map(r => ({ label: r.label, n: r.n }))} empty="No blockers." />
+    <details className="apps-more-details"><summary>See examples and timing</summary><p className="apps-muted">Updated {when(report.generatedAt)}{report.waitingForCompanySlot ? ` · ${report.waitingForCompanySlot} waiting for a company’s daily slot` : ""}</p>{report.reasons.map(r => <p key={r.code}><strong>{r.label}</strong><br /><span className="apps-muted">{r.examples.map(e => `${e.company} · ${e.title}`).join("; ") || "No examples"}</span></p>)}</details>
+    {report.youApply && report.youApply.length > 0 && <details className="apps-more-details"><summary>Jobs you can apply to yourself ({report.youApply.length})</summary><YouApplyPile jobs={report.youApply} /></details>}
+  </>;
 }
 
 /** Jobs whose site the engine can't fill: you apply, with the tailored resume already made. */
@@ -250,18 +235,21 @@ function StatusPill({ status }: { status: Status }) {
 }
 
 function BarList({ rows, empty }: { rows: Array<{ label: string; n: number }>; empty: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const sorted = [...rows].sort((a, b) => b.n - a.n);
+  const visible = expanded ? sorted : sorted.slice(0, 5);
   const max = Math.max(1, ...rows.map((r) => r.n));
   if (!rows.length) return <p className="apps-empty">{empty}</p>;
   return (
-    <ul className="apps-barlist">
-      {rows.map((r) => (
+    <> <ul className="apps-barlist">
+      {visible.map((r) => (
         <li key={r.label} title={`${r.label}: ${r.n}`}>
           <span className="apps-barlist-label">{r.label}</span>
           <span className="apps-barlist-track"><span className="apps-barlist-fill" style={{ width: `${(r.n / max) * 100}%` }} /></span>
           <span className="apps-barlist-n">{r.n}</span>
         </li>
       ))}
-    </ul>
+    </ul>{sorted.length > 5 && <button className="apps-link" onClick={() => setExpanded(v => !v)}>{expanded ? "Show fewer" : `Show all ${sorted.length}`}</button>}</>
   );
 }
 
@@ -364,8 +352,8 @@ function AccountsCard({ accounts }: { accounts: AccountRow[] }) {
   return (
     <div>
       <div className="apps-card-head">
-        <h3>Sign-ins the engine created</h3>
-        {needsVerify > 0 && <span className="apps-pill st-warning">! {needsVerify} waiting for email verification</span>}
+        <h3>Your employer logins</h3>
+        {needsVerify > 0 && <span className="apps-pill st-warning">{needsVerify} need email verification</span>}
       </div>
       <ul className="apps-cards apps-only-narrow">
         {accounts.map((a) => {
@@ -386,7 +374,7 @@ function AccountsCard({ accounts }: { accounts: AccountRow[] }) {
           );
         })}
       </ul>
-      <div className="apps-table-wrap apps-only-wide"><table className="apps-table">
+      <details className="apps-more-details apps-full-table"><summary>View full table</summary><div className="apps-table-wrap apps-only-wide"><table className="apps-table">
         <thead><tr><th>Employer</th><th>Email</th><th>Password</th><th>Status</th><th>Created</th><th /></tr></thead>
         <tbody>{accounts.map((a) => {
           const m = ACCOUNT_STATUS[a.status] ?? ACCOUNT_STATUS.created;
@@ -405,7 +393,7 @@ function AccountsCard({ accounts }: { accounts: AccountRow[] }) {
             </tr>
           );
         })}</tbody>
-      </table></div>
+      </table></div></details>
     </div>
   );
 }
@@ -954,7 +942,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                   })}
                 </ul>
                 <DailyChart days={data.daily} />
-                <dl className="apps-status">
+                <details className="apps-more-details"><summary>More pipeline details</summary><dl className="apps-status">
                   <dt>Success rate</dt><dd>{pct(k.successRate)} <span className="apps-muted">applied ÷ (applied + failed)</span></dd>
                   <dt>Skipped</dt><dd>{k.skipped}</dd>
                   <dt>Form patterns</dt>
@@ -963,7 +951,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                   <dd>{data.discovery.boards.map((b) => `${b.ats} ${b.boards} (${b.withMatches} with matches)`).join(" · ") || "—"}</dd>
                   <dt>Jobs by source</dt>
                   <dd>{data.discovery.jobsBySite.map((s) => `${s.site} ${s.n}`).join(" · ")}</dd>
-                </dl>
+                </dl></details>
               </Section>
 
               <Section title="Application history" hint="All applications and their status" meta={<><span>{k.total} total</span><span>{k.applied} applied</span><span>{k.needsReview} need review</span></>}>
@@ -1045,8 +1033,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
               </Section>
 
               <Section title="Questions & learned answers" hint="Questions that often need your input" meta={<span>{data.topPendingQuestions.length} categor{data.topPendingQuestions.length === 1 ? "y" : "ies"}</span>}>
-                <h3>Why applications wait for you</h3>
-                <BarList rows={data.reviewReasons.map((r) => ({ label: humanize(r.reason), n: r.n }))} empty="Nothing waiting for review." />
+                <details className="apps-more-details"><summary>Why applications are waiting</summary><BarList rows={data.reviewReasons.map((r) => ({ label: humanize(r.reason), n: r.n }))} empty="Nothing waiting for review." /></details>
                 <h3>Questions that most often need your answer</h3>
                 <p className="apps-muted">Answer these once (Review) and they're remembered for future applications.</p>
                 <BarList rows={data.topPendingQuestions.map((q) => ({ label: q.label, n: q.n }))} empty="No pending questions." />
