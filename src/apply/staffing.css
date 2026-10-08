@@ -63,3 +63,16 @@
 .staffing-detail form { gap: 16px; }
 .staffing-detail textarea { min-height: 180px; }
 @media (max-width: 640px) { .staffing-match { flex-direction: column; padding: 16px; gap: 16px; } .staffing-match-actions { align-items: stretch; } .staffing-match-actions > div { justify-content: space-between; } .staffing-source-details > summary small { display: block; margin: 8px 0; } .staffing-detail :is(input, textarea) { font-size: 16px; } }
+
+/* Ten jobs per page: two rows of five on desktop. */
+.staffing-main { width: min(1680px, 100%); }
+.staffing-shortlist { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.staffing-match { flex-direction: column; margin-bottom: 0; padding: 18px; gap: 16px; min-width: 0; }
+.staffing-job-title { font-size: 16px; line-height: 1.4; overflow-wrap: anywhere; }
+.staffing-match-main p { line-height: 1.5; }
+.staffing-match-actions { margin-top: auto; align-items: stretch; }
+.staffing-match-actions > div { flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.staffing-match-facts { line-height: 1.5; }
+@media (max-width: 1199px) { .staffing-shortlist { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 800px) { .staffing-shortlist { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .staffing-shortlist { grid-template-columns: 1fr; } }

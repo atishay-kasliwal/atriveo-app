@@ -48,7 +48,7 @@ export async function list(db, params) {
   rows = rows.filter(j => (!query || `${j.title} ${j.company} ${j.location}`.toLowerCase().includes(query)) && (!source || j.source_id === source));
   const total = rows.length;
   const offset = Math.max(0, Math.min(100000, Number(params.get('offset')) || 0));
-  return { ok: true, counts, total, jobs: rows.slice(offset, offset + 5).map(({ description, ...j }) => j) };
+  return { ok: true, counts, total, jobs: rows.slice(offset, offset + 10).map(({ description, ...j }) => j) };
 }
 export async function mutate(db, op, body) {
   if (op === 'add') {
