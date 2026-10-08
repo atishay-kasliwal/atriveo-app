@@ -30,6 +30,7 @@ import { auditAtsMatrix, keywordCountsFromTexts, bulletTextsFromAcs } from "./ac
 import { assessJdGate } from "./ac-jd-gate.mjs";
 import { RULEBOOK_PROJECT_COUNT } from "./ac-rulebook.mjs";
 import { assertUniqueCompositionVerbs } from "./ac-verbs.mjs";
+import { applyOverlay, readOverlay } from "./ac-bank-overlay.mjs";
 import {
   loadResumeProjectPool,
   pickResumeProjectRoles,
@@ -53,10 +54,13 @@ const GENERIC_ATS_WORDS = new Set([
 // ── Load ─────────────────────────────────────────────────────────────────────
 export function loadBank(dir = BANK_DIR) {
   const bankDir = dir || resolveBankDir();
-  const acs = fs.readdirSync(bankDir)
+  const gitAcs = fs.readdirSync(bankDir)
     .filter((f) => /^AC-\d+\.yaml$/.test(f))
     .map((f) => yaml.load(fs.readFileSync(path.join(bankDir, f), "utf8")))
     .filter(Boolean);
+  // Bullets you wrote or reworded in the resume builder (ac-bank-overlay.mjs), on the real bank only.
+  const overlay = path.resolve(bankDir) === path.resolve(BANK_DIR) ? readOverlay() : null;
+  const acs = applyOverlay(gitAcs, overlay);
   const concepts = readYaml(path.join(bankDir, "CONCEPTS.yaml"));
   const themes = readYaml(path.join(bankDir, "THEMES.yaml"));
   const constraints = readYaml(path.join(bankDir, "CONSTRAINTS.yaml")) || {};
@@ -73,7 +77,8 @@ export function loadBank(dir = BANK_DIR) {
     tiers,
     tier_rules: tiersRaw.rules || { min_s_tier: 2, max_c_tier: 1 },
     bank_dir: bankDir,
-    bank_version: bankMeta.version ?? acs.length,
+    // Your bullets change the version, so resumes cached before them are rebuilt; without any, it is the git bank's.
+    bank_version: overlay ? `${bankMeta.version ?? gitAcs.length}+u${overlay.fingerprint}` : bankMeta.version ?? gitAcs.length,
     bank_updated_at: bankMeta.updated_at || null,
   };
 }

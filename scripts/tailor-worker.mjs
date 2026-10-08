@@ -31,6 +31,7 @@ import {
 } from "./resume-queue.mjs";
 import { resolveResumeSessionDir } from "./resume-path.mjs";
 import { tailorOneAc } from "./tailor-ac.mjs";
+import { syncOverlay } from "./ac-bank-overlay.mjs";
 import { getArtifactsRoot, readManifest } from "./ac-artifact-store.mjs";
 import { getWorkerId } from "./worker-id.mjs";
 import { draftCoverLetter } from "./resume-cover.mjs";
@@ -164,6 +165,8 @@ async function processOneJob(db) {
       }).catch(() => { /* mongo blip */ });
     }, LEASE_RENEW_MS);
 
+    // Bullets you wrote or reworded in the resume builder (Mongo bank_overlay), so this resume can use them.
+    await syncOverlay(db).catch((e) => log("warn", `bank overlay not refreshed: ${e.message || e}`));
     const result = await tailorOneAc(
       {
         company,

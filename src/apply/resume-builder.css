@@ -49,3 +49,15 @@
 .rb-pages i { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; }
 .rb-pages.is-over { color: #fcd34d; } .rb-pages.is-over i { background: #f59e0b; }
 .rb-preview iframe.rb-live { background: #3a3d42; }
+/* Writing a bullet: your words, the rules' verdict, and where it goes. */
+.rb-writer { display: flex; flex-direction: column; gap: 8px; }
+.rb-writer textarea { font: inherit; font-size: 13px; line-height: 1.45; color: var(--foreground); background: var(--card-bg); border: 1px solid var(--primary); border-radius: 8px; padding: 8px 10px; resize: vertical; }
+.rb-verdict { font-size: 12px; } .rb-verdict ul { margin: 0; padding-left: 18px; color: #fcd34d; } .rb-verdict li.is-bank { color: #fdba74; }
+.rb-ok { color: #22c55e; font-weight: 600; }
+.rb-verbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+.rb-verbs button { font: inherit; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border-col); background: none; color: var(--foreground); cursor: pointer; }
+.rb-verbs button:hover { border-color: var(--primary); }
+.rb-writer-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rb-new { align-self: flex-start; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--primary); background: none; border: 1px dashed color-mix(in oklab, var(--primary) 60%, var(--border-col)); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+.rb-new:disabled { opacity: .5; cursor: default; }
+.rb-custom { font-style: normal; color: #fbbf24; }

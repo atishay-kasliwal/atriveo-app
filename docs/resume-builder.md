@@ -4,7 +4,7 @@
 content (bullets, header title, skills); the pipeline's own renderer and compiler build the PDF, so the template
 is always the same one every generated resume uses.
 
-Started 2026-10-08. Status: **Phase 1 built** (see [Phases](#phases)).
+Started 2026-10-08. Status: **Phase 1 built, plus writing your own bullets and the live preview** (see [Phases](#phases)).
 
 ## How you use it
 
@@ -24,7 +24,31 @@ In the editor:
 - **Header**: **Title**, **Email** and **Location** (printed as you write it, e.g. "Charlotte, NC"). They start as
   the resume prints them: your profile's email, and the posting's city (home city when it names none).
 - **Technical skills** (one line each, `Category: a, b, c`).
-- The preview re-renders about a second after you stop editing. **Save** turns on when the draft passes every check.
+- **Save** turns on when the compiled PDF passes every check.
+
+### Writing bullets (three ways)
+
+| You want | Do | What happens |
+|---|---|---|
+| Different words on **this resume only** | ✎ on the bullet → edit → **Use on this resume only** | The bank keeps its wording; the bullet shows "this resume only". |
+| Different words **from now on** | ✎ → edit → **Save to bank (future resumes too)** | Your wording replaces that bank bullet's (that version of it) for every future resume. Resumes already built keep the old wording, which stays valid. |
+| A **new bullet** | **+ Write a new bullet** in the section → **Add (saved to your bank)** | A new bank entry (`AC-U001`, …) for that employer or project, on this resume and offered to future ones. |
+
+While you type, the rules' verdict shows under the box (RESUME_BULLET_GUIDE.md, the bank lint's own rules, in
+`scripts/ac-bullet-rules.mjs`): 12–35 words, an approved action verb (not Built / Developed / Trained), at most two
+"and" and two commas, no puffery, at most 3 technologies, no "research" at Stony Brook. **For the bank only**, the
+opening verb must be one no other bullet that can share a resume uses; when it isn't, the box offers free verbs (click
+one to swap it in). A this-resume-only edit needs a verb not used elsewhere on that resume.
+
+### Live preview
+
+Two tabs over the preview: **Live** (default) and **PDF**.
+
+- **Live** is the resume as HTML in the template's layout (Letter, 0.5in margins, 11pt Computer Modern), paginated
+  in the browser by [Paged.js](https://github.com/pagedjs/pagedjs). It updates as you type and shows
+  **Live 1 page ✓** or **Live 2 pages ⚠**. It mirrors the LaTeX template closely, not to the pixel.
+- **PDF** is the compiled resume, the file Fill sends. It recompiles about a second after you stop, and its page count
+  (**PDF 1 page ✓**) is the one that decides Save.
 
 ## Checks (every render; Save is refused unless all pass)
 
@@ -59,6 +83,7 @@ Today card / track ──► GET  /tailor/resume-builder/load      loadResume() 
 
 | What | Where |
 |---|---|
+| Your bullets (new and reworded) | Mongo `bank_overlay`: `{ _id: "AC-U001", type: "new", ac }` or `{ _id: "AC-026:default", type: "reword", ac_id, facet, text, previous }`. Each machine copies it to a local file (`AC_BANK_OVERLAY`, default `<tmp>/atriveo-bank-overlay.json`) before reading the bank: the builder on every load/render, the resume workers before every build. `loadBank()` merges it over `data/ac-bank` (only the real bank dir) and adds `+u<fingerprint>` to `bank_version`, so cached resumes rebuild. |
 | Drafts (every render) | `tailored-resumes/.builder-drafts/<id>/` (not synced between Mac and Oracle; safe to delete) |
 | A job's saved edit | `<generated run folder>/edits/<n>/Atishay Kasliwal.pdf` (+ `builder.json`, `resume.tex`); always under the generated run, never nested in another edit |
 | Which PDF a job uses | Mongo `jobs.resume.pdf_path` (all documents of that job URL); `resume.generated_pdf_path` = the generated one while an edit is in use; `resume.edited_at` |
@@ -72,7 +97,11 @@ folders are new files, so nothing is ever overwritten).
 
 | File | Role |
 |---|---|
-| `scripts/resume-builder.mjs` | load / render / save / revert, the checks, `GENERAL_RESUMES` (track → folder) |
+| `scripts/resume-builder.mjs` | load / render / save / revert, the checks, `checkText` / `saveBullet` / `freeVerbs` (your bullets), `GENERAL_RESUMES` (track → folder) |
+| `scripts/ac-bank-overlay.mjs` | your bullets: Mongo `bank_overlay` ↔ local copy, merged by `loadBank()` (`scripts/ac-bank.mjs`) |
+| `scripts/ac-bullet-rules.mjs` | the bullet rules, shared by `ac-bullet-lint.mjs` and the builder |
+| `scripts/tailor-worker.mjs` | refreshes your bullets (`syncOverlay`) before each build |
+| `src/apply/ResumeLivePreview.tsx` | the Live tab (HTML in the template's layout + Paged.js in its own frame) |
 | `scripts/ac-tex.mjs` | the renderer; `city` and `project.stack` options used only by the builder; `toolsFromBullets` exported |
 | `scripts/tailor-server.mjs` | the `/resume-builder/*` routes (search "Resume builder") |
 | `src/apply/ResumeBuilderPage.tsx` + `resume-builder.css` | the page |
@@ -81,6 +110,7 @@ folders are new files, so nothing is ever overwritten).
 | `src/apply/tracks.ts` | track labels shared by Today and the builder |
 | `scripts/general-resumes.mjs` | builds the general resumes (keeps `composition.json`, so they can be edited) |
 | `tests/review/resumeBuilder.test.mjs` | load → swap → render one page → save → reload → revert, and the refusals |
+| `tests/review/resumeBuilderBullets.test.mjs` | rules, new bullet → bank, reword → bank (old wording still valid), this-resume-only edit, the pipeline composes with them |
 | `~/.playatriveo/integrations/sync-resumes.sh` (not in git) | `--exclude .builder-drafts` |
 
 ## Decisions (and why)
@@ -94,16 +124,17 @@ folders are new files, so nothing is ever overwritten).
 | 2026-10-08 | Edits are saved as **new files** (`edits/<n>/`), never over the generated PDF, because the Mac↔Oracle sync never overwrites. |
 | 2026-10-08 | Auto-filled metadata of a typed bullet (technologies, keywords) is shown collapsed and editable (Phase 2). |
 | 2026-10-08 | **Project tools lines, header email and location are editable** (user asked). The tools line stays automatic until you type in it. |
+| 2026-10-08 | **Live preview with Paged.js** (user asked), next to the compiled PDF. The PDF stays the one that's sent and that gates Save; making HTML the real renderer would be a separate decision. |
+| 2026-10-08 | **Three ways to write**: this resume only, reword for the bank, new bullet (always to the bank). Bank bullets keep the bank's rules, including a verb of their own. |
 
 ## Phases
 
 1. **Edit with your bank** (built 2026-10-08): from a Today card or a track's general resume; move / swap / remove /
    add bank bullets, add or remove projects, project tools lines, title / email / location, skills; live preview;
    checks; save; revert.
-2. **New words**: paste a job description to start a resume; write a new bullet (lint rules from
-   `ac-bullet-lint.mjs`: approved action verb, not Built/Developed/Trained, 12–35 words, ≤3 technologies, no
-   "research" at Stony Brook). It's saved to the bank (Mongo, copied next to the git bank before each build so
-   future resumes can pick it; bank version bumps so cached resumes rebuild) with an export-to-git script.
+2. **Your words** (built 2026-10-08, pulled forward): this-resume-only edits, rewording for the bank, new bullets
+   saved to the bank, live rule checks with free-verb suggestions; Paged.js live preview. **Still to come:** paste a
+   job description to start a resume; a script that exports your bullets into `data/ac-bank` YAML for git.
 3. **Evaluation view** (below).
 
 ## Evaluation
@@ -124,7 +155,12 @@ folders are new files, so nothing is ever overwritten).
   `GENERAL_RESUMES` in `src/apply/TodayPage.tsx`, add `data/baseline-jds/<track>.txt`, run
   `node --env-file=.env.tailor --env-file=.env scripts/general-resumes.mjs <track>`.
 - **Rebuilding a general resume** replaces an edit made in the builder (it deletes `builder.json` and `generated/`).
-- **A rule for bullets** (e.g. allow a repeated verb): `validate()` in `scripts/resume-builder.mjs`.
+- **A rule for bullets** (e.g. allow a repeated verb): bank rules in `scripts/ac-bullet-rules.mjs` (the lint uses
+  them too); what the builder adds (bank-wide verb, per-resume checks) in `checkText()` / `validate()` in
+  `scripts/resume-builder.mjs`.
+- **Undo a bank reword**: delete its `bank_overlay` document (`AC-xxx:<facet>`); its `previous` field has the old
+  wording. A new bullet: delete `AC-Uxxx` (resumes that use it keep their PDF; re-opening them in the builder flags it).
+- **How the Live tab looks**: the `CSS` in `src/apply/ResumeLivePreview.tsx` (sizes in pt, as in the LaTeX template).
 - **How long a render may take**: tectonic timeout in `renderDraft()` (120 s); the page waits 0.9 s after your last edit.
 - **A job is re-tailored** (forced rebuild): the pipeline writes a new `pdf_path` and the edit stops being used;
   it's still in `edits/` and **Revert**/re-open finds the new generated resume.

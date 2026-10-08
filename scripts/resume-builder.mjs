@@ -24,6 +24,8 @@ import { resolveExperienceMeta, resolveProjectMeta, sortProjectsByRecency } from
 import { jdSkillMatch, loadSkills } from "./ac-jd-skills.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
+import { lintBullet, openingVerb as bankVerb, resumeRoles, techPattern } from "./ac-bullet-rules.mjs";
+import { OVERLAY_COLLECTION, readOverlay, syncOverlay } from "./ac-bank-overlay.mjs";
 import { PROJECT_SLUG_TO_NAME, ROLE_SLUG_TO_NAME } from "./ac-role-meta.mjs";
 
 export const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || path.join(os.homedir(), "Documents", "tailored-resumes");
@@ -110,6 +112,7 @@ const jdOf = async (db, jobUrl) => (await db.collection("descriptions").findOne(
 
 /** What the builder opens: { source, headerTitle, skills, sections, options, roles, current, jd }. */
 export async function loadResume(db, { jobUrl = null, track = null, appId = null } = {}) {
+  if (db) await syncOverlay(db);
   // An application (a Today card) edits the resume of its job: the first of its job URLs that has one.
   if (!jobUrl && appId) {
     const app = await db.collection("applications").findOne({ _id: appId }, { projection: { jobUrls: 1 } });
@@ -154,6 +157,90 @@ export async function loadResume(db, { jobUrl = null, track = null, appId = null
   };
 }
 
+// ── Your bullets: reworded or new, checked by the bank's rules (ac-bullet-rules.mjs) ──────────────────────────────
+
+/** Technologies the text names (skills-library names found in it, as the bank lint matches them). */
+function techsIn(text) {
+  return [...new Set(loadSkills().map((sk) => sk.name).filter((n) => n && techPattern(n).test(text)))];
+}
+
+/**
+ * What's wrong with a bullet you wrote, by the bank's rules (RESUME_BULLET_GUIDE.md): length, an approved action
+ * verb (not Built / Developed / Trained), no puffery, at most 3 technologies, no "research" at Stony Brook. For the
+ * bank (bankWide), also an opening verb no other bullet that can share a resume uses (the bank lint's rule).
+ */
+export function checkText(role, text, bank = loadBank(), { bankWide = true, acId = null } = {}) {
+  const t = String(text || "").replace(/\s+/g, " ").trim();
+  if (!t) return ["Write the bullet first."];
+  const techs = techsIn(t);
+  const issues = lintBullet({ id: acId ?? "new", role, signature_technologies: techs.slice(0, 3) }, t).issues
+    .filter((i) => !/^signature tech mismatch/.test(i));
+  if (techs.length > 3) issues.push(`names ${techs.length} technologies (${techs.join(", ")}); 3 at most`);
+  if (bankWide) {
+    const roles = resumeRoles(bank.bank_dir);
+    const verb = bankVerb(t);
+    const clash = bank.acs.find((a) => a.id !== acId && roles.has(a.role) && (a.variants || []).some((v) => bankVerb(v.text) === verb));
+    if (clash && roles.has(role)) issues.push(`"${verb}" already opens ${clash.id} (bullets that can share a resume each need their own opening verb)`);
+  }
+  return issues;
+}
+
+/** Approved action verbs no bullet that can share a resume opens with yet (suggestions when yours is taken). */
+export function freeVerbs(bank = loadBank(), limit = 14) {
+  const roles = resumeRoles(bank.bank_dir);
+  const used = new Set(bank.acs.filter((a) => roles.has(a.role)).flatMap((a) => (a.variants || []).map((v) => bankVerb(v.text))));
+  const all = JSON.parse(fs.readFileSync(path.join(bank.bank_dir, "HARVARD_ACTION_VERBS.json"), "utf8"));
+  const verbs = [...new Set(Object.values(all.categories).flat().map((v) => String(v)))].filter((v) => /^[A-Za-z]+$/.test(v) && !used.has(v.toLowerCase()) && !/^(built|developed|trained)$/i.test(v));
+  return verbs.slice(0, limit);
+}
+
+/** A new bank entry for a bullet you wrote: its employer or project, technologies from the text, the role's usual scores. */
+function newEntry(id, role, text, bank) {
+  const techs = techsIn(text).slice(0, 3);
+  const siblings = bank.acs.filter((a) => a.role === role && a.capabilities);
+  const caps = {};
+  for (const k of ["ai", "backend", "frontend", "data", "cloud", "ml"]) caps[k] = siblings.length ? Math.round(siblings.reduce((n, a) => n + (a.capabilities[k] ?? 0), 0) / siblings.length) : 60;
+  return {
+    id, role, slot_kind: siblings[0]?.slot_kind ?? (bank.acs.find((a) => a.role === role)?.slot_kind ?? "experience"),
+    engineering_identity: siblings[0]?.engineering_identity ?? null, achievement_theme: "your-bullet", display_order: 900, wow_score: 0.7,
+    metrics_claimed: [], concepts_claimed: [], signature_technologies: techs, fact: text, capabilities: caps, strength: { recruiter: 7 },
+    ats_keywords: techs, facets: { default: { phrase: "your-bullet", keywords: techs.map((x) => x.toLowerCase()) } },
+    variants: [{ facet: "default", emphasis: "default", strength: 8, text }], source: "resume-builder",
+  };
+}
+
+/**
+ * Save a bullet to the bank. mode "reword": your wording replaces that bank bullet's (this version of it) for every
+ * future resume; mode "new": a new bank entry for that employer or project. Returns the bullet as the resume uses it.
+ */
+export async function saveBullet(db, { role, text, mode, acId = null, facet = null }) {
+  const t = String(text || "").replace(/\s+/g, " ").trim();
+  await syncOverlay(db);
+  const bank = loadBank();
+  if (!bank.acs.some((a) => a.role === role)) throw new BuilderError(`Unknown employer or project: ${role}`);
+  const original = mode === "reword" ? bank.acs.find((a) => a.id === acId) : null;
+  if (mode === "reword" && (!original || original.role !== role)) throw new BuilderError("That bullet isn't in the bank for this section.");
+  const issues = checkText(role, t, bank, { acId: original?.id ?? null });
+  if (issues.length) throw new BuilderError(`Not saved: ${issues.join("; ")}`);
+  const col = db.collection(OVERLAY_COLLECTION);
+  const at = new Date().toISOString();
+  let bullet;
+  if (mode === "reword") {
+    const f = facet ?? original.variants?.[0]?.facet ?? "default";
+    const previous = original.variants?.find((v) => (v.facet ?? "default") === f)?.text ?? null;
+    await col.updateOne({ _id: `${acId}:${f}` }, { $set: { type: "reword", ac_id: acId, facet: f, text: t, updatedAt: at }, $setOnInsert: { previous, createdAt: at } }, { upsert: true });
+    bullet = { ac_id: acId, facet: f, text: t };
+  } else if (mode === "new") {
+    const n = (await col.countDocuments({ type: "new" })) + 1;
+    let id = `AC-U${String(n).padStart(3, "0")}`;
+    while (bank.acs.some((a) => a.id === id) || await col.findOne({ _id: id })) id = `AC-U${String(Number(id.slice(4)) + 1).padStart(3, "0")}`;
+    await col.insertOne({ _id: id, type: "new", ac: newEntry(id, role, t, bank), createdAt: at });
+    bullet = { ac_id: id, facet: "default", text: t };
+  } else throw new BuilderError("mode is reword or new");
+  await syncOverlay(db);
+  return { ok: true, bullet };
+}
+
 /** Plain text of a composition, for the JD skill match (what an ATS reads, near enough). */
 const textOf = (c) => [c.headerTitle, ...c.sections.flatMap((s) => s.bullets.map((b) => b.text)), ...(c.skills || [])].filter(Boolean).join("\n");
 
@@ -169,12 +256,24 @@ function validate(edit, bank) {
   const byId = new Map(bank.acs.map((a) => [a.id, a]));
   const problems = [];
   const seen = new Map();
+  // A bullet you reworded for the bank keeps its old wording valid on resumes built before (it was the bank's then).
+  const earlier = new Map();
+  for (const e of readOverlay()?.entries ?? []) if (e.type === "reword" && e.previous) earlier.set(e.ac_id, [...(earlier.get(e.ac_id) ?? []), String(e.previous).replace(/\s+/g, " ").trim()]);
   for (const s of edit.sections) {
     for (const b of s.bullets) {
+      // Your wording for this resume only: the bullet rules instead of a bank match.
+      if (b.custom) {
+        for (const issue of checkText(s.role, b.text, bank, { bankWide: false })) problems.push(`"${b.text.slice(0, 40)}…": ${issue}`);
+        const verb = openingVerb(b.text);
+        if (seen.has(verb)) problems.push(`"${verb}" opens two bullets (${seen.get(verb)} and your edit)`);
+        seen.set(verb, "your edit");
+        continue;
+      }
       const ac = byId.get(b.ac_id);
       if (!ac) { problems.push(`${b.ac_id} isn't in the bank`); continue; }
       if (ac.role !== s.role) problems.push(`${b.ac_id} belongs to ${labelOf(ac.role)}, not ${labelOf(s.role)}`);
-      if (!(ac.variants || []).some((v) => String(v.text).replace(/\s+/g, " ").trim() === b.text.trim())) problems.push(`${b.ac_id}'s text isn't one of its bank versions`);
+      const versions = [...(ac.variants || []).map((v) => String(v.text).replace(/\s+/g, " ").trim()), ...(earlier.get(b.ac_id) ?? [])];
+      if (!versions.includes(b.text.trim())) problems.push(`${b.ac_id}'s text isn't one of its bank versions`);
       const verb = openingVerb(b.text);
       if (seen.has(verb)) problems.push(`"${verb}" opens two bullets (${seen.get(verb)} and ${b.ac_id})`);
       seen.set(verb, b.ac_id);
@@ -188,6 +287,7 @@ function validate(edit, bank) {
  * it, changed. Returns { draftId, pdfPath, pages, problems, jdMatch: { before, after, missing } }.
  */
 export async function renderDraft(db, edit) {
+  if (db) await syncOverlay(db);
   const bank = loadBank();
   const base = await loadResume(db, edit.source);
   const clean = {
@@ -197,7 +297,7 @@ export async function renderDraft(db, edit) {
     skills: (edit.skills || []).map((s) => String(s).trim()).filter((s) => s.includes(":")).slice(0, 8),
     sections: (edit.sections || []).map((s) => {
       const kind = s.kind === "project" ? "project" : "experience";
-      const bullets = (s.bullets || []).map((b) => ({ ac_id: String(b.ac_id), facet: b.facet ?? null, text: String(b.text || "").replace(/\s+/g, " ").trim() }));
+      const bullets = (s.bullets || []).map((b) => ({ ac_id: String(b.ac_id), facet: b.facet ?? null, text: String(b.text || "").replace(/\s+/g, " ").trim(), ...(b.custom ? { custom: true } : {}) }));
       // Your tools line for a project (up to 8, short names); none = picked from its bullets, as generated resumes do.
       const stack = kind === "project" && Array.isArray(s.stack) ? [...new Set(s.stack.map((t) => String(t).trim().slice(0, 30)).filter(Boolean))].slice(0, 8) : [];
       return { role: s.role, kind, bullets, ...(kind === "project" ? { stack: stack.length ? stack : null } : {}) };

@@ -9,7 +9,8 @@ import "./resume-builder.css";
 // Opens a Today card's resume (?app=<application id> or ?job=<job url>) or a track's general resume (?track=…).
 // Design and decisions: docs/resume-builder.md. Server: scripts/resume-builder.mjs (/resume-builder/* routes).
 
-interface Bullet { ac_id: string; facet: string | null; text: string }
+/** custom: your wording for this resume only (not in the bank). */
+interface Bullet { ac_id: string; facet: string | null; text: string; custom?: boolean }
 /** A project's tools line ("Atriveo | FastAPI, Docker…"): stack = yours; null = picked from its bullets (stackAuto). */
 interface Section { role: string; kind: "experience" | "project"; label: string; bullets: Bullet[]; stack?: string[] | null; stackAuto?: string[] }
 type Source = { kind: "job"; jobUrl: string; company: string; title: string; location: string | null } | { kind: "track"; track: string; company: string; title: string; location: null };
@@ -51,6 +52,8 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   // Live: the HTML preview (instant, Paged.js); PDF: the compiled file that is sent.
   const [view, setView] = useState<"live" | "pdf">("live");
   const [livePages, setLivePages] = useState<number | null>(null);
+  // Writing a bullet: rewording one (bi) or a new one (bi = -1) in section si, with the rules' verdict as you type.
+  const [writing, setWriting] = useState<{ si: number; bi: number; text: string; issues: string[] | null; verbs: string[]; busy: boolean; error: string } | null>(null);
 
   const load = useCallback(async () => {
     if (!query) return;
@@ -76,6 +79,64 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     }, 900);
     return () => clearTimeout(t);
   }, [edit, dirty]);
+
+  const writingKey = writing ? `${writing.si}:${writing.bi}:${writing.text}` : "";
+  useEffect(() => {
+    if (!writing || !loaded) return;
+    const s = sections[writing.si];
+    const b = writing.bi >= 0 ? s?.bullets[writing.bi] : null;
+    const t = setTimeout(async () => {
+      try {
+        const r = await call<{ issues: string[]; freeVerbs: string[] }>("check", { role: s?.role, text: writing.text, acId: b && !b.custom ? b.ac_id : b?.custom ? b.ac_id : null });
+        setWriting((w) => w && `${w.si}:${w.bi}:${w.text}` === writingKey ? { ...w, issues: r.issues, verbs: r.freeVerbs } : w);
+      } catch { /* keep the last verdict */ }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [writingKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The verb rule only binds the bank (bullets that may share a resume); this resume checks its own verbs on render.
+  const bankOnly = (i: string) => /already opens/.test(i);
+  const useHere = () => {
+    if (!writing) return;
+    const { si, bi, text } = writing;
+    change((x) => { const old = x[si]!.bullets[bi]!; x[si]!.bullets[bi] = { ac_id: old.ac_id, facet: old.facet, text: text.replace(/\s+/g, " ").trim(), custom: true }; return x; });
+    setWriting(null);
+  };
+  const saveToBank = async () => {
+    if (!writing || !loaded) return;
+    const { si, bi, text } = writing;
+    const s = sections[si]!;
+    const old = bi >= 0 ? s.bullets[bi] : null;
+    setWriting({ ...writing, busy: true, error: "" });
+    try {
+      const r = await call<{ bullet: Bullet }>("bullet", { role: s.role, text, mode: old ? "reword" : "new", acId: old?.ac_id ?? null, facet: old?.facet ?? null });
+      change((x) => { if (bi >= 0) x[si]!.bullets[bi] = r.bullet; else x[si]!.bullets.push(r.bullet); return x; });
+      // The bank now has it: offer it (or its new wording) in Swap and Add too.
+      setLoaded((l) => l && { ...l, options: { ...l.options, [s.role]: [...(l.options[s.role] ?? []).filter((o) => !(o.ac_id === r.bullet.ac_id && o.facet === r.bullet.facet)), r.bullet] } });
+      setNotice(old ? "Saved to your bank: future resumes use this wording." : "Added to your bank and to this resume.");
+      setWriting(null);
+    } catch (e) { setWriting((w) => w && { ...w, busy: false, error: e instanceof Error ? e.message : String(e) }); }
+  };
+  const writer = (w: NonNullable<typeof writing>, isNew: boolean) => {
+    const textIssues = (w.issues ?? []).filter((i) => !bankOnly(i));
+    const anyIssues = (w.issues ?? []).length > 0;
+    return (
+      <div className="rb-writer">
+        <textarea autoFocus rows={3} value={w.text} placeholder="Start with an action verb: what you did, with what, and the result in numbers." onChange={(e) => setWriting({ ...w, text: e.target.value, issues: null })} />
+        <div className="rb-verdict">
+          {w.issues == null ? <span className="apps-muted">Checking…</span>
+            : !anyIssues ? <span className="rb-ok">✓ Passes every bullet rule</span>
+            : <ul>{w.issues.map((i) => <li key={i} className={bankOnly(i) ? "is-bank" : ""}>{i}{bankOnly(i) ? " (only for the bank)" : ""}</li>)}</ul>}
+          {w.issues?.some(bankOnly) && w.verbs.length > 0 && <div className="rb-verbs"><span className="apps-muted">Free verbs:</span>{w.verbs.map((v) => <button key={v} type="button" onClick={() => setWriting({ ...w, text: w.text.replace(/^\s*[A-Za-z]+/, v), issues: null })}>{v}</button>)}</div>}
+          {w.error && <p className="td-error" role="alert">{w.error}</p>}
+        </div>
+        <div className="rb-writer-acts">
+          {!isNew && <button className="apps-btn" disabled={w.busy || w.issues == null || textIssues.length > 0} title="Only this resume changes; the bank keeps its wording" onClick={useHere}>Use on this resume only</button>}
+          <button className="rv-primary" disabled={w.busy || w.issues == null || anyIssues} title={isNew ? "Added to this resume and to your bank, for future resumes" : "Your wording replaces this bullet's in the bank, for future resumes too"} onClick={() => void saveToBank()}>{w.busy ? "Saving…" : isNew ? "Add (saved to your bank)" : "Save to bank (future resumes too)"}</button>
+          <button className="apps-link" disabled={w.busy} onClick={() => setWriting(null)}>Cancel</button>
+        </div>
+      </div>
+    );
+  };
 
   const change = (fn: (s: Section[]) => Section[]) => { setSections((s) => fn(structuredClone(s))); setDirty(true); };
   const used = new Set(sections.flatMap((s) => s.bullets.map((b) => b.ac_id)));
@@ -160,9 +221,10 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
                 })()}
                 <ol>{s.bullets.map((b, bi) => (
                   <li key={`${b.ac_id}:${bi}`} className={(verbs.get(verb(b.text)) ?? 0) > 1 ? "is-dup" : ""}>
-                    <p>{b.text}</p>
+                    {writing && writing.si === si && writing.bi === bi ? writer(writing, false) : <p>{b.text}</p>}
                     <div className="rb-row">
-                      <span className="rb-id" title="Bank entry">{b.ac_id}{b.facet && b.facet !== "default" ? ` · ${b.facet}` : ""}</span>
+                      <span className="rb-id" title="Bank entry">{b.ac_id}{b.facet && b.facet !== "default" ? ` · ${b.facet}` : ""}{b.custom ? <em className="rb-custom"> · this resume only</em> : null}</span>
+                      <button className="rb-icon" title="Edit the wording" disabled={Boolean(writing)} onClick={() => setWriting({ si, bi, text: b.text, issues: null, verbs: [], busy: false, error: "" })}>✎</button>
                       <button className="rb-icon" disabled={bi === 0} title="Move up" onClick={() => change((x) => { const l = x[si]!.bullets; [l[bi - 1], l[bi]] = [l[bi]!, l[bi - 1]!]; return x; })}>↑</button>
                       <button className="rb-icon" disabled={bi === s.bullets.length - 1} title="Move down" onClick={() => change((x) => { const l = x[si]!.bullets; [l[bi + 1], l[bi]] = [l[bi]!, l[bi + 1]!]; return x; })}>↓</button>
                       <select aria-label="Swap for another bullet" value="" onChange={(e) => { const o = (loaded.options[s.role] ?? [])[Number(e.target.value)]; if (o) change((x) => { x[si]!.bullets[bi] = o; return x; }); }}>
@@ -173,6 +235,8 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
                     </div>
                   </li>
                 ))}</ol>
+                {writing && writing.si === si && writing.bi === -1 ? writer(writing, true)
+                  : <button className="rb-new" disabled={Boolean(writing)} onClick={() => setWriting({ si, bi: -1, text: "", issues: null, verbs: [], busy: false, error: "" })}>+ Write a new bullet</button>}
                 {addable(s.role).length > 0 && <select className="rb-add" aria-label="Add a bullet" value="" onChange={(e) => { const o = addable(s.role)[Number(e.target.value)]; if (o) change((x) => { x[si]!.bullets.push(o); return x; }); }}>
                   <option value="">+ Add a bullet from the bank…</option>
                   {addable(s.role).map((o, oi) => <option key={oi} value={oi}>{o.text.slice(0, 120)}</option>)}
