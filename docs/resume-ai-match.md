@@ -1,6 +1,6 @@
 # AI Match / Resume Optimizer implementation report
 
-Local implementation only. Nothing deployed, no production data modified, no optimized resume silently saved.
+Deployed with the user's authorized Mac subscription worker. Analysis and queue records are stored in production; optimized resumes are never silently saved. Save remains the user's final approval.
 
 ## Files changed
 
