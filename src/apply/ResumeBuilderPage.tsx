@@ -83,19 +83,19 @@ function StartScreen() {
   };
   return (
     <div className="rb-start">
-      <h1>Resume builder</h1>
+      <header className="rb-start-heading"><span className="rb-eyebrow">YOUR NEXT APPLICATION</span><h1>A resume for your next role.</h1><p>Build from a job description, or start with one of your general resumes.</p></header>
       <section className="rb-paste" aria-label="Start from a job description">
-        <h2>Start from a job description</h2>
-        <p className="apps-muted">Paste the posting. Your resume is built the way Today's are (track, bullets from your bank, skills), then opens here to edit. It stays here: it isn't added to Today.</p>
-        <textarea rows={8} value={jd} disabled={building} placeholder="Paste the whole job description: title, company, responsibilities, requirements…" onChange={(e) => setJd(e.target.value)} />
+        <div className="rb-section-heading"><span className="rb-step" aria-hidden="true">01</span><div><h2>Start with a job description</h2><p>Paste the posting. Make it yours.</p></div></div>
+        <p className="apps-muted">We’ll choose relevant experience and skills for this role. You can review and edit your resume before downloading.</p>
+        <label className="rb-jd-label" htmlFor="rb-job-description">Job description</label><textarea id="rb-job-description" rows={8} value={jd} disabled={building} placeholder="Paste the whole job description: title, company, responsibilities, requirements…" onChange={(e) => setJd(e.target.value)} />
         <div className="rb-paste-fields">
-          <label><span>Company</span><input value={fields.company} disabled={building} placeholder="From the text" onChange={(e) => set("company", e.target.value)} /></label>
-          <label><span>Role title</span><input value={fields.title} disabled={building} placeholder="Needed if the text doesn't say it" onChange={(e) => set("title", e.target.value)} /></label>
-          <label><span>Location</span><input value={fields.location} disabled={building} placeholder="City, ST (optional)" onChange={(e) => set("location", e.target.value)} /></label>
+          <label><span>Company</span><input value={fields.company} disabled={building} placeholder="e.g. Acme" onChange={(e) => set("company", e.target.value)} /></label>
+          <label><span>Role title</span><input value={fields.title} disabled={building} placeholder="e.g. Software Engineer" onChange={(e) => set("title", e.target.value)} /></label>
+          <label><span>Location <small>Optional</small></span><input value={fields.location} disabled={building} placeholder="City, ST (optional)" onChange={(e) => set("location", e.target.value)} /></label>
         </div>
         <div className="rb-paste-acts">
-          <button className="rv-primary" disabled={building || tooShort || !fields.title.trim()} onClick={() => void build()}>{building ? "Building your resume…" : "Build resume"}</button>
-          <span className="apps-muted">{building ? "Choosing bullets and compiling: usually under half a minute." : tooShort && jd.trim() ? "A few paragraphs at least." : !fields.title.trim() && !tooShort ? "Add the role title." : ""}</span>
+          <button className="rv-primary" disabled={building || tooShort || !fields.title.trim()} onClick={() => void build()}>{building ? "Building your resume…" : "Build my resume →"}</button>
+          <span className="apps-muted">{building ? "Choosing bullets and compiling: usually under half a minute." : tooShort && jd.trim() ? "Add at least 300 characters from the posting." : !fields.title.trim() && !tooShort ? "Add the role title." : "Your resume stays here, separate from Today."}</span>
         </div>
         {error && <p className="td-error" role="alert">{error}</p>}
       </section>
@@ -113,10 +113,10 @@ function StartScreen() {
           </li>
         ))}</ul>
       </section>}
-      <section aria-label="General resumes">
-        <h2>General resumes</h2>
-        <p className="apps-muted">Or edit a track's general resume (a Today card's resume opens from the card: Resume → Edit).</p>
-        <div className="rb-tracks">{GENERAL.map((t) => <Link key={t} className={`rb-track tr-${t}`} to={`/resume_builder?track=${t}`}><i />{TRACK_LABEL[t]}<span>General resume</span></Link>)}</div>
+      <section className="rb-general" aria-label="General resumes">
+        <div className="rb-section-heading"><span className="rb-step" aria-hidden="true">02</span><div><h2>Start with a general resume</h2><p>Choose your track to review and edit.</p></div></div>
+        <p className="apps-muted">For a resume from Today, open its card and choose Resume → Edit.</p>
+        <div className="rb-tracks">{GENERAL.map((t) => <Link key={t} className={`rb-track tr-${t}`} to={`/resume_builder?track=${t}`}><i /><strong>{TRACK_LABEL[t]}</strong><span>Edit resume <b aria-hidden="true">↗</b></span></Link>)}</div>
       </section>
     </div>
   );

@@ -129,26 +129,37 @@
 
 /* Start screen: paste a job description, your resumes, the general ones. */
 .rb-start-page { overflow-y: auto; }
-.rb-start { padding: 32px 20px 60px; max-width: 860px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
-.rb-start h1 { margin: 0; font-size: 24px; }
-.rb-start h2 { margin: 0 0 6px; font-size: 13px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); }
-.rb-start p { margin: 0 0 10px; font-size: 13px; }
-.rb-paste { display: flex; flex-direction: column; gap: 10px; padding: 18px; border: 1px solid var(--border-col); border-radius: 14px; background: var(--card-bg); }
-.rb-paste p { margin: 0; }
-.rb-paste textarea { font: inherit; font-size: 13.5px; line-height: 1.55; color: var(--foreground); background: none; border: 1px solid var(--border-col); border-radius: 10px; padding: 10px 12px; resize: vertical; outline: none; min-height: 140px; }
-.rb-paste textarea:focus, .rb-paste input:focus { border-color: var(--primary); }
-.rb-paste-fields { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 10px; }
-.rb-paste-fields label { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--muted-fg); }
-.rb-paste-fields input { font: inherit; font-size: 13.5px; color: var(--foreground); background: none; border: 1px solid var(--border-col); border-radius: 8px; padding: 7px 10px; outline: none; min-width: 0; }
-.rb-paste-acts { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12.5px; }
-.rb-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); }
-.rb-list li { display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
-.rb-list li + li { border-top: 1px solid color-mix(in oklab, var(--border-col) 70%, transparent); }
-.rb-list-main { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 10px; color: var(--foreground); text-decoration: none; }
-.rb-list-main span { font-size: 13px; color: var(--muted-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rb-list-meta { font-size: 12px; color: var(--muted-fg); white-space: nowrap; }
-.rb-list-acts { display: flex; align-items: center; gap: 8px; }
-.rb-list-acts .apps-btn { height: 30px; padding: 0 12px; font-size: 12.5px; text-decoration: none; display: inline-flex; align-items: center; }
+/* Resume builder landing screen */
+.rb-start { box-sizing: border-box; padding: 48px 28px 72px; max-width: 1160px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+.rb-start-heading { margin-bottom: 4px; }
+.rb-eyebrow { font-size: 11px; font-weight: 650; letter-spacing: .12em; color: var(--primary); }
+.rb-start h1 { margin: 12px 0; font-size: clamp(28px, 3vw, 40px); line-height: 1.15; letter-spacing: -.035em; }
+.rb-start-heading p { color: var(--muted-fg); font-size: 16px; line-height: 1.6; margin: 0; }
+.rb-start h2 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: -.02em; color: var(--foreground); }
+.rb-start p { line-height: 1.65; }
+.rb-section-heading { display: flex; align-items: center; gap: 14px; }
+.rb-section-heading p { margin: 4px 0 0; color: var(--muted-fg); font-size: 14px; }
+.rb-step { display: grid; place-items: center; width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px; background: color-mix(in srgb, var(--primary) 12%, var(--card-bg)); color: var(--primary); font-size: 13px; font-weight: 650; }
+.rb-paste { display: flex; flex-direction: column; gap: 18px; padding: 28px; border: 1px solid var(--border-col); border-radius: 20px; background: var(--card-bg); box-shadow: 0 12px 40px #00000012; }
+.rb-paste > p { margin: 0; font-size: 14px; max-width: 72ch; }
+.rb-jd-label { font-size: 13px; font-weight: 600; margin-bottom: -8px; }
+.rb-paste textarea { box-sizing: border-box; width: 100%; font: inherit; font-size: 15px; line-height: 1.7; color: var(--foreground); background: color-mix(in srgb, var(--card-bg) 80%, var(--background)); border: 1px solid var(--border-col); border-radius: 12px; padding: 16px; resize: vertical; outline: none; min-height: 220px; }
+.rb-start :is(input, textarea)::placeholder { color: var(--muted-fg); opacity: .85; }
+.rb-start :is(input, textarea):focus-visible { border-color: var(--primary); outline: 3px solid color-mix(in srgb, var(--primary) 20%, transparent); outline-offset: 2px; }
+.rb-paste-fields { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 16px; }
+.rb-paste-fields label { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--foreground); min-width: 0; }
+.rb-paste-fields small { color: var(--muted-fg); font-weight: 400; margin-left: 4px; }
+.rb-paste-fields input { box-sizing: border-box; width: 100%; font: inherit; font-size: 15px; color: var(--foreground); background: none; border: 1px solid var(--border-col); border-radius: 10px; padding: 12px; min-height: 46px; outline: none; min-width: 0; }
+.rb-paste-acts { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 13px; padding-top: 6px; }
+.rb-paste-acts .rv-primary { min-height: 48px; padding: 12px 24px; border-radius: 10px; font-size: 15px; font-weight: 650; }
+.rb-general > p { font-size: 13px; margin: 16px 0; }
+.rb-list { list-style: none; margin: 16px 0 0; padding: 0; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); }
+.rb-list li { display: flex; align-items: center; gap: 12px; padding: 16px; }
+.rb-list li + li { border-top: 1px solid var(--border-col); }
+.rb-list-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; color: var(--foreground); text-decoration: none; }
+.rb-list-main span, .rb-list-meta { font-size: 13px; color: var(--muted-fg); overflow-wrap: anywhere; }
+.rb-list-acts { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.rb-list-acts .apps-btn { min-height: 44px; padding: 0 14px; text-decoration: none; display: inline-flex; align-items: center; }
 .rb-back { margin-left: auto; font-size: 12.5px; color: var(--primary); text-decoration: none; } .rb-back:hover { text-decoration: underline; }
 @media (max-width: 700px) { .rb-paste-fields { grid-template-columns: 1fr; } .rb-list li { flex-wrap: wrap; } .rb-list-main { flex-basis: 100%; flex-direction: column; gap: 2px; } }
 .rb-tracks { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
@@ -187,3 +198,31 @@
 .rb-sheet-done { min-height: 42px; }
 .rb-menu { display: flex; flex-direction: column; gap: 8px; }
 .rb-menu .apps-btn { min-height: 42px; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+
+.rb-start .rb-tracks { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.rb-start .rb-track { min-width: 0; padding: 20px; gap: 14px; border-radius: 14px; transition: border-color .15s, background .15s; }
+.rb-start .rb-track strong { font-size: 16px; color: var(--foreground); }
+.rb-start .rb-track i { width: 10px; height: 10px; box-shadow: 0 0 0 5px color-mix(in srgb, var(--tr) 12%, transparent); }
+.rb-start .rb-track span { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.rb-start .rb-track:hover { border-color: var(--tr); background: color-mix(in srgb, var(--tr) 5%, var(--card-bg)); text-decoration: none; }
+.rb-start :is(a, button):focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+@media (max-width: 900px) { .rb-start .rb-tracks { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  .rb-start { padding: 28px 16px 40px; gap: 24px; }
+  .rb-start-heading p { font-size: 14px; }
+  .rb-paste { padding: 20px 16px; gap: 16px; border-radius: 16px; }
+  .rb-start h2 { font-size: 18px; }
+  .rb-paste textarea { min-height: 240px; font-size: 16px; }
+  .rb-paste-fields { grid-template-columns: 1fr; gap: 14px; }
+  .rb-paste-fields input { font-size: 16px; }
+  .rb-paste-acts { flex-direction: column; align-items: stretch; gap: 10px; }
+  .rb-paste-acts .rv-primary { width: 100%; }
+  .rb-start .rb-tracks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rb-start .rb-track { padding: 18px; }
+  .rb-list li { flex-wrap: wrap; }
+  .rb-list-main { flex-basis: 100%; }
+  .rb-list-acts { width: 100%; }
+}
+
+.rb-start .apps-muted { color: color-mix(in srgb, var(--foreground) 65%, var(--muted-fg)); }
+@media (prefers-reduced-motion: reduce) { .rb-start .rb-track { transition: none; } }
