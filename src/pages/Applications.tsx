@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ApplyHeatmap from "../components/ApplyHeatmap";
 import { IN_BROWSER_LABEL, InBrowserActions, inBrowserSummary } from "../apply/InBrowser";
 import type { InBrowserApp } from "../apply/reviewQueue";
@@ -9,6 +9,7 @@ import QuestionField from "../apply/QuestionField";
 import { answerFor, defaultScope, humanize, postAction, questionKind, when, type PendingQ, type Scope } from "../apply/engine";
 import { getTailorServerBase } from "../utils/tailorServer";
 import "../styles/applications.css";
+import "../styles/insights.css";
 
 // Application engine analytics (playatriveo): history, outcomes and what needs you.
 // Data: GET /tailor/applications/analytics → Mac sidecar → Mongo (read-only).
@@ -88,7 +89,6 @@ const STATUS_META: Record<Status, { label: string; icon: string; cls: string }> 
 
 const pct = (n: number | null) => (n === null ? "—" : `${Math.round(n * 100)}%`);
 const clock = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString([], { ...(new Date(iso).toDateString() === new Date().toDateString() ? {} : { month: "short", day: "numeric" }), hour: "numeric", minute: "2-digit" }) : null);
-const duration = (ms: number | null | undefined) => (ms == null ? null : ms < 60_000 ? `${Math.round(ms / 1000)}s` : `${Math.floor(ms / 60_000)}m ${Math.round((ms % 60_000) / 1000)}s`);
 
 interface InboxMail { id: string; at: string; kind: "applied" | "rejected"; subject: string; company: string | null; title: string | null }
 interface InboxSummary {
@@ -122,80 +122,56 @@ function OutcomePill({ outcome }: { outcome: HistoryRow["outcome"] }) {
 }
 
 function InboxConfirmItem({ item, onDone }: { item: InboxSummary["confirm"][number]; onDone: (message: string) => void }) {
-  const [pick, setPick] = useState(item.candidates[0]?.id ?? "");
+  const [pick, setPick] = useState("");
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const run = async (body: object, ok: string) => {
-    setBusy(true);
-    const r = await postAction(body);
-    setBusy(false);
-    onDone(r.ok ? ok : r.error ?? "Failed");
+    setBusy(true); setError(null);
+    try {
+      const result = await postAction(body);
+      if (result.ok) onDone(ok);
+      else setError(result.error ?? "Couldn't save. Please try again.");
+    } catch { setError("Couldn't connect. Please try again."); }
+    finally { setBusy(false); }
   };
-  return (
-    <li className="apps-inbox-item">
-      <div className="apps-cards-id">
-        <strong>{item.company ?? "Unknown company"}{item.title ? ` · ${item.title}` : ""}</strong>
-        <span>{item.kind === "rejected" ? "Rejection" : "Confirmation"} · {when(item.at)} · “{item.subject}”</span>
-      </div>
-      <div className="apps-muted">{item.reason}</div>
-      <div className="apps-cards-actions">
-        {item.candidates.length > 0 && (
-          <select className="apps-select" aria-label="Which application is this about?" value={pick} onChange={(e) => setPick(e.target.value)}>
-            {item.candidates.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
-          </select>
-        )}
-        <button className="apps-btn accent" disabled={!pick || busy}
-          onClick={() => void run({ action: "inbox_confirm", mailId: item.id, target: item.target, id: pick }, item.kind === "rejected" ? "Marked rejected." : "Linked.")}>
-          {item.kind === "rejected" ? "Mark rejected" : "Link"}
-        </button>
-        <button className="apps-btn" disabled={busy} onClick={() => void run({ action: "inbox_dismiss", mailId: item.id }, "Dismissed.")}>Not one of mine</button>
-      </div>
-    </li>
-  );
+  return <article className="ins-mail-review" aria-busy={busy}>
+    <div className="ins-mail-heading"><CompanyLogo company={item.company} size="md" /><div><h3>{item.company ?? "Unknown company"}</h3><p>{item.title || "Role not named in this email"}</p></div><span className={`apps-tag ${item.kind === "rejected" ? "bad" : "good"}`}>{item.kind === "rejected" ? "Rejection" : "Receipt"}</span></div>
+    <div className="ins-mail-subject"><span className="ins-label">Email received · {when(item.at)}</span><p>{item.subject}</p></div>
+    <p className="ins-mail-help">We couldn't confidently match this email to an application. Choose the correct application below.</p>
+    <details className="ins-explanation"><summary>Why does this need review?</summary><p>{item.reason}</p></details>
+    <label className="ins-match-label">Match to an application
+      <select className="apps-select" value={pick} disabled={busy} onChange={e => setPick(e.target.value)}>
+        <option value="">Choose an application…</option>
+        {item.candidates.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+      </select>
+    </label>
+    {!item.candidates.length && <p className="apps-muted">No matching applications are available yet.</p>}
+    {error && <p className="apps-error" role="alert">{error}</p>}
+    <div className="ins-mail-actions"><button className="apps-btn accent" disabled={!pick || busy} onClick={() => void run({ action: "inbox_confirm", mailId: item.id, target: item.target, id: pick }, item.kind === "rejected" ? "Marked rejected." : "Email linked.")}>{busy ? "Saving…" : item.kind === "rejected" ? "Confirm rejection" : "Link application"}</button><button className="apps-btn" disabled={busy} onClick={() => void run({ action: "inbox_dismiss", mailId: item.id }, "Email dismissed.")}>Not one of mine</button></div>
+  </article>;
 }
 
 function EmployerResponses({ inbox, onDone }: { inbox: InboxSummary; onDone: (message: string) => void }) {
-  return (
-    <>
-      {inbox.confirm.length > 0 && (
-        <>
-          <h3 className="apps-subhead">Please confirm ({inbox.confirm.length})</h3>
-          <ul className="apps-inbox-list">{inbox.confirm.map((item) => <InboxConfirmItem key={item.id} item={item} onDone={onDone} />)}</ul>
-        </>
-      )}
-      <h3 className="apps-subhead">Recent</h3>
-      {inbox.recent.length === 0 ? <p className="apps-muted">No confirmations or rejections in the last {inbox.days} days.</p> : (
-        <>
-        <div className="apps-only-narrow">
-        <ul className="apps-inbox-list">
-          {inbox.recent.map((m) => (
-            <li key={m.id} className="apps-inbox-item" title={m.subject}>
-              <div className="apps-cards-top">
-                <div className="apps-cards-id"><strong>{m.company ?? "—"}</strong><span>{m.title ?? "Role not named"}</span></div>
-                <span className={`apps-pill ${m.kind === "rejected" ? "st-critical" : "st-good"}`}><span aria-hidden>{m.kind === "rejected" ? "✕" : "✓"}</span> {m.kind === "rejected" ? "Rejected" : "Confirmed"}</span>
-              </div>
-              <div className="apps-muted">{when(m.at)} · {m.recordedIn.length ? `in ${m.recordedIn.map((w) => RECORDED_IN[w]).join(", ")}` : "not matched"}</div>
-            </li>
-          ))}
-        </ul>
-        </div>
-        <details className="apps-more-details apps-full-table"><summary>View full table</summary><div className="apps-table-wrap apps-only-wide">
-          <table className="apps-table">
-            <thead><tr><th>Received</th><th>Company</th><th>Role</th><th>Result</th><th>Recorded in</th></tr></thead>
-            <tbody>{inbox.recent.map((m) => (
-              <tr key={m.id} title={m.subject}>
-                <td>{when(m.at)}</td>
-                <td>{m.company ?? "—"}</td>
-                <td>{m.title ?? "—"}</td>
-                <td><span className={`apps-pill ${m.kind === "rejected" ? "st-critical" : "st-good"}`}><span aria-hidden>{m.kind === "rejected" ? "✕" : "✓"}</span> {m.kind === "rejected" ? "Rejected" : "Confirmed"}</span></td>
-                <td className="apps-detail">{m.recordedIn.length ? m.recordedIn.map((w) => RECORDED_IN[w]).join(", ") : "not matched"}</td>
-              </tr>
-            ))}</tbody>
-          </table>
-        </div></details>
-        </>
-      )}
-    </>
-  );
+  const [mode, setMode] = useState<"review" | "recent">(inbox.confirm.length ? "review" : "recent");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [resolved, setResolved] = useState<string[]>([]);
+  const [page, setPage] = useState(0);
+  const waiting = inbox.confirm.filter(m => !resolved.includes(`${m.target}:${m.id}`));
+  const selected = waiting.find(m => `${m.target}:${m.id}` === selectedId) ?? waiting[0];
+  const index = selected ? waiting.indexOf(selected) : 0;
+  const recentPage = Math.min(page, Math.max(0, Math.ceil(inbox.recent.length / 6) - 1));
+  return <section className="ins-responses">
+    <div className="ins-view-heading"><div><h2>Employer responses</h2><p>Application receipts and rejections · last {inbox.days} days</p></div><div className="ins-response-counts"><span><b>{inbox.confirmed}</b> receipts</span><span><b>{inbox.rejected}</b> rejections</span></div></div>
+    <div className="ins-switch" role="group" aria-label="Employer response view"><button aria-pressed={mode === "review"} onClick={() => setMode("review")}>Needs a match <span>{waiting.length}</span></button><button aria-pressed={mode === "recent"} onClick={() => setMode("recent")}>Recent emails <span>{inbox.recent.length}</span></button></div>
+    {mode === "review" ? selected ? <div className="ins-review-layout">
+      <aside className="ins-review-context"><span className="ins-label">One email at a time</span><h3>Keep your results up to date.</h3><p>Link each response to the right role. Your application history will reflect the result.</p><div className="ins-pagination"><button className="apps-btn" aria-label="Previous email" disabled={index === 0} onClick={() => setSelectedId(`${waiting[index - 1].target}:${waiting[index - 1].id}`)}>←</button><span>{index + 1} of {waiting.length}</span><button className="apps-btn" aria-label="Next email" disabled={index >= waiting.length - 1} onClick={() => setSelectedId(`${waiting[index + 1].target}:${waiting[index + 1].id}`)}>→</button></div></aside>
+      <InboxConfirmItem key={`${selected.target}:${selected.id}`} item={selected} onDone={message => { setResolved(ids => [...ids, `${selected.target}:${selected.id}`]); onDone(message); }} />
+    </div> : <div className="ins-empty"><h3>You're all caught up.</h3><p>No emails need matching.</p><button className="apps-btn" onClick={() => setMode("recent")}>View recent emails</button></div> : <>
+      <ul className="ins-response-list">{inbox.recent.slice(recentPage * 6, recentPage * 6 + 6).map(m => <li key={m.id}><CompanyLogo company={m.company} size="sm" /><div className="ins-response-id"><strong>{m.company ?? "Unknown company"}</strong><span>{m.title ?? "Role not named"}</span><details><summary>Email details</summary><p>{m.subject}</p><p>{m.recordedIn.length ? `Recorded in ${m.recordedIn.map(w => RECORDED_IN[w]).join(", ")}` : "Not yet matched"}</p></details></div><span className={`apps-tag ${m.kind === "rejected" ? "bad" : "good"}`}>{m.kind === "rejected" ? "Rejected" : "Receipt"}</span><time>{when(m.at)}</time></li>)}</ul>
+      {!inbox.recent.length && <div className="ins-empty">No employer emails in this period.</div>}
+      {inbox.recent.length > 6 && <div className="ins-pagination"><button className="apps-btn" disabled={recentPage === 0} onClick={() => setPage(recentPage - 1)}>Previous</button><span>Page {recentPage + 1} of {Math.ceil(inbox.recent.length / 6)}</span><button className="apps-btn" disabled={(recentPage + 1) * 6 >= inbox.recent.length} onClick={() => setPage(recentPage + 1)}>Next</button></div>}
+    </>}
+  </section>;
 }
 
 function QueueReasons({ report }: { report: QueueReport }) {
@@ -540,39 +516,9 @@ function useBodyLock() {
   }, []);
 }
 
-function Stat({ label, value, tone, sub }: { label: string; value: string | number; tone?: "warn" | "bad" | "good"; sub?: string }) {
-  return (
-    <div className={`apps-stat ${tone ?? ""}`}>
-      <strong>{value}</strong>
-      <span>{label}</span>
-      {sub && <small>{sub}</small>}
-    </div>
-  );
-}
-
 function Section({ title, hint, meta, children }: { title: string; hint: string; meta?: React.ReactNode; children: React.ReactNode }) {
-  const icons: Record<string, string> = {
-    "Employer responses": "M4 6h16v12H4z M4 6l8 7 8-7",
-    "Why jobs aren't being applied": "M12 8v5 M12 16h.01 M12 3L2 20h20z",
-    "Pipeline": "M4 5h16 M7 12h10 M10 19h4",
-    "Application history": "M5 5h14v16H5z M8 9h8 M8 13h8 M8 17h5",
-    "ATS performance": "M5 20V12 M12 20V4 M19 20V8",
-    "Questions & learned answers": "M9 8a3 3 0 116 0c0 2-3 2-3 5 M12 17h.01 M4 3h16v18H4z",
-    "Failures": "M8 8l8 8 M16 8l-8 8 M12 2a10 10 0 100 20 10 10 0 000-20",
-    "Employer accounts": "M16 8a4 4 0 11-8 0 4 4 0 018 0 M4 21v-2a8 8 0 0116 0v2",
-  };
-  const labels: Record<string, string> = { "Why jobs aren't being applied": "Queue blockers", "Questions & learned answers": "Questions", "ATS performance": "Platforms", "Employer accounts": "Accounts" };
-  return (
-    <details className="apps-section">
-      <summary>
-        <span className="apps-insight-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d={icons[title] || icons["Application history"]} /></svg></span><span className="apps-chev" aria-hidden>›</span>
-        <span className="apps-section-title">{labels[title] || title}</span>
-        <span className="apps-section-hint">{hint}</span>
-        <span className="apps-section-meta">{meta}</span>
-      </summary>
-      <div className="apps-section-body">{children}</div>
-    </details>
-  );
+  const labels: Record<string, string> = { "Questions & learned answers": "Questions", "ATS performance": "Platforms" };
+  return <section className="ins-panel"><div className="ins-view-heading"><div><h2>{labels[title] || title}</h2><p>{hint}</p></div><div className="ins-panel-meta">{meta}</div></div><div className="ins-panel-body">{children}</div></section>;
 }
 
 function ReviewDrawer({ row, onClose, onDone }: { row: HistoryRow; onClose: () => void; onDone: (msg: string) => void }) {
@@ -632,82 +578,7 @@ function ReviewDrawer({ row, onClose, onDone }: { row: HistoryRow; onClose: () =
   );
 }
 
-const OPS_PREVIEW = 6;
-const HISTORY_PAGE = 25;
-const OPS_VISIBLE = 10;
-
-/** Rows for each attention column: 6 collapsed; expanded shows 10 and scrolls the rest. */
-function OpsRows({ expanded, children }: { expanded: boolean; children: React.ReactNode[] }) {
-  const ref = useRef<HTMLUListElement>(null);
-  const scrolls = expanded && children.length > OPS_VISIBLE;
-
-  // Row height changes across breakpoints, so size the list to the 10th row. Written straight to the
-  // DOM (no state) so the first expanded paint is already the right height.
-  useLayoutEffect(() => {
-    const ul = ref.current;
-    if (!scrolls || !ul) return;
-    const fit = () => {
-      const tenth = ul.children[OPS_VISIBLE - 1] as HTMLElement | undefined;
-      if (tenth) ul.style.maxHeight = `${Math.ceil(tenth.getBoundingClientRect().bottom - ul.getBoundingClientRect().top + ul.scrollTop)}px`;
-      ul.toggleAttribute("data-more", ul.scrollTop + ul.clientHeight < ul.scrollHeight - 2);
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(ul);
-    ul.addEventListener("scroll", fit, { passive: true });
-    return () => {
-      ro.disconnect();
-      ul.removeEventListener("scroll", fit);
-      ul.style.maxHeight = "";
-      ul.removeAttribute("data-more");
-    };
-  }, [scrolls, children.length]);
-
-  return <ul ref={ref} className={`apps-rows ${scrolls ? "is-scroll" : ""}`}>{expanded ? children : children.slice(0, OPS_PREVIEW)}</ul>;
-}
-
-/** One column of "Needs your attention". The second column continues the first's list, so it has no header links. */
-function AttentionPanel({ rows, total, expanded, second, onToggle, onReview, onRetry, onHistory }: { rows: HistoryRow[]; total: number; expanded: boolean; second?: boolean; onToggle: () => void; onReview: (id: string) => void; onRetry: (id: string) => void; onHistory: (id: string) => void }) {
-  const titleId = second ? "attn-title-2" : "attn-title";
-  return (
-    <section className={`apps-panel is-attn ${rows.length ? "has-items" : ""}`} aria-labelledby={titleId}>
-      <div className="apps-panel-head">
-        <h2 id={titleId}>{second ? "More needing attention" : <>Needs your attention {total > 0 && <span className="apps-count warn">{total}</span>}</>}</h2>
-        {!second && <span className="apps-panel-links"><Link to="/unanswered">Questions to answer</Link><Link to="/ready">Ready to submit</Link></span>}
-      </div>
-      {rows.length === 0 ? (
-        <p className="apps-clear">{second ? "Nothing more." : "Nothing is waiting for you."}</p>
-      ) : (
-        <>
-          <OpsRows expanded={expanded}>
-            {rows.map((h) => {
-              const r = reasonOf(h);
-              return (
-                <li key={h.id}>
-                  <CompanyLogo company={h.company} size="sm" />
-                  <div className="apps-row-id">
-                    <strong>{h.company}</strong>
-                    <span>{h.title} · {when(h.updatedAt)}</span>
-                  </div>
-                  <span className={`apps-tag ${r.tone}`}>{r.label}</span>
-                  <span className="apps-row-act">
-                    <button className="apps-link" onClick={() => onHistory(h.id)}>History</button>
-                    {h.status === "FAILED" && h.owner !== "extension"
-                      ? <button className="apps-btn" onClick={() => onRetry(h.id)}>Retry</button>
-                      : <button className="apps-btn accent" onClick={() => onReview(h.id)}>Review</button>}
-                  </span>
-                </li>
-              );
-            })}
-          </OpsRows>
-          {!second && total > 2 * OPS_PREVIEW && (
-            <button className="apps-link" onClick={onToggle}>{expanded ? "Show fewer" : `View all needing review (${total})`}</button>
-          )}
-        </>
-      )}
-    </section>
-  );
-}
+const HISTORY_PAGE = 10;
 
 // --- Date range (your time zone) ------------------------------------------------------------------
 type RangeKey = "today" | "yesterday" | "7" | "30" | "90" | "all" | "custom";
@@ -740,7 +611,9 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [historyId, setHistoryId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [opsExpanded, setOpsExpanded] = useState(false);
+  const [view, setView] = useState<"overview" | "responses" | "history" | "system">("overview");
+  const [systemView, setSystemView] = useState("pipeline");
+  const [historyPage, setHistoryPage] = useState(0);
 
   const load = useCallback(async () => {
     try {
@@ -773,52 +646,32 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
     return () => clearTimeout(t);
   }, [notice]);
 
-  // History loads a page at a time (newest first); filter and search run on the sidecar.
   const [history, setHistory] = useState<{ rows: HistoryRow[]; total: number; key: string } | null>(null);
   const [historyBusy, setHistoryBusy] = useState(false);
-  const historyKey = `${filter}|${query.trim()}`;
-  const loadHistory = useCallback(async (skip: number, limit = HISTORY_PAGE) => {
-    setHistoryBusy(true);
-    try {
-      const params = new URLSearchParams({ view: "history", status: filter, q: query.trim(), skip: String(skip), limit: String(limit) });
-      const res = await fetch(`${getTailorServerBase()}/applications/analytics?${params}`, { credentials: "include", cache: "no-store" });
-      const json = await res.json();
-      if (!res.ok || json.ok === false) throw new Error(json.error || `HTTP ${res.status}`);
-      setHistory((cur) => ({ key: historyKey, total: json.total, rows: skip && cur?.key === historyKey ? [...cur.rows, ...json.rows] : json.rows }));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setHistoryBusy(false);
-    }
-  }, [filter, query, historyKey]);
-  // A new filter or search (typed searches wait a moment) loads its first page; each later summary refresh
-  // (every minute) reloads the rows shown. The first summary doesn't: history loads alongside it.
-  const shownRef = useRef(HISTORY_PAGE);
-  shownRef.current = Math.max(HISTORY_PAGE, history?.key === historyKey ? history.rows.length : 0);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const historyKey = `${filter}|${query.trim()}|${historyPage}`;
   useEffect(() => {
-    const t = setTimeout(() => void loadHistory(0, shownRef.current), query ? 250 : 0);
-    return () => clearTimeout(t);
-  }, [loadHistory, query]);
-  const lastSummary = useRef<string | undefined>(undefined);
-  useEffect(() => {
-    const prev = lastSummary.current;
-    lastSummary.current = data?.generatedAt;
-    if (prev && data?.generatedAt && prev !== data.generatedAt) void loadHistory(0, shownRef.current);
-  }, [data?.generatedAt, loadHistory]);
+    if (view !== "history") return;
+    const controller = new AbortController();
+    setHistoryBusy(true); setHistoryError(null);
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams({ view: "history", status: filter, q: query.trim(), skip: String(historyPage * HISTORY_PAGE), limit: String(HISTORY_PAGE) });
+      void fetch(`${getTailorServerBase()}/applications/analytics?${params}`, { credentials: "include", cache: "no-store", signal: controller.signal })
+        .then(async response => {
+          const json = await response.json();
+          if (!response.ok || json.ok === false) throw new Error(json.error || `HTTP ${response.status}`);
+          if (controller.signal.aborted) return;
+          const lastPage = Math.max(0, Math.ceil(json.total / HISTORY_PAGE) - 1);
+          if (historyPage > lastPage) { setHistoryPage(lastPage); return; }
+          setHistory({ key: historyKey, total: json.total, rows: json.rows });
+        }).catch(e => { if (!controller.signal.aborted) setHistoryError(e instanceof Error ? e.message : String(e)); })
+        .finally(() => { if (!controller.signal.aborted) setHistoryBusy(false); });
+    }, query ? 250 : 0);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [view, filter, query, historyPage, historyKey, data?.generatedAt]);
   const historyRows = history?.key === historyKey ? history.rows : [];
-
-  // "View all" in Needs your attention loads the rest of it; the summary carries the first rows.
-  const [allAttention, setAllAttention] = useState<HistoryRow[] | null>(null);
-  useEffect(() => {
-    if (!opsExpanded || !data || data.attentionTotal <= data.attention.length) return;
-    let live = true;
-    void fetch(`${getTailorServerBase()}/applications/analytics?view=history&status=NEEDS_REVIEW,FAILED&limit=500`, { credentials: "include", cache: "no-store" })
-      .then((r) => r.json()).then((j) => { if (live && j.ok !== false) setAllAttention(j.rows); }).catch(() => {});
-    return () => { live = false; };
-  }, [opsExpanded, data]);
-  const attention = opsExpanded && allAttention ? allAttention : data?.attention ?? [];
-  // Two columns: collapsed, each shows OPS_PREVIEW rows; expanded, the list splits in half.
-  const attentionSplit = opsExpanded ? Math.ceil(attention.length / 2) : OPS_PREVIEW;
+  const attention = data?.attention ?? [];
+  const showHistory = (status: Status | "ALL") => { setFilter(status); setQuery(""); setHistoryPage(0); setView("history"); };
 
   // In-flight first, then queued in the order the worker claims them (priority, then oldest first).
   const queue = useMemo(() => {
@@ -838,149 +691,60 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
   const rangeLabel = rangeKey === "custom" ? `${rangeFrom.slice(5)} – ${rangeTo.slice(5)}` : (RANGES.find(([key]) => key === rangeKey)?.[1] ?? "");
   const submitted = (r?.applied ?? 0) + (r?.linkedinApplied ?? 0);
   const cur = data?.current ?? null;
-  const working = Boolean(cur);
   const needsVerify = (data?.accounts ?? []).filter((a) => a.status === "verify_email").length;
 
   return (
-    <div className="apps-page">
+    <div className="apps-page insights-workspace">
       {header}
-      <main className="apps-body">
-        {error && <div className="apps-error">Couldn't load analytics: {error}. Please retry; if this continues, the analytics service or relay needs attention.</div>}
-        {!data && !error && <p className="apps-muted">Loading…</p>}
-
-        {data && k && (
-          <>
-            <section className="apps-bar" aria-label="Engine status">
-              <div className="apps-bar-top">
-                <div className="apps-bar-title">
-                  <h1>Application Engine</h1>
-                  {data.worker && !data.worker.online
-                    ? <span className="apps-state bad" title={`Last seen ${when(data.worker.updatedAt)}`}><i aria-hidden />Worker offline</span>
-                    : <span className={`apps-state ${working ? "on" : ""}`}><i aria-hidden />{working ? "Working" : `Idle${data.lastActivityAt ? ` · last application ${when(data.lastActivityAt)}` : ""}`}</span>}
-                  {data.worker && (
-                    <span className={`apps-state ${data.worker.gmailConnected ? "" : "warn"}`} title={data.worker.gmailConnected ? "Emailed security codes and verification links are handled automatically" : "Run npm run apply:gmail-auth on the Mac so codes are entered automatically"}>
-                      Gmail {data.worker.gmailConnected ? "connected" : "not connected"}
-                    </span>
-                  )}
-                  {data.killSwitch && (
-                    <span className={`apps-state ${data.killSwitch.enabled ? "" : "bad"}`} title={data.killSwitch.reason ?? undefined}>
-                      Submissions {data.killSwitch.enabled ? "allowed" : `blocked${data.killSwitch.reason ? `: ${data.killSwitch.reason}` : ""}`}
-                    </span>
-                  )}
-                </div>
-                <div className="apps-daterange" role="group" aria-label="Date range">
-                  {RANGES.map(([k, label]) => <button key={k} className={k === rangeKey ? "active" : ""} aria-pressed={k === rangeKey} onClick={() => pickRange(k)}>{label}</button>)}
-                  {rangeKey === "custom" && <span className="apps-daterange-custom">
-                    <input type="date" aria-label="From" value={custom.from} max={custom.to || etDay(0)} onChange={(e) => setCustom((c) => ({ ...c, from: e.target.value }))} />
-                    <span aria-hidden>→</span>
-                    <input type="date" aria-label="To" value={custom.to} min={custom.from} max={etDay(0)} onChange={(e) => setCustom((c) => ({ ...c, to: e.target.value }))} />
-                  </span>}
-                </div>
-                <button className="apps-refresh" onClick={() => void load()} aria-label="Refresh now">Refreshed {when(data.generatedAt)} <span aria-hidden>↻</span></button>
-              </div>
-              {cur && (
-                <div className="apps-now">
-                  <span className="apps-pulse" aria-hidden />
-                  <CompanyLogo company={cur.company} size="sm" />
-                  <span className="apps-now-id"><strong>{cur.company}</strong> {cur.title}</span>
-                  <span className="apps-muted">
-                    {cur.status === "SUBMITTING" ? "Submitting" : "Filling application"}
-                    {stepLabel(cur.step) ? ` · ${stepLabel(cur.step)}` : ""}
-                    {cur.attempt ? ` · attempt ${cur.attempt}` : ""}
-                    {cur.startedAt ? ` · started ${clock(cur.startedAt)}` : ""}
-                  </span>
-                  <a href={cur.url} target="_blank" rel="noreferrer">Open ↗</a>
-                </div>
-              )}
-              <div className="apps-stats">
-                {/* Every tile counts what happened in the chosen range; "now" lines are the current state. */}
-                <Stat label={`Jobs discovered · ${rangeLabel}`} value={r?.discovered ?? data.funnel[0]?.n ?? 0} sub={[`${data.funnel[0]?.n ?? 0} all-time`, clock(data.lastAt?.discovered) && `latest ${clock(data.lastAt?.discovered)}`].filter(Boolean).join(" · ")} />
-                <Stat label={`Resumes built · ${rangeLabel}`} value={r?.matched ?? data.funnel[1]?.n ?? 0} sub={[`${data.funnel[1]?.n ?? 0} ready all-time`, clock(data.lastAt?.matched) && `latest ${clock(data.lastAt?.matched)}`].filter(Boolean).join(" · ")} />
-                <Stat label={`Queued · ${rangeLabel}`} value={r?.queued ?? 0} sub={`${data.byStatus?.READY_TO_APPLY ?? 0} in the queue now`} />
-                <Stat label={`Submitted · ${rangeLabel}`} value={submitted} tone={submitted ? "good" : undefined} sub={[r?.linkedinApplied ? `${r.linkedinApplied} on LinkedIn` : null, `${k.applied + (data.linkedin?.applied ?? 0)} all-time`, clock(data.lastAt?.applied) && `last ${clock(data.lastAt?.applied)}`, duration(data.lastAt?.avgApplyMs) && `avg ${duration(data.lastAt?.avgApplyMs)}`].filter(Boolean).join(" · ")} />
-                <Stat label={`Sent to review · ${rangeLabel}`} value={r?.needsReview ?? k.needsReview} tone={(r?.needsReview ?? k.needsReview) ? "warn" : undefined} sub={[`${k.needsReview} waiting now`, data.linkedin?.waiting ? `+${data.linkedin.waiting} on LinkedIn` : null].filter(Boolean).join(" · ")} />
-                <Stat label={`Failed · ${rangeLabel}`} value={r?.failed ?? k.failed} tone={(r?.failed ?? k.failed) ? "bad" : undefined} sub={[`${k.failed} all-time`, clock(data.lastAt?.failed) && `latest ${clock(data.lastAt?.failed)}`].filter(Boolean).join(" · ")} />
-              </div>
-              <ApplyHeatmap />
-            </section>
-
-            <div className="apps-ops">
-              <AttentionPanel rows={attention.slice(0, attentionSplit)} total={data.attentionTotal} expanded={opsExpanded} onToggle={() => setOpsExpanded((v) => !v)} onReview={setOpenId} onRetry={retry} onHistory={setHistoryId} />
-              <AttentionPanel second rows={attention.slice(attentionSplit)} total={data.attentionTotal} expanded={opsExpanded} onToggle={() => setOpsExpanded((v) => !v)} onReview={setOpenId} onRetry={retry} onHistory={setHistoryId} />
+      <main className="ins-workspace">
+        <header className="ins-page-head"><div><span className="ins-label">Your application workspace</span><h1>Application insights</h1><p>A clear view of your progress and what needs you next.</p></div><div className="ins-page-tools"><Link className="apps-btn" to="/">Back to opportunities ↗</Link><button className="apps-refresh" onClick={() => void load()}>Refresh ↻</button>{data && <span className="apps-muted">Updated {when(data.generatedAt)}</span>}</div></header>
+        {error && <div className="apps-error" role="alert">Couldn't refresh insights: {error} <button className="apps-btn" onClick={() => void load()}>Retry</button></div>}
+        {!data && !error && <p className="apps-muted">Loading your insights…</p>}
+        {data && k && <>
+          <nav className="ins-nav" aria-label="Insights views">{([['overview', 'Overview'], ['responses', 'Employer responses'], ['history', 'History'], ['system', 'System details']] as const).map(([key, label]) => <button key={key} aria-current={view === key ? 'page' : undefined} onClick={() => setView(key)}>{label}{key === 'responses' && Boolean(data.inbox?.confirm.length) && <span>{data.inbox!.confirm.length}</span>}</button>)}</nav>
+          {view === "overview" && <section className="ins-overview" aria-label="Overview">
+            <div className="ins-overview-top"><h2>Your progress</h2><div className="ins-range"><label>Activity period <select value={rangeKey} onChange={e => pickRange(e.target.value as RangeKey)}>{RANGES.map(([key,label]) => <option value={key} key={key}>{label}</option>)}</select></label>{rangeKey === 'custom' && <span><input type="date" aria-label="From" value={custom.from} max={custom.to || etDay(0)} onChange={e => setCustom(c => ({...c, from:e.target.value}))} /> → <input type="date" aria-label="To" value={custom.to} min={custom.from} max={etDay(0)} onChange={e => setCustom(c => ({...c, to:e.target.value}))} /></span>}</div></div>
+            <div className="ins-metrics">
+              <div><span>Applications submitted</span><strong>{submitted}</strong><small>{rangeLabel} · {k.applied + (data.linkedin?.applied ?? 0)} all time</small></div>
+              <button onClick={() => showHistory('NEEDS_REVIEW')}><span>Awaiting your review ↗</span><strong>{k.needsReview}</strong><small>Current applications</small></button>
+              <button onClick={() => showHistory('READY_TO_APPLY')}><span>Ready in the queue ↗</span><strong>{data.byStatus?.READY_TO_APPLY ?? 0}</strong><small>{(data.byStatus?.APPLYING ?? 0) + (data.byStatus?.SUBMITTING ?? 0)} being filled or submitted</small></button>
             </div>
-
-            <section className="apps-insights" aria-labelledby="ins-title">
-              <div className="apps-insights-head">
-                <h2 id="ins-title">Application insights</h2>
-                <span className="apps-muted">{rangeLabel === "Today" || rangeLabel === "Yesterday" ? rangeLabel : `${rangeFrom} → ${rangeTo}`}</span>
-              </div>
-
-              {data.inbox && (
-                <Section title="Employer responses" hint={`Confirmations and rejections from your inbox, last ${data.inbox.days} days`}
-                  meta={<><span>{data.inbox.confirmed} confirmed</span><span>{data.inbox.rejected} rejected</span>{data.inbox.confirm.length > 0 && <span className="warn">{data.inbox.confirm.length} to confirm</span>}</>}>
-                  <EmployerResponses inbox={data.inbox} onDone={(m) => { setNotice(m); void load(); }} />
-                </Section>
-              )}
-              {data.queueReport && (
-                <Section title="Why jobs aren't being applied" hint="Every job with a resume, by the reason it isn't going to the engine"
-                  meta={<><span>{data.queueReport.resumeReady} with a resume</span><span className={data.queueReport.autoQueue ? "" : "warn"}>auto-queue {data.queueReport.autoQueue ? "on" : "off"}</span></>}>
-                  <QueueReasons report={data.queueReport} />
-                </Section>
-              )}
-              <Section title="Pipeline" hint="Job funnel from discovery to submission" meta={<>{data.funnel.map((f) => <span key={f.stage}>{f.n} {f.stage.toLowerCase()}</span>)}</>}>
-                <ul className="apps-funnel">
-                  {data.funnel.map((f, i) => {
-                    const max = Math.max(1, data.funnel[0]?.n ?? 1);
-                    const prev = i ? data.funnel[i - 1]!.n : null;
-                    return (
-                      <li key={f.stage} title={`${f.stage}: ${f.n}`}>
-                        <span className="apps-barlist-label">{f.stage}</span>
-                        <span className="apps-barlist-track"><span className="apps-funnel-fill" style={{ width: `${Math.max(1, (f.n / max) * 100)}%` }} /></span>
-                        <span className="apps-barlist-n">{f.n}{prev ? <small> {pct(f.n / prev)}</small> : null}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <DailyChart days={data.daily} />
-                <details className="apps-more-details"><summary>More pipeline details</summary><dl className="apps-status">
-                  <dt>Success rate</dt><dd>{pct(k.successRate)} <span className="apps-muted">applied ÷ (applied + failed)</span></dd>
-                  <dt>Skipped</dt><dd>{k.skipped}</dd>
-                  <dt>Form patterns</dt>
-                  <dd>{data.formTrust.trusted ?? 0} trusted · {data.formTrust.learning ?? 0} learning{data.formTrust.revoked ? ` · ${data.formTrust.revoked} revoked` : ""}</dd>
-                  <dt>Job boards</dt>
-                  <dd>{data.discovery.boards.map((b) => `${b.ats} ${b.boards} (${b.withMatches} with matches)`).join(" · ") || "—"}</dd>
-                  <dt>Jobs by source</dt>
-                  <dd>{data.discovery.jobsBySite.map((s) => `${s.site} ${s.n}`).join(" · ")}</dd>
-                </dl></details>
-              </Section>
-
-              <Section title="Application history" hint="All applications and their status" meta={<><span>{k.total} total</span><span>{k.applied} applied</span><span>{k.needsReview} need review</span></>}>
+            <div className="ins-overview-grid">
+              <section className="ins-panel"><div className="ins-view-heading"><div><h2>Your next steps</h2><p>Pick one thing to move forward.</p></div></div><div className="ins-next-steps">
+                <Link to="/unanswered"><span><strong>Answer application questions</strong><small>Complete the answers holding applications back.</small></span><span>→</span></Link>
+                <Link to="/ready"><span><strong>Review ready applications</strong><small>Check your answers and approve the next submission.</small></span><span>→</span></Link>
+                <button onClick={() => setView('responses')}><span><strong>{data.inbox?.confirm.length ? `Match ${data.inbox.confirm.length} employer emails` : 'Review employer responses'}</strong><small>{data.inbox?.confirm.length ? 'A few emails need to be linked to the right role.' : 'See application receipts and rejections.'}</small></span><span>→</span></button>
+                {k.failed > 0 && <button onClick={() => showHistory('FAILED')}><span><strong>Check {k.failed} failed applications</strong><small>Review what happened and retry when appropriate.</small></span><span>→</span></button>}
+              </div></section>
+              <section className="ins-panel"><div className="ins-view-heading"><div><h2>Recent employer responses</h2><p>Latest emails · last {data.inbox?.days ?? 60} days</p></div><button className="apps-link" onClick={() => setView('responses')}>View all →</button></div><ul className="ins-recent-preview">{(data.inbox?.recent ?? []).slice(0,4).map(mail => <li key={mail.id}><CompanyLogo company={mail.company} size="sm" /><div><strong>{mail.company ?? 'Unknown company'}</strong><span>{mail.title || 'Role not named'}</span></div><span className={`apps-tag ${mail.kind === 'rejected' ? 'bad' : 'good'}`}>{mail.kind === 'rejected' ? 'Rejected' : 'Receipt'}</span></li>)}</ul>{!data.inbox?.recent.length && <p className="ins-empty">No employer responses yet.</p>}</section>
+            </div>
+            <div className="ins-health"><span><i className={data.worker?.online ? 'is-online' : ''} />{data.worker ? data.worker.online ? 'Worker online' : 'Worker offline' : 'Worker status unavailable'}</span>{cur && <span>{cur.status === 'SUBMITTING' ? 'Submitting' : 'Filling'} · {cur.company}</span>}{data.killSwitch && !data.killSwitch.enabled && <span className="apps-tag bad">Submissions paused{data.killSwitch.reason ? `: ${data.killSwitch.reason}` : ''}</span>}<button className="apps-link" onClick={() => setView('system')}>System details →</button></div>
+          </section>}
+          {view === 'responses' && (data.inbox ? <EmployerResponses inbox={data.inbox} onDone={done} /> : <div className="ins-empty">Employer responses aren't available yet.</div>)}
+          {view === 'history' && <div className="ins-history">              <Section title="Application history" hint="All applications and their status" meta={<><span>{k.total} total</span><span>{k.applied} applied</span><span>{k.needsReview} need review</span></>}>
                 <div className="apps-filters">
                   {(["ALL", "APPLIED", "NEEDS_REVIEW", "FAILED", "SKIPPED", "READY_TO_APPLY"] as const).map((st) => (
-                    <button key={st} className={filter === st ? "active" : ""} onClick={() => setFilter(st)}>{st === "ALL" ? "All" : STATUS_META[st].label}</button>
+                    <button key={st} className={filter === st ? "active" : ""} onClick={() => { setFilter(st); setHistoryPage(0); }}>{st === "ALL" ? "All" : STATUS_META[st].label}</button>
                   ))}
-                  <input placeholder="Search company or role" aria-label="Search applications" value={query} onChange={(e) => setQuery(e.target.value)} />
+                  <input placeholder="Search company or role" aria-label="Search applications" value={query} onChange={(e) => { setQuery(e.target.value); setHistoryPage(0); }} />
                 </div>
-                {!history ? <p className="apps-muted">Loading history…</p> : historyRows.length === 0 ? <p className="apps-muted">{historyBusy ? "Loading…" : "No applications match."}</p> : (
+                {historyError ? <p className="apps-error" role="alert">{historyError} <button className="apps-btn" onClick={() => void load()}>Retry</button></p> : !history ? <p className="apps-muted">Loading history…</p> : historyRows.length === 0 ? <p className="apps-muted">{historyBusy ? "Loading…" : "No applications match."}</p> : (
                   <>
-                  <div className="apps-table-wrap apps-only-wide">
+                  <div className="apps-table-wrap apps-only-wide" tabIndex={0} aria-label="Application history results">
                     <table className="apps-table">
-                      <thead><tr><th>Updated</th><th>Company</th><th>Role</th><th>ATS</th><th>Status</th><th>Details</th><th>Attempts</th><th /></tr></thead>
+                      <thead><tr><th>Updated</th><th>Company</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
                       <tbody>{historyRows.map((h) => (
                         <tr key={h.id}>
                           <td>{when(h.updatedAt)}</td>
                           <td>{h.company}</td>
                           <td>{h.title}</td>
-                          <td>{h.ats ?? "—"}</td>
                           <td><StatusPill status={h.status} /> <OutcomePill outcome={h.outcome} /></td>
-                          <td className="apps-detail">{detailOf(h)}</td>
-                          <td>{h.attempts}</td>
-                          <td className="apps-row-actions">
+                          <td><div className="apps-row-actions">
                             {h.status === "NEEDS_REVIEW" && <button className="apps-link" onClick={() => setOpenId(h.id)}>Review</button>}
                             {h.status === "FAILED" && <button className="apps-link" onClick={() => retry(h.id)}>Retry</button>}
                             <button className="apps-link" onClick={() => setHistoryId(h.id)}>History</button>
                             <a href={h.url} target="_blank" rel="noreferrer">Open</a>
-                          </td>
+                          </div></td>
                         </tr>
                       ))}</tbody>
                     </table>
@@ -1005,17 +769,47 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                       </li>
                     ))}
                   </ul>
-                  {history.total > historyRows.length && (
-                    <div className="apps-more">
-                      <span className="apps-muted">{historyRows.length} of {history.total}</span>
-                      <button className="apps-btn" disabled={historyBusy} onClick={() => void loadHistory(historyRows.length)}>{historyBusy ? "Loading…" : `Show ${Math.min(HISTORY_PAGE, history.total - historyRows.length)} more`}</button>
-                    </div>
-                  )}
+                  <div className="ins-pagination">
+                    <span>{historyPage * HISTORY_PAGE + 1}–{historyPage * HISTORY_PAGE + historyRows.length} of {history.total} applications</span>
+                    <button className="apps-btn" disabled={historyBusy || historyPage === 0} onClick={() => setHistoryPage(p => p - 1)}>Previous</button>
+                    <span>Page {historyPage + 1} of {Math.max(1, Math.ceil(history.total / HISTORY_PAGE))}</span>
+                    <button className="apps-btn" disabled={historyBusy || (historyPage + 1) * HISTORY_PAGE >= history.total} onClick={() => setHistoryPage(p => p + 1)}>Next</button>
+                  </div>
                   </>
                 )}
-              </Section>
-
-              <Section title="ATS performance" hint="Application results by platform" meta={<><span>{data.byAts.length} platform{data.byAts.length === 1 ? "" : "s"}</span><span>{k.total} jobs</span></>}>
+              </Section></div>}
+          {view === 'system' && <div className="ins-system">
+            <aside className="ins-system-nav" aria-label="System detail categories">{[['pipeline','Pipeline'],['queue','Queue blockers'],['platforms','Platforms'],['questions','Questions'],['failures','Failures'],['accounts','Employer accounts'],['activity','Activity & connections']].map(([key,label]) => <button key={key} aria-current={systemView === key ? 'page' : undefined} onClick={() => setSystemView(key)}>{label}</button>)}</aside>
+            <div className="ins-system-content">
+              {systemView === 'pipeline' && <>              <Section title="Pipeline" hint={`Job funnel · all time. Daily outcomes: ${rangeLabel}. Change the activity period in Overview.`} meta={<>{data.funnel.map((f) => <span key={f.stage}>{f.n} {f.stage.toLowerCase()}</span>)}</>}>
+                <ul className="apps-funnel">
+                  {data.funnel.map((f, i) => {
+                    const max = Math.max(1, data.funnel[0]?.n ?? 1);
+                    const prev = i ? data.funnel[i - 1]!.n : null;
+                    return (
+                      <li key={f.stage} title={`${f.stage}: ${f.n}`}>
+                        <span className="apps-barlist-label">{f.stage}</span>
+                        <span className="apps-barlist-track"><span className="apps-funnel-fill" style={{ width: `${Math.max(1, (f.n / max) * 100)}%` }} /></span>
+                        <span className="apps-barlist-n">{f.n}{prev ? <small> {pct(f.n / prev)}</small> : null}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <details className="apps-more-details"><summary>Activity totals · {rangeLabel}</summary><div className="apps-simple-metrics">{[['Discovered',r?.discovered],['Resumes built',r?.matched],['Queued',r?.queued],['Submitted',submitted],['Sent to review',r?.needsReview],['Failed',r?.failed]].map(([label,value]) => <div key={label}><b>{value ?? '—'}</b><span>{label}</span></div>)}</div></details>
+                <DailyChart days={data.daily} />
+                <details className="apps-more-details"><summary>More pipeline details</summary><dl className="apps-status">
+                  <dt>Success rate</dt><dd>{pct(k.successRate)} <span className="apps-muted">applied ÷ (applied + failed)</span></dd>
+                  <dt>Skipped</dt><dd>{k.skipped}</dd>
+                  <dt>Form patterns</dt>
+                  <dd>{data.formTrust.trusted ?? 0} trusted · {data.formTrust.learning ?? 0} learning{data.formTrust.revoked ? ` · ${data.formTrust.revoked} revoked` : ""}</dd>
+                  <dt>Job boards</dt>
+                  <dd>{data.discovery.boards.map((b) => `${b.ats} ${b.boards} (${b.withMatches} with matches)`).join(" · ") || "—"}</dd>
+                  <dt>Jobs by source</dt>
+                  <dd>{data.discovery.jobsBySite.map((s) => `${s.site} ${s.n}`).join(" · ")}</dd>
+                </dl></details>
+              </Section></>}
+              {systemView === 'queue' && <Section title="Queue blockers" hint="What is holding applications back">{data.queueReport ? <QueueReasons report={data.queueReport} /> : <p className="apps-muted">No queue report available.</p>}</Section>}
+              {systemView === 'platforms' && <>              <Section title="ATS performance" hint="Application results by platform" meta={<><span>{data.byAts.length} platform{data.byAts.length === 1 ? "" : "s"}</span><span>{k.total} jobs</span></>}>
                 <ul className="apps-cards apps-only-narrow">
                   {data.byAts.map((a) => (
                     <li key={a.ats}>
@@ -1030,27 +824,21 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
                     <tr key={a.ats}><td>{a.ats}</td><td>{a.total}</td><td>{a.APPLIED}</td><td>{a.NEEDS_REVIEW}</td><td>{a.FAILED}</td><td>{a.SKIPPED}</td><td>{a.other}</td></tr>
                   ))}</tbody>
                 </table></div>
-              </Section>
-
-              <Section title="Questions & learned answers" hint="Questions that often need your input" meta={<span>{data.topPendingQuestions.length} categor{data.topPendingQuestions.length === 1 ? "y" : "ies"}</span>}>
+              </Section></>}
+              {systemView === 'questions' && <>              <Section title="Questions & learned answers" hint="Questions that often need your input" meta={<span>{data.topPendingQuestions.length} categor{data.topPendingQuestions.length === 1 ? "y" : "ies"}</span>}>
                 <details className="apps-more-details"><summary>Why applications are waiting</summary><BarList rows={data.reviewReasons.map((r) => ({ label: humanize(r.reason), n: r.n }))} empty="Nothing waiting for review." /></details>
                 <h3>Questions that most often need your answer</h3>
                 <p className="apps-muted">Answer these once (Review) and they're remembered for future applications.</p>
                 <BarList rows={data.topPendingQuestions.map((q) => ({ label: q.label, n: q.n }))} empty="No pending questions." />
-              </Section>
-
-              <Section title="Failures" hint="Failed applications by type" meta={<span>{k.failed ? `${k.failed} failed` : "No failures"}</span>}>
+              </Section></>}
+              {systemView === 'failures' && <>              <Section title="Failures" hint="Failed applications by type" meta={<span>{k.failed ? `${k.failed} failed` : "No failures"}</span>}>
                 <BarList rows={data.failureCodes.map((r) => ({ label: humanize(r.code), n: r.n }))} empty="No failures." />
-              </Section>
-
-              {data.accounts && data.accounts.length > 0 && (
-                <Section title="Employer accounts" hint="Sign-ins the engine created" meta={<><span>{data.accounts.length} account{data.accounts.length === 1 ? "" : "s"}</span>{needsVerify > 0 && <span className="warn">{needsVerify} to verify</span>}</>}>
-                  <AccountsCard accounts={data.accounts} />
-                </Section>
-              )}
-            </section>
-          </>
-        )}
+              </Section></>}
+              {systemView === 'accounts' && <Section title="Employer accounts" hint="Accounts created for your applications" meta={<span>{needsVerify} need verification</span>}>{data.accounts?.length ? <AccountsCard accounts={data.accounts} /> : <p className="apps-muted">No employer accounts.</p>}</Section>}
+              {systemView === 'activity' && <Section title="Activity & connections" hint="Application activity and service status"><ApplyHeatmap /><dl className="apps-status"><dt>Worker</dt><dd>{data.worker ? data.worker.online ? 'Online' : 'Offline' : 'Unknown'}</dd><dt>Gmail</dt><dd>{data.worker?.gmailConnected ? 'Connected' : 'Not connected'}</dd><dt>Submissions</dt><dd>{data.killSwitch ? data.killSwitch.enabled ? 'Allowed' : `Paused: ${data.killSwitch.reason ?? 'No reason supplied'}` : 'Unknown'}</dd><dt>Last application activity</dt><dd>{data.lastActivityAt ? when(data.lastActivityAt) : 'No activity yet'}</dd></dl>{cur && <div className="apps-now"><strong>{cur.company}</strong><span>{cur.title} · {stepLabel(cur.step) || humanize(cur.status)}{cur.startedAt ? ` · started ${clock(cur.startedAt)}` : ''}</span><a href={cur.url} target="_blank" rel="noreferrer">Open ↗</a></div>}</Section>}
+            </div>
+          </div>}
+        </>}
       </main>
 
       {historyId && data && (() => {
