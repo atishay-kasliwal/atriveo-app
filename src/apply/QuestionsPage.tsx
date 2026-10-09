@@ -59,9 +59,42 @@ export default function QuestionsPage({ header }: { header?: React.ReactNode }) 
   }, [apps, answered, optional, first]);
   const ordered = useMemo(() => [...groups].sort((a, b) => Number(workspace.later.includes(a.key)) - Number(workspace.later.includes(b.key))), [groups, workspace.later]);
   const current = ordered.find(g => g.key === workspace.active) ?? ordered[0];
-  const select = (key: string) => { setWorkspace(w => ({...w, active: key})); setQueueOpen(false); };
+  const jump = (key: string) => requestAnimationFrame(() => {
+    const row = [...(list.current?.querySelectorAll<HTMLElement>("[data-row]") ?? [])].find(el => el.dataset.row === key);
+    row?.scrollIntoView({block: "start", behavior: "instant"});
+    row?.querySelector<HTMLElement>(".qs-question-title")?.focus({preventScroll: true});
+  });
+  const select = (key: string) => { setWorkspace(w => ({...w, active: key})); setQueueOpen(false); jump(key); };
+  const restored = useRef(false);
+  const orderedKey = ordered.map(g => g.key).join("\n");
+  useEffect(() => {
+    const pane = list.current?.querySelector<HTMLElement>(".qs-question-list");
+    if (!pane) return;
+    if (!restored.current && ordered.length) { restored.current = true; if (workspace.active) jump(workspace.active); }
+    let frame = 0;
+    const track = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const top = window.matchMedia("(max-width:760px)").matches ? 80 : pane.getBoundingClientRect().top + 80;
+        const visibleRows = [...pane.querySelectorAll<HTMLElement>("[data-row]")];
+        const row = visibleRows.find(el => el.getBoundingClientRect().bottom > top);
+        if (row?.dataset.row) { const key = row.dataset.row; setWorkspace(w => w.active === key ? w : {...w, active: key}); }
+      });
+    };
+    pane.addEventListener("scroll", track); window.addEventListener("scroll", track, true);
+    return () => {cancelAnimationFrame(frame); pane.removeEventListener("scroll", track); window.removeEventListener("scroll", track, true);};
+  }, [orderedKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const nav = list.current?.querySelector<HTMLElement>(".qs-queue");
+    const item = nav?.querySelector<HTMLElement>('[aria-current="step"]');
+    if (!nav || !item || !nav.clientHeight) return;
+    const box = item.getBoundingClientRect(), bounds = nav.getBoundingClientRect();
+    if (box.top < bounds.top || box.bottom > bounds.bottom) nav.scrollTop += box.top - bounds.top;
+  }, [workspace.active]);
   const defer = (g: Group) => {
+    const next = ordered.find(x => x.key !== g.key && !workspace.later.includes(x.key))?.key ?? ordered.find(x => x.key !== g.key)?.key ?? g.key;
     setWorkspace(w => ({...w, later: [...w.later.filter(k => k !== g.key), g.key], active: ordered.find(x => x.key !== g.key && !w.later.includes(x.key))?.key ?? ordered.find(x => x.key !== g.key)?.key ?? g.key}));
+    jump(next);
     setNotice("Left for later. Your applications are unchanged.");
   };
   const open = (a: UnansweredApp) => a.questions.filter((q) => !answered[keyOf(a, q)]);
@@ -70,8 +103,10 @@ export default function QuestionsPage({ header }: { header?: React.ReactNode }) 
   const blocked = apps.filter((a) => open(a).some(blocking)).length;
 
   const focusNext = (from: string) => {
-    setWorkspace(w => ({...w, active: ordered.find(g => g.key !== from)?.key ?? ""}));
-    requestAnimationFrame(() => list.current?.querySelector<HTMLElement>(".qs-question-title")?.focus());
+    const at = ordered.findIndex(g => g.key === from);
+    const next = ordered.slice(at + 1).find(g => g.key !== from) ?? ordered.find(g => g.key !== from);
+    setWorkspace(w => ({...w, active: next?.key ?? ""}));
+    if (next) jump(next.key);
   };
 
   /** One answer for the whole group: each job gets its own matching option; the rest stay for a different answer. */
@@ -156,11 +191,13 @@ export default function QuestionsPage({ header }: { header?: React.ReactNode }) 
           <button className="apps-btn qs-queue-toggle" aria-expanded={queueOpen} onClick={() => setQueueOpen(v => !v)}>Questions ({groups.length}) {queueOpen ? "−" : "+"}</button>
           <nav className={`qs-queue ${queueOpen ? "is-open" : ""}`} aria-label="Question queue">
             <div className="qs-queue-label">Most jobs first</div>
-            {ordered.map(g => { const jobs = new Set(g.asked.map(x => x.app.id)).size; return <button key={g.key} className={`qs-queue-item ${current?.key === g.key ? "is-active" : ""}`} aria-current={current?.key === g.key ? "step" : undefined} disabled={!!busy} onClick={() => select(g.key)}>
-              <span>{g.label}</span><small>{jobs} job{jobs === 1 ? "" : "s"}{workspace.later.includes(g.key) ? " · Later" : ""}{workspace.drafts[g.key] ? " · Draft" : ""}</small>
+            {ordered.map((g, index) => { const jobs = new Set(g.asked.map(x => x.app.id)).size; return <button key={g.key} className={`qs-queue-item ${current?.key === g.key ? "is-active" : ""}`} aria-current={current?.key === g.key ? "step" : undefined} disabled={!!busy} onClick={() => select(g.key)}>
+              <span><b className="qs-number">Q{index + 1}</b> {g.label}</span><small>{jobs} job{jobs === 1 ? "" : "s"}{workspace.later.includes(g.key) ? " · Later" : ""}{workspace.drafts[g.key] ? " · Draft" : ""}</small>
             </button>; })}
           </nav>
-          {current && <GroupRow key={current.key} g={current} text={workspace.drafts[current.key] ?? ""} onText={text => setWorkspace(w => ({...w, drafts: {...w.drafts, [current.key]: text}}))} busy={busy === current.key} disabled={!!busy && busy !== current.key} result={results[current.key]} onSave={v => void save(current, v)} onSkip={() => void skip(current)} onLater={() => defer(current)} />}
+          <div className="qs-question-list" aria-label="All questions">
+            {ordered.map((g, index) => <GroupRow key={g.key} number={index + 1} g={g} text={workspace.drafts[g.key] ?? ""} onText={text => setWorkspace(w => ({...w, drafts: {...w.drafts, [g.key]: text}}))} busy={busy === g.key} disabled={!!busy && busy !== g.key} result={results[g.key]} onSave={v => void save(g, v)} onSkip={() => void skip(g)} onLater={() => defer(g)} />)}
+          </div>
         </>}
         {!ordered.length && <section className="qs-finished">
           <span className="qs-finished-icon" aria-hidden="true">{!data || loading ? "…" : "✓"}</span>
@@ -175,7 +212,7 @@ export default function QuestionsPage({ header }: { header?: React.ReactNode }) 
 }
 
 /** An explicit save applies the selected answer to the matching applications. */
-function GroupRow({ g, text, onText, busy, disabled, result, onSave, onSkip, onLater }: { g: Group; text: string; onText: (value: string) => void; busy: boolean; disabled: boolean; result?: { ok: boolean; text: string }; onSave: (value: string) => void; onSkip: () => void; onLater: () => void }) {
+function GroupRow({ number, g, text, onText, busy, disabled, result, onSave, onSkip, onLater }: { number: number; g: Group; text: string; onText: (value: string) => void; busy: boolean; disabled: boolean; result?: { ok: boolean; text: string }; onSave: (value: string) => void; onSkip: () => void; onLater: () => void }) {
   const [more, setMore] = useState(false);
   const jobs = [...new Map(g.asked.map(({app}) => [app.id, app])).values()];
   const one = g.asked.length === 1 ? g.asked[0]! : null;
@@ -194,7 +231,7 @@ function GroupRow({ g, text, onText, busy, disabled, result, onSave, onSkip, onL
     input = <div className="qs-field">{multiline ? <textarea aria-label="Your answer" rows={5} value={text} disabled={off} placeholder="Write your answer…" onChange={e => onText(e.target.value)} onKeyDown={e => {if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {e.preventDefault(); submit();}}} /> : <input aria-label="Your answer" value={text} disabled={off} placeholder="Your answer" onChange={e => onText(e.target.value)} />}</div>;
   }
   return <article className="qs-row" data-row={g.key} aria-label={g.label} aria-busy={busy}>
-    <div className="qs-question-top"><span className="apps-muted">{g.required ? "Required answer" : "Optional answer"}</span><CardActions><button disabled={off} onClick={onSkip}>Discard {jobs.length === 1 ? "this application" : `all ${jobs.length} applications`}</button><small>Removes these jobs from Today and To answer.</small></CardActions></div>
+    <div className="qs-question-top"><span className="apps-muted"><b className="qs-number">Q{number}</b> · {g.required ? "Required answer" : "Optional answer"}</span><CardActions><button disabled={off} onClick={onSkip}>Discard {jobs.length === 1 ? "this application" : `all ${jobs.length} applications`}</button><small>Removes these jobs from Today and To answer.</small></CardActions></div>
     <h2 className="qs-question-title" tabIndex={-1}>{g.label}</h2>
     <p className="qs-context">Used by {jobs.length} application{jobs.length === 1 ? "" : "s"}{g.asked.some(x => x.q.sensitive) ? " · Sensitive answers stay with each application" : " · Remembered for future applications"}</p>
     <form onSubmit={e => {e.preventDefault(); submit();}}>

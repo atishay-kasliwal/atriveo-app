@@ -69,3 +69,17 @@ fieldset.qs-field { border:0; margin:0; padding:0; }
  .qs-chip { width:100%; }
  .qs-companies { margin:18px 0; }
 }
+/* Numbered question sheet with independent desktop navigation and content scrolling. */
+.qs-workspace { overflow:hidden; }
+.qs-question-list { min-height:0; overflow:auto; display:flex; flex-direction:column; gap:16px; scrollbar-width:thin; padding:0 4px 16px; }
+.qs-question-list > .qs-row { flex-shrink:0; width:100%; scroll-margin-top:8px; }
+.qs-number { font-weight:600; color:var(--primary); font-variant-numeric:tabular-nums; }
+.qs-queue-item .qs-number { margin-right:6px; }
+@media (max-width:760px) {
+ .qs-workspace { overflow:visible; }
+ .qs-question-list { overflow:visible; padding:0; }
+ .qs-queue-toggle { position:sticky; top:0; z-index:3; background:var(--card-bg); }
+ .qs-queue.is-open { position:sticky; top:52px; z-index:3; background:var(--background, #101113); flex-shrink:0; }
+ .qs-question-list > .qs-row { scroll-margin-top:58px; }
+ .qs-footer { position:static; }
+}
