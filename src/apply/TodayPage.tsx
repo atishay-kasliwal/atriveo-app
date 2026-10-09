@@ -412,7 +412,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const isBusy = queueRunning || busy === item.id;
     const nc = inNC(item.location);
     const age = ago(item.age);
-    const tags = (item.priorityTags ?? []).filter((t) => !item.location?.includes(t));
+    const tags = (item.priorityTags ?? []).filter((t) => !item.location?.includes(t) && !/^exp\.? not stated$/i.test(t));
     const match = item.score == null ? null : Math.max(0, Math.min(100, item.score));
     return (
       <article key={item.id} onMouseDown={() => setFocus(index)} className={`td-card is-${stage.tone} ${item.track && TRACK_LABEL[item.track] ? `tr-${item.track}` : ""} ${selectedIds.includes(item.id) ? "is-selected" : ""} ${index === focused ? "is-focused" : ""} ${(item.score ?? 0) >= 80 ? "is-top" : ""}`} aria-label={`${item.company}: ${stage.label}`} aria-busy={isBusy}>
@@ -429,27 +429,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
 
         </div>
         <div className="td-tags">{(item.score ?? 0) >= 80 && <span className="td-top" title="80+ match: worth applying first">★ Top match</span>}<span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{item.resumeReady === false && (() => { const e = etaLabel(item.resumeEta); return <span className="td-tag td-notready" title={`${e.title} It moves up once the resume is ready.`}>{e.text}</span>; })()}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
-        <div className="td-body">
-          {item.kind === "drafted" && q && <>
-            <p className="td-big">{drafted || q.n} answer{(drafted || q.n) === 1 ? "" : "s"} drafted</p>
-            <p className="td-note">Atriveo fills them on the job page; you check, then Submit.</p>
-          </>}
-          {item.kind === "answer" && q && <>
-            <p className="td-big">{item.toAnswer} question{item.toAnswer === 1 ? "" : "s"} to answer</p>
-            <p className="td-note">Answer {item.toAnswer === 1 ? "it" : "them"} once; then it moves up for Open & Fill.</p>
-          </>}
-          {item.kind === "fill" && <p className="td-note">Every answer is approved. Atriveo fills it on the job page; you check, then Submit.</p>}
-          {item.kind === "approve" && r && <>
-            <p className="td-big">{r.answered} answers verified</p>
-            <p className="td-note">Filled {when(r.filledAt)}{r.resumeFile ? ` · ${r.resumeFile}` : ""}.</p>
-            {r.companySubmittedToday && <p className="td-note warn">Already submitted to {item.company} today: this one goes out tomorrow.</p>}
-          </>}
-          {item.kind === "you_submit" && r && <>
-            <p className="td-big">{r.answered} answers verified</p>
-            <p className="td-note">{r.openFill?.filledAt ? `Atriveo Fill filled ${r.openFill.filled ?? 0} fields ${when(r.openFill.filledAt)}.` : "Opens in your Chrome; Atriveo Fill fills it and you click Submit."}</p>
-          </>}
-          {errors[item.id] && <p className="td-error" role="alert">{errors[item.id]}</p>}
-        </div>
+        {item.kind === "approve" && r?.companySubmittedToday && <p className="td-note warn">Already submitted to {item.company} today: this one goes out tomorrow.</p>}
+        {errors[item.id] && <p className="td-error" role="alert">{errors[item.id]}</p>}
         <footer className="td-foot">
           {match != null && <div className={`td-profile-match ${match >= 60 ? "is-high" : match >= 35 ? "is-mid" : ""}`}>
             <div><span>Profile match</span><strong>{match}%</strong></div>
@@ -467,6 +448,26 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           </div>
           {item.resumeReady === false && <p className="card-action-note">{etaLabel(item.resumeEta).text}. AI review becomes available when your resume is ready.</p>}
           <CardActions>
+        <div className="td-detail-copy">
+          {item.kind === "drafted" && q && <>
+            <p className="td-big">{drafted || q.n} answer{(drafted || q.n) === 1 ? "" : "s"} drafted</p>
+            <p className="td-note">Atriveo fills them on the job page; you check, then Submit.</p>
+          </>}
+          {item.kind === "answer" && q && <>
+            <p className="td-big">{item.toAnswer} question{item.toAnswer === 1 ? "" : "s"} to answer</p>
+            <p className="td-note">Answer {item.toAnswer === 1 ? "it" : "them"} once; then it moves up for Open & Fill.</p>
+          </>}
+          {item.kind === "fill" && <p className="td-note">Every answer is approved. Atriveo fills it on the job page; you check, then Submit.</p>}
+          {item.kind === "approve" && r && <>
+            <p className="td-big">{r.answered} answers verified</p>
+            <p className="td-note">Filled {when(r.filledAt)}{r.resumeFile ? ` · ${r.resumeFile}` : ""}.</p>
+          </>}
+          {item.kind === "you_submit" && r && <>
+            <p className="td-big">{r.answered} answers verified</p>
+            <p className="td-note">{r.openFill?.filledAt ? `Atriveo Fill filled ${r.openFill.filled ?? 0} fields ${when(r.openFill.filledAt)}.` : "Opens in your Chrome; Atriveo Fill fills it and you click Submit."}</p>
+          </>}
+        </div>
+
           {item.kind === "approve" && ["greenhouse", "ashby", "lever", "workday"].includes(item.ats ?? "") && <button className="apps-btn" disabled={isBusy} onClick={() => void openFill(item)}>Open & Fill</button>}
           <div className="td-review-links">
             {(item.kind === "approve" || item.kind === "you_submit") && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Answers</button>}
