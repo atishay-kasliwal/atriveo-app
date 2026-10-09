@@ -83,3 +83,8 @@
  .apply-avatar { width: 26px; height: 26px; font-size: 12px; }
  .apply-signout { min-height: 32px; font-size: 11px; padding: 4px 8px; }
 }
+
+.apply-worker { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; color: var(--muted-fg); font-size: 12px; }
+.apply-worker i { width: 6px; height: 6px; border-radius: 50%; background: #73b591; flex: none; }
+.apply-worker.is-offline { color: #d9827e; }
+.apply-worker.is-offline i { background: currentColor; }

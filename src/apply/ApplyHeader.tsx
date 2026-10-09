@@ -2,7 +2,7 @@ import AiUsage from './AiUsage';
 import { Link, useLocation } from "react-router-dom";
 import ApplyLogo from "./ApplyLogo";
 import { blocking } from "./questionGroups";
-import { useReviewCounts, useUnansweredCards, useUnansweredQueue } from "./reviewQueue";
+import { useReadyQueue, useReviewCounts, useUnansweredCards, useUnansweredQueue } from "./reviewQueue";
 import type { User } from "../types";
 
 async function signOut() {
@@ -16,6 +16,8 @@ export default function ApplyHeader({ user }: { user: User }) {
   const counts = useReviewCounts();
   // Required questions nobody answered, once every application's questions have loaded (else the server's count).
   const queue = useUnansweredQueue(60_000);
+  const ready = useReadyQueue(60_000);
+  const worker = queue.data?.worker ?? ready.data?.worker ?? null;
   const { cards } = useUnansweredCards();
   const waitingRows = (queue.data?.unanswered ?? []).filter((r) => (r.needsInput ?? 0) > 0);
   const loaded = waitingRows.every((r) => cards[r.id] && cards[r.id]!.updatedAt >= r.updatedAt);
@@ -40,6 +42,7 @@ export default function ApplyHeader({ user }: { user: User }) {
         <Link to="/stats" aria-current={page === "stats" ? "page" : undefined}>Stats</Link>
       </nav>
       <div className="apply-header-right">
+        {worker && <span className={`apply-worker ${worker.online ? "is-online" : "is-offline"}`} role="status"><i aria-hidden="true" />{worker.online ? "Worker running" : "Worker offline"}</span>}
         <AiUsage />
         <a className="apply-ext" href="https://application.atriveo.com" target="_blank" rel="noreferrer">Job feed ↗</a>
         <span className="apply-user" title={user.email}><span className="apply-avatar" aria-hidden>{initial}</span></span>

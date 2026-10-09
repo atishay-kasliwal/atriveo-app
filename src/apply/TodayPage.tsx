@@ -233,7 +233,6 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const selectable = (i: Item) => i.kind === "you_submit" || ((i.kind === "fill" || i.kind === "drafted") && Boolean(i.url) && AUTO_ATS.includes(i.ats ?? "") && canQueueApply());
   const queueable = items.filter(selectable);
   const queued = items.filter((i) => selectable(i) && selectedIds.includes(i.id)).map((i) => ({ id: i.id, company: i.company, ...(i.kind === "you_submit" ? {} : { url: i.url }) }));
-  const worker = unanswered.data?.worker ?? ready.data?.worker ?? null;
 
   const finish = (item: Item, message: string, delta: Parameters<typeof adjustCounts>[0]) => {
     setDone((d) => ({ ...d, [item.id]: item.updatedAt }));
@@ -542,7 +541,6 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
             ? <span className="td-confirm">Discard {selectedIds.length}? <button className="apps-btn danger" disabled={busy !== null} onClick={() => void discard(selectedIds)}>Discard</button><button className="apps-link" onClick={() => setConfirmDiscard(false)}>Cancel</button></span>
             : <button className="apps-btn" disabled={queueRunning || busy !== null} onClick={() => setConfirmDiscard(true)}>Discard selected ({selectedIds.length})</button>)}
           {queueable.length > 0 && <><button className="apps-btn td-desk" disabled={queueRunning} onClick={() => setSelectedIds(queueable.map(i => i.id))}>Select all Open & Fill ({queueable.length})</button><button className="apps-btn td-desk" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear</button><OpenFillQueue onRunning={setQueueRunning} selected={queued} onFilled={(id) => { const it = everything.find((i) => i.id === id); if (it) setDone((d) => ({ ...d, [id]: it.updatedAt })); setSelectedIds((ids) => ids.filter((x) => x !== id)); }} onFinish={() => { void refreshReady(); void refreshUnanswered(); }} /></>}
-          {worker && <span className={`apps-state ${worker.online ? "" : "bad"}`}><i aria-hidden />{worker.online ? "Worker running" : "Worker offline"}</span>}
           {fillable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("fill")}>Fill and verify all {fillable.length}</button>}
           {approvable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("approve")}>Approve all {approvable.length} ready</button>}
         </div>
