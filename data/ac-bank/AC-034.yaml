@@ -1,5 +1,8 @@
 id: AC-034
 role: shriffle
+# Retired 2026-10-09: Atishay asked not to use Shriffle.
+tracks:
+  - retired
 slot_kind: experience
 visibility:
   default: false
