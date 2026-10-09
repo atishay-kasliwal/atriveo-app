@@ -68,7 +68,7 @@ function etaLabel(eta?: ResumeEta): { text: string; title: string } {
 }
 
 /** Postings older than this have no freshness left on the bar. */
-const FRESH_HOURS = 72;
+
 
 /** A North Carolina job (they come first). */
 const NC = /\b(NC|North Carolina|Raleigh|Durham|Charlotte|Cary|Chapel Hill|Morrisville|Research Triangle|RTP|Greensboro|Winston[- ]Salem|Wilmington|Apex)\b/i;
@@ -414,22 +414,20 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const nc = inNC(item.location);
     const age = ago(item.age);
     const tags = (item.priorityTags ?? []).filter((t) => !item.location?.includes(t));
-    const hours = item.age ? (Date.now() - Date.parse(item.age)) / 3_600_000 : NaN;
-    const fresh = Number.isFinite(hours) ? Math.max(0, Math.min(1, 1 - hours / FRESH_HOURS)) : null;
+    const match = item.score == null ? null : Math.max(0, Math.min(100, item.score));
     return (
       <article key={item.id} onMouseDown={() => setFocus(index)} className={`td-card is-${stage.tone} ${item.track && TRACK_LABEL[item.track] ? `tr-${item.track}` : ""} ${selectedIds.includes(item.id) ? "is-selected" : ""} ${index === focused ? "is-focused" : ""} ${(item.score ?? 0) >= 80 ? "is-top" : ""}`} aria-label={`${item.company}: ${stage.label}`} aria-busy={isBusy}>
         <header className="td-head">
           <input type="checkbox" className="td-check" disabled={queueRunning} aria-label={`Select ${item.company} ${item.title}`} checked={selectedIds.includes(item.id)} onChange={e => setSelectedIds(ids => e.target.checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} />
-          <CompanyLogo company={item.company} size="sm" />
+          <CompanyLogo company={item.company} size="md" />
           <div className="td-id"><strong title={item.company}>{item.company}</strong></div>
           <button type="button" className="td-skip-co" disabled={isBusy} title={`Skip ${item.company}: hide its jobs until you remove it from Skipped companies (S)`} aria-label={`Skip ${item.company}`} onClick={() => skipCompany(item.company)}><svg aria-hidden="true" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" strokeWidth="1.5"/><path d="M4.1 11.9l7.8-7.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg></button>
-          {item.score != null && <span className={`td-score ${item.score >= 60 ? "is-high" : item.score >= 35 ? "is-mid" : ""}`} style={{ ["--pct" as string]: `${Math.min(100, item.score)}%` }} title={`Match score ${item.score}%`}><b>{item.score}</b></span>}
+
         </header>
         <h2 className="td-role" title={item.title}>{item.title}</h2>
         <div className="td-meta">
           {item.location && <span className={`td-loc ${nc ? "is-nc" : ""}`} title={item.location}>{nc ? "★ " : ""}{item.location}</span>}
-          {age && <span className={`td-age ${hours < 1 ? "is-new" : ""}`} title={item.age ?? undefined}>{age}</span>}
-          {fresh != null && <span className={`td-fresh ${fresh > 0.66 ? "is-fresh" : fresh > 0.33 ? "is-mid" : "is-stale"}`} title={fresh > 0 ? "Freshness: drains over 3 days; early applicants are seen first" : "Over 3 days old"}><i style={{ width: `${Math.round(fresh * 100)}%` }} /></span>}
+
         </div>
         <div className="td-tags">{(item.score ?? 0) >= 80 && <span className="td-top" title="80+ match: worth applying first">★ Top match</span>}<span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{item.resumeReady === false && (() => { const e = etaLabel(item.resumeEta); return <span className="td-tag td-notready" title={`${e.title} It moves up once the resume is ready.`}>{e.text}</span>; })()}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
         <div className="td-body">
@@ -454,6 +452,11 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {errors[item.id] && <p className="td-error" role="alert">{errors[item.id]}</p>}
         </div>
         <footer className="td-foot">
+          {match != null && <div className={`td-profile-match ${match >= 60 ? "is-high" : match >= 35 ? "is-mid" : ""}`}>
+            <div><span>Profile match</span><strong>{match}%</strong></div>
+            <div className="td-match-bar" role="meter" aria-label="Profile match" aria-valuemin={0} aria-valuemax={100} aria-valuenow={match}><i style={{ width: `${match}%` }} /></div>
+          </div>}
+          <div className="td-primary-actions">
           {item.kind === "linkedin" && <a className="td-cta td-cta-linkedin" title="Apply on LinkedIn, then Atriveo → Apply on this page on the company's form" href={item.url} target="_blank" rel="noreferrer" onClick={() => noteLinkedinOpen(item.url!, item.company, item.title)}>
             <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
             <span>Open on LinkedIn</span><svg className="td-cta-ext" aria-hidden="true" viewBox="0 0 16 16"><path d="M6 3.5H3.5v9h9V10M9 3h4v4M13 3L7.5 8.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"/></svg></a>}
@@ -462,6 +465,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
           {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}
           {item.resumeReady !== false ? <Link className="apps-btn td-ai-review" to={`/resume_builder?${item.kind === "linkedin" ? `job=${encodeURIComponent(item.id)}` : `app=${encodeURIComponent(item.id)}`}&ai=review`}>✦ Review with AI</Link> : <button className="apps-btn td-ai-review" disabled title="A resume needs to be created before AI can review it">✦ Review with AI</button>}
+          </div>
           {item.resumeReady === false && <p className="card-action-note">{etaLabel(item.resumeEta).text}. AI review becomes available when your resume is ready.</p>}
           <CardActions>
           {item.kind === "approve" && ["greenhouse", "ashby", "lever", "workday"].includes(item.ats ?? "") && <button className="apps-btn" disabled={isBusy} onClick={() => void openFill(item)}>Open & Fill</button>}
@@ -479,6 +483,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
             <button className="apps-link td-discard" disabled={isBusy} onClick={() => void discard([item.id])}>Discard</button>
           </div>
           </CardActions>
+          <div className="td-card-caption"><span>{item.kind === "linkedin" ? "LinkedIn" : item.ats ? item.ats.charAt(0).toUpperCase() + item.ats.slice(1) : "Atriveo"}</span>{age && <span title={item.age ?? undefined}>{age}</span>}</div>
         </footer>
       </article>
     );

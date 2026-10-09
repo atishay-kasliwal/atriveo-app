@@ -434,3 +434,39 @@
   .td-page .td-meta { font-size: 12px; }
   .td-page .td-foot .td-ai-review:hover { text-decoration: none; }
 }
+
+/* Restrained opportunity cards: a clear reading order and quiet, flat actions. */
+.td-page .td-grid .td-card { border-radius: 12px; background: #17191c; border-color: #292d32; padding: 24px; gap: 18px; }
+.td-page .td-card.is-focused, .td-page .td-card.is-selected { border-color: #5d7ca5; box-shadow: none; }
+.td-page .td-card:hover { border-color: #454d57; }
+.td-page .td-head { gap: 14px; }
+.td-page .td-head .company-logo { --logo-size: 44px; width: 44px; height: 44px; border-radius: 10px; background: #24272b; box-shadow: none; flex: none; }
+.td-page .td-head .company-logo img { width: 70%; height: 70%; object-fit: contain; }
+.td-page .td-id strong { font-size: 16px; font-weight: 600; }
+.td-page .td-check { width: 14px; height: 14px; opacity: .65; }
+.td-page .td-check:checked, .td-page .td-check:focus-visible { opacity: 1; }
+.td-page .td-role { font-size: 19px; line-height: 1.5; margin: 4px 0 8px; min-height: 3em; }
+.td-page .td-meta { font-size: 13px; }
+.td-page .td-meta .td-loc.is-nc { font-weight: 500; }
+.td-page .td-stage, .td-page .td-track, .td-page .td-tag { border-radius: 5px; font-size: 11px; font-weight: 500; padding: 4px 7px; }
+.td-page .td-foot { gap: 14px; padding-top: 20px; font-family: inherit; }
+.td-profile-match { display: flex; flex-direction: column; gap: 12px; color: var(--muted-fg); font-size: 12px; --match-color: #8b969e; }
+.td-profile-match.is-high { --match-color: #69c69a; }
+.td-profile-match.is-mid { --match-color: #d5ad61; }
+.td-profile-match > div:first-child { display: flex; align-items: center; justify-content: space-between; }
+.td-profile-match strong { color: var(--match-color); font-weight: 600; font-variant-numeric: tabular-nums; }
+.td-match-bar { height: 3px; background: #282d31; overflow: hidden; border-radius: 2px; }
+.td-match-bar i { display: block; height: 100%; background: var(--match-color); }
+.td-page .td-primary-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: stretch; }
+.td-page .td-primary-actions > :is(a, button) { height: auto; min-height: 44px; margin: 0; padding: 10px 12px; border-radius: 7px; font-size: 12px; font-weight: 600; display: flex; justify-content: center; align-items: center; text-align: center; }
+.td-page .td-primary-actions .td-cta, .td-page .td-primary-actions .rv-primary { background: #252a30; border: 1px solid #333a43; color: #e4e7ec; box-shadow: none; letter-spacing: 0; }
+.td-page .td-primary-actions .td-cta:hover, .td-page .td-primary-actions .rv-primary:hover:not(:disabled) { background: #303740; transform: none; filter: none; }
+.td-page .td-primary-actions .td-ai-review { background: transparent; border-color: #333a43; color: #9db9de; white-space: nowrap; }
+.td-page .td-primary-actions .td-ai-review:hover { background: #222830; text-decoration: none; }
+.td-page .card-actions > summary { border: 0; min-height: 24px; font-size: 11px; justify-content: flex-start; }
+.td-card-caption { display: flex; justify-content: space-between; align-items: center; color: var(--muted-fg); font-size: 11px; }
+@media (max-width: 759px) {
+  .td-page .td-grid .td-card { padding: 18px; gap: 12px; }
+  .td-page .td-role { font-size: 17px; min-height: 0; margin: 0; }
+  .td-page .td-foot { display: flex; flex-direction: column; align-items: stretch; padding-top: 16px; border-top: 1px solid var(--border-col); }
+}
