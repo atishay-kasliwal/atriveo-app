@@ -107,6 +107,9 @@ const FRAME_SCRIPT = (n: number, mode: "fit" | "width") => `
     // "fit": the whole first page in view; "width": as wide as the frame (phones scroll down the page).
     const zw = (window.innerWidth - (${mode === "width" ? 8 : 20})) / (width / z);
     document.body.style.zoom = ${mode === "width" ? "zw" : "Math.min(1.6, zw, (window.innerHeight - 20) / (height / z))"};
+    const paper = pg.getBoundingClientRect();
+    // Trim 20% of the grey surround, without changing the page scale or iframe viewport.
+    post({type:"rb-frame",left:Math.max(0,paper.left)*.2,right:Math.max(0,window.innerWidth-paper.right)*.2});
   };
   window.addEventListener("resize", fit);
   // Each bullet's lines, and the lines a text would take as a bullet (a hidden list as wide as the page's).
@@ -191,7 +194,8 @@ export default function ResumeLivePreview({ layout, title, email, city, sections
   useEffect(() => {
     const on = (e: MessageEvent) => {
       if (e.source !== frame.current?.contentWindow || e.data?.id !== id.current) return;
-      if (e.data.type === "rb-pages") { handlers.current.onFit({ pages: e.data.pages, lines: e.data.lines, bullets: e.data.bullets, measured: e.data.measured }); send(hl.current && { ...hl.current, scroll: false }); }
+      if(e.data.type === "rb-frame") { const {left,right}=e.data;if(Number.isFinite(left)&&Number.isFinite(right)&&frame.current)frame.current.style.clipPath=`inset(0 ${right}px 0 ${left}px round 10px)`; }
+      else if (e.data.type === "rb-pages") { handlers.current.onFit({ pages: e.data.pages, lines: e.data.lines, bullets: e.data.bullets, measured: e.data.measured }); send(hl.current && { ...hl.current, scroll: false }); }
       else if (e.data.type === "rb-pick") handlers.current.onPick(e.data.target);
       else if (e.data.type === "rb-hover") handlers.current.onHover(e.data.key);
     };
