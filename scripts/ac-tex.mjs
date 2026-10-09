@@ -18,7 +18,7 @@ import { SKILLS_MAX_CATEGORIES } from "./skills-library.mjs";
 import { resolveBankDir } from "./ac-bank.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
-import { displayUrl } from "./ats/patterns.mjs";
+import {resumeContactLink} from "../src/shared/resumeContact.mjs";
 import { employerTitle } from "./ac-tracks.mjs";
 
 const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
@@ -219,7 +219,7 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
   const city = cityAsWritten || resolveHeaderLocation(location, me.location);
   // Profile links show their address, not a label: extracted text keeps only what is printed,
   // so a link drawn as "Linkedin" reaches a parser without its URL.
-  const link = (url) => `\\href{${url}}{${esc(displayUrl(url))}}`;
+  const link = (url) => `\\href{${url}}{${esc(resumeContactLink(url).label)}}`;
   // Only the fields that are set, so a blank phone or email leaves no "| |".
   const contactLine = [esc(title), me.phone && esc(me.phone), me.email && `\\href{mailto:${me.email}}{${esc(me.email)}}`, me.linkedin && link(me.linkedin), me.github && link(me.github), city && esc(city)].filter(Boolean).join(" $|$ ");
   // Keep all contact fields on one line; shrink only when the actual width requires it.

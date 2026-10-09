@@ -1,3 +1,4 @@
+import {resumeContactLink} from '../shared/resumeContact.mjs';
 import { useEffect, useMemo, useRef, useState } from "react";
 // By file path: the package's exports map leaves out the polyfill build.
 import pagedPolyfill from "../../node_modules/pagedjs/dist/paged.polyfill.min.js?url";
@@ -8,7 +9,7 @@ import pagedPolyfill from "../../node_modules/pagedjs/dist/paged.polyfill.min.js
 // stays the one that's sent, and Save waits for it (docs/resume-builder.md).
 
 export interface Layout {
-  name: string; phone: string | null; linkedin: string | null; github: string | null;
+  name: string; phone: string | null; linkedin: string | null; github: string | null; linkedinUrl?:string|null; githubUrl?:string|null;
   education: Array<{ school: string; place: string; degree: string; dates: string }>;
   roles: Record<string, { name: string; dates: string; place: string; order: number; title: string | null }>;
   projects: Record<string, { name: string; dates: string; rank: number }>;
@@ -36,6 +37,7 @@ const CSS = `
 html, body { margin: 0; }
 body { font-family: "Computer Modern Serif", "Latin Modern Roman", "CMU Serif", "Times New Roman", serif; font-size: 11pt; line-height: 1.2; color: #000; }
 .name { text-align: center; font-size: 24.9pt; font-weight: bold; font-variant: small-caps; line-height: 1.1; }
+.contact a { color: inherit; text-decoration: none; }
 .contact { text-align: center; font-size: 9pt; margin-top: 1pt; white-space: nowrap; }
 h2 { font-size: 12pt; font-weight: normal; margin: 4pt 0 3pt; padding-bottom: 1pt; border-bottom: 0.6pt solid #000; }
 .row { display: flex; justify-content: space-between; gap: 8pt; }
@@ -58,7 +60,8 @@ li { font-size: 10pt; margin: 0; }
 `;
 
 function resumeHtml(layout: Layout, p: { title: string; email: string; city: string; sections: PreviewSection[]; skills: string[] }) {
-  const contact = [p.title, layout.phone, p.email, layout.linkedin, layout.github, p.city].filter(Boolean).map((x) => esc(String(x))).join(" | ");
+  const social=(value:string|null|undefined)=>{if(!value)return null;const link=resumeContactLink(value);return link.href?`<a href="${esc(link.href)}" target="_blank" rel="noopener noreferrer">${esc(link.label)}</a>`:esc(link.label);};
+  const contact = [esc(p.title),layout.phone&&esc(layout.phone),p.email&&esc(p.email),social(layout.linkedinUrl||layout.linkedin),social(layout.githubUrl||layout.github),p.city&&esc(p.city)].filter(Boolean).join(" | ");
   const items = (s: PreviewSection) => `<ul>${s.bullets.map((b, bi) => `<li data-k="${s.si}:${bi}">${esc(b.text)}</li>`).join("")}</ul>`;
   const exp = p.sections.filter((s) => s.kind === "experience" && s.bullets.length)
     .sort((a, b) => (layout.roles[b.role]?.order ?? 0) - (layout.roles[a.role]?.order ?? 0))

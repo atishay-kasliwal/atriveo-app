@@ -92,7 +92,7 @@ function layoutOf(bank) {
   const projs = Object.keys(kinds).filter((r) => kinds[r] === "project");
   const ranked = sortProjectsByRecency(projs.map((role) => ({ role }))).map((p) => p.role);
   return {
-    name: me.name, phone: me.phone || null, linkedin: me.linkedin ? displayUrl(me.linkedin) : null, github: me.github ? displayUrl(me.github) : null,
+    name: me.name, phone: me.phone || null, linkedinUrl:me.linkedin||null,githubUrl:me.github||null, linkedin: me.linkedin ? displayUrl(me.linkedin) : null, github: me.github ? displayUrl(me.github) : null,
     education: EDUCATION_ROWS,
     roles: Object.fromEntries(exp.map((r) => { const m = resolveExperienceMeta(r); return [r, { name: labelOf(r), dates: m.dates, place: m.loc, order: m.order || 0,
       title: r === "stony-brook" ? null : employerTitle(r, null) || (r === "wake-forest" ? "AI/ML Engineer" : m.title) }]; })),
