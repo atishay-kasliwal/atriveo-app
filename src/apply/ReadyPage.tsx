@@ -11,6 +11,7 @@ import { armExtension, extensionVersion } from "./openFill";
 import { adjustCounts, refreshReady, useReadyQueue, type ApprovedApp, type ManualApp, type ReadyApp } from "./reviewQueue";
 import "../styles/applications.css";
 import "./review-pages.css";
+import "./ready-workspace.css";
 
 // Applications the engine filled completely and checked, waiting only for your approval.
 // The list on the left, the selected one's full record on the right, no page scrolling.
@@ -211,12 +212,19 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
   const heldSelected = selected ? held.get(selected.id) ?? null : null;
 
   return (
-    <div className="rv-page">
+    <div className={`rv-page ready-workspace ${header ? "has-header" : ""}`}>
       {header}
       <div className="rv-bar">
         <div className="rv-bar-title">
-          <h1>Ready to submit</h1>
-          {data && <span className="apps-muted">{ready.length} to approve{manual.length ? ` · ${manual.length} for you to submit` : ""} · every question answered · every check passed</span>}
+          <span className="ready-eyebrow">Your application workspace</span>
+          <h1>Your next chapter is ready.</h1>
+          <p className="ready-subtitle">Review your applications. Make your next move.</p>
+          {data && <div className="ready-counts" aria-label="Application queue counts">
+            <span><strong>{ready.length}</strong> to approve</span>
+            <span><strong>{manual.length}</strong> for you to submit</span>
+            <span><strong>{approved.length}</strong> approved</span>
+            <span className="ready-verified">Every question answered · every check passed</span>
+          </div>}
         </div>
         <div className="rv-bar-actions">
           {data?.worker && !data.worker.online && <span className="apps-state bad" title={`Last seen ${when(data.worker.updatedAt)}`}><i aria-hidden />Worker offline: approvals wait</span>}
@@ -241,6 +249,7 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
                   {data.counts.unanswered > 0 && <Link to="/unanswered">{data.counts.unanswered} application{data.counts.unanswered === 1 ? " needs" : "s need"} answers →</Link>}
                 </div>
               )}
+              <div className="ready-list-heading"><h2>Ready to submit</h2><span>{ready.length}</span></div>
               <ul className="rv-rows">
                 {ready.map((r) => {
                   const why = held.get(r.id);

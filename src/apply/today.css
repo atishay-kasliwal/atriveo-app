@@ -375,3 +375,37 @@
   .td-search-n { position: static; flex: none; }
 }
 .td-ai-review { display:flex;align-items:center;justify-content:center;min-height:38px;text-decoration:none;border:1px solid color-mix(in srgb,var(--primary) 35%,var(--border-col));color:var(--primary); }
+
+/* Category and match tags identify each job; card surfaces stay neutral. */
+.td-page .td-card::before { content: none; }
+.td-page .td-card,
+.td-page .td-card.is-top { background: var(--card-bg); border: 1px solid var(--border-col); box-shadow: none; }
+.td-page .td-card:hover { border-color: var(--muted-fg); }
+.td-page .td-card.is-selected,
+.td-page .td-card.is-focused { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+
+/* Give navigation, filtering, and queue actions distinct, consistently aligned rows. */
+@media (min-width: 760px) {
+  .td-page .td-bar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 360px); gap: 16px 24px; padding: 24px 28px 18px; }
+  .td-page .td-title { grid-column: 1; grid-row: 1; gap: 6px; }
+  .td-page .td-title h1 { font-size: 28px; }
+  .td-page .td-search { grid-column: 2; grid-row: 1; width: 100%; margin: 0; }
+  .td-page .td-moods { grid-column: 1 / -1; grid-row: 2; }
+  .td-page .td-kinds { grid-column: 1 / -1; grid-row: 3; margin: 0; }
+  .td-page .td-actions { grid-column: 1 / -1; grid-row: 4; margin: 0; flex-wrap: wrap; padding-top: 14px; border-top: 1px solid var(--border-col); }
+  .td-page .td-goal { margin: 0 28px 20px; }
+  .td-page .td-grid { padding: 2px 28px 18px; gap: 20px; overflow-y: auto; align-items: start; grid-template-rows: none !important; grid-auto-rows: auto; }
+  .td-page .td-grid .td-card { height: auto; min-height: 340px; padding: 22px; gap: 14px; }
+  .td-page .td-head { gap: 12px; }
+  .td-page .td-body { flex: 0 0 auto; overflow: visible; }
+  .td-page .td-body:empty { display: none; }
+  .td-page .td-foot { margin-top: auto; padding: 16px 0 0; border-top: 1px solid var(--border-col); }
+  .td-page .td-bottom { padding: 0 28px 16px; justify-content: space-between; }
+  .td-page .td-bottom .td-pager { margin: 0; }
+}
+.td-page .td-role { font-size: 18px; font-weight: 600; line-height: 1.45; letter-spacing: -.015em; min-height: 2.9em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.td-page .td-meta { flex-wrap: wrap; gap: 8px; }
+.td-page .td-meta .td-loc { white-space: normal; flex: 1 1 150px; }
+@media (max-width: 759px) {
+  .td-page .td-role { font-size: 16px; min-height: 0; }
+}

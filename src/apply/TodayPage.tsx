@@ -98,7 +98,7 @@ const STAGE: Record<Kind, { label: string; tone: string }> = {
 function useLayout() {
   const pick = () => ({
     mobile: window.innerWidth < 760,
-    columns: window.innerWidth >= 1400 ? 5 : window.innerWidth >= 1100 ? 4 : window.innerWidth >= 760 ? 2 : 1,
+    columns: window.innerWidth >= 1900 ? 4 : window.innerWidth >= 1200 ? 3 : window.innerWidth >= 760 ? 2 : 1,
     rows: window.innerWidth < 760 ? 12 : window.innerHeight >= 860 ? 2 : 1,
   });
   const [n, setN] = useState(pick);
@@ -421,10 +421,11 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         <header className="td-head">
           <input type="checkbox" className="td-check" disabled={queueRunning} aria-label={`Select ${item.company} ${item.title}`} checked={selectedIds.includes(item.id)} onChange={e => setSelectedIds(ids => e.target.checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} />
           <CompanyLogo company={item.company} size="sm" />
-          <div className="td-id"><strong title={item.company}>{item.company}</strong><span title={item.title}>{item.title}</span></div>
+          <div className="td-id"><strong title={item.company}>{item.company}</strong></div>
           <button type="button" className="td-skip-co" disabled={isBusy} title={`Skip ${item.company}: hide its jobs until you remove it from Skipped companies (S)`} aria-label={`Skip ${item.company}`} onClick={() => skipCompany(item.company)}><svg aria-hidden="true" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" strokeWidth="1.5"/><path d="M4.1 11.9l7.8-7.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg></button>
           {item.score != null && <span className={`td-score ${item.score >= 60 ? "is-high" : item.score >= 35 ? "is-mid" : ""}`} style={{ ["--pct" as string]: `${Math.min(100, item.score)}%` }} title={`Match score ${item.score}%`}><b>{item.score}</b></span>}
         </header>
+        <h2 className="td-role" title={item.title}>{item.title}</h2>
         <div className="td-meta">
           {item.location && <span className={`td-loc ${nc ? "is-nc" : ""}`} title={item.location}>{nc ? "★ " : ""}{item.location}</span>}
           {age && <span className={`td-age ${hours < 1 ? "is-new" : ""}`} title={item.age ?? undefined}>{age}</span>}
