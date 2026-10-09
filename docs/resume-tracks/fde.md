@@ -198,6 +198,19 @@ hiring manager), with labels swapped between rounds.
 
 To swap a bullet, change the id in `TRACKS.yaml` `pinned`, then do the same checks.
 
+**Per-job check (2026-10-08 night).** The 25 open FDE applications were rebuilt with the pinned set, and each was
+judged blind against its own posting (new vs that job's old resume).
+- **Result:** the new resume won **19 / 25 (76%)**. It won every customer-facing or AI-application FDE role (Rubie,
+  Revin, Whop, Rogo, Harvey, Replit, Lovable, CLEAR, LiveKit, Alex AI…).
+- **Where it lost:** infrastructure or platform-heavy FDE roles, where the older, tool-dense resume won: Thought
+  Machine (FDE, Infrastructure), Fluidstack ×2 (GPU cloud, fleet telemetry, ERP), TRM Labs (deploys the platform),
+  Medeloop (FastAPI/AWS pipeline), Venn (slight).
+- **Applied:** the 19 winners attach the new resume. The 6 losers keep their old resume, with
+  `jobs.resume.kept_old_reason` on their job documents.
+- **Open: an FDE-infrastructure set.** One fixed set can't serve both kinds of FDE posting. The plan is a second
+  pinned set for infrastructure-heavy FDE postings (Kubernetes, CI/CD, observability, cloud and data pipelines),
+  chosen by the posting's text, tested the same way until both kinds reach 90%+.
+
 **Not yet covered:**
 - Interview prep for "~99% agreement" vs "90%+", and "1 h → 1 min" vs "3 h → 2 min" (different measures).
 - Lines the reviewer flagged on other roles' resumes: "27% portfolio return", "99.9% uptime", the duplicate FOMC
