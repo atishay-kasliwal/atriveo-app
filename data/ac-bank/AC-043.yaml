@@ -30,5 +30,4 @@ variants:
     emphasis: data
     strength: 8
     text: >-
-      Gathered 10+ heterogeneous MRI scan types with Apache Airflow ETL pipelines into reproducible
-      research-ready cohorts for brain tumor studies.
+      Gathered 10+ heterogeneous MRI scan types with Apache Airflow ETL pipelines into reproducible cohorts that fed a 450+ scan stroke study at 87% predictive accuracy.

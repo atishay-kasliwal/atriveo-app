@@ -170,7 +170,7 @@ stony_brook_title_patterns:
 # only at an employer listed for it. Names match data/ac-bank skill names (skills-library.mjs).
 confirmed_skills:
   stony-brook: [PyTorch, TensorFlow, scikit-learn, LangGraph, Vector Databases, Hugging Face, MLflow, MLOps, AWS Bedrock, FinBERT, Pinecone, R, SQL, Excel, Tableau, Power BI, Plotly, R Shiny, Statistical Analysis, A/B Testing, Time Series Forecasting, Predictive Modeling, Model Evaluation, Hypothesis Testing, Regression, Pandas, NumPy, Data Visualization, Dashboards, MongoDB, MySQL, PostgreSQL, GraphQL, Agile, Scrum, AWS IAM, Claude, Anthropic]
-  wake-forest: [PyTorch, TensorFlow, scikit-learn, Vector Databases, Anthropic, N4ITK, R, SQL, Excel, XGBoost, LightGBM, ggplot2, R Shiny, Statistical Analysis, A/B Testing, Predictive Modeling, Model Evaluation, Hypothesis Testing, Regression, Pandas, NumPy, Data Visualization, MongoDB, MySQL, PostgreSQL, GraphQL, Agile, Scrum, HIPAA]
+  wake-forest: [PyTorch, TensorFlow, scikit-learn, Vector Databases, Anthropic, N4ITK, R, SQL, Excel, XGBoost, LightGBM, ggplot2, R Shiny, Statistical Analysis, A/B Testing, Predictive Modeling, Model Evaluation, Hypothesis Testing, Regression, Pandas, NumPy, Data Visualization, MongoDB, MySQL, PostgreSQL, GraphQL, Agile, Scrum, HIPAA, Airflow]
   # 2026-10-08 (docs/resume-tracks/facts): A/B tests, SQL and Power BI dashboards at Accolite.
   # 2026-10-09: security (JWT, OAuth 2.0, API gateway, AWS security services) and documentation (Swagger/API docs,
   # design, leadership and requirement docs) at Accolite (Atishay).

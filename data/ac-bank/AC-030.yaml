@@ -23,5 +23,4 @@ variants:
     emphasis: platform
     strength: 7
     text: >-
-      Built an internal payroll and operations platform in Node.js, Python, TypeScript, React, and Firebase,
-      automating payslip generation and financial workflows for 3,000 employees.
+      Created an in-house payroll platform on React, Node.js and Firebase that generates payslips and runs finance workflows for 3,000 employees, retiring a high-maintenance Oracle setup.
