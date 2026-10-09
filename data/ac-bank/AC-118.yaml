@@ -25,5 +25,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Synthesized radiomics, clinical, and genomics features into Python multi-modal models on 73-patient
-      research cohorts for outcome prediction.
+      Synthesized radiomics, clinical and genomics features into Python multimodal models on 73-patient cohorts from 2020-2025, predicting outcomes at 0.70 AUC.

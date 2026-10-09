@@ -27,5 +27,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Evaluated XGBoost and scikit-learn classifiers with Python cross-validation pipelines on 255-sample
-      radiomics research cohorts.
+      Evaluated XGBoost and scikit-learn classifiers with Python cross-validation on 255-sample radiomics cohorts, with SVM leading at 0.727 F1 and 0.70 AUC.

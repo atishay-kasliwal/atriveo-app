@@ -1,5 +1,8 @@
 id: AC-127
 role: medledger
+# 2026-10-09: retired (MedLedger); hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: scheduling
 display_order: 5

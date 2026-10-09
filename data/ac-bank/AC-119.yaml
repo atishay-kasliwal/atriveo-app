@@ -1,5 +1,8 @@
 id: AC-119
 role: mri-research
+# 2026-10-09: AC-115; hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: clustering
 display_order: 7

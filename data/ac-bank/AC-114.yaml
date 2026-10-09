@@ -27,5 +27,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Predicted survival with Python Kaplan-Meier and Cox models using lifelines on 73-patient clinical
-      research cohorts from 2020–2022.
+      Predicted patient outcomes on 73-patient clinical cohorts from 2020-2025 with Python Kaplan-Meier, Cox and SVM models, reaching 0.70 AUC with lifelines and scikit-learn.

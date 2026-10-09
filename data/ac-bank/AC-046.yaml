@@ -47,7 +47,7 @@ variants:
     emphasis: ml
     strength: 8
     text: >-
-      Introduced Python radiomics survival models forecasting patient outcomes at 6, 12 and 24 months at a 0.7 C-index, putting prognosis next to each scan at clinical review.
+      Introduced Python radiomics prognosis models predicting patient outcomes at 6, 12 and 24 months at 0.70 AUC, putting prognosis next to each scan at clinical review.
   - facet: ai
     emphasis: ai
     strength: 9

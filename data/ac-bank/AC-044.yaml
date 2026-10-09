@@ -52,9 +52,9 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Derived 200+ quantitative biomarkers with a PyRadiomics extraction pipeline, feeding prognosis models that reached a 0.7 C-index on patient survival.
+      Derived 200+ quantitative biomarkers with a PyRadiomics extraction pipeline, feeding prognosis models that reached 0.70 AUC on patient outcomes.
   - facet: production-ml
     emphasis: ml
     strength: 9
     text: >-
-      Derived 200+ PyRadiomics biomarkers through reusable preprocessing, extraction and validation workflows, feeding survival models at a 0.7 C-index.
+      Derived 200+ PyRadiomics biomarkers through reusable preprocessing, extraction and validation workflows, feeding outcome models at 0.70 AUC.

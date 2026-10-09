@@ -39,3 +39,5 @@ Facts only, each with its source and status. Bullets for any role are written fr
 | Survival / prognosis models on the 200+ radiomic biomarkers: **C-index about 0.7** | Confirmed (his estimate) |
 | Presentation to the 20-member team changed the team's next modeling decisions | Confirmed |
 | Portfolio site says 10 TB, 4 h → 18 min, 95% concordance; resume facts are 2 TB, 3 h → 2 min / 1 h → <1 min, 99% | **Mismatch: update the site** |
+| Correction 2026-10-09: the stroke model's **87% is recall** (SVM), accuracy ~63%; best AUC 0.80; the "0.7" he recalled matches the best SVM's **0.697 AUC** (MRI repo), so bullets say AUC, not C-index | MRI repo results files |
+| MRI repo held patient files with MRN numbers and was public; made **private** 2026-10-09 (history cleanup still to do) | — |

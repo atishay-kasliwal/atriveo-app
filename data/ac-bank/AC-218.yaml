@@ -11,13 +11,11 @@ tracks:
 metrics_claimed: []
 concepts_claimed:
   - data-science
-signature_technologies:
-  - XGBoost
-  - LightGBM
-  - SHAP
+signature_technologies: [XGBoost]
 fact: >-
-  Stroke MRI outcome prediction (Wake Forest CAIR x Atrium Health): 500+ radiomic features, 450+ scans, 87%
-  accuracy, SHAP; feature models beat a clinical-variables-only baseline (Research-Cohorts report).
+  Stroke MRI outcome prediction (Wake Forest CAIR x Atrium Health): 500+ radiomic features, 450+ scans;
+  SVM recall 0.867, accuracy 0.63, F1 0.72; best test AUC 0.80 (MRI repo mrs_model_comparison.csv). The 87% is
+  recall, not accuracy (corrected 2026-10-09).
 provenance:
   level: USER_CONFIRMED
   confirmed_at: '2026-10-08'
@@ -45,4 +43,4 @@ variants:
     emphasis: ds
     strength: 9
     text: >-
-      Evaluated SVM, Random Forest and XGBoost machine learning models against LightGBM on 500+ radiomic features from 450+ MRI scans, reaching 87% predictive accuracy over a clinical-only baseline with SHAP explanations.
+      Evaluated 4 classifiers including SVM and XGBoost on 500+ radiomic features from 450+ MRI scans, with SVM recalling 87% of poor-outcome patients and models reaching up to 0.80 AUC.

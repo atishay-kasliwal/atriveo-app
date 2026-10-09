@@ -27,4 +27,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Interpreted multimodal radiomics models with Python SHAP, LIME and permutation importance on 255 samples.
+      Interpreted multimodal radiomics models with Python SHAP, LIME and permutation importance on 255 samples, explaining which features drove outcome predictions at 0.70 AUC.

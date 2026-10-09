@@ -27,5 +27,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Selected LASSO radiomics signatures in Python and scikit-learn with nomograms and risk stratification
-      across 255-sample research cohorts.
+      Selected LASSO radiomics signatures in Python and scikit-learn with nomograms and risk stratification across 255-sample cohorts, choosing the features behind 0.70 AUC outcome models.
