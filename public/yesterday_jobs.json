@@ -286,7 +286,7 @@
     "title": "Software Test Technician",
     "valid_through": null,
     "ats_score": 66,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "job_url": "https://www1.jobdiva.com/candidates/myjobs/openjob_outside.jsp?a=kvjdnwtsxgckrpsoozx5qc0oueybw1005779v7x6soig8eyqqmzaubfdl9tcx21s&from=COMP&id=33155707",
@@ -3989,7 +3989,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-08T14:55:23.158Z",
     "ats_score": 57,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "session_id": "2026-10-08T14:17:27Z",
@@ -4421,10 +4421,10 @@
     "application": {
       "applicationId": "ba899cb2-76d0-4481-ad1a-07c8974a37b9",
       "applicationKey": "ashby:aac35219-c38c-4490-8050-cee52e7dcf6b",
-      "status": "READY_TO_APPLY",
-      "reviewReason": null,
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "OPTION_NOT_FOUND",
       "ats": "ashby",
-      "updatedAt": "2026-10-09T04:07:40.372Z"
+      "updatedAt": "2026-10-09T14:43:07.511Z"
     },
     "ats_score": 50,
     "fit_score": 5
@@ -9305,7 +9305,7 @@
     "apply_type": "easy_apply",
     "apply_type_at": "2026-10-08T16:57:13.710Z",
     "ats_score": 45,
-    "fit_score": 21
+    "fit_score": 20
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4449673609",
@@ -10085,6 +10085,14 @@
     "apply_type_at": "2026-10-08T16:56:38.372Z",
     "job_url_direct_at": "2026-10-08T17:01:35.610Z",
     "job_url_direct_from": "board-match",
+    "application": {
+      "applicationId": "7ef2ccb4-403d-40d0-8cb2-0aadc413fd65",
+      "applicationKey": "greenhouse:5219383007",
+      "status": "READY_TO_APPLY",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-09T15:02:03.850Z"
+    },
     "ats_score": 46,
     "fit_score": 5
   },
@@ -10210,7 +10218,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-08T19:59:08.084Z",
     "ats_score": 50,
-    "fit_score": 13
+    "fit_score": 12
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4475975133",
@@ -10272,7 +10280,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-08T19:59:03.540Z",
     "ats_score": 50,
-    "fit_score": 13
+    "fit_score": 12
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4468327577",
@@ -11453,10 +11461,10 @@
     "application": {
       "applicationId": "d116cad8-22e4-4811-b1ba-c853ff42754e",
       "applicationKey": "greenhouse:6206005004",
-      "status": "READY_TO_APPLY",
-      "reviewReason": null,
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
       "ats": "greenhouse",
-      "updatedAt": "2026-10-09T04:04:32.924Z"
+      "updatedAt": "2026-10-09T14:45:26.301Z"
     },
     "ats_score": 28,
     "fit_score": 4
@@ -11829,10 +11837,10 @@
     "application": {
       "applicationId": "37147cfc-5b89-449b-bb02-f68bb3657db0",
       "applicationKey": "greenhouse:8875663002",
-      "status": "READY_TO_APPLY",
-      "reviewReason": null,
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
       "ats": "greenhouse",
-      "updatedAt": "2026-10-09T04:04:03.036Z"
+      "updatedAt": "2026-10-09T14:49:35.395Z"
     },
     "ats_score": 28,
     "fit_score": 4
@@ -12172,7 +12180,7 @@
     "summary": "**Who this is a fit for** * Engineers who have shipped production software built on modern AI models: agents or other tool\\-using systems especially.",
     "title": "Software Engineer",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4475959955",
@@ -12900,6 +12908,14 @@
         "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-08/DoorDashUSA (8thOctober)-2/Atishay Kasliwal - Cover Letter.pdf",
         "built_at": "2026-10-08T17:02:04.802Z"
       }
+    },
+    "application": {
+      "applicationId": "33d94a5c-7150-479c-94e7-271c8cafb20f",
+      "applicationKey": "greenhouse:8264542",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-09T15:02:16.499Z"
     },
     "ats_score": 43,
     "fit_score": 8
@@ -15303,7 +15319,7 @@
     "summary": "**Title:** Full\\-Stack Developer **Location:** Remote \u2013 USA only **Meet CalCPA** Company \\| Nonprofit \\| 1 \\- 100 Employees We are a mission\\-based organization that strives to increase the value and\u2026",
     "title": "Full-Stack Developer",
     "ats_score": 38,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "session_id": "2026-10-08T18:00:42Z",
@@ -15396,7 +15412,7 @@
     "summary": "**Below is the complete job description** Java Backend Engineer Sunnyvale, CA Hybrid **Responsibilities:** Backend\\-heavy stack: Java, Spring, Kafka, Cassandra, Postgres, need both SQL and NoSQL DB k\u2026",
     "title": "Java Backend Engineer",
     "ats_score": 71,
-    "fit_score": 16
+    "fit_score": 17
   },
   {
     "session_id": "2026-10-08T18:00:42Z",
@@ -18306,7 +18322,7 @@
     "apply_type": "easy_apply",
     "apply_type_at": "2026-10-08T19:55:38.162Z",
     "ats_score": 71,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4476940749",
@@ -18620,7 +18636,7 @@
     "summary": "**Description** Are you excited to figure out not just what is happening but why \u2014 and to help build a delivery business that's still taking shape?",
     "title": "Data Scientist II, Prime Air",
     "ats_score": 42,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4477435325",
@@ -21651,7 +21667,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-09T00:58:28.267Z",
     "ats_score": 33,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4475989191",
@@ -23657,6 +23673,35 @@
     "site": "linkedin",
     "summary": "Forward Deployed Engineer (FDE) **Work Location:** Fully Remote \u2013 United States **Employment Type:** Full\\-Time **Experience:** **10\\+ Years** **Work Model:** Remote with occasional travel for client\u2026",
     "title": "FORWARD DEPLOYED ENGINEER",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "2921b356933e40af47c3c0beec3016071525634d37fdb3f3912363f53ae29fe4",
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-09T15:00:57.378Z",
+      "error": null,
+      "company": "Bestinfo Systems LLC",
+      "title": "FORWARD DEPLOYED ENGINEER",
+      "resume_slot": 100,
+      "session_hour": "10",
+      "batch_time": "2026-10-08T21:02:20Z",
+      "session_id": "2026-10-09T14:37:40Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "BestinfoSystemsLLC (9thOctober)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-09/BestinfoSystemsLLC (9thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-09/BestinfoSystemsLLC (9thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-09/BestinfoSystemsLLC (9thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-09T15:00:57.378Z"
+      }
+    },
     "ats_score": 42,
     "fit_score": 6
   },
@@ -24299,24 +24344,6 @@
     "site": "linkedin",
     "summary": "**Description** The Foundational AI Assets (FAI) team is looking for a passionate, talented, and inventive Senior Applied Scientist with a strong deep learning background, to build industry\\-leading \u2026",
     "title": "Applied Scientist III, Foundation AI Assets (FAI)",
-    "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": null,
-      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-09T04:01:09.394Z",
-      "error": null,
-      "company": "Amazon",
-      "title": "Applied Scientist III, Foundation AI Assets (FAI)",
-      "resume_slot": 22,
-      "session_hour": "20",
-      "batch_time": "2026-10-09T00:47:45Z",
-      "session_id": "2026-10-09T04:00:22Z",
-      "priority": 1000,
-      "source": "hourly"
-    },
     "ats_score": 30,
     "fit_score": 4
   },
@@ -25989,24 +26016,6 @@
     "site": "linkedin",
     "summary": "**Description** Build the foundational tooling that powers the Amazon Ads Machine Learning Platform \u2014 including servers, skills, knowledge bases, and agents that enable teams across the organization \u2026",
     "title": "Software Development Engineer, Developer Experience",
-    "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": null,
-      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-09T04:01:06.886Z",
-      "error": null,
-      "company": "Amazon",
-      "title": "Software Development Engineer, Developer Experience",
-      "resume_slot": 4,
-      "session_hour": "21",
-      "batch_time": "2026-10-09T01:59:36Z",
-      "session_id": "2026-10-09T04:00:23Z",
-      "priority": 1000,
-      "source": "hourly"
-    },
     "ats_score": 33,
     "fit_score": 4
   },
@@ -29332,24 +29341,6 @@
     "site": "linkedin",
     "summary": "**Software Engineer \u2013 Python (Advanced)** **About The Role** What if your Python skills could directly influence how AI systems reason about code, data, and complex engineering problems?",
     "title": "Software Engineer - Python (Advanced)",
-    "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": null,
-      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-09T04:01:13.207Z",
-      "error": null,
-      "company": "Alignerr",
-      "title": "Software Engineer - Python (Advanced)",
-      "resume_slot": 84,
-      "session_hour": "21",
-      "batch_time": "2026-10-09T01:59:36Z",
-      "session_id": "2026-10-09T04:00:23Z",
-      "priority": 1000,
-      "source": "hourly"
-    },
     "ats_score": 100,
     "fit_score": 8
   },
@@ -29720,10 +29711,10 @@
     "application": {
       "applicationId": "b9fd097d-6355-4d8f-ab0f-051c9a0ee4d1",
       "applicationKey": "greenhouse:7898534",
-      "status": "READY_TO_APPLY",
-      "reviewReason": null,
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
       "ats": "greenhouse",
-      "updatedAt": "2026-10-09T04:01:47.175Z"
+      "updatedAt": "2026-10-09T14:41:52.413Z"
     },
     "ats_score": 28,
     "fit_score": 5
@@ -31907,24 +31898,6 @@
     "site": "linkedin",
     "summary": "**About The Role** What if your Python expertise could directly shape the infrastructure that trains and evaluates the most advanced AI systems in the world?",
     "title": "Data Platform Engineer (Python)",
-    "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": null,
-      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-09T04:01:13.617Z",
-      "error": null,
-      "company": "Alignerr",
-      "title": "Data Platform Engineer (Python)",
-      "resume_slot": 89,
-      "session_hour": "23",
-      "batch_time": "2026-10-09T03:02:21Z",
-      "session_id": "2026-10-09T04:00:23Z",
-      "priority": 1000,
-      "source": "hourly"
-    },
     "ats_score": 75,
     "fit_score": 7
   },
@@ -31956,24 +31929,6 @@
     "site": "linkedin",
     "summary": "**Backend Developer \u2014 Data Annotation Systems (AI Infrastructure)** **About The Role** What if your Python expertise could directly shape the infrastructure behind the world's most advanced AI models?",
     "title": "Backend Developer - Data Annotation Systems",
-    "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": null,
-      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-09T04:01:13.718Z",
-      "error": null,
-      "company": "Alignerr",
-      "title": "Backend Developer - Data Annotation Systems",
-      "resume_slot": 90,
-      "session_hour": "23",
-      "batch_time": "2026-10-09T03:02:21Z",
-      "session_id": "2026-10-09T04:00:23Z",
-      "priority": 1000,
-      "source": "hourly"
-    },
     "ats_score": 60,
     "fit_score": 9
   },
@@ -32065,6 +32020,8 @@
         "built_at": "2026-10-09T03:13:28.259Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-09T14:58:46.249Z",
     "ats_score": 33,
     "fit_score": 5
   },
@@ -32134,7 +32091,7 @@
       "updatedAt": "2026-10-09T03:15:42.515Z"
     },
     "ats_score": 66,
-    "fit_score": 17
+    "fit_score": 16
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4477482650",
@@ -32754,10 +32711,10 @@
     "application": {
       "applicationId": "a074a0e3-03a9-454d-9033-b73e9ff48f91",
       "applicationKey": "greenhouse:8878726002",
-      "status": "READY_TO_APPLY",
-      "reviewReason": null,
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
       "ats": "greenhouse",
-      "updatedAt": "2026-10-09T04:04:09.292Z"
+      "updatedAt": "2026-10-09T14:51:04.837Z"
     },
     "ats_score": 28,
     "fit_score": 5
