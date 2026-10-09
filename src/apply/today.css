@@ -387,16 +387,16 @@
 /* Compact desktop workspace with room for readable application cards. */
 @media (min-width: 760px) {
   .td-page .td-goal { margin: 0 28px 20px; }
-  .td-page .td-grid { padding: 2px 28px 18px; gap: 20px; overflow-y: auto; align-items: start; grid-template-rows: none !important; grid-auto-rows: auto; }
-  .td-page .td-grid .td-card { height: auto; min-height: 340px; padding: 22px; gap: 14px; }
+  .td-page .td-grid { padding: 2px 28px 18px; gap: 20px; overflow-y: auto; align-items: stretch; grid-template-rows: none !important; grid-auto-rows: max-content; align-content: start; }
+  .td-page .td-grid .td-card { height: auto; min-height: 0; padding: 20px; gap: 12px; }
   .td-page .td-head { gap: 12px; }
   .td-page .td-body { flex: 0 0 auto; overflow: visible; }
   .td-page .td-body:empty { display: none; }
-  .td-page .td-foot { margin-top: auto; padding: 16px 0 0; border-top: 1px solid var(--border-col); }
+  .td-page .td-foot { margin-top: auto; padding: 16px 0 0; font-family: inherit; text-align: left; border-top: 1px solid var(--border-col); }
   .td-page .td-bottom { padding: 0 28px 16px; justify-content: space-between; }
   .td-page .td-bottom .td-pager { margin: 0; }
 }
-.td-page .td-role { font-size: 18px; font-weight: 600; line-height: 1.45; letter-spacing: -.015em; min-height: 2.9em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.td-page .td-role { font-size: 18px; font-weight: 600; line-height: 1.45; letter-spacing: -.015em; min-height: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .td-page .td-meta { flex-wrap: wrap; gap: 8px; }
 .td-page .td-meta .td-loc { white-space: normal; flex: 1 1 150px; }
 @media (max-width: 759px) {
@@ -425,4 +425,12 @@
 @media (max-width: 759px) {
   .td-page .td-bar { padding: 14px 16px; gap: 12px; }
   .td-page .td-title { min-width: 160px; }
+}
+
+@media (min-width: 760px) {
+  /* Size rows from their contents so buttons cannot spill into the next row. */
+  .td-page .td-card > * { flex-shrink: 0; }
+  .td-page .td-role { margin: 4px 0; }
+  .td-page .td-meta { font-size: 12px; }
+  .td-page .td-foot .td-ai-review:hover { text-decoration: none; }
 }
