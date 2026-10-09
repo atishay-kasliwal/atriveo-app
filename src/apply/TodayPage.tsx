@@ -98,7 +98,7 @@ const STAGE: Record<Kind, { label: string; tone: string }> = {
 function useLayout() {
   const pick = () => ({
     mobile: window.innerWidth < 760,
-    columns: window.innerWidth >= 1900 ? 4 : window.innerWidth >= 1200 ? 3 : window.innerWidth >= 760 ? 2 : 1,
+    columns: window.innerWidth >= 1900 ? 5 : window.innerWidth >= 1200 ? 3 : window.innerWidth >= 760 ? 2 : 1,
     rows: window.innerWidth < 760 ? 12 : window.innerHeight >= 860 ? 2 : 1,
   });
   const [n, setN] = useState(pick);
