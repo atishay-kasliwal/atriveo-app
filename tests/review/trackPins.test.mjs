@@ -55,10 +55,12 @@ test('an FDE title gets exactly the pinned set; a SWE title gets no FDE-only bul
   const sweIds = ids(swe.result.composition);
   assert.ok(sweIds.includes('AC-211') && sweIds.includes('AC-213'));
   assert.equal(sweIds.filter((x) => /^AC-20[0-24-9]$|^AC-210$|:fde$/.test(x)).length, 0, 'no FDE-only bullet on a SWE resume');
-  // An AI-track title has no pinned set yet: the pipeline's own choice, without FDE or SWE bullets.
+  // An AI-track title gets the AI set (2026-10-09): its own bullets, never an FDE-only or SWE-only one.
   const ai = generateResume({ jd: jd('ai-engineer'), meta: { title: 'AI Engineer', company: 'Test' } });
-  assert.equal(ai.result.pinned_track, undefined);
-  assert.equal(ids(ai.result.composition).filter((x) => /^AC-2[01]\d$|:fde$|:swe$/.test(x)).length, 0);
+  assert.equal(ai.result.pinned_track, 'ai-engineer');
+  const aiIds = ids(ai.result.composition);
+  assert.ok(['AC-227', 'AC-228', 'AC-229', 'AC-231'].every((x) => aiIds.includes(x)));
+  assert.equal(aiIds.filter((x) => /^AC-20[013-9]$|^AC-21[0-4]$|:fde$|:swe$/.test(x)).length, 0, 'no FDE-only or SWE-only bullet on an AI resume');
 });
 
 test('a DS title gets the DS set; a BI-heavy DS posting gets the analytics set', { timeout: 120_000 }, () => {
