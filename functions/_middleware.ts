@@ -8,7 +8,7 @@ interface Env extends AdminEnv {
 const PUBLIC_API_PATHS = ["/api/auth/login", "/api/auth/logout", "/api/auth/google", "/api/auth/callback", "/api/auth/signup",
   // Token-checked by the route itself (inbox watcher on the Mac), not a login cookie.
   "/api/tracker/inbox"];
-const ASSET_RE = /\.(js|css|ico|svg|png|jpe?g|gif|webp|avif|woff2?|map|webmanifest)$/i;
+const ASSET_RE = /\.(js|css|ico|svg|png|jpe?g|gif|webp|avif|woff2?|ttf|map|webmanifest)$/i;
 
 function isJsonRoute(path: string): boolean {
   return path.startsWith("/api/") || path.startsWith("/tailor");
