@@ -384,15 +384,8 @@
 .td-page .td-card.is-selected,
 .td-page .td-card.is-focused { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
 
-/* Give navigation, filtering, and queue actions distinct, consistently aligned rows. */
+/* Compact desktop workspace with room for readable application cards. */
 @media (min-width: 760px) {
-  .td-page .td-bar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 360px); gap: 16px 24px; padding: 24px 28px 18px; }
-  .td-page .td-title { grid-column: 1; grid-row: 1; gap: 6px; }
-  .td-page .td-title h1 { font-size: 28px; }
-  .td-page .td-search { grid-column: 2; grid-row: 1; width: 100%; margin: 0; }
-  .td-page .td-moods { grid-column: 1 / -1; grid-row: 2; }
-  .td-page .td-kinds { grid-column: 1 / -1; grid-row: 3; margin: 0; }
-  .td-page .td-actions { grid-column: 1 / -1; grid-row: 4; margin: 0; flex-wrap: wrap; padding-top: 14px; border-top: 1px solid var(--border-col); }
   .td-page .td-goal { margin: 0 28px 20px; }
   .td-page .td-grid { padding: 2px 28px 18px; gap: 20px; overflow-y: auto; align-items: start; grid-template-rows: none !important; grid-auto-rows: auto; }
   .td-page .td-grid .td-card { height: auto; min-height: 340px; padding: 22px; gap: 14px; }
@@ -408,4 +401,28 @@
 .td-page .td-meta .td-loc { white-space: normal; flex: 1 1 150px; }
 @media (max-width: 759px) {
   .td-page .td-role { font-size: 16px; min-height: 0; }
+}
+
+/* Keep all toolbar controls on one line; narrow screens scroll within the toolbar. */
+.td-page .td-bar { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 16px; padding: 20px 28px; overflow-x: auto; scrollbar-width: thin; }
+.td-page .td-title { flex: 0 0 auto; min-width: 180px; padding: 0; flex-direction: column; align-items: flex-start; gap: 4px; }
+.td-page .td-title h1 { font-size: 24px; }
+.td-page .td-title .apps-muted { white-space: nowrap; }
+.td-page .td-search { flex: 0 0 240px; width: 240px; margin: 0; }
+.td-page .td-moods,
+.td-page .td-kinds,
+.td-page .td-actions { display: flex; flex: 0 0 auto; flex-wrap: nowrap; margin: 0; padding: 0; gap: 8px; overflow: visible; border: 0; }
+.td-page .td-mood,
+.td-page .td-kind,
+.td-page .td-actions > * { flex-shrink: 0; white-space: nowrap; }
+.td-page .td-actions { padding-left: 16px; border-left: 1px solid var(--border-col); }
+.td-page .td-fill-queue { flex-wrap: nowrap; }
+/* Popups escape the horizontally scrolling toolbar instead of being clipped. */
+@media (min-width: 760px) {
+  .td-page .td-skip-pop,
+  .td-page .td-skip-pop.td-resumes { position: fixed; top: 150px; right: 28px; left: auto; max-height: min(360px, 60dvh); }
+}
+@media (max-width: 759px) {
+  .td-page .td-bar { padding: 14px 16px; gap: 12px; }
+  .td-page .td-title { min-width: 160px; }
 }
