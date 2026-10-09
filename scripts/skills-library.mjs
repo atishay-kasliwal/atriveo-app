@@ -76,6 +76,7 @@ export const SKILLS_LIBRARY = [
     label: "Languages",
     kind: "technology",
     skills: [
+      defineSkill({ name: "C++", displayName: "C++", match: ["c++", "cpp"], marketFrequency: 2200, priority: 6, tier: "B", bankBacked: false }),
       defineSkill({ name: "Python", displayName: "Python", aliases: ["python3", "py"], match: ["python", "py"], marketFrequency: 18017, priority: 10, tier: "A", related: ["FastAPI", "PyTorch", "Machine Learning"] }),
       defineSkill({ name: "Java", displayName: "Java", aliases: ["jvm"], match: ["java"], marketFrequency: 9040, priority: 10, tier: "A", related: ["Spring Boot", "REST APIs"] }),
       defineSkill({ name: "TypeScript", displayName: "TypeScript", aliases: ["ts"], match: ["typescript"], marketFrequency: 4200, priority: 9, tier: "A", related: ["React", "Node.js"] }),
@@ -92,6 +93,7 @@ export const SKILLS_LIBRARY = [
     label: "Backend Frameworks",
     kind: "technology",
     skills: [
+      defineSkill({ name: ".NET", displayName: ".NET", aliases: ["dotnet", "asp.net"], match: [".net", "dotnet", "asp.net"], marketFrequency: 1500, priority: 5, tier: "C", bankBacked: false }),
       defineSkill({ name: "FastAPI", displayName: "FastAPI", match: ["fastapi", "fast api"], marketFrequency: 3200, priority: 10, tier: "A", related: ["Python", "REST APIs", "Microservices"] }),
       defineSkill({ name: "Spring Boot", displayName: "Spring Boot", aliases: ["springboot", "spring framework"], match: ["spring boot", "spring"], marketFrequency: 4800, priority: 9, tier: "A", related: ["Java", "REST APIs", "Microservices"] }),
       defineSkill({ name: "Node.js", displayName: "Node.js", aliases: ["nodejs"], match: ["node.js", "nodejs", "node"], marketFrequency: 3600, priority: 9, tier: "A", related: ["Express.js", "JavaScript"] }),
@@ -112,6 +114,12 @@ export const SKILLS_LIBRARY = [
     label: "Software Engineering",
     kind: "concept",
     skills: [
+      defineSkill({ name: "Cursor", displayName: "Cursor", aliases: ["cursor ai"], match: ["cursor ai", "cursor ide", "cursor"], marketFrequency: 500, priority: 4, tier: "C", bankBacked: false }),
+      defineSkill({ name: "Agile", displayName: "Agile", aliases: ["agile methodology"], match: ["agile"], marketFrequency: 2200, priority: 6, tier: "B", bankBacked: false }),
+      defineSkill({ name: "Scrum", displayName: "Scrum", match: ["scrum"], marketFrequency: 1200, priority: 5, tier: "C", bankBacked: false }),
+      defineSkill({ name: "HIPAA", displayName: "HIPAA", match: ["hipaa"], marketFrequency: 700, priority: 5, tier: "C", bankBacked: false }),
+      defineSkill({ name: "Jira", displayName: "Jira", match: ["jira"], marketFrequency: 1400, priority: 5, tier: "C", bankBacked: false }),
+      defineSkill({ name: "Salesforce", displayName: "Salesforce", match: ["salesforce", "sfdc"], marketFrequency: 900, priority: 5, tier: "C", bankBacked: false }),
       defineSkill({ name: "Scalability", displayName: "Scalability", match: ["scalability", "scalable", "high throughput"], marketFrequency: 11848, priority: 8, tier: "B", evidence: "inferred", related: ["Distributed Systems", "Microservices"] }),
       defineSkill({ name: "Distributed Systems", displayName: "Distributed Systems", match: ["distributed system", "distributed systems", "distributed architecture"], marketFrequency: 4316, priority: 8, tier: "B", evidence: "inferred", related: ["Microservices", "Kafka"] }),
       defineSkill({ name: "Microservices", displayName: "Microservices", match: ["microservice", "microservices"], marketFrequency: 3800, priority: 8, tier: "B", evidence: "direct", related: ["Distributed Systems", "REST APIs"] }),
@@ -128,6 +136,7 @@ export const SKILLS_LIBRARY = [
     label: "AI & Machine Learning",
     kind: "technology",
     skills: [
+      defineSkill({ name: "Claude", displayName: "Claude", aliases: ["claude api"], match: ["claude"], marketFrequency: 900, priority: 6, tier: "B", bankBacked: false, related: ["Anthropic"] }),
       defineSkill({ name: "LLMs", displayName: "LLMs", aliases: ["large language models", "foundation models", "generative ai", "genai"], match: ["llm", "llms"], marketFrequency: 9453, priority: 10, tier: "A", related: ["RAG", "LangChain", "Agent Systems"] }),
       defineSkill({ name: "RAG", displayName: "RAG", aliases: ["retrieval augmented generation"], match: ["rag"], marketFrequency: 2800, priority: 9, tier: "A", related: ["LLMs", "LangChain", "Vector Retrieval"] }),
       defineSkill({ name: "MCP", displayName: "MCP", aliases: ["model context protocol"], match: ["mcp"], marketFrequency: 400, priority: 4, tier: "C", related: ["Agent Systems"] }),
@@ -168,6 +177,10 @@ export const SKILLS_LIBRARY = [
     label: "Data Engineering",
     kind: "technology",
     skills: [
+      defineSkill({ name: "Databricks", displayName: "Databricks", match: ["databricks"], marketFrequency: 1300, priority: 6, tier: "B", bankBacked: false, related: ["Spark"] }),
+      defineSkill({ name: "Hadoop", displayName: "Hadoop", aliases: ["apache hadoop"], match: ["hadoop"], marketFrequency: 900, priority: 5, tier: "C", bankBacked: false }),
+      defineSkill({ name: "Airflow", displayName: "Airflow", aliases: ["apache airflow"], match: ["airflow"], marketFrequency: 1500, priority: 7, tier: "B", bankBacked: false }),
+      defineSkill({ name: "dbt", displayName: "dbt", match: ["dbt"], marketFrequency: 1200, priority: 7, tier: "B", bankBacked: false }),
       defineSkill({ name: "ETL Pipelines", displayName: "ETL Pipelines", aliases: ["elt"], match: ["etl", "data pipeline"], marketFrequency: 3400, priority: 9, tier: "A", related: ["Data Ingestion", "Stream Processing"] }),
       defineSkill({ name: "Data Ingestion", displayName: "Data Ingestion", match: ["data ingestion", "ingestion"], marketFrequency: 1800, priority: 7, tier: "B", related: ["ETL Pipelines"] }),
       defineSkill({ name: "Stream Processing", displayName: "Stream Processing", aliases: ["streaming pipeline"], match: ["stream processing", "streaming"], marketFrequency: 2100, priority: 8, tier: "B", related: ["Apache Kafka", "Event-Driven Architecture"] }),
@@ -184,6 +197,11 @@ export const SKILLS_LIBRARY = [
     label: "Databases",
     kind: "technology",
     skills: [
+      defineSkill({ name: "Cassandra", displayName: "Cassandra", aliases: ["apache cassandra"], match: ["cassandra"], marketFrequency: 700, priority: 5, tier: "C", bankBacked: false, related: ["NoSQL"] }),
+      defineSkill({ name: "MySQL", displayName: "MySQL", match: ["mysql"], marketFrequency: 1600, priority: 6, tier: "B", bankBacked: false, related: ["SQL"] }),
+      defineSkill({ name: "SQL Server", displayName: "SQL Server", aliases: ["mssql"], match: ["sql server", "mssql", "ms sql", "t-sql"], marketFrequency: 1300, priority: 6, tier: "B", bankBacked: false, related: ["SQL"] }),
+      defineSkill({ name: "Snowflake", displayName: "Snowflake", match: ["snowflake"], marketFrequency: 1700, priority: 7, tier: "B", bankBacked: false }),
+      defineSkill({ name: "Redshift", displayName: "Redshift", aliases: ["amazon redshift"], match: ["redshift"], marketFrequency: 800, priority: 5, tier: "C", bankBacked: false }),
       defineSkill({ name: "PostgreSQL", displayName: "PostgreSQL", aliases: ["postgres", "pg"], match: ["postgresql", "postgres"], marketFrequency: 3800, priority: 9, tier: "A", related: ["SQL", "Relational Databases"] }),
       defineSkill({ name: "MongoDB", displayName: "MongoDB", aliases: ["mongo"], match: ["mongodb", "mongo"], marketFrequency: 2400, priority: 7, tier: "B", related: ["NoSQL"] }),
       defineSkill({ name: "Redis", displayName: "Redis", match: ["redis"], marketFrequency: 2600, priority: 8, tier: "B", related: ["Caching"] }),
@@ -212,6 +230,10 @@ export const SKILLS_LIBRARY = [
     label: "Cloud & DevOps",
     kind: "technology",
     skills: [
+      defineSkill({ name: "AWS IAM", displayName: "AWS IAM", aliases: ["iam"], match: ["aws iam", "iam"], marketFrequency: 1000, priority: 6, tier: "B", bankBacked: false, related: ["AWS"] }),
+      defineSkill({ name: "CloudWatch", displayName: "CloudWatch", aliases: ["amazon cloudwatch"], match: ["cloudwatch"], marketFrequency: 600, priority: 5, tier: "C", bankBacked: false, related: ["AWS", "Observability"] }),
+      defineSkill({ name: "DevOps", displayName: "DevOps", match: ["devops"], marketFrequency: 2400, priority: 6, tier: "B", bankBacked: false, related: ["CI/CD"] }),
+      defineSkill({ name: "Terraform", displayName: "Terraform", match: ["terraform"], marketFrequency: 2000, priority: 7, tier: "B", bankBacked: false, related: ["Infrastructure as Code"] }),
       defineSkill({ name: "Git", displayName: "Git", match: ["git"], marketFrequency: 4000, priority: 6, tier: "B", bankBacked: false, related: ["CI/CD"] }),
       defineSkill({ name: "AWS", displayName: "AWS", aliases: ["amazon web services"], match: ["aws"], marketFrequency: 8483, priority: 10, tier: "A", related: ["Lambda", "S3", "EC2", "Docker"] }),
       defineSkill({ name: "Docker", displayName: "Docker", aliases: ["containerization"], match: ["docker", "container"], marketFrequency: 5200, priority: 9, tier: "A", related: ["Kubernetes", "CI/CD"] }),
@@ -242,6 +264,8 @@ export const SKILLS_LIBRARY = [
     label: "Data Science & Statistics",
     kind: "technology",
     skills: [
+      defineSkill({ name: "SAS", displayName: "SAS", match: ["sas"], marketFrequency: 700, priority: 5, tier: "C", bankBacked: false }),
+      defineSkill({ name: "MATLAB", displayName: "MATLAB", match: ["matlab"], marketFrequency: 700, priority: 5, tier: "C", bankBacked: false }),
       defineSkill({ name: "R", displayName: "R", match: ["r", "rstudio", "tidyverse", "r programming"], marketFrequency: 2600, priority: 8, tier: "A", bankBacked: false, related: ["Statistics", "Statistical Analysis"] }),
       defineSkill({ name: "Statistical Analysis", displayName: "Statistical Analysis", aliases: ["statistics", "statistical modeling"], match: ["statistic", "statistical analysis", "statistical modeling"], marketFrequency: 3000, priority: 9, tier: "A", bankBacked: false, related: ["Hypothesis Testing", "Regression"] }),
       defineSkill({ name: "A/B Testing", displayName: "A/B Testing", aliases: ["experimentation"], match: ["a/b test", "a/b tests", "a/b testing", "ab test", "ab testing", "experimentation", "experiments", "controlled experiment"], marketFrequency: 2400, priority: 8, tier: "A", bankBacked: false, related: ["Hypothesis Testing", "Statistical Analysis"] }),
@@ -261,6 +285,7 @@ export const SKILLS_LIBRARY = [
     label: "Visualization & BI",
     kind: "technology",
     skills: [
+      defineSkill({ name: "PowerPoint", displayName: "PowerPoint", match: ["powerpoint", "power point"], marketFrequency: 900, priority: 5, tier: "C", bankBacked: false }),
       defineSkill({ name: "Tableau", displayName: "Tableau", match: ["tableau"], marketFrequency: 1500, priority: 7, tier: "A", bankBacked: false, related: ["Power BI", "Dashboards"] }),
       defineSkill({ name: "Power BI", displayName: "Power BI", aliases: ["powerbi"], match: ["power bi", "powerbi"], marketFrequency: 1500, priority: 7, tier: "A", bankBacked: false, related: ["Tableau", "Dashboards"] }),
       defineSkill({ name: "Excel", displayName: "Excel", aliases: ["microsoft excel", "ms excel"], match: ["excel", "spreadsheet"], marketFrequency: 2200, priority: 7, tier: "A", bankBacked: false, related: ["Data Analysis"] }),
@@ -275,6 +300,7 @@ export const SKILLS_LIBRARY = [
     label: "Frontend",
     kind: "technology",
     skills: [
+      defineSkill({ name: "Angular", displayName: "Angular", aliases: ["angularjs"], match: ["angular", "angularjs"], marketFrequency: 1800, priority: 6, tier: "B", bankBacked: false }),
       defineSkill({ name: "React", displayName: "React", aliases: ["reactjs"], match: ["react"], marketFrequency: 5200, priority: 10, tier: "A", related: ["TypeScript", "Full Stack"] }),
       defineSkill({ name: "TypeScript", displayName: "TypeScript", aliases: ["ts"], match: ["typescript"], marketFrequency: 4200, priority: 9, tier: "A", related: ["React", "JavaScript"] }),
       defineSkill({ name: "JavaScript", displayName: "JavaScript", aliases: ["js"], match: ["javascript"], marketFrequency: 4100, priority: 9, tier: "A", related: ["React"] }),
@@ -305,7 +331,8 @@ export const SKILL_MARKET_PRIOR = Object.fromEntries(
 );
 
 function normJd(jd) {
-  return ` ${String(jd || "").toLowerCase().replace(/[^a-z0-9+#./ ]/g, " ").replace(/\s+/g, " ")} `;
+  // Markdown-escaped JDs write "C\+\+" and "Node\.js": unescape first, as the ATS parser does.
+  return ` ${String(jd || "").replace(/\\([+&#.*-])/g, "$1").toLowerCase().replace(/[^a-z0-9+#./ ]/g, " ").replace(/\s+/g, " ")} `;
 }
 
 export function jdMentionsSkill(skill, haystack) {

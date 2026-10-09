@@ -30,6 +30,9 @@ test('a track sees its own bullets; others and untracked titles never do', () =>
   for (const t of ['Data Scientist', 'Senior Data Scientist II']) assert.equal(employerTitle('stony-brook', t), 'Graduate Data Analyst', t);
   assert.equal(employerTitle('wake-forest', 'Data Scientist'), 'AI and Data Analytics Intern');
   assert.equal(employerTitle('stony-brook', 'Machine Learning Engineer'), 'Machine Learning Engineer');
+  // A level-stripped fragment is never printed as a title: the track's fallback (AI Engineer), else Software Engineer.
+  assert.equal(employerTitle('stony-brook', 'AI Software Intern'), 'AI Engineer');
+  assert.equal(employerTitle('stony-brook', 'Distinguished'), 'Software Engineer');
 });
 
 test('an FDE title gets exactly the pinned set; a SWE title gets no FDE-only bullet', { timeout: 120_000 }, () => {

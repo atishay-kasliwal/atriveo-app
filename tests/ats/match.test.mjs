@@ -200,12 +200,12 @@ test("nothing stated for degree/seniority earns their points; absent skill group
   assert.equal(m.categories.reduce((n, c) => n + Math.round(c.max * 10), 0), 1000);
 });
 
-test("unparsed responsibility prose cannot earn full experience points", () => {
+test("unparsed responsibility prose is listed for review and neither earns nor costs points", () => {
   const vague = parseJobDescription("Software Engineer\nRequirements:\n- Demonstrated ability to handle ambiguous stakeholder needs.", config);
   const m = score(resume, vague);
-  const experience = m.categories.find((c) => c.key === "experience_alignment");
-  assert.equal(experience.earned, 0);
-  assert.match(experience.note, /manual review/);
+  assert.equal(m.categories.find((c) => c.key === "experience_alignment"), undefined, "nothing mapped: the category isn't scored");
+  assert.equal(m.categories.reduce((n, c) => n + c.max, 0), 100, "its weight is shared by the scored categories");
+  assert.ok(m.unparsed_requirements.some((r) => /ambiguous stakeholder/.test(r.source)));
   assert.equal(m.coverage.status, "incomplete");
 });
 
@@ -231,4 +231,18 @@ test("deterministic under shuffled configuration keys and ats:diff explains scor
   assert.ok(diff.delta >= 0);
   assert.equal(diff.changed_config, false);
   assert.ok(diff.changes.length);
+});
+
+test("responsibility evidence matches its stems: collaborated, cross-functional, microservices, distributed systems", async () => {
+  const { stemPhrase } = await import("../../scripts/ats/evidence.mjs");
+  assert.ok(stemPhrase("Delivered with a cross-functional client team", "cross functional"));
+  assert.ok(stemPhrase("Collaborated with 20 residents", "collaborat"));
+  assert.ok(stemPhrase("Java and Spring Boot microservices", "microservice"));
+  assert.ok(stemPhrase("Designed distributed systems", "distributed system"));
+  assert.ok(!stemPhrase("Escalated tickets", "scale"), "a stem only matches at a word start");
+});
+
+test("alternatives: 'one or more of', 'such as' and '(or …)' lists are one requirement; benefits lines hold none", () => {
+  const jd = parseJobDescription("Software Engineer\nRequirements:\n- Skills in one or more languages: C++, C#.\n- Backend languages such as Go or Python (or Java, Kotlin, Rust).\n- Experience with Docker and Kubernetes.\n- 401(k), including employer match on contributions made while employed by Ramp", config);
+  assert.deepEqual(jd.required.map((r) => r.label), ["C++ / C#", "Go / Python / Java / Kotlin / Rust", "Docker", "Kubernetes"]);
 });

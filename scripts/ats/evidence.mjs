@@ -11,6 +11,12 @@ export function resumeEvidence(parsed) {
       section, entry: entry.company || entry.name || "Unknown", text: bullet,
     });
   }
+  // A tools line ties a skill to one job or project: stronger than the skills list, weaker than a bullet using it.
+  for (const [section, tier, entries] of [["experience", "job_tools", parsed.experience], ["projects", "project_tools", parsed.projects]]) {
+    for (const entry of entries) for (const item of String(entry.stack || "").split(/\s*[,;|]\s*/).filter(Boolean)) {
+      out.push({ tier, section: "tools", entry: entry.company || entry.name || "Unknown", text: item });
+    }
+  }
   for (const item of parsed.skills.items || []) out.push({ tier: "skills_only", section: "skills", entry: "Skills", text: item });
   return out;
 }
@@ -40,7 +46,7 @@ export function skillEvidence(alternatives, parsed, config) {
   const kindOrder = { exact: 0, equivalent: 1, related: 2 };
   candidates.sort((a, b) => b.credit - a.credit || kindOrder[a.kind] - kindOrder[b.kind] || a.skill.localeCompare(b.skill) || a.entry.localeCompare(b.entry) || a.text.localeCompare(b.text));
   const best = candidates[0] || { skill: alternatives[0], kind: "missing", tier: "missing", credit: 0, evidence: null, entry: null, term: null };
-  const distinctBullets = unique(candidates.filter((c) => c.section !== "skills").map((c) => `${c.entry}:${c.text}`));
+  const distinctBullets = unique(candidates.filter((c) => c.section !== "skills" && c.section !== "tools").map((c) => `${c.entry}:${c.text}`));
   return {
     ...best,
     distinct_bullets: distinctBullets.length,
@@ -49,8 +55,15 @@ export function skillEvidence(alternatives, parsed, config) {
   };
 }
 
+// Responsibility evidence terms are stems ("collaborat", "scalab", "microservice"): a term matches at a word start
+// and may run on ("collaborated", "microservices"); a space also matches a hyphen ("cross-functional").
+export function stemPhrase(text, term) {
+  const esc = String(term).replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, "[\\s-]+");
+  return new RegExp(`(?<![a-z0-9])${esc}[a-z]*(?![a-z0-9])`, "i").test(String(text));
+}
+
 export function conceptEvidence(item, parsed, config) {
-  const candidates = resumeEvidence(parsed).filter((r) => r.section !== "skills" && item.evidence.some((term) => phrase(r.text, term)))
+  const candidates = resumeEvidence(parsed).filter((r) => r.section !== "skills" && r.section !== "tools" && item.evidence.some((term) => stemPhrase(r.text, term)))
     .map((r) => ({ ...r, credit: config.scoring.job_match.responsibility_tiers[r.tier === "project_bullet" ? "project_bullet" : "job_bullet"] }));
   candidates.sort((a, b) => b.credit - a.credit || a.text.localeCompare(b.text));
   const best = candidates[0];

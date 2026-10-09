@@ -157,8 +157,14 @@ function toEntry(key, raw, cfg, previous) {
     return { name, stack: stack.length ? stack.join(" | ") : null, ...common };
   }
   const isTitle = (t) => hasWord(t, cfg.title_words);
-  let company = f.texts.find((t) => !isTitle(t)) ?? (f.texts.length > 1 ? f.texts[0] : null);
-  const title = f.texts.find((t) => t !== company && isTitle(t)) ?? f.texts.find((t) => t !== company) ?? null;
+  // The company line is the one carrying a tools list ("Accolite Digital | Java, SQL") when there is one.
+  let company = f.texts.find((t) => /\s[|•·]\s/.test(t) && !isTitle(t.split(/\s+[|•·]\s+/)[0]))
+    ?? f.texts.find((t) => !isTitle(t)) ?? (f.texts.length > 1 ? f.texts[0] : null);
+  // "Accolite Digital | Java, Spring Boot": the employer's tools line rides on the company line.
+  const companyLine = company;
+  let stack = null;
+  if (company && /\s[|•·]\s/.test(company)) [company, stack] = [company.split(/\s+[|•·]\s+/)[0], company.split(/\s+[|•·]\s+/).slice(1).join(" | ")];
+  const title = f.texts.find((t) => t !== companyLine && isTitle(t)) ?? f.texts.find((t) => t !== companyLine) ?? null;
   let inherited = false;
   // A second role under the same employer: the header has a title and dates but no employer.
   if (!company && title && previous?.company) [company, inherited] = [previous.company, true];
@@ -168,6 +174,7 @@ function toEntry(key, raw, cfg, previous) {
     ...(inherited && { company_inherited: true }),
     title,
     title_extra: extra ? (extra[2] ?? extra[3]).trim() : null,
+    ...(stack && { stack }),
     ...common,
   };
 }

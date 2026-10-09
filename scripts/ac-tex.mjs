@@ -13,7 +13,7 @@ import {
   projectRecencyMs,
   sortProjectsByRecency,
 } from "./ac-role-meta.mjs";
-import { buildSkillsFromComposition } from "./ac-skills.mjs";
+import { buildSkillsFromComposition, employerTools } from "./ac-skills.mjs";
 import { SKILLS_MAX_CATEGORIES } from "./skills-library.mjs";
 import { resolveBankDir } from "./ac-bank.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
@@ -172,12 +172,13 @@ function titleWordCount(rawTitle) {
 // Titles of 3 words or fewer are already clean and specific — keep them
 // verbatim. Longer/specific titles get mapped to a canonical archetype so we
 // never mislabel e.g. "Forward Deployment Engineer" as "Full Stack".
+const TITLE_NOUN = /\b(?:engineer|developer|scientist|analyst|architect|researcher|consultant|manager|programmer|specialist|lead|designer|administrator)s?\b/i;
+
 function cleanShortTitle(rawTitle) {
-  return String(rawTitle || "")
-    .replace(/\([^)]*\)/g, "")     // drop parentheticals
-    .replace(/[,–—|].*$/, "")      // drop ", Backend" / "| Team" tails
-    .replace(/\s+/g, " ")
-    .trim();
+  // Drop parentheticals, then keep the part that names a role: "(USA) Distinguished, Data Scientist" is a Data
+  // Scientist, not "Distinguished"; ", Backend" and "| Team" tails go when the first part already names one.
+  const parts = String(rawTitle || "").replace(/\([^)]*\)/g, "").split(/\s*[,–—|]\s*/).map((p) => p.replace(/\s+/g, " ").trim()).filter(Boolean);
+  return parts.find((p) => TITLE_NOUN.test(p)) || parts[0] || "";
 }
 
 export function deriveHeaderTitle(jd, composition, rawTitle) {
@@ -250,8 +251,8 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
       // The title line carries the title only (ATS readiness): a parser files that whole line as the job title.
       const displayTitle = roleTitle;
       const items = bullets.map((b) => `        \\resumeItem{${esc(b.text)}}`).join("\n");
-      // Only the resume builder sets an employer's tools line (role.stack); it goes on the company line, never the
-      // title line, and generated resumes print none.
+      // An employer's tools line (role.stack: the JD's skills used there, or the resume builder's own) goes on the
+      // company line, never the title line.
       const head = role.stack?.length
         ? `\\resumeSubheadingTools{\\textbf{${esc(name)}} $|$ \\emph{\\small ${esc(role.stack.join(", "))}}}`
         : `\\resumeSubheading{${esc(name)}}`;
@@ -344,9 +345,12 @@ export function compactCompositionForTex(result) {
 }
 
 export function prepareResumeArtifacts({ jd, composition, bank, headerTitle, location }) {
-  const compact = composition.experience?.[0]?.bullets?.[0]?.ac
+  const compact0 = composition.experience?.[0]?.bullets?.[0]?.ac
     ? compactCompositionForTex(composition)
     : composition;
+  // Each employer's tools line: the JD's skills Atishay used there. The resume builder's own line (role.stack) wins.
+  const compact = { ...compact0, experience: (compact0.experience || []).map((role) => (role.stack !== undefined ? role
+    : { ...role, stack: employerTools(role.role, jd, bank) })) };
   const skillsCfg = composition.minimum_visual_targets?.skills || {};
   const skills = composition.skills?.length
     ? composition.skills

@@ -45,5 +45,4 @@ variants:
     emphasis: ds
     strength: 9
     text: >-
-      Assessed GPT-4o market-reaction predictions against minute-level SPY moves at 1, 5 and 10-minute windows,
-      reaching 0.74 weighted F1 with Whisper transcripts and Pinecone retrieval.
+      Assessed GPT-4o LLM market-reaction predictions against minute-level SPY moves at 1, 5 and 10-minute windows, reaching 0.74 weighted F1 with Whisper transcripts and Pinecone retrieval.

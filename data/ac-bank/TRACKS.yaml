@@ -8,6 +8,9 @@
 tracks:
   ai-engineer:
     label: AI engineer
+    # Stony Brook's title on AI resumes when the posting's title no longer names a role once level words go
+    # ("AI Software Intern"): AI Engineer, as Atishay chose for Stony Brook on FDE resumes (2026-10-09).
+    stony_brook_fallback_title: AI Engineer
     # Title words that put a job on this track (ML engineer roles included).
     title_patterns: ['\bai\b', 'machine learning', '\bml\b', '\bllm', 'agentic', 'genai', 'generative', 'deep learning', '\bnlp\b', 'computer vision', 'mlops']
     # Stony Brook and Wake Forest lead for AI; Accolite stays short. 11 in all, as on every other
@@ -111,10 +114,24 @@ tracks:
         wake-forest: [AC-047, AC-033, AC-031:production-ml]
         accolite: [AC-212, AC-190, AC-191, AC-213, AC-183:swe]
       projects:
-        atriveo: [AC-214, AC-057]
+        atriveo: [AC-214, AC-057:swe-security]
         insurance-platform: [AC-067]
       project_stacks:
         atriveo: [React, TypeScript, Node.js, MongoDB, FastAPI, PostgreSQL]
+    # C++ postings (2026-10-09): InsureRaft, Atishay's C++ and NuRaft project, replaces the insurance microservices
+    # project, so C++ shows in a project bullet rather than only the skills list (ATS test: C++ asked on 24 of 500).
+    pinned_variants:
+      - name: systems-cpp
+        when: { min_signals: 1, signals: [c++, cpp] }
+        experience:
+          stony-brook: [AC-211, AC-019, AC-003, AC-025]
+          wake-forest: [AC-047, AC-033, AC-031:production-ml]
+          accolite: [AC-212, AC-190, AC-191, AC-213, AC-183:swe]
+        projects:
+          atriveo: [AC-214, AC-057:swe-security]
+          insureraft: [AC-073]
+        project_stacks:
+          atriveo: [React, TypeScript, Node.js, MongoDB, FastAPI, PostgreSQL]
 
 # Checked in this order; the first track whose pattern matches the job title wins.
 order: [forward-deployed, data-science, data-analytics, ai-engineer, software-engineer]
@@ -141,11 +158,20 @@ stony_brook_title_patterns:
 # Skills section once it is listed here (and only when the JD asks for it); a bullet may name it
 # only at an employer listed for it. Names match data/ac-bank skill names (skills-library.mjs).
 confirmed_skills:
-  stony-brook: [PyTorch, TensorFlow, scikit-learn, LangGraph, Vector Databases, Hugging Face, MLflow, MLOps, AWS Bedrock, FinBERT, Pinecone, R, SQL, Excel, Tableau, Power BI, Plotly, R Shiny, Statistical Analysis, A/B Testing, Time Series Forecasting, Predictive Modeling, Model Evaluation, Hypothesis Testing, Regression, Pandas, NumPy, Data Visualization, Dashboards]
-  wake-forest: [PyTorch, TensorFlow, scikit-learn, Vector Databases, Anthropic, N4ITK, R, SQL, Excel, XGBoost, LightGBM, ggplot2, R Shiny, Statistical Analysis, A/B Testing, Predictive Modeling, Model Evaluation, Hypothesis Testing, Regression, Pandas, NumPy, Data Visualization]
+  stony-brook: [PyTorch, TensorFlow, scikit-learn, LangGraph, Vector Databases, Hugging Face, MLflow, MLOps, AWS Bedrock, FinBERT, Pinecone, R, SQL, Excel, Tableau, Power BI, Plotly, R Shiny, Statistical Analysis, A/B Testing, Time Series Forecasting, Predictive Modeling, Model Evaluation, Hypothesis Testing, Regression, Pandas, NumPy, Data Visualization, Dashboards, MongoDB, MySQL, PostgreSQL, GraphQL, Agile, Scrum, AWS IAM, Claude, Anthropic]
+  wake-forest: [PyTorch, TensorFlow, scikit-learn, Vector Databases, Anthropic, N4ITK, R, SQL, Excel, XGBoost, LightGBM, ggplot2, R Shiny, Statistical Analysis, A/B Testing, Predictive Modeling, Model Evaluation, Hypothesis Testing, Regression, Pandas, NumPy, Data Visualization, MongoDB, MySQL, PostgreSQL, GraphQL, Agile, Scrum, HIPAA]
   # 2026-10-08 (docs/resume-tracks/facts): A/B tests, SQL and Power BI dashboards at Accolite.
-  accolite: [SQL, Power BI, A/B Testing, Dashboards, Excel]
+  # 2026-10-09: security (JWT, OAuth 2.0, API gateway, AWS security services) and documentation (Swagger/API docs,
+  # design, leadership and requirement docs) at Accolite (Atishay).
+  # 2026-10-09: MongoDB, SQL, MySQL, PostgreSQL and GraphQL at Accolite, Wake Forest and Stony Brook (Atishay).
+  accolite: [SQL, Power BI, A/B Testing, Dashboards, Excel, MongoDB, MySQL, PostgreSQL, GraphQL, JWT, OAuth, OpenAPI, API Gateway, Agile, Scrum, AWS IAM, Databricks]
+  # 2026-10-09: Agile/Scrum at Accolite, Wake Forest and SBU; AWS IAM at Accolite and SBU; HIPAA at Wake Forest;
+  # Claude (Anthropic) at SBU and Atriveo; Databricks at Accolite.
+  atriveo: [Claude, Anthropic]
   # Used, employer not said yet: skills section only until he says where.
   unplaced: [Spark, ChromaDB, Generative AI, Prompt Engineering, Function Calling, OpenAI, GitHub Copilot, Git, NoSQL, MCP, Deep Learning]
-  # Asked about and not confirmed: never claim.
-  not_confirmed: [FAISS, Fine-tuning, LlamaIndex, Kubeflow, Milvus, Conversational AI]
+  # 2026-10-09: used, per Atishay (all 18 tools from the ATS test report; C++ also in the InsureRaft and cipher repos;
+  # CloudWatch for observability; Hadoop and .NET from coursework at SBU and SUAS); skills section only, when the JD asks.
+  tools_confirmed: [Linux, Jira, MySQL, SQL Server, HTML, CSS, HTML/CSS, Terraform, Angular, C++, Snowflake, dbt, Airflow, BigQuery, Redshift, PowerPoint, SAS, MATLAB, Salesforce, CloudWatch, Hadoop, .NET, DevOps, Observability, Cursor, Cassandra]
+  # Asked about and not confirmed: never claim (2026-10-09: C#, Go, Rust, Looker, OWASP, OpenTelemetry).
+  not_confirmed: [FAISS, Fine-tuning, LlamaIndex, Kubeflow, Milvus, Conversational AI, C#, Go, Rust, Looker, OWASP, OpenTelemetry]

@@ -69,7 +69,7 @@ job_match:
   jd_parser: { max_heading_chars: 50, max_title_chars: 110 }
   # Bare lowercase uses of these words are usually ordinary prose, not the technology.
   case_sensitive_terms: [Go, Rust, Swift, React, Spark, Airflow, Snowflake, Lambda, ECS, REST, RAG, S3]
-  unknown_skill_stopwords: [About, Ability, Advanced, All, Also, Bachelor, Background, Bonus, Build, Building, Collaborative, Comfort, Communication, Computer, Degree, Develop, Developing, Engineering, Experience, Experienced, Familiarity, For, Four, Hands, Have, High, Knowledge, Master, Minimum, Nice, PhD, Preferred, Previous, Proficiency, Recent, Required, Requirements, Strong, Technical, The, This, We, Work, Working, You, AML]
+  unknown_skill_stopwords: [About, Ability, Advanced, All, Also, Bachelor, Background, Bonus, Build, Building, Collaborative, Comfort, Communication, Computer, Degree, Develop, Developing, Engineering, Experience, Experienced, Familiarity, For, Four, Hands, Have, High, Knowledge, Master, Minimum, Nice, PhD, Preferred, Previous, Proficiency, Recent, Required, Requirements, Strong, Technical, The, This, We, Work, Working, You, AML, Our, U.S, Office, Suite, Server, Microsoft, Software, Information, Technology, Cloud, Candidates, Candidate, Development, Infrastructure, Languages, Relational, Core, Science, Business, Analytics, Life, Benefits, Health, Plans, Plan, Retirement, Program, Programs, Disability, Savings, Flexible, Spending, Accounts, See, Option, Studio, Web, Code, Vision, Semantic, Generation, Augmented, Agentic, Testing, Systems, Data, Platform, Platforms, Tools, Services, Applications, Solutions, Product, Products, Company, Team, Teams, Excellent, Understanding, Including, Using, Modern, Other, Similar, Related, Relevant, Equivalent, Field, Fields, Industry, Insurance, Matching, Match, Employer]
   weights:
     required_skills: 30
     experience_alignment: 25
@@ -79,7 +79,7 @@ job_match:
     education_certs: 5
     achievement_evidence: 5
     domain_terminology: 5
-  evidence_tiers: { measured_job_bullet: 1.0, job_bullet: 0.9, project_bullet: 0.75, skills_only: 0.5, missing: 0 }
+  evidence_tiers: { measured_job_bullet: 1.0, job_bullet: 0.9, job_tools: 0.8, project_bullet: 0.75, project_tools: 0.7, skills_only: 0.5, missing: 0 }
   match_kinds: { exact: 1.0, equivalent: 0.95, related: 0.5, missing: 0 }
   responsibility_tiers: { job_bullet: 1.0, project_bullet: 0.75, missing: 0 }
   domain_kinds: { exact: 1.0, equivalent: 0.6, missing: 0 }
@@ -95,7 +95,7 @@ job_match:
     words_points: 2
     min_shared_word_length: 4
     families:
-      software: [software engineer, software developer, development engineer, full stack engineer, full stack, backend engineer, frontend engineer, platform engineer, developer]
+      software: [software engineer, software developer, development engineer, full stack engineer, full stack, backend engineer, frontend engineer, platform engineer, developer, forward deployed engineer, forward deployed, forward-deployed, deployment engineer, deployed engineer]
       data: [data engineer, data scientist, data analyst, analytics engineer]
       ai: [ai engineer, machine learning engineer, ml engineer, applied scientist, research scientist]
       security: [security engineer, cybersecurity analyst, security analyst]

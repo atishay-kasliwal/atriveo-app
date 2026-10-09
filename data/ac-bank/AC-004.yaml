@@ -50,5 +50,4 @@ variants:
       - FinBERT
       - AWS
     text: >-
-      Integrated live video, audio and transcript signals from FOMC press conferences through Kafka into FinBERT
-      and LLM agents on AWS, giving a trading team market reads within minutes.
+      Integrated live video, audio and transcript signals from FOMC press conferences through a distributed Kafka pipeline into FinBERT and LLM agents on AWS, giving a trading team market reads within minutes.

@@ -85,7 +85,10 @@ function recommendation(item, categoryName, bank) {
 export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOString().slice(0, 10), bank = [] } = {}) {
   const cfg = config.scoring.job_match;
   const weights = cfg.weights;
-  const present = Object.keys(weights).filter((k) => !((k === "required_skills" && !jd.required.length) || (k === "preferred_skills" && !jd.preferred.length)));
+  // A category the JD gives nothing to score on is left out and its weight shared: no listed skills, or
+  // responsibilities the parser couldn't map to any concept (scoring those 0 would grade the parser, not the resume).
+  const unmappable = !jd.responsibility_concepts.length && (jd.unparsed.length || jd.responsibilities.length);
+  const present = Object.keys(weights).filter((k) => !((k === "required_skills" && !jd.required.length) || (k === "preferred_skills" && !jd.preferred.length) || (k === "experience_alignment" && unmappable)));
   const original = Object.values(weights).reduce((a, b) => a + ticks(b), 0);
   if (original !== 1000) throw new Error(`Job Match weights total ${points(original)}, expected 100`);
   const base = Object.fromEntries(present.map((k) => [k, ticks(weights[k])]));
@@ -103,14 +106,12 @@ export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOStrin
     return { label: r.label, source: r.source, classification: ev.credit ? "evidenced" : "missing", evidence_tier: ev.tier, evidence: ev.evidence, evidence_entry: ev.entry, credit: ev.credit };
   });
   const mappedSources = new Set(jd.responsibility_concepts.map((r) => r.source));
-  const unparsedWork = jd.unparsed.filter((r) => !mappedSources.has(r.source) && !/\b(?:legally|eligible to work|sponsorship|on.site|hybrid|relocat|fluent in|benefit|salary|compensation|equal opportunity)\b/i.test(r.source))
-    .map((r) => ({ label: "Unparsed qualification", source: r.source, classification: "unparsed", evidence: null, credit: 0 }));
-  const experienceRows = [...responsibilities, ...unparsedWork];
-  categories.push(experienceRows.length ? category("experience_alignment", max("experience_alignment"), experienceRows,
-    unparsedWork.length ? String(unparsedWork.length) + (unparsedWork.length === 1 ? " qualification line needs" : " qualification lines need") + " manual review; no points assumed" : null)
-    : jd.unparsed.length || jd.responsibilities.length
-      ? category("experience_alignment", max("experience_alignment"), [{ label: "Responsibilities could not be mapped", classification: "unparsed", evidence: null, credit: 0 }], "Manual review needed; no experience points were assumed")
-      : full("experience_alignment", max("experience_alignment"), "No responsibilities stated"));
+  // Lines the parser couldn't read stay listed for manual review (job_match.unparsed_requirements); they earn and
+  // lose nothing, so the score reflects only requirements it understood.
+  const unparsedWork = jd.unparsed.filter((r) => !mappedSources.has(r.source) && !/\b(?:legally|eligible to work|sponsorship|on.site|hybrid|relocat|fluent in|benefit|salary|compensation|equal opportunity)\b/i.test(r.source));
+  const reviewNote = unparsedWork.length ? String(unparsedWork.length) + (unparsedWork.length === 1 ? " qualification line needs" : " qualification lines need") + " manual review; not scored" : null;
+  if (responsibilities.length) categories.push(category("experience_alignment", max("experience_alignment"), responsibilities, reviewNote));
+  else if (!unmappable) categories.push(full("experience_alignment", max("experience_alignment"), "No responsibilities stated"));
 
   const family = familyFor(jd.title, cfg.role);
   const titles = resume.experience.map((e) => e.title).filter(Boolean);

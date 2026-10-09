@@ -7,7 +7,7 @@ wow_score: 0.81
 metrics_claimed: [uptime_999, daily_2k_queries]
 concepts_claimed: [cloudflare, deployment, docker, uptime]
 signature_technologies: [Cloudflare]
-fact: Cloudflare Pages and Workers deployment with Docker — 99.9% uptime, 2K+ daily queries.
+fact: "Cloudflare Pages and Workers deployment with Docker — 99.9% uptime, 2K+ daily queries. 2026-10-09 code: JWT sessions (jose HS256, HttpOnly SameSite cookies), salted PBKDF2 passwords + login rate limit (functions/_lib), health endpoints and worker heartbeats."
 capabilities:
   cloud: 90
   backend: 76
@@ -20,6 +20,9 @@ ats_keywords:
   - deployment
   - DevOps
 facets:
+  swe-security:
+    phrase: Atriveo security and monitoring
+    keywords: [security, jwt, monitoring, cloudflare]
   cloud:
     phrase: Cloudflare deployment
     keywords: [cloudflare, workers, pages, docker, deploy]
@@ -28,5 +31,12 @@ variants:
     emphasis: cloud
     strength: 8
     text: >-
-      Maintained 99.9% uptime across 2K+ daily production queries by running the platform on Cloudflare Pages
-      and Workers with Docker.
+      Maintained 99.9% uptime across 2K+ daily production queries by running the platform on Cloudflare Pages and Workers with Docker.
+  - facet: swe-security
+    emphasis: swe
+    strength: 9
+    tracks:
+      - software-engineer
+    signature_technologies: [Cloudflare, JWT, PBKDF2]
+    text: >-
+      Reinforced Atriveo's security on Cloudflare Pages and Workers with JWT sessions, salted PBKDF2 passwords and monitored health checks, holding 99.9% uptime across 2K+ daily production queries.

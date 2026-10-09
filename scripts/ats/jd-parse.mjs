@@ -68,11 +68,14 @@ function skillHits(text, config) {
 function extractAlternatives(line, hits) {
   const groups = [];
   const commaOrList = /,\s*or\s+(?:[A-Za-z][\w.-]*\s*)?/i.test(line);
+  // "one or more of C++, C#, Go", "such as Go or Python (or Java, Rust)", "e.g. Redis, Cassandra": any one will do.
+  const anyOf = /\b(?:one or more|at least one|any (?:one )?of|one of|such as|e\.g\.?|for example|like|or (?:similar|equivalent|other|another|comparable))\b|\(\s*or\b/i.test(line);
   for (const h of hits) {
     const last = groups.at(-1);
     const prev = last?.at(-1);
     const between = prev && line.slice(prev.at + prev.spelling.length, h.at);
-    if (last && (/^(?:\s*\/\s*|\s*,?\s*or\s+)$/i.test(between) || (commaOrList && /^\s*,\s*$/.test(between)))) last.push(h);
+    if (last && (/^(?:\s*\/\s*|\s*,?\s*or\s+)$/i.test(between) || (commaOrList && /^\s*,\s*$/.test(between))
+      || (anyOf && /^[\s,()]*(?:(?:or|and)\s+)?[\s,()]*$/i.test(between)))) last.push(h);
     else groups.push([h]);
   }
   return groups.map((g) => [...new Set(g.map((h) => h.name))]);
@@ -105,6 +108,8 @@ export function parseJobDescription(text, config) {
     relevant.push(line);
     const kind = /^(?:preferred|nice to have|bonus)\b/i.test(line) || /\b(?:is a plus|a bonus)\b/i.test(line) ? "preferred" : MARK_REQUIRED.test(line) ? "required" : section;
     const target = kind === "preferred" || kind === "required" ? kind : null;
+    // Benefits and pay lines ("401(k) with employer match", "medical, dental and vision") hold no requirements.
+    if (target && /\b(?:401\(?k\)?|medical,? dental|dental and vision|paid time off|\bPTO\b|parental leave|retirement plan|health insurance|salary range|base salary|compensation range|equity package|employer match)\b/i.test(line)) continue;
     if (target) {
       qualifications.push(line);
       const groups = extractAlternatives(line, skillHits(line, config));

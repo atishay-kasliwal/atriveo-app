@@ -45,5 +45,4 @@ variants:
     emphasis: ds
     strength: 9
     text: >-
-      Evaluated SVM, Random Forest and XGBoost against LightGBM on 500+ radiomic features from 450+ MRI scans,
-      reaching 87% predictive accuracy over a clinical-only baseline with SHAP explanations.
+      Evaluated SVM, Random Forest and XGBoost machine learning models against LightGBM on 500+ radiomic features from 450+ MRI scans, reaching 87% predictive accuracy over a clinical-only baseline with SHAP explanations.

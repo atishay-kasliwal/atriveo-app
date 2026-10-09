@@ -28,5 +28,4 @@ variants:
     emphasis: streaming
     strength: 10
     text: >-
-      Composed Kafka Streams topologies with persistent state stores on a 3-broker cluster, powering real-time
-      insurance policy analytics and interactive query APIs.
+      Composed Kafka Streams topologies with persistent state stores on a 3-broker cluster, powering real-time insurance policy analytics and interactive query APIs documented in Swagger.

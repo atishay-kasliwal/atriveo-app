@@ -1,5 +1,7 @@
 import { SignJWT } from "jose";
 import { emailAllowed, NOT_ALLOWED_MESSAGE, type AdminEnv } from "../../_lib/admin";
+import { hashPassword, isLegacyHash, verifyPassword } from "../../_lib/password";
+import { clearFailures, loginBlocked, recordFailure, WINDOW_MINUTES } from "../../_lib/loginLimit";
 
 interface Env extends AdminEnv {
   atriveo_auth: D1Database;
@@ -9,15 +11,6 @@ interface Env extends AdminEnv {
 interface LoginBody {
   email: string;
   password: string;
-}
-
-async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
 }
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
@@ -32,16 +25,27 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       return Response.json({ error: NOT_ALLOWED_MESSAGE }, { status: 403 });
     }
 
-    const passwordHash = await hashPassword(password);
+    const key = email.toLowerCase().trim();
+    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+    if (await loginBlocked(env.atriveo_auth, key, ip)) {
+      return Response.json({ error: `Too many sign-in attempts. Try again in ${WINDOW_MINUTES} minutes.` }, { status: 429 });
+    }
 
-    const user = await env.atriveo_auth
-      .prepare("SELECT email, name FROM users WHERE email = ? AND password_hash = ?")
-      .bind(email.toLowerCase().trim(), passwordHash)
-      .first<{ email: string; name: string }>();
+    const row = await env.atriveo_auth
+      .prepare("SELECT email, name, password_hash FROM users WHERE email = ?")
+      .bind(key)
+      .first<{ email: string; name: string; password_hash: string | null }>();
 
-    if (!user) {
+    if (!row || !(await verifyPassword(password, row.password_hash))) {
+      await recordFailure(env.atriveo_auth, key, ip);
       return Response.json({ error: "Invalid email or password" }, { status: 401 });
     }
+    await clearFailures(env.atriveo_auth, key);
+    // An account still on the old unsalted hash moves to PBKDF2 now that the password is known.
+    if (isLegacyHash(row.password_hash)) {
+      await env.atriveo_auth.prepare("UPDATE users SET password_hash = ? WHERE email = ?").bind(await hashPassword(password), key).run();
+    }
+    const user = { email: row.email, name: row.name };
 
     const secret = new TextEncoder().encode(env.JWT_SECRET);
     const token = await new SignJWT({ email: user.email, name: user.name })

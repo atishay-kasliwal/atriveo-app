@@ -1,17 +1,10 @@
 import { SignJWT } from "jose";
 import { emailAllowed, NOT_ALLOWED_MESSAGE, type AdminEnv } from "../../_lib/admin";
+import { hashPassword } from "../../_lib/password";
 
 interface Env extends AdminEnv {
   atriveo_auth: D1Database;
   JWT_SECRET: string;
-}
-
-async function hashPassword(password: string): Promise<string> {
-  const data = new TextEncoder().encode(password);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
 }
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {

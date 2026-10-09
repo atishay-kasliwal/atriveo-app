@@ -43,5 +43,4 @@ variants:
     emphasis: security
     strength: 9
     text: >-
-      Regulated platform traffic through a Spring Cloud API Gateway with JWT authentication, Redis
-      token-bucket rate limiting at 5 req/s, and Resilience4j circuit breakers.
+      Regulated platform traffic through a secure Spring Cloud API Gateway with JWT authentication, Redis token-bucket rate limiting at 5 req/s, and Resilience4j circuit breakers.

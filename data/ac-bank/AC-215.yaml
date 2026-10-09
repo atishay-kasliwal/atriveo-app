@@ -43,4 +43,4 @@ variants:
     emphasis: ds
     strength: 9
     text: >-
-      Forecasted FOMC-driven market direction from 200K+ financial and text records cleaned in Python and SQL pipelines, reaching 67.7% directional accuracy versus 50% chance for 20-30 analysts.
+      Forecasted FOMC-driven market direction from 200K+ financial and text records cleaned in scalable Python and SQL pipelines, reaching 67.7% directional accuracy versus 50% chance for 20-30 analysts.

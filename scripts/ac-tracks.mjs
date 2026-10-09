@@ -48,7 +48,8 @@ export function bankForTrack(bank, track) {
 export function trackPins(track, doc = loadTracks(), { title = "", jd = "" } = {}) {
   const t = track ? doc.tracks?.[track] : null;
   if (!t?.pinned) return null;
-  const text = `${title}\n${jd}`.toLowerCase();
+  // Markdown-escaped JDs write "C\\+\\+": unescape before matching signals.
+  const text = `${title}\n${jd}`.replace(/\\([+&#.*-])/g, "$1").toLowerCase();
   for (const v of t.pinned_variants || []) {
     const n = (v.when?.signals || []).filter((s) => new RegExp(`(^|[^a-z0-9])${String(s).toLowerCase().replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")}($|[^a-z0-9])`).test(text)).length;
     if (v.when?.min_signals && n >= v.when.min_signals) return { ...v, signals_found: n };
@@ -103,7 +104,10 @@ export function employerTitle(roleSlug, headerTitle, doc = loadTracks()) {
     if (pattern?.title) return pattern.title;
     // The job's track may name Stony Brook's title on all its resumes (tracks.<id>.stony_brook_title).
     const track = classifyTrack(headerTitle, doc);
-    return doc.tracks?.[track]?.stony_brook_title ?? role;
+    if (doc.tracks?.[track]?.stony_brook_title) return doc.tracks[track].stony_brook_title;
+    // A level-stripped posting title that no longer names a role ("AI Software" from "AI Software Intern") is never
+    // printed as a job title: the track's fallback title, else Software Engineer.
+    return /\b(?:engineer|developer|scientist|analyst|architect|researcher|consultant|programmer|specialist|designer)s?\b/i.test(role) ? role : doc.tracks?.[track]?.stony_brook_fallback_title ?? "Software Engineer";
   }
   // A track may name other employers' titles on its resumes (tracks.<id>.employer_titles).
   const track = classifyTrack(headerTitle, doc);

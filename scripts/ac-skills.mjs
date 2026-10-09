@@ -1,9 +1,11 @@
 // Dynamic skills lines from selected AC evidence only — no untraceable drift.
 
 import { parseAtsKeywords } from "./ac-bank.mjs";
-import { confirmedSkillKeys, isConfirmedSkill } from "./ac-tracks.mjs";
+import { confirmedSkillKeys, isConfirmedSkill, loadTracks } from "./ac-tracks.mjs";
 import {
   SKILLS_LIBRARY,
+  SKILL_BY_DISPLAY,
+  SKILL_BY_NAME,
   SKILLS_MAX_CATEGORIES,
   pickCategoriesForJd,
   sortSkillsByScore,
@@ -18,7 +20,8 @@ function norm(text) {
 }
 
 function normJd(jd) {
-  return ` ${norm(jd)} `;
+  // Markdown-escaped JDs write "C\+\+" and "Node\.js": unescape first, as the ATS parser does.
+  return ` ${norm(String(jd || "").replace(/\\([+&#.*-])/g, "$1"))} `;
 }
 
 function acIdFromBullet(bullet) {
@@ -211,6 +214,16 @@ export function buildSkillsFromComposition(composition, bank, jd, {
     hasEvidence,
   });
 
+  // JD skills Atishay has whose categories didn't make the cut: rather than drop them, the last line becomes
+  // "Additional Skills" holding them first (then that category's own JD skills), so no asked-for skill is lost.
+  const pickedLabels = new Set(categories.map((c) => c.label));
+  const leftovers = SKILLS_LIBRARY.filter((c) => !pickedLabels.has(c.label)).flatMap((c) => c.skills)
+    .filter((sk) => hasEvidence(sk) && jdMentionsSkill(sk, hay));
+  if (leftovers.length && categories.length >= maxCategories) {
+    const last = categories[categories.length - 1];
+    categories[categories.length - 1] = { ...last, label: "Additional Skills", skills: [...leftovers, ...last.skills.filter((sk) => jdMentionsSkill(sk, hay))] };
+  }
+
   for (const cat of categories) {
     const candidates = [];
 
@@ -226,7 +239,8 @@ export function buildSkillsFromComposition(composition, bank, jd, {
     const jdHit = (s) => jdMentionsSkill(s, hay);
     const relevant = candidates.filter((s) => jdHit(s));
     const filler = candidates.filter((s) => !jdHit(s));
-    const ordered = sortSkillsByScore([...relevant, ...filler], jd, confidenceMap);
+    // Skills the JD names go first, so a line that runs out of room drops filler, never a JD skill.
+    const ordered = [...sortSkillsByScore(relevant, jd, confidenceMap), ...sortSkillsByScore(filler, jd, confidenceMap)];
     const displayNames = ordered.map((s) => s.displayName);
     const capped = fitSkillsToSingleLine(cat.label, displayNames);
 
@@ -235,4 +249,44 @@ export function buildSkillsFromComposition(composition, bank, jd, {
   }
 
   return lines;
+}
+
+// A tools line names tools (languages, frameworks, databases, cloud, BI products), never practices or concepts.
+const TOOL_CATEGORIES = new Set(["Languages", "Backend Frameworks", "ML Frameworks", "Data Engineering", "Databases", "Search & Vector", "Cloud & DevOps", "Frontend", "Visualization & BI", "Data Science & Statistics"]);
+const NOT_TOOLS = new Set(["dashboards", "data visualization", "statistical analysis", "a/b testing", "hypothesis testing", "regression", "predictive modeling", "time series forecasting", "model evaluation", "observability", "devops", "infrastructure as code", "etl pipelines", "data ingestion", "caching", "relational databases", "nosql", "vector databases", "authentication", "event-driven architecture", "serverless", "stream processing", "feature pipelines", "data modeling", "json"]);
+const CATEGORY_OF = new Map(SKILLS_LIBRARY.flatMap((c) => c.skills.map((sk) => [sk.name, c.label])));
+const isTool = (sk) => TOOL_CATEGORIES.has(CATEGORY_OF.get(sk.name)) && !NOT_TOOLS.has(sk.displayName.toLowerCase());
+
+/**
+ * An employer's tools line for one JD: skills Atishay confirmed at that employer (TRACKS.yaml confirmed_skills) or that
+ * its bank bullets already name (signature_technologies), kept only when the JD asks for them. Up to 6, about one
+ * line on the company row. Empty when the JD names none of them.
+ */
+export function employerTools(roleSlug, jd, bank, { max = 6, maxChars = 58 } = {}) {
+  const hay = normJd(jd);
+  const confirmed = loadTracks().confirmed_skills?.[roleSlug] || [];
+  const fromBank = (bank?.acs || []).filter((a) => a.role === roleSlug)
+    .flatMap((a) => [a, ...(a.variants || [])].flatMap((x) => x.signature_technologies || []));
+  // Skills the employer's own bullet texts already name (any wording in the bank), matched by library terms.
+  const texts = normJd((bank?.acs || []).filter((a) => a.role === roleSlug)
+    .flatMap((a) => [a.text, ...(a.variants || []).map((v) => v.text)]).filter(Boolean).join(" "));
+  const fromTexts = SKILLS_LIBRARY.flatMap((c) => c.skills).filter((sk) => sk.bankBacked !== false && jdMentionsSkill(sk, texts)).map((sk) => sk.displayName);
+  const seen = new Set(); const picked = [];
+  for (const name of [...confirmed, ...fromBank, ...fromTexts]) {
+    const entry = SKILL_BY_DISPLAY.get(String(name).toLowerCase()) || SKILL_BY_NAME.get(String(name).toLowerCase());
+    const display = entry?.displayName || name;
+    const key = display.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (entry && !isTool(entry)) continue;
+    const hit = entry ? jdMentionsSkill(entry, hay) : hay.includes(` ${key} `);
+    if (hit) picked.push({ display, weight: (entry?.marketFrequency || 500) * (entry?.priority || 5) });
+  }
+  picked.sort((a, b) => b.weight - a.weight);
+  const out = [];
+  for (const p of picked) {
+    if (out.length >= max || [...out, p.display].join(", ").length > maxChars) continue;
+    out.push(p.display);
+  }
+  return out;
 }

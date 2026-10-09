@@ -1,4 +1,4 @@
-version: 61
+version: 62
 updated_at: "2026-10-09"
 note: "Harvard action verbs and unique resume openings; confirmed SBU/Wake Forest technology context. Resume scope remains Atriveo+Insurance."
 
@@ -11,3 +11,4 @@ fde_track: "v58: FDE-only bullets AC-200..AC-209 and fde wordings of AC-001, AC-
 fde_infrastructure: "v59: AC-210 and the FDE infrastructure set (TRACKS.yaml pinned_variants), used on postings with 6+ infrastructure signals."
 swe_track: "v60: SWE-only bullets AC-211..AC-214, AC-183 swe wording, AC-203 also on SWE; TRACKS.yaml pins the tested SWE set (docs/resume-tracks/swe.md)."
 ds_track: "v61: DS-only bullets AC-215..AC-226 (tracks: [data-science]); TRACKS.yaml pins the tested DS set and an analytics set for BI-heavy DS postings (8+ signals); Stony Brook = Graduate Data Analyst, Wake Forest = AI and Data Analytics Intern on DS resumes (docs/resume-tracks/ds-da.md)."
+ats_round: "v62: ATS round (500-posting test, docs/resume-tracks): wording Atishay confirmed (cross-functional, distributed, JWT-secured, documented, machine learning, LLM) in AC-004/067/068/171/205/212/215/217/218/221/223; AC-057 swe-security variant; SWE systems-cpp set (InsureRaft) for C++ postings; confirmed skills: 18 tools, databases at all three employers, Agile/Scrum, AWS IAM, HIPAA, Claude, Databricks, Cursor, Cassandra, CloudWatch, Hadoop, .NET; not confirmed: C#, Go, Rust, Looker, OWASP, OpenTelemetry."
