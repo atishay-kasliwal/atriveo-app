@@ -32,6 +32,12 @@ test('an FDE title gets exactly the pinned set; a SWE title gets no FDE-only bul
   assert.deepEqual(ids(fde.result.composition).sort(), expected.sort());
   assert.deepEqual(fde.result.composition.projects.find((p) => p.role === 'atriveo').stack, pins.project_stacks.atriveo);
   assert.ok(fde.result.composition.skills.length > 0, 'skills are rebuilt for the JD');
+  // An infrastructure-heavy FDE posting gets the infrastructure set; the same title on a customer-facing JD does not.
+  const infraJd = `${jd('forward-deployed')}\nYou will run Kubernetes, Terraform and Helm on bare metal GPU clusters, own observability with Prometheus and Grafana, act as SRE on incidents, and tune Linux networking for distributed systems.`;
+  const infra = generateResume({ jd: infraJd, meta: { title: 'Forward Deployed Engineer, Infrastructure', company: 'Test' } });
+  assert.equal(infra.result.pinned_set, 'infrastructure');
+  assert.ok(ids(infra.result.composition).includes('AC-210') && ids(infra.result.composition).includes('AC-191'));
+  assert.equal(fde.result.pinned_set, 'default');
   const swe = generateResume({ jd: jd('software-engineer'), meta: { title: 'Software Engineer', company: 'Test' } });
   assert.equal(swe.result.pinned_track, undefined);
   assert.equal(ids(swe.result.composition).filter((x) => /^AC-20\d$|:fde$/.test(x)).length, 0);

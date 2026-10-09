@@ -148,19 +148,22 @@ export function sharedOpeningVerbsByTrack(acs, roles, tracksDoc) {
   const out = [];
   const on = (x, t) => !Array.isArray(x?.tracks) || (t != null && x.tracks.includes(t));
   const byId = new Map(acs.map((a) => [a.id, a]));
+  const refPairs = (sets) => [...Object.values(sets.experience || {}), ...Object.values(sets.projects || {})].flat().map((ref) => {
+    const [id, facet] = String(ref).split(":");
+    const ac = byId.get(id);
+    const v = ac && (facet ? ac.variants.find((x) => x.facet === facet) : ac.variants[0]);
+    return ac && v ? [ac, v] : null;
+  }).filter(Boolean);
   for (const track of [...Object.keys(tracksDoc?.tracks || {}), null]) {
-    const pins = track ? tracksDoc.tracks[track]?.pinned : null;
-    let pairs;
-    if (pins) {
-      pairs = [...Object.values(pins.experience || {}), ...Object.values(pins.projects || {})].flat().map((ref) => {
-        const [id, facet] = String(ref).split(":");
-        const ac = byId.get(id);
-        const v = ac && (facet ? ac.variants.find((x) => x.facet === facet) : ac.variants[0]);
-        return ac && v ? [ac, v] : null;
-      }).filter(Boolean);
-    } else {
-      pairs = acs.filter((a) => roles.has(a.role) && on(a, track)).flatMap((ac) => (ac.variants || []).filter((v) => on(v, track)).map((v) => [ac, v]));
+    const t = track ? tracksDoc.tracks[track] : null;
+    if (t?.pinned) {
+      // Each pinned set is a whole resume: the default and every variant.
+      for (const set of [{ name: "default", ...t.pinned }, ...(t.pinned_variants || [])]) {
+        for (const s of sharedVerbsIn(refPairs(set))) out.push({ ...s, track: `${track}/${set.name}` });
+      }
+      continue;
     }
+    const pairs = acs.filter((a) => roles.has(a.role) && on(a, track)).flatMap((ac) => (ac.variants || []).filter((v) => on(v, track)).map((v) => [ac, v]));
     for (const s of sharedVerbsIn(pairs)) out.push({ ...s, track: track ?? "untracked" });
   }
   return out;

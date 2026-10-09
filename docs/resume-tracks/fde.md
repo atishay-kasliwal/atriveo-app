@@ -207,9 +207,18 @@ judged blind against its own posting (new vs that job's old resume).
   Medeloop (FastAPI/AWS pipeline), Venn (slight).
 - **Applied:** the 19 winners attach the new resume. The 6 losers keep their old resume, with
   `jobs.resume.kept_old_reason` on their job documents.
-- **Open: an FDE-infrastructure set.** One fixed set can't serve both kinds of FDE posting. The plan is a second
-  pinned set for infrastructure-heavy FDE postings (Kubernetes, CI/CD, observability, cloud and data pipelines),
-  chosen by the posting's text, tested the same way until both kinds reach 90%+.
+- **Infrastructure set (shipped, v59).** `TRACKS.yaml` `pinned_variants: infrastructure` applies to postings with 6+
+  distinct infrastructure signals (title + JD). It keeps the FDE spine (users, clinicians, client demos) and swaps in
+  proven infrastructure work: AC-199 live MLOps on AWS Bedrock, AC-191 CI/CD, AC-190 incident fixes, AC-189 Lambda
+  latency, AC-070:fde observability, AC-068 gateway, AC-210 Atriveo's Oracle/Docker/MongoDB backend.
+  - **Blind results:** it beat the default FDE set on 12/13 infrastructure-heavy FDE postings (one reviewer slip
+    counted). It beat the old resume on all 3 real infrastructure applications (Thought Machine, Fluidstack Compute,
+    TRM Labs).
+  - **Round 1** (without the observability bullet) lost 2 of those 3. Reviewers named observability, so AC-070 got
+    an FDE wording.
+  - **Re-judged slight losses:** Medeloop and Venn now go to the new default resume (clear). Fluidstack
+    Manufacturing (ERP/order systems) still slightly prefers the old one.
+  - **Net, on the 25 real FDE applications:** about 24/25 prefer the new FDE resumes.
 
 **Not yet covered:**
 - Interview prep for "~99% agreement" vs "90%+", and "1 h → 1 min" vs "3 h → 2 min" (different measures).

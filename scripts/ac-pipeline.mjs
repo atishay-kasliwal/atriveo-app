@@ -179,7 +179,8 @@ function applyGlobalOptimize(candidate, { bank, jd, planner, meta, pages, cfg })
  */
 function applyTrackPins(candidate, { trackBank, jd, planner, meta, pages }) {
   const track = classifyTrack(meta.title);
-  const pins = trackPins(track);
+  // The set is chosen on the real posting (meta.postingJd), even when composing ran on a baseline JD.
+  const pins = trackPins(track, undefined, { title: meta.title, jd: meta.postingJd || jd });
   if (!pins || !candidate?.composition) return candidate;
   const byId = new Map(trackBank.acs.map((a) => [a.id, a]));
   const resolve = (ref) => {
@@ -200,11 +201,12 @@ function applyTrackPins(candidate, { trackBank, jd, planner, meta, pages }) {
   return {
     ...rescored,
     variant_id: "track-pinned",
-    variant_label: `${track} pinned set`,
+    variant_label: `${track} pinned set (${pins.name})`,
     beam_variant: candidate.beam_variant ?? candidate.variant_id,
     contribution_pruned: [],
     global_optimize: candidate.global_optimize,
     pinned_track: track,
+    pinned_set: pins.name,
   };
 }
 

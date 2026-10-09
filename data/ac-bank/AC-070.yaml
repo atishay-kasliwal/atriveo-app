@@ -31,3 +31,12 @@ variants:
     text: >-
       Monitored all 8 microservices with a Prometheus and Grafana observability stack, Zipkin tracing and ELK
       logging via Spring Actuator metrics.
+  # FDE wording (docs/resume-tracks/fde.md, infrastructure set): opens with its own verb on FDE resumes.
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    tracks:
+      - forward-deployed
+    text: >-
+      Established Prometheus and Grafana observability with Zipkin tracing and ELK logging across all 8 insurance
+      microservices via Spring Actuator metrics.

@@ -50,6 +50,21 @@ tracks:
       # The tools after a project's name (else picked from its bullets).
       project_stacks:
         atriveo: [TypeScript, React, Node.js, MongoDB, Playwright, Docker]
+    # Other tested sets, each used when its rule matches the posting (title + JD); else the set above. Infrastructure:
+    # postings with 6+ distinct infrastructure signals (FDE median is 1; the three infrastructure FDE roles that beat
+    # the set above had 8-10, every posting it won had 4 or fewer). docs/resume-tracks/fde.md.
+    pinned_variants:
+      - name: infrastructure
+        when: { min_signals: 6, signals: [kubernetes, k8s, terraform, helm, docker, ci/cd, cicd, observability, prometheus, grafana, datadog, sre, site reliability, infrastructure, gpu, bare metal, on-prem, networking, linux, distributed systems, devops, incident, uptime, latency, telemetry, cloud infrastructure, platform engineering, data pipelines, etl, kafka, spark] }
+        experience:
+          stony-brook: [AC-200, AC-004:fde, AC-199, AC-001:fde]
+          wake-forest: [AC-202, AC-203, AC-204]
+          accolite: [AC-205, AC-191, AC-190, AC-189]
+        projects:
+          atriveo: [AC-208, AC-210]
+          insurance-platform: [AC-070:fde, AC-068]
+        project_stacks:
+          atriveo: [Node.js, MongoDB, Docker, Oracle Cloud, Playwright, TypeScript]
 
   software-engineer:
     label: Software engineer

@@ -40,9 +40,26 @@ export function bankForTrack(bank, track) {
   return changed ? { ...bank, acs } : bank;
 }
 
-/** A track's pinned bullet set (TRACKS.yaml tracks.<id>.pinned), or null. */
-export function trackPins(track, doc = loadTracks()) {
-  return track ? doc.tracks?.[track]?.pinned ?? null : null;
+/**
+ * A track's pinned bullet set for a posting (TRACKS.yaml tracks.<id>.pinned), or null. With a title and JD, the first
+ * of `pinned_variants` whose rule matches wins: `when.min_signals` distinct `when.signals` words in the title + JD.
+ * The chosen set carries its `name` ("default" for `pinned`).
+ */
+export function trackPins(track, doc = loadTracks(), { title = "", jd = "" } = {}) {
+  const t = track ? doc.tracks?.[track] : null;
+  if (!t?.pinned) return null;
+  const text = `${title}\n${jd}`.toLowerCase();
+  for (const v of t.pinned_variants || []) {
+    const n = (v.when?.signals || []).filter((s) => new RegExp(`(^|[^a-z0-9])${String(s).toLowerCase().replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")}($|[^a-z0-9])`).test(text)).length;
+    if (v.when?.min_signals && n >= v.when.min_signals) return { ...v, signals_found: n };
+  }
+  return { name: "default", ...t.pinned };
+}
+
+/** Every pinned set a track has (the default and its variants), for checks that cover them all. */
+export function allPinnedSets(track, doc = loadTracks()) {
+  const t = doc.tracks?.[track];
+  return t?.pinned ? [{ name: "default", ...t.pinned }, ...(t.pinned_variants || [])] : [];
 }
 
 /** Planner settings a track changes, applied over the planner's own (see buildPlannerRuntimeConfig). */

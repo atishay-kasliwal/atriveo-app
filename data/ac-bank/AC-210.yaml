@@ -1,0 +1,52 @@
+# FDE-only bullet (tracks: forward-deployed), docs/resume-tracks/fde.md (infrastructure set), 2026-10-08.
+id: AC-210
+role: atriveo
+slot_kind: project
+engineering_identity: platform
+achievement_theme: fde-backend-ops
+display_order: 4
+wow_score: 0.8
+tracks:
+  - forward-deployed
+metrics_claimed:
+  - workers_2
+concepts_claimed:
+  - infrastructure
+  - operations
+signature_technologies:
+  - Docker
+  - MongoDB
+fact: >-
+  Atriveo's backend runs on an Oracle Cloud VM: a dashboard container and two resume-worker containers (Docker) claim
+  builds from a MongoDB job queue with leases and per-machine owners (moved from a laptop in Oct 2026).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: Atriveo's production setup (docker ps on the VM, scripts/resume-queue.mjs), 2026-10-08
+capabilities:
+  ai: 40
+  backend: 85
+  data: 60
+  cloud: 90
+  ml: 20
+  frontend: 30
+strength:
+  recruiter: 8
+ats_keywords:
+  - Docker
+  - MongoDB
+  - Oracle Cloud
+facets:
+  fde:
+    phrase: backend operations
+    keywords:
+      - docker
+      - infrastructure
+      - operations
+variants:
+  - facet: fde
+    emphasis: fde
+    strength: 9
+    text: >-
+      Centralized Atriveo's backend on an Oracle Cloud VM, running a dashboard and 2 resume workers in Docker against a
+      MongoDB job queue with leased claims.

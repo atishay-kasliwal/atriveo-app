@@ -357,7 +357,7 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     const pipeline = generateResume({
       jd: composeJd,
       planner,
-      meta: { company, title: composeTitle, location: job.location },
+      meta: { company, title: composeTitle, location: job.location, postingJd: jd },
       forceBorderline: job.force_borderline === true,
       strictJdGate: job.strict_jd_gate === true,
       jdGate: composeGate,
