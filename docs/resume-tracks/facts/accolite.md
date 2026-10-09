@@ -20,3 +20,6 @@ Bank entries AC-163…AC-198.
 | **In-house product (Accolite's ERP):** you built the whole frontend for client onboarding, employee onboarding, invoicing and the rest of the company's operations | you, 2026-10-08 | confirmed |
 | **Testing:** unit tests for whole microservices in JUnit (Java) and PyTest (Python), held to a 100% code-coverage and zero-bug standard | you, 2026-10-08 | confirmed (phrase it as the standard you worked to) |
 | CI/CD 6 hours → 90 seconds, 100K+ users and every other number | you, 2026-10-08 ("all true") | confirmed |
+| **A/B test on the in-house product (ERP):** users, leadership included, split into two groups, each on a different version; the best of both became the final product | you, 2026-10-08 | confirmed. **Group sizes and the deciding metric?** |
+| SQL used at Accolite | you, 2026-10-08 | confirmed |
+| R not used at Accolite (voice note: "for Acolyte, I have not done") | you, 2026-10-08 | **confirm** |

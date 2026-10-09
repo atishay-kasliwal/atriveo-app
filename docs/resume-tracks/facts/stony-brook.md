@@ -24,3 +24,8 @@ The FOMC / financial intelligence platform. Bank entries AC-001…AC-026, AC-199
 | Team of ~20–22 | you, 2026-10-08 | confirmed |
 | Service uptime ~94% | you, 2026-10-08 | confirmed. **Not for resumes:** 94% reads as low. |
 | **Title on SWE resumes: Software Engineer** (FDE: AI Engineer) | you, 2026-10-08 | decided |
+| **A/B tests of prediction models** (comparing model versions) | you, 2026-10-08 | confirmed. **Which models and what result?** |
+| **R** used with FinBERT (voice note said "for Acolyte"; FinBERT was here) | you, 2026-10-08 | **confirm: R at Stony Brook** |
+| **Time-series forecasting** of results | you, 2026-10-08 | confirmed |
+| **Excel, advanced:** used extensively, unstructured data cleaning, detailed formulas | you, 2026-10-08 | confirmed |
+| SQL used | you, 2026-10-08 | confirmed |

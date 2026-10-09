@@ -22,3 +22,7 @@ Facts only, each with its source and status. Bullets for any role are written fr
 | Patient similarity over 10K+ historical cases; Claude summaries of similar patients' histories; outcomes at 6/12/24 months | bank AC-045 / AC-046 | confirmed |
 | React/TypeScript clinician dashboard with mask refinement | bank AC-047 | confirmed |
 | Not for the resume: the 100-year-old patient outlier (good interview story) | you | n/a |
+| **A/B tests of the segmentation/prediction algorithms** (comparing versions) | you, 2026-10-08 | confirmed. **Which versions and what result?** |
+| **R** used to build models | you, 2026-10-08 | confirmed |
+| **Excel, advanced:** cleaning and structuring unstructured data, detailed formulas | you, 2026-10-08 | confirmed |
+| SQL used | you, 2026-10-08 | confirmed |
