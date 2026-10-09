@@ -37,5 +37,4 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Integrated LLM agents with external financial APIs through MCP servers and function calling in Python
-      across 3+ tool-use workflows with structured evaluation benchmarks.
+      Integrated LLM agents with 5 third-party market, news and filing APIs through MCP servers and function calling in Python, saving every response as structured data the agents reuse.

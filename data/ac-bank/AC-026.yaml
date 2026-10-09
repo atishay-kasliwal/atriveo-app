@@ -48,11 +48,9 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Led development of AI-powered financial intelligence over 7 years of FOMC history using Python
-      pipelines, multi-agent reasoning and retrieval to cut macro analysis from 3 days to under 20 minutes.
+      Led the FOMC platform from a professor's lab idea to daily use by 20-30 analysts and traders, combining Python pipelines and multi-agent reasoning to cut analysis from 3 days to under 20 minutes.
   - facet: production-ml
     emphasis: ml
     strength: 9
     text: >-
-      Led an AI-powered financial intelligence platform over 7 years of FOMC data using Python, RAG retrieval
-      and multi-agent reasoning, reducing macro analysis from 3 days to under 20 minutes.
+      Led an AI platform over 7 years of FOMC data from lab idea to 20-30 daily analysts and traders, using Python RAG retrieval and multi-agent reasoning to cut analysis from 3 days to 20 minutes.

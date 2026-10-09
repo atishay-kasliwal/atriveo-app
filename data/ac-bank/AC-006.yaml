@@ -37,5 +37,4 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Assembled Kafka streaming consumers processing live market feeds into Python NLP feature extraction
-      serving 5 real-time macro analysis workflows in production.
+      Assembled Kafka streaming consumers that turn live market feeds into Python NLP features for the forecasting model reaching 67.7% directional accuracy versus 50% chance.

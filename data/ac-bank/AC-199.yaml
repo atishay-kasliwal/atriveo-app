@@ -47,8 +47,7 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Managed FinBERT sentiment models on AWS Bedrock A100 GPUs with MLflow, scoring 110+ Fed events
-      yearly since 2019 as each press conference goes live.
+      Consolidated FinBERT sentiment models from SageMaker and EC2 A100 GPUs onto AWS Bedrock to cut maintenance, tracking runs in MLflow while scoring 110+ Fed events yearly since 2019.
   - facet: ai-track
     emphasis: ai
     strength: 9
@@ -56,4 +55,4 @@ variants:
       - ai-engineer
     signature_technologies: [FinBERT, AWS Bedrock, MLflow]
     text: >-
-      Served FinBERT sentiment models on AWS Bedrock A100 GPUs behind FastAPI endpoints under 60 ms, monitoring runs in MLflow while scoring 110+ Fed events yearly.
+      Consolidated FinBERT sentiment models from SageMaker and EC2 A100 GPUs onto AWS Bedrock to cut GPU maintenance, monitoring runs in MLflow while scoring 110+ Fed events yearly.

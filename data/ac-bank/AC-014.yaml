@@ -10,9 +10,7 @@ metrics_claimed:
   - debate
 concepts_claimed:
   - ai
-signature_technologies:
-  - Python
-  - LangChain
+signature_technologies: []
 fact: Multi-agent debate evaluation across Fundamental Sentiment and Valuation agents.
 capabilities:
   ai: 90
@@ -37,5 +35,4 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Systematized Python and LangChain multi-agent debate evaluation scoring directional accuracy across 30
-      equity forecasts in production.
+      Systematized scoring of the 3-agent debate's directional calls on 30 S&P 500 stocks over 7, 30 and 90-day windows, confirming 60% accuracy before any recommendation reached users.

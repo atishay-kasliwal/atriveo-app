@@ -10,7 +10,6 @@ stony-brook:
 
 wake-forest:
   - Python
-  - GCP
   - SimpleITK
   - PyRadiomics
   - Apache Airflow

@@ -1,5 +1,8 @@
 id: AC-129
 role: medledger
+# Merged 2026-10-09 into AC-124: hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: security
 display_order: 7
@@ -25,5 +28,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Integrated Helmet and CORS hardening with CSRF middleware protecting 3 role-based clinic management
-      routes in production.
+      Integrated Helmet, CORS and CSRF middleware hardening the 3 role-based clinic management route groups.

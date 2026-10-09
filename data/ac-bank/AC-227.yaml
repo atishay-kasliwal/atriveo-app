@@ -42,4 +42,4 @@ variants:
     emphasis: ai
     strength: 9
     text: >-
-      Integrated live video, audio and transcripts from FOMC press conferences through scalable Kafka pipelines into a multi-agent FinBERT and LLM system on AWS for market reads within minutes.
+      Integrated live video, audio and transcripts from FOMC press conferences through scalable Kafka pipelines into multi-agent FinBERT and LLM analysis on AWS, giving 20-30 traders market reads within minutes.

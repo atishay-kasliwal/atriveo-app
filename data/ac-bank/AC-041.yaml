@@ -20,4 +20,4 @@ variants:
     emphasis: cloud-serverless
     strength: 6
     text: >-
-      Launched Cloudflare Workers functions for sign-in, application sync and resume relay, securing them with JWT sessions, Google OAuth and salted PBKDF2 passwords.
+      Launched Cloudflare Workers sign-in for 2 Atriveo sites with JWT sessions, Google OAuth and salted PBKDF2 passwords behind a 5-attempt lockout.

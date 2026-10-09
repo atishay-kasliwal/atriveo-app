@@ -61,8 +61,7 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Engineered production RAG and LLM workflows with LangChain and Pinecone on AWS, improving macro analysis
-      evaluation accuracy by 18%.
+      Engineered production RAG with LangChain and Pinecone on AWS over 7 years of FOMC history, lifting macro-analysis evaluation accuracy 18%.
   - facet: ai-track
     emphasis: ai
     strength: 9

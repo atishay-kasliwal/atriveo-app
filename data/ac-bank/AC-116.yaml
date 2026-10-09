@@ -27,5 +27,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Interpreted multimodal radiomics models with Python SHAP, LIME and permutation importance on 255 samples
-      in production.
+      Interpreted multimodal radiomics models with Python SHAP, LIME and permutation importance on 255 samples.

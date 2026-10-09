@@ -37,5 +37,4 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Authored Java and Python playbooks documenting 4 enterprise pipeline architectures plus ERP workflows
-      preserving team continuity across Fidelity production systems.
+      Authored Java and Python playbooks for 4 enterprise pipeline architectures and the ERP, so new engineers could run Fidelity systems without the original authors.

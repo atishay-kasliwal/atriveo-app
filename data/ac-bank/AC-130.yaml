@@ -1,5 +1,8 @@
 id: AC-130
 role: medledger
+# Merged 2026-10-09 into AC-126: hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: doctor-api
 display_order: 8
@@ -27,5 +30,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Assembled MongoDB and Express.js doctor profile CRUD APIs with Mongoose models and role-scoped access
-      for 3 clinic roles managing production patient workflows.
+      Assembled MongoDB and Express.js doctor profile CRUD APIs with Mongoose models and role-scoped access for 3 clinic roles.

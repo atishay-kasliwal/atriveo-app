@@ -12,8 +12,7 @@ concepts_claimed:
   - regression
   - invariants
   - testing
-signature_technologies:
-  - Python
+signature_technologies: []
 fact: Automated PDF regression testing enforcing one-page layout invariants across generated resumes.
 capabilities:
   backend: 88
@@ -41,5 +40,4 @@ variants:
     emphasis: backend
     strength: 9
     text: >-
-      Established automated PDF regression testing that enforced one-page layout invariants across generated
-      resumes, preventing formatting drift with Python in production.
+      Established automated PDF regression tests that hold every generated resume to one page with intact text extraction across 500-posting test runs.

@@ -25,5 +25,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Conducted a Python gap analysis mapping an always-on platform design to the production Hushh consent
-      protocol across 4 invariants.
+      Conducted a Python gap analysis of an always-on platform design against Hushh's production consent protocol, finding it broke 3 of 4 trust invariants and pivoting the work.

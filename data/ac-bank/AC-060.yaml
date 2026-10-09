@@ -30,4 +30,4 @@ variants:
     emphasis: frontend
     strength: 8
     text: >-
-      Expanded resume generation to many applications at once with a bulk tailoring queue streaming live progress to the console over server-sent events.
+      Expanded resume generation into a bulk tailoring queue that built 2.2K resumes in 9 days, streaming live progress to the console over server-sent events.

@@ -10,9 +10,7 @@ metrics_claimed:
   - dashboard
 concepts_claimed:
   - frontend
-signature_technologies:
-  - React
-  - Python
+signature_technologies: [React]
 fact: React analytics dashboard for macro analysis and agent outputs.
 capabilities:
   ai: 75
@@ -37,5 +35,4 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Presented macro analysis and multi-agent outputs to 5 daily financial analysts through a React and
-      Python analytics dashboard in production.
+      Presented macro analysis and multi-agent outputs to 20-30 analysts and traders through a React dashboard, turning each Fed event into a read within minutes.

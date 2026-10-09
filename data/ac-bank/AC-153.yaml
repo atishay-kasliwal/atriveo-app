@@ -1,5 +1,8 @@
 id: AC-153
 role: user-data-platform
+# Merged 2026-10-09 into AC-248: hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: platform-ownership
 display_order: 1

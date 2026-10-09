@@ -7,8 +7,7 @@ wow_score: 0.82
 metrics_claimed:
   - roadmap_tiles_7
 concepts_claimed: []
-signature_technologies:
-  - Python
+signature_technologies: []
 fact: Built a 90-day roadmap sequencing 7 platform tiles for external developer onboarding to the consent API.
 capabilities:
   backend: 85
@@ -26,5 +25,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Planned a Python 90-day roadmap sequencing 7 platform tiles for external developer onboarding to the
-      consent API in production.
+      Planned a 90-day roadmap of 7 tiles that takes an external developer from first contact to a production agent on Hushh's consent API.

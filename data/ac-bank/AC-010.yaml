@@ -22,5 +22,4 @@ variants:
     emphasis: reliability
     strength: 7
     text: >-
-      Implemented API gateway authentication and rate limiting for microservices,
-      improving reliability and security across production deployments.
+      Implemented an API gateway with JWT and OAuth 2.0 authentication plus rate limiting for British Telecom microservices handling 10K+ daily transactions.

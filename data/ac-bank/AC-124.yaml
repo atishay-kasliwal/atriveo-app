@@ -27,5 +27,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Implemented JWT authentication with bcrypt hashing securing registration and login for 3 clinic user
-      roles in production.
+      Implemented MedLedger security with JWT and bcrypt auth, role-based access for 3 user roles plus Helmet, CORS and CSRF hardening on every route group.

@@ -38,5 +38,4 @@ variants:
     emphasis: ats
     strength: 8
     text: >-
-      Integrated Python ATS resume gap analysis scoring top-ranked jobs against a stored profile with 30+
-      keyword checks to surface gaps before applications.
+      Integrated Python ATS gap analysis that scores each run's top-ranked jobs against a stored profile with 30+ keyword checks before any application.

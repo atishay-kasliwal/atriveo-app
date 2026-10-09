@@ -9,9 +9,7 @@ metrics_claimed:
   - retrieval_eval
 concepts_claimed:
   - ai
-signature_technologies:
-  - Python
-  - LangChain
+signature_technologies: [LangChain, Pinecone]
 fact: Vector retrieval evaluation for financial document semantic search.
 capabilities:
   ai: 86
@@ -36,5 +34,4 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Tested vector retrieval in Python and LangChain, measuring semantic search quality across 200K+
-      financial document corpora for production RAG tuning.
+      Tested Pinecone vector retrieval over 200K+ financial documents in LangChain, lifting macro-analysis evaluation accuracy 18% before the production RAG launch.

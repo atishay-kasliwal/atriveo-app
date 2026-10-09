@@ -1,5 +1,8 @@
 id: AC-125
 role: medledger
+# Merged 2026-10-09 into AC-124: hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: authorization
 display_order: 3
@@ -26,5 +29,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Defined Express.js role-based access control separating Admin, Doctor, and Patient permissions across 3
-      protected API route groups in production.
+      Defined Express.js role-based access control separating Admin, Doctor and Patient permissions across 3 protected API route groups.

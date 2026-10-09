@@ -12,8 +12,7 @@ tracks:
 metrics_claimed: []
 concepts_claimed:
   - data-science
-signature_technologies:
-  - Python
+signature_technologies: []
 fact: "Kai AGENT_WEIGHTS per risk profile (conservative/balanced/aggressive); Renaissance tiers ACE/KING/QUEEN by free cash flow (config.py, renaissance_agent.py)."
 provenance:
   level: USER_CONFIRMED
@@ -42,4 +41,4 @@ variants:
     emphasis: hushh
     strength: 9
     text: >-
-      Customized stock recommendations for 3 risk profiles by weighting each agent's vote in Python, plus a 3-tier conviction list of free-cash-flow leaders.
+      Customized Kai's recommendations with a teammate for 4 investor strategies from bearish to long-term, weighting the 3 agents' votes so users could commit part or all of a portfolio.

@@ -32,5 +32,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Designed a medical clinic management system on Node.js and Express with MongoDB managing patient,
-      doctor, and appointment records for 3 user roles.
+      Designed MedLedger, a Node.js and MongoDB clinic system managing patient, doctor and appointment records for 3 user roles.

@@ -42,4 +42,4 @@ variants:
     emphasis: hushh
     strength: 9
     text: >-
-      Presented all 3 agents' cases and dissent to users over FastAPI SSE streams before they decided, keeping a human in the loop on every buy-or-hold call.
+      Presented all 3 agents' cases and dissent to users over FastAPI SSE streams within 2 minutes, keeping a human in the loop on every buy-or-hold call.

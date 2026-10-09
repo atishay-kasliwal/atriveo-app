@@ -44,4 +44,4 @@ variants:
     emphasis: hushh
     strength: 9
     text: >-
-      Unified 5 market-data, news and SEC filing sources into one async Python pipeline feeding fundamental, sentiment and valuation agents in a stock analysis engine.
+      Unified 5 sources including Yahoo Finance, Finnhub and SEC EDGAR filings in one async Python pipeline, letting Kai's 3 agents finish each stock analysis within 2 minutes.

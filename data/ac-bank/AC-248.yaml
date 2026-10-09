@@ -1,0 +1,45 @@
+# hushh solo contribution (Research-Cohorts report, verifiable in his commits), 2026-10-09.
+id: AC-248
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: hushh-external-agent
+display_order: 13
+wow_score: 0.85
+tracks:
+  - software-engineer
+  - forward-deployed
+  - ai-engineer
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies: []
+fact: "Research-Cohorts 01: designer with one collaborator; consent flow end to end against hushh production (Cloud Run), X25519 + AES-256-GCM; principles doc and 90-day roadmap; PR in progress."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Security
+  - APIs
+facets:
+  hushh:
+    phrase: hushh-external-agent
+    keywords:
+      - security
+      - apis
+variants:
+  - facet: hushh
+    emphasis: hushh
+    strength: 9
+    text: >-
+      Delivered hushh's first working external-agent sample, running the full consent flow with client-side X25519 and AES-256-GCM decryption against the live production backend.

@@ -39,5 +39,4 @@ variants:
     emphasis: scoring
     strength: 9
     text: >-
-      Formulated a Python keyword scoring engine with 30+ weighted tech terms ranking jobs by stack fit for
-      backend, ML, and data science roles.
+      Formulated a Python keyword scoring engine with 30+ weighted tech terms that ranks each run's ~109 surviving roles by stack fit for backend, ML and data science.

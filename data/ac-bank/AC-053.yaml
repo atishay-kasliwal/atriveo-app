@@ -31,4 +31,4 @@ variants:
     emphasis: backend
     strength: 9
     text: >-
-      Implemented Node.js APIs over MongoDB on an Oracle VM powering application tracking, job search and resume queues, synced to the Cloudflare console through a token-authenticated relay.
+      Implemented Node.js APIs over MongoDB on an Oracle VM powering tracking, job search and resume queues for 50K+ applications a year through a token-authenticated relay.

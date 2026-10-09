@@ -29,5 +29,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Prepared 255-sample radiomics cohorts and 73 patient records with Python and pandas preprocessing
-      pipelines across 2020–2022 datasets for clinical research analysis in production workflows.
+      Prepared 255-sample radiomics cohorts and 73 patient records from 2020-2022 with Python and pandas preprocessing pipelines for clinical analysis.

@@ -38,5 +38,4 @@ variants:
     emphasis: architecture
     strength: 9
     text: >-
-      Programmed a C++ insurance state machine applying 8 typed domain events with idempotency keys and
-      monotonic committed log indices in production.
+      Programmed a C++ insurance state machine applying 8 typed domain events with idempotency keys and monotonic log indices, so replays never apply a claim twice.

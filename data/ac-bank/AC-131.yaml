@@ -1,5 +1,8 @@
 id: AC-131
 role: medledger
+# Merged 2026-10-09 into AC-127: hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: frontend
 display_order: 9
@@ -27,5 +30,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Launched responsive EJS dashboards for managing appointments and patient records for 3 clinic roles with
-      JavaScript in production.
+      Launched responsive EJS dashboards for appointments and patient records across 3 clinic roles with JavaScript.

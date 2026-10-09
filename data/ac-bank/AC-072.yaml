@@ -1,5 +1,8 @@
 id: AC-072
 role: insurance-platform
+# Merged 2026-10-09 into AC-069: hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: docker-orchestration
 display_order: 10

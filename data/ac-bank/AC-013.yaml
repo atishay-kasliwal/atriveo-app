@@ -37,5 +37,4 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Extracted firms and macro themes from 200K+ financial news records with Python NLP on AWS powering
-      downstream forecasting features.
+      Extracted firms and macro themes from 200K+ financial news records with Python NLP on AWS, adding the news signal that raised forecasting accuracy 45%.

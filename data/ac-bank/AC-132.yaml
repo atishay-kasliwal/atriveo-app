@@ -1,13 +1,15 @@
 id: AC-132
 role: medledger
+# Merged 2026-10-09 into AC-124: hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: middleware
 display_order: 10
 wow_score: 0.81
 metrics_claimed: []
 concepts_claimed: []
-signature_technologies:
-  - Express.js
+signature_technologies: [JWT]
 fact: Implemented centralized error handling and auth middleware across Express route layers.
 capabilities:
   backend: 85
@@ -25,5 +27,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Centralized error handling and JWT auth middleware across Express layers securing the clinic API for 3
-      roles with Express.js in production.
+      Centralized error handling and JWT auth middleware across Express layers, securing the clinic API for 3 roles.

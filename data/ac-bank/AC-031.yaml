@@ -13,9 +13,7 @@ concepts_claimed:
   - radiomics
   - upload
   - clinical
-signature_technologies:
-  - Python
-  - GCP
+signature_technologies: [Python]
 fact: >-
   AI clinical decision support platform — 10K+ MRIs, 3h→2min segmentation at 90%+, 2min upload-to-insight,
   20-person clinical team.
@@ -61,11 +59,9 @@ variants:
     emphasis: platform
     strength: 10
     text: >-
-      Designed a Python and GCP-based AI radiology platform that processed 10K+ brain MRI studies and reduced
-      tumor segmentation from 3 hours to 2 minutes.
+      Designed a Python AI radiology platform that processed 10K+ brain MRI studies and cut tumor segmentation from 3 hours to 2 minutes.
   - facet: production-ml
     emphasis: ml
     strength: 9
     text: >-
-      Created a Python and GCP healthcare AI pipeline processing 10K+ brain MRI studies, reducing automated
-      tumor segmentation from 3 hours to 2 minutes.
+      Created a Python healthcare AI pipeline processing 10K+ brain MRI studies, cutting automated tumor segmentation from 3 hours to 2 minutes.

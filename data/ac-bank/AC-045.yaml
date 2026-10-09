@@ -39,8 +39,7 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Enabled physicians to compare disease patterns and outcomes using Python and Pinecone patient similarity
-      retrieval across 5 to 10 years of historical MRI data.
+      Enabled physicians to compare disease patterns and outcomes with Python and Pinecone patient-similarity retrieval over 10K+ historical cases spanning 5 to 10 years.
 signature_technologies:
   - Python
   - Pinecone

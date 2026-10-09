@@ -10,10 +10,7 @@ metrics_claimed:
   - researchers_5
 concepts_claimed:
   - cloud
-signature_technologies:
-  - AWS
-  - Python
-  - OpenAI
+signature_technologies: [AWS, Python]
 fact: OpenAI GPT-backed macro analysis APIs in Python on AWS for 5 daily financial analysts.
 capabilities:
   ai: 82
@@ -40,5 +37,4 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Operated OpenAI GPT-backed macro analysis APIs in Python on AWS, serving 5 daily financial analysts with
-      sub-minute response times.
+      Operated GPT-backed macro analysis APIs in Python on AWS, answering 20-30 analysts and traders within a minute of each Fed statement.

@@ -1,5 +1,8 @@
 id: AC-157
 role: user-data-platform
+# Merged 2026-10-09 into AC-153: hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: consent
 display_order: 5

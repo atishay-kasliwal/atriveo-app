@@ -53,14 +53,12 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Constructed an event-driven FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis from 3
-      days to under 20 minutes and reaching approximately 68% directional accuracy across 13 sessions.
+      Constructed an event-driven FastAPI pipeline on AWS over 7 years of FOMC data, cutting analysis from 3 days to under 20 minutes at 67.7% directional accuracy across 13 live sessions.
   - facet: production-ml
     emphasis: ml
     strength: 9
     text: >-
-      Constructed an event-driven FastAPI pipeline on AWS for data ingestion, preprocessing and model inference
-      with performance reporting, reaching approximately 68% directional accuracy across 13 evaluation sessions.
+      Constructed an event-driven FastAPI pipeline on AWS for ingestion, preprocessing and model inference, cutting macro analysis from 3 days to under 20 minutes at 67.7% directional accuracy.
   # FDE wording (docs/resume-tracks/fde.md), only on Forward deployed resumes.
   - facet: fde
     emphasis: fde

@@ -1,5 +1,8 @@
 id: AC-022
 role: stony-brook
+# Merged 2026-10-09 (into AC-003 / AC-012): hidden from every resume by a track no resume uses.
+tracks:
+  - retired
 slot_kind: experience
 engineering_identity: frontend
 achievement_theme: research-ui

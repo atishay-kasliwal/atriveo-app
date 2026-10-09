@@ -23,4 +23,4 @@ variants:
     emphasis: llm-ai
     strength: 8
     text: >-
-      Matched application questions to each user's ranked story bank by domain and skill overlap, proposing answers that wait for human approval before any form is submitted.
+      Matched application questions to each user's ranked story bank by domain and skill overlap across 893 applications, proposing answers that wait for human approval before submission.

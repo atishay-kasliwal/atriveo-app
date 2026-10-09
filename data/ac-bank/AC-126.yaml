@@ -6,9 +6,7 @@ display_order: 4
 wow_score: 0.84
 metrics_claimed: []
 concepts_claimed: []
-signature_technologies:
-  - MongoDB
-  - Mongoose
+signature_technologies: [Mongoose]
 fact: Built REST CRUD APIs for patient records with Mongoose schemas and server-side data validation.
 capabilities:
   backend: 85
@@ -27,5 +25,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Programmed REST CRUD APIs for patient records with Mongoose schemas and validation supporting 3 clinic
-      user roles with MongoDB in production.
+      Programmed MedLedger's REST CRUD APIs for patient and doctor records with Mongoose validation, documented in Swagger OpenAPI for 3 clinic roles.

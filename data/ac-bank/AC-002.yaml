@@ -37,5 +37,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Processed 200K+ financial records in real time through a Python and Kafka NLP pipeline on AWS,
-      delivering 27% portfolio return and $2.6K backtesting profit.
+      Processed 200K+ financial records in real time through a Python and Kafka NLP pipeline on AWS, powering a strategy that returned 21% over about 18 months of S&P 500 trading.

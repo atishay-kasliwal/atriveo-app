@@ -42,4 +42,4 @@ variants:
     emphasis: hushh
     strength: 9
     text: >-
-      Instituted ownership checks, an authorization test matrix and CWE-400 request bounds across the stock agent's FastAPI routes to keep each user's conversations secure.
+      Instituted ownership checks, an authorization test matrix and CWE-400 request bounds across Kai's FastAPI routes, capping every analysis at 2 minutes so no user could exhaust the service.

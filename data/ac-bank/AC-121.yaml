@@ -1,5 +1,8 @@
 id: AC-121
 role: mri-research
+# Merged 2026-10-09 into AC-113: hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: reporting
 display_order: 9

@@ -37,5 +37,4 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Accelerated the FOMC pipeline from 3 days to under 20 minutes through Python performance tuning and AWS
-      inference optimization in production.
+      Accelerated the FOMC pipeline from 3 days to under 20 minutes through parallel inference, caching and async I/O in Python on AWS.

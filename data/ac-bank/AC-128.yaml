@@ -1,5 +1,8 @@
 id: AC-128
 role: medledger
+# Merged 2026-10-09 into AC-126: hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: api-docs
 display_order: 6
@@ -27,5 +30,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Authored Swagger OpenAPI docs on Express.js for auth and patient REST endpoints on the clinic API
-      serving 3 user roles in production.
+      Authored Swagger OpenAPI docs on Express.js for the auth and patient REST endpoints serving 3 clinic user roles.

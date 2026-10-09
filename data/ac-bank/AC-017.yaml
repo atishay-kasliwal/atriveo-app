@@ -1,5 +1,8 @@
 id: AC-017
 role: insurance-platform
+# Merged 2026-10-09 into AC-063 (it contradicted the Java/Spring platform): hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 visibility:
   default: false

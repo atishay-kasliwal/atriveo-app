@@ -28,5 +28,4 @@ variants:
     emphasis: compliance
     strength: 9
     text: >-
-      Established an immutable Raft audit log on a 3-node cluster serving as a tamper-evident production
-      compliance record for insurance regulators.
+      Established an immutable Raft audit log on a 3-node cluster, giving insurance regulators a tamper-evident record of every policy and claim event.

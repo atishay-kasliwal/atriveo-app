@@ -32,7 +32,7 @@ product:
     types with inconsistent slice counts, clarity, and dimensions. Preprocessing,
     alignment, and tumor marking were slow and error-prone.
   solution: >
-    End-to-end platform on GCP: MRI upload triggers automated preprocessing
+    End-to-end platform (no cloud named on resumes, per Atishay 2026-10-08): MRI upload triggers automated preprocessing
     (registration, denoising, alignment to a unified plane), AI tumor segmentation,
     PyRadiomics feature extraction, patient similarity search, survival analysis,
     and a clinician dashboard for review and mask correction.
@@ -41,7 +41,7 @@ product:
   stack:
     languages: [Python]
     imaging: [SimpleITK, PyRadiomics]
-    cloud: [GCP]
+    cloud: []
     orchestration: [Apache Airflow]
     frontend: [React, TypeScript, Redux]
     domain: [MRI, brain tumor, radiomics, survival analysis, medical imaging]
@@ -104,7 +104,7 @@ achievements:
     fact: End-to-end AI radiology platform in clinical use processing 10K+ brain MRI studies for a 20-person physician-research team.
     metrics_used: [10K+ studies, 3h→2min, 90%+ accuracy, 2min latency, clinical deployment]
     resume_bullet: >-
-      Designed a Python and GCP-based AI radiology platform that processed 10K+ brain MRI studies and reduced
+      Designed a Python AI radiology platform that processed 10K+ brain MRI studies and reduced
       tumor segmentation from 3 hours to 2 minutes.
     review_notes: |
       Pinned first on every Wake Forest resume (headline bullet). Impossible-to-ignore summary

@@ -1,0 +1,44 @@
+# hushh solo contribution (Research-Cohorts report, verifiable in his commits), 2026-10-09.
+id: AC-247
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: hushh-rl-hedging
+display_order: 12
+wow_score: 0.85
+tracks:
+  - data-science
+  - ai-engineer
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies: []
+fact: "Research-Cohorts 03: implementer; GBM simulator, Deep Hedging (Buhler et al.) Policy Gradient pipeline; matched or beat Black-Scholes under trained conditions, did not generalize across moneyness; 8 equities + Nasdaq 100."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Reinforcement Learning
+  - Monte Carlo
+facets:
+  hushh:
+    phrase: hushh-rl-hedging
+    keywords:
+      - reinforcement learning
+      - monte carlo
+variants:
+  - facet: hushh
+    emphasis: hushh
+    strength: 9
+    text: >-
+      Modeled option hedging with a Policy Gradient RL agent on thousands of Monte Carlo GBM price paths, matching or beating Black-Scholes under trained conditions across 8 equities and the Nasdaq 100.

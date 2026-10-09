@@ -46,11 +46,9 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Upgraded timesheet submission to AWS Lambda and SQS for 3,000 employees eliminating manual weekly filing
-      across production operations.
+      Upgraded timesheet submission to AWS Lambda and SQS for 3,000 employees, eliminating manual weekly filing.
   - facet: production-ml
     emphasis: ml
     strength: 9
     text: >-
-      Upgraded timesheet submission to event-driven AWS Lambda and SQS workflows in production, eliminating
-      manual weekly filing for 3,000 employees.
+      Upgraded timesheet submission to event-driven AWS Lambda and SQS workflows, eliminating manual weekly filing for 3,000 employees.

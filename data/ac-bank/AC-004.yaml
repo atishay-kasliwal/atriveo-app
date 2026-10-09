@@ -37,8 +37,7 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Streamlined event-driven Kafka pipelines moving FOMC releases to Python inference workflows within
-      minutes instead of multi-day manual analysis cycles.
+      Streamlined event-driven Kafka pipelines that move each FOMC release into Python inference within minutes, replacing a 3-day manual analysis cycle for 20-30 analysts.
   # FDE wording (docs/resume-tracks/fde.md), only on Forward deployed resumes.
   - facet: fde
     emphasis: fde

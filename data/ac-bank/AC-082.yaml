@@ -40,5 +40,4 @@ variants:
     emphasis: infra
     strength: 8
     text: >-
-      Launched a CMake-built C++ server with OpenSSL TLS and an interactive CLI managing policies and claims
-      across a 3-node production cluster.
+      Launched a CMake-built C++ server with OpenSSL TLS and an interactive CLI managing policies and claims across a 3-node cluster.

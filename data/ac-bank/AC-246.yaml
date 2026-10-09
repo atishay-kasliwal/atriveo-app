@@ -1,0 +1,46 @@
+# hushh solo contribution (Research-Cohorts report, verifiable in his commits), 2026-10-09.
+id: AC-246
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: hushh-weight-eval
+display_order: 11
+wow_score: 0.85
+tracks:
+  - ai-engineer
+  - software-engineer
+  - data-science
+  - forward-deployed
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies: []
+fact: "Research-Cohorts 02: sole author, hushh-research PR #756 (all CI checks passing, open); 500-line service, gates, attribution, audit persistence, read-only endpoint."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Evaluation
+  - MLOps
+facets:
+  hushh:
+    phrase: hushh-weight-eval
+    keywords:
+      - evaluation
+      - mlops
+variants:
+  - facet: hushh
+    emphasis: hushh
+    strength: 9
+    text: >-
+      Authored KaiWeightEvalService, which replays Kai's past decisions offline against candidate agent weights and blocks promotion on 3 accuracy and safety gates, never touching live weights.

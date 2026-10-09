@@ -1,5 +1,8 @@
 id: AC-185
 role: accolite
+# Merged 2026-10-09 into AC-186: hidden from every resume.
+tracks:
+  - retired
 slot_kind: experience
 engineering_identity: enterprise
 client_context: inhouse

@@ -1,5 +1,8 @@
 id: AC-160
 role: user-data-platform
+# Merged 2026-10-09 into AC-155: hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: authorization
 display_order: 8
@@ -25,5 +28,4 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Assigned time-bounded access through Python scoped capability tokens with attr.domain path grammar
-      across 4 trust invariants in production.
+      Assigned time-bounded access through Python scoped capability tokens with attr.domain path grammar across 4 trust invariants.

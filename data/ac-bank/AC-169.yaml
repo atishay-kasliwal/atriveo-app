@@ -37,5 +37,4 @@ variants:
     emphasis: default
     strength: 8
     text: >-
-      Verified auditable data integrity for Fidelity insurance exchanges on MySQL and AWS spanning 10K+
-      encrypted sister-company records in production.
+      Verified data integrity for 10K+ encrypted Fidelity insurance records with MySQL and AWS checks, keeping every sister-company exchange auditable.

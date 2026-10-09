@@ -45,5 +45,4 @@ variants:
     emphasis: fde
     strength: 9
     text: >-
-      Adapted the FOMC pipeline beyond press conferences to NASDAQ-100 trading days without video or
-      transcripts, reusing the same agents at slightly lower accuracy than the full multimodal model.
+      Adapted the FOMC pipeline beyond press conferences to NASDAQ-100 trading days without video or transcripts, holding 58% directional accuracy versus 50% chance with the same agents.

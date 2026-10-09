@@ -10,9 +10,7 @@ metrics_claimed:
   - stocks_30
 concepts_claimed:
   - ai
-signature_technologies:
-  - Python
-  - LangChain
+signature_technologies: [Python]
 fact: 3-agent RL debate system — 60% directional accuracy on 30 S&P stocks.
 capabilities:
   ai: 95
@@ -51,14 +49,13 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Orchestrated a Python and LangChain 3-agent RL debate system achieving 60% directional accuracy across
-      30 S&P 500 stocks on 7d 30d and 90d forecasting windows in production.
+      Orchestrated a Python 3-agent RL debate system with a teammate that analyzes 30 S&P 500 stocks over 7, 30 and 90-day windows, reaching 60% directional accuracy.
   - facet: production-ml
     emphasis: ml
     strength: 9
+    signature_technologies: []
     text: >-
-      Orchestrated a Python and LangChain 3-agent reinforcement learning system across 30 S&P 500 stocks over 7,
-      30 and 90-day forecasting windows, achieving 60% directional accuracy.
+      Orchestrated a 3-agent reinforcement learning debate system with a teammate across 30 S&P 500 stocks over 7, 30 and 90-day windows, achieving 60% directional accuracy.
   - facet: ai-track
     emphasis: ai
     strength: 9
@@ -66,4 +63,4 @@ variants:
       - ai-engineer
     signature_technologies: [Gemini]
     text: >-
-      Orchestrated Kai, a 3-agent stock analysis engine whose fundamental, sentiment and valuation agents debate over 2 rounds to a 70% consensus with Gemini at 60% directional accuracy.
+      Orchestrated Kai's 3-agent RL debate engine with a teammate so fundamental, sentiment and valuation agents argue until 70% agree, reaching 60% directional accuracy on 30 S&P 500 stocks with Gemini.

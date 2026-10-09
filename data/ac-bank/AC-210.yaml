@@ -48,5 +48,4 @@ variants:
     emphasis: fde
     strength: 9
     text: >-
-      Centralized Atriveo's backend on an Oracle Cloud VM, running a dashboard and 2 resume workers in Docker against a
-      MongoDB job queue with leased claims.
+      Centralized Atriveo's backend on an Oracle Cloud VM, running a dashboard and 2 Docker resume workers that build 50K+ resumes a year from a MongoDB queue with leased claims.

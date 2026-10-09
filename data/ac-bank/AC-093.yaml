@@ -42,5 +42,4 @@ variants:
     emphasis: platform
     strength: 10
     text: >-
-      Constructed a Python and scikit-learn Marketing Mix Model analyzing 5 media channels across 156 weeks at
-      R² 0.9489 and 2.74% MAPE in production.
+      Constructed a Python and scikit-learn Marketing Mix Model across 5 media channels over 156 weeks of simulated data, reaching R² 0.9489 and 2.74% MAPE.
