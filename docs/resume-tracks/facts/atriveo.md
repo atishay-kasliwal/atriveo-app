@@ -14,4 +14,7 @@
 | 225 Gmail status events | Mongo `inbox_events` | confirmed (data) |
 | Real-world failures handled: Ashby form changes, Greenhouse email verification, dynamic questions, spam blocks; final submission and open answers kept human-controlled | this project's history (Oct 2026) | confirmed |
 | Backend moved from the Mac to an Oracle VM (Docker workers, Mongo) | this project's history | confirmed |
-| Note: Mongo data starts 2026-09-29; earlier versions' numbers have to come from you | | |
+| **Over the year: 50K+ applications tracked and 50K+ tailored resumes** across its users | you, 2026-10-08 | confirmed |
+| **Earlier version** ran on FastAPI + PostgreSQL + Cloudflare (Pages and Workers, with Docker), at **99.9% uptime** across **2K+ daily queries** | you, 2026-10-08 ("everything true") | confirmed |
+| **Today's version:** Node.js/TypeScript, MongoDB, Docker on an Oracle Cloud VM, Playwright automation, React console | the running system | confirmed |
+| Note: the 9-day figures (8.1K boards, 6.5K jobs, 2.2K resumes, 893 applications) are this database's window since 2026-09-29. The year totals above are the headline. Say which era a stack belongs to, so the two never read as a contradiction. | | |
