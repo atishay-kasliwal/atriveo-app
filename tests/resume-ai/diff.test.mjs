@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {resumeChangeDiff} from '../../src/shared/resumeChangeDiff.mjs';
+test('unchanged bullets are hidden while actual replacements remain visible',()=>{assert.deepEqual(resumeChangeDiff({kind:'section',current:'Kept\n\nOld',suggested:'Kept\n\nNew',bullets:[{text:'Kept'},{text:'New'}]}),{removed:['Old'],added:['New'],unchanged:1,reordered:false});});
+test('reordering and duplicate occurrences do not masquerade as rewrites',()=>{assert.equal(resumeChangeDiff({kind:'section',current:'A\n\nB',suggested:'B\n\nA'}).reordered,true);assert.deepEqual(resumeChangeDiff({kind:'section',current:'A\n\nA',suggested:'A'}).removed,['A']);});

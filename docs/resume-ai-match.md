@@ -128,3 +128,9 @@ The inspected 42→48 Codex review had two validated project changes, three bloc
 New reviews explicitly consider all three sections and split compound requirements into atomic facts. Locked education is included as context for degree requirement assessment; it remains outside the editable content boundary. Existing reviews display the summary immediately but their original scores/requirements are not silently regenerated.
 
 Validation: 43 tests pass, including project-only result explanations, unchanged section disclaimers, reviewed state and all-three-section dashboard presentation.
+
+## Focused changes and saved PDF clarity
+
+AI comparisons now omit exact unchanged bullets/groups, show removed/replaced wording and new wording, and distinguish pure reordering. The full original/proposed section remains expandable; Apply still uses the complete validated patch. The editor explicitly labels unsaved changes, draft checking, validation issues and saved PDFs. Save is enabled only for the compiled draft matching the current edit. Save & download saves that draft and downloads the returned saved PDF path; the mobile menu also offers the previous saved PDF explicitly.
+
+Checks cover unchanged and duplicate bullet handling, reordering, current-draft readiness, returned PDF download path and standard filename. Thirteen targeted editor/diff checks pass.

@@ -1,3 +1,4 @@
+import {resumeChangeDiff} from '../shared/resumeChangeDiff.mjs';
 import {resumeReviewSummary} from '../shared/resumeReviewSummary.mjs';
 import {aiUsageSession} from './AiUsage';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -384,11 +385,12 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const verbs = new Map<string, number>();
   for (const b of sections.flatMap((s) => s.bullets)) verbs.set(verb(b.text), (verbs.get(verb(b.text)) ?? 0) + 1);
 
-  const save = async () => {
+  const save = async (download=false) => {
     if (!loaded || !draft?.draftId) return;
     setSaving(true);
     try {
-      await call<{ pdfPath: string }>("save", { source: loaded.source, draftId: draft.draftId });
+      const result=await call<{ pdfPath: string }>("save", { source: loaded.source, draftId: draft.draftId });
+      if(download){const link=document.createElement("a");link.href=pdfUrl(result.pdfPath,true);link.download="Atishay Kasliwal.pdf";document.body.appendChild(link);link.click();link.remove();}
       setSavedAt(Date.now());
       await load();
     } catch (e) { setNotice(e instanceof Error ? e.message : String(e)); }
@@ -405,7 +407,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   useEffect(() => { if (!savedAt) return; const t = setTimeout(() => setSavedAt(0), 5000); return () => clearTimeout(t); }, [savedAt]);
   useEffect(() => { if (!flash) return; const t = setTimeout(() => setFlash(null), 1600); return () => clearTimeout(t); }, [flash]);
 
-  const canSave = Boolean(dirty && draft?.draftId && !draft.problems.length && !rendering && !saving);
+  const canSave = Boolean(dirty && draftOf === edit && draft?.draftId && !draft.problems.length && !rendering && !saving);
   // Shortcuts: ⌘S saves, ⌘Z undoes (outside a text box, where the box's own undo works), Esc closes.
   const keys = useRef({ canSave, save, undo, close: () => {} });
   keys.current = { canSave, save, undo, close: () => { if (picker) setPicker(null); else if (writing) closeWriting(); else setSheet(null); } };
@@ -638,9 +640,11 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     <ResumeLivePreview layout={loaded.layout} title={title} email={email} city={city} sections={liveSections} skills={skillLines} measure={measure}
       mode={phone ? "width" : "fit"} squeeze={squeezeRef.current} highlight={highlight} onFit={setFit} onPick={pick} onHover={setHover} />
   );
-  const pdfStatus = <span className="rb-pdf-status" title="The compiled PDF, the one Fill sends">PDF {rendering ? "checking…" : draft?.pages ? `${plural(draft.pages, "page")} ${draft.pages === 1 ? "✓" : "⚠"}` : dirty ? "…" : "saved"}</span>;
+  const pdfStatus = <span className={`rb-pdf-status ${dirty?"rb-unsaved":""}`} role="status">{dirty?(saving?"Saving PDF…":canSave?"Unsaved changes · draft ready":draft?.problems.length?"Unsaved changes · needs fixes":"Unsaved changes · checking draft…"):"Saved PDF"}</span>;
   const problems = draft && draft.problems.length > 0 && <div className="rb-checks bad" role="alert"><b>Can't save yet</b><ul>{draft.problems.map((p) => <li key={p}>{p}</li>)}</ul></div>;
   const saveBtn = <button className="rv-primary" disabled={!canSave} onClick={() => void save()} title={draft && !draft.problems.length ? "One page · every bullet from your bank · no repeated opening verb (⌘S)" : "⌘S"}>{saving ? "Saving…" : "Save"}</button>;
+  const downloadBtn=dirty?<button className="apps-btn" disabled={!canSave} onClick={()=>void save(true)} title="Save the current draft, then download that PDF">Save & download</button>:loaded&&<a className="apps-btn" href={pdfUrl(loaded.current.pdfPath,true)}>Download</a>;
+  const aiComparison=(s:AiSuggestion)=>{const diff=resumeChangeDiff(s);return <><div className="rb-ai-compare"><div><small>{s.kind==="skills"?"CURRENT GROUPS":"REPLACED / REMOVED"}</small>{diff.removed.length?diff.removed.map((text,i)=><p key={i}>{text}</p>):<p className="apps-muted">{diff.reordered?"Bullet order updated":"Nothing removed"}</p>}</div><div><small>{s.kind==="skills"?"SUGGESTED GROUPS":"NEW / REWRITTEN"}</small>{diff.added.length?diff.added.map((text,i)=><p className="rb-ai-new" key={i}>{text}</p>):<p className="apps-muted">{diff.reordered?"Same wording, new order":"No new wording"}</p>}</div></div>{diff.unchanged>0&&<small>{diff.unchanged} unchanged {s.kind==="skills"?"groups":"bullets"} hidden</small>}<details><summary>View full {s.kind==="skills"?"skills section":"section"}</summary><small>CURRENT</small><p>{s.current}</p><small>SUGGESTED</small><p>{s.suggested}</p></details></>;};
   const undoBtn = <button className="apps-btn" disabled={!history.current.length} onClick={undo} title="Undo the last change (⌘Z)">Undo</button>;
 
   const aiStale = Boolean(ai && (aiJdStale || aiInput !== aiSnapshot(sections)));
@@ -660,7 +664,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     {aiStale && <button className="apps-btn" disabled={aiBusy} onClick={() => void runAi()}>Refresh match</button>}
     {!aiReview ? <><h3>Biggest gaps</h3><ul>{ai.requirements.filter(r => r.status !== "STRONG").slice(0,5).map(r => <li key={r.requirement}><b>{r.requirement}</b><small>{r.status === "MISSING" ? "No supporting evidence" : "Could be clearer"}</small></li>)}</ul><button className="rv-primary" disabled={aiBusy || aiStale || !pendingAi.length} onClick={() => setAiReview(true)}>Review Changes ({pendingAi.length})</button><button className="apps-btn" disabled={aiBusy} onClick={() => void runAi(sections,true)}>Optimize Resume</button><details><summary>Strong matches, partial matches & missing requirements</summary>{ai.requirements.map(r => <p key={r.requirement}><b>{r.status} · {r.requirement}</b><br />{r.evidence}</p>)}{ai.atsProblems.map(p => <p key={p}>{p}</p>)}</details></> : <>
     {pendingAi.length>0 && <button className="rv-primary" disabled={aiBusy || aiStale} onClick={() => void applyAi(pendingAi)}>Apply All ({pendingAi.length})</button>}
-    {pendingAi.map(s => <article className="rb-ai-diff" key={s.id}><small>{s.kind === "skills"?"TECHNICAL SKILLS":sections[s.si]?.kind === "experience"?"EXPERIENCE":"PROJECTS"}</small><h3>{s.kind === "skills" ? "Technical Skills" : sections[s.si]?.label}</h3><div className="rb-ai-compare"><div><small>CURRENT</small><p>{s.current}</p></div><div><small>SUGGESTED</small><p className="rb-ai-new">{s.suggested}</p></div></div><p>{s.reason}</p><small>JD requirements: {s.requirements.join(" · ") || "Skills relevance"}</small><details><summary>Evidence used</summary>{s.evidence_source.map(e => <p key={e}>{e}</p>)}</details><div><button className="apps-btn" disabled={aiBusy} onClick={() => { void aiDecision(s,"rejected").then(() => setAiDone(d => {const ids=[...d,s.id];const request=readAiRequest();if(request)persistAi({...request,doneIds:ids});return ids;})).catch(e => setAiError(String(e.message))); }}>Keep current</button><button className="rv-primary" disabled={aiBusy || aiStale} onClick={() => void applyAi([s])}>Apply</button><button className="apps-btn" disabled={aiBusy || aiStale} onClick={() => { void aiDecision(s,"edited").then(() => { setAiOpen(false); if (s.kind === "skills") { if (phone) setSheet({kind:"skills",line:0}); else skillsRef.current?.focus(); } else { const proposed = s.bullets?.[0]; if (proposed) { setWriting({si:s.si,bi:0,text:proposed.text,issues:null,verbs:[],busy:false,error:""}); if (phone) setSheet({kind:"bullet",si:s.si,bi:0}); else editorRef.current?.querySelector(`[data-section="${s.si}"]`)?.scrollIntoView(); } } }).catch(e => setAiError(String(e.message))); }}>Edit</button></div></article>)}
+    {pendingAi.map(s => <article className="rb-ai-diff" key={s.id}><small>{s.kind === "skills"?"TECHNICAL SKILLS":sections[s.si]?.kind === "experience"?"EXPERIENCE":"PROJECTS"}</small><h3>{s.kind === "skills" ? "Technical Skills" : sections[s.si]?.label}</h3>{aiComparison(s)}<p>{s.reason}</p><small>JD requirements: {s.requirements.join(" · ") || "Skills relevance"}</small><details><summary>Evidence used</summary>{s.evidence_source.map(e => <p key={e}>{e}</p>)}</details><div><button className="apps-btn" disabled={aiBusy} onClick={() => { void aiDecision(s,"rejected").then(() => setAiDone(d => {const ids=[...d,s.id];const request=readAiRequest();if(request)persistAi({...request,doneIds:ids});return ids;})).catch(e => setAiError(String(e.message))); }}>Keep current</button><button className="rv-primary" disabled={aiBusy || aiStale} onClick={() => void applyAi([s])}>Apply</button><button className="apps-btn" disabled={aiBusy || aiStale} onClick={() => { void aiDecision(s,"edited").then(() => { setAiOpen(false); if (s.kind === "skills") { if (phone) setSheet({kind:"skills",line:0}); else skillsRef.current?.focus(); } else { const proposed = s.bullets?.[0]; if (proposed) { setWriting({si:s.si,bi:0,text:proposed.text,issues:null,verbs:[],busy:false,error:""}); if (phone) setSheet({kind:"bullet",si:s.si,bi:0}); else editorRef.current?.querySelector(`[data-section="${s.si}"]`)?.scrollIntoView(); } } }).catch(e => setAiError(String(e.message))); }}>Edit</button></div></article>)}
     {!pendingAi.length && <p>No remaining rewrites. You can review the preview and save.</p>}<button className="apps-btn" disabled={aiBusy} onClick={() => void runAi(sections,true)}>Optimize Resume</button></>}
     <button className="apps-link" onClick={() => { setAiReview(true); }}>Review Individually</button><button className="apps-link" onClick={() => setAiOpen(false)}>Cancel</button><p className="apps-muted">Only Experience, Technical Skills and Projects can change. Suggestions change your draft only. Save approves the final PDF.</p></>}
   </section></>;
@@ -682,7 +686,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
           <div className="rb-ph-bar">
             {undoBtn}
             <button className="apps-btn" onClick={() => { setWriting(null); setPicker(null); setSheet({ kind: "menu" }); }} aria-label="More">⋯</button>
-            {savedAt ? <span className="rb-saved">Saved ✓</span> : pdfStatus}
+            {dirty?pdfStatus:savedAt?<span className="rb-saved">Saved ✓</span>:pdfStatus}
             {saveBtn}
           </div>
           {(t || picker) && <div className="rb-sheet-back" onClick={() => { setSheet(null); setPicker(null); setWriting(null); }} />}
@@ -713,7 +717,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
               {t.kind === "skills" && <><div className="rb-sheet-head"><b>Technical skills</b></div>{skillsField}</>}
               {t.kind === "menu" && <div className="rb-menu">
                 <a className="apps-btn" href={pdfUrl(preview ?? loaded.current.pdfPath)} target="_blank" rel="noreferrer">Open the PDF</a>
-                <a className="apps-btn" href={pdfUrl(loaded.current.pdfPath, true)}>Download saved</a>
+                {downloadBtn}{dirty&&<a className="apps-link" href={pdfUrl(loaded.current.pdfPath,true)}>Download previous saved PDF</a>}
                 <button className="apps-btn" disabled={!dirty || saving} onClick={() => { void load(); setSheet(null); }}>Discard changes</button>
                 {loaded.current.edited && <button className="apps-btn" disabled={saving} onClick={() => { void revert(); setSheet(null); }}>Revert to generated</button>}
                 {projects.length > 0 && <><span className="rb-sheet-label">Add a project</span>{projects.map((p) => <button key={p.role} className="apps-btn" onClick={() => { change((x) => [...x, { role: p.role, kind: "project", label: p.label, bullets: [] }]); setSheet(null); }}>+ {p.label}</button>)}</>}
@@ -759,12 +763,12 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
                 <button role="tab" aria-selected={view === "pdf"} className={view === "pdf" ? "is-on" : ""} onClick={() => setView("pdf")}>PDF</button>
               </span>
               {roomChip}
-              {savedAt ? <span className="rb-saved">Saved ✓</span> : pdfStatus}
+              {dirty?pdfStatus:savedAt?<span className="rb-saved">Saved ✓</span>:pdfStatus}
               {draft?.jdMatch && <span className="rb-match" title={draft.jdMatch.missing.length ? `Still missing: ${draft.jdMatch.missing.join(", ")}` : "Every skill this job names is on it"}>JD {draft.jdMatch.before ?? "–"} → <b>{draft.jdMatch.after ?? "–"}</b></span>}
               <span className="rb-actions">
                 {undoBtn}
                 {loaded.current.edited && <button className="apps-btn" disabled={saving} onClick={() => void revert()} title="Back to the generated resume">Revert</button>}
-                <a className="apps-btn" href={pdfUrl(loaded.current.pdfPath, true)} title="Download the saved PDF">Download</a>
+                {downloadBtn}
                 <button className="apps-btn" disabled={!dirty || saving} onClick={() => void load()}>Discard</button>
                 {saveBtn}
               </span>

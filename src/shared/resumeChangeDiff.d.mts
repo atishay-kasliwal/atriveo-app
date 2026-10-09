@@ -1,0 +1,1 @@
+export function resumeChangeDiff(change:{kind:string;current:string;suggested:string;bullets?:Array<{text:string}>;skills?:string[]}):{removed:string[];added:string[];unchanged:number;reordered:boolean};
