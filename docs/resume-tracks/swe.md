@@ -63,3 +63,11 @@ The blind test decides whether two are needed.
 - The duplicate FOMC "3 days → under 20 minutes" pair.
 - Atriveo stacks without their era. Earlier FastAPI/PostgreSQL vs today's Node/MongoDB must say which, so they never
   read as a contradiction.
+
+## 4. Decisions (2026-10-08)
+
+- **One default SWE set**, plus a React-heavy variant used only when a posting leans hard on React and frontend, as FDE
+  has its infrastructure variant. The blind test confirms both.
+- **Stony Brook title:** Software Engineer on SWE resumes.
+- **All numbers are true.** Earlier and current figures may both be used; name the era where two could look like a
+  conflict.

@@ -15,3 +15,8 @@ Bank entries AC-163…AC-198.
 | In-house ERP replacing Oracle CRM for 3,000 employees | bank AC-183 | confirmed |
 | CI/CD for 20 engineers, 6 hours → 90 seconds, 20+ releases a month | bank AC-191 | confirmed |
 | 500+ technical interviews; intern mentorship to full-time; knowledge-transfer playbooks | bank AC-193…197 | confirmed |
+| **British Telecom e-commerce platform built end to end:** multiple microservices, backend and frontend, including the payment gateway | you, 2026-10-08 | confirmed |
+| **The 100K+ users** (Redis/Elasticsearch incident fix) are British Telecom's users | you, 2026-10-08 | confirmed |
+| **In-house product (Accolite's ERP):** you built the whole frontend for client onboarding, employee onboarding, invoicing and the rest of the company's operations | you, 2026-10-08 | confirmed |
+| **Testing:** unit tests for whole microservices in JUnit (Java) and PyTest (Python), held to a 100% code-coverage and zero-bug standard | you, 2026-10-08 | confirmed (phrase it as the standard you worked to) |
+| CI/CD 6 hours → 90 seconds, 100K+ users and every other number | you, 2026-10-08 ("all true") | confirmed |

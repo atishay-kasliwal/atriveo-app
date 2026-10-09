@@ -18,3 +18,5 @@
 | **Earlier version** ran on FastAPI + PostgreSQL + Cloudflare (Pages and Workers, with Docker), at **99.9% uptime** across **2K+ daily queries** | you, 2026-10-08 ("everything true") | confirmed |
 | **Today's version:** Node.js/TypeScript, MongoDB, Docker on an Oracle Cloud VM, Playwright automation, React console | the running system | confirmed |
 | Note: the 9-day figures (8.1K boards, 6.5K jobs, 2.2K resumes, 893 applications) are this database's window since 2026-09-29. The year totals above are the headline. Say which era a stack belongs to, so the two never read as a contradiction. | | |
+| **Built entirely by you, end to end:** Chrome extension, React console, job discovery and descriptions, resume tailoring, workers, Gmail sync, application automation | you, 2026-10-08 | confirmed |
+| Rule from you (2026-10-08): numbers from both eras are true; a product's numbers move over time, so either may be used, ideally saying which era | you | rule |

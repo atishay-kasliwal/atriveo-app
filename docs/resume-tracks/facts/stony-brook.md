@@ -18,3 +18,9 @@ The FOMC / financial intelligence platform. Bank entries AC-001…AC-026, AC-199
 | Production RAG (LangChain, Pinecone, AWS), 18% evaluation accuracy lift | bank AC-025 | confirmed |
 | Analysis APIs for 5 daily financial analysts | bank AC-020 | confirmed |
 | Title: "kind of an AI engineer and software engineer, a middle ground"; the current rule prints the applied-for title | you, 2026-10-08 | decision pending (see FDE notes) |
+| **You built the entire FOMC backend**, from the pipeline to everything else | you, 2026-10-08 | confirmed |
+| **API latency under 60 ms** | you, 2026-10-08 | confirmed |
+| **~200 users a day** on the platform (the 20–30 figure is the daily core of analysts and collaborators) | you, 2026-10-08 | confirmed |
+| Team of ~20–22 | you, 2026-10-08 | confirmed |
+| Service uptime ~94% | you, 2026-10-08 | confirmed. **Not for resumes:** 94% reads as low. |
+| **Title on SWE resumes: Software Engineer** (FDE: AI Engineer) | you, 2026-10-08 | decided |
