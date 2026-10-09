@@ -71,3 +71,29 @@ The blind test decides whether two are needed.
 - **Stony Brook title:** Software Engineer on SWE resumes.
 - **All numbers are true.** Earlier and current figures may both be used; name the era where two could look like a
   conflict.
+
+## 5. Result and how it ships (2026-10-08)
+
+**Test.** 30 SWE postings (10 full stack, 10 backend, 10 general), one per company, chosen with a fixed seed. The new
+set was compared blind with the previous SWE general resume, labels swapped between rounds.
+- **Round 1: 24/30.** It lost on Kafka streaming roles (the old resume had Kafka Streams state stores) and on
+  ML-flavoured roles (the old resume had the PyTorch 90%+ model).
+- **Round 2: 27/30 (90%).** Changes before it: Kafka Streams (AC-067) took the insurance slot, the PyTorch model
+  (AC-033) took the Wake Forest data slot, and "zero-bug" was dropped.
+- **Round 2 by kind:** 10/10 full stack, 9/10 backend, 8/10 general. The 3 losses were slight: a data-lake role and
+  two ML-evaluation roles.
+
+**The set** (`TRACKS.yaml` `tracks.software-engineer.pinned`):
+
+| Employer / project | Bullets |
+|---|---|
+| Stony Brook (title Software Engineer) | AC-211 backend (<60 ms, 200+ daily users), AC-019 3 days → 20 min, AC-003 ingestion APIs, AC-025 RAG |
+| Wake Forest | AC-047 React/TypeScript dashboard, AC-033 PyTorch 90%+, AC-031:production-ml 3 h → 2 min |
+| Accolite | AC-212 BT e-commerce end to end, AC-190 incident fix (100K+ BT users, P99 −40%), AC-191 CI/CD, AC-213 JUnit/PyTest 100% coverage standard, AC-183:swe ERP |
+| Atriveo | AC-214 built end to end (50K+ applications, 50K+ resumes in a year), AC-057 99.9% uptime (earlier FastAPI/PostgreSQL/Cloudflare version) |
+| Insurance | AC-067 Kafka Streams |
+
+**React variant: not needed yet.** The set won every full-stack posting. Add one only if real applications show a gap.
+
+**Watch.** The software-engineer track catches every "engineer" title not matched earlier, data engineers included.
+If data-engineering postings start losing, add a data variant (as FDE has its infrastructure variant).

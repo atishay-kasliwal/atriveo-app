@@ -100,7 +100,10 @@ export function employerTitle(roleSlug, headerTitle, doc = loadTracks()) {
     // Words only: "Forward-Deployed" and "forward deployed" match the same pattern.
     const words = (s) => ` ${String(s).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()} `;
     const pattern = (doc.stony_brook_title_patterns || []).find((p) => p?.match && words(role).includes(words(p.match)));
-    return pattern?.title ?? role;
+    if (pattern?.title) return pattern.title;
+    // The job's track may name Stony Brook's title on all its resumes (tracks.<id>.stony_brook_title).
+    const track = classifyTrack(headerTitle, doc);
+    return doc.tracks?.[track]?.stony_brook_title ?? role;
   }
   return doc.employer_titles?.[roleSlug] ?? null;
 }

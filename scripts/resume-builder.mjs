@@ -99,6 +99,8 @@ function layoutOf(bank) {
     projects: Object.fromEntries(projs.map((r) => [r, { name: labelOf(r), dates: resolveProjectMeta(r).dates, rank: ranked.indexOf(r) }])),
     sbTitleOverrides: loadTracks().stony_brook_title_overrides ?? {},
     sbTitlePatterns: loadTracks().stony_brook_title_patterns ?? [],
+    // Tracks in match order with their Stony Brook title, so the live preview names it as the PDF does.
+    sbTrackTitles: ((t) => (t.order || Object.keys(t.tracks || {})).map((id) => ({ patterns: t.tracks?.[id]?.title_patterns ?? [], exclude: t.tracks?.[id]?.exclude_patterns ?? [], title: t.tracks?.[id]?.stony_brook_title ?? null })))(loadTracks()),
   };
 }
 

@@ -1,0 +1,54 @@
+# SWE-only bullet (tracks: software-engineer), docs/resume-tracks/swe.md, 2026-10-08.
+id: AC-212
+role: accolite
+slot_kind: experience
+engineering_identity: platform
+achievement_theme: swe-bt-ecommerce
+display_order: 1
+wow_score: 0.85
+tracks:
+  - software-engineer
+metrics_claimed:
+  - transactions_10k_day
+concepts_claimed:
+  - full-stack
+  - payments
+signature_technologies:
+  - Java
+  - Spring Boot
+fact: >-
+  Built British Telecom's e-commerce platform end to end: multiple microservices, backend and frontend,
+  including the payment gateway; 10K+ daily transactions.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: SWE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 20
+  backend: 92
+  data: 50
+  cloud: 75
+  ml: 10
+  frontend: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Java
+  - Spring Boot
+  - Microservices
+  - Payments
+facets:
+  swe:
+    phrase: e-commerce platform
+    keywords:
+      - e-commerce
+      - payments
+      - full stack
+      - microservices
+variants:
+  - facet: swe
+    emphasis: swe
+    strength: 9
+    text: >-
+      Delivered British Telecom's e-commerce platform end to end, from Java and Spring Boot microservices to the
+      storefront and payment gateway, at 10K+ daily transactions.

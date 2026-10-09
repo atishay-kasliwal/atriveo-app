@@ -1,0 +1,52 @@
+# SWE-only bullet (tracks: software-engineer), docs/resume-tracks/swe.md, 2026-10-08.
+id: AC-213
+role: accolite
+slot_kind: experience
+engineering_identity: platform
+achievement_theme: swe-testing
+display_order: 4
+wow_score: 0.85
+tracks:
+  - software-engineer
+metrics_claimed:
+  - coverage_100
+concepts_claimed:
+  - testing
+  - quality
+signature_technologies:
+  - JUnit
+  - PyTest
+fact: >-
+  Unit tests for whole microservices in JUnit (Java) and PyTest (Python), held to a 100% code-coverage and
+  zero-bug standard.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: SWE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 10
+  backend: 85
+  data: 40
+  cloud: 50
+  ml: 10
+  frontend: 40
+strength:
+  recruiter: 9
+ats_keywords:
+  - JUnit
+  - PyTest
+  - Unit Testing
+facets:
+  swe:
+    phrase: unit testing
+    keywords:
+      - testing
+      - unit tests
+      - code quality
+      - test coverage
+variants:
+  - facet: swe
+    emphasis: swe
+    strength: 9
+    text: >-
+      Wrote JUnit and PyTest suites covering entire Java and Python microservices to a 100% code-coverage standard before every client release.

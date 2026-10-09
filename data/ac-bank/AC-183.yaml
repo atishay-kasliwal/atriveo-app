@@ -54,3 +54,12 @@ variants:
     text: >-
       Overhauled Oracle CRM into a React and MongoDB operations platform supporting onboarding, timesheets and
       performance workflows for 3,000 employees.
+  # SWE wording (docs/resume-tracks/swe.md), only on Software engineer resumes.
+  - facet: swe
+    emphasis: swe
+    strength: 9
+    tracks:
+      - software-engineer
+    text: >-
+      Overhauled Oracle CRM into an in-house React and MongoDB operations platform covering client onboarding,
+      employee onboarding and invoicing for 3,000 employees.

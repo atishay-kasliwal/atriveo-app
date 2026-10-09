@@ -70,6 +70,21 @@ tracks:
     label: Software engineer
     # Data engineer roles included. Accolite leads for full-stack work.
     title_patterns: ['engineer', 'developer', '\bsde\b', '\bswe\b', 'software', 'programmer', 'full.?stack', 'backend', 'frontend']
+    # Stony Brook's title on this track's resumes (2026-10-08, Atishay): Software Engineer, whatever the posting calls
+    # the role (Backend, Data, Full Stack...). Exact overrides and stony_brook_title_patterns come first.
+    stony_brook_title: Software Engineer
+    # The tested SWE set (docs/resume-tracks/swe.md: preferred on 27 of 30 SWE postings, 10/10 full stack, in a blind
+    # review against the previous SWE resume). Every software-engineer-track resume uses these; skills still tailor.
+    pinned:
+      experience:
+        stony-brook: [AC-211, AC-019, AC-003, AC-025]
+        wake-forest: [AC-047, AC-033, AC-031:production-ml]
+        accolite: [AC-212, AC-190, AC-191, AC-213, AC-183:swe]
+      projects:
+        atriveo: [AC-214, AC-057]
+        insurance-platform: [AC-067]
+      project_stacks:
+        atriveo: [React, TypeScript, Node.js, MongoDB, FastAPI, PostgreSQL]
 
 # Checked in this order; the first track whose pattern matches the job title wins.
 order: [forward-deployed, data-science, data-analytics, ai-engineer, software-engineer]

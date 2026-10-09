@@ -477,7 +477,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
     const L = loaded!.layout;
     if (s.kind === "project") return (L.projects[s.role]?.dates ?? "").replace(/--/g, "–");
     const r = L.roles[s.role];
-    const t = s.role === "stony-brook" ? sbTitle(title, L.sbTitleOverrides, L.sbTitlePatterns) : r?.title ?? "";
+    const t = s.role === "stony-brook" ? sbTitle(title, L.sbTitleOverrides, L.sbTitlePatterns, L.sbTrackTitles) : r?.title ?? "";
     return [t, (r?.dates ?? "").replace(/--/g, "–")].filter(Boolean).join(" · ");
   };
   const setStack = (si: number, role: string, v: string) => {

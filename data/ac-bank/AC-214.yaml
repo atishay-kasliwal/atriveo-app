@@ -1,0 +1,53 @@
+# SWE-only bullet (tracks: software-engineer), docs/resume-tracks/swe.md, 2026-10-08.
+id: AC-214
+role: atriveo
+slot_kind: project
+engineering_identity: platform
+achievement_theme: swe-founder
+display_order: 1
+wow_score: 0.85
+tracks:
+  - software-engineer
+metrics_claimed:
+  - applications_50k
+  - resumes_50k
+  - year_1
+concepts_claimed:
+  - full-stack
+  - product
+signature_technologies:
+  - React
+fact: >-
+  Built Atriveo entirely, end to end (Chrome extension, React console, job discovery, resume tailoring, workers,
+  Gmail sync, automation); 50K+ applications tracked and 50K+ tailored resumes over the year.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: SWE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 70
+  backend: 85
+  data: 70
+  cloud: 75
+  ml: 50
+  frontend: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - React
+  - Chrome Extension
+  - Full Stack
+facets:
+  swe:
+    phrase: founded product
+    keywords:
+      - full stack
+      - product
+      - end to end
+variants:
+  - facet: swe
+    emphasis: swe
+    strength: 9
+    text: >-
+      Founded Atriveo, building its Chrome extension, React console and job-discovery backend end to end to
+      track 50K+ applications and tailor 50K+ resumes in a year.

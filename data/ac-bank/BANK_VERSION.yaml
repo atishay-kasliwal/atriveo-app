@@ -1,4 +1,4 @@
-version: 59
+version: 60
 updated_at: "2026-10-08"
 note: "Harvard action verbs and unique resume openings; confirmed SBU/Wake Forest technology context. Resume scope remains Atriveo+Insurance."
 
@@ -9,3 +9,4 @@ validation_update: "Corrected all 12 production-ml variants for unique action ve
 production_ml_review: "v57: production-ml variants chosen only for production-ML / MLOps / healthcare-ML postings (distinctive facet keywords; they had replaced stronger originals on up to 62% of postings); slashes replaced with words; CI/CD and Lambda variants keep their metrics."
 fde_track: "v58: FDE-only bullets AC-200..AC-209 and fde wordings of AC-001, AC-004, AC-047 (tracks: [forward-deployed]); TRACKS.yaml pins the tested FDE set (docs/resume-tracks/fde.md)."
 fde_infrastructure: "v59: AC-210 and the FDE infrastructure set (TRACKS.yaml pinned_variants), used on postings with 6+ infrastructure signals."
+swe_track: "v60: SWE-only bullets AC-211..AC-214, AC-183 swe wording, AC-203 also on SWE; TRACKS.yaml pins the tested SWE set (docs/resume-tracks/swe.md)."

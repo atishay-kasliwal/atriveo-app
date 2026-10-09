@@ -1,0 +1,56 @@
+# SWE-only bullet (tracks: software-engineer), docs/resume-tracks/swe.md, 2026-10-08.
+id: AC-211
+role: stony-brook
+slot_kind: experience
+engineering_identity: platform
+achievement_theme: swe-backend
+display_order: 1
+wow_score: 0.85
+tracks:
+  - software-engineer
+metrics_claimed:
+  - users_200_day
+  - latency_60ms
+concepts_claimed:
+  - backend
+  - api
+signature_technologies:
+  - FastAPI
+  - Kafka
+  - AWS
+fact: >-
+  Built the FOMC platform's entire backend, from the pipeline to the APIs; API latency under 60 ms; ~200 users a
+  day; team of ~20.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: SWE fact interview, docs/resume-tracks/facts
+capabilities:
+  ai: 70
+  backend: 92
+  data: 80
+  cloud: 80
+  ml: 50
+  frontend: 40
+strength:
+  recruiter: 9
+ats_keywords:
+  - FastAPI
+  - Kafka
+  - AWS
+  - APIs
+facets:
+  swe:
+    phrase: backend services
+    keywords:
+      - backend
+      - api
+      - latency
+      - services
+variants:
+  - facet: swe
+    emphasis: swe
+    strength: 9
+    text: >-
+      Designed the FOMC platform's entire backend from Kafka ingestion to FastAPI services on AWS, serving 200+
+      daily users at under 60 ms API latency.
