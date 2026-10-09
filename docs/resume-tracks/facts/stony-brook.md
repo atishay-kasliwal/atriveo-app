@@ -29,3 +29,9 @@ The FOMC / financial intelligence platform. Bank entries AC-001…AC-026, AC-199
 | **Time-series forecasting** of results | you, 2026-10-08 | confirmed |
 | **Excel, advanced:** used extensively, unstructured data cleaning, detailed formulas | you, 2026-10-08 | confirmed |
 | SQL used | you, 2026-10-08 | confirmed |
+| Title on your DS resume: **Graduate Data Analyst** | your DS resume, 2026-10-08 | title option for DS/DA |
+| Python and SQL pipelines for ingestion, cleaning, transformation and analysis of **200K+ financial and text records** | your DS resume, 2026-10-08 | confirmed |
+| **67.7% forecasting accuracy** through statistical analysis and predictive modeling across market event windows | your DS resume, 2026-10-08 | confirmed (same as the 13-session 67.7%) |
+| **Forecasting accuracy +45%** and **manual research effort −90%** by integrating financial data with news, speeches and policy statements | your DS resume, 2026-10-08 | confirmed |
+| **Interactive R Shiny and Plotly dashboards** over 200K+ records spanning 7 years, for recurring analysis | your DS resume, 2026-10-08 | confirmed |
+| Tools: Python, R, SQL, Excel, Tableau, Power BI, statistical analysis | your DS resume, 2026-10-08 | confirmed |

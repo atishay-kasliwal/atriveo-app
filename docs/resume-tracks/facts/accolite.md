@@ -23,3 +23,8 @@ Bank entries AC-163…AC-198.
 | **A/B test on the in-house product (ERP):** users, leadership included, split into two groups, each on a different version; the best of both became the final product | you, 2026-10-08 | confirmed. **Group sizes and the deciding metric?** |
 | SQL used at Accolite | you, 2026-10-08 | confirmed |
 | R not used at Accolite (voice note: "for Acolyte, I have not done") | you, 2026-10-08 | **confirm** |
+| Title on your DS resume: **Senior Software Engineer** (other resumes: Senior Software Developer) | your DS resume, 2026-10-08 | title option |
+| **SQL-driven platforms for 3 Fortune 500 clients**, reporting and operations for 100K+ users | your DS resume, 2026-10-08 | confirmed |
+| **Reconciliation errors −90%**: automated transaction matching, validation, exception reporting | your DS resume, 2026-10-08 | confirmed |
+| **Power BI dashboards** for onboarding, timesheets and reviews, reporting for 3,000 employees | your DS resume, 2026-10-08 | confirmed |
+| Standardized SQL queries, KPI definitions and data-validation rules across business and engineering teams | your DS resume, 2026-10-08 | confirmed |

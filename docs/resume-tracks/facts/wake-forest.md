@@ -26,3 +26,9 @@ Facts only, each with its source and status. Bullets for any role are written fr
 | **R** used to build models | you, 2026-10-08 | confirmed |
 | **Excel, advanced:** cleaning and structuring unstructured data, detailed formulas | you, 2026-10-08 | confirmed |
 | SQL used | you, 2026-10-08 | confirmed |
+| Title on your DS resume: **AI and Data Analytics Intern** | your DS resume, 2026-10-08 | title option for DS/DA |
+| **Reconciled Epic patient records with 450+ MRI studies**: standardized validation, privacy controls, better completeness | your DS resume, 2026-10-08 | confirmed |
+| **Automated DICOM ingestion, cleaning and preprocessing**, manual preparation time −50% | your DS resume, 2026-10-08 | confirmed |
+| **500+ quantitative features from 450+ MRI scans** (PyRadiomics, N4ITK) for **stroke analysis** | your DS resume, 2026-10-08 | confirmed: a separate analysis from the 10K-study tumor platform |
+| **87% predictive accuracy**: trained and validated SVM, Random Forest, XGBoost and LightGBM, with SHAP | your DS resume, 2026-10-08 | confirmed: this is the algorithm comparison (A/B of models) |
+| Presented clinical trends and model findings to a 20-member team with R, ggplot2, Shiny | your DS resume, 2026-10-08 | confirmed |
