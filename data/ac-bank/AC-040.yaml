@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-040
 role: atriveo
 slot_kind: project
@@ -19,5 +20,4 @@ variants:
     emphasis: frontend
     strength: 6
     text: >-
-      Built a full-stack AI product with React dashboard and FastAPI backend on AWS,
-      shipping production features to 1K+ users.
+      Delivered Atriveo's React and TypeScript console on Cloudflare Pages with a Node API and Oracle-hosted MongoDB, giving one screen to review, approve and track each application.

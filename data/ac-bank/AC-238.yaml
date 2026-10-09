@@ -1,0 +1,41 @@
+# Atriveo apply engine (playatriveo), verified in code 2026-10-09.
+id: AC-238
+role: atriveo
+slot_kind: experience
+engineering_identity: data
+achievement_theme: apply-safety
+display_order: 19
+wow_score: 0.85
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies: []
+fact: "playatriveo src/application/safety: killSwitch, preSubmitValidator, sensitiveQuestionPolicy, finalFormCertification, formTrust, submissionPolicy."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Safety
+  - Automation
+facets:
+  apply:
+    phrase: apply-safety
+    keywords:
+      - safety
+      - automation
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Audited every automated application through 6 safety gates, from a kill switch and pre-submit validation to final-form certification, so no form leaves without a human check.

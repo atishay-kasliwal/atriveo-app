@@ -1,0 +1,48 @@
+# hushh Kai work at Stony Brook (confirmed by Atishay 2026-10-09: items 1-6 his), docs/resume-tracks/facts/stony-brook.md.
+id: AC-235
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: hushh-agent-interop
+display_order: 9
+wow_score: 0.85
+tracks:
+  - forward-deployed
+  - software-engineer
+  - ai-engineer
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - Google ADK
+  - A2A
+  - MCP
+fact: "Kai via Google ADK (adk_bridge/kai_agent.py), A2A compliance (verify_adk_a2a_compliance.py), MCP tools (mcp_modules/tools/kai_tools.py)."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Agents
+  - MCP
+facets:
+  hushh:
+    phrase: hushh-agent-interop
+    keywords:
+      - agents
+      - mcp
+variants:
+  - facet: hushh
+    emphasis: hushh
+    strength: 9
+    text: >-
+      Published the stock agent through Google ADK, A2A and MCP tool interfaces so other private agents could call its analysis inside a consent-scoped platform.

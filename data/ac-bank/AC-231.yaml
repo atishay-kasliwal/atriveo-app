@@ -1,0 +1,44 @@
+# AI-only bullet (tracks: ai-engineer), docs/resume-tracks/ai.md, 2026-10-09.
+id: AC-231
+role: wake-forest
+slot_kind: experience
+engineering_identity: data
+achievement_theme: ai-segmentation
+display_order: 1
+wow_score: 0.85
+tracks:
+  - ai-engineer
+metrics_claimed: []
+concepts_claimed:
+  - ai
+signature_technologies:
+  - PyTorch
+fact: "90%+ mask accuracy; ~99% physician agreement; still in the hospital workflow (FDE round)."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Machine Learning
+  - Computer Vision
+facets:
+  ai:
+    phrase: ai-segmentation
+    keywords:
+      - machine learning
+      - computer vision
+variants:
+  - facet: ai
+    emphasis: ai
+    strength: 9
+    text: >-
+      Validated a PyTorch tumor segmentation model at 90%+ mask accuracy and about 99% agreement with physician ground truth, which the hospital still runs in its clinical workflow.

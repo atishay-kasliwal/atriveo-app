@@ -1,0 +1,46 @@
+# AI-only bullet (tracks: ai-engineer), docs/resume-tracks/ai.md, 2026-10-09.
+id: AC-230
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: ai-gpt4o-eval
+display_order: 3
+wow_score: 0.85
+tracks:
+  - ai-engineer
+metrics_claimed: []
+concepts_claimed:
+  - ai
+signature_technologies:
+  - GPT-4o
+  - Whisper
+  - Pinecone
+fact: "FedTalk: GPT-4o vs SPY minute moves, 0.74 weighted F1, Whisper, Pinecone (facts/github.md)."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - LLM
+  - Evaluation
+facets:
+  ai:
+    phrase: ai-gpt4o-eval
+    keywords:
+      - llm
+      - evaluation
+variants:
+  - facet: ai
+    emphasis: ai
+    strength: 9
+    text: >-
+      Assessed GPT-4o LLM market-reaction predictions against minute-level SPY moves at 1, 5 and 10-minute windows, reaching 0.74 weighted F1 with Whisper transcripts and Pinecone retrieval.

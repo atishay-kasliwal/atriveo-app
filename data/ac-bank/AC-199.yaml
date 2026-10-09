@@ -36,6 +36,9 @@ ats_keywords:
   - NLP
   - sentiment analysis
 facets:
+  ai-track:
+    phrase: AI engineer wording
+    keywords: [llm, ai]
   ml:
     phrase: live MLOps inference
     keywords: [mlops, mlflow, hugging face, finbert, bedrock, inference, sentiment, nlp, gpu]
@@ -46,3 +49,11 @@ variants:
     text: >-
       Managed FinBERT sentiment models on AWS Bedrock A100 GPUs with MLflow, scoring 110+ Fed events
       yearly since 2019 as each press conference goes live.
+  - facet: ai-track
+    emphasis: ai
+    strength: 9
+    tracks:
+      - ai-engineer
+    signature_technologies: [FinBERT, AWS Bedrock, MLflow]
+    text: >-
+      Served FinBERT sentiment models on AWS Bedrock A100 GPUs behind FastAPI endpoints under 60 ms, monitoring runs in MLflow while scoring 110+ Fed events yearly.

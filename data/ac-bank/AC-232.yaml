@@ -1,0 +1,47 @@
+# hushh Kai work at Stony Brook (confirmed by Atishay 2026-10-09: items 1-6 his), docs/resume-tracks/facts/stony-brook.md.
+id: AC-232
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: hushh-data-pipeline
+display_order: 6
+wow_score: 0.85
+tracks:
+  - software-engineer
+  - data-science
+  - forward-deployed
+  - ai-engineer
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - Python
+fact: "hushh Kai fetchers: yfinance, Finnhub, Financial Modeling Prep, NewsAPI, SEC EDGAR (consent-protocol/hushh_mcp/operons/kai/fetchers.py)."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Data Pipelines
+  - Python
+facets:
+  hushh:
+    phrase: hushh-data-pipeline
+    keywords:
+      - data pipelines
+      - python
+variants:
+  - facet: hushh
+    emphasis: hushh
+    strength: 9
+    text: >-
+      Unified 5 market-data, news and SEC filing sources into one async Python pipeline feeding fundamental, sentiment and valuation agents in a stock analysis engine.

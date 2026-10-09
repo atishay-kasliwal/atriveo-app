@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-015
 role: atriveo
 slot_kind: project
@@ -25,5 +26,4 @@ variants:
     emphasis: cloud-serverless
     strength: 9
     text: >-
-      Shipped a production AI recommendation platform on AWS with FastAPI and React,
-      serving 1K+ users with automated deployment pipelines.
+      Shipped Atriveo's job recommendations to 1K users over a year, ranking fresh postings by skill fit and sponsorship signals in a React console backed by MongoDB.

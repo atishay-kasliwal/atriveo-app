@@ -55,7 +55,6 @@ variants:
     # This wording names the modelling tools, not the entry's Python.
     signature_technologies: [PyTorch, scikit-learn]
     text: >-
-      Forecasted patient outcomes at 6, 12 and 24 months with PyTorch and scikit-learn models, using
-      Anthropic Claude summaries of 10K+ similar patients' histories to guide treating physicians.
+      Forecasted stroke patients' functional outcomes at 6, 12 and 24 months with PyTorch and scikit-learn machine learning models, using Claude summaries of 10K+ similar patients from a 90-field thrombectomy registry.
 signature_technologies:
   - Python

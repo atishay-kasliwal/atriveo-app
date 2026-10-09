@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-016
 role: atriveo
 slot_kind: project
@@ -22,5 +23,4 @@ variants:
     emphasis: llm-ai
     strength: 8
     text: >-
-      Built LLM-powered personalization features in Python, increasing user engagement
-      with production inference APIs and evaluation benchmarks.
+      Matched application questions to each user's ranked story bank by domain and skill overlap, proposing answers that wait for human approval before any form is submitted.

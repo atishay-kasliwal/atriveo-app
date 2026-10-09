@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-061
 role: atriveo
 slot_kind: project
@@ -6,7 +7,8 @@ display_order: 11
 wow_score: 0.77
 metrics_claimed: []
 concepts_claimed: [postgres, sync, integration, api]
-signature_technologies: [FastAPI, PostgreSQL]
+signature_technologies:
+  - MongoDB
 fact: PostgreSQL schemas and FastAPI endpoints syncing application tracking with external tracker APIs.
 capabilities:
   backend: 88
@@ -28,5 +30,4 @@ variants:
     emphasis: backend
     strength: 8
     text: >-
-      Modeled PostgreSQL schemas and FastAPI APIs that synchronized centralized application tracking with
-      external job tracker integrations.
+      Modeled MongoDB collections for jobs, applications and resume queues with leased claims so 3 workers on 2 machines never build the same resume twice.

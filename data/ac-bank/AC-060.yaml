@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-060
 role: atriveo
 slot_kind: project
@@ -6,7 +7,7 @@ display_order: 10
 wow_score: 0.80
 metrics_claimed: []
 concepts_claimed: [bulk, queue, tailor, frontend]
-signature_technologies: [React]
+signature_technologies: []
 fact: React bulk tailor queue with streaming progress for multi-job resume generation via local AC pipeline.
 capabilities:
   frontend: 86
@@ -29,5 +30,4 @@ variants:
     emphasis: frontend
     strength: 8
     text: >-
-      Expanded resume generation to multiple job applications at once with a React bulk tailoring queue and
-      streaming progress feedback.
+      Expanded resume generation to many applications at once with a bulk tailoring queue streaming live progress to the console over server-sent events.

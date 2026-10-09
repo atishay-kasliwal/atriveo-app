@@ -36,10 +36,10 @@ accolite:
 atriveo:
   - React
   - TypeScript
-  - FastAPI
+  - Node.js
   - Python
-  - PostgreSQL
-  - LangChain
+  - MongoDB
+  - Claude
   - Cloudflare
 
 insurance-platform:

@@ -1,0 +1,45 @@
+# AI-only bullet (tracks: ai-engineer), docs/resume-tracks/ai.md, 2026-10-09.
+id: AC-228
+role: atriveo
+slot_kind: experience
+engineering_identity: data
+achievement_theme: ai-atriveo-llm
+display_order: 1
+wow_score: 0.85
+tracks:
+  - ai-engineer
+metrics_claimed: []
+concepts_claimed:
+  - ai
+signature_technologies:
+  - Claude
+  - Codex
+fact: "Code: scripts/resume-ai-provider.mjs (Claude/Codex CLIs, JSON schema, tools off, credentials stripped); truth-only fact bank; 50K+ resumes in a year."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - LLM
+  - Guardrails
+facets:
+  ai:
+    phrase: ai-atriveo-llm
+    keywords:
+      - llm
+      - guardrails
+variants:
+  - facet: ai
+    emphasis: ai
+    strength: 9
+    text: >-
+      Founded Atriveo, an LLM platform tailoring 50K+ resumes through secure, sandboxed Claude and Codex calls with JSON-schema outputs grounded in a verified fact bank so no claim is invented.

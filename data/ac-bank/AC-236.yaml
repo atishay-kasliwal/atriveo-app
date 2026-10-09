@@ -1,0 +1,45 @@
+# hushh Kai work at Stony Brook (confirmed by Atishay 2026-10-09: items 1-6 his), docs/resume-tracks/facts/stony-brook.md.
+id: AC-236
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: hushh-transparency
+display_order: 10
+wow_score: 0.85
+tracks:
+  - ai-engineer
+  - forward-deployed
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - FastAPI
+fact: "Kai debate engine: dissent capture, SSE agent_token streaming to the user; the user decides (debate_engine.py)."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Human-in-the-loop
+  - Agents
+facets:
+  hushh:
+    phrase: hushh-transparency
+    keywords:
+      - human-in-the-loop
+      - agents
+variants:
+  - facet: hushh
+    emphasis: hushh
+    strength: 9
+    text: >-
+      Presented all 3 agents' cases and dissent to users over FastAPI SSE streams before they decided, keeping a human in the loop on every buy-or-hold call.

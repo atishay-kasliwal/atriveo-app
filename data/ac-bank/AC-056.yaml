@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-056
 role: atriveo
 slot_kind: project
@@ -12,8 +13,7 @@ concepts_claimed:
   - batch
   - selection
   - evidence
-signature_technologies:
-  - Python
+signature_technologies: []
 fact: Evidence-based tailoring pipeline — role-specific resumes from 5K+ weekly JDs with automated bullet selection.
 capabilities:
   ai: 86
@@ -41,5 +41,4 @@ variants:
     emphasis: product
     strength: 9
     text: >-
-      Generated role-specific resumes from 5K+ weekly job descriptions with a Python evidence-based tailoring
-      pipeline and automated bullet selection.
+      Generated role-specific resumes for 5 role tracks, pinning a blind-tested bullet set per track that lifted ATS match from the 50s to the 80s across 500 postings.

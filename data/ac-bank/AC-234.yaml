@@ -1,0 +1,45 @@
+# hushh Kai work at Stony Brook (confirmed by Atishay 2026-10-09: items 1-6 his), docs/resume-tracks/facts/stony-brook.md.
+id: AC-234
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: hushh-api-security
+display_order: 8
+wow_score: 0.85
+tracks:
+  - software-engineer
+  - forward-deployed
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - FastAPI
+fact: "Kai tests: test_kai_auth_matrix, test_kai_chat_conversation_ownership, test_kai_agent_bounds_cwe400 (consent-protocol/tests)."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Security
+  - API Development
+facets:
+  hushh:
+    phrase: hushh-api-security
+    keywords:
+      - security
+      - api development
+variants:
+  - facet: hushh
+    emphasis: hushh
+    strength: 9
+    text: >-
+      Instituted ownership checks, an authorization test matrix and CWE-400 request bounds across the stock agent's FastAPI routes to keep each user's conversations secure.

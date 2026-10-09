@@ -31,6 +31,9 @@ ats_keywords:
   - Pinecone
   - AWS
 facets:
+  ai-track:
+    phrase: AI engineer wording
+    keywords: [llm, ai]
   default:
     phrase: production-rag
     keywords:
@@ -60,3 +63,11 @@ variants:
     text: >-
       Engineered production RAG and LLM workflows with LangChain and Pinecone on AWS, improving macro analysis
       evaluation accuracy by 18%.
+  - facet: ai-track
+    emphasis: ai
+    strength: 9
+    tracks:
+      - ai-engineer
+    signature_technologies: [LangChain, Pinecone]
+    text: >-
+      Engineered production RAG with LangChain and Pinecone over 7 years of FOMC history, lifting evaluation accuracy 18% and reaching 67.7% directional accuracy versus 50% chance across 13 live sessions.

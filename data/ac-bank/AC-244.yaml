@@ -1,0 +1,42 @@
+# Atriveo hub product, from its GitHub README (2026-10-09); numbers only from the repo.
+id: AC-244
+role: atriveo
+slot_kind: experience
+engineering_identity: data
+achievement_theme: hub-reel
+display_order: 25
+wow_score: 0.85
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - H.264
+fact: "atriveo-reel README: 1080x1920 30 fps H.264 via VideoToolbox; layouts Sequential, Top/Bottom, Take Turns, Side by Side; web, API, render worker on one Mac via Cloudflare Tunnel."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Video
+  - Self-hosting
+facets:
+  hub:
+    phrase: hub-reel
+    keywords:
+      - video
+      - self-hosting
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Utilized VideoToolbox H.264 encoding to turn two video links into 1080x1920 comparison reels in 4 layouts, self-hosting the web app, API and render worker on one Mac.

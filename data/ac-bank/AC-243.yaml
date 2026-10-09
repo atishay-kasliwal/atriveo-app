@@ -1,0 +1,42 @@
+# Atriveo hub product, from its GitHub README (2026-10-09); numbers only from the repo.
+id: AC-243
+role: atriveo
+slot_kind: experience
+engineering_identity: data
+achievement_theme: hub-capture
+display_order: 24
+wow_score: 0.85
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - Cloudflare
+fact: "atriveo-capture-agent README: enroll a device in under five minutes; capture plugins, sync, fleet health; Worker."
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Edge
+  - Sync
+facets:
+  hub:
+    phrase: hub-capture
+    keywords:
+      - edge
+      - sync
+variants:
+  - facet: default
+    emphasis: default
+    strength: 9
+    text: >-
+      Remodeled Cortex capture into a cross-platform agent that enrolls devices in under 5 minutes and syncs plugin captures to a Cloudflare Worker with fleet-health checks.

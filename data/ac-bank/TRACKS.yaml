@@ -26,6 +26,17 @@ tracks:
     # The fixed SWE keyword list (ATS_COVERAGE_MATRIX.yaml) caps LangChain, RAG and Python at
     # 2-4 mentions; an AI JD wants them repeated, so it doesn't steer bullet choice here.
     ats_matrix: false
+    # The AI set (2026-10-09, docs/resume-tracks/ai.md): what AI postings ask most (Python 80%, production 73%, LLMs
+    # 65%, agents 61%, latency 59%, evals 51%, APIs 50%, multimodal 49%, monitoring 45%). Skills still tailor.
+    pinned:
+      experience:
+        stony-brook: [AC-227, AC-025:ai-track, AC-230, AC-199:ai-track, AC-023:ai-track]
+        wake-forest: [AC-231, AC-202, AC-046:ai]
+        accolite: [AC-189, AC-190, AC-191]
+      projects:
+        atriveo: [AC-228, AC-229]
+      project_stacks:
+        atriveo: [Python, TypeScript, Claude, MongoDB, Node.js, Docker]
 
   data-science:
     label: Data science

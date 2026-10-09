@@ -27,6 +27,9 @@ ats_keywords:
   - Python
   - LangChain
 facets:
+  ai-track:
+    phrase: AI engineer wording
+    keywords: [llm, ai]
   default:
     phrase: multi-agent
     keywords:
@@ -56,3 +59,11 @@ variants:
     text: >-
       Orchestrated a Python and LangChain 3-agent reinforcement learning system across 30 S&P 500 stocks over 7,
       30 and 90-day forecasting windows, achieving 60% directional accuracy.
+  - facet: ai-track
+    emphasis: ai
+    strength: 9
+    tracks:
+      - ai-engineer
+    signature_technologies: [Gemini]
+    text: >-
+      Orchestrated Kai, a 3-agent stock analysis engine whose fundamental, sentiment and valuation agents debate over 2 rounds to a 70% consensus with Gemini at 60% directional accuracy.

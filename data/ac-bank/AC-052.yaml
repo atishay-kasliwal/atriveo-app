@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-052
 role: atriveo
 slot_kind: project
@@ -6,7 +7,9 @@ display_order: 3
 wow_score: 0.84
 metrics_claimed: [users_daily_1k]
 concepts_claimed: [dashboard, analytics, tracking, frontend]
-signature_technologies: [React, TypeScript]
+signature_technologies:
+  - React
+  - TypeScript
 fact: React and TypeScript dashboard centralizing application tracking, analytics, and timelines for 1K+ daily users.
 capabilities:
   frontend: 90
@@ -29,5 +32,4 @@ variants:
     emphasis: frontend
     strength: 9
     text: >-
-      Centralized application tracking, pipeline analytics, and job timelines for 1K+ daily users in a React
-      and TypeScript dashboard.
+      Centralized application tracking, pipeline analytics and job timelines for 1K users in a React and TypeScript dashboard.

@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-042
 role: atriveo
 slot_kind: project
@@ -6,7 +7,8 @@ display_order: 2
 wow_score: 0.96
 metrics_claimed: [jd_5k_weekly, pdf_one_page]
 concepts_claimed: [resume, compiler, beam, rcs, pdf, planner]
-signature_technologies: [Python]
+signature_technologies:
+  - Tectonic
 fact: Python resume compiler — beam search, RCS scoring, one-page PDFs; indexes 5K+ weekly JDs.
 capabilities:
   ai: 94
@@ -30,5 +32,4 @@ variants:
     emphasis: ai-product
     strength: 10
     text: >-
-      Shaped a Python resume compiler with planner-driven beam search and RCS scoring, auto-generating
-      one-page tailored PDFs from indexed job descriptions.
+      Shaped a resume compiler that composes one-page Tectonic PDFs from a 199-entry verified fact bank with beam search, contribution pruning and RCS scoring for each job description.

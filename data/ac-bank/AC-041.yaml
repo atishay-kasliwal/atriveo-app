@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-041
 role: atriveo
 slot_kind: project
@@ -19,5 +20,4 @@ variants:
     emphasis: cloud-serverless
     strength: 6
     text: >-
-      Launched serverless AI workflow automation on AWS Lambda and S3,
-      reducing manual processing time by 40% for production users.
+      Launched Cloudflare Workers functions for sign-in, application sync and resume relay, securing them with JWT sessions, Google OAuth and salted PBKDF2 passwords.

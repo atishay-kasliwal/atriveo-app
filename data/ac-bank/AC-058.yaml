@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-058
 role: atriveo
 slot_kind: project
@@ -28,5 +29,4 @@ variants:
     emphasis: product
     strength: 8
     text: >-
-      Identified response rates and hiring-stage bottlenecks with pipeline analytics, helping users prioritize
-      follow-ups across tracked applications.
+      Identified response rates and hiring-stage bottlenecks by classifying Gmail replies as applied, rejected or other and syncing each outcome to the tracker.

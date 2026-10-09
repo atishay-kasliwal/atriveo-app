@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-054
 role: atriveo
 slot_kind: project
@@ -6,7 +7,8 @@ display_order: 5
 wow_score: 0.86
 metrics_claimed: [daily_2k_queries]
 concepts_claimed: [rag, search, recommendations, ai]
-signature_technologies: [LangChain]
+signature_technologies:
+  - Node.js
 fact: LangChain RAG pipeline for contextual job search — 2K+ daily queries.
 capabilities:
   ai: 92
@@ -30,5 +32,4 @@ variants:
     emphasis: ai
     strength: 9
     text: >-
-      Retrieved context for 2K+ daily job-search queries with a LangChain RAG pipeline across indexed
-      applications.
+      Invented a deterministic Node.js ATS checker that parses resumes and job descriptions, scoring readiness and job match across 8 categories with evidence tiers so every score is explainable.

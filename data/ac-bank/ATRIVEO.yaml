@@ -19,18 +19,20 @@ product:
     Job seekers manually track applications across boards, lack pipeline visibility,
     and spend hours tailoring resumes per role without evidence-backed bullet selection.
   solution: >
-    Full-stack platform: open-source Chrome extension captures LinkedIn/Indeed listings;
-    React dashboard with application tracker; LangChain RAG powers search; FastAPI +
-    PostgreSQL backend; Python resume compiler (beam search, RCS, PDF gate) tailors
-    one-page resumes from 5K+ weekly indexed job descriptions.
-  users: 1K+ daily users
+    Full-stack platform (updated 2026-10-09 from the code): Chrome extension captures LinkedIn/Indeed listings and
+    syncs status from Gmail; React + TypeScript console on Cloudflare Pages (Workers functions, D1 sign-in with JWT,
+    Google OAuth, PBKDF2); Node API and MongoDB on an Oracle VM with Docker resume workers (leased claims); resume
+    compiler (beam search, RCS, Tectonic one-page gate) over a verified fact bank; deterministic ATS checker;
+    Playwright apply engine (Greenhouse, Ashby, Lever, Workday adapters, safety layer, never submits); Claude/Codex
+    structured outputs. 50K+ applications tracked and 50K+ resumes tailored in a year.
+  users: 1K users over a year (confirmed 2026-10-08; the older "1K+ daily" is superseded)
   deployment: Cloudflare Pages + Workers, Docker
   open_source: GitHub (Chrome extension + application tracker)
   stack:
     frontend: [React, TypeScript, Vite, TailwindCSS]
-    backend: [Python, FastAPI, PostgreSQL]
-    ai: [LangChain, RAG, beam search, RCS, planner]
-    infra: [Docker, Cloudflare Pages, Cloudflare Workers]
+    backend: [Node.js, MongoDB, Python]
+    ai: [Claude, Codex, beam search, RCS, planner, ATS checker]
+    infra: [Docker, Cloudflare Pages, Cloudflare Workers, Oracle Cloud, Playwright]
     extension: [Chrome Web Store]
     resume_engine: [Python, beam search, RCS, Tectonic PDF]
 
@@ -38,7 +40,9 @@ product:
 
 metrics:
   users:
-    daily_users: "1K+"
+    users_over_a_year: "1K"
+    applications_tracked_year: "50K+"
+    resumes_tailored_year: "50K+"
   traffic:
     daily_queries: "2K+"
   reliability:
@@ -56,14 +60,14 @@ metrics:
 # ── ATS tech coverage (spread across bullets) ───────────────────────────────
 
 ats_tech_coverage:
-  React: [AC-050, AC-052, AC-060]
-  TypeScript: [AC-052]
-  FastAPI: [AC-050, AC-053, AC-061]
-  PostgreSQL: [AC-053, AC-061]
-  Python: [AC-042, AC-056, AC-059, AC-062]
-  LangChain: [AC-054]
-  Cloudflare: [AC-057]
+  React: [AC-040, AC-052, AC-015]
+  TypeScript: [AC-040, AC-052]
+  Node.js: [AC-053]
+  MongoDB: [AC-053, AC-061, AC-015]
+  Python: [AC-059]
+  Cloudflare: [AC-057, AC-041]
   Docker: [AC-057]
+  Playwright: [AC-237]
 
 # ── Dynamic anchor routing (planner v2.json) ────────────────────────────────
 

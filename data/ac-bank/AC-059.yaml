@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-059
 role: atriveo
 slot_kind: project
@@ -6,7 +7,9 @@ display_order: 9
 wow_score: 0.79
 metrics_claimed: [jd_5k_weekly]
 concepts_claimed: [etl, indexing, linkedin, ats, ingestion]
-signature_technologies: [Python]
+signature_technologies:
+  - Python
+  - JobSpy
 fact: Python indexing pipeline processing 5K+ LinkedIn job descriptions each week for tailoring and ATS matching.
 capabilities:
   data: 88
@@ -28,5 +31,4 @@ variants:
     emphasis: data
     strength: 8
     text: >-
-      Cataloged 5K+ LinkedIn job descriptions each week with a Python indexing pipeline for offline resume
-      tailoring and ATS matching.
+      Cataloged fresh LinkedIn postings every hour with a Python JobSpy pipeline that filters for H-1B sponsorship and tech-stack fit before indexing them for tailoring.

@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-053
 role: atriveo
 slot_kind: project
@@ -6,7 +7,9 @@ display_order: 4
 wow_score: 0.82
 metrics_claimed: []
 concepts_claimed: [backend, api, postgres, tracker, sync]
-signature_technologies: [FastAPI, PostgreSQL]
+signature_technologies:
+  - Node.js
+  - MongoDB
 fact: FastAPI and PostgreSQL backend for application tracking, search APIs, and production data sync.
 capabilities:
   backend: 90
@@ -28,5 +31,4 @@ variants:
     emphasis: backend
     strength: 9
     text: >-
-      Implemented FastAPI and PostgreSQL services powering application tracking, search APIs, and production
-      data synchronization across the platform.
+      Implemented Node.js APIs over MongoDB on an Oracle VM powering application tracking, job search and resume queues, synced to the Cloudflare console through a token-authenticated relay.

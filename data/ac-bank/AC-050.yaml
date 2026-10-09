@@ -1,3 +1,4 @@
+# Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-050
 role: atriveo
 slot_kind: project
@@ -6,7 +7,8 @@ display_order: 1
 wow_score: 0.90
 metrics_claimed: [users_daily_1k, uptime_999]
 concepts_claimed: [platform, extension, dashboard, tailoring, tracker, production]
-signature_technologies: [React, FastAPI]
+signature_technologies:
+  - Chrome Extension
 fact: Job search automation platform — Chrome extension, tracking, resume tailoring; 1K+ daily users, 99.9% uptime.
 capabilities:
   frontend: 88
@@ -32,5 +34,4 @@ variants:
     emphasis: platform
     strength: 10
     text: >-
-      Founded a React and FastAPI job search platform with an integrated Chrome extension, serving 1K+ daily
-      users while automating application tracking and resume tailoring at 99.9% uptime.
+      Steered Atriveo from a Chrome extension tracker into a full job-search platform covering discovery, tailoring, applying and tracking across 50K+ applications in a year.

@@ -1,4 +1,4 @@
-version: 62
+version: 63
 updated_at: "2026-10-09"
 note: "Harvard action verbs and unique resume openings; confirmed SBU/Wake Forest technology context. Resume scope remains Atriveo+Insurance."
 
@@ -12,3 +12,4 @@ fde_infrastructure: "v59: AC-210 and the FDE infrastructure set (TRACKS.yaml pin
 swe_track: "v60: SWE-only bullets AC-211..AC-214, AC-183 swe wording, AC-203 also on SWE; TRACKS.yaml pins the tested SWE set (docs/resume-tracks/swe.md)."
 ds_track: "v61: DS-only bullets AC-215..AC-226 (tracks: [data-science]); TRACKS.yaml pins the tested DS set and an analytics set for BI-heavy DS postings (8+ signals); Stony Brook = Graduate Data Analyst, Wake Forest = AI and Data Analytics Intern on DS resumes (docs/resume-tracks/ds-da.md)."
 ats_round: "v62: ATS round (500-posting test, docs/resume-tracks): wording Atishay confirmed (cross-functional, distributed, JWT-secured, documented, machine learning, LLM) in AC-004/067/068/171/205/212/215/217/218/221/223; AC-057 swe-security variant; SWE systems-cpp set (InsureRaft) for C++ postings; confirmed skills: 18 tools, databases at all three employers, Agile/Scrum, AWS IAM, HIPAA, Claude, Databricks, Cursor, Cassandra, CloudWatch, Hadoop, .NET; not confirmed: C#, Go, Rust, Looker, OWASP, OpenTelemetry."
+ai_track: "v63: AI set pinned (AI ATS 72 to 84 on 100 postings, 80+ 19 to 67): AI-only AC-227..AC-231 and ai-track wordings of AC-023 (hushh Kai), AC-025, AC-199; AC-046 ai wording confirmed (stroke registry, Claude summaries); AC-202 also on AI. hushh Kai bullets AC-232..AC-236 (confirmed his; tested in SWE/FDE/AI/DS sets, each scored lower, so not pinned). Atriveo: 15 old entries rewritten from verified code (stack, 1K users over a year), AC-237/238 apply engine, AC-239..AC-245 hub products (Dance, Cortex, Bio, Capture, Reel, Dock); ATRIVEO.yaml and ROLE-ATS-TECH match the real stack."
