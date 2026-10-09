@@ -80,7 +80,9 @@ export function employerTitle(roleSlug, headerTitle, doc = loadTracks()) {
     if (!role) return null;
     const exact = doc.stony_brook_title_overrides?.[role];
     if (exact) return exact;
-    const pattern = (doc.stony_brook_title_patterns || []).find((p) => p?.match && role.toLowerCase().includes(String(p.match).toLowerCase()));
+    // Words only: "Forward-Deployed" and "forward deployed" match the same pattern.
+    const words = (s) => ` ${String(s).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()} `;
+    const pattern = (doc.stony_brook_title_patterns || []).find((p) => p?.match && words(role).includes(words(p.match)));
     return pattern?.title ?? role;
   }
   return doc.employer_titles?.[roleSlug] ?? null;

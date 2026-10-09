@@ -21,6 +21,7 @@ test('a track sees its own bullets; others and untracked titles never do', () =>
   for (const t of ['software-engineer', 'ai-engineer', 'data-science', 'data-analytics', null]) assert.equal(fdeOnly(bankForTrack(bank, t)).length, 0, String(t));
   assert.equal(classifyTrack('Forward Deployed Software Engineer - SF'), 'forward-deployed');
   assert.equal(employerTitle('stony-brook', 'Senior Forward Deployed Engineer'), 'AI Engineer');
+  assert.equal(employerTitle('stony-brook', 'Forward-Deployed Engineer'), 'AI Engineer');
 });
 
 test('an FDE title gets exactly the pinned set; a SWE title gets no FDE-only bullet', { timeout: 120_000 }, () => {

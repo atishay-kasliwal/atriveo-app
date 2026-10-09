@@ -28,7 +28,8 @@ const dates = (s: string) => esc(s).replace(/--/g, "–");
 const LEVEL_WORDS = /\b(?:senior|sr|staff|lead|principal|junior|jr|associate|entry level|new grad(?:uate)?|graduate|intern(?:ship)?|[ivx]+|\d+)\b\.?/gi;
 export const sbTitle = (title: string, overrides: Record<string, string>, patterns: Array<{ match: string; title: string }> = []) => {
   const role = title.replace(LEVEL_WORDS, " ").replace(/[\s,–—-]+$/, "").replace(/\s+/g, " ").trim();
-  return overrides[role] ?? patterns.find((p) => role.toLowerCase().includes(p.match.toLowerCase()))?.title ?? role;
+  const words = (s: string) => ` ${s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()} `;
+  return overrides[role] ?? patterns.find((p) => words(role).includes(words(p.match)))?.title ?? role;
 };
 
 const CSS = `
