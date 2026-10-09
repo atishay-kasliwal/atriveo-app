@@ -1,3 +1,4 @@
+import {Link} from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from "react";
 import CompanyLogo from "../components/CompanyLogo";
 import QuestionField from "./QuestionField";
@@ -139,19 +140,20 @@ export default function QuestionsPage({ header }: { header?: React.ReactNode }) 
         </div>
       </div>
       {(error || cardsError) && <p className="ar-error" role="alert">{error || cardsError}</p>}
+      {data && !rows.length && <div className="product-empty-actions"><Link className="apps-btn" to="/">Back to Today</Link><Link className="apps-btn" to="/staffing">Find more jobs</Link></div>}
       <main className="qs-columns" ref={list}>
         <section className="qs-col" aria-label="Asked by several jobs">
           <h2>Asked by several jobs <span className="apps-muted">answer once · saved for all of them and remembered</span></h2>
           <div className="qs-list">
             {shared.map(row)}
-            {!shared.length && <p className="apps-muted qs-empty">{apps.length ? "No question is shared by several jobs right now." : "Loading questions…"}</p>}
+            {!shared.length && <p className="apps-muted qs-empty">{(data && loading===0) ? "No question is shared by several jobs right now." : "Loading questions…"}</p>}
           </div>
         </section>
         <section className="qs-col" aria-label="Only for one job">
           <h2>Only for one job <span className="apps-muted">{single.length}</span></h2>
           <div className="qs-list">
             {single.map(row)}
-            {!single.length && <p className="apps-muted qs-empty">{apps.length ? "Nothing job-specific left." : "Loading questions…"}</p>}
+            {!single.length && <p className="apps-muted qs-empty">{(data && loading===0) ? "Nothing job-specific left." : "Loading questions…"}</p>}
           </div>
         </section>
       </main>

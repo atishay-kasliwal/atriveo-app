@@ -1,3 +1,4 @@
+import CardActions from './CardActions';
 import {useNavigate} from 'react-router-dom';
 import { useEffect, useRef, useState } from "react";
 import { getJson, when } from "./engine";
@@ -12,13 +13,15 @@ type Workspace = { jobs: Job[]; total: number; counts: Record<string, number> };
 type Status = { sources: Source[]; runs: Run[]; schedule: { label: string; next_at: string }; total_jobs: number };
 const LABELS: Record<string, string> = { access_pending: "Needs provider access", not_checked: "Not checked yet", running: "Checking", ready: "Jobs readable", needs_connector: "Needs connector", blocked: "Access blocked", failed: "Check failed" };
 
+function rememberedWorkspace(){try{const saved=JSON.parse(sessionStorage.getItem("atriveo-staffing-view")||"{}");return {view:["recommended","saved","applied","browse"].includes(saved.view)?saved.view:"recommended",offset:Number.isInteger(saved.offset)&&saved.offset>=0?saved.offset:0,query:typeof saved.query==="string"?saved.query:"",filter:typeof saved.filter==="string"?saved.filter:"all"};}catch{return {view:"recommended",offset:0,query:"",filter:"all"};}}
 export default function StaffingPage({ header }: { header?: React.ReactNode }) {
   const navigate=useNavigate();
+  const remembered=useRef(rememberedWorkspace());
   const refreshSequence = useRef(0);
   const dialogRef = useRef<HTMLElement>(null);
-  const [view, setView] = useState("recommended");
-  const [offset, setOffset] = useState(0);
-  const [query, setQuery] = useState("");
+  const [view, setView] = useState(remembered.current.view);
+  const [offset, setOffset] = useState(remembered.current.offset);
+  const [query, setQuery] = useState(remembered.current.query);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [detail, setDetail] = useState<Job | null>(null);
   const [preparing, setPreparing] = useState("");
@@ -28,8 +31,9 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState(remembered.current.filter);
   const [note, setNote] = useState("");
+  useEffect(()=>{try{sessionStorage.setItem("atriveo-staffing-view",JSON.stringify({view,offset,query,filter}));}catch{}},[view,offset,query,filter]);
   async function refresh() {
     const sequence = ++refreshSequence.current;
     try {
@@ -106,9 +110,9 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
     <nav className="staffing-views" aria-label="Job views">{[["recommended", "Recommended"], ["saved", "Saved"], ["applied", "Applied"], ["browse", "Browse all"]].map(([key, label]) => <button className={`apps-btn ${view === key ? "accent" : ""}`} aria-pressed={view === key} key={key} onClick={() => { setView(key); setOffset(0); setFilter("all"); setQuery(""); }}>{label} <small>{workspace?.counts[key] ?? "…"}</small></button>)}</nav>
     {view === "browse" && <div className="staffing-search"><input aria-label="Search jobs" placeholder="Search role, company, location" value={query} onChange={e => { setQuery(e.target.value); setOffset(0); }} /><select aria-label="Source" value={filter} onChange={e => { setFilter(e.target.value); setOffset(0); }}><option value="all">All sources</option>{sources.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}<option value="manual">Manually added</option></select></div>}
     <section className="staffing-shortlist" aria-label="Job shortlist">
-      {!workspace ? <p>Finding your matches…</p> : !selectedJobs.length ? <p className="apps-muted">{view === "recommended" ? "You’re caught up. Browse all jobs or add a posting you like." : "No jobs here yet."}</p> : selectedJobs.map(j => <article className="staffing-match" key={j._id}>
+      {!workspace ? <p>Finding your matches…</p> : !selectedJobs.length ? <p className="apps-muted">{view === "recommended" ? "You’re caught up. Browse all jobs or add a posting you like." : "No jobs here yet."}<span className="product-empty-actions"><button className="apps-btn" onClick={()=>{setView("browse");setOffset(0);}}>Browse jobs</button><button className="apps-btn" onClick={()=>setAdding(true)}>Add a job</button></span></p> : selectedJobs.map(j => <article className="staffing-match" key={j._id}>
         <div className="staffing-match-main"><button className="staffing-job-title" onClick={() => void inspect(j)}>{j.title}</button><p>{j.company} · {j.location || "Location not specified"}</p><div className="staffing-match-facts">{j.reasons.length > 0 && <span>Skills in posting: {j.reasons.join(" · ")}</span>}{j.warning && <span className="staffing-error">{j.warning}</span>}<small>{j.resume ? "✓ Resume ready" : "Resume needed"} · Found {when(j.first_seen_at)}</small></div></div>
-        <div className="staffing-match-actions">{j.state !== "applied" && <><button className="rv-primary" disabled={Boolean(preparing) || busy} onClick={() => void (j.resume ? open(j) : prepare(j))}>{preparing === j._id ? "Preparing…" : j.resume ? "Open & Fill" : "Create resume"}</button><div><button className="apps-link" disabled={busy} onClick={() => void decide(j, j.state === "saved" ? "new" : "saved")}>{j.state === "saved" ? "Unsave" : "Save"}</button><button className="apps-link" disabled={busy} onClick={() => void decide(j, "passed")}>Pass</button><button className="apps-link" disabled={busy} onClick={() => void decide(j, "applied")}>Mark applied</button></div></>}{j.resume && <a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(j.resume)}&dl=1`}>Download resume</a>}<button className="apps-btn staffing-ai-review" disabled={Boolean(preparing)||busy} onClick={()=>void reviewWithAi(j)} title={j.resume?"Review this resume against the job description":"Create this job’s resume, then review it with AI"}>✦ Review with AI</button></div>
+        <div className="staffing-match-actions">{j.state !== "applied" && <button className="rv-primary" disabled={Boolean(preparing)||busy} onClick={()=>void(j.resume?open(j):prepare(j))}>{preparing===j._id?"Preparing resume…":j.resume?"Open & Fill":"Create resume"}</button>}<button className="apps-btn staffing-ai-review" disabled={Boolean(preparing)||busy} onClick={()=>void reviewWithAi(j)}>✦ Review with AI</button>{preparing===j._id&&<p className="card-action-note" role="status">Creating your resume. This card updates when it is ready.</p>}{!j.resume&&!preparing&&<p className="card-action-note">AI review creates this job’s resume first.</p>}<CardActions>{j.state!=="applied"&&<><button className="apps-link" disabled={busy} onClick={()=>void decide(j,j.state==="saved"?"new":"saved")}>{j.state==="saved"?"Unsave job":"Save job"}</button><button className="apps-link" disabled={busy} onClick={()=>void decide(j,"passed")}>Pass</button><button className="apps-link" disabled={busy} onClick={()=>void decide(j,"applied")}>Mark applied</button></>}{j.resume&&<a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(j.resume)}&dl=1`}>Download saved resume</a>}<button className="apps-link" onClick={()=>void inspect(j)}>View job details</button></CardActions></div>
       </article>)}
     </section>
     {workspace && workspace.total > 10 && <div className="staffing-pagination"><button className="apps-btn" disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - 10))}>Previous</button><small>{offset + 1}–{Math.min(offset + 10, workspace.total)} of {workspace.total}</small><button className="apps-btn" disabled={offset + 10 >= workspace.total} onClick={() => setOffset(offset + 10)}>Next ten →</button></div>}

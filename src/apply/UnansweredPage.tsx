@@ -136,7 +136,7 @@ export default function UnansweredPage({ header }: { header?: React.ReactNode })
 
   return <div className="rv-page application-workspace">
     {header}
-    <div className="ar-toolbar"><div><span className="ar-eyebrow">APPLICATION REVIEW</span><h1>One company. One complete form.</h1></div><div className="ar-toolbar-actions"><span>{data?.counts.unanswered ?? "…"} applications{data?.counts.reviewComplete ? ` · ${data.counts.reviewComplete} ready to fill and verify` : ""}</span><button className="apps-btn" disabled={loading || busy} onClick={() => void refreshUnanswered()}>{loading ? "Updating…" : "Refresh"}</button><button className="apps-btn" aria-pressed={manage} onClick={() => setManage(!manage)}>Manage queue</button></div></div>
+    <div className="ar-toolbar"><div><span className="ar-eyebrow">APPLICATION REVIEW</span><h1>Review your application</h1></div><div className="ar-toolbar-actions"><span>{data?.counts.unanswered ?? "…"} applications{data?.counts.reviewComplete ? ` · ${data.counts.reviewComplete} ready to fill and verify` : ""}</span><button className="apps-btn" disabled={loading || busy} onClick={() => void refreshUnanswered()}>{loading ? "Updating…" : "Refresh"}</button><button className="apps-btn" aria-pressed={manage} onClick={() => setManage(!manage)}>Manage queue</button></div></div>
     {(error || cardsError) && <p className="ar-error" role="alert">{error || cardsError}</p>}
     <main className="ar-workspace">
       <aside className="ar-queue" aria-label="Application list">

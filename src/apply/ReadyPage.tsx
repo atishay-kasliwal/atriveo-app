@@ -230,14 +230,14 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
 
       <main className="rv-main">
         <DiscardApplications selected={discardSelected} disabled={busy} onDone={async () => { setDiscardSelected([]); await refreshReady(); }} />
-        {error && !data && <p className="apps-error">Couldn't load: {error}. The Mac sidecar must be running (npm run tailor:restart).</p>}
+        {error && !data && <p className="apps-error">Couldn't load: {error}. Please retry the connection. <button className="apps-btn" onClick={()=>void refreshReady()}>Retry</button></p>}
         {!data && !error && <p className="apps-muted rv-wait">Loading the applications ready to submit…</p>}
         {data && (
           <div className={`rv-split ${showDetail && selected ? "is-detail" : ""}`}>
             <aside className="rv-list" aria-label="Ready to submit">
               {rows.length === 0 && !(data.inBrowser ?? []).length && (
                 <div className="rv-empty">
-                  <strong>Nothing is waiting for your approval.</strong>
+                  <strong>Nothing is waiting for your approval.</strong><Link to="/">Back to Today →</Link>
                   {data.counts.unanswered > 0 && <Link to="/unanswered">{data.counts.unanswered} application{data.counts.unanswered === 1 ? " needs" : "s need"} answers →</Link>}
                 </div>
               )}

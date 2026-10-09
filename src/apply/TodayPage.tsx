@@ -1,3 +1,4 @@
+import CardActions from './CardActions';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OpenFillQueue from "./OpenFillQueue";
@@ -459,6 +460,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {item.kind === "answer" && <button className="rv-primary" disabled={isBusy} onClick={() => cards[item.id] ? setAnswering(item.id) : navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer {item.toAnswer ?? ""}</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
           {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}
+          {item.resumeReady !== false ? <Link className="apps-btn td-ai-review" to={`/resume_builder?${item.kind === "linkedin" ? `job=${encodeURIComponent(item.id)}` : `app=${encodeURIComponent(item.id)}`}&ai=review`}>✦ Review with AI</Link> : <button className="apps-btn td-ai-review" disabled title="A resume needs to be created before AI can review it">✦ Review with AI</button>}
+          {item.resumeReady === false && <p className="card-action-note">{etaLabel(item.resumeEta).text}. AI review becomes available when your resume is ready.</p>}
+          <CardActions>
           {item.kind === "approve" && ["greenhouse", "ashby", "lever", "workday"].includes(item.ats ?? "") && <button className="apps-btn" disabled={isBusy} onClick={() => void openFill(item)}>Open & Fill</button>}
           <div className="td-review-links">
             {(item.kind === "approve" || item.kind === "you_submit") && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Answers</button>}
@@ -468,12 +472,12 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
             {item.kind === "linkedin" && <button className="td-ghost td-applied" disabled={isBusy} onClick={() => void markApplied(item)}><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round"/></svg>Mark applied</button>}
             {item.url && item.kind !== "linkedin" && <a className="apps-btn" href={item.url} target="_blank" rel="noreferrer">Job ↗</a>}
           </div>
-          {item.resumeReady !== false ? <Link className="apps-btn td-ai-review" to={`/resume_builder?${item.kind === "linkedin" ? `job=${encodeURIComponent(item.id)}` : `app=${encodeURIComponent(item.id)}`}&ai=review`}>✦ Review with AI</Link> : <button className="apps-btn td-ai-review" disabled title="A resume needs to be created before AI can review it">✦ Review with AI</button>}
           <div className="td-links">
             <button className="apps-link" disabled={isBusy} onClick={() => later_(item)}>Later</button>
             {(item.kind === "approve" || item.kind === "you_submit") && <Link to={`/ready?app=${encodeURIComponent(item.id)}`}>Details</Link>}
             <button className="apps-link td-discard" disabled={isBusy} onClick={() => void discard([item.id])}>Discard</button>
           </div>
+          </CardActions>
         </footer>
       </article>
     );
@@ -554,7 +558,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       <main className="td-grid" style={mobile ? undefined : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}>
         {loading && <div className="td-empty">Loading your applications…</div>}
         {!loading && !items.length && everything.length > 0 && <div className="td-empty"><strong>{words.length && !found.length ? `No company or role matches “${query.trim()}”.` : "Nothing here for this filter."}</strong>{words.length > 0 && !found.length && <span>Skipped companies stay hidden; jobs you already applied to or discarded aren't on Today.</span>}<button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all", query: "" })}>Show everything</button></div>}
-        {!loading && !everything.length && <div className="td-empty"><strong>Nothing is waiting for you.</strong><span>New applications show up here once their questions are collected.</span></div>}
+        {!loading && !everything.length && <div className="td-empty"><strong>Nothing is waiting for you.</strong><span>New applications show up here once their questions are collected.</span><Link className="apps-btn" to="/staffing">Find more jobs</Link></div>}
         {shown.map((item, index) => card(item, index))}
       </main>
       <div className="td-bottom">
