@@ -28,5 +28,4 @@ variants:
     emphasis: data-pipeline
     strength: 9
     text: >-
-      Compiled insurance events into a 3-node Elasticsearch cluster with a Kafka consumer service for
-      low-latency policy search and retrieval.
+      Compiled insurance events into a 3-node Elasticsearch cluster through a Kafka consumer service, serving policy search via a Spring Boot REST API with HATEOAS and OpenAPI.

@@ -1,5 +1,8 @@
 id: AC-102
 role: bayesian-mmm
+# Merged 2026-10-09 into AC-093 (no separate result): hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: end-to-end-workflow
 display_order: 10

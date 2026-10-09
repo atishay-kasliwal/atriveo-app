@@ -1,5 +1,8 @@
 id: AC-069
 role: insurance-platform
+# Merged 2026-10-09 into AC-063 (no separate result): hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: service-discovery-config
 display_order: 7

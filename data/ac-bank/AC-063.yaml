@@ -30,5 +30,4 @@ variants:
     emphasis: platform
     strength: 10
     text: >-
-      Conceived an event-driven insurance microservices platform on Java and Kafka, transferring policy data
-      from third-party providers to a payment gateway across 8 services.
+      Conceived an event-driven insurance platform of 8 Java and Kafka microservices with CQRS, Avro schemas and Eureka discovery, moving policy data from third-party providers to a payment gateway.
