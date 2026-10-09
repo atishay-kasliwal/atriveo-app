@@ -100,7 +100,7 @@ function layoutOf(bank) {
     sbTitleOverrides: loadTracks().stony_brook_title_overrides ?? {},
     sbTitlePatterns: loadTracks().stony_brook_title_patterns ?? [],
     // Tracks in match order with their Stony Brook title, so the live preview names it as the PDF does.
-    sbTrackTitles: ((t) => (t.order || Object.keys(t.tracks || {})).map((id) => ({ patterns: t.tracks?.[id]?.title_patterns ?? [], exclude: t.tracks?.[id]?.exclude_patterns ?? [], title: t.tracks?.[id]?.stony_brook_title ?? null })))(loadTracks()),
+    sbTrackTitles: ((t) => (t.order || Object.keys(t.tracks || {})).map((id) => ({ patterns: t.tracks?.[id]?.title_patterns ?? [], exclude: t.tracks?.[id]?.exclude_patterns ?? [], title: t.tracks?.[id]?.stony_brook_title ?? null, employers: t.tracks?.[id]?.employer_titles ?? {} })))(loadTracks()),
   };
 }
 

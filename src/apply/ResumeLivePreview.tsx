@@ -17,7 +17,7 @@ export interface Layout {
   /** A header title containing `match` prints `title` at Stony Brook (TRACKS.yaml stony_brook_title_patterns). */
   sbTitlePatterns?: Array<{ match: string; title: string }>;
   /** Tracks in match order (TRACKS.yaml): the first whose patterns match the header title sets Stony Brook's title. */
-  sbTrackTitles?: Array<{ patterns: string[]; exclude: string[]; title: string | null }>;
+  sbTrackTitles?: Array<{ patterns: string[]; exclude: string[]; title: string | null; employers?: Record<string, string> }>;
 }
 /** si: the section's place in the editor, so a line on the page maps back to it. */
 export interface PreviewSection { si: number; role: string; kind: "experience" | "project"; bullets: Array<{ text: string }>; tools?: string[] }
@@ -28,6 +28,12 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 const dates = (s: string) => esc(s).replace(/--/g, "–");
 // As ac-tracks.employerTitle: Stony Brook shows the header title without seniority words.
 const LEVEL_WORDS = /\b(?:senior|sr|staff|lead|principal|junior|jr|associate|entry level|new grad(?:uate)?|graduate|intern(?:ship)?|[ivx]+|\d+)\b\.?/gi;
+/** The first track (TRACKS.yaml order) whose title patterns match the header title. */
+const trackFor = (title: string, tracks: Layout["sbTrackTitles"] = []) => {
+  const hit = (ps: string[]) => ps.some((p) => new RegExp(p, "i").test(title));
+  return tracks.find((t) => hit(t.patterns) && !hit(t.exclude));
+};
+
 export const sbTitle = (title: string, overrides: Record<string, string>, patterns: Array<{ match: string; title: string }> = [], tracks: Array<{ patterns: string[]; exclude: string[]; title: string | null }> = []) => {
   const role = title.replace(LEVEL_WORDS, " ").replace(/[\s,–—-]+$/, "").replace(/\s+/g, " ").trim();
   const words = (s: string) => ` ${s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()} `;
@@ -74,7 +80,8 @@ function resumeHtml(layout: Layout, p: { title: string; email: string; city: str
     .sort((a, b) => (layout.roles[b.role]?.order ?? 0) - (layout.roles[a.role]?.order ?? 0))
     .map((s) => {
       const m = layout.roles[s.role] ?? { name: s.role, dates: "", place: "", order: 0, title: null };
-      const title = s.role === "stony-brook" ? sbTitle(p.title, layout.sbTitleOverrides, layout.sbTitlePatterns, layout.sbTrackTitles) : m.title ?? "";
+      const title = s.role === "stony-brook" ? sbTitle(p.title, layout.sbTitleOverrides, layout.sbTitlePatterns, layout.sbTrackTitles)
+        : trackFor(p.title, layout.sbTrackTitles)?.employers?.[s.role] ?? m.title ?? "";
       return `<div class="entry"><div class="row" data-s="${s.si}"><span class="head"><b>${esc(m.name)}</b>${s.tools?.length ? ` | <em class="tools">${esc(s.tools.join(", "))}</em>` : ""}</span><span>${dates(m.dates)}</span></div>
         <div class="row sub" data-s="${s.si}"><span>${esc(title)}</span><span>${esc(m.place)}</span></div>
         ${items(s)}</div>`;

@@ -1,0 +1,47 @@
+# DS-only bullet (tracks: data-science), docs/resume-tracks/ds-da.md, 2026-10-08.
+id: AC-216
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: ds-ab-signals
+display_order: 2
+wow_score: 0.85
+tracks:
+  - data-science
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - Python
+fact: >-
+  A/B test of prediction models: financial-only vs with news, speeches, policy statements; +45% forecasting
+  accuracy, -90% manual research effort (your DS resume; you: A/B tests of prediction models).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - A/B Testing
+  - Forecasting
+facets:
+  ds:
+    phrase: ds-ab-signals
+    keywords:
+      - a/b testing
+      - forecasting
+variants:
+  - facet: ds
+    emphasis: ds
+    strength: 9
+    text: >-
+      Increased forecasting accuracy 45% by A/B testing Python models trained on financial data alone against
+      versions adding news, speeches and policy statements, cutting manual analysis effort 90%.

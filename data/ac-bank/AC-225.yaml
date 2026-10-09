@@ -1,0 +1,44 @@
+# DS-only bullet (tracks: data-science), docs/resume-tracks/ds-da.md, 2026-10-08.
+id: AC-225
+role: atriveo
+slot_kind: project
+engineering_identity: data
+achievement_theme: ds-matching
+display_order: 1
+wow_score: 0.85
+tracks:
+  - data-science
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies: []
+fact: >-
+  Atriveo built end to end; 50K+ applications and 50K+ tailored resumes in a year; JD skill matching and a
+  scored evidence planner (the system's own code).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Machine Learning
+facets:
+  ds:
+    phrase: ds-matching
+    keywords:
+      - machine learning
+variants:
+  - facet: ds
+    emphasis: ds
+    strength: 9
+    text: >-
+      Founded Atriveo, matching 50K+ job applications to tailored resumes in a year with job-description skill
+      scoring and a planner that selects evidence for each posting.

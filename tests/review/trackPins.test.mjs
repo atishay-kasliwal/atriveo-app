@@ -26,7 +26,9 @@ test('a track sees its own bullets; others and untracked titles never do', () =>
   assert.equal(employerTitle('stony-brook', 'Forward-Deployed Engineer'), 'AI Engineer');
   // SWE-track titles print Software Engineer at Stony Brook; other tracks keep their own rule.
   for (const t of ['Backend Software Engineer', 'Data Engineer', 'Senior Full Stack Developer', 'Software Engineer II']) assert.equal(employerTitle('stony-brook', t), 'Software Engineer', t);
-  assert.equal(employerTitle('stony-brook', 'Data Scientist'), 'Data Scientist (Research)');
+  // DS-track titles print Graduate Data Analyst at Stony Brook and the analytics intern title at Wake Forest.
+  for (const t of ['Data Scientist', 'Senior Data Scientist II']) assert.equal(employerTitle('stony-brook', t), 'Graduate Data Analyst', t);
+  assert.equal(employerTitle('wake-forest', 'Data Scientist'), 'AI and Data Analytics Intern');
   assert.equal(employerTitle('stony-brook', 'Machine Learning Engineer'), 'Machine Learning Engineer');
 });
 
@@ -54,4 +56,17 @@ test('an FDE title gets exactly the pinned set; a SWE title gets no FDE-only bul
   const ai = generateResume({ jd: jd('ai-engineer'), meta: { title: 'AI Engineer', company: 'Test' } });
   assert.equal(ai.result.pinned_track, undefined);
   assert.equal(ids(ai.result.composition).filter((x) => /^AC-2[01]\d$|:fde$|:swe$/.test(x)).length, 0);
+});
+
+test('a DS title gets the DS set; a BI-heavy DS posting gets the analytics set', { timeout: 120_000 }, () => {
+  const ds = generateResume({ jd: jd('data-science'), meta: { title: 'Data Scientist', company: 'Test' } });
+  assert.equal(ds.result.pinned_track, 'data-science');
+  assert.equal(ds.result.pinned_set, 'default');
+  const dsIds = ids(ds.result.composition);
+  assert.ok(['AC-215', 'AC-218', 'AC-222', 'AC-225'].every((x) => dsIds.includes(x)));
+  assert.equal(dsIds.filter((x) => /^AC-2(0\d|1[0-4])$|:fde$|:swe$/.test(x)).length, 0, 'no FDE or SWE bullet on a DS resume');
+  const biJd = `${jd('data-science')}\nOwn operational reporting and KPIs: build Power BI and Tableau dashboards and visualizations, monitor data quality and trends, write SQL and present metrics to stakeholders.`;
+  const bi = generateResume({ jd: biJd, meta: { title: 'Operations Data Scientist', company: 'Test' } });
+  assert.equal(bi.result.pinned_set, 'analytics');
+  assert.ok(ids(bi.result.composition).includes('AC-226') && ids(bi.result.composition).includes('AC-190'));
 });

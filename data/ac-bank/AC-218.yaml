@@ -1,0 +1,49 @@
+# DS-only bullet (tracks: data-science), docs/resume-tracks/ds-da.md, 2026-10-08.
+id: AC-218
+role: wake-forest
+slot_kind: experience
+engineering_identity: data
+achievement_theme: ds-stroke-models
+display_order: 1
+wow_score: 0.85
+tracks:
+  - data-science
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - XGBoost
+  - LightGBM
+  - SHAP
+fact: >-
+  Stroke MRI outcome prediction (Wake Forest CAIR x Atrium Health): 500+ radiomic features, 450+ scans, 87%
+  accuracy, SHAP; feature models beat a clinical-variables-only baseline (Research-Cohorts report).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Machine Learning
+  - Predictive Modeling
+facets:
+  ds:
+    phrase: ds-stroke-models
+    keywords:
+      - machine learning
+      - predictive modeling
+variants:
+  - facet: ds
+    emphasis: ds
+    strength: 9
+    text: >-
+      Evaluated SVM, Random Forest and XGBoost against LightGBM on 500+ radiomic features from 450+ MRI scans,
+      reaching 87% predictive accuracy over a clinical-only baseline with SHAP explanations.

@@ -1,0 +1,46 @@
+# DS-only bullet (tracks: data-science), docs/resume-tracks/ds-da.md, 2026-10-08.
+id: AC-223
+role: accolite
+slot_kind: experience
+engineering_identity: data
+achievement_theme: ds-sql-kpi
+display_order: 2
+wow_score: 0.85
+tracks:
+  - data-science
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - SQL
+  - Power BI
+fact: >-
+  Standardized SQL queries, KPI definitions, data-validation rules; SQL-driven platforms for 3 Fortune 500 clients, 100K+ users; Power BI dashboards for onboarding, timesheets, reviews for 3,000 employees (your DS resume).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - SQL
+  - KPIs
+facets:
+  ds:
+    phrase: ds-sql-kpi
+    keywords:
+      - sql
+      - kpis
+variants:
+  - facet: ds
+    emphasis: ds
+    strength: 9
+    text: >-
+      Standardized SQL queries and KPI definitions for 3 Fortune 500 clients serving 100K+ users, then designed Power BI dashboards tracking onboarding and timesheets for 3,000 employees.

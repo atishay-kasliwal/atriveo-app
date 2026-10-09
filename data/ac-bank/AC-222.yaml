@@ -1,0 +1,44 @@
+# DS-only bullet (tracks: data-science), docs/resume-tracks/ds-da.md, 2026-10-08.
+id: AC-222
+role: accolite
+slot_kind: experience
+engineering_identity: data
+achievement_theme: ds-ab-ui
+display_order: 1
+wow_score: 0.85
+tracks:
+  - data-science
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies: []
+fact: >-
+  A/B test: ~10,000 in-house users in two groups on two UI designs; feedback; final design combined both;
+  features tested with leadership the same way (you, 2026-10-08).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - A/B Testing
+facets:
+  ds:
+    phrase: ds-ab-ui
+    keywords:
+      - a/b testing
+variants:
+  - facet: ds
+    emphasis: ds
+    strength: 9
+    text: >-
+      Tested two interface designs across about 10K in-house users split into two cohorts, merging the elements
+      each group preferred into the final ERP platform.

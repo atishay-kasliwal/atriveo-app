@@ -1,5 +1,5 @@
-version: 60
-updated_at: "2026-10-08"
+version: 61
+updated_at: "2026-10-09"
 note: "Harvard action verbs and unique resume openings; confirmed SBU/Wake Forest technology context. Resume scope remains Atriveo+Insurance."
 
 user_update: "Added 12 user-provided Deloitte production ML and data-workflow variants; existing variants retained."
@@ -10,3 +10,4 @@ production_ml_review: "v57: production-ml variants chosen only for production-ML
 fde_track: "v58: FDE-only bullets AC-200..AC-209 and fde wordings of AC-001, AC-004, AC-047 (tracks: [forward-deployed]); TRACKS.yaml pins the tested FDE set (docs/resume-tracks/fde.md)."
 fde_infrastructure: "v59: AC-210 and the FDE infrastructure set (TRACKS.yaml pinned_variants), used on postings with 6+ infrastructure signals."
 swe_track: "v60: SWE-only bullets AC-211..AC-214, AC-183 swe wording, AC-203 also on SWE; TRACKS.yaml pins the tested SWE set (docs/resume-tracks/swe.md)."
+ds_track: "v61: DS-only bullets AC-215..AC-226 (tracks: [data-science]); TRACKS.yaml pins the tested DS set and an analytics set for BI-heavy DS postings (8+ signals); Stony Brook = Graduate Data Analyst, Wake Forest = AI and Data Analytics Intern on DS resumes (docs/resume-tracks/ds-da.md)."

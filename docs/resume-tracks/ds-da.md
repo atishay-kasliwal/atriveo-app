@@ -94,3 +94,35 @@ scientist 167, ML scientist 33, research scientist 15.
    business impact.
 5. **Titles:** Stony Brook on DS resumes already prints "Data Scientist (Research)". DA needs a decision, since your
    work there wasn't an analyst role; "Data Analyst" at Stony Brook would be a stretch.
+
+## 6. The DS set (shipped 2026-10-08)
+
+Your direction changed parts of section 5: stretch framing is allowed for DS/DA; R, SQL, Excel, Tableau, Power BI and
+A/B testing are confirmed (facts/skills.md); Stony Brook prints **Graduate Data Analyst** and Wake Forest **AI and
+Data Analytics Intern**, as on your own DS resume.
+
+**Default set** (`TRACKS.yaml` data-science `pinned`): Stony Brook AC-215 (FOMC forecasting from 200K+ records,
+67.7% vs 50%), AC-216 (A/B-tested models, +45%), AC-217 (GPT-4o eval, 0.74 F1), AC-199 (FinBERT on Bedrock + MLflow);
+Wake Forest AC-218 (SVM/RF/XGBoost/LightGBM, 87%), AC-219 (segmentation, 99% physician agreement), AC-220 (Epic +
+DICOM), AC-221 (hypothesis tests in R/Shiny); Accolite AC-222 (10K-user A/B interface test), AC-223 (SQL KPIs + Power
+BI for 3,000 employees), AC-224 (reconciliation −90%); projects Atriveo AC-225 and the survival models AC-114.
+
+**Analytics set** (`pinned_variants: analytics`): DS postings with 8+ BI/reporting signals (Power BI, Tableau,
+dashboards, reporting, KPIs, data quality, stakeholders, SQL...): 3 of 30 tested postings, 54 of 690 overall. It
+swaps the Bedrock bullet for R Shiny/Plotly dashboards (AC-226), leads Wake Forest with data reconciliation and
+adds the P99 metrics bullet (AC-190) at Accolite.
+
+**Blind test** (Sonnet hiring manager, 30 DS postings, labels swapped across rounds) against your own hand-made DS
+resume:
+
+| Version | Order A | Order B |
+| --- | --- | --- |
+| First draft | 24/30 | 24/30 |
+| + pipelines, Power BI, hypothesis tests folded into bullets | 26/30 | 25/30 |
+| + analytics set for BI-heavy postings (6/6 on those three) | **29/30** | **28/30** |
+
+Still lost: Bristol Myers Squibb (omics data harmonization, R) and sometimes TalentHop (healthcare stats), where your
+resume's Healthcare Data skills line (Epic, EMR, DICOM) reads closer.
+
+**Hold-out check:** 20 fresh DS postings (none used in tuning; 2 took the analytics set), each resume built by the
+pipeline for its own JD, labels randomized per posting: **20/20** preferred over your resume.

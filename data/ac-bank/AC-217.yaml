@@ -1,0 +1,49 @@
+# DS-only bullet (tracks: data-science), docs/resume-tracks/ds-da.md, 2026-10-08.
+id: AC-217
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: ds-eval
+display_order: 3
+wow_score: 0.85
+tracks:
+  - data-science
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - GPT-4o
+  - Whisper
+  - Pinecone
+fact: >-
+  FedTalk: 58.7% accuracy, 100% precision, 58.7% recall, 0.74 weighted F1 at 1/5/10-minute windows
+  (fedtalk-openai-analysis-main).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Model Evaluation
+  - NLP
+facets:
+  ds:
+    phrase: ds-eval
+    keywords:
+      - model evaluation
+      - nlp
+variants:
+  - facet: ds
+    emphasis: ds
+    strength: 9
+    text: >-
+      Assessed GPT-4o market-reaction predictions against minute-level SPY moves at 1, 5 and 10-minute windows,
+      reaching 0.74 weighted F1 with Whisper transcripts and Pinecone retrieval.

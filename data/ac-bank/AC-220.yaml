@@ -1,0 +1,48 @@
+# DS-only bullet (tracks: data-science), docs/resume-tracks/ds-da.md, 2026-10-08.
+id: AC-220
+role: wake-forest
+slot_kind: experience
+engineering_identity: data
+achievement_theme: ds-epic-dicom
+display_order: 3
+wow_score: 0.85
+tracks:
+  - data-science
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - Epic
+  - DICOM
+fact: >-
+  Epic reconciliation with 450+ MRI studies; DICOM ingestion and cleaning automated, preparation time -50% (your
+  DS resume).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Data Cleaning
+  - Healthcare Data
+facets:
+  ds:
+    phrase: ds-epic-dicom
+    keywords:
+      - data cleaning
+      - healthcare data
+variants:
+  - facet: ds
+    emphasis: ds
+    strength: 9
+    text: >-
+      Reconciled Epic patient records with 450+ MRI studies under standardized validation and privacy controls,
+      then automated DICOM ingestion to cut preparation time 50%.

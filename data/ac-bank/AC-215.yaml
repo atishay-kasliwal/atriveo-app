@@ -1,0 +1,46 @@
+# DS-only bullet (tracks: data-science), docs/resume-tracks/ds-da.md, 2026-10-08.
+id: AC-215
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: ds-forecast
+display_order: 1
+wow_score: 0.85
+tracks:
+  - data-science
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - Python
+  - SQL
+fact: >-
+  67.7% directional accuracy across 13 sessions (vs 50% chance); 200K+ financial and text records over 7 years processed with Python and SQL pipelines (your DS resume); used by 20-30 analysts and traders.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Forecasting
+  - NLP
+facets:
+  ds:
+    phrase: ds-forecast
+    keywords:
+      - forecasting
+      - nlp
+variants:
+  - facet: ds
+    emphasis: ds
+    strength: 9
+    text: >-
+      Forecasted FOMC-driven market direction from 200K+ financial and text records cleaned in Python and SQL pipelines, reaching 67.7% directional accuracy versus 50% chance for 20-30 analysts.

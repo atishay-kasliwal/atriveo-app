@@ -27,6 +27,36 @@ tracks:
   data-science:
     label: Data science
     title_patterns: ['data scien', 'applied scien', 'research scien', 'machine learning scien', '\bml scien', 'quantitative', 'statistic']
+    # Titles on DS resumes, from Atishay's own DS resume (2026-10-08).
+    stony_brook_title: Graduate Data Analyst
+    employer_titles:
+      wake-forest: AI and Data Analytics Intern
+      accolite: Senior Software Engineer
+    # The tested DS set (docs/resume-tracks/ds-da.md). Every data-science-track resume uses these; skills still tailor.
+    pinned:
+      experience:
+        stony-brook: [AC-215, AC-216, AC-217, AC-199]
+        wake-forest: [AC-218, AC-219, AC-220, AC-221]
+        accolite: [AC-222, AC-223, AC-224]
+      projects:
+        atriveo: [AC-225]
+        mri-research: [AC-114]
+      project_stacks:
+        atriveo: [Python, TypeScript, MongoDB, LLMs, Node.js]
+    # Analytics set (2026-10-08): DS postings that are really BI/reporting roles (8+ of these signals: 3 of 30 DS
+    # postings, 54 of 690 overall, all three lost to the analyst-style resume with the default set). docs/resume-tracks/ds-da.md.
+    pinned_variants:
+      - name: analytics
+        when: { min_signals: 8, signals: [power bi, tableau, looker, dashboard, dashboards, dashboarding, reporting, reports, excel, business intelligence, kpi, kpis, visualization, visualizations, data quality, operational, trends, stakeholder, stakeholders, metrics, sql] }
+        experience:
+          stony-brook: [AC-215, AC-226, AC-216, AC-217]
+          wake-forest: [AC-220, AC-218, AC-221, AC-219]
+          accolite: [AC-223, AC-224, AC-190, AC-222]
+        projects:
+          atriveo: [AC-225]
+          mri-research: [AC-114]
+        project_stacks:
+          atriveo: [Python, SQL, MongoDB, TypeScript, Node.js]
 
   data-analytics:
     label: Data analytics
@@ -96,8 +126,9 @@ order: [forward-deployed, data-science, data-analytics, ai-engineer, software-en
 employer_titles:
   wake-forest: AI/ML Engineer
   accolite: Senior Software Developer
-stony_brook_title_overrides:
-  Data Scientist: Data Scientist (Research)
+stony_brook_title_overrides: {}
+  # Was "Data Scientist: Data Scientist (Research)"; 2026-10-08 the DS track sets Stony Brook's title instead
+  # (tracks.data-science.stony_brook_title), from Atishay's own DS resume.
 # A header title containing one of these (any case) prints this title at Stony Brook, when no exact override above
 # matches. FDE postings word the title many ways ("Forward Deployed Software Engineer", "AI Forward Deployed
 # Engineer"). 2026-10-08, Atishay: Stony Brook is "AI Engineer" on FDE resumes, since FDE is a company title and the
@@ -110,9 +141,11 @@ stony_brook_title_patterns:
 # Skills section once it is listed here (and only when the JD asks for it); a bullet may name it
 # only at an employer listed for it. Names match data/ac-bank skill names (skills-library.mjs).
 confirmed_skills:
-  stony-brook: [PyTorch, TensorFlow, scikit-learn, LangGraph, Vector Databases, Hugging Face, MLflow, MLOps, AWS Bedrock, FinBERT]
-  wake-forest: [PyTorch, TensorFlow, scikit-learn, Vector Databases, Anthropic, N4ITK]
+  stony-brook: [PyTorch, TensorFlow, scikit-learn, LangGraph, Vector Databases, Hugging Face, MLflow, MLOps, AWS Bedrock, FinBERT, Pinecone, R, SQL, Excel, Tableau, Power BI, Plotly, R Shiny, Statistical Analysis, A/B Testing, Time Series Forecasting, Predictive Modeling, Model Evaluation, Hypothesis Testing, Regression, Pandas, NumPy, Data Visualization, Dashboards]
+  wake-forest: [PyTorch, TensorFlow, scikit-learn, Vector Databases, Anthropic, N4ITK, R, SQL, Excel, XGBoost, LightGBM, ggplot2, R Shiny, Statistical Analysis, A/B Testing, Predictive Modeling, Model Evaluation, Hypothesis Testing, Regression, Pandas, NumPy, Data Visualization]
+  # 2026-10-08 (docs/resume-tracks/facts): A/B tests, SQL and Power BI dashboards at Accolite.
+  accolite: [SQL, Power BI, A/B Testing, Dashboards, Excel]
   # Used, employer not said yet: skills section only until he says where.
-  unplaced: [Pinecone, ChromaDB, Generative AI, Prompt Engineering, Function Calling, OpenAI, GitHub Copilot, Git, NoSQL, MCP, Deep Learning]
+  unplaced: [Spark, ChromaDB, Generative AI, Prompt Engineering, Function Calling, OpenAI, GitHub Copilot, Git, NoSQL, MCP, Deep Learning]
   # Asked about and not confirmed: never claim.
   not_confirmed: [FAISS, Fine-tuning, LlamaIndex, Kubeflow, Milvus, Conversational AI]

@@ -105,7 +105,9 @@ export function employerTitle(roleSlug, headerTitle, doc = loadTracks()) {
     const track = classifyTrack(headerTitle, doc);
     return doc.tracks?.[track]?.stony_brook_title ?? role;
   }
-  return doc.employer_titles?.[roleSlug] ?? null;
+  // A track may name other employers' titles on its resumes (tracks.<id>.employer_titles).
+  const track = classifyTrack(headerTitle, doc);
+  return doc.tracks?.[track]?.employer_titles?.[roleSlug] ?? doc.employer_titles?.[roleSlug] ?? null;
 }
 
 const skillKey = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9+#.]/g, "");

@@ -1,0 +1,45 @@
+# DS-only bullet (tracks: data-science), docs/resume-tracks/ds-da.md, 2026-10-08.
+id: AC-221
+role: wake-forest
+slot_kind: experience
+engineering_identity: data
+achievement_theme: ds-present
+display_order: 4
+wow_score: 0.85
+tracks:
+  - data-science
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - R
+  - ggplot2
+fact: Presented clinical trends and model findings to the 20-member team with R, ggplot2, Shiny (your DS resume).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Data Visualization
+  - R
+facets:
+  ds:
+    phrase: ds-present
+    keywords:
+      - data visualization
+      - r
+variants:
+  - facet: ds
+    emphasis: ds
+    strength: 9
+    text: >-
+      Presented hypothesis-test results and clinical risk trends to a 20-member research team through R, ggplot2 and Shiny visualizations.

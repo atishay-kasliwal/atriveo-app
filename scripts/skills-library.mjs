@@ -236,6 +236,41 @@ export const SKILLS_LIBRARY = [
       defineSkill({ name: "Cloud Run", displayName: "Cloud Run", match: ["cloud run"], marketFrequency: 800, priority: 4, tier: "C", bankBacked: false, related: ["GCP", "Serverless"] }),
     ],
   },
+  // Data science and analytics (2026-10-08, docs/resume-tracks/ds-da.md). bankBacked: false entries appear only when
+  // confirmed in TRACKS.yaml confirmed_skills and the JD asks for them; the others also when a bullet shows them.
+  {
+    label: "Data Science & Statistics",
+    kind: "technology",
+    skills: [
+      defineSkill({ name: "R", displayName: "R", match: ["r", "rstudio", "tidyverse", "r programming"], marketFrequency: 2600, priority: 8, tier: "A", bankBacked: false, related: ["Statistics", "Statistical Analysis"] }),
+      defineSkill({ name: "Statistical Analysis", displayName: "Statistical Analysis", aliases: ["statistics", "statistical modeling"], match: ["statistic", "statistical analysis", "statistical modeling"], marketFrequency: 3000, priority: 9, tier: "A", bankBacked: false, related: ["Hypothesis Testing", "Regression"] }),
+      defineSkill({ name: "A/B Testing", displayName: "A/B Testing", aliases: ["experimentation"], match: ["a/b test", "a/b tests", "a/b testing", "ab test", "ab testing", "experimentation", "experiments", "controlled experiment"], marketFrequency: 2400, priority: 8, tier: "A", bankBacked: false, related: ["Hypothesis Testing", "Statistical Analysis"] }),
+      defineSkill({ name: "Hypothesis Testing", displayName: "Hypothesis Testing", match: ["hypothesis test", "statistical significance", "t-test", "anova", "chi-square"], marketFrequency: 1800, priority: 8, tier: "B", bankBacked: false, related: ["A/B Testing"] }),
+      defineSkill({ name: "Regression", displayName: "Regression", match: ["regression"], marketFrequency: 900, priority: 6, tier: "B", bankBacked: false, related: ["Statistical Analysis", "Predictive Modeling"] }),
+      defineSkill({ name: "Predictive Modeling", displayName: "Predictive Modeling", match: ["predictive model", "predictive analytics", "predictive modeling"], marketFrequency: 1200, priority: 7, tier: "B", bankBacked: false, related: ["Machine Learning"] }),
+      defineSkill({ name: "Time Series Forecasting", displayName: "Time Series Forecasting", aliases: ["forecasting", "time series"], match: ["time series", "time-series", "forecast"], marketFrequency: 1100, priority: 7, tier: "B", bankBacked: false, related: ["Predictive Modeling"] }),
+      defineSkill({ name: "Model Evaluation", displayName: "Model Evaluation", match: ["model evaluation", "model validation", "precision", "recall", "f1", "auc"], marketFrequency: 900, priority: 6, tier: "B", bankBacked: false, related: ["Machine Learning"] }),
+      defineSkill({ name: "XGBoost", displayName: "XGBoost", match: ["xgboost", "gradient boost"], marketFrequency: 700, priority: 6, tier: "B", bankBacked: false, related: ["scikit-learn"] }),
+      defineSkill({ name: "LightGBM", displayName: "LightGBM", match: ["lightgbm"], marketFrequency: 300, priority: 4, tier: "C", bankBacked: false, related: ["XGBoost"] }),
+      defineSkill({ name: "Pandas", displayName: "Pandas", match: ["pandas"], marketFrequency: 1500, priority: 6, tier: "B", bankBacked: false, related: ["NumPy", "Python"] }),
+      defineSkill({ name: "NumPy", displayName: "NumPy", match: ["numpy"], marketFrequency: 1000, priority: 5, tier: "B", bankBacked: false, related: ["Pandas"] }),
+      defineSkill({ name: "Spark", displayName: "Spark", aliases: ["apache spark", "pyspark"], match: ["spark", "pyspark"], marketFrequency: 1600, priority: 6, tier: "B", bankBacked: false, related: ["Big Data"] }),
+    ],
+  },
+  {
+    label: "Visualization & BI",
+    kind: "technology",
+    skills: [
+      defineSkill({ name: "Tableau", displayName: "Tableau", match: ["tableau"], marketFrequency: 1500, priority: 7, tier: "A", bankBacked: false, related: ["Power BI", "Dashboards"] }),
+      defineSkill({ name: "Power BI", displayName: "Power BI", aliases: ["powerbi"], match: ["power bi", "powerbi"], marketFrequency: 1500, priority: 7, tier: "A", bankBacked: false, related: ["Tableau", "Dashboards"] }),
+      defineSkill({ name: "Excel", displayName: "Excel", aliases: ["microsoft excel", "ms excel"], match: ["excel", "spreadsheet"], marketFrequency: 2200, priority: 7, tier: "A", bankBacked: false, related: ["Data Analysis"] }),
+      defineSkill({ name: "Dashboards", displayName: "Dashboards", match: ["dashboard"], marketFrequency: 1500, priority: 6, tier: "B", bankBacked: false, related: ["Tableau", "Power BI"] }),
+      defineSkill({ name: "R Shiny", displayName: "R Shiny", aliases: ["shiny"], match: ["shiny"], marketFrequency: 150, priority: 4, tier: "C", bankBacked: false, related: ["R"] }),
+      defineSkill({ name: "ggplot2", displayName: "ggplot2", match: ["ggplot"], marketFrequency: 150, priority: 4, tier: "C", bankBacked: false, related: ["R"] }),
+      defineSkill({ name: "Plotly", displayName: "Plotly", match: ["plotly"], marketFrequency: 200, priority: 4, tier: "C", bankBacked: false, related: ["Dashboards"] }),
+      defineSkill({ name: "Data Visualization", displayName: "Data Visualization", match: ["data visualization", "visualization", "visualizing data"], marketFrequency: 1500, priority: 6, tier: "B", bankBacked: false, related: ["Dashboards"] }),
+    ],
+  },
   {
     label: "Frontend",
     kind: "technology",

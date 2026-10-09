@@ -1,0 +1,45 @@
+# DS-only bullet (tracks: data-science), docs/resume-tracks/ds-da.md, 2026-10-08.
+id: AC-226
+role: stony-brook
+slot_kind: experience
+engineering_identity: data
+achievement_theme: ds-dashboards
+display_order: 5
+wow_score: 0.85
+tracks:
+  - data-science
+metrics_claimed: []
+concepts_claimed:
+  - data-science
+signature_technologies:
+  - R Shiny
+  - Plotly
+fact: Built interactive R Shiny and Plotly dashboards across 200K+ records spanning 7 years for recurring analysis (your DS resume).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts
+capabilities:
+  ai: 75
+  backend: 50
+  data: 90
+  cloud: 50
+  ml: 85
+  frontend: 30
+strength:
+  recruiter: 9
+ats_keywords:
+  - Dashboards
+  - Data Visualization
+facets:
+  ds:
+    phrase: ds-dashboards
+    keywords:
+      - dashboards
+      - data visualization
+variants:
+  - facet: ds
+    emphasis: ds
+    strength: 9
+    text: >-
+      Designed interactive R Shiny and Plotly dashboards tracking market trends across 200K+ financial records spanning 7 years for recurring analyst reviews.
