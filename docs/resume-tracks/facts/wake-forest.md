@@ -32,3 +32,10 @@ Facts only, each with its source and status. Bullets for any role are written fr
 | **500+ quantitative features from 450+ MRI scans** (PyRadiomics, N4ITK) for **stroke analysis** | your DS resume, 2026-10-08 | confirmed: a separate analysis from the 10K-study tumor platform |
 | **87% predictive accuracy**: trained and validated SVM, Random Forest, XGBoost and LightGBM, with SHAP | your DS resume, 2026-10-08 | confirmed: this is the algorithm comparison (A/B of models) |
 | Presented clinical trends and model findings to a 20-member team with R, ggplot2, Shiny | your DS resume, 2026-10-08 | confirmed |
+
+| Fact (2026-10-09) | Status |
+| --- | --- |
+| Apache Airflow used for the MRI data pipelines | Confirmed |
+| Survival / prognosis models on the 200+ radiomic biomarkers: **C-index about 0.7** | Confirmed (his estimate) |
+| Presentation to the 20-member team changed the team's next modeling decisions | Confirmed |
+| Portfolio site says 10 TB, 4 h → 18 min, 95% concordance; resume facts are 2 TB, 3 h → 2 min / 1 h → <1 min, 99% | **Mismatch: update the site** |
