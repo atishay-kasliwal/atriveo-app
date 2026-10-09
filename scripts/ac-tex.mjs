@@ -225,7 +225,7 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
   // Keep all contact fields on one line; shrink only when the actual width requires it.
   const header = `\\begin{center}
     \\textbf{\\Huge \\scshape ${esc(me.name)}} \\\\ \\vspace{1pt}
-    \\sbox{\\contactbox}{\\fontsize{9}{11}\\selectfont ${contactLine}}
+    \\sbox{\\contactbox}{\\fontsize{8.5}{11}\\selectfont ${contactLine}}
     \\ifdim\\wd\\contactbox>\\textwidth
       \\resizebox{\\textwidth}{!}{\\usebox{\\contactbox}}
     \\else\\usebox{\\contactbox}\\fi

@@ -38,7 +38,7 @@ html, body { margin: 0; }
 body { font-family: "Computer Modern Serif", "Latin Modern Roman", "CMU Serif", "Times New Roman", serif; font-size: 11pt; line-height: 1.2; color: #000; }
 .name { text-align: center; font-size: 24.9pt; font-weight: bold; font-variant: small-caps; line-height: 1.1; }
 .contact a { color: inherit; text-decoration: none; }
-.contact { text-align: center; font-size: 9pt; margin-top: 1pt; white-space: nowrap; }
+.contact { text-align: center; font-size: 8.5pt; margin-top: 1pt; white-space: nowrap; }
 h2 { font-size: 12pt; font-weight: normal; margin: 4pt 0 3pt; padding-bottom: 1pt; border-bottom: 0.6pt solid #000; }
 .row { display: flex; justify-content: space-between; gap: 8pt; }
 .entry { margin: 0 0 1pt 0.15in; }
