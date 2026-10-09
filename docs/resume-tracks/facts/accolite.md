@@ -28,3 +28,4 @@ Bank entries AC-163…AC-198.
 | **Reconciliation errors −90%**: automated transaction matching, validation, exception reporting | your DS resume, 2026-10-08 | confirmed |
 | **Power BI dashboards** for onboarding, timesheets and reviews, reporting for 3,000 employees | your DS resume, 2026-10-08 | confirmed |
 | Standardized SQL queries, KPI definitions and data-validation rules across business and engineering teams | your DS resume, 2026-10-08 | confirmed |
+| **A/B test detail:** ~10,000 in-house users split into two groups, each on a different UI design; feedback on what they liked and disliked; the final design combined the preferred elements. Features were tested the same way with leadership. | you, 2026-10-08 | confirmed |
