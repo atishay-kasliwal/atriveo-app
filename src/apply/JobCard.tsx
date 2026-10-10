@@ -9,6 +9,14 @@ import "./today.css";
 const NC = /\b(NC|North Carolina|Raleigh|Durham|Charlotte|Cary|Chapel Hill|Morrisville|Research Triangle|RTP|Greensboro|Winston[- ]Salem|Wilmington|Apex)\b/i;
 export const inNC = (location?: string | null) => Boolean(location && NC.test(location));
 
+export /** "3h", "2d", "5w": how long ago the posting went up (or was found). */
+function ago(iso?: string | null): string | null {
+  if (!iso) return null;
+  const h = (Date.now() - Date.parse(iso)) / 3_600_000;
+  if (!Number.isFinite(h)) return null;
+  return h < 1 ? "just now" : h < 24 ? `${Math.floor(h)}h ago` : h < 24 * 14 ? `${Math.floor(h / 24)}d ago` : `${Math.floor(h / 24 / 7)}w ago`;
+}
+
 /** The resume-match bar's label, percent and hover text (null before the tailored resume is scored). */
 export function resumeMatchView(rm: ResumeMatch | null | undefined, resumeReady?: boolean) {
   const match = rm == null ? null : Math.max(0, Math.min(100, rm.score));

@@ -92,3 +92,11 @@
 .staffing-match .card-actions-content { position: absolute; bottom: calc(100% + 8px); left: 0; right: 0; z-index: 3; padding: 8px; gap: 4px; border: 1px solid var(--border-col); border-radius: 10px; background: var(--card-bg); box-shadow: 0 8px 24px rgb(0 0 0 / .22); max-height: 240px; overflow-y: auto; }
 .staffing-match .card-actions-content :is(button,a) { border-radius: 6px; }
 .staffing-match .card-actions-content :is(button,a):hover { background: var(--secondary-bg); }
+
+/* Staffing jobs use Today's card (JobCard): five across, equal heights, More opens over the card. */
+.staffing-shortlist.td-page { overflow: visible; display: block; }
+.staffing-shortlist .staffing-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: 1fr; align-items: stretch; padding: 0; }
+.staffing-shortlist .staffing-grid > p { grid-column: 1 / -1; }
+@media (max-width: 1400px) { .staffing-shortlist .staffing-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .staffing-shortlist .staffing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 759px) { .staffing-shortlist .staffing-grid { display: flex; flex-direction: column; grid-auto-rows: auto; } }

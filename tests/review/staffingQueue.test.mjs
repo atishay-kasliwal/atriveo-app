@@ -60,3 +60,22 @@ test('auto-queue takes new Recommended jobs without a resume, newest first, belo
   await mutate(db, 'prepare', { id: 'old' });
   assert.equal((await db.collection('jobs').findOne({ job_url: 'https://jobs.test/old' })).resume.priority, PRIORITY_CLICKED);
 }));
+
+test('the workspace leaves out skipped companies and gives each card its role track and resume match', () => withDb(async db => {
+  const fs = await import('node:fs');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'staffing-match-'));
+  const pdf = path.join(dir, 'Atishay Kasliwal.pdf');
+  fs.writeFileSync(pdf, '%PDF');
+  fs.writeFileSync(path.join(dir, 'ats-score.json'), JSON.stringify({ job_match: { score: 64.6, requirement_counts: { required: { matched: 4, total: 6 }, preferred: { matched: 1, total: 2 } } } }));
+  await db.collection('staffing_jobs').insertMany([posting('keep', { title: 'Software Engineer' }), posting('drop', { company: 'Skipped Staffing LLC' })]);
+  await db.collection('jobs').insertMany([
+    { job_url: 'https://jobs.test/keep', site: 'staffing', score_pct: 80, resume: { status: 'success', pdf_path: pdf } },
+    { job_url: 'https://jobs.test/drop', site: 'staffing', score_pct: 80 },
+  ]);
+  const page = await list(db, new URLSearchParams('view=recommended&skip=skipped staffing'));
+  assert.deepEqual(page.jobs.map(j => j._id), ['keep']);
+  assert.equal(page.counts.recommended, 1, 'counts leave skipped companies out too');
+  assert.equal(page.jobs[0].track, 'software-engineer');
+  assert.deepEqual(page.jobs[0].resume_match, { score: 65, required: { matched: 4, total: 6 }, preferred: { matched: 1, total: 2 } });
+  fs.rmSync(dir, { recursive: true, force: true });
+}));

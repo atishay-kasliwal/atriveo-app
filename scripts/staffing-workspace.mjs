@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { withMongo } from './mongo-client.mjs';
 import { enqueueJob } from './resume-queue.mjs';
-import { markJobApplied } from './applications-analytics.mjs';
+import { markJobApplied, resumeMatchOf, trackOf } from './applications-analytics.mjs';
 
 export function postingUrl(value) {
   const u = new URL(String(value));
@@ -41,7 +41,9 @@ async function workspaceRows(db) {
     .filter(j => { const group = j.fingerprint || j.key; if (seen.has(j.key) || seen.has(group)) return false; seen.add(j.key); seen.add(group); return true; });
 }
 export async function list(db, params) {
-  let rows = await workspaceRows(db);
+  // Skipped companies (Today's list, sent as skip=…): a company is skipped when its name contains one, as on Today.
+  const skip = params.getAll('skip').map(s => s.trim().toLowerCase()).filter(Boolean);
+  let rows = (await workspaceRows(db)).filter(j => !skip.some(s => String(j.company || '').toLowerCase().includes(s)));
   const counts = { recommended: rows.filter(j => j.eligible && j.state === 'new').length, saved: rows.filter(j => j.state === 'saved').length, applied: rows.filter(j => j.state === 'applied').length, browse: rows.filter(j => !['passed', 'applied'].includes(j.state)).length };
   const view = params.get('view') || 'recommended';
   rows = rows.filter(j => view === 'recommended' ? j.eligible && j.state === 'new' : view === 'browse' ? !['passed', 'applied'].includes(j.state) : j.state === view);
@@ -50,7 +52,8 @@ export async function list(db, params) {
   rows = rows.filter(j => (!query || `${j.title} ${j.company} ${j.location}`.toLowerCase().includes(query)) && (!source || j.source_id === source));
   const total = rows.length;
   const offset = Math.max(0, Math.min(100000, Number(params.get('offset')) || 0));
-  return { ok: true, counts, total, jobs: rows.slice(offset, offset + 10).map(({ description, ...j }) => j) };
+  // The card's role track and resume match (ats-score.json beside the PDF), only for the page shown.
+  return { ok: true, counts, total, jobs: rows.slice(offset, offset + 10).map(({ description, ...j }) => ({ ...j, track: trackOf(j.title), resume_match: resumeMatchOf(j.resume) })) };
 }
 // Staffing resumes are built by the resume worker, like every other job. A click goes to the fast lane (1001,
 // beside the extension's Tailor); the background sweep queues Recommended jobs just below it.

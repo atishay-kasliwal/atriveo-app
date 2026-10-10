@@ -209,13 +209,13 @@ const inBrowserRows = async (apps, now) => (await apps.aggregate([{ $match: IN_B
 
 /** The resume track a job's title puts it on (TRACKS.yaml), or null. */
 let tracksDoc = null;
-const trackOf = (title) => { try { tracksDoc ??= loadTracks(); return classifyTrack(title, tracksDoc); } catch { return null; } };
+export const trackOf = (title) => { try { tracksDoc ??= loadTracks(); return classifyTrack(title, tracksDoc); } catch { return null; } };
 
 /**
  * How well the tailored resume itself matches the job: the deterministic Job Match (scripts/ats) that tailor-ac saves
  * as ats-score.json beside the PDF. Each resume is rewritten per job, so this, not the profile score, is the one to read.
  */
-const resumeMatchOf = (pdfPath) => {
+export const resumeMatchOf = (pdfPath) => {
   if (!pdfPath) return null;
   try {
     const m = JSON.parse(fs.readFileSync(path.join(path.dirname(pdfPath), "ats-score.json"), "utf8")).job_match;

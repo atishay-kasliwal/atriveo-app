@@ -1,4 +1,4 @@
-import JobCard, { inNC } from './JobCard';
+import JobCard, { ago, inNC } from './JobCard';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OpenFillQueue from "./OpenFillQueue";
@@ -70,14 +70,6 @@ function etaLabel(eta?: ResumeEta): { text: string; title: string } {
 
 
 export { inNC };
-
-/** "3h", "2d", "5w": how long ago the posting went up (or was found). */
-function ago(iso?: string | null): string | null {
-  if (!iso) return null;
-  const h = (Date.now() - Date.parse(iso)) / 3_600_000;
-  if (!Number.isFinite(h)) return null;
-  return h < 1 ? "just now" : h < 24 ? `${Math.floor(h)}h ago` : h < 24 * 14 ? `${Math.floor(h / 24)}d ago` : `${Math.floor(h / 24 / 7)}w ago`;
-}
 
 /** Sites Atriveo Fill fills by itself (Apply with Atriveo, full support). */
 const AUTO_ATS = ["greenhouse", "lever", "ashby"];

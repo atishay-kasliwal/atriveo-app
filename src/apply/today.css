@@ -489,3 +489,7 @@
 @media (max-width: 759px) {
   .td-page .td-foot { display: grid; grid-template-columns: auto minmax(0, 1fr); }
 }
+.td-role-link { all: unset; cursor: pointer; }
+.td-role-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.td-role-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+.td-mark-applied.is-applied { color: #69c69a; opacity: 1; }
