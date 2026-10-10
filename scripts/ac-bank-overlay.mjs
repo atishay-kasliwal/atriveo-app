@@ -6,6 +6,8 @@
 //   { _id: "retire:AC-010", type: "retire", ac_id, facet: null, reason }       retired on the bank page (/bank):
 //   { _id: "retire:AC-010:reliability", type: "retire", ac_id, facet, reason } the entry, or one wording, gets the
 //                                                                               "retired" track no resume uses
+//   { _id: "fact:AC-010:<hash>", type: "fact", ac_id, facet, text }           a number or result you gave (bank page)
+//   { _id: "score:AC-010:reliability", type: "score", ac_id, facet, strength, note }   its new rubric score
 //
 // loadBank() is synchronous, so it reads a local copy (OVERLAY_FILE); syncOverlay(db) refreshes that copy and is
 // called before each resume build (tailor-worker) and by the builder. The bank's version then carries the
@@ -53,6 +55,13 @@ export function applyOverlay(acs, overlay) {
     const ac = byId.get(e.ac_id);
     const v = ac?.variants?.find((x) => (x.facet ?? "default") === (e.facet ?? "default"));
     if (v) v.text = e.text;
+  }
+  for (const e of overlay.entries) {
+    if (e.type !== "score") continue;
+    const v = byId.get(e.ac_id)?.variants?.find((x) => (x.facet ?? "default") === e.facet);
+    if (!v) continue;
+    v.strength = e.strength;
+    if (e.note) v.strength_note = e.note; else delete v.strength_note;
   }
   for (const e of overlay.entries) {
     if (e.type !== "retire") continue;

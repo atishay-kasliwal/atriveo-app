@@ -45,6 +45,7 @@ import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, renderDraft, revertResume, saveBullet, saveDraft, startPasted } from "./resume-builder.mjs";
 import { BankPageError, bankView, retireBullet } from "./bank-page.mjs";
 import { syncOverlay } from "./ac-bank-overlay.mjs";
+import { approveDraft, draftResult, startDraft } from "./bank-draft.mjs";
 import { applicationsAnalytics, applicationDetail, dismissJob, linkJobToApplication, markJobApplied, saveLinkedinDirect, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
@@ -1692,7 +1693,7 @@ const server = http.createServer(async (req, res) => {
   // &cards=N with view=unanswered: the first N cards too. &ids=a,b with view=cards: those cards.
   // No view: everything at once; ?counts=1 is view=counts (consoles loaded before the views).
   // Resume builder (docs/resume-builder.md): GET load ?job=<job_url> | ?app=<application id> | ?track=<track> |
-  // ?pasted=<id>; GET pasted (your pasted resumes); GET bank (every bullet, for /bank); POST bank-retire; POST render | save | revert | bullet (save one to the bank) |
+  // ?pasted=<id>; GET pasted (your pasted resumes); GET bank (every bullet, for /bank); POST bank-retire, bank-draft, bank-draft-result, bank-approve; POST render | save | revert | bullet (save one to the bank) |
   // check (the bullet rules, nothing saved) | guess (company / title / location from a pasted JD) | start (build a
   // resume from a pasted JD) | delete (a pasted resume).
   if (pathname.startsWith("/resume-builder/")) {
@@ -1703,6 +1704,18 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && op === "bank") {
       withMongo((db) => syncOverlay(db), { appName: "AtriveoTailorServer" }).then(() => false, () => true)
         .then((stale) => reply(200, { ...bankView(), stale }), (e) => reply(500, { ok: false, error: String(e.message || e) }));
+      return;
+    }
+    // POST bank-draft {acId, facet, fact} | bank-draft-result {id} | bank-approve {acId, facet, text, parts}
+    // (scripts/bank-draft.mjs): drafts from a fact you give, by your Mac AI worker; the one you pick is saved.
+    if (req.method === "POST" && ["bank-draft", "bank-draft-result", "bank-approve"].includes(op)) {
+      let raw = "";
+      req.on("data", (c) => { raw += c; if (raw.length > 20_000) req.destroy(); });
+      req.on("end", () => {
+        let body; try { body = JSON.parse(raw || "{}"); } catch { return reply(400, { ok: false, error: "Bad JSON" }); }
+        withMongo((db) => (op === "bank-draft" ? startDraft(db, body) : op === "bank-draft-result" ? draftResult(db, body) : approveDraft(db, body)), { appName: "AtriveoTailorServer" })
+          .then((data) => reply(200, data), (e) => reply(e instanceof BankPageError || e instanceof BuilderError ? 400 : 500, { ok: false, error: String(e.message || e) }));
+      });
       return;
     }
     if (req.method === "POST" && op === "bank-retire") {

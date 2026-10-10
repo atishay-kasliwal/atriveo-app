@@ -40,6 +40,8 @@ export function bankView(bank = loadBank(), doc = loadTracks(), overlay = readOv
   // What you changed on this page or in the builder and haven't exported to git yet.
   const mine = overlay?.entries ?? [];
   const reworded = new Map(mine.filter((e) => e.type === "reword").map((e) => [`${e.ac_id}:${e.facet ?? "default"}`, e]));
+  const scored = new Map(mine.filter((e) => e.type === "score").map((e) => [`${e.ac_id}:${e.facet}`, e]));
+  const facts = (id) => mine.filter((e) => e.type === "fact" && e.ac_id === id).map((e) => ({ text: e.text, at: e.createdAt ?? null }));
   const retiredHere = new Map(mine.filter((e) => e.type === "retire").map((e) => [e.facet == null ? e.ac_id : `${e.ac_id}:${e.facet}`, e]));
   const entries = bank.acs.map((ac) => ({
     id: ac.id,
@@ -53,6 +55,7 @@ export function bankView(bank = loadBank(), doc = loadTracks(), overlay = readOv
     retired: isRetired(ac),
     retiredHere: retiredHere.get(ac.id)?.reason ?? (retiredHere.has(ac.id) ? "" : null),
     yours: ac.source === "resume-builder",
+    yourFacts: facts(ac.id),
     variants: (ac.variants || []).map((v) => {
       const facet = v.facet ?? "default";
       return {
@@ -65,7 +68,7 @@ export function bankView(bank = loadBank(), doc = loadTracks(), overlay = readOv
         retired: isRetired(v),
         pinned: pins.get(`${ac.id}:${facet}`) || [],
         // Reworded since it was scored (the score is the old wording's).
-        edited: reworded.has(`${ac.id}:${facet}`),
+        edited: reworded.has(`${ac.id}:${facet}`) && !(String(scored.get(`${ac.id}:${facet}`)?.updatedAt ?? "") >= String(reworded.get(`${ac.id}:${facet}`).updatedAt ?? "")),
         retiredHere: retiredHere.get(`${ac.id}:${facet}`)?.reason ?? (retiredHere.has(`${ac.id}:${facet}`) ? "" : null),
       };
     }),

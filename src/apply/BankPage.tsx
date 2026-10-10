@@ -12,7 +12,7 @@ import "./bank.css";
 
 interface Pin { track: string; set: string }
 interface Variant { facet: string; text: string; strength: number | null; note: string | null; tracks: string[]; retired: boolean; pinned: Pin[]; edited: boolean; retiredHere: string | null }
-interface Entry { id: string; role: string; label: string; kind: "experience" | "project"; theme: string; fact: string; confirmedAt: string | null; tracks: string[]; retired: boolean; retiredHere: string | null; yours: boolean; variants: Variant[] }
+interface Entry { id: string; role: string; label: string; kind: "experience" | "project"; theme: string; fact: string; confirmedAt: string | null; tracks: string[]; retired: boolean; retiredHere: string | null; yours: boolean; yourFacts: Array<{ text: string; at: string | null }>; variants: Variant[] }
 interface Bank { stale?: boolean; version: string; updatedAt: string | null; tracks: Array<{ id: string; label: string; hasSet: boolean }>; entries: Entry[] }
 
 const TRACKS = ["software-engineer", "ai-engineer", "data-science", "data-analytics", "forward-deployed"];
@@ -175,6 +175,9 @@ export default function BankPage({ header }: { header?: React.ReactNode }) {
 }
 
 interface Edit { facet: string; text: string; issues: string[] | null; verbs: string[] }
+interface Draft { text: string; why: string; strength: number; parts: Record<string, number>; issues: string[] }
+/** Giving a missing fact: typing, then drafting on your Mac, then the drafts to pick from. */
+interface FactRun { facet: string; text: string; id: string | null; status: "typing" | "running" | "done" | "failed"; drafts: Draft[]; error: string; workerOnline: boolean }
 interface Retire { facet: string | null; reason: string }
 
 function Detail({ entry: e, track, onClose, onBank, reload }: { entry: Entry; track: string; onClose: () => void; onBank: (b: Bank) => void; reload: () => Promise<void> }) {
@@ -186,6 +189,20 @@ function Detail({ entry: e, track, onClose, onBank, reload }: { entry: Entry; tr
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState("");
+  const [fact, setFact] = useState<FactRun | null>(null);
+
+  // Poll the draft job until the drafts (or an error) arrive; give up after 5 minutes.
+  useEffect(() => {
+    if (fact?.status !== "running" || !fact.id) return;
+    const started = Date.now();
+    const t = setInterval(() => {
+      call<{ status: string; drafts: Draft[]; error: string | null; workerOnline: boolean }>("bank-draft-result", { id: fact.id })
+        .then((r) => setFact((f) => (!f || f.id !== fact.id ? f : r.status === "running"
+          ? (Date.now() - started > 300_000 ? { ...f, status: "failed", error: "Drafting took over 5 minutes. Check your Mac AI worker, then draft again." } : { ...f, workerOnline: r.workerOnline })
+          : { ...f, status: r.status === "done" ? "done" : "failed", drafts: r.drafts, error: r.error ?? "", workerOnline: r.workerOnline })), () => {});
+    }, 2000);
+    return () => clearInterval(t);
+  }, [fact?.id, fact?.status]);
 
   // The builder's rules on what you type (nothing saved), a moment after you stop.
   useEffect(() => {
@@ -201,6 +218,17 @@ function Detail({ entry: e, track, onClose, onBank, reload }: { entry: Entry; tr
     setBusy(true); setError("");
     try { await what(); setDone(message); setEdit(null); setRetire(null); } catch (err) { setError(String((err as Error).message || err)); } finally { setBusy(false); }
   };
+  const startDraft = async () => {
+    if (!fact) return;
+    setBusy(true); setError("");
+    try {
+      const { id } = await call<{ id: string }>("bank-draft", { acId: e.id, facet: fact.facet, fact: fact.text });
+      setFact({ ...fact, id, status: "running", drafts: [], error: "", workerOnline: true });
+      void reload();
+    } catch (err) { setError(String((err as Error).message || err)); } finally { setBusy(false); }
+  };
+  const pickDraft = (d: Draft) => fact && run(async () => { onBank(await call<Bank>("bank-approve", { acId: e.id, facet: fact.facet, text: d.text, parts: d.parts })); setFact(null); },
+    `Saved at ${d.strength}/10. Every future resume uses the new wording.`);
   const save = () => edit && run(async () => { await call("bullet", { role: e.role, text: edit.text, mode: "reword", acId: e.id, facet: edit.facet }); await reload(); }, "Saved. Every future resume uses the new wording.");
   const doRetire = (facet: string | null, reason: string, restore = false) => run(async () => onBank(await call<Bank>("bank-retire", { acId: e.id, facet, reason, restore })),
     restore ? "Restored." : facet == null ? "Retired. No future resume uses this entry." : "Retired. No future resume uses this wording.");
@@ -222,6 +250,7 @@ function Detail({ entry: e, track, onClose, onBank, reload }: { entry: Entry; tr
         <span className="bk-label">Fact behind it</span>
         <p>{e.fact || "No fact written for this entry yet."}</p>
         {e.confirmedAt ? <span className="bk-confirmed">Confirmed by you · {shortDate(e.confirmedAt)}</span> : null}
+        {e.yourFacts.length ? <ul className="bk-facts">{e.yourFacts.map((f) => <li key={f.text}>{f.text}{f.at ? <span className="apps-muted"> · you, {shortDate(f.at)}</span> : null}</li>)}</ul> : null}
       </div>
       <span className="bk-label">Wordings{hidden > 0 ? ` (${hidden} more hidden by your filters)` : ""}</span>
       <div className="bk-variants">
@@ -257,6 +286,44 @@ function Detail({ entry: e, track, onClose, onBank, reload }: { entry: Entry; tr
               ) : <p>{v.text}</p>}
               {v.note && !editing ? <p className="bk-note">{v.note}</p> : null}
               {v.pinned.length ? <div className="bk-pins"><span className="apps-muted">Printed on</span>{v.pinned.map((p) => <Track key={`${p.track}-${p.set}`} id={p.track} set={p.set} />)}</div> : null}
+              {fact?.facet === v.facet ? (
+                <div className="bk-edit bk-fact-run">
+                  {fact.status === "typing" ? (
+                    <>
+                      <textarea id={`bk-fact-${e.id}-${v.facet}`} aria-label="The missing number or result" rows={3} value={fact.text} autoFocus
+                        placeholder="The real number or result, e.g. cut partner onboarding from 2 weeks to 3 days"
+                        onChange={(ev) => setFact({ ...fact, text: ev.target.value })}
+                        onKeyDown={(ev) => { if (ev.key === "Escape") { ev.stopPropagation(); setFact(null); } }} />
+                      <span className="apps-muted">Saved as your fact. Claude then drafts wordings from this bullet's facts only; a draft with any number your facts don't give is blocked.</span>
+                      <div className="bk-actions">
+                        <button type="button" className="rv-primary" disabled={busy || !fact.text.trim()} onClick={() => void startDraft()}>{busy ? "Saving…" : "Save fact and draft"}</button>
+                        <button type="button" className="bk-btn" onClick={() => setFact(null)}>Cancel</button>
+                      </div>
+                    </>
+                  ) : fact.status === "running" ? (
+                    <p className="apps-muted" role="status">{fact.workerOnline ? "Drafting on your Mac…" : "Waiting for your Mac AI worker. It's offline: wake your Mac and it picks this up."}</p>
+                  ) : fact.status === "failed" ? (
+                    <div className="bk-actions"><span className="bk-error" role="alert">{fact.error || "Drafting failed."}</span><button type="button" className="bk-btn" onClick={() => void startDraft()}>Draft again</button></div>
+                  ) : (
+                    <>
+                      <span className="bk-label">Pick a wording</span>
+                      {fact.drafts.map((d) => (
+                        <div key={d.text} className={`bk-draft ${d.issues.length ? "is-blocked" : ""}`}>
+                          <div className="bk-card-top"><Score s={d.strength} /><span className="apps-muted">{Object.entries(d.parts || {}).map(([k, n]) => `${k} ${n}`).join(" · ")}</span></div>
+                          <p>{d.text}</p>
+                          {d.why ? <span className="apps-muted">{d.why}</span> : null}
+                          {d.issues.length ? <ul className="bk-issues">{d.issues.map((i) => <li key={i}>{i}</li>)}</ul> : null}
+                          <div className="bk-actions"><button type="button" className="rv-primary" disabled={busy || d.issues.length > 0} onClick={() => void pickDraft(d)}>Use this wording</button></div>
+                        </div>
+                      ))}
+                      <div className="bk-actions">
+                        <button type="button" className="bk-btn" disabled={busy} onClick={() => void startDraft()}>Draft again</button>
+                        <button type="button" className="bk-btn" onClick={() => setFact(null)}>Keep the current wording</button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : null}
               {retiring ? (
                 <div className="bk-edit">
                   <input id={`bk-why-${e.id}-${v.facet}`} type="text" className="bk-search bk-why" placeholder="Why (optional), e.g. duplicate of AC-232" aria-label="Why retire it" value={retire.reason} onChange={(ev) => setRetire({ ...retire, reason: ev.target.value })} />
@@ -267,7 +334,8 @@ function Detail({ entry: e, track, onClose, onBank, reload }: { entry: Entry; tr
                 </div>
               ) : !editing && !e.retired ? (
                 <div className="bk-actions">
-                  {!v.retired ? <button type="button" className="bk-btn" onClick={() => { setDone(""); setError(""); setRetire(null); setEdit({ facet: v.facet, text: v.text, issues: null, verbs: [] }); }}>Edit</button> : null}
+                  {!v.retired && fact?.facet !== v.facet ? <button type="button" className={v.note ? "rv-primary" : "bk-btn"} onClick={() => { setDone(""); setError(""); setRetire(null); setEdit(null); setFact({ facet: v.facet, text: "", id: null, status: "typing", drafts: [], error: "", workerOnline: true }); }}>{v.note ? "Give the missing fact" : "Add a fact"}</button> : null}
+                  {!v.retired ? <button type="button" className="bk-btn" onClick={() => { setDone(""); setError(""); setRetire(null); setFact(null); setEdit({ facet: v.facet, text: v.text, issues: null, verbs: [] }); }}>Edit</button> : null}
                   {v.retiredHere != null ? <button type="button" className="bk-btn" disabled={busy} onClick={() => void doRetire(v.facet, "", true)}>Restore</button>
                     : !v.retired ? <button type="button" className="bk-btn" disabled={busy || v.pinned.length > 0} title={v.pinned.length ? `Printed on the ${pinnedSets([v]).join(", ")} resume: take it out of that set in TRACKS.yaml first` : undefined}
                         onClick={() => { setDone(""); setError(""); setEdit(null); setRetire({ facet: v.facet, reason: "" }); }}>Retire</button> : null}
