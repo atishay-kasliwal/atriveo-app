@@ -84,3 +84,26 @@
   .bk-list { overflow: visible; }
   .bk-detail { position: fixed; inset: 0; z-index: 60; border-left: 0; padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
 }
+
+/* Editing in the detail panel (phase 2): one wording at a time; the builder's rule check under the box. */
+.bk-stale { font-size: 12px; color: var(--bk-near); }
+.bk-edit { display: flex; flex-direction: column; gap: 8px; }
+.bk-edit textarea { width: 100%; box-sizing: border-box; min-height: 92px; resize: vertical; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-col); background: var(--input-bg); color: var(--foreground); font: inherit; font-size: 13px; line-height: 1.5; }
+.bk-edit textarea:focus { outline: 2px solid var(--ring); outline-offset: 1px; }
+.bk-why { width: 100%; box-sizing: border-box; }
+.bk-verdict { display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.bk-verdict ul { margin: 0; padding-left: 18px; color: var(--bk-low); }
+.bk-words { color: var(--muted-fg); font-variant-numeric: tabular-nums; }
+.bk-words.is-off { color: var(--bk-near); }
+.bk-ok { color: var(--bk-good); }
+.bk-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.bk-btn { border: 1px solid var(--border-col); background: var(--secondary-bg); color: var(--foreground); border-radius: 6px; padding: 5px 12px; font: inherit; font-size: 12.5px; cursor: pointer; }
+.bk-btn:hover:not(:disabled) { background: var(--accent-bg); }
+.bk-btn:disabled { opacity: .5; cursor: not-allowed; }
+.bk-btn.is-danger { color: var(--bk-low); border-color: color-mix(in oklab, var(--bk-low) 45%, var(--border-col)); }
+.bk-btn:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.bk-tag.is-edited { color: var(--bk-near); }
+.bk-error, .bk-done { margin: 0; padding: 8px 10px; border-radius: 6px; font-size: 12.5px; }
+.bk-error { border: 1px solid color-mix(in oklab, var(--bk-low) 50%, var(--border-col)); background: color-mix(in oklab, var(--bk-low) 10%, transparent); }
+.bk-done { border: 1px solid color-mix(in oklab, var(--bk-good) 45%, var(--border-col)); background: color-mix(in oklab, var(--bk-good) 8%, transparent); }
+.bk-entry-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; padding-top: 4px; border-top: 1px solid var(--border-col); font-size: 12.5px; }

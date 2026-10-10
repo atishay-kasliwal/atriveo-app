@@ -6,6 +6,7 @@
 //   a new bullet (AC-U001…)   → data/ac-bank/AC-U001.yaml
 //   a reworded bullet         → that entry's variant `text`, the old wording kept in the variant's `earlier_texts`
 //                               (resumes that printed it stay valid in the builder)
+//   a retirement (bank page)  → `tracks: [retired]` on the entry (with a "# Retired" comment) or on that variant
 // Then it runs the bank lint on the result (git only, no overlay) and shows the diff. You commit.
 // Safe to run again: what's already in git is skipped, and once in git the overlay's copy changes nothing.
 //
@@ -73,6 +74,41 @@ export function rewordYaml(src, facet, text) {
   return [...lines.slice(0, item), ...kept, ...lines.slice(end)].join("\n");
 }
 
+/**
+ * The YAML with the entry (facet null) or one variant retired: its `tracks` replaced by `[retired]`, the track no resume
+ * uses. An entry also gets a "# Retired <date> on the bank page" comment, as the hand-retired ones have. null: no variant.
+ */
+export function retireYaml(src, facet, reason = "", date = "") {
+  const lines = src.split("\n");
+  const dropKey = (arr, from, to, indent) => {
+    const at = arr.findIndex((l, k) => k >= from && k < to && l.startsWith(`${indent}tracks:`));
+    if (at < 0) return arr;
+    let end = at + 1;
+    while (end < arr.length && (arr[end].startsWith(`${indent} `) || (indent === "" && /^\s+-/.test(arr[end])))) end++;
+    return [...arr.slice(0, at), ...arr.slice(end)];
+  };
+  if (facet == null) {
+    const top = lines.findIndex((l) => /^variants:\s*$/.test(l));
+    const kept = dropKey(lines, 0, top < 0 ? lines.length : top, "");
+    const roleAt = kept.findIndex((l) => /^role:/.test(l));
+    const note = `# Retired${date ? ` ${date}` : ""} on the bank page${reason ? ` (${norm(reason)})` : ""}: hidden from every resume.`;
+    kept.splice(roleAt + 1, 0, note, "tracks:", "  - retired");
+    return kept.join("\n");
+  }
+  const vStart = lines.findIndex((l) => /^variants:\s*$/.test(l));
+  let item = -1;
+  for (let i = vStart + 1; vStart >= 0 && i < lines.length && (/^\s/.test(lines[i]) || lines[i] === ""); i++) {
+    const m = lines[i].match(/^(\s*)- facet:\s*(\S+)\s*$/);
+    if (m && m[2].replace(/['"]/g, "") === facet) { item = i; break; }
+  }
+  if (item < 0) return null;
+  const keyIndent = lines[item].match(/^(\s*)-/)[1] + "  ";
+  let end = item + 1;
+  while (end < lines.length && lines[end].startsWith(keyIndent)) end++;
+  const body = dropKey(lines.slice(item + 1, end), 0, end - item - 1, keyIndent);
+  return [...lines.slice(0, item + 1), `${keyIndent}tracks:`, `${keyIndent}  - retired`, ...body, ...lines.slice(end)].join("\n");
+}
+
 /** What exporting `entries` into `bankDir` changes: [{ file, kind, id, before, after }]. Writes nothing. */
 export function planExport(entries, bankDir) {
   const out = [];
@@ -95,8 +131,21 @@ export function planExport(entries, bankDir) {
     if (after === src) continue;
     if (pending) pending.after = after; else out.push({ file, kind: "reword", id: e._id, before, after });
   }
+  for (const e of entries.filter((x) => x.type === "retire")) {
+    const file = path.join(bankDir, `${e.ac_id}.yaml`);
+    if (!fs.existsSync(file)) { out.push({ file, kind: "missing", id: e._id }); continue; }
+    const before = fs.readFileSync(file, "utf8");
+    const pending = out.find((o) => o.file === file);
+    const src = pending ? pending.after : before;
+    if (isRetiredIn(yaml.load(src), e.facet)) continue;
+    const after = retireYaml(src, e.facet ?? null, e.reason, (e.createdAt ?? "").slice(0, 10));
+    if (after === null) { out.push({ file, kind: "missing", id: e._id }); continue; }
+    if (pending) pending.after = after; else out.push({ file, kind: "retire", id: e._id, before, after });
+  }
   return out;
 }
+
+const isRetiredIn = (ac, facet) => (facet == null ? ac?.tracks : ac?.variants?.find((v) => (v.facet ?? "default") === facet)?.tracks)?.includes("retired") ?? false;
 
 /** Overlay entries already in the bank's YAML word for word (the ones --prune may delete). */
 export function inGit(entries, bankDir) {
@@ -105,6 +154,7 @@ export function inGit(entries, bankDir) {
     if (!fs.existsSync(file)) return false;
     const ac = yaml.load(fs.readFileSync(file, "utf8"));
     if (e.type === "new") return (ac.variants ?? []).some((v) => norm(v.text) === norm(e.ac.variants?.[0]?.text));
+    if (e.type === "retire") return isRetiredIn(ac, e.facet ?? null);
     return (ac.variants ?? []).some((v) => (v.facet ?? "default") === (e.facet ?? "default") && norm(v.text) === norm(e.text));
   });
 }
@@ -140,7 +190,7 @@ async function main() {
   try {
     console.log(`${entries.length} overlay entr${entries.length === 1 ? "y" : "ies"} (${entries.filter((e) => e.type === "new").length} new, ${entries.filter((e) => e.type === "reword").length} reworded) → ${path.relative(ROOT, bankDir) || bankDir}`);
     const plan = planExport(entries, bankDir);
-    for (const p of plan) console.log(`  ${p.kind === "new" ? "+" : p.kind === "reword" ? "~" : "!"} ${path.basename(p.file)}  ${p.kind === "missing" ? `(${p.id}: its bank entry or variant is gone; left in the overlay)` : p.id}`);
+    for (const p of plan) console.log(`  ${p.kind === "new" ? "+" : p.kind === "reword" ? "~" : p.kind === "retire" ? "-" : "!"} ${path.basename(p.file)}  ${p.kind === "missing" ? `(${p.id}: its bank entry or variant is gone; left in the overlay)` : p.id}`);
     if (!plan.some((p) => p.after)) console.log("  Nothing to write: the bank already has every bullet.");
     if (!dry) for (const p of plan) if (p.after) fs.writeFileSync(p.file, p.after.endsWith("\n") ? p.after : `${p.after}\n`);
     if (!dry && plan.some((p) => p.after)) {

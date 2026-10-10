@@ -3,6 +3,9 @@
 //
 //   { _id: "AC-U001", type: "new", ac: {…a full bank entry…} }                  a bullet you wrote
 //   { _id: "AC-026:default", type: "reword", ac_id, facet, text, previous }   your wording of a bank bullet
+//   { _id: "retire:AC-010", type: "retire", ac_id, facet: null, reason }       retired on the bank page (/bank):
+//   { _id: "retire:AC-010:reliability", type: "retire", ac_id, facet, reason } the entry, or one wording, gets the
+//                                                                               "retired" track no resume uses
 //
 // loadBank() is synchronous, so it reads a local copy (OVERLAY_FILE); syncOverlay(db) refreshes that copy and is
 // called before each resume build (tailor-worker) and by the builder. The bank's version then carries the
@@ -35,7 +38,9 @@ export function readOverlay(file = OVERLAY_FILE) {
   } catch { return null; }
 }
 
-/** The bank entries with your bullets merged in: new entries added, reworded variants replaced. */
+const RETIRED = ["retired"];
+
+/** The bank entries with your bullets merged in: new entries added, reworded variants replaced, retired ones hidden. */
 export function applyOverlay(acs, overlay) {
   if (!overlay) return acs;
   const out = acs.map((ac) => ({ ...ac, variants: (ac.variants || []).map((v) => ({ ...v })) }));
@@ -48,6 +53,14 @@ export function applyOverlay(acs, overlay) {
     const ac = byId.get(e.ac_id);
     const v = ac?.variants?.find((x) => (x.facet ?? "default") === (e.facet ?? "default"));
     if (v) v.text = e.text;
+  }
+  for (const e of overlay.entries) {
+    if (e.type !== "retire") continue;
+    const ac = byId.get(e.ac_id);
+    if (!ac) continue;
+    if (e.facet == null) { ac.tracks = RETIRED; continue; }
+    const v = ac.variants.find((x) => (x.facet ?? "default") === e.facet);
+    if (v) v.tracks = RETIRED;
   }
   return out;
 }

@@ -43,7 +43,8 @@ import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, renderDraft, revertResume, saveBullet, saveDraft, startPasted } from "./resume-builder.mjs";
-import { bankView } from "./bank-page.mjs";
+import { BankPageError, bankView, retireBullet } from "./bank-page.mjs";
+import { syncOverlay } from "./ac-bank-overlay.mjs";
 import { applicationsAnalytics, applicationDetail, dismissJob, linkJobToApplication, markJobApplied, saveLinkedinDirect, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
@@ -1691,15 +1692,27 @@ const server = http.createServer(async (req, res) => {
   // &cards=N with view=unanswered: the first N cards too. &ids=a,b with view=cards: those cards.
   // No view: everything at once; ?counts=1 is view=counts (consoles loaded before the views).
   // Resume builder (docs/resume-builder.md): GET load ?job=<job_url> | ?app=<application id> | ?track=<track> |
-  // ?pasted=<id>; GET pasted (your pasted resumes); GET bank (every bullet, for /bank); POST render | save | revert | bullet (save one to the bank) |
+  // ?pasted=<id>; GET pasted (your pasted resumes); GET bank (every bullet, for /bank); POST bank-retire; POST render | save | revert | bullet (save one to the bank) |
   // check (the bullet rules, nothing saved) | guess (company / title / location from a pasted JD) | start (build a
   // resume from a pasted JD) | delete (a pasted resume).
   if (pathname.startsWith("/resume-builder/")) {
     const op = pathname.slice("/resume-builder/".length);
     const reply = (code, data) => { res.writeHead(code, { "Content-Type": "application/json", "Cache-Control": "no-store" }); res.end(JSON.stringify(data)); };
-    // GET bank: the whole bank for the bank page (scripts/bank-page.mjs). Files only, no Mongo.
+    // GET bank: the whole bank for the bank page (scripts/bank-page.mjs), with your overlay fresh from Mongo (the git
+    // bank alone, marked stale, when Mongo can't be reached). POST bank-retire {acId, facet?, reason?, restore?}.
     if (req.method === "GET" && op === "bank") {
-      try { reply(200, bankView()); } catch (e) { reply(500, { ok: false, error: String(e.message || e) }); }
+      withMongo((db) => syncOverlay(db), { appName: "AtriveoTailorServer" }).then(() => false, () => true)
+        .then((stale) => reply(200, { ...bankView(), stale }), (e) => reply(500, { ok: false, error: String(e.message || e) }));
+      return;
+    }
+    if (req.method === "POST" && op === "bank-retire") {
+      let raw = "";
+      req.on("data", (c) => { raw += c; if (raw.length > 10_000) req.destroy(); });
+      req.on("end", () => {
+        let body; try { body = JSON.parse(raw || "{}"); } catch { return reply(400, { ok: false, error: "Bad JSON" }); }
+        withMongo((db) => retireBullet(db, body), { appName: "AtriveoTailorServer" })
+          .then((data) => reply(200, data), (e) => reply(e instanceof BankPageError ? 400 : 500, { ok: false, error: String(e.message || e) }));
+      });
       return;
     }
     const run = (body) => withMongo((db) => op === "load" ? loadResume(db, { jobUrl: body.job || null, track: body.track || null, appId: body.app || null, pasted: body.pasted || null })

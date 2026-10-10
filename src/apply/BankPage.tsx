@@ -6,13 +6,14 @@ import "./bank.css";
 
 // Bank (/bank): every bullet in the resume bank on one screen. Five columns (Stony Brook, Wake Forest, Accolite,
 // Atriveo, other projects) with "Needs your input" (wordings under 9/10) above them; click a card for its fact and
-// every wording, with the tracks whose tested resume prints it. Read-only for now. Server: scripts/bank-page.mjs
-// (GET /resume-builder/bank). Design and phases: docs/bank-page.md.
+// every wording, with the tracks whose tested resume prints it. Edit a wording (the builder's rules and save), retire or
+// restore one. Server: scripts/bank-page.mjs (GET /resume-builder/bank, POST bank-retire; edits: POST check and bullet).
+// Design and phases: docs/bank-page.md.
 
 interface Pin { track: string; set: string }
-interface Variant { facet: string; text: string; strength: number | null; note: string | null; tracks: string[]; retired: boolean; pinned: Pin[] }
-interface Entry { id: string; role: string; label: string; kind: "experience" | "project"; theme: string; fact: string; confirmedAt: string | null; tracks: string[]; retired: boolean; variants: Variant[] }
-interface Bank { version: string; updatedAt: string | null; tracks: Array<{ id: string; label: string; hasSet: boolean }>; entries: Entry[] }
+interface Variant { facet: string; text: string; strength: number | null; note: string | null; tracks: string[]; retired: boolean; pinned: Pin[]; edited: boolean; retiredHere: string | null }
+interface Entry { id: string; role: string; label: string; kind: "experience" | "project"; theme: string; fact: string; confirmedAt: string | null; tracks: string[]; retired: boolean; retiredHere: string | null; yours: boolean; variants: Variant[] }
+interface Bank { stale?: boolean; version: string; updatedAt: string | null; tracks: Array<{ id: string; label: string; hasSet: boolean }>; entries: Entry[] }
 
 const TRACKS = ["software-engineer", "ai-engineer", "data-science", "data-analytics", "forward-deployed"];
 /** One column each; every other project shares the last. */
@@ -20,6 +21,12 @@ const OWN_COLUMN: Record<string, string> = { "stony-brook": "Stony Brook", "wake
 const COLUMNS = [...Object.entries(OWN_COLUMN).map(([id, label]) => ({ id, label })), { id: "projects", label: "Projects" }];
 const columnOf = (role: string) => (role in OWN_COLUMN ? role : "projects");
 const NINE = 9;
+async function call<T>(op: string, body?: object): Promise<T> {
+  const res = await fetch(`${getTailorServerBase()}/resume-builder/${op}`, body ? { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : { credentials: "include", cache: "no-store" });
+  const json = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
+  if (!res.ok || json.ok === false) throw new Error(json.error || `HTTP ${res.status}`);
+  return json as T;
+}
 const FILTER_KEY = "bank-filters";
 
 const store = {
@@ -62,11 +69,10 @@ export default function BankPage({ header }: { header?: React.ReactNode }) {
 
   useEffect(() => {
     let live = true;
-    fetch(`${getTailorServerBase()}/resume-builder/bank`, { credentials: "include", cache: "no-store" })
-      .then(async (r) => { const j = await r.json().catch(() => ({ ok: false, error: `HTTP ${r.status}` })); if (!r.ok || j.ok === false) throw new Error(j.error || `HTTP ${r.status}`); return j as Bank; })
-      .then((b) => { if (live) setBank(b); }, (e) => { if (live) setError(String(e.message || e)); });
+    call<Bank>("bank").then((b) => { if (live) setBank(b); }, (e) => { if (live) setError(String(e.message || e)); });
     return () => { live = false; };
   }, []);
+  const reload = () => call<Bank>("bank").then(setBank);
   useEffect(() => { store.set({ track, under, retired }); }, [track, under, retired]);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
@@ -77,8 +83,6 @@ export default function BankPage({ header }: { header?: React.ReactNode }) {
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
   }, []);
-
-  const shown = (e: Entry) => shownWordings(e, track, retired);
 
   const visible = useMemo(() => {
     if (!bank) return [];
@@ -125,6 +129,7 @@ export default function BankPage({ header }: { header?: React.ReactNode }) {
         <div className="rv-bar-title">
           <h1>Bank</h1>
           {bank ? <span className="apps-muted"><b className="bk-num">{stats.nine}</b> of <b className="bk-num">{stats.live}</b> wordings at 9+ · v{bank.version}</span> : null}
+          {bank?.stale ? <span className="bk-stale" role="status">Your unsaved-to-git edits couldn't be loaded; showing the git bank.</span> : null}
           {bank ? <span className="bk-meter" aria-hidden="true"><i style={{ width: `${(100 * stats.nine) / Math.max(stats.live, 1)}%` }} /></span> : null}
         </div>
         <div className="bk-filters">
@@ -162,24 +167,57 @@ export default function BankPage({ header }: { header?: React.ReactNode }) {
                 })}
               </div>
             </div>
-            {open ? <Detail entry={open} show={shown(open)} onClose={() => setSelected(null)} /> : null}
+            {open ? <Detail key={open.id} entry={open} track={track} onClose={() => setSelected(null)} onBank={setBank} reload={reload} /> : null}
           </div>
         )}
     </div>
   );
 }
 
-function Detail({ entry: e, show, onClose }: { entry: Entry; show: Variant[]; onClose: () => void }) {
+interface Edit { facet: string; text: string; issues: string[] | null; verbs: string[] }
+interface Retire { facet: string | null; reason: string }
+
+function Detail({ entry: e, track, onClose, onBank, reload }: { entry: Entry; track: string; onClose: () => void; onBank: (b: Bank) => void; reload: () => Promise<void> }) {
+  // Retired wordings stay listed here (dimmed) so they can be restored; the track filter still applies.
+  const show = e.variants.filter((v) => track === "all" || v.retired || onTrack(e, v, track));
   const hidden = e.variants.length - show.length;
+  const [edit, setEdit] = useState<Edit | null>(null);
+  const [retire, setRetire] = useState<Retire | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState("");
+
+  // The builder's rules on what you type (nothing saved), a moment after you stop.
+  useEffect(() => {
+    if (!edit) return;
+    const t = setTimeout(() => {
+      call<{ issues: string[]; freeVerbs: string[] }>("check", { role: e.role, text: edit.text, acId: e.id })
+        .then((r) => setEdit((x) => (x && x.text === edit.text ? { ...x, issues: r.issues, verbs: r.freeVerbs } : x)), () => {});
+    }, 350);
+    return () => clearTimeout(t);
+  }, [edit?.text]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const run = async (what: () => Promise<unknown>, message: string) => {
+    setBusy(true); setError("");
+    try { await what(); setDone(message); setEdit(null); setRetire(null); } catch (err) { setError(String((err as Error).message || err)); } finally { setBusy(false); }
+  };
+  const save = () => edit && run(async () => { await call("bullet", { role: e.role, text: edit.text, mode: "reword", acId: e.id, facet: edit.facet }); await reload(); }, "Saved. Every future resume uses the new wording.");
+  const doRetire = (facet: string | null, reason: string, restore = false) => run(async () => onBank(await call<Bank>("bank-retire", { acId: e.id, facet, reason, restore })),
+    restore ? "Restored." : facet == null ? "Retired. No future resume uses this entry." : "Retired. No future resume uses this wording.");
+  const pinnedSets = (vs: Variant[]) => [...new Set(vs.flatMap((v) => v.pinned).map((p) => TRACK_LABEL[p.track] ?? p.track))];
+  const entryPins = pinnedSets(e.variants);
+  const words = edit ? edit.text.trim().split(/\s+/).filter(Boolean).length : 0;
+
   return (
     <aside className="bk-detail" aria-label={`${e.id} details`}>
       <header>
         <div>
           <h2>{e.label}</h2>
-          <p className="apps-muted"><span className="bk-id">{e.id}</span> · {e.kind} · {theme(e)}{e.retired ? " · retired" : ""}</p>
+          <p className="apps-muted"><span className="bk-id">{e.id}</span> · {e.kind} · {theme(e)}{e.yours ? " · yours" : ""}{e.retired ? " · retired" : ""}</p>
         </div>
         <button type="button" className="bk-close" onClick={onClose} aria-label="Close">×</button>
       </header>
+      {error ? <p className="bk-error" role="alert">{error}</p> : done ? <p className="bk-done" role="status">{done}</p> : null}
       <div className="bk-fact">
         <span className="bk-label">Fact behind it</span>
         <p>{e.fact || "No fact written for this entry yet."}</p>
@@ -187,19 +225,72 @@ function Detail({ entry: e, show, onClose }: { entry: Entry; show: Variant[]; on
       </div>
       <span className="bk-label">Wordings{hidden > 0 ? ` (${hidden} more hidden by your filters)` : ""}</span>
       <div className="bk-variants">
-        {show.map((v) => (
-          <div key={v.facet} className={`bk-variant ${v.retired ? "is-retired" : ""}`}>
-            <div className="bk-card-top">
-              <Score s={v.strength} />
-              {v.tracks.length ? v.tracks.map((t) => <span key={t} className="bk-tag">{TRACK_LABEL[t] ?? t} only</span>) : <span className="bk-tag">Every track</span>}
-              <span className="bk-id">{v.facet}</span>
-              {v.retired ? <span className="bk-id">retired</span> : null}
+        {show.map((v) => {
+          const editing = edit?.facet === v.facet;
+          const retiring = retire?.facet === v.facet;
+          return (
+            <div key={v.facet} className={`bk-variant ${v.retired ? "is-retired" : ""}`}>
+              <div className="bk-card-top">
+                <Score s={v.strength} />
+                {v.tracks.length ? v.tracks.map((t) => <span key={t} className="bk-tag">{TRACK_LABEL[t] ?? t} only</span>) : <span className="bk-tag">Every track</span>}
+                <span className="bk-id">{v.facet}</span>
+                {v.edited ? <span className="bk-tag is-edited" title="The score is the old wording's until it is re-scored">Edited · score is from before</span> : null}
+                {v.retired ? <span className="bk-id">retired{v.retiredHere ? ` · ${v.retiredHere}` : ""}</span> : null}
+              </div>
+              {editing ? (
+                <div className="bk-edit">
+                  <textarea id={`bk-edit-${e.id}-${v.facet}`} aria-label="Wording" rows={4} value={edit.text} autoFocus
+                    onChange={(ev) => setEdit({ ...edit, text: ev.target.value, issues: null })}
+                    onKeyDown={(ev) => { if (ev.key === "Escape") { ev.stopPropagation(); setEdit(null); } }} />
+                  <div className="bk-verdict">
+                    <span className={`bk-words ${words && (words < 12 || words > 35) ? "is-off" : ""}`}>{words} words</span>
+                    {edit.issues == null ? <span className="apps-muted">Checking…</span>
+                      : !edit.issues.length ? <span className="bk-ok">Passes every bullet rule</span>
+                      : <ul>{edit.issues.map((i) => <li key={i}>{i}</li>)}</ul>}
+                    {edit.issues?.some((i) => /already opens/.test(i)) && edit.verbs.length ? <span className="apps-muted">Free verbs: {edit.verbs.slice(0, 8).join(", ")}</span> : null}
+                  </div>
+                  <div className="bk-actions">
+                    <button type="button" className="rv-primary" disabled={busy || !edit.issues || edit.issues.length > 0 || edit.text.trim() === v.text} onClick={() => void save()}>{busy ? "Saving…" : "Save wording"}</button>
+                    <button type="button" className="bk-btn" onClick={() => setEdit(null)}>Cancel</button>
+                  </div>
+                </div>
+              ) : <p>{v.text}</p>}
+              {v.note && !editing ? <p className="bk-note">{v.note}</p> : null}
+              {v.pinned.length ? <div className="bk-pins"><span className="apps-muted">Printed on</span>{v.pinned.map((p) => <Track key={`${p.track}-${p.set}`} id={p.track} set={p.set} />)}</div> : null}
+              {retiring ? (
+                <div className="bk-edit">
+                  <input id={`bk-why-${e.id}-${v.facet}`} type="text" className="bk-search bk-why" placeholder="Why (optional), e.g. duplicate of AC-232" aria-label="Why retire it" value={retire.reason} onChange={(ev) => setRetire({ ...retire, reason: ev.target.value })} />
+                  <div className="bk-actions">
+                    <button type="button" className="bk-btn is-danger" disabled={busy} onClick={() => void doRetire(v.facet, retire.reason)}>Retire this wording</button>
+                    <button type="button" className="bk-btn" onClick={() => setRetire(null)}>Cancel</button>
+                  </div>
+                </div>
+              ) : !editing && !e.retired ? (
+                <div className="bk-actions">
+                  {!v.retired ? <button type="button" className="bk-btn" onClick={() => { setDone(""); setError(""); setRetire(null); setEdit({ facet: v.facet, text: v.text, issues: null, verbs: [] }); }}>Edit</button> : null}
+                  {v.retiredHere != null ? <button type="button" className="bk-btn" disabled={busy} onClick={() => void doRetire(v.facet, "", true)}>Restore</button>
+                    : !v.retired ? <button type="button" className="bk-btn" disabled={busy || v.pinned.length > 0} title={v.pinned.length ? `Printed on the ${pinnedSets([v]).join(", ")} resume: take it out of that set in TRACKS.yaml first` : undefined}
+                        onClick={() => { setDone(""); setError(""); setEdit(null); setRetire({ facet: v.facet, reason: "" }); }}>Retire</button> : null}
+                </div>
+              ) : null}
             </div>
-            <p>{v.text}</p>
-            {v.note ? <p className="bk-note">{v.note}</p> : null}
-            {v.pinned.length ? <div className="bk-pins"><span className="apps-muted">Printed on</span>{v.pinned.map((p) => <Track key={`${p.track}-${p.set}`} id={p.track} set={p.set} />)}</div> : null}
-          </div>
-        ))}
+          );
+        })}
+      </div>
+      <div className="bk-entry-actions">
+        {e.retiredHere != null ? <button type="button" className="bk-btn" disabled={busy} onClick={() => void doRetire(null, "", true)}>Restore this entry</button>
+          : e.retired ? <span className="apps-muted">Retired in git.</span>
+          : retire?.facet === null ? (
+            <div className="bk-edit">
+              <input id={`bk-why-${e.id}`} type="text" className="bk-search bk-why" placeholder="Why (optional), e.g. duplicate of AC-232" aria-label="Why retire the entry" value={retire.reason} onChange={(ev) => setRetire({ ...retire, reason: ev.target.value })} />
+              <div className="bk-actions">
+                <button type="button" className="bk-btn is-danger" disabled={busy} onClick={() => void doRetire(null, retire.reason)}>Retire all {e.variants.length} wording{e.variants.length === 1 ? "" : "s"}</button>
+                <button type="button" className="bk-btn" onClick={() => setRetire(null)}>Cancel</button>
+              </div>
+            </div>
+          ) : <button type="button" className="bk-btn" disabled={busy || entryPins.length > 0} title={entryPins.length ? `Printed on the ${entryPins.join(", ")} resume: take it out of that set in TRACKS.yaml first` : undefined}
+              onClick={() => { setDone(""); setError(""); setEdit(null); setRetire({ facet: null, reason: "" }); }}>Retire this entry</button>}
+        {entryPins.length && !e.retired ? <span className="apps-muted">Printed on the {entryPins.join(", ")} resume, so it can't be retired here.</span> : null}
       </div>
     </aside>
   );

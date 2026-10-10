@@ -35,17 +35,30 @@ One screen for the whole resume bullet bank (`data/ac-bank/AC-*.yaml` plus your 
 - `scripts/tailor-server.mjs`: `GET /resume-builder/bank` reads files only, with no Mongo.
 - `src/apply/BankPage.tsx` and `src/apply/bank.css` are the page; the route and the "Bank" nav link are in
   `ApplyApp.tsx` and `ApplyHeader.tsx`.
-- `tests/review/bankPage.test.mjs` checks:
+- Editing (phase 2), in the detail panel:
+  - **Edit:** the builder's live rule check (`POST /resume-builder/check`) and save (`POST bullet`, mode `reword`): your
+    wording replaces that wording for every future resume, through the Mongo overlay. The old score stays, tagged
+    "Edited · score is from before", until it is re-scored.
+  - **Retire / Restore:** `POST /resume-builder/bank-retire {acId, facet?, reason?, restore?}` writes or deletes an
+    overlay entry `{ type: "retire" }`; `applyOverlay` gives the entry or wording the `retired` track no resume uses.
+    A wording a track's tested set prints can't be retired (change TRACKS.yaml first). Only retirements made on the page
+    can be restored there.
+  - `npm run bank:export` writes rewords and retirements into the YAML (`tracks: [retired]`, plus a "# Retired …"
+    comment on an entry); you review and commit.
+  - Pinning isn't on the page on purpose: the pinned sets are blind-tested, so they change through TRACKS.yaml and a test.
+  - **Where it applies:** every resume builder that reads the overlay (both Oracle workers and the Mac tailor-worker)
+    needs `ac-bank-overlay.mjs` from this change, or it ignores retirements.
+- `tests/review/bankPage.test.mjs` and `bankPageEdit.test.mjs` check:
   - every pinned bullet is a live wording the page marks;
   - the desktop board fits one screen;
   - the filters work;
-  - the phone layout.
+  - the phone layout;
+  - retire/restore in Mongo, the tested-set guard, the export, and the edit/retire controls.
 
 ## Phases
 
-1. **Read-only page (this).**
-2. Edit, retire, merge and pin from the detail panel, through the builder's checks (`checkText`, the unique-verb rule,
-   `ac-bullet-lint`).
+1. Read-only page (live 2026-10-10).
+2. **Edit, retire and restore from the detail panel (this).** A merge is a retire with "merged into AC-…" as the reason.
 3. Needs your input: type the missing fact on the card; it goes to the fact sheet, and a new wording is drafted for
    review.
 
