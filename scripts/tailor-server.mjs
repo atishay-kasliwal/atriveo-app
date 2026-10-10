@@ -43,6 +43,7 @@ import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, renderDraft, revertResume, saveBullet, saveDraft, startPasted } from "./resume-builder.mjs";
+import { bankView } from "./bank-page.mjs";
 import { applicationsAnalytics, applicationDetail, dismissJob, linkJobToApplication, markJobApplied, saveLinkedinDirect, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
@@ -1690,12 +1691,17 @@ const server = http.createServer(async (req, res) => {
   // &cards=N with view=unanswered: the first N cards too. &ids=a,b with view=cards: those cards.
   // No view: everything at once; ?counts=1 is view=counts (consoles loaded before the views).
   // Resume builder (docs/resume-builder.md): GET load ?job=<job_url> | ?app=<application id> | ?track=<track> |
-  // ?pasted=<id>; GET pasted (your pasted resumes); POST render | save | revert | bullet (save one to the bank) |
+  // ?pasted=<id>; GET pasted (your pasted resumes); GET bank (every bullet, for /bank); POST render | save | revert | bullet (save one to the bank) |
   // check (the bullet rules, nothing saved) | guess (company / title / location from a pasted JD) | start (build a
   // resume from a pasted JD) | delete (a pasted resume).
   if (pathname.startsWith("/resume-builder/")) {
     const op = pathname.slice("/resume-builder/".length);
     const reply = (code, data) => { res.writeHead(code, { "Content-Type": "application/json", "Cache-Control": "no-store" }); res.end(JSON.stringify(data)); };
+    // GET bank: the whole bank for the bank page (scripts/bank-page.mjs). Files only, no Mongo.
+    if (req.method === "GET" && op === "bank") {
+      try { reply(200, bankView()); } catch (e) { reply(500, { ok: false, error: String(e.message || e) }); }
+      return;
+    }
     const run = (body) => withMongo((db) => op === "load" ? loadResume(db, { jobUrl: body.job || null, track: body.track || null, appId: body.app || null, pasted: body.pasted || null })
       : op === "pasted" ? listPasted(db)
       : op === "guess" ? Promise.resolve({ ok: true, ...guessPosting(body.jd) })

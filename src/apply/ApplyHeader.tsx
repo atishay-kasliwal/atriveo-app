@@ -31,7 +31,7 @@ export default function ApplyHeader({ user }: { user: User }) {
         <span className="apply-brand-by">by Atriveo</span>
       </a>
       <nav className="apply-nav" aria-label="Console">
-        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" ? "page" : undefined}>
+        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" ? "page" : undefined}>
           Today{waiting !== null ? <span className="apply-nav-n">{waiting}</span> : null}
         </Link>
         <Link to="/unanswered" aria-current={page === "answer" ? "page" : undefined}>
@@ -39,6 +39,7 @@ export default function ApplyHeader({ user }: { user: User }) {
         </Link>
         <Link to="/staffing" aria-current={path === "/staffing" ? "page" : undefined}>Staffing</Link>
         <Link to="/resume_builder" aria-current={path === "/resume_builder" ? "page" : undefined}>Resumes</Link>
+        <Link to="/bank" aria-current={path === "/bank" ? "page" : undefined}>Bank</Link>
         <Link to="/stats" aria-current={page === "stats" ? "page" : undefined}>Stats</Link>
       </nav>
       <div className="apply-header-right">

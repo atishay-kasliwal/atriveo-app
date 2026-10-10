@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-route
 import { useAuth } from "../hooks/useAuth";
 import Applications from "../pages/Applications";
 import AdminLogin from "./AdminLogin";
+import BankPage from "./BankPage";
 import ApplyHeader from "./ApplyHeader";
 import QuestionsPage from "./QuestionsPage";
 import ReadyPage from "./ReadyPage";
@@ -19,6 +20,7 @@ function Console() {
   const header = <ApplyHeader user={user} />;
   if (path === "/staffing") return <StaffingPage header={header} />;
   if (path === "/resume_builder") return <ResumeBuilderPage header={header} />;
+  if (path === "/bank") return <BankPage header={header} />;
   if (path === "/unanswered") return <QuestionsPage header={header} />;
   // The full form view: every question of one application, drafts included.
   if (path === "/answers") return <UnansweredPage header={header} />;
