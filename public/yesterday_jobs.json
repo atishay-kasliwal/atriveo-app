@@ -369,22 +369,33 @@
     "title": "Python Data Engineer",
     "valid_through": null,
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "eb37d1b06867af179bae8ecc3112d13f018bac6b73faf1f0313d151af60d5dd1",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-10T14:55:32.181Z",
+      "updated_at": "2026-10-10T15:23:55.706Z",
       "error": null,
       "company": "Collabera",
       "title": "Python Data Engineer",
-      "resume_slot": null,
+      "resume_slot": 3167,
       "session_hour": "07",
       "batch_time": "2026-10-09T11:11:21.463022+00:00",
       "session_id": "staffing-20261009T110020-a966768a",
       "priority": 950,
-      "source": "staffing"
+      "source": "staffing",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Collabera (10thOctober)-7",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Collabera (10thOctober)-7/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Collabera (10thOctober)-7",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Collabera (10thOctober)-7/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-10T15:23:55.706Z"
+      }
     },
     "ats_score": 55,
     "fit_score": 5
@@ -423,22 +434,33 @@
     "title": "Associate Software Developer",
     "valid_through": null,
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "d871bbe480ab31aa7f856c81bdde342524b2042f181420a253d2c0f07a4bccc7",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-10T14:55:30.728Z",
+      "updated_at": "2026-10-10T15:31:35.469Z",
       "error": null,
       "company": "Collabera",
       "title": "Associate Software Developer",
-      "resume_slot": null,
+      "resume_slot": 3570,
       "session_hour": "07",
       "batch_time": "2026-10-09T11:11:21.463022+00:00",
       "session_id": "staffing-20261009T110020-a966768a",
       "priority": 950,
-      "source": "staffing"
+      "source": "staffing",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Collabera (10thOctober)-8",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Collabera (10thOctober)-8/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Collabera (10thOctober)-8",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Collabera (10thOctober)-8/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-10T15:31:35.469Z"
+      }
     },
     "ats_score": 0,
     "fit_score": 4
@@ -477,25 +499,36 @@
     "title": "Machine Learning Engineer",
     "valid_through": null,
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "6ca5249b94854befa270ce39033e5fc71bdcc46a9f47adbcb32a1d784fe83496",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-10T14:55:55.626Z",
+      "updated_at": "2026-10-10T15:34:09.671Z",
       "error": null,
       "company": "Artech",
       "title": "Machine Learning Engineer",
-      "resume_slot": null,
+      "resume_slot": 3700,
       "session_hour": "07",
       "batch_time": "2026-10-09T11:11:21.463022+00:00",
       "session_id": "staffing-20261009T110020-a966768a",
       "priority": 950,
-      "source": "staffing"
+      "source": "staffing",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Artech (10thOctober)-31",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Artech (10thOctober)-31/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Artech (10thOctober)-31",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Artech (10thOctober)-31/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-10T15:34:09.671Z"
+      }
     },
     "ats_score": 44,
-    "fit_score": 13
+    "fit_score": 12
   },
   {
     "job_url": "https://insightglobal.com/jobs/ba275fc4-1fd8-420a-b8e1-4e41f497815f",
@@ -531,22 +564,33 @@
     "title": "REMOTE Acumatica Software Engineer",
     "valid_through": null,
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "5d83d6c7bee6c33e8b268752833ab6451fa7ed6ea0161d7c4fed372c24cb899e",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-10T14:55:30.496Z",
+      "updated_at": "2026-10-10T15:38:16.795Z",
       "error": null,
       "company": "Insight Global",
       "title": "REMOTE Acumatica Software Engineer",
-      "resume_slot": null,
+      "resume_slot": 3921,
       "session_hour": "07",
       "batch_time": "2026-10-09T11:11:21.463022+00:00",
       "session_id": "staffing-20261009T110020-a966768a",
       "priority": 950,
-      "source": "staffing"
+      "source": "staffing",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "InsightGlobal (10thOctober)-12",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/InsightGlobal (10thOctober)-12/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/InsightGlobal (10thOctober)-12",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/InsightGlobal (10thOctober)-12/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-10T15:38:16.794Z"
+      }
     },
     "ats_score": 50,
     "fit_score": 6
@@ -585,22 +629,33 @@
     "title": "Software Developer III",
     "valid_through": "2026-10-28T00:00:00+00:00",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "67dc8ef61452d234bbe6758f180985c3606c78fddd0a0c1165153eff1ce54c68",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-10T14:55:32.483Z",
+      "updated_at": "2026-10-10T15:38:45.958Z",
       "error": null,
       "company": "Randstad USA",
       "title": "Software Developer III",
-      "resume_slot": null,
+      "resume_slot": 3947,
       "session_hour": "07",
       "batch_time": "2026-10-09T11:11:21.463022+00:00",
       "session_id": "staffing-20261009T110020-a966768a",
       "priority": 950,
-      "source": "staffing"
+      "source": "staffing",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "RandstadUSA (10thOctober)-17",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/RandstadUSA (10thOctober)-17/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/RandstadUSA (10thOctober)-17",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/RandstadUSA (10thOctober)-17/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-10T15:38:45.958Z"
+      }
     },
     "ats_score": 40,
     "fit_score": 5
@@ -639,22 +694,33 @@
     "title": "AI Engineer",
     "valid_through": "2026-10-30T00:00:00+00:00",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "79c2bf18141646e0489fd83f326d8f4cf08f546a16b5e3176e17c0d3b51895ad",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-10T14:55:31.589Z",
+      "updated_at": "2026-10-10T15:42:02.672Z",
       "error": null,
       "company": "Randstad USA",
       "title": "AI Engineer",
-      "resume_slot": null,
+      "resume_slot": 4116,
       "session_hour": "07",
       "batch_time": "2026-10-09T11:11:21.463022+00:00",
       "session_id": "staffing-20261009T110020-a966768a",
       "priority": 950,
-      "source": "staffing"
+      "source": "staffing",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "RandstadUSA (10thOctober)-18",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/RandstadUSA (10thOctober)-18/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/RandstadUSA (10thOctober)-18",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/RandstadUSA (10thOctober)-18/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-10T15:42:02.672Z"
+      }
     },
     "ats_score": 30,
     "fit_score": 5
@@ -693,22 +759,33 @@
     "title": "Software Quality Analyst",
     "valid_through": null,
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "5fac8d8a1d9dabba02ff9eb9675c4139acf612e7ab6a5ebb3cf33c6a0d45c15c",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-10T14:55:30.411Z",
+      "updated_at": "2026-10-10T15:47:11.072Z",
       "error": null,
       "company": "Collabera",
       "title": "Software Quality Analyst",
-      "resume_slot": null,
+      "resume_slot": 4389,
       "session_hour": "07",
       "batch_time": "2026-10-09T11:11:21.463022+00:00",
       "session_id": "staffing-20261009T110020-a966768a",
       "priority": 950,
-      "source": "staffing"
+      "source": "staffing",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "Collabera (10thOctober)-9",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Collabera (10thOctober)-9/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Collabera (10thOctober)-9",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Collabera (10thOctober)-9/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-10T15:47:11.071Z"
+      }
     },
     "ats_score": 0,
     "fit_score": 3
@@ -747,22 +824,33 @@
     "title": "Software QA Analyst",
     "valid_through": null,
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "c0297433a6dd528184c8e57b02d802b723df60adfd0ee3dabe1054889ee9f697",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-10T14:55:31.284Z",
+      "updated_at": "2026-10-10T15:47:31.348Z",
       "error": null,
       "company": "Collabera",
       "title": "Software QA Analyst",
-      "resume_slot": null,
+      "resume_slot": 4402,
       "session_hour": "07",
       "batch_time": "2026-10-09T11:11:21.463022+00:00",
       "session_id": "staffing-20261009T110020-a966768a",
       "priority": 950,
-      "source": "staffing"
+      "source": "staffing",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "Collabera (10thOctober)-10",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Collabera (10thOctober)-10/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Collabera (10thOctober)-10",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Collabera (10thOctober)-10/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-10T15:47:31.348Z"
+      }
     },
     "ats_score": 0,
     "fit_score": 3
@@ -801,22 +889,33 @@
     "title": "Salesforce/Seismic Administrator Data Analyst",
     "valid_through": null,
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "5b2f1c3267e07f4bbb574788ca9ca9f2edbc2695dde7f0d7f69cd2366fc2f96c",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-10T14:55:34.440Z",
+      "updated_at": "2026-10-10T15:53:59.831Z",
       "error": null,
       "company": "Compunnel",
       "title": "Salesforce/Seismic Administrator Data Analyst",
-      "resume_slot": null,
+      "resume_slot": 4802,
       "session_hour": "07",
       "batch_time": "2026-10-09T11:11:21.463022+00:00",
       "session_id": "staffing-20261009T110020-a966768a",
       "priority": 950,
-      "source": "staffing"
+      "source": "staffing",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "Compunnel (10thOctober)-16",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Compunnel (10thOctober)-16/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Compunnel (10thOctober)-16",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Compunnel (10thOctober)-16/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-10T15:53:59.831Z"
+      }
     },
     "ats_score": 50,
     "fit_score": 6
@@ -855,22 +954,33 @@
     "title": "Software Developer",
     "valid_through": null,
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "7e2aebfa7ce8bbde59fb8a8a8dbc154638b74405530e15e3d29c9c3ff5309297",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-10T14:55:47.257Z",
+      "updated_at": "2026-10-10T16:02:03.726Z",
       "error": null,
       "company": "Kforce",
       "title": "Software Developer",
-      "resume_slot": null,
+      "resume_slot": 5252,
       "session_hour": "07",
       "batch_time": "2026-10-09T11:11:21.463022+00:00",
       "session_id": "staffing-20261009T110020-a966768a",
       "priority": 950,
-      "source": "staffing"
+      "source": "staffing",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Kforce (10thOctober)-24",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Kforce (10thOctober)-24/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Kforce (10thOctober)-24",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/Kforce (10thOctober)-24/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-10T16:02:03.726Z"
+      }
     },
     "ats_score": 60,
     "fit_score": 4
@@ -1399,22 +1509,33 @@
     "title": "DevOps Engineer \u2013 Linux & Python",
     "valid_through": "2026-12-12T15:59:13.027000+00:00",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "d0fdd0d7147c5c051a5d8010ea6abf72a744887768066ef1aa47c10a547bd148",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-10T14:56:01.171Z",
+      "updated_at": "2026-10-10T15:54:54.387Z",
       "error": null,
       "company": "Motion Recruitment",
       "title": "DevOps Engineer \u2013 Linux & Python",
-      "resume_slot": null,
+      "resume_slot": 4854,
       "session_hour": "07",
       "batch_time": "2026-10-09T11:11:21.463022+00:00",
       "session_id": "staffing-20261009T110020-a966768a",
       "priority": 950,
-      "source": "staffing"
+      "source": "staffing",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "MotionRecruitment (10thOctober)-9",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/MotionRecruitment (10thOctober)-9/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/MotionRecruitment (10thOctober)-9",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-10/MotionRecruitment (10thOctober)-9/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-10T15:54:54.387Z"
+      }
     },
     "ats_score": 50,
     "fit_score": 5
@@ -3318,7 +3439,7 @@
       "status": "FAILED",
       "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-10T14:46:30.531Z"
+      "updatedAt": "2026-10-10T15:16:40.653Z"
     },
     "ats_score": 69,
     "fit_score": 12
@@ -4297,7 +4418,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-09T14:55:17.409Z",
     "ats_score": 75,
-    "fit_score": 10
+    "fit_score": 9
   },
   {
     "session_id": "2026-10-09T14:37:40Z",
@@ -5584,7 +5705,7 @@
     "summary": "In most instances, this position requires in\\-person interviews as part of the hiring process.",
     "title": "Software Engineer III, Infrastructure, Google Cloud Global Networking",
     "ats_score": 33,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "session_id": "2026-10-09T14:37:40Z",
@@ -6025,10 +6146,10 @@
       "status": "FAILED",
       "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-10T14:38:22.512Z"
+      "updatedAt": "2026-10-10T15:39:29.702Z"
     },
     "ats_score": 0,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4467843518",
@@ -6540,6 +6661,8 @@
         "built_at": "2026-10-09T14:46:16.296Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-10T15:58:04.528Z",
     "ats_score": 40,
     "fit_score": 2
   },
@@ -8241,7 +8364,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-09T15:59:12.963Z",
     "ats_score": 50,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "session_id": "2026-10-09T14:37:40Z",
@@ -10197,6 +10320,8 @@
         "built_at": "2026-10-09T15:03:07.375Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-10T15:58:22.712Z",
     "ats_score": 0,
     "fit_score": 2
   },
@@ -10998,6 +11123,8 @@
         "built_at": "2026-10-09T15:08:11.883Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-10T15:58:17.644Z",
     "ats_score": 36,
     "fit_score": 7
   },
@@ -11504,7 +11631,7 @@
       "status": "FAILED",
       "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-10T14:57:09.754Z"
+      "updatedAt": "2026-10-10T15:27:27.548Z"
     },
     "ats_score": 40,
     "fit_score": 7
@@ -11597,8 +11724,10 @@
         "built_at": "2026-10-09T15:11:39.887Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-10T15:57:57.386Z",
     "ats_score": 64,
-    "fit_score": 15
+    "fit_score": 16
   },
   {
     "session_id": "2026-10-09T15:03:24Z",
@@ -12124,7 +12253,7 @@
       "status": "FAILED",
       "reviewReason": null,
       "ats": "greenhouse",
-      "updatedAt": "2026-10-10T14:51:54.190Z"
+      "updatedAt": "2026-10-10T15:22:52.679Z"
     },
     "ats_score": 63,
     "fit_score": 9
@@ -12738,6 +12867,8 @@
         "built_at": "2026-10-09T15:21:29.126Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-10T15:58:01.050Z",
     "ats_score": 50,
     "fit_score": 8
   },
@@ -13500,6 +13631,8 @@
         "built_at": "2026-10-09T15:26:15.984Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-10T15:57:53.517Z",
     "ats_score": 50,
     "fit_score": 5
   },
@@ -14249,7 +14382,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-09T15:59:21.881Z",
     "ats_score": 20,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4424442430",
@@ -14696,6 +14829,8 @@
         "built_at": "2026-10-09T16:06:42.158Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-10T15:57:49.709Z",
     "ats_score": 36,
     "fit_score": 7
   },
@@ -14769,7 +14904,7 @@
       "updatedAt": "2026-10-09T23:04:34.717Z"
     },
     "ats_score": 64,
-    "fit_score": 9
+    "fit_score": 10
   },
   {
     "session_id": "2026-10-09T16:03:44Z",
@@ -15406,7 +15541,7 @@
     "apply_type": "easy_apply",
     "apply_type_at": "2026-10-09T16:57:18.120Z",
     "ats_score": 43,
-    "fit_score": 16
+    "fit_score": 15
   },
   {
     "session_id": "2026-10-09T16:03:44Z",
@@ -16146,6 +16281,8 @@
         "built_at": "2026-10-09T16:15:43.067Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-10T15:58:32.348Z",
     "ats_score": 55,
     "fit_score": 5
   },
@@ -16268,6 +16405,8 @@
         "built_at": "2026-10-09T16:16:22.576Z"
       }
     },
+    "apply_type": "closed",
+    "apply_type_at": "2026-10-10T15:58:40.404Z",
     "ats_score": 20,
     "fit_score": 4
   },
@@ -16607,6 +16746,8 @@
         "built_at": "2026-10-09T16:18:07.340Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-10T15:58:58.882Z",
     "ats_score": 50,
     "fit_score": 3
   },
@@ -16939,6 +17080,8 @@
         "built_at": "2026-10-09T16:19:58.016Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-10T15:58:13.649Z",
     "ats_score": 33,
     "fit_score": 5
   },
@@ -16999,6 +17142,8 @@
         "built_at": "2026-10-09T16:20:20.057Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-10T15:58:27.847Z",
     "ats_score": 42,
     "fit_score": 8
   },
@@ -17894,7 +18039,7 @@
     "apply_type": "easy_apply",
     "apply_type_at": "2026-10-09T17:56:04.161Z",
     "ats_score": 57,
-    "fit_score": 15
+    "fit_score": 14
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4459625292",
@@ -18228,6 +18373,8 @@
         "built_at": "2026-10-09T17:11:31.697Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-10T15:58:09.769Z",
     "ats_score": 55,
     "fit_score": 5
   },
@@ -18784,6 +18931,8 @@
         "built_at": "2026-10-09T17:12:53.734Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-10T15:58:35.744Z",
     "ats_score": 62,
     "fit_score": 10
   },
@@ -21017,6 +21166,8 @@
         "built_at": "2026-10-09T18:08:28.723Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-10T15:59:12.706Z",
     "ats_score": 66,
     "fit_score": 2
   },
@@ -21954,6 +22105,8 @@
         "built_at": "2026-10-09T19:04:40.392Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-10T15:59:17.431Z",
     "ats_score": 60,
     "fit_score": 4
   },
@@ -22533,6 +22686,8 @@
         "built_at": "2026-10-09T19:05:56.724Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-10T15:58:44.899Z",
     "ats_score": 69,
     "fit_score": 24
   },
@@ -22725,6 +22880,8 @@
         "built_at": "2026-10-09T19:06:43.893Z"
       }
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-10T15:58:50.153Z",
     "ats_score": 63,
     "fit_score": 23
   },
@@ -24677,7 +24834,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-09T23:55:44.295Z",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4422137269",
@@ -25111,7 +25268,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-09T23:55:49.353Z",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://jobs.lever.co/veeva/37497319-4c90-41a9-99c6-e2992a0670e4",
@@ -26223,6 +26380,8 @@
         "built_at": "2026-10-09T23:03:41.850Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-10T15:59:08.646Z",
     "ats_score": 60,
     "fit_score": 4
   },
@@ -26523,6 +26682,8 @@
         "built_at": "2026-10-09T23:03:45.341Z"
       }
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-10T15:59:03.774Z",
     "ats_score": 60,
     "fit_score": 4
   },
@@ -28046,6 +28207,8 @@
       "status": "success",
       "updated_at": "2026-10-09T20:26:05.298Z"
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-10T15:58:54.892Z",
     "ats_score": 66,
     "fit_score": 4
   },
@@ -28575,7 +28738,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-09T23:55:35.561Z",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-10-09T20:25:28Z",
@@ -29302,7 +29465,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-09T23:55:39.063Z",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4464214890",
@@ -32874,7 +33037,7 @@
       "status": "FAILED",
       "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-10T14:55:42.678Z"
+      "updatedAt": "2026-10-10T15:25:54.408Z"
     },
     "ats_score": 40,
     "fit_score": 7
@@ -35171,7 +35334,7 @@
     "apply_type": "easy_apply",
     "apply_type_at": "2026-10-10T00:56:52.712Z",
     "ats_score": 61,
-    "fit_score": 16
+    "fit_score": 17
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4456305527",
@@ -36194,7 +36357,7 @@
       "status": "FAILED",
       "reviewReason": null,
       "ats": "greenhouse",
-      "updatedAt": "2026-10-10T14:47:28.017Z"
+      "updatedAt": "2026-10-10T15:17:38.148Z"
     },
     "ats_score": 37,
     "fit_score": 4
