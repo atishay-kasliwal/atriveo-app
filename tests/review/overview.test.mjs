@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { MongoClient } from 'mongodb';
-import { applicationsAnalytics, overviewHistory, overviewSummary } from '../../scripts/applications-analytics.mjs';
+import { applicationsAnalytics, overviewHistory, overviewSummary, markJobApplied } from '../../scripts/applications-analytics.mjs';
 
 // The Overview per view (summary + history pages) against the full response it replaces, on a real
 // (in-memory) Mongo: same numbers, light rows, history paged and filtered on the server.
@@ -103,4 +103,20 @@ test('the Overview summary has the full response\'s numbers; history pages, filt
     await client.close();
     await mongod.stop();
   }
+});
+
+
+test("Staffing applied marks contribute to Today’s total and repeated marks count once", async () => {
+  const mongod = await MongoMemoryServer.create();
+  const client = new MongoClient(mongod.getUri());
+  try {
+    await client.connect();
+    const db = client.db('staffing-counter');
+    const day = new Date().toLocaleString('sv-SE', {timeZone:'America/New_York'}).slice(0,10);
+    const url = 'https://staffing.example/jobs/full-stack-engineer';
+    await markJobApplied(db, url);
+    await markJobApplied(db, url);
+    const result = await overviewSummary(db, {from:day,to:day});
+    assert.equal(result.range.applied + result.range.linkedinApplied, 1);
+  } finally { await client.close(); await mongod.stop(); }
 });
