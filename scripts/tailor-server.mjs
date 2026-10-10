@@ -18,6 +18,7 @@ import { analyzeResume, recordAiDecision, resumeAiVersion, enqueueResumeAi, resu
  * No external dependencies — Node built-ins only.
  */
 import { handleStaffing } from "./staffing-routes.mjs";
+import { startStaffingAutoQueue } from "./staffing-workspace.mjs";
 import { handleMuse } from "./muse-http.mjs";
 import { resumeDownloadPath } from "./resume-download.mjs";
 import http from "node:http";
@@ -2310,5 +2311,6 @@ server.listen(PORT, process.env.TAILOR_HOST?.trim() || "127.0.0.1", () => {
   log(usesExternalDrive
     ? `drive mounted: ${fs.existsSync(path.dirname(OUT_ROOT)) ? "YES" : "NO — plug in the external drive"}`
     : `output root: ${fs.existsSync(OUT_ROOT) ? "OK" : "MISSING — create it first"}`);
+  if (startStaffingAutoQueue(log)) log("staffing auto-queue: on");
   void os; // reserved
 });

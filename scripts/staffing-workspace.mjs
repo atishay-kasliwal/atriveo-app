@@ -1,8 +1,7 @@
 import crypto from 'node:crypto';
-import path from 'node:path';
 import fs from 'node:fs';
 import { withMongo } from './mongo-client.mjs';
-import { startPasted, OUT_ROOT } from './resume-builder.mjs';
+import { enqueueJob } from './resume-queue.mjs';
 import { markJobApplied } from './applications-analytics.mjs';
 
 export function postingUrl(value) {
@@ -19,7 +18,7 @@ export function facts(j) {
   const tools = skills.filter(s => new RegExp(`\\b${s}\\b`, 'i').test(text));
   return { reasons: tools.slice(0, 3), warning: /no sponsorship|without sponsorship|not.*sponsor|US citizen|security clearance|now and.*future/i.test(text) ? 'Check work authorization requirements' : null };
 }
-export async function list(db, params) {
+async function workspaceRows(db) {
   const [raw, eligible, decisions, swipes, applied] = await Promise.all([
     db.collection('staffing_jobs').find({ expired: false }).toArray(),
     db.collection('jobs').find({ site: 'staffing' }, { projection: { job_url: 1, score_pct: 1, score: 1, resume: 1 } }).toArray(),
@@ -35,11 +34,14 @@ export async function list(db, params) {
   const seen = new Set();
   const groupStates = new Map();
   for (const j of raw) { const k = keyOf(j.job_url), group = j.fingerprint || k; const state = appliedKeys.has(k) ? 'applied' : decisionMap.get(k)?.state || (passedKeys.has(k) ? 'passed' : 'new'); const priority = { new: 0, saved: 1, passed: 2, applied: 3 }; if ((priority[state] || 0) >= (priority[groupStates.get(group)] || 0)) groupStates.set(group, state); }
-  let rows = raw.map(j => {
+  return raw.map(j => {
     const key = keyOf(j.job_url), matched = jobMap.get(key), d = decisionMap.get(key);
-    return { ...j, key, eligible: Boolean(matched), score: Number(matched?.score_pct || 0), resume: matched?.resume?.pdf_path || d?.resume_path || null, builder_id: d?.builder_id || null, state: groupStates.get(j.fingerprint || key) || 'new', ...facts(j) };
+    return { ...j, key, eligible: Boolean(matched), score: Number(matched?.score_pct || 0), resume: matched?.resume?.pdf_path || d?.resume_path || null, resume_status: matched?.resume?.pdf_path || d?.resume_path ? 'success' : matched?.resume?.status || null, builder_id: d?.builder_id || null, state: groupStates.get(j.fingerprint || key) || 'new', ...facts(j) };
   }).sort((a, b) => Number(b.eligible) - Number(a.eligible) || b.score - a.score || String(b.first_seen_at).localeCompare(String(a.first_seen_at)))
     .filter(j => { const group = j.fingerprint || j.key; if (seen.has(j.key) || seen.has(group)) return false; seen.add(j.key); seen.add(group); return true; });
+}
+export async function list(db, params) {
+  let rows = await workspaceRows(db);
   const counts = { recommended: rows.filter(j => j.eligible && j.state === 'new').length, saved: rows.filter(j => j.state === 'saved').length, applied: rows.filter(j => j.state === 'applied').length, browse: rows.filter(j => !['passed', 'applied'].includes(j.state)).length };
   const view = params.get('view') || 'recommended';
   rows = rows.filter(j => view === 'recommended' ? j.eligible && j.state === 'new' : view === 'browse' ? !['passed', 'applied'].includes(j.state) : j.state === view);
@@ -49,6 +51,40 @@ export async function list(db, params) {
   const total = rows.length;
   const offset = Math.max(0, Math.min(100000, Number(params.get('offset')) || 0));
   return { ok: true, counts, total, jobs: rows.slice(offset, offset + 10).map(({ description, ...j }) => j) };
+}
+// Staffing resumes are built by the resume worker, like every other job. A click goes to the fast lane (1001,
+// beside the extension's Tailor); the background sweep queues Recommended jobs just below it.
+export const PRIORITY_CLICKED = 1001;
+export const PRIORITY_STAFFING = 950;
+async function queueResume(db, j, priority, existing) {
+  const status = existing?.resume?.status;
+  if (status === 'running') return { queued: true, resume_status: 'running' };
+  if (status === 'queued') {
+    if ((existing.resume.priority ?? 0) < priority) await db.collection('jobs').updateOne({ job_url: j.job_url, 'resume.status': 'queued' }, { $set: { 'resume.priority': priority, 'resume.source': 'staffing' } });
+    return { queued: true, resume_status: 'queued' };
+  }
+  // A success whose PDF isn't on this server, or a failure, is rebuilt. Jobs outside Recommended (Browse, added by hand) have no jobs row yet; the worker needs one plus the description.
+  if (!existing) await db.collection('jobs').updateOne({ job_url: j.job_url }, { $setOnInsert: { job_url: j.job_url, company: j.company, title: j.title, location: j.location, site: 'staffing' } }, { upsert: true });
+  await db.collection('descriptions').updateOne({ job_url: j.job_url }, { $setOnInsert: { description: j.description } }, { upsert: true });
+  const r = await enqueueJob(db, { job_url: j.job_url, company: j.company, title: j.title, location: j.location, source: 'staffing', priority }, { force: status === 'failed' || status === 'success' });
+  if (r.pdf_path) return { resume: r.pdf_path };
+  return { queued: true, resume_status: 'queued' };
+}
+/** Queues a resume for every Recommended job that has none, newest first. Skips work-authorization warnings and past failures. */
+export async function queueRecommended(db) {
+  const todo = (await workspaceRows(db)).filter(j => j.eligible && j.state === 'new' && !j.resume && !j.resume_status && !j.warning)
+    .sort((a, b) => String(b.first_seen_at).localeCompare(String(a.first_seen_at)));
+  for (const j of todo) await queueResume(db, j, PRIORITY_STAFFING, {});
+  return todo.length;
+}
+/** STAFFING_AUTO_QUEUE=1 turns on the sweep: shortly after start, then every STAFFING_AUTO_QUEUE_MIN minutes (default 30). */
+export function startStaffingAutoQueue(log = console.log) {
+  if (process.env.STAFFING_AUTO_QUEUE !== '1') return null;
+  const sweep = () => withMongo(db => queueRecommended(db), { appName: 'AtriveoStaffingAutoQueue' })
+    .then(n => { if (n) log(`staffing auto-queue: ${n} resume(s) queued`); })
+    .catch(e => log(`staffing auto-queue failed: ${e.message || e}`));
+  setTimeout(sweep, 60000);
+  return setInterval(sweep, Math.max(5, Number(process.env.STAFFING_AUTO_QUEUE_MIN) || 30) * 60000);
 }
 export async function mutate(db, op, body) {
   if (op === 'add') {
@@ -72,25 +108,11 @@ export async function mutate(db, op, body) {
   }
   if (op === 'detail') return { ok: true, job: j };
   if (op === 'prepare') {
-    const existing = await db.collection('jobs').findOne({ job_url: j.job_url, 'resume.pdf_path': { $exists: true } });
+    const existing = await db.collection('jobs').findOne({ job_url: j.job_url }, { projection: { resume: 1 } });
     if (existing?.resume?.pdf_path && fs.existsSync(existing.resume.pdf_path)) return { ok: true, resume: existing.resume.pdf_path };
     const old = await decisions.findOne({ _id: key });
     if (old?.resume_path && fs.existsSync(old.resume_path)) return { ok: true, resume: old.resume_path, builder_id: old.builder_id };
-    // Atomic lease prevents double clicks or two tabs creating the same resume twice.
-    const lease = await decisions.updateOne({ _id: key, $or: [{ preparing_until: { $exists: false } }, { preparing_until: { $lt: new Date() } }] }, { $set: { preparing_until: new Date(Date.now() + 10 * 60000) } });
-    if (!lease.matchedCount) {
-      if (old) throw new Error('This resume is already being prepared. Try again shortly.');
-      try { await decisions.insertOne({ _id: key, preparing_until: new Date(Date.now() + 10 * 60000) }); } catch { throw new Error('This resume is already being prepared.'); }
-    }
-    try {
-      const result = await startPasted(db, { jd: j.description, title: j.title, company: j.company, location: j.location });
-      const resume = path.join(OUT_ROOT, 'pasted', result.source.pasted, 'Atishay Kasliwal.pdf');
-      await decisions.updateOne({ _id: key }, { $set: { resume_path: resume, builder_id: result.source.pasted, updated_at: new Date() } });
-      await db.collection('jobs').updateOne({ job_url: j.job_url }, { $set: { company: j.company, title: j.title, location: j.location, site: 'staffing', 'resume.status': 'success', 'resume.pdf_path': resume } }, { upsert: true });
-      await db.collection('descriptions').updateOne({ job_url: j.job_url }, { $set: { description: j.description } }, { upsert: true });
-      await db.collection('applications').updateMany({ $or: [{ url: j.job_url }, { jobUrls: j.job_url }] }, { $set: { 'resume.path': resume, 'resume.fileName': 'Atishay Kasliwal.pdf' } });
-      return { ok: true, resume, builder_id: result.source.pasted };
-    } finally { await decisions.updateOne({ _id: key }, { $unset: { preparing_until: '' } }); }
+    return { ok: true, ...await queueResume(db, j, PRIORITY_CLICKED, existing) };
   }
   throw new Error('Unknown action');
 }

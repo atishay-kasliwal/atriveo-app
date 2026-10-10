@@ -8,7 +8,7 @@ import "./staffing.css";
 
 type Source = { _id: string; name: string; url: string; tier: number; enabled: boolean; status: string; detail: string; last_checked_at?: string; matching_jobs?: number; connector_state?: string; limited?: boolean; parse_errors?: number; errors?: number };
 type Run = { _id: string; status: string; started_at: string; finished_at?: string; jobs_seen: number; new_jobs: number; published_jobs?: number; error?: string };
-type Job = { _id: string; company: string; title: string; location: string; job_url: string; summary: string; source_id: string; first_seen_at: string; observed_at?: string; description?: string; reasons: string[]; warning?: string; resume?: string; builder_id?: string; state: string; eligible: boolean };
+type Job = { _id: string; company: string; title: string; location: string; job_url: string; summary: string; source_id: string; first_seen_at: string; observed_at?: string; description?: string; reasons: string[]; warning?: string; resume?: string; resume_status?: string | null; builder_id?: string; state: string; eligible: boolean };
 type Workspace = { jobs: Job[]; total: number; counts: Record<string, number> };
 type Status = { sources: Source[]; runs: Run[]; schedule: { label: string; next_at: string }; total_jobs: number };
 const LABELS: Record<string, string> = { access_pending: "Needs provider access", not_checked: "Not checked yet", running: "Checking", ready: "Jobs readable", needs_connector: "Needs connector", blocked: "Access blocked", failed: "Check failed" };
@@ -24,7 +24,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
   const [query, setQuery] = useState(remembered.current.query);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [detail, setDetail] = useState<Job | null>(null);
-  const [preparing, setPreparing] = useState("");
+  const [queueing, setQueueing] = useState<string[]>([]);
   const [adding, setAdding] = useState(false);
   const [manual, setManual] = useState({ url: "", company: "", title: "", location: "", description: "" });
   const [status, setStatus] = useState<Status | null>(null);
@@ -42,7 +42,9 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
       setStatus(s); setJobs(j.jobs); setWorkspace(j); setError("");
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
   }
-  useEffect(() => { void refresh(); const timer = setInterval(() => void refresh(), 15000); return () => clearInterval(timer); }, [view, offset, query, filter]);
+  // Resumes build in the background; poll faster while any card on screen is waiting for one.
+  const building = Boolean(workspace?.jobs.some(j => j.resume_status === "queued" || j.resume_status === "running"));
+  useEffect(() => { void refresh(); const timer = setInterval(() => void refresh(), building ? 5000 : 15000); return () => clearInterval(timer); }, [view, offset, query, filter, building]);
   useEffect(() => {
     if (!detail && !adding) return;
     const previous = document.activeElement as HTMLElement | null;
@@ -79,17 +81,13 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
     setBusy(true); setError("");
     try { await request("decision", { id: j._id, state }); setDetail(null); setOffset(0); await refresh(); } catch (e) { setError(String(e instanceof Error ? e.message : e)); } finally { setBusy(false); }
   }
-  async function prepare(j: Job) {
-    setPreparing(j._id); setError("");
-    try { await request("prepare", { id: j._id }); setNote("Resume ready. Open & Fill to start your application."); await refresh(); } catch (e) { setError(String(e instanceof Error ? e.message : e)); } finally { setPreparing(""); }
+  async function prepare(j: Job, then = "") {
+    setQueueing(q => [...q, j._id]); setError("");
+    try { const r = await request("prepare", { id: j._id }); setNote(r.resume ? "Resume ready. Open & Fill to start your application." : `${j.title} is queued for a resume. The card updates when it is ready.${then}`); await refresh(); } catch (e) { setError(String(e instanceof Error ? e.message : e)); } finally { setQueueing(q => q.filter(id => id !== j._id)); }
   }
-  async function reviewWithAi(j: Job) {
-    setPreparing(j._id); setError("");
-    try {
-      const ready=j.resume?j:await request("prepare",{id:j._id});
-      const builderId=ready.builder_id||j.builder_id;
-      navigate(`/resume_builder?${builderId?`pasted=${encodeURIComponent(builderId)}`:`job=${encodeURIComponent(j.job_url)}`}&ai=review`);
-    } catch(e) {setError(e instanceof Error?e.message:String(e));} finally {setPreparing("");}
+  function reviewWithAi(j: Job) {
+    if (!j.resume) return void prepare(j, " Review with AI works once it is built.");
+    navigate(`/resume_builder?${j.builder_id?`pasted=${encodeURIComponent(j.builder_id)}`:`job=${encodeURIComponent(j.job_url)}`}&ai=review`);
   }
   async function open(j: Job) {
     setError("");
@@ -112,7 +110,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
     <section className="staffing-shortlist" aria-label="Job shortlist">
       {!workspace ? <p>Finding your matches…</p> : !selectedJobs.length ? <p className="apps-muted">{view === "recommended" ? "You’re caught up. Browse all jobs or add a posting you like." : "No jobs here yet."}<span className="product-empty-actions"><button className="apps-btn" onClick={()=>{setView("browse");setOffset(0);}}>Browse jobs</button><button className="apps-btn" onClick={()=>setAdding(true)}>Add a job</button></span></p> : selectedJobs.map(j => <article className="staffing-match" key={j._id}>
         <div className="staffing-match-main"><button className="staffing-job-title" onClick={() => void inspect(j)}>{j.title}</button><p>{j.company} · {j.location || "Location not specified"}</p><div className="staffing-match-facts">{j.reasons.length > 0 && <span>Skills in posting: {j.reasons.join(" · ")}</span>}{j.warning && <span className="staffing-error">{j.warning}</span>}<small>{j.resume ? "✓ Resume ready" : "Resume needed"} · Found {when(j.first_seen_at)}</small></div></div>
-        <div className="staffing-match-actions">{j.state !== "applied" && <button className="rv-primary" disabled={Boolean(preparing)||busy} onClick={()=>void(j.resume?open(j):prepare(j))}>{preparing===j._id?"Preparing resume…":j.resume?"Open & Fill":"Create resume"}</button>}<button className="apps-btn staffing-ai-review" disabled={Boolean(preparing)||busy} onClick={()=>void reviewWithAi(j)}>✦ Review with AI</button>{preparing===j._id&&<p className="card-action-note" role="status">Creating your resume. This card updates when it is ready.</p>}{!j.resume&&!preparing&&<p className="card-action-note">AI review creates this job’s resume first.</p>}<CardActions>{j.state!=="applied"&&<><button className="apps-link" disabled={busy} onClick={()=>void decide(j,j.state==="saved"?"new":"saved")}>{j.state==="saved"?"Unsave job":"Save job"}</button><button className="apps-link" disabled={busy} onClick={()=>void decide(j,"passed")}>Pass</button><button className="apps-link" disabled={busy} onClick={()=>void decide(j,"applied")}>Mark applied</button></>}{j.resume&&<a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(j.resume)}&dl=1`}>Download saved resume</a>}<button className="apps-link" onClick={()=>void inspect(j)}>View job details</button></CardActions></div>
+        <div className="staffing-match-actions">{(() => { const waiting = !j.resume && (queueing.includes(j._id) || j.resume_status === "queued" || j.resume_status === "running"); return <>{j.state !== "applied" && <button className="rv-primary" disabled={waiting||busy} onClick={()=>void(j.resume?open(j):prepare(j))}>{j.resume?"Open & Fill":j.resume_status==="running"?"Building resume…":waiting?"Queued for a resume":"Create resume"}</button>}<button className="apps-btn staffing-ai-review" disabled={waiting||busy} onClick={()=>reviewWithAi(j)}>✦ Review with AI</button>{waiting&&<p className="card-action-note" role="status">{j.resume_status==="running"?"Building your resume now.":"In line for a resume."} This card updates when it is ready.</p>}{!j.resume&&!waiting&&j.resume_status==="failed"&&<p className="card-action-note">The last build failed. Create resume tries again.</p>}{!j.resume&&!waiting&&j.resume_status!=="failed"&&<p className="card-action-note">AI review creates this job’s resume first.</p>}</>; })()}<CardActions>{j.state!=="applied"&&<><button className="apps-link" disabled={busy} onClick={()=>void decide(j,j.state==="saved"?"new":"saved")}>{j.state==="saved"?"Unsave job":"Save job"}</button><button className="apps-link" disabled={busy} onClick={()=>void decide(j,"passed")}>Pass</button><button className="apps-link" disabled={busy} onClick={()=>void decide(j,"applied")}>Mark applied</button></>}{j.resume&&<a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(j.resume)}&dl=1`}>Download saved resume</a>}<button className="apps-link" onClick={()=>void inspect(j)}>View job details</button></CardActions></div>
       </article>)}
     </section>
     {workspace && workspace.total > 10 && <div className="staffing-pagination"><button className="apps-btn" disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - 10))}>Previous</button><small>{offset + 1}–{Math.min(offset + 10, workspace.total)} of {workspace.total}</small><button className="apps-btn" disabled={offset + 10 >= workspace.total} onClick={() => setOffset(offset + 10)}>Next ten →</button></div>}
