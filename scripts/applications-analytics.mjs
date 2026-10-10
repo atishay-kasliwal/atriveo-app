@@ -4,6 +4,7 @@
 // at GET /applications/analytics (behind the site login via the /tailor relay).
 
 import fs from "node:fs";
+import path from "node:path";
 import { classifyTrack, loadTracks } from "./ac-tracks.mjs";
 
 const TZ = "America/New_York";
@@ -210,6 +211,20 @@ const inBrowserRows = async (apps, now) => (await apps.aggregate([{ $match: IN_B
 let tracksDoc = null;
 const trackOf = (title) => { try { tracksDoc ??= loadTracks(); return classifyTrack(title, tracksDoc); } catch { return null; } };
 
+/**
+ * How well the tailored resume itself matches the job: the deterministic Job Match (scripts/ats) that tailor-ac saves
+ * as ats-score.json beside the PDF. Each resume is rewritten per job, so this, not the profile score, is the one to read.
+ */
+const resumeMatchOf = (pdfPath) => {
+  if (!pdfPath) return null;
+  try {
+    const m = JSON.parse(fs.readFileSync(path.join(path.dirname(pdfPath), "ats-score.json"), "utf8")).job_match;
+    if (typeof m?.score !== "number") return null;
+    const c = m.requirement_counts ?? {};
+    return { score: Math.round(m.score), required: c.required ?? null, preferred: c.preferred ?? null };
+  } catch { return null; }
+};
+
 const rowBase = (r) => ({
   id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
   url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, priorityTags: r.priorityTags ?? [], updatedAt: r.updatedAt,
@@ -217,6 +232,7 @@ const rowBase = (r) => ({
   track: trackOf(r.title),
   // Its resume file is here, so Fill can attach it now (Today puts these first).
   resumeReady: Boolean(r.resume?.path && fs.existsSync(r.resume.path)),
+  resumeMatch: resumeMatchOf(r.resume?.path),
 });
 
 /**
@@ -250,7 +266,7 @@ async function addJobFacts(db, rows) {
     }
     r.score ??= null; r.postedAt ??= null; r.foundAt ??= null;
     r.track = trackOf(r.title);
-    if ("resumePath" in r) { r.resumeReady = Boolean(r.resumePath && fs.existsSync(r.resumePath)); delete r.resumePath; }
+    if ("resumePath" in r) { r.resumeReady = Boolean(r.resumePath && fs.existsSync(r.resumePath)); r.resumeMatch = resumeMatchOf(r.resumePath); delete r.resumePath; }
     if (r.resumeReady === false) r._jobUrls = r.jobUrls ?? [];
     delete r.jobUrls;
   }
@@ -442,6 +458,7 @@ export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600
         resumePath: d.resume?.pdf_path ?? null,
         // The file is on this machine, so Apply with Atriveo can attach it now.
         resumeReady: Boolean(d.resume?.pdf_path && fs.existsSync(d.resume.pdf_path)),
+        resumeMatch: resumeMatchOf(d.resume?.pdf_path),
         // "offsite" (the company's own form), "easy_apply" (LinkedIn's), or null until checked.
         applyType: d.apply_type ?? null });
     } else {

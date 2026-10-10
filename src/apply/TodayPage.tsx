@@ -1,4 +1,4 @@
-import CardActions from './CardActions';
+import JobCard, { inNC } from './JobCard';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OpenFillQueue from "./OpenFillQueue";
@@ -6,12 +6,11 @@ import ApplicationReview from "./ApplicationReview";
 import AnswerModal from "./AnswerModal";
 import ResumeDownloadLink from "../components/ResumeDownloadLink";
 import PdfPreviewModal from "../components/PdfPreviewModal";
-import CompanyLogo from "../components/CompanyLogo";
 import { postAction, when } from "./engine";
 import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, extensionVersion, noteLinkedinOpen } from "./openFill";
 import { blocking } from "./questionGroups";
 import { discardNow, dismissJobs, markJobsApplied } from "./discard";
-import { adjustCounts, loadCards, refreshLinkedin, refreshReady, refreshUnanswered, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp, type ResumeEta } from "./reviewQueue";
+import { adjustCounts, loadCards, refreshLinkedin, refreshReady, refreshUnanswered, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp, type ResumeEta, type ResumeMatch } from "./reviewQueue";
 import { GOALS, readPref, streakOf, useApplyHistory, useAppliedToday, useSprint, writePref } from "./todayGoal";
 import { useExclusions } from "../hooks/useExclusions";
 import { TRACK_LABEL } from "./tracks";
@@ -27,7 +26,7 @@ import "./today.css";
 // a question nobody has answered come last and send you to To answer, which shows only those questions.
 
 type Kind = "you_submit" | "approve" | "fill" | "drafted" | "linkedin" | "answer";
-interface Item { resumeEta?: ResumeEta; resumeReady?: boolean; easyApply?: boolean; resumePath?: string | null; track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+interface Item { resumeMatch?: ResumeMatch | null; resumeEta?: ResumeEta; resumeReady?: boolean; easyApply?: boolean; resumePath?: string | null; track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
 
 
 
@@ -70,9 +69,7 @@ function etaLabel(eta?: ResumeEta): { text: string; title: string } {
 /** Postings older than this have no freshness left on the bar. */
 
 
-/** A North Carolina job (they come first). */
-const NC = /\b(NC|North Carolina|Raleigh|Durham|Charlotte|Cary|Chapel Hill|Morrisville|Research Triangle|RTP|Greensboro|Winston[- ]Salem|Wilmington|Apex)\b/i;
-export const inNC = (location?: string | null) => Boolean(location && NC.test(location));
+export { inNC };
 
 /** "3h", "2d", "5w": how long ago the posting went up (or was found). */
 function ago(iso?: string | null): string | null {
@@ -169,14 +166,14 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const manual = ready.data?.manual ?? [];
     const manualIds = new Set(manual.map((r) => r.id));
     const fromReady = (r: ReadyApp, kind: Kind): Item => ({ id: r.id, kind, company: r.company, title: r.title, ats: r.ats, url: r.url, updatedAt: r.updatedAt, priorityTags: r.priorityTags, ready: r,
-      location: r.location, score: r.score ?? null, track: r.track ?? null, age: r.postedAt ?? r.foundAt ?? r.createdAt ?? null, resumeReady: r.resumeReady });
+      location: r.location, score: r.score ?? null, track: r.track ?? null, age: r.postedAt ?? r.foundAt ?? r.createdAt ?? null, resumeReady: r.resumeReady, resumeMatch: r.resumeMatch ?? null });
     const fromQueue = (q: QueuedApp): Item => {
       const c = cards[q.id];
       // Only required questions nobody answered hold it back (optional ones and resume fields are left to the page).
       const current = c && c.updatedAt >= q.updatedAt ? c : null;
       const toAnswer = current ? current.questions.filter(blocking).length : q.needsInput ?? 0;
       return { toAnswer, id: q.id, kind: !q.n ? "fill" : toAnswer > 0 ? "answer" : "drafted", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? null, url: c?.url, updatedAt: q.updatedAt, priorityTags: q.priorityTags ?? c?.priorityTags, queued: q,
-        location: q.location ?? c?.location ?? null, score: q.score ?? null, track: q.track ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null, resumeReady: q.resumeReady, resumeEta: q.resumeEta };
+        location: q.location ?? c?.location ?? null, score: q.score ?? null, track: q.track ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null, resumeReady: q.resumeReady, resumeEta: q.resumeEta, resumeMatch: q.resumeMatch ?? null };
     };
     // What you can act on now comes first (Open & Fill: approved or drafted alike), then what needs answers;
     // within each, North Carolina first, then the newest posting, then the best match.
@@ -187,7 +184,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       ...(unanswered.data?.unanswered ?? []).map(fromQueue),
       // LinkedIn postings: no application (the engine never applies on LinkedIn); same score, place and age.
       ...(linkedin.data?.linkedin ?? []).map((l): Item => ({ id: l.id, kind: "linkedin", company: l.company, title: l.title, ats: null, url: l.url,
-        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null, easyApply: l.applyType === "easy_apply", resumeReady: l.resumeReady, resumeEta: l.resumeEta })),
+        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null, easyApply: l.applyType === "easy_apply", resumeReady: l.resumeReady, resumeEta: l.resumeEta, resumeMatch: l.resumeMatch ?? null })),
     ];
     return all
       .filter((i) => done[i.id] !== i.updatedAt && !skipped(i.company))
@@ -410,33 +407,17 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const r = item.ready as ManualApp | undefined;
     const drafted = q ? (q.readyForReview ?? q.suggestions ?? 0) : 0;
     const isBusy = queueRunning || busy === item.id;
-    const nc = inNC(item.location);
     const age = ago(item.age);
     const tags = (item.priorityTags ?? []).filter((t) => !item.location?.includes(t) && !/^exp\.? not stated$/i.test(t));
-    const match = item.score == null ? null : Math.max(0, Math.min(100, item.score));
     return (
-      <article key={item.id} onMouseDown={() => setFocus(index)} className={`td-card is-${stage.tone} ${item.track && TRACK_LABEL[item.track] ? `tr-${item.track}` : ""} ${selectedIds.includes(item.id) ? "is-selected" : ""} ${index === focused ? "is-focused" : ""} ${(item.score ?? 0) >= 80 ? "is-top" : ""}`} aria-label={`${item.company}: ${stage.label}`} aria-busy={isBusy}>
-        <header className="td-head">
-          <input type="checkbox" className="td-check" disabled={queueRunning} aria-label={`Select ${item.company} ${item.title}`} checked={selectedIds.includes(item.id)} onChange={e => setSelectedIds(ids => e.target.checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} />
-          <CompanyLogo company={item.company} size="md" />
-          <div className="td-id"><strong title={item.company}>{item.company}</strong></div>
-          <button type="button" className="td-skip-co" disabled={isBusy} title={`Skip ${item.company}: hide its jobs until you remove it from Skipped companies (S)`} aria-label={`Skip ${item.company}`} onClick={() => skipCompany(item.company)}><svg aria-hidden="true" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" strokeWidth="1.5"/><path d="M4.1 11.9l7.8-7.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg></button>
-
-        </header>
-        <h2 className="td-role" title={item.title}>{item.title}</h2>
-        <div className="td-meta">
-          {item.location && <span className={`td-loc ${nc ? "is-nc" : ""}`} title={item.location}>{nc ? "★ " : ""}{item.location}</span>}
-
-        </div>
-        <div className="td-tags">{(item.score ?? 0) >= 80 && <span className="td-top" title="80+ match: worth applying first">★ Top match</span>}<span className={`td-stage is-${stage.tone}`}>{stage.label}</span>{item.track && TRACK_LABEL[item.track] && <span className={`td-track is-${item.track}`} title="Resume track">{TRACK_LABEL[item.track]}</span>}{item.resumeReady === false && (() => { const e = etaLabel(item.resumeEta); return <span className="td-tag td-notready" title={`${e.title} It moves up once the resume is ready.`}>{e.text}</span>; })()}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</div>
-        {item.kind === "approve" && r?.companySubmittedToday && <p className="td-note warn">Already submitted to {item.company} today: this one goes out tomorrow.</p>}
-        {errors[item.id] && <p className="td-error" role="alert">{errors[item.id]}</p>}
-        <footer className="td-foot">
-          {match != null && <div className={`td-profile-match ${match >= 60 ? "is-high" : match >= 35 ? "is-mid" : ""}`}>
-            <div><span>Profile match</span><strong>{match}%</strong></div>
-            <div className="td-match-bar" role="meter" aria-label="Profile match" aria-valuemin={0} aria-valuemax={100} aria-valuenow={match}><i style={{ width: `${match}%` }} /></div>
-          </div>}
-          <div className="td-primary-actions">
+      <JobCard key={item.id} id={item.id} company={item.company} title={item.title} location={item.location} track={item.track} resumeMatch={item.resumeMatch} resumeReady={item.resumeReady}
+        className={`is-${stage.tone} ${index === focused ? "is-focused" : ""} ${(item.score ?? 0) >= 80 ? "is-top" : ""}`} ariaLabel={`${item.company}: ${stage.label}`} busy={isBusy}
+        selected={selectedIds.includes(item.id)} selectDisabled={queueRunning} onSelect={(checked) => setSelectedIds(ids => checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} onFocus={() => setFocus(index)}
+        onSkip={() => skipCompany(item.company)} onApplied={item.kind === "linkedin" ? () => void markApplied(item) : undefined} appliedTitle="Mark applied: you applied yourself, it leaves Today (A)"
+        leadTags={<>{(item.score ?? 0) >= 80 && <span className="td-top" title="80+ match: worth applying first">★ Top match</span>}<span className={`td-stage is-${stage.tone}`}>{stage.label}</span></>}
+        tags={<>{item.resumeReady === false && (() => { const e = etaLabel(item.resumeEta); return <span className="td-tag td-notready" title={`${e.title} It moves up once the resume is ready.`}>{e.text}</span>; })()}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</>}
+        notes={<>{item.kind === "approve" && r?.companySubmittedToday && <p className="td-note warn">Already submitted to {item.company} today: this one goes out tomorrow.</p>}{errors[item.id] && <p className="td-error" role="alert">{errors[item.id]}</p>}</>}
+        primary={<>
           {item.kind === "linkedin" && <a className="td-cta td-cta-linkedin" title="Apply on LinkedIn, then Atriveo → Apply on this page on the company's form" href={item.url} target="_blank" rel="noreferrer" onClick={() => noteLinkedinOpen(item.url!, item.company, item.title)}>
             <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
             <span>Open on LinkedIn</span><svg className="td-cta-ext" aria-hidden="true" viewBox="0 0 16 16"><path d="M6 3.5H3.5v9h9V10M9 3h4v4M13 3L7.5 8.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"/></svg></a>}
@@ -445,9 +426,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
           {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}
           {item.resumeReady !== false ? <Link className="apps-btn td-ai-review" to={`/resume_builder?${item.kind === "linkedin" ? `job=${encodeURIComponent(item.id)}` : `app=${encodeURIComponent(item.id)}`}&ai=review`}>✦ Review with AI</Link> : <button className="apps-btn td-ai-review" disabled title="A resume needs to be created before AI can review it">✦ Review with AI</button>}
-          </div>
-          {item.resumeReady === false && <p className="card-action-note">{etaLabel(item.resumeEta).text}. AI review becomes available when your resume is ready.</p>}
-          <CardActions>
+</>}
+        actionNote={item.resumeReady === false && <p className="card-action-note">{etaLabel(item.resumeEta).text}. AI review becomes available when your resume is ready.</p>}
+        more={<>
         <div className="td-detail-copy">
           {item.kind === "drafted" && q && <>
             <p className="td-big">{drafted || q.n} answer{(drafted || q.n) === 1 ? "" : "s"} drafted</p>
@@ -474,7 +455,6 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
             {item.kind !== "linkedin" && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Resume</button>}
             {item.resumeReady !== false && <Link className="apps-btn td-edit" title="Edit this resume (same template)" to={`/resume_builder?${item.kind === "linkedin" ? `job=${encodeURIComponent(item.id)}` : `app=${encodeURIComponent(item.id)}`}`}>Edit</Link>}
             {item.kind === "linkedin" && item.resumePath && <button className="td-ghost" onClick={() => setPdf(item.resumePath!)}><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M4 1.8h5.2L12.5 5v9.2H4zM9 1.8V5h3.5M6 8.2h4.5M6 10.8h4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round"/></svg>Resume</button>}
-            {item.kind === "linkedin" && <button className="td-ghost td-applied" disabled={isBusy} onClick={() => void markApplied(item)}><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round"/></svg>Mark applied</button>}
             {item.url && item.kind !== "linkedin" && <a className="apps-btn" href={item.url} target="_blank" rel="noreferrer">Job ↗</a>}
           </div>
           <div className="td-links">
@@ -482,10 +462,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
             {(item.kind === "approve" || item.kind === "you_submit") && <Link to={`/ready?app=${encodeURIComponent(item.id)}`}>Details</Link>}
             <button className="apps-link td-discard" disabled={isBusy} onClick={() => void discard([item.id])}>Discard</button>
           </div>
-          </CardActions>
-          <div className="td-card-caption"><span>{item.kind === "linkedin" ? "LinkedIn" : item.ats ? item.ats.charAt(0).toUpperCase() + item.ats.slice(1) : "Atriveo"}</span>{age && <span title={item.age ?? undefined}>{age}</span>}</div>
-        </footer>
-      </article>
+          </>}
+        source={item.kind === "linkedin" ? "LinkedIn" : item.ats ? item.ats.charAt(0).toUpperCase() + item.ats.slice(1) : "Atriveo"} age={age} ageTitle={item.age ?? undefined} />
     );
   };
 

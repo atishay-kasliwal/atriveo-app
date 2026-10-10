@@ -251,6 +251,8 @@
 .td-skip-co svg { width: 15px; height: 15px; }
 .td-card:hover .td-skip-co, .td-card.is-focused .td-skip-co, .td-skip-co:focus-visible { opacity: 1; }
 .td-skip-co:hover:not(:disabled) { color: #ef4444; border-color: color-mix(in oklab, #ef4444 40%, var(--border-col)); }
+.td-skip-co + .td-mark-applied { margin-left: -6px; }
+.td-mark-applied:hover:not(:disabled) { color: #69c69a; border-color: color-mix(in oklab, #69c69a 40%, var(--border-col)); }
 .td-kind svg { flex: none; }
 .td-resumes li { text-transform: none; }
 .td-resumes li > span:first-child { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
@@ -457,6 +459,7 @@
 .td-profile-match strong { color: var(--match-color); font-weight: 600; font-variant-numeric: tabular-nums; }
 .td-match-bar { height: 3px; background: #282d31; overflow: hidden; border-radius: 2px; }
 .td-match-bar i { display: block; height: 100%; background: var(--match-color); }
+.td-profile-match em { font-style: normal; opacity: .75; }
 .td-page .td-primary-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: stretch; }
 .td-page .td-primary-actions > :is(a, button) { height: auto; min-height: 44px; margin: 0; padding: 10px 12px; border-radius: 7px; font-size: 12px; font-weight: 600; display: flex; justify-content: center; align-items: center; text-align: center; }
 .td-page .td-primary-actions .td-cta, .td-page .td-primary-actions .rv-primary { background: #252a30; border: 1px solid #333a43; color: #e4e7ec; box-shadow: none; letter-spacing: 0; }
@@ -474,9 +477,11 @@
 /* Routine explanation stays in More; warnings and the primary decision stay visible. */
 .td-page .td-foot > :is(.td-profile-match, .td-primary-actions, .card-action-note) { grid-column: 1 / -1; }
 .td-page .td-foot > .card-actions { grid-column: 1; width: auto; }
-.td-page .td-foot > .card-actions[open] { grid-column: 1 / -1; }
 .td-page .td-foot > .td-card-caption { grid-column: 2; justify-content: flex-end; gap: 12px; align-self: center; }
-.td-page .td-foot > .card-actions[open] + .td-card-caption { grid-column: 1 / -1; }
+.td-page .td-foot { position: relative; }
+.td-page .td-foot > .card-actions { position: static; }
+.td-page .td-foot > .card-actions > .card-actions-content { position: absolute; left: 0; right: 0; bottom: 32px; z-index: 3; padding: 8px; gap: 6px; border: 1px solid var(--border-col); border-radius: 10px; background: var(--card-bg); box-shadow: 0 8px 24px rgb(0 0 0 / .35); max-height: 260px; overflow-y: auto; }
+.td-page .td-card:has(.card-actions[open]) { z-index: 2; }
 .td-page .td-detail-copy { display: flex; flex-direction: column; gap: 8px; }
 .td-page .td-detail-copy:empty, .td-page .td-meta:empty { display: none; }
 .td-page .td-detail-copy .td-big { font-size: 13px; }
