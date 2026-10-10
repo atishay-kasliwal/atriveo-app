@@ -107,3 +107,13 @@
 .bk-error { border: 1px solid color-mix(in oklab, var(--bk-low) 50%, var(--border-col)); background: color-mix(in oklab, var(--bk-low) 10%, transparent); }
 .bk-done { border: 1px solid color-mix(in oklab, var(--bk-good) 45%, var(--border-col)); background: color-mix(in oklab, var(--bk-good) 8%, transparent); }
 .bk-entry-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; padding-top: 4px; border-top: 1px solid var(--border-col); font-size: 12.5px; }
+
+/* Giving a missing fact (phase 3): the fact box, then the drafts to pick from. */
+.bk-facts { margin: 4px 0 0; padding-left: 18px; font-size: 12.5px; line-height: 1.5; }
+.bk-fact-run { padding: 10px; border-radius: 8px; border: 1px dashed color-mix(in oklab, var(--primary) 45%, var(--border-col)); }
+.bk-fact-run textarea { width: 100%; box-sizing: border-box; min-height: 70px; resize: vertical; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-col); background: var(--input-bg); color: var(--foreground); font: inherit; font-size: 13px; }
+.bk-fact-run .apps-muted { font-size: 12px; }
+.bk-draft { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 8px; border: 1px solid var(--border-col); background: var(--background); }
+.bk-draft p { margin: 0; font-size: 13px; line-height: 1.5; }
+.bk-draft.is-blocked { opacity: .75; }
+.bk-issues { margin: 0; padding-left: 18px; font-size: 12px; color: var(--bk-low); }

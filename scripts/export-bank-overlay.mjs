@@ -7,6 +7,8 @@
 //   a reworded bullet         → that entry's variant `text`, the old wording kept in the variant's `earlier_texts`
 //                               (resumes that printed it stay valid in the builder)
 //   a retirement (bank page)  → `tracks: [retired]` on the entry (with a "# Retired" comment) or on that variant
+//   a fact you gave (bank page) → the entry's `user_facts` list; a new score → the variant's `strength`
+//                               (and `strength_note`, or none once it reaches 9)
 // Then it runs the bank lint on the result (git only, no overlay) and shows the diff. You commit.
 // Safe to run again: what's already in git is skipped, and once in git the overlay's copy changes nothing.
 //
@@ -109,6 +111,44 @@ export function retireYaml(src, facet, reason = "", date = "") {
   return [...lines.slice(0, item + 1), `${keyIndent}tracks:`, `${keyIndent}  - retired`, ...body, ...lines.slice(end)].join("\n");
 }
 
+/** The YAML with one variant's `strength` (and `strength_note`) set. null: no such variant. */
+export function scoreYaml(src, facet, strength, note) {
+  const lines = src.split("\n");
+  const vStart = lines.findIndex((l) => /^variants:\s*$/.test(l));
+  let item = -1;
+  for (let i = vStart + 1; vStart >= 0 && i < lines.length && (/^\s/.test(lines[i]) || lines[i] === ""); i++) {
+    const m = lines[i].match(/^(\s*)- facet:\s*(\S+)\s*$/);
+    if (m && m[2].replace(/['"]/g, "") === facet) { item = i; break; }
+  }
+  if (item < 0) return null;
+  const keyIndent = lines[item].match(/^(\s*)-/)[1] + "  ";
+  let end = item + 1;
+  while (end < lines.length && lines[end].startsWith(keyIndent)) end++;
+  const body = lines.slice(item + 1, end).filter((l) => !l.startsWith(`${keyIndent}strength:`) && !l.startsWith(`${keyIndent}strength_note:`));
+  const add = [`${keyIndent}strength: ${Number(strength)}`, ...(note ? [`${keyIndent}strength_note: ${JSON.stringify(norm(note))}`] : [])];
+  const at = body.findIndex((l) => l.startsWith(`${keyIndent}text:`));
+  body.splice(at < 0 ? body.length : at, 0, ...add);
+  return [...lines.slice(0, item + 1), ...body, ...lines.slice(end)].join("\n");
+}
+
+/** The YAML with a fact you gave added to the entry's `user_facts` (before `variants:`), unless it's there already. */
+export function factYaml(src, text, date = "") {
+  const ac = yaml.load(src) ?? {};
+  if ((ac.user_facts ?? []).some((f) => norm(f.text ?? f) === norm(text))) return src;
+  const lines = src.split("\n");
+  const item = [`  - text: ${JSON.stringify(norm(text))}`, ...(date ? [`    added: "${date}"`] : [])];
+  const at = lines.findIndex((l) => /^user_facts:\s*$/.test(l));
+  if (at >= 0) {
+    let end = at + 1;
+    while (end < lines.length && /^\s/.test(lines[end])) end++;
+    lines.splice(end, 0, ...item);
+  } else {
+    const v = lines.findIndex((l) => /^variants:\s*$/.test(l));
+    lines.splice(v < 0 ? lines.length : v, 0, "# Numbers and results you gave on the bank page.", "user_facts:", ...item);
+  }
+  return lines.join("\n");
+}
+
 /** What exporting `entries` into `bankDir` changes: [{ file, kind, id, before, after }]. Writes nothing. */
 export function planExport(entries, bankDir) {
   const out = [];
@@ -142,6 +182,17 @@ export function planExport(entries, bankDir) {
     if (after === null) { out.push({ file, kind: "missing", id: e._id }); continue; }
     if (pending) pending.after = after; else out.push({ file, kind: "retire", id: e._id, before, after });
   }
+  for (const e of entries.filter((x) => x.type === "fact" || x.type === "score")) {
+    const file = path.join(bankDir, `${e.ac_id}.yaml`);
+    if (!fs.existsSync(file)) { out.push({ file, kind: "missing", id: e._id }); continue; }
+    const before = fs.readFileSync(file, "utf8");
+    const pending = out.find((o) => o.file === file);
+    const src = pending ? pending.after : before;
+    const after = e.type === "fact" ? factYaml(src, e.text, (e.createdAt ?? "").slice(0, 10)) : scoreYaml(src, e.facet, e.strength, e.note);
+    if (after === null) { out.push({ file, kind: "missing", id: e._id }); continue; }
+    if (after === src) continue;
+    if (pending) pending.after = after; else out.push({ file, kind: e.type, id: e._id, before, after });
+  }
   return out;
 }
 
@@ -155,6 +206,8 @@ export function inGit(entries, bankDir) {
     const ac = yaml.load(fs.readFileSync(file, "utf8"));
     if (e.type === "new") return (ac.variants ?? []).some((v) => norm(v.text) === norm(e.ac.variants?.[0]?.text));
     if (e.type === "retire") return isRetiredIn(ac, e.facet ?? null);
+    if (e.type === "fact") return (ac.user_facts ?? []).some((f) => norm(f.text ?? f) === norm(e.text));
+    if (e.type === "score") { const v = (ac.variants ?? []).find((x) => (x.facet ?? "default") === e.facet); return v?.strength === e.strength && norm(v?.strength_note) === norm(e.note); }
     return (ac.variants ?? []).some((v) => (v.facet ?? "default") === (e.facet ?? "default") && norm(v.text) === norm(e.text));
   });
 }
@@ -190,7 +243,7 @@ async function main() {
   try {
     console.log(`${entries.length} overlay entr${entries.length === 1 ? "y" : "ies"} (${entries.filter((e) => e.type === "new").length} new, ${entries.filter((e) => e.type === "reword").length} reworded) → ${path.relative(ROOT, bankDir) || bankDir}`);
     const plan = planExport(entries, bankDir);
-    for (const p of plan) console.log(`  ${p.kind === "new" ? "+" : p.kind === "reword" ? "~" : p.kind === "retire" ? "-" : "!"} ${path.basename(p.file)}  ${p.kind === "missing" ? `(${p.id}: its bank entry or variant is gone; left in the overlay)` : p.id}`);
+    for (const p of plan) console.log(`  ${p.kind === "new" ? "+" : p.kind === "reword" ? "~" : p.kind === "retire" ? "-" : p.kind === "fact" || p.kind === "score" ? "*" : "!"} ${path.basename(p.file)}  ${p.kind === "missing" ? `(${p.id}: its bank entry or variant is gone; left in the overlay)` : p.id}`);
     if (!plan.some((p) => p.after)) console.log("  Nothing to write: the bank already has every bullet.");
     if (!dry) for (const p of plan) if (p.after) fs.writeFileSync(p.file, p.after.endsWith("\n") ? p.after : `${p.after}\n`);
     if (!dry && plan.some((p) => p.after)) {
