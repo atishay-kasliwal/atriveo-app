@@ -17,6 +17,16 @@ const { chromium } = requireEngine('playwright');
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const view = bankView();
 
+test('every live entry has role tags (fits) naming real tracks, including its own tracks and every track that prints it', () => {
+  const ids = new Set(Object.keys(loadTracks().tracks));
+  for (const e of view.entries.filter((x) => !x.retired && x.variants.some((v) => !v.retired) && !x.yours)) {
+    assert.ok(e.fits.length, `${e.id} has fits`);
+    for (const t of e.fits) assert.ok(ids.has(t), `${e.id} fits "${t}" is a track`);
+    for (const t of e.tracks) assert.ok(e.fits.includes(t), `${e.id} is ${t}-only but its fits leave it out`);
+    for (const p of e.variants.flatMap((v) => v.pinned)) assert.ok(e.fits.includes(p.track), `${e.id} is printed on ${p.track} but its fits leave it out`);
+  }
+});
+
 test('every pinned bullet in TRACKS.yaml is a live wording the page marks as printed on that track', () => {
   const doc = loadTracks();
   const byId = new Map(view.entries.map((e) => [e.id, e]));

@@ -52,6 +52,8 @@ export function bankView(bank = loadBank(), doc = loadTracks(), overlay = readOv
     fact: ac.fact || "",
     confirmedAt: ac.provenance?.level === "USER_CONFIRMED" ? ac.provenance.confirmed_at ?? null : null,
     tracks: ownTracks(ac),
+    // Roles the bullet is good for (`fits:`), for reading and filtering only; resume selection never reads it.
+    fits: Array.isArray(ac.fits) ? ac.fits : [],
     retired: isRetired(ac),
     retiredHere: retiredHere.get(ac.id)?.reason ?? (retiredHere.has(ac.id) ? "" : null),
     yours: ac.source === "resume-builder",
