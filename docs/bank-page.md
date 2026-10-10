@@ -20,6 +20,8 @@ One screen for the whole resume bullet bank (`data/ac-bank/AC-*.yaml` plus your 
   - its id;
   - how many wordings it has;
   - the tracks whose tested resume prints it (TRACKS.yaml `pinned` and `pinned_variants`).
+  - the roles it is good for: the entry's `fits: [...]` (track ids). The track pills filter by it. It is a label only:
+    resume selection never reads it. `tracks: [...]` is different: it hides the entry from every other track.
 - **Track filter:** with a track picked, the board keeps only the wordings that track can use (bankForTrack's rule:
   untagged wordings are on every track). The bullets that track's resume prints come first.
 - **Detail panel** (click a card; Esc or × closes it):

@@ -1,6 +1,7 @@
 # FDE-only bullet (tracks: forward-deployed), docs/resume-tracks/fde.md, 2026-10-08.
 id: AC-206
 role: accolite
+fits: [forward-deployed]
 slot_kind: experience
 engineering_identity: platform
 achievement_theme: fde-production-fixes

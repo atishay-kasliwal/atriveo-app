@@ -1,5 +1,6 @@
 id: AC-099
 role: bayesian-mmm
+fits: [data-science]
 slot_kind: project
 achievement_theme: time-series-cv
 display_order: 7

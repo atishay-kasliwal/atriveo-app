@@ -1,6 +1,7 @@
 # FDE-only bullet (tracks: forward-deployed), docs/resume-tracks/fde.md, 2026-10-08.
 id: AC-208
 role: atriveo
+fits: [forward-deployed]
 slot_kind: project
 engineering_identity: platform
 achievement_theme: fde-integrations-scale

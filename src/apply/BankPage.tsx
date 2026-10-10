@@ -12,7 +12,7 @@ import "./bank.css";
 
 interface Pin { track: string; set: string }
 interface Variant { facet: string; text: string; strength: number | null; note: string | null; tracks: string[]; retired: boolean; pinned: Pin[]; edited: boolean; retiredHere: string | null }
-interface Entry { id: string; role: string; label: string; kind: "experience" | "project"; theme: string; fact: string; confirmedAt: string | null; tracks: string[]; retired: boolean; retiredHere: string | null; yours: boolean; yourFacts: Array<{ text: string; at: string | null }>; variants: Variant[] }
+interface Entry { id: string; role: string; label: string; kind: "experience" | "project"; theme: string; fact: string; confirmedAt: string | null; tracks: string[]; fits: string[]; retired: boolean; retiredHere: string | null; yours: boolean; yourFacts: Array<{ text: string; at: string | null }>; variants: Variant[] }
 interface Bank { stale?: boolean; version: string; updatedAt: string | null; tracks: Array<{ id: string; label: string; hasSet: boolean }>; entries: Entry[] }
 
 const TRACKS = ["software-engineer", "ai-engineer", "data-science", "data-analytics", "forward-deployed"];
@@ -36,8 +36,13 @@ const store = {
 
 /** A wording is on a track unless it, or its entry, is tagged for other tracks only (bankForTrack's rule). */
 const onTrack = (e: Entry, v: Variant, track: string) => (!e.tracks.length || e.tracks.includes(track)) && (!v.tracks.length || v.tracks.includes(track));
+/** The track filter: on the track and tagged as a fit for it (`fits:`; an entry with no tags yet shows everywhere). */
+const fitsTrack = (e: Entry, v: Variant, track: string) => onTrack(e, v, track) && (!e.fits.length || e.fits.includes(track));
 /** The wordings the board shows for an entry (track and retired filters applied). */
-const shownWordings = (e: Entry, track: string, retired: boolean) => e.variants.filter((v) => (retired || (!v.retired && !e.retired)) && (track === "all" || onTrack(e, v, track)));
+const shownWordings = (e: Entry, track: string, retired: boolean) => e.variants.filter((v) => (retired || (!v.retired && !e.retired)) && (track === "all" || fitsTrack(e, v, track)));
+const Fits = ({ e }: { e: Entry }) => (
+  <span className="bk-fits">{e.fits.length ? e.fits.map((t) => <span key={t} className={`bk-fit is-${t}`}>{TRACK_LABEL[t] ?? t}</span>) : <span className="bk-fit">No role tag yet</span>}</span>
+);
 const lowest = (vs: Variant[]) => vs.reduce<number | null>((m, v) => (v.strength == null ? m : m == null ? v.strength : Math.min(m, v.strength)), null);
 /** The note on the lowest-scoring wording: what it needs from you. */
 const lowestNote = (vs: Variant[]) => [...vs].sort((a, b) => (a.strength ?? 10) - (b.strength ?? 10))[0]?.note ?? null;
@@ -117,6 +122,7 @@ export default function BankPage({ header }: { header?: React.ReactNode }) {
         </span>
         <span className="bk-text">{main.text}</span>
         {needs && lowestNote(vs) ? <span className="bk-note">{lowestNote(vs)}</span> : null}
+        <Fits e={e} />
         {pins.length ? <span className="bk-pins">{pins.map((p) => <Track key={p.track} id={p.track} />)}</span> : null}
       </button>
     );
@@ -182,7 +188,7 @@ interface Retire { facet: string | null; reason: string }
 
 function Detail({ entry: e, track, onClose, onBank, reload }: { entry: Entry; track: string; onClose: () => void; onBank: (b: Bank) => void; reload: () => Promise<void> }) {
   // Retired wordings stay listed here (dimmed) so they can be restored; the track filter still applies.
-  const show = e.variants.filter((v) => track === "all" || v.retired || onTrack(e, v, track));
+  const show = e.variants.filter((v) => track === "all" || v.retired || fitsTrack(e, v, track));
   const hidden = e.variants.length - show.length;
   const [edit, setEdit] = useState<Edit | null>(null);
   const [retire, setRetire] = useState<Retire | null>(null);
@@ -249,6 +255,8 @@ function Detail({ entry: e, track, onClose, onBank, reload }: { entry: Entry; tr
       <div className="bk-fact">
         <span className="bk-label">Fact behind it</span>
         <p>{e.fact || "No fact written for this entry yet."}</p>
+        <span className="bk-label">Good for</span>
+        <Fits e={e} />
         {e.confirmedAt ? <span className="bk-confirmed">Confirmed by you · {shortDate(e.confirmedAt)}</span> : null}
         {e.yourFacts.length ? <ul className="bk-facts">{e.yourFacts.map((f) => <li key={f.text}>{f.text}{f.at ? <span className="apps-muted"> · you, {shortDate(f.at)}</span> : null}</li>)}</ul> : null}
       </div>
