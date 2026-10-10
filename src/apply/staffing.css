@@ -77,3 +77,18 @@
 @media (max-width: 800px) { .staffing-shortlist { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 480px) { .staffing-shortlist { grid-template-columns: 1fr; } }
 .staffing-match-actions .staffing-ai-review { width:100%; text-align:center; min-height:38px; margin-top:4px; border:1px solid color-mix(in srgb,var(--primary) 35%,var(--border-col)); color:var(--primary); }
+
+/* Keep secondary actions inside the card without resizing its grid row. */
+.staffing-match { position: relative; }
+.staffing-match-main { padding-right: 34px; }
+.staffing-mark-applied { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; display: grid; place-items: center; padding: 5px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--muted-fg); cursor: pointer; }
+.staffing-mark-applied svg { width: 22px; height: 22px; }
+.staffing-mark-applied:hover:not(:disabled) { color: var(--primary); background: var(--secondary-bg); border-color: var(--border-col); }
+.staffing-mark-applied:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.staffing-mark-applied.is-applied { color: var(--primary); }
+.staffing-mark-applied:disabled:not(.is-applied) { opacity: .5; cursor: default; }
+.staffing-match:has(.card-actions[open]) { z-index: 2; }
+.staffing-match .card-actions { position: relative; }
+.staffing-match .card-actions-content { position: absolute; bottom: calc(100% + 8px); left: 0; right: 0; z-index: 3; padding: 8px; gap: 4px; border: 1px solid var(--border-col); border-radius: 10px; background: var(--card-bg); box-shadow: 0 8px 24px rgb(0 0 0 / .22); max-height: 240px; overflow-y: auto; }
+.staffing-match .card-actions-content :is(button,a) { border-radius: 6px; }
+.staffing-match .card-actions-content :is(button,a):hover { background: var(--secondary-bg); }

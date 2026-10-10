@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { onApplicationsChanged } from "./applicationUpdates";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getTailorServerBase } from "../utils/tailorServer";
 
 // Today's daily goal: how many you applied to today (engine submissions + LinkedIn postings you marked applied,
@@ -21,17 +22,19 @@ export const GOALS = [10, 15, 20, 25];
 export function useAppliedToday() {
   const [server, setServer] = useState<{ n: number; at: number; day: string } | null>(null);
   const [marks, setMarks] = useState<number[]>([]);
+  const sequence = useRef(0);
   const load = useCallback(async () => {
+    const request = ++sequence.current;
     const day = todayKey();
     const at = Date.now();
     try {
       const res = await fetch(`${getTailorServerBase()}/applications/analytics?view=summary&from=${day}&to=${day}`, { credentials: "include", cache: "no-store" });
       const json = await res.json();
-      if (!res.ok || json.ok === false) return;
+      if (!res.ok || json.ok === false || request !== sequence.current) return;
       setServer({ n: (json.range?.applied ?? 0) + (json.range?.linkedinApplied ?? 0), at, day });
     } catch { /* keep the last count */ }
   }, []);
-  useEffect(() => { const first = setTimeout(load, 0); const t = setInterval(load, 300_000); return () => { clearTimeout(first); clearInterval(t); }; }, [load]);
+  useEffect(() => { const first = setTimeout(load, 0); const t = setInterval(load, 30_000); const unsubscribe = onApplicationsChanged(() => void load()); return () => { clearTimeout(first); clearInterval(t); unsubscribe(); sequence.current++; }; }, [load]);
   const mark = useCallback(() => setMarks((m) => [...m, Date.now()]), []);
   // Re-check every 15 s so a combo ends on screen once 3 minutes pass without a mark.
   const [now, setNow] = useState(Date.now);
@@ -69,7 +72,8 @@ export function useApplyHistory(days = 84): DayCount[] | null {
     };
     const first = setTimeout(load, 0);
     const t = setInterval(load, 1_800_000);
-    return () => { clearTimeout(first); clearInterval(t); };
+    const unsubscribe = onApplicationsChanged(() => void load());
+    return () => { clearTimeout(first); clearInterval(t); unsubscribe(); };
   }, [days]);
   return rows;
 }
