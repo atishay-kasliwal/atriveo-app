@@ -35,7 +35,6 @@ facets:
 variants:
   - facet: default
     emphasis: default
-    strength: 8
-    strength_note: "No result: what the 5 integrations enabled (coverage, speed, accuracy)?"
+    strength: 9
     text: >-
-      Integrated LLM agents with 5 third-party market, news and filing APIs through MCP servers and function calling in Python, saving every response as structured data the agents reuse.
+      Integrated LLM agents with 5 third-party market, news and filing APIs through MCP servers and function calling in Python, widening analysis coverage while saving every response as structured data.

@@ -1,6 +1,9 @@
 # Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-058
 role: atriveo
+# 2026-10-10: no finding; hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: pipeline-analytics
 display_order: 8

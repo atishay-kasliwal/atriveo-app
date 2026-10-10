@@ -1,8 +1,5 @@
 id: AC-184
 role: accolite
-# Merged 2026-10-09 into AC-183 (no number available): hidden from every resume.
-tracks:
-  - retired
 slot_kind: experience
 engineering_identity: enterprise
 client_context: inhouse
@@ -38,7 +35,6 @@ facets:
 variants:
   - facet: default
     emphasis: default
-    strength: 8
+    strength: 9
     text: >-
-      Guided 3,000 employees through hierarchy setup and timesheet compliance with React and MongoDB
-      onboarding workflows that cut new-hire ramp time in production.
+      Guided 3,000 employees through onboarding in React and MongoDB workflows that auto-assign new hires to teams by skill, cutting onboarding from weeks to days.

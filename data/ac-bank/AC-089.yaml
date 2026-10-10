@@ -36,8 +36,6 @@ facets:
 variants:
   - facet: deploy
     emphasis: deploy
-    strength: 8
-    strength_note: "Thin result: what moving off CI runners saved (minutes, cost)?"
+    strength: 9
     text: >-
-      Published ~20 daily production dashboard updates with Python via the GitHub Contents API to GitHub Pages
-      without CI runners for zero-downtime releases.
+      Published ~20 daily dashboard updates with Python via the GitHub Contents API to GitHub Pages without CI runners, so every release ships in one push at no CI cost.

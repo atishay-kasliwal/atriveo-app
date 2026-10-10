@@ -1,5 +1,8 @@
 id: AC-197
 role: accolite
+# 2026-10-10: no result; hidden from every resume.
+tracks:
+  - retired
 slot_kind: experience
 engineering_identity: leadership
 client_context: leadership

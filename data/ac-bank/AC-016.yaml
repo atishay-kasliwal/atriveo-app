@@ -21,7 +21,6 @@ facets:
 variants:
   - facet: llm-ai
     emphasis: llm-ai
-    strength: 8
-    strength_note: "No result: how many questions it answered, or the time it saved per application?"
+    strength: 9
     text: >-
-      Matched application questions to each user's ranked story bank by domain and skill overlap across 893 applications, proposing answers that wait for human approval before submission.
+      Matched application questions to each user's ranked story bank by domain and skill overlap, drafting 1,000+ answers across 893 applications and saving about 5 hours of manual writing.

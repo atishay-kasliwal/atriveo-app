@@ -1,6 +1,9 @@
 # Rewritten 2026-10-09 from verified Atriveo code and confirmed facts (docs/resume-tracks/facts/atriveo.md).
 id: AC-041
 role: atriveo
+# 2026-10-10: removed at his request; hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 visibility:
   default: false

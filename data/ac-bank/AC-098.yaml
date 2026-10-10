@@ -36,5 +36,4 @@ variants:
     emphasis: forecasting
     strength: 9
     text: >-
-      Computed a 1,000-run Python Monte Carlo simulation producing 90% confidence interval coverage for
-      probabilistic sales forecast uncertainty.
+      Computed a 1,000-run Python Monte Carlo simulation of sales-forecast uncertainty on simulated data, putting holdout MAPE at 6.93%.

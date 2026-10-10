@@ -1,5 +1,8 @@
 id: AC-082
 role: insureraft
+# 2026-10-10: AC-073; hidden from every resume.
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: build-runtime
 display_order: 10
