@@ -36,5 +36,6 @@ variants:
   - facet: default
     emphasis: default
     strength: 8
+    strength_note: "No result: integrity problems caught, or audits passed?"
     text: >-
       Verified data integrity for 10K+ encrypted Fidelity insurance records with MySQL and AWS checks, keeping every sister-company exchange auditable.

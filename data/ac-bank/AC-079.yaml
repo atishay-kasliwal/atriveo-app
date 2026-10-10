@@ -37,6 +37,7 @@ variants:
   - facet: distributed
     emphasis: distributed
     strength: 8
+    strength_note: "No measured result: how long a new node takes to catch up?"
     text: >-
       Enabled dynamic cluster membership on a 3-node Raft cluster with configuration updates and learner-node
       snapshot catch-up for zero-downtime onboarding.

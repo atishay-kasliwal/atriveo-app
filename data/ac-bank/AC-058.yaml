@@ -28,5 +28,6 @@ variants:
   - facet: product
     emphasis: product
     strength: 8
+    strength_note: "No result: what the response-rate findings showed or changed?"
     text: >-
       Identified response rates and hiring-stage bottlenecks across 50K+ tracked applications by classifying Gmail replies as applied, rejected or other.

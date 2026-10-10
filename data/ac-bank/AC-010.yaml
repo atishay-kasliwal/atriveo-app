@@ -20,6 +20,7 @@ facets:
 variants:
   - facet: reliability
     emphasis: reliability
-    strength: 7
+    strength: 8
+    strength_note: "No result: what did the gateway change (requests blocked, incidents avoided, latency)?"
     text: >-
       Implemented an API gateway with JWT and OAuth 2.0 authentication plus rate limiting for British Telecom microservices handling 10K+ daily transactions.

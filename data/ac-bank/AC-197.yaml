@@ -36,5 +36,6 @@ variants:
   - facet: default
     emphasis: default
     strength: 8
+    strength_note: "No result: handover time saved, or teams that ran the systems from the playbooks?"
     text: >-
       Authored Java and Python playbooks for 4 enterprise pipeline architectures and the ERP, so new engineers could run Fidelity systems without the original authors.

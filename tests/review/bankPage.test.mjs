@@ -44,6 +44,10 @@ test('entries carry labels, kinds and retired flags', () => {
   assert.equal(view.entries.find((e) => e.role === 'atriveo').kind, 'project');
   assert.ok(view.entries.some((e) => e.retired || e.variants.some((v) => v.retired)));
   assert.ok(view.entries.every((e) => e.variants.every((v) => !v.tracks.includes('retired'))));
+  // Every live wording under 9 says what it is missing; none at 9+ carries a note.
+  const live = view.entries.filter((e) => !e.retired).flatMap((e) => e.variants.filter((v) => !v.retired).map((v) => ({ ref: `${e.id}:${v.facet}`, ...v })));
+  assert.deepEqual(live.filter((v) => v.strength < 9 && !v.note).map((v) => v.ref), []);
+  assert.deepEqual(live.filter((v) => v.strength >= 9 && v.note).map((v) => v.ref), []);
 });
 
 async function fixture(viewport) {

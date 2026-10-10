@@ -20,6 +20,6 @@ facets:
 variants:
   - facet: frontend
     emphasis: frontend
-    strength: 7
+    strength: 9
     text: >-
       Revitalized React product pages backed by Spring Boot services, cutting page load time 35% for 5K+ users.

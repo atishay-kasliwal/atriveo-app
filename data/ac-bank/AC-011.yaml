@@ -32,6 +32,6 @@ facets:
 variants:
   - facet: default
     emphasis: default
-    strength: 8
+    strength: 9
     text: >-
       Tested Pinecone vector retrieval over 200K+ financial documents in LangChain, lifting macro-analysis evaluation accuracy 18% before the production RAG launch.

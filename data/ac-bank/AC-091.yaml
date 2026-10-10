@@ -35,5 +35,6 @@ variants:
   - facet: analytics
     emphasis: analytics
     strength: 8
+    strength_note: "No result: what the health view caught or fixed?"
     text: >-
       Visualized pipeline health in a JavaScript admin view with hourly heatmaps and 7, 14 and 30-day trends across the last 50 runs.

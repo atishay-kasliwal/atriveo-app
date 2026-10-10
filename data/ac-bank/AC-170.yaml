@@ -36,5 +36,6 @@ variants:
   - facet: default
     emphasis: default
     strength: 8
+    strength_note: "No result: audits passed or review time saved?"
     text: >-
       Recorded 100% of Fidelity's encrypted sister-company transfer events in compliance-grade Java and AWS audit trails for regulatory review.

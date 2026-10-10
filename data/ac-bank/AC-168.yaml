@@ -36,5 +36,6 @@ variants:
   - facet: default
     emphasis: default
     strength: 8
+    strength_note: "Visibility is not a result: what the console let compliance do faster?"
     text: >-
       Customized an Angular and Java operations console giving Fidelity compliance teams live visibility into 500+ daily encrypted transfer events.

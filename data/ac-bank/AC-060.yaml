@@ -28,6 +28,6 @@ facets:
 variants:
   - facet: frontend
     emphasis: frontend
-    strength: 8
+    strength: 9
     text: >-
       Expanded resume generation into a bulk tailoring queue that built 2.2K resumes in 9 days, streaming live progress to the console over server-sent events.

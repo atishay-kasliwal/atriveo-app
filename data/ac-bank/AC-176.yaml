@@ -36,5 +36,6 @@ variants:
   - facet: default
     emphasis: default
     strength: 8
+    strength_note: "Count but no result: what the 20+ launches achieved (revenue, customers, speed)?"
     text: >-
       Headed 20+ British Telecom service launches end to end, from Java APIs to Angular payment flows for live commerce customers.

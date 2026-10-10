@@ -49,6 +49,8 @@ export function bankView(bank = loadBank(), doc = loadTracks()) {
         facet,
         text: String(v.text || "").trim(),
         strength: typeof v.strength === "number" ? v.strength : null,
+        // Under 9: what the wording is missing (a number or result only you can give).
+        note: v.strength_note || null,
         tracks: ownTracks(v),
         retired: isRetired(v),
         pinned: pins.get(`${ac.id}:${facet}`) || [],

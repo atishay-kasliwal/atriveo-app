@@ -39,5 +39,6 @@ variants:
   - facet: infra
     emphasis: infra
     strength: 8
+    strength_note: "No result: features only; what it made possible or how it was used?"
     text: >-
       Launched a CMake-built C++ server with OpenSSL TLS and an interactive CLI managing policies and claims across a 3-node cluster.

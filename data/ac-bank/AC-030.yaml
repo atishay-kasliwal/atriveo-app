@@ -21,6 +21,6 @@ facets:
 variants:
   - facet: platform
     emphasis: platform
-    strength: 7
+    strength: 9
     text: >-
       Created an in-house payroll platform on React, Node.js and Firebase that generates payslips and runs finance workflows for 3,000 employees, retiring a high-maintenance Oracle setup.

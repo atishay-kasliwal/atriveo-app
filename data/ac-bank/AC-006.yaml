@@ -35,6 +35,6 @@ facets:
 variants:
   - facet: default
     emphasis: default
-    strength: 8
+    strength: 9
     text: >-
       Assembled Kafka streaming consumers that turn live market feeds into Python NLP features for the forecasting model reaching 67.7% directional accuracy versus 50% chance.

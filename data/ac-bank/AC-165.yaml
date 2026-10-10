@@ -36,5 +36,6 @@ variants:
   - facet: default
     emphasis: default
     strength: 8
+    strength_note: "Visibility is not a result: audit time saved or issues found?"
     text: >-
       Unified Fidelity's audit hub on Java and AWS, giving compliance teams visibility into 100% of sister-company insurance transfers.

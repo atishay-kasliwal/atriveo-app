@@ -28,6 +28,6 @@ facets:
 variants:
   - facet: data
     emphasis: data
-    strength: 8
+    strength: 9
     text: >-
-      Gathered 10+ heterogeneous MRI scan types with Apache Airflow ETL pipelines into reproducible cohorts that fed a 450+ scan stroke study at 87% predictive accuracy.
+      Gathered 10+ heterogeneous MRI scan types with Apache Airflow ETL pipelines into reproducible cohorts that fed a 450+ scan stroke study whose SVM recalled 87% of poor-outcome patients.

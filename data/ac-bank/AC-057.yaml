@@ -29,7 +29,7 @@ facets:
 variants:
   - facet: cloud
     emphasis: cloud
-    strength: 8
+    strength: 9
     text: >-
       Maintained 99.9% uptime across 2K+ daily production queries by running the platform on Cloudflare Pages and Workers with Docker.
   - facet: swe-security

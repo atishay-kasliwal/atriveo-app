@@ -35,6 +35,6 @@ facets:
 variants:
   - facet: default
     emphasis: default
-    strength: 8
+    strength: 9
     text: >-
       Operated GPT-backed macro analysis APIs in Python on AWS, answering 20-30 analysts and traders within a minute of each Fed statement.

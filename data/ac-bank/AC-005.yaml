@@ -35,6 +35,6 @@ facets:
 variants:
   - facet: default
     emphasis: default
-    strength: 8
+    strength: 9
     text: >-
       Devised a Python backtesting engine on AWS that tested trading signals across 30 S&P 500 stocks on 7 and 30-day windows at 80%+ signal accuracy.

@@ -20,6 +20,6 @@ facets:
 variants:
   - facet: backend-api
     emphasis: backend-api
-    strength: 8
+    strength: 9
     text: >-
       Delivered REST and GraphQL APIs in Java, Spring Boot and Spring MVC for British Telecom with Resilience4j circuit breaking, holding 200ms P99 and 99% uptime across 10K+ daily transactions.

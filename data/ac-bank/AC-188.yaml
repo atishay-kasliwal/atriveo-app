@@ -35,7 +35,7 @@ facets:
 variants:
   - facet: default
     emphasis: default
-    strength: 8
+    strength: 9
     text: >-
       Reduced manual timesheet entry by 500+ annual hours with Python and AWS Lambda Slack bots auto-creating
       ERP records for 3,000 employees in production.

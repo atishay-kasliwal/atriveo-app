@@ -28,6 +28,6 @@ facets:
 variants:
   - facet: backend
     emphasis: backend
-    strength: 8
+    strength: 9
     text: >-
       Modeled MongoDB collections for jobs, applications and resume queues with leased claims so 3 workers on 2 machines never build the same resume twice.

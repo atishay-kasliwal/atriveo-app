@@ -29,6 +29,6 @@ facets:
 variants:
   - facet: data
     emphasis: data
-    strength: 8
+    strength: 9
     text: >-
       Cataloged 5K+ fresh LinkedIn postings a week with an hourly Python JobSpy pipeline that filters for H-1B sponsorship and tech-stack fit before tailoring.

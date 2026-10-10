@@ -10,7 +10,7 @@ import "./bank.css";
 // (GET /resume-builder/bank). Design and phases: docs/bank-page.md.
 
 interface Pin { track: string; set: string }
-interface Variant { facet: string; text: string; strength: number | null; tracks: string[]; retired: boolean; pinned: Pin[] }
+interface Variant { facet: string; text: string; strength: number | null; note: string | null; tracks: string[]; retired: boolean; pinned: Pin[] }
 interface Entry { id: string; role: string; label: string; kind: "experience" | "project"; theme: string; fact: string; confirmedAt: string | null; tracks: string[]; retired: boolean; variants: Variant[] }
 interface Bank { version: string; updatedAt: string | null; tracks: Array<{ id: string; label: string; hasSet: boolean }>; entries: Entry[] }
 
@@ -32,6 +32,8 @@ const onTrack = (e: Entry, v: Variant, track: string) => (!e.tracks.length || e.
 /** The wordings the board shows for an entry (track and retired filters applied). */
 const shownWordings = (e: Entry, track: string, retired: boolean) => e.variants.filter((v) => (retired || (!v.retired && !e.retired)) && (track === "all" || onTrack(e, v, track)));
 const lowest = (vs: Variant[]) => vs.reduce<number | null>((m, v) => (v.strength == null ? m : m == null ? v.strength : Math.min(m, v.strength)), null);
+/** The note on the lowest-scoring wording: what it needs from you. */
+const lowestNote = (vs: Variant[]) => [...vs].sort((a, b) => (a.strength ?? 10) - (b.strength ?? 10))[0]?.note ?? null;
 const pinnedOn = (vs: Variant[], track: string) => vs.some((v) => v.pinned.some((p) => p.track === track));
 const theme = (e: Entry) => e.theme.replace(/[-_]/g, " ");
 const words = (q: string) => q.toLowerCase().split(/\s+/).filter(Boolean);
@@ -98,7 +100,7 @@ export default function BankPage({ header }: { header?: React.ReactNode }) {
   const needs = visible.filter(({ vs }) => (lowest(vs) ?? NINE) < NINE).sort((a, b) => (lowest(a.vs) ?? 0) - (lowest(b.vs) ?? 0));
   const open = bank?.entries.find((e) => e.id === selected) ?? null;
 
-  const card = (e: Entry, vs: Variant[]) => {
+  const card = (e: Entry, vs: Variant[], needs = false) => {
     const main = vs.find((v) => !v.tracks.length) ?? vs[0];
     const pins = [...new Map(vs.flatMap((v) => v.pinned).map((p) => [p.track, p])).values()];
     return (
@@ -110,6 +112,7 @@ export default function BankPage({ header }: { header?: React.ReactNode }) {
           {vs.length > 1 ? <span className="bk-id">{vs.length} wordings</span> : null}
         </span>
         <span className="bk-text">{main.text}</span>
+        {needs && lowestNote(vs) ? <span className="bk-note">{lowestNote(vs)}</span> : null}
         {pins.length ? <span className="bk-pins">{pins.map((p) => <Track key={p.track} id={p.track} />)}</span> : null}
       </button>
     );
@@ -144,7 +147,7 @@ export default function BankPage({ header }: { header?: React.ReactNode }) {
               {needs.length ? (
                 <section className="bk-needs" aria-label="Needs your input">
                   <header><h2>Needs your input</h2><span className="apps-muted">{needs.length} bullet{needs.length === 1 ? "" : "s"} under 9/10. Each needs a real number or result from you.</span></header>
-                  <div className="bk-needs-row">{needs.slice(0, 4).map(({ e, vs }) => card(e, vs))}</div>
+                  <div className="bk-needs-row">{needs.slice(0, 4).map(({ e, vs }) => card(e, vs, true))}</div>
                 </section>
               ) : null}
               <div className="bk-cols">
@@ -193,6 +196,7 @@ function Detail({ entry: e, show, onClose }: { entry: Entry; show: Variant[]; on
               {v.retired ? <span className="bk-id">retired</span> : null}
             </div>
             <p>{v.text}</p>
+            {v.note ? <p className="bk-note">{v.note}</p> : null}
             {v.pinned.length ? <div className="bk-pins"><span className="apps-muted">Printed on</span>{v.pinned.map((p) => <Track key={`${p.track}-${p.set}`} id={p.track} set={p.set} />)}</div> : null}
           </div>
         ))}

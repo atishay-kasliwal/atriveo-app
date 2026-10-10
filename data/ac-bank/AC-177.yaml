@@ -35,6 +35,6 @@ facets:
 variants:
   - facet: default
     emphasis: default
-    strength: 8
+    strength: 9
     text: >-
       Achieved 99% uptime on British Telecom order APIs across 10K+ daily transactions with Java and Spring Boot fault-tolerance patterns.

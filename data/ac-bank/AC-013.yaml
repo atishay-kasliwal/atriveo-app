@@ -35,6 +35,6 @@ facets:
 variants:
   - facet: default
     emphasis: default
-    strength: 8
+    strength: 9
     text: >-
       Extracted firms and macro themes from 200K+ financial news records with Python NLP on AWS, adding the news signal that raised forecasting accuracy 45%.

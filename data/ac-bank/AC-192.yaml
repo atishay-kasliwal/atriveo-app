@@ -35,6 +35,6 @@ facets:
 variants:
   - facet: default
     emphasis: default
-    strength: 8
+    strength: 9
     text: >-
       Enhanced British Telecom partner integrations with FastAPI and Redis microservices, delivering sub-200ms REST responses across 10K+ API calls.

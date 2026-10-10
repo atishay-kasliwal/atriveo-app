@@ -36,7 +36,7 @@ facets:
 variants:
   - facet: automation
     emphasis: automation
-    strength: 8
+    strength: 9
     text: >-
       Scheduled ~20 daily Python macOS cron runs completing full scrape-to-deploy in under 15 minutes for
       production job intelligence delivery.

@@ -35,6 +35,6 @@ facets:
 variants:
   - facet: default
     emphasis: default
-    strength: 8
+    strength: 9
     text: >-
       Programmed FastAPI ingestion APIs on AWS that load 200K+ financial records with validated schemas, so forecasts run on clean data within minutes of each Fed release.

@@ -36,5 +36,6 @@ variants:
   - facet: default
     emphasis: default
     strength: 8
+    strength_note: "No result: T-Mobile signup or conversion change?"
     text: >-
       Directed end-to-end T-Mobile commerce features on React and Java, from backend APIs to customer purchase flows serving 10K+ users.

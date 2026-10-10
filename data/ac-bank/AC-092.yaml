@@ -37,5 +37,6 @@ variants:
   - facet: ats
     emphasis: ats
     strength: 8
+    strength_note: "No result: how the gap checks changed which jobs you applied to?"
     text: >-
       Integrated Python ATS gap analysis that scores each run's top-ranked jobs against a stored profile with 30+ keyword checks before any application.

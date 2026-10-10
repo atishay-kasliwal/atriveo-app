@@ -18,6 +18,7 @@ facets:
 variants:
   - facet: frontend
     emphasis: frontend
-    strength: 6
+    strength: 8
+    strength_note: "Scale but no result: what the console changed (minutes per application, approvals a day)?"
     text: >-
       Delivered Atriveo's React and TypeScript console on Cloudflare Pages with a Node API and Oracle-hosted MongoDB, giving one screen to review, approve and track 50K+ applications a year.

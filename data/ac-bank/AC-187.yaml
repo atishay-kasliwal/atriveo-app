@@ -44,7 +44,7 @@ facets:
 variants:
   - facet: default
     emphasis: default
-    strength: 8
+    strength: 9
     text: >-
       Upgraded timesheet submission to AWS Lambda and SQS for 3,000 employees, eliminating manual weekly filing.
   - facet: production-ml

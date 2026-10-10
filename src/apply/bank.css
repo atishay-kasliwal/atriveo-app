@@ -53,6 +53,8 @@
 .bk-score.is-none { color: var(--muted-fg); background: var(--secondary-bg); }
 .bk-pins { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-size: 12px; }
 .bk-track { --c: var(--muted-fg); font-size: 10.5px; font-weight: 700; letter-spacing: .03em; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--c); color: var(--c); white-space: nowrap; }
+.bk-note { font-size: 12px; line-height: 1.4; color: var(--bk-near); }
+.bk-variant p.bk-note { font-size: 12px; }
 .bk-tag { font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--secondary-bg); color: var(--muted-fg); }
 
 .bk-detail { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 14px 16px 24px; border-left: 1px solid var(--border-col); background: var(--background); }
