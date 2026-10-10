@@ -38,6 +38,7 @@ Facts only, each with its source and status. Bullets for any role are written fr
 | Apache Airflow used for the MRI data pipelines | Confirmed |
 | Survival / prognosis models on the 200+ radiomic biomarkers: **C-index about 0.7** | Confirmed (his estimate) |
 | Presentation to the 20-member team changed the team's next modeling decisions | Confirmed |
-| Portfolio site says 10 TB, 4 h → 18 min, 95% concordance; resume facts are 2 TB, 3 h → 2 min / 1 h → <1 min, 99% | **Mismatch: update the site** |
+| Portfolio site: 10 TB, 4 h → 18 min, 95% concordance (an earlier or later stage of the same project; see below) | Both true |
 | Correction 2026-10-09: the stroke model's **87% is recall** (SVM), accuracy ~63%; best AUC 0.80; the "0.7" he recalled matches the best SVM's **0.697 AUC** (MRI repo), so bullets say AUC, not C-index | MRI repo results files |
 | MRI repo held patient files with MRN numbers and was public; made **private** 2026-10-09 (history cleanup still to do) | — |
+| 2026-10-09: the portfolio figures (10 TB, 4 h → 18 min, 95% radiologist concordance) and the resume figures (2 TB, 3 h → 2 min / 1 h → <1 min, 99% physician agreement) are **both true: measured at different stages as the project progressed** (Atishay). Not a mismatch; in interviews, tell it as the progression | Confirmed |
