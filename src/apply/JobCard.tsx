@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import CompanyLogo from "../components/CompanyLogo";
 import CardActions from "./CardActions";
 import { TRACK_LABEL } from "./tracks";
@@ -15,6 +15,18 @@ function ago(iso?: string | null): string | null {
   const h = (Date.now() - Date.parse(iso)) / 3_600_000;
   if (!Number.isFinite(h)) return null;
   return h < 1 ? "just now" : h < 24 ? `${Math.floor(h)}h ago` : h < 24 * 14 ? `${Math.floor(h / 24)}d ago` : `${Math.floor(h / 24 / 7)}w ago`;
+}
+
+export /** Cards across, and rows that fit the window (a second row of five on a tall screen); a phone scrolls a list of compact cards. */
+function useLayout() {
+  const pick = () => ({
+    mobile: window.innerWidth < 760,
+    columns: window.innerWidth >= 1900 ? 5 : window.innerWidth >= 1200 ? 3 : window.innerWidth >= 760 ? 2 : 1,
+    rows: window.innerWidth < 760 ? 12 : window.innerHeight >= 860 ? 2 : 1,
+  });
+  const [n, setN] = useState(pick);
+  useEffect(() => { const f = () => setN(pick()); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
+  return n;
 }
 
 /** The resume-match bar's label, percent and hover text (null before the tailored resume is scored). */

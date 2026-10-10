@@ -493,3 +493,9 @@
 .td-role-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .td-role-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
 .td-mark-applied.is-applied { color: #69c69a; opacity: 1; }
+/* A job's resume as one page icon: green ready, orange queued or building, red failed, grey none yet. */
+.td-resume-dot { flex: none; display: inline-grid; place-items: center; width: 26px; height: 24px; border-radius: 6px; border: 1px solid color-mix(in oklab, currentColor 40%, transparent); color: #8b969e; }
+.td-resume-dot svg { width: 14px; height: 14px; }
+.td-resume-dot.is-ready { color: #69c69a; }
+.td-resume-dot.is-queued { color: #e8a54b; }
+.td-resume-dot.is-failed { color: #ef4444; }

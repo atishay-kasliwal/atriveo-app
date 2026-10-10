@@ -40,20 +40,42 @@ async function workspaceRows(db) {
   }).sort((a, b) => Number(b.eligible) - Number(a.eligible) || b.score - a.score || String(b.first_seen_at).localeCompare(String(a.first_seen_at)))
     .filter(j => { const group = j.fingerprint || j.key; if (seen.has(j.key) || seen.has(group)) return false; seen.add(j.key); seen.add(group); return true; });
 }
+/** A North Carolina job (Today's rule: they come first). */
+const NC = /\b(NC|North Carolina|Raleigh|Durham|Charlotte|Cary|Chapel Hill|Morrisville|Research Triangle|RTP|Greensboro|Winston[- ]Salem|Wilmington|Apex)\b/i;
+const TRACKS = ['software-engineer', 'ai-engineer', 'data-analytics', 'data-science', 'forward-deployed'];
+/** The tracks in turn (a SWE, an AI, a Data Analyst…), each in its own order, as Today's Mixed. */
+function interleave(list) {
+  const groups = new Map();
+  for (const j of list) { const k = TRACKS.includes(j.track) ? j.track : 'other'; groups.set(k, [...(groups.get(k) || []), j]); }
+  const out = [];
+  for (let round = 0; out.length < list.length; round++) for (const g of groups.values()) if (g[round]) out.push(g[round]);
+  return out;
+}
+/**
+ * One page of Staffing, filtered like Today: view, skipped companies (skip=…), search words (q, every word in the
+ * company or title), source, then track (one of TRACKS, all, or mixed: the tracks in turn). North Carolina first,
+ * then the newest find, then the best score. track_counts are for the view and search before the track filter.
+ */
 export async function list(db, params) {
-  // Skipped companies (Today's list, sent as skip=…): a company is skipped when its name contains one, as on Today.
   const skip = params.getAll('skip').map(s => s.trim().toLowerCase()).filter(Boolean);
   let rows = (await workspaceRows(db)).filter(j => !skip.some(s => String(j.company || '').toLowerCase().includes(s)));
   const counts = { recommended: rows.filter(j => j.eligible && j.state === 'new').length, saved: rows.filter(j => j.state === 'saved').length, applied: rows.filter(j => j.state === 'applied').length, browse: rows.filter(j => !['passed', 'applied'].includes(j.state)).length };
   const view = params.get('view') || 'recommended';
   rows = rows.filter(j => view === 'recommended' ? j.eligible && j.state === 'new' : view === 'browse' ? !['passed', 'applied'].includes(j.state) : j.state === view);
-  const query = (params.get('q') || '').toLowerCase();
+  const words = (params.get('q') || '').toLowerCase().split(/\s+/).filter(Boolean);
   const source = params.get('source');
-  rows = rows.filter(j => (!query || `${j.title} ${j.company} ${j.location}`.toLowerCase().includes(query)) && (!source || j.source_id === source));
+  rows = rows.filter(j => words.every(w => `${j.title} ${j.company} ${j.location}`.toLowerCase().includes(w)) && (!source || j.source_id === source))
+    .map(j => ({ ...j, track: trackOf(j.title) }))
+    .sort((a, b) => Number(NC.test(b.location || '')) - Number(NC.test(a.location || '')) || String(b.first_seen_at).localeCompare(String(a.first_seen_at)) || b.score - a.score);
+  const track_counts = Object.fromEntries([['all', rows.length], ...TRACKS.map(t => [t, rows.filter(j => j.track === t).length])]);
+  const track = params.get('track') || 'all';
+  if (TRACKS.includes(track)) rows = rows.filter(j => j.track === track);
+  else if (track === 'mixed') rows = interleave(rows);
   const total = rows.length;
+  const limit = Math.max(1, Math.min(30, Number(params.get('limit')) || 10));
   const offset = Math.max(0, Math.min(100000, Number(params.get('offset')) || 0));
-  // The card's role track and resume match (ats-score.json beside the PDF), only for the page shown.
-  return { ok: true, counts, total, jobs: rows.slice(offset, offset + 10).map(({ description, ...j }) => ({ ...j, track: trackOf(j.title), resume_match: resumeMatchOf(j.resume) })) };
+  // The card's resume match (ats-score.json beside the PDF), only for the page shown.
+  return { ok: true, counts, track_counts, total, jobs: rows.slice(offset, offset + limit).map(({ description, ...j }) => ({ ...j, resume_match: resumeMatchOf(j.resume) })) };
 }
 // Staffing resumes are built by the resume worker, like every other job. A click goes to the fast lane (1001,
 // beside the extension's Tailor); the background sweep queues Recommended jobs just below it.

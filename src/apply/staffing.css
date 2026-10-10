@@ -1,4 +1,4 @@
-.staffing-page { overflow: auto; }
+.staffing-page:not(.td-page) { overflow: auto; }
 .staffing-main { width: min(1400px, 100%); margin: 0 auto; padding: 24px; box-sizing: border-box; }
 .staffing-title { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 16px; }
 .staffing-title h1 { margin: 0; font-size: 26px; }
@@ -93,10 +93,18 @@
 .staffing-match .card-actions-content :is(button,a) { border-radius: 6px; }
 .staffing-match .card-actions-content :is(button,a):hover { background: var(--secondary-bg); }
 
-/* Staffing jobs use Today's card (JobCard): five across, equal heights, More opens over the card. */
-.staffing-shortlist.td-page { overflow: visible; display: block; }
-.staffing-shortlist .staffing-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: 1fr; align-items: stretch; padding: 0; }
-.staffing-shortlist .staffing-grid > p { grid-column: 1 / -1; }
-@media (max-width: 1400px) { .staffing-shortlist .staffing-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 900px) { .staffing-shortlist .staffing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 759px) { .staffing-shortlist .staffing-grid { display: flex; flex-direction: column; grid-auto-rows: auto; } }
+/* Staffing is laid out like Today (td-page): the whole screen, cards side by side, the same bar, keys and pager. */
+.staffing-page .staffing-source-pick { appearance: auto; max-width: 200px; color: inherit; }
+.staffing-detail.is-sources { width: min(1100px, calc(100vw - 32px)); }
+.staffing-page .td-empty .product-empty-actions { justify-content: center; }
+/* Staffing has more controls than Today and no goal bar: the bar wraps to a second row instead of being cut off. */
+@media (min-width: 760px) {
+  .staffing-page.td-page .td-bar { flex-wrap: wrap; row-gap: 10px; }
+  .staffing-page.td-page .td-kinds { flex-wrap: wrap; }
+}
+@media (min-width: 760px) {
+  /* Skill tags stay on one line so two rows of cards fit the screen; anything left scrolls inside the grid, not the page. */
+  .staffing-page.td-page .td-tags { flex-wrap: nowrap; overflow: hidden; }
+  .staffing-page.td-page .td-tags > * { flex-shrink: 0; white-space: nowrap; }
+  .staffing-page.td-page .td-grid { overflow-y: auto; }
+}

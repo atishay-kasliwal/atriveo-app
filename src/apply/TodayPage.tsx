@@ -1,4 +1,4 @@
-import JobCard, { ago, inNC } from './JobCard';
+import JobCard, { ago, inNC, useLayout } from './JobCard';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OpenFillQueue from "./OpenFillQueue";
@@ -82,18 +82,6 @@ const STAGE: Record<Kind, { label: string; tone: string }> = {
   linkedin: { label: "On LinkedIn", tone: "info" },
   answer: { label: "Needs your answers", tone: "warn" },
 };
-
-/** Cards across, and rows that fit the window (a second row of five on a tall screen); a phone scrolls a list of compact cards. */
-function useLayout() {
-  const pick = () => ({
-    mobile: window.innerWidth < 760,
-    columns: window.innerWidth >= 1900 ? 5 : window.innerWidth >= 1200 ? 3 : window.innerWidth >= 760 ? 2 : 1,
-    rows: window.innerWidth < 760 ? 12 : window.innerHeight >= 860 ? 2 : 1,
-  });
-  const [n, setN] = useState(pick);
-  useEffect(() => { const f = () => setN(pick()); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
-  return n;
-}
 
 export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const unanswered = useUnansweredQueue(60_000);
