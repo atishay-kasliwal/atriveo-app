@@ -169,6 +169,8 @@ function toEntry(key, raw, cfg, previous) {
   // A second role under the same employer: the header has a title and dates but no employer.
   if (!company && title && previous?.company) [company, inherited] = [previous.company, true];
   const extra = title?.match(TITLE_EXTRA_RE);
+  // "AI Engineer | Python, AWS": tools after the title still tie those skills to this job (readiness warns separately).
+  if (!stack && extra?.[2]) stack = extra[2].trim();
   return {
     company,
     ...(inherited && { company_inherited: true }),

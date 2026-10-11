@@ -61,11 +61,11 @@ test('load → swap a bullet → render one page → save repoints the job and i
     assert.match(tex, /\\textbf\{Atriveo\} \$\|\$ \\emph\{Go, Rust\}/);
     assert.deepEqual(custom.stacks.atriveo, ['Go', 'Rust']);
     assert.ok(draft.stacks.atriveo.length > 0, 'without yours, the tools come from the bullets');
-    // An employer's tools go on the company line, never the title line; without yours it prints none.
-    assert.match(tex, /\\resumeSubheadingTools\{\\textbf\{Accolite Digital\} \$\|\$ \\emph\{\\small Java, Spring Boot\}\}/);
+    // An employer's tools follow the job title (Senior Software Developer | Java), never the company name.
+    assert.match(tex, /\\resumeSubheading\{Accolite Digital\}\{[^}]*\}\{[^}$]+ \$\|\$ Java, Spring Boot\}/);
     assert.equal(custom.pages, 1);
     assert.deepEqual(draft.stacks.accolite, []);
-    assert.doesNotMatch(fs.readFileSync(path.join(path.dirname(draft.pdfPath), 'resume.tex'), 'utf8'), /\\resumeSubheadingTools\{/);
+    assert.doesNotMatch(fs.readFileSync(path.join(path.dirname(draft.pdfPath), 'resume.tex'), 'utf8'), /\\resumeSubheading\{Accolite Digital\}\{[^}]*\}\{[^}]*\$\|\$/);
     const badEmail = await renderDraft(db, { source: r.source, headerTitle: r.headerTitle, email: 'not-an-email', skills: r.skills, sections: r.sections });
     assert.ok(badEmail.problems.some((p) => /isn't an email/.test(p)));
 
