@@ -516,7 +516,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
       );
     }
     return (
-      <button type="button" className={`rb-tools ${shown.length ? "" : "is-empty"}`} title={s.kind === "experience" ? "Tools after the name, on the company line (optional)" : auto ? "Picked from the bullets; click to set your own" : "Your tools line; click to edit"} onClick={() => setEditingTools(s.role)}>
+      <button type="button" className={`rb-tools ${shown.length ? "" : "is-empty"}`} title={s.kind === "experience" ? "Tools after the job title (optional)" : auto ? "Picked from the bullets; click to set your own" : "Your tools line; click to edit"} onClick={() => setEditingTools(s.role)}>
         {shown.length ? shown.map((t) => <span key={t} className="rb-chip">{t}</span>) : <span className="rb-chip-add">+ tools</span>}
         {auto && shown.length > 0 && <em>auto</em>}
       </button>

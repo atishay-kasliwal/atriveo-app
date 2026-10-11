@@ -33,7 +33,6 @@ const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 \\titlespacing*{\\section}{0pt}{2pt}{2pt}
 \\newcommand{\\resumeItem}[1]{\\item\\small{{#1 \\vspace{-2pt}}}}
 \\newcommand{\\resumeSubheading}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\textbf{#1} & #2 \\\\ \\sbox{\\projectbox}{\\textit{\\small#3}}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & \\textit{\\small #4} \\\\ \\end{tabular*}\\vspace{-7pt}}
-\\newcommand{\\resumeSubheadingTools}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\sbox{\\projectbox}{#1}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & #2 \\\\ \\sbox{\\projectbox}{\\textit{\\small#3}}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & \\textit{\\small #4} \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\newcommand{\\resumeProjectHeading}[2]{\\item\\begin{tabular*}{0.97\\textwidth}{p{0.72\\textwidth}@{\\extracolsep{\\fill}}r}\\sbox{\\projectbox}{\\small#1}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & #2 \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\newcommand{\\resumeEducation}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\textbf{#1} & #4 \\\\ \\textit{\\small #3} & \\textit{\\small #2} \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
@@ -246,19 +245,15 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
         text: bulletText(b),
         ac_id: b.ac_id,
       }));
-      // The title line carries the title only: parsers file that whole line as the job title,
-      // so a stack printed after it ("Software Engineer | FastAPI, Python") becomes part of it.
-      // The title line carries the title only (ATS readiness): a parser files that whole line as the job title.
       const displayTitle = roleTitle;
       const items = bullets.map((b) => `        \\resumeItem{${esc(b.text)}}`).join("\n");
-      // An employer's tools line (role.stack: the JD's skills used there, or the resume builder's own) goes on the
-      // company line, never the title line.
-      const head = role.stack?.length
-        ? `\\resumeSubheadingTools{\\textbf{${esc(name)}} $|$ \\emph{\\small ${esc(role.stack.join(", "))}}}`
-        : `\\resumeSubheading{${esc(name)}}`;
+      // An employer's tools (role.stack: the JD's skills used there, or the resume builder's own) follow the job title
+      // ("AI Engineer | Python, AWS"), as the user asked (2026-10-10); ATS readiness warns that a parser may file them
+      // as part of the title (title_extra_text).
+      const titleLine = role.stack?.length ? `${esc(displayTitle)} $|$ ${esc(role.stack.join(", "))}` : esc(displayTitle);
       return {
         order: meta.order || 0,
-        tex: `    ${head}{${meta.dates}}{${esc(displayTitle)}}{${esc(meta.loc)}}\n      \\resumeItemListStart\n${items}\n      \\resumeItemListEnd`,
+        tex: `    \\resumeSubheading{${esc(name)}}{${meta.dates}}{${titleLine}}{${esc(meta.loc)}}\n      \\resumeItemListStart\n${items}\n      \\resumeItemListEnd`,
       };
     })
     .sort((a, b) => b.order - a.order)

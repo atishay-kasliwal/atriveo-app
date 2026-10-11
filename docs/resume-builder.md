@@ -33,9 +33,9 @@ In the editor:
 - **Projects**: **Remove**, **+ Add a project**, and the **tools after the name** (chips; click to edit) ("Atriveo | FastAPI,
   Docker…"). Until you type in it, the tools line is picked from the project's bullets (as in generated resumes) and
   follows your swaps; once you type, your list is printed (up to 8). **Auto** goes back to the automatic one.
-- **Employers' tools** (optional): **Tools after the name** under each employer prints "Accolite Digital | *Java,
-  AWS…*" on the **company line**, never the title line (a parser files the whole title line as the job title). Empty
-  by default, as generated resumes print none; **Use Java, AWS…** fills it with the tools the bullets name, **Clear**
+- **Employers' tools** (optional): **Tools after the job title** under each employer prints "*Senior Software Developer
+  | Java, AWS…*" on the **title line** (the user asked, 2026-10-10; ATS readiness warns a parser may file it as part of
+  the title). Generated resumes fill it with the JD's skills used there; **Use Java, AWS…** fills it with the tools the bullets name, **Clear**
   removes it. The line shrinks to fit the width, like a project's.
 - **Header**: **Title**, **Email** and **Location** (printed as you write it, e.g. "Charlotte, NC"). They start as
   the resume prints them: your profile's email, and the posting's city (home city when it names none).
@@ -160,6 +160,7 @@ folders are new files, so nothing is ever overwritten).
 | 2026-10-08 | **Export bullets to git** as a script you run and commit, not automatic: the bank is truth-only and reviewed; the overlay keeps working until then. |
 | 2026-10-08 | **Editor polish + phone view** (user asked): controls on hover, picker with line counts, editor and page linked, undo, drag; phones edit by tapping the page (a sheet for typing: the page redraws on each change, which would drop the keyboard). The live preview squeezes its gaps when the PDF says "full", as TeX does. |
 | 2026-10-08 | **Employers' tools line** (user asked): optional, set per resume in the builder, on the company line (not the title line, for parsers); generated resumes unchanged. New macro `\resumeSubheadingTools` in `scripts/ac-tex.mjs`. |
+| 2026-10-10 | **Employers' tools moved to the title line** (user asked: "skills should be with the job title, not with the place where I worked"), in generated resumes, the builder and its preview. `\resumeSubheadingTools` is gone. Readiness keeps its title_extra_text warning (3 points each, cap 9); the checker still credits the tools to that job. |
 | 2026-10-08 | **Room measured on the compiled PDF** (exact, includes TeX's squeeze); the live estimate only fills in while compiling. |
 | 2026-10-08 | **Three ways to write**: this resume only, reword for the bank, new bullet (always to the bank). Bank bullets keep the bank's rules, including a verb of their own. |
 

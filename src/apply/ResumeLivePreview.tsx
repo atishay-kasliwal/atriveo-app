@@ -60,8 +60,7 @@ h2 { font-size: 12pt; font-weight: normal; margin: 4pt 0 3pt; padding-bottom: 1p
 ul { margin: 1pt 0 3pt; padding-left: 0.3in; }
 li { font-size: 10pt; margin: 0; }
 .proj { font-size: 10pt; } .proj em { font-style: italic; }
-.tools { font-size: 10pt; }
-.row > .head { white-space: nowrap; min-width: 0; overflow: hidden; } /* as the PDF: a long name | tools line never wraps */
+.row > .head { white-space: nowrap; min-width: 0; overflow: hidden; } /* as the PDF: a long title | tools line never wraps */
 .skills { margin-left: 0.15in; font-size: 10pt; }
 .pagedjs_page { background: #fff; box-shadow: 0 2px 14px rgba(0,0,0,.45); margin: 0 auto 12px; }
 @media screen { body { padding: 10px 0; } }
@@ -82,8 +81,8 @@ function resumeHtml(layout: Layout, p: { title: string; email: string; city: str
       const m = layout.roles[s.role] ?? { name: s.role, dates: "", place: "", order: 0, title: null };
       const title = s.role === "stony-brook" ? sbTitle(p.title, layout.sbTitleOverrides, layout.sbTitlePatterns, layout.sbTrackTitles)
         : trackFor(p.title, layout.sbTrackTitles)?.employers?.[s.role] ?? m.title ?? "";
-      return `<div class="entry"><div class="row" data-s="${s.si}"><span class="head"><b>${esc(m.name)}</b>${s.tools?.length ? ` | <em class="tools">${esc(s.tools.join(", "))}</em>` : ""}</span><span>${dates(m.dates)}</span></div>
-        <div class="row sub" data-s="${s.si}"><span>${esc(title)}</span><span>${esc(m.place)}</span></div>
+      return `<div class="entry"><div class="row" data-s="${s.si}"><b>${esc(m.name)}</b><span>${dates(m.dates)}</span></div>
+        <div class="row sub" data-s="${s.si}"><span class="head">${esc(title)}${s.tools?.length ? ` | ${esc(s.tools.join(", "))}` : ""}</span><span>${esc(m.place)}</span></div>
         ${items(s)}</div>`;
     }).join("");
   const proj = p.sections.filter((s) => s.kind === "project" && s.bullets.length)
