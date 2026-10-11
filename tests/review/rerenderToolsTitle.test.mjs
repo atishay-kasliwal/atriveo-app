@@ -36,6 +36,11 @@ test('dry run changes nothing; apply redraws one page, keeps a backup, leaves se
   };
   const open = mk('Open (10thOctober)');
   const sent = mk('Sent (10thOctober)');
+  // No employer had tools: the macro is defined but unused, so the page already reads right.
+  const unused = OLD.replace(/\\resumeSubheadingTools\{\\textbf\{([^{}]*)\} \$\|\$ \\emph\{\\small [^{}]*\}\}/g, '\\resumeSubheading{$1}');
+  fs.mkdirSync(path.join(root, '2026-10-09', 'Plain'), { recursive: true });
+  fs.writeFileSync(path.join(root, '2026-10-09', 'Plain', 'resume.tex'), unused);
+  fs.writeFileSync(path.join(root, '2026-10-09', 'Plain', 'Atishay Kasliwal.pdf'), '%PDF-1.4 old');
   const mongo = await MongoMemoryServer.create();
   const client = await MongoClient.connect(mongo.getUri());
   try {
@@ -46,7 +51,7 @@ test('dry run changes nothing; apply redraws one page, keeps a backup, leaves se
     ]);
     const quiet = () => {};
     const dry = await rerender({ db, root, apply: false, log: quiet });
-    assert.deepEqual([dry.looked, dry.sent, dry.redrawn], [2, 1, 1]);
+    assert.deepEqual([dry.looked, dry.alreadyNew, dry.unknownShape, dry.sent, dry.redrawn], [3, 1, 0, 1, 1]);
     assert.equal(fs.readFileSync(open, 'utf8'), '%PDF-1.4 old');
 
     const done = await rerender({ db, root, apply: true, log: quiet });
@@ -62,7 +67,7 @@ test('dry run changes nothing; apply redraws one page, keeps a backup, leaves se
     assert.equal(a2.resume.sha256, 'old');
 
     const again = await rerender({ db, root, apply: true, log: quiet });
-    assert.deepEqual([again.alreadyNew, again.redrawn], [1, 0], 'running it twice changes nothing more');
+    assert.deepEqual([again.alreadyNew, again.redrawn], [2, 0], 'running it twice changes nothing more');
   } finally {
     await client.close();
     await mongo.stop();

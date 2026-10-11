@@ -64,7 +64,8 @@ export async function rerender({ db, root, hours = 24, all = false, apply = fals
     const texPath = path.join(dir, "resume.tex");
     const pdfPath = path.join(dir, PDF);
     const tex = fs.readFileSync(texPath, "utf8");
-    if (!tex.includes("\\resumeSubheadingTools")) { tally.alreadyNew += 1; continue; }
+    // Defined but unused (no employer had tools): the page already reads right.
+    if (!tex.includes("\\resumeSubheadingTools{")) { tally.alreadyNew += 1; continue; }
     const next = convertTex(tex);
     if (!next) { tally.unknownShape += 1; log(`skip (unknown heading shape): ${dir}`); continue; }
     if (await db.collection("applications").countDocuments({ "resume.path": pdfPath, status: { $in: SENT } })) { tally.sent += 1; continue; }
