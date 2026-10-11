@@ -201,7 +201,8 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
       notes={j.warning ? <p className="td-note warn">{j.warning}</p> : null}
       primary={<>{!applied && <button className="rv-primary" disabled={waiting || busy} onClick={() => void (j.resume ? open(j) : prepare(j))}>{j.resume ? "Open & Fill" : j.resume_status === "running" ? "Building resume…" : waiting ? "Queued for a resume" : "Create resume"}</button>}<button className="apps-btn td-ai-review" disabled={waiting || busy} onClick={() => reviewWithAi(j)}>✦ Review with AI</button></>}
       actionNote={waiting ? <p className="card-action-note" role="status">{j.resume_status === "running" ? "Building your resume now." : "In line for a resume."} This card updates when it is ready.</p> : !j.resume && j.resume_status === "failed" ? <p className="card-action-note">The last build failed. Create resume tries again.</p> : null}
-      more={<>{!applied && <><button className="apps-link" disabled={busy} onClick={() => void decide([j], j.state === "saved" ? "new" : "saved")}>{j.state === "saved" ? "Unsave job" : "Save job"}</button><button className="apps-link" disabled={busy} onClick={() => void decide([j], "passed")}>Pass</button></>}{j.resume && <a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(j.resume)}&dl=1`}>Download saved resume</a>}<button className="apps-link" onClick={() => void inspect(j)}>View job details</button></>}
+      quickActions={!applied && <><button className="apps-link" disabled={busy} onClick={() => void decide([j], j.state === "saved" ? "new" : "saved")}>{j.state === "saved" ? "Unsave job" : "Save job"}</button><button className="apps-link" onClick={() => void inspect(j)}>View job details</button></>}
+      more={<>{!applied && <><button className="apps-link" disabled={busy} onClick={() => void decide([j], "passed")}>Pass</button></>}{j.resume && <a className="apps-link" href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(j.resume)}&dl=1`}>Download saved resume</a>}</>}
       source={j.source_id === "manual" ? "Added by you" : sources.find(s => s._id === j.source_id)?.name ?? "Staffing"} age={ago(j.first_seen_at)} ageTitle={`Found ${when(j.first_seen_at)}`} />;
   };
 
@@ -251,7 +252,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
       </div>
     </div>
     {error && <p className="ar-error" role="alert">{error} <button className="apps-link" onClick={() => void refresh()}>Retry</button></p>}
-    <main className="td-grid" aria-label="Job shortlist" style={mobile ? undefined : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}>
+    <main className="td-grid" aria-label="Job shortlist" style={mobile ? undefined : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(min-content, 1fr))` }}>
       {!workspace && <div className="td-empty">Finding your matches…</div>}
       {workspace && !jobs.length && <div className="td-empty"><strong>{filtered ? "Nothing here for this filter." : view === "recommended" ? "You’re caught up." : "No jobs here yet."}</strong>{!filtered && view === "recommended" && <span>Browse all jobs or add a posting you like.</span>}<span className="product-empty-actions">{filtered ? <button className="apps-link" onClick={() => pick({ track: "all", query: "", filter: "all" })}>Show everything</button> : <><button className="apps-btn" onClick={() => pick({ view: "browse" })}>Browse jobs</button><button className="apps-btn" onClick={() => setAdding(true)}>Add a job</button></>}</span></div>}
       {jobs.map((j, i) => card(j, i))}

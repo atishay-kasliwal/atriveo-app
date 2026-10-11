@@ -77,7 +77,9 @@
     "dev:apply": "vite --config vite.apply.config.ts",
     "deploy:apply": "bash scripts/deploy-apply.sh",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:outreach": "node --test tests/outreach/outreach.test.mjs",
+    "test:outreach:browser": "npm run build:apply && node --test tests/outreach/browser.test.mjs"
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.14.4",
@@ -87,7 +89,8 @@
     "pagedjs": "^0.4.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router-dom": "^7.14.0"
+    "react-router-dom": "^7.14.0",
+    "cheerio": "^1.2.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260409.1",

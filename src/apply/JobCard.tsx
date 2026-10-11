@@ -21,7 +21,7 @@ export /** Cards across, and rows that fit the window (a second row of five on a
 function useLayout() {
   const pick = () => ({
     mobile: window.innerWidth < 760,
-    columns: window.innerWidth >= 1900 ? 5 : window.innerWidth >= 1200 ? 3 : window.innerWidth >= 760 ? 2 : 1,
+    columns: window.innerWidth >= 1600 ? 5 : window.innerWidth >= 1200 ? 4 : window.innerWidth >= 1100 ? 3 : window.innerWidth >= 760 ? 2 : 1,
     rows: window.innerWidth < 760 ? 12 : window.innerHeight >= 860 ? 2 : 1,
   });
   const [n, setN] = useState(pick);
@@ -57,6 +57,7 @@ interface Props {
   actionNote?: ReactNode;
   /** Secondary actions, opened over the card by More so its height never changes. */
   more?: ReactNode;
+  quickActions?: ReactNode;
   source: string;
   age?: string | null;
   ageTitle?: string;
@@ -103,8 +104,12 @@ export default function JobCard(p: Props) {
         </div>
         <div className="td-primary-actions">{p.primary}</div>
         {p.actionNote}
-        {p.more && <CardActions>{p.more}</CardActions>}
-        <div className="td-card-caption"><span>{p.source}</span>{p.age && <span title={p.ageTitle}>{p.age}</span>}</div>
+        <div className="td-card-tools">
+          {p.quickActions}
+          {p.more && <CardActions>{p.more}</CardActions>}
+          {p.source !== 'LinkedIn' && <span className="td-source">{p.source}</span>}
+          {p.age && <span className="td-age" title={p.ageTitle}>{p.age}</span>}
+        </div>
       </footer>
     </article>
   );

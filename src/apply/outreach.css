@@ -1,0 +1,53 @@
+.outreach-page { color: var(--foreground, #e8e9ed); }
+.outreach-page.rv-page { display:block; height:auto; min-height:100dvh; overflow:visible; }
+.outreach-page > :not(.apply-header, .outreach-overlay) { margin-left:24px; margin-right:24px; }
+.outreach-page { padding-bottom:32px; }
+.outreach-page-head { display:flex; align-items:center; justify-content:space-between; gap:24px; margin:30px 0 22px; }
+.outreach-page-head h1 { margin:7px 0; font-size:30px; letter-spacing:-1px; }
+.outreach-page-head p,.outreach-muted { color:var(--muted-fg, #9299a6); font-size:13px; line-height:1.6; }
+.outreach-eyebrow { color:var(--muted-fg, #9299a6); font-size:10px; font-weight:700; letter-spacing:1.5px; }
+.outreach-tabs,.outreach-toolbar,.outreach-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:16px 0; }
+.outreach-toolbar input { flex:1; min-width:200px; }
+.outreach-page input,.outreach-page textarea,.outreach-page select,.outreach-panel input,.outreach-panel textarea,.outreach-panel select { box-sizing:border-box; color:inherit; font:inherit; font-size:13px; border:1px solid var(--border-col, #32363e); background:var(--background, #111316); border-radius:7px; padding:10px 12px; max-width:100%; }
+.outreach-page input:focus,.outreach-panel input:focus,.outreach-panel textarea:focus,.outreach-page textarea:focus { outline:2px solid #7ca6d9; outline-offset:1px; }
+.outreach-list { display:grid; gap:10px; }
+.outreach-list-row { text-align:left; width:100%; display:flex; align-items:center; justify-content:space-between; gap:20px; color:inherit; background:var(--card-bg, #191b20); border:1px solid var(--border-col, #30343c); border-radius:10px; padding:20px; cursor:pointer; }
+.outreach-list-row:hover { border-color:#7ca6d9; }
+.outreach-list-row>span:first-child { display:grid; gap:6px; }
+.outreach-list-row small { color:var(--muted-fg, #9299a6); }
+.outreach-badge { display:inline-block; flex-shrink:0; font-size:11px; font-weight:600; color:#a6b7cd; background:#263142; padding:5px 9px; border-radius:6px; }
+.outreach-badge.is-sent { color:#76d9af; background:#18362b; }
+.outreach-badge.is-needs_review,.outreach-badge.is-uncertain,.outreach-badge.is-failed { color:#ecc386; background:#3a3021; }
+.outreach-empty { border:1px dashed var(--border-col, #333); border-radius:12px; text-align:center; padding:70px 24px; color:var(--muted-fg, #9299a6); }
+.outreach-empty h2 { color:var(--foreground, #e8e9ed); font-size:19px; }
+.outreach-settings { max-width:800px; padding:24px; border:1px solid var(--border-col, #333); border-radius:12px; background:var(--card-bg, #191b20); }
+.outreach-settings fieldset,.outreach-panel fieldset { border:0; padding:0; margin:0; min-width:0; }
+.outreach-settings h2 { font-size:17px; margin:28px 0 12px; }.outreach-settings h2:first-child { margin-top:0; }
+.outreach-field { display:grid; gap:7px; margin:14px 0; font-size:12px; color:var(--foreground, #e8e9ed); }
+.outreach-field input,.outreach-field select,.outreach-field textarea { width:100%; }
+.outreach-field textarea { resize:vertical; line-height:1.6; }
+.outreach-two { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.outreach-check { display:flex; gap:9px; align-items:flex-start; font-size:12px; line-height:1.6; margin:12px 0; }
+.outreach-check input { flex:0 0 auto; margin-top:3px; accent-color:#7ca6d9; }
+.outreach-overlay { position:fixed; inset:0; z-index:1200; background:#0008; display:flex; justify-content:flex-end; }
+.outreach-panel { width:min(650px,100%); height:100%; background:var(--card-bg, #191b20); color:var(--foreground, #e8e9ed); box-shadow:-16px 0 50px #0005; display:flex; flex-direction:column; outline:none; }
+.outreach-panel-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; padding:22px 26px; border-bottom:1px solid var(--border-col, #333); }
+.outreach-panel-head h2 { margin:8px 0 5px; font-size:22px; }.outreach-panel-head p { margin:0; color:var(--muted-fg, #9299a6); font-size:13px; line-height:1.5; }
+.outreach-panel-body { flex:1; overflow:auto; padding:20px 26px; overscroll-behavior:contain; }
+.outreach-panel h3 { font-size:14px; margin:24px 0 12px; }
+.outreach-status-row { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.outreach-panel a,.outreach-actions a { color:#a4c4ed; font-size:12px; }
+.outreach-panel-foot { display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; padding:18px 26px; border-top:1px solid var(--border-col, #333); }
+.outreach-error,.outreach-warning,.outreach-notice { font-size:13px; line-height:1.6; padding:12px 14px; border-radius:7px; overflow-wrap:anywhere; }
+.outreach-error { background:#472327; color:#ffc1c6; }.outreach-error button { display:block; margin-top:8px; }
+.outreach-warning { background:#352e21; color:#e6cda5; }.outreach-notice { background:#173629; color:#9fdfbe; }
+.outreach-evidence { padding:12px; background:var(--background, #111316); border:1px solid var(--border-col, #333); border-radius:8px; font-size:12px; }
+.outreach-contact-result { display:flex; flex-wrap:wrap; gap:8px; padding:12px 0; border-top:1px solid var(--border-col, #333); overflow-wrap:anywhere; }
+.outreach-contact-result small { flex-basis:100%; color:var(--muted-fg, #9299a6); line-height:1.5; }
+.outreach-contact-result span { font-size:10px; }.outreach-evidence details { margin-top:10px; }
+.outreach-attachment { display:flex; align-items:center; gap:12px; font-size:12px; padding:12px; border:1px solid var(--border-col, #333); border-radius:8px; }
+.outreach-upload { position:relative; cursor:pointer; overflow:hidden; }.outreach-upload input { position:absolute; opacity:0; inset:0; width:100%; cursor:pointer; }
+.outreach-history { margin:24px 0; font-size:12px; }.outreach-history article { padding:15px 0; border-top:1px solid var(--border-col, #333); }.outreach-history pre { white-space:pre-wrap; font:inherit; line-height:1.6; }.outreach-history small { overflow-wrap:anywhere; }
+.td-outreach { display:inline-flex; align-items:center; margin-left:0; }
+.td-outreach button { min-width:28px; padding:0 4px; font-size:16px; line-height:1; }
+@media(max-width:600px) { .outreach-two { grid-template-columns:1fr; gap:0; }.outreach-panel-head,.outreach-panel-body,.outreach-panel-foot { padding-left:18px; padding-right:18px; }.outreach-page-head { align-items:flex-start; flex-direction:column; gap:10px; }.outreach-list-row { padding:15px; }.outreach-panel-foot button { flex:1; }.outreach-settings { padding:16px; } }

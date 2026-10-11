@@ -8,6 +8,7 @@ import QuestionsPage from "./QuestionsPage";
 import ReadyPage from "./ReadyPage";
 import ResumeBuilderPage from "./ResumeBuilderPage";
 import StaffingPage from "./StaffingPage";
+import OutreachPage from "./OutreachPage";
 import TodayPage from "./TodayPage";
 import UnansweredPage from "./UnansweredPage";
 
@@ -18,6 +19,7 @@ function Console() {
   if (loading) return <div className="apply-loading" aria-busy="true"><div className="spin" /></div>;
   if (!user) return <Navigate to="/login" replace />;
   const header = <ApplyHeader user={user} />;
+  if (path === "/outreach") return <OutreachPage header={header} />;
   if (path === "/staffing") return <StaffingPage header={header} />;
   if (path === "/resume_builder") return <ResumeBuilderPage header={header} />;
   if (path === "/bank") return <BankPage header={header} />;

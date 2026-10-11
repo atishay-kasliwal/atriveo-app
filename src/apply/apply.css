@@ -82,6 +82,9 @@
  .apply-nav-n { min-width: 0; font-size: 9px; }
  .apply-avatar { width: 26px; height: 26px; font-size: 12px; }
  .apply-signout { min-height: 32px; font-size: 11px; padding: 4px 8px; }
+
+.apply-header-right .apply-signout { display: inline-grid; place-items: center; width: 34px; height: 34px; min-height: 34px; padding: 0; border-radius: 10px; font-size: 16px; line-height: 1; }
+.apply-header-right .apply-signout:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 }
 
 .apply-worker { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; color: var(--muted-fg); font-size: 12px; }

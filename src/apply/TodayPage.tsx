@@ -1,5 +1,7 @@
+import OutreachPanel from "./OutreachPanel";
+import { outreachApi, useOutreachList, type OutreachTarget } from "./outreach";
 import JobCard, { ago, inNC, useLayout } from './JobCard';
-import { useEffect, useMemo, useRef, useState } from "react";
+import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OpenFillQueue from "./OpenFillQueue";
 import ApplicationReview from "./ApplicationReview";
@@ -84,6 +86,8 @@ const STAGE: Record<Kind, { label: string; tone: string }> = {
 };
 
 export default function TodayPage({ header }: { header?: React.ReactNode }) {
+  const outreach = useOutreachList();
+  const [outreachTarget, setOutreachTarget] = useState<OutreachTarget | null>(null);
   const unanswered = useUnansweredQueue(60_000);
   const ready = useReadyQueue(60_000);
   const linkedin = useLinkedinQueue(300_000);
@@ -336,6 +340,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     if (!r.marked.length) { setErrors((e) => ({ ...e, [item.id]: r.errors[0] ?? "Couldn't save" })); return; }
     setDone((d) => ({ ...d, [item.id]: item.updatedAt }));
     goalDay.mark();
+    void outreachApi('create', { jobUrl: item.url || item.id }).then(() => outreach.refresh()).catch(() => {
+      setNotice(current => `${current} Outreach could not be prepared; paste its job URL on the Outreach page to try again.`);
+    });
     const n = (goalDay.applied ?? 0) + 1;
     setNotice(`Marked ${item.company} as applied. ${n} / ${goal} today${n >= goal ? " · goal reached 🎉" : ` · ${goal - n} to go`}`);
     setTimeout(() => void refreshLinkedin(), 1500);
@@ -353,7 +360,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   // Keys: 1–7 pick a track, ←/→ (↑/↓ by row) move between cards and pages, A/L/D/O act on the outlined card.
   const keys = useRef<(e: KeyboardEvent) => void>(() => {});
   keys.current = (e: KeyboardEvent) => {
-    if (e.metaKey || e.ctrlKey || e.altKey || review || pdf || confirmAll || queueRunning || answering) return;
+    if (e.metaKey || e.ctrlKey || e.altKey || review || pdf || confirmAll || queueRunning || answering || outreachTarget) return;
     const el = e.target as HTMLElement | null;
     if (el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName))) return;
     const n = Number(e.key);
@@ -408,6 +415,11 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {item.resumeReady !== false ? <Link className="apps-btn td-ai-review" to={`/resume_builder?${item.kind === "linkedin" ? `job=${encodeURIComponent(item.id)}` : `app=${encodeURIComponent(item.id)}`}&ai=review`}>✦ Review with AI</Link> : <button className="apps-btn td-ai-review" disabled title="A resume needs to be created before AI can review it">✦ Review with AI</button>}
 </>}
         actionNote={item.resumeReady === false && <p className="card-action-note">{etaLabel(item.resumeEta).text}. AI review becomes available when your resume is ready.</p>}
+        quickActions={<>
+          {item.resumeReady !== false && <Link className="apps-link" to={`/resume_builder?${item.kind === "linkedin" ? `job=${encodeURIComponent(item.id)}` : `app=${encodeURIComponent(item.id)}`}`}>Edit resume</Link>}
+          <button className="apps-link" disabled={isBusy} onClick={() => later_(item)}>Later</button>
+          <button className="apps-link" onClick={() => { const draft = outreach.drafts.find(d => d.applicationId === item.id || (item.url && d.jobUrl === item.url)); setOutreachTarget(draft ? { id: draft.id } : { applicationId: item.kind === "linkedin" ? undefined : item.id, jobUrl: item.url }); }}>Outreach</button>
+        </>}
         more={<>
         <div className="td-detail-copy">
           {item.kind === "drafted" && q && <>
@@ -438,7 +450,6 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
             {item.url && item.kind !== "linkedin" && <a className="apps-btn" href={item.url} target="_blank" rel="noreferrer">Job ↗</a>}
           </div>
           <div className="td-links">
-            <button className="apps-link" disabled={isBusy} onClick={() => later_(item)}>Later</button>
             {(item.kind === "approve" || item.kind === "you_submit") && <Link to={`/ready?app=${encodeURIComponent(item.id)}`}>Details</Link>}
             <button className="apps-link td-discard" disabled={isBusy} onClick={() => void discard([item.id])}>Discard</button>
           </div>
@@ -450,9 +461,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const loading = !unanswered.data && !ready.data;
   return (
     <div className="rv-page td-page">
-      {header}
+      {isValidElement<{ todayCount?: number | null }>(header) ? cloneElement(header, { todayCount: loading ? null : everything.length }) : header}
       <div className="td-bar">
-        <div className="td-title"><h1>Today</h1><span className="apps-muted">{loading ? "Loading…" : `${everything.length} application${everything.length === 1 ? "" : "s"} waiting for you`}</span></div>
         <form className="td-search" role="search" onSubmit={(e) => { e.preventDefault(); searchRef.current?.blur(); }}>
           <svg aria-hidden="true" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" strokeWidth="1.5"/><path d="M10.4 10.4L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
           <input ref={searchRef} type="search" value={query} placeholder="Search company or role" aria-label="Search company or role" autoComplete="off" spellCheck={false} enterKeyHint="search"
@@ -467,7 +477,24 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
             </button>
           ))}
         </div>
-        <div className="td-kinds" role="group" aria-label="How you apply">
+        <div className="td-actions">
+          {selectedIds.length > 0 && (confirmDiscard
+            ? <span className="td-confirm">Discard {selectedIds.length}? <button className="apps-btn danger" disabled={busy !== null} onClick={() => void discard(selectedIds)}>Discard</button><button className="apps-link" onClick={() => setConfirmDiscard(false)}>Cancel</button></span>
+            : <button className="apps-btn" disabled={queueRunning || busy !== null} onClick={() => setConfirmDiscard(true)}>Discard selected ({selectedIds.length})</button>)}
+          {queueable.length > 0 && <><button className="apps-btn td-desk" disabled={queueRunning} onClick={() => setSelectedIds(queueable.map(i => i.id))}>Select all Open & Fill ({queueable.length})</button><button className="apps-btn td-desk" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear</button><OpenFillQueue onRunning={setQueueRunning} selected={queued} onFilled={(id) => { const it = everything.find((i) => i.id === id); if (it) setDone((d) => ({ ...d, [id]: it.updatedAt })); setSelectedIds((ids) => ids.filter((x) => x !== id)); }} onFinish={() => { void refreshReady(); void refreshUnanswered(); }} /></>}
+          {fillable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("fill")}>Fill and verify all {fillable.length}</button>}
+          {approvable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("approve")}>Approve all {approvable.length} ready</button>}
+        </div>
+      </div>
+      {(unanswered.error || ready.error) && <p className="ar-error" role="alert">{unanswered.error || ready.error}</p>}
+      <main className="td-grid" style={mobile ? undefined : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(min-content, 1fr))` }}>
+        {loading && <div className="td-empty">Loading your applications…</div>}
+        {!loading && !items.length && everything.length > 0 && <div className="td-empty"><strong>{words.length && !found.length ? `No company or role matches “${query.trim()}”.` : "Nothing here for this filter."}</strong>{words.length > 0 && !found.length && <span>Skipped companies stay hidden; jobs you already applied to or discarded aren't on Today.</span>}<button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all", query: "" })}>Show everything</button></div>}
+        {!loading && !everything.length && <div className="td-empty"><strong>Nothing is waiting for you.</strong><span>New applications show up here once their questions are collected.</span><Link className="apps-btn" to="/staffing">Find more jobs</Link></div>}
+        {shown.map((item, index) => card(item, index))}
+      </main>
+      <div className="td-bottom td-toolbar">
+        <div className="td-kinds td-footer-filters" role="group" aria-label="How you apply">
           {(Object.keys(KIND_LABEL) as Array<Exclude<KindFilter, "all">>).map((k) => (
             <button key={k} type="button" className={`td-kind ${kind === k ? "is-on" : ""}`} aria-pressed={kind === k} onClick={() => pick({ kind: kind === k ? "all" : k })}>{KIND_LABEL[k]} <b>{kindCount(k)}</b></button>
           ))}
@@ -495,15 +522,6 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           </span>
           {(track !== "all" || kind !== "all" || query) && <button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all", query: "" })}>Clear filters</button>}
         </div>
-        <div className="td-actions">
-          {selectedIds.length > 0 && (confirmDiscard
-            ? <span className="td-confirm">Discard {selectedIds.length}? <button className="apps-btn danger" disabled={busy !== null} onClick={() => void discard(selectedIds)}>Discard</button><button className="apps-link" onClick={() => setConfirmDiscard(false)}>Cancel</button></span>
-            : <button className="apps-btn" disabled={queueRunning || busy !== null} onClick={() => setConfirmDiscard(true)}>Discard selected ({selectedIds.length})</button>)}
-          {queueable.length > 0 && <><button className="apps-btn td-desk" disabled={queueRunning} onClick={() => setSelectedIds(queueable.map(i => i.id))}>Select all Open & Fill ({queueable.length})</button><button className="apps-btn td-desk" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear</button><OpenFillQueue onRunning={setQueueRunning} selected={queued} onFilled={(id) => { const it = everything.find((i) => i.id === id); if (it) setDone((d) => ({ ...d, [id]: it.updatedAt })); setSelectedIds((ids) => ids.filter((x) => x !== id)); }} onFinish={() => { void refreshReady(); void refreshUnanswered(); }} /></>}
-          {fillable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("fill")}>Fill and verify all {fillable.length}</button>}
-          {approvable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("approve")}>Approve all {approvable.length} ready</button>}
-        </div>
-      </div>
       <div className="td-goal" aria-label={`Applied today: ${goalDay.applied ?? "loading"} of ${goal}`}>
         <span className="td-goal-n"><b>{goalDay.applied ?? "–"}</b> / <button type="button" title="Daily goal: click to change" onClick={() => { const g = GOALS[(GOALS.indexOf(goal) + 1) % GOALS.length]!; setGoal(g); writePref("goal", g); }}>{goal}</button> applied today</span>
         <div className={`td-goal-bar ${(goalDay.applied ?? 0) >= goal ? "is-done" : ""}`}>
@@ -517,15 +535,6 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           ? <span className="td-sprint is-on" title="Applications in this 25-minute sprint">⏱ {Math.floor(sprint.left / 60_000)}:{String(Math.floor((sprint.left % 60_000) / 1000)).padStart(2, "0")} · <b>{sprint.count}</b> applied{sprint.best ? ` · best ${sprint.best}` : ""}<button type="button" className="apps-link" onClick={sprint.stop}>End</button></span>
           : <button type="button" className="td-sprint" disabled={goalDay.applied == null} onClick={sprint.start} title="25 minutes: count how many you apply to">⏱ Sprint{sprint.best ? ` · best ${sprint.best}` : ""}</button>}
       </div>
-      {(unanswered.error || ready.error) && <p className="ar-error" role="alert">{unanswered.error || ready.error}</p>}
-      <main className="td-grid" style={mobile ? undefined : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}>
-        {loading && <div className="td-empty">Loading your applications…</div>}
-        {!loading && !items.length && everything.length > 0 && <div className="td-empty"><strong>{words.length && !found.length ? `No company or role matches “${query.trim()}”.` : "Nothing here for this filter."}</strong>{words.length > 0 && !found.length && <span>Skipped companies stay hidden; jobs you already applied to or discarded aren't on Today.</span>}<button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all", query: "" })}>Show everything</button></div>}
-        {!loading && !everything.length && <div className="td-empty"><strong>Nothing is waiting for you.</strong><span>New applications show up here once their questions are collected.</span><Link className="apps-btn" to="/staffing">Find more jobs</Link></div>}
-        {shown.map((item, index) => card(item, index))}
-      </main>
-      <div className="td-bottom">
-      <aside className="td-keys" aria-label="Keyboard shortcuts"><span><kbd>1</kbd>–<kbd>7</kbd> track</span><span><kbd>←</kbd><kbd>→</kbd> move</span><span><kbd>O</kbd> open</span><span><kbd>A</kbd> mark applied</span><span><kbd>L</kbd> later</span><span><kbd>S</kbd> skip company</span><span><kbd>D</kbd> discard</span><span><kbd>/</kbd> search</span></aside>
       {items.length > perPage && (
         <nav className="td-pager" aria-label="More applications">
           <button className="apps-btn" disabled={current === 0} onClick={() => setPage(current - 1)} aria-label="Previous applications">←</button>
@@ -553,6 +562,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         setNotice(`Saved ${n} answer${n === 1 ? "" : "s"}${it ? ` for ${it.company}` : ""}. It moves up for Open & Fill once the engine checks them.`);
         setTimeout(() => { void refreshUnanswered(); if (it?.queued) void loadCards([it.queued]); }, 1500);
       }} />}
+      {outreachTarget && <OutreachPanel key={JSON.stringify(outreachTarget)} target={outreachTarget} onClose={() => setOutreachTarget(null)} onChanged={() => void outreach.refresh()} />}
       {pdf && <PdfPreviewModal pdfPath={pdf} onClose={() => setPdf(null)} />}
       {review && <ApplicationReview key={`${review.id}:${review.mode}`} application={review} onClose={() => setReview(null)} />}
       {notice && <div className="apps-toast" role="status"><span>{notice}</span><button type="button" className="apps-toast-close" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}

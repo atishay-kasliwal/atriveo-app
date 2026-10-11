@@ -17,6 +17,7 @@ import { analyzeResume, recordAiDecision, resumeAiVersion, enqueueResumeAi, resu
  *
  * No external dependencies — Node built-ins only.
  */
+import { outreachHandler, outreachCors } from "./outreach/routes.mjs";
 import { handleStaffing } from "./staffing-routes.mjs";
 import { startStaffingAutoQueue } from "./staffing-workspace.mjs";
 import { handleMuse } from "./muse-http.mjs";
@@ -1140,12 +1141,13 @@ let applicationActions = Promise.resolve();
 let listTailoredCache = null; // { at: number, resumes: [] }
 const LIST_TAILORED_CACHE_MS = 30_000;
 
+const handleOutreach = outreachHandler();
 const server = http.createServer(async (req, res) => {
   // permissive CORS so the Vite dev origin can reach us
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Tailor-Token");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS,DELETE");
-  if (req.method === "OPTIONS") { res.writeHead(204); return res.end(); }
+  if (req.method === "OPTIONS") { if (req.url?.startsWith("/outreach/") && !outreachCors(req, res)) { res.writeHead(403); return res.end(); } res.writeHead(204); return res.end(); }
 
   const reqUrl = new URL(req.url || "/", "http://127.0.0.1");
   const pathname = reqUrl.pathname;
@@ -1155,6 +1157,7 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({ ok: false, error: "Unauthorized" }));
   }
   if (await handleStaffing(req, res, reqUrl)) return;
+  if (await handleOutreach(req, res, reqUrl)) return;
   // Open & Fill: the Atriveo Fill extension on this Mac only (never through the relay); see fill-routes.mjs.
   if (await handleFillRoute(req, res, reqUrl, (request) => runManualFill(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo"), request), APPLY_HERE_DOCS)) return;
 
@@ -2295,6 +2298,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, process.env.TAILOR_HOST?.trim() || "127.0.0.1", () => {
+  handleOutreach.start();
   log(`listening on http://localhost:${PORT}`);
   // Bound to loopback, so this only matters once cloudflared publishes it — but
   // then /scrape/start is reachable by anyone who knows the tunnel URL, and it
