@@ -1,0 +1,131 @@
+\documentclass[letterpaper,11pt]{article}
+\usepackage{graphicx}\newsavebox{\contactbox}\newsavebox{\projectbox}
+\usepackage{latexsym}\usepackage[empty]{fullpage}\usepackage{titlesec}
+\usepackage[usenames,dvipsnames]{color}\usepackage{verbatim}\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}\usepackage{fancyhdr}\usepackage[english]{babel}\usepackage{tabularx}
+\pagestyle{fancy}\fancyhf{}\fancyfoot{}\renewcommand{\headrulewidth}{0pt}\renewcommand{\footrulewidth}{0pt}
+\addtolength{\oddsidemargin}{-0.5in}\addtolength{\evensidemargin}{-0.5in}\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}\addtolength{\textheight}{1.0in}
+\urlstyle{same}\raggedbottom\raggedright\setlength{\tabcolsep}{0in}
+\titleformat{\section}{\vspace{-1pt}\raggedright\large}{}{0em}{}[\color{black}\titlerule \vspace{2pt}]
+\titlespacing*{\section}{0pt}{2pt}{2pt}
+\newcommand{\resumeItem}[1]{\item\small{{#1 \vspace{-2pt}}}}
+\newcommand{\resumeSubheading}[4]{\vspace{-2pt}\item\begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}\textbf{#1} & #2 \\ \sbox{\projectbox}{\textit{\small#3}}\ifdim\wd\projectbox>0.72\textwidth\resizebox{0.72\textwidth}{!}{\usebox{\projectbox}}\else\usebox{\projectbox}\fi & \textit{\small #4} \\ \end{tabular*}\vspace{-7pt}}
+\newcommand{\resumeSubheadingTools}[4]{\vspace{-2pt}\item\begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}\sbox{\projectbox}{#1}\ifdim\wd\projectbox>0.72\textwidth\resizebox{0.72\textwidth}{!}{\usebox{\projectbox}}\else\usebox{\projectbox}\fi & #2 \\ \sbox{\projectbox}{\textit{\small#3}}\ifdim\wd\projectbox>0.72\textwidth\resizebox{0.72\textwidth}{!}{\usebox{\projectbox}}\else\usebox{\projectbox}\fi & \textit{\small #4} \\ \end{tabular*}\vspace{-7pt}}
+\newcommand{\resumeProjectHeading}[2]{\item\begin{tabular*}{0.97\textwidth}{p{0.72\textwidth}@{\extracolsep{\fill}}r}\sbox{\projectbox}{\small#1}\ifdim\wd\projectbox>0.72\textwidth\resizebox{0.72\textwidth}{!}{\usebox{\projectbox}}\else\usebox{\projectbox}\fi & #2 \\ \end{tabular*}\vspace{-7pt}}
+\newcommand{\resumeEducation}[4]{\vspace{-2pt}\item\begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}\textbf{#1} & #4 \\ \textit{\small #3} & \textit{\small #2} \\ \end{tabular*}\vspace{-7pt}}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+\begin{document}
+\begin{center}
+    \textbf{\Huge \scshape Atishay Kasliwal} \\ \vspace{1pt}
+    \sbox{\contactbox}{\fontsize{8.5}{11}\selectfont Software Engineer $|$ 934-246-1198 $|$ \href{mailto:katishay45@gmail.com}{katishay45@gmail.com} $|$ \href{https://www.linkedin.com/in/atishay-kasliwal}{linkedin.com/in/atishay-kasliwal} $|$ \href{https://github.com/atishay-kasliwal}{github.com/atishay-kasliwal} $|$ New York City}
+    \ifdim\wd\contactbox>\textwidth
+      \resizebox{\textwidth}{!}{\usebox{\contactbox}}
+    \else\usebox{\contactbox}\fi
+\end{center}
+
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeEducation{Stony Brook University}{Stony Brook, New York}{Master of Science in Data Science}{Aug. 2024 -- May 2026}
+    \resumeEducation{Symbiosis University of Applied Sciences}{Indore, Madhya Pradesh}{Bachelor of Technology in Computer Science and Information Technology}{Aug. 2018 -- May 2022}
+  \resumeSubHeadingListEnd
+
+\section{Experience}
+  \resumeSubHeadingListStart
+    \resumeSubheadingTools{\textbf{Stony Brook University} $|$ \emph{\small Python, AWS, SQL, React, PostgreSQL, FastAPI}}{November 2024 -- May 2026}{Software Engineer}{Stony Brook, NY}
+      \resumeItemListStart
+        \resumeItem{Designed the FOMC platform's entire backend from Kafka ingestion to FastAPI services on AWS, serving 200+ daily users at under 60 ms API latency.}
+        \resumeItem{Accelerated the FOMC pipeline from 3 days to under 20 minutes through parallel inference, caching and async I/O in Python on AWS.}
+        \resumeItem{Programmed FastAPI ingestion APIs on AWS that load 200K+ f\kern0pt{}inancial records with validated schemas, so forecasts run on clean data within minutes of each Fed release.}
+        \resumeItem{Engineered production RAG with LangChain and Pinecone retrieval on AWS, delivering 18\% accuracy lift in macro analysis evaluations.}
+      \resumeItemListEnd
+
+    \resumeSubheadingTools{\textbf{Wake Forest - CAIR} $|$ \emph{\small Python, SQL, React, TypeScript, PostgreSQL, PyTorch}}{May 2025 -- August 2025}{AI/ML Engineer}{Winston-Salem, NC}
+      \resumeItemListStart
+        \resumeItem{Visualized MRIs, prior studies and AI segmentations for 20 residents with 2 lead doctors in a React and TypeScript clinician dashboard the hospital still uses.}
+        \resumeItem{Attained 90\%+ mask accuracy with a PyTorch brain tumor segmentation model on N4ITK bias-corrected MRI, replacing manual tumor outlining for treating clinicians.}
+        \resumeItem{Created a Python healthcare AI pipeline processing 10K+ brain MRI studies, cutting automated tumor segmentation from 3 hours to 2 minutes.}
+      \resumeItemListEnd
+
+    \resumeSubheadingTools{\textbf{Accolite Digital} $|$ \emph{\small Python, Java, AWS, SQL, React, CI/CD}}{August 2021 -- August 2024}{Senior Software Developer}{Hyderabad, TG}
+      \resumeItemListStart
+        \resumeItem{Delivered British Telecom's e-commerce platform end to end with a cross-functional client team, from Java and Spring Boot microservices to the storefront and JWT-secured payment gateway, at 10K+ daily transactions.}
+        \resumeItem{Resolved recurring production incidents for 100K+ British Telecom users by rearchitecting on Redis and Elasticsearch, cutting P99 latency 40\%.}
+        \resumeItem{Installed Jenkins, Docker and Kubernetes CI/CD across 20 engineers cutting release cycles from 6 hours to 90 seconds with 20+ monthly production releases.}
+        \resumeItem{Wrote JUnit and PyTest suites covering entire Java and Python microservices to a 100\% code-coverage standard before every client release.}
+        \resumeItem{Overhauled Oracle CRM into an in-house React and MongoDB operations platform covering client onboarding, employee onboarding and invoicing for 3,000 employees.}
+      \resumeItemListEnd
+  \resumeSubHeadingListEnd
+
+\section{Projects}
+  \resumeSubHeadingListStart
+    \resumeProjectHeading{\textbf{Atriveo} $|$ \emph{React, TypeScript, Node.js, MongoDB, FastAPI, PostgreSQL}}{September 2025 -- Present}
+    \resumeItemListStart
+      \resumeItem{Founded Atriveo, building its Chrome extension, React console and job-discovery backend end to end to track 50K+ applications and tailor 50K+ resumes in a year.}
+      \resumeItem{Reinforced Atriveo's security on Cloudf\kern0pt{}lare Pages and Workers with JWT sessions, salted PBKDF2 passwords and monitored health checks, holding 99.9\% uptime across 2K+ daily production queries.}
+    \resumeItemListEnd
+
+    \resumeProjectHeading{\textbf{Insurance Microservices Platform} $|$ \emph{Kafka, Java, Spring Boot, Elasticsearch, Docker}}{June 2025 -- August 2025}
+    \resumeItemListStart
+      \resumeItem{Composed Kafka Streams topologies with persistent state stores on a 3-broker cluster, powering real-time insurance policy analytics and interactive query APIs documented in Swagger.}
+    \resumeItemListEnd
+  \resumeSubHeadingListEnd
+
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Cloud \& DevOps}{: AWS, CI/CD, Docker, GCP, Terraform, Observability, Prometheus, CloudWatch} \\
+     \textbf{Languages}{: Python, Java, SQL, TypeScript, GraphQL, JavaScript, CSS, Shell Scripting} \\
+     \textbf{Software Engineering}{: Microservices, Agile, API Design, Event-Driven Architecture} \\
+     \textbf{Backend Frameworks}{: Spring Boot, FastAPI, Kafka, REST APIs, Node.js, Authentication, JWT} \\
+     \textbf{Additional Skills}{: LLMs, Machine Learning, React, RAG, ETL Pipelines, Redis, PyTorch} \\
+    }}
+ \end{itemize}
+
+\end{document}
+
+% ==== JD: Pointone — Software Engineer ====
+% ABOUT POINTONE
+% 
+% PointOne is the AI revenue platform for professional services.
+% 
+% We’re a Tier 1 venture-backed startup (Y Combinator, Bessemer, 8VC, General Catalyst) that has raised over $20M and grown revenue over 17x over the past 12 months.
+% 
+% WHO YOU ARE
+% 
+% You have:
+% 
+% - 2-5 years of experience at hyper-growth startups and/or leading big tech companies
+% 
+% - A CS degree from a top university
+% 
+% - Strong product sense
+% 
+% - High degree of ownership and the ability to operate autonomously
+% 
+% WHY YOU SHOULD JOIN
+% 
+% Growth: Our engineers drive the company. You will be expected to quickly take ownership of critical projects and ramp up to own entire products or customers.
+% 
+% Impact: A lot of AI tools have trouble showing real impact. Not us—we deliver hard ROI to our customers (which is one reason why we're one of the stickiest tools in a law firm).
+% 
+% Equity: We want to bet on ourselves and our employees—we offer a highly competitive equity component with any compensation package. We are looking for true builders and innovators.
+% 
+% WHAT YOU’LL DO
+% 
+% - Develop novel AI products, providing customers with entirely new workflows.
+% 
+% - Work directly with customers to understand needs, prioritize requests, and translate them into technical solutions.
+% 
+% - Lead by example through mentoring future hires, pairing, and code reviews. You'll shape our engineering culture.
+% 
+% You're excited to work in-person, talk to customers, and drive the development of the next frontier of AI tools.
+% 
+% The compensation for this position is determined by multiple factors, including prior experience and expertise. A competitive equity component will also be offered as part of the package.
+% 
+% Benefits include comprehensive health, dental, and vision insurance, meals in office, regular team events, a personal wellness fund, a personal learning fund, and more!
