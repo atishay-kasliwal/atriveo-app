@@ -78,10 +78,14 @@ export async function rerender({ db, root, hours = 24, all = false, apply = fals
       const built = path.join(work, "resume.pdf");
       if (r.status !== 0 || !fs.existsSync(built)) { tally.failed += 1; log(`compile failed: ${dir}\n${(r.stderr || "").slice(-400)}`); continue; }
       if (pages(built) !== 1) { tally.notOnePage += 1; log(`kept old (not one page): ${dir}`); continue; }
+      // Another run may have redrawn it meanwhile: then it is done, and its backup already holds the original.
+      if (!fs.readFileSync(texPath, "utf8").includes("\\resumeSubheadingTools{")) { tally.alreadyNew += 1; continue; }
       const backup = path.join(backupRoot, path.relative(root, dir));
       fs.mkdirSync(backup, { recursive: true });
-      fs.copyFileSync(pdfPath, path.join(backup, PDF));
-      fs.copyFileSync(texPath, path.join(backup, "resume.tex"));
+      // The first backup is the original; never overwrite it.
+      for (const [from, name] of [[pdfPath, PDF], [texPath, "resume.tex"]]) {
+        try { fs.copyFileSync(from, path.join(backup, name), fs.constants.COPYFILE_EXCL); } catch (e) { if (e.code !== "EEXIST") throw e; }
+      }
       // Same folder, then rename: a reader never sees half a file.
       fs.copyFileSync(built, `${pdfPath}.new`);
       fs.renameSync(`${pdfPath}.new`, pdfPath);
