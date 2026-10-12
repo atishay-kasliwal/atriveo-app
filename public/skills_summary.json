@@ -1,36 +1,36 @@
 {
-  "generated_at": "2026-10-12T02:56:26.095243+00:00",
-  "total_analyzed": 7371,
+  "generated_at": "2026-10-12T03:59:10.625258+00:00",
+  "total_analyzed": 7380,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 4287,
+        "Python": 4291,
         "Java": 2085,
         "SQL": 1897,
-        "TypeScript": 1192,
+        "TypeScript": 1195,
         "JavaScript": 974,
         "HTML/CSS": 380,
         "Rust": 358,
         ".NET": 357,
-        "Kotlin": 205,
+        "Kotlin": 206,
         "C++": 204,
         "Go": 178,
         "Scala": 136,
         "Ruby": 102,
         "Bash/Shell": 98,
         "PHP": 71,
-        "Swift": 58
+        "Swift": 59
       }
     },
     "Frameworks & Libraries": {
       "color": "#8b5cf6",
       "skills": {
-        "React": 1106,
+        "React": 1109,
         "PyTorch": 900,
         "TensorFlow": 572,
         "Spring": 471,
-        "Node.js": 436,
+        "Node.js": 438,
         "Angular": 378,
         "LangChain": 350,
         "Scikit-learn": 337,
@@ -41,19 +41,19 @@
         "FastAPI": 176,
         "Vue": 175,
         "GraphQL": 175,
-        "Next.js": 163,
-        "Django": 140,
+        "Next.js": 164,
+        "Django": 141,
         "Flask": 105,
         "Playwright": 102,
         "Rails": 67,
         "Selenium": 45,
-        "NestJS": 19
+        "NestJS": 20
       }
     },
     "Cloud": {
       "color": "#f59e0b",
       "skills": {
-        "AWS": 2356,
+        "AWS": 2357,
         "Azure": 1269,
         "GCP": 935,
         "S3": 314,
@@ -74,8 +74,8 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 3075,
-        "REST API": 1409,
+        "Scalability": 3076,
+        "REST API": 1410,
         "Distributed Systems": 1258,
         "Microservices": 667,
         "System Design": 553,
@@ -94,10 +94,10 @@
       "color": "#10b981",
       "skills": {
         "CI/CD": 1601,
-        "Kubernetes": 990,
-        "Git": 901,
-        "Docker": 891,
-        "Linux": 518,
+        "Kubernetes": 991,
+        "Git": 902,
+        "Docker": 892,
+        "Linux": 519,
         "Terraform": 373,
         "GitHub Actions": 245,
         "Jenkins": 202,
@@ -113,8 +113,8 @@
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
-        "ETL/ELT": 1252,
-        "PostgreSQL": 620,
+        "ETL/ELT": 1254,
+        "PostgreSQL": 622,
         "Spark": 565,
         "Kafka": 437,
         "Databricks": 378,
@@ -136,8 +136,8 @@
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 2362,
-        "Agents": 1820,
-        "LLM": 1662,
+        "Agents": 1824,
+        "LLM": 1663,
         "GenAI": 1054,
         "PyTorch": 900,
         "RAG": 758,
