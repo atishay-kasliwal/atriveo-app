@@ -343,8 +343,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     void outreachApi('create', { jobUrl: item.url || item.id }).then(() => outreach.refresh()).catch(() => {
       setNotice(current => `${current} Outreach could not be prepared; paste its job URL on the Outreach page to try again.`);
     });
-    const n = (goalDay.applied ?? 0) + 1;
-    setNotice(`Marked ${item.company} as applied. ${n} / ${goal} today${n >= goal ? " · goal reached 🎉" : ` · ${goal - n} to go`}`);
+    setNotice(`Marked ${item.company} as applied. Updating today's total…`);
     setTimeout(() => void refreshLinkedin(), 1500);
   };
 
