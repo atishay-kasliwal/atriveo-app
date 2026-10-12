@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getTailorServerBase } from "../utils/tailorServer";
 
 // Today's daily goal: how many you applied to today (engine submissions + LinkedIn postings you marked applied,
-// from the Stats summary for today, America/New_York), plus what you marked on this page since it last loaded.
+// from the Stats summary for today, America/New_York).
 
 const TZ = "America/New_York";
 export const todayKey = () => new Date().toLocaleString("sv-SE", { timeZone: TZ }).slice(0, 10);
@@ -18,29 +18,30 @@ export function writePref(key: string, value: unknown): void {
 
 export const GOALS = [10, 15, 20, 25];
 
-/** Applied today, from the server, plus the marks you made here after it answered. */
+/** Applied today from persisted applications; local marks are only used for combos. */
 export function useAppliedToday() {
-  const [server, setServer] = useState<{ n: number; at: number; day: string } | null>(null);
+  const [server, setServer] = useState<{ n: number; day: string } | null>(null);
   const [marks, setMarks] = useState<number[]>([]);
   const sequence = useRef(0);
   const load = useCallback(async () => {
     const request = ++sequence.current;
     const day = todayKey();
-    const at = Date.now();
     try {
       const res = await fetch(`${getTailorServerBase()}/applications/analytics?view=summary&from=${day}&to=${day}`, { credentials: "include", cache: "no-store" });
       const json = await res.json();
       if (!res.ok || json.ok === false || request !== sequence.current) return;
-      setServer({ n: (json.range?.applied ?? 0) + (json.range?.linkedinApplied ?? 0), at, day });
+      setServer({ n: (json.range?.applied ?? 0) + (json.range?.linkedinApplied ?? 0), day });
     } catch { /* keep the last count */ }
   }, []);
   useEffect(() => { const first = setTimeout(load, 0); const t = setInterval(load, 30_000); const unsubscribe = onApplicationsChanged(() => void load()); return () => { clearTimeout(first); clearInterval(t); unsubscribe(); sequence.current++; }; }, [load]);
-  const mark = useCallback(() => setMarks((m) => [...m, Date.now()]), []);
+  const mark = useCallback(() => {
+    setMarks((m) => [...m, Date.now()]);
+    void load();
+  }, [load]);
   // Re-check every 15 s so a combo ends on screen once 3 minutes pass without a mark.
   const [now, setNow] = useState(Date.now);
   useEffect(() => { if (!marks.length) return; const t = setInterval(() => setNow(Date.now()), 15_000); return () => clearInterval(t); }, [marks.length]);
   const day = todayKey();
-  const sinceLoad = marks.filter((t) => !server || (t > server.at && server.day === day)).length;
   // A combo: marks no more than 3 minutes apart, counted back from the latest one.
   let combo = 0;
   for (let i = marks.length - 1; i >= 0; i--) {
@@ -48,7 +49,7 @@ export function useAppliedToday() {
     if (next - marks[i]! > 180_000) break;
     combo += 1;
   }
-  return { applied: server && server.day === day ? server.n + sinceLoad : server ? sinceLoad : null, combo, mark, refresh: load };
+  return { applied: server && server.day === day ? server.n : null, combo, mark, refresh: load };
 }
 
 // --- History: applied per day (engine, Open & Fill and extension submissions; America/New_York) --------------
