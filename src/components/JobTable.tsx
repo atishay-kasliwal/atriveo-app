@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { Job } from "../types";
+import { applicationLabel, applicationHint } from "../utils/applicationType";
 import type { SortBy, SortDir } from "../pages/Dashboard.types";
 import type { SavedJobSource } from "../hooks/useApplyClickLog";
 import type { ApplyMetadata, ApplyRecord } from "../hooks/useApplyTracker";
@@ -575,10 +576,10 @@ function JobTableRow({
                 href={job.job_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Open job posting"
+                title={applicationHint(job)}
                 onClick={(e) => e.stopPropagation()}
               >
-                Apply
+                {applicationLabel(job)}
               </a>
             ) : null}
             {job.job_url && onSaveJob && (
@@ -645,12 +646,13 @@ function JobTableRow({
             {job.job_url ? (
               <a
                 className="job-table-action job-table-action--apply"
+                title={applicationHint(job)}
                 href={job.job_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
               >
-                Apply
+                {applicationLabel(job)}
               </a>
             ) : null}
             {job.job_url && onSaveJob && (

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Job } from "../types";
+import { applicationLabel, applicationHint } from "../utils/applicationType";
 import type { ApplyRecord } from "../hooks/useApplyTracker";
 import type { TailorRecord } from "../types/tailorQueue";
 import type { ApplyMetadata } from "../hooks/useApplyTracker";
@@ -160,12 +161,13 @@ export default function JobInspector({
             {job.job_url ? (
               <a
                 className={`inspector-btn inspector-btn--primary${isApplied ? " inspector-btn--applied" : ""}`}
+                title={applicationHint(job)}
                 href={job.job_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
               >
-                {isApplied ? "Applied ✓" : "Apply ↗"}
+                {applicationLabel(job)} ↗
               </a>
             ) : null}
             {canQueueResume && (
