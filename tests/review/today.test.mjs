@@ -301,13 +301,20 @@ test('Mark applied on an On LinkedIn card records it and takes it off Today', as
   LINKEDIN = PENDO;
   const f = await fixture(); const { page, calls } = f;
   try {
-    await page.route('**/applications/job-applied', (route) => { calls.push({ applied: route.request().postDataJSON() }); return route.fulfill({ json: { ok: true } }); });
+    let saved = 2;
+    await page.route('**/applications/analytics?**', route => route.fulfill({ json: { ok: true, range: { applied: 1, linkedinApplied: saved }, daily: [] } }));
+    await page.route('**/applications/job-applied', (route) => { calls.push({ applied: route.request().postDataJSON() }); saved++; return route.fulfill({ json: { ok: true } }); });
     await page.goto(`${f.base}/`);
+    await page.getByLabel('Applied today: 3 of 15').waitFor();
     const card = page.getByRole('article', { name: 'Pendo: On LinkedIn' });
     await card.getByRole('button', { name: /Mark applied/ }).click();
     await page.getByText('Marked Pendo as applied.').waitFor();
     assert.deepEqual(calls.filter((c) => c.applied), [{ applied: { jobUrl: 'https://www.linkedin.com/jobs/view/111' } }]);
     assert.equal(await card.count(), 0);
+    await page.getByLabel('Applied today: 4 of 15').waitFor();
+    // A subsequent refresh already includes the saved mark; it must stay at four.
+    await page.reload();
+    await page.getByLabel('Applied today: 4 of 15').waitFor();
   } finally { await f.close(); LINKEDIN = []; }
 });
 
