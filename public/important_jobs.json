@@ -180,6 +180,14 @@
     "site": "ashby",
     "summary": "At Snowflake, we are powering the era of the agentic enterprise.",
     "title": "AI Software Engineer",
+    "application": {
+      "applicationId": "80546207-957c-4365-933f-11a3e1ff4ec1",
+      "applicationKey": "ashby:628f36e0-8554-4d5f-8d5e-a017a761ca54",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "ashby",
+      "updatedAt": "2026-10-13T17:20:07.577Z"
+    },
     "ats_score": 47,
     "fit_score": 8
   },
@@ -249,6 +257,14 @@
     "site": "greenhouse",
     "summary": "Developer Experience sits and builds the tools, platforms, and workflows that hundreds of Toast engineers rely on every day.",
     "title": "Software Engineer II, Developer Experience",
+    "application": {
+      "applicationId": "15d23ecf-66ad-476a-9f8c-c3552733c6c6",
+      "applicationKey": "greenhouse:8245633",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-13T17:21:47.432Z"
+    },
     "ats_score": 50,
     "fit_score": 5
   },
@@ -526,7 +542,7 @@
     "summary": "**Company Overview** Docusign brings agreements to life.",
     "title": "Software Engineer",
     "ats_score": 64,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "session_id": "2026-10-13T16:46:06Z",
@@ -595,7 +611,7 @@
     "summary": "**Job Description** Data Scientist Must Have Technical/Functional Skills * Good understanding of machine learning including with extensive hands\\-on experience in model building (gradient boosting (X\u2026",
     "title": "Data Scientist",
     "ats_score": 28,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4460079731",
