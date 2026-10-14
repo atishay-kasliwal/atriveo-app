@@ -19,6 +19,14 @@
     "site": "greenhouse",
     "summary": "About the Team The Spark Platform team owns and operates DoorDash's Apache Spark ecosystem \u2014 the execution runtime, remote shuffle service, cluster scheduler, and reliability tooling that powers the \u2026",
     "title": "Software Engineer, Spark Platform",
+    "application": {
+      "applicationId": "d295921f-7108-4980-b507-5dc521e130f3",
+      "applicationKey": "greenhouse:8192190",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-14T14:35:44.265Z"
+    },
     "ats_score": 53,
     "fit_score": 7
   },
@@ -42,6 +50,14 @@
     "site": "greenhouse",
     "summary": "About the Team DoorDash is building the world's most reliable on-demand, logistics engine for delivery!",
     "title": "Software Engineer, Backend (All Teams)",
+    "application": {
+      "applicationId": "fc1a9518-1907-40cf-bea6-8994a4414c5a",
+      "applicationKey": "greenhouse:8138486",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-14T14:36:35.007Z"
+    },
     "ats_score": 87,
     "fit_score": 6
   },
@@ -65,6 +81,14 @@
     "site": "greenhouse",
     "summary": "About the Team DoorDash is a data driven organization and relies on timely, accurate and reliable data to drive many business and product decisions.",
     "title": "Software Engineer, Data Platform",
+    "application": {
+      "applicationId": "eaf2e39d-6452-432e-b866-6d209303d953",
+      "applicationKey": "greenhouse:8191886",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-14T14:38:09.056Z"
+    },
     "ats_score": 28,
     "fit_score": 7
   },
@@ -88,6 +112,14 @@
     "site": "greenhouse",
     "summary": "About the Team Data is at the foundation of DoorDash success.",
     "title": "Software Engineer, Data Engineering",
+    "application": {
+      "applicationId": "b0625515-5e79-4d73-8cb5-5179ff796c36",
+      "applicationKey": "greenhouse:8192116",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-14T15:43:30.582Z"
+    },
     "ats_score": 69,
     "fit_score": 7
   },
@@ -134,6 +166,14 @@
     "site": "greenhouse",
     "summary": "About the Team DoorDash is building the world's most reliable on-demand, logistics engine for delivery!",
     "title": "Software Engineering, Android (All Teams)",
+    "application": {
+      "applicationId": "330ea5f6-2d11-4d2f-86bb-56cde78cd5d0",
+      "applicationKey": "greenhouse:8161616",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-14T14:40:23.306Z"
+    },
     "ats_score": 0,
     "fit_score": 5
   },
@@ -238,7 +278,7 @@
     "ats_posting_id": null,
     "company": "Scale AI",
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://job-boards.greenhouse.io/scaleai/jobs/4665557005",
     "level": "Entry",
     "location": "",
     "max_exp": null,
@@ -249,6 +289,16 @@
     "site": "linkedin",
     "summary": "Scale GP (Scale Generative AI Platform) is an enterprise\\-grade AI platform that provides APIs for knowledge retrieval, inference, evaluation, and more.",
     "title": "Infrastructure Software Engineer, Enterprise GenAI",
+    "job_url_direct_at": "2026-10-14T14:01:52.310Z",
+    "job_url_direct_from": "board-match",
+    "application": {
+      "applicationId": "6d19f6ec-1724-4959-abe4-0e6ba0b1700d",
+      "applicationKey": "greenhouse:4665557005",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-14T15:46:29.179Z"
+    },
     "ats_score": 54,
     "fit_score": 7
   },
@@ -318,6 +368,14 @@
     "site": "greenhouse",
     "summary": "About the Team Data Platform\u2019s Data User Experience Engineering builds the products every DoorDash employee uses to answer questions with data.",
     "title": "Software Engineer, Data and AI Platform",
+    "application": {
+      "applicationId": "d6bb4550-8188-46b6-b62f-041ff4741384",
+      "applicationKey": "greenhouse:8192187",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-14T15:48:00.461Z"
+    },
     "ats_score": 44,
     "fit_score": 8
   },
@@ -330,7 +388,7 @@
     "ats_posting_id": null,
     "company": "OpenAI",
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://jobs.ashbyhq.com/openai/ac442f1f-c0d2-4608-a155-bfc89190e01c",
     "level": "Entry",
     "location": "San Francisco, CA",
     "max_exp": null,
@@ -341,6 +399,16 @@
     "site": "linkedin",
     "summary": "**About The Team** The Intelligence \\& Investigations Engineering team builds systems that detect, analyze, and disrupt abuse across OpenAI\u2019s products.",
     "title": "Fullstack Software Engineer, Child Safety Tools & Systems",
+    "job_url_direct_at": "2026-10-14T13:55:27.359Z",
+    "job_url_direct_from": "board-match",
+    "application": {
+      "applicationId": "e6ea2427-a2ec-454f-a38c-f599c96d8cc0",
+      "applicationKey": "ashby:ac442f1f-c0d2-4608-a155-bfc89190e01c",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "ashby",
+      "updatedAt": "2026-10-14T15:48:40.650Z"
+    },
     "ats_score": 62,
     "fit_score": 4
   },
@@ -478,7 +546,26 @@
     "score_pct": 28,
     "site": "greenhouse",
     "summary": "Waymo is an autonomous driving technology company with the mission to be the world's most trusted driver.",
-    "title": "2027 Summer Intern, PhD, Machine Learning, Simulation Realism"
+    "title": "2027 Summer Intern, PhD, Machine Learning, Simulation Realism",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T13:19:59.436Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Waymo",
+      "title": "2027 Summer Intern, PhD, Machine Learning, Simulation Realism",
+      "resume_slot": 48,
+      "session_hour": null,
+      "batch_time": null,
+      "session_id": "2026-10-14T13:14:33Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
   },
   {
     "session_id": "2026-10-14T13:14:33Z",
