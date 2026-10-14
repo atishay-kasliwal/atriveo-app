@@ -28993,7 +28993,7 @@
       "status": "FAILED",
       "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-14T19:38:20.899Z"
+      "updatedAt": "2026-10-14T20:08:26.334Z"
     },
     "ats_score": 66,
     "fit_score": 6
@@ -29061,7 +29061,7 @@
       "status": "FAILED",
       "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-14T19:42:56.402Z"
+      "updatedAt": "2026-10-14T20:13:46.468Z"
     },
     "ats_score": 33,
     "fit_score": 5
@@ -40378,6 +40378,24 @@
     "site": "linkedin",
     "summary": "You\u2019ll work on state\\-of\\-the\\-art research, advanced software tools, new AI systems, and machine learning algorithms, leveraging Amazon's in\\-house tech stack to bring innovative solutions to life.",
     "title": "AI/ML Engineer, Hiring Intelligence, Science & Experimentation (HIRISE)",
+    "resume": {
+      "status": "queued",
+      "stage": "QUEUED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": null,
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:00:49.418Z",
+      "error": null,
+      "company": "Amazon",
+      "title": "AI/ML Engineer, Hiring Intelligence, Science & Experimentation (HIRISE)",
+      "resume_slot": 37,
+      "session_hour": "13",
+      "batch_time": "2026-10-14T17:01:01Z",
+      "session_id": "2026-10-14T20:00:19Z",
+      "priority": 1000,
+      "source": "hourly"
+    },
     "ats_score": 0,
     "fit_score": 3
   },
@@ -45282,7 +45300,7 @@
     "company": "Orenda, Inc",
     "competition_score": 0,
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://job-boards.greenhouse.io/orenda/jobs/8031471003",
     "level": "Entry",
     "location": "New York, NY",
     "max_exp": null,
@@ -45328,6 +45346,16 @@
         "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/OrendaInc (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
         "built_at": "2026-10-14T19:03:43.510Z"
       }
+    },
+    "job_url_direct_at": "2026-10-14T20:00:52.049Z",
+    "job_url_direct_from": "board-match",
+    "application": {
+      "applicationId": "9388ffaa-b6dc-4846-851d-af0449fb77df",
+      "applicationKey": "greenhouse:8031471003",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-14T20:04:03.281Z"
     },
     "ats_score": 60,
     "fit_score": 7
@@ -45404,7 +45432,7 @@
     "company": "Tower Research Capital",
     "competition_score": 0,
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://www.tower-research.com/open-positions/?gh_jid=8099779",
     "level": "Entry",
     "location": "New York, United States",
     "max_exp": null,
@@ -45450,6 +45478,16 @@
         "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/TowerResearchCapital (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
         "built_at": "2026-10-14T19:03:54.397Z"
       }
+    },
+    "job_url_direct_at": "2026-10-14T20:00:52.290Z",
+    "job_url_direct_from": "board-match",
+    "application": {
+      "applicationId": "0f60b053-2b44-4675-8312-2dc2ebb4cb26",
+      "applicationKey": "greenhouse:8099779",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-14T20:04:48.100Z"
     },
     "ats_score": 60,
     "fit_score": 4
@@ -46054,6 +46092,24 @@
     "site": "linkedin",
     "summary": "Preferred Qualifications: \u2022 Experience in recommendation system, online advertising, information retrieval, natural language processing, machine learning, large\\-scale data mining, or related fields.",
     "title": "Machine Learning Engineer, Recommendations - USDS",
+    "resume": {
+      "status": "queued",
+      "stage": "QUEUED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": null,
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:00:57.237Z",
+      "error": null,
+      "company": "TikTok USDS Joint Venture",
+      "title": "Machine Learning Engineer, Recommendations - USDS",
+      "resume_slot": 107,
+      "session_hour": "15",
+      "batch_time": "2026-10-14T19:02:02Z",
+      "session_id": "2026-10-14T20:00:21Z",
+      "priority": 1000,
+      "source": "hourly"
+    },
     "ats_score": 37,
     "fit_score": 5
   },
@@ -46085,6 +46141,24 @@
     "site": "linkedin",
     "summary": "**Responsibilities** About the Team The Search team is responsible for the machine learning algorithm for TikTok's rapidly growing video search, ecommerce search, local service search and AI search b\u2026",
     "title": "Machine Learning Engineer, Search - USDS",
+    "resume": {
+      "status": "queued",
+      "stage": "QUEUED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": null,
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:00:56.830Z",
+      "error": null,
+      "company": "TikTok USDS Joint Venture",
+      "title": "Machine Learning Engineer, Search - USDS",
+      "resume_slot": 105,
+      "session_hour": "15",
+      "batch_time": "2026-10-14T19:02:02Z",
+      "session_id": "2026-10-14T20:00:21Z",
+      "priority": 1000,
+      "source": "hourly"
+    },
     "ats_score": 37,
     "fit_score": 5
   },
@@ -46356,6 +46430,24 @@
     "site": "linkedin",
     "summary": "Architect self\\-evolving defense systems that maintain robustness and resilience against rapid tactic shifts and data drift.",
     "title": "Machine Learning Engineer, TikTok Risk & Integrity - USDS",
+    "resume": {
+      "status": "queued",
+      "stage": "QUEUED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": null,
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:00:56.604Z",
+      "error": null,
+      "company": "TikTok USDS Joint Venture",
+      "title": "Machine Learning Engineer, TikTok Risk & Integrity - USDS",
+      "resume_slot": 103,
+      "session_hour": "15",
+      "batch_time": "2026-10-14T19:02:02Z",
+      "session_id": "2026-10-14T20:00:21Z",
+      "priority": 1000,
+      "source": "hourly"
+    },
     "ats_score": 18,
     "fit_score": 3
   },
@@ -47012,7 +47104,7 @@
       "status": "FAILED",
       "reviewReason": null,
       "ats": "greenhouse",
-      "updatedAt": "2026-10-14T19:42:12.008Z"
+      "updatedAt": "2026-10-14T20:13:00.832Z"
     },
     "ats_score": 50,
     "fit_score": 6
@@ -47126,7 +47218,7 @@
     "company": "Lyft",
     "competition_score": 0,
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://app.careerpuck.com/job-board/lyft/job/8639200002?gh_jid=8639200002",
     "level": "Entry",
     "location": "San Francisco County, CA",
     "max_exp": null,
@@ -47171,6 +47263,16 @@
         "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Lyft (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
         "built_at": "2026-10-14T19:06:40.571Z"
       }
+    },
+    "job_url_direct_at": "2026-10-14T20:00:55.325Z",
+    "job_url_direct_from": "board-match",
+    "application": {
+      "applicationId": "bca3b6b8-024d-4176-b9e7-d1b6306ef27e",
+      "applicationKey": "greenhouse:8639200002",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-14T20:05:41.791Z"
     },
     "ats_score": 50,
     "fit_score": 5
@@ -48191,6 +48293,24 @@
     "site": "linkedin",
     "summary": "**Responsibilities** About the team We are a group of applied machine learning engineers and data scientists that focus on general feed recommendations and E\\-commerce recommendations.",
     "title": "Machine Learning Engineer, Recommendations - USDS",
+    "resume": {
+      "status": "queued",
+      "stage": "QUEUED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": null,
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:00:57.061Z",
+      "error": null,
+      "company": "TikTok USDS Joint Venture",
+      "title": "Machine Learning Engineer, Recommendations - USDS",
+      "resume_slot": 106,
+      "session_hour": "15",
+      "batch_time": "2026-10-14T19:02:02Z",
+      "session_id": "2026-10-14T20:00:21Z",
+      "priority": 1000,
+      "source": "hourly"
+    },
     "ats_score": 37,
     "fit_score": 5
   },
@@ -48377,7 +48497,7 @@
       "status": "FAILED",
       "reviewReason": null,
       "ats": "ashby",
-      "updatedAt": "2026-10-14T19:46:03.373Z"
+      "updatedAt": "2026-10-14T20:16:59.405Z"
     },
     "ats_score": 42,
     "fit_score": 3
@@ -48410,6 +48530,24 @@
     "site": "linkedin",
     "summary": "**Responsibilities** About the team About The Tiktok Monetization Product Data Science Team We're the TikTok Monetization Products data science team, who enables and champions data driven decision ma\u2026",
     "title": "Data Scientist, Ads",
+    "resume": {
+      "status": "queued",
+      "stage": "QUEUED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": null,
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:00:57.566Z",
+      "error": null,
+      "company": "TikTok USDS Joint Venture",
+      "title": "Data Scientist, Ads",
+      "resume_slot": 111,
+      "session_hour": "15",
+      "batch_time": "2026-10-14T19:02:02Z",
+      "session_id": "2026-10-14T20:00:21Z",
+      "priority": 1000,
+      "source": "hourly"
+    },
     "ats_score": 66,
     "fit_score": 5
   },
@@ -48561,6 +48699,24 @@
     "site": "linkedin",
     "summary": "**Responsibilities** About The Team Our Recommendation Architecture Team is responsible for building and optimizing the architecture for our recommendation system to provide the best experience for o\u2026",
     "title": "Software Engineer, Recommendations - USDS",
+    "resume": {
+      "status": "queued",
+      "stage": "QUEUED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": null,
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:00:53.520Z",
+      "error": null,
+      "company": "TikTok USDS Joint Venture",
+      "title": "Software Engineer, Recommendations - USDS",
+      "resume_slot": 63,
+      "session_hour": "15",
+      "batch_time": "2026-10-14T19:02:02Z",
+      "session_id": "2026-10-14T20:00:21Z",
+      "priority": 1000,
+      "source": "hourly"
+    },
     "ats_score": 50,
     "fit_score": 5
   },
@@ -49132,6 +49288,24 @@
     "site": "linkedin",
     "summary": "**Software Engineer** **Location: Austin, Texas, United States** **Industry: IT Services and IT Consulting** **Work Setting: Remote** Are you passionate about building scalable software systems, solv\u2026",
     "title": "Software Engineer",
+    "resume": {
+      "status": "queued",
+      "stage": "QUEUED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": null,
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:00:54.479Z",
+      "error": null,
+      "company": "SoTalent",
+      "title": "Software Engineer",
+      "resume_slot": 76,
+      "session_hour": "15",
+      "batch_time": "2026-10-14T19:02:02Z",
+      "session_id": "2026-10-14T20:00:21Z",
+      "priority": 1000,
+      "source": "hourly"
+    },
     "ats_score": 40,
     "fit_score": 7
   },
@@ -50445,7 +50619,7 @@
     "company": "ERG",
     "competition_score": 0,
     "date_posted": null,
-    "job_url_direct": null,
+    "job_url_direct": "https://jobs.lever.co/erg/d946c3de-cdf2-4fd1-842d-af17dfd886c0",
     "level": "Entry",
     "location": "Boston, MA",
     "max_exp": null,
@@ -50490,6 +50664,16 @@
         "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/ERG (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
         "built_at": "2026-10-14T19:11:40.918Z"
       }
+    },
+    "job_url_direct_at": "2026-10-14T20:01:02.775Z",
+    "job_url_direct_from": "board-match",
+    "application": {
+      "applicationId": "eb809510-ca98-4701-8288-bdca6f6bf8bf",
+      "applicationKey": "lever:d946c3de-cdf2-4fd1-842d-af17dfd886c0",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "lever",
+      "updatedAt": "2026-10-14T20:07:49.729Z"
     },
     "ats_score": 0,
     "fit_score": 3
@@ -50645,13 +50829,13 @@
     "summary": "**About This Role** Are you interested in building innovative technology that shapes the financial markets?",
     "title": "Associate, Software Engineer - Aladdin Graph",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "eca0201aaab07b366c0496e901c1d7a2f4a2ad37cdbca5c258ba1010df4f522e",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
       "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-14T20:00:44.716Z",
+      "updated_at": "2026-10-14T20:01:17.075Z",
       "error": null,
       "company": "BlackRock",
       "title": "Associate, Software Engineer - Aladdin Graph",
@@ -50660,7 +50844,18 @@
       "batch_time": "2026-10-14T20:00:18Z",
       "session_id": "2026-10-14T20:00:20Z",
       "priority": 1000,
-      "source": "hourly"
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "BlackRock (14thOctober)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/BlackRock (14thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/BlackRock (14thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/BlackRock (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:17.075Z"
+      }
     },
     "ats_score": 57,
     "fit_score": 9
@@ -50694,13 +50889,13 @@
     "summary": "*To get the best candidate experience, please consider applying for a maximum of 3 roles within 12 months to ensure you are not duplicating efforts.* **About Futureforce University Recruiting** Our F\u2026",
     "title": "Software Engineering AMTS (College Grad)",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "894b38aaa65fa4e9f469438b784bc4823a028d3aaf39ddf36d7876a593215945",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
       "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-14T20:00:45.368Z",
+      "updated_at": "2026-10-14T20:01:23.286Z",
       "error": null,
       "company": "Salesforce",
       "title": "Software Engineering AMTS (College Grad)",
@@ -50709,7 +50904,18 @@
       "batch_time": "2026-10-14T20:00:18Z",
       "session_id": "2026-10-14T20:00:19Z",
       "priority": 1000,
-      "source": "hourly"
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Salesforce (14thOctober)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Salesforce (14thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Salesforce (14thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Salesforce (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:23.286Z"
+      }
     },
     "ats_score": 44,
     "fit_score": 5
@@ -50743,13 +50949,13 @@
     "summary": "*To get the best candidate experience, please consider applying for a maximum of 3 roles within 12 months to ensure you are not duplicating efforts.* **About Futureforce University Recruiting** Our F\u2026",
     "title": "Software Engineering AMTS (College Grad)",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "894b38aaa65fa4e9f469438b784bc4823a028d3aaf39ddf36d7876a593215945",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
       "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-14T20:00:45.597Z",
+      "updated_at": "2026-10-14T20:01:24.066Z",
       "error": null,
       "company": "Salesforce",
       "title": "Software Engineering AMTS (College Grad)",
@@ -50758,7 +50964,18 @@
       "batch_time": "2026-10-14T20:00:18Z",
       "session_id": "2026-10-14T20:00:19Z",
       "priority": 1000,
-      "source": "hourly"
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Salesforce (14thOctober)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Salesforce (14thOctober)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Salesforce (14thOctober)-2",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Salesforce (14thOctober)-2/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:24.066Z"
+      }
     },
     "ats_score": 44,
     "fit_score": 5
@@ -50792,13 +51009,13 @@
     "summary": "**About the Opportunity:** The SOFTWARE ENGINEER NEW GRAD, MACHINE LEARNING PLATFORM role focuses on developing and maintaining the infrastructure that supports large\\-scale machine learning models.",
     "title": "Software Engineer New Grad, Machine Learning Platform - Quora (Remote)",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "86ec6280d7c27b61d055859c15c0693d51a9721259ef6ce23e426d3bf476f82f",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
       "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-14T20:00:46.191Z",
+      "updated_at": "2026-10-14T20:01:28.459Z",
       "error": null,
       "company": "TalentHop",
       "title": "Software Engineer New Grad, Machine Learning Platform - Quora (Remote)",
@@ -50807,7 +51024,18 @@
       "batch_time": "2026-10-14T20:00:18Z",
       "session_id": "2026-10-14T20:00:19Z",
       "priority": 1000,
-      "source": "hourly"
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "TalentHop (14thOctober)-6",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/TalentHop (14thOctober)-6/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/TalentHop (14thOctober)-6",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/TalentHop (14thOctober)-6/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:28.459Z"
+      }
     },
     "ats_score": 40,
     "fit_score": 6
@@ -50841,13 +51069,13 @@
     "summary": "* Cloud \\& Microservices: Build RESTful APIs and containerized microservices deployed on AWS or Azure platforms.",
     "title": "Advanced Software Engineer",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "cb5a81a5639d3dc39fe3153c3abf42a9fe28d5020a3d20f59b15739b396952cb",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
       "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-14T20:00:46.446Z",
+      "updated_at": "2026-10-14T20:01:29.353Z",
       "error": null,
       "company": "crewlia",
       "title": "Advanced Software Engineer",
@@ -50856,7 +51084,18 @@
       "batch_time": "2026-10-14T20:00:18Z",
       "session_id": "2026-10-14T20:00:19Z",
       "priority": 1000,
-      "source": "hourly"
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Crewlia (14thOctober)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Crewlia (14thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Crewlia (14thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Crewlia (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:29.353Z"
+      }
     },
     "ats_score": 64,
     "fit_score": 13
@@ -50890,13 +51129,13 @@
     "summary": "This collaborative unit works with Orthopaedic Surgeons, Nurse Practitioners, Physician Assistants, Physical Therapists, Occupational Therapists and the trauma team.",
     "title": "New Grad RN Resident - Orthopaedics",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "bcd21a75433348d4108e8cc5a179623d9f971490f1351c0e815fb8adf210d47e",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
       "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-14T20:00:46.663Z",
+      "updated_at": "2026-10-14T20:01:35.963Z",
       "error": null,
       "company": "Cleveland Clinic",
       "title": "New Grad RN Resident - Orthopaedics",
@@ -50905,7 +51144,18 @@
       "batch_time": "2026-10-14T20:00:18Z",
       "session_id": "2026-10-14T20:00:19Z",
       "priority": 1000,
-      "source": "hourly"
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "ClevelandClinic (14thOctober)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/ClevelandClinic (14thOctober)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/ClevelandClinic (14thOctober)-2",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/ClevelandClinic (14thOctober)-2/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:35.963Z"
+      }
     },
     "ats_score": 0,
     "fit_score": 2
@@ -50940,13 +51190,13 @@
     "summary": "Who we are Atoms is building the machines that power the next era of progress.",
     "title": "Software Engineering Intern - 2027 Winter Term ",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "c81333e5abf4d5d439bcd94038ec57617096850fd713f74678eb333a52313a48",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
       "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-14T20:00:46.909Z",
+      "updated_at": "2026-10-14T20:01:41.231Z",
       "error": null,
       "company": "ATOMS Careers page",
       "title": "Software Engineering Intern - 2027 Winter Term ",
@@ -50955,7 +51205,26 @@
       "batch_time": "2026-10-14T20:00:18Z",
       "session_id": "2026-10-14T20:00:19Z",
       "priority": 1000,
-      "source": "hourly"
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "ATOMSCareersPage (14thOctober)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/ATOMSCareersPage (14thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/ATOMSCareersPage (14thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/ATOMSCareersPage (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:41.231Z"
+      }
+    },
+    "application": {
+      "applicationId": "6fe84afb-3cee-4134-8d0f-14bb6d9b3528",
+      "applicationKey": "greenhouse:8888411002",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-14T20:09:12.246Z"
     },
     "ats_score": 50,
     "fit_score": 9
@@ -51038,13 +51307,13 @@
     "summary": "*To get the best candidate experience, please consider applying for a maximum of 3 roles within 12 months to ensure you are not duplicating efforts.* **About Futureforce University Recruiting** Our F\u2026",
     "title": "Software Engineering AMTS (College Grad)",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "894b38aaa65fa4e9f469438b784bc4823a028d3aaf39ddf36d7876a593215945",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
       "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-14T20:00:48.863Z",
+      "updated_at": "2026-10-14T20:01:41.971Z",
       "error": null,
       "company": "Salesforce",
       "title": "Software Engineering AMTS (College Grad)",
@@ -51053,7 +51322,18 @@
       "batch_time": "2026-10-14T20:00:18Z",
       "session_id": "2026-10-14T20:00:20Z",
       "priority": 1000,
-      "source": "hourly"
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Salesforce (14thOctober)-3",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Salesforce (14thOctober)-3/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Salesforce (14thOctober)-3",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Salesforce (14thOctober)-3/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:41.971Z"
+      }
     },
     "ats_score": 44,
     "fit_score": 5
@@ -51087,13 +51367,13 @@
     "summary": "*To get the best candidate experience, please consider applying for a maximum of 3 roles within 12 months to ensure you are not duplicating efforts.* **About Futureforce University Recruiting** Our F\u2026",
     "title": "Software Engineering AMTS (College Grad)",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "894b38aaa65fa4e9f469438b784bc4823a028d3aaf39ddf36d7876a593215945",
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
       "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-14T20:00:49.264Z",
+      "updated_at": "2026-10-14T20:01:42.775Z",
       "error": null,
       "company": "Salesforce",
       "title": "Software Engineering AMTS (College Grad)",
@@ -51102,7 +51382,18 @@
       "batch_time": "2026-10-14T20:00:18Z",
       "session_id": "2026-10-14T20:00:20Z",
       "priority": 1000,
-      "source": "hourly"
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Salesforce (14thOctober)-4",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Salesforce (14thOctober)-4/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Salesforce (14thOctober)-4",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Salesforce (14thOctober)-4/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:42.775Z"
+      }
     },
     "ats_score": 44,
     "fit_score": 5
@@ -51135,6 +51426,35 @@
     "site": "linkedin",
     "summary": "****\ud83d\ude80 Join the Future of Commerce with Whatnot!**** Whatnot is the largest live shopping platform in North America and Europe to buy, sell, and discover the things you love.",
     "title": "Software Engineer, Data Platform",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "3ef8d14c2b6ed22f53f0ca19bbf886b43fb5e509c157694aff38148b8a58af2f",
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:01:43.980Z",
+      "error": null,
+      "company": "Whatnot",
+      "title": "Software Engineer, Data Platform",
+      "resume_slot": 39,
+      "session_hour": "16",
+      "batch_time": "2026-10-14T20:00:18Z",
+      "session_id": "2026-10-14T20:00:19Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Whatnot (14thOctober)-5",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Whatnot (14thOctober)-5/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Whatnot (14thOctober)-5",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Whatnot (14thOctober)-5/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:43.980Z"
+      }
+    },
     "ats_score": 58,
     "fit_score": 9
   },
@@ -51166,6 +51486,35 @@
     "site": "linkedin",
     "summary": "Trace3 is a leading Transformative IT Authority, providing unique technology solutions and consulting services to our clients.",
     "title": "Software Engineer (26-137)",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "aea5a086efa6ff3acb5f4e9d731148ab3f26ad1a9a6d5afce165f8ecd27f68c3",
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:01:45.026Z",
+      "error": null,
+      "company": "Trace3",
+      "title": "Software Engineer (26-137)",
+      "resume_slot": 42,
+      "session_hour": "16",
+      "batch_time": "2026-10-14T20:00:18Z",
+      "session_id": "2026-10-14T20:00:19Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Trace3 (14thOctober)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Trace3 (14thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Trace3 (14thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Trace3 (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:45.026Z"
+      }
+    },
     "ats_score": 42,
     "fit_score": 5
   },
@@ -51197,6 +51546,43 @@
     "site": "greenhouse",
     "summary": "About SmartAsset: SmartAsset is an online destination for consumer-focused financial information, educational content, personalized calculators, and tools.",
     "title": "Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "b2290e9e14452bb0c442a19ff5b3d1935f2ec5d5f676316953049833bd0a2091",
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:01:50.360Z",
+      "error": null,
+      "company": "SmartAsset",
+      "title": "Software Engineer",
+      "resume_slot": 43,
+      "session_hour": "16",
+      "batch_time": "2026-10-14T20:00:18Z",
+      "session_id": "2026-10-14T20:00:19Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "SmartAsset (14thOctober)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/SmartAsset (14thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/SmartAsset (14thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/SmartAsset (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:50.360Z"
+      }
+    },
+    "application": {
+      "applicationId": "d2f1eab2-bcb2-46a2-802f-388e7aaeae01",
+      "applicationKey": "greenhouse:8881645002",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-14T20:06:11.115Z"
+    },
     "ats_score": 50,
     "fit_score": 8
   },
@@ -51228,6 +51614,43 @@
     "site": "ashby",
     "summary": "Before the detail, here's the challenge you'd help us solve.",
     "title": "Software Engineer, Simulation",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "08f94a074731ad09852678ac594207b07f508791fc3baea13f9eb7cbc7a4e229",
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:01:58.001Z",
+      "error": null,
+      "company": "Wayve",
+      "title": "Software Engineer, Simulation",
+      "resume_slot": 44,
+      "session_hour": "16",
+      "batch_time": "2026-10-14T20:00:18Z",
+      "session_id": "2026-10-14T20:00:19Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Wayve (14thOctober)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Wayve (14thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Wayve (14thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Wayve (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:01:58.001Z"
+      }
+    },
+    "application": {
+      "applicationId": "10f1276a-f8af-4a02-89e8-15c3409369ba",
+      "applicationKey": "ashby:90866bb9-017d-45a4-ba18-d9b7fc46a6e5",
+      "status": "FAILED",
+      "reviewReason": null,
+      "ats": "ashby",
+      "updatedAt": "2026-10-14T20:06:56.241Z"
+    },
     "ats_score": 42,
     "fit_score": 5
   },
@@ -51259,6 +51682,35 @@
     "site": "linkedin",
     "summary": "**Why Join the Float Team?** * Gain **versatile experience** across multiple units.",
     "title": "New Graduate RN Float Team FT Nights",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "72db3695c92a7cd7ace4cb3eb58b2c7f519af5c92091566f485ebc98c61371cd",
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:02:04.756Z",
+      "error": null,
+      "company": "Loyola Medicine",
+      "title": "New Graduate RN Float Team FT Nights",
+      "resume_slot": 51,
+      "session_hour": "16",
+      "batch_time": "2026-10-14T20:00:18Z",
+      "session_id": "2026-10-14T20:00:19Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "LoyolaMedicine (14thOctober)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/LoyolaMedicine (14thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/LoyolaMedicine (14thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/LoyolaMedicine (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:02:04.755Z"
+      }
+    },
     "ats_score": 0,
     "fit_score": 3
   },
@@ -51290,6 +51742,35 @@
     "site": "linkedin",
     "summary": "The **HCA Healthcare Residency Program** is a year\\-long program designed to give you hands\\-on experience to help establish valuable clinical and critical thinking skills.",
     "title": "New Grad RN - Southern Hills",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "0ffdeb3df063d7d6d10ca50dae3865558bd121304635188a4aa1316c75dbb5e8",
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:02:11.320Z",
+      "error": null,
+      "company": "TriStar Southern Hills Medical Center",
+      "title": "New Grad RN - Southern Hills",
+      "resume_slot": 50,
+      "session_hour": "16",
+      "batch_time": "2026-10-14T20:00:18Z",
+      "session_id": "2026-10-14T20:00:19Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "TriStarSouthernHillsMedicalCente (14thOctober)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/TriStarSouthernHillsMedicalCente (14thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/TriStarSouthernHillsMedicalCente (14thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/TriStarSouthernHillsMedicalCente (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:02:11.320Z"
+      }
+    },
     "ats_score": 0,
     "fit_score": 8
   },
@@ -51321,6 +51802,35 @@
     "site": "linkedin",
     "summary": "Additionally, the Cleveland Clinic system provides nurses with many professional development resources, including further education and online/in\\-person courses to enhance their skills.",
     "title": "New Grad RN Resident - Pediatric Hematology Oncology",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "9fe77064e216f4027f34a31d47a4234acf5463a45e7530c74c02ebfab5414e9b",
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:02:17.979Z",
+      "error": null,
+      "company": "Cleveland Clinic",
+      "title": "New Grad RN Resident - Pediatric Hematology Oncology",
+      "resume_slot": 49,
+      "session_hour": "16",
+      "batch_time": "2026-10-14T20:00:18Z",
+      "session_id": "2026-10-14T20:00:19Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "ClevelandClinic (14thOctober)-3",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/ClevelandClinic (14thOctober)-3/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/ClevelandClinic (14thOctober)-3",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/ClevelandClinic (14thOctober)-3/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:02:17.979Z"
+      }
+    },
     "ats_score": 0,
     "fit_score": 2
   },
@@ -51352,6 +51862,35 @@
     "site": "linkedin",
     "summary": "Skanska is searching for a dynamic Field Engineer I.",
     "title": "New Grad Field Engineer I (Heavy Civil Construction)",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "6b7d391b477f14ec3da471abe6dd6ed7d78a8ee4a2387e17602994e99b6417ec",
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:02:23.999Z",
+      "error": null,
+      "company": "Skanska",
+      "title": "New Grad Field Engineer I (Heavy Civil Construction)",
+      "resume_slot": 48,
+      "session_hour": "16",
+      "batch_time": "2026-10-14T20:00:18Z",
+      "session_id": "2026-10-14T20:00:19Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "Skanska (14thOctober)",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Skanska (14thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Skanska (14thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/Skanska (14thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:02:23.999Z"
+      }
+    },
     "ats_score": 0,
     "fit_score": 2
   },
@@ -51383,6 +51922,35 @@
     "site": "linkedin",
     "summary": "**Why Join the Float Team?** * Gain **versatile experience** across multiple units.",
     "title": "New Graduate RN Float Team FT Nights",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "72db3695c92a7cd7ace4cb3eb58b2c7f519af5c92091566f485ebc98c61371cd",
+      "lease_until": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
+      "owner": "atishays-macbook-air-8-local-fa3e9bb6",
+      "updated_at": "2026-10-14T20:02:31.013Z",
+      "error": null,
+      "company": "Trinity Health",
+      "title": "New Graduate RN Float Team FT Nights",
+      "resume_slot": 46,
+      "session_hour": "16",
+      "batch_time": "2026-10-14T20:00:18Z",
+      "session_id": "2026-10-14T20:00:19Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "TrinityHealth (14thOctober)-2",
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/TrinityHealth (14thOctober)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/TrinityHealth (14thOctober)-2",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-14/TrinityHealth (14thOctober)-2/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-14T20:02:31.013Z"
+      }
+    },
     "ats_score": 0,
     "fit_score": 3
   },
@@ -51407,14 +51975,14 @@
     "summary": "About Pinterest: Millions of people around the world come to our platform to find creative ideas, dream about new possibilities and plan for memories that will last a lifetime.",
     "title": "University Grad Machine Learning Engineer 2027 (Zurich)",
     "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
+      "status": "failed",
+      "stage": "GATED",
       "fingerprint": null,
       "lease_until": null,
-      "worker_id": null,
+      "worker_id": "atishays-macbook-air-8-local-fa3e9bb6",
       "owner": "atishays-macbook-air-8-local-fa3e9bb6",
-      "updated_at": "2026-10-14T20:00:49.013Z",
-      "error": null,
+      "updated_at": "2026-10-14T20:01:42.948Z",
+      "error": "JD not found or too short in Mongo descriptions",
       "company": "Pinterest",
       "title": "University Grad Machine Learning Engineer 2027 (Zurich)",
       "resume_slot": 35,
@@ -51422,7 +51990,8 @@
       "batch_time": null,
       "session_id": "2026-10-14T20:00:20Z",
       "priority": 1000,
-      "source": "hourly"
+      "source": "hourly",
+      "failure_reason": null
     }
   }
 ]
