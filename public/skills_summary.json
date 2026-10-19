@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-10-18T18:16:00.054634+00:00",
-  "total_analyzed": 9239,
+  "generated_at": "2026-10-19T17:40:08.053857+00:00",
+  "total_analyzed": 9240,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
       "skills": {
-        "Python": 5409,
-        "Java": 2635,
-        "SQL": 2431,
+        "Python": 5410,
+        "Java": 2636,
+        "SQL": 2432,
         "TypeScript": 1462,
         "JavaScript": 1223,
         "HTML/CSS": 498,
@@ -74,11 +74,11 @@
     "Backend & Architecture": {
       "color": "#0ea5e9",
       "skills": {
-        "Scalability": 3862,
+        "Scalability": 3863,
         "REST API": 1811,
         "Distributed Systems": 1527,
-        "Microservices": 886,
-        "System Design": 693,
+        "Microservices": 887,
+        "System Design": 694,
         "Event-Driven": 563,
         "Kafka": 534,
         "API Design": 398,
@@ -93,7 +93,7 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 2034,
+        "CI/CD": 2035,
         "Kubernetes": 1267,
         "Git": 1184,
         "Docker": 1151,
@@ -138,7 +138,7 @@
         "Machine Learning": 2977,
         "Agents": 2331,
         "LLM": 2136,
-        "GenAI": 1386,
+        "GenAI": 1387,
         "PyTorch": 1161,
         "RAG": 1019,
         "Deep Learning": 748,
