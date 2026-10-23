@@ -4,7 +4,7 @@ import { evaluate, transitions, notify, DEFAULTS } from "../../scripts/health-wa
 
 const NOW = Date.parse("2026-10-24T12:00:00Z");
 const ago = (h) => new Date(NOW - h * 3_600_000).toISOString();
-const facts = (o = {}) => ({ newestBoards: ago(1), newestStaffing: ago(2), staleQueued: 0, fitMissing: 0, ...o });
+const facts = (o = {}) => ({ newestBoards: ago(1), newestLinkedin: ago(1), newestStaffing: ago(2), staleQueued: 0, fitMissing: 0, ...o });
 const failing = (cs) => cs.filter((c) => !c.ok).map((c) => c.key);
 
 test("healthy: recent jobs, an empty queue, Fit saved", () => assert.deepEqual(failing(evaluate(facts(), DEFAULTS, NOW)), []));
@@ -13,6 +13,14 @@ test("the Oct 16 outage would have been caught: no board jobs for 8 days", () =>
   const cs = evaluate(facts({ newestBoards: ago(8 * 24) }), DEFAULTS, NOW);
   assert.deepEqual(failing(cs), ["scrape_boards"]);
   assert.match(cs[0].message, /8 days/);
+});
+
+test("LinkedIn is watched on its own: boards can be fine while LinkedIn is blocked", () => {
+  const cs = evaluate(facts({ newestLinkedin: ago(15) }), DEFAULTS, NOW);
+  assert.deepEqual(failing(cs), ["scrape_linkedin"]);
+  assert.match(cs.find((c) => c.key === "scrape_linkedin").message, /run the LinkedIn scrape from your Mac/);
+  assert.deepEqual(failing(evaluate(facts({ newestLinkedin: ago(8) }), DEFAULTS, NOW)), [], "8h is inside the 12h limit");
+  assert.deepEqual(failing(evaluate(facts({ newestBoards: ago(10) }), DEFAULTS, NOW)), ["scrape_boards"], "a stale board does not blame LinkedIn");
 });
 
 test("each check has its own limit", () => {

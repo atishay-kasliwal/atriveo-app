@@ -9,7 +9,8 @@
 import { withMongo } from "./mongo-client.mjs";
 
 export const DEFAULTS = {
-  boards_hours: 6,      // newest job from any source other than staffing (LinkedIn, ATS boards...)
+  boards_hours: 6,      // newest job from any source other than staffing and LinkedIn (the ATS boards)
+  linkedin_hours: 12,   // newest LinkedIn job: LinkedIn rate-limits datacenter addresses, so it can fail while the boards keep working
   staffing_hours: 36,   // newest staffing job
   queue_hours: 3,       // a queued resume this old counts as waiting too long
   stale_queue_min: 5,   // ...and this many of them is a stuck queue (one or two are usually skipped-company jobs, queued on purpose)
@@ -22,9 +23,10 @@ const rounded = (h) => (h === Infinity ? "never" : h >= 48 ? `${Math.round(h / 2
 
 /** Turn the facts read from Mongo into named checks: { key, ok, message }. Pure, so it is tested without a database. */
 export function evaluate(facts, cfg = DEFAULTS, now = Date.now()) {
-  const boards = hoursSince(facts.newestBoards, now), staffing = hoursSince(facts.newestStaffing, now);
+  const boards = hoursSince(facts.newestBoards, now), linkedin = hoursSince(facts.newestLinkedin, now), staffing = hoursSince(facts.newestStaffing, now);
   return [
     { key: "scrape_boards", ok: boards <= cfg.boards_hours, message: `No new jobs from LinkedIn or the job boards for ${rounded(boards)} (last at ${facts.newestBoards ? new Date(facts.newestBoards).toISOString().slice(0, 16) + "Z" : "never"}).` },
+    { key: "scrape_linkedin", ok: linkedin <= cfg.linkedin_hours, message: `No new LinkedIn jobs for ${rounded(linkedin)}. LinkedIn probably blocks Oracle's address: run the LinkedIn scrape from your Mac, or slow it down.` },
     { key: "scrape_staffing", ok: staffing <= cfg.staffing_hours, message: `No new staffing jobs for ${rounded(staffing)}.` },
     { key: "resume_queue", ok: facts.staleQueued < cfg.stale_queue_min, message: `${facts.staleQueued} resumes have waited more than ${cfg.queue_hours} hours: the resume workers may be stuck.` },
     { key: "fit_saved", ok: facts.fitMissing <= cfg.fit_missing, message: `${facts.fitMissing} recent jobs have no Fit saved (the worker or backfill is not writing it).` },
@@ -63,13 +65,14 @@ export async function notify(message, { server = process.env.NTFY_SERVER || "htt
 
 export async function readFacts(db, now = Date.now()) {
   const jobs = db.collection("jobs");
-  const [boards, staffing, staleQueued, fitMissing] = await Promise.all([
-    jobs.find({ site: { $ne: "staffing" } }, { projection: { run_at: 1 } }).sort({ run_at: -1 }).limit(1).toArray(),
+  const [boards, linkedin, staffing, staleQueued, fitMissing] = await Promise.all([
+    jobs.find({ site: { $nin: ["staffing", "linkedin"] } }, { projection: { run_at: 1 } }).sort({ run_at: -1 }).limit(1).toArray(),
+    jobs.find({ site: "linkedin" }, { projection: { run_at: 1 } }).sort({ run_at: -1 }).limit(1).toArray(),
     jobs.find({ site: "staffing" }, { projection: { run_at: 1 } }).sort({ run_at: -1 }).limit(1).toArray(),
     jobs.countDocuments({ "resume.status": "queued", "resume.updated_at": { $lt: new Date(now - DEFAULTS.queue_hours * 3_600_000).toISOString() } }),
     jobs.countDocuments({ run_at: { $gte: new Date(now - 3 * 86_400_000) }, "resume.status": "success", fit: { $exists: false } }),
   ]);
-  return { newestBoards: boards[0]?.run_at ?? null, newestStaffing: staffing[0]?.run_at ?? null, staleQueued, fitMissing };
+  return { newestBoards: boards[0]?.run_at ?? null, newestLinkedin: linkedin[0]?.run_at ?? null, newestStaffing: staffing[0]?.run_at ?? null, staleQueued, fitMissing };
 }
 
 export async function runOnce({ dry = false, cfg = DEFAULTS, now = Date.now(), send = notify } = {}) {
