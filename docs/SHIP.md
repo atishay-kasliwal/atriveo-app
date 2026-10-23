@@ -47,3 +47,10 @@ Turning the Mac jobs off once Oracle is producing jobs (the broken scrape and li
 
 (`board-discovery` runs weekly and is not on Oracle yet.) If LinkedIn blocks Oracle's address the scraper logs it, the health watch alerts, and the options are
 a lower frequency (`SCRAPE_EVERY_MIN`), a proxy (the pipeline already has optional Tor support in `scraper.py`), or dropping LinkedIn.
+
+## Oracle host: read before rebooting or upgrading the kernel
+- The VM's Arm quota is **2 OCPUs / 12 GB** (this account), so that is its maximum size.
+- **Do not unpin the kernel.** `mongo:8.0` (container `atriveo-mongodb`) will not start on Linux kernel 6.19 or newer (MongoDB SERVER-121912). The VM is pinned to
+  `6.17.0-1018-oracle` (GRUB_DEFAULT in `/etc/default/grub`; packages on `apt-mark hold`). After a reboot, check `uname -r` says 6.17 and `docker ps` shows `atriveo-mongodb` Up.
+  Upgrade the kernel only after a MongoDB release that fixes the bug is running (pull it and test first).
+- A reboot (resize, updates) takes the database down for a few minutes; all 7 containers restart on their own.
