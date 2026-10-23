@@ -2,7 +2,7 @@ import { formatLocation } from "../utils/location";
 import { notifyApplicationsChanged } from "./applicationUpdates";
 import JobCard, { ago, useLayout } from './JobCard';
 import { useExclusions } from "../hooks/useExclusions";
-import type { ResumeMatch } from "./reviewQueue";
+import type { ResumeMatch, ResumeReadyState } from "./reviewQueue";
 import { TRACK_LABEL } from "./tracks";
 import {useNavigate} from 'react-router-dom';
 import { useEffect, useRef, useState } from "react";
@@ -13,7 +13,7 @@ import "./staffing.css";
 
 type Source = { _id: string; name: string; url: string; tier: number; enabled: boolean; status: string; detail: string; last_checked_at?: string; matching_jobs?: number; connector_state?: string; limited?: boolean; parse_errors?: number; errors?: number };
 type Run = { _id: string; status: string; started_at: string; finished_at?: string; jobs_seen: number; new_jobs: number; published_jobs?: number; error?: string };
-type Job = { track?: string | null; resume_match?: ResumeMatch | null; _id: string; company: string; title: string; location: string; job_url: string; summary: string; source_id: string; first_seen_at: string; observed_at?: string; description?: string; reasons: string[]; warning?: string; resume?: string; resume_status?: string | null; builder_id?: string; state: string; eligible: boolean };
+type Job = { track?: string | null; resume_match?: ResumeMatch | null; resume_ready?: ResumeReadyState | null; _id: string; company: string; title: string; location: string; job_url: string; summary: string; source_id: string; first_seen_at: string; observed_at?: string; description?: string; reasons: string[]; warning?: string; resume?: string; resume_status?: string | null; builder_id?: string; state: string; eligible: boolean };
 type Workspace = { jobs: Job[]; total: number; counts: Record<string, number>; track_counts?: Record<string, number> };
 type Status = { sources: Source[]; runs: Run[]; schedule: { label: string; next_at: string }; total_jobs: number };
 const LABELS: Record<string, string> = { access_pending: "Needs provider access", not_checked: "Not checked yet", running: "Checking", ready: "Jobs readable", needs_connector: "Needs connector", blocked: "Access blocked", failed: "Check failed" };
@@ -192,7 +192,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
   const filtered = track !== "all" || query || filter !== "all";
   const card = (j: Job, index: number) => {
     const waiting = waitingFor(j); const applied = j.state === "applied";
-    return <JobCard key={j._id} id={j._id} company={j.company} title={j.title} location={j.location || "Location not specified"} track={j.track} resumeMatch={j.resume_match} resumeReady={Boolean(j.resume)} busy={busy}
+    return <JobCard key={j._id} id={j._id} company={j.company} title={j.title} location={j.location || "Location not specified"} track={j.track} resumeMatch={j.resume_match} readyState={j.resume_ready} resumeReady={Boolean(j.resume)} busy={busy}
       className={index === focused ? "is-focused" : ""} onFocus={() => setFocus(index)}
       selected={selectedIds.includes(j._id)} selectDisabled={busy} onSelect={(checked) => setSelectedIds(ids => checked ? [...ids, j._id] : ids.filter(id => id !== j._id))}
       onTitle={() => void inspect(j)} onSkip={() => skipCompany(j.company)}

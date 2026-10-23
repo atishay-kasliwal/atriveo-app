@@ -2,7 +2,7 @@
 // for Fit, and its signature takes no resume: a tailored resume, its headline or its bullets cannot reach the score.
 import { loadAtsConfig, loadCandidate, withHash, sha256, canonicalJson } from "./config.mjs";
 import { parseJobDescription } from "./jd-parse.mjs";
-import { scoreJobMatch } from "./match.mjs";
+import { scoreJobMatch, familyFor } from "./match.mjs";
 import { keywordCoverage } from "./evidence.mjs";
 import { evaluateKnockouts } from "./knockouts.mjs";
 import { buildMaster } from "./master.mjs";
@@ -18,6 +18,8 @@ function context(overrides = {}) {
   })();
   return { ...defaults, ...overrides };
 }
+/** What a saved Fit was computed with: when either changes, a saved Fit is stale and is recomputed. */
+export const fitIdentity = () => { const c = context(); return { config_hash: c.config.hash, master_hash: c.masterHash }; };
 export const resetFitContext = () => { defaults = undefined; };
 
 function confidenceOf(match, cfg, { fromKeywords, blank }) {
@@ -60,8 +62,12 @@ export function scoreFit(jdText, { title = null, asOf = new Date().toISOString()
   const ledger = match.skill_ledger;
   const labels = new Set(ledger.skills.flatMap((s) => [s.label, ...s.alternatives].map((x) => x.toLowerCase())));
   const mentioned = keywordCoverage(String(jdText || ""), "", config).map((k) => k.name).filter((n) => !labels.has(n.toLowerCase()));
+  // Nothing in the posting points at a role family your bank supports and no skill matched: the number rests on soft
+  // categories only. Shown as a tag; Fit itself is unchanged.
+  const family = familyFor(jd.title, config.scoring.job_match.role);
+  const outsideRoles = ledger.total.matched === 0 && !(family && master.families.includes(family));
   return {
-    kind: "fit", score: match.score, config_hash: config.hash, master_hash: masterHash, as_of: asOf,
+    kind: "fit", outside_roles: outsideRoles, score: match.score, config_hash: config.hash, master_hash: masterHash, as_of: asOf,
     confidence: confidenceOf(match, config.scoring.fit.confidence, { fromKeywords, blank }),
     ledger: { ...ledger, mentioned, unrecognized },
     knockouts: evaluateKnockouts({ jd, jdText, ledger, years: match.years_experience, candidate, master, config }),

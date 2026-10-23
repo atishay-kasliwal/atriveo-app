@@ -3,8 +3,9 @@ import { analyzeMatchingResume } from "./job-matching-analysis.mjs";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { resumeMatchOf, trackOf } from "./applications-analytics.mjs";
+import { resumeMatchOf, resumeReadyOf, trackOf } from "./applications-analytics.mjs";
 import { publishResume, storeFromEnv } from "./resume-store.mjs";
+import { ensureFit } from "./fit-store.mjs";
 
 // Job Matching: one job at a time, its tailored resume already built. Nothing here builds a resume or applies anywhere.
 // The queue is the jobs whose resume is done and that you haven't decided on; a decision is one job_swipes row
@@ -14,6 +15,7 @@ const run = promisify(execFile);
 const IMAGE = "resume-page.png";
 const SOURCE = "job-matching";
 const DAYS = 7;
+const FIT_PER_REQUEST = 40;
 
 const isoOf = (v) => (v ? new Date(v).toISOString() : null);
 const ENT = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", ndash: "–", mdash: "—", rsquo: "’", lsquo: "‘", ldquo: "“", rdquo: "”", bull: "•" };
@@ -89,6 +91,22 @@ export function shapeJd(text) {
  * later comes back after the rest). Best match first. Only what the page shows crosses the wire.
  */
 const published = new Set();
+const CONF = { high: 2, medium: 1, low: 0 };
+/**
+ * The queue's order: saved-for-later last; then jobs with a hard mismatch (blocked); then by Fit; then how sure Fit is;
+ * then the pipeline's score and the newest. Jobs without a Fit yet sort after those that have one.
+ */
+export function rankForMatching(docs, later = new Map()) {
+  return [...docs].sort((a, b) => {
+    const la = later.has(a.job_url), lb = later.has(b.job_url);
+    if (la !== lb) return la ? 1 : -1;
+    const ba = a.fit?.knockouts?.verdict === "blocked", bb = b.fit?.knockouts?.verdict === "blocked";
+    if (ba !== bb) return ba ? 1 : -1;
+    return (b.fit?.score ?? -1) - (a.fit?.score ?? -1) || (CONF[b.fit?.confidence] ?? -1) - (CONF[a.fit?.confidence] ?? -1)
+      || (b.score_pct ?? 0) - (a.score_pct ?? 0) || String(b.run_at).localeCompare(String(a.run_at));
+  });
+}
+
 export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date() } = {}) {
   const since = new Date(now.getTime() - DAYS * 86_400_000);
   const [docs, applied, swipes] = await Promise.all([
@@ -109,11 +127,10 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
     if (taken.has(d.job_url) || d.apply_type === "closed" || byUrl.has(d.job_url)) continue;
     byUrl.set(d.job_url, d);
   }
-  const ranked = [...byUrl.values()].sort((a, b) => {
-    const la = later.has(a.job_url), lb = later.has(b.job_url);
-    if (la !== lb) return la ? 1 : -1;
-    return (b.score_pct ?? 0) - (a.score_pct ?? 0) || String(b.run_at).localeCompare(String(a.run_at));
-  });
+  // Fit (master resume against the posting) is kept on each job; up to FIT_PER_REQUEST missing or stale ones are computed here.
+  const fits = await ensureFit(db, [...byUrl.values()], { max: FIT_PER_REQUEST });
+  for (const d of byUrl.values()) d.fit = fits.get(d.job_url) ?? null;
+  const ranked = rankForMatching([...byUrl.values()], later);
   // A page is the rows with a resume file and a page image; others are skipped, not shown half-ready.
   const rows = [];
   let skipped = 0;
@@ -141,8 +158,8 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
       applyType: d.apply_type ?? null, track: trackOf(d.title),
       // The company's own form when known, else the posting you were shown.
       applyUrl: d.job_url_direct || d.job_url, postingUrl: d.job_url,
-      resumePath: d.resume.pdf_path, resumeObject: d.resume.object ? { sha256: d.resume.object.sha256, hasImage: Boolean(d.resume.object.image_key) } : null, resumeMatch: resumeMatchOf(d.resume.pdf_path),
-      saved: later.has(d.job_url), jd, ats: await analyzeMatchingResume(d.resume.pdf_path, jd.full, decode(d.title)),
+      resumePath: d.resume.pdf_path, resumeObject: d.resume.object ? { sha256: d.resume.object.sha256, hasImage: Boolean(d.resume.object.image_key) } : null, resumeMatch: resumeMatchOf(d.resume.pdf_path), ready: resumeReadyOf(d.resume.pdf_path, d.fit), fit: d.fit,
+      saved: later.has(d.job_url), jd, ats: await analyzeMatchingResume(d.resume.pdf_path, jd.full, d.fit),
     };
   }));
   return { ok: true, generatedAt: now.toISOString(), total: ranked.length - skipped, jobs };

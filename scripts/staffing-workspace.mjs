@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { withMongo } from './mongo-client.mjs';
 import { enqueueJob } from './resume-queue.mjs';
-import { markJobApplied, resumeMatchOf, trackOf } from './applications-analytics.mjs';
+import { markJobApplied, resumeMatchOf, resumeReadyOf, trackOf } from './applications-analytics.mjs';
 
 export function postingUrl(value) {
   const u = new URL(String(value));
@@ -21,7 +21,7 @@ export function facts(j) {
 async function workspaceRows(db) {
   const [raw, eligible, decisions, swipes, applied] = await Promise.all([
     db.collection('staffing_jobs').find({ expired: false }).toArray(),
-    db.collection('jobs').find({ site: 'staffing' }, { projection: { job_url: 1, score_pct: 1, score: 1, resume: 1 } }).toArray(),
+    db.collection('jobs').find({ site: 'staffing' }, { projection: { job_url: 1, score_pct: 1, score: 1, resume: 1, fit: 1 } }).toArray(),
     db.collection('staffing_decisions').find().toArray(),
     db.collection('job_swipes').find({ direction: { $in: ['applied', 'left'] } }, { projection: { job_url: 1, direction: 1 } }).toArray(),
     db.collection('applications').find({ status: 'APPLIED' }, { projection: { url: 1, jobUrls: 1 } }).toArray(),
@@ -36,7 +36,7 @@ async function workspaceRows(db) {
   for (const j of raw) { const k = keyOf(j.job_url), group = j.fingerprint || k; const state = appliedKeys.has(k) ? 'applied' : decisionMap.get(k)?.state || (passedKeys.has(k) ? 'passed' : 'new'); const priority = { new: 0, saved: 1, passed: 2, applied: 3 }; if ((priority[state] || 0) >= (priority[groupStates.get(group)] || 0)) groupStates.set(group, state); }
   return raw.map(j => {
     const key = keyOf(j.job_url), matched = jobMap.get(key), d = decisionMap.get(key);
-    return { ...j, key, eligible: Boolean(matched), score: Number(matched?.score_pct || 0), resume: matched?.resume?.pdf_path || d?.resume_path || null, resume_status: matched?.resume?.pdf_path || d?.resume_path ? 'success' : matched?.resume?.status || null, builder_id: d?.builder_id || null, state: groupStates.get(j.fingerprint || key) || 'new', ...facts(j) };
+    return { ...j, key, eligible: Boolean(matched), score: Number(matched?.score_pct || 0), resume: matched?.resume?.pdf_path || d?.resume_path || null, fit: matched?.fit ?? null, resume_status: matched?.resume?.pdf_path || d?.resume_path ? 'success' : matched?.resume?.status || null, builder_id: d?.builder_id || null, state: groupStates.get(j.fingerprint || key) || 'new', ...facts(j) };
   }).sort((a, b) => Number(b.eligible) - Number(a.eligible) || b.score - a.score || String(b.first_seen_at).localeCompare(String(a.first_seen_at)))
     .filter(j => { const group = j.fingerprint || j.key; if (seen.has(j.key) || seen.has(group)) return false; seen.add(j.key); seen.add(group); return true; });
 }
@@ -75,7 +75,7 @@ export async function list(db, params) {
   const limit = Math.max(1, Math.min(30, Number(params.get('limit')) || 10));
   const offset = Math.max(0, Math.min(100000, Number(params.get('offset')) || 0));
   // The card's resume match (ats-score.json beside the PDF), only for the page shown.
-  return { ok: true, counts, track_counts, total, jobs: rows.slice(offset, offset + limit).map(({ description, ...j }) => ({ ...j, resume_match: resumeMatchOf(j.resume) })) };
+  return { ok: true, counts, track_counts, total, jobs: rows.slice(offset, offset + limit).map(({ description, fit, ...j }) => ({ ...j, resume_match: resumeMatchOf(j.resume), resume_ready: resumeReadyOf(j.resume, fit) })) };
 }
 // Staffing resumes are built by the resume worker, like every other job. A click goes to the fast lane (1001,
 // beside the extension's Tailor); the background sweep queues Recommended jobs just below it.

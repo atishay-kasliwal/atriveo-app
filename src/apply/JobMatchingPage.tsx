@@ -13,11 +13,20 @@ import "./job-matching.css";
 // exist before a job reaches this queue) and nothing is submitted: Apply opens the application page in a new tab.
 
 interface Jd { about: string; requirements: string[]; nice: string[]; duties: string[]; salary: string | null; work: string | null; kind: string | null; flags: string[]; full: string; structured: boolean }
-interface AtsAnalysis { score: number | null; required: { matched: number; total: number } | null; incomplete: boolean; keywords: { name: string; matched: boolean }[]; highlights: { start: number; end: number }[]; pages: number | null; roomLines: number | null }
+interface Count { matched: number; total: number }
+interface FitSkill { label: string; alternatives: string[]; class: "required" | "preferred"; status: "matched" | "partial" | "missing" }
+// Fit: the master resume (your whole bank) against the posting. Every skill count on this page is read from its ledger.
+interface Fit {
+  score: number; confidence: "high" | "medium" | "low"; confidence_reasons: string[]; outside_roles: boolean;
+  knockouts: { verdict: string; items: { type: string; status: string; reason: string; source: string | null }[] };
+  ledger: { required: Count; preferred: Count; total: Count; matched: string[]; partial: string[]; missing: string[]; skills: FitSkill[] };
+}
+interface Ready { status: "Ready" | "Review" | "Needs Work"; reasons: string[]; skills_checked: boolean }
+interface AtsAnalysis { highlights: { start: number; end: number }[]; pages: number | null; roomLines: number | null }
 interface MatchJob {
   id: string; company: string; title: string; location: string | null; level: string | null; score: number | null;
   postedAt: string | null; foundAt: string | null; applyType: string | null; track: string | null;
-  applyUrl: string; postingUrl: string; resumePath: string; resumeObject?: { sha256: string; hasImage: boolean } | null; resumeMatch: ResumeMatch | null; saved: boolean; jd: Jd; ats: AtsAnalysis | null;
+  applyUrl: string; postingUrl: string; resumePath: string; resumeObject?: { sha256: string; hasImage: boolean } | null; resumeMatch: ResumeMatch | null; saved: boolean; jd: Jd; ats: AtsAnalysis | null; fit: Fit | null; ready: Ready | null;
 }
 interface Queue { ok: boolean; total: number; jobs: MatchJob[] }
 type Decision = "skip" | "apply" | "later";
@@ -126,15 +135,18 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
   const done = history.length;
   const position = `${done + 1} of ${done + total}`;
   const ats = job?.ats;
-  const keywords = ats?.keywords ?? [];
-  const missing = keywords.filter((k) => !k.matched);
-  const score = ats?.score ?? job?.score ?? null;
-  const skillsHit = ats?.required?.total ? ats.required.matched : keywords.length - missing.length;
-  const skillsTotal = ats?.required?.total ? ats.required.total : keywords.length;
-  const have = keywords.filter((k) => k.matched).map((k) => k.name);
-  const why = !job || !keywords.length ? "" : have.length
-    ? `Your resume covers ${have.length} of ${keywords.length} key skills here, including ${have.slice(0, 4).join(", ")}.${missing.length ? ` Not yet covered: ${missing.slice(0, 3).map((k) => k.name).join(", ")}.` : " Nothing the job asks for is missing."}`
-    : "Your resume doesn’t cover the key skills this job lists.";
+  const fit = job?.fit ?? null;
+  const skills = fit?.ledger.skills ?? [];
+  const missing = skills.filter((k) => k.status === "missing");
+  const partial = skills.filter((k) => k.status === "partial");
+  const score = fit?.score ?? null;
+  const skillsHit = fit?.ledger.total.matched ?? 0;
+  const skillsTotal = fit?.ledger.total.total ?? 0;
+  const have = fit?.ledger.matched ?? [];
+  const why = !job || !fit || !skillsTotal ? "" : have.length
+    ? `Your bank shows ${have.length} of ${skillsTotal} skills this job asks for, including ${have.slice(0, 4).join(", ")}.${missing.length ? ` Not shown yet: ${missing.slice(0, 3).map((k) => k.label).join(", ")}.` : " Nothing it asks for is missing."}`
+    : "Your bank doesn’t show the skills this job lists.";
+  const toCheck = fit?.knockouts.items.filter((i) => i.status !== "clear") ?? [];
   const glance = job ? (job.jd.about.match(/[^.!?]+[.!?]+/g)?.slice(0, 2).join(" ").trim() || job.jd.about || job.jd.duties[0] || "") : "";
 
   return <div className="rv-page jm-page">{header}
@@ -173,19 +185,20 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
               <div><strong className={skillsTotal && skillsHit === skillsTotal ? "jm-good" : undefined}>{skillsTotal ? skillsHit : "–"}{skillsTotal > 0 && <small>/{skillsTotal}</small>}</strong><span>Skills match</span></div>
               <div><strong className="jm-text">{job.level ?? "Not stated"}</strong><span>Seniority</span></div>
             </div>
+            {fit && (fit.confidence === "low" || fit.outside_roles) && <p className="jm-conf">{fit.outside_roles ? "Outside the roles your bank supports. " : ""}{fit.confidence === "low" ? `Low confidence: ${fit.confidence_reasons[0] ?? "the posting says little"}.` : ""}</p>}
             {why && <section className="jm-block"><h2>Why it matches you</h2><p>{why}</p></section>}
-            {keywords.length > 0 && <section className="jm-block"><h2>Key skills they need</h2>
-              <ul className="jm-chips">{keywords.map((k) => <li key={k.name} className={k.matched ? "jm-in" : "jm-out"}>{k.name}</li>)}</ul></section>}
+            {skills.length > 0 && <section className="jm-block"><h2>Key skills they need</h2>
+              <ul className="jm-chips">{skills.map((k) => <li key={`${k.class}:${k.label}`} className={k.status === "matched" ? "jm-in" : k.status === "partial" ? "jm-part" : "jm-out"} title={k.class}>{k.label}</li>)}</ul></section>}
             {glance && <section className="jm-block"><h2>Role at a glance</h2><p>{glance}</p></section>}
-            {ats && <section className="jm-block jm-gaps"><h2>What we’re missing</h2>
-              {missing.length ? <>
-                <ul className="jm-chips">{missing.map((k) => <li key={k.name} className="jm-out">{k.name}</li>)}</ul>
-                <p className="apps-muted">Required by the job, not on this resume. <a className="apps-link" href={`/resume_builder?job=${encodeURIComponent(job.id)}`}>Fill in the resume ↗</a></p>
-              </> : <p className="apps-muted">Everything the job asks for is on your resume.</p>}
-              {ats.incomplete && <p className="apps-muted">Some requirements need a manual check against the full description.</p>}
+            {fit && <section className="jm-block jm-gaps"><h2>What we’re missing</h2>
+              {missing.length || partial.length ? <>
+                <ul className="jm-chips">{missing.map((k) => <li key={k.label} className="jm-out">{k.label}</li>)}{partial.map((k) => <li key={k.label} className="jm-part" title="Related experience only">{k.label}</li>)}</ul>
+                <p className="apps-muted">Asked for by the job; your bank shows {missing.length ? "no evidence" : "only related work"} for these. <a className="apps-link" href={`/resume_builder?job=${encodeURIComponent(job.id)}`}>Edit the resume ↗</a></p>
+              </> : <p className="apps-muted">{skillsTotal ? "Everything the job asks for is in your bank." : "No specific skills were found in this posting."}</p>}
+              {toCheck.length > 0 && <ul className="jm-check">{toCheck.map((i) => <li key={i.type} className={`is-${i.status}`}><b>{i.status === "blocked" ? "Likely mismatch" : "Check"}:</b> {i.reason}</li>)}</ul>}
             </section>}
             <section className="jm-block jm-fulljd">
-              <div><h2>Full job description</h2><p className="apps-muted">Keywords from your resume are highlighted green.</p></div>
+              <div><h2>Full job description</h2><p className="apps-muted">Skills your bank shows are highlighted green.</p></div>
               <button type="button" className="apps-link" onClick={() => setFull(true)}>View <kbd>F</kbd></button>
             </section>
           </div>
@@ -195,6 +208,7 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
           <header className="jm-rhead">
             <b>Tailored resume</b>
             <a className="apps-link" href={`/resume_builder?job=${encodeURIComponent(job.id)}`}>Edit resume ↗</a>
+            {job.ready && <span className={`jm-ready is-${job.ready.status.toLowerCase().replace(" ", "-")}`} title={[...job.ready.reasons, job.ready.skills_checked ? "" : "Skills not checked against Fit yet"].filter(Boolean).join(". ")}>Resume Ready · {job.ready.status}</span>}
             {ats?.roomLines != null && <span className="apps-muted">{ats.roomLines >= 3 ? `Room for ~${ats.roomLines} lines` : "One-page limit"}</span>}
           </header>
           <div className="jm-page-box">

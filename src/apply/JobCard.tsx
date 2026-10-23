@@ -3,7 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import CompanyLogo from "../components/CompanyLogo";
 import CardActions from "./CardActions";
 import { TRACK_LABEL } from "./tracks";
-import type { ResumeMatch } from "./reviewQueue";
+import type { ResumeMatch, ResumeReadyState } from "./reviewQueue";
 import "./today.css";
 
 /** A North Carolina job (they come first). */
@@ -49,6 +49,7 @@ interface Props {
   /** Tags before the track tag. */
   leadTags?: ReactNode;
   resumeMatch?: ResumeMatch | null;
+  readyState?: ResumeReadyState | null;
   resumeReady?: boolean;
   /** Warnings and errors shown under the tags. */
   notes?: ReactNode;
@@ -80,8 +81,7 @@ interface Props {
 /** One job on Today or Staffing: the same card, header to caption, on both pages. */
 export default function JobCard(p: Props) {
   const nc = inNC(p.location);
-  const { match, title: matchTitle } = resumeMatchView(p.resumeMatch, p.resumeReady);
-  const rm = p.resumeMatch;
+  const readyTitle = p.readyState ? [p.readyState.status, ...p.readyState.reasons, p.readyState.skills_checked ? "" : "Skills were not checked against Fit yet"].filter(Boolean).join(". ") : (p.resumeReady === false ? "Shown once the tailored resume is built and checked" : "This resume has not been checked yet");
   const trackLabel = p.track ? TRACK_LABEL[p.track as keyof typeof TRACK_LABEL] : undefined;
   return (
     <article onMouseDown={p.onFocus} className={`td-card ${trackLabel ? `tr-${p.track}` : ""} ${p.selected ? "is-selected" : ""} ${p.className ?? ""}`} aria-label={p.ariaLabel ?? p.company} aria-busy={p.busy}>
@@ -99,9 +99,8 @@ export default function JobCard(p: Props) {
       <div className="td-tags">{p.leadTags}{trackLabel && <span className={`td-track is-${p.track}`} title="Resume track">{trackLabel}</span>}{p.tags}</div>
       {p.notes}
       <footer className="td-foot">
-        <div className={`td-profile-match ${match == null ? "is-none" : match >= 60 ? "is-high" : match >= 35 ? "is-mid" : ""}`} title={matchTitle}>
-          <div><span>Resume match{rm?.required?.total ? <em> · required {rm.required.matched}/{rm.required.total}</em> : null}</span><strong>{match == null ? "—" : `${match}%`}</strong></div>
-          <div className="td-match-bar" role="meter" aria-label="Resume match" aria-valuemin={0} aria-valuemax={100} aria-valuenow={match ?? 0}><i style={{ width: `${match ?? 0}%` }} /></div>
+        <div className={`td-profile-match td-ready ${p.readyState ? `is-${p.readyState.status.toLowerCase().replace(" ", "-")}` : "is-none"}`} title={readyTitle}>
+          <div><span>Resume Ready</span><strong>{p.readyState?.status ?? "—"}</strong></div>
         </div>
         <div className="td-primary-actions">{p.primary}</div>
         {p.actionNote}

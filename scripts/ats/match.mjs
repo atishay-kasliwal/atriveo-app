@@ -14,7 +14,7 @@ export function levelFor(title, cfg) {
   return cfg.levels.mid;
 }
 
-function familyFor(title, cfg) {
+export function familyFor(title, cfg) {
   const t = String(title || "");
   for (const [family, titles] of Object.entries(cfg.families)) if (titles.some((s) => phrase(t, s))) return family;
   return null;

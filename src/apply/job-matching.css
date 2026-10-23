@@ -119,3 +119,14 @@
 .jm-fulljd > div { display: flex; flex-direction: column; gap: 3px; }
 .jm-fulljd kbd { font: inherit; font-size: 11px; padding: 1px 6px; border-radius: 4px; border: 1px solid color-mix(in oklab, currentColor 30%, transparent); opacity: .75; }
 .jm-sheet-body .jm-description { white-space: pre-wrap; }
+
+/* Fit's confidence note, the skills you only partly show, what to check, and the Resume Ready status. */
+.jm-conf { margin: 0; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; color: var(--amber, #e0a526); border: 1px solid color-mix(in oklab, var(--amber, #e0a526) 40%, var(--border-col)); }
+.jm-chips .jm-part { background: color-mix(in oklab, #6aa9ff 12%, transparent); border-color: color-mix(in oklab, #6aa9ff 45%, var(--border-col)); color: #9cc4ff; }
+.jm-check { margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; }
+.jm-check .is-blocked { color: #e07a72; }
+.jm-check .is-unknown { color: var(--muted-fg); }
+.jm-ready { padding: 2px 10px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border-col); }
+.jm-ready.is-ready { color: #69c69a; }
+.jm-ready.is-review { color: #d5ad61; }
+.jm-ready.is-needs-work { color: #e07a72; }

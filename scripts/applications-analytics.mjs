@@ -3,6 +3,8 @@
 // ats_boards for the discovery → resume → apply funnel. Served by the sidecar
 // at GET /applications/analytics (behind the site login via the /tailor relay).
 
+import { loadAtsConfig } from './ats/config.mjs';
+import { resumeReady } from './ats/ready.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import { classifyTrack, loadTracks } from "./ac-tracks.mjs";
@@ -225,6 +227,23 @@ export const resumeMatchOf = (pdfPath) => {
   } catch { return null; }
 };
 
+/**
+ * Resume Ready for a tailored resume: Ready, Review or Needs Work (never a score). It reads the readiness saved beside the
+ * PDF (ats-score.json) and, when the job's Fit is known, checks the resume still shows the skills Fit says you have.
+ * Null before the resume has been checked.
+ */
+let atsConfig;
+export const resumeReadyOf = (pdfPath, fit = null) => {
+  if (!pdfPath) return null;
+  try {
+    const saved = JSON.parse(fs.readFileSync(path.join(path.dirname(String(pdfPath)), "ats-score.json"), "utf8"));
+    if (!saved.readiness?.parsed) return null;
+    atsConfig ??= loadAtsConfig();
+    const r = resumeReady({ readiness: saved.readiness, tailored: saved.readiness.parsed, ledger: fit?.ledger ?? { skills: [] }, config: atsConfig, pages: saved.readiness.input?.pages ?? null });
+    return { ...r, skills_checked: Boolean(fit?.ledger?.skills?.length) };
+  } catch { return null; }
+};
+
 const rowBase = (r) => ({
   id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
   url: r.finalUrl ?? r.applyUrl, priority: r.priority ?? 0, priorityTags: r.priorityTags ?? [], updatedAt: r.updatedAt,
@@ -233,6 +252,8 @@ const rowBase = (r) => ({
   // Its resume file is here, so Fill can attach it now (Today puts these first).
   resumeReady: Boolean(r.resume?.path && fs.existsSync(r.resume.path)),
   resumeMatch: resumeMatchOf(r.resume?.path),
+  readyState: resumeReadyOf(r.resume?.path),
+  _resumePath: r.resume?.path ?? null,
 });
 
 /**
@@ -246,9 +267,10 @@ async function addJobFacts(db, rows) {
   const urls = [...new Set(rows.flatMap((r) => r.jobUrls ?? []))];
   const facts = new Map();
   if (urls.length) {
-    const docs = await db.collection("jobs").find({ job_url: { $in: urls } }, { projection: { _id: 0, job_url: 1, score_pct: 1, date_posted: 1, run_at: 1 } }).toArray();
+    const docs = await db.collection("jobs").find({ job_url: { $in: urls } }, { projection: { _id: 0, job_url: 1, score_pct: 1, date_posted: 1, run_at: 1, fit: 1 } }).toArray();
     for (const j of docs) {
-      const f = facts.get(j.job_url) ?? { score: null, postedAt: null, foundAt: null };
+      const f = facts.get(j.job_url) ?? { score: null, postedAt: null, foundAt: null, fit: null };
+      if (j.fit?.ledger) f.fit = j.fit;
       if (typeof j.score_pct === "number") f.score = Math.max(f.score ?? 0, j.score_pct);
       const posted = isoOf(j.date_posted), found = isoOf(j.run_at);
       if (posted && (!f.postedAt || posted < f.postedAt)) f.postedAt = posted;
@@ -263,10 +285,13 @@ async function addJobFacts(db, rows) {
       if (f.score !== null) r.score = Math.max(r.score ?? 0, f.score);
       if (f.postedAt && (!r.postedAt || f.postedAt < r.postedAt)) r.postedAt = f.postedAt;
       if (f.foundAt && (!r.foundAt || f.foundAt < r.foundAt)) r.foundAt = f.foundAt;
+      if (f.fit && !r._fit) r._fit = f.fit;
     }
     r.score ??= null; r.postedAt ??= null; r.foundAt ??= null;
     r.track = trackOf(r.title);
-    if ("resumePath" in r) { r.resumeReady = Boolean(r.resumePath && fs.existsSync(r.resumePath)); r.resumeMatch = resumeMatchOf(r.resumePath); delete r.resumePath; }
+    if ("resumePath" in r) { r.resumeReady = Boolean(r.resumePath && fs.existsSync(r.resumePath)); r.resumeMatch = resumeMatchOf(r.resumePath); r.readyState = resumeReadyOf(r.resumePath, r._fit); delete r.resumePath; }
+    else if (r._resumePath !== undefined) r.readyState = resumeReadyOf(r._resumePath, r._fit);
+    delete r._resumePath; delete r._fit;
     if (r.resumeReady === false) r._jobUrls = r.jobUrls ?? [];
     delete r.jobUrls;
   }
@@ -440,7 +465,7 @@ export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600
   const since = new Date(now.getTime() - days * 86_400_000);
   const [docs, applied, dismissed] = await Promise.all([
     db.collection("jobs").find({ run_at: { $gte: since }, job_url: /^https:\/\/(www\.)?linkedin\.com\//, "resume.status": "success" },
-      { projection: { _id: 0, job_url: 1, company: 1, title: 1, location: 1, score_pct: 1, date_posted: 1, run_at: 1, apply_type: 1, "resume.pdf_path": 1 } }).toArray(),
+      { projection: { _id: 0, job_url: 1, company: 1, title: 1, location: 1, score_pct: 1, date_posted: 1, run_at: 1, apply_type: 1, "resume.pdf_path": 1, fit: 1 } }).toArray(),
     db.collection("applications").distinct("jobUrls"),
     db.collection("job_swipes").distinct("job_url", { direction: { $in: ["left", "applied"] } }),
   ]);
@@ -459,6 +484,7 @@ export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600
         // The file is on this machine, so Apply with Atriveo can attach it now.
         resumeReady: Boolean(d.resume?.pdf_path && fs.existsSync(d.resume.pdf_path)),
         resumeMatch: resumeMatchOf(d.resume?.pdf_path),
+        readyState: resumeReadyOf(d.resume?.pdf_path, d.fit),
         // "offsite" (the company's own form), "easy_apply" (LinkedIn's), or null until checked.
         applyType: d.apply_type ?? null });
     } else {

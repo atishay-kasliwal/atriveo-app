@@ -21,6 +21,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { closeMongo, withMongo } from "./mongo-client.mjs";
+import { computeFit } from "./fit-store.mjs";
 import {
   claimNextJob,
   ensureResumeIndex,
@@ -221,6 +222,8 @@ async function processOneJob(db) {
       fallback: result.fallback || null,
     });
 
+    // Fit (the master resume against this posting) is kept on the job so the Matching queue can sort by it. Best effort.
+    if (success) { try { await db.collection("jobs").updateOne({ job_url: jobUrl }, { $set: { fit: computeFit(jd, title) } }); } catch { /* the queue computes it on demand */ } }
     if (success && result.pdfPath) await draftCoverLetter(db, { jobUrl, company, title, jd, dir: path.dirname(result.pdfPath) }, { log });
 
     log(

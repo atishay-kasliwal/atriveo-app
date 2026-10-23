@@ -593,3 +593,8 @@
   .td-page .td-toolbar > .td-goal { padding: 6px 2px; border-top: 1px solid var(--border-col); }
   .td-page .td-toolbar > .td-pager { border: 0; padding: 0; }
 }
+
+/* Resume Ready: a status, not a score. */
+.td-ready.is-ready { --match-color: #69c69a; }
+.td-ready.is-review { --match-color: #d5ad61; }
+.td-ready.is-needs-work { --match-color: #e07a72; }
