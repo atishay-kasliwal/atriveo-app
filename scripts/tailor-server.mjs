@@ -49,6 +49,7 @@ import { BankPageError, bankView, retireBullet } from "./bank-page.mjs";
 import { syncOverlay } from "./ac-bank-overlay.mjs";
 import { approveDraft, draftResult, startDraft } from "./bank-draft.mjs";
 import { applicationsAnalytics, applicationDetail, dismissJob, linkJobToApplication, markJobApplied, saveLinkedinDirect, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
+import { matchingQueue, recordDecision, resumeImagePath } from "./job-matching.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
@@ -1829,6 +1830,57 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
       }
     });
+    return;
+  }
+
+  // GET /applications/matching-queue?limit=&offset= — Job Matching: the next jobs to decide on, resume and JD ready.
+  if (req.method === "GET" && pathname === "/applications/matching-queue") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const params = new URL(req.url, "http://x").searchParams;
+        const limit = Math.min(Math.max(Number(params.get("limit")) || 8, 1), 20);
+        const offset = Math.max(Number(params.get("offset")) || 0, 0);
+        const data = await withMongo((db) => matchingQueue(db, { limit, offset }), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
+  }
+
+  // POST /applications/job-decision {jobUrl, decision: skip|apply|later|undo} — records the choice; submits nothing.
+  if (req.method === "POST" && pathname === "/applications/job-decision") {
+    let raw = "";
+    req.on("data", (c) => { raw += c; if (raw.length > 10_000) req.destroy(); });
+    req.on("end", async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const body = JSON.parse(raw || "{}");
+        const data = await withMongo((db) => recordDecision(db, { jobUrl: body?.jobUrl, decision: body?.decision }), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    });
+    return;
+  }
+
+  // GET /applications/resume-image?path=<resume pdf> — the page image made beside a tailored resume (PDFs under the resume folder only).
+  if (req.method === "GET" && pathname === "/applications/resume-image") {
+    const pdfPath = path.resolve(String(reqUrl.searchParams.get("path") || ""));
+    const png = resumeImagePath(pdfPath);
+    if (!pdfPath.startsWith(path.resolve(OUT_ROOT) + path.sep) || path.extname(pdfPath).toLowerCase() !== ".pdf" || !fs.existsSync(png)) {
+      res.writeHead(404); res.end("not found");
+      return;
+    }
+    res.writeHead(200, { "Content-Type": "image/png", "Cache-Control": "private, max-age=3600" });
+    fs.createReadStream(png).pipe(res);
     return;
   }
 

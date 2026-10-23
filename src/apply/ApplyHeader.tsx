@@ -30,9 +30,10 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
         <span className="apply-brand-by">by Atriveo</span>
       </a>
       <nav className="apply-nav" aria-label="Console">
-        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" ? "page" : undefined}>
+        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/job-matching" ? "page" : undefined}>
           Today{waiting !== null ? <span className="apply-nav-n">{waiting}</span> : null}
         </Link>
+        <Link to="/job-matching" aria-current={path === "/job-matching" ? "page" : undefined}>Matching</Link>
         <Link to="/unanswered" aria-current={page === "answer" ? "page" : undefined}>
           To answer{toAnswer !== undefined ? <span className="apply-nav-n">{toAnswer}</span> : null}
         </Link>
