@@ -15,6 +15,8 @@ const DAYS = 7;
 const JD_CAP = 12_000;
 
 const isoOf = (v) => (v ? new Date(v).toISOString() : null);
+const ENT = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", ndash: "–", mdash: "—", rsquo: "’", lsquo: "‘", ldquo: "“", rdquo: "”", bull: "•" };
+const decode = (s) => String(s ?? "").replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (m, e) => e[0] === "#" ? String.fromCodePoint(parseInt(e.slice(e[1].toLowerCase() === "x" ? 2 : 1), e[1].toLowerCase() === "x" ? 16 : 10) || 32) : (ENT[e.toLowerCase()] ?? m));
 const clip = (s, n) => (s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s);
 
 /** The first page of a tailored resume as a PNG beside the PDF, made once (poppler's pdftoppm). Null when it can't be made. */
@@ -34,9 +36,9 @@ export const resumeImagePath = (pdfPath) => path.join(path.dirname(pdfPath), IMA
 
 const SECTION = [
   ["nice", /^(preferred|nice[- ]to[- ]have|bonus|plus(es)?|desired|extra credit|a plus)\b/i],
-  ["requirements", /^(requirements?|qualifications?|minimum|basic qualifications|what you.?ll need|what we.?re looking for|must[- ]have|you have|you bring|who you are|about you|skills|experience)\b/i],
+  ["requirements", /^(required|requirements?|qualifications?|minimum|basic qualifications|what you.?ll need|what we.?re looking for|must[- ]have|you have|you bring|who you are|about you|skills|experience)\b/i],
   ["duties", /^(responsibilities|what you.?ll do|what you will do|the role|your role|in this role|duties|day[- ]to[- ]day|you will|the work|key responsibilities)\b/i],
-  ["about", /^(about (the )?(role|job|position|team|us|company)|overview|summary|who we are|job description|position summary|the opportunity)\b/i],
+  ["about", /^(role summary|about (the )?(role|job|position|team|us|company)|overview|summary|who we are|job description|position summary|the opportunity)\b/i],
 ];
 const BULLET = /^\s*(?:[-*•·▪◦–]|\d+[.)])\s+/;
 
@@ -49,7 +51,8 @@ function bucketOf(line) {
 
 /** A job description cut into what a decision needs: facts, the must-haves, the duties, flags. Plain text in, small JSON out. */
 export function shapeJd(text) {
-  const full = String(text || "").replace(/\r/g, "").replace(/\n{3,}/g, "\n\n").trim().slice(0, JD_CAP);
+  // Many saved descriptions are flattened: sections and bullets are separated by runs of spaces, not newlines.
+  const full = decode(text).replace(/\r/g, "").replace(/[ \t]*\n[ \t]*/g, "\n").replace(/[ \t\u00a0]{3,}/g, "\n").replace(/\n{3,}/g, "\n\n").trim().slice(0, JD_CAP);
   const lines = full.split("\n");
   const sections = { about: [], requirements: [], nice: [], duties: [] };
   let cur = "about", sawHeading = false;
@@ -126,7 +129,7 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
   const jobs = rows.map((d) => {
     const jd = shapeJd(jdOf.get(d.job_url) ?? "");
     return {
-      id: d.job_url, company: d.company ?? "", title: d.title ?? "", location: d.location ?? null, level: d.level ?? null,
+      id: d.job_url, company: decode(d.company), title: decode(d.title), location: d.location ? decode(d.location) : null, level: d.level ?? null,
       score: typeof d.score_pct === "number" ? d.score_pct : null, postedAt: isoOf(d.date_posted), foundAt: isoOf(d.run_at),
       applyType: d.apply_type ?? null, track: trackOf(d.title),
       // The company's own form when known, else the posting you were shown.
