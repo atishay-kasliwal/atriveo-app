@@ -11,6 +11,7 @@ const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? proces
 const N = Number(arg("--n", 60));
 const DAYS = Number(arg("--days", 30));
 const OUT = arg("--out", "fit-validation.json");
+const LOCAL = arg("--local", null); // a tailored-resumes folder: read real runs (meta.json, jd.txt, PDF) from disk, no database
 const SAMPLE = arg("--sample", null); // cache of the picked jobs and postings: re-runs then need no database
 const hash = (s) => crypto.createHash("sha1").update(s).digest("hex");
 
@@ -25,8 +26,38 @@ const trackOf = (title) => {
 const levelOf = (title) => (/\b(principal|staff|lead|director|architect)\b/i.test(title) ? "staff+" : /\b(senior|sr\.?|iii|iv)\b/i.test(title) ? "senior" : /\b(intern|junior|jr\.?|entry|associate|i)\b/i.test(title) ? "junior" : "mid");
 
 const since = new Date(Date.now() - DAYS * 86_400_000);
+function localRuns(root) {
+  const out = [];
+  for (const day of fs.readdirSync(root).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort().reverse()) {
+    for (const run of fs.readdirSync(`${root}/${day}`)) {
+      const dir = `${root}/${day}/${run}`;
+      try {
+        const meta = JSON.parse(fs.readFileSync(`${dir}/meta.json`, "utf8"));
+        const pdf = `${dir}/Atishay Kasliwal.pdf`;
+        if (!meta.role || !fs.existsSync(`${dir}/jd.txt`) || !fs.existsSync(pdf)) continue;
+        out.push({ job_url: meta.url || dir, company: meta.company, title: meta.role, level: null, score_pct: meta.score_pct ?? null, resume: { pdf_path: pdf }, jdText: fs.readFileSync(`${dir}/jd.txt`, "utf8") });
+      } catch { /* not a run folder */ }
+    }
+  }
+  return out;
+}
 const cached = SAMPLE && fs.existsSync(SAMPLE) ? JSON.parse(fs.readFileSync(SAMPLE, "utf8")) : null;
-const { docs, jds } = cached ? { docs: cached.docs, jds: new Map(cached.jds) } : await withMongo(async (db) => {
+const pick = (usable) => {
+  // Deterministic stratified pick: group by track x level, then deal round-robin in hash order.
+  const groups = new Map();
+  for (const d of [...usable].sort((a, b) => hash(a.job_url).localeCompare(hash(b.job_url)))) {
+    const key = `${trackOf(d.title)}|${levelOf(d.title)}`;
+    (groups.get(key) || groups.set(key, []).get(key)).push(d);
+  }
+  const picked = [];
+  for (let round = 0; picked.length < N; round++) {
+    let any = false;
+    for (const list of [...groups.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v)) if (list[round] && picked.length < N) { picked.push(list[round]); any = true; }
+    if (!any) break;
+  }
+  return picked;
+};
+const { docs, jds } = LOCAL ? (() => { const d = pick(localRuns(LOCAL)); return { docs: d, jds: new Map(d.map((x) => [x.job_url, x.jdText])) }; })() : cached ? { docs: cached.docs, jds: new Map(cached.jds) } : await withMongo(async (db) => {
   const docs = await db.collection("jobs").find({ run_at: { $gte: since }, "resume.status": "success", "resume.pdf_path": { $type: "string" } },
     { projection: { _id: 0, job_url: 1, company: 1, title: 1, level: 1, score_pct: 1, "resume.pdf_path": 1 } }).sort({ run_at: -1 }).limit(900).toArray();
   const usable = docs.filter((d) => fs.existsSync(d.resume.pdf_path));
