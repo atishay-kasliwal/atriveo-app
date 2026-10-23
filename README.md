@@ -290,6 +290,7 @@ npm run ship -- --rollback   # put the previous dashboard + workers back
 - **Run commands in the right place:** `npm run ship` and `npm run deploy:apply` run on the Mac in `~/atriveo-app-job-matching`, never on the Oracle server.
 - **Restarting workers** interrupts a resume compiling at that moment (it is re-queued).
 - **Not handled by ship:** the `R2_*` settings (they live in the Oracle env files) and merging playatriveo's `claude/r2-fetch`. See [docs/R2_RESUMES.md](docs/R2_RESUMES.md) and [docs/DEPLOY_FIT_R2.md](docs/DEPLOY_FIT_R2.md).
+- **Scraper, enqueue loop and alerts on Oracle:** `npm run ship -- --scraper` (see [docs/SHIP.md](docs/SHIP.md)); set `NTFY_TOPIC` in the Oracle `dashboard.env` first and subscribe in the ntfy phone app.
 - **Other one-offs:** `docker exec atriveo-dashboard node /app/scripts/fit-backfill.mjs --days 14` saves Fit on recent jobs (or `npm run ship -- --backfill`). `scripts/resume-retention.mjs prune|local` cleans up R2 / local resumes (dry-run unless `--apply`).
 
 ---

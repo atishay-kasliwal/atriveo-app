@@ -26,3 +26,24 @@ Notes
 - It does not set the `R2_*` values; those stay in the Oracle env files.
 - Terraform is not used: it provisions infrastructure (VMs, buckets, DNS), and nothing here needs that. If you later want the R2 bucket and Pages project
   described as code, that is a separate, small Terraform file; it is not needed to deploy.
+
+## Scraping and alerts on Oracle (replaces the Mac)
+
+`npm run ship -- --scraper` also builds and starts, on Oracle:
+- `atriveo-scraper`: `python -m job_pipeline.main --pipeline all` every 60 minutes (a failed cycle retries after 15), from a fresh clone of
+  github.com/atishay-kasliwal/job-pipeline (`SCRAPER_REF`, default main). LinkedIn and Indeed through JobSpy: public pages, **no login, no account**.
+  Memory-capped at 1.5 GB so it cannot starve Mongo.
+- `atriveo-after-scrape`: every 15 minutes, `linkedin-apply-type`, `linkedin-board-match --apply`, then `resume-enqueue` (what ran on the Mac at :55).
+- `atriveo-health` (started by every ship): `health-watch.mjs` every 15 minutes. It sends a phone push through ntfy when no new LinkedIn/board jobs
+  arrive for 6 h, no staffing jobs for 36 h, 5+ resumes wait over 3 h, or 300+ recent jobs have no Fit. One alert when it starts, one when it recovers,
+  a reminder every 12 h. Set `NTFY_TOPIC=<your secret topic>` in `/home/ubuntu/atriveo-muse/private/dashboard.env` (and `NTFY_SERVER` if self-hosted),
+  then install the ntfy app and subscribe to that topic.
+
+Check the scraper: `docker logs --tail 20 atriveo-scraper`.  Dry run of the health check: `docker exec atriveo-health node /app/scripts/health-watch.mjs --once --dry`.
+
+Turning the Mac jobs off once Oracle is producing jobs (the broken scrape and linkedin-match first):
+
+    for j in scrape-hourly linkedin-match board-discovery; do launchctl bootout gui/$UID ~/Library/LaunchAgents/com.atriveo.$j.plist; done
+
+(`board-discovery` runs weekly and is not on Oracle yet.) If LinkedIn blocks Oracle's address the scraper logs it, the health watch alerts, and the options are
+a lower frequency (`SCRAPE_EVERY_MIN`), a proxy (the pipeline already has optional Tor support in `scraper.py`), or dropping LinkedIn.

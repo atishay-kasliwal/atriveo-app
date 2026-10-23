@@ -146,7 +146,7 @@ if [ "$SCRAPER" = 1 ]; then
     && JPSHA=\$(git rev-parse --short HEAD) && cp $STAGE/ship-$COMMIT/deploy/scraper/loop.sh ./loop.sh && cp $STAGE/ship-$COMMIT/deploy/scraper/Dockerfile.loop ./Dockerfile.loop \
     && docker build -q -f Dockerfile.loop -t job-pipeline-scraper:\$JPSHA . \
     && (docker rm -f atriveo-scraper >/dev/null 2>&1 || true) \
-    && docker run -d --name atriveo-scraper --restart unless-stopped --network atriveo-production --env-file /home/ubuntu/atriveo-muse/private/dashboard.env job-pipeline-scraper:\$JPSHA >/dev/null \
+    && docker run -d --name atriveo-scraper --restart unless-stopped --memory 1500m --cpus 1 --network atriveo-production --env-file /home/ubuntu/atriveo-muse/private/dashboard.env job-pipeline-scraper:\$JPSHA >/dev/null \
     && (docker rm -f atriveo-after-scrape >/dev/null 2>&1 || true) \
     && docker run -d --name atriveo-after-scrape --restart unless-stopped --network atriveo-production --user 1001:1001 --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $NEW_DASH_IMAGE sh /app/deploy/scraper/after-scrape.sh >/dev/null \
     && sleep 5 && docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}' | grep -E 'scraper|after-scrape' && docker logs --tail 5 atriveo-scraper"
