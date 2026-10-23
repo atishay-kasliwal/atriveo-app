@@ -73,7 +73,7 @@ echo "live now: $DEPLOYED   dashboard $DASH_IMAGE   workers $WORK_IMAGE"
 [ "$DEPLOYED" != "$COMMIT" ] || { echo "The live commit is already $COMMIT."; [ "$WEBSITE" = 1 ] || exit 0; }
 
 # Files that change on the server: everything under scripts/ and data/ats that differs between the live commit and this one.
-CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats deploy | grep -v -e '^scripts/ship\.sh$' -e '^scripts/ats/validate' -e '^scripts/test-' || true)"
+CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats deploy | grep -v -e '^scripts/ship\.sh$' -e '^scripts/ship-lib\.sh$' -e '^scripts/ats/validate' -e '^scripts/test-' || true)"
 SRC_CHANGED="$(git diff --name-only "$DEPLOYED" HEAD -- src public vite.apply.config.ts apply.html | head -1 || true)"
 # The scoring bundle ships whole whenever anything in it (or the Fit code around it) changes.
 if echo "$CHANGED" | grep -q -E '^(data/ats|scripts/ats|scripts/(fit-|job-matching|applications-analytics|resume-queue|tailor-worker))'; then
