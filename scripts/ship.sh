@@ -32,6 +32,8 @@ for a in "$@"; do case "$a" in
   *) echo "unknown option: $a" >&2; exit 2;; esac; done
 
 cd "$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=ship-lib.sh
+. scripts/ship-lib.sh
 say() { printf '\n\033[1m== %s\033[0m\n' "$*"; }
 run_remote() { if [ "$DRY" = 1 ]; then echo "[dry-run] ssh $HOST: $*"; else "${SSH[@]}" "$@"; fi; }
 state() { "${SSH[@]}" "cat $ROOT_REMOTE/ship-state.env"; }
@@ -73,6 +75,10 @@ echo "live now: $DEPLOYED   dashboard $DASH_IMAGE   workers $WORK_IMAGE"
 # Files that change on the server: everything under scripts/ and data/ats that differs between the live commit and this one.
 CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats deploy | grep -v -e '^scripts/ship\.sh$' -e '^scripts/ats/validate' -e '^scripts/test-' || true)"
 SRC_CHANGED="$(git diff --name-only "$DEPLOYED" HEAD -- src public vite.apply.config.ts apply.html | head -1 || true)"
+# The scoring bundle ships whole whenever anything in it (or the Fit code around it) changes.
+if echo "$CHANGED" | grep -q -E '^(data/ats|scripts/ats|scripts/(fit-|job-matching|applications-analytics|resume-queue|tailor-worker))'; then
+  CHANGED="$(printf '%s\n%s\n' "$CHANGED" "$(bundle_files)" | grep -v '^$' | sort -u)"
+fi
 say "Files to ship ($(echo "$CHANGED" | grep -c . || true))"
 echo "$CHANGED" | sed 's/^/  /'
 [ -n "$CHANGED" ] || echo "  (no server files changed)"
@@ -86,17 +92,21 @@ if [ "$TESTS" = 1 ]; then
 fi
 
 if [ -n "$CHANGED" ]; then
-  say "Drift check: the live image must still hold what was shipped at $DEPLOYED"
-  EXPECT="$(for f in $CHANGED; do git cat-file -e "$DEPLOYED:$f" 2>/dev/null && printf '%s  %s\n' "$(git show "$DEPLOYED:$f" | shasum -a 256 | cut -d' ' -f1)" "$f"; done || true)"
-  echo "$EXPECT" | awk 'NF{print "  " substr($1,1,12) "  " $2}'
+  say "Drift check: every file we will replace must be a version this repo has had (an older one is fine; one found nowhere in git is a server edit)"
+  # shellcheck disable=SC2086
+  FILES="$(echo $CHANGED)"
   for IMG in "$DASH_IMAGE" "$WORK_IMAGE"; do
-    if [ "$DRY" = 1 ]; then echo "[dry-run] docker run --rm -i $IMG sha256sum -c   (stdin: the hashes above)"; continue; fi
-    if ! printf '%s\n' "$EXPECT" | "${SSH[@]}" "docker run --rm -i --entrypoint sh $IMG -c 'cd /app && sha256sum -c --quiet'" 2>&1; then
-      echo; echo "STOP: $IMG has a file that differs from commit $DEPLOYED (listed above)." >&2
-      echo "Someone changed it on the server. Copy it out, diff it, fold it into git, then run again." >&2
-      exit 1
-    fi
-    echo "  $IMG: unchanged since $DEPLOYED"
+    if [ "$DRY" = 1 ]; then echo "[dry-run] $IMG: hash the $(echo "$CHANGED" | wc -l | tr -d ' ') files that exist there and look each up in git history"; continue; fi
+    LIVE="$("${SSH[@]}" "docker run --rm --entrypoint sh $IMG -c 'cd /app && for f in $FILES; do [ -f \$f ] && sha256sum \$f; done'")"
+    BAD=0
+    while read -r hash path; do
+      [ -n "$path" ] || continue
+      if c="$(known_version "$path" "$hash")"; then
+        [ "$c" = "$(git rev-parse HEAD)" ] || { [ "$(git show "HEAD:$path" 2>/dev/null | shasum -a 256 | cut -d' ' -f1)" = "$hash" ] || echo "  $IMG: $path is an older version (from ${c:0:9}); it will be replaced"; }
+      else echo "  $IMG: $path matches NO version in git history: it was edited on the server" >&2; BAD=1; fi
+    done <<< "$LIVE"
+    [ "$BAD" = 0 ] || { echo; echo "STOP: copy the file(s) above out of $IMG, diff them, fold the changes into git, then run again." >&2; exit 1; }
+    echo "  $IMG: ok"
   done
 fi
 
