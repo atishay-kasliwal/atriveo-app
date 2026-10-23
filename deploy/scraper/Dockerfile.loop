@@ -1,0 +1,12 @@
+# Built on Oracle from a checkout of github.com/atishay-kasliwal/job-pipeline (the build context), with loop.sh copied in beside it.
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY job_pipeline ./job_pipeline
+COPY data ./data
+COPY loop.sh ./loop.sh
+RUN useradd --uid 1001 --no-create-home appuser && mkdir -p output archives && chown -R 1001:0 /app && chmod +x loop.sh
+USER 1001
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+CMD ["sh", "/app/loop.sh"]

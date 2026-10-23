@@ -7,6 +7,7 @@
 #   npm run ship -- --rollback   put the previous dashboard and workers back
 #   npm run ship -- --init       once: record what is live now (see INIT_* below)
 #   Options: --skip-tests  --skip-website  --backfill  --yes (do not stop at the confirmation)
+#            --scraper  (re)build and start the scraper containers from github.com/atishay-kasliwal/job-pipeline (SCRAPER_REF=main)
 #
 # What it protects against: overwriting a file on the server that someone changed there. Before anything is replaced, each file
 # it will overwrite is hashed inside the LIVE image and compared with the hash of that file at the last shipped commit. A
@@ -23,10 +24,11 @@ INIT_DASH_IMAGE="atriveo-dashboard:fit-3f309439c";    INIT_DASH_START="start-das
 INIT_WORK_IMAGE="atriveo-dashboard:workers-fit-3f309439c"
 INIT_WORK_STARTS="start-resume-fast-fit-3f309439c.sh start-compiler-fit-3f309439c.sh"
 
-DRY=0; ROLLBACK=0; INIT=0; TESTS=1; WEBSITE=1; BACKFILL=0; YES=0
+DRY=0; ROLLBACK=0; INIT=0; TESTS=1; WEBSITE=1; BACKFILL=0; YES=0; SCRAPER=0
+SCRAPER_REPO="${SCRAPER_REPO:-https://github.com/atishay-kasliwal/job-pipeline}"; SCRAPER_REF="${SCRAPER_REF:-main}"
 for a in "$@"; do case "$a" in
   --dry-run) DRY=1;; --rollback) ROLLBACK=1;; --init) INIT=1;; --skip-tests) TESTS=0;; --skip-website) WEBSITE=0;;
-  --backfill) BACKFILL=1;; --yes) YES=1;; -h|--help) sed -n '2,14p' "$0"; exit 0;;
+  --backfill) BACKFILL=1;; --scraper) SCRAPER=1;; --yes) YES=1;; -h|--help) sed -n '2,14p' "$0"; exit 0;;
   *) echo "unknown option: $a" >&2; exit 2;; esac; done
 
 cd "$(cd "$(dirname "$0")/.." && pwd)"
@@ -69,7 +71,7 @@ echo "live now: $DEPLOYED   dashboard $DASH_IMAGE   workers $WORK_IMAGE"
 [ "$DEPLOYED" != "$COMMIT" ] || { echo "The live commit is already $COMMIT."; [ "$WEBSITE" = 1 ] || exit 0; }
 
 # Files that change on the server: everything under scripts/ and data/ats that differs between the live commit and this one.
-CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats | grep -v -e '^scripts/ship\.sh$' -e '^scripts/ats/validate' -e '^scripts/test-' || true)"
+CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats deploy | grep -v -e '^scripts/ship\.sh$' -e '^scripts/ats/validate' -e '^scripts/test-' || true)"
 SRC_CHANGED="$(git diff --name-only "$DEPLOYED" HEAD -- src public vite.apply.config.ts apply.html | head -1 || true)"
 say "Files to ship ($(echo "$CHANGED" | grep -c . || true))"
 echo "$CHANGED" | sed 's/^/  /'
@@ -116,7 +118,7 @@ if [ -n "$CHANGED" ]; then
   NEW_WORK_STARTS="${NEW_WORK_STARTS# }"
 
   say "Building overlays and start scripts"
-  OVERLAY="cd $ROOT_REMOTE/staging/ship-$COMMIT && printf 'FROM %s\nCOPY scripts /app/scripts\nCOPY data /app/data\n' '$DASH_IMAGE' > Dockerfile.dash && docker build -q -f Dockerfile.dash -t $NEW_DASH_IMAGE . \
+  OVERLAY="cd $ROOT_REMOTE/staging/ship-$COMMIT && mkdir -p scripts data deploy && printf 'FROM %s\nCOPY scripts /app/scripts\nCOPY data /app/data\nCOPY deploy /app/deploy\n' '$DASH_IMAGE' > Dockerfile.dash && docker build -q -f Dockerfile.dash -t $NEW_DASH_IMAGE . \
     && printf 'FROM %s\nCOPY scripts /app/scripts\nCOPY data /app/data\n' '$WORK_IMAGE' > Dockerfile.work && docker build -q -f Dockerfile.work -t $NEW_WORK_IMAGE . \
     && cd ~/$ROOT_REMOTE && sed 's#$DASH_IMAGE#$NEW_DASH_IMAGE#' $DASH_START > $NEW_DASH_START && chmod +x $NEW_DASH_START"
   i=0; for old in $WORK_STARTS; do i=$((i+1)); new="$(echo "$NEW_WORK_STARTS" | cut -d' ' -f$i)"; OVERLAY="$OVERLAY && sed 's#$WORK_IMAGE#$NEW_WORK_IMAGE#' $old > $new && chmod +x $new"; done
@@ -134,6 +136,20 @@ if [ -n "$CHANGED" ]; then
     echo "  dashboard and workers are Up."
     "${SSH[@]}" "cd $ROOT_REMOTE && sed -i -e 's/^PREV_COMMIT=.*/PREV_COMMIT=$DEPLOYED/' -e 's/^PREV_DASH_START=.*/PREV_DASH_START=$DASH_START/' -e 's/^PREV_WORK_STARTS=.*/PREV_WORK_STARTS=\"$WORK_STARTS\"/' -e 's/^DEPLOYED_COMMIT=.*/DEPLOYED_COMMIT=$COMMIT/' -e 's#^DASH_IMAGE=.*#DASH_IMAGE=$NEW_DASH_IMAGE#' -e 's/^DASH_START=.*/DASH_START=$NEW_DASH_START/' -e 's#^WORK_IMAGE=.*#WORK_IMAGE=$NEW_WORK_IMAGE#' -e 's/^WORK_STARTS=.*/WORK_STARTS=\"$NEW_WORK_STARTS\"/' ship-state.env && cat ship-state.env"
   fi
+fi
+
+if [ "$SCRAPER" = 1 ]; then
+  say "Scraper containers (job-pipeline@$SCRAPER_REF, and the after-scrape loop on the new dashboard image)"
+  [ -n "${NEW_DASH_IMAGE:-}" ] || NEW_DASH_IMAGE="$DASH_IMAGE"
+  STAGE="~/$ROOT_REMOTE/staging"
+  run_remote "set -e; cd $STAGE && rm -rf scraper-src && git clone -q --depth 1 --branch $SCRAPER_REF $SCRAPER_REPO scraper-src && cd scraper-src \
+    && JPSHA=\$(git rev-parse --short HEAD) && cp $STAGE/ship-$COMMIT/deploy/scraper/loop.sh ./loop.sh && cp $STAGE/ship-$COMMIT/deploy/scraper/Dockerfile.loop ./Dockerfile.loop \
+    && docker build -q -f Dockerfile.loop -t job-pipeline-scraper:\$JPSHA . \
+    && (docker rm -f atriveo-scraper >/dev/null 2>&1 || true) \
+    && docker run -d --name atriveo-scraper --restart unless-stopped --network atriveo-production --env-file /home/ubuntu/atriveo-muse/private/dashboard.env job-pipeline-scraper:\$JPSHA >/dev/null \
+    && (docker rm -f atriveo-after-scrape >/dev/null 2>&1 || true) \
+    && docker run -d --name atriveo-after-scrape --restart unless-stopped --network atriveo-production --user 1001:1001 --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $NEW_DASH_IMAGE sh /app/deploy/scraper/after-scrape.sh >/dev/null \
+    && sleep 5 && docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}' | grep -E 'scraper|after-scrape' && docker logs --tail 5 atriveo-scraper"
 fi
 
 if [ "$BACKFILL" = 1 ]; then say "Saving Fit on recent jobs"; run_remote "docker exec atriveo-dashboard node /app/scripts/fit-backfill.mjs --days 14 | tail -3"; fi
