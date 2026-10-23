@@ -17,6 +17,7 @@ The web app is the **control plane** (feed, queue, status). The Mac sidecar is t
 5. [Current architecture](#current-architecture)
 6. [Permanent setup (run once)](#permanent-setup-run-once)
 7. [Daily operations](#daily-operations)
+   - [Deploying to production (`npm run ship`)](#deploying-to-production-npm-run-ship)
 8. [Resume layout (fixed)](#resume-layout-fixed)
 9. [Compiler pipeline (technical)](#compiler-pipeline-technical)
 10. [npm scripts reference](#npm-scripts-reference)
@@ -269,6 +270,27 @@ Re-install after path changes:
 ```bash
 JOB_PIPELINE_DIR=~/job-pipeline npm run pipeline:install
 ```
+
+---
+
+## Deploying to production (`npm run ship`)
+
+Run from your Mac. No GitHub Actions. Full notes: [docs/SHIP.md](docs/SHIP.md).
+
+```bash
+npm run ship -- --init       # ONCE: record what is live on Oracle now (needs ssh key ~/.ssh/atriveo_oracle)
+npm run ship -- --dry-run    # show the plan, change nothing  <- always do this first
+npm run ship                 # test, drift-check, ship, restart dashboard + workers, check Up, then website
+npm run ship -- --rollback   # put the previous dashboard + workers back
+```
+
+- **Order is built in:** backend first, website last (new pages read fields the backend sends).
+- **Drift check:** stops if a file on the server differs from what was last shipped (someone edited it there). Fix: copy it out, fold it into git, run again.
+- **First time only:** `--init` assumes live = the Oct 23 images (`fit-3f309439c`). Check `ship-state.env` on Oracle if unsure: `ssh -i ~/.ssh/atriveo_oracle ubuntu@129.213.92.151 cat atriveo-production/ship-state.env`.
+- **Run commands in the right place:** `npm run ship` and `npm run deploy:apply` run on the Mac in `~/atriveo-app-job-matching`, never on the Oracle server.
+- **Restarting workers** interrupts a resume compiling at that moment (it is re-queued).
+- **Not handled by ship:** the `R2_*` settings (they live in the Oracle env files) and merging playatriveo's `claude/r2-fetch`. See [docs/R2_RESUMES.md](docs/R2_RESUMES.md) and [docs/DEPLOY_FIT_R2.md](docs/DEPLOY_FIT_R2.md).
+- **Other one-offs:** `docker exec atriveo-dashboard node /app/scripts/fit-backfill.mjs --days 14` saves Fit on recent jobs (or `npm run ship -- --backfill`). `scripts/resume-retention.mjs prune|local` cleans up R2 / local resumes (dry-run unless `--apply`).
 
 ---
 
