@@ -1,3 +1,4 @@
+import { formatLocation } from "../utils/location";
 import { useEffect, useState, type ReactNode } from "react";
 import CompanyLogo from "../components/CompanyLogo";
 import CardActions from "./CardActions";
@@ -93,7 +94,7 @@ export default function JobCard(p: Props) {
       </header>
       {p.onTitle ? <h2 className="td-role" title={p.title}><button type="button" className="td-role-link" onClick={p.onTitle}>{p.title}</button></h2> : <h2 className="td-role" title={p.title}>{p.title}</h2>}
       <div className="td-meta">
-        {p.location && <span className={`td-loc ${nc ? "is-nc" : ""}`} title={p.location}>{nc ? "★ " : ""}{p.location}</span>}
+        {p.location && <span className={`td-loc ${nc ? "is-nc" : ""}`} title={p.location}>{nc ? "★ " : ""}{formatLocation(p.location)}</span>}
       </div>
       <div className="td-tags">{p.leadTags}{trackLabel && <span className={`td-track is-${p.track}`} title="Resume track">{trackLabel}</span>}{p.tags}</div>
       {p.notes}

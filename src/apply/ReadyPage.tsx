@@ -1,3 +1,4 @@
+import { formatLocation } from "../utils/location";
 import DiscardApplications from "./DiscardApplications";
 import { InBrowserSection } from "./InBrowser";
 import { useEffect, useMemo, useState } from "react";
@@ -318,7 +319,7 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
                   <CompanyLogo company={selected.company} size="md" />
                   <div className="apps-drawer-title">
                     <strong>{selected.company}</strong>
-                    <span>{selected.title}{selected.location ? ` · ${selected.location}` : ""}{selected.ats ? ` · ${selected.ats}` : ""}</span>
+                    <span>{selected.title}{selected.location ? ` · ${formatLocation(selected.location)}` : ""}{selected.ats ? ` · ${selected.ats}` : ""}</span>
                   </div>
                   <a className="apps-link" href={selected.url} target="_blank" rel="noreferrer">Open form ↗</a>
                 </div>

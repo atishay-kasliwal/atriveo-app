@@ -1,3 +1,4 @@
+import { formatLocation } from "../utils/location";
 import { useCallback, useEffect, useRef, useState } from "react";
 import CompanyLogo from "../components/CompanyLogo";
 import { getJson } from "./engine";
@@ -137,7 +138,7 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
             <span className="jm-pos" aria-live="polite">{position}</span>
           </header>
           <ul className="jm-facts">
-            {job.location && <li>{job.location}</li>}
+            {job.location && <li>{formatLocation(job.location)}</li>}
             {job.jd.work && <li>{job.jd.work}</li>}
             {job.jd.kind && <li>{job.jd.kind}</li>}
             {job.jd.salary && <li className="jm-pay">{job.jd.salary}</li>}

@@ -1,3 +1,4 @@
+import { formatLocation } from "../utils/location";
 import CardActions from './CardActions';
 import {resumeChangeDiff} from '../shared/resumeChangeDiff.mjs';
 import {resumeReviewSummary} from '../shared/resumeReviewSummary.mjs';
@@ -111,7 +112,7 @@ function StartScreen() {
         <h2>Your resumes</h2>
         <ul className="rb-list">{list.map((p) => (
           <li key={p.id}>
-            <Link to={`/resume_builder?pasted=${p.id}`} className="rb-list-main"><b>{p.company}</b><span>{p.title}{p.location ? ` · ${p.location}` : ""}</span></Link>
+            <Link to={`/resume_builder?pasted=${p.id}`} className="rb-list-main"><b>{p.company}</b><span>{p.title}{p.location ? ` · ${formatLocation(p.location)}` : ""}</span></Link>
             <span className="rb-list-meta">{when(p.updatedAt || p.createdAt)}{p.edited ? " · edited" : ""}</span>
             <span className="rb-list-acts"><CardActions>
               <Link className="apps-btn" to={`/resume_builder?pasted=${p.id}`}>Edit</Link>
