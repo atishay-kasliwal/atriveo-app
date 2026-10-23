@@ -42,7 +42,7 @@ test("one alert when it starts failing, a reminder only after 12 hours, one when
   r = transitions(bad, r.state, DEFAULTS, NOW + 13 * 3_600_000);
   assert.deepEqual(r.messages.map((m) => m.title), ["Still down"]);
   const later = NOW + 14 * 3_600_000, fresh = new Date(later - 3_600_000).toISOString();
-  const good = evaluate(facts({ newestBoards: fresh, newestStaffing: fresh }), DEFAULTS, later);
+  const good = evaluate(facts({ newestBoards: fresh, newestLinkedin: fresh, newestStaffing: fresh }), DEFAULTS, later);
   r = transitions(good, r.state, DEFAULTS, NOW + 14 * 3_600_000);
   assert.deepEqual(r.messages.map((m) => m.title), ["Recovered"]);
   r = transitions(good, r.state, DEFAULTS, NOW + 15 * 3_600_000);
