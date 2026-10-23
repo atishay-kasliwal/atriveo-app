@@ -125,9 +125,11 @@ if [ -n "$CHANGED" ]; then
 
   say "Restarting"
   run_remote "cd ~/$ROOT_REMOTE && ./$NEW_DASH_START && for s in $NEW_WORK_STARTS; do ./\$s; done; sleep 6; docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}' | grep -E 'dashboard|resume'"
+  # The health watch (alerts when scraping or the resume queue stops) runs from the same image, with the dashboard's settings.
+  run_remote "docker rm -f atriveo-health >/dev/null 2>&1; docker run -d --name atriveo-health --restart unless-stopped --network atriveo-production --user 1001:1001 --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $NEW_DASH_IMAGE node /app/scripts/health-watch.mjs --loop 900 >/dev/null && echo 'health watch started'"
   say "Health"
   if [ "$DRY" != 1 ]; then
-    BAD="$("${SSH[@]}" "docker ps --format '{{.Names}} {{.Status}}' | grep -E 'dashboard|resume' | grep -v ' Up ' || true; docker ps -a --filter status=restarting --format '{{.Names}} restarting' | grep -E 'dashboard|resume' || true")"
+    BAD="$("${SSH[@]}" "docker ps --format '{{.Names}} {{.Status}}' | grep -E 'dashboard|resume|health' | grep -v ' Up ' || true; docker ps -a --filter status=restarting --format '{{.Names}} restarting' | grep -E 'dashboard|resume' || true")"
     if [ -n "$BAD" ]; then echo "$BAD" >&2; echo "A container is not Up. Rolling back." >&2; "$0" --rollback --yes || true; exit 1; fi
     echo "  dashboard and workers are Up."
     "${SSH[@]}" "cd $ROOT_REMOTE && sed -i -e 's/^PREV_COMMIT=.*/PREV_COMMIT=$DEPLOYED/' -e 's/^PREV_DASH_START=.*/PREV_DASH_START=$DASH_START/' -e 's/^PREV_WORK_STARTS=.*/PREV_WORK_STARTS=\"$WORK_STARTS\"/' -e 's/^DEPLOYED_COMMIT=.*/DEPLOYED_COMMIT=$COMMIT/' -e 's#^DASH_IMAGE=.*#DASH_IMAGE=$NEW_DASH_IMAGE#' -e 's/^DASH_START=.*/DASH_START=$NEW_DASH_START/' -e 's#^WORK_IMAGE=.*#WORK_IMAGE=$NEW_WORK_IMAGE#' -e 's/^WORK_STARTS=.*/WORK_STARTS=\"$NEW_WORK_STARTS\"/' ship-state.env && cat ship-state.env"
