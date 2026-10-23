@@ -17,14 +17,16 @@ interface AtsAnalysis { score: number | null; required: { matched: number; total
 interface MatchJob {
   id: string; company: string; title: string; location: string | null; level: string | null; score: number | null;
   postedAt: string | null; foundAt: string | null; applyType: string | null; track: string | null;
-  applyUrl: string; postingUrl: string; resumePath: string; resumeMatch: ResumeMatch | null; saved: boolean; jd: Jd; ats: AtsAnalysis | null;
+  applyUrl: string; postingUrl: string; resumePath: string; resumeObject?: { sha256: string; hasImage: boolean } | null; resumeMatch: ResumeMatch | null; saved: boolean; jd: Jd; ats: AtsAnalysis | null;
 }
 interface Queue { ok: boolean; total: number; jobs: MatchJob[] }
 type Decision = "skip" | "apply" | "later";
 
 const BATCH = 8;
 const REFILL_AT = 3;
-const imageUrl = (j: MatchJob) => `${getTailorServerBase()}/applications/resume-image?path=${encodeURIComponent(j.resumePath)}`;
+const imageUrl = (j: MatchJob) => j.resumeObject?.hasImage
+  ? `${getTailorServerBase()}/applications/resume-file?sha=${j.resumeObject.sha256}&kind=image`
+  : `${getTailorServerBase()}/applications/resume-image?path=${encodeURIComponent(j.resumePath)}`;
 
 async function send(jobUrl: string, decision: Decision | "undo") {
   const res = await fetch(`${getTailorServerBase()}/applications/job-decision`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jobUrl, decision }) });
@@ -197,7 +199,7 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
           </header>
           <div className="jm-page-box">
             {imgOk ? <img key={job.id} src={imageUrl(job)} alt={`Tailored resume for ${job.company}`} onError={() => setImgOk(false)} />
-              : <p className="apps-muted">The resume preview didn't load. <a href={`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(job.resumePath)}`} target="_blank" rel="noreferrer">Open the PDF ↗</a></p>}
+              : <p className="apps-muted">The resume preview didn't load. <a href={job.resumeObject ? `${getTailorServerBase()}/applications/resume-file?sha=${job.resumeObject.sha256}&kind=pdf` : `${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(job.resumePath)}`} target="_blank" rel="noreferrer">Open the PDF ↗</a></p>}
           </div>
         </section>
       </main>

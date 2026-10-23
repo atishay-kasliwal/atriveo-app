@@ -4,6 +4,7 @@ import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { resumeMatchOf, trackOf } from "./applications-analytics.mjs";
+import { publishResume, storeFromEnv } from "./resume-store.mjs";
 
 // Job Matching: one job at a time, its tailored resume already built. Nothing here builds a resume or applies anywhere.
 // The queue is the jobs whose resume is done and that you haven't decided on; a decision is one job_swipes row
@@ -87,11 +88,12 @@ export function shapeJd(text) {
  * The next jobs to decide on: resume done (PDF and page image on disk), no application, no decision yet (Saved for
  * later comes back after the rest). Best match first. Only what the page shows crosses the wire.
  */
+const published = new Set();
 export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date() } = {}) {
   const since = new Date(now.getTime() - DAYS * 86_400_000);
   const [docs, applied, swipes] = await Promise.all([
     db.collection("jobs").find({ run_at: { $gte: since }, "resume.status": "success", "resume.pdf_path": { $type: "string" } },
-      { projection: { _id: 0, job_url: 1, job_url_direct: 1, company: 1, title: 1, location: 1, level: 1, score_pct: 1, date_posted: 1, run_at: 1, apply_type: 1, site: 1, "resume.pdf_path": 1 } })
+      { projection: { _id: 0, job_url: 1, job_url_direct: 1, company: 1, title: 1, location: 1, level: 1, score_pct: 1, date_posted: 1, run_at: 1, apply_type: 1, site: 1, "resume.pdf_path": 1, "resume.object": 1 } })
       .sort({ run_at: -1 }).limit(1500).toArray(),
     db.collection("applications").distinct("jobUrls"),
     db.collection("job_swipes").find({}, { projection: { _id: 0, job_url: 1, direction: 1, swiped_at: 1 } }).toArray(),
@@ -119,6 +121,11 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
     if (rows.length >= limit) break;
     const pdf = d.resume.pdf_path;
     if (!fs.existsSync(pdf) || !(await ensureResumeImage(pdf))) { skipped++; continue; }
+    // With R2 set up, the resume and its page image are kept there too (once per file; the answer says where).
+    if (storeFromEnv() && !published.has(pdf)) {
+      const r = await publishResume(pdf);
+      if (r.object) { d.resume.object = r.object; published.add(pdf); }
+    }
     rows.push(d);
   }
   const urls = rows.map((d) => d.job_url);
@@ -134,7 +141,7 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
       applyType: d.apply_type ?? null, track: trackOf(d.title),
       // The company's own form when known, else the posting you were shown.
       applyUrl: d.job_url_direct || d.job_url, postingUrl: d.job_url,
-      resumePath: d.resume.pdf_path, resumeMatch: resumeMatchOf(d.resume.pdf_path),
+      resumePath: d.resume.pdf_path, resumeObject: d.resume.object ? { sha256: d.resume.object.sha256, hasImage: Boolean(d.resume.object.image_key) } : null, resumeMatch: resumeMatchOf(d.resume.pdf_path),
       saved: later.has(d.job_url), jd, ats: await analyzeMatchingResume(d.resume.pdf_path, jd.full, decode(d.title)),
     };
   }));

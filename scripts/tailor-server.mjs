@@ -50,6 +50,7 @@ import { syncOverlay } from "./ac-bank-overlay.mjs";
 import { approveDraft, draftResult, startDraft } from "./bank-draft.mjs";
 import { applicationsAnalytics, applicationDetail, dismissJob, linkJobToApplication, markJobApplied, saveLinkedinDirect, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
 import { matchingQueue, recordDecision, resumeImagePath } from "./job-matching.mjs";
+import { resumeFileRedirect } from "./resume-store.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
 import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
@@ -1868,6 +1869,14 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
       }
     });
+    return;
+  }
+
+  // GET /applications/resume-file?sha=<sha256>&kind=pdf|image — a resume kept in R2, as a redirect to a link that expires in minutes.
+  if (req.method === "GET" && pathname === "/applications/resume-file") {
+    const r = resumeFileRedirect({ sha: reqUrl.searchParams.get("sha"), kind: reqUrl.searchParams.get("kind") });
+    res.writeHead(r.status, r.location ? { Location: r.location, "Cache-Control": "private, no-store" } : {});
+    res.end();
     return;
   }
 

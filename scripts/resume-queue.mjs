@@ -4,6 +4,7 @@ import { COMPILE_STAGES, resolveCachedCompile } from "./ac-artifact-store.mjs";
 import { loadBank } from "./ac-bank.mjs";
 import { hourEtFromBatch, parseSessionHour, etDateKey, etDayBoundsUtc } from "./resume-path.mjs";
 import { compileOwner } from "./worker-id.mjs";
+import { publishResume } from "./resume-store.mjs";
 
 // Each machine runs its own queue.
 //
@@ -476,6 +477,13 @@ export async function updateResumeState(db, jobUrl, patch) {
   const set = {};
   for (const [key, value] of Object.entries(patch)) {
     set[`resume.${key}`] = value;
+  }
+  // A finished resume is also kept in R2 (when configured): the reference sits beside the local path, which stays as is.
+  // Both writers of a success (a fresh compile and a cache hit) come through here. A storage problem never fails the row.
+  if (patch.status === "success" && typeof patch.pdf_path === "string") {
+    const stored = await publishResume(patch.pdf_path);
+    if (stored.object) { set["resume.object"] = stored.object; set["resume.object_error"] = null; }
+    else if (stored.error) set["resume.object_error"] = stored.error.slice(0, 200);
   }
   set["resume.updated_at"] = new Date().toISOString();
   await db.collection("jobs").updateOne({ job_url: jobUrl }, { $set: set });
