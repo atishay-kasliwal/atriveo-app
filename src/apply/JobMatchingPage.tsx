@@ -181,7 +181,7 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
           {job.jd.flags.length > 0 && <p className="jm-flags">{job.jd.flags.map((f) => <span key={f}>{f}</span>)}</p>}
           <div className="jm-panel">
             <div className="jm-score" aria-label="Match summary">
-              <div><strong className={score != null && score >= 80 ? "jm-good" : undefined}>{score ?? "–"}{score != null && <small>/100</small>}</strong><span>Match</span></div>
+              <div><strong className={score != null && score >= 80 ? "jm-good" : undefined}>{score != null ? Math.round(score) : "–"}{score != null && <small>/100</small>}</strong><span>Match</span></div>
               <div><strong className={skillsTotal && skillsHit === skillsTotal ? "jm-good" : undefined}>{skillsTotal ? skillsHit : "–"}{skillsTotal > 0 && <small>/{skillsTotal}</small>}</strong><span>Skills match</span></div>
               <div><strong className="jm-text">{job.level ?? "Not stated"}</strong><span>Seniority</span></div>
             </div>

@@ -9,7 +9,7 @@ import path from "node:path";
 import yaml from "js-yaml";
 import { fileURLToPath } from "node:url";
 import { parseDateRange } from "./patterns.mjs";
-import { EDUCATION_ROWS } from "../ac-tex.mjs";
+import { EDUCATION_ROWS } from "../resume-education.mjs";
 
 const bankDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../data/ac-bank");
 // Provenance levels that are not a claim you made or confirmed.
