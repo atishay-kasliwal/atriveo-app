@@ -11,6 +11,7 @@ const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? proces
 const N = Number(arg("--n", 60));
 const DAYS = Number(arg("--days", 30));
 const OUT = arg("--out", "fit-validation.json");
+const SAMPLE = arg("--sample", null); // cache of the picked jobs and postings: re-runs then need no database
 const hash = (s) => crypto.createHash("sha1").update(s).digest("hex");
 
 const trackOf = (title) => {
@@ -24,7 +25,8 @@ const trackOf = (title) => {
 const levelOf = (title) => (/\b(principal|staff|lead|director|architect)\b/i.test(title) ? "staff+" : /\b(senior|sr\.?|iii|iv)\b/i.test(title) ? "senior" : /\b(intern|junior|jr\.?|entry|associate|i)\b/i.test(title) ? "junior" : "mid");
 
 const since = new Date(Date.now() - DAYS * 86_400_000);
-const { docs, jds } = await withMongo(async (db) => {
+const cached = SAMPLE && fs.existsSync(SAMPLE) ? JSON.parse(fs.readFileSync(SAMPLE, "utf8")) : null;
+const { docs, jds } = cached ? { docs: cached.docs, jds: new Map(cached.jds) } : await withMongo(async (db) => {
   const docs = await db.collection("jobs").find({ run_at: { $gte: since }, "resume.status": "success", "resume.pdf_path": { $type: "string" } },
     { projection: { _id: 0, job_url: 1, company: 1, title: 1, level: 1, score_pct: 1, "resume.pdf_path": 1 } }).sort({ run_at: -1 }).limit(900).toArray();
   const usable = docs.filter((d) => fs.existsSync(d.resume.pdf_path));
@@ -44,6 +46,7 @@ const { docs, jds } = await withMongo(async (db) => {
   return { docs: picked, jds: new Map(rows.map((r) => [r.job_url, r.description])) };
 });
 
+if (SAMPLE && !cached) fs.writeFileSync(SAMPLE, JSON.stringify({ docs, jds: [...jds] }));
 const rows = [];
 for (const d of docs) {
   const jd = jds.get(d.job_url);

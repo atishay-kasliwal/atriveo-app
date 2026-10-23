@@ -67,11 +67,35 @@ test("one ledger: required plus preferred is the total and the missing list is w
   assert.deepEqual(ledger.missing.filter((l) => rows.some((i) => i.label === l && i.lost > 0)), ledger.missing.filter((l) => ledger.skills.find((s) => s.label === l).class === "required"));
 });
 
-test("a skill counts only with evidence: Kubernetes is in a bullet, Agile is not", () => {
-  const r = fit();
+test("a skill counts only with evidence: Kubernetes is in a bullet, Rust is not", () => {
+  const r = fit(jdText.replace("Go is a plus.", "Go is a plus.\n- Rust experience."));
   assert.ok(r.ledger.matched.includes("Java"));
   assert.ok(r.ledger.matched.includes("Kubernetes"));
-  assert.ok(r.ledger.missing.includes("Agile"));
+  assert.ok(r.ledger.missing.includes("Rust"));
+});
+
+test("every job gets a Fit: a blank or unreadable posting still scores, flagged Low Confidence", () => {
+  const blank = scoreFit("", { title: "Data Analyst", asOf: "2026-10-23" });
+  assert.equal(typeof blank.score, "number");
+  assert.equal(blank.confidence.level, "low");
+  const unreadable = scoreFit("Great place to work. Apply today!", { title: "Backend Engineer", asOf: "2026-10-23" });
+  assert.equal(typeof unreadable.score, "number");
+  assert.equal(unreadable.confidence.level, "low");
+});
+
+test("words the parser cannot place are listed, never scored as missing skills", () => {
+  const r = fit("Backend Engineer\nRequirements:\n- Experience with Retail, Government and Money Laundering.\n- Python experience.\n");
+  assert.ok(!r.ledger.missing.includes("Retail"));
+  assert.ok(r.ledger.matched.includes("Python"));
+});
+
+test("role alignment follows the families your bank supports, so a data analyst role is not marked as a mismatch", () => {
+  assert.ok(master.families.includes("data"));
+  const r = fit("Data Analyst\nRequirements:\n- SQL and Python experience.\n");
+  const row = r.categories.find((c) => c.key === "role_alignment").items.find((i) => i.label === "Past position titles");
+  assert.equal(row.lost, 0);
+  const rn = fit("Registered Nurse\nRequirements:\n- Python experience.\n", { title: "Registered Nurse" });
+  assert.ok(rn.categories.find((c) => c.key === "role_alignment").items.find((i) => i.label === "Past position titles").lost > 0);
 });
 
 test("the bank's keyword lists are not evidence", () => {

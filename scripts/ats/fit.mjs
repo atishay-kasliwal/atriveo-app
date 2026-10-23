@@ -20,33 +20,50 @@ function context(overrides = {}) {
 }
 export const resetFitContext = () => { defaults = undefined; };
 
-function confidenceOf(match, cfg) {
+function confidenceOf(match, cfg, { fromKeywords, blank }) {
   const scored = match.skill_ledger.total.total + (match.categories.find((c) => c.key === "experience_alignment")?.items.length || 0);
   const w = match.applicable_weight;
-  const level = w < cfg.low_below_applicable_weight || scored < cfg.low_below_scored_requirements ? "low"
-    : w >= cfg.high_from_applicable_weight && scored >= cfg.high_from_scored_requirements ? "high" : "medium";
-  const reasons = [];
-  if (w < cfg.low_below_applicable_weight) reasons.push(`The posting gave us something to score for only ${w} of 100 points`);
-  if (scored < cfg.low_below_scored_requirements) reasons.push(`Only ${scored} scorable requirement${scored === 1 ? "" : "s"} found`);
-  return { level, applicable_weight: w, scored_requirements: scored, reasons };
+  const lowReasons = [];
+  if (blank) lowReasons.push("No job description was saved; scored from the title alone");
+  if (fromKeywords) lowReasons.push("No requirements list was recognized; skills were read from keywords in the text");
+  if (!match.skill_ledger.total.total) lowReasons.push("No skills found to compare");
+  if (w < cfg.low_below_applicable_weight) lowReasons.push(`The posting gave us something to score for only ${w} of 100 points`);
+  if (scored < cfg.low_below_scored_requirements) lowReasons.push(`Only ${scored} scorable requirement${scored === 1 ? "" : "s"} found`);
+  const level = lowReasons.length ? "low" : w >= cfg.high_from_applicable_weight && scored >= cfg.high_from_scored_requirements ? "high" : "medium";
+  return { level, applicable_weight: w, scored_requirements: scored, reasons: lowReasons };
+}
+
+// Only skills the dictionary knows are compared: a capitalized word the parser could not place ("Retail", "Government")
+// is not a skill, and a requirement we cannot recognize is never held against you. They are listed, not scored.
+function knownSkill(requirement, config) {
+  const known = new Set(Object.entries(config.skills).flatMap(([name, skill]) => [name, ...(skill.variants || [])]).map((t) => t.toLowerCase()));
+  return requirement.alternatives.some((a) => known.has(String(a).toLowerCase()));
 }
 
 export function scoreFit(jdText, { title = null, asOf = new Date().toISOString().slice(0, 10), ...overrides } = {}) {
   const { config, candidate, master, masterHash } = context(overrides);
-  if (!String(jdText || "").trim()) return { score: null, note: "No job description" };
-  const jd = parseJobDescription(jdText, config);
+  // Every job gets a Fit. When the posting says little, the number rests on less and Confidence says so.
+  const blank = !String(jdText || "").trim();
+  const jd = parseJobDescription(jdText || "", config);
   if (title) jd.title = title;
-  if (!jd.required.length && !jd.preferred.length && !jd.responsibilities.length && !jd.unparsed.length && !jd.degree && !jd.years) {
-    return { score: null, note: "Requirements were not recognized in this posting" };
+  const unrecognized = [...jd.required, ...jd.preferred].filter((r) => !knownSkill(r, config)).map((r) => r.label);
+  jd.required = jd.required.filter((r) => knownSkill(r, config));
+  jd.preferred = jd.preferred.filter((r) => knownSkill(r, config));
+  let fromKeywords = false;
+  if (!jd.required.length && !jd.preferred.length) {
+    // No requirements list we could read: use the dictionary skills the text mentions, and say so.
+    const lines = String(jdText || "").split(/\r?\n/);
+    jd.required = keywordCoverage(String(jdText || ""), "", config).map((k) => ({ label: k.name, alternatives: [k.name], source: lines.find((l) => k.terms.some((t) => l.toLowerCase().includes(t.toLowerCase()))) || null }));
+    fromKeywords = jd.required.length > 0;
   }
   const match = scoreJobMatch(master, jd, config, { asOf, fit: true, candidate });
   const ledger = match.skill_ledger;
   const labels = new Set(ledger.skills.flatMap((s) => [s.label, ...s.alternatives].map((x) => x.toLowerCase())));
-  const mentioned = keywordCoverage(jdText, "", config).map((k) => k.name).filter((n) => !labels.has(n.toLowerCase()));
+  const mentioned = keywordCoverage(String(jdText || ""), "", config).map((k) => k.name).filter((n) => !labels.has(n.toLowerCase()));
   return {
     kind: "fit", score: match.score, config_hash: config.hash, master_hash: masterHash, as_of: asOf,
-    confidence: confidenceOf(match, config.scoring.fit.confidence),
-    ledger: { ...ledger, mentioned },
+    confidence: confidenceOf(match, config.scoring.fit.confidence, { fromKeywords, blank }),
+    ledger: { ...ledger, mentioned, unrecognized },
     knockouts: evaluateKnockouts({ jd, jdText, ledger, years: match.years_experience, candidate, master, config }),
     categories: match.categories, not_applicable: match.not_applicable, unknown_requirements: match.unknown_requirements,
     accounting: match.accounting, recommendations: match.recommendations, coverage: match.coverage,

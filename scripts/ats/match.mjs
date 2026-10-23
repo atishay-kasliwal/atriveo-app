@@ -152,7 +152,7 @@ export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOStrin
   const titles = resume.experience.map((e) => e.title).filter(Boolean);
   const headline = resume.contact.other.find((s) => /engineer|scientist|analyst|developer|manager/i.test(s)) || "";
   const roleParts = [
-    { label: "Past position titles", max: cfg.role.title_points, credit: family && titles.some((t) => familyFor(t, cfg.role) === family) ? 1 : 0, evidence: titles.join("; ") },
+    { label: "Past position titles", max: cfg.role.title_points, credit: family && (titles.some((t) => familyFor(t, cfg.role) === family) || (fit && (resume.families || []).includes(family))) ? 1 : 0, evidence: fit && family && (resume.families || []).includes(family) ? `Your bank supports ${family} roles` : titles.join("; ") },
     // The headline is chosen per job when a resume is tailored, so Fit never reads one.
     ...(fit ? [] : [{ label: "Resume headline", max: cfg.role.headline_points, credit: family && familyFor(headline, cfg.role) === family ? 1 : 0, evidence: headline || null }]),
     { label: "Role title words", max: cfg.role.words_points, credit: jd.title && titles.some((t) => t.toLowerCase().split(/\W+/).some((w) => w.length >= cfg.role.min_shared_word_length && phrase(jd.title, w))) ? 1 : 0, evidence: titles.join("; ") },

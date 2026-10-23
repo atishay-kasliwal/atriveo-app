@@ -14,6 +14,8 @@ import { EDUCATION_ROWS } from "../ac-tex.mjs";
 const bankDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../data/ac-bank");
 // Provenance levels that are not a claim you made or confirmed.
 const NOT_EVIDENCE = new Set(["UNSUPPORTED", "HISTORICAL_CLAIM"]);
+// The bank's display tags (fits:) name the roles it can credibly support; Fit reads them as role families.
+const FIT_FAMILY = { "software-engineer": "software", "forward-deployed": "software", "ai-engineer": "ai", "data-science": "data", "data-analytics": "data" };
 const readYaml = (file) => yaml.load(fs.readFileSync(file, "utf8")) || {};
 const dates = (text) => parseDateRange(String(text || "").replace(/\s*--\s*/g, " – "));
 const flat = (v) => (Array.isArray(v) ? v.flatMap(flat) : v && typeof v === "object" ? Object.values(v).flatMap(flat) : v ? [String(v)] : []);
@@ -26,11 +28,13 @@ export function buildMaster(dir = bankDir) {
   }
   const bulletsByRole = new Map();
   const excluded = { no_role_file: new Set(), not_evidence: 0 };
+  const families = new Set();
   for (const f of files.filter((n) => /^AC-U?\d+\.yaml$/.test(n)).sort()) {
     let ac; try { ac = readYaml(path.join(dir, f)); } catch { continue; }
     if (!ac?.role) continue;
     if (NOT_EVIDENCE.has(ac.provenance?.level)) { excluded.not_evidence++; continue; }
     if (!roles.has(ac.role)) { excluded.no_role_file.add(ac.role); continue; }
+    for (const tag of ac.fits || []) if (FIT_FAMILY[tag]) families.add(FIT_FAMILY[tag]);
     const texts = [ac.fact, ...(ac.variants || []).map((v) => v.text)].map((t) => String(t || "").replace(/\s+/g, " ").trim()).filter(Boolean);
     const list = bulletsByRole.get(ac.role) || [];
     for (const t of new Set(texts)) list.push(t);
@@ -49,7 +53,7 @@ export function buildMaster(dir = bankDir) {
   const rank = (e) => (e.dates?.current ? 9999 * 12 : (e.dates?.end?.year ?? 0) * 12 + (e.dates?.end?.month ?? 0));
   experience.sort((a, b) => rank(b) - rank(a));
   return {
-    contact: { other: [] }, summary: null, experience: experience.filter((e) => e.bullets.length), projects: projects.filter((e) => e.bullets.length),
+    families: [...families].sort(), contact: { other: [] }, summary: null, experience: experience.filter((e) => e.bullets.length), projects: projects.filter((e) => e.bullets.length),
     education: EDUCATION_ROWS.map((e) => ({ school: e.school, degree: e.degree, dates: dates(e.dates) })),
     skills: { groups: [], items: [] },
     provenance: { source: "data/ac-bank", roles: [...roles.keys()], excluded: { ...excluded, no_role_file: [...excluded.no_role_file] } },
