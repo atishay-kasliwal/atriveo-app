@@ -53,6 +53,7 @@ export function createStore({ endpoint, bucket, accessKeyId, secretAccessKey, fe
     bucket,
     async head(key) { const r = await call("HEAD", key); if (r.status === 404) return null; if (!r.ok) throw new Error(`R2 HEAD ${key}: ${r.status}`); return { bytes: Number(r.headers.get("content-length")) }; },
     async put(key, body, contentType) { const r = await call("PUT", key, { body, contentType }); if (!r.ok) throw new Error(`R2 PUT ${key}: ${r.status}`); },
+    async del(key) { const r = await call("DELETE", key); if (!r.ok && r.status !== 404) throw new Error(`R2 DELETE ${key}: ${r.status}`); },
     async get(key) { const r = await call("GET", key); if (r.status === 404) return null; if (!r.ok) throw new Error(`R2 GET ${key}: ${r.status}`); return Buffer.from(await r.arrayBuffer()); },
     /** A link that reads one object for `seconds` (default 5 minutes) and then stops working. */
     presignGet(key, seconds = 300) {
