@@ -3,21 +3,15 @@ import fs from 'node:fs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { loadAtsConfig, sha256 } from './ats/config.mjs';
-import { phrase, termRegex } from './ats/jd-parse.mjs';
+import { termRegex } from './ats/jd-parse.mjs';
+import { keywordCoverage } from './ats/evidence.mjs';
+export { keywordCoverage };
 import { parseResume } from './ats/resume-parse.mjs';
 import { scoreAts } from './ats/score.mjs';
 
 const run = promisify(execFile);
 const cache = new Map();
 let config;
-
-export function keywordCoverage(jd, resumeText, cfg) {
-  return Object.entries(cfg.skills).flatMap(([name, skill]) => {
-    const terms = [name, ...(skill.variants || [])];
-    const present = terms.filter(term => phrase(jd, term, cfg));
-    return present.length ? [{ name, terms: present, matched: terms.some(term => phrase(resumeText, term, cfg)) }] : [];
-  });
-}
 
 export function keywordHighlights(jd, keywords, cfg) {
   const ranges = keywords.filter(k => k.matched).flatMap(k => k.terms.flatMap(term => {

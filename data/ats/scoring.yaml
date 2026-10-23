@@ -114,3 +114,26 @@ job_match:
     max_distinct_bullets: 3
     warning_repetitions: 5
     penalty: 0
+
+# Fit: the master resume (the whole AC bank) against the untouched posting. Nothing tailored is read.
+fit:
+  # Low confidence = the posting gave us little to score. It never changes the Fit number.
+  confidence:
+    low_below_applicable_weight: 40
+    low_below_scored_requirements: 3
+    high_from_applicable_weight: 70
+    high_from_scored_requirements: 6
+  # A hard mismatch is shown and ranked last; nothing is rejected automatically, and unknowns never count against a job.
+  knockouts:
+    # Substantially higher: the posting's years exceed ours by this much, or its level is this many above ours.
+    years_gap: 3
+    level_gap: 2
+    # Level implied by years of experience: below the first number is junior, below the second mid, below the third senior, else staff.
+    years_to_level: [2, 5, 8]
+    weak_overlap: { min_required_skills: 2, max_matched_share: 0.1 }
+
+# Resume Ready: is the tailored resume safe to send? A status, never a score, and it never feeds Fit.
+resume_ready:
+  # Share of the skills Fit says you truthfully have that may be missing from the tailored resume before it needs work.
+  needs_work_left_off_share: 0.5
+  max_pages: 1

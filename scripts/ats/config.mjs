@@ -35,3 +35,8 @@ export function withHash(config) {
   const { hash: _drop, ...values } = config;
   return { ...values, hash: sha256(canonicalJson(values)).slice(0, 16) };
 }
+
+/** The candidate settings file (data/ats/candidate.yaml). Values are read as written; "unknown" stays "unknown". */
+export function loadCandidate(file = path.join(ATS_CONFIG_DIR, "candidate.yaml")) {
+  return yaml.load(fs.readFileSync(file, "utf8")) || {};
+}

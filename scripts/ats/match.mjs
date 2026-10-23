@@ -6,7 +6,7 @@ import { skillEvidence, conceptEvidence, domainEvidence } from "./evidence.mjs";
 const ticks = (n) => Math.round(Number(n || 0) * 10);
 const points = (n) => n / 10;
 
-function levelFor(title, cfg) {
+export function levelFor(title, cfg) {
   const t = String(title || "").toLowerCase();
   for (const [level, re] of [["principal", /\b(principal|distinguished)\b/], ["staff", /\b(staff|lead)\b/], ["senior", /\b(senior|sr\.?|iii|iv)\b/], ["intern", /\b(intern|internship)\b/], ["junior", /\b(junior|jr\.?|entry.level|associate)\b/]]) {
     if (re.test(t)) return cfg.levels[level];
@@ -82,13 +82,48 @@ function recommendation(item, categoryName, bank) {
   };
 }
 
-export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOString().slice(0, 10), bank = [] } = {}) {
+// One entry per skill the JD asks for (required and preferred), read from the scored rows so every count
+// shown anywhere comes from the same place. Related-only evidence is "partial": listed, never counted as matched.
+export function buildSkillLedger(categories) {
+  const rows = [["required", "required_skills"], ["preferred", "preferred_skills"]].flatMap(([cls, key]) =>
+    (categories.find((c) => c.key === key)?.items || []).map((i) => ({
+      label: i.label, alternatives: i.alternatives || [i.label], class: cls, source: i.source || null,
+      status: i.classification === "exact" || i.classification === "equivalent" ? "matched" : i.classification === "related" ? "partial" : "missing",
+      matched_skill: i.matched_skill ?? null, evidence_tier: i.evidence_tier, evidence: i.evidence, evidence_entry: i.evidence_entry,
+    })));
+  const count = (list) => ({ matched: list.filter((r) => r.status === "matched").length, total: list.length });
+  return {
+    skills: rows, required: count(rows.filter((r) => r.class === "required")), preferred: count(rows.filter((r) => r.class === "preferred")), total: count(rows),
+    matched: rows.filter((r) => r.status === "matched").map((r) => r.label),
+    partial: rows.filter((r) => r.status === "partial").map((r) => r.label),
+    missing: rows.filter((r) => r.status === "missing").map((r) => r.label),
+  };
+}
+
+export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOString().slice(0, 10), bank = [], fit = false, candidate = null } = {}) {
   const cfg = config.scoring.job_match;
   const weights = cfg.weights;
   // A category the JD gives nothing to score on is left out and its weight shared: no listed skills, or
   // responsibilities the parser couldn't map to any concept (scoring those 0 would grade the parser, not the resume).
   const unmappable = !jd.responsibility_concepts.length && (jd.unparsed.length || jd.responsibilities.length);
-  const present = Object.keys(weights).filter((k) => !((k === "required_skills" && !jd.required.length) || (k === "preferred_skills" && !jd.preferred.length) || (k === "experience_alignment" && unmappable)));
+  const years = yearsExperience(resume.experience, asOf);
+  const wanted = jd.years?.minimum;
+  const wantedLevel = levelFor(jd.title, cfg.seniority);
+  // Fit: a requirement the JD never states is not applicable, never free points. Certifications we have not been
+  // told about stay unknown and are not scored either way. Resume quality (achievement wording) is not fit.
+  const certsKnown = !fit || Array.isArray(candidate?.certifications);
+  const scoredCerts = certsKnown ? jd.certifications : [];
+  const unknownRequirements = certsKnown ? [] : jd.certifications.map((c) => ({ type: "certification", requirement: c.text, source: c.source, reason: "Candidate certifications not provided" }));
+  const notApplicable = new Map();
+  if (fit) {
+    notApplicable.set("achievement_evidence", "Resume quality is judged by Resume Ready, not Fit");
+    if (!jd.title) notApplicable.set("role_alignment", "No job title in the posting");
+    if (wanted == null && wantedLevel <= cfg.seniority.levels.mid) notApplicable.set("seniority", "No years or level above mid stated");
+    if (!jd.degree && !scoredCerts.length) notApplicable.set("education_certs", unknownRequirements.length ? "Certifications asked for; candidate certifications unknown" : "No degree or certification stated");
+    if (!jd.domains.length) notApplicable.set("domain_terminology", "No domain terminology stated");
+  }
+  const na = (k) => notApplicable.has(k);
+  const present = Object.keys(weights).filter((k) => !((k === "required_skills" && !jd.required.length) || (k === "preferred_skills" && !jd.preferred.length) || (k === "experience_alignment" && unmappable) || na(k)));
   const original = Object.values(weights).reduce((a, b) => a + ticks(b), 0);
   if (original !== 1000) throw new Error(`Job Match weights total ${points(original)}, expected 100`);
   const base = Object.fromEntries(present.map((k) => [k, ticks(weights[k])]));
@@ -118,22 +153,19 @@ export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOStrin
   const headline = resume.contact.other.find((s) => /engineer|scientist|analyst|developer|manager/i.test(s)) || "";
   const roleParts = [
     { label: "Past position titles", max: cfg.role.title_points, credit: family && titles.some((t) => familyFor(t, cfg.role) === family) ? 1 : 0, evidence: titles.join("; ") },
-    { label: "Resume headline", max: cfg.role.headline_points, credit: family && familyFor(headline, cfg.role) === family ? 1 : 0, evidence: headline || null },
+    // The headline is chosen per job when a resume is tailored, so Fit never reads one.
+    ...(fit ? [] : [{ label: "Resume headline", max: cfg.role.headline_points, credit: family && familyFor(headline, cfg.role) === family ? 1 : 0, evidence: headline || null }]),
     { label: "Role title words", max: cfg.role.words_points, credit: jd.title && titles.some((t) => t.toLowerCase().split(/\W+/).some((w) => w.length >= cfg.role.min_shared_word_length && phrase(jd.title, w))) ? 1 : 0, evidence: titles.join("; ") },
   ];
-  categories.push(category("role_alignment", max("role_alignment"), roleParts.map((p) => ({
+  if (!na("role_alignment")) categories.push(category("role_alignment", max("role_alignment"), roleParts.map((p) => ({
     label: p.label, classification: p.credit ? "met" : "missing", evidence: p.evidence || null, weight: p.max, credit: p.credit,
   }))));
 
   if (jd.preferred.length) categories.push(category("preferred_skills", max("preferred_skills"), skillRows(jd.preferred, resume, config)));
-  const years = yearsExperience(resume.experience, asOf);
-  const wanted = jd.years?.minimum;
   const actualLevel = Math.max(...titles.map((t) => levelFor(t, cfg.seniority)), 0);
-  const wantedLevel = levelFor(jd.title, cfg.seniority);
-  categories.push(wanted == null && wantedLevel <= cfg.seniority.levels.mid ? full("seniority", max("seniority"), "No seniority requirement stated") : category("seniority", max("seniority"), [
-    { label: wanted == null ? "No years minimum stated" : `${wanted}+ years experience`, classification: wanted == null ? "no requirement stated" : years >= wanted ? "met" : "gap", evidence: `${years} non-overlapping years from parsed positions`, weight: cfg.seniority.years_points, credit: wanted == null ? 1 : Math.min(1, years / wanted) },
-    { label: "Title level", classification: actualLevel >= wantedLevel ? "met" : "gap", evidence: titles.join("; ") || null, weight: cfg.seniority.title_points, credit: actualLevel >= wantedLevel ? 1 : 0 },
-  ]));
+  const yearsRow = { label: wanted == null ? "No years minimum stated" : `${wanted}+ years experience`, classification: wanted == null ? "no requirement stated" : years >= wanted ? "met" : "gap", evidence: `${years} non-overlapping years from parsed positions`, weight: cfg.seniority.years_points, credit: wanted == null ? 1 : Math.min(1, years / wanted) };
+  const titleRow = { label: "Title level", classification: actualLevel >= wantedLevel ? "met" : "gap", evidence: titles.join("; ") || null, weight: cfg.seniority.title_points, credit: actualLevel >= wantedLevel ? 1 : 0 };
+  if (!na("seniority")) categories.push(!fit && wanted == null && wantedLevel <= cfg.seniority.levels.mid ? full("seniority", max("seniority"), "No seniority requirement stated") : category("seniority", max("seniority"), fit && wanted == null ? [titleRow] : [yearsRow, titleRow]));
 
   const levels = cfg.education.degree_levels;
   const degreeRows = [];
@@ -141,13 +173,14 @@ export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOStrin
     const actual = Math.max(...resume.education.map((e) => Object.keys(levels).filter((l) => phrase(e.degree, l)).map((l) => levels[l])).flat(), 0);
     const credit = actual >= levels[jd.degree.level] ? 1 : jd.degree.equivalent_experience && years >= (wanted || cfg.education.equivalent_experience_years_default) ? 1 : 0;
     degreeRows.push({ label: `${jd.degree.level} degree`, source: jd.degree.source, classification: credit ? "met" : "missing", evidence: resume.education.map((e) => e.degree).join("; ") || null, weight: cfg.education.degree_points, credit });
-  } else degreeRows.push({ label: "No degree requirement stated", classification: "no requirement stated", weight: cfg.education.degree_points, credit: 1 });
-  if (!jd.certifications.length) degreeRows.push({ label: "No certification requirement stated", classification: "no requirement stated", weight: cfg.education.certification_points, credit: 1 });
-  for (const cert of jd.certifications) {
-    const matched = [resume.summary, ...resume.skills.items, ...resume.education.map((e) => e.degree)].filter(Boolean).find((s) => phrase(s, cert.text));
-    degreeRows.push({ label: cert.text, source: cert.source, classification: matched ? "met" : "missing", evidence: matched || null, weight: cfg.education.certification_points / jd.certifications.length, credit: matched ? 1 : 0 });
+  } else if (!fit) degreeRows.push({ label: "No degree requirement stated", classification: "no requirement stated", weight: cfg.education.degree_points, credit: 1 });
+  if (!scoredCerts.length && !fit) degreeRows.push({ label: "No certification requirement stated", classification: "no requirement stated", weight: cfg.education.certification_points, credit: 1 });
+  for (const cert of scoredCerts) {
+    const known = Array.isArray(candidate?.certifications) ? candidate.certifications : [];
+    const matched = [resume.summary, ...resume.skills.items, ...known, ...resume.education.map((e) => e.degree)].filter(Boolean).find((s) => phrase(s, cert.text));
+    degreeRows.push({ label: cert.text, source: cert.source, classification: matched ? "met" : "missing", evidence: matched || null, weight: cfg.education.certification_points / scoredCerts.length, credit: matched ? 1 : 0 });
   }
-  categories.push(category("education_certs", max("education_certs"), degreeRows, !jd.degree && !jd.certifications.length ? "No degree or certification requirement stated" : null));
+  if (!na("education_certs")) categories.push(category("education_certs", max("education_certs"), degreeRows, !jd.degree && !jd.certifications.length ? "No degree or certification requirement stated" : null));
 
   const bullets = resume.experience.flatMap((e) => e.bullets);
   const a = cfg.achievement;
@@ -156,13 +189,13 @@ export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOStrin
     { label: "Action verbs", weight: a.action_verb_points, credit: bullets.length ? bullets.filter((b) => a.action_verbs.some((v) => phrase(b.split(/\s+/).slice(0, 2).join(" "), v))).length / bullets.length : 0 },
     { label: "Clear wording", weight: a.clear_wording_points, credit: bullets.length ? bullets.filter((b) => !a.weak_phrases.some((v) => phrase(b, v))).length / bullets.length : 0 },
   ];
-  categories.push(category("achievement_evidence", max("achievement_evidence"), measures.map((m) => ({ label: m.label, classification: "measured", evidence: `${Math.round(m.credit * 100)}% of ${bullets.length} job bullets`, weight: m.weight, credit: m.credit }))));
+  if (!na("achievement_evidence")) categories.push(category("achievement_evidence", max("achievement_evidence"), measures.map((m) => ({ label: m.label, classification: "measured", evidence: `${Math.round(m.credit * 100)}% of ${bullets.length} job bullets`, weight: m.weight, credit: m.credit }))));
 
   const domains = jd.domains.map((d) => {
     const ev = domainEvidence(config.domains[d.id], resume, config);
     return { label: d.label, source: d.source, classification: ev.kind, evidence: ev.evidence, credit: ev.credit };
   });
-  categories.push(domains.length ? category("domain_terminology", max("domain_terminology"), domains) : full("domain_terminology", max("domain_terminology"), "No mapped domain terminology stated"));
+  if (!na("domain_terminology")) categories.push(domains.length ? category("domain_terminology", max("domain_terminology"), domains) : full("domain_terminology", max("domain_terminology"), "No mapped domain terminology stated"));
 
   const earnedTicks = categories.reduce((n, c) => n + ticks(c.earned), 0);
   const maxTicks = categories.reduce((n, c) => n + ticks(c.max), 0);
@@ -175,6 +208,15 @@ export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOStrin
     accounting: { earned: points(earnedTicks), lost: points(maxTicks - earnedTicks), max: points(maxTicks) },
     requirement_counts: { required: count(categories.find((c) => c.key === "required_skills")?.items || []), preferred: count(categories.find((c) => c.key === "preferred_skills")?.items || []) },
     categories, recommendations, potential_knockouts: jd.potential_knockouts,
+    skill_ledger: buildSkillLedger(categories),
+    ...(fit && {
+      mode: "fit",
+      // Weight (of the original 100) that the posting gave us something to score on; the score is renormalized over it.
+      applicable_weight: present.reduce((n, k) => n + weights[k], 0),
+      not_applicable: [...notApplicable].map(([key, reason]) => ({ key, reason })),
+      unknown_requirements: unknownRequirements,
+      years_experience: years,
+    }),
     unparsed_requirements: jd.unparsed,
     coverage: { status: jd.unparsed.length || !jd.title || !(jd.required.length + jd.preferred.length) ? "incomplete" : "complete", scored_requirements: jd.required.length + jd.preferred.length, unparsed_requirements: jd.unparsed.length, missing_job_title: !jd.title, no_skill_requirements: !(jd.required.length + jd.preferred.length) },
     note: "Our deterministic comparison, not the score of any employer's ATS. Readiness is separate.",

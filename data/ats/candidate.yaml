@@ -1,0 +1,19 @@
+# Facts about the candidate that job requirements are checked against (knockouts, certifications).
+# Edit here; nothing in the scoring code holds these values. `unknown` means "not provided": it is shown to you as
+# unknown and never counts for or against a job. Do not fill a value in unless it is true.
+
+work_authorization:
+  status: f1_opt
+  authorized_years_remaining: 3     # F-1 OPT: 3 years of US work authorization
+  sponsorship_required_during_authorization: false
+  sponsorship_required_after_authorization: unknown
+
+location:
+  city: New York
+  state: NY
+  country: US
+relocation: true
+
+us_citizen: unknown
+security_clearance: unknown
+certifications: unknown            # a list (even an empty one) once confirmed; `unknown` keeps certification asks unscored

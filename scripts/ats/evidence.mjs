@@ -78,3 +78,11 @@ export function domainEvidence(item, parsed, config) {
   }
   return { kind: "missing", credit: 0, evidence: null };
 }
+
+export function keywordCoverage(jd, resumeText, cfg) {
+  return Object.entries(cfg.skills).flatMap(([name, skill]) => {
+    const terms = [name, ...(skill.variants || [])];
+    const present = terms.filter(term => phrase(jd, term, cfg));
+    return present.length ? [{ name, terms: present, matched: terms.some(term => phrase(resumeText, term, cfg)) }] : [];
+  });
+}
