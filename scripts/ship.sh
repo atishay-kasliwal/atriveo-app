@@ -69,7 +69,7 @@ echo "live now: $DEPLOYED   dashboard $DASH_IMAGE   workers $WORK_IMAGE"
 [ "$DEPLOYED" != "$COMMIT" ] || { echo "The live commit is already $COMMIT."; [ "$WEBSITE" = 1 ] || exit 0; }
 
 # Files that change on the server: everything under scripts/ and data/ats that differs between the live commit and this one.
-CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats | grep -v '^scripts/\(validate\|test-\)' || true)"
+CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats | grep -v -e '^scripts/ship\.sh$' -e '^scripts/ats/validate' -e '^scripts/test-' || true)"
 SRC_CHANGED="$(git diff --name-only "$DEPLOYED" HEAD -- src public vite.apply.config.ts apply.html | head -1 || true)"
 say "Files to ship ($(echo "$CHANGED" | grep -c . || true))"
 echo "$CHANGED" | sed 's/^/  /'
@@ -108,7 +108,11 @@ if [ -n "$CHANGED" ]; then
   fi
   NEW_DASH_IMAGE="atriveo-dashboard:ship-$COMMIT"; NEW_WORK_IMAGE="atriveo-dashboard:workers-ship-$COMMIT"
   NEW_DASH_START="start-dashboard-ship-$COMMIT.sh"
-  NEW_WORK_STARTS=""; for s in $WORK_STARTS; do NEW_WORK_STARTS="$NEW_WORK_STARTS $(echo "$s" | sed -E "s/-(fit|ship)-[0-9a-f]+\.sh$/-ship-$COMMIT.sh/; t; s/-[a-z0-9]+-[0-9a-f]{9}\.sh$/-ship-$COMMIT.sh/")"; done
+  NEW_WORK_STARTS=""
+  for s in $WORK_STARTS; do
+    kind="$(echo "$s" | sed -E -e 's/^start-//' -e 's/-(fit|ship)-[0-9a-f]+\.sh$//' -e 's/-[a-z0-9]+-[0-9a-f]{9}\.sh$//')"
+    NEW_WORK_STARTS="$NEW_WORK_STARTS start-$kind-ship-$COMMIT.sh"
+  done
   NEW_WORK_STARTS="${NEW_WORK_STARTS# }"
 
   say "Building overlays and start scripts"
