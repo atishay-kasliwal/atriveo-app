@@ -7,6 +7,7 @@
 #   npm run ship -- --rollback   put the previous dashboard and workers back
 #   npm run ship -- --init       once: record what is live now (see INIT_* below)
 #   Options: --skip-tests  --skip-website  --backfill  --yes (do not stop at the confirmation)
+#            --only-scraper  rebuild just the scraper containers (no overlay, no dashboard or worker restart)
 #            --check-only  read the live state and run the drift check, then stop (changes nothing)
 #            --scraper  (re)build and start the scraper containers from github.com/atishay-kasliwal/job-pipeline (SCRAPER_REF=main)
 #
@@ -25,11 +26,11 @@ INIT_DASH_IMAGE="atriveo-dashboard:fit-3f309439c";    INIT_DASH_START="start-das
 INIT_WORK_IMAGE="atriveo-dashboard:workers-fit-3f309439c"
 INIT_WORK_STARTS="start-resume-fast-fit-3f309439c.sh start-compiler-fit-3f309439c.sh"
 
-DRY=0; ROLLBACK=0; INIT=0; TESTS=1; WEBSITE=1; BACKFILL=0; YES=0; SCRAPER=0; CHECK_ONLY=0
+DRY=0; ROLLBACK=0; INIT=0; TESTS=1; WEBSITE=1; BACKFILL=0; YES=0; SCRAPER=0; CHECK_ONLY=0; ONLY_SCRAPER=0
 SCRAPER_REPO="${SCRAPER_REPO:-https://github.com/atishay-kasliwal/job-pipeline}"; SCRAPER_REF="${SCRAPER_REF:-main}"
 for a in "$@"; do case "$a" in
   --dry-run) DRY=1;; --rollback) ROLLBACK=1;; --init) INIT=1;; --skip-tests) TESTS=0;; --skip-website) WEBSITE=0;;
-  --backfill) BACKFILL=1;; --scraper) SCRAPER=1;; --check-only) CHECK_ONLY=1;; --yes) YES=1;; -h|--help) sed -n '2,14p' "$0"; exit 0;;
+  --backfill) BACKFILL=1;; --scraper) SCRAPER=1;; --check-only) CHECK_ONLY=1;; --only-scraper) ONLY_SCRAPER=1; SCRAPER=1; WEBSITE=0; TESTS=0;; --yes) YES=1;; -h|--help) sed -n '2,14p' "$0"; exit 0;;
   *) echo "unknown option: $a" >&2; exit 2;; esac; done
 
 cd "$(cd "$(dirname "$0")/.." && pwd)"
@@ -71,11 +72,12 @@ else
 fi
 git cat-file -e "$DEPLOYED^{commit}" 2>/dev/null || { echo "The live commit $DEPLOYED is not in this repo; fetch it first." >&2; exit 1; }
 echo "live now: $DEPLOYED   dashboard $DASH_IMAGE   workers $WORK_IMAGE"
-[ "$DEPLOYED" != "$COMMIT" ] || { echo "The live commit is already $COMMIT."; [ "$WEBSITE" = 1 ] || exit 0; }
+[ "$ONLY_SCRAPER" = 1 ] || [ "$DEPLOYED" != "$COMMIT" ] || { echo "The live commit is already $COMMIT."; [ "$WEBSITE" = 1 ] || exit 0; }
 
 # Files that change on the server: everything under scripts/ and data/ats that differs between the live commit and this one.
 CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats deploy | grep -v -e '^scripts/ship\.sh$' -e '^scripts/ship-lib\.sh$' -e '^scripts/ats/validate' -e '^scripts/test-' || true)"
 SRC_CHANGED="$(git diff --name-only "$DEPLOYED" HEAD -- src public vite.apply.config.ts apply.html | head -1 || true)"
+if [ "$ONLY_SCRAPER" = 1 ]; then CHANGED="$(git ls-files deploy)"; fi
 # The scoring bundle ships whole whenever anything in it (or the Fit code around it) changes.
 if echo "$CHANGED" | grep -q -E '^(data/ats|scripts/ats|scripts/(fit-|job-matching|applications-analytics|resume-queue|tailor-worker))'; then
   CHANGED="$(printf '%s\n%s\n' "$CHANGED" "$(bundle_files)" | grep -v '^$' | sort -u)"
@@ -92,7 +94,7 @@ if [ "$TESTS" = 1 ]; then
   fi
 fi
 
-if [ -n "$CHANGED" ]; then
+if [ -n "$CHANGED" ] && [ "$ONLY_SCRAPER" != 1 ]; then
   say "Drift check: every file we will replace must be a version this repo has had (an older one is fine; one found nowhere in git is a server edit)"
   # shellcheck disable=SC2086
   FILES="$(echo $CHANGED)"
@@ -116,6 +118,13 @@ if [ "$CHECK_ONLY" = 1 ]; then say "Check only: nothing was changed"; exit 0; fi
 
 if [ "$YES" != 1 ] && [ "$DRY" != 1 ]; then read -r -p "Ship $COMMIT to Oracle and restart the dashboard and workers? [y/N] " r; [ "$r" = y ] || exit 1; fi
 
+if [ "$ONLY_SCRAPER" = 1 ]; then
+  say "Shipping the scraper files"
+  if [ "$DRY" = 1 ]; then echo "[dry-run] tar deploy/ | ssh: extract to $ROOT_REMOTE/staging/ship-$COMMIT"; else
+    COPYFILE_DISABLE=1 tar czf - deploy | "${SSH[@]}" "mkdir -p $ROOT_REMOTE/staging/ship-$COMMIT && tar xzf - -C $ROOT_REMOTE/staging/ship-$COMMIT 2>/dev/null; find $ROOT_REMOTE/staging/ship-$COMMIT -name '._*' -delete"
+  fi
+  CHANGED=""
+fi
 if [ -n "$CHANGED" ]; then
   say "Shipping"
   if [ "$DRY" = 1 ]; then echo "[dry-run] tar the files above | ssh: extract to $ROOT_REMOTE/staging/ship-$COMMIT"; else
@@ -157,7 +166,7 @@ if [ "$SCRAPER" = 1 ]; then
   [ -n "${NEW_DASH_IMAGE:-}" ] || NEW_DASH_IMAGE="$DASH_IMAGE"
   STAGE="~/$ROOT_REMOTE/staging"
   run_remote "set -e; cd $STAGE && rm -rf scraper-src && git clone -q --depth 1 --branch $SCRAPER_REF $SCRAPER_REPO scraper-src && cd scraper-src \
-    && JPSHA=\$(git rev-parse --short HEAD) && cp $STAGE/ship-$COMMIT/deploy/scraper/loop.sh ./loop.sh && cp $STAGE/ship-$COMMIT/deploy/scraper/Dockerfile.loop ./Dockerfile.loop \
+    && JPSHA=\$(git rev-parse --short HEAD) && cp $STAGE/ship-$COMMIT/deploy/scraper/loop.sh ./loop.sh && cp $STAGE/ship-$COMMIT/deploy/scraper/Dockerfile.loop ./Dockerfile.loop && cp $STAGE/ship-$COMMIT/deploy/scraper/patch_storage.py ./patch_storage.py \
     && docker build -q -f Dockerfile.loop -t job-pipeline-scraper:\$JPSHA . \
     && (docker rm -f atriveo-scraper >/dev/null 2>&1 || true) \
     && docker run -d --name atriveo-scraper --restart unless-stopped --memory 1500m --cpus 1 --network atriveo-production --env-file /home/ubuntu/atriveo-muse/private/dashboard.env job-pipeline-scraper:\$JPSHA >/dev/null \

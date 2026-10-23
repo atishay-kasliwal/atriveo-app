@@ -6,6 +6,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY job_pipeline ./job_pipeline
 COPY data ./data
 COPY loop.sh ./loop.sh
+COPY patch_storage.py ./patch_storage.py
+# Fails the build if storage.py is no longer what the patch expects.
+RUN python patch_storage.py && rm patch_storage.py
 RUN useradd --uid 1001 --no-create-home appuser && mkdir -p output archives && chown -R 1001:0 /app && chmod +x loop.sh
 USER 1001
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
