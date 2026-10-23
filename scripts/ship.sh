@@ -7,6 +7,7 @@
 #   npm run ship -- --rollback   put the previous dashboard and workers back
 #   npm run ship -- --init       once: record what is live now (see INIT_* below)
 #   Options: --skip-tests  --skip-website  --backfill  --yes (do not stop at the confirmation)
+#            --check-only  read the live state and run the drift check, then stop (changes nothing)
 #            --scraper  (re)build and start the scraper containers from github.com/atishay-kasliwal/job-pipeline (SCRAPER_REF=main)
 #
 # What it protects against: overwriting a file on the server that someone changed there. Before anything is replaced, each file
@@ -24,11 +25,11 @@ INIT_DASH_IMAGE="atriveo-dashboard:fit-3f309439c";    INIT_DASH_START="start-das
 INIT_WORK_IMAGE="atriveo-dashboard:workers-fit-3f309439c"
 INIT_WORK_STARTS="start-resume-fast-fit-3f309439c.sh start-compiler-fit-3f309439c.sh"
 
-DRY=0; ROLLBACK=0; INIT=0; TESTS=1; WEBSITE=1; BACKFILL=0; YES=0; SCRAPER=0
+DRY=0; ROLLBACK=0; INIT=0; TESTS=1; WEBSITE=1; BACKFILL=0; YES=0; SCRAPER=0; CHECK_ONLY=0
 SCRAPER_REPO="${SCRAPER_REPO:-https://github.com/atishay-kasliwal/job-pipeline}"; SCRAPER_REF="${SCRAPER_REF:-main}"
 for a in "$@"; do case "$a" in
   --dry-run) DRY=1;; --rollback) ROLLBACK=1;; --init) INIT=1;; --skip-tests) TESTS=0;; --skip-website) WEBSITE=0;;
-  --backfill) BACKFILL=1;; --scraper) SCRAPER=1;; --yes) YES=1;; -h|--help) sed -n '2,14p' "$0"; exit 0;;
+  --backfill) BACKFILL=1;; --scraper) SCRAPER=1;; --check-only) CHECK_ONLY=1;; --yes) YES=1;; -h|--help) sed -n '2,14p' "$0"; exit 0;;
   *) echo "unknown option: $a" >&2; exit 2;; esac; done
 
 cd "$(cd "$(dirname "$0")/.." && pwd)"
@@ -110,6 +111,8 @@ if [ -n "$CHANGED" ]; then
     echo "  $IMG: ok"
   done
 fi
+
+if [ "$CHECK_ONLY" = 1 ]; then say "Check only: nothing was changed"; exit 0; fi
 
 if [ "$YES" != 1 ] && [ "$DRY" != 1 ]; then read -r -p "Ship $COMMIT to Oracle and restart the dashboard and workers? [y/N] " r; [ "$r" = y ] || exit 1; fi
 
