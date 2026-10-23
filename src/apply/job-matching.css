@@ -96,3 +96,26 @@
 .jm-rhead > a { margin-left: auto; font-size: 12px; }
 /* Keep the JD scroll contained on phones too, despite the general review-page mobile rule. */
 .rv-page.jm-page { height: 100dvh; min-height: 0; overflow: hidden; }
+
+/* Summary card: score strip, why, key skills, role, what's missing. The full description opens in the sheet. */
+.jm-panel { display: flex; flex-direction: column; gap: 10px; padding-bottom: 14px; }
+.jm-score { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--border-col); border-radius: 10px; background: var(--secondary-bg); }
+.jm-score > div { display: flex; flex-direction: column; gap: 4px; padding: 12px 16px; min-width: 0; }
+.jm-score > div + div { border-left: 1px solid var(--border-col); }
+.jm-score strong { font-size: 28px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.jm-score strong small { font-size: 14px; font-weight: 400; color: var(--muted-fg); }
+.jm-score .jm-text { font-size: 18px; line-height: 1.5; text-transform: capitalize; }
+.jm-score .jm-good { color: #4ade80; }
+.jm-score span { font-size: 13px; color: var(--muted-fg); }
+.jm-block { border: 1px solid var(--border-col); border-radius: 10px; padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+.jm-block h2 { margin: 0; font-size: 14px; font-weight: 600; color: var(--foreground); }
+.jm-block p { margin: 0; font-size: 14px; line-height: 1.6; }
+.jm-block p.apps-muted { font-size: 12.5px; }
+.jm-chips { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+.jm-chips li { padding: 4px 12px; border-radius: 999px; font-size: 13px; border: 1px solid var(--border-col); }
+.jm-chips .jm-in { background: color-mix(in oklab, #22a65a 16%, transparent); border-color: color-mix(in oklab, #22a65a 40%, var(--border-col)); color: #a7f3c4; }
+.jm-chips .jm-out { background: color-mix(in oklab, var(--amber, #e0a526) 12%, transparent); border-color: color-mix(in oklab, var(--amber, #e0a526) 50%, var(--border-col)); color: var(--amber, #e0a526); }
+.jm-fulljd { flex-direction: row; align-items: center; justify-content: space-between; }
+.jm-fulljd > div { display: flex; flex-direction: column; gap: 3px; }
+.jm-fulljd kbd { font: inherit; font-size: 11px; padding: 1px 6px; border-radius: 4px; border: 1px solid color-mix(in oklab, currentColor 30%, transparent); opacity: .75; }
+.jm-sheet-body .jm-description { white-space: pre-wrap; }

@@ -124,7 +124,16 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
   const done = history.length;
   const position = `${done + 1} of ${done + total}`;
   const ats = job?.ats;
-  const matched = ats?.keywords.filter(k => k.matched).length ?? 0;
+  const keywords = ats?.keywords ?? [];
+  const missing = keywords.filter((k) => !k.matched);
+  const score = ats?.score ?? job?.score ?? null;
+  const skillsHit = ats?.required?.total ? ats.required.matched : keywords.length - missing.length;
+  const skillsTotal = ats?.required?.total ? ats.required.total : keywords.length;
+  const have = keywords.filter((k) => k.matched).map((k) => k.name);
+  const why = !job || !keywords.length ? "" : have.length
+    ? `Your resume covers ${have.length} of ${keywords.length} key skills here, including ${have.slice(0, 4).join(", ")}.${missing.length ? ` Not yet covered: ${missing.slice(0, 3).map((k) => k.name).join(", ")}.` : " Nothing the job asks for is missing."}`
+    : "Your resume doesn’t cover the key skills this job lists.";
+  const glance = job ? (job.jd.about.match(/[^.!?]+[.!?]+/g)?.slice(0, 2).join(" ").trim() || job.jd.about || job.jd.duties[0] || "") : "";
 
   return <div className="rv-page jm-page">{header}
     {error && <p className="jm-error" role="alert">{error} <button type="button" className="apps-link" onClick={() => { setError(""); void fill(); }}>Retry</button></p>}
@@ -156,19 +165,27 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
             {job.applyType === "easy_apply" && <li>Easy Apply</li>}
           </ul>
           {job.jd.flags.length > 0 && <p className="jm-flags">{job.jd.flags.map((f) => <span key={f}>{f}</span>)}</p>}
-          <div className="jm-description-head">
-            <h2>Full job description</h2>
-            <button type="button" className="apps-link" onClick={() => setFull(true)}>Expand <kbd>F</kbd></button>
-          </div>
-          {ats && <p className="jm-keyword-legend"><span className="jm-keyword-dot" />Green = in your resume · {matched}/{ats.keywords.length} keywords</p>}
-          <div className="jm-panel"><Description job={job} /></div>
-          <div className="jm-ats" aria-label="ATS match score">
-            <div><span>ATS match</span><strong>{ats?.score != null ? <>{ats.score}<small>/100</small></> : <small>Unavailable</small>}</strong></div>
-            <div className="jm-ats-detail">
-              <span>{ats?.required?.total ? `Required skills ${ats.required.matched}/${ats.required.total}` : "Compared with the displayed resume"}</span>
-              <span className="apps-muted">{ats?.incomplete ? "Some requirements need manual review" : "Atriveo’s resume–job match"}</span>
+          <div className="jm-panel">
+            <div className="jm-score" aria-label="Match summary">
+              <div><strong className={score != null && score >= 80 ? "jm-good" : undefined}>{score ?? "–"}{score != null && <small>/100</small>}</strong><span>Match</span></div>
+              <div><strong className={skillsTotal && skillsHit === skillsTotal ? "jm-good" : undefined}>{skillsTotal ? skillsHit : "–"}{skillsTotal > 0 && <small>/{skillsTotal}</small>}</strong><span>Skills match</span></div>
+              <div><strong className="jm-text">{job.level ?? "Not stated"}</strong><span>Seniority</span></div>
             </div>
-            {ats?.keywords.some(k => !k.matched) && <details><summary>Keywords not in resume ({ats.keywords.length - matched})</summary><p>{ats.keywords.filter(k => !k.matched).map(k => k.name).join(" · ")}</p></details>}
+            {why && <section className="jm-block"><h2>Why it matches you</h2><p>{why}</p></section>}
+            {keywords.length > 0 && <section className="jm-block"><h2>Key skills they need</h2>
+              <ul className="jm-chips">{keywords.map((k) => <li key={k.name} className={k.matched ? "jm-in" : "jm-out"}>{k.name}</li>)}</ul></section>}
+            {glance && <section className="jm-block"><h2>Role at a glance</h2><p>{glance}</p></section>}
+            {ats && <section className="jm-block jm-gaps"><h2>What we’re missing</h2>
+              {missing.length ? <>
+                <ul className="jm-chips">{missing.map((k) => <li key={k.name} className="jm-out">{k.name}</li>)}</ul>
+                <p className="apps-muted">Required by the job, not on this resume. <a className="apps-link" href={`/resume_builder?job=${encodeURIComponent(job.id)}`}>Fill in the resume ↗</a></p>
+              </> : <p className="apps-muted">Everything the job asks for is on your resume.</p>}
+              {ats.incomplete && <p className="apps-muted">Some requirements need a manual check against the full description.</p>}
+            </section>}
+            <section className="jm-block jm-fulljd">
+              <div><h2>Full job description</h2><p className="apps-muted">Keywords from your resume are highlighted green.</p></div>
+              <button type="button" className="apps-link" onClick={() => setFull(true)}>View <kbd>F</kbd></button>
+            </section>
           </div>
         </section>
 
