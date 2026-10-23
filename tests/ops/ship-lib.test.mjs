@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { spawnSync } from "node:child_process";
 import crypto from "node:crypto";
 
@@ -18,4 +21,15 @@ test("the scoring bundle lists the scoring config and code, and none of the vali
   const files = sh("bundle_files").stdout.trim().split("\n");
   for (const f of ["data/ats/scoring.yaml", "data/ats/skills.yaml", "data/ats/candidate.yaml", "scripts/ats/fit.mjs", "scripts/ats/match.mjs"]) assert.ok(files.includes(f), f);
   assert.ok(!files.some((f) => f.includes("validate")));
+});
+
+test("the remote hash snippet skips files the image does not have yet and still exits 0 (a new last file once aborted a ship silently)", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "img-"));
+  fs.mkdirSync(path.join(dir, "scripts"), { recursive: true });
+  fs.writeFileSync(path.join(dir, "scripts/old.mjs"), "x");
+  const snippet = sh("remote_hash_script scripts/old.mjs scripts/brand-new.mjs").stdout.replace("cd /app", `cd ${dir}`);
+  const r = spawnSync("sh", ["-c", snippet], { encoding: "utf8" });
+  assert.equal(r.status, 0);
+  assert.match(r.stdout, /^[0-9a-f]{64}  scripts\/old\.mjs$/m);
+  assert.ok(!r.stdout.includes("brand-new"));
 });

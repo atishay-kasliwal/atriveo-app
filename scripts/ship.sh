@@ -97,7 +97,8 @@ if [ -n "$CHANGED" ]; then
   FILES="$(echo $CHANGED)"
   for IMG in "$DASH_IMAGE" "$WORK_IMAGE"; do
     if [ "$DRY" = 1 ]; then echo "[dry-run] $IMG: hash the $(echo "$CHANGED" | wc -l | tr -d ' ') files that exist there and look each up in git history"; continue; fi
-    LIVE="$("${SSH[@]}" "docker run --rm --entrypoint sh $IMG -c 'cd /app && for f in $FILES; do [ -f \$f ] && sha256sum \$f; done'")"
+    SNIPPET="$(remote_hash_script $FILES)"
+    LIVE="$("${SSH[@]}" "docker run --rm --entrypoint sh $IMG -c '$SNIPPET'")" || { echo "Could not read the files in $IMG over ssh." >&2; exit 1; }
     BAD=0
     while read -r hash path; do
       [ -n "$path" ] || continue

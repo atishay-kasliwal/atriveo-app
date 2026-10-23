@@ -15,3 +15,7 @@ known_version() {
 # The scoring bundle: always shipped whole, so the dashboard and the workers never score with different dictionaries or
 # configs (a Fit saved by one would look stale to the other).
 bundle_files() { git ls-files data/ats scripts/ats | grep -v -e '^scripts/ats/validate' ; }
+
+# remote_hash_script <files...>: the shell snippet run inside the image to hash the files that exist there. A file that is new
+# (not in the image yet) is skipped, and the snippet always exits 0: a missing last file must not look like a failure.
+remote_hash_script() { printf 'cd /app && for f in %s; do [ -f "$f" ] && sha256sum "$f"; done; true' "$*"; }
