@@ -9,6 +9,7 @@ import path from "node:path";
 import yaml from "js-yaml";
 import { fileURLToPath } from "node:url";
 import { parseDateRange } from "./patterns.mjs";
+import { loadCandidate } from "./config.mjs";
 import { EDUCATION_ROWS } from "../resume-education.mjs";
 
 const bankDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../data/ac-bank");
@@ -49,6 +50,7 @@ export function buildMaster(dir = bankDir) {
     const used = (anchors[id] || []).filter((t) => bullets.some((b) => b.toLowerCase().includes(String(t).toLowerCase())));
     return { company: doc.role.employer, name: doc.role.employer, title: doc.role.title, dates: dates(doc.role.dates), bullets, stack: [...new Set([...used, ...declared])].join(", "), role_id: id };
   };
+  const approvedSkills = [...(loadCandidate().approved_skills ?? [])].map(String);
   const experience = [], projects = [];
   for (const [id, doc] of roles) (doc.role.slot_kind === "project" ? projects : experience).push(entry(id, doc));
   const rank = (e) => (e.dates?.current ? 9999 * 12 : (e.dates?.end?.year ?? 0) * 12 + (e.dates?.end?.month ?? 0));
@@ -56,7 +58,8 @@ export function buildMaster(dir = bankDir) {
   return {
     families: [...families].sort(), contact: { other: [] }, summary: null, experience: experience.filter((e) => e.bullets.length), projects: projects.filter((e) => e.bullets.length),
     education: EDUCATION_ROWS.map((e) => ({ school: e.school, degree: e.degree, dates: dates(e.dates) })),
-    skills: { groups: [], items: [] },
+    // Skills you approved yourself in candidate.yaml (approved_skills): listed under Skills, the weakest evidence tier.
+    skills: { groups: [], items: approvedSkills },
     provenance: { source: "data/ac-bank", roles: [...roles.keys()], excluded: { ...excluded, no_role_file: [...excluded.no_role_file] } },
   };
 }

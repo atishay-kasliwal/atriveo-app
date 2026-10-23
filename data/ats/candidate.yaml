@@ -17,3 +17,7 @@ relocation: true
 us_citizen: unknown
 security_clearance: unknown
 certifications: unknown            # a list (even an empty one) once confirmed; `unknown` keeps certification asks unscored
+
+# Skills you vouch for even when no bank bullet shows them (they count as the weakest evidence: "listed under Skills", 0.5).
+# Add only what is true. Empty = Fit credits a skill only through a bullet, a role's verified tools, or a project's declared stack.
+approved_skills: []

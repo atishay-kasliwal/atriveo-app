@@ -210,3 +210,55 @@ test("depth counts facts, not rewordings: the master merges a fact's wordings in
   assert.equal(m.experience[0].bullets.length, 1);
   assert.equal(skillEvidence(["Kafka"], m, configWith((c) => { c.scoring.job_match.depth = { base: 0.7, full_at_bullets: 4 }; })).distinct_bullets, 1);
 });
+
+// Fit audit, Oct 23: real postings showed good jobs marked "blocked" by the parser. Each case below is a posting wording.
+const verdictOf = (body, title = "Software Engineer") => fit(`${title}\nRequirements:\n${body}\n- Python experience.\n`, { title }).knockouts.items.filter((i) => i.status === "blocked").map((i) => i.type);
+
+test("degree: a choice of levels asks for the lowest; an alternative to years is not a requirement; preferred lines do not raise it", () => {
+  assert.deepEqual(verdictOf("- A Bachelor's, Master's, or PhD degree in computer science."), []);
+  assert.deepEqual(verdictOf("- Advanced degree (Master's or PhD) in Statistics.", "Data Scientist"), []);
+  assert.deepEqual(verdictOf("- PhD or equivalent research experience.", "Applied Scientist"), []);
+  assert.deepEqual(verdictOf("- 8+ years of programming experience OR 4+ years experience with a PhD."), []);
+  assert.deepEqual(verdictOf("- Bachelor's degree required.\nPreferred:\n- Advanced degree (Masters or PhD).", "Data Scientist"), []);
+  assert.deepEqual(verdictOf("- Master's degree required.", "Data Scientist"), [], "you hold a Master's");
+  assert.deepEqual(verdictOf("- PhD in computer science required.", "Research Scientist"), ["degree"]);
+  assert.deepEqual(verdictOf("- PhD and 3+ years of experience.", "Scientist"), ["degree"]);
+});
+
+test("years: a range asks for its low end; an either/or asks for the smaller; a preferred ask is not a requirement", () => {
+  const years = (body) => fit(`Software Engineer\nRequirements:\n${body}\n- Python experience.\n`).categories.find((c) => c.key === "seniority")?.items[0]?.label;
+  assert.equal(years("- 2-8 years of experience."), "2+ years experience");
+  assert.equal(years("- 3 to 8 years in software testing."), "3+ years experience");
+  assert.equal(years("- 5+ years of experience or 3+ years with a Master's."), "3+ years experience");
+  assert.deepEqual(verdictOf("- 2-8 years of experience."), [], "2-8 years is not an 8-year requirement");
+  assert.deepEqual(verdictOf("- 8+ years of experience."), ["seniority"]);
+  const preferred = fit("Software Engineer\nRequirements:\n- Python experience.\nPreferred Qualifications:\n- 10+ years of experience.\n");
+  assert.ok(!preferred.knockouts.items.some((i) => i.type === "seniority"));
+});
+
+test("sponsorship: the usual wordings are read; offers are clear; a heading alone is nothing", () => {
+  const sponsor = (line) => fit(`Software Engineer\nRequirements:\n- Python experience.\n- ${line}\n`).knockouts.items.find((i) => i.type === "sponsorship")?.status ?? "none";
+  assert.equal(sponsor("Authorized to work in the US without current or future visa sponsorship"), "unknown", "rules out future sponsorship; after OPT is unknown");
+  assert.equal(sponsor("Applicants requiring employer sponsorship of a visa will not be considered for this position."), "clear");
+  assert.equal(sponsor("We are unable to sponsor visas."), "clear");
+  assert.equal(sponsor("Visa sponsorship available"), "clear");
+  assert.equal(sponsor("Sponsorship:"), "none");
+  assert.equal(sponsor("Immigration sponsorship (e.g., H-1B) is not available for this position."), "clear");
+  const itar = fit("Software Engineer\nRequirements:\n- Python experience.\n- Must be a U.S. person under ITAR.\n").knockouts.items.find((i) => i.type === "citizenship");
+  assert.equal(itar?.status, "unknown");
+});
+
+test("approved skills are yours to add: with none listed a skill needs a bullet; listed ones count as the weakest evidence", () => {
+  const skill = (m) => skillEvidence(["Swift"], m, config);
+  assert.equal(skill(master).kind, "missing");
+  const withApproved = { ...master, skills: { groups: [], items: ["Swift"] } };
+  const e = skill(withApproved);
+  assert.equal(e.tier, "skills_only");
+  assert.ok(e.credit > 0 && e.credit <= 0.5 + 1e-9);
+});
+
+test("skills the dictionary learned from the audit are scored now (Git, Agile, MLOps, Databricks, .NET, MCP)", () => {
+  const r = fit("Platform Engineer\nRequirements:\n- Git, Agile, MLOps, Databricks, .NET and MCP experience.\n", { title: "Platform Engineer" });
+  assert.deepEqual(r.ledger.skills.map((s) => s.label).sort(), [".NET", "Agile", "Databricks", "Git", "MCP", "MLOps"]);
+  assert.deepEqual(r.ledger.unrecognized, []);
+});

@@ -71,3 +71,14 @@ Playwright: { variants: [], related: [browser automation] }
 Tableau: { variants: [], related: [data visualization] }
 Power BI: { variants: [powerbi], related: [data visualization] }
 Kubernetes security: { variants: [], related: [kubernetes, security] }
+# Added Oct 23 after the Fit audit: skills postings ask for that the dictionary did not know (they were dropped, never scored).
+Git: { variants: [], related: [GitHub] }
+GitHub: { variants: [], related: [Git] }
+DevOps: { variants: [], related: [CI/CD] }
+NoSQL: { variants: [], related: [MongoDB, Redis] }
+MLOps: { variants: [ml ops], related: [] }
+.NET: { variants: [dotnet, asp.net], related: [C#] }
+Agile: { variants: [scrum], related: [] }
+Databricks: { variants: [], related: [Spark] }
+Claude: { variants: [anthropic], related: [] }
+MCP: { variants: [model context protocol], related: [] }

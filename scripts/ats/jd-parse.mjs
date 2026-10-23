@@ -7,6 +7,8 @@ const PREFERRED = /^(?:preferred (?:qualifications?|skills?|experience)|secondar
 const RESPONSIBILITIES = /^(?:essential (?:functions?|duties)|core job functions?|job duties?|day[- ]to[- ]day tasks?|role and responsibilities?|roles and responsibilities?|job responsibilities?|key job responsibilities?|key responsibilities?|your core responsibilities?|responsibilities?|a typical day|the impact you'll make|the difference you will make|you will|what you'll achieve|what you'll be responsible for|what you'll be working on|you're excited about this opportunity because you will|what will you be doing|what will you do in this role|what does the day[- ]to[- ]day look like|here's a taste of the problems we're solving|as a .+ you will|in this role,? you (?:will|can expect to)|in your day[- ]to[- ]day,? you will|how your work moves the mission forward|what you(?:'ll| will) (?:do|be doing)|what you can expect|what success looks like|as an early engineer|role overview|duties|your impact|what you will build)/i;
 const MARK_REQUIRED = /\b(?:required|must have|minimum|need to have|essential)\b/i;
 const DEGREE = /\b(?:associate(?:'s)?|bachelor(?:'s)?|master(?:'s)?|ph\.?d\.?|doctorate|BS|BA|MS|MA|BTech)\b[^\n.;]{0,90}/gi;
+// Each level word on its own (the DEGREE match above runs on into the words after it, so it cannot tell "Bachelor's, Master's, or PhD" apart).
+const LEVEL_WORD = /\b(?:associate(?:'s)?|bachelor(?:'s)?|master(?:'s)?|ph\.?d\.?|doctorate|BS|BA|MS|MA|BTech)\b/gi;
 const YEARS = /\b(\d{1,2})\s*\+?\s*(?:years?|yrs?)\b/gi;
 const CERT = /\b(?:certification|certified|certificate)\b[^\n.;]{0,70}/gi;
 
@@ -89,6 +91,7 @@ export function parseJobDescription(text, config) {
   const parsed = { title, required: [], preferred: [], responsibilities: [], domains: [], years: null, degree: null, certifications: [], potential_knockouts: [], unparsed: [] };
   let section = "background";
   const seen = new Set();
+  const degreeCandidates = [], yearCandidates = [];
   const relevant = [];
   const qualifications = [];
   for (let i = title ? 1 : 0; i < lines.length; i++) {
@@ -119,18 +122,34 @@ export function parseJobDescription(text, config) {
         if (!seen.has(id)) { parsed[itemKind].push({ label: alternatives.join(" / "), alternatives, source: line }); seen.add(id); }
       }
       if (!groups.length && !/\b(?:associate|bachelor|master|ph\.?d|doctorate|BS|BA|MS|MA|BTech|\d+\s*\+?\s*years?|certification|certified|certificate)\b/i.test(line)) parsed.unparsed.push({ classification: target, source: line });
-      for (const m of line.matchAll(DEGREE)) {
-        const level = /ph\.?d\.?|doctorate/i.test(m[0]) ? "phd" : /master|\bMS\b|\bMA\b/i.test(m[0]) ? "master" : /bachelor|\bBS\b|\bBA\b|BTech/i.test(m[0]) ? "bachelor" : "associate";
-        if (!parsed.degree || config.scoring.job_match.education.degree_levels[level] > config.scoring.job_match.education.degree_levels[parsed.degree.level]) parsed.degree = { level, source: line, classification: target, equivalent_experience: /equivalent experience/i.test(line) };
+      // Degree: a line that offers a choice ("Bachelor's, Master's, or PhD", "Master's or PhD", "PhD or equivalent experience", "Advanced degree")
+      // asks for the LOWEST level it names; a line naming one level asks for that. Several lines: the highest REQUIRED one wins (below).
+      const levelOf = (t) => (/ph\.?d\.?|doctorate/i.test(t) ? "phd" : /master|\bMS\b|\bMA\b|advanced degree/i.test(t) ? "master" : /bachelor|\bBS\b|\bBA\b|BTech/i.test(t) ? "bachelor" : "associate");
+      const hasDegree = DEGREE.test(line); DEGREE.lastIndex = 0;
+      const found = hasDegree ? [...line.matchAll(LEVEL_WORD)].map((m) => levelOf(m[0])) : [];
+      if (/advanced degree/i.test(line) && !found.length) found.push("master");
+      // "8+ years of experience OR 4+ years with a PhD": the degree is one way in, not a requirement.
+      const alternativeToYears = /\bor\b/i.test(line) && /\b\d{1,2}\s*\+?\s*(?:years?|yrs?)\b/i.test(line);
+      if (found.length && !alternativeToYears) {
+        const rank = config.scoring.job_match.education.degree_levels;
+        const choice = /\bor\b|\//i.test(line) || /equivalent/i.test(line);
+        const level = found.reduce((a, b) => (choice ? (rank[b] < rank[a] ? b : a) : (rank[b] > rank[a] ? b : a)));
+        degreeCandidates.push({ level, source: line, classification: target, equivalent_experience: /equivalent (?:practical |work |relevant |research )?experience/i.test(line) });
       }
-      for (const m of line.matchAll(YEARS)) {
-        const n = Number(m[1]);
-        if (!parsed.years || n > parsed.years.minimum) parsed.years = { minimum: n, source: line, classification: target };
-      }
+      // Years: "2-8 years" asks for 2; "8+ years OR 4+ years with a PhD" asks for the smaller; several different asks on one line: the larger.
+      const asks = [];
+      let rest = line;
+      for (const m of line.matchAll(/\b(\d{1,2})\s*(?:-|–|—|to)\s*(\d{1,2})\s*\+?\s*(?:years?|yrs?)\b/gi)) { asks.push(Number(m[1])); rest = rest.replace(m[0], " "); }
+      for (const m of rest.matchAll(YEARS)) asks.push(Number(m[1]));
+      if (asks.length) yearCandidates.push({ minimum: /\bor\b/i.test(line) ? Math.min(...asks) : Math.max(...asks), source: line, classification: target });
       for (const m of line.matchAll(CERT)) parsed.certifications.push({ text: m[0], source: line, classification: target });
     }
     if (section === "responsibilities") parsed.responsibilities.push(line);
   }
+  // A required line beats a preferred one; among required lines (or, if there are none, among preferred ones) the highest ask wins.
+  const pickBest = (list, key) => { const req = list.filter((c) => c.classification !== "preferred"); const pool = req.length ? req : list; return pool.reduce((a, b) => (key(b) > key(a) ? b : a), pool[0]); };
+  if (degreeCandidates.length) parsed.degree = pickBest(degreeCandidates, (c) => config.scoring.job_match.education.degree_levels[c.level]);
+  if (yearCandidates.length) parsed.years = pickBest(yearCandidates, (c) => c.minimum);
   for (const [id, item] of Object.entries(config.responsibilities)) {
     const source = [...parsed.responsibilities, ...qualifications].find((line) => item.terms.some((term) => phrase(line, term)));
     if (source) (parsed.responsibility_concepts ??= []).push({ id, label: item.label, source });

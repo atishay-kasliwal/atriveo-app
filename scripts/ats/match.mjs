@@ -107,7 +107,7 @@ export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOStrin
   // responsibilities the parser couldn't map to any concept (scoring those 0 would grade the parser, not the resume).
   const unmappable = !jd.responsibility_concepts.length && (jd.unparsed.length || jd.responsibilities.length);
   const years = yearsExperience(resume.experience, asOf);
-  const wanted = jd.years?.minimum;
+  const wanted = jd.years && jd.years.classification !== "preferred" ? jd.years.minimum : undefined;
   const wantedLevel = levelFor(jd.title, cfg.seniority);
   // Fit: a requirement the JD never states is not applicable, never free points. Certifications we have not been
   // told about stay unknown and are not scored either way. Resume quality (achievement wording) is not fit.
