@@ -2,6 +2,8 @@
 # variants are equivalent spellings; related terms earn partial credit only.
 Python: { variants: [python 3], related: [] }
 Java: { variants: [], related: [] }
+HTML: { variants: [HTML5], related: [] }
+CSS: { variants: [CSS3], related: [] }
 JavaScript: { variants: [js], related: [] }
 TypeScript: { variants: [typescript], related: [javascript] }
 Go: { variants: [golang], related: [] }

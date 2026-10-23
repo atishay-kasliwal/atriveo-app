@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { analyzeMatchingResume } from "./job-matching-analysis.mjs";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -12,7 +13,6 @@ const run = promisify(execFile);
 const IMAGE = "resume-page.png";
 const SOURCE = "job-matching";
 const DAYS = 7;
-const JD_CAP = 12_000;
 
 const isoOf = (v) => (v ? new Date(v).toISOString() : null);
 const ENT = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", ndash: "–", mdash: "—", rsquo: "’", lsquo: "‘", ldquo: "“", rdquo: "”", bull: "•" };
@@ -52,7 +52,7 @@ function bucketOf(line) {
 /** A job description cut into what a decision needs: facts, the must-haves, the duties, flags. Plain text in, small JSON out. */
 export function shapeJd(text) {
   // Many saved descriptions are flattened: sections and bullets are separated by runs of spaces, not newlines.
-  const full = decode(text).replace(/\r/g, "").replace(/[ \t]*\n[ \t]*/g, "\n").replace(/[ \t\u00a0]{3,}/g, "\n").replace(/\n{3,}/g, "\n\n").trim().slice(0, JD_CAP);
+  const full = decode(text).replace(/\r/g, "").replace(/[ \t]*\n[ \t]*/g, "\n").replace(/[ \t\u00a0]{3,}/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
   const lines = full.split("\n");
   const sections = { about: [], requirements: [], nice: [], duties: [] };
   let cur = "about", sawHeading = false;
@@ -123,10 +123,10 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
   }
   const urls = rows.map((d) => d.job_url);
   const jds = urls.length ? await db.collection("descriptions").aggregate([
-    { $match: { job_url: { $in: urls } } }, { $project: { _id: 0, job_url: 1, description: { $substrCP: ["$description", 0, JD_CAP] } } },
+    { $match: { job_url: { $in: urls } } }, { $project: { _id: 0, job_url: 1, description: 1 } },
   ]).toArray() : [];
   const jdOf = new Map(jds.map((j) => [j.job_url, j.description]));
-  const jobs = rows.map((d) => {
+  const jobs = await Promise.all(rows.map(async (d) => {
     const jd = shapeJd(jdOf.get(d.job_url) ?? "");
     return {
       id: d.job_url, company: decode(d.company), title: decode(d.title), location: d.location ? decode(d.location) : null, level: d.level ?? null,
@@ -135,9 +135,9 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
       // The company's own form when known, else the posting you were shown.
       applyUrl: d.job_url_direct || d.job_url, postingUrl: d.job_url,
       resumePath: d.resume.pdf_path, resumeMatch: resumeMatchOf(d.resume.pdf_path),
-      saved: later.has(d.job_url), jd,
+      saved: later.has(d.job_url), jd, ats: await analyzeMatchingResume(d.resume.pdf_path, jd.full, decode(d.title)),
     };
-  });
+  }));
   return { ok: true, generatedAt: now.toISOString(), total: ranked.length - skipped, jobs };
 }
 

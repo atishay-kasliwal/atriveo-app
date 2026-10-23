@@ -2,7 +2,7 @@ import { formatLocation } from "../utils/location";
 import { useCallback, useEffect, useRef, useState } from "react";
 import CompanyLogo from "../components/CompanyLogo";
 import { getJson } from "./engine";
-import { ago, resumeMatchView } from "./JobCard";
+import { ago } from "./JobCard";
 import type { ResumeMatch } from "./reviewQueue";
 import { TRACK_LABEL } from "./tracks";
 import { getTailorServerBase } from "../utils/tailorServer";
@@ -13,14 +13,14 @@ import "./job-matching.css";
 // exist before a job reaches this queue) and nothing is submitted: Apply opens the application page in a new tab.
 
 interface Jd { about: string; requirements: string[]; nice: string[]; duties: string[]; salary: string | null; work: string | null; kind: string | null; flags: string[]; full: string; structured: boolean }
+interface AtsAnalysis { score: number | null; required: { matched: number; total: number } | null; incomplete: boolean; keywords: { name: string; matched: boolean }[]; highlights: { start: number; end: number }[]; pages: number | null; roomLines: number | null }
 interface MatchJob {
   id: string; company: string; title: string; location: string | null; level: string | null; score: number | null;
   postedAt: string | null; foundAt: string | null; applyType: string | null; track: string | null;
-  applyUrl: string; postingUrl: string; resumePath: string; resumeMatch: ResumeMatch | null; saved: boolean; jd: Jd;
+  applyUrl: string; postingUrl: string; resumePath: string; resumeMatch: ResumeMatch | null; saved: boolean; jd: Jd; ats: AtsAnalysis | null;
 }
 interface Queue { ok: boolean; total: number; jobs: MatchJob[] }
 type Decision = "skip" | "apply" | "later";
-type Tab = "overview" | "requirements" | "duties";
 
 const BATCH = 8;
 const REFILL_AT = 3;
@@ -34,8 +34,16 @@ async function send(jobUrl: string, decision: Decision | "undo") {
 
 const typing = (t: EventTarget | null) => t instanceof HTMLElement && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName));
 
-function List({ items, empty }: { items: string[]; empty: string }) {
-  return items.length ? <ul className="jm-list">{items.map((t, i) => <li key={i}>{t}</li>)}</ul> : <p className="apps-muted">{empty}</p>;
+function Description({ job }: { job: MatchJob }) {
+  const text = job.jd.full || "No description was saved for this job.";
+  let cursor = 0;
+  const content: React.ReactNode[] = [];
+  for (const { start, end } of job.ats?.highlights ?? []) {
+    content.push(text.slice(cursor, start), <mark className="jm-keyword" key={start}>{text.slice(start, end)}</mark>);
+    cursor = end;
+  }
+  content.push(text.slice(cursor));
+  return <div className="jm-description">{content}</div>;
 }
 
 export default function JobMatchingPage({ header }: { header?: React.ReactNode }) {
@@ -44,7 +52,6 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
   const [total, setTotal] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
-  const [tab, setTab] = useState<Tab>("overview");
   const [full, setFull] = useState(false);
   const [imgOk, setImgOk] = useState(true);
   const seen = useRef(new Set<string>());
@@ -71,7 +78,7 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
   useEffect(() => { for (const j of queue.slice(1, 3)) new Image().src = imageUrl(j); }, [queue]);
 
   const job = queue[0];
-  useEffect(() => { setTab("overview"); setFull(false); setImgOk(true); }, [job?.id]);
+  useEffect(() => { setFull(false); setImgOk(true); }, [job?.id]);
 
   const decide = useCallback((decision: Decision) => {
     const j = queue[0];
@@ -116,7 +123,8 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
 
   const done = history.length;
   const position = `${done + 1} of ${done + total}`;
-  const rm = job ? resumeMatchView(job.resumeMatch, true) : null;
+  const ats = job?.ats;
+  const matched = ats?.keywords.filter(k => k.matched).length ?? 0;
 
   return <div className="rv-page jm-page">{header}
     {error && <p className="jm-error" role="alert">{error} <button type="button" className="apps-link" onClick={() => { setError(""); void fill(); }}>Retry</button></p>}
@@ -148,28 +156,27 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
             {job.applyType === "easy_apply" && <li>Easy Apply</li>}
           </ul>
           {job.jd.flags.length > 0 && <p className="jm-flags">{job.jd.flags.map((f) => <span key={f}>{f}</span>)}</p>}
-          <div className="jm-tabs" role="tablist" aria-label="Job description">
-            {(["overview", "requirements", "duties"] as Tab[]).map((t) => <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>{t === "duties" ? "Responsibilities" : t[0]!.toUpperCase() + t.slice(1)}</button>)}
-            <button type="button" className="jm-full" onClick={() => setFull(true)}>Full description <kbd>F</kbd></button>
+          <div className="jm-description-head">
+            <h2>Full job description</h2>
+            <button type="button" className="apps-link" onClick={() => setFull(true)}>Expand <kbd>F</kbd></button>
           </div>
-          <div className="jm-panel" role="tabpanel">
-            {tab === "overview" && <>
-              <p className="jm-about">{job.jd.about || "No description was saved for this job."}</p>
-              {job.jd.requirements.length > 0 && <><h2>Must have</h2><List items={job.jd.requirements.slice(0, 4)} empty="" /></>}
-            </>}
-            {tab === "requirements" && <>
-              <h2>Must have</h2><List items={job.jd.requirements} empty="The description doesn't list requirements separately." />
-              {job.jd.nice.length > 0 && <><h2>Nice to have</h2><List items={job.jd.nice} empty="" /></>}
-            </>}
-            {tab === "duties" && <><h2>What you'd do</h2><List items={job.jd.duties} empty="The description doesn't list responsibilities separately." /></>}
+          {ats && <p className="jm-keyword-legend"><span className="jm-keyword-dot" />Green = in your resume · {matched}/{ats.keywords.length} keywords</p>}
+          <div className="jm-panel"><Description job={job} /></div>
+          <div className="jm-ats" aria-label="ATS match score">
+            <div><span>ATS match</span><strong>{ats?.score != null ? <>{ats.score}<small>/100</small></> : <small>Unavailable</small>}</strong></div>
+            <div className="jm-ats-detail">
+              <span>{ats?.required?.total ? `Required skills ${ats.required.matched}/${ats.required.total}` : "Compared with the displayed resume"}</span>
+              <span className="apps-muted">{ats?.incomplete ? "Some requirements need manual review" : "Atriveo’s resume–job match"}</span>
+            </div>
+            {ats?.keywords.some(k => !k.matched) && <details><summary>Keywords not in resume ({ats.keywords.length - matched})</summary><p>{ats.keywords.filter(k => !k.matched).map(k => k.name).join(" · ")}</p></details>}
           </div>
         </section>
 
         <section className="jm-resume" aria-label="Tailored resume">
           <header className="jm-rhead">
             <b>Tailored resume</b>
-            {rm?.match != null && <span className="jm-match" title={rm.title}><i style={{ width: `${rm.match}%` }} />Match {rm.match}%</span>}
-            {job.resumeMatch?.required?.total ? <span className="apps-muted">required {job.resumeMatch.required.matched}/{job.resumeMatch.required.total}</span> : null}
+            <a className="apps-link" href={`/resume_builder?job=${encodeURIComponent(job.id)}`}>Edit resume ↗</a>
+            {ats?.roomLines != null && <span className="apps-muted">{ats.roomLines >= 3 ? `Room for ~${ats.roomLines} lines` : "One-page limit"}</span>}
           </header>
           <div className="jm-page-box">
             {imgOk ? <img key={job.id} src={imageUrl(job)} alt={`Tailored resume for ${job.company}`} onError={() => setImgOk(false)} />
@@ -188,7 +195,7 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
       {full && <div className="jm-overlay" onClick={() => setFull(false)}>
         <div className="jm-sheet" role="dialog" aria-label="Full job description" onClick={(e) => e.stopPropagation()}>
           <header><div><b>{job.company}</b><span> · {job.title}</span></div><button type="button" className="apps-btn" onClick={() => setFull(false)}>Close <kbd>Esc</kbd></button></header>
-          <pre>{job.jd.full || "No description was saved for this job."}</pre>
+          <div className="jm-sheet-body"><Description job={job} /></div>
         </div>
       </div>}
     </>}
