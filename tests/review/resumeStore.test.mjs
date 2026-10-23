@@ -39,12 +39,16 @@ test("publishResume stores the PDF and its page image once, by content hash, and
     const pdf = path.join(dir, "Atishay Kasliwal.pdf");
     fs.writeFileSync(pdf, "%PDF-1.5 test resume");
     fs.writeFileSync(path.join(dir, "resume-page.png"), "png bytes");
+    fs.writeFileSync(path.join(dir, "resume.tex"), "\\documentclass{article}");
+    fs.writeFileSync(path.join(dir, "jd.txt"), "The posting");
     const a = await publishResume(pdf, { store });
     assert.equal(a.configured, true);
     assert.equal(a.object.key, resumeKey(a.object.sha256));
     assert.equal(a.object.image_key, imageKey(a.object.sha256));
     assert.equal(a.object.bucket, "atriveo-resumes");
-    assert.equal(fake.objects.size, 2);
+    assert.equal(fake.objects.size, 4);
+    assert.equal(a.object.tex_key, `resumes/${a.object.sha256.slice(0, 2)}/${a.object.sha256}.tex`);
+    assert.equal(a.object.jd_key, `resumes/${a.object.sha256.slice(0, 2)}/${a.object.sha256}.jd.txt`);
     const puts = fake.seen.filter((s) => s.method === "PUT").length;
     const b = await publishResume(pdf, { store });
     assert.deepEqual(b.object, a.object, "same file, same key");

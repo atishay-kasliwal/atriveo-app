@@ -29,6 +29,9 @@ export function signRequest({ method, host, canonicalPath, query = "", headers =
 
 export const resumeKey = (sha256) => `resumes/${sha256.slice(0, 2)}/${sha256}.pdf`;
 export const imageKey = (sha256) => `resumes/${sha256.slice(0, 2)}/${sha256}.png`;
+// The source and posting that belong to one PDF, keyed by that PDF's hash: the apply side reads both to fill forms.
+export const texKey = (sha256) => `resumes/${sha256.slice(0, 2)}/${sha256}.tex`;
+export const jdKey = (sha256) => `resumes/${sha256.slice(0, 2)}/${sha256}.jd.txt`;
 
 export function storeFromEnv(env = process.env) {
   const { R2_ACCOUNT_ID: account, R2_ACCESS_KEY_ID: accessKeyId, R2_SECRET_ACCESS_KEY: secretAccessKey, R2_BUCKET: bucket } = env;
@@ -85,6 +88,11 @@ export async function publishResume(pdfPath, { store = storeFromEnv(), imagePath
       const k = imageKey(sha256);
       if (!(await store.head(k))) await store.put(k, image, "image/png");
       object.image_key = k;
+    }
+    for (const [file, key, field, type] of [[path.join(path.dirname(pdfPath), "resume.tex"), texKey(sha256), "tex_key", "text/plain"], [path.join(path.dirname(pdfPath), "jd.txt"), jdKey(sha256), "jd_key", "text/plain"]]) {
+      if (!fs.existsSync(file)) continue;
+      if (!(await store.head(key))) await store.put(key, fs.readFileSync(file), type);
+      object[field] = key;
     }
     return { configured: true, object };
   } catch (error) {
