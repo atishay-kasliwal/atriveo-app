@@ -188,3 +188,25 @@ test("the candidate settings are read from data/ats/candidate.yaml", () => {
   assert.equal(c.security_clearance, "unknown");
   assert.equal(c.certifications, "unknown");
 });
+
+test("depth: a skill in one bullet earns less than the same skill across four, and only in Fit", () => {
+  const entry = (bullets) => ({ experience: [{ company: "Acme", title: "Engineer", bullets, stack: "" }], projects: [], skills: { items: [] }, education: [], contact: { other: [] } });
+  const one = entry(["Built Kafka pipelines that cut latency by 30%."]);
+  const four = entry(["Built Kafka pipelines that cut latency by 30%.", "Ran Kafka consumers for 12 services.", "Tuned Kafka retention for cost.", "Moved batch jobs to Kafka streams."]);
+  const fitConfig = configWith((c) => { c.scoring.job_match.depth = { base: 0.7, full_at_bullets: 4 }; });
+  const a = skillEvidence(["Kafka"], one, fitConfig), b = skillEvidence(["Kafka"], four, fitConfig);
+  assert.equal(a.distinct_bullets, 1);
+  assert.equal(b.distinct_bullets, 4);
+  assert.ok(Math.abs(a.credit / b.credit - 0.7) < 1e-9);
+  assert.equal(skillEvidence(["Kafka"], one, config).credit, skillEvidence(["Kafka"], four, config).credit, "the old tailored score has no depth");
+});
+
+test("depth counts facts, not rewordings: the master merges a fact's wordings into one bullet", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bank-"));
+  fs.writeFileSync(path.join(dir, "ROLE-ATS-TECH.yaml"), "{}\n");
+  fs.writeFileSync(path.join(dir, "ACME.yaml"), "role:\n  id: acme\n  employer: Acme\n  title: Software Engineer\n  dates: January 2022 -- January 2023\n  slot_kind: experience\n");
+  fs.writeFileSync(path.join(dir, "AC-901.yaml"), "id: AC-901\nrole: acme\nfact: Ran Kafka consumers.\nvariants:\n  - text: Ran Kafka consumers for 12 services.\n  - text: Operated Kafka consumers at scale.\n");
+  const m = buildMaster(dir);
+  assert.equal(m.experience[0].bullets.length, 1);
+  assert.equal(skillEvidence(["Kafka"], m, configWith((c) => { c.scoring.job_match.depth = { base: 0.7, full_at_bullets: 4 }; })).distinct_bullets, 1);
+});

@@ -36,8 +36,9 @@ export function buildMaster(dir = bankDir) {
     if (!roles.has(ac.role)) { excluded.no_role_file.add(ac.role); continue; }
     for (const tag of ac.fits || []) if (FIT_FAMILY[tag]) families.add(FIT_FAMILY[tag]);
     const texts = [ac.fact, ...(ac.variants || []).map((v) => v.text)].map((t) => String(t || "").replace(/\s+/g, " ").trim()).filter(Boolean);
+    // The variants are wordings of one confirmed fact: together they are one bullet, so depth counts facts, not rewordings.
     const list = bulletsByRole.get(ac.role) || [];
-    for (const t of new Set(texts)) list.push(t);
+    if (texts.length) list.push([...new Set(texts)].join(" | "));
     bulletsByRole.set(ac.role, list);
   }
   const anchors = readYaml(path.join(dir, "ROLE-ATS-TECH.yaml"));

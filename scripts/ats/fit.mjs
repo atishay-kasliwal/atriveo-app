@@ -12,7 +12,7 @@ function context(overrides = {}) {
   defaults ??= (() => {
     const config = loadAtsConfig();
     // Repetition across a whole bank is not stuffing; that check belongs to one printed resume.
-    const fitConfig = withHash({ ...structuredClone({ ...config, hash: undefined }), scoring: { ...structuredClone(config.scoring), job_match: { ...structuredClone(config.scoring.job_match), stuffing: { ...config.scoring.job_match.stuffing, warning_repetitions: 1e9, penalty: 0 } } } });
+    const fitConfig = withHash({ ...structuredClone({ ...config, hash: undefined }), scoring: { ...structuredClone(config.scoring), job_match: { ...structuredClone(config.scoring.job_match), stuffing: { ...config.scoring.job_match.stuffing, warning_repetitions: 1e9, penalty: 0 }, depth: config.scoring.fit.depth } } });
     const master = buildMaster();
     return { config: fitConfig, candidate: loadCandidate(), master, masterHash: sha256(canonicalJson(master)).slice(0, 16) };
   })();

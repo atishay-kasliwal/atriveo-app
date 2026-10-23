@@ -117,6 +117,9 @@ job_match:
 
 # Fit: the master resume (the whole AC bank) against the untouched posting. Nothing tailored is read.
 fit:
+  # Depth of evidence: a skill shown in one bullet earns `base` of its credit; it earns all of it at `full_at_bullets`
+  # separate bullets (one confirmed fact, in any of its wordings, is one bullet).
+  depth: { base: 0.7, full_at_bullets: 4 }
   # Low confidence = the posting gave us little to score. It never changes the Fit number.
   confidence:
     low_below_applicable_weight: 40

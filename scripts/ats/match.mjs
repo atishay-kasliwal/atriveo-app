@@ -56,7 +56,7 @@ function skillRows(requirements, resume, config) {
     const evidence = skillEvidence(r.alternatives, resume, config);
     return { label: r.label, source: r.source, alternatives: r.alternatives, classification: evidence.kind,
       evidence_tier: evidence.tier, matched_skill: evidence.skill, matched_term: evidence.term,
-      evidence: evidence.evidence, evidence_entry: evidence.entry, supporting: evidence.supporting,
+      evidence: evidence.evidence, evidence_entry: evidence.entry, supporting: evidence.supporting, distinct_bullets: evidence.distinct_bullets, depth_factor: evidence.depth_factor,
       ...(evidence.stuffing_warning && { warning: `Repeated in ${evidence.distinct_bullets} distinct bullets; extra mentions earn no credit${config.scoring.job_match.stuffing.penalty ? ` and incur a ${config.scoring.job_match.stuffing.penalty}-point penalty` : ""}` }),
       penalty_points: evidence.stuffing_warning ? config.scoring.job_match.stuffing.penalty : 0, credit: evidence.credit };
   });
@@ -138,7 +138,7 @@ export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOStrin
   if (jd.required.length) categories.push(category("required_skills", max("required_skills"), skillRows(jd.required, resume, config)));
   const responsibilities = jd.responsibility_concepts.map((r) => {
     const ev = conceptEvidence(config.responsibilities[r.id], resume, config);
-    return { label: r.label, source: r.source, classification: ev.credit ? "evidenced" : "missing", evidence_tier: ev.tier, evidence: ev.evidence, evidence_entry: ev.entry, credit: ev.credit };
+    return { label: r.label, source: r.source, classification: ev.credit ? "evidenced" : "missing", evidence_tier: ev.tier, evidence: ev.evidence, evidence_entry: ev.entry, distinct_bullets: ev.distinct_bullets ?? 0, credit: ev.credit };
   });
   const mappedSources = new Set(jd.responsibility_concepts.map((r) => r.source));
   // Lines the parser couldn't read stay listed for manual review (job_match.unparsed_requirements); they earn and

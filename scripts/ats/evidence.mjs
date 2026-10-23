@@ -1,5 +1,12 @@
 import { phrase } from "./jd-parse.mjs";
 
+// Fit only: one mention is thin evidence, a skill shown across several separate bullets is depth. The factor runs from
+// `base` (one bullet, or a tools line alone) to 1 at `full_at_bullets` bullets. Without config.depth nothing changes.
+export function depthFactor(bullets, depth) {
+  if (!depth) return 1;
+  return depth.base + (1 - depth.base) * Math.min(1, Math.max(0, bullets - 1) / (depth.full_at_bullets - 1));
+}
+
 const unique = (xs) => [...new Set(xs.filter(Boolean))];
 const short = (s) => String(s).length > 220 ? `${String(s).slice(0, 217)}...` : String(s);
 
@@ -47,8 +54,10 @@ export function skillEvidence(alternatives, parsed, config) {
   candidates.sort((a, b) => b.credit - a.credit || kindOrder[a.kind] - kindOrder[b.kind] || a.skill.localeCompare(b.skill) || a.entry.localeCompare(b.entry) || a.text.localeCompare(b.text));
   const best = candidates[0] || { skill: alternatives[0], kind: "missing", tier: "missing", credit: 0, evidence: null, entry: null, term: null };
   const distinctBullets = unique(candidates.filter((c) => c.section !== "skills" && c.section !== "tools").map((c) => `${c.entry}:${c.text}`));
+  const factor = best.kind === "missing" ? 1 : depthFactor(distinctBullets.length, cfg.depth);
   return {
     ...best,
+    credit: best.credit * factor, depth_factor: factor,
     distinct_bullets: distinctBullets.length,
     stuffing_warning: distinctBullets.length >= cfg.stuffing.warning_repetitions,
     supporting: candidates.slice(0, cfg.stuffing.max_distinct_bullets).map((c) => ({ entry: c.entry, text: c.evidence, tier: c.tier, kind: c.kind })),
@@ -67,7 +76,8 @@ export function conceptEvidence(item, parsed, config) {
     .map((r) => ({ ...r, credit: config.scoring.job_match.responsibility_tiers[r.tier === "project_bullet" ? "project_bullet" : "job_bullet"] }));
   candidates.sort((a, b) => b.credit - a.credit || a.text.localeCompare(b.text));
   const best = candidates[0];
-  return best ? { credit: best.credit, tier: best.tier, entry: best.entry, evidence: short(best.text) } : { credit: 0, tier: "missing", entry: null, evidence: null };
+  const bullets = new Set(candidates.map((c) => `${c.entry}:${c.text}`)).size;
+  return best ? { credit: best.credit * depthFactor(bullets, config.scoring.job_match.depth), tier: best.tier, entry: best.entry, evidence: short(best.text), distinct_bullets: bullets } : { credit: 0, tier: "missing", entry: null, evidence: null };
 }
 
 export function domainEvidence(item, parsed, config) {
