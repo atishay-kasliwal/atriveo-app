@@ -91,7 +91,8 @@ CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts d
 SRC_CHANGED="$(git diff --name-only "$DEPLOYED" HEAD -- src public vite.apply.config.ts apply.html | head -1 || true)"
 if [ "$ONLY_SCRAPER" = 1 ]; then CHANGED="$(git ls-files deploy)"; fi
 # The scraper step copies loop.sh, Dockerfile.loop and patch_storage.py from the shipped set, so --scraper always ships them, changed or not.
-if [ "$SCRAPER" = 1 ] && [ "$ONLY_SCRAPER" != 1 ]; then CHANGED="$(printf '%s\n%s\n' "$CHANGED" "$(git ls-files deploy/scraper)" | grep -v '^$' | sort -u)"; fi
+# The after-scrape loop's own scripts go with it (the two LinkedIn ones ran only on the Mac before, so they were never in the image).
+if [ "$SCRAPER" = 1 ]; then CHANGED="$(printf '%s\n%s\n%s\n' "$CHANGED" "$(git ls-files deploy/scraper)" "$(git ls-files scripts/linkedin-apply-type.mjs scripts/linkedin-board-match.mjs)" | grep -v '^$' | sort -u)"; fi
 # The scoring bundle ships whole whenever anything in it (or the Fit code around it) changes.
 if echo "$CHANGED" | grep -q -E '^(data/ats|scripts/ats|scripts/(fit-|job-matching|applications-analytics|resume-queue|tailor-worker))'; then
   CHANGED="$(printf '%s\n%s\n' "$CHANGED" "$(bundle_files)" | grep -v '^$' | sort -u)"
