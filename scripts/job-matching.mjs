@@ -72,7 +72,7 @@ export function shapeJd(text) {
   if (!sawHeading) sections.about = [clip(full.replace(/\s+/g, " "), 480)];
   const salary = (full.match(/\$\s?\d{2,3}(?:,\d{3})?(?:\.\d+)?\s?[kK]?\s?(?:-|–|—|to)\s?\$?\s?\d{2,3}(?:,\d{3})?(?:\.\d+)?\s?[kK]?(?:\s?(?:\/|per)\s?(?:yr|year|hour|hr))?/) ?? [])[0] ?? null;
   const work = /\bhybrid\b/i.test(full) ? "Hybrid" : /\bremote\b/i.test(full) ? "Remote" : /\bon[- ]?site\b|\bin[- ]office\b/i.test(full) ? "On-site" : null;
-  const kind = /\bintern(ship)?\b/i.test(full) ? "Internship" : /\bcontract(or)?\b|\bc2h\b/i.test(full) ? "Contract" : /\bfull[- ]time\b/i.test(full) ? "Full-time" : null;
+  const kind = /\bfull[- ]time\b/i.test(full) ? "Full-time" : /\bpart[- ]time\b/i.test(full) ? "Part-time" : /(?:^|\n)\s*internship\s*(?:$|\n)|\b(?:paid|summer) internship\b|\binternship (?:role|position|opportunity)\b/i.test(full) ? "Internship" : /\b(?:contract(?:or)? (?:role|position|opportunity)|c2h)\b|(?:job|employment) type\s*:\s*contract/i.test(full) ? "Contract" : null;
   const flags = [];
   if (/(?:not|unable to|cannot|can.?t|won.?t|will not)\s+(?:\w+\s+){0,3}sponsor|without (?:visa )?sponsorship|no (?:visa )?sponsorship/i.test(full)) flags.push("No sponsorship");
   if (/\b(?:u\.?s\.? citizen(?:ship)?|security clearance|secret clearance|ts\/sci)\b/i.test(full)) flags.push("Citizenship or clearance");
