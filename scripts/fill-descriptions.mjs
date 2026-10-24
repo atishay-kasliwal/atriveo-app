@@ -79,9 +79,18 @@ export async function fillDescriptions(db, { apply = false, days = 3, limit = 40
     }));
     if (i + 6 < todo.length) await new Promise((r) => setTimeout(r, 250));
   }
+  // Any site: a resume that failed for lack of text, whose text has arrived since (LinkedIn's comes from the Mac), is re-opened.
+  if (apply) {
+    const stuck = await db.collection("jobs").find({ run_at: { $gte: since }, "resume.status": "failed", "resume.error": /JD not found|too short/i }).project({ job_url: 1 }).toArray();
+    const now = new Map((await db.collection("descriptions").find({ job_url: { $in: stuck.map((j) => j.job_url) } }).project({ job_url: 1, description: 1 }).toArray()).map((d) => [d.job_url, d.description]));
+    for (const j of stuck.filter((x) => String(now.get(x.job_url) ?? "").length >= MIN_CHARS)) {
+      const r = await db.collection("jobs").updateOne({ job_url: j.job_url, "resume.status": "failed", "resume.error": /JD not found|too short/i }, { $unset: { resume: "" } });
+      out.reopened += r.modifiedCount;
+    }
+  }
   // Jobs with their text and no resume record at all: queue them (newest first), a bounded number per run.
   if (apply) {
-    const fresh = await db.collection("jobs").find({ site: { $in: SITES }, run_at: { $gte: since }, $or: [{ resume: { $exists: false } }, { resume: null }] })
+    const fresh = await db.collection("jobs").find({ site: { $in: [...SITES, "linkedin"] }, run_at: { $gte: since }, $or: [{ resume: { $exists: false } }, { resume: null }] })
       .project({ job_url: 1, company: 1, title: 1, location: 1, score_pct: 1, session_id: 1, batch_time: 1 }).sort({ run_at: -1 }).toArray();
     const have = new Map((await db.collection("descriptions").find({ job_url: { $in: fresh.map((j) => j.job_url) } }).project({ job_url: 1, description: 1 }).toArray()).map((d) => [d.job_url, d.description]));
     for (const j of fresh.filter((x) => String(have.get(x.job_url) ?? "").length >= MIN_CHARS).slice(0, queueLimit)) {
