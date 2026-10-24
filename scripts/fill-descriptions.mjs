@@ -5,8 +5,10 @@
 //   options: --days 3 (how far back to look)  --limit 400
 //
 // Why: the scraper's own detail request sometimes times out (Greenhouse) or comes back empty (Ashby), so about a third of the board
-// jobs had no description and their resume failed with "JD not found or too short". The text is on the board; this fetches it.
+// jobs had no description and their resume failed with "JD not found or too short". The text is on the board; this fetches it, and
+// queues a resume for every recent board job that has its text but no resume yet (the hourly enqueue only sees the newest scrape).
 import { withMongo, closeMongo } from "./mongo-client.mjs";
+import { enqueueJob } from "./resume-queue.mjs";
 
 const MIN_CHARS = 200;
 const SITES = ["greenhouse", "ashby", "lever"];
@@ -55,13 +57,13 @@ export function missingDescriptions(jobs, held) {
   return jobs.filter((j) => j.job_url && String(held.get(j.job_url) ?? "").length < MIN_CHARS);
 }
 
-export async function fillDescriptions(db, { apply = false, days = 3, limit = 400, fetchImpl = fetch, log = console.log } = {}) {
+export async function fillDescriptions(db, { apply = false, days = 3, limit = 400, queueLimit = 150, fetchImpl = fetch, enqueue = enqueueJob, log = console.log } = {}) {
   const since = new Date(Date.now() - days * 24 * 3600e3);
   const jobs = await db.collection("jobs").find({ site: { $in: SITES }, run_at: { $gte: since } }).project({ job_url: 1, site: 1 }).toArray();
   const docs = await db.collection("descriptions").find({ job_url: { $in: jobs.map((j) => j.job_url) } }).project({ job_url: 1, description: 1 }).toArray();
   const held = new Map(docs.map((d) => [d.job_url, d.description]));
   const todo = missingDescriptions(jobs, held).slice(0, limit);
-  const out = { looked_at: jobs.length, missing: todo.length, filled: 0, unavailable: 0, reopened: 0 };
+  const out = { looked_at: jobs.length, missing: todo.length, filled: 0, unavailable: 0, reopened: 0, queued: 0 };
   for (let i = 0; i < todo.length; i += 6) {
     await Promise.all(todo.slice(i, i + 6).map(async (j) => {
       const text = await fetchDescription(j.job_url, { fetchImpl });
@@ -77,8 +79,18 @@ export async function fillDescriptions(db, { apply = false, days = 3, limit = 40
     }));
     if (i + 6 < todo.length) await new Promise((r) => setTimeout(r, 250));
   }
+  // Jobs with their text and no resume record at all: queue them (newest first), a bounded number per run.
+  if (apply) {
+    const fresh = await db.collection("jobs").find({ site: { $in: SITES }, run_at: { $gte: since }, $or: [{ resume: { $exists: false } }, { resume: null }] })
+      .project({ job_url: 1, company: 1, title: 1, location: 1, score_pct: 1, session_id: 1, batch_time: 1 }).sort({ run_at: -1 }).toArray();
+    const have = new Map((await db.collection("descriptions").find({ job_url: { $in: fresh.map((j) => j.job_url) } }).project({ job_url: 1, description: 1 }).toArray()).map((d) => [d.job_url, d.description]));
+    for (const j of fresh.filter((x) => String(have.get(x.job_url) ?? "").length >= MIN_CHARS).slice(0, queueLimit)) {
+      const r = await enqueue(db, j);
+      if (!r.skipped) out.queued++;
+    }
+  }
   log(`${out.looked_at} board jobs from the last ${days} days: ${out.missing} had no description; ${out.filled} found on the board, ${out.unavailable} not available there`);
-  if (apply) log(`  wrote ${out.filled} descriptions, re-opened ${out.reopened} failed resumes`); else log("  (report only: nothing was changed; add --apply)");
+  if (apply) log(`  wrote ${out.filled} descriptions, re-opened ${out.reopened} failed resumes, queued ${out.queued} resumes`); else log("  (report only: nothing was changed; add --apply)");
   return out;
 }
 
