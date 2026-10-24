@@ -77,6 +77,8 @@
     "dev:apply": "vite --config vite.apply.config.ts",
     "deploy:apply": "bash scripts/deploy-apply.sh",
     "ship": "bash scripts/ship.sh",
+    "set-r2": "bash scripts/set-r2.sh",
+    "r2-status": "node --env-file=.env scripts/r2-status.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test:outreach": "node --test tests/outreach/outreach.test.mjs",

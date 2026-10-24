@@ -8,6 +8,7 @@
 #   npm run ship -- --init       once: record what is live now (see INIT_* below)
 #   Options: --skip-tests  --skip-website  --backfill  --yes (do not stop at the confirmation)
 #            --only-scraper  rebuild just the scraper containers (no overlay, no dashboard or worker restart)
+#            --restart  recreate the running containers from the current images (picks up changed settings in dashboard.env); ships nothing
 #            --check-only  read the live state and run the drift check, then stop (changes nothing)
 #            --scraper  (re)build and start the scraper containers from github.com/atishay-kasliwal/job-pipeline (SCRAPER_REF=main)
 #
@@ -26,11 +27,11 @@ INIT_DASH_IMAGE="atriveo-dashboard:fit-3f309439c";    INIT_DASH_START="start-das
 INIT_WORK_IMAGE="atriveo-dashboard:workers-fit-3f309439c"
 INIT_WORK_STARTS="start-resume-fast-fit-3f309439c.sh start-compiler-fit-3f309439c.sh"
 
-DRY=0; ROLLBACK=0; INIT=0; TESTS=1; WEBSITE=1; BACKFILL=0; YES=0; SCRAPER=0; CHECK_ONLY=0; ONLY_SCRAPER=0
+DRY=0; ROLLBACK=0; INIT=0; TESTS=1; WEBSITE=1; BACKFILL=0; YES=0; SCRAPER=0; CHECK_ONLY=0; ONLY_SCRAPER=0; RESTART=0
 SCRAPER_REPO="${SCRAPER_REPO:-https://github.com/atishay-kasliwal/job-pipeline}"; SCRAPER_REF="${SCRAPER_REF:-main}"
 for a in "$@"; do case "$a" in
   --dry-run) DRY=1;; --rollback) ROLLBACK=1;; --init) INIT=1;; --skip-tests) TESTS=0;; --skip-website) WEBSITE=0;;
-  --backfill) BACKFILL=1;; --scraper) SCRAPER=1;; --check-only) CHECK_ONLY=1;; --only-scraper) ONLY_SCRAPER=1; SCRAPER=1; WEBSITE=0; TESTS=0;; --yes) YES=1;; -h|--help) sed -n '2,14p' "$0"; exit 0;;
+  --backfill) BACKFILL=1;; --scraper) SCRAPER=1;; --check-only) CHECK_ONLY=1;; --restart) RESTART=1;; --only-scraper) ONLY_SCRAPER=1; SCRAPER=1; WEBSITE=0; TESTS=0;; --yes) YES=1;; -h|--help) sed -n '2,14p' "$0"; exit 0;;
   *) echo "unknown option: $a" >&2; exit 2;; esac; done
 
 cd "$(cd "$(dirname "$0")/.." && pwd)"
@@ -54,6 +55,17 @@ if [ "$ROLLBACK" = 1 ]; then
   [ "$YES" = 1 ] || { read -r -p "Restart the previous dashboard and workers? [y/N] " r; [ "$r" = y ] || exit 1; }
   run_remote "cd $ROOT_REMOTE && ./$PREV_DASH_START && for s in $PREV_WORK_STARTS; do ./\$s; done && sed -i 's/^DEPLOYED_COMMIT=.*/DEPLOYED_COMMIT=$PREV_COMMIT/' ship-state.env && docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}' | grep -E 'dashboard|resume'"
   echo "Rolled back. If the website was deployed for the newer commit, redeploy it from that older commit too."
+  exit 0
+fi
+
+if [ "$RESTART" = 1 ]; then
+  say "Restarting the containers from the current images (settings in dashboard.env are read again)"
+  S="$(state)"; eval "$S"
+  [ "$YES" = 1 ] || { read -r -p "Restart the dashboard, workers, health watch and after-scrape loop? [y/N] " r; [ "$r" = y ] || exit 1; }
+  run_remote "cd ~/$ROOT_REMOTE && ./$DASH_START && for s in $WORK_STARTS; do ./\$s; done; \
+    (docker rm -f atriveo-health >/dev/null 2>&1; docker run -d --name atriveo-health --restart unless-stopped --network atriveo-production --user 1001:1001 --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $DASH_IMAGE node /app/scripts/health-watch.mjs --loop 900 >/dev/null && echo 'health watch restarted'); \
+    if docker inspect atriveo-after-scrape >/dev/null 2>&1; then docker rm -f atriveo-after-scrape >/dev/null 2>&1; docker run -d --name atriveo-after-scrape --restart unless-stopped --network atriveo-production --user 1001:1001 --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $DASH_IMAGE sh /app/deploy/scraper/after-scrape.sh >/dev/null && echo 'after-scrape loop restarted'; fi; \
+    sleep 6; docker ps --format '{{.Names}}  {{.Status}}' | sort | sed 's/^/  /'"
   exit 0
 fi
 
