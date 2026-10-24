@@ -39,6 +39,6 @@ test("after-scrape loop: runs the three steps in order and one failing step does
   const node = stub("node-stub", `echo "$(basename $1)" >> ${log}; case "$1" in *board-match*) exit 5;; *) exit 0;; esac`);
   const r = run("deploy/scraper/after-scrape.sh", { NODE: node });
   assert.equal(r.status, 0);
-  assert.deepEqual(fs.readFileSync(log, "utf8").trim().split("\n"), ["linkedin-apply-type.mjs", "linkedin-board-match.mjs", "resume-enqueue.mjs"]);
+  assert.deepEqual(fs.readFileSync(log, "utf8").trim().split("\n"), ["linkedin-apply-type.mjs", "linkedin-board-match.mjs", "resume-enqueue.mjs", "repair-resume-paths.mjs"]);
   assert.match(r.stdout, /linkedin-board-match failed \(exit 5\)/);
 });

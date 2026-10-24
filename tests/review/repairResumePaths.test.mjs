@@ -55,3 +55,39 @@ test("applyRepairs refuses to overwrite a record that changed since it was read"
   await applyRepairs(db, [{ app: a, to: "/r/new/job1.pdf", via: "x" }]);
   assert.equal(db.apps.get(1).resume.path, "/r/someone/else.pdf");
 });
+
+import { classifyRebuilds, enqueueRebuilds, discardApplications } from "../../scripts/repair-resume-paths.mjs";
+
+test("classifyRebuilds sorts by the posting's real state and never calls an unreadable one closed", async () => {
+  const items = [1, 2, 3, 4].map((n) => ({ app: { _id: n, company: `C${n}`, title: "T", applyUrl: `https://x/${n}` } })).concat([{ app: { _id: 5, company: "C5", title: "T" } }]);
+  const states = { "https://x/1": "open", "https://x/2": "closed", "https://x/3": "unknown", "https://x/4": "open" };
+  const out = await classifyRebuilds(items, { alive: async (u) => ({ state: states[u] }) });
+  assert.deepEqual(out.open.map((r) => r.app._id).sort(), [1, 4]);
+  assert.deepEqual(out.closed.map((r) => r.app._id), [2]);
+  assert.deepEqual(out.unknown.map((r) => r.app._id).sort(), [3, 5], "no link is unknown too");
+});
+
+test("enqueueRebuilds queues each job through the resume queue's own enqueue, with a priority below a manual click", async () => {
+  const calls = [];
+  const enqueue = async (_db, job) => { calls.push(job); return job.job_url.endsWith("dup") ? { skipped: true } : { skipped: false }; };
+  const items = [{ app: { _id: 1, company: "A", title: "SWE", resume: { sourceJobUrl: "https://j/1" } } }, { app: { _id: 2, company: "B", title: "DS", jobUrls: ["https://j/dup"] } }, { app: { _id: 3, company: "C", title: "X", url: "https://j/3" } }];
+  const r = await enqueueRebuilds({}, items, { enqueue, priority: 500 });
+  assert.deepEqual(calls.map((c) => c.job_url), ["https://j/1", "https://j/dup", "https://j/3"]);
+  assert.ok(calls.every((c) => c.priority === 500 && c.source === "repair"));
+  assert.deepEqual([r.queued, r.skipped, r.errors.length], [2, 1, 0]);
+  const bad = await enqueueRebuilds({}, items.slice(0, 1), { enqueue: async () => { throw new Error("boom"); } });
+  assert.match(bad.errors[0], /A: boom/);
+});
+
+test("discardApplications previews first and confirms only what the preview found; protected ones are reported, not forced", async () => {
+  const sent = [];
+  const post = async (body) => { sent.push(body); return body.operation === "preview"
+    ? { ok: true, targets: body.ids.filter((id) => id !== "p").map((id) => ({ id, updatedAt: "t" })) }
+    : { ok: true, discarded: body.targets.map((t) => t.id), errors: [] }; };
+  const r = await discardApplications(["a", "p", "b"], { post, batch: 20 });
+  assert.equal(r.discarded, 2);
+  assert.deepEqual(r.protectedOrFailed, ["p"]);
+  assert.deepEqual(sent.map((s) => s.operation), ["preview", "confirm"]);
+  assert.ok(sent.every((s) => s.action === "discard_applications"), "the same request the Discard button sends");
+  assert.deepEqual(sent[1].targets.map((t) => t.id), ["a", "b"], "the protected one is never in the confirm");
+});
