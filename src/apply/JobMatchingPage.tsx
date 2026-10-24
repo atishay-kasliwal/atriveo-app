@@ -22,7 +22,7 @@ interface Fit {
   ledger: { required: Count; preferred: Count; total: Count; matched: string[]; partial: string[]; missing: string[]; skills: FitSkill[] };
 }
 interface LeftOff { label: string; class: "required" | "preferred"; entry: string | null; text: string | null; as: "bullet" | "tools" | "skills" }
-interface Ready { status: "Ready" | "Review" | "Needs Work"; reasons: string[]; skills_checked: boolean; checks?: { skills_on_resume?: { left_off_detail?: LeftOff[] } } }
+interface Ready { status: "Ready" | "Review" | "Needs Work"; reasons: string[]; notes?: string[]; skills_checked: boolean; checks?: { skills_on_resume?: { left_off_detail?: LeftOff[] } } }
 interface AtsAnalysis { highlights: { start: number; end: number }[]; pages: number | null; roomLines: number | null }
 interface MatchJob {
   id: string; company: string; title: string; location: string | null; level: string | null; score: number | null;
@@ -218,7 +218,7 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
           <header className="jm-rhead">
             <b>Tailored resume</b>
             <a className="apps-link" href={`/resume_builder?job=${encodeURIComponent(job.id)}`}>Edit resume ↗</a>
-            {job.ready && <span className={`jm-ready is-${job.ready.status.toLowerCase().replace(" ", "-")}`} title={[...job.ready.reasons, job.ready.skills_checked ? "" : "Skills not checked against Fit yet"].filter(Boolean).join(". ")}>Resume Ready · {job.ready.status}</span>}
+            {job.ready && <span className={`jm-ready is-${job.ready.status.toLowerCase().replace(" ", "-")}`} title={[...job.ready.reasons, ...(job.ready.notes ?? []), job.ready.skills_checked ? "" : "Skills not checked against Fit yet"].filter(Boolean).join(". ")}>Resume Ready · {job.ready.status}</span>}
             {ats?.roomLines != null && <span className="apps-muted">{ats.roomLines >= 3 ? `Room for ~${ats.roomLines} lines` : "One-page limit"}</span>}
           </header>
           <div className="jm-page-box">

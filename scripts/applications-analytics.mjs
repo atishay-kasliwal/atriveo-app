@@ -239,7 +239,7 @@ export const resumeReadyOf = (pdfPath, fit = null) => {
     const saved = JSON.parse(fs.readFileSync(path.join(path.dirname(String(pdfPath)), "ats-score.json"), "utf8"));
     if (!saved.readiness?.parsed) return null;
     atsConfig ??= loadAtsConfig();
-    const r = resumeReady({ readiness: saved.readiness, tailored: saved.readiness.parsed, ledger: fit?.ledger ?? { skills: [] }, config: atsConfig, pages: saved.readiness.input?.pages ?? null });
+    const r = resumeReady({ readiness: saved.readiness, tailored: saved.readiness.parsed, ledger: fit?.ledger ?? { skills: [] }, config: atsConfig, pages: saved.readiness.input?.pages ?? null, jobTitle: saved.jd?.title ?? null });
     return { ...r, skills_checked: Boolean(fit?.ledger?.skills?.length) };
   } catch { return null; }
 };

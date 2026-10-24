@@ -262,3 +262,26 @@ test("skills the dictionary learned from the audit are scored now (Git, Agile, M
   assert.deepEqual(r.ledger.skills.map((s) => s.label).sort(), [".NET", "Agile", "Databricks", "Git", "MCP", "MLOps"]);
   assert.deepEqual(r.ledger.unrecognized, []);
 });
+
+import { dateStyle } from "../../scripts/ats/ready.mjs";
+
+test("Resume Ready: dates in mixed styles ask for a review; one style, even with abbreviated and full month names, is fine", () => {
+  assert.equal(dateStyle("Aug. 2024"), dateStyle("November 2024"), "abbreviated and full month names are the same style");
+  assert.equal(dateStyle("Present"), null);
+  assert.notEqual(dateStyle("Aug 2024"), dateStyle("08/2024"));
+  const tailored = (a, b) => ({ contact: { other: [] }, experience: [{ dates: { text: a, start: {} } }, { dates: { text: b, start: {} } }], projects: [], education: [] });
+  const ok = resumeReady({ readiness: { status: "PASS" }, tailored: tailored("Aug. 2024 – May 2026", "November 2021 – Present"), ledger: { skills: [] }, config });
+  assert.equal(ok.status, "Ready");
+  const mixed = resumeReady({ readiness: { status: "PASS" }, tailored: tailored("Aug 2024 – May 2026", "08/2021 – 06/2023"), ledger: { skills: [] }, config });
+  assert.equal(mixed.status, "Review");
+  assert.match(mixed.reasons.join(" "), /different styles/);
+});
+
+test("Resume Ready: a posting title that shares no words with your headline is a note, never a status change", () => {
+  const tailored = { contact: { other: ["Full Stack Engineer"] }, experience: [], projects: [], education: [] };
+  const none = resumeReady({ readiness: { status: "PASS" }, tailored, ledger: { skills: [] }, config, jobTitle: "Registered Nurse" });
+  assert.equal(none.status, "Ready");
+  assert.equal(none.notes.length, 1);
+  const some = resumeReady({ readiness: { status: "PASS" }, tailored, ledger: { skills: [] }, config, jobTitle: "Senior Full Stack Developer" });
+  assert.deepEqual(some.notes, []);
+});
