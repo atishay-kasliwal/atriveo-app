@@ -90,8 +90,12 @@ export async function fillDescriptions(db, { apply = false, days = 3, limit = 40
   }
   // Jobs with their text and no resume record at all: queue them (newest first), a bounded number per run.
   if (apply) {
-    const fresh = await db.collection("jobs").find({ site: { $in: [...SITES, "linkedin"] }, run_at: { $gte: since }, $or: [{ resume: { $exists: false } }, { resume: null }] })
-      .project({ job_url: 1, company: 1, title: 1, location: 1, score_pct: 1, session_id: 1, batch_time: 1 }).sort({ run_at: -1 }).toArray();
+    // The same posting is stored once per scrape pipeline and the resume sits on one of those rows, so judge by posting, not by row.
+    const rows = await db.collection("jobs").find({ site: { $in: [...SITES, "linkedin"] }, run_at: { $gte: since } })
+      .project({ job_url: 1, company: 1, title: 1, location: 1, score_pct: 1, session_id: 1, batch_time: 1, "resume.status": 1 }).sort({ run_at: -1 }).toArray();
+    const hasResume = new Set(rows.filter((r) => r.resume?.status).map((r) => r.job_url));
+    const seenUrl = new Set();
+    const fresh = rows.filter((r) => !r.resume?.status && !hasResume.has(r.job_url) && !seenUrl.has(r.job_url) && seenUrl.add(r.job_url));
     const have = new Map((await db.collection("descriptions").find({ job_url: { $in: fresh.map((j) => j.job_url) } }).project({ job_url: 1, description: 1 }).toArray()).map((d) => [d.job_url, d.description]));
     for (const j of fresh.filter((x) => String(have.get(x.job_url) ?? "").length >= MIN_CHARS).slice(0, queueLimit)) {
       const r = await enqueue(db, j);

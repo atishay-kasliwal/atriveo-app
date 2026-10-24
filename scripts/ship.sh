@@ -64,7 +64,7 @@ if [ "$RESTART" = 1 ]; then
   [ "$YES" = 1 ] || { read -r -p "Restart the dashboard, workers, health watch and after-scrape loop? [y/N] " r; [ "$r" = y ] || exit 1; }
   run_remote "cd ~/$ROOT_REMOTE && ./$DASH_START && for s in $WORK_STARTS; do ./\$s; done; \
     (docker rm -f atriveo-health >/dev/null 2>&1; docker run -d --name atriveo-health --restart unless-stopped --network atriveo-production --user 1001:1001 --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $DASH_IMAGE node /app/scripts/health-watch.mjs --loop 900 >/dev/null && echo 'health watch restarted'); \
-    if docker inspect atriveo-after-scrape >/dev/null 2>&1; then docker rm -f atriveo-after-scrape >/dev/null 2>&1; docker run -d --name atriveo-after-scrape --restart unless-stopped --network atriveo-production --user 1001:1001 --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $DASH_IMAGE sh /app/deploy/scraper/after-scrape.sh >/dev/null && echo 'after-scrape loop restarted'; fi; \
+    if docker inspect atriveo-after-scrape >/dev/null 2>&1; then docker rm -f atriveo-after-scrape >/dev/null 2>&1; docker run -d --name atriveo-after-scrape --restart unless-stopped --network atriveo-production --user 1001:1001 -v /home/ubuntu/$ROOT_REMOTE/files:/home/ubuntu/$ROOT_REMOTE/files:ro -v /home/ubuntu/$ROOT_REMOTE/files/resumes:/Users/atishaykasliwal/Documents/tailored-resumes:ro --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $DASH_IMAGE sh /app/deploy/scraper/after-scrape.sh >/dev/null && echo 'after-scrape loop restarted'; fi; \
     sleep 6; docker ps --format '{{.Names}}  {{.Status}}' | sort | sed 's/^/  /'"
   exit 0
 fi
@@ -186,7 +186,7 @@ if [ "$SCRAPER" = 1 ]; then
     && (docker rm -f atriveo-scraper >/dev/null 2>&1 || true) \
     && docker run -d --name atriveo-scraper --restart unless-stopped --memory 1500m --cpus 1 --network atriveo-production --env-file /home/ubuntu/atriveo-muse/private/dashboard.env job-pipeline-scraper:\$JPSHA >/dev/null \
     && (docker rm -f atriveo-after-scrape >/dev/null 2>&1 || true) \
-    && docker run -d --name atriveo-after-scrape --restart unless-stopped --network atriveo-production --user 1001:1001 --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $NEW_DASH_IMAGE sh /app/deploy/scraper/after-scrape.sh >/dev/null \
+    && docker run -d --name atriveo-after-scrape --restart unless-stopped --network atriveo-production --user 1001:1001 -v /home/ubuntu/$ROOT_REMOTE/files:/home/ubuntu/$ROOT_REMOTE/files:ro -v /home/ubuntu/$ROOT_REMOTE/files/resumes:/Users/atishaykasliwal/Documents/tailored-resumes:ro --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $NEW_DASH_IMAGE sh /app/deploy/scraper/after-scrape.sh >/dev/null \
     && sleep 5 && docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}' | grep -E 'scraper|after-scrape' && docker logs --tail 5 atriveo-scraper"
 fi
 
