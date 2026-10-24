@@ -7,6 +7,9 @@ export function depthFactor(bullets, depth) {
   return depth.base + (1 - depth.base) * Math.min(1, Math.max(0, bullets - 1) / (depth.full_at_bullets - 1));
 }
 
+// The master joins a bank fact's wordings with " | ". For display, show the one wording that contains the skill.
+const wordingWith = (text, term, config) => { const parts = String(text).split(" | "); return parts.length > 1 ? (parts.find((p) => phrase(p, term, config)) ?? parts[0]) : text; };
+
 const unique = (xs) => [...new Set(xs.filter(Boolean))];
 const short = (s) => String(s).length > 220 ? `${String(s).slice(0, 217)}...` : String(s);
 
@@ -47,7 +50,7 @@ export function skillEvidence(alternatives, parsed, config) {
         }
       }
       if (!term) continue;
-      candidates.push({ ...record, skill: name, term, kind, credit: cfg.evidence_tiers[record.tier] * cfg.match_kinds[kind], evidence: short(record.text) });
+      candidates.push({ ...record, skill: name, term, kind, credit: cfg.evidence_tiers[record.tier] * cfg.match_kinds[kind], evidence: short(wordingWith(record.text, term, config)) });
     }
   }
   const kindOrder = { exact: 0, equivalent: 1, related: 2 };

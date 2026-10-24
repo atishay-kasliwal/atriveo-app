@@ -21,7 +21,8 @@ interface Fit {
   knockouts: { verdict: string; items: { type: string; status: string; reason: string; source: string | null }[] };
   ledger: { required: Count; preferred: Count; total: Count; matched: string[]; partial: string[]; missing: string[]; skills: FitSkill[] };
 }
-interface Ready { status: "Ready" | "Review" | "Needs Work"; reasons: string[]; skills_checked: boolean }
+interface LeftOff { label: string; class: "required" | "preferred"; entry: string | null; text: string | null; as: "bullet" | "tools" | "skills" }
+interface Ready { status: "Ready" | "Review" | "Needs Work"; reasons: string[]; skills_checked: boolean; checks?: { skills_on_resume?: { left_off_detail?: LeftOff[] } } }
 interface AtsAnalysis { highlights: { start: number; end: number }[]; pages: number | null; roomLines: number | null }
 interface MatchJob {
   id: string; company: string; title: string; location: string | null; level: string | null; score: number | null;
@@ -147,6 +148,8 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
     ? `Your bank shows ${have.length} of ${skillsTotal} skills this job asks for, including ${have.slice(0, 4).join(", ")}.${missing.length ? ` Not shown yet: ${missing.slice(0, 3).map((k) => k.label).join(", ")}.` : " Nothing it asks for is missing."}`
     : "Your bank doesn’t show the skills this job lists.";
   const toCheck = fit?.knockouts.items.filter((i) => i.status !== "clear") ?? [];
+  // Skills your bank proves but the tailored resume leaves out, with the bullet that proves each (nothing shown when none).
+  const leftOff = job?.ready?.checks?.skills_on_resume?.left_off_detail ?? [];
   const glance = job ? (job.jd.about.match(/[^.!?]+[.!?]+/g)?.slice(0, 2).join(" ").trim() || job.jd.about || job.jd.duties[0] || "") : "";
 
   return <div className="rv-page jm-page">{header}
@@ -196,6 +199,13 @@ export default function JobMatchingPage({ header }: { header?: React.ReactNode }
                 <p className="apps-muted">Asked for by the job; your bank shows {missing.length ? "no evidence" : "only related work"} for these. <a className="apps-link" href={`/resume_builder?job=${encodeURIComponent(job.id)}`}>Edit the resume ↗</a></p>
               </> : <p className="apps-muted">{skillsTotal ? "Everything the job asks for is in your bank." : "No specific skills were found in this posting."}</p>}
               {toCheck.length > 0 && <ul className="jm-check">{toCheck.map((i) => <li key={i.type} className={`is-${i.status}`}><b>{i.status === "blocked" ? "Likely mismatch" : "Check"}:</b> {i.reason}</li>)}</ul>}
+            </section>}
+            {leftOff.length > 0 && <section className="jm-block jm-evidence"><h2>Your resume leaves these out</h2>
+              <p className="apps-muted">You have them; the job asks for them. Add the bullet to the resume if you want it counted.</p>
+              <ul>{leftOff.slice(0, 5).map((d) => <li key={d.label}><b>{d.label}</b>{d.class === "preferred" && <em> preferred</em>}
+                {d.text ? <span>{d.as === "bullet" ? <>“{d.text}”</> : <>listed under tools</>}{d.entry ? <small> · {d.entry}</small> : null}</span> : null}</li>)}</ul>
+              {leftOff.length > 5 && <p className="apps-muted">+{leftOff.length - 5} more</p>}
+              <a className="apps-link" href={`/resume_builder?job=${encodeURIComponent(job.id)}`}>Edit the resume ↗</a>
             </section>}
             <section className="jm-block jm-fulljd">
               <div><h2>Full job description</h2><p className="apps-muted">Skills your bank shows are highlighted green.</p></div>

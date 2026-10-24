@@ -19,7 +19,8 @@ function context(overrides = {}) {
   return { ...defaults, ...overrides };
 }
 /** What a saved Fit was computed with: when either changes, a saved Fit is stale and is recomputed. */
-export const fitIdentity = () => { const c = context(); return { config_hash: c.config.hash, master_hash: c.masterHash }; };
+// `shape` changes when the stored Fit gains fields (2: the proof bullet for each matched skill).
+export const fitIdentity = () => { const c = context(); return { config_hash: c.config.hash, master_hash: c.masterHash, shape: 2 }; };
 export const resetFitContext = () => { defaults = undefined; };
 
 function confidenceOf(match, cfg, { fromKeywords, blank }) {

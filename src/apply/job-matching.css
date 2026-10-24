@@ -130,3 +130,10 @@
 .jm-ready.is-ready { color: #69c69a; }
 .jm-ready.is-review { color: #d5ad61; }
 .jm-ready.is-needs-work { color: #e07a72; }
+
+/* Skills your bank proves but the resume leaves out: one line each, with the proof. */
+.jm-evidence ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.jm-evidence li { display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 1.45; }
+.jm-evidence li em { font-style: normal; font-size: 11.5px; color: var(--muted-fg); margin-left: 6px; }
+.jm-evidence li span { color: var(--muted-fg); }
+.jm-evidence li small { font-size: 11.5px; opacity: .8; }

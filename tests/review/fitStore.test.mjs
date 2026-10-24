@@ -14,6 +14,9 @@ test("a saved Fit is small, current, and goes stale when its inputs change", () 
   assert.equal(fitIsCurrent(fit), true);
   assert.equal(fitIsCurrent({ ...fit, master_hash: "old" }), false);
   assert.equal(fitIsCurrent({ ...fit, config_hash: "old" }), false);
+  assert.equal(fitIsCurrent({ ...fit, shape: 1 }), false, "a Fit saved before it kept the proof bullets is recomputed");
+  const { shape: _omitted, ...legacy } = fit;
+  assert.equal(fitIsCurrent(legacy), false);
   assert.equal(fitIsCurrent(null), false);
 });
 
@@ -50,4 +53,33 @@ test("the queue is ordered by Fit; blocked jobs and saved-for-later go last; con
 test("Resume Ready is read from the readiness saved beside the PDF, and is null before there is one", async () => {
   assert.equal(resumeReadyOf(null), null);
   assert.equal(resumeReadyOf("/nowhere/at/all.pdf"), null);
+});
+
+import { resumeReady } from "../../scripts/ats/ready.mjs";
+import { parseResume } from "../../scripts/ats/resume-parse.mjs";
+import { config, CLEAN_LAYOUT } from "../ats/helpers.mjs";
+
+test("Resume Ready names the bank bullet that proves each skill the resume leaves out, one wording, not the joined text", () => {
+  const fit = computeFit("Backend Engineer\nRequirements:\n- Spring Boot, MongoDB and Java experience.\n", "Backend Engineer");
+  const stored = fit.ledger.skills.filter((s) => s.status === "matched");
+  assert.ok(stored.length && stored.every((s) => s.evidence?.text && s.evidence.entry), "the stored Fit keeps the proof for every matched skill");
+  const r = resumeReady({ readiness: { status: "PASS" }, tailored: parseResume(CLEAN_LAYOUT, config.sections), ledger: fit.ledger, config });
+  const detail = r.checks.skills_on_resume.left_off_detail;
+  assert.ok(detail.length >= 1);
+  for (const d of detail) {
+    assert.ok(d.entry && d.text, `${d.label} has a source`);
+    assert.ok(!d.text.includes(" | "), "one wording, not the wordings joined together");
+    assert.ok(d.text.toLowerCase().includes(d.label.toLowerCase().split(" ")[0]), `the wording actually mentions ${d.label}`);
+    assert.ok(["bullet", "tools", "skills"].includes(d.as));
+  }
+  assert.deepEqual(r.checks.skills_on_resume.left_off, detail.filter((d) => d.class === "required").map((d) => d.label));
+});
+
+test("preferred skills the resume leaves out are listed with their proof but never change the status", () => {
+  const fit = computeFit("Backend Engineer\nRequirements:\n- Java experience.\nPreferred Qualifications:\n- Elasticsearch and MongoDB.\n", "Backend Engineer");
+  const tailored = parseResume(CLEAN_LAYOUT, config.sections);
+  const withPreferred = resumeReady({ readiness: { status: "PASS" }, tailored, ledger: fit.ledger, config });
+  const requiredOnly = resumeReady({ readiness: { status: "PASS" }, tailored, ledger: { skills: fit.ledger.skills.filter((s) => s.class === "required") }, config });
+  assert.equal(withPreferred.status, requiredOnly.status);
+  assert.ok(withPreferred.checks.skills_on_resume.left_off_detail.some((d) => d.class === "preferred"));
 });
