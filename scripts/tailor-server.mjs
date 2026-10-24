@@ -49,6 +49,7 @@ import { BankPageError, bankView, retireBullet } from "./bank-page.mjs";
 import { syncOverlay } from "./ac-bank-overlay.mjs";
 import { approveDraft, draftResult, startDraft } from "./bank-draft.mjs";
 import { applicationsAnalytics, applicationDetail, dismissJob, linkJobToApplication, markJobApplied, saveLinkedinDirect, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
+import { recordMatchingEvent } from "./matching-workspace.mjs";
 import { matchingQueue, recordDecision, resumeImagePath } from "./job-matching.mjs";
 import { resumeFileRedirect } from "./resume-store.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
@@ -1842,7 +1843,7 @@ const server = http.createServer(async (req, res) => {
         const params = new URL(req.url, "http://x").searchParams;
         const limit = Math.min(Math.max(Number(params.get("limit")) || 8, 1), 20);
         const offset = Math.max(Number(params.get("offset")) || 0, 0);
-        const data = await withMongo((db) => matchingQueue(db, { limit, offset }), { appName: "AtriveoTailorServer" });
+        const data = await withMongo((db) => matchingQueue(db, { limit, offset, company: params.get("company"), jobUrl: params.get("job"), exclude: (params.get("exclude") || "").split(",").filter(x=>/^[a-f0-9]{16}$/.test(x)), learn: params.get("learn") !== "0" }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify(data));
       } catch (e) {
@@ -1850,6 +1851,16 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
       }
     })();
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/applications/matching-event") {
+    let raw = "";
+    req.on("data", c => { raw += c; if(raw.length > 10000) req.destroy(); });
+    req.on("end", async () => {
+      try { const data = await withMongo(db => recordMatchingEvent(db, JSON.parse(raw || "{}"))); res.writeHead(200, {"Content-Type":"application/json"}); res.end(JSON.stringify(data)); }
+      catch(e) { res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({ok:false,error:e.message})); }
+    });
     return;
   }
 

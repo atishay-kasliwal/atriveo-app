@@ -14,8 +14,8 @@ export function compactFit(result, { jdChars = null } = {}) {
       required: l.required, preferred: l.preferred, total: l.total, matched: l.matched, partial: l.partial, missing: l.missing,
       mentioned: l.mentioned, unrecognized: l.unrecognized,
       // `evidence` is the bank bullet (or tools line) that proves a matched skill: Resume Ready uses it to say what to add.
-      skills: l.skills.map((s) => ({ label: s.label, alternatives: s.alternatives, class: s.class, status: s.status,
-        ...(s.status === "matched" && s.evidence ? { evidence: { entry: s.evidence_entry ?? null, text: s.evidence, tier: s.evidence_tier ?? null } } : {}) })),
+      skills: l.skills.map((s) => ({ label: s.label, alternatives: s.alternatives, class: s.class, status: s.status, source: s.source ?? null,
+        ...(s.evidence ? { evidence: { entry: s.evidence_entry ?? null, text: s.evidence, tier: s.evidence_tier ?? null } } : {}) })),
     },
     lost: result.categories.flatMap((c) => c.items.filter((i) => i.lost > 0).map((i) => ({ category: c.key, requirement: i.label, source: i.source ?? null, lost: i.lost }))).sort((a, b) => b.lost - a.lost).slice(0, 5),
     ...fitIdentity(), jd_chars: jdChars, as_of: result.as_of,

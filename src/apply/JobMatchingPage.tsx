@@ -1,246 +1,93 @@
-import { formatLocation } from "../utils/location";
-import { useCallback, useEffect, useRef, useState } from "react";
-import CompanyLogo from "../components/CompanyLogo";
-import { getJson } from "./engine";
-import { ago } from "./JobCard";
-import type { ResumeMatch } from "./reviewQueue";
-import { TRACK_LABEL } from "./tracks";
-import { getTailorServerBase } from "../utils/tailorServer";
-import "./review-pages.css";
-import "./job-matching.css";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import CompanyLogo from '../components/CompanyLogo';
+import { getJson } from './engine';
+import { ago } from './JobCard';
+import { TRACK_LABEL } from './tracks';
+import { formatLocation } from '../utils/location';
+import { getTailorServerBase } from '../utils/tailorServer';
+import './review-pages.css';
+import './job-matching.css';
 
-// Job Matching: one job, its tailored resume, a decision. Nothing is built here (the resume and the page image
-// exist before a job reaches this queue) and nothing is submitted: Apply opens the application page in a new tab.
+type Decision = 'skip'|'apply'|'later';
+type Tab = 'Overview'|'Skill match'|'Evidence'|'Description'|'Company';
+interface Proof {label:string;class:string;status:string;strength:'strong'|'moderate'|'weak'|'partial'|'missing';source:string|null;entry:string|null;text:string|null;tier:string|null;box:{x:number;y:number;width:number;height:number}|null}
+interface Skill {label:string;alternatives:string[];class:string;status:string;evidence?:{entry:string|null;text:string;tier:string}}
+interface Company {key:string;name:string;count:number;newToday:number;bestMatch:number|null;saved:number}
+interface Related {id:string;key:string;company:string;title:string;location:string|null;score:number|null}
+interface Job extends Related {position:number;level:string|null;track:string|null;postedAt:string|null;foundAt:string|null;applyUrl:string;postingUrl:string;resumePath:string;resumeObject?:{sha256:string;hasImage:boolean}|null;resumeMatch:{score:number}|null;saved:boolean;similar:Related[];jd:{full:string;about:string;requirements:string[];duties:string[];nice:string[];flags:string[];work:string|null;kind:string|null;salary:string|null};fit:{score:number;confidence:string;confidence_reasons:string[];outside_roles:boolean;ledger:{required:{matched:number;total:number};total:{matched:number;total:number};skills:Skill[]};knockouts:{verdict:string;items:{status:string;reason:string;type:string}[]};lost?:{category:string;requirement:string;lost:number}[]}|null;ats:{highlights:{start:number;end:number}[];proofs?:Proof[];pages:number|null;roomLines:number|null}|null;ready:{status:string;reasons:string[];notes?:string[]}|null}
+interface Queue {ok:boolean;total:number;jobs:Job[];companies:Company[];stats:{opened:number;skipped:number;saved:number;remaining:number};preference:{active:boolean;limit:number}}
+const imageUrl=(j:Job)=>j.resumeObject?.hasImage?`${getTailorServerBase()}/applications/resume-file?sha=${j.resumeObject.sha256}&kind=image`:`${getTailorServerBase()}/applications/resume-image?path=${encodeURIComponent(j.resumePath)}`;
+const typing=(t:EventTarget|null)=>t instanceof HTMLElement&&(t.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(t.tagName));
+async function post(route:string,body:unknown){const r=await fetch(`${getTailorServerBase()}/applications/${route}`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||`HTTP ${r.status}`);}
+function Description({job}:{job:Job}){const text=job.jd.full||'No description was saved for this job.';let cursor=0;const out:ReactNode[]=[];for(const {start,end}of job.ats?.highlights??[]){out.push(text.slice(cursor,start),<mark key={start}>{text.slice(start,end)}</mark>);cursor=end;}out.push(text.slice(cursor));return <div className="jm-description">{out}</div>;}
+function strengthOf(s:Skill):Proof['strength']{return s.status==='missing'?'missing':s.status==='partial'?'partial':s.evidence?.tier==='skills_only'?'weak':s.evidence?.tier?.includes('tools')?'moderate':s.evidence?'strong':'weak';}
+const strengthLabel={strong:'Strong',moderate:'Moderate',weak:'Weak',partial:'Partial',missing:'Missing'};
 
-interface Jd { about: string; requirements: string[]; nice: string[]; duties: string[]; salary: string | null; work: string | null; kind: string | null; flags: string[]; full: string; structured: boolean }
-interface Count { matched: number; total: number }
-interface FitSkill { label: string; alternatives: string[]; class: "required" | "preferred"; status: "matched" | "partial" | "missing" }
-// Fit: the master resume (your whole bank) against the posting. Every skill count on this page is read from its ledger.
-interface Fit {
-  score: number; confidence: "high" | "medium" | "low"; confidence_reasons: string[]; outside_roles: boolean;
-  knockouts: { verdict: string; items: { type: string; status: string; reason: string; source: string | null }[] };
-  ledger: { required: Count; preferred: Count; total: Count; matched: string[]; partial: string[]; missing: string[]; skills: FitSkill[] };
-}
-interface LeftOff { label: string; class: "required" | "preferred"; entry: string | null; text: string | null; as: "bullet" | "tools" | "skills" }
-interface Ready { status: "Ready" | "Review" | "Needs Work"; reasons: string[]; notes?: string[]; skills_checked: boolean; checks?: { skills_on_resume?: { left_off_detail?: LeftOff[] } } }
-interface AtsAnalysis { highlights: { start: number; end: number }[]; pages: number | null; roomLines: number | null }
-interface MatchJob {
-  id: string; company: string; title: string; location: string | null; level: string | null; score: number | null;
-  postedAt: string | null; foundAt: string | null; applyType: string | null; track: string | null;
-  applyUrl: string; postingUrl: string; resumePath: string; resumeObject?: { sha256: string; hasImage: boolean } | null; resumeMatch: ResumeMatch | null; saved: boolean; jd: Jd; ats: AtsAnalysis | null; fit: Fit | null; ready: Ready | null;
-}
-interface Queue { ok: boolean; total: number; jobs: MatchJob[] }
-type Decision = "skip" | "apply" | "later";
-
-const BATCH = 8;
-const REFILL_AT = 3;
-const imageUrl = (j: MatchJob) => j.resumeObject?.hasImage
-  ? `${getTailorServerBase()}/applications/resume-file?sha=${j.resumeObject.sha256}&kind=image`
-  : `${getTailorServerBase()}/applications/resume-image?path=${encodeURIComponent(j.resumePath)}`;
-
-async function send(jobUrl: string, decision: Decision | "undo") {
-  const res = await fetch(`${getTailorServerBase()}/applications/job-decision`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jobUrl, decision }) });
-  const json = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
-  if (!res.ok || !json.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
-}
-
-const typing = (t: EventTarget | null) => t instanceof HTMLElement && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName));
-
-function Description({ job }: { job: MatchJob }) {
-  const text = job.jd.full || "No description was saved for this job.";
-  let cursor = 0;
-  const content: React.ReactNode[] = [];
-  for (const { start, end } of job.ats?.highlights ?? []) {
-    content.push(text.slice(cursor, start), <mark className="jm-keyword" key={start}>{text.slice(start, end)}</mark>);
-    cursor = end;
-  }
-  content.push(text.slice(cursor));
-  return <div className="jm-description">{content}</div>;
-}
-
-export default function JobMatchingPage({ header }: { header?: React.ReactNode }) {
-  const [queue, setQueue] = useState<MatchJob[]>([]);
-  const [history, setHistory] = useState<MatchJob[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState("");
-  const [full, setFull] = useState(false);
-  const [imgOk, setImgOk] = useState(true);
-  const seen = useRef(new Set<string>());
-  const fetching = useRef(false);
-
-  const fill = useCallback(async () => {
-    if (fetching.current) return;
-    fetching.current = true;
-    try {
-      const q = await getJson<Queue>(`/applications/matching-queue?limit=${BATCH}`);
-      const fresh = q.jobs.filter((j) => !seen.current.has(j.id));
-      fresh.forEach((j) => seen.current.add(j.id));
-      setQueue((cur) => [...cur, ...fresh]);
-      setTotal(q.total);
-      setError("");
-    } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
-    finally { fetching.current = false; setLoaded(true); }
-  }, []);
-
-  useEffect(() => { void fill(); }, [fill]);
-  useEffect(() => { if (loaded && queue.length <= REFILL_AT && queue.length < total) void fill(); }, [loaded, queue.length, total, fill]);
-
-  // The next two resumes and the one after are fetched now, so a decision shows the next job at once.
-  useEffect(() => { for (const j of queue.slice(1, 3)) new Image().src = imageUrl(j); }, [queue]);
-
-  const job = queue[0];
-  useEffect(() => { setFull(false); setImgOk(true); }, [job?.id]);
-
-  const decide = useCallback((decision: Decision) => {
-    const j = queue[0];
-    if (!j) return;
-    // The tab opens inside the click so the browser allows it; the application is never submitted for you.
-    if (decision === "apply") window.open(j.applyUrl, "_blank", "noopener,noreferrer");
-    setQueue((q) => q.slice(1));
-    setHistory((h) => [...h, j]);
-    setTotal((n) => (decision === "later" ? n : Math.max(0, n - 1)));
-    send(j.id, decision).catch((e) => {
-      // Not recorded: the job comes back so nothing is lost silently.
-      setQueue((q) => [j, ...q]);
-      setHistory((h) => h.filter((x) => x.id !== j.id));
-      setTotal((n) => n + (decision === "later" ? 0 : 1));
-      setError(`Couldn't save that choice (${e instanceof Error ? e.message : e}). The job is back in the queue.`);
-    });
-  }, [queue]);
-
-  const back = useCallback(() => {
-    const j = history[history.length - 1];
-    if (!j) return;
-    setHistory((h) => h.slice(0, -1));
-    setQueue((q) => [j, ...q]);
-    setTotal((n) => n + 1);
-    send(j.id, "undo").catch((e) => setError(`Couldn't undo (${e instanceof Error ? e.message : e}).`));
-  }, [history]);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (typing(e.target) || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === "Escape") { setFull(false); return; }
-      if (full) return;
-      if (e.key === "ArrowLeft") { e.preventDefault(); decide("skip"); }
-      else if (e.key === "ArrowRight") { e.preventDefault(); decide("apply"); }
-      else if (e.key === "s" || e.key === "S") decide("later");
-      else if (e.key === "f" || e.key === "F") setFull(true);
-      else if (e.key === "p" || e.key === "P") back();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [decide, back, full]);
-
-  const done = history.length;
-  const position = `${done + 1} of ${done + total}`;
-  const ats = job?.ats;
-  const fit = job?.fit ?? null;
-  const skills = fit?.ledger.skills ?? [];
-  const missing = skills.filter((k) => k.status === "missing");
-  const partial = skills.filter((k) => k.status === "partial");
-  const score = fit?.score ?? null;
-  const skillsHit = fit?.ledger.total.matched ?? 0;
-  const skillsTotal = fit?.ledger.total.total ?? 0;
-  const have = fit?.ledger.matched ?? [];
-  const why = !job || !fit || !skillsTotal ? "" : have.length
-    ? `Your bank shows ${have.length} of ${skillsTotal} skills this job asks for, including ${have.slice(0, 4).join(", ")}.${missing.length ? ` Not shown yet: ${missing.slice(0, 3).map((k) => k.label).join(", ")}.` : " Nothing it asks for is missing."}`
-    : "Your bank doesn’t show the skills this job lists.";
-  const toCheck = fit?.knockouts.items.filter((i) => i.status !== "clear") ?? [];
-  // Skills your bank proves but the tailored resume leaves out, with the bullet that proves each (nothing shown when none).
-  const leftOff = job?.ready?.checks?.skills_on_resume?.left_off_detail ?? [];
-  const glance = job ? (job.jd.about.match(/[^.!?]+[.!?]+/g)?.slice(0, 2).join(" ").trim() || job.jd.about || job.jd.duties[0] || "") : "";
-
-  return <div className="rv-page jm-page">{header}
-    {error && <p className="jm-error" role="alert">{error} <button type="button" className="apps-link" onClick={() => { setError(""); void fill(); }}>Retry</button></p>}
-    {!job ? <main className="jm-empty">
-      {!loaded ? <div className="spin" aria-busy="true" /> : <>
-        <strong>{done ? "That's every job for now" : "Nothing to review yet"}</strong>
-        <span className="apps-muted">{done ? `You went through ${done}. New ones arrive as their resumes finish.` : "Jobs show up here once their tailored resume is built."}</span>
-        {history.length > 0 && <button type="button" className="apps-btn" onClick={back}>Back to the last one</button>}
-      </>}
-    </main> : <>
-      <main className="jm-main">
-        <section className="jm-job" aria-label="Job">
-          <header className="jm-head">
-            <CompanyLogo company={job.company} size="lg" />
-            <div className="jm-id">
-              <span className="jm-co">{job.company}</span>
-              <h1>{job.title}</h1>
-            </div>
-            <span className="jm-pos" aria-live="polite">{position}</span>
-          </header>
-          <ul className="jm-facts">
-            {job.location && <li>{formatLocation(job.location)}</li>}
-            {job.jd.work && <li>{job.jd.work}</li>}
-            {job.jd.kind && <li>{job.jd.kind}</li>}
-            {job.jd.salary && <li className="jm-pay">{job.jd.salary}</li>}
-            {job.level && <li>{job.level}</li>}
-            {job.track && TRACK_LABEL[job.track] && <li>{TRACK_LABEL[job.track]} track</li>}
-            {ago(job.postedAt ?? job.foundAt) && <li>{ago(job.postedAt ?? job.foundAt)}</li>}
-            {job.applyType === "easy_apply" && <li>Easy Apply</li>}
-          </ul>
-          {job.jd.flags.length > 0 && <p className="jm-flags">{job.jd.flags.map((f) => <span key={f}>{f}</span>)}</p>}
-          <div className="jm-panel">
-            <div className="jm-score" aria-label="Match summary">
-              <div><strong className={score != null && score >= 80 ? "jm-good" : undefined}>{score != null ? Math.round(score) : "–"}{score != null && <small>/100</small>}</strong><span>Match</span></div>
-              <div><strong className={skillsTotal && skillsHit === skillsTotal ? "jm-good" : undefined}>{skillsTotal ? skillsHit : "–"}{skillsTotal > 0 && <small>/{skillsTotal}</small>}</strong><span>Skills match</span></div>
-              <div><strong className="jm-text">{job.level ?? "Not stated"}</strong><span>Seniority</span></div>
-            </div>
-            {fit && (fit.confidence === "low" || fit.outside_roles) && <p className="jm-conf">{fit.outside_roles ? "Outside the roles your bank supports. " : ""}{fit.confidence === "low" ? `Low confidence: ${fit.confidence_reasons[0] ?? "the posting says little"}.` : ""}</p>}
-            {why && <section className="jm-block"><h2>Why it matches you</h2><p>{why}</p></section>}
-            {skills.length > 0 && <section className="jm-block"><h2>Key skills they need</h2>
-              <ul className="jm-chips">{skills.map((k) => <li key={`${k.class}:${k.label}`} className={k.status === "matched" ? "jm-in" : k.status === "partial" ? "jm-part" : "jm-out"} title={k.class}>{k.label}</li>)}</ul></section>}
-            {glance && <section className="jm-block"><h2>Role at a glance</h2><p>{glance}</p></section>}
-            {fit && <section className="jm-block jm-gaps"><h2>What we’re missing</h2>
-              {missing.length || partial.length ? <>
-                <ul className="jm-chips">{missing.map((k) => <li key={k.label} className="jm-out">{k.label}</li>)}{partial.map((k) => <li key={k.label} className="jm-part" title="Related experience only">{k.label}</li>)}</ul>
-                <p className="apps-muted">Asked for by the job; your bank shows {missing.length ? "no evidence" : "only related work"} for these. <a className="apps-link" href={`/resume_builder?job=${encodeURIComponent(job.id)}`}>Edit the resume ↗</a></p>
-              </> : <p className="apps-muted">{skillsTotal ? "Everything the job asks for is in your bank." : "No specific skills were found in this posting."}</p>}
-              {toCheck.length > 0 && <ul className="jm-check">{toCheck.map((i) => <li key={i.type} className={`is-${i.status}`}><b>{i.status === "blocked" ? "Likely mismatch" : "Check"}:</b> {i.reason}</li>)}</ul>}
-            </section>}
-            {leftOff.length > 0 && <section className="jm-block jm-evidence"><h2>Your resume leaves these out</h2>
-              <p className="apps-muted">You have them; the job asks for them. Add the bullet to the resume if you want it counted.</p>
-              <ul>{leftOff.slice(0, 5).map((d) => <li key={d.label}><b>{d.label}</b>{d.class === "preferred" && <em> preferred</em>}
-                {d.text ? <span>{d.as === "bullet" ? <>“{d.text}”</> : <>listed under tools</>}{d.entry ? <small> · {d.entry}</small> : null}</span> : null}</li>)}</ul>
-              {leftOff.length > 5 && <p className="apps-muted">+{leftOff.length - 5} more</p>}
-              <a className="apps-link" href={`/resume_builder?job=${encodeURIComponent(job.id)}`}>Edit the resume ↗</a>
-            </section>}
-            <section className="jm-block jm-fulljd">
-              <div><h2>Full job description</h2><p className="apps-muted">Skills your bank shows are highlighted green.</p></div>
-              <button type="button" className="apps-link" onClick={() => setFull(true)}>View <kbd>F</kbd></button>
-            </section>
-          </div>
-        </section>
-
-        <section className="jm-resume" aria-label="Tailored resume">
-          <header className="jm-rhead">
-            <b>Tailored resume</b>
-            <a className="apps-link" href={`/resume_builder?job=${encodeURIComponent(job.id)}`}>Edit resume ↗</a>
-            {job.ready && <span className={`jm-ready is-${job.ready.status.toLowerCase().replace(" ", "-")}`} title={[...job.ready.reasons, ...(job.ready.notes ?? []), job.ready.skills_checked ? "" : "Skills not checked against Fit yet"].filter(Boolean).join(". ")}>Resume Ready · {job.ready.status}</span>}
-            {ats?.roomLines != null && <span className="apps-muted">{ats.roomLines >= 3 ? `Room for ~${ats.roomLines} lines` : "One-page limit"}</span>}
-          </header>
-          <div className="jm-page-box">
-            {imgOk ? <img key={job.id} src={imageUrl(job)} alt={`Tailored resume for ${job.company}`} onError={() => setImgOk(false)} />
-              : <p className="apps-muted">The resume preview didn't load. <a href={job.resumeObject ? `${getTailorServerBase()}/applications/resume-file?sha=${job.resumeObject.sha256}&kind=pdf` : `${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(job.resumePath)}`} target="_blank" rel="noreferrer">Open the PDF ↗</a></p>}
-          </div>
-        </section>
-      </main>
-
-      <footer className="jm-actions">
-        <button type="button" className="apps-btn jm-back" onClick={back} disabled={!history.length} title="Undo the last choice (P)">← Previous</button>
-        <button type="button" className="apps-btn jm-skip" onClick={() => decide("skip")}>Not apply <kbd>←</kbd></button>
-        <button type="button" className="apps-btn jm-later" onClick={() => decide("later")} title="Come back to it after the rest (S)">Save for later <kbd>S</kbd></button>
-        <button type="button" className="rv-primary jm-go" onClick={() => decide("apply")}>Apply <kbd>→</kbd></button>
-      </footer>
-
-      {full && <div className="jm-overlay" onClick={() => setFull(false)}>
-        <div className="jm-sheet" role="dialog" aria-label="Full job description" onClick={(e) => e.stopPropagation()}>
-          <header><div><b>{job.company}</b><span> · {job.title}</span></div><button type="button" className="apps-btn" onClick={() => setFull(false)}>Close <kbd>Esc</kbd></button></header>
-          <div className="jm-sheet-body"><Description job={job} /></div>
-        </div>
-      </div>}
-    </>}
-  </div>;
+export default function JobMatchingPage({header}:{header?:ReactNode}){
+ const [queue,setQueue]=useState<Job[]>([]),[previous,setPrevious]=useState<Job[]>([]),[meta,setMeta]=useState<Queue|null>(null),[company,setCompany]=useState(''),[loading,setLoading]=useState(true),[error,setError]=useState(''),[tab,setTab]=useState<Tab>('Overview'),[proof,setProof]=useState<Proof|null>(null),[full,setFull]=useState(false),[more,setMore]=useState(false),[busy,setBusy]=useState(false),[imgOk,setImgOk]=useState(true),[learn,setLearn]=useState(()=>localStorage.getItem('matching-personalize')!=='0'),[notice,setNotice]=useState(''),[lastDecision,setLastDecision]=useState<{job:Job;decision:Decision}|null>(null);
+ const seen=useRef(new Set<string>()),request=useRef(0),fetching=useRef(false),applyButton=useRef<HTMLButtonElement>(null),dialog=useRef<HTMLDivElement>(null),fullButton=useRef<HTMLButtonElement>(null),pendingJump=useRef<string|undefined>(undefined);
+ const job=queue[0];
+ const event=useCallback((kind:string,j:Job)=>{void post('matching-event',{jobUrl:j.id,kind}).catch(()=>{});},[]);
+ const load=useCallback(async(reset=false,filter=company,jump?:string)=>{
+  if(fetching.current&&!reset)return;const generation=reset?++request.current:request.current;fetching.current=true;
+  if(reset){seen.current.clear();setLoading(true);setQueue([]);setPrevious([]);}
+  const params=new URLSearchParams({limit:'8',learn:learn?'1':'0'});if(filter)params.set('company',filter);if(jump)params.set('job',jump);if(!reset)params.set('exclude',[...seen.current].slice(-512).join(','));
+  try{const q=await getJson<Queue>(`/applications/matching-queue?${params}`);if(generation!==request.current)return;const fresh=q.jobs.filter(j=>!seen.current.has(j.key));fresh.forEach(j=>seen.current.add(j.key));setQueue(cur=>reset?fresh:[...cur,...fresh]);setMeta(q);setError('');if(reset&&filter&&fresh[0])void post('matching-event',{jobUrl:fresh[0].id,kind:'opened_company'}).catch(()=>{});}
+  catch(e){if(generation===request.current)setError(e instanceof Error?e.message:String(e));}finally{if(generation===request.current){fetching.current=false;setLoading(false);}}
+ },[company,learn]);
+ useEffect(()=>{const target=pendingJump.current;pendingJump.current=undefined;void load(true,company,target);},[company,learn]); // queue scope is intentionally reset only by these controls
+ useEffect(()=>{if(!loading&&queue.length>0&&queue.length<=3)void load();},[queue.length,loading,load]);
+ useEffect(()=>{setTab('Overview');setProof(null);setImgOk(true);if(job)event('viewed',job);},[job?.id,event]);
+ useEffect(()=>{for(const j of queue.slice(1,3))new Image().src=imageUrl(j);},[queue]);
+ useEffect(()=>{if(full)dialog.current?.focus();else fullButton.current?.focus({preventScroll:true});},[full]);
+ const chooseCompany=(c:string)=>{setCompany(c);setMore(false);};
+ const next=useCallback(()=>{if(queue.length<2){void load();setNotice('Loading the next jobs…');return;}setPrevious(p=>[...p,queue[0]].slice(-100));setQueue(q=>q.slice(1));},[queue,load]);
+ const back=useCallback(()=>{const j=previous.at(-1);if(!j)return;setPrevious(p=>p.slice(0,-1));setQueue(q=>[j,...q.filter(x=>x.id!==j.id)]);event('returned',j);},[previous,event]);
+ const jump=(j:Related)=>{if(job)event('opened_similar',job);if(company){pendingJump.current=j.id;setCompany('');}else void load(true,'',j.id);};
+ const decide=useCallback(async(decision:Decision)=>{
+  if(!job||busy)return;
+  if(decision==='apply'){const tab=window.open(job.applyUrl,'_blank','noopener,noreferrer');void tab;}
+  setBusy(true);setError('');try{await post('job-decision',{jobUrl:job.id,decision});setLastDecision({job,decision});setNotice(decision==='apply'?'Application page opened. Nothing was submitted.':decision==='later'?'Saved for later.':'Marked not apply.');setPrevious(p=>p.filter(j=>j.id!==job.id));setQueue(q=>q.filter(j=>j.id!==job.id));setMeta(m=>m?{...m,total:Math.max(0,m.total-1),stats:{...m.stats,opened:m.stats.opened+(decision==='apply'?1:0),skipped:m.stats.skipped+(decision==='skip'?1:0),saved:m.stats.saved+(decision==='later'?1:0),remaining:Math.max(0,m.stats.remaining-(decision==='later'?0:1))},companies:m.companies.map(c=>c.key===job.company.trim().toLowerCase()?{...c,count:Math.max(0,c.count-1),saved:c.saved+(decision==='later'?1:0)}:c)}:m);}catch(e){setError(`Choice not saved: ${e instanceof Error?e.message:String(e)}`);}finally{setBusy(false);}
+ },[job,busy]);
+ const undo=async()=>{if(!lastDecision||busy)return;setBusy(true);try{await post('job-decision',{jobUrl:lastDecision.job.id,decision:'undo'});setQueue(q=>[lastDecision.job,...q.filter(j=>j.id!==lastDecision.job.id)]);seen.current.add(lastDecision.job.key);setLastDecision(null);setNotice('Last choice undone.');void load();}catch(e){setError(String(e));}finally{setBusy(false);}};
+ useEffect(()=>{const handler=(e:KeyboardEvent)=>{if(e.repeat||typing(e.target)||e.metaKey||e.ctrlKey||e.altKey)return;if(e.key==='Escape'){setFull(false);setMore(false);setProof(null);return;}if(full||more)return;const key=e.key.toLowerCase();if(e.key==='ArrowLeft'){e.preventDefault();back();}else if(e.key==='ArrowRight'){e.preventDefault();next();}else if(key==='n'){e.preventDefault();void decide('skip');}else if(key==='s'){e.preventDefault();void decide('later');}else if(key==='a'){e.preventDefault();applyButton.current?.focus();setNotice('Press Enter on Apply to open the application page.');}else if(key==='f'){e.preventDefault();setFull(true);}};window.addEventListener('keydown',handler);return()=>window.removeEventListener('keydown',handler);},[back,next,decide,full,more]);
+ const skills=job?.fit?.ledger.skills??[];
+ const proofs=job?.ats?.proofs??skills.map(s=>({label:s.label,class:s.class,status:s.status,strength:strengthOf(s),source:null,entry:s.evidence?.entry??null,text:s.evidence?.text??null,tier:s.evidence?.tier??null,box:null}));
+ const strong=proofs.filter(p=>p.strength==='strong'),concerns=proofs.filter(p=>p.strength!=='strong');
+ const score=job?.fit?.score;const required=job?.fit?.ledger.required;const verdict=job?.fit?.knockouts.verdict==='blocked'?'Check blockers':job?.fit?.confidence==='low'?'Review fit':score==null?'Fit pending':score>=85?'Strong fit':score>=70?'Worth a look':'Stretch role';
+ const edge=[...strong].sort((a,b)=>proofs.filter(p=>p.entry===b.entry).length-proofs.filter(p=>p.entry===a.entry).length)[0];
+ const edgeSkills=edge?proofs.filter(p=>p.entry===edge.entry&&p.strength==='strong').map(p=>p.label):[];
+ const activeCompany=meta?.companies?.find(c=>c.key===company);
+ const showProof=(p:Proof)=>{setProof(p);};
+ const proofButton=(p:Proof)=><button type="button" className={`jm-proof-row is-${p.strength}${proof?.label===p.label?' selected':''}`} key={p.label} onClick={()=>showProof(p)}><span className="jm-proof-icon" aria-hidden="true">{p.strength==='strong'?'✓':p.strength==='missing'?'−':'△'}</span><span><b>{p.label}</b><small>{p.entry|| (p.strength==='missing'?'No evidence in your bank':'Evidence needs a closer look')}</small></span><em>{strengthLabel[p.strength]}</em></button>;
+ return <div className="rv-page jm-page">{header}
+  {error&&<div className="jm-error" role="alert">{error}<button onClick={()=>void load()} type="button">Retry</button></div>}
+  <main className="jm-layout">
+   <aside className="jm-rail" aria-label="Filter jobs by company"><button type="button" className={!company?'active':''} onClick={()=>chooseCompany('')} aria-label={`All companies, ${meta?.stats?.remaining??0} jobs`} aria-pressed={!company}><span className="jm-grid-icon">▦</span><small>{meta?.stats?.remaining??'—'}</small><span className="jm-company-tip"><b>All companies</b><span>Browse the full matching queue</span></span></button>
+    {(meta?.companies??[]).slice(0,9).map(c=><button type="button" key={c.key} className={company===c.key?'active':''} onClick={()=>chooseCompany(c.key)} aria-label={`${c.name}, ${c.count} matching jobs`} aria-pressed={company===c.key}><CompanyLogo company={c.name} size="md"/><small>{c.count}</small><span className="jm-company-tip"><b>{c.name}</b><span>{c.count} matching jobs · {c.newToday} new today</span><span>Best bank fit: {c.bestMatch??'Pending'}{c.bestMatch!=null?'/100':''} · {c.saved} saved</span></span></button>)}
+    {(meta?.companies?.length??0)>9&&<button type="button" onClick={()=>setMore(!more)} aria-expanded={more}><span>+{meta!.companies.length-9}</span><small>more</small></button>}
+   </aside>
+   {loading&&!job?<div className="jm-loading"><span className="spin"/><b>Preparing your decision workspace</b><span>Reading job fit and resume evidence</span></div>:!job?<section className="jm-empty"><b>{error?'The queue could not load':activeCompany?`No more ${activeCompany.name} jobs`:'You’re caught up'}</b><p>Saved roles stay available in the queue. New jobs appear when their resumes finish.</p><button type="button" className="apps-btn" onClick={()=>{seen.current.clear();void load(true,company);}}>Refresh queue</button>{company&&<button className="apps-link" onClick={()=>chooseCompany('')}>All companies</button>}</section>:<>
+   <section className="jm-workspace" aria-label="Job intelligence">
+    <header className="jm-job-header"><CompanyLogo company={job.company} size="md"/><div><span className="jm-company-name">{job.company}</span><h1>{job.title}</h1></div><span className="jm-queue-context">Job {job.position||1} of {meta?.total??'—'}<a href={job.postingUrl} target="_blank" rel="noreferrer" title="Original posting" aria-label="Open original posting">↗</a></span><ul className="jm-facts">{[formatLocation(job.location),job.jd.work,job.jd.kind,job.level,job.track?`${TRACK_LABEL[job.track]||job.track} track`:null,ago(job.postedAt??job.foundAt)].filter(Boolean).map((v,i)=><li key={i}>{v}</li>)}</ul></header>
+    <section className="jm-decision-strip" aria-label="Decision summary"><div className={`jm-score-ring ${score!=null&&score>=80?'positive':''}`} style={{'--score':`${score??0}%`} as React.CSSProperties}><strong>{score!=null?Math.round(score):'—'}</strong><small>Bank fit</small></div><div><strong>{required?.total?`${required.matched}/${required.total}`:'—'}</strong><small>Core skills</small></div><div><strong>{job.resumeMatch?Math.round(job.resumeMatch.score):'—'}<span className="jm-outof">/100</span></strong><small>This resume</small></div><span className={`jm-verdict ${score!=null&&score>=85&&job.fit?.confidence!=='low'?'positive':''}`}>{verdict}</span><span className="jm-confidence" title={job.fit?.confidence_reasons.join('. ')}>Confidence: {job.fit?.confidence??'pending'}</span></section>
+    <div className="jm-toolbar"><div className="jm-tabs" role="tablist" aria-label="Job intelligence views">{(['Overview','Skill match','Evidence','Description','Company']as Tab[]).map(t=><button type="button" role="tab" aria-selected={tab===t} tabIndex={tab===t?0:-1} id={`jm-tab-${t.replace(' ','-')}`} key={t} onClick={()=>setTab(t)} onKeyDown={e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.stopPropagation();e.preventDefault();const tabs:Tab[]=['Overview','Skill match','Evidence','Description','Company'];const n=(tabs.indexOf(t)+(e.key==='ArrowRight'?1:4))%5;setTab(tabs[n]);document.getElementById(`jm-tab-${tabs[n].replace(' ','-')}`)?.focus();}}}>{t}</button>)}</div><button type="button" className="jm-expand" ref={fullButton} onClick={()=>setFull(true)} title="Expand job description (F)" aria-label="Expand full job description">⤢</button></div>
+    <div className="jm-content" role="tabpanel" aria-labelledby={`jm-tab-${tab.replace(' ','-')}`}>
+    {job.fit?.confidence==='low'&&<p className="jm-confidence-note">Limited posting detail: {job.fit.confidence_reasons[0]||'review the description before deciding.'}</p>}
+    {tab==='Overview'&&<div className="jm-overview-grid"><section className="jm-card jm-why"><h2><span className="jm-green">✓</span> Why you match <small>Bank evidence</small></h2>{strong.length?strong.slice(0,4).map(proofButton):<p className="jm-muted">No strong requirement evidence found. Check Skill match before deciding.</p>}</section><section className="jm-card jm-concerns"><h2><span className="jm-amber">△</span> Potential concerns <small>{concerns.length} skills</small></h2>{concerns.slice(0,3).map(proofButton)}{job.fit?.knockouts.items.filter(i=>i.status!=='clear').slice(0,2).map((k,i)=><p className={k.status==='blocked'?'jm-blocker':'jm-muted'} key={i}>{k.reason}</p>)}{!concerns.length&&<p className="jm-muted">No skill gaps recognized. This does not rule out requirements the parser missed.</p>}{concerns.length>3&&<button type="button" className="apps-link" onClick={()=>setTab('Skill match')}>Review all {concerns.length} concerns →</button>}</section><section className="jm-card jm-skills-card"><h2>Skill match <button type="button" className="apps-link" onClick={()=>setTab('Skill match')}>All {proofs.length} →</button></h2><div className="jm-mini-skills">{proofs.slice(0,5).map(p=><button type="button" key={p.label} onClick={()=>showProof(p)}><span>{p.label}</span><span className={`jm-state is-${p.strength}`}>{strengthLabel[p.strength]}</span></button>)}</div><p className="jm-footnote">Evidence strength, not an invented percentage.</p></section><section className="jm-card jm-role"><h2>Role at a glance</h2><dl>{[['Workplace',job.jd.work||formatLocation(job.location)||'Not stated'],['Job type',job.jd.kind||'Not stated'],['Level',job.level||'Not stated'],['Salary',job.jd.salary||'Not stated']].map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl></section><section className="jm-card jm-edge"><h2>◇ Your edge</h2>{edge?<><span className="jm-eyebrow">Strongest evidence cluster</span><b>{edge.entry}</b><p>{edgeSkills.slice(0,4).join(' + ')}</p><small>{edgeSkills.length} requested skills share this evidence source.</small></>:<p className="jm-muted">No strong evidence cluster found for this posting.</p>}{concerns[0]&&<span className="jm-edge-gap">Check first: {concerns[0].label} · {strengthLabel[concerns[0].strength].toLowerCase()} evidence</span>}</section></div>}
+    {tab==='Skill match'&&<section className="jm-card jm-full-card"><h2>Requirement → evidence <small>{required?.matched??0}/{required?.total??0} required matched</small></h2><p className="jm-muted">Strong: a work or project bullet. Moderate: tools tied to work. Weak: a skills-list mention. Partial: related technology. Missing: no bank evidence.</p>{proofs.map(proofButton)}</section>}
+    {tab==='Evidence'&&<section className="jm-card jm-full-card"><h2>Evidence ledger <small>Stored candidate bank</small></h2>{proofs.filter(p=>p.text).map(p=><button type="button" className="jm-evidence-card" key={p.label} onClick={()=>showProof(p)}><span><b>{p.label}</b><em className={`jm-state is-${p.strength}`}>{strengthLabel[p.strength]}</em></span><small>{p.entry} · {p.box?'Locate in this PDF':'Bank evidence; no exact PDF link'}</small><p>{p.text}</p></button>)}{!proofs.some(p=>p.text)&&<p className="jm-muted">No stored supporting evidence for this job’s recognized requirements.</p>}</section>}
+    {tab==='Description'&&<section className="jm-card jm-full-card"><h2>Full job description</h2><p className="jm-footnote">Green terms have evidence in your bank. Check Evidence to see whether the bullet is in this PDF.</p><Description job={job}/></section>}
+    {tab==='Company'&&<section className="jm-card jm-full-card"><h2>{job.company}</h2>{(()=>{const c=meta?.companies?.find(c=>c.name===job.company);return c?<div className="jm-company-stats">{[[c.count,'Matching jobs'],[c.newToday,'New today'],[c.bestMatch??'—','Best bank fit'],[c.saved,'Saved']].map(([v,k])=><div key={k}><strong>{v}</strong><span>{k}</span></div>)}</div>:null;})()}<p className="jm-muted">Counts come from the current resume-ready queue. No candidate percentile, company-size or salary estimates are inferred.</p><button type="button" className="apps-btn" onClick={()=>chooseCompany(job.company.trim().toLowerCase())}>Browse this company’s jobs</button></section>}
+    </div>
+    <section className="jm-similar" aria-label="Similar opportunities"><header><h2>Similar opportunities</h2><span>Shared skills & role terms</span></header><div>{(job.similar??[]).slice(0,4).map(j=><button type="button" key={j.id} onClick={()=>jump(j)}><CompanyLogo company={j.company} size="sm"/><span><b>{j.company}</b><span>{j.title}</span><small>{j.score!=null?`${Math.round(j.score)} bank fit`:'Fit pending'} · {formatLocation(j.location)}</small></span><i>›</i></button>)}{!job.similar?.length&&<p className="jm-muted">No closely related resume-ready jobs found.</p>}</div></section>
+   </section>
+   <section className="jm-resume" aria-label="Tailored resume"><header className="jm-rhead"><b>Tailored resume</b><a className="apps-link" href={`/resume_builder?job=${encodeURIComponent(job.id)}`}>Edit resume ↗</a>{job.ready&&<span className={`jm-ready is-${job.ready.status.toLowerCase().replace(' ','-')}`} title={job.ready.reasons.join('. ')}>Resume Ready · {job.ready.status}</span>}</header>{job.ready&&job.ready.status!=='Ready'&&job.ready.reasons.length>0&&<details className="jm-ready-details"><summary>{job.ready.reasons.length} checks to review</summary><ul>{job.ready.reasons.map(r=><li key={r}>{r}</li>)}</ul></details>}<div className="jm-page-box">{imgOk?<div className="jm-paper"><img key={job.id} src={imageUrl(job)} alt={`Tailored resume for ${job.company}`} onError={()=>setImgOk(false)}/>{proof?.box&&<div className="jm-pdf-highlight" style={{left:`${proof.box.x}%`,top:`${proof.box.y}%`,width:`${proof.box.width}%`,height:`${proof.box.height}%`}} aria-label={`Resume evidence for ${proof.label}`}/>}</div>:<p className="jm-muted">Preview unavailable. <a href={job.resumeObject?`${getTailorServerBase()}/applications/resume-file?sha=${job.resumeObject.sha256}&kind=pdf`:`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(job.resumePath)}`} target="_blank" rel="noreferrer">Open PDF ↗</a></p>}</div>{proof&&<aside className="jm-proof-inspector" aria-label="Selected evidence"><header><b>{proof.label}<span className={`jm-state is-${proof.strength}`}>{strengthLabel[proof.strength]}</span></b><button type="button" onClick={()=>setProof(null)} aria-label="Close evidence">×</button></header><small>{proof.entry||'No stored source'} · {proof.box?'Highlighted in this PDF':'Bank evidence; not located in this PDF'}</small><p>{proof.text||'No direct supporting evidence in the candidate bank. Treat this as a real gap.'}</p>{proof.source&&<details><summary>Job requirement</summary><p>{proof.source}</p></details>}</aside>}</section>
+   </>}
+  </main>
+  <footer className="jm-actions"><div className="jm-browse"><button type="button" className="apps-btn" onClick={back} disabled={!previous.length||busy}>← Previous</button><button type="button" className="jm-next" onClick={next} disabled={!job||busy} aria-label="Next job without deciding" title="Next job without deciding (→)">→</button></div><div className="jm-progress"><span>{meta?.stats?.opened??0} opened <i>·</i> {meta?.stats?.saved??0} saved <i>·</i> {meta?.stats?.remaining??0} remaining</span><label title="After five decisions, preferences adjust ordering by at most two points; jobs are never hidden."><input type="checkbox" checked={learn} onChange={e=>{setLearn(e.target.checked);localStorage.setItem('matching-personalize',e.target.checked?'1':'0');}}/>Learn preferences{meta?.preference?.active?' · active':''}</label></div><div className="jm-decision-actions"><button type="button" className="apps-btn" onClick={()=>void decide('skip')} disabled={!job||busy}>Not apply <kbd>N</kbd></button><button type="button" className="apps-btn" onClick={()=>void decide('later')} disabled={!job||busy}>Save for later <kbd>S</kbd></button><button type="button" className="rv-primary" ref={applyButton} onClick={()=>void decide('apply')} disabled={!job||busy}>Apply ↗ <kbd>↵</kbd></button></div></footer>
+  <div className="jm-notice" role="status" aria-live="polite">{notice}{lastDecision&&<button type="button" onClick={()=>void undo()} disabled={busy}>Undo choice</button>}</div>
+  {more&&<div className="jm-overlay" onClick={()=>setMore(false)}><div className="jm-company-picker" role="dialog" aria-modal="true" aria-label="All companies" onClick={e=>e.stopPropagation()}><header><h2>Companies in your queue</h2><button onClick={()=>setMore(false)} aria-label="Close companies">×</button></header>{meta?.companies?.map(c=><button type="button" key={c.key} onClick={()=>chooseCompany(c.key)}><CompanyLogo company={c.name} size="sm"/><b>{c.name}</b><span>{c.count} jobs</span></button>)}</div></div>}
+  {full&&job&&<div className="jm-overlay" onClick={()=>setFull(false)}><div className="jm-sheet" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Full job description" onKeyDown={e=>{if(e.key==='Tab'){e.preventDefault();dialog.current?.querySelector<HTMLButtonElement>('button')?.focus();}}} onClick={e=>e.stopPropagation()}><header><b>{job.company} · {job.title}</b><button type="button" className="apps-btn" onClick={()=>setFull(false)}>Close <kbd>Esc</kbd></button></header><div className="jm-sheet-body"><Description job={job}/></div></div></div>}
+ </div>;
 }

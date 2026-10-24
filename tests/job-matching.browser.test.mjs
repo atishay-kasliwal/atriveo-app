@@ -1,59 +1,34 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import http from 'node:http';
-import path from 'node:path';
-import os from 'node:os';
-import { createRequire } from 'node:module';
-const { chromium } = createRequire(path.join(os.homedir(), 'playatriveo/package.json'))('playwright');
-const root = path.resolve(import.meta.dirname, '..');
-const full = 'Required Skills\nJava, React.js, and Python.\nResponsibilities\n' + 'Build APIs and collaborate with the team.\n'.repeat(70) + 'End of full posting.';
-const sample = { ok: true, total: 1, jobs: [{ id: 'https://example.org/job/1', company: 'Example', title: 'Full Stack Developer', location: 'NY - New York', track: 'software-engineer', saved: false, applyUrl: 'https://example.org/job/1', resumePath: '/resume.pdf', jd: { full, flags: [] }, ats: { score: 78, required: {matched: 2, total: 3}, keywords: [{name:'Java', matched:false}, {name:'React',matched:true}, {name:'Python',matched:true}], highlights: [{start: full.indexOf('React.js'), end: full.indexOf('React.js') + 8}, {start: full.indexOf('Python'), end: full.indexOf('Python') + 6}], pages:1, roomLines:0 } }] };
-
-test('full description, green PDF keywords and ATS score fit desktop and mobile', async t => {
- const fixture = process.env.JM_UI_FIXTURE ? JSON.parse(fs.readFileSync(process.env.JM_UI_FIXTURE, 'utf8')) : sample;
- const server = http.createServer((req,res) => {
-  const pathname = new URL(req.url,'http://localhost').pathname;
-  const requested = path.join(root,'dist-apply',pathname);
-  const file = fs.existsSync(requested) && fs.statSync(requested).isFile() ? requested : path.join(root,'dist-apply/index.html');
-  res.setHeader('Content-Type', file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(file));
- });
- await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
- const base = `http://localhost:${server.address().port}`;
- t.after(async()=>{await new Promise(resolve=>server.close(resolve));});
- const browser = await chromium.launch({headless:true, executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH});
- t.after(async()=>{await browser.close();});
- const page = await browser.newPage({viewport:{width:1600,height:1000}});const errors=[];
- page.on('pageerror',e=>errors.push(e.message));
- await page.route('**/*', route=>{
-  const url=new URL(route.request().url());
-  const headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Credentials':'true'};
-  if(url.pathname==='/api/auth/me')return route.fulfill({json:{user:{id:1,email:'katishay@gmail.com',name:'Test'}},headers});
-  if(url.pathname==='/applications/matching-queue')return route.fulfill({json:fixture,headers});
-  if(url.pathname==='/applications/resume-image')return route.fulfill(process.env.JM_UI_IMAGE ? {path:process.env.JM_UI_IMAGE,contentType:'image/png',headers} : {status:404,headers});
-  if(url.origin===base)return route.continue();
-  return route.abort();
- });
- await page.goto(base+'/job-matching');
- await page.getByRole('heading',{name:'Full job description'}).waitFor();
- const score=page.getByLabel('ATS match score');
- assert.ok((await score.innerText()).includes(`${fixture.jobs[0].ats.score}`));
- assert.equal(await page.locator('.jm-panel .jm-description').innerText(),fixture.jobs[0].jd.full);
- assert.ok(await page.locator('.jm-panel mark').count()>0);
- assert.equal(await page.locator('.jm-facts').innerText().then(s=>s.includes('New York, NY')),true);
- for(const viewport of [{width:1600,height:1000},{width:1280,height:720},{width:390,height:844}]){
-  await page.setViewportSize(viewport);
-  assert.ok(await score.isVisible());
-  const bounds=await score.boundingBox();assert.ok(bounds.y+bounds.height<viewport.height, JSON.stringify({viewport,bounds}));
-  assert.ok(await page.getByRole('button',{name:/^Apply/}).isVisible());
-  const dimensions=await page.evaluate(()=>({width:document.documentElement.scrollWidth,height:document.documentElement.scrollHeight,viewport:innerHeight}));
-  assert.ok(dimensions.width<=viewport.width);assert.ok(dimensions.height<=dimensions.viewport+1);
- }
- await page.setViewportSize({width:1600,height:1000});
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import http from 'node:http';import path from 'node:path';import os from 'node:os';import {createRequire} from 'node:module';
+const {chromium}=createRequire(path.join(os.homedir(),'playatriveo/package.json'))('playwright');const root=path.resolve(import.meta.dirname,'..');
+const p=(label,strength,entry='Stony Brook University')=>({label,strength,status:strength==='strong'?'matched':strength==='missing'?'missing':'partial',class:'required',entry,text:strength==='missing'?null:`Built ${label} production services with measured improvements.`,source:`Experience in ${label}`,tier:'job_bullet',box:strength==='strong'?{x:10,y:25,width:75,height:5}:null});
+const proofs=[p('Python','strong'),p('AWS','strong'),p('Machine learning','strong','Wake Forest – CAIR'),p('C++','partial'),p('SageMaker','missing')];
+const mk=(key,company,title)=>({key,id:`https://example.org/${key}`,company,title,location:'Bellevue, WA',position:1,level:'Entry',track:'ai-engineer',foundAt:'2026-10-24T12:00:00Z',applyUrl:`https://example.org/apply/${key}`,postingUrl:`https://example.org/${key}`,resumePath:'/resume.pdf',resumeMatch:{score:84},jd:{full:'Required Skills\nPython and AWS.\nResponsibilities\nBuild reliable inference services.',work:null,kind:'Full-time',salary:null,flags:[]},fit:{score:87,confidence:'high',confidence_reasons:[],ledger:{required:{matched:3,total:5},total:{matched:3,total:5},skills:proofs.map(x=>({...x,alternatives:[x.label],evidence:x.text?{entry:x.entry,text:x.text,tier:x.tier}:undefined}))},knockouts:{verdict:'clear',items:[]}},ats:{proofs,highlights:[],pages:1,roomLines:0},ready:{status:'Review',reasons:['Check the skills left off this resume.']},similar:[]});
+const jobs=[mk('1','Amazon Web Services (AWS)','Software Development Engineer II, SageMaker AI Inference'),mk('2','NVIDIA','AI Systems Engineer'),mk('3','Google','Applied ML Engineer')];jobs.forEach(j=>j.similar=jobs.filter(x=>x.id!==j.id).map(({id,key,company,title,location})=>({id,key,company,title,location,score:87})));
+const companies=['Amazon Web Services (AWS)','NVIDIA','Google','Meta','Microsoft','Apple','OpenAI','Tesla','Stripe','Databricks','Netflix'].map(name=>({key:name.toLowerCase(),name,count:5,newToday:2,bestMatch:87,saved:1}));
+test('matching workspace supports evidence, company filters, safe navigation, decisions and responsive layout',async t=>{
+ const source=process.env.JM_UI_FIXTURE?JSON.parse(fs.readFileSync(process.env.JM_UI_FIXTURE,'utf8')):null;const list=source?.jobs??jobs;
+ const server=http.createServer((req,res)=>{const f=path.join(root,'dist-apply',new URL(req.url,'http://localhost').pathname);const file=fs.existsSync(f)&&fs.statSync(f).isFile()?f:path.join(root,'dist-apply/index.html');res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(file));});await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(()=>new Promise(r=>server.close(r)));
+ const browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH});t.after(()=>browser.close());const page=await browser.newPage({viewport:{width:1660,height:1000}});page.setDefaultTimeout(10000);const errors=[],decisions=[],requests=[];page.on('pageerror',e=>errors.push(e.message));const base=`http://localhost:${server.address().port}`;
+ await page.route('**/*',async route=>{const u=new URL(route.request().url());const headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Credentials':'true','Access-Control-Allow-Headers':'Content-Type'};
+ if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers});
+ if(u.pathname==='/api/auth/me')return route.fulfill({json:{user:{id:1,name:'Test',email:'katishay@gmail.com'}}});
+ if(u.pathname==='/applications/matching-queue'){requests.push(u);const selected=u.searchParams.get('job');const filter=u.searchParams.get('company');const excluded=new Set((u.searchParams.get('exclude')||'').split(','));let rows=list.filter(j=>!excluded.has(j.key)&&(!filter||j.company.toLowerCase()===filter));if(selected)rows.sort((a,b)=>Number(b.id===selected)-Number(a.id===selected));return route.fulfill({json:{...(source??{}),ok:true,total:list.length,jobs:rows,companies:source?.companies??companies,stats:source?.stats??{opened:2,skipped:1,saved:1,remaining:list.length},preference:{active:false,limit:2}},headers});}
+ if(u.pathname==='/applications/matching-event')return route.fulfill({json:{ok:true},headers});
+ if(u.pathname==='/applications/job-decision'){decisions.push(route.request().postDataJSON());return route.fulfill({json:{ok:true},headers});}
+ if(u.pathname==='/applications/resume-image'||u.pathname==='/applications/resume-file')return route.fulfill(process.env.JM_UI_IMAGE?{path:process.env.JM_UI_IMAGE,contentType:'image/png',headers}:{status:404,headers});
+ if(u.origin===base)return route.continue();return route.abort();});
+ await page.goto(base+'/job-matching');await page.getByRole('heading',{name:list[0].title,exact:true}).waitFor();
+ for(const viewport of [{width:1660,height:1000},{width:1440,height:900},{width:1280,height:720},{width:390,height:844}]){await page.setViewportSize(viewport);const d=await page.evaluate(()=>({w:document.documentElement.scrollWidth,h:document.documentElement.scrollHeight,vh:innerHeight}));assert.ok(d.w<=viewport.width,JSON.stringify({viewport,d}));assert.ok(d.h<=d.vh+1,JSON.stringify({viewport,d}));const b=await page.getByRole('button',{name:/^Apply ↗/}).boundingBox();assert.ok(b.y+b.height<=viewport.height);}
+ await page.setViewportSize({width:1660,height:1000});
  if(process.env.JM_UI_SCREENSHOT)await page.screenshot({path:process.env.JM_UI_SCREENSHOT});
- await page.getByRole('button',{name:/^Expand/}).click();
- await page.getByRole('dialog').waitFor();
- assert.equal(await page.locator('.jm-sheet .jm-description').innerText(),fixture.jobs[0].jd.full);
- await page.keyboard.press('Escape');assert.equal(await page.getByRole('dialog').count(),0);
+ await page.getByRole('tab',{name:'Evidence',exact:true}).click();const evidence=page.locator('.jm-evidence-card').first();if(await evidence.count()){await evidence.click();await page.getByLabel('Selected evidence').waitFor();await page.getByRole('button',{name:'Close evidence'}).click();}
+ await page.getByRole('tab',{name:'Description',exact:true}).click();assert.equal(await page.locator('.jm-description').innerText(),list[0].jd.full);
+ await page.getByRole('button',{name:'Expand full job description'}).click();await page.getByRole('dialog',{name:'Full job description'}).waitFor();await page.keyboard.press('Escape');assert.equal(await page.getByRole('dialog').count(),0);
+ await page.keyboard.press('a');assert.equal(decisions.length,0);assert.equal(await page.getByRole('button',{name:/^Apply ↗/}).evaluate(e=>e===document.activeElement),true);
+ await page.keyboard.press('ArrowRight');await page.getByRole('heading',{name:list[1].title,exact:true}).waitFor();assert.equal(decisions.length,0);
+ await page.keyboard.press('ArrowLeft');await page.getByRole('heading',{name:list[0].title,exact:true}).waitFor();
+ await page.getByRole('tab',{name:'Overview',exact:true}).click();const related=page.locator('.jm-similar button').first();if(await related.count()){await related.click();await page.waitForFunction(title=>document.querySelector('.jm-job-header h1')?.textContent!==title,list[0].title);}
+ await page.getByRole('button',{name:/^Not apply/}).click();await page.waitForFunction(()=>document.querySelector('.jm-notice')?.textContent?.includes('Marked not apply'));assert.equal(decisions.at(-1).decision,'skip');await page.getByRole('button',{name:'Undo choice'}).click();await page.waitForFunction(()=>document.querySelector('.jm-notice')?.textContent?.includes('undone'));assert.equal(decisions.at(-1).decision,'undo');
+ await page.getByRole('button',{name:`${(source?.companies??companies)[0].name}, ${(source?.companies??companies)[0].count} matching jobs`,exact:true}).click();await page.waitForTimeout(150);assert.ok(requests.some(u=>u.searchParams.has('company')));
  assert.deepEqual(errors,[]);
 });

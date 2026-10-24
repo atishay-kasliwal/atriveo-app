@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { queueKey, companyKey, companySummary, similarJobs, matchingEvents, preferenceBoost, recordMatchingEvent, forgetMatchingDecision } from "./matching-workspace.mjs";
 import { analyzeMatchingResume } from "./job-matching-analysis.mjs";
 import path from "node:path";
 import { execFile } from "node:child_process";
@@ -107,14 +108,14 @@ export function rankForMatching(docs, later = new Map()) {
   });
 }
 
-export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date() } = {}) {
+export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(), company = null, jobUrl = null, exclude = [], learn = true } = {}) {
   const since = new Date(now.getTime() - DAYS * 86_400_000);
   const [docs, applied, swipes] = await Promise.all([
     db.collection("jobs").find({ run_at: { $gte: since }, "resume.status": "success", "resume.pdf_path": { $type: "string" } },
-      { projection: { _id: 0, job_url: 1, job_url_direct: 1, company: 1, title: 1, location: 1, level: 1, score_pct: 1, date_posted: 1, run_at: 1, apply_type: 1, site: 1, "resume.pdf_path": 1, "resume.object": 1 } })
+      { projection: { _id: 0, job_url: 1, job_url_direct: 1, company: 1, title: 1, location: 1, level: 1, score_pct: 1, date_posted: 1, run_at: 1, apply_type: 1, site: 1, fit: 1, "resume.pdf_path": 1, "resume.object": 1 } })
       .sort({ run_at: -1 }).limit(1500).toArray(),
     db.collection("applications").distinct("jobUrls"),
-    db.collection("job_swipes").find({}, { projection: { _id: 0, job_url: 1, direction: 1, swiped_at: 1 } }).toArray(),
+    db.collection("job_swipes").find({}, { projection: { _id: 0, job_url: 1, direction: 1, swiped_at: 1, source: 1 } }).toArray(),
   ]);
   const taken = new Set(applied);
   const later = new Map();
@@ -130,7 +131,21 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
   // Fit (master resume against the posting) is kept on each job; up to FIT_PER_REQUEST missing or stale ones are computed here.
   const fits = await ensureFit(db, [...byUrl.values()], { max: FIT_PER_REQUEST });
   for (const d of byUrl.values()) d.fit = fits.get(d.job_url) ?? null;
-  const ranked = rankForMatching([...byUrl.values()], later);
+  const events = learn ? await matchingEvents(db).catch(() => []) : [];
+  const allRanked = rankForMatching([...byUrl.values()], later);
+  // A bounded preference signal can only reorder nearby scores; it never removes a job.
+  if (learn && events.length) {
+    const boosts=new Map(allRanked.map(d=>[d.job_url,preferenceBoost({...d,track:trackOf(d.title)},events)]));
+    allRanked.sort((a,b)=>Number(later.has(a.job_url))-Number(later.has(b.job_url)) || Number(a.fit?.knockouts?.verdict==='blocked')-Number(b.fit?.knockouts?.verdict==='blocked') || ((b.fit?.score??-1)+(boosts.get(b.job_url)||0))-((a.fit?.score??-1)+(boosts.get(a.job_url)||0)));
+  }
+  const companies = companySummary(allRanked, later, now);
+  const excluded = new Set(exclude.slice(0,512));
+  const scoped = company ? allRanked.filter(d=>companyKey(d.company)===companyKey(company)) : allRanked;
+  const ranked = scoped.filter(d=>!excluded.has(queueKey(d.job_url)));
+  if (jobUrl) { const i=ranked.findIndex(d=>d.job_url===jobUrl); if(i>0)ranked.unshift(...ranked.splice(i,1)); }
+  const stats = { opened: 0, skipped: 0, saved: 0, remaining: allRanked.length };
+  const known = new Set(docs.map(d=>d.job_url));
+  for(const swipe of swipes) if(known.has(swipe.job_url)&&swipe.source==='job-matching'){if(swipe.direction==='right')stats.opened++;else if(swipe.direction==='left')stats.skipped++;else if(swipe.direction==='later')stats.saved++;}
   // A page is the rows with a resume file and a page image; others are skipped, not shown half-ready.
   const rows = [];
   let skipped = 0;
@@ -153,7 +168,7 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
   const jobs = await Promise.all(rows.map(async (d) => {
     const jd = shapeJd(jdOf.get(d.job_url) ?? "");
     return {
-      id: d.job_url, company: decode(d.company), title: decode(d.title), location: d.location ? decode(d.location) : null, level: d.level ?? null,
+      id: d.job_url, key: queueKey(d.job_url), position: scoped.findIndex(x=>x.job_url===d.job_url)+1, similar: similarJobs(d, allRanked), company: decode(d.company), title: decode(d.title), location: d.location ? decode(d.location) : null, level: d.level ?? null,
       score: typeof d.score_pct === "number" ? d.score_pct : null, postedAt: isoOf(d.date_posted), foundAt: isoOf(d.run_at),
       applyType: d.apply_type ?? null, track: trackOf(d.title),
       // The company's own form when known, else the posting you were shown.
@@ -162,7 +177,7 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
       saved: later.has(d.job_url), jd, ats: await analyzeMatchingResume(d.resume.pdf_path, jd.full, d.fit),
     };
   }));
-  return { ok: true, generatedAt: now.toISOString(), total: ranked.length - skipped, jobs };
+  return { ok: true, generatedAt: now.toISOString(), total: scoped.length - skipped, companies, stats, preference: { active: learn && events.filter(e=>["apply_opened","saved","not_apply"].includes(e.kind)).length>=5, limit: 2 }, jobs };
 }
 
 /** Not apply (left), Apply (right: you chose to; nothing is submitted), Save for later (later), or undo your last choice on it. */
@@ -172,11 +187,13 @@ export async function recordDecision(db, { jobUrl, decision, now = new Date() })
   if (decision === "undo") {
     // Only this page's own rows; a Discard or Mark applied made elsewhere stays.
     const r = await swipes.deleteOne({ job_url: jobUrl, source: SOURCE });
+    if(r.deletedCount)await forgetMatchingDecision(db,jobUrl).catch(()=>{});
     return { ok: true, undone: r.deletedCount > 0 };
   }
   const direction = { skip: "left", apply: "right", later: "later" }[decision];
   if (!direction) throw new Error("Unknown decision");
   await swipes.updateOne({ job_url: jobUrl },
     { $set: { job_url: jobUrl, direction, swiped_at: now.toISOString(), date: now.toISOString().slice(0, 10), source: SOURCE } }, { upsert: true });
+  await recordMatchingEvent(db, {jobUrl, kind: {apply:'apply_opened',skip:'not_apply',later:'saved'}[decision], now}).catch(()=>{});
   return { ok: true };
 }
