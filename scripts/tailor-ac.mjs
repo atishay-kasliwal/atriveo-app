@@ -20,6 +20,8 @@ import { resolveHeaderLocation } from "./ac-header-location.mjs";
 import { scoreAndSaveRun } from "./ats/persist.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
 import { classifyTrack, trackPins } from "./ac-tracks.mjs";
+import { fillResumePage, measurePdf } from "./ac-page-fill.mjs";
+import { auditRulebookCompleteness } from "./ac-rulebook.mjs";
 import {
   createArtifactRun,
   advanceArtifactStage,
@@ -377,9 +379,30 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     }
 
     const {
-      composition, compact, skills, headerTitle, tex, oracle, gate, contribution,
-      contribution_pruned, resume_confidence_score, variant_id, rulebook,
+      composition, skills, headerTitle, oracle, gate, contribution,
+      contribution_pruned, resume_confidence_score, variant_id,
     } = pipeline.result;
+
+    // The page rules (2026-10-24): exactly one page, filled to the bottom, two projects with at least two bullets each.
+    // The pinned or planned bullets go in first; fillResumePage adds or removes bullets and measures the compiled page.
+    onLog?.("step", "Page rules · one page, filled to the bottom, two projects × two bullets");
+    let pageFill;
+    try {
+      pageFill = fillResumePage({
+        compact: pipeline.result.compact, skills, headerTitle, location: job.location, jd: composeJd, track: classifyTrack(composeTitle),
+      });
+    } catch (e) {
+      // The page rules never stop a resume: on an error it is built as planned, and Resume Ready reports what it breaks.
+      onLog?.("warn", `Page rules unavailable: ${String(e.message || e)}`);
+      pageFill = { compact: pipeline.result.compact, tex: pipeline.result.tex, report: { changes: [], pages: null, bottom_gap_pt: null, filled: false, error: String(e.message || e) } };
+    }
+    for (const change of pageFill.report.changes) onLog?.("think", `  ${change}`);
+    onLog?.(pageFill.report.filled ? "result" : "warn",
+      `Page · ${pageFill.report.pages} page · ${pageFill.report.bottom_gap_pt}pt left before the final stretch`);
+    const compact = pageFill.compact;
+    const tex = pageFill.tex;
+    let rulebook = pipeline.result.rulebook;
+    try { rulebook = auditRulebookCompleteness(compact); } catch { /* keep the pipeline's */ }
 
     onLog?.("result", `Pipeline v${pipeline.pipeline_version} · bank v${pipeline.bank.bank_version}`);
     onLog?.("result", `RCS ${resume_confidence_score}${variant_id ? ` · winner ${variant_id}` : ""}`);
@@ -462,12 +485,16 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
 
     const report = {
       ...compactPipelineResult(pipeline),
+      // The bullets printed, after the page rules (not the pipeline's pick before them).
+      composition: compact,
+      selected_acs: [...(compact.experience || []), ...(compact.projects || [])].flatMap((s) => (s.bullets || []).map((b) => b.ac_id)),
       snapshot,
       dir,
       pipeline_steps: PIPELINE_STEPS,
       contribution_pruned,
       ac_contribution: contribution,
       rulebook,
+      page_fill: pageFill.report,
       eligibility,
       jd_gate: pipeline.jd_gate || jdGate,
       fallback: result.fallback ? { type: result.fallback, reason: result.fallback_reason } : null,
@@ -520,6 +547,14 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
 
     report.pdf = c.pdf;
     report.pages = c.pages;
+    // The page as it was sent: pages and the empty space under the last line (Resume Ready reads this small file).
+    try {
+      const final = measurePdf(c.pdf);
+      const pageFile = { ...pageFill.report, final_pages: final.pages, final_gap_pt: Math.max(0, final.bottom_gap_pt) };
+      fs.writeFileSync(path.join(dir, "page-fill.json"), `${JSON.stringify(pageFile, null, 2)}\n`);
+      report.page_fill = pageFile;
+      onLog?.(final.pages === 1 && final.bottom_gap_pt < 12 ? "result" : "warn", `Final page · ${final.pages} page · ${final.bottom_gap_pt}pt under the last line`);
+    } catch (e) { onLog?.("warn", `Page measure unavailable: ${String(e.message || e)}`); }
     fs.writeFileSync(path.join(dir, "report.json"), `${JSON.stringify(report, null, 2)}\n`);
     try {
       const { saved } = scoreAndSaveRun(dir);

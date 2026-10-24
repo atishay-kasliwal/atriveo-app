@@ -18,8 +18,8 @@ import { bankForTrack, classifyTrack, trackPins } from "./ac-tracks.mjs";
 // Part of every resume cache key: bump it when the output changes for the same JD and bank
 // (2.1.0: role tracks, title-only experience lines, Education after the header; 2.1.1: AI track
 // Accolite 3 -> 2 so the page fits; 2.1.2: no ligatures in resume text; 2.1.3: Accolite title
-// "Senior Software Developer").
-export const PIPELINE_VERSION = "2.2.0";
+// "Senior Software Developer"; 2.3.0: page rules: one page filled to the bottom, two projects with two bullets each).
+export const PIPELINE_VERSION = "2.3.0";
 
 export const PIPELINE_STEPS = [
   "load_bank",
