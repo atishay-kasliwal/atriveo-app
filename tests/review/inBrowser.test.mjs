@@ -37,7 +37,7 @@ const inBrowser = (id, extra = {}, submission = {}) => base(id, {
   ...extra, submission: { ...base(id).submission, ...submission },
 });
 const seed = () => [
-  // The worker's: questions waiting (Unanswered), approval waiting (Ready).
+  // The worker's: a question waiting (off Today; the Stats drawer shows it), approval waiting (Ready).
   base('eq', { review: { reason: 'UNKNOWN_QUESTION', detail: 'questions', since: 't', pending: [pending('Why us?')], failedChecks: [] } }),
   base('ea', { review: { reason: 'SUBMIT_APPROVAL', detail: 'ready', since: 't', pending: [], failedChecks: [] } }),
   // Yours in the browser: one can go back to the worker, one was just filled (its page may still be submitted).
@@ -74,10 +74,9 @@ test('the review queue leaves your browser\'s applications out of every action l
   try {
     const db = client.db('ib');
     await db.collection('applications').insertMany(seed());
-    const unanswered = await reviewQueue(db, { view: 'unanswered', cards: 10, now });
-    assert.deepEqual(unanswered.unanswered.map((r) => r.id), ['eq'], 'only the worker\'s application waits on the Unanswered page');
-    assert.deepEqual(unanswered.cards.map((r) => r.id), ['eq']);
-    assert.equal((await reviewQueue(db, { view: 'cards', ids: ['xb', 'xf'], now })).cards.length, 0, 'no question cards (with Approve) for them');
+    const fillable = await reviewQueue(db, { view: 'fillable', now });
+    assert.deepEqual(fillable.fillable.map((r) => r.id), [], 'none for Open & Fill on Today: eq needs an answer, xb and xf are in your browser');
+    assert.deepEqual((await reviewQueue(db, { view: 'cards', ids: ['eq', 'xb', 'xf'], now })).cards.map((r) => r.id), ['eq'], 'no question cards (with Approve) for them');
     const ready = await reviewQueue(db, { view: 'ready', now });
     assert.deepEqual(ready.ready.map((r) => r.id), ['ea'], 'Ready lists the worker\'s approval only');
     assert.equal(ready.manual.length, 0);
@@ -87,8 +86,7 @@ test('the review queue leaves your browser\'s applications out of every action l
     assert.equal(byId.xf.canReturn, false);
     assert.match(byId.xf.returnBlock, /may still submit it/);
     const counts = await reviewQueue(db, { view: 'counts', now });
-    assert.equal(counts.counts.unanswered, 1);
-    assert.equal(counts.counts.ready, 1);
+    assert.deepEqual(counts.counts, { fillable: 0, ready: 1 });
     // The Overview's attention list says what it is, with the same Return to worker answer.
     const summary = await overviewSummary(db, {});
     const row = summary.attention.find((h) => h.id === 'xb');
@@ -165,7 +163,7 @@ test('Overview: an application open in your browser says so, and its review offe
   const { summary } = globalThis.__ib;
   const f = await console_((url) => url.pathname === '/applications/analytics'
     ? (url.searchParams.get('view') === 'history' ? { ok: true, generatedAt: now.toISOString(), rows: summary.attention, total: summary.attention.length, skip: 0, limit: 25 } : summary)
-    : url.pathname === '/applications/review-queue' ? { ok: true, generatedAt: now.toISOString(), cards: [], counts: { unanswered: 1, questions: 1, ready: 1 }, unanswered: [] } : null);
+    : url.pathname === '/applications/review-queue' ? { ok: true, generatedAt: now.toISOString(), cards: [], counts: { fillable: 0, ready: 1 }, fillable: [] } : null);
   try {
     await f.page.goto(`${f.base}/stats`);
     const attention = f.page.getByRole('region', { name: /Needs your attention/ });

@@ -66,11 +66,6 @@
 .td-fill-queue { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; }
 .td-fill-queue [role="status"] { max-width: 340px; overflow-wrap: anywhere; }
 
-/* To answer: one card per application, its unanswered questions scroll inside the card. */
-.qa-grid { grid-template-rows: minmax(0, 1fr); align-items: start; }
-.qa-card .td-body { gap: 12px; padding-right: 4px; }
-.qa-questions .apps-q label { display: flex; flex-direction: column; gap: 6px; }
-.qa-questions .apps-q :is(input, select, textarea) { width: 100%; }
 .td-strip li.td-strip-link { padding: 0; }
 .td-strip li.td-strip-link a { display: flex; align-items: baseline; gap: 7px; padding: 7px 12px; color: inherit; text-decoration: none; }
 .td-strip li.td-strip-link a:hover span { color: var(--primary); }
@@ -279,16 +274,6 @@
 .td-top { font-size: 10.5px; font-weight: 700; letter-spacing: .03em; padding: 3px 8px; border-radius: 999px; color: #facc15; border: 1px solid color-mix(in oklab, #facc15 50%, transparent); }
 .td-tag.td-notready { color: #f59e0b; border-color: color-mix(in oklab, #f59e0b 45%, transparent); }
 .td-page .td-card:has(.td-notready) { opacity: .7; }
-/* Answer pop-up: one job's questions. */
-.td-answer { width: min(640px, 100%); display: flex; flex-direction: column; gap: 14px; }
-.td-answer > header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.td-answer > header h2 { margin: 0; }
-.td-answer form { display: flex; flex-direction: column; gap: 16px; }
-.td-answer-q { padding: 12px; border-radius: 10px; border: 1px solid var(--border-col); background: color-mix(in oklab, var(--accent-bg) 40%, transparent); }
-.td-answer .apps-q label { display: flex; flex-direction: column; gap: 6px; }
-.td-answer :is(input, textarea, select) { width: 100%; }
-.td-answer .td-modal-actions { align-items: center; }
-.td-answer .td-modal-actions .apps-muted { margin-right: auto; font-size: 12.5px; }
 
 /* --- Phones: filters on two swipeable lines, a one-line goal, and a scrolling list of compact cards ------ */
 @media (max-width: 759px) {

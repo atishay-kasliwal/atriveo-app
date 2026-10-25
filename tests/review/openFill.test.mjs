@@ -100,7 +100,7 @@ test('built Ready page: Open & Fill instead of Approve for Ashby/Lever; arms, th
   const { chromium } = requireEngine('playwright');
   const manualRow = { id: 'm1', company: 'Test Ashby', companyKey: 'test-ashby', title: 'Software Engineer', location: null, ats: 'ashby', url: 'https://jobs.ashbyhq.com/test/x', priority: 5, updatedAt: '2026-10-03T19:00:00Z', filledAt: '2026-10-03T18:00:00Z', resumeFile: 'r.pdf', answered: 6, readyAtCompany: 1, companySubmittedToday: false, openFill: null, priorityTags: ['Strong match', 'New York', 'New grad'] };
   const formUrl = 'https://jobs.ashbyhq.com/test/1f0e2d3c-4b5a-4968-8776-655443322110/application';
-  const queue = { ok: true, generatedAt: '2026-10-03T19:00:00Z', counts: { unanswered: 0, questions: 0, ready: 1 }, ready: [], approved: [], manual: [manualRow], worker: { online: false, updatedAt: '2026-10-03T19:00:00Z' }, killSwitch: { enabled: true, reason: null } };
+  const queue = { ok: true, generatedAt: '2026-10-03T19:00:00Z', counts: { fillable: 0, ready: 1 }, ready: [], approved: [], manual: [manualRow], worker: { online: false, updatedAt: '2026-10-03T19:00:00Z' }, killSwitch: { enabled: true, reason: null } };
   const server = http.createServer((req, res) => {
     const requested = path.join(root, 'dist-apply', req.url.split('?')[0]);
     const file = fs.existsSync(requested) && fs.statSync(requested).isFile() ? requested : path.join(root, 'dist-apply/index.html');

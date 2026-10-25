@@ -198,9 +198,9 @@ const pendingQuestion = (p) => ({
   reviewStatus: p.openEndedUserReview?.status ?? (p.answerProposal?.answer || p.openEndedSuggestion ? "suggested" : "none"),
 });
 
-// The console's `blocking` rule (src/apply/questionGroups.ts, with engine.ts's questionKind and reviewCategory) on a
-// pendingQuestion: a required question with no answer, suggestion or draft that Fill can't copy from your resume.
-// Keep the two in step; tests/review/todayLight.test.mjs checks the cases.
+// The `blocking` rule on a pendingQuestion (the engine's question categories, as engine.ts's questionKind): a required
+// question with no answer, suggestion or draft that Fill can't copy from your resume. Such applications stay off
+// Today (fillableOrder). tests/review/todayLight.test.mjs checks the cases.
 const UNREADABLE = /^(?:unlabeled\b.*|yes|no|type your response|select|choose|answer|please select)?$/i;
 const RESUME_FIELD = /^(company( name)?|employer|(job )?title|start date( month| year)?|end date( month| year)?|current (role|job)|education( history)?|school( name)?|university|degree|discipline|field of study|major)\s*\*?$/i;
 const isQuestion = (q) => q.type !== "file" && !UNREADABLE.test(String(q.label ?? "").replace(/[()*:]/g, " ").replace(/\s+/g, " ").trim());
@@ -211,7 +211,7 @@ const needsYourAnswer = (q) => categoryOf(q) === "needs_input" && !String(q.answ
   && !q.userDraft?.trim() && !q.openEndedUserReview?.draftAnswer?.trim();
 export const blockingQuestion = (q) => needsYourAnswer(q) && q.required && !RESUME_FIELD.test(String(q.label ?? "").trim());
 
-// Blocked on questions: the Unanswered page.
+// Blocked on questions; the ones Open & Fill can take are Today's fillable cards.
 const BLOCKED = { status: "NEEDS_REVIEW", ...NOT_IN_BROWSER, "submission.attemptedAt": null, $or: [
   { "review.pending.0": { $exists: true } },
   { "review.questionReviewStatus": "complete", "review.reason": { $nin: ["SUBMIT_APPROVAL", "MANUAL_SUBMIT"] } },
@@ -346,27 +346,29 @@ const questionCategory = { $switch: { branches: [
 const categoryCount = category => ({ $size: { $filter: { input: { $ifNull: ["$review.pending", []] }, cond: { $eq: [questionCategory, category] } } } });
 
 /**
- * Lightweight per-application counts keep filtering independent of card loading. light (Today) adds what a card
- * needs before its questions load: toAnswer (the console's blocking count), the ATS and the link.
+ * Today's Open & Fill cards from blocked applications: every question answered, drafted or suggested (n 0: all
+ * approved). Applications with a required question nobody answered (blockingQuestion) are left out:
+ * answering in the console was retired. Each row carries what a card needs (the ATS and the link); its resume facts
+ * load per card (view=details).
  */
-const unansweredOrder = async (apps, { light = false } = {}) => (await apps.aggregate([
+const fillableOrder = async (apps) => (await apps.aggregate([
   { $match: BLOCKED },
   { $project: {
     updatedAt: 1, company: 1, title: 1, location: 1, createdAt: 1, priorityTags: 1, jobUrls: 1, resumePath: "$resume.path",
-    ...(light ? { ats: 1, url: { $ifNull: ["$finalUrl", "$applyUrl"] }, pendingLite: { $map: { input: { $ifNull: ["$review.pending", []] }, in: {
+    ats: 1, url: { $ifNull: ["$finalUrl", "$applyUrl"] }, pendingLite: { $map: { input: { $ifNull: ["$review.pending", []] }, in: {
       label: "$$this.label", type: "$$this.type", required: "$$this.required", answerProposal: "$$this.answerProposal",
-      openEndedSuggestion: "$$this.openEndedSuggestion", openEndedUserReview: "$$this.openEndedUserReview" } } } } : {}),
+      openEndedSuggestion: "$$this.openEndedSuggestion", openEndedUserReview: "$$this.openEndedUserReview" } } },
     n: { $size: "$review.pending" },
-    suggestions: categoryCount("readyForReview"),
-    readyForReview: categoryCount("readyForReview"), needsInput: categoryCount("needsInput"), actionRequired: categoryCount("actionRequired"),
+    readyForReview: categoryCount("readyForReview"),
     rank: { $ifNull: ["$priority", 0] },
   } },
-  { $sort: { suggestions: -1, n: 1, rank: -1, updatedAt: 1, _id: 1 } },
-  { $project: { _id: 0, id: "$_id", updatedAt: 1, company: 1, title: 1, location: 1, createdAt: 1, priorityTags: 1, jobUrls: 1, resumePath: 1, n: 1, suggestions: 1, readyForReview: 1, needsInput: 1, actionRequired: 1,
-    ...(light ? { ats: 1, url: 1, pendingLite: 1 } : {}) } },
-]).toArray()).map(({ pendingLite, ...r }) => (pendingLite ? { ...r, ats: r.ats ?? null, url: r.url ?? null, toAnswer: pendingLite.map(pendingQuestion).filter(blockingQuestion).length } : r));
+  { $sort: { readyForReview: -1, n: 1, rank: -1, updatedAt: 1, _id: 1 } },
+  { $project: { _id: 0, id: "$_id", updatedAt: 1, company: 1, title: 1, location: 1, createdAt: 1, priorityTags: 1, jobUrls: 1, resumePath: 1, n: 1, readyForReview: 1, ats: 1, url: 1, pendingLite: 1 } },
+]).toArray())
+  .filter((r) => !r.pendingLite.map(pendingQuestion).some(blockingQuestion))
+  .map(({ pendingLite: _pending, ...r }) => ({ ...r, ats: r.ats ?? null, url: r.url ?? null }));
 
-/** The cards (questions included) of these applications, in this order; any no longer blocked are left out. */
+/** The cards (questions included) of these applications, in this order; any no longer blocked are left out (the Stats review drawer). */
 async function unansweredCards(apps, ids) {
   if (!ids.length) return [];
   const rows = await apps.aggregate([{ $match: { ...BLOCKED, _id: { $in: ids } } }, reviewRow(true)]).toArray();
@@ -374,12 +376,6 @@ async function unansweredCards(apps, ids) {
   return ids.filter((id) => byId.has(id)).map((id) => byId.get(id))
     .map((r) => ({ ...rowBase(r), reviewReason: r.review.reason ?? null, questionReviewStatus: r.review.questionReviewStatus ?? null, reviewStage: r.review.stage ?? null, questions: r.review.pending.map(pendingQuestion) }));
 }
-
-const blockedTotals = async (apps) => {
-  const [t] = await apps.aggregate([{ $match: BLOCKED }, { $group: { _id: null, apps: { $sum: 1 }, questions: { $sum: { $size: "$review.pending" } },
-    reviewComplete: { $sum: { $cond: [{ $eq: [{ $size: { $ifNull: ["$review.pending", []] } }, 0] }, 1, 0] } } } }]).toArray();
-  return { unanswered: t?.apps ?? 0, questions: t?.questions ?? 0, reviewComplete: t?.reviewComplete ?? 0 };
-};
 
 /** Everything on the Ready page: waiting for your approval, or for you to submit it yourself (Open & Fill). */
 const readyRows = async (apps) => (await apps.aggregate([{ $match: MAYBE_READY }, reviewRow(false)]).toArray()).filter((r) => readyForApproval(r) || readyForYou(r));
@@ -433,20 +429,15 @@ function readyLists(readyDocs, { approved, submittedRecently }, now) {
   };
 }
 
-const countsOf = (order, ready) => ({ unanswered: order.length, questions: order.reduce((n, r) => n + r.n, 0), ready: ready.length,
-  readyForReview: order.reduce((n, r) => n + r.readyForReview, 0), needsInput: order.reduce((n, r) => n + r.needsInput, 0), actionRequired: order.reduce((n, r) => n + r.actionRequired, 0),
-  // Only a completed question review is in BLOCKED with nothing pending.
-  reviewComplete: order.filter((r) => r.n === 0).length });
-
 /**
- * The Unanswered and Ready pages and the header counts, each reading only what it shows:
+ * Today and the Ready page and the header counts, each reading only what it shows:
  * the link to Mongo is slow, so load time follows the bytes read. Read-only, no history cap.
- *   counts      the header numbers
- *   unanswered  every application blocked on questions as { id, updatedAt, n } in page order,
- *               plus the cards of the first `cards`
- *   cards       the cards of `ids` still blocked, in that order
+ *   counts      the header numbers: fillable and ready
+ *   fillable    Today's Open & Fill cards from blocked applications (fillableOrder)
+ *   cards       the cards (questions included) of `ids` still blocked, in that order: the Stats review drawer
+ *   details     the resume facts of `ids` (Today's cards on screen)
  *   ready       applications waiting only for your approval, and the approvals on their way
- *   full        all of it with every card, for consoles loaded before the views existed
+ *   linkedin    LinkedIn postings with a resume ready and no application
  */
 /**
  * LinkedIn postings the pipeline found in the last `days` with a resume ready: Today shows them as "On LinkedIn"
@@ -597,7 +588,7 @@ async function cardDetails(db, ids, now) {
   return Object.fromEntries(rows.map((r) => [r.id, { resumeReady: r.resumeReady, resumeMatch: r.resumeMatch ?? null, readyState: r.readyState ?? null, ...(r.resumeEta ? { resumeEta: r.resumeEta } : {}) }]));
 }
 
-export async function reviewQueue(db, { view = "full", cards = 0, ids = [], light = false, now = new Date() } = {}) {
+export async function reviewQueue(db, { view, ids = [], light = false, now = new Date() } = {}) {
   const apps = db.collection("applications");
   const generatedAt = now.toISOString();
   switch (view) {
@@ -610,27 +601,18 @@ export async function reviewQueue(db, { view = "full", cards = 0, ids = [], ligh
       return { ok: true, generatedAt, linkedin: light ? rows : await addResumeEta(db, rows, now) };
     }
     case "counts": {
-      const [engine, totals, ready] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps)]);
-      return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length } };
+      const [engine, order, ready] = await Promise.all([engineState(db), fillableOrder(apps), readyRows(apps)]);
+      return { ok: true, generatedAt, ...engine, counts: { fillable: order.length, ready: ready.length } };
     }
-    case "unanswered": {
-      const [engine, order, ready] = await Promise.all([engineState(db), unansweredOrder(apps, { light }), readyRows(apps)]);
-      await addJobFacts(db, order, { light });
-      if (!light) await addResumeEta(db, order, now);
-      const first = await unansweredCards(apps, order.slice(0, cards).map((r) => r.id));
-      return { ok: true, generatedAt, ...engine, counts: countsOf(order, ready), unanswered: order, cards: first };
+    case "fillable": {
+      const [engine, order, ready] = await Promise.all([engineState(db), fillableOrder(apps), readyRows(apps)]);
+      await addJobFacts(db, order, { light: true });
+      return { ok: true, generatedAt, ...engine, counts: { fillable: order.length, ready: ready.length }, fillable: order };
     }
     case "ready": {
-      const [engine, totals, ready, approved, inBrowser] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps), approvals(apps, now), inBrowserRows(apps, now)]);
+      const [engine, ready, approved, inBrowser] = await Promise.all([engineState(db), readyRows(apps), approvals(apps, now), inBrowserRows(apps, now)]);
       await addJobFacts(db, ready);
-      return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length, inBrowser: inBrowser.length }, ...readyLists(ready, approved, now), inBrowser };
-    }
-    case "full": {
-      const [engine, order, ready, approved, inBrowser] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps), approvals(apps, now), inBrowserRows(apps, now)]);
-      await addJobFacts(db, [...order, ...ready]);
-      await addResumeEta(db, order, now);
-      const unanswered = await unansweredCards(apps, order.map((r) => r.id));
-      return { ok: true, generatedAt, ...engine, counts: { ...countsOf(order, ready), inBrowser: inBrowser.length }, unanswered, ...readyLists(ready, approved, now), inBrowser };
+      return { ok: true, generatedAt, ...engine, counts: { ready: ready.length, inBrowser: inBrowser.length }, ...readyLists(ready, approved, now), inBrowser };
     }
     default:
       throw new Error(`Unknown review-queue view: ${view}`);

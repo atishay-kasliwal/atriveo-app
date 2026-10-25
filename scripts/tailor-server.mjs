@@ -77,6 +77,8 @@ dotenv.config({ path: path.join(ROOT, ".env.tailor") });
 
 // Load the engine bank once at startup.
 const RECOVER_SCRIPT = path.join(SCRIPT_DIR, "tailor-recover.mjs");
+// Engine actions only the retired answer pages (/unanswered, /answers) sent; refused before the action CLI runs.
+const RETIRED_ACTIONS = new Set(["question_review", "application_review"]);
 function spawnRecover(reason) {
   try {
     const child = spawn(process.execPath, [RECOVER_SCRIPT, `--reason=${reason}`], {
@@ -1673,6 +1675,14 @@ const server = http.createServer(async (req, res) => {
     });
     // One action at a time: each run rewrites the learned-answers file, so two at once could drop answers.
     req.on("end", () => {
+      // Story-answer review (question_review, application_review) belonged to the retired answer pages.
+      let action = null;
+      try { action = JSON.parse(raw || "{}")?.action ?? null; } catch { /* the action CLI reports bad JSON */ }
+      if (RETIRED_ACTIONS.has(action)) {
+        res.writeHead(410, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify({ ok: false, error: `${action} was retired with the answer pages` }));
+        return;
+      }
       applicationActions = applicationActions.then(() => new Promise((done) => {
         const dir = process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo");
         const child = spawn(path.join(dir, "node_modules", ".bin", "tsx"), ["src/cli/action.ts"], { cwd: dir, env: process.env });
@@ -1697,11 +1707,10 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // GET /applications/review-queue?view=counts|unanswered|cards|details|ready|linkedin — the Unanswered and Ready pages
-  // and the header counts, each reading only what it shows (read-only, no cap; see reviewQueue).
-  // &cards=N with view=unanswered: the first N cards too. &ids=a,b with view=cards: those cards; with view=details:
-  // those cards' resume facts. &light=1 with view=unanswered|linkedin: rows without them (Today loads them per page).
-  // No view: everything at once; ?counts=1 is view=counts (consoles loaded before the views).
+  // GET /applications/review-queue?view=counts|fillable|cards|details|ready|linkedin — Today, the Ready page, the Stats
+  // review drawer (cards) and the header counts, each reading only what it shows (read-only, no cap; see reviewQueue).
+  // &ids=a,b with view=cards: those cards; with view=details: those cards' resume facts. &light=1 with view=linkedin:
+  // rows without them (Today loads them per page). ?counts=1 is view=counts (consoles loaded before the views).
   // Resume builder (docs/resume-builder.md): GET load ?job=<job_url> | ?app=<application id> | ?track=<track> |
   // ?pasted=<id>; GET pasted (your pasted resumes); GET bank (every bullet, for /bank); POST bank-retire, bank-draft, bank-draft-result, bank-approve; POST render | save | revert | bullet (save one to the bank) |
   // check (the bullet rules, nothing saved) | guess (company / title / location from a pasted JD) | start (build a
@@ -1776,11 +1785,10 @@ const server = http.createServer(async (req, res) => {
       try {
         if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
         const params = new URL(req.url, "http://x").searchParams;
-        const view = params.get("counts") === "1" ? "counts" : params.get("view") || "full";
-        const cards = Math.min(Math.max(Number(params.get("cards")) || 0, 0), 50);
+        const view = params.get("counts") === "1" ? "counts" : params.get("view") || "";
         const ids = String(params.get("ids") || "").split(",").map((id) => id.trim().slice(0, 80)).filter(Boolean).slice(0, 50);
         const light = params.get("light") === "1";
-        const data = await withMongo((db) => reviewQueue(db, { view, cards, ids, light }), { appName: "AtriveoTailorServer" });
+        const data = await withMongo((db) => reviewQueue(db, { view, ids, light }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify(data));
       } catch (e) {

@@ -8,12 +8,12 @@ import { MongoClient } from 'mongodb';
 import { blockingQuestion, readyBrief, reviewQueue } from '../../scripts/applications-analytics.mjs';
 
 // Today loads its lists light (no Resume Match, Resume Ready or resume ETA) and asks for those per page with
-// view=details. The light unanswered rows carry toAnswer, the console's blocking count. Real in-memory Mongo.
+// view=details. view=fillable leaves out applications with a blocking question. Real in-memory Mongo.
 const requireEngine = createRequire(path.join(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), 'playatriveo'), 'package.json'));
 const { MongoMemoryServer } = requireEngine('mongodb-memory-server');
 
 const q = (label, extra = {}) => ({ fingerprint: label, label, type: 'text', required: true, ...extra });
-// Each case: the pending question as the engine stores it, and whether src/apply/questionGroups.ts `blocking` holds it back.
+// Each case: the pending question as the engine stores it, and whether `blockingQuestion` holds it back.
 const CASES = [
   [q('Why do you want to work here?'), true],
   [q('Anything else?', { required: false }), false, 'optional'],
@@ -34,7 +34,7 @@ const CASES = [
 const asConsole = (p) => ({ ...p, required: Boolean(p.required), suggestedAnswer: p.answerProposal?.answer ?? p.openEndedSuggestion?.suggestedAnswer,
   userDraft: p.openEndedUserReview?.draftAnswer ?? null, reviewStatus: p.openEndedUserReview?.status ?? (p.answerProposal?.answer || p.openEndedSuggestion ? 'suggested' : 'none') });
 
-test('blockingQuestion matches the console rule', () => {
+test('blockingQuestion: required questions with nothing to start from that Fill cannot copy', () => {
   for (const [p, want, why] of CASES) assert.equal(blockingQuestion(asConsole(p)), want, `${p.label}${why ? ` (${why})` : ''}`);
 });
 
@@ -67,20 +67,21 @@ test('light lists leave out the resume facts, which view=details brings for the 
       { job_url: 'https://www.linkedin.com/jobs/view/9', company: 'Li', title: 'AI Engineer', score_pct: 60, run_at: new Date('2026-10-05T08:00:00Z'), resume: { status: 'success', pdf_path: pdf } },
     ]);
 
-    const full = await reviewQueue(db, { view: 'unanswered', now });
-    const light = await reviewQueue(db, { view: 'unanswered', light: true, now });
-    assert.deepEqual(light.unanswered.map((r) => r.id), full.unanswered.map((r) => r.id), 'same rows, same order');
-    assert.deepEqual(light.counts, full.counts);
-    const [l1, l2] = ['a1', 'a2'].map((id) => light.unanswered.find((r) => r.id === id));
-    assert.equal(l1.toAnswer, CASES.filter(([, want]) => want).length, 'the blocking questions');
-    assert.equal(l2.toAnswer, 0, 'a resume field only');
-    assert.equal(l1.ats, 'greenhouse');
-    assert.equal(l1.url, 'https://job-boards.greenhouse.io/co/jobs/a1?final', 'the final URL when there is one');
+    const fillable = await reviewQueue(db, { view: 'fillable', now });
+    assert.deepEqual(fillable.fillable.map((r) => r.id), ['a2'], 'a1 has blocking questions, so it stays off Today');
+    assert.deepEqual(fillable.counts, { fillable: 1, ready: 0 });
+    assert.deepEqual((await reviewQueue(db, { view: 'counts', now })).counts, { fillable: 1, ready: 0 }, 'the header counts the same cards');
+    const [l2] = fillable.fillable;
+    assert.equal(l2.n, 1, 'a resume field only');
+    assert.equal(l2.ats, 'greenhouse');
     assert.equal(l2.url, 'https://job-boards.greenhouse.io/co/jobs/a2');
-    assert.equal(l1.resumeReady, true);
     assert.equal(l2.resumeReady, false, 'still sorted by whether the resume is here');
-    for (const r of light.unanswered) for (const k of ['resumeMatch', 'readyState', 'resumeEta', 'pendingLite', '_jobUrls']) assert.equal(k in r, false, `${r.id} has no ${k}`);
-    assert.ok(full.unanswered.find((r) => r.id === 'a1').resumeMatch, 'the full list reads the saved Job Match');
+    for (const k of ['toAnswer', 'resumeMatch', 'readyState', 'resumeEta', 'pendingLite', '_jobUrls']) assert.equal(k in l2, false, `no ${k}`);
+    // a1 with only its non-blocking questions: Open & Fill can take it, and its final URL is the link.
+    await db.collection('applications').updateOne({ _id: 'a1' }, { $set: { 'review.pending': CASES.filter(([, want]) => !want).map(([p]) => p) } });
+    const l1 = (await reviewQueue(db, { view: 'fillable', now })).fillable.find((r) => r.id === 'a1');
+    assert.equal(l1.url, 'https://job-boards.greenhouse.io/co/jobs/a1?final', 'the final URL when there is one');
+    assert.equal(l1.resumeReady, true);
 
     const li = await reviewQueue(db, { view: 'linkedin', light: true, now });
     assert.equal(li.linkedin.length, 1);
@@ -90,8 +91,7 @@ test('light lists leave out the resume facts, which view=details brings for the 
 
     const { details } = await reviewQueue(db, { view: 'details', ids: ['a1', 'a2', 'https://www.linkedin.com/jobs/view/9', 'nope'], now });
     assert.deepEqual(Object.keys(details).sort(), ['a1', 'a2', 'https://www.linkedin.com/jobs/view/9'], 'unknown ids are left out');
-    assert.deepEqual(details.a1.resumeMatch, full.unanswered.find((r) => r.id === 'a1').resumeMatch, 'the same Job Match the full list sends');
-    assert.deepEqual(details.a2.resumeEta, full.unanswered.find((r) => r.id === 'a2').resumeEta, 'the same ETA the full list sends');
+    assert.ok(details.a1.resumeMatch, 'the saved Job Match');
     assert.equal(details.a2.resumeEta.state, 'queued');
     const fullLi = await reviewQueue(db, { view: 'linkedin', now });
     assert.deepEqual(details['https://www.linkedin.com/jobs/view/9'].resumeMatch, fullLi.linkedin[0].resumeMatch, 'the same Job Match the full LinkedIn list sends');

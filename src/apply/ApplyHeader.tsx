@@ -1,8 +1,7 @@
 import AiUsage from './AiUsage';
 import { Link, useLocation } from "react-router-dom";
 import ApplyLogo from "./ApplyLogo";
-import { blocking } from "./questionGroups";
-import { useReadyQueue, useReviewCounts, useUnansweredCards, useUnansweredQueue } from "./reviewQueue";
+import { useFillableQueue, useReadyQueue, useReviewCounts } from "./reviewQueue";
 import type { User } from "../types";
 
 async function signOut() {
@@ -13,18 +12,12 @@ async function signOut() {
 export default function ApplyHeader({ todayCount }: { user: User; todayCount?: number | null }) {
   const path = useLocation().pathname.replace(/\/+$/, "");
   const counts = useReviewCounts();
-  // Required questions nobody answered, once every application's questions have loaded (else the server's count).
-  const queue = useUnansweredQueue(60_000);
+  const queue = useFillableQueue(60_000);
   const ready = useReadyQueue(60_000);
   const worker = queue.data?.worker ?? ready.data?.worker ?? null;
-  const { cards } = useUnansweredCards();
-  const waitingRows = (queue.data?.unanswered ?? []).filter((r) => (r.needsInput ?? 0) > 0);
-  const loaded = waitingRows.every((r) => cards[r.id] && cards[r.id]!.updatedAt >= r.updatedAt);
-  // The light list carries each application's count (toAnswer), so this no longer waits for every card.
-  const toAnswer = queue.data && loaded ? waitingRows.reduce((n, r) => n + cards[r.id]!.questions.filter(blocking).length, 0)
-    : queue.data && waitingRows.every((r) => r.toAnswer !== undefined) ? waitingRows.reduce((n, r) => n + (r.toAnswer ?? 0), 0) : counts?.needsInput;
-  const page = path === "/stats" || path === "/overview" ? "stats" : path === "/unanswered" ? "answer" : path === "/answers" || path === "/ready" || path === "/review" ? "work" : "today";
-  const waiting = counts ? counts.unanswered + counts.ready : null;
+  const page = path === "/stats" || path === "/overview" ? "stats" : path === "/ready" || path === "/review" ? "work" : "today";
+  // Today's application cards: Open & Fill from blocked applications, plus approve / you submit (LinkedIn postings aside).
+  const waiting = counts ? (counts.fillable ?? 0) + counts.ready : null;
   return (
     <div className="apply-header">
       <a className="apply-brand" href="/" aria-label="Atriveo Apply home">
@@ -36,9 +29,6 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
           Today{waiting !== null ? <span className="apply-nav-n">{waiting}</span> : null}
         </Link>
         <Link to="/job-matching" aria-current={path === "/job-matching" ? "page" : undefined}>Matching</Link>
-        <Link to="/unanswered" aria-current={page === "answer" ? "page" : undefined}>
-          To answer{toAnswer !== undefined ? <span className="apply-nav-n">{toAnswer}</span> : null}
-        </Link>
         <Link to="/staffing" aria-current={path === "/staffing" ? "page" : undefined}>Staffing</Link>
         <Link to="/resume_builder" aria-current={path === "/resume_builder" ? "page" : undefined}>Resumes</Link>
         <Link to="/bank" aria-current={path === "/bank" ? "page" : undefined}>Bank</Link>
