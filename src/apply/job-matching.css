@@ -58,9 +58,9 @@
 .jm-rail>button[data-platform="ashby"]{--platform:var(--platform-ashby)}
 .jm-rail>button[data-platform="workday"]{--platform:var(--platform-workday)}
 .jm-rail>button[data-platform="smartrecruiters"]{--platform:var(--platform-smartrecruiters)}
-.jm-rail>button[data-platform]{border-color:color-mix(in oklab,var(--platform) 70%,transparent)}
-.jm-rail>button[data-platform]:hover,.jm-rail>button[data-platform]:focus-visible{border-color:var(--platform)}
-.jm-rail>button[data-platform].active{border-color:var(--platform);box-shadow:0 0 0 1px var(--platform),0 0 0 4px color-mix(in oklab,var(--platform) 22%,transparent)}
+.jm-rail>button[data-platform]{--platform-edge:color-mix(in oklab,var(--platform) 92%,var(--foreground));border-color:var(--platform-edge)}
+.jm-rail>button[data-platform]:hover,.jm-rail>button[data-platform]:focus-visible{border-color:color-mix(in oklab,var(--platform) 80%,var(--foreground))}
+.jm-rail>button[data-platform].active{border-color:var(--platform-edge);box-shadow:0 0 0 1px var(--platform-edge),0 0 0 4px color-mix(in oklab,var(--platform) 22%,transparent)}
 .jm-company-tip .jm-company-source{display:flex;align-items:center;gap:6px;color:var(--foreground)}
 .jm-rail>button[data-platform] .jm-company-source::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--platform);flex:none}
 
