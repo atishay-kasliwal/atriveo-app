@@ -1,5 +1,5 @@
-# Wake Forest MLOps patient-history workflow (confirmed 2026-10-01; restored 2026-10-25, its first id AC-200 went to an FDE bullet).
-id: AC-249
+# Wake Forest MLOps patient-history workflow (confirmed 2026-10-01; restored 2026-10-25 as AC-250: AC-200 went to an FDE bullet and AC-249 is taken by the FOMC project work).
+id: AC-250
 role: wake-forest
 fits: [ai-engineer, data-science, forward-deployed]
 slot_kind: experience
