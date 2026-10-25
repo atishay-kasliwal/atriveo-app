@@ -1,9 +1,9 @@
 import { useEffect, useSyncExternalStore } from "react";
-import { getJson, type PendingQ } from "./engine";
+import { getJson } from "./engine";
 
 // GET /applications/review-queue, one view per page so each reads only what it shows (the link
-// to Mongo is slow, so load time follows the bytes read): the Unanswered page's order and the
-// cards on screen, the Ready page's lists, the header counts. What a page loaded is kept while
+// to Mongo is slow, so load time follows the bytes read): Today's fillable and LinkedIn cards and
+// their resume facts, the Ready page's lists, the header counts. What a page loaded is kept while
 // you move between pages; pages refresh it in the background and update their own rows at once.
 
 export interface EngineState {
@@ -11,9 +11,9 @@ export interface EngineState {
   worker: { online: boolean; updatedAt: string } | null;
 }
 export interface Counts {
-  unanswered: number; questions: number; ready: number; readyForReview?: number; needsInput?: number; actionRequired?: number;
-  /** Of `unanswered`: every answer approved, waiting for you to choose Fill and verify. */
-  reviewComplete?: number;
+  /** Today's Open & Fill cards from blocked applications (every question answered or drafted). */
+  fillable?: number;
+  ready: number;
   /** Open in your browser (Apply with Atriveo): never in the lists above. */
   inBrowser?: number;
 }
@@ -44,7 +44,6 @@ interface Row {
   /** How well its tailored resume matches the job (ats-score.json Job Match, 0-100), or null before it is scored. */
   resumeMatch?: ResumeMatch | null; readyState?: ResumeReadyState | null;
 }
-export interface UnansweredApp extends Row { reviewStage?: "questions" | "final_form" | null; reviewReason: string | null; questionReviewStatus: "open" | "complete" | null; questions: PendingQ[] }
 export interface ReadyApp extends Row {
   filledAt: string; resumeFile: string | null; answered: number;
   /** Ready jobs at this company; one is submitted per company per day. */
@@ -61,7 +60,6 @@ export interface ApprovedApp extends Row {
   status: string; reviewReason: string | null; reviewDetail: string | null; failureCode: string | null;
   submittedAt: string | null; approvedAt: string | null;
 }
-/** An application blocked on questions, in the Unanswered page's order; its card loads when it's needed. */
 /** When a resume that isn't here yet should be (the server's estimate; minutes rounded to 2, 5, 10, 20, 30, 40, 60…). */
 export interface ResumeEta { state: "syncing" | "building" | "queued" | "failed" | "not_queued"; minutes: number | null; ahead?: number }
 /** Job Match of the tailored resume; required/preferred are requirement counts the resume meets. */
@@ -69,13 +67,13 @@ export interface ResumeEta { state: "syncing" | "building" | "queued" | "failed"
 export interface ResumeReadyState { status: "Ready" | "Review" | "Needs Work"; reasons: string[]; skills_checked?: boolean }
 export interface ResumeMatch { score: number | null; status?: "stale"; reason?: string; coverage?: { status: string; unparsed_requirements: number }; required?: { matched: number; total: number } | null; preferred?: { matched: number; total: number } | null }
 /**
- * toAnswer, ats and url come with the light list (Today), so a card's kind and Open & Fill don't wait for its questions;
+ * A blocked application Open & Fill can take (every question answered or drafted; n 0: all approved), for Today.
  * resumeMatch, readyState and resumeEta come per card from loadDetails.
  */
-export interface QueuedApp { toAnswer?: number; ats?: string | null; url?: string | null; resumeMatch?: ResumeMatch | null; readyState?: ResumeReadyState | null; resumeEta?: ResumeEta; resumeReady?: boolean; track?: string | null; location?: string | null; createdAt?: string | null; priorityTags?: string[]; score?: number | null; postedAt?: string | null; foundAt?: string | null; company?: string; title?: string; id: string; updatedAt: string; n: number; suggestions?: number; readyForReview?: number; needsInput?: number; actionRequired?: number }
+export interface QueuedApp { ats?: string | null; url?: string | null; resumeMatch?: ResumeMatch | null; readyState?: ResumeReadyState | null; resumeEta?: ResumeEta; resumeReady?: boolean; track?: string | null; location?: string | null; createdAt?: string | null; priorityTags?: string[]; score?: number | null; postedAt?: string | null; foundAt?: string | null; company?: string; title?: string; id: string; updatedAt: string; n: number; readyForReview?: number }
 
 interface View extends EngineState { ok: boolean; generatedAt: string; counts: Counts }
-export interface UnansweredQueue extends View { unanswered: QueuedApp[] }
+export interface FillableQueue extends View { fillable: QueuedApp[] }
 export interface ReadyQueue extends View { ready: ReadyApp[]; approved: ApprovedApp[]; manual?: ManualApp[]; inBrowser?: InBrowserApp[] }
 
 const visible = () => document.visibilityState === "visible";
@@ -96,9 +94,9 @@ const counts = store<{ counts: Counts | null }>({ counts: null });
 let countsInflight: Promise<void> | null = null;
 
 function refreshCounts(): void {
-  if (countsInflight || unanswered.loading() || ready.loading()) return;
+  if (countsInflight || fillable.loading() || ready.loading()) return;
   countsInflight = getJson<View>("/applications/review-queue?view=counts")
-    .then((r) => counts.set({ counts: r.counts }))
+    .then((r) => counts.set({ counts: { ...counts.get().counts, ...r.counts } }))
     .catch(() => { /* the badges are optional */ })
     .finally(() => { countsInflight = null; });
 }
@@ -122,8 +120,7 @@ export function adjustCounts(delta: Partial<Counts>): void {
   counts.set({
     counts: {
       ...c,
-      unanswered: Math.max(0, c.unanswered + (delta.unanswered ?? 0)),
-      questions: Math.max(0, c.questions + (delta.questions ?? 0)),
+      ...(c.fillable !== undefined ? { fillable: Math.max(0, c.fillable + (delta.fillable ?? 0)) } : {}),
       ready: Math.max(0, c.ready + (delta.ready ?? 0)),
     },
   });
@@ -137,7 +134,7 @@ interface Loaded<T> { data: T | null; error: string | null; loading: boolean }
 const STALE_MS = 10_000;
 
 /** One page's view: loaded on first use, then every `pollMs` while the tab is visible. */
-/** A polled server view; views with header counts (Unanswered, Ready) also refresh those counts. */
+/** A polled server view; views with header counts (fillable, Ready) also refresh those they carry. */
 function pageView<T extends { generatedAt: string; counts?: Counts }>(load: (first: boolean) => Promise<T>) {
   const s = store<Loaded<T>>({ data: null, error: null, loading: false });
   let inflight: Promise<void> | null = null;
@@ -145,7 +142,7 @@ function pageView<T extends { generatedAt: string; counts?: Counts }>(load: (fir
     if (inflight) return inflight;
     s.set({ loading: true });
     inflight = load(!s.get().data)
-      .then((data) => { s.set({ data, error: null }); if (data.counts) counts.set({ counts: data.counts }); })
+      .then((data) => { s.set({ data, error: null }); if (data.counts) counts.set({ counts: { ...counts.get().counts, ...data.counts } }); })
       .catch((e) => s.set({ error: e instanceof Error ? e.message : String(e) }))
       .finally(() => { inflight = null; s.set({ loading: false }); });
     return inflight;
@@ -168,15 +165,8 @@ function pageView<T extends { generatedAt: string; counts?: Counts }>(load: (fir
   return { refresh, use, loading: () => inflight !== null };
 }
 
-// Cards loaded with the first page of the Unanswered queue; the rest load as they come into view.
-const FIRST_CARDS = 20;
-
-const unanswered = pageView<UnansweredQueue>(async (first) => {
-  const n = first ? FIRST_CARDS : 0;
-  const r = await getJson<UnansweredQueue & { cards: UnansweredApp[] }>(`/applications/review-queue?view=unanswered&light=1&cards=${n}`);
-  if (n) putCards(r.unanswered.slice(0, n), r.cards);
-  return r;
-});
+// Today's Open & Fill cards from blocked applications (applications needing an answer stay off Today).
+const fillable = pageView<FillableQueue>(() => getJson<FillableQueue>("/applications/review-queue?view=fillable"));
 const ready = pageView<ReadyQueue>(() => getJson<ReadyQueue>("/applications/review-queue?view=ready"));
 
 /** A LinkedIn posting with a resume ready and no application (the engine never applies on LinkedIn). */
@@ -187,61 +177,12 @@ const linkedin = pageView<LinkedinQueue>(() => getJson<LinkedinQueue>("/applicat
 export const useLinkedinQueue = linkedin.use;
 export const refreshLinkedin = linkedin.refresh;
 
-/** The Unanswered page's order: every application blocked on questions, without its questions. */
-export const useUnansweredQueue = unanswered.use;
-export const refreshUnanswered = unanswered.refresh;
+/** Today's fillable cards, in order (the header reads its worker state too). */
+export const useFillableQueue = fillable.use;
+export const refreshFillable = fillable.refresh;
 /** The Ready page: waiting for your approval or for you to submit (Open & Fill), and the approvals on their way. */
 export const useReadyQueue = ready.use;
 export const refreshReady = ready.refresh;
-
-// --- Unanswered cards -----------------------------------------------------------------------
-
-interface Cards {
-  /** Questions and details by application id, as last loaded. */
-  cards: Record<string, UnansweredApp>;
-  /** Asked for at this version and not returned: no longer waiting for answers. */
-  gone: Record<string, string>;
-  error: string | null;
-}
-const cards = store<Cards>({ cards: {}, gone: {}, error: null });
-const cardsInflight = new Set<string>();
-
-/** Keep the cards that came back; the rest of `asked` are no longer blocked on questions. */
-function putCards(asked: QueuedApp[], got: UnansweredApp[]): void {
-  const cur = cards.get();
-  const next = { ...cur.cards };
-  for (const c of got) next[c.id] = c;
-  const gone = { ...cur.gone };
-  for (const q of asked) if (!next[q.id] || next[q.id]!.updatedAt < q.updatedAt) gone[q.id] = q.updatedAt;
-  cards.set({ cards: next, gone, error: null });
-}
-
-const needsCard = (q: QueuedApp) => {
-  const { cards: have, gone } = cards.get();
-  return !cardsInflight.has(q.id) && !(have[q.id] && have[q.id]!.updatedAt >= q.updatedAt) && !(gone[q.id] && gone[q.id]! >= q.updatedAt);
-};
-
-/** Load the cards of these applications that aren't loaded at their current version. */
-export async function loadCards(rows: QueuedApp[]): Promise<void> {
-  const want = rows.filter(needsCard);
-  if (!want.length) return;
-  want.forEach((q) => cardsInflight.add(q.id));
-  try {
-    const chunks = Array.from({ length: Math.ceil(want.length / 25) }, (_, i) => want.slice(i * 25, i * 25 + 25));
-    await Promise.all(chunks.map(async (chunk) => {
-      const r = await getJson<{ cards: UnansweredApp[] }>(`/applications/review-queue?view=cards&ids=${chunk.map((q) => encodeURIComponent(q.id)).join(",")}`);
-      putCards(chunk, r.cards);
-    }));
-  } catch (e) {
-    cards.set({ error: e instanceof Error ? e.message : String(e) });
-  } finally {
-    want.forEach((q) => cardsInflight.delete(q.id));
-  }
-}
-
-export function useUnansweredCards(): Cards {
-  return useSyncExternalStore(cards.subscribe, cards.get);
-}
 
 // --- Card details ---------------------------------------------------------------------------
 

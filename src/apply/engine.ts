@@ -56,14 +56,6 @@ export function questionKind(q: Pick<PendingQ, "label" | "type">): QuestionKind 
   return UNREADABLE.test(q.label.replace(/[()*:]/g, " ").replace(/\s+/g, " ").trim()) ? "unreadable" : "question";
 }
 
-/** Consents and declarations the engine may not flag as sensitive; each is tied to its own wording. */
-const DECLARATION = /acknowledg|privacy|consent|certif|attest|declar|\bagree|terms and conditions/i;
-
-/** A readable, non-sensitive question that isn't a declaration: safe to remember widely or copy between forms. */
-export function plainQuestion(q: PendingQ): boolean {
-  return !q.sensitive && !q.openEndedAssessment?.questionFamily && questionKind(q) === "question" && !DECLARATION.test(q.label);
-}
-
 /**
  * Where an answer is remembered unless you change it. Sensitive, unreadable and declaration
  * questions stay with this application; a question that names the company stays with the company.
@@ -73,13 +65,6 @@ export function defaultScope(q: PendingQ, company: string): Scope {
   return "application";
 }
 
-export type ReviewCategory = "ready_for_review" | "needs_input" | "action_required";
-export function reviewCategory(q: PendingQ): ReviewCategory {
-  if (questionKind(q) !== "question") return "action_required";
-  if (q.openEndedUserReview?.status === "rejected" || q.reviewStatus === "rejected") return "needs_input";
-  return q.answerProposal?.state ?? (q.suggestedAnswer || q.openEndedSuggestion?.suggestedAnswer ? "ready_for_review" : "needs_input");
-}
-export const proposalText = (q: PendingQ) => q.answerProposal?.answer ?? q.suggestedAnswer ?? q.openEndedSuggestion?.suggestedAnswer ?? "";
 
 /** The `answer` action's payload for one question; unreadable questions never leave this application. */
 export function answerFor(q: PendingQ, value: string, scope: Scope) {

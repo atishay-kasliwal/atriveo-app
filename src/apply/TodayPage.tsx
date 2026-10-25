@@ -3,17 +3,15 @@ import { outreachApi, useOutreachList, type OutreachTarget } from "./outreach";
 import JobCard, { ago, inNC, useLayout } from './JobCard';
 import { platformOf } from './platform';
 import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import OpenFillQueue from "./OpenFillQueue";
 import ApplicationReview from "./ApplicationReview";
-import AnswerModal from "./AnswerModal";
 import ResumeDownloadLink from "../components/ResumeDownloadLink";
 import PdfPreviewModal from "../components/PdfPreviewModal";
 import { postAction, when } from "./engine";
 import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, extensionVersion, noteLinkedinOpen } from "./openFill";
-import { blocking } from "./questionGroups";
 import { discardNow, dismissJobs, markJobsApplied } from "./discard";
-import { adjustCounts, loadCards, loadDetails, refreshLinkedin, refreshReady, refreshUnanswered, useCardDetails, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp, type ResumeEta, type ResumeMatch, type ResumeReadyState } from "./reviewQueue";
+import { adjustCounts, loadDetails, refreshFillable, refreshLinkedin, refreshReady, useCardDetails, useFillableQueue, useLinkedinQueue, useReadyQueue, type ManualApp, type QueuedApp, type ReadyApp, type ResumeEta, type ResumeMatch, type ResumeReadyState } from "./reviewQueue";
 import { GOALS, readPref, streakOf, useApplyHistory, useAppliedToday, useSprint, writePref } from "./todayGoal";
 import { useExclusions } from "../hooks/useExclusions";
 import { TRACK_LABEL } from "./tracks";
@@ -26,20 +24,20 @@ import "./today.css";
 // button is Open & Fill: a form the engine verified opens armed with those answers; any other (answers approved,
 // or every question answered or drafted) opens its job page, where Apply with Atriveo (the toolbar button) fills
 // it live and shows each answer, drafts included, in its side panel. You always click Submit. Applications with
-// a question nobody has answered come last and send you to To answer, which shows only those questions.
+// a required question nobody has answered aren't shown: answering in the console was retired.
 
-type Kind = "you_submit" | "approve" | "fill" | "drafted" | "linkedin" | "answer";
-interface Item { resumeMatch?: ResumeMatch | null; readyState?: ResumeReadyState | null; resumeEta?: ResumeEta; resumeReady?: boolean; easyApply?: boolean; resumePath?: string | null; track?: string | null; toAnswer?: number; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+type Kind = "you_submit" | "approve" | "fill" | "drafted" | "linkedin";
+interface Item { resumeMatch?: ResumeMatch | null; readyState?: ResumeReadyState | null; resumeEta?: ResumeEta; resumeReady?: boolean; easyApply?: boolean; resumePath?: string | null; track?: string | null; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
 
 
 
 /** The mood bar: one track at a time (keys 1–7), or Mixed, which takes the tracks in turn. */
 type TrackFilter = "all" | "mixed" | keyof typeof TRACK_LABEL;
 const TRACK_FILTERS: TrackFilter[] = ["all", ...Object.keys(TRACK_LABEL), "mixed"];
-/** What you do with it: Open & Fill (you submit, approve, approved or drafted answers), On LinkedIn, or answer first. */
-type KindFilter = "all" | "fill" | "linkedin" | "answer";
-const KIND_OF: Record<Kind, KindFilter> = { you_submit: "fill", approve: "fill", fill: "fill", drafted: "fill", linkedin: "linkedin", answer: "answer" };
-const KIND_LABEL: Record<Exclude<KindFilter, "all">, string> = { fill: "Open & Fill", linkedin: "On LinkedIn", answer: "Need answers" };
+/** What you do with it: Open & Fill (you submit, approve, approved or drafted answers) or On LinkedIn. */
+type KindFilter = "all" | "fill" | "linkedin";
+const KIND_OF: Record<Kind, KindFilter> = { you_submit: "fill", approve: "fill", fill: "fill", drafted: "fill", linkedin: "linkedin" };
+const KIND_LABEL: Record<Exclude<KindFilter, "all">, string> = { fill: "Open & Fill", linkedin: "On LinkedIn" };
 
 /** The tracks in turn (a SWE, an AI, a Data Analyst…), each in its own order; untracked jobs keep their place in the turn. */
 function interleave<T extends { track?: string | null }>(list: T[]): T[] {
@@ -83,18 +81,15 @@ const STAGE: Record<Kind, { label: string; tone: string }> = {
   fill: { label: "Answers approved", tone: "info" },
   drafted: { label: "Answers drafted", tone: "info" },
   linkedin: { label: "On LinkedIn", tone: "info" },
-  answer: { label: "Needs your answers", tone: "warn" },
 };
 
 export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const outreach = useOutreachList();
   const [outreachTarget, setOutreachTarget] = useState<OutreachTarget | null>(null);
-  const unanswered = useUnansweredQueue(60_000);
+  const queue = useFillableQueue(60_000);
   const ready = useReadyQueue(60_000);
   const linkedin = useLinkedinQueue(300_000);
-  const { cards } = useUnansweredCards();
   const detail = useCardDetails();
-  const navigate = useNavigate();
   const { mobile, columns, rows } = useLayout();
   const perPage = columns * rows;
   const [queueRunning, setQueueRunning] = useState(false);
@@ -112,10 +107,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   // The tailored resume of a card with no application (On LinkedIn), shown from its file.
   const [pdf, setPdf] = useState<string | null>(null);
-  // Answer on a card: its questions in a pop-up (To answer stays for answering many jobs at once).
-  const [answering, setAnswering] = useState<string | null>(null);
   const [track, setTrack] = useState<TrackFilter>(() => { const t = readPref<string>("track", "all"); return (TRACK_FILTERS as string[]).includes(t) ? t as TrackFilter : "all"; });
-  const [kind, setKind] = useState<KindFilter>(() => { const k = readPref<string>("kind", "all"); return ["all", "fill", "linkedin", "answer"].includes(k) ? k as KindFilter : "all"; });
+  const [kind, setKind] = useState<KindFilter>(() => { const k = readPref<string>("kind", "all"); return ["all", "fill", "linkedin"].includes(k) ? k as KindFilter : "all"; });
   const [goal, setGoal] = useState<number>(() => { const g = readPref<number>("goal", 15); return GOALS.includes(g) ? g : 15; });
   const [focus, setFocus] = useState(0);
   // Search: cards whose company (or job title) has these words, on top of the track and kind filters.
@@ -153,21 +146,15 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const manualIds = new Set(manual.map((r) => r.id));
     const fromReady = (r: ReadyApp, kind: Kind): Item => ({ id: r.id, kind, company: r.company, title: r.title, ats: r.ats, url: r.url, updatedAt: r.updatedAt, priorityTags: r.priorityTags, ready: r,
       location: r.location, score: r.score ?? null, track: r.track ?? null, age: r.postedAt ?? r.foundAt ?? r.createdAt ?? null, resumeReady: r.resumeReady, resumeMatch: r.resumeMatch ?? null, readyState: r.readyState ?? null });
-    const fromQueue = (q: QueuedApp): Item => {
-      const c = cards[q.id];
-      // Only required questions nobody answered hold it back (optional ones and resume fields are left to the page).
-      const current = c && c.updatedAt >= q.updatedAt ? c : null;
-      const toAnswer = current ? current.questions.filter(blocking).length : q.toAnswer ?? q.needsInput ?? 0;
-      return { toAnswer, id: q.id, kind: !q.n ? "fill" : toAnswer > 0 ? "answer" : "drafted", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? q.ats ?? null, url: c?.url ?? q.url ?? undefined, updatedAt: q.updatedAt, priorityTags: q.priorityTags ?? c?.priorityTags, queued: q,
-        location: q.location ?? c?.location ?? null, score: q.score ?? null, track: q.track ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null, resumeReady: q.resumeReady, resumeEta: q.resumeEta, resumeMatch: q.resumeMatch ?? null, readyState: q.readyState ?? null };
-    };
-    // What you can act on now comes first (Open & Fill: approved or drafted alike), then what needs answers;
+    const fromQueue = (q: QueuedApp): Item => ({ id: q.id, kind: !q.n ? "fill" : "drafted", company: q.company ?? "", title: q.title ?? "", ats: q.ats ?? null, url: q.url ?? undefined, updatedAt: q.updatedAt, priorityTags: q.priorityTags, queued: q,
+      location: q.location ?? null, score: q.score ?? null, track: q.track ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null, resumeReady: q.resumeReady, resumeEta: q.resumeEta, resumeMatch: q.resumeMatch ?? null, readyState: q.readyState ?? null });
+    // You submit, then approve, then Open & Fill (approved or drafted alike) and LinkedIn;
     // within each, North Carolina first, then the newest posting, then the best match.
-    const order: Record<Kind, number> = { you_submit: 0, approve: 1, fill: 2, drafted: 2, linkedin: 2, answer: 3 };
+    const order: Record<Kind, number> = { you_submit: 0, approve: 1, fill: 2, drafted: 2, linkedin: 2 };
     const all = [
       ...manual.map((r) => fromReady(r, "you_submit")),
       ...(ready.data?.ready ?? []).filter((r) => !manualIds.has(r.id)).map((r) => fromReady(r, "approve")),
-      ...(unanswered.data?.unanswered ?? []).map(fromQueue),
+      ...(queue.data?.fillable ?? []).map(fromQueue),
       // LinkedIn postings: no application (the engine never applies on LinkedIn); same score, place and age.
       ...(linkedin.data?.linkedin ?? []).map((l): Item => ({ id: l.id, kind: "linkedin", company: l.company, title: l.title, ats: null, url: l.url,
         updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null, easyApply: l.applyType === "easy_apply", resumeReady: l.resumeReady, resumeEta: l.resumeEta, resumeMatch: l.resumeMatch ?? null, readyState: l.readyState ?? null })),
@@ -181,7 +168,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       // Ready to apply first: a card whose resume isn't on the server yet waits behind every one that is.
       .sort((a, b) => Number(later.includes(a.id)) - Number(later.includes(b.id)) || Number(a.resumeReady === false) - Number(b.resumeReady === false) || (order[a.kind] + (a.easyApply ? 0.5 : 0)) - (order[b.kind] + (b.easyApply ? 0.5 : 0))
         || Number(inNC(b.location)) - Number(inNC(a.location)) || (b.age ?? "").localeCompare(a.age ?? "") || (b.score ?? -1) - (a.score ?? -1));
-  }, [ready.data, unanswered.data, linkedin.data, cards, detail, done, later, exclusions]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ready.data, queue.data, linkedin.data, detail, done, later, exclusions]); // eslint-disable-line react-hooks/exhaustive-deps
   // Counts on each pill: a track's count follows the chosen kind, and a kind's count follows the chosen track.
   const inTrack = (i: Item, t: TrackFilter) => t === "all" || t === "mixed" || i.track === t;
   const inKind = (i: Item, k: KindFilter) => k === "all" || KIND_OF[i.kind] === k;
@@ -202,14 +189,10 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const pages = Math.max(1, Math.ceil(items.length / perPage));
   const current = Math.min(page, pages - 1);
   const shown = items.slice(current * perPage, (current + 1) * perPage);
-  // The job links of the cards on screen (questions load with them; a page of ten at a time).
-  const shownQueued = shown.flatMap((i) => i.queued ? [i.queued] : []);
-  const shownKey = shownQueued.map((q) => `${q.id}@${q.updatedAt}`).join(",");
-  useEffect(() => { if (shownQueued.length) void loadCards(shownQueued); }, [shownKey]); // eslint-disable-line react-hooks/exhaustive-deps
   // Resume Match, Resume Ready and the resume ETA of the cards on screen, again whenever the lists reload.
   // (Kind, link and ATS come with the light lists, so Select all and Open & Fill don't wait for every card.)
   const detailIds = shown.filter((i) => i.queued || i.kind === "linkedin").map((i) => i.id);
-  const detailKey = `${detailIds.join(",")}|${unanswered.data?.generatedAt ?? ""}|${linkedin.data?.generatedAt ?? ""}`;
+  const detailKey = `${detailIds.join(",")}|${queue.data?.generatedAt ?? ""}|${linkedin.data?.generatedAt ?? ""}`;
   useEffect(() => { if (detailIds.length) void loadDetails(detailIds); }, [detailKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const kindCount = (k: KindFilter) => found.filter((i) => inTrack(i, track) && inKind(i, k)).length;
   const trackCount = (t: TrackFilter) => found.filter((i) => inTrack(i, t) && inKind(i, kind)).length;
@@ -224,14 +207,14 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     setDone((d) => ({ ...d, [item.id]: item.updatedAt }));
     adjustCounts(delta);
     setNotice(message);
-    setTimeout(() => { void refreshReady(); void refreshUnanswered(); }, 1500);
+    setTimeout(() => { void refreshReady(); void refreshFillable(); }, 1500);
   };
   const run = async (item: Item, body: object, onOk: () => void) => {
     setBusy(item.id);
     setErrors((e) => ({ ...e, [item.id]: "" }));
     const res = await postAction({ ...body, applicationId: item.id, expectedUpdatedAt: item.updatedAt });
     setBusy(null);
-    if (!res.ok) { setErrors((e) => ({ ...e, [item.id]: res.error ?? "Couldn't do that" })); if (/changed/i.test(res.error ?? "")) { void refreshReady(); void refreshUnanswered(); } return; }
+    if (!res.ok) { setErrors((e) => ({ ...e, [item.id]: res.error ?? "Couldn't do that" })); if (/changed/i.test(res.error ?? "")) { void refreshReady(); void refreshFillable(); } return; }
     onOk();
   };
 
@@ -299,7 +282,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     }
     setBusy(null);
     setNotice(`Started filling ${ok} of ${fillable.length}. Each moves on once its answers check out. Nothing is submitted.`);
-    void refreshUnanswered();
+    void refreshFillable();
   };
 
   const approveAll = async () => {
@@ -331,7 +314,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       setDone((d) => ({ ...d, ...Object.fromEntries(everything.filter((i) => gone.has(i.id)).map((i) => [i.id, i.updatedAt])) }));
       setSelectedIds((s) => s.filter((id) => !gone.has(id)));
       setNotice(`Discarded ${gone.size}${r.errors.length ? ` · ${r.errors.length} kept: ${r.errors[0]}` : ""}`);
-      setTimeout(() => { void refreshReady(); void refreshUnanswered(); }, 1500);
+      setTimeout(() => { void refreshReady(); void refreshFillable(); }, 1500);
     } catch (e) {
       setNotice(e instanceof Error ? e.message : String(e));
     } finally { setBusy(null); setConfirmDiscard(false); }
@@ -355,7 +338,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const focused = Math.min(focus, Math.max(0, shown.length - 1));
   const later_ = (item: Item) => setLaterAt((l) => { const next = { ...l, [item.id]: Date.now() }; writePref("later", next); return next; });
   const skipCompany = (company: string) => { excludeCompany(company); setNotice(`Skipping ${company}: its jobs stay off Today until you remove it from Skipped companies.`); };
-  /** O: the card's main way in (LinkedIn posting, Open & Fill); nothing for cards that need answers or approval. */
+  /** O: the card's main way in (LinkedIn posting, Open & Fill); nothing for cards that need approval. */
   const openCard = (item: Item) => {
     if (item.kind === "linkedin" && item.url) { noteLinkedinOpen(item.url, item.company, item.title); window.open(item.url, "_blank", "noreferrer"); }
     else if (item.kind === "fill" || item.kind === "drafted") void openInBrowser(item);
@@ -364,7 +347,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   // Keys: 1–7 pick a track, ←/→ (↑/↓ by row) move between cards and pages, A/L/D/O act on the outlined card.
   const keys = useRef<(e: KeyboardEvent) => void>(() => {});
   keys.current = (e: KeyboardEvent) => {
-    if (e.metaKey || e.ctrlKey || e.altKey || review || pdf || confirmAll || queueRunning || answering || outreachTarget) return;
+    if (e.metaKey || e.ctrlKey || e.altKey || review || pdf || confirmAll || queueRunning || outreachTarget) return;
     const el = e.target as HTMLElement | null;
     if (el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName))) return;
     const n = Number(e.key);
@@ -396,7 +379,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const stage = STAGE[item.kind];
     const q = item.queued;
     const r = item.ready as ManualApp | undefined;
-    const drafted = q ? (q.readyForReview ?? q.suggestions ?? 0) : 0;
+    const drafted = q?.readyForReview ?? 0;
     const isBusy = queueRunning || busy === item.id;
     const age = ago(item.age);
     const tags = (item.priorityTags ?? []).filter((t) => !item.location?.includes(t) && !/^exp\.? not stated$/i.test(t));
@@ -414,7 +397,6 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
             <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
             <span>{item.easyApply ? "Easy Apply" : "Open Link"}</span><svg className="td-cta-ext" aria-hidden="true" viewBox="0 0 16 16"><path d="M6 3.5H3.5v9h9V10M9 3h4v4M13 3L7.5 8.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"/></svg></a>}
           {(item.kind === "drafted" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => void openInBrowser(item)}>{busy === item.id ? "Opening…" : "Open & Fill"}</button>}
-          {item.kind === "answer" && <button className="rv-primary" disabled={isBusy} onClick={() => cards[item.id] ? setAnswering(item.id) : navigate(`/unanswered?app=${encodeURIComponent(item.id)}`)}>Answer {item.toAnswer ?? ""}</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
           {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}
           {item.resumeReady !== false ? <Link className="apps-btn td-ai-review" to={`/resume_builder?${item.kind === "linkedin" ? `job=${encodeURIComponent(item.id)}` : `app=${encodeURIComponent(item.id)}`}&ai=review`}>✦ Review with AI</Link> : <button className="apps-btn td-ai-review" disabled title="A resume needs to be created before AI can review it">✦ Review with AI</button>}
@@ -430,10 +412,6 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {item.kind === "drafted" && q && <>
             <p className="td-big">{drafted || q.n} answer{(drafted || q.n) === 1 ? "" : "s"} drafted</p>
             <p className="td-note">Atriveo fills them on the job page; you check, then Submit.</p>
-          </>}
-          {item.kind === "answer" && q && <>
-            <p className="td-big">{item.toAnswer} question{item.toAnswer === 1 ? "" : "s"} to answer</p>
-            <p className="td-note">Answer {item.toAnswer === 1 ? "it" : "them"} once; then it moves up for Open & Fill.</p>
           </>}
           {item.kind === "fill" && <p className="td-note">Every answer is approved. Atriveo fills it on the job page; you check, then Submit.</p>}
           {item.kind === "approve" && r && <>
@@ -463,7 +441,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     );
   };
 
-  const loading = !unanswered.data && !ready.data;
+  const loading = !queue.data && !ready.data;
   return (
     <div className="rv-page td-page">
       {isValidElement<{ todayCount?: number | null }>(header) ? cloneElement(header, { todayCount: loading ? null : everything.length }) : header}
@@ -486,12 +464,12 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {selectedIds.length > 0 && (confirmDiscard
             ? <span className="td-confirm">Discard {selectedIds.length}? <button className="apps-btn danger" disabled={busy !== null} onClick={() => void discard(selectedIds)}>Discard</button><button className="apps-link" onClick={() => setConfirmDiscard(false)}>Cancel</button></span>
             : <button className="apps-btn" disabled={queueRunning || busy !== null} onClick={() => setConfirmDiscard(true)}>Discard selected ({selectedIds.length})</button>)}
-          {queueable.length > 0 && <><button className="apps-btn td-desk" disabled={queueRunning} onClick={() => setSelectedIds(queueable.map(i => i.id))}>Select all Open & Fill ({queueable.length})</button><button className="apps-btn td-desk" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear</button><OpenFillQueue onRunning={setQueueRunning} selected={queued} onFilled={(id) => { const it = everything.find((i) => i.id === id); if (it) setDone((d) => ({ ...d, [id]: it.updatedAt })); setSelectedIds((ids) => ids.filter((x) => x !== id)); }} onFinish={() => { void refreshReady(); void refreshUnanswered(); }} /></>}
+          {queueable.length > 0 && <><button className="apps-btn td-desk" disabled={queueRunning} onClick={() => setSelectedIds(queueable.map(i => i.id))}>Select all Open & Fill ({queueable.length})</button><button className="apps-btn td-desk" disabled={queueRunning || !selectedIds.length} onClick={() => setSelectedIds([])}>Clear</button><OpenFillQueue onRunning={setQueueRunning} selected={queued} onFilled={(id) => { const it = everything.find((i) => i.id === id); if (it) setDone((d) => ({ ...d, [id]: it.updatedAt })); setSelectedIds((ids) => ids.filter((x) => x !== id)); }} onFinish={() => { void refreshReady(); void refreshFillable(); }} /></>}
           {fillable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("fill")}>Fill and verify all {fillable.length}</button>}
           {approvable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("approve")}>Approve all {approvable.length} ready</button>}
         </div>
       </div>
-      {(unanswered.error || ready.error) && <p className="ar-error" role="alert">{unanswered.error || ready.error}</p>}
+      {(queue.error || ready.error) && <p className="ar-error" role="alert">{queue.error || ready.error}</p>}
       <main className="td-grid" style={mobile ? undefined : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(min-content, 1fr))` }}>
         {loading && <div className="td-empty">Loading your applications…</div>}
         {!loading && !items.length && everything.length > 0 && <div className="td-empty"><strong>{words.length && !found.length ? `No company or role matches “${query.trim()}”.` : "Nothing here for this filter."}</strong>{words.length > 0 && !found.length && <span>Skipped companies stay hidden; jobs you already applied to or discarded aren't on Today.</span>}<button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all", query: "" })}>Show everything</button></div>}
@@ -561,12 +539,6 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           </div>
         );
       })()}
-      {answering && cards[answering] && <AnswerModal app={cards[answering]!} onClose={() => setAnswering(null)} onSaved={(n) => {
-        const it = everything.find((i) => i.id === answering);
-        setAnswering(null);
-        setNotice(`Saved ${n} answer${n === 1 ? "" : "s"}${it ? ` for ${it.company}` : ""}. It moves up for Open & Fill once the engine checks them.`);
-        setTimeout(() => { void refreshUnanswered(); if (it?.queued) void loadCards([it.queued]); }, 1500);
-      }} />}
       {outreachTarget && <OutreachPanel key={JSON.stringify(outreachTarget)} target={outreachTarget} onClose={() => setOutreachTarget(null)} onChanged={() => void outreach.refresh()} />}
       {pdf && <PdfPreviewModal pdfPath={pdf} onClose={() => setPdf(null)} />}
       {review && <ApplicationReview key={`${review.id}:${review.mode}`} application={review} onClose={() => setReview(null)} />}

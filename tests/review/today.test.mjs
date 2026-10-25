@@ -17,21 +17,12 @@ const queued = (id, company, n, extra = {}) => ({ id, company, title: 'Backend E
 // A LinkedIn posting with a resume ready and no application (only the LinkedIn test lists it).
 let LINKEDIN = [];
 const PENDO = [{ id: 'https://www.linkedin.com/jobs/view/111', url: 'https://www.linkedin.com/jobs/view/111', company: 'Pendo', title: 'Software Engineer', location: 'Raleigh, NC', score: 66, postedAt: null, foundAt: at, track: 'software-engineer', resumeFile: 'Pendo/Jane Doe.pdf', resumePath: '/Users/x/Documents/tailored-resumes/Pendo/Jane Doe.pdf' }];
-const view = { ok: true, generatedAt: at, killSwitch: null, worker: { online: true, updatedAt: at }, counts: { unanswered: 4, questions: 9, ready: 3 } };
+const view = { ok: true, generatedAt: at, killSwitch: null, worker: { online: true, updatedAt: at }, counts: { fillable: 2, ready: 3 } };
 const READY = { ...view, ready: [readyRow('r1', 'Stripe'), readyRow('r2', 'Ramp'), readyRow('m1', 'Spotify', { ats: 'lever' })], manual: [{ ...readyRow('m1', 'Spotify', { ats: 'lever' }), openFill: null }], approved: [] };
-const UNANSWERED = { ...view, unanswered: [queued('u1', 'Rogo', 4), queued('u2', 'Vercel', 5), queued('c1', 'Anthropic', 0), queued('d1', 'Figma', 3, { readyForReview: 3, needsInput: 0 }), queued('u3', 'Tailscale', 2)] };
-// The sidecar sends the first cards (with each job's link) alongside the queue.
-const question = (fieldKey, label, extra = {}) => ({ fieldKey, fingerprint: fieldKey, label, type: 'text', required: true, options: [], canonicalKey: null, sensitive: null, reason: 'UNKNOWN', detail: null, ...extra });
-// Rogo: one question with a suggestion (drafted) and one with nothing to start from.
-// Rogo, Vercel, Tailscale share "How did you hear about us?" (each its own options) and each has its own question.
-const heard = (options) => question('hear', 'How did you hear about us?', { type: 'select', options });
-const QUESTIONS = {
-  u1: [question('q1', 'Years of Python?', { answerProposal: { state: 'ready_for_review', answer: '5', family: 'x', source: 'bank', reason: 'r' } }), question('q2', 'Which team excites you?'), heard(['LinkedIn', 'Other']), question('co', 'Company name')],
-  u2: [heard(['Linkedin Jobs', 'Referral']), question('q3', 'Why Vercel?', { type: 'textarea' }), question('opt', 'Twitter', { required: false })],
-  u3: [heard(['Job board', 'Friend']), question('q4', 'Where are you based?')],
-};
-const card = (q) => ({ ...q, ats: 'ashby', url: `https://jobs.example.test/${q.id}`, questions: QUESTIONS[q.id] ?? [] });
-UNANSWERED.cards = UNANSWERED.unanswered.map(card);
+// Blocked applications Open & Fill can take: every answer approved (c1) or drafted (d1). Ones needing an answer never reach Today.
+// Each row brings its ATS and link, so Open & Fill doesn't wait for anything else.
+const link = (id) => ({ ats: 'ashby', url: `https://jobs.example.test/${id}` });
+const FILLABLE = { ...view, fillable: [queued('c1', 'Anthropic', 0, link('c1')), queued('d1', 'Figma', 3, { readyForReview: 3, ...link('d1') })] };
 
 async function fixture() {
   const server = http.createServer((req, res) => {
@@ -51,7 +42,7 @@ async function fixture() {
     if (url.pathname === '/applications/review-queue') {
       const v = url.searchParams.get('view');
       if (v === 'linkedin') return route.fulfill({ json: { ok: true, generatedAt: at, linkedin: LINKEDIN } });
-      return route.fulfill({ json: v === 'ready' ? READY : v === 'counts' ? view : v === 'cards' ? { ok: true, generatedAt: at, cards: UNANSWERED.cards.filter((c) => (url.searchParams.get('ids') ?? '').split(',').includes(c.id)) } : UNANSWERED });
+      return route.fulfill({ json: v === 'ready' ? READY : v === 'counts' ? view : v === 'fillable' ? FILLABLE : { ok: false, error: `unexpected view ${v}` } });
     }
     if (url.pathname === '/applications/action') { calls.push(route.request().postDataJSON()); return route.fulfill({ json: { ok: true } }); }
     if (url.hostname === '127.0.0.1' && url.port === String(port)) return route.continue();
@@ -67,12 +58,11 @@ test('Today shows what needs you, closest to submission first, five at a time, w
   try {
     await page.goto(`${f.base}/`);
     await page.getByRole('heading', { name: 'Today', exact: true }).waitFor();
-    await page.getByText('8 applications waiting for you', { exact: true }).waitFor();
+    await page.getByText('5 applications waiting for you', { exact: true }).waitFor();
     const order = await page.locator('.td-card .td-id strong').allTextContents();
-    assert.deepEqual(order, ['Spotify', 'Stripe', 'Ramp', 'Anthropic', 'Figma'], 'everything you can Open & Fill first; questions nobody answered last');
+    assert.deepEqual(order, ['Spotify', 'Stripe', 'Ramp', 'Anthropic', 'Figma'], 'you submit, approve, then Open & Fill; no cards that need answers');
     assert.ok(await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight + 1), 'no page scroll');
-    await page.getByRole('button', { name: 'Next applications' }).click();
-    assert.deepEqual(await page.locator('.td-card .td-id strong').allTextContents(), ['Rogo', 'Vercel', 'Tailscale']);
+    assert.equal(await page.getByRole('button', { name: /Need answers/ }).count(), 0, 'no Need answers pill');
     assert.equal(calls.length, 0, 'looking sends nothing');
     assert.deepEqual(errors, []);
   } finally { await f.close(); }
@@ -111,52 +101,17 @@ test('Open & Fill on a drafted or approved card opens its job page and sends not
   } finally { await f.close(); }
 });
 
-test('Answer on a card opens only the questions you must answer in a pop-up on Today; Cancel saves nothing', async () => {
-  const f = await fixture(); const { page, calls } = f;
+test('the retired answer pages send old links, deep links included, to Today', async () => {
+  const f = await fixture(); const { page, errors } = f;
   try {
-    await page.goto(`${f.base}/`);
-    await page.getByRole('button', { name: 'Next applications' }).click();
-    await page.getByRole('article', { name: 'Rogo: Needs your answers' }).getByRole('button', { name: /^Answer/ }).click();
-    const pop = page.getByRole('dialog', { name: "Answer Rogo's questions" });
-    await pop.waitFor();
-    assert.ok(!page.url().includes('/unanswered'), 'you stay on Today');
-    const text = await pop.innerText();
-    assert.match(text, /How did you hear about us\?/);
-    assert.doesNotMatch(text, /Years of Python/, 'a drafted answer is not asked again');
-    assert.doesNotMatch(text, /Company name/, 'resume fields are left to Atriveo Fill');
-    assert.doesNotMatch(text, /Twitter/, 'optional questions are left out');
-    await pop.getByRole('button', { name: 'Cancel' }).click();
-    await pop.waitFor({ state: 'detached' });
-    assert.equal(calls.filter((c) => c.action === 'answer').length, 0, 'Cancel saves nothing');
-  } finally { await f.close(); }
-});
-
-test('To answer: each question once, shared ones saved for every job, nothing already drafted', async () => {
-  const f = await fixture(); const { page, calls } = f;
-  try {
-    await page.goto(`${f.base}/unanswered?app=u1`);
-    const shared = page.getByRole('region', { name: 'Asked by several jobs' });
-    const heard = shared.getByRole('article', { name: 'How did you hear about us?' });
-    await heard.waitFor();
-    assert.equal(await heard.locator('.qs-count').textContent(), '3');
-    const text = await page.locator('.qs-columns').innerText();
-    assert.doesNotMatch(text, /Years of Python/, 'a drafted answer is not shown');
-    assert.doesNotMatch(text, /Company name/, 'resume fields are left to Atriveo Fill');
-    assert.doesNotMatch(text, /Twitter/, 'optional questions are hidden until asked for');
-    // One click on a choice: saved for each job with its own matching option; Tailscale offers none.
-    await heard.getByRole('button', { name: 'LinkedIn', exact: true }).click();
-    await page.getByText('Saved for 2 jobs · 1 need a different choice').waitFor();
-    const answers = calls.filter((c) => c.action === 'answer');
-    assert.deepEqual(answers.map((c) => [c.applicationId, c.answers[0].value, c.answers[0].scope]).sort(), [['u1', 'LinkedIn', 'global'], ['u2', 'Linkedin Jobs', 'global']]);
-    // A job-specific question: type and press Enter.
-    const single = page.getByRole('region', { name: 'Only for one job' });
-    await single.getByRole('article', { name: 'Which team excites you?' }).getByRole('textbox').fill('Inference');
-    await page.keyboard.press('Enter');
-    await page.getByText('✓ 3 answered for 2 jobs this session').waitFor();
-    assert.equal(await single.getByRole('article', { name: 'Which team excites you?' }).count(), 0, 'an answered question leaves the list');
-    assert.deepEqual(calls.at(-1), { action: 'answer', applicationId: 'u1', answers: [{ fingerprint: 'q2', label: 'Which team excites you?', type: 'text', canonicalKey: null, sensitive: null, value: 'Inference', scope: 'global' }] });
-    await page.getByLabel(/Show optional/).check();
-    await single.getByRole('article', { name: 'Twitter' }).waitFor();
+    for (const old of ['/unanswered?app=u1', '/answers']) {
+      await page.goto(`${f.base}${old}`);
+      await page.waitForURL((u) => u.pathname === '/');
+      await page.getByRole('article', { name: 'Figma: Answers drafted' }).waitFor();
+    }
+    assert.equal(await page.getByRole('link', { name: /To answer/ }).count(), 0, 'no To answer link in the header');
+    assert.equal(await page.getByRole('button', { name: /^Answer/ }).count(), 0, 'no Answer button on any card');
+    assert.deepEqual(errors, []);
   } finally { await f.close(); }
 });
 
@@ -234,28 +189,10 @@ test('Select all Open & Fill queues every fillable card and opens them one at a 
   } finally { await f.close(); }
 });
 
-test('Skip on a question skips its job; on a shared question, every job that asks it', async () => {
-  const f = await fixture(); const { page, calls } = f;
-  try {
-    await page.goto(`${f.base}/unanswered`);
-    const single = page.getByRole('region', { name: 'Only for one job' });
-    await single.getByRole('article', { name: 'Why Vercel?' }).getByRole('button', { name: 'Skip job' }).click();
-    await page.getByText('1 job skipped').waitFor();
-    assert.deepEqual(calls.at(-1), { action: 'skip', applicationId: 'u2', note: 'skipped on To answer: Why Vercel?' });
-    // Vercel is gone everywhere: the shared question now lists only Rogo and Tailscale.
-    const heard = page.getByRole('region', { name: 'Asked by several jobs' }).getByRole('article', { name: 'How did you hear about us?' });
-    assert.equal(await heard.locator('.qs-count').textContent(), '2');
-    await heard.getByRole('button', { name: 'Skip all 2 jobs' }).click();
-    await page.getByText('3 jobs skipped').waitFor();
-    assert.deepEqual(calls.filter((c) => c.action === 'skip').map((c) => c.applicationId).sort(), ['u1', 'u2', 'u3']);
-    assert.ok(calls.every((c) => c.action === 'skip'), 'skipping answers nothing');
-  } finally { await f.close(); }
-});
-
 test('within Open & Fill: North Carolina first, then the newest posting; score and age on the card; Discard', async () => {
-  const saved = UNANSWERED.unanswered.map((q) => ({ ...q }));
-  Object.assign(UNANSWERED.unanswered.find((q) => q.id === 'c1'), { location: 'New York, NY', postedAt: '2026-10-04T10:00:00.000Z', score: 72 });
-  Object.assign(UNANSWERED.unanswered.find((q) => q.id === 'd1'), { location: 'Raleigh, NC', postedAt: '2026-09-20T10:00:00.000Z', score: 20 });
+  const saved = FILLABLE.fillable.map((q) => ({ ...q }));
+  Object.assign(FILLABLE.fillable.find((q) => q.id === 'c1'), { location: 'New York, NY', postedAt: '2026-10-04T10:00:00.000Z', score: 72 });
+  Object.assign(FILLABLE.fillable.find((q) => q.id === 'd1'), { location: 'Raleigh, NC', postedAt: '2026-09-20T10:00:00.000Z', score: 20 });
   const f = await fixture(); const { page, calls } = f;
   try {
     await page.route('**/applications/action', (route) => {
@@ -273,7 +210,7 @@ test('within Open & Fill: North Carolina first, then the newest posting; score a
     await page.getByText('Discarded 1').waitFor();
     assert.deepEqual(calls.filter((c) => c.action === 'discard_applications').map((c) => c.operation), ['preview', 'confirm']);
     assert.equal(await anthropic.count(), 0, 'a discarded card leaves Today');
-  } finally { await f.close(); UNANSWERED.unanswered.splice(0, UNANSWERED.unanswered.length, ...saved); }
+  } finally { await f.close(); FILLABLE.fillable.splice(0, FILLABLE.fillable.length, ...saved); }
 });
 
 test('LinkedIn postings show as On LinkedIn cards: the button opens the posting, Discard records it as not interested', async () => {
@@ -336,15 +273,15 @@ test('Search narrows Today to a company or role as you type; / jumps in, Esc cle
   const f = await fixture(); const { page, calls, errors } = f;
   try {
     await page.goto(`${f.base}/`);
-    await page.getByText('8 applications waiting for you', { exact: true }).waitFor();
+    await page.getByText('5 applications waiting for you', { exact: true }).waitFor();
     const names = () => page.locator('.td-card .td-id strong').allTextContents();
     await page.keyboard.press('/');
     await page.keyboard.type('ramp');
     assert.deepEqual(await names(), ['Ramp']);
     await page.getByText('1 found', { exact: true }).waitFor();
     // Every word must match the company or the title.
-    await page.getByRole('searchbox', { name: 'Search company or role' }).fill('backend v');
-    assert.deepEqual(await names(), ['Vercel']);
+    await page.getByRole('searchbox', { name: 'Search company or role' }).fill('backend f');
+    assert.deepEqual(await names(), ['Figma']);
     await page.getByRole('searchbox', { name: 'Search company or role' }).fill('nobody');
     await page.getByText('No company or role matches “nobody”.').waitFor();
     await page.keyboard.press('Escape');
