@@ -21,7 +21,7 @@ test('matching workspace supports evidence, company filters, safe navigation, de
  await page.goto(base+'/job-matching');await page.getByRole('heading',{name:list[0].title,exact:true}).waitFor();
  if(!source){const downloaded=page.waitForEvent('download');await page.getByRole('link',{name:'Download PDF ↓',exact:true}).click();assert.equal((await downloaded).suggestedFilename(),'Atishay Kasliwal.pdf');}
 
- for(const viewport of [{width:1660,height:1000},{width:1440,height:900},{width:1280,height:720},{width:390,height:844}]){await page.setViewportSize(viewport);const d=await page.evaluate(()=>({w:document.documentElement.scrollWidth,h:document.documentElement.scrollHeight,vh:innerHeight}));assert.ok(d.w<=viewport.width,JSON.stringify({viewport,d}));assert.ok(d.h<=d.vh+1,JSON.stringify({viewport,d}));const b=await page.getByRole('button',{name:/^Apply ↗/}).boundingBox();assert.ok(b.y+b.height<=viewport.height);}
+ for(const viewport of [{width:1660,height:1000},{width:1440,height:900},{width:1280,height:720},{width:390,height:844}]){await page.setViewportSize(viewport);const d=await page.evaluate(()=>({w:document.documentElement.scrollWidth,h:document.documentElement.scrollHeight,vh:innerHeight}));assert.ok(d.w<=viewport.width,JSON.stringify({viewport,d}));assert.ok(d.h<=d.vh+1,JSON.stringify({viewport,d}));const b=await page.getByRole('button',{name:/^Apply ↗/}).boundingBox();assert.ok(b.y+b.height<=viewport.height);await page.getByRole('link',{name:'Download PDF ↓',exact:true}).waitFor({state:'visible'});}
  await page.setViewportSize({width:1660,height:1000});
  const rail=page.getByRole('complementary',{name:'Filter jobs by company'});
  const companyList=source?.companies??companies;
