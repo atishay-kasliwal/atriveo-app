@@ -3,6 +3,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { resolveBankDir } from "./ac-role-meta.mjs";
 
@@ -65,6 +66,17 @@ export function allPinnedSets(track, doc = loadTracks()) {
 
 /** Every resume prints at least this many projects (Atishay, 2026-10-23; ac-page-fill enforceProjects). */
 export const RESUME_MIN_PROJECTS = 2;
+
+/**
+ * The projects a track's resumes may print, for the resume builder's "Add a project": its pinned sets' projects, its
+ * `projects` pool, the planner's pool and the projects any track may print (jd_selected_projects).
+ */
+export function allowedProjects(track, doc = loadTracks()) {
+  const t = doc.tracks?.[track];
+  const pinned = allPinnedSets(track, doc).flatMap((s) => Object.keys(s.projects || {}));
+  const planner = JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "planner", "v2.json"), "utf8"));
+  return [...new Set([...pinned, ...(t?.projects ?? []), ...(planner.resume_project_pool ?? []), ...jdSelectedProjects(doc)])];
+}
 
 /** Projects any track may print in the second slot when the posting fits them best (TRACKS.yaml jd_selected_projects). */
 export function jdSelectedProjects(doc = loadTracks()) {

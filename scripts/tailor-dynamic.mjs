@@ -396,8 +396,8 @@ const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 
 const EDUCATION = `\\section{Education}
   \\resumeSubHeadingListStart
-    \\resumeSubheading{Stony Brook University}{Stony Brook, New York}{Master of Science in Data Science}{August 2024 -- May 2026}
-    \\resumeSubheading{Symbiosis University of Applied Sciences}{Indore, Madhya Pradesh}{Bachelor of Technology in Computer Science and Information Technology}{August 2018 -- May 2022}
+    \\resumeSubheading{Stony Brook University}{Stony Brook, New York}{Master of Science in Data Science}{Aug. 2024 -- May 2026}
+    \\resumeSubheading{Symbiosis University of Applied Sciences}{Indore, Madhya Pradesh}{Bachelor of Technology in Computer Science and Information Technology}{Aug. 2018 -- May 2022}
   \\resumeSubHeadingListEnd`;
 
 // Closed set only — never the JD's raw/verbatim job title, even if the

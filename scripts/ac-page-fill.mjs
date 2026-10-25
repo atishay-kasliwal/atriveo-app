@@ -86,21 +86,24 @@ function faceFor(ac, track) {
 
 // Figures a bullet states (67.7%, 0.70, 3x): two bullets in one section should not repeat one.
 const figures = (text) => new Set(String(text || "").match(/\d+(?:\.\d+)?\s*%|\b\d+\.\d+\b|\b\d+x\b/gi)?.map((f) => f.replace(/\s+/g, "")) ?? []);
+// Counts too ("13 live FOMC sessions" -> 13sessions): a project's bullets never restate a fact printed elsewhere on the page.
+const counts = (text) => new Set([...String(text || "").matchAll(/\b(\d[\d,]*\+?)\s+(?:[A-Za-z][\w-]*\s+){0,2}?([a-z][a-z-]*s)\b/gi)].map(([, n, noun]) => `${n.replace(/,/g, "")}${noun.toLowerCase()}`));
+const factKeys = (text) => new Set([...figures(text), ...counts(text)]);
 
 /**
  * Bullets the bank offers for one employer or project that the resume does not use yet, best first. Never one whose
  * opening verb is already used, one with a word the renderer strips (it would print "a modular pipeline..." without its
  * verb), or one that repeats a figure stated in sectionTexts (the page fill passes every bullet on the page).
  */
-export function candidatesFor(role, kind, bank, used, jdLower, track, sectionTexts = []) {
+export function candidatesFor(role, kind, bank, used, jdLower, track, sectionTexts = [], keys = figures) {
   const usedVerbs = new Set([...used.values()].map(firstVerb));
-  const sectionFigures = new Set(sectionTexts.flatMap((t) => [...figures(t)]));
+  const sectionFigures = new Set(sectionTexts.flatMap((t) => [...keys(t)]));
   return (bank.acs || [])
     .filter((ac) => ac.role === role && ac.slot_kind === kind && ac.visibility?.default !== false && !used.has(ac.id))
     .map((ac) => ({ ac, face: faceFor(ac, track) }))
     .filter(({ face }) => face?.text && !usedVerbs.has(firstVerb(face.text)))
     .filter(({ face }) => stripBanned(face.text) === face.text && /^[A-Z]/.test(face.text.trim()))
-    .filter(({ face }) => ![...figures(face.text)].some((f) => sectionFigures.has(f)))
+    .filter(({ face }) => ![...keys(face.text)].some((f) => sectionFigures.has(f)))
     .map((c) => ({ ...c, score: bulletScore(c.ac, c.face, jdLower) }))
     .sort((a, b) => b.score - a.score || a.ac.id.localeCompare(b.ac.id));
 }
@@ -125,7 +128,7 @@ const projectFits = (bank, role, track) => !track
 function distinctFigures(list) {
   const kept = [], seen = new Set();
   for (const c of list) {
-    const f = [...figures(c.face.text)];
+    const f = [...factKeys(c.face.text)];
     if (f.some((x) => seen.has(x))) continue;
     f.forEach((x) => seen.add(x));
     kept.push(c);
@@ -150,7 +153,7 @@ export function enforceProjects(compact, bank, { jd = "", track = null, pool = n
   while (out.projects.length < minProjects) {
     const used = usedMap(out);
     const options = roles.filter((r) => !have.has(r) && ![...have].some((h) => sameProduct(r, h)))
-      .map((role) => ({ role, list: distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track)) }))
+      .map((role) => ({ role, list: distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track, [...used.values()], factKeys)) }))
       .filter((o) => o.list.length >= minBullets)
       .map((o) => ({ ...o, tagged: projectFits(bank, o.role, track), fit: o.list.slice(0, minBullets).reduce((s, c) => s + c.score, 0) / minBullets }))
       .sort((a, b) => Number(b.tagged) - Number(a.tagged) || b.fit - a.fit || roles.indexOf(a.role) - roles.indexOf(b.role));
@@ -162,7 +165,7 @@ export function enforceProjects(compact, bank, { jd = "", track = null, pool = n
   }
   for (const p of out.projects) {
     while (p.bullets.length < minBullets) {
-      const [best] = candidatesFor(p.role, "project", bank, usedMap(out), jdLower, track, p.bullets.map((b) => b.text));
+      const [best] = candidatesFor(p.role, "project", bank, usedMap(out), jdLower, track, [...usedMap(out).values()], factKeys);
       if (!best) break;
       p.bullets.push(bulletOf(best));
       changes.push(`added ${best.ac.id} to ${p.role}`);
@@ -180,7 +183,7 @@ export function enforceProjects(compact, bank, { jd = "", track = null, pool = n
     const allRoles = [...new Set([...(roles || []), ...(bank.acs || []).filter((a) => a.slot_kind === "project").map((a) => a.role)])];
     const swap = allRoles.filter((r) => !out.projects.some((q) => q.role === r || sameProduct(q.role, r)))
       .filter((r) => !offTrack || short || duplicate || projectFits(bank, r, track))
-      .map((role) => ({ role, list: distinctFigures(candidatesFor(role, "project", bank, others, jdLower, track)) }))
+      .map((role) => ({ role, list: distinctFigures(candidatesFor(role, "project", bank, others, jdLower, track, [...others.values()], factKeys)) }))
       .filter((o) => o.list.length >= minBullets)
       .map((o) => ({ ...o, tagged: projectFits(bank, o.role, track), fit: o.list.slice(0, minBullets).reduce((x, c) => x + c.score, 0) / minBullets }))
       .sort((a, b) => Number(b.tagged) - Number(a.tagged) || b.fit - a.fit)[0];
@@ -210,7 +213,7 @@ export function chooseProjects(compact, bank, { jd = "", track = null, extra = j
     const slot = out.projects.map((p, i) => ({ i, fit: fitOf(p) })).slice(1).sort((a, b) => a.fit - b.fit)[0];
     const others = out.projects.filter((_, i) => i !== slot.i);
     const used = new Map([...(out.experience || []), ...others].flatMap((s) => s.bullets.map((b) => [b.ac_id, b.text])));
-    const list = distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track, others.flatMap((p) => p.bullets.map((b) => b.text))));
+    const list = distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track, [...used.values()], factKeys));
     if (list.length < minBullets) continue;
     const fit = list.slice(0, minBullets).reduce((s, c) => s + c.score, 0) / minBullets;
     if (fit <= slot.fit) continue;

@@ -151,6 +151,30 @@ function readRoleYamlDates(bankDir = resolveBankDir()) {
   return { byEmployer, bySlug };
 }
 
+/**
+ * "project" or "experience" for an employer or project slug, from its own definition: the name tables above, then its
+ * bank file's `role.slot_kind` (ATRIVEO.yaml, FOMC-MARKET-LLM.yaml). A bullet's slot_kind never decides it (2026-10-23).
+ */
+export function roleKindOf(roleSlug, bankDir = resolveBankDir()) {
+  if (PROJECT_SLUG_TO_NAME[roleSlug]) return "project";
+  if (ROLE_SLUG_TO_NAME[roleSlug]) return "experience";
+  return readRoleKinds(bankDir)[roleSlug] === "project" ? "project" : "experience";
+}
+
+function readRoleKinds(bankDir) {
+  const out = {};
+  for (const file of fs.readdirSync(bankDir)) {
+    if (!file.endsWith(".yaml") || /^AC-U?\d+\.yaml$/.test(file)) continue;
+    try {
+      const role = yaml.load(fs.readFileSync(path.join(bankDir, file), "utf8"))?.role;
+      if (role?.id && role.slot_kind) out[role.id] = role.slot_kind;
+    } catch {
+      // not a role file
+    }
+  }
+  return out;
+}
+
 export function resolveExperienceMeta(roleSlug, bankDir = resolveBankDir()) {
   const name = ROLE_SLUG_TO_NAME[roleSlug] || roleSlug;
   const { byEmployer, bySlug } = readRoleYamlDates(bankDir);
