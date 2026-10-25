@@ -1,0 +1,52 @@
+# Wake Forest MLOps patient-history workflow (confirmed 2026-10-01; restored 2026-10-25 as AC-250: AC-200 went to an FDE bullet and AC-249 is taken by the FOMC project work).
+id: AC-250
+role: wake-forest
+fits: [ai-engineer, data-science, forward-deployed]
+slot_kind: experience
+engineering_identity: data
+achievement_theme: mlops-patient-review
+display_order: 11
+wow_score: 0.85
+metrics_claimed:
+  - history_6_months
+concepts_claimed:
+  - mlops
+  - clinical
+  - historical
+signature_technologies: []
+fact: >-
+  MLOps workflow at Wake Forest: once an anonymized scan is standardized and lands, the historical pipeline runs,
+  then the workflow gathers the patient's data, MRI scans, the previous 6 months and the following 6 months of
+  history, and sends the treating physician a status update. No platform or volume is confirmed, so none is claimed.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-01'
+  context: Oct 1 bank session (atriveo-app-bank worktree), wording approved 2026-10-25
+capabilities:
+  ml: 82
+  data: 86
+  backend: 74
+  cloud: 60
+strength:
+  recruiter: 9
+ats_keywords:
+  - MLOps
+  - MRI
+  - clinical
+  - patient data
+  - machine learning
+facets:
+  ml:
+    phrase: mlops patient-history workflow
+    keywords:
+      - mlops
+      - workflow
+      - clinical
+      - patient
+      - history
+variants:
+  - facet: ml
+    emphasis: ml
+    strength: 9
+    text: >-
+      Produced status updates for treating physicians through an MLOps workflow that, once each anonymized MRI was standardized, assembled the patient's scans and the 6 months of history before and after.
