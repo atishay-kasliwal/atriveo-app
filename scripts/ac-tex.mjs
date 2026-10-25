@@ -33,7 +33,7 @@ const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 \\titlespacing*{\\section}{0pt}{2pt}{2pt}
 \\newcommand{\\resumeItem}[1]{\\item\\small{{#1 \\vspace{-2pt}}}}
 \\newcommand{\\resumeSubheading}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\textbf{#1} & #2 \\\\ \\sbox{\\projectbox}{\\textit{\\small#3}}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & \\textit{\\small #4} \\\\ \\end{tabular*}\\vspace{-7pt}}
-\\newcommand{\\resumeProjectHeading}[2]{\\item\\begin{tabular*}{0.97\\textwidth}{p{0.72\\textwidth}@{\\extracolsep{\\fill}}r}\\sbox{\\projectbox}{\\small#1}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & #2 \\\\ \\end{tabular*}\\vspace{-7pt}}
+\\newcommand{\\resumeProjectHeading}[2]{\\item\\begin{tabular*}{0.97\\textwidth}{l@{\\extracolsep{\\fill}}r}\\sbox{\\projectbox}{\\small#1}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & #2 \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\newcommand{\\resumeEducation}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\textbf{#1} & #4 \\\\ \\textit{\\small #3} & \\textit{\\small #2} \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
 \\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.15in, label={}]}
