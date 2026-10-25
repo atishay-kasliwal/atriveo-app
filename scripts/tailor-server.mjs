@@ -1873,7 +1873,7 @@ const server = http.createServer(async (req, res) => {
         const params = new URL(req.url, "http://x").searchParams;
         const limit = Math.min(Math.max(Number(params.get("limit")) || 8, 1), 20);
         const offset = Math.max(Number(params.get("offset")) || 0, 0);
-        const data = await withMongo((db) => matchingQueue(db, { limit, offset, company: params.get("company"), jobUrl: params.get("job"), exclude: (params.get("exclude") || "").split(",").filter(x=>/^[a-f0-9]{16}$/.test(x)), learn: params.get("learn") !== "0" }), { appName: "AtriveoTailorServer" });
+        const data = await withMongo((db) => matchingQueue(db, { limit, offset, period: params.get("period") || "7d", sources: (params.get("sources") || "").split(","), role: params.get("role") || "", query: (params.get("q") || "").slice(0,200), timeZone: params.get("tz") || "America/New_York", sort: params.get("sort") === "fit" ? "fit" : "latest", company: params.get("company"), jobUrl: params.get("job"), exclude: (params.get("exclude") || "").split(",").filter(x=>/^[a-f0-9]{16}$/.test(x)), learn: params.get("learn") !== "0" }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify(data));
       } catch (e) {
