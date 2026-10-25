@@ -192,7 +192,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
   const filtered = track !== "all" || query || filter !== "all";
   const card = (j: Job, index: number) => {
     const waiting = waitingFor(j); const applied = j.state === "applied";
-    return <JobCard key={j._id} id={j._id} company={j.company} title={j.title} location={j.location || "Location not specified"} track={j.track} resumeMatch={j.resume_match} readyState={j.resume_ready} resumeReady={Boolean(j.resume)} busy={busy}
+    return <JobCard key={j._id} id={j._id} company={j.company} title={j.title} location={j.location || "Location not specified"} track={j.track} resumeMatch={j.resume_match} readyState={j.resume_ready} resumeReady={Boolean(j.resume)} busy={busy} platform="staffing"
       className={index === focused ? "is-focused" : ""} onFocus={() => setFocus(index)}
       selected={selectedIds.includes(j._id)} selectDisabled={busy} onSelect={(checked) => setSelectedIds(ids => checked ? [...ids, j._id] : ids.filter(id => id !== j._id))}
       onTitle={() => void inspect(j)} onSkip={() => skipCompany(j.company)}

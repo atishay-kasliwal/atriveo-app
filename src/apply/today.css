@@ -598,3 +598,31 @@
 .td-ready.is-ready { --match-color: #69c69a; }
 .td-ready.is-review { --match-color: #d5ad61; }
 .td-ready.is-needs-work { --match-color: #e07a72; }
+
+/* Platform border: the card's edge says where the job came from (data-platform on JobCard).
+   Mid-tone hues that read on the dark card surface and on a light one; unknown sources keep the neutral border. */
+:root {
+  --platform-linkedin: #0a66c2;
+  --platform-staffing: #8b5cf6;
+  --platform-greenhouse: #1f9d74;
+  --platform-lever: #0ea5b7;
+  --platform-ashby: #e0457b;
+  --platform-workday: #e8890c;
+  --platform-smartrecruiters: #b8a01a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --platform-linkedin: #2f7fd6; }
+}
+:root[data-theme="dark"] { --platform-linkedin: #2f7fd6; }
+.td-card[data-platform="linkedin"] { --platform: var(--platform-linkedin); }
+.td-card[data-platform="staffing"] { --platform: var(--platform-staffing); }
+.td-card[data-platform="greenhouse"] { --platform: var(--platform-greenhouse); }
+.td-card[data-platform="lever"] { --platform: var(--platform-lever); }
+.td-card[data-platform="ashby"] { --platform: var(--platform-ashby); }
+.td-card[data-platform="workday"] { --platform: var(--platform-workday); }
+.td-card[data-platform="smartrecruiters"] { --platform: var(--platform-smartrecruiters); }
+.td-page .td-grid .td-card[data-platform] { border-color: color-mix(in oklab, var(--platform) 70%, var(--border-col)); }
+.td-page .td-grid .td-card[data-platform]:hover { border-color: var(--platform); }
+.td-page .td-grid .td-card[data-platform]:is(.is-focused, .is-selected) { border-color: var(--platform); box-shadow: 0 0 0 1px var(--platform), 0 0 0 4px color-mix(in oklab, var(--platform) 22%, transparent); }
+.td-card[data-platform] .td-source { display: inline-flex; align-items: center; gap: 5px; }
+.td-card[data-platform] .td-source::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--platform); flex: none; }

@@ -4,6 +4,7 @@ import CompanyLogo from "../components/CompanyLogo";
 import CardActions from "./CardActions";
 import { TRACK_LABEL } from "./tracks";
 import type { ResumeMatch, ResumeReadyState } from "./reviewQueue";
+import { PLATFORM_LABEL, type Platform } from "./platform";
 import "./today.css";
 
 /** A North Carolina job (they come first). */
@@ -44,6 +45,8 @@ interface Props {
   title: string;
   location?: string | null;
   track?: string | null;
+  /** Where the job came from: tints the border; null keeps it neutral. */
+  platform?: Platform | null;
   /** Tags after the track tag (stage, resume state, skills…). */
   tags?: ReactNode;
   /** Tags before the track tag. */
@@ -84,7 +87,7 @@ export default function JobCard(p: Props) {
   const readyTitle = p.readyState ? [p.readyState.status, ...p.readyState.reasons, p.readyState.skills_checked ? "" : "Skills were not checked against Fit yet"].filter(Boolean).join(". ") : (p.resumeReady === false ? "Shown once the tailored resume is built and checked" : "This resume has not been checked yet");
   const trackLabel = p.track ? TRACK_LABEL[p.track as keyof typeof TRACK_LABEL] : undefined;
   return (
-    <article onMouseDown={p.onFocus} className={`td-card ${trackLabel ? `tr-${p.track}` : ""} ${p.selected ? "is-selected" : ""} ${p.className ?? ""}`} aria-label={p.ariaLabel ?? p.company} aria-busy={p.busy}>
+    <article onMouseDown={p.onFocus} className={`td-card ${trackLabel ? `tr-${p.track}` : ""} ${p.selected ? "is-selected" : ""} ${p.className ?? ""}`} aria-label={p.ariaLabel ?? p.company} aria-busy={p.busy} data-platform={p.platform ?? undefined}>
       <header className="td-head">
         {p.onSelect && <input type="checkbox" className="td-check" disabled={p.selectDisabled} aria-label={`Select ${p.company} ${p.title}`} checked={Boolean(p.selected)} onChange={(e) => p.onSelect!(e.target.checked)} />}
         <CompanyLogo company={p.company} size="md" />
@@ -107,7 +110,7 @@ export default function JobCard(p: Props) {
         <div className="td-card-tools">
           {p.quickActions}
           {p.more && <CardActions>{p.more}</CardActions>}
-          {p.source !== 'LinkedIn' && <span className="td-source">{p.source}</span>}
+          {p.source !== 'LinkedIn' && <span className="td-source" title={p.platform ? `From ${PLATFORM_LABEL[p.platform]}` : undefined}>{p.source}</span>}
           {p.age && <span className="td-age" title={p.ageTitle}>{p.age}</span>}
         </div>
       </footer>
