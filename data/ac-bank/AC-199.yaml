@@ -18,7 +18,7 @@ signature_technologies:
   - MLflow
 fact: >-
   Live MLOps workflow (confirmed 2026-10-05): when a Federal Reserve press conference goes live, FinBERT and
-  other Hugging Face models run on AWS Bedrock (A100 GPUs) with MLflow tracking. About 110 Fed events a year
+  other Hugging Face models (about 10 in all; names stay off the resume) run on AWS Bedrock (A100 GPUs) with MLflow tracking. About 110 Fed events a year
   (press conferences, speeches, minutes) since 2019. Speed depended on hardware, so no time metric is claimed.
 capabilities:
   ai: 84
