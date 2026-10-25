@@ -35,3 +35,18 @@ test('newest-first order stays chronological regardless of fit or saved state',(
  assert.deepEqual(rankForMatching([older,newer],new Map([[newer.job_url,'saved']]),'latest').map(d=>d.job_url),[newer.job_url,older.job_url]);
  assert.equal(rankForMatching([older,newer],new Map(),'fit')[0].job_url,older.job_url);
 });
+
+test('applied today uses submission time in the local day, not all-time totals, opens or rediscovery',()=>{
+ const now=new Date('2026-10-26T02:00:00Z'); // Oct 25, 10pm New York
+ const apps=[{jobUrls:['yesterday'],lifecycle:{appliedAt:'2026-10-25T03:59:59Z'}},{jobUrls:['today'],lifecycle:{appliedAt:'2026-10-25T04:00:00Z'}},{jobUrls:['tomorrow'],lifecycle:{appliedAt:'2026-10-26T04:00:00Z'}},{jobUrls:['unknown']}];
+ const swipes=[{job_url:'today',direction:'applied',applied_at:'2026-10-26T01:00:00Z'},{job_url:'yesterday',direction:'applied',applied_at:'2026-10-26T01:00:00Z'},{job_url:'manual',direction:'applied',applied_at:'2026-10-26T01:00:00Z'},{job_url:'old',direction:'applied',applied_at:'2026-10-25T03:59:59Z'},{job_url:'opened',direction:'right',swiped_at:'2026-10-26T01:00:00Z'}];
+ assert.equal(confirmedApplicationCount(apps,swipes,{now,timeZone:'America/New_York'}),2);
+ assert.equal(confirmedApplicationCount(apps,swipes,{now,timeZone:'Invalid/Zone'}),2);
+ assert.equal(confirmedApplicationCount(apps,swipes,{now,timeZone:'UTC'}),2); // future-day application + manual
+ assert.equal(confirmedApplicationCount(apps,swipes),6);
+});
+test('today counting handles both occurrences of the fall-back hour and midnight rollover',()=>{
+ const apps=[{jobUrls:['first'],lifecycle:{appliedAt:'2026-11-01T05:30:00Z'}},{jobUrls:['second'],lifecycle:{appliedAt:'2026-11-01T06:30:00Z'}}];
+ assert.equal(confirmedApplicationCount(apps,[],{now:new Date('2026-11-02T04:59:59Z')}),2);
+ assert.equal(confirmedApplicationCount(apps,[],{now:new Date('2026-11-02T05:00:00Z')}),0);
+});

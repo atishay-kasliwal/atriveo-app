@@ -118,8 +118,8 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
       { projection: { _id: 0, job_url: 1, job_url_direct: 1, company: 1, title: 1, location: 1, level: 1, score_pct: 1, date_posted: 1, run_at: 1, apply_type: 1, site: 1, fit: 1, "resume.pdf_path": 1, "resume.object": 1 } })
       .sort({ run_at: -1 }).limit(6000).toArray(),
     db.collection("applications").distinct("jobUrls"),
-    db.collection("job_swipes").find({}, { projection: { _id: 0, job_url: 1, direction: 1, swiped_at: 1, source: 1 } }).toArray(),
-    db.collection("applications").find({status:"APPLIED"},{projection:{_id:1,jobUrls:1}}).toArray(),
+    db.collection("job_swipes").find({}, { projection: { _id: 0, job_url: 1, direction: 1, swiped_at: 1, applied_at: 1, source: 1 } }).toArray(),
+    db.collection("applications").find({status:"APPLIED"},{projection:{_id:1,jobUrls:1,"lifecycle.appliedAt":1}}).toArray(),
   ]);
   const taken = new Set(applied);
   const later = new Map();
@@ -148,7 +148,7 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
   const scoped = company ? allRanked.filter(d=>companyKey(d.company)===companyKey(company)) : allRanked;
   const ranked = scoped.filter(d=>!excluded.has(queueKey(d.job_url)));
   if (jobUrl) { const i=ranked.findIndex(d=>d.job_url===jobUrl); if(i>0)ranked.unshift(...ranked.splice(i,1)); }
-  const stats = { applied: confirmedApplicationCount(confirmed,swipes), opened: 0, skipped: 0, saved: 0, remaining: allRanked.length };
+  const stats = { appliedToday: confirmedApplicationCount(confirmed,swipes,{now,timeZone}), applied: confirmedApplicationCount(confirmed,swipes), opened: 0, skipped: 0, saved: 0, remaining: allRanked.length };
   const known = new Set(docs.map(d=>d.job_url));
   for(const swipe of swipes) if(known.has(swipe.job_url)&&swipe.source==='job-matching'){if(swipe.direction==='right')stats.opened++;else if(swipe.direction==='left')stats.skipped++;else if(swipe.direction==='later')stats.saved++;}
   // A page is the rows with a resume file and a page image; others are skipped, not shown half-ready.

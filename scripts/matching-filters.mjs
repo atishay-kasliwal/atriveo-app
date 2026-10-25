@@ -19,7 +19,10 @@ export function filterMatchingJobs(docs,{period='7d',sources=[],role='',query=''
   const text=[d.title,d.company,d.location].join(' ').toLowerCase();return tokens.every(token=>text.includes(token));
  });
 }
-export function confirmedApplicationCount(applications,swipes){
+export function confirmedApplicationCount(applications,swipes,{now,timeZone='America/New_York'}={}){
+ try{dayIn(new Date(),timeZone);}catch{timeZone='America/New_York';}
+ const today=now?dayIn(now,timeZone):null;
+ const onDay=value=>{const date=new Date(value);return value&&Number.isFinite(date.getTime())&&dayIn(date,timeZone)===today;};
  const linked=new Set(applications.flatMap(a=>a.jobUrls||[]));
- return applications.length+new Set(swipes.filter(s=>s.direction==='applied'&&!linked.has(s.job_url)).map(s=>s.job_url)).size;
+ return applications.filter(a=>!today||onDay(a.lifecycle?.appliedAt)).length+new Set(swipes.filter(s=>s.direction==='applied'&&!linked.has(s.job_url)&&(!today||onDay(s.applied_at||s.swiped_at))).map(s=>s.job_url)).size;
 }
