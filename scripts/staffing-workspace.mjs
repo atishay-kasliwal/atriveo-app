@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { withMongo } from './mongo-client.mjs';
 import { enqueueJob } from './resume-queue.mjs';
-import { markJobApplied, resumeMatchOf, resumeReadyOf, trackOf } from './applications-analytics.mjs';
+import { markJobApplied, readyBrief, resumeMatchOf, resumeReadyOf, trackOf } from './applications-analytics.mjs';
 
 export function postingUrl(value) {
   const u = new URL(String(value));
@@ -75,7 +75,7 @@ export async function list(db, params) {
   const limit = Math.max(1, Math.min(30, Number(params.get('limit')) || 10));
   const offset = Math.max(0, Math.min(100000, Number(params.get('offset')) || 0));
   // The card's resume match (ats-score.json beside the PDF), only for the page shown.
-  return { ok: true, counts, track_counts, total, jobs: rows.slice(offset, offset + limit).map(({ description, fit, ...j }) => ({ ...j, resume_match: resumeMatchOf(j.resume), resume_ready: resumeReadyOf(j.resume, fit) })) };
+  return { ok: true, counts, track_counts, total, jobs: rows.slice(offset, offset + limit).map(({ description, fit, ...j }) => ({ ...j, resume_match: resumeMatchOf(j.resume), resume_ready: readyBrief(resumeReadyOf(j.resume, fit)) })) };
 }
 // Staffing resumes are built by the resume worker, like every other job. A click goes to the fast lane (1001,
 // beside the extension's Tailor); the background sweep queues Recommended jobs just below it.

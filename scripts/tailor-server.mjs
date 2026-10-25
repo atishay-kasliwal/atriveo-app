@@ -1695,9 +1695,10 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // GET /applications/review-queue?view=counts|unanswered|cards|ready — the Unanswered and Ready pages
+  // GET /applications/review-queue?view=counts|unanswered|cards|details|ready|linkedin — the Unanswered and Ready pages
   // and the header counts, each reading only what it shows (read-only, no cap; see reviewQueue).
-  // &cards=N with view=unanswered: the first N cards too. &ids=a,b with view=cards: those cards.
+  // &cards=N with view=unanswered: the first N cards too. &ids=a,b with view=cards: those cards; with view=details:
+  // those cards' resume facts. &light=1 with view=unanswered|linkedin: rows without them (Today loads them per page).
   // No view: everything at once; ?counts=1 is view=counts (consoles loaded before the views).
   // Resume builder (docs/resume-builder.md): GET load ?job=<job_url> | ?app=<application id> | ?track=<track> |
   // ?pasted=<id>; GET pasted (your pasted resumes); GET bank (every bullet, for /bank); POST bank-retire, bank-draft, bank-draft-result, bank-approve; POST render | save | revert | bullet (save one to the bank) |
@@ -1776,7 +1777,8 @@ const server = http.createServer(async (req, res) => {
         const view = params.get("counts") === "1" ? "counts" : params.get("view") || "full";
         const cards = Math.min(Math.max(Number(params.get("cards")) || 0, 0), 50);
         const ids = String(params.get("ids") || "").split(",").map((id) => id.trim().slice(0, 80)).filter(Boolean).slice(0, 50);
-        const data = await withMongo((db) => reviewQueue(db, { view, cards, ids }), { appName: "AtriveoTailorServer" });
+        const light = params.get("light") === "1";
+        const data = await withMongo((db) => reviewQueue(db, { view, cards, ids, light }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify(data));
       } catch (e) {
