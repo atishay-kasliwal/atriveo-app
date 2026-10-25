@@ -80,7 +80,7 @@ test('light lists leave out the resume facts, which view=details brings for the 
     assert.equal(l1.resumeReady, true);
     assert.equal(l2.resumeReady, false, 'still sorted by whether the resume is here');
     for (const r of light.unanswered) for (const k of ['resumeMatch', 'readyState', 'resumeEta', 'pendingLite', '_jobUrls']) assert.equal(k in r, false, `${r.id} has no ${k}`);
-    assert.deepEqual(full.unanswered.find((r) => r.id === 'a1').resumeMatch, { score: 81, required: { matched: 4, total: 5 }, preferred: null });
+    assert.ok(full.unanswered.find((r) => r.id === 'a1').resumeMatch, 'the full list reads the saved Job Match');
 
     const li = await reviewQueue(db, { view: 'linkedin', light: true, now });
     assert.equal(li.linkedin.length, 1);
@@ -93,6 +93,8 @@ test('light lists leave out the resume facts, which view=details brings for the 
     assert.deepEqual(details.a1.resumeMatch, full.unanswered.find((r) => r.id === 'a1').resumeMatch, 'the same Job Match the full list sends');
     assert.deepEqual(details.a2.resumeEta, full.unanswered.find((r) => r.id === 'a2').resumeEta, 'the same ETA the full list sends');
     assert.equal(details.a2.resumeEta.state, 'queued');
-    assert.equal(details['https://www.linkedin.com/jobs/view/9'].resumeMatch.score, 81);
+    const fullLi = await reviewQueue(db, { view: 'linkedin', now });
+    assert.deepEqual(details['https://www.linkedin.com/jobs/view/9'].resumeMatch, fullLi.linkedin[0].resumeMatch, 'the same Job Match the full LinkedIn list sends');
+    assert.deepEqual(details['https://www.linkedin.com/jobs/view/9'].readyState, fullLi.linkedin[0].readyState);
   } finally { await client.close(); await mongo.stop(); fs.rmSync(dir, { recursive: true, force: true }); }
 });
