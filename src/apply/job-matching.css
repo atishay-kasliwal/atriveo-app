@@ -50,3 +50,17 @@
 .jm-mobile-download{display:none}@media(max-width:800px){.jm-mobile-download{display:inline-flex;flex-shrink:0;align-items:center;min-height:29px;padding:4px 7px;font-size:10px}}
 
 .jm-companion-ready{font-size:10px;color:var(--jm-green);padding:0 3px}
+/* Source border: each company tile's edge says where its jobs were pulled from (data-platform; tokens in today.css). */
+.jm-rail>button[data-platform="linkedin"]{--platform:var(--platform-linkedin)}
+.jm-rail>button[data-platform="staffing"]{--platform:var(--platform-staffing)}
+.jm-rail>button[data-platform="greenhouse"]{--platform:var(--platform-greenhouse)}
+.jm-rail>button[data-platform="lever"]{--platform:var(--platform-lever)}
+.jm-rail>button[data-platform="ashby"]{--platform:var(--platform-ashby)}
+.jm-rail>button[data-platform="workday"]{--platform:var(--platform-workday)}
+.jm-rail>button[data-platform="smartrecruiters"]{--platform:var(--platform-smartrecruiters)}
+.jm-rail>button[data-platform]{border-color:color-mix(in oklab,var(--platform) 70%,transparent)}
+.jm-rail>button[data-platform]:hover,.jm-rail>button[data-platform]:focus-visible{border-color:var(--platform)}
+.jm-rail>button[data-platform].active{border-color:var(--platform);box-shadow:0 0 0 1px var(--platform),0 0 0 4px color-mix(in oklab,var(--platform) 22%,transparent)}
+.jm-company-tip .jm-company-source{display:flex;align-items:center;gap:6px;color:var(--foreground)}
+.jm-rail>button[data-platform] .jm-company-source::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--platform);flex:none}
+
