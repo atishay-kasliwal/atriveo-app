@@ -33,7 +33,7 @@ const jd = parseJobDescription(jdText, config);
 const score = (r = resume, j = jd, c = config) => scoreJobMatch(r, j, c, { asOf: "2026-10-01" });
 
 test("JD sections keep required and preferred separate; about/benefits never enter scoring", () => {
-  assert.deepEqual(jd.required.map((r) => r.label), ["Go / Rust / TypeScript", "PostgreSQL", "Kafka"]);
+  assert.deepEqual(jd.required.map((r) => r.label), ["Python", "API", "Observability", "Go / Rust / TypeScript", "PostgreSQL", "Kafka"]);
   assert.deepEqual(jd.preferred.map((r) => r.label), ["Swift", "Kubernetes / Docker"]);
   assert.equal(jd.years.minimum, 4);
   assert.equal(jd.degree.level, "bachelor");
@@ -74,7 +74,7 @@ The base salary range includes RSUs and benefits.
 
 test("unusual role and qualification headings are recognized; inline bonus does not switch sections", () => {
   const posting = parseJobDescription("About the Team\nIn This Role, You Will:\n- Build APIs.\nYou Might Thrive In This Role If You\n- Have experience with Go or Rust.\n- Have built products (bonus for startup experience).\n- Proficient in Python.", config);
-  assert.deepEqual(posting.required.map((x) => x.label), ["Go / Rust", "Python"]);
+  assert.deepEqual(posting.required.map((x) => x.label), ["API", "Go / Rust", "Python"]);
   assert.equal(posting.responsibilities.length, 1);
 });
 
@@ -105,7 +105,7 @@ test("ordinary lowercase go is not Go language evidence", () => {
 });
 
 test("any-of requirement earns credit from one alternative and retains its source", () => {
-  const item = score().categories.find((c) => c.key === "required_skills").items[0];
+  const item = score().categories.find((c) => c.key === "required_skills").items.find(i => i.label === "Go / Rust / TypeScript");
   assert.equal(item.label, "Go / Rust / TypeScript");
   assert.equal(item.matched_skill, "Go");
   assert.equal(item.classification, "exact");
@@ -123,7 +123,7 @@ test("evidence credit order and equivalent vs related are explicit", () => {
   assert.equal(project.credit, .75);
   assert.equal(skillsOnly.credit, .5);
   assert.equal(equivalent.kind, "equivalent");
-  assert.equal(equivalent.credit, .95);
+  assert.equal(equivalent.credit, .9 * .95);
   assert.equal(related.kind, "related");
   assert.equal(related.credit, .5);
 });
@@ -157,7 +157,7 @@ test("points and losses add up exactly at item, category and total level", () =>
     assert.equal(Math.round((c.earned + c.lost) * 10), Math.round(c.max * 10));
     for (const i of c.items) assert.equal(Math.round((i.earned + i.lost) * 10), Math.round(i.max * 10));
   }
-  assert.deepEqual(m.requirement_counts.required, { matched: 3, total: 3 });
+  assert.deepEqual(m.requirement_counts.required, { matched: 5, total: 6 });
 });
 
 test("no JD yields readiness only through the CLI formatter; scores remain separate", () => {
@@ -190,13 +190,12 @@ test("a supplied job title overrides a short marketing opener", () => {
   assert.equal(result.job_match.coverage.missing_job_title, false);
 });
 
-test("nothing stated for degree/seniority earns their points; absent skill groups redistribute", () => {
+test("unstated degree and seniority earn no points; their weights redistribute", () => {
   const sparse = parseJobDescription("Software Engineer\nResponsibilities:\n- Build Python APIs.", config);
   const m = score(resume, sparse);
-  assert.equal(m.categories.find((c) => c.key === "seniority").earned, m.categories.find((c) => c.key === "seniority").max);
-  assert.equal(m.categories.find((c) => c.key === "education_certs").earned, m.categories.find((c) => c.key === "education_certs").max);
-  assert.equal(m.categories.some((c) => c.key === "required_skills"), false);
-  assert.equal(m.coverage.no_skill_requirements, true);
+  assert.equal(m.categories.some(c => c.key === "seniority" || c.key === "education_certs" || c.key === "achievement_evidence"), false);
+  assert.equal(m.categories.some((c) => c.key === "required_skills"), true);
+  assert.equal(m.coverage.no_skill_requirements, false);
   assert.equal(m.categories.reduce((n, c) => n + Math.round(c.max * 10), 0), 1000);
 });
 
@@ -204,7 +203,7 @@ test("unparsed responsibility prose is listed for review and neither earns nor c
   const vague = parseJobDescription("Software Engineer\nRequirements:\n- Demonstrated ability to handle ambiguous stakeholder needs.", config);
   const m = score(resume, vague);
   assert.equal(m.categories.find((c) => c.key === "experience_alignment"), undefined, "nothing mapped: the category isn't scored");
-  assert.equal(m.categories.reduce((n, c) => n + c.max, 0), 100, "its weight is shared by the scored categories");
+  assert.equal(m.score, null, "unparsed prose cannot produce a number from role-title points alone");
   assert.ok(m.unparsed_requirements.some((r) => /ambiguous stakeholder/.test(r.source)));
   assert.equal(m.coverage.status, "incomplete");
 });
@@ -245,4 +244,35 @@ test("responsibility evidence matches its stems: collaborated, cross-functional,
 test("alternatives: 'one or more of', 'such as' and '(or …)' lists are one requirement; benefits lines hold none", () => {
   const jd = parseJobDescription("Software Engineer\nRequirements:\n- Skills in one or more languages: C++, C#.\n- Backend languages such as Go or Python (or Java, Kotlin, Rust).\n- Experience with Docker and Kubernetes.\n- 401(k), including employer match on contributions made while employed by Ramp", config);
   assert.deepEqual(jd.required.map((r) => r.label), ["C++ / C#", "Go / Python / Java / Kotlin / Rust", "Docker", "Kubernetes"]);
+});
+
+
+test("skills in responsibilities, short qualification sentences and HTML survive extraction", () => {
+  const text = `<h2>Responsibilities</h2><ul><li>Build Java microservices with Kafka, Docker and Kubernetes.</li><li>Deploy PostgreSQL and Redis on AWS using Terraform.</li></ul><h2>Qualifications</h2><p>You have Python experience.</p><p>Preferred qualifications: Knowledge of GraphQL.</p><h2>Benefits</h2><p>Our wellness portal uses Swift.</p>`;
+  const parsed = parseJobDescription(text, config);
+  const labels = parsed.required.map(r => r.label);
+  for (const skill of ["Java", "Microservices", "Kafka", "Docker", "Kubernetes", "PostgreSQL", "Redis", "AWS", "Terraform", "Python"]) assert.ok(labels.includes(skill), skill);
+  assert.ok(parsed.preferred.some(r => r.label === "GraphQL"));
+  assert.ok(![...parsed.required,...parsed.preferred].some(r => r.label === "Swift"));
+  assert.ok(parsed.required.every(r => r.source));
+});
+
+test("repeated requirements and redundant alternatives count once, genuine alternatives remain", () => {
+  const parsed = parseJobDescription("Backend Engineer\nRequirements:\n- Java and AWS.\n- Java / AWS.\n- AWS and Java.\n- Python or Rust.\nPreferred Qualifications:\n- Java and AWS.\n- Kubernetes or Docker.", config);
+  assert.deepEqual(parsed.required.map(r => r.label), ["Java", "AWS", "Python / Rust"]);
+  assert.deepEqual(parsed.preferred.map(r => r.label), ["Kubernetes / Docker"]);
+});
+
+
+test("long inline headings retain their content and preferred classification", () => {
+ const parsed=parseJobDescription("Backend Engineer\nRequirements: Extensive production experience building services with Java, Kafka, Docker and Kubernetes.\nPreferred Qualifications: Experience working with Python, Redis and Terraform in production.",config);
+ assert.deepEqual(parsed.required.map(r=>r.label),["Java","Kafka","Docker","Kubernetes"]);
+ assert.deepEqual(parsed.preferred.map(r=>r.label),["Python","Redis","Terraform"]);
+});
+
+
+test("Bonus Points starts preferred requirements without promoting them to required", () => {
+ const parsed=parseJobDescription("Backend Engineer\nRequirements:\n- TypeScript and Kafka.\nBonus Points\n- Snowflake and Terraform.",config);
+ assert.deepEqual(parsed.required.map(r=>r.label),["TypeScript","Kafka"]);
+ assert.deepEqual(parsed.preferred.map(r=>r.label),["Snowflake","Terraform"]);
 });

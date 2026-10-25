@@ -9,5 +9,6 @@ export function scoreAts(readiness, jdText, config, { asOf = new Date().toISOStr
   if (!jd.required.length && !jd.preferred.length && !jd.responsibilities.length && !jd.unparsed.length && !jd.degree && !jd.years) {
     return { readiness, jd, job_match: null, note: "JD requirements were not recognized; Job Match needs manual review" };
   }
-  return { readiness, jd, job_match: scoreJobMatch(readiness.parsed, jd, config, { asOf, bank }) };
+  const match = scoreJobMatch(readiness.parsed, jd, config, { asOf, bank });
+  return { readiness, jd, job_match: match.score == null ? null : match, ...(match.score == null && { note: match.note }) };
 }

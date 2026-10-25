@@ -65,7 +65,7 @@ readiness:
 
 # Job Match is independent of Readiness. All arithmetic uses integer tenths internally.
 job_match:
-  version: "1.0.0"
+  version: "1.1.0"
   jd_parser: { max_heading_chars: 50, max_title_chars: 110 }
   # Bare lowercase uses of these words are usually ordinary prose, not the technology.
   case_sensitive_terms: [Go, Rust, Swift, React, Spark, Airflow, Snowflake, Lambda, ECS, REST, RAG, S3]
@@ -79,6 +79,11 @@ job_match:
     education_certs: 5
     achievement_evidence: 5
     domain_terminology: 5
+  # Related API and delivery concepts share one unit of skill weight.
+  # They remain separate visible requirements; adding synonyms cannot multiply weight.
+  skill_weight_groups:
+    - [API, REST, GraphQL, gRPC]
+    - [CI/CD, GitHub Actions, Jenkins]
   evidence_tiers: { measured_job_bullet: 1.0, job_bullet: 0.9, job_tools: 0.8, project_bullet: 0.75, project_tools: 0.7, skills_only: 0.5, missing: 0 }
   match_kinds: { exact: 1.0, equivalent: 0.95, related: 0.5, missing: 0 }
   responsibility_tiers: { job_bullet: 1.0, project_bullet: 0.75, missing: 0 }

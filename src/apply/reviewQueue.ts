@@ -67,7 +67,7 @@ export interface ResumeEta { state: "syncing" | "building" | "queued" | "failed"
 /** Job Match of the tailored resume; required/preferred are requirement counts the resume meets. */
 /** Resume Ready: is the tailored resume safe to send. A status, never a score. */
 export interface ResumeReadyState { status: "Ready" | "Review" | "Needs Work"; reasons: string[]; skills_checked?: boolean }
-export interface ResumeMatch { score: number; required?: { matched: number; total: number } | null; preferred?: { matched: number; total: number } | null }
+export interface ResumeMatch { score: number | null; status?: "stale"; reason?: string; coverage?: { status: string; unparsed_requirements: number }; required?: { matched: number; total: number } | null; preferred?: { matched: number; total: number } | null }
 export interface QueuedApp { resumeMatch?: ResumeMatch | null; readyState?: ResumeReadyState | null; resumeEta?: ResumeEta; resumeReady?: boolean; track?: string | null; location?: string | null; createdAt?: string | null; priorityTags?: string[]; score?: number | null; postedAt?: string | null; foundAt?: string | null; company?: string; title?: string; id: string; updatedAt: string; n: number; suggestions?: number; readyForReview?: number; needsInput?: number; actionRequired?: number }
 
 interface View extends EngineState { ok: boolean; generatedAt: string; counts: Counts }

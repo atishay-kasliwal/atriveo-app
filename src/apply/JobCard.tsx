@@ -32,9 +32,9 @@ function useLayout() {
 
 /** The resume-match bar's label, percent and hover text (null before the tailored resume is scored). */
 export function resumeMatchView(rm: ResumeMatch | null | undefined, resumeReady?: boolean) {
-  const match = rm == null ? null : Math.max(0, Math.min(100, rm.score));
-  const title = rm == null ? (resumeReady === false ? "Shown once the tailored resume is built and scored" : "This resume hasn't been scored against the job yet")
-    : [`The tailored resume against this job description: ${match}%`, rm.required?.total ? `required ${rm.required.matched}/${rm.required.total}` : "", rm.preferred?.total ? `preferred ${rm.preferred.matched}/${rm.preferred.total}` : ""].filter(Boolean).join(" · ");
+  const match = rm?.score == null ? null : Math.max(0, Math.min(100, rm.score));
+  const title = rm?.status === "stale" ? rm.reason || "Resume assessment needs refresh" : rm == null ? (resumeReady === false ? "Shown once the tailored resume is built and scored" : "This resume hasn't been scored against the job yet")
+    : [`The tailored resume against this job description: ${match}%`, rm.required?.total ? `required ${rm.required.matched}/${rm.required.total}` : "", rm.preferred?.total ? `preferred ${rm.preferred.matched}/${rm.preferred.total}` : "", rm.coverage?.status === "incomplete" ? "Incomplete requirement coverage; manual review needed" : ""].filter(Boolean).join(" · ");
   return { match, title };
 }
 

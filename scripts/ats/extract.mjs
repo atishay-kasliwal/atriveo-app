@@ -10,7 +10,7 @@ import { spawnSync } from "node:child_process";
 import { sha256 } from "./config.mjs";
 
 function run(cmd, args) {
-  const r = spawnSync(cmd, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+  const r = spawnSync(cmd, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, timeout: 15_000 });
   if (r.error) throw new Error(`${cmd} is not available: ${r.error.message}`);
   if (r.status !== 0) throw new Error(`${cmd} ${args.join(" ")} failed: ${(r.stderr || "").trim().slice(0, 300)}`);
   return r.stdout;

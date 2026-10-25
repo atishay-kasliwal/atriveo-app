@@ -4,6 +4,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { MongoClient } from 'mongodb';
+import { assessmentInputs, ATS_ALGORITHM_HASH } from '../../scripts/ats/identity.mjs';
+import { loadAtsConfig } from '../../scripts/ats/config.mjs';
 
 // Staffing resumes go through the resume queue like every other job: Create resume returns at once and the
 // Oracle worker (owner oracle-atriveo) builds it, so the page never waits and other cards stay usable.
@@ -66,7 +68,7 @@ test('the workspace leaves out skipped companies and gives each card its role tr
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'staffing-match-'));
   const pdf = path.join(dir, 'Atishay Kasliwal.pdf');
   fs.writeFileSync(pdf, '%PDF');
-  fs.writeFileSync(path.join(dir, 'ats-score.json'), JSON.stringify({ job_match: { score: 64.6, requirement_counts: { required: { matched: 4, total: 6 }, preferred: { matched: 1, total: 2 } } } }));
+  fs.writeFileSync(path.join(dir, 'ats-score.json'), JSON.stringify({ schema_version: 1, algorithm_hash: ATS_ALGORITHM_HASH, config_hash: loadAtsConfig().hash, as_of: new Date().toISOString().slice(0,10), inputs: assessmentInputs(pdf), job_match: { score: 64.6, requirement_counts: { required: { matched: 4, total: 6 }, preferred: { matched: 1, total: 2 } } } }));
   await db.collection('staffing_jobs').insertMany([posting('keep', { title: 'Software Engineer' }), posting('drop', { company: 'Skipped Staffing LLC' })]);
   await db.collection('jobs').insertMany([
     { job_url: 'https://jobs.test/keep', site: 'staffing', score_pct: 80, resume: { status: 'success', pdf_path: pdf } },

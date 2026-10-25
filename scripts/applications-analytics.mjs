@@ -4,6 +4,8 @@
 // at GET /applications/analytics (behind the site login via the /tailor relay).
 
 import { loadAtsConfig } from './ats/config.mjs';
+import { scoreAndSaveRun } from './ats/persist.mjs';
+import { assessmentFreshness } from './ats/identity.mjs';
 import { resumeReady } from './ats/ready.mjs';
 import fs from "node:fs";
 import path from "node:path";
@@ -217,13 +219,23 @@ export const trackOf = (title) => { try { tracksDoc ??= loadTracks(); return cla
  * How well the tailored resume itself matches the job: the deterministic Job Match (scripts/ats) that tailor-ac saves
  * as ats-score.json beside the PDF. Each resume is rewritten per job, so this, not the profile score, is the one to read.
  */
-export const resumeMatchOf = (pdfPath) => {
+export const resumeMatchOf = (pdfPath, { refresh = false } = {}) => {
   if (!pdfPath) return null;
   try {
-    const m = JSON.parse(fs.readFileSync(path.join(path.dirname(pdfPath), "ats-score.json"), "utf8")).job_match;
-    if (typeof m?.score !== "number") return null;
+    const dir = path.dirname(pdfPath);
+    let saved;
+    try { saved = JSON.parse(fs.readFileSync(path.join(dir, "ats-score.json"), "utf8")); } catch { saved = null; }
+    let freshness = assessmentFreshness(saved, pdfPath);
+    // Only the bounded matching-page batch requests recalculation, never catalog analytics.
+    if (refresh && !freshness.current && fs.existsSync(path.join(dir, "jd.txt"))) {
+      try { saved = scoreAndSaveRun(dir).saved; freshness = assessmentFreshness(saved, pdfPath); } catch { /* retain a visible stale state; never show the old number */ }
+    }
+    if (!saved) return null;
+    if (!freshness.current) return { score: null, status: "stale", reason: freshness.reason };
+    const m = saved.job_match;
+    if (!Number.isFinite(m?.score)) return null;
     const c = m.requirement_counts ?? {};
-    return { score: Math.round(m.score), required: c.required ?? null, preferred: c.preferred ?? null };
+    return { score: Math.round(m.score), required: c.required ?? null, preferred: c.preferred ?? null, ...(m.coverage && { coverage: m.coverage }) };
   } catch { return null; }
 };
 
@@ -237,6 +249,7 @@ export const resumeReadyOf = (pdfPath, fit = null) => {
   if (!pdfPath) return null;
   try {
     const saved = JSON.parse(fs.readFileSync(path.join(path.dirname(String(pdfPath)), "ats-score.json"), "utf8"));
+    if (!assessmentFreshness(saved, pdfPath).current) return { status: "Review", reasons: ["Resume assessment needs refresh before its checks can be trusted"], skills_checked: false };
     if (!saved.readiness?.parsed) return null;
     atsConfig ??= loadAtsConfig();
     // page-fill.json (written by the build since 2026-10-24) says how much empty space the page has at the bottom.
