@@ -34,7 +34,7 @@ async function fixture(t, viewport = { width: 1600, height: 900 }) {
     }
     if (url.pathname === '/api/auth/me') return route.fulfill({ json: { user: { id: 1, name: 'Test Applicant', email: 'applicant@example.org' } } });
     if (url.pathname === '/api/prefs') return route.fulfill({ json: { prefs: {} } });
-    if (url.pathname === '/applications/review-queue') return route.fulfill({ json: { ok: true, generatedAt: new Date().toISOString(), counts: { unanswered: 0, ready: 0 }, unanswered: [], cards: [], ready: [], manual: [], approved: [], linkedin: job.appliedAt ? [] : [{ id: job.jobUrl, url: job.jobUrl, company: job.company, title: job.title, location: 'New York, NY', score: 84, updatedAt: new Date().toISOString() }] } });
+    if (url.pathname === '/applications/review-queue') return route.fulfill({ json: { ok: true, generatedAt: new Date().toISOString(), counts: { fillable: 0, ready: 0 }, fillable: [], ready: [], manual: [], approved: [], linkedin: job.appliedAt ? [] : [{ id: job.jobUrl, url: job.jobUrl, company: job.company, title: job.title, location: 'New York, NY', score: 84, updatedAt: new Date().toISOString() }] } });
     if (url.pathname === '/applications/job-applied') { await f.applied(); return route.fulfill({ json: { ok: true } }); }
     if (url.pathname === '/applications/analytics') return route.fulfill({ json: { ok: true, range: { applied: 0, linkedinApplied: 0 }, daily: [] } });
     if (url.pathname === '/applications/action') return route.fulfill({ json: { ok: true } });

@@ -151,3 +151,6 @@
 .ib-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 8px 8px 44px; }
 .ib-actions .ib-why { flex-basis: 100%; margin: 0; font-size: 11px; }
 .ib-banner { margin: 0 0 12px; }
+
+/* Load errors on Today, Staffing and Resumes (moved from the retired answer page's stylesheet). */
+.ar-error { color: var(--red); margin: 0 0 8px; font-size: 12px; padding: 0 24px; }

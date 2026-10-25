@@ -11,21 +11,21 @@ import { dismissJob, linkJobToApplication, markJobApplied, reviewQueue, saveLink
 const requireEngine = createRequire(path.join(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), 'playatriveo'), 'package.json'));
 const { MongoMemoryServer } = requireEngine('mongodb-memory-server');
 
-test('unanswered rows carry score, postedAt and foundAt from jobs, and no job_urls', async () => {
+test('fillable rows carry score, postedAt and foundAt from jobs, and no job_urls', async () => {
   const mongo = await MongoMemoryServer.create();
   const client = await MongoClient.connect(mongo.getUri());
   try {
     const db = client.db('t');
     const url = 'https://jobs.ashbyhq.com/acme/1';
     await db.collection('applications').insertOne({ _id: 'a1', company: 'Acme', title: 'Engineer', location: 'Raleigh, NC', status: 'NEEDS_REVIEW', jobUrls: [url], priority: 1, createdAt: '2026-10-01T00:00:00.000Z', updatedAt: '2026-10-02T00:00:00.000Z',
-      submission: { attemptedAt: null }, review: { reason: 'QUESTIONS', pending: [{ fingerprint: 'f', label: 'Why?', type: 'text' }] } });
+      submission: { attemptedAt: null }, review: { reason: 'QUESTIONS', pending: [{ fingerprint: 'f', label: 'Why?', type: 'text', answerProposal: { state: 'ready_for_review', answer: 'Because' } }] } });
     await db.collection('jobs').insertMany([
       { job_url: url, score_pct: 40, date_posted: '2026-09-30', run_at: '2026-10-01T02:00:00Z' },
       { job_url: url, score_pct: 65, date_posted: 'null', run_at: '2026-09-30T05:00:00Z' },
     ]);
-    const { unanswered } = await reviewQueue(db, { view: 'unanswered' });
-    assert.equal(unanswered.length, 1);
-    const r = unanswered[0];
+    const { fillable } = await reviewQueue(db, { view: 'fillable' });
+    assert.equal(fillable.length, 1);
+    const r = fillable[0];
     assert.equal(r.score, 65);
     assert.equal(r.postedAt, '2026-09-30T00:00:00.000Z');
     assert.equal(r.foundAt, '2026-09-30T05:00:00.000Z');

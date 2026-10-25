@@ -287,7 +287,6 @@ function ReviewPanel({ row, onDone }: { row: HistoryRow; onDone: (msg: string) =
           scope={scopes[q.fingerprint] ?? defaultScope(q, row.company)} onScope={(sc) => setScopes((cur) => ({ ...cur, [q.fingerprint]: sc }))} />
       ))}
       <div className="apps-review-actions">
-        {(row.questions.some((q) => q.openEndedAssessment?.questionFamily) || row.questionReviewStatus === "complete") && <Link className="apps-btn-link" to="/answers">Review story answers and continue →</Link>}
         {canApproveSubmit && (
           <button className="primary" disabled={busy} onClick={() => run({ action: "approve_submit", applicationId: row.id, expectedUpdatedAt: row.updatedAt }, "Approval queued. The worker will refill, validate, and submit if nothing changed.")}>Approve and submit</button>
         )}
@@ -711,7 +710,7 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
             </div>
             <div className="ins-overview-grid">
               <section className="ins-panel"><div className="ins-view-heading"><div><h2>Your next steps</h2><p>Pick one thing to move forward.</p></div></div><div className="ins-next-steps">
-                <Link to="/unanswered"><span><strong>Answer application questions</strong><small>Complete the answers holding applications back.</small></span><span>→</span></Link>
+                <Link to="/"><span><strong>Answer application questions</strong><small>On Today, choose Answer on any card waiting on you.</small></span><span>→</span></Link>
                 <Link to="/ready"><span><strong>Review ready applications</strong><small>Check your answers and approve the next submission.</small></span><span>→</span></Link>
                 <button onClick={() => setView('responses')}><span><strong>{data.inbox?.confirm.length ? `Match ${data.inbox.confirm.length} employer emails` : 'Review employer responses'}</strong><small>{data.inbox?.confirm.length ? 'A few emails need to be linked to the right role.' : 'See application receipts and rejections.'}</small></span><span>→</span></button>
                 {k.failed > 0 && <button onClick={() => showHistory('FAILED')}><span><strong>Check {k.failed} failed applications</strong><small>Review what happened and retry when appropriate.</small></span><span>→</span></button>}

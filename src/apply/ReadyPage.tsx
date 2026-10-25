@@ -247,7 +247,6 @@ export default function ReadyPage({ header }: { header?: React.ReactNode }) {
               {rows.length === 0 && !(data.inBrowser ?? []).length && (
                 <div className="rv-empty">
                   <strong>Nothing is waiting for your approval.</strong><Link to="/">Back to Today →</Link>
-                  {data.counts.unanswered > 0 && <Link to="/unanswered">{data.counts.unanswered} application{data.counts.unanswered === 1 ? " needs" : "s need"} answers →</Link>}
                 </div>
               )}
               <div className="ready-list-heading"><h2>Ready to submit</h2><span>{ready.length}</span></div>
