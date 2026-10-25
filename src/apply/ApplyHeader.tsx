@@ -20,7 +20,9 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
   const { cards } = useUnansweredCards();
   const waitingRows = (queue.data?.unanswered ?? []).filter((r) => (r.needsInput ?? 0) > 0);
   const loaded = waitingRows.every((r) => cards[r.id] && cards[r.id]!.updatedAt >= r.updatedAt);
-  const toAnswer = queue.data && loaded ? waitingRows.reduce((n, r) => n + cards[r.id]!.questions.filter(blocking).length, 0) : counts?.needsInput;
+  // The light list carries each application's count (toAnswer), so this no longer waits for every card.
+  const toAnswer = queue.data && loaded ? waitingRows.reduce((n, r) => n + cards[r.id]!.questions.filter(blocking).length, 0)
+    : queue.data && waitingRows.every((r) => r.toAnswer !== undefined) ? waitingRows.reduce((n, r) => n + (r.toAnswer ?? 0), 0) : counts?.needsInput;
   const page = path === "/stats" || path === "/overview" ? "stats" : path === "/unanswered" ? "answer" : path === "/answers" || path === "/ready" || path === "/review" ? "work" : "today";
   const waiting = counts ? counts.unanswered + counts.ready : null;
   return (

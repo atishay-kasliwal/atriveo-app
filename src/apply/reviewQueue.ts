@@ -68,7 +68,11 @@ export interface ResumeEta { state: "syncing" | "building" | "queued" | "failed"
 /** Resume Ready: is the tailored resume safe to send. A status, never a score. */
 export interface ResumeReadyState { status: "Ready" | "Review" | "Needs Work"; reasons: string[]; skills_checked?: boolean }
 export interface ResumeMatch { score: number; required?: { matched: number; total: number } | null; preferred?: { matched: number; total: number } | null }
-export interface QueuedApp { resumeMatch?: ResumeMatch | null; readyState?: ResumeReadyState | null; resumeEta?: ResumeEta; resumeReady?: boolean; track?: string | null; location?: string | null; createdAt?: string | null; priorityTags?: string[]; score?: number | null; postedAt?: string | null; foundAt?: string | null; company?: string; title?: string; id: string; updatedAt: string; n: number; suggestions?: number; readyForReview?: number; needsInput?: number; actionRequired?: number }
+/**
+ * toAnswer, ats and url come with the light list (Today), so a card's kind and Open & Fill don't wait for its questions;
+ * resumeMatch, readyState and resumeEta come per card from loadDetails.
+ */
+export interface QueuedApp { toAnswer?: number; ats?: string | null; url?: string | null; resumeMatch?: ResumeMatch | null; readyState?: ResumeReadyState | null; resumeEta?: ResumeEta; resumeReady?: boolean; track?: string | null; location?: string | null; createdAt?: string | null; priorityTags?: string[]; score?: number | null; postedAt?: string | null; foundAt?: string | null; company?: string; title?: string; id: string; updatedAt: string; n: number; suggestions?: number; readyForReview?: number; needsInput?: number; actionRequired?: number }
 
 interface View extends EngineState { ok: boolean; generatedAt: string; counts: Counts }
 export interface UnansweredQueue extends View { unanswered: QueuedApp[] }
@@ -169,7 +173,7 @@ const FIRST_CARDS = 20;
 
 const unanswered = pageView<UnansweredQueue>(async (first) => {
   const n = first ? FIRST_CARDS : 0;
-  const r = await getJson<UnansweredQueue & { cards: UnansweredApp[] }>(`/applications/review-queue?view=unanswered&cards=${n}`);
+  const r = await getJson<UnansweredQueue & { cards: UnansweredApp[] }>(`/applications/review-queue?view=unanswered&light=1&cards=${n}`);
   if (n) putCards(r.unanswered.slice(0, n), r.cards);
   return r;
 });
@@ -178,7 +182,7 @@ const ready = pageView<ReadyQueue>(() => getJson<ReadyQueue>("/applications/revi
 /** A LinkedIn posting with a resume ready and no application (the engine never applies on LinkedIn). */
 export interface LinkedinJob { resumeMatch?: ResumeMatch | null; readyState?: ResumeReadyState | null; resumeEta?: ResumeEta; resumeReady?: boolean; id: string; url: string; company: string; title: string; location: string | null; score: number | null; postedAt: string | null; foundAt: string | null; track: string | null; resumeFile: string | null; resumePath?: string | null; applyType?: "offsite" | "easy_apply" | null }
 export interface LinkedinQueue { ok: boolean; generatedAt: string; linkedin: LinkedinJob[] }
-const linkedin = pageView<LinkedinQueue>(() => getJson<LinkedinQueue>("/applications/review-queue?view=linkedin"));
+const linkedin = pageView<LinkedinQueue>(() => getJson<LinkedinQueue>("/applications/review-queue?view=linkedin&light=1"));
 /** Today's "On LinkedIn" cards: you open the posting, click Apply there, and Apply with Atriveo fills the company's form. */
 export const useLinkedinQueue = linkedin.use;
 export const refreshLinkedin = linkedin.refresh;
@@ -237,4 +241,30 @@ export async function loadCards(rows: QueuedApp[]): Promise<void> {
 
 export function useUnansweredCards(): Cards {
   return useSyncExternalStore(cards.subscribe, cards.get);
+}
+
+// --- Card details ---------------------------------------------------------------------------
+
+/** Resume Match, Resume Ready and the resume ETA of one card (application id, or LinkedIn job URL). */
+export interface CardDetail { resumeReady?: boolean; resumeMatch: ResumeMatch | null; readyState: ResumeReadyState | null; resumeEta?: ResumeEta }
+const details = store<{ details: Record<string, CardDetail> }>({ details: {} });
+const detailsInflight = new Set<string>();
+
+/** Load the details of the cards on screen (the lists come without them); each call reloads them, 50 a request. */
+export async function loadDetails(ids: string[]): Promise<void> {
+  const want = [...new Set(ids)].filter((id) => !detailsInflight.has(id));
+  if (!want.length) return;
+  want.forEach((id) => detailsInflight.add(id));
+  try {
+    const chunks = Array.from({ length: Math.ceil(want.length / 50) }, (_, i) => want.slice(i * 50, i * 50 + 50));
+    await Promise.all(chunks.map(async (chunk) => {
+      const r = await getJson<{ details: Record<string, CardDetail> }>(`/applications/review-queue?view=details&ids=${chunk.map(encodeURIComponent).join(",")}`);
+      details.set({ details: { ...details.get().details, ...r.details } });
+    }));
+  } catch { /* the badges show "—" until the next load */ }
+  finally { want.forEach((id) => detailsInflight.delete(id)); }
+}
+
+export function useCardDetails(): Record<string, CardDetail> {
+  return useSyncExternalStore(details.subscribe, details.get).details;
 }

@@ -196,6 +196,19 @@ const pendingQuestion = (p) => ({
   reviewStatus: p.openEndedUserReview?.status ?? (p.answerProposal?.answer || p.openEndedSuggestion ? "suggested" : "none"),
 });
 
+// The console's `blocking` rule (src/apply/questionGroups.ts, with engine.ts's questionKind and reviewCategory) on a
+// pendingQuestion: a required question with no answer, suggestion or draft that Fill can't copy from your resume.
+// Keep the two in step; tests/review/todayLight.test.mjs checks the cases.
+const UNREADABLE = /^(?:unlabeled\b.*|yes|no|type your response|select|choose|answer|please select)?$/i;
+const RESUME_FIELD = /^(company( name)?|employer|(job )?title|start date( month| year)?|end date( month| year)?|current (role|job)|education( history)?|school( name)?|university|degree|discipline|field of study|major)\s*\*?$/i;
+const isQuestion = (q) => q.type !== "file" && !UNREADABLE.test(String(q.label ?? "").replace(/[()*:]/g, " ").replace(/\s+/g, " ").trim());
+const categoryOf = (q) => !isQuestion(q) ? "action_required"
+  : q.openEndedUserReview?.status === "rejected" || q.reviewStatus === "rejected" ? "needs_input"
+  : q.answerProposal?.state ?? (q.suggestedAnswer || q.openEndedSuggestion?.suggestedAnswer ? "ready_for_review" : "needs_input");
+const needsYourAnswer = (q) => categoryOf(q) === "needs_input" && !String(q.answerProposal?.answer ?? q.suggestedAnswer ?? q.openEndedSuggestion?.suggestedAnswer ?? "").trim()
+  && !q.userDraft?.trim() && !q.openEndedUserReview?.draftAnswer?.trim();
+export const blockingQuestion = (q) => needsYourAnswer(q) && q.required && !RESUME_FIELD.test(String(q.label ?? "").trim());
+
 // Blocked on questions: the Unanswered page.
 const BLOCKED = { status: "NEEDS_REVIEW", ...NOT_IN_BROWSER, "submission.attemptedAt": null, $or: [
   { "review.pending.0": { $exists: true } },
@@ -246,6 +259,8 @@ export const resumeReadyOf = (pdfPath, fit = null) => {
     return { ...r, skills_checked: Boolean(fit?.ledger?.skills?.length) };
   } catch { return null; }
 };
+/** What a job card shows of Resume Ready (its title and badge): the checks and notes stay on the server. */
+export const readyBrief = (r) => (r ? { status: r.status, reasons: r.reasons ?? [], skills_checked: r.skills_checked } : null);
 
 const rowBase = (r) => ({
   id: r._id, company: r.company, companyKey: r.companyKey ?? null, title: r.title, location: r.location ?? null, ats: r.ats ?? null,
@@ -255,7 +270,7 @@ const rowBase = (r) => ({
   // Its resume file is here, so Fill can attach it now (Today puts these first).
   resumeReady: Boolean(r.resume?.path && fs.existsSync(r.resume.path)),
   resumeMatch: resumeMatchOf(r.resume?.path),
-  readyState: resumeReadyOf(r.resume?.path),
+  readyState: readyBrief(resumeReadyOf(r.resume?.path)),
   _resumePath: r.resume?.path ?? null,
 });
 
@@ -266,7 +281,7 @@ const rowBase = (r) => ({
  * Sets score / postedAt / foundAt on each row and drops jobUrls.
  */
 const isoOf = (v) => { if (!v || v === "null") return null; const d = new Date(v); return Number.isNaN(d.getTime()) ? null : d.toISOString(); };
-async function addJobFacts(db, rows) {
+async function addJobFacts(db, rows, { light = false } = {}) {
   const urls = [...new Set(rows.flatMap((r) => r.jobUrls ?? []))];
   const facts = new Map();
   if (urls.length) {
@@ -292,10 +307,11 @@ async function addJobFacts(db, rows) {
     }
     r.score ??= null; r.postedAt ??= null; r.foundAt ??= null;
     r.track = trackOf(r.title);
-    if ("resumePath" in r) { r.resumeReady = Boolean(r.resumePath && fs.existsSync(r.resumePath)); r.resumeMatch = resumeMatchOf(r.resumePath); r.readyState = resumeReadyOf(r.resumePath, r._fit); delete r.resumePath; }
-    else if (r._resumePath !== undefined) r.readyState = resumeReadyOf(r._resumePath, r._fit);
+    // light: Resume Match and Resume Ready come later, for the cards on screen only (view=details).
+    if ("resumePath" in r) { r.resumeReady = Boolean(r.resumePath && fs.existsSync(r.resumePath)); if (!light) { r.resumeMatch = resumeMatchOf(r.resumePath); r.readyState = readyBrief(resumeReadyOf(r.resumePath, r._fit)); } delete r.resumePath; }
+    else if (r._resumePath !== undefined && !light) r.readyState = readyBrief(resumeReadyOf(r._resumePath, r._fit));
     delete r._resumePath; delete r._fit;
-    if (r.resumeReady === false) r._jobUrls = r.jobUrls ?? [];
+    if (r.resumeReady === false && !light) r._jobUrls = r.jobUrls ?? [];
     delete r.jobUrls;
   }
   return rows;
@@ -316,19 +332,26 @@ const questionCategory = { $switch: { branches: [
 ] , default: "needsInput" } };
 const categoryCount = category => ({ $size: { $filter: { input: { $ifNull: ["$review.pending", []] }, cond: { $eq: [questionCategory, category] } } } });
 
-/** Lightweight per-application counts keep filtering independent of card loading. */
-const unansweredOrder = (apps) => apps.aggregate([
+/**
+ * Lightweight per-application counts keep filtering independent of card loading. light (Today) adds what a card
+ * needs before its questions load: toAnswer (the console's blocking count), the ATS and the link.
+ */
+const unansweredOrder = async (apps, { light = false } = {}) => (await apps.aggregate([
   { $match: BLOCKED },
   { $project: {
     updatedAt: 1, company: 1, title: 1, location: 1, createdAt: 1, priorityTags: 1, jobUrls: 1, resumePath: "$resume.path",
+    ...(light ? { ats: 1, url: { $ifNull: ["$finalUrl", "$applyUrl"] }, pendingLite: { $map: { input: { $ifNull: ["$review.pending", []] }, in: {
+      label: "$$this.label", type: "$$this.type", required: "$$this.required", answerProposal: "$$this.answerProposal",
+      openEndedSuggestion: "$$this.openEndedSuggestion", openEndedUserReview: "$$this.openEndedUserReview" } } } } : {}),
     n: { $size: "$review.pending" },
     suggestions: categoryCount("readyForReview"),
     readyForReview: categoryCount("readyForReview"), needsInput: categoryCount("needsInput"), actionRequired: categoryCount("actionRequired"),
     rank: { $ifNull: ["$priority", 0] },
   } },
   { $sort: { suggestions: -1, n: 1, rank: -1, updatedAt: 1, _id: 1 } },
-  { $project: { _id: 0, id: "$_id", updatedAt: 1, company: 1, title: 1, location: 1, createdAt: 1, priorityTags: 1, jobUrls: 1, resumePath: 1, n: 1, suggestions: 1, readyForReview: 1, needsInput: 1, actionRequired: 1 } },
-]).toArray();
+  { $project: { _id: 0, id: "$_id", updatedAt: 1, company: 1, title: 1, location: 1, createdAt: 1, priorityTags: 1, jobUrls: 1, resumePath: 1, n: 1, suggestions: 1, readyForReview: 1, needsInput: 1, actionRequired: 1,
+    ...(light ? { ats: 1, url: 1, pendingLite: 1 } : {}) } },
+]).toArray()).map(({ pendingLite, ...r }) => (pendingLite ? { ...r, ats: r.ats ?? null, url: r.url ?? null, toAnswer: pendingLite.map(pendingQuestion).filter(blockingQuestion).length } : r));
 
 /** The cards (questions included) of these applications, in this order; any no longer blocked are left out. */
 async function unansweredCards(apps, ids) {
@@ -464,7 +487,7 @@ export async function addResumeEta(db, rows, now = new Date()) {
   return rows;
 }
 
-export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600 } = {}) {
+export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600, light = false } = {}) {
   const since = new Date(now.getTime() - days * 86_400_000);
   const [docs, applied, dismissed] = await Promise.all([
     db.collection("jobs").find({ run_at: { $gte: since }, job_url: /^https:\/\/(www\.)?linkedin\.com\//, "resume.status": "success" },
@@ -486,8 +509,7 @@ export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600
         resumePath: d.resume?.pdf_path ?? null,
         // The file is on this machine, so Apply with Atriveo can attach it now.
         resumeReady: Boolean(d.resume?.pdf_path && fs.existsSync(d.resume.pdf_path)),
-        resumeMatch: resumeMatchOf(d.resume?.pdf_path),
-        readyState: resumeReadyOf(d.resume?.pdf_path, d.fit),
+        ...(light ? {} : { resumeMatch: resumeMatchOf(d.resume?.pdf_path), readyState: readyBrief(resumeReadyOf(d.resume?.pdf_path, d.fit)) }),
         // "offsite" (the company's own form), "easy_apply" (LinkedIn's), or null until checked.
         applyType: d.apply_type ?? null });
     } else {
@@ -541,22 +563,47 @@ export async function dismissJob(db, jobUrl, now = new Date()) {
   return { ok: true };
 }
 
-export async function reviewQueue(db, { view = "full", cards = 0, ids = [], now = new Date() } = {}) {
+/**
+ * Resume Match, Resume Ready and the resume ETA of the cards on screen (Today loads its lists light, without them).
+ * ids are application ids, or LinkedIn job URLs for On LinkedIn cards. Ids it can't find are left out.
+ */
+async function cardDetails(db, ids, now) {
+  const urls = ids.filter((id) => id.startsWith("https://")), appIds = ids.filter((id) => !id.startsWith("https://"));
+  const [apps, jobs] = await Promise.all([
+    appIds.length ? db.collection("applications").find({ _id: { $in: appIds } }, { projection: { title: 1, jobUrls: 1, "resume.path": 1 } }).toArray() : [],
+    urls.length ? db.collection("jobs").find({ job_url: { $in: urls } }, { projection: { _id: 0, job_url: 1, "resume.status": 1, "resume.pdf_path": 1, fit: 1 } }).toArray() : [],
+  ]);
+  const appRows = await addJobFacts(db, apps.map((a) => ({ id: a._id, title: a.title, jobUrls: a.jobUrls ?? [], resumePath: a.resume?.path ?? null })));
+  const byUrl = new Map();
+  for (const j of jobs) if (!byUrl.has(j.job_url) || j.resume?.status === "success") byUrl.set(j.job_url, j);
+  const jobRows = [...byUrl.values()].map((j) => {
+    const pdf = j.resume?.status === "success" ? j.resume.pdf_path ?? null : null;
+    return { id: j.job_url, url: j.job_url, resumeReady: Boolean(pdf && fs.existsSync(pdf)), resumeMatch: resumeMatchOf(pdf), readyState: readyBrief(resumeReadyOf(pdf, j.fit)) };
+  });
+  const rows = await addResumeEta(db, [...appRows, ...jobRows], now);
+  return Object.fromEntries(rows.map((r) => [r.id, { resumeReady: r.resumeReady, resumeMatch: r.resumeMatch ?? null, readyState: r.readyState ?? null, ...(r.resumeEta ? { resumeEta: r.resumeEta } : {}) }]));
+}
+
+export async function reviewQueue(db, { view = "full", cards = 0, ids = [], light = false, now = new Date() } = {}) {
   const apps = db.collection("applications");
   const generatedAt = now.toISOString();
   switch (view) {
     case "cards":
       return { ok: true, generatedAt, cards: await unansweredCards(apps, ids) };
-    case "linkedin":
-      return { ok: true, generatedAt, linkedin: await addResumeEta(db, await linkedinJobs(db, { now }), now) };
+    case "details":
+      return { ok: true, generatedAt, details: await cardDetails(db, ids, now) };
+    case "linkedin": {
+      const rows = await linkedinJobs(db, { now, light });
+      return { ok: true, generatedAt, linkedin: light ? rows : await addResumeEta(db, rows, now) };
+    }
     case "counts": {
       const [engine, totals, ready] = await Promise.all([engineState(db), blockedTotals(apps), readyRows(apps)]);
       return { ok: true, generatedAt, ...engine, counts: { ...totals, ready: ready.length } };
     }
     case "unanswered": {
-      const [engine, order, ready] = await Promise.all([engineState(db), unansweredOrder(apps), readyRows(apps)]);
-      await addJobFacts(db, order);
-      await addResumeEta(db, order, now);
+      const [engine, order, ready] = await Promise.all([engineState(db), unansweredOrder(apps, { light }), readyRows(apps)]);
+      await addJobFacts(db, order, { light });
+      if (!light) await addResumeEta(db, order, now);
       const first = await unansweredCards(apps, order.slice(0, cards).map((r) => r.id));
       return { ok: true, generatedAt, ...engine, counts: countsOf(order, ready), unanswered: order, cards: first };
     }

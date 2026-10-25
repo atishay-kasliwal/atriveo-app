@@ -12,7 +12,7 @@ import { postAction, when } from "./engine";
 import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, extensionVersion, noteLinkedinOpen } from "./openFill";
 import { blocking } from "./questionGroups";
 import { discardNow, dismissJobs, markJobsApplied } from "./discard";
-import { adjustCounts, loadCards, refreshLinkedin, refreshReady, refreshUnanswered, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp, type ResumeEta, type ResumeMatch, type ResumeReadyState } from "./reviewQueue";
+import { adjustCounts, loadCards, loadDetails, refreshLinkedin, refreshReady, refreshUnanswered, useCardDetails, useLinkedinQueue, useReadyQueue, useUnansweredCards, useUnansweredQueue, type ManualApp, type QueuedApp, type ReadyApp, type ResumeEta, type ResumeMatch, type ResumeReadyState } from "./reviewQueue";
 import { GOALS, readPref, streakOf, useApplyHistory, useAppliedToday, useSprint, writePref } from "./todayGoal";
 import { useExclusions } from "../hooks/useExclusions";
 import { TRACK_LABEL } from "./tracks";
@@ -92,6 +92,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const ready = useReadyQueue(60_000);
   const linkedin = useLinkedinQueue(300_000);
   const { cards } = useUnansweredCards();
+  const detail = useCardDetails();
   const navigate = useNavigate();
   const { mobile, columns, rows } = useLayout();
   const perPage = columns * rows;
@@ -155,8 +156,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       const c = cards[q.id];
       // Only required questions nobody answered hold it back (optional ones and resume fields are left to the page).
       const current = c && c.updatedAt >= q.updatedAt ? c : null;
-      const toAnswer = current ? current.questions.filter(blocking).length : q.needsInput ?? 0;
-      return { toAnswer, id: q.id, kind: !q.n ? "fill" : toAnswer > 0 ? "answer" : "drafted", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? null, url: c?.url, updatedAt: q.updatedAt, priorityTags: q.priorityTags ?? c?.priorityTags, queued: q,
+      const toAnswer = current ? current.questions.filter(blocking).length : q.toAnswer ?? q.needsInput ?? 0;
+      return { toAnswer, id: q.id, kind: !q.n ? "fill" : toAnswer > 0 ? "answer" : "drafted", company: q.company ?? c?.company ?? "Loading…", title: q.title ?? c?.title ?? "", ats: c?.ats ?? q.ats ?? null, url: c?.url ?? q.url ?? undefined, updatedAt: q.updatedAt, priorityTags: q.priorityTags ?? c?.priorityTags, queued: q,
         location: q.location ?? c?.location ?? null, score: q.score ?? null, track: q.track ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null, resumeReady: q.resumeReady, resumeEta: q.resumeEta, resumeMatch: q.resumeMatch ?? null, readyState: q.readyState ?? null };
     };
     // What you can act on now comes first (Open & Fill: approved or drafted alike), then what needs answers;
@@ -171,12 +172,15 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null, easyApply: l.applyType === "easy_apply", resumeReady: l.resumeReady, resumeEta: l.resumeEta, resumeMatch: l.resumeMatch ?? null, readyState: l.readyState ?? null })),
     ];
     return all
+      // The resume facts of the cards on screen, loaded with them (the lists come without).
+      // The list alone decides the order (resumeReady), so cards don't move as these arrive.
+      .map((i) => { const d = detail[i.id]; return d ? { ...i, resumeMatch: d.resumeMatch, readyState: d.readyState, resumeEta: d.resumeEta ?? i.resumeEta } : i; })
       .filter((i) => done[i.id] !== i.updatedAt && !skipped(i.company))
       // Easy Apply postings (LinkedIn's own form) come after everything you can fill on a company's site.
       // Ready to apply first: a card whose resume isn't on the server yet waits behind every one that is.
       .sort((a, b) => Number(later.includes(a.id)) - Number(later.includes(b.id)) || Number(a.resumeReady === false) - Number(b.resumeReady === false) || (order[a.kind] + (a.easyApply ? 0.5 : 0)) - (order[b.kind] + (b.easyApply ? 0.5 : 0))
         || Number(inNC(b.location)) - Number(inNC(a.location)) || (b.age ?? "").localeCompare(a.age ?? "") || (b.score ?? -1) - (a.score ?? -1));
-  }, [ready.data, unanswered.data, linkedin.data, cards, done, later, exclusions]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ready.data, unanswered.data, linkedin.data, cards, detail, done, later, exclusions]); // eslint-disable-line react-hooks/exhaustive-deps
   // Counts on each pill: a track's count follows the chosen kind, and a kind's count follows the chosen track.
   const inTrack = (i: Item, t: TrackFilter) => t === "all" || t === "mixed" || i.track === t;
   const inKind = (i: Item, k: KindFilter) => k === "all" || KIND_OF[i.kind] === k;
@@ -201,11 +205,11 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const shownQueued = shown.flatMap((i) => i.queued ? [i.queued] : []);
   const shownKey = shownQueued.map((q) => `${q.id}@${q.updatedAt}`).join(",");
   useEffect(() => { if (shownQueued.length) void loadCards(shownQueued); }, [shownKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  // Every queued card's questions and link (Select all covers every page; a card whose only open questions are
-  // optional or resume fields moves up to Open & Fill once they load).
-  const openFillQueued = items.flatMap((i) => i.queued ? [i.queued] : []);
-  const openFillKey = openFillQueued.map((q) => `${q.id}@${q.updatedAt}`).join(",");
-  useEffect(() => { if (openFillQueued.length) void loadCards(openFillQueued); }, [openFillKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Resume Match, Resume Ready and the resume ETA of the cards on screen, again whenever the lists reload.
+  // (Kind, link and ATS come with the light lists, so Select all and Open & Fill don't wait for every card.)
+  const detailIds = shown.filter((i) => i.queued || i.kind === "linkedin").map((i) => i.id);
+  const detailKey = `${detailIds.join(",")}|${unanswered.data?.generatedAt ?? ""}|${linkedin.data?.generatedAt ?? ""}`;
+  useEffect(() => { if (detailIds.length) void loadDetails(detailIds); }, [detailKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const kindCount = (k: KindFilter) => found.filter((i) => inTrack(i, track) && inKind(i, k)).length;
   const trackCount = (t: TrackFilter) => found.filter((i) => inTrack(i, t) && inKind(i, kind)).length;
   const approvable = items.filter((i) => i.kind === "approve");
