@@ -29,6 +29,8 @@ RUN npm ci --omit=dev
 
 COPY data ./data
 COPY scripts ./scripts
+# Resume rendering imports the shared contact formatter.
+COPY src/shared ./src/shared
 
 ENV CI=1
 ENV NODE_ENV=production

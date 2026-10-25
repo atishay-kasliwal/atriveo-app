@@ -6,7 +6,7 @@ import path from 'node:path';
 import { config } from './helpers.mjs';
 import { skillEvidence, conceptEvidence } from '../../scripts/ats/evidence.mjs';
 import { scoreFit } from '../../scripts/ats/fit.mjs';
-import { parseJobDescription } from '../../scripts/ats/jd-parse.mjs';
+import { parseJobDescription, normalizeJobDescription } from '../../scripts/ats/jd-parse.mjs';
 import { scoreJobMatch } from '../../scripts/ats/match.mjs';
 import { assessmentInputs, ATS_ALGORITHM_HASH, assessmentFreshness } from '../../scripts/ats/identity.mjs';
 import { resumeMatchOf, resumeReadyOf } from '../../scripts/applications-analytics.mjs';
@@ -95,4 +95,12 @@ test('saved scores require current rules, PDF, JD and title; stale readiness can
   assert.equal(assessmentFreshness(saved,pdf).current,false);fs.writeFileSync(file,original);
  }
  assert.equal(assessmentFreshness({...saved,as_of:'2020-01-01'},pdf).current,false);
+});
+
+
+test('HTML normalization is portable, preserves boundaries and safely decodes entities',()=>{
+ const text=normalizeJobDescription('<h2>Requirements</h2><ul><li>Java &amp; Python</li><li>CI&#x2f;CD</li></ul><script>Rust</script><!-- Go -->');
+ assert.ok(text.includes('Java & Python'));assert.ok(text.includes('CI/CD'));
+ assert.ok(!text.includes('Rust'));assert.ok(!text.includes('Go'));
+ assert.equal(normalizeJobDescription('C++ &lt; Java; &#999999999;'),'C++ < Java; &#999999999;');
 });

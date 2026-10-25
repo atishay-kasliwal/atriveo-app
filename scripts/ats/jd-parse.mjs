@@ -1,13 +1,19 @@
 // Parse what a job description actually asks for. Background and benefits never enter the score.
 // Ambiguous prose is retained as an unparsed requirement rather than silently becoming a match.
 
-import { load } from "cheerio";
-
 // Preserve list/paragraph boundaries before decoding saved HTML and entities.
 export function normalizeJobDescription(text) {
-  const raw = String(text || "");
-  if (!/<\/?(?:p|div|li|ul|ol|br|h[1-6]|section|strong|b)\b/i.test(raw) && !/&(?:#\d+|#x[0-9a-f]+|amp|nbsp|quot|apos|lt|gt);/i.test(raw)) return raw;
-  return load(raw.replace(/<br\s*\/?\s*>|<\/(?:p|div|li|h[1-6]|section)>/gi, "\n").replace(/<li\b[^>]*>/gi, "\n- ")).text();
+  const entities = { amp: '&', nbsp: ' ', quot: '"', apos: "'", lt: '<', gt: '>', ndash: '–', mdash: '—', lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”', bull: '•', hellip: '…' };
+  return String(text || "")
+    .replace(/<!--[\s\S]*?-->|<(?:script|style)\b[^>]*>[\s\S]*?<\/(?:script|style)\s*>/gi, " ")
+    .replace(/<br\s*\/?\s*>|<\/(?:p|div|li|h[1-6]|section)>/gi, "\n")
+    .replace(/<li\b[^>]*>/gi, "\n- ").replace(/<\/?[a-z][^>]*>/gi, " ")
+    .replace(/&(#x[0-9a-f]+|#\d+|amp|nbsp|quot|apos|lt|gt|ndash|mdash|lsquo|rsquo|ldquo|rdquo|bull|hellip);/gi, (raw, key) => {
+      if (key[0] !== '#') return entities[key.toLowerCase()] || raw;
+      const hex = key[1].toLowerCase() === 'x';
+      const code = parseInt(key.slice(hex ? 2 : 1), hex ? 16 : 10);
+      return code > 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : raw;
+    });
 }
 
 const BACKGROUND = /^(?:about(?: us| the | our| \w+)?|who we are|company|our mission|benefits|job benefits|perks|compensation|salary|base salary|actual compensation|equal opportunity|committed to equal opportunities|eeo|what we offer|what's in it for you|why join|privacy|our culture|how we work|our approach|important note|you want to know more|a quick note about the process|a note on ai|health and wellbeing|growth and future|community|you belong here|usa-based roles only|canada-based roles only|why your work matters|a day in the life)/i;
