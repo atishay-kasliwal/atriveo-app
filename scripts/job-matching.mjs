@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { resumeRevision } from "./application-kit.mjs";
 import { queueKey, companyKey, companySummary, similarJobs, matchingEvents, preferenceBoost, recordMatchingEvent, forgetMatchingDecision } from "./matching-workspace.mjs";
 import { analyzeMatchingResume } from "./job-matching-analysis.mjs";
 import path from "node:path";
@@ -173,7 +174,7 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
       applyType: d.apply_type ?? null, track: trackOf(d.title),
       // The company's own form when known, else the posting you were shown.
       applyUrl: d.job_url_direct || d.job_url, postingUrl: d.job_url,
-      resumePath: d.resume.pdf_path, resumeObject: d.resume.object ? { sha256: d.resume.object.sha256, hasImage: Boolean(d.resume.object.image_key) } : null, resumeMatch: resumeMatchOf(d.resume.pdf_path, { refresh: true }), ready: resumeReadyOf(d.resume.pdf_path, d.fit), fit: d.fit,
+      resumePath: d.resume.pdf_path, resumeSha256: resumeRevision(d.resume), resumeObject: d.resume.object ? { sha256: d.resume.object.sha256, hasImage: Boolean(d.resume.object.image_key) } : null, resumeMatch: resumeMatchOf(d.resume.pdf_path, { refresh: true }), ready: resumeReadyOf(d.resume.pdf_path, d.fit), fit: d.fit,
       saved: later.has(d.job_url), jd, ats: await analyzeMatchingResume(d.resume.pdf_path, jd.full, d.fit),
     };
   }));

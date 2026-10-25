@@ -61,6 +61,9 @@ jobs:
       - name: ATS Readiness and Job Match tests
         run: npm run test:ats
 
+      - name: Pinned application kit contract
+        run: node --test tests/application-kit.test.mjs
+
   docker:
     name: Docker portable compiler
     runs-on: ubuntu-latest

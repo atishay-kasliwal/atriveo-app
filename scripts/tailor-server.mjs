@@ -42,6 +42,8 @@ import {
 import { buildSkillsLines, capSkillsLineToOnePhysicalLine } from "./skills-library.mjs";
 import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
+import { createHash } from "node:crypto";
+import { prepareApplicationKit } from "./application-kit.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, renderDraft, revertResume, saveBullet, saveDraft, startPasted } from "./resume-builder.mjs";
@@ -1837,6 +1839,24 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // An authenticated, job-bound snapshot. This never compiles or substitutes a resume.
+  if (req.method === "POST" && pathname === "/applications/application-kit") {
+    let raw = "";
+    req.on("data", chunk => { raw += chunk; if (raw.length > 10000) req.destroy(); });
+    req.on("end", async () => {
+      try {
+        const input = JSON.parse(raw || "{}");
+        const kit = await withMongo(db => prepareApplicationKit(db, input, { outRoot: OUT_ROOT }));
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "private, no-store" });
+        res.end(JSON.stringify({ ok: true, kit }));
+      } catch (e) {
+        res.writeHead(e.status || 400, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify({ ok: false, error: e.message || "Application kit unavailable" }));
+      }
+    });
+    return;
+  }
+
   // GET /applications/matching-queue?limit=&offset= — Job Matching: the next jobs to decide on, resume and JD ready.
   if (req.method === "GET" && pathname === "/applications/matching-queue") {
     (async () => {
@@ -1900,6 +1920,10 @@ const server = http.createServer(async (req, res) => {
     if (!pdfPath.startsWith(path.resolve(OUT_ROOT) + path.sep) || path.extname(pdfPath).toLowerCase() !== ".pdf" || !fs.existsSync(png)) {
       res.writeHead(404); res.end("not found");
       return;
+    }
+    const expected = reqUrl.searchParams.get("sha");
+    if (expected && (!/^[a-f0-9]{64}$/.test(expected) || !fs.existsSync(pdfPath) || createHash("sha256").update(fs.readFileSync(pdfPath)).digest("hex") !== expected || fs.statSync(png).mtimeMs < fs.statSync(pdfPath).mtimeMs)) {
+      res.writeHead(409, { "Cache-Control": "no-store" }); res.end("Resume changed. Refresh Job Matching."); return;
     }
     res.writeHead(200, { "Content-Type": "image/png", "Cache-Control": "private, max-age=3600" });
     fs.createReadStream(png).pipe(res);
@@ -2351,6 +2375,10 @@ const server = http.createServer(async (req, res) => {
     }
     try {
       const data = fs.readFileSync(pdfPath);
+      const expected = reqUrl.searchParams.get("sha");
+      if (expected && (!/^[a-f0-9]{64}$/.test(expected) || createHash("sha256").update(data).digest("hex") !== expected)) {
+        res.writeHead(409, { "Cache-Control": "no-store" }); res.end("Resume changed. Refresh Job Matching."); return;
+      }
       const isDownload = reqUrl.searchParams.get("dl") === "1";
       res.writeHead(200, {
         "Content-Type": "application/pdf",
