@@ -1,6 +1,7 @@
 import OutreachPanel from "./OutreachPanel";
 import { outreachApi, useOutreachList, type OutreachTarget } from "./outreach";
 import JobCard, { ago, inNC, useLayout } from './JobCard';
+import { platformOf } from './platform';
 import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OpenFillQueue from "./OpenFillQueue";
@@ -401,6 +402,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const tags = (item.priorityTags ?? []).filter((t) => !item.location?.includes(t) && !/^exp\.? not stated$/i.test(t));
     return (
       <JobCard key={item.id} id={item.id} company={item.company} title={item.title} location={item.location} track={item.track} resumeMatch={item.resumeMatch} readyState={item.readyState} resumeReady={item.resumeReady}
+        platform={item.kind === "linkedin" ? "linkedin" : platformOf(item.ats, item.url)}
         className={`is-${stage.tone} ${index === focused ? "is-focused" : ""} ${(item.score ?? 0) >= 80 ? "is-top" : ""}`} ariaLabel={`${item.company}: ${stage.label}`} busy={isBusy}
         selected={selectedIds.includes(item.id)} selectDisabled={queueRunning} onSelect={(checked) => setSelectedIds(ids => checked ? [...ids, item.id] : ids.filter(id => id !== item.id))} onFocus={() => setFocus(index)}
         onSkip={() => skipCompany(item.company)} onApplied={item.kind === "linkedin" ? () => void markApplied(item) : undefined} appliedTitle="Mark applied: you applied yourself, it leaves Today (A)"
