@@ -48,3 +48,5 @@
 .jm-rhead>.jm-download{margin-left:auto;min-height:30px;padding:5px 10px;font-size:11px;white-space:nowrap}.jm-rhead>.jm-download+a{margin-left:0}
 
 .jm-mobile-download{display:none}@media(max-width:800px){.jm-mobile-download{display:inline-flex;flex-shrink:0;align-items:center;min-height:29px;padding:4px 7px;font-size:10px}}
+
+.jm-companion-ready{font-size:10px;color:var(--jm-green);padding:0 3px}
