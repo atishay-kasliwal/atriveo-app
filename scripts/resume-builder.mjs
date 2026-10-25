@@ -21,8 +21,8 @@ import { spawnSync } from "node:child_process";
 import { loadBank } from "./ac-bank.mjs";
 import { assembleAcResume, EDUCATION_ROWS, toolsFromBullets } from "./ac-tex.mjs";
 import { displayUrl } from "./ats/patterns.mjs";
-import { bankForTrack, classifyTrack, employerTitle, loadTracks } from "./ac-tracks.mjs";
-import { resolveExperienceMeta, resolveProjectMeta, sortProjectsByRecency } from "./ac-role-meta.mjs";
+import { allowedProjects, bankForTrack, classifyTrack, employerTitle, loadTracks, RESUME_MIN_PROJECTS } from "./ac-tracks.mjs";
+import { resolveExperienceMeta, resolveProjectMeta, roleKindOf, sortProjectsByRecency } from "./ac-role-meta.mjs";
 import { jdSkillMatch, loadSkills } from "./ac-jd-skills.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
@@ -56,7 +56,8 @@ function compositionAt(dir) {
   const run = readJson(path.join(dir, "composition.json"));
   if (!run?.composition) throw new BuilderError("This resume has no composition to edit (built before the builder existed). Rebuild it first.");
   const c = run.composition;
-  const sec = (kind) => (b) => ({ role: b.role, kind, bullets: (b.bullets || []).map((x) => ({ ac_id: x.ac_id, facet: x.facet ?? null, text: x.text })), stack: null });
+  // A section keeps the tools line the generator printed (a track's project_stacks), so the page shows the same one.
+  const sec = (kind) => (b) => ({ role: b.role, kind, bullets: (b.bullets || []).map((x) => ({ ac_id: x.ac_id, facet: x.facet ?? null, text: x.text })), stack: b.stack?.length ? [...b.stack] : null });
   return {
     headerTitle: run.header_title ?? null,
     skills: run.skills ?? c.skills ?? [],
@@ -104,7 +105,9 @@ function layoutOf(bank) {
   };
 }
 
-const roleKind = (bank) => Object.fromEntries(bank.acs.filter((a) => a.role).map((a) => [a.role, a.slot_kind === "project" ? "project" : "experience"]));
+// Experience or project, from the employer's or project's own definition (roleKindOf), never from one bullet's
+// slot_kind: a mislabelled bullet once made Atriveo an "employer" with no dates and a lowercase name (2026-10-23).
+const roleKind = (bank) => Object.fromEntries([...new Set(bank.acs.map((a) => a.role).filter(Boolean))].map((r) => [r, roleKindOf(r, bank.bank_dir)]));
 const labelOf = (role) => ROLE_SLUG_TO_NAME[role] || PROJECT_SLUG_TO_NAME[role] || role;
 
 async function jobDoc(db, jobUrl) {
@@ -244,6 +247,8 @@ export async function loadResume(db, { jobUrl = null, track = null, appId = null
   if (!fs.existsSync(path.join(dir, PDF))) throw new BuilderError("The resume file isn't on this server yet.");
   const c = compositionAt(dir);
   const kinds = roleKind(bank);
+  const resumeTrack = classifyTrack(c.headerTitle || source.title);
+  const allowed = new Set(allowedProjects(resumeTrack));
   // The header's email and city as this resume prints them (yours if you changed them, else the profile's / the posting's).
   const me = loadResumeProfile();
   return {
@@ -256,9 +261,11 @@ export async function loadResume(db, { jobUrl = null, track = null, appId = null
     // A project's tools line: yours (stack set) or the one the bullets give (stackAuto), as the PDF shows it.
     sections: c.sections.map((s) => ({ ...s, label: labelOf(s.role), stack: s.stack ?? null, stackAuto: toolsFromBullets(s.bullets, s.role) })),
     // Bullets this resume's track may use: a track's own bullets (tracks: [...]) only on that track's resumes.
-    options: bankOptions(bankForTrack(bank, classifyTrack(c.headerTitle || source.title))),
-    // Projects you could add (every project with bank bullets).
-    roles: Object.entries(kinds).map(([role, kind]) => ({ role, kind, label: labelOf(role) })),
+    options: bankOptions(bankForTrack(bank, resumeTrack)),
+    // Employers, and the projects this resume's track may print (allowedProjects): "Add a project" offers only these.
+    roles: Object.entries(kinds).filter(([role, kind]) => kind === "experience" || allowed.has(role)).map(([role, kind]) => ({ role, kind, label: labelOf(role) })),
+    track: resumeTrack,
+    minProjects: RESUME_MIN_PROJECTS,
     current: { pdfPath: path.join(dir, PDF), edited: Boolean(generated), generatedPdfPath: generated, pages: pageCount(path.join(dir, PDF)), room: pageRoom(path.join(dir, PDF)) },
     jd: jd ? jd.slice(0, 20_000) : null,
     layout: layoutOf(bank),
@@ -374,10 +381,18 @@ export function pageRoom(pdfPath) {
   return -Math.ceil(pages.slice(1).reduce((n, p) => n + Math.max(0, p.bottom - 36), 0) / 12);
 }
 
-/** The edit, checked against the bank: known bullets only (Phase 1), each section's own, no repeated opening verb. */
-function validate(edit, bank) {
+/**
+ * The edit, checked against the bank: known bullets only (Phase 1), each section's own, no repeated opening verb, at
+ * least RESUME_MIN_PROJECTS projects, each one a project the resume's track may print.
+ */
+function validate(edit, bank, track = classifyTrack(edit.headerTitle)) {
   const byId = new Map(bank.acs.map((a) => [a.id, a]));
   const problems = [];
+  const allowed = allowedProjects(track);
+  const projects = edit.sections.filter((s) => s.kind === "project");
+  for (const p of projects) if (!allowed.includes(p.role)) problems.push(`${labelOf(p.role)} isn't a project this resume's track uses`);
+  for (const s of edit.sections) if (roleKindOf(s.role, bank.bank_dir) !== s.kind) problems.push(`${labelOf(s.role)} is ${roleKindOf(s.role, bank.bank_dir) === "project" ? "a project" : "an employer"}, not ${s.kind === "project" ? "a project" : "an employer"}`);
+  if (projects.length < RESUME_MIN_PROJECTS) problems.push(`A resume has at least ${RESUME_MIN_PROJECTS} projects; this one has ${projects.length}.`);
   const seen = new Map();
   // A bullet you reworded for the bank keeps its old wording valid on resumes built before (it was the bank's then).
   const earlier = new Map();
@@ -428,7 +443,7 @@ export async function renderDraft(db, edit) {
       return { role: s.role, kind, bullets, stack: stack.length ? stack : null };
     }),
   };
-  const problems = validate(clean, bank);
+  const problems = validate(clean, bank, base.track);
   if (clean.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean.email)) problems.push(`"${clean.email}" isn't an email address`);
   const composition = {
     experience: clean.sections.filter((s) => s.kind === "experience").map((s) => ({ role: s.role, bullets: s.bullets, stack: s.stack })),
@@ -441,7 +456,7 @@ export async function renderDraft(db, edit) {
   const dir = path.join(OUT_ROOT, ".builder-drafts", draftId);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, "resume.tex"), tex);
-  fs.writeFileSync(path.join(dir, EDIT_FILE), JSON.stringify({ source: edit.source, ...clean, location: base.source.location, renderedAt: new Date().toISOString() }, null, 2));
+  fs.writeFileSync(path.join(dir, EDIT_FILE), JSON.stringify({ source: edit.source, ...clean, track: base.track, location: base.source.location, renderedAt: new Date().toISOString() }, null, 2));
   const pdfPath = path.join(dir, PDF);
   if (!fs.existsSync(pdfPath)) {
     const r = spawnSync("tectonic", ["resume.tex"], { cwd: dir, encoding: "utf8", timeout: 120_000 });
@@ -485,7 +500,7 @@ export async function saveDraft(db, { source, draftId }) {
   const saved = readJson(path.join(draft, EDIT_FILE));
   if (!saved || !fs.existsSync(path.join(draft, PDF))) throw new BuilderError("That draft is gone; render it again.");
   if (JSON.stringify(saved.source) !== JSON.stringify(source)) throw new BuilderError("That draft belongs to another resume.");
-  const problems = validate(saved, loadBank());
+  const problems = validate(saved, loadBank(), saved.track ?? classifyTrack(saved.headerTitle));
   if (problems.length || pageCount(path.join(draft, PDF)) !== 1) throw new BuilderError(`Not saved: ${problems[0] ?? "it isn't one page"}`);
   if (source.kind === "job") {
     const { doc } = await jobDoc(db, source.jobUrl);

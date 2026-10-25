@@ -133,5 +133,7 @@ test("legacy template PDF: the checks catch all three problems it had", { skip }
   assert.equal(roles.find(r => r[0] === "Stony Brook University")[2], "Software Engineer");
   assert.equal(roles.find(r => r[0].includes("Wake Forest"))[2].split(" | ")[0], "AI/ML Engineer");
   const rich = assembleAcResume({ experience: [], projects: [{role: "atriveo", bullets: [{text: "Python FastAPI Docker PostgreSQL Redis AWS React"}]}]}, {profile: fixture.profile});
-  for (const skill of ["Python", "FastAPI", "Docker", "PostgreSQL", "Redis", "AWS", "React", "TypeScript", "LangChain", "Cloudflare"]) assert.ok(rich.replace(/\\kern0pt\{\}/g, "").includes(skill), skill);
+  // Atriveo's default tools are its real stack (ATRIVEO.yaml, 2026-10-09): no LangChain.
+  for (const skill of ["Python", "FastAPI", "Docker", "PostgreSQL", "Redis", "AWS", "React", "TypeScript", "Node.js", "MongoDB", "Cloudflare"]) assert.ok(rich.replace(/\\kern0pt\{\}/g, "").includes(skill), skill);
+  assert.ok(!rich.includes("LangChain"), "LangChain is not in Atriveo's stack");
 });

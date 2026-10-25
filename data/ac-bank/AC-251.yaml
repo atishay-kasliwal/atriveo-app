@@ -1,0 +1,52 @@
+# FOMC Market LLM project: the live evaluation dashboard (facts/github.md, FedTalk extended to 13 sessions), 2026-10-25.
+id: AC-251
+role: fomc-market-llm
+fits: [ai-engineer, data-science, data-analytics]
+slot_kind: project
+engineering_identity: data
+achievement_theme: fomc-live-evaluation
+display_order: 3
+wow_score: 0.84
+metrics_claimed:
+  - sessions_13
+concepts_claimed:
+  - evaluation
+  - analytics
+signature_technologies: []
+fact: >-
+  FedTalk extended to a live dashboard: 13 FOMC sessions (Jun 2024 - Dec 2025), each scored on accuracy, MAE and MSE;
+  model-vs-model comparison; paper-trading simulation (docs/resume-tracks/facts/github.md). No dashboard framework or
+  user count is confirmed, so none is claimed.
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts/github.md
+capabilities:
+  ai: 70
+  ml: 78
+  data: 88
+  backend: 55
+strength:
+  recruiter: 9
+ats_keywords:
+  - Model Evaluation
+  - MAE
+  - MSE
+  - Dashboard
+  - Backtesting
+  - LLM
+facets:
+  data:
+    phrase: live model evaluation dashboard
+    keywords:
+      - evaluation
+      - dashboard
+      - metrics
+      - backtesting
+      - model comparison
+variants:
+  - facet: data
+    emphasis: data
+    strength: 9
+    text: >-
+      Investigated LLM forecast quality across 13 live FOMC sessions in a dashboard scoring accuracy, MAE and MSE, comparing models side by side and simulating paper trades.

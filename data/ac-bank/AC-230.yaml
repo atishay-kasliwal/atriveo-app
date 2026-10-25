@@ -1,14 +1,13 @@
-# AI-only bullet (tracks: ai-engineer), docs/resume-tracks/ai.md, 2026-10-09.
+# FedTalk evaluation (docs/resume-tracks/ai.md, 2026-10-09). Moved from Stony Brook to the FOMC Market LLM project
+# (2026-10-25) and opened to every track; the posting decides whether the project prints.
 id: AC-230
-role: stony-brook
-fits: [ai-engineer]
-slot_kind: experience
+role: fomc-market-llm
+fits: [ai-engineer, data-science, data-analytics]
+slot_kind: project
 engineering_identity: data
 achievement_theme: ai-gpt4o-eval
 display_order: 3
 wow_score: 0.85
-tracks:
-  - ai-engineer
 metrics_claimed: []
 concepts_claimed:
   - ai

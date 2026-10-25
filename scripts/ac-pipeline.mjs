@@ -19,7 +19,9 @@ import { bankForTrack, classifyTrack, trackPins } from "./ac-tracks.mjs";
 // (2.1.0: role tracks, title-only experience lines, Education after the header; 2.1.1: AI track
 // Accolite 3 -> 2 so the page fits; 2.1.2: no ligatures in resume text; 2.1.3: Accolite title
 // "Senior Software Developer"; 2.3.0: page rules: one page filled to the bottom, two projects with two bullets each).
-export const PIPELINE_VERSION = "2.3.0";
+// 2.4.0: the second project is the one the posting fits best (FOMC Market LLM on any track), no figure printed twice
+// on the page, tools lines name tools only, whole-word skills with no guessed related skills.
+export const PIPELINE_VERSION = "2.4.0";
 
 export const PIPELINE_STEPS = [
   "load_bank",

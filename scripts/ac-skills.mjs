@@ -10,7 +10,6 @@ import {
   pickCategoriesForJd,
   sortSkillsByScore,
   skillHaystack,
-  expandRelatedSkills,
   jdMentionsSkill,
   fitSkillsToSingleLine,
 } from "./skills-library.mjs";
@@ -45,9 +44,13 @@ function rolesInComposition(composition) {
   return roles;
 }
 
+// Whole words only: a bare substring let the alias "ts" (TypeScript) match "results" (2026-10-23).
+const escapeRe = (t) => t.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+const wordIn = (hay, t) => new RegExp(`(^|[^a-z0-9+#])${escapeRe(t)}($|[^a-z0-9+#])`).test(hay);
+
 function textMatchesSkill(skill, text) {
-  const hay = ` ${String(text || "").toLowerCase()} `;
-  return skillHaystack(skill).some((t) => hay.includes(` ${t} `) || hay.includes(t));
+  const hay = String(text || "").toLowerCase();
+  return skillHaystack(skill).some((t) => wordIn(hay, t));
 }
 
 function recordEvidence(evidenceBySkill, confidenceMap, skill, source, confidence) {
@@ -129,19 +132,15 @@ function collectBulletEvidence(composition, bank, { useSelectedAcCorpus = true }
         if (skill.bankBacked === false) continue;
         if (terms.has(skill.name)) continue;
         if (skill.evidence === "inferred") continue;
-        if (!skillHaystack(skill).some((t) => hay.includes(t))) continue;
+        if (!skillHaystack(skill).some((t) => wordIn(hay, t))) continue;
         terms.add(skill.name);
         recordEvidence(evidenceBySkill, confidenceMap, skill, "role-corpus", 0.7);
       }
     }
   }
 
-  const expanded = expandRelatedSkills(terms, evidenceBySkill);
-  for (const name of expanded) {
-    if (!confidenceMap.has(name)) confidenceMap.set(name, 0.55);
-  }
-
-  return { terms: expanded, evidenceBySkill, confidenceMap, bullets, selectedIds };
+  // Related skills (LLMs → LangChain, MCP) are a guess, not evidence (2026-10-23): only what the bank names counts.
+  return { terms, evidenceBySkill, confidenceMap, bullets, selectedIds };
 }
 
 function skillInEvidence(skill, evidenceTerms) {

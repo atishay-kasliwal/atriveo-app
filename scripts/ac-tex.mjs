@@ -33,7 +33,7 @@ const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 \\titlespacing*{\\section}{0pt}{2pt}{2pt}
 \\newcommand{\\resumeItem}[1]{\\item\\small{{#1 \\vspace{-2pt}}}}
 \\newcommand{\\resumeSubheading}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\textbf{#1} & #2 \\\\ \\sbox{\\projectbox}{\\textit{\\small#3}}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & \\textit{\\small #4} \\\\ \\end{tabular*}\\vspace{-7pt}}
-\\newcommand{\\resumeProjectHeading}[2]{\\item\\begin{tabular*}{0.97\\textwidth}{p{0.72\\textwidth}@{\\extracolsep{\\fill}}r}\\sbox{\\projectbox}{\\small#1}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & #2 \\\\ \\end{tabular*}\\vspace{-7pt}}
+\\newcommand{\\resumeProjectHeading}[2]{\\item\\begin{tabular*}{0.97\\textwidth}{l@{\\extracolsep{\\fill}}r}\\sbox{\\projectbox}{\\small#1}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & #2 \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\newcommand{\\resumeEducation}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\textbf{#1} & #4 \\\\ \\textit{\\small #3} & \\textit{\\small #2} \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
 \\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.15in, label={}]}
@@ -53,7 +53,10 @@ ${EDUCATION_ROWS.map((e) => `    \\resumeEducation{${e.school}}{${e.place}}{${e.
 
 // Stack shown after a project's name when its bullets name fewer than five tools.
 const ROLE_STACK_DEFAULTS = {
-  atriveo: ["React", "TypeScript", "FastAPI", "LangChain", "Cloudflare"],
+  // ATRIVEO.yaml stack (2026-10-09, from the code): React + TypeScript console on Cloudflare, Node API, MongoDB, Docker workers.
+  atriveo: ["TypeScript", "React", "Node.js", "MongoDB", "Docker", "Cloudflare"],
+  // FOMC-MARKET-LLM.yaml / facts/github.md (FedTalk): Whisper, sentence-transformers into Pinecone, GPT-4o.
+  "fomc-market-llm": ["Python", "GPT-4o", "Whisper", "Pinecone"],
   "insurance-platform": ["Java", "Spring Boot", "Kafka", "Elasticsearch", "Docker"],
   insureraft: ["C++", "Raft", "NuRaft", "CMake"],
   "job-pipeline": ["Python", "MongoDB", "JobSpy", "pandas"],
@@ -63,27 +66,23 @@ const ROLE_STACK_DEFAULTS = {
   "user-data-platform": ["FastAPI", "Python", "X25519", "AES-GCM", "MCP"],
 };
 
+// Tools only: concepts and domains (LLMs, RAG, ETL, MRI, healthcare data) never print as a project's tools (2026-10-23).
 const TOOL_PATTERNS = [
   ["FastAPI", /fastapi/i],
   ["Python", /\bpython\b/i],
   ["Java", /\bjava\b/i],
-  ["Spring Boot", /spring/i],
+  ["Spring Boot", /\bspring\b/i],
   ["Kafka", /kafka/i],
   ["AWS", /\baws\b/i],
-  ["Healthcare Data", /healthcare|clinical|physician|clinician/i],
-  ["ETL", /\betl\b|preprocessing|ingestion/i],
   ["GCP", /\bgcp\b|google cloud/i],
   ["SimpleITK", /simpleitk/i],
-  ["Radiomics", /radiomic|pyradiomic/i],
-  ["MRI", /\bmri\b|brain scan|segmentation/i],
-  ["LLMs", /\bllm/i],
-  ["RAG", /\brag\b/i],
   ["LangChain", /langchain/i],
   ["LangGraph", /langgraph/i],
   ["Docker", /docker/i],
   ["PostgreSQL", /postgres/i],
-  ["Redis", /redis/i],
-  ["React", /react/i],
+  ["Redis", /\bredis\b/i],
+  // Whole words: "market-reaction" once printed React on the FOMC project and AC-217 (2026-10-25).
+  ["React", /\breact\b/i],
   ["PyTorch", /pytorch/i],
   ["Cloudflare", /cloudflare/i],
 ];

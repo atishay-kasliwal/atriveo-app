@@ -12,7 +12,7 @@ import { spawnSync } from "node:child_process";
 import { assembleAcResume, toolsFromBullets } from "./ac-tex.mjs";
 import { stripBanned } from "./tailor-dynamic.mjs";
 import { loadBank } from "./ac-bank.mjs";
-import { bankForTrack, loadTracks, trackPins } from "./ac-tracks.mjs";
+import { bankForTrack, jdSelectedProjects, loadTracks, trackPins } from "./ac-tracks.mjs";
 import { PROJECT_SLUG_TO_NAME as PROJECT_NAME } from "./ac-role-meta.mjs";
 
 // Where the last line of this template ends when the page is full (measured: a resume stretched to the bottom margin ends
@@ -86,21 +86,24 @@ function faceFor(ac, track) {
 
 // Figures a bullet states (67.7%, 0.70, 3x): two bullets in one section should not repeat one.
 const figures = (text) => new Set(String(text || "").match(/\d+(?:\.\d+)?\s*%|\b\d+\.\d+\b|\b\d+x\b/gi)?.map((f) => f.replace(/\s+/g, "")) ?? []);
+// Counts too ("13 live FOMC sessions" -> 13sessions): a project's bullets never restate a fact printed elsewhere on the page.
+const counts = (text) => new Set([...String(text || "").matchAll(/\b(\d[\d,]*\+?)\s+(?:[A-Za-z][\w-]*\s+){0,2}?([a-z][a-z-]*s)\b/gi)].map(([, n, noun]) => `${n.replace(/,/g, "")}${noun.toLowerCase()}`));
+const factKeys = (text) => new Set([...figures(text), ...counts(text)]);
 
 /**
  * Bullets the bank offers for one employer or project that the resume does not use yet, best first. Never one whose
  * opening verb is already used, one with a word the renderer strips (it would print "a modular pipeline..." without its
- * verb), or one that repeats a figure another bullet in the same section states.
+ * verb), or one that repeats a figure stated in sectionTexts (the page fill passes every bullet on the page).
  */
-export function candidatesFor(role, kind, bank, used, jdLower, track, sectionTexts = []) {
+export function candidatesFor(role, kind, bank, used, jdLower, track, sectionTexts = [], keys = figures) {
   const usedVerbs = new Set([...used.values()].map(firstVerb));
-  const sectionFigures = new Set(sectionTexts.flatMap((t) => [...figures(t)]));
+  const sectionFigures = new Set(sectionTexts.flatMap((t) => [...keys(t)]));
   return (bank.acs || [])
     .filter((ac) => ac.role === role && ac.slot_kind === kind && ac.visibility?.default !== false && !used.has(ac.id))
     .map((ac) => ({ ac, face: faceFor(ac, track) }))
     .filter(({ face }) => face?.text && !usedVerbs.has(firstVerb(face.text)))
     .filter(({ face }) => stripBanned(face.text) === face.text && /^[A-Z]/.test(face.text.trim()))
-    .filter(({ face }) => ![...figures(face.text)].some((f) => sectionFigures.has(f)))
+    .filter(({ face }) => ![...keys(face.text)].some((f) => sectionFigures.has(f)))
     .map((c) => ({ ...c, score: bulletScore(c.ac, c.face, jdLower) }))
     .sort((a, b) => b.score - a.score || a.ac.id.localeCompare(b.ac.id));
 }
@@ -125,7 +128,7 @@ const projectFits = (bank, role, track) => !track
 function distinctFigures(list) {
   const kept = [], seen = new Set();
   for (const c of list) {
-    const f = [...figures(c.face.text)];
+    const f = [...factKeys(c.face.text)];
     if (f.some((x) => seen.has(x))) continue;
     f.forEach((x) => seen.add(x));
     kept.push(c);
@@ -150,7 +153,7 @@ export function enforceProjects(compact, bank, { jd = "", track = null, pool = n
   while (out.projects.length < minProjects) {
     const used = usedMap(out);
     const options = roles.filter((r) => !have.has(r) && ![...have].some((h) => sameProduct(r, h)))
-      .map((role) => ({ role, list: distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track)) }))
+      .map((role) => ({ role, list: distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track, [...used.values()], factKeys)) }))
       .filter((o) => o.list.length >= minBullets)
       .map((o) => ({ ...o, tagged: projectFits(bank, o.role, track), fit: o.list.slice(0, minBullets).reduce((s, c) => s + c.score, 0) / minBullets }))
       .sort((a, b) => Number(b.tagged) - Number(a.tagged) || b.fit - a.fit || roles.indexOf(a.role) - roles.indexOf(b.role));
@@ -162,7 +165,7 @@ export function enforceProjects(compact, bank, { jd = "", track = null, pool = n
   }
   for (const p of out.projects) {
     while (p.bullets.length < minBullets) {
-      const [best] = candidatesFor(p.role, "project", bank, usedMap(out), jdLower, track, p.bullets.map((b) => b.text));
+      const [best] = candidatesFor(p.role, "project", bank, usedMap(out), jdLower, track, [...usedMap(out).values()], factKeys);
       if (!best) break;
       p.bullets.push(bulletOf(best));
       changes.push(`added ${best.ac.id} to ${p.role}`);
@@ -180,7 +183,7 @@ export function enforceProjects(compact, bank, { jd = "", track = null, pool = n
     const allRoles = [...new Set([...(roles || []), ...(bank.acs || []).filter((a) => a.slot_kind === "project").map((a) => a.role)])];
     const swap = allRoles.filter((r) => !out.projects.some((q) => q.role === r || sameProduct(q.role, r)))
       .filter((r) => !offTrack || short || duplicate || projectFits(bank, r, track))
-      .map((role) => ({ role, list: distinctFigures(candidatesFor(role, "project", bank, others, jdLower, track)) }))
+      .map((role) => ({ role, list: distinctFigures(candidatesFor(role, "project", bank, others, jdLower, track, [...others.values()], factKeys)) }))
       .filter((o) => o.list.length >= minBullets)
       .map((o) => ({ ...o, tagged: projectFits(bank, o.role, track), fit: o.list.slice(0, minBullets).reduce((x, c) => x + c.score, 0) / minBullets }))
       .sort((a, b) => Number(b.tagged) - Number(a.tagged) || b.fit - a.fit)[0];
@@ -190,6 +193,46 @@ export function enforceProjects(compact, bank, { jd = "", track = null, pool = n
     changes.push(`replaced project ${p.role} (${why}) with ${swap.role}`);
   }
   return { compact: out, changes };
+}
+
+/**
+ * The second project slot goes to the project the posting fits best: a project any track may print
+ * (TRACKS.yaml jd_selected_projects, e.g. FOMC Market LLM) replaces the weakest project after the first when its two
+ * best bullets score higher against the posting than that project's printed bullets. The first project (the newest,
+ * Atriveo) is never replaced, and nothing is forced: no fit, no change.
+ */
+export function chooseProjects(compact, bank, { jd = "", track = null, extra = jdSelectedProjects(), minBullets = 2 } = {}) {
+  const jdLower = String(jd).toLowerCase();
+  const out = { ...compact, projects: (compact.projects || []).map((p) => ({ ...p, bullets: [...(p.bullets || [])] })) };
+  const changes = [];
+  if (out.projects.length < 2) return { compact: out, changes };
+  const fitOf = (p) => p.bullets.reduce((s, b) => s + scoreOfPrinted(b, bank, jdLower), 0) / Math.max(1, p.bullets.length);
+  for (const role of extra) {
+    if (out.projects.some((p) => p.role === role || sameProduct(p.role, role))) continue;
+    // The weakest project after the first is the one it would replace.
+    const slot = out.projects.map((p, i) => ({ i, fit: fitOf(p) })).slice(1).sort((a, b) => a.fit - b.fit)[0];
+    const others = out.projects.filter((_, i) => i !== slot.i);
+    const used = new Map([...(out.experience || []), ...others].flatMap((s) => s.bullets.map((b) => [b.ac_id, b.text])));
+    const list = distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track, [...used.values()], factKeys));
+    if (list.length < minBullets) continue;
+    const fit = list.slice(0, minBullets).reduce((s, c) => s + c.score, 0) / minBullets;
+    if (fit <= slot.fit) continue;
+    changes.push(`chose project ${role} over ${out.projects[slot.i].role} for this posting (${fit.toFixed(3)} vs ${slot.fit.toFixed(3)})`);
+    out.projects[slot.i] = { role, bullets: list.slice(0, minBullets).map(bulletOf) };
+  }
+  return { compact: out, changes };
+}
+
+/** An experience bullet that repeats a figure a project prints comes out (the page fill adds another in its place). */
+export function dropRepeatedFigures(compact) {
+  const projectFigures = new Set((compact.projects || []).flatMap((p) => p.bullets.flatMap((b) => [...figures(b.text)])));
+  const changes = [];
+  const experience = (compact.experience || []).map((s) => ({ ...s, bullets: s.bullets.filter((b) => {
+    const repeat = [...figures(b.text)].find((f) => projectFigures.has(f));
+    if (repeat) changes.push(`removed ${b.ac_id} (${s.role}): ${repeat} is printed under a project`);
+    return !repeat;
+  }) }));
+  return { compact: { ...compact, experience }, changes };
 }
 
 // Never fewer than these when making room; never more than these when filling.
@@ -238,7 +281,7 @@ export function fillOnePage(compact, { bank, jd = "", track = null, render, meas
     // More than a line left: the best bullet that still fits.
     const used = usedMap(cur);
     const options = sections(cur).filter(({ kind, s }) => s.bullets.length < capOf(kind, s.role))
-      .flatMap(({ kind, s }) => candidatesFor(s.role, kind, bank, used, jdLower, track, s.bullets.map((b) => b.text)).slice(0, 3).map((c) => ({ ...c, kind, role: s.role })))
+      .flatMap(({ kind, s }) => candidatesFor(s.role, kind, bank, used, jdLower, track, [...used.values()]).slice(0, 3).map((c) => ({ ...c, kind, role: s.role })))
       .filter((c) => !tried.has(c.ac.id))
       .sort((a, b) => b.score - a.score);
     let added = false;
@@ -278,7 +321,9 @@ export function fillResumePage({ compact, skills, headerTitle, location, jd, tra
   const render = (c) => assembleAcResume(fitTools(c), { headerTitle, skillsLines: skills, bank: trackBank, location });
   const pinned = Object.keys(trackPins(track, undefined, { jd })?.projects || {});
   const projects = enforceProjects(compact, trackBank, { jd, track, pool, pinned });
-  const filled = fillOnePage(projects.compact, { bank: trackBank, jd, track, render, measure });
+  const chosen = chooseProjects(projects.compact, trackBank, { jd, track });
+  const deduped = dropRepeatedFigures(chosen.compact);
+  const filled = fillOnePage(deduped.compact, { bank: trackBank, jd, track, render, measure });
   const count = (c) => ({
     experience: Object.fromEntries((c.experience || []).map((s) => [s.role, s.bullets.length])),
     projects: Object.fromEntries((c.projects || []).map((s) => [s.role, s.bullets.length])),
@@ -289,7 +334,7 @@ export function fillResumePage({ compact, skills, headerTitle, location, jd, tra
     report: {
       before: count(compact),
       after: count(filled.compact),
-      changes: [...projects.changes, ...filled.log],
+      changes: [...projects.changes, ...chosen.changes, ...deduped.changes, ...filled.log],
       pages: filled.measure.pages,
       bottom_gap_pt: filled.measure.bottom_gap_pt,
       filled: filled.filled && filled.measure.bottom_gap_pt < LINE_PT,

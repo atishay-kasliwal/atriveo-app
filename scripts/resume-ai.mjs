@@ -64,6 +64,8 @@ export async function analyzeResume(db, body, { generate, load=loadResume, bank=
   if(!Array.isArray(sections)||sections.length>20||!Array.isArray(skills)||skills.some(s=>typeof s!=='string'||s.length>2000)||sections.some(s=>!Array.isArray(s.bullets)||s.bullets.length>20||s.bullets.some(b=>typeof b.text!=='string'||b.text.length>1000)))throw new BuilderError('Invalid resume content');
   const roles=sections.map(s=>s.role);
   if(new Set(roles).size!==roles.length||sections.some(s=>!['experience','project'].includes(s.kind)||!loaded.roles.some(r=>r.role===s.role&&r.kind===s.kind)))throw new BuilderError('Unknown content section');
+  // The review reads the resume's own projects: at least the number every resume prints (loaded.minProjects).
+  if(loaded.minProjects&&sections.filter(s=>s.kind==='project').length<loaded.minProjects)throw new BuilderError(`A resume has at least ${loaded.minProjects} projects`);
   const resumeVersion=versionOf({sections,skills,headerTitle:body.headerTitle||''}),jdVersion=versionOf(originalJd);
   const evidence=buildEvidence(sections,skills,bank);
   if(body.mode==='question') {
