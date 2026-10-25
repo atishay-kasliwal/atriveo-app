@@ -74,12 +74,12 @@ test("a skill counts only with evidence: Kubernetes is in a bullet, Rust is not"
   assert.ok(r.ledger.missing.includes("Rust"));
 });
 
-test("every job gets a Fit: a blank or unreadable posting still scores, flagged Low Confidence", () => {
+test("blank or unreadable postings have no fabricated score and Low Confidence", () => {
   const blank = scoreFit("", { title: "Data Analyst", asOf: "2026-10-23" });
-  assert.equal(typeof blank.score, "number");
+  assert.equal(blank.score, null);
   assert.equal(blank.confidence.level, "low");
   const unreadable = scoreFit("Great place to work. Apply today!", { title: "Backend Engineer", asOf: "2026-10-23" });
-  assert.equal(typeof unreadable.score, "number");
+  assert.equal(unreadable.score, null);
   assert.equal(unreadable.confidence.level, "low");
 });
 

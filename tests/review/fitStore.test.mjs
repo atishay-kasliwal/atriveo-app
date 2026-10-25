@@ -18,6 +18,11 @@ test("a saved Fit is small, current, and goes stale when its inputs change", () 
   const { shape: _omitted, ...legacy } = fit;
   assert.equal(fitIsCurrent(legacy), false);
   assert.equal(fitIsCurrent(null), false);
+  assert.equal(fitIsCurrent({...fit,candidate_hash:"old"}),false);
+  assert.equal(fitIsCurrent({...fit,as_of:"2020-01-01"}),false);
+  const unscorable=computeFit("", "Software Engineer");
+  assert.equal(unscorable.score,null);
+  assert.equal(fitIsCurrent(unscorable),true,"unknown scores are cached rather than repeatedly fabricated");
 });
 
 test("ensureFit computes and saves only what is missing or stale, up to the limit, and keeps a Fit when the posting is gone", async () => {
@@ -82,4 +87,11 @@ test("preferred skills the resume leaves out are listed with their proof but nev
   const requiredOnly = resumeReady({ readiness: { status: "PASS" }, tailored, ledger: { skills: fit.ledger.skills.filter((s) => s.class === "required") }, config });
   assert.equal(withPreferred.status, requiredOnly.status);
   assert.ok(withPreferred.checks.skills_on_resume.left_off_detail.some((d) => d.class === "preferred"));
+});
+
+
+test("old parser results expire and unassessed requirements remain visible in saved Fit", () => {
+ const fit=computeFit("Backend Engineer\nRequirements:\n- Java experience.\n- Demonstrated ability to handle ambiguous stakeholder needs.","Backend Engineer");
+ assert.equal(fitIsCurrent({...fit,shape:3}),false);
+ assert.ok(fit.ledger.unparsed.some(r=>r.source.includes("ambiguous stakeholder")));
 });

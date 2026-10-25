@@ -7,12 +7,12 @@ import { scoreFit, fitIdentity } from "./ats/fit.mjs";
 export function compactFit(result, { jdChars = null } = {}) {
   const l = result.ledger;
   return {
-    score: result.score, confidence: result.confidence.level, confidence_reasons: result.confidence.reasons, applicable_weight: result.confidence.applicable_weight,
+    score: result.score, coverage: result.coverage, confidence: result.confidence.level, confidence_reasons: result.confidence.reasons, applicable_weight: result.confidence.applicable_weight,
     outside_roles: Boolean(result.outside_roles),
     knockouts: { verdict: result.knockouts.verdict, items: result.knockouts.items },
     ledger: {
       required: l.required, preferred: l.preferred, total: l.total, matched: l.matched, partial: l.partial, missing: l.missing,
-      mentioned: l.mentioned, unrecognized: l.unrecognized,
+      mentioned: l.mentioned, unrecognized: l.unrecognized, unparsed: l.unparsed,
       // `evidence` is the bank bullet (or tools line) that proves a matched skill: Resume Ready uses it to say what to add.
       skills: l.skills.map((s) => ({ label: s.label, alternatives: s.alternatives, class: s.class, status: s.status, source: s.source ?? null,
         ...(s.evidence ? { evidence: { entry: s.evidence_entry ?? null, text: s.evidence, tier: s.evidence_tier ?? null } } : {}) })),
@@ -23,9 +23,10 @@ export function compactFit(result, { jdChars = null } = {}) {
 }
 
 export const fitIsCurrent = (fit) => {
-  if (!fit || typeof fit.score !== "number") return false;
+  if (!fit || (fit.score !== null && typeof fit.score !== "number")) return false;
   const id = fitIdentity();
-  return fit.config_hash === id.config_hash && fit.master_hash === id.master_hash && fit.shape === id.shape;
+  return fit.config_hash === id.config_hash && fit.master_hash === id.master_hash && fit.candidate_hash === id.candidate_hash && fit.shape === id.shape
+    && fit.as_of?.slice(0, 7) === new Date().toISOString().slice(0, 7);
 };
 
 /** Fit for one posting, in the storable shape. */

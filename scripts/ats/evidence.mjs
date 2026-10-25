@@ -1,4 +1,4 @@
-import { phrase } from "./jd-parse.mjs";
+import { phrase, termRegex } from "./jd-parse.mjs";
 
 // Fit only: one mention is thin evidence, a skill shown across several separate bullets is depth. The factor runs from
 // `base` (one bullet, or a tools line alone) to 1 at `full_at_bullets` bullets. Without config.depth nothing changes.
@@ -7,27 +7,48 @@ export function depthFactor(bullets, depth) {
   return depth.base + (1 - depth.base) * Math.min(1, Math.max(0, bullets - 1) / (depth.full_at_bullets - 1));
 }
 
-// The master joins a bank fact's wordings with " | ". For display, show the one wording that contains the skill.
-const wordingWith = (text, term, config) => { const parts = String(text).split(" | "); return parts.length > 1 ? (parts.find((p) => phrase(p, term, config)) ?? parts[0]) : text; };
+// Source paths and URLs are provenance, not proof that a technology was used.
+export function evidenceText(value) {
+  return String(value || "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/https?:\/\/[^\s)]+/gi, " ")
+    .replace(/(?:[\w.-]+\/)*[\w.-]+\.(?:md|ya?ml|json|pdf|tex|csv|txt)\b/gi, " ")
+    .replace(/\(\s*\)/g, "").replace(/\s+/g, " ").trim();
+}
 
-const unique = (xs) => [...new Set(xs.filter(Boolean))];
-const short = (s) => String(s).length > 220 ? `${String(s).slice(0, 217)}...` : String(s);
+// Match an affirmative occurrence in its own clause, not a denial or a future plan.
+export function affirmative(text, term, config, stem = false) {
+  const pattern = termRegex(term, config);
+  const source = stem ? pattern.source.replace(/\(\?!\[a-z0-9\]\)$/, "[a-z]*(?![a-z0-9])").replace(/ /g, "[\\s-]+") : pattern.source;
+  const clean = evidenceText(text);
+  for (const m of clean.matchAll(new RegExp(source, pattern.flags + "g"))) {
+    const prefix = clean.slice(0, m.index).split(/\s\|\s|[;!?]|\.(?:\s|$)|,\s*(?=(?:but|used|built|implemented|developed)\b)|\bbut\b/i).at(-1).slice(-100);
+    const learningOnly = /(?:^|\b(?:currently|am|is|are|was|were|started|began|now)\s+)(?:learning|studying)\s*(?:\w+\s+){0,3}$/i.test(prefix);
+    if (!learningOnly && !/\b(?:did not|didn't|do not|don't|does not|doesn't|never|not|no|no(?: prior| practical| production| hands-on)? experience(?: with| in| using)?|without(?: any)?(?: experience(?: with| in))?|not familiar with|not proficient in|plan(?:ned|ning)? to (?:use|learn)|intend(?:ed)? to use|will (?:use|learn))\b(?! only)\s*(?:\w+[\s,]+){0,6}$/i.test(prefix)) return true;
+  }
+  return false;
+}
+
+// A version number is not a measured outcome or scope.
+export const measuredEvidence = text => /\d[\d,.]*(?:\s*[kmb])?\s*(?:%|percent|ms\b|milliseconds?\b|seconds?\b|minutes?\b|hours?\b|days?\b|users?\b|employees?\b|engineers?\b|records?\b|transactions?\b|requests?\b|scans?\b|cases?\b|studies\b|releases?\b|TB\b|GB\b|F1\b)|\$\s*\d|\d[\d,.]*[- ]person\b/i.test(text);
+const unique = xs => [...new Set(xs.filter(Boolean))];
+const short = s => String(s).length > 220 ? `${String(s).slice(0, 217)}...` : String(s);
+const wordingWith = (text, term, config) => String(text).split(" | ").find(p => affirmative(p, term, config)) || text;
 
 export function resumeEvidence(parsed) {
   const out = [];
   for (const [section, entries] of [["experience", parsed.experience], ["projects", parsed.projects]]) {
     for (const entry of entries) for (const bullet of entry.bullets || []) out.push({
-      tier: section === "experience" ? (/\d/.test(bullet) ? "measured_job_bullet" : "job_bullet") : "project_bullet",
-      section, entry: entry.company || entry.name || "Unknown", text: bullet,
+      tier: section === "experience" ? (measuredEvidence(evidenceText(bullet)) ? "measured_job_bullet" : "job_bullet") : "project_bullet",
+      section, entry: entry.company || entry.name || "Unknown", text: evidenceText(bullet),
     });
   }
   // A tools line ties a skill to one job or project: stronger than the skills list, weaker than a bullet using it.
   for (const [section, tier, entries] of [["experience", "job_tools", parsed.experience], ["projects", "project_tools", parsed.projects]]) {
     for (const entry of entries) for (const item of String(entry.stack || "").split(/\s*[,;|]\s*/).filter(Boolean)) {
-      out.push({ tier, section: "tools", entry: entry.company || entry.name || "Unknown", text: item });
+      out.push({ tier, section: "tools", entry: entry.company || entry.name || "Unknown", text: evidenceText(item) });
     }
   }
-  for (const item of parsed.skills.items || []) out.push({ tier: "skills_only", section: "skills", entry: "Skills", text: item });
+  for (const item of parsed.skills.items || []) out.push({ tier: "skills_only", section: "skills", entry: "Skills", text: evidenceText(item) });
   return out;
 }
 
@@ -40,12 +61,12 @@ export function skillEvidence(alternatives, parsed, config) {
     for (const record of records) {
       let kind = null;
       let term = null;
-      if (phrase(record.text, name, config)) [kind, term] = ["exact", name];
+      if (affirmative(record.text, name, config)) [kind, term] = ["exact", name];
       else {
-        const variant = (skill.variants || []).find((v) => phrase(record.text, v, config));
+        const variant = (skill.variants || []).find((v) => affirmative(record.text, v, config));
         if (variant) [kind, term] = ["equivalent", variant];
         else {
-          const related = (skill.related || []).find((v) => phrase(record.text, v, config));
+          const related = (skill.related || []).find((v) => affirmative(record.text, v, config));
           if (related) [kind, term] = ["related", related];
         }
       }
@@ -56,7 +77,7 @@ export function skillEvidence(alternatives, parsed, config) {
   const kindOrder = { exact: 0, equivalent: 1, related: 2 };
   candidates.sort((a, b) => b.credit - a.credit || kindOrder[a.kind] - kindOrder[b.kind] || a.skill.localeCompare(b.skill) || a.entry.localeCompare(b.entry) || a.text.localeCompare(b.text));
   const best = candidates[0] || { skill: alternatives[0], kind: "missing", tier: "missing", credit: 0, evidence: null, entry: null, term: null };
-  const distinctBullets = unique(candidates.filter((c) => c.section !== "skills" && c.section !== "tools").map((c) => `${c.entry}:${c.text}`));
+  const distinctBullets = unique(candidates.filter((c) => c.section !== "skills" && c.section !== "tools" && (best.kind === "related" ? c.kind === "related" : c.kind !== "related")).map((c) => `${c.entry}:${c.text}`));
   const factor = best.kind === "missing" ? 1 : depthFactor(distinctBullets.length, cfg.depth);
   return {
     ...best,
@@ -75,18 +96,18 @@ export function stemPhrase(text, term) {
 }
 
 export function conceptEvidence(item, parsed, config) {
-  const candidates = resumeEvidence(parsed).filter((r) => r.section !== "skills" && r.section !== "tools" && item.evidence.some((term) => stemPhrase(r.text, term)))
+  const candidates = resumeEvidence(parsed).filter((r) => r.section !== "skills" && r.section !== "tools" && item.evidence.some((term) => affirmative(r.text, term, config, true)))
     .map((r) => ({ ...r, credit: config.scoring.job_match.responsibility_tiers[r.tier === "project_bullet" ? "project_bullet" : "job_bullet"] }));
   candidates.sort((a, b) => b.credit - a.credit || a.text.localeCompare(b.text));
   const best = candidates[0];
   const bullets = new Set(candidates.map((c) => `${c.entry}:${c.text}`)).size;
-  return best ? { credit: best.credit * depthFactor(bullets, config.scoring.job_match.depth), tier: best.tier, entry: best.entry, evidence: short(best.text), distinct_bullets: bullets } : { credit: 0, tier: "missing", entry: null, evidence: null };
+  return best ? { credit: best.credit * depthFactor(bullets, config.scoring.job_match.depth), tier: best.tier, entry: best.entry, evidence: short(String(best.text).split(" | ").find(p => item.evidence.some(term => affirmative(p, term, config, true))) || best.text), distinct_bullets: bullets } : { credit: 0, tier: "missing", entry: null, evidence: null };
 }
 
 export function domainEvidence(item, parsed, config) {
   const all = [parsed.summary || "", ...parsed.experience.flatMap((e) => e.bullets), ...parsed.projects.flatMap((e) => e.bullets)].filter(Boolean);
   for (const [kind, terms] of [["exact", item.terms], ["equivalent", item.equivalents || []]]) {
-    const hit = all.find((text) => terms.some((term) => phrase(text, term)));
+    const hit = all.find((text) => terms.some((term) => affirmative(text, term, config)));
     if (hit) return { kind, credit: config.scoring.job_match.domain_kinds[kind], evidence: short(hit) };
   }
   return { kind: "missing", credit: 0, evidence: null };

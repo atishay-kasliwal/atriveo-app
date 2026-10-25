@@ -82,3 +82,34 @@ Agile: { variants: [scrum], related: [] }
 Databricks: { variants: [], related: [Spark] }
 Claude: { variants: [anthropic], related: [] }
 MCP: { variants: [model context protocol], related: [] }
+
+# Vocabulary recovered from the billing-platform audit; related is partial evidence only.
+NestJS: { variants: [nest.js], related: [Node.js] }
+Jenkins: { variants: [], related: [CI/CD] }
+EKS: { variants: [amazon eks], related: [Kubernetes] }
+RDS: { variants: [amazon rds], related: [PostgreSQL, MySQL] }
+SQS: { variants: [amazon sqs], related: [Kafka] }
+SNS: { variants: [amazon sns], related: [] }
+Datadog: { variants: [], related: [Observability] }
+OpenTelemetry: { variants: [OTel], related: [Observability] }
+Pulumi: { variants: [], related: [Terraform] }
+Stripe: { variants: [], related: [] }
+Chargebee: { variants: [], related: [] }
+Zuora: { variants: [], related: [] }
+Metronome: { variants: [], related: [] }
+Lago: { variants: [], related: [] }
+Salesforce: { variants: [], related: [] }
+CRM: { variants: [customer relationship management], related: [] }
+ClickHouse: { variants: [], related: [] }
+Druid: { variants: [apache druid], related: [] }
+OLAP: { variants: [online analytical processing], related: [] }
+Flink: { variants: [apache flink], related: [] }
+CDC: { variants: [change data capture], related: [] }
+Multi-tenancy: { variants: [multi-tenant, multi tenant, multitenant], related: [] }
+Data isolation: { variants: [tenant isolation, per-tenant isolation], related: [] }
+Unit testing: { variants: [unit tests, unit test], related: [] }
+Integration testing: { variants: [integration tests, integration test], related: [] }
+Data structures: { variants: [], related: [] }
+Algorithms: { variants: [], related: [] }
+System design: { variants: [], related: [Distributed systems] }
+Debugging: { variants: [debug], related: [] }

@@ -1,9 +1,18 @@
 // Parse what a job description actually asks for. Background and benefits never enter the score.
 // Ambiguous prose is retained as an unparsed requirement rather than silently becoming a match.
 
+import { load } from "cheerio";
+
+// Preserve list/paragraph boundaries before decoding saved HTML and entities.
+export function normalizeJobDescription(text) {
+  const raw = String(text || "");
+  if (!/<\/?(?:p|div|li|ul|ol|br|h[1-6]|section|strong|b)\b/i.test(raw) && !/&(?:#\d+|#x[0-9a-f]+|amp|nbsp|quot|apos|lt|gt);/i.test(raw)) return raw;
+  return load(raw.replace(/<br\s*\/?\s*>|<\/(?:p|div|li|h[1-6]|section)>/gi, "\n").replace(/<li\b[^>]*>/gi, "\n- ")).text();
+}
+
 const BACKGROUND = /^(?:about(?: us| the | our| \w+)?|who we are|company|our mission|benefits|job benefits|perks|compensation|salary|base salary|actual compensation|equal opportunity|committed to equal opportunities|eeo|what we offer|what's in it for you|why join|privacy|our culture|how we work|our approach|important note|you want to know more|a quick note about the process|a note on ai|health and wellbeing|growth and future|community|you belong here|usa-based roles only|canada-based roles only|why your work matters|a day in the life)/i;
-const REQUIRED = /^(?:required skills?(?: and experience)?|required (?:qualifications?|expertise)|requirements?|job requirements?|basic requirements?|qualifications?|job qualifications?|candidate background\s*(?:&|and)\s*qualifications?|pre[- ]requisite qualifications?|what qualifications you will need|minimum qualifications?|must[- ]haves?(?: skills?)?|mandatory (?:skills?|qualifications?)|core mandatory skills?|position requirements?|top \d+ qualifications?|skills sought|key skills|technical skills?|skill set|knowledge,? skills,? and\/?or abilities required|skills you(?:'ll| will) need (?:to bring|to be successful)|skills that will differentiate your candidacy|your skills and experience|your expertise|you must have|you have|we're excited about you because you have|we're excited about you because|to thrive in this role,? you have|what we (?:value|require)|we look for|who you might be|who we're looking for|what skills and experience do you need|what does it take to be successful|the ideal candidate|you may be a (?:good )?fit if|you might be a good fit if you|what you(?:'ll| will) need|what you'll bring to the team|what we(?:'re| are) looking for|what we look for|what you bring|who you are|basic qualifications?|additional considerations|you might thrive in this role|experience we value|mindset we value|is it you we're looking for|about you|you likely)/i;
-const PREFERRED = /^(?:preferred (?:qualifications?|skills?|experience)|secondary\s*\/\s*preferred skills?|desired experience|ideal experience|additional desired experience|bonus skills and attributes|how you stand out|even better|strong candidates may have|nice[- ]to[- ]haves?|bonus points for|bonus|preferred|desirable|what sets you apart)$/i;
+const REQUIRED = /^(?:required skills?(?: and experience)?|required (?:qualifications?|expertise)|requirements?|job requirements?|basic requirements?|qualifications?|job qualifications?|candidate background\s*(?:&|and)\s*qualifications?|pre[- ]requisite qualifications?|what qualifications you will need|minimum qualifications?|must[- ]haves?(?: skills?)?|mandatory (?:skills?|qualifications?)|core mandatory skills?|position requirements?|top \d+ qualifications?|skills sought|key skills|technical skills?|skill set|knowledge,? skills,? and\/?or abilities required|skills you(?:'ll| will) need (?:to bring|to be successful)|skills that will differentiate your candidacy|your skills and experience|your expertise|you must have|you have|we're excited about you because you have|we're excited about you because|to thrive in this role,? you have|what we (?:value|require)|we look for|who you might be|who we're looking for|what skills and experience do you need|what does it take to be successful|the ideal candidate|you may be a (?:good )?fit if|you might be a good fit if you|what you(?:'ll| will) need|what you(?:'ll| will) bring(?: to the team)?|what we(?:'re| are) looking for|what we look for|what you bring|who you are|basic qualifications?|additional considerations|you might thrive in this role|experience we value|mindset we value|is it you we're looking for|about you|you likely)/i;
+const PREFERRED = /^(?:preferred (?:qualifications?|skills?|experience)|secondary\s*\/\s*preferred skills?|desired experience|ideal experience|additional desired experience|bonus skills and attributes|how you stand out|even better|strong candidates may have|nice[- ]to[- ]haves?|bonus points(?: for)?|bonus|preferred|desirable|what sets you apart)$/i;
 const RESPONSIBILITIES = /^(?:essential (?:functions?|duties)|core job functions?|job duties?|day[- ]to[- ]day tasks?|role and responsibilities?|roles and responsibilities?|job responsibilities?|key job responsibilities?|key responsibilities?|your core responsibilities?|responsibilities?|a typical day|the impact you'll make|the difference you will make|you will|what you'll achieve|what you'll be responsible for|what you'll be working on|you're excited about this opportunity because you will|what will you be doing|what will you do in this role|what does the day[- ]to[- ]day look like|here's a taste of the problems we're solving|as a .+ you will|in this role,? you (?:will|can expect to)|in your day[- ]to[- ]day,? you will|how your work moves the mission forward|what you(?:'ll| will) (?:do|be doing)|what you can expect|what success looks like|as an early engineer|role overview|duties|your impact|what you will build)/i;
 const MARK_REQUIRED = /\b(?:required|must have|minimum|need to have|essential)\b/i;
 const DEGREE = /\b(?:associate(?:'s)?|bachelor(?:'s)?|master(?:'s)?|ph\.?d\.?|doctorate|BS|BA|MS|MA|BTech)\b[^\n.;]{0,90}/gi;
@@ -28,7 +37,7 @@ function clean(line) {
 }
 
 function sectionOf(line) {
-  const s = line.replace(/^\d+[.)]\s*/, "").replace(/[:\s.]+$/, "").trim();
+  const s = line.split(":", 1)[0].replace(/^\d+[.)]\s*/, "").replace(/[:\s.]+$/, "").trim();
   const parenthetical = s.match(/\((requirements?|qualifications?|responsibilities?)\)$/i);
   if (parenthetical) return /^responsibilities?$/i.test(parenthetical[1]) ? "responsibilities" : "required";
   if (/^the responsibilities of this position include\b/i.test(s)) return "responsibilities";
@@ -84,7 +93,7 @@ function extractAlternatives(line, hits) {
 }
 
 export function parseJobDescription(text, config) {
-  const lines = String(text || "").split(/\r?\n/).map((raw) => ({ text: clean(raw), bullet: /^\s*(?:[-•*]|\d+[.)])\s+/.test(raw) })).filter((x) => x.text);
+  const lines = normalizeJobDescription(text).split(/\r?\n/).map((raw) => ({ text: clean(raw), bullet: /^\s*(?:[-•*]|\d+[.)])\s+/.test(raw) })).filter((x) => x.text);
   const first = lines[0]?.text || "";
   const title = /^job title\s*:/i.test(first) ? first.replace(/^job title\s*:\s*/i, "")
     : first.length <= config.scoring.job_match.jd_parser.max_title_chars && !/[.!?]$/.test(first) && !/^(?:we |our |the |description|location|employment type|work arrangement)\b/i.test(first) && !sectionOf(first) ? first : null;
@@ -97,16 +106,18 @@ export function parseJobDescription(text, config) {
   for (let i = title ? 1 : 0; i < lines.length; i++) {
     let { text: line, bullet } = lines[i];
     const heading = sectionOf(line);
-    if (!bullet && heading && (/:$/.test(line) || line.length < config.scoring.job_match.jd_parser.max_heading_chars)) {
+    if (!bullet && heading && (line.includes(":") || line.length < config.scoring.job_match.jd_parser.max_heading_chars)) {
       section = heading;
       const colon = line.indexOf(":");
-      if (colon < 0 || !line.slice(colon + 1).trim()) continue;
-      line = line.slice(colon + 1).trim();
+      // Prefix headings also match sentences such as "You have Python experience".
+      // Only discard a heading when it carries no recognized skill.
+      if (colon >= 0 && line.slice(colon + 1).trim()) line = line.slice(colon + 1).trim();
+      else if (!skillHits(line, config).some(h => !h.unknown)) continue;
     }
     if (/\b(?:equal opportunity employer|base salary|actual compensation|competitive compensation|benefits program|benefit offerings|sign-on payments|pay transparency notice)\b/i.test(line)) { section = "background"; continue; }
     // Some postings have no section headings. Only explicit qualification bullets
     // are safe to classify there; prose about the employer stays background.
-    if (section === "background" && bullet && /^(?:must have|minimum|experience (?:in|with|working)|proficien(?:cy|t)|knowledge of|familiarity with|strong (?:skills|knowledge|experience)|bachelor|master|ph\.?d|\d+\+? years?)\b/i.test(line)) section = "required";
+    if (section === "background" && /^(?:must have|minimum|experience (?:in|with|working)|proficien(?:cy|t)|knowledge of|familiarity with|strong (?:skills|knowledge|experience)|bachelor|master|ph\.?d|\d+\+? years?)\b/i.test(line)) section = "required";
     if (section === "background") continue;
     relevant.push(line);
     const kind = /^(?:preferred|nice to have|bonus)\b/i.test(line) || /\b(?:is a plus|a bonus)\b/i.test(line) ? "preferred" : MARK_REQUIRED.test(line) ? "required" : section;
@@ -144,8 +155,24 @@ export function parseJobDescription(text, config) {
       if (asks.length) yearCandidates.push({ minimum: /\bor\b/i.test(line) ? Math.min(...asks) : Math.max(...asks), source: line, classification: target });
       for (const m of line.matchAll(CERT)) parsed.certifications.push({ text: m[0], source: line, classification: target });
     }
-    if (section === "responsibilities") parsed.responsibilities.push(line);
+    if (section === "responsibilities") {
+      parsed.responsibilities.push(line);
+      // Technologies explicitly used in the work are requirements too. Employer
+      // background, benefits and unknown capitalized words never enter here.
+      if (!target) for (const alternatives of extractAlternatives(line, skillHits(line, config).filter(h => !h.unknown))) {
+        const id = `required:${alternatives.join("|")}`;
+        if (!seen.has(id)) { parsed.required.push({ label: alternatives.join(" / "), alternatives, source: line }); seen.add(id); }
+      }
+    }
   }
+  // Repeated lists must not multiply the same requirement. A required ask wins
+  // over a preferred repetition; an independently required skill also satisfies
+  // a redundant any-of group without creating an extra scored row.
+  const canonical = items => items.filter((item, i) => !items.some((other, j) => j !== i
+    && other.alternatives.every(a => item.alternatives.includes(a))
+    && (other.alternatives.length < item.alternatives.length || j < i)));
+  parsed.required = canonical(parsed.required);
+  parsed.preferred = canonical(parsed.preferred).filter(item => !parsed.required.some(other => other.alternatives.every(a => item.alternatives.includes(a))));
   // A required line beats a preferred one; among required lines (or, if there are none, among preferred ones) the highest ask wins.
   const pickBest = (list, key) => { const req = list.filter((c) => c.classification !== "preferred"); const pool = req.length ? req : list; return pool.reduce((a, b) => (key(b) > key(a) ? b : a), pool[0]); };
   if (degreeCandidates.length) parsed.degree = pickBest(degreeCandidates, (c) => config.scoring.job_match.education.degree_levels[c.level]);
