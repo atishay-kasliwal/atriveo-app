@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import http from "node:http";
-import { signRequest, createStore, publishResume, fetchResumeToFile, resumeKey, imageKey, storeFromEnv } from "../../scripts/resume-store.mjs";
+import { signRequest, createStore, publishResume, fetchResumeToFile, resumeKey, imageKey, storeFromEnv, resumeFileRedirect } from "../../scripts/resume-store.mjs";
 
 test("SigV4 matches AWS's published GET-object example", () => {
   const r = signRequest({
@@ -114,4 +114,16 @@ test("resume-file answers with a short-lived redirect, and refuses a bad hash or
   assert.ok(resumeFileRedirect({ sha, kind: "image" }, { store }).location.includes(`${sha}.png?`));
   assert.equal(resumeFileRedirect({ sha: "../../etc/passwd" }, { store }).status, 400);
   assert.equal(resumeFileRedirect({ sha }, { store: null }).status, 404);
+});
+
+
+test("PDF downloads sign attachment headers while previews stay inline",()=>{
+ const store=createStore({endpoint:"https://acct.r2.cloudflarestorage.com",bucket:"b",accessKeyId:"id",secretAccessKey:"secret",now:()=>new Date("2026-10-25T12:00:00Z")});
+ const sha="a".repeat(64);
+ const preview=new URL(resumeFileRedirect({sha,kind:"pdf"},{store}).location);
+ const download=new URL(resumeFileRedirect({sha,kind:"pdf",dl:"1"},{store}).location);
+ assert.equal(preview.searchParams.has("response-content-disposition"),false);
+ assert.equal(download.searchParams.get("response-content-disposition"),'attachment; filename="Atishay Kasliwal.pdf"');
+ assert.notEqual(download.searchParams.get("X-Amz-Signature"),preview.searchParams.get("X-Amz-Signature"));
+ assert.equal(new URL(resumeFileRedirect({sha,kind:"image",dl:"1"},{store}).location).searchParams.has("response-content-disposition"),false);
 });

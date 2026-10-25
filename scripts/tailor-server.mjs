@@ -1887,7 +1887,7 @@ const server = http.createServer(async (req, res) => {
 
   // GET /applications/resume-file?sha=<sha256>&kind=pdf|image — a resume kept in R2, as a redirect to a link that expires in minutes.
   if (req.method === "GET" && pathname === "/applications/resume-file") {
-    const r = resumeFileRedirect({ sha: reqUrl.searchParams.get("sha"), kind: reqUrl.searchParams.get("kind") });
+    const r = resumeFileRedirect({ sha: reqUrl.searchParams.get("sha"), kind: reqUrl.searchParams.get("kind"), dl: reqUrl.searchParams.get("dl") });
     res.writeHead(r.status, r.location ? { Location: r.location, "Cache-Control": "private, no-store" } : {});
     res.end();
     return;

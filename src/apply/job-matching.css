@@ -44,3 +44,5 @@
 @media(max-height:780px){.jm-confidence{display:none}}
 
 .jm-unassessed{border-top:1px solid var(--border-col);margin-top:10px;padding-top:12px}.jm-unassessed h3{font-size:12px;color:var(--jm-amber)}.jm-unassessed ul{padding-left:18px;font-size:12px;color:var(--text-2);line-height:1.6}
+
+.jm-rhead>.jm-download{margin-left:auto;min-height:30px;padding:5px 10px;font-size:11px;white-space:nowrap}.jm-rhead>.jm-download+a{margin-left:0}

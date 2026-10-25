@@ -59,9 +59,10 @@ export function createStore({ endpoint, bucket, accessKeyId, secretAccessKey, fe
     async del(key) { const r = await call("DELETE", key); if (!r.ok && r.status !== 404) throw new Error(`R2 DELETE ${key}: ${r.status}`); },
     async get(key) { const r = await call("GET", key); if (r.status === 404) return null; if (!r.ok) throw new Error(`R2 GET ${key}: ${r.status}`); return Buffer.from(await r.arrayBuffer()); },
     /** A link that reads one object for `seconds` (default 5 minutes) and then stops working. */
-    presignGet(key, seconds = 300) {
+    presignGet(key, seconds = 300, { download = false } = {}) {
       const amzDate = stamp(), date = amzDate.slice(0, 8), scope = `${date}/auto/s3/aws4_request`;
       const params = { "X-Amz-Algorithm": "AWS4-HMAC-SHA256", "X-Amz-Credential": `${accessKeyId}/${scope}`, "X-Amz-Date": amzDate, "X-Amz-Expires": String(seconds), "X-Amz-SignedHeaders": "host" };
+      if (download) params["response-content-disposition"] = 'attachment; filename="Atishay Kasliwal.pdf"';
       const query = Object.keys(params).sort().map((k) => `${enc(k)}=${enc(params[k])}`).join("&");
       const canonical = ["GET", pathOf(key), query, `host:${host}\n`, "host", "UNSIGNED-PAYLOAD"].join("\n");
       const toSign = ["AWS4-HMAC-SHA256", amzDate, scope, hex(canonical)].join("\n");
@@ -118,5 +119,5 @@ export function resumeFileRedirect(query, { store = storeFromEnv(), seconds = 30
   if (!store) return { status: 404 };
   if (!/^[0-9a-f]{64}$/.test(sha)) return { status: 400 };
   const key = query.kind === "image" ? imageKey(sha) : resumeKey(sha);
-  return { status: 302, location: store.presignGet(key, seconds) };
+  return { status: 302, location: store.presignGet(key, seconds, { download: query.kind !== "image" && query.dl === "1" }) };
 }
