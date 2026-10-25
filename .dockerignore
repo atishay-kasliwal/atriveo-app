@@ -9,7 +9,9 @@ dist
 public/job_descriptions
 output
 functions
-src
+src/*
+!src/shared
+!src/shared/**
 docs
 *.md
 !README.md
