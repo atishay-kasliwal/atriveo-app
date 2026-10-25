@@ -1,5 +1,13 @@
 # Shipping to production: `npm run ship`
 
+**Production is `main`, always.** A change reaches production only this way: branch → PR → merged into `main` → deploy from a clean
+checkout of `main`. `npm run ship` and `npm run deploy:apply` refuse anything else (`scripts/require-main.sh`: the checkout must be
+exactly `origin/main` with no changed tracked files). Dry runs, `--check-only`, `--restart` and `--rollback` work from anywhere.
+Keep one checkout just for deploying:
+
+    git worktree add --detach ~/atriveo-app-deploy origin/main        once
+    cd ~/atriveo-app-deploy && git fetch && git checkout --detach origin/main && npm ci && npm run ship
+
 One command from your Mac. No GitHub Actions. It replaces the manual paste in DEPLOY_FIT_R2.md for everything after the first time.
 
     npm run ship -- --init        once: records what is live now on Oracle (the Oct 23 images: fit-3f309439c)

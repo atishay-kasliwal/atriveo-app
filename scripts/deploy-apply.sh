@@ -20,6 +20,9 @@ BRANCH="${APPLY_PAGES_BRANCH:-main}"
 ADMINS="${ADMIN_EMAILS:-katishay@gmail.com}"
 
 cd "$APP_DIR"
+# shellcheck source=require-main.sh
+. scripts/require-main.sh
+require_main
 npm run build:apply
 
 rm -rf "$STAGE"
