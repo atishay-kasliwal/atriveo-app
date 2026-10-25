@@ -1,0 +1,16 @@
+# FOMC Market LLM | project definition (2026-10-23; selection rule 2026-10-25)
+# Lint: npm run ac:bullet-lint -- --role fomc-market-llm
+# The FedTalk research side of Stony Brook: Whisper transcripts, sentence-transformer embeddings in Pinecone, GPT-4o
+# market-reaction predictions scored against SPY minute moves, and a live dashboard over 13 FOMC sessions.
+# Any track may print it: it takes the second project slot only when the posting fits it better (TRACKS.yaml
+# jd_selected_projects, ac-page-fill chooseProjects), and no figure it prints repeats under Stony Brook.
+# Dates: Atishay, 2026-10-23 (Nov 2024 - Dec 2025). Facts: docs/resume-tracks/facts/github.md (FedTalk rows).
+
+role:
+  id: fomc-market-llm
+  employer: FOMC Market LLM
+  title: AI Research Engineer
+  location: ""
+  dates: November 2024 -- December 2025
+  slot_kind: project
+  resume_pick_count: 2

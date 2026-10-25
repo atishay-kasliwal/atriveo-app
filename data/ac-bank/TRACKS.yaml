@@ -5,6 +5,10 @@
 # the other tracks use the planner's defaults until he decides theirs.
 # Loader, classifier and planner overrides: scripts/ac-tracks.mjs
 
+# Projects any track may print in the second project slot, chosen only when the posting fits them better than the
+# project already there (ac-page-fill chooseProjects): FOMC Market LLM (2026-10-25, Atishay: keep it, never forced).
+jd_selected_projects: [fomc-market-llm]
+
 tracks:
   ai-engineer:
     label: AI engineer
@@ -20,7 +24,7 @@ tracks:
       wake-forest: 4
       accolite: 2
     # The newest project first, the second by fit to the JD. Never the Java insurance platform.
-    projects: [atriveo, mri-research, user-data-platform]
+    projects: [atriveo, mri-research, user-data-platform, fomc-market-llm]
     # Bullets that claim the "ai" concept (every other track: planner default, 4).
     max_ai_bullets: 12
     # The fixed SWE keyword list (ATS_COVERAGE_MATRIX.yaml) caps LangChain, RAG and Python at
@@ -30,7 +34,8 @@ tracks:
     # 65%, agents 61%, latency 59%, evals 51%, APIs 50%, multimodal 49%, monitoring 45%). Skills still tailor.
     pinned:
       experience:
-        stony-brook: [AC-227, AC-025:ai-track, AC-230, AC-199:ai-track, AC-023:ai-track]
+        # AC-230 (FedTalk evaluation) moved to the FOMC Market LLM project (2026-10-25); the page fill adds a Stony Brook bullet.
+        stony-brook: [AC-227, AC-025:ai-track, AC-199:ai-track, AC-023:ai-track]
         wake-forest: [AC-231, AC-202, AC-046:ai]
         accolite: [AC-189, AC-190, AC-191]
       projects:

@@ -63,6 +63,14 @@ export function allPinnedSets(track, doc = loadTracks()) {
   return t?.pinned ? [{ name: "default", ...t.pinned }, ...(t.pinned_variants || [])] : [];
 }
 
+/** Every resume prints at least this many projects (Atishay, 2026-10-23; ac-page-fill enforceProjects). */
+export const RESUME_MIN_PROJECTS = 2;
+
+/** Projects any track may print in the second slot when the posting fits them best (TRACKS.yaml jd_selected_projects). */
+export function jdSelectedProjects(doc = loadTracks()) {
+  return [...(doc.jd_selected_projects ?? [])];
+}
+
 /** Planner settings a track changes, applied over the planner's own (see buildPlannerRuntimeConfig). */
 export function trackPlannerOverrides(runtime, title, doc = loadTracks()) {
   const id = classifyTrack(title, doc);

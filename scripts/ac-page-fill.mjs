@@ -12,7 +12,7 @@ import { spawnSync } from "node:child_process";
 import { assembleAcResume, toolsFromBullets } from "./ac-tex.mjs";
 import { stripBanned } from "./tailor-dynamic.mjs";
 import { loadBank } from "./ac-bank.mjs";
-import { bankForTrack, loadTracks, trackPins } from "./ac-tracks.mjs";
+import { bankForTrack, jdSelectedProjects, loadTracks, trackPins } from "./ac-tracks.mjs";
 import { PROJECT_SLUG_TO_NAME as PROJECT_NAME } from "./ac-role-meta.mjs";
 
 // Where the last line of this template ends when the page is full (measured: a resume stretched to the bottom margin ends
@@ -90,7 +90,7 @@ const figures = (text) => new Set(String(text || "").match(/\d+(?:\.\d+)?\s*%|\b
 /**
  * Bullets the bank offers for one employer or project that the resume does not use yet, best first. Never one whose
  * opening verb is already used, one with a word the renderer strips (it would print "a modular pipeline..." without its
- * verb), or one that repeats a figure another bullet in the same section states.
+ * verb), or one that repeats a figure stated in sectionTexts (the page fill passes every bullet on the page).
  */
 export function candidatesFor(role, kind, bank, used, jdLower, track, sectionTexts = []) {
   const usedVerbs = new Set([...used.values()].map(firstVerb));
@@ -192,6 +192,46 @@ export function enforceProjects(compact, bank, { jd = "", track = null, pool = n
   return { compact: out, changes };
 }
 
+/**
+ * The second project slot goes to the project the posting fits best: a project any track may print
+ * (TRACKS.yaml jd_selected_projects, e.g. FOMC Market LLM) replaces the weakest project after the first when its two
+ * best bullets score higher against the posting than that project's printed bullets. The first project (the newest,
+ * Atriveo) is never replaced, and nothing is forced: no fit, no change.
+ */
+export function chooseProjects(compact, bank, { jd = "", track = null, extra = jdSelectedProjects(), minBullets = 2 } = {}) {
+  const jdLower = String(jd).toLowerCase();
+  const out = { ...compact, projects: (compact.projects || []).map((p) => ({ ...p, bullets: [...(p.bullets || [])] })) };
+  const changes = [];
+  if (out.projects.length < 2) return { compact: out, changes };
+  const fitOf = (p) => p.bullets.reduce((s, b) => s + scoreOfPrinted(b, bank, jdLower), 0) / Math.max(1, p.bullets.length);
+  for (const role of extra) {
+    if (out.projects.some((p) => p.role === role || sameProduct(p.role, role))) continue;
+    // The weakest project after the first is the one it would replace.
+    const slot = out.projects.map((p, i) => ({ i, fit: fitOf(p) })).slice(1).sort((a, b) => a.fit - b.fit)[0];
+    const others = out.projects.filter((_, i) => i !== slot.i);
+    const used = new Map([...(out.experience || []), ...others].flatMap((s) => s.bullets.map((b) => [b.ac_id, b.text])));
+    const list = distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track, others.flatMap((p) => p.bullets.map((b) => b.text))));
+    if (list.length < minBullets) continue;
+    const fit = list.slice(0, minBullets).reduce((s, c) => s + c.score, 0) / minBullets;
+    if (fit <= slot.fit) continue;
+    changes.push(`chose project ${role} over ${out.projects[slot.i].role} for this posting (${fit.toFixed(3)} vs ${slot.fit.toFixed(3)})`);
+    out.projects[slot.i] = { role, bullets: list.slice(0, minBullets).map(bulletOf) };
+  }
+  return { compact: out, changes };
+}
+
+/** An experience bullet that repeats a figure a project prints comes out (the page fill adds another in its place). */
+export function dropRepeatedFigures(compact) {
+  const projectFigures = new Set((compact.projects || []).flatMap((p) => p.bullets.flatMap((b) => [...figures(b.text)])));
+  const changes = [];
+  const experience = (compact.experience || []).map((s) => ({ ...s, bullets: s.bullets.filter((b) => {
+    const repeat = [...figures(b.text)].find((f) => projectFigures.has(f));
+    if (repeat) changes.push(`removed ${b.ac_id} (${s.role}): ${repeat} is printed under a project`);
+    return !repeat;
+  }) }));
+  return { compact: { ...compact, experience }, changes };
+}
+
 // Never fewer than these when making room; never more than these when filling.
 const FLOOR = { experience: { "stony-brook": 4, default: 2 }, project: 2 };
 // What goes first when the page runs over: a project's third bullet, then the oldest employer, Stony Brook last.
@@ -238,7 +278,7 @@ export function fillOnePage(compact, { bank, jd = "", track = null, render, meas
     // More than a line left: the best bullet that still fits.
     const used = usedMap(cur);
     const options = sections(cur).filter(({ kind, s }) => s.bullets.length < capOf(kind, s.role))
-      .flatMap(({ kind, s }) => candidatesFor(s.role, kind, bank, used, jdLower, track, s.bullets.map((b) => b.text)).slice(0, 3).map((c) => ({ ...c, kind, role: s.role })))
+      .flatMap(({ kind, s }) => candidatesFor(s.role, kind, bank, used, jdLower, track, [...used.values()]).slice(0, 3).map((c) => ({ ...c, kind, role: s.role })))
       .filter((c) => !tried.has(c.ac.id))
       .sort((a, b) => b.score - a.score);
     let added = false;
@@ -278,7 +318,9 @@ export function fillResumePage({ compact, skills, headerTitle, location, jd, tra
   const render = (c) => assembleAcResume(fitTools(c), { headerTitle, skillsLines: skills, bank: trackBank, location });
   const pinned = Object.keys(trackPins(track, undefined, { jd })?.projects || {});
   const projects = enforceProjects(compact, trackBank, { jd, track, pool, pinned });
-  const filled = fillOnePage(projects.compact, { bank: trackBank, jd, track, render, measure });
+  const chosen = chooseProjects(projects.compact, trackBank, { jd, track });
+  const deduped = dropRepeatedFigures(chosen.compact);
+  const filled = fillOnePage(deduped.compact, { bank: trackBank, jd, track, render, measure });
   const count = (c) => ({
     experience: Object.fromEntries((c.experience || []).map((s) => [s.role, s.bullets.length])),
     projects: Object.fromEntries((c.projects || []).map((s) => [s.role, s.bullets.length])),
@@ -289,7 +331,7 @@ export function fillResumePage({ compact, skills, headerTitle, location, jd, tra
     report: {
       before: count(compact),
       after: count(filled.compact),
-      changes: [...projects.changes, ...filled.log],
+      changes: [...projects.changes, ...chosen.changes, ...deduped.changes, ...filled.log],
       pages: filled.measure.pages,
       bottom_gap_pt: filled.measure.bottom_gap_pt,
       filled: filled.filled && filled.measure.bottom_gap_pt < LINE_PT,

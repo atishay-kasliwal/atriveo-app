@@ -116,6 +116,15 @@ projects:
     bullets: 10
     note: Archived — no AC-133–142 bank planned
 
+  - order: 9.5
+    role: fomc-market-llm
+    repo: atishay-kasliwal/fedtalk-openai-analysis-main
+    status: done
+    on_resume: jd-selected
+    bank: data/ac-bank/FOMC-MARKET-LLM.yaml
+    bullets: 3
+    note: Second project slot on any track when the posting fits it best (TRACKS.yaml jd_selected_projects), 2026-10-25. Bullets AC-230, AC-251, AC-252.
+
   - order: 10
     role: fomc-intelligence
     repo: atishay-kasliwal/fedtalk-openai-analysis-main

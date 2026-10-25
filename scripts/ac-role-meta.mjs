@@ -129,6 +129,7 @@ export const PROJECT_SLUG_TO_NAME = {
   "radiomics-pipeline": "Advanced Radiomics Research Pipeline",
   "cpp-encryption": "Encryption and Decryption Application",
   "fomc-dashboard": "FOMC Intelligence Dashboard",
+  "fomc-market-llm": "FOMC Market LLM",
 };
 
 function readRoleYamlDates(bankDir = resolveBankDir()) {

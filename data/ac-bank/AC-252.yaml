@@ -1,0 +1,54 @@
+# FOMC Market LLM project: retrieval behind the GPT-4o calls (facts/github.md, FedTalk architecture), 2026-10-25.
+id: AC-252
+role: fomc-market-llm
+fits: [ai-engineer, data-science, software-engineer]
+slot_kind: project
+engineering_identity: ai
+achievement_theme: fomc-retrieval
+display_order: 4
+wow_score: 0.83
+metrics_claimed:
+  - embedding_dims_768
+concepts_claimed:
+  - ai
+  - retrieval
+signature_technologies:
+  - Pinecone
+  - GPT-4o
+fact: >-
+  FedTalk: Fed statements and news split into sentences, embedded with sentence-transformers (768-dim) into Pinecone;
+  per-minute retrieval feeds GPT-4o market-reaction predictions (docs/resume-tracks/facts/github.md).
+provenance:
+  level: USER_CONFIRMED
+  confirmed_at: '2026-10-08'
+  context: DS round, docs/resume-tracks/facts/github.md
+capabilities:
+  ai: 85
+  ml: 78
+  data: 75
+  backend: 65
+strength:
+  recruiter: 9
+ats_keywords:
+  - RAG
+  - Vector Database
+  - Embeddings
+  - Retrieval
+  - NLP
+  - LLM
+  - sentence-transformers
+facets:
+  ai:
+    phrase: embedding retrieval for llm calls
+    keywords:
+      - retrieval
+      - embeddings
+      - vector database
+      - rag
+      - nlp
+variants:
+  - facet: ai
+    emphasis: ai
+    strength: 9
+    text: >-
+      Retrieved minute-by-minute context for GPT-4o from 768-dimension sentence-transformer embeddings of Fed statements and news indexed in Pinecone, grounding each market-reaction call.
