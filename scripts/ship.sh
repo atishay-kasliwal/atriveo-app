@@ -37,6 +37,8 @@ for a in "$@"; do case "$a" in
 cd "$(cd "$(dirname "$0")/.." && pwd)"
 # shellcheck source=ship-lib.sh
 . scripts/ship-lib.sh
+# shellcheck source=require-main.sh
+. scripts/require-main.sh
 say() { printf '\n\033[1m== %s\033[0m\n' "$*"; }
 run_remote() { if [ "$DRY" = 1 ]; then echo "[dry-run] ssh $HOST: $*"; else "${SSH[@]}" "$@"; fi; }
 state() { "${SSH[@]}" "cat $ROOT_REMOTE/ship-state.env"; }
@@ -54,9 +56,12 @@ if [ "$ROLLBACK" = 1 ]; then
   echo "dashboard -> $PREV_DASH_START   workers -> $PREV_WORK_STARTS"
   [ "$YES" = 1 ] || { read -r -p "Restart the previous dashboard and workers? [y/N] " r; [ "$r" = y ] || exit 1; }
   run_remote "cd $ROOT_REMOTE && ./$PREV_DASH_START && for s in $PREV_WORK_STARTS; do ./\$s; done && sed -i 's/^DEPLOYED_COMMIT=.*/DEPLOYED_COMMIT=$PREV_COMMIT/' ship-state.env && docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}' | grep -E 'dashboard|resume'"
-  echo "Rolled back. If the website was deployed for the newer commit, redeploy it from that older commit too."
+  echo "Rolled back. If the website was deployed for the newer commit, roll it back in Cloudflare Pages (atriveo-apply > Deployments > Rollback), then revert the change on main with a PR."
   exit 0
 fi
+
+# Only main goes to production (scripts/require-main.sh). Dry runs, checks and restarts ship nothing, so they may run anywhere.
+[ "$DRY" = 1 ] || [ "$CHECK_ONLY" = 1 ] || [ "$RESTART" = 1 ] || [ "$ONLY_SCRAPER" = 1 ] || require_main
 
 if [ "$RESTART" = 1 ]; then
   say "Restarting the containers from the current images (settings in dashboard.env are read again)"
