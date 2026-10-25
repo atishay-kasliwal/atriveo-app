@@ -20,7 +20,7 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
   const waiting = counts ? (counts.fillable ?? 0) + counts.ready : null;
   return (
     <div className="apply-header">
-      <a className="apply-brand" href="/" aria-label="Atriveo Apply home">
+      <a className="apply-brand" href="/" aria-label="Atriveo Apply by Atriveo home">
         <ApplyLogo height={22} />
         <span className="apply-brand-by">by Atriveo</span>
       </a>
