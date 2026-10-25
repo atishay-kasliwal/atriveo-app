@@ -64,3 +64,6 @@
 .jm-company-tip .jm-company-source{display:flex;align-items:center;gap:6px;color:var(--foreground)}
 .jm-rail>button[data-platform] .jm-company-source::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--platform);flex:none}
 
+/* The follow-time choice inside the companion line: compact, readable on the dark workspace. */
+.jm-companion-ready select{font:inherit;color:var(--foreground);background:var(--secondary-bg);border:1px solid var(--border-col);border-radius:4px;padding:0 2px;margin:0 2px;cursor:pointer}
+.jm-companion-ready select:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
