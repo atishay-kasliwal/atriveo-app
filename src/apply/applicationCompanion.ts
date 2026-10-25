@@ -3,8 +3,13 @@ const CHANNEL='atriveo-companion-v1';
 export interface CompanionJob {id:string;resumeSha256?:string|null;applyUrl:string}
 interface Kit {version:1;id:string;expiresAt:string;job:{id:string;applyUrl:string};resume:{sha256:string};[key:string]:unknown}
 let connected=false;
+/** How long the resume follows you after Apply (the extension keeps it within 15 s to 5 min); your choice, kept in this browser. */
+export const FOLLOW_OPTIONS=[15,30,45,60,120,180,240,300] as const;
+const FOLLOW_KEY='atriveo.companion.followSeconds';
+export function readFollowSeconds():number{try{const n=Number(localStorage.getItem(FOLLOW_KEY));return (FOLLOW_OPTIONS as readonly number[]).includes(n)?n:60;}catch{return 60;}}
+export function writeFollowSeconds(seconds:number):void{try{localStorage.setItem(FOLLOW_KEY,String(seconds));}catch{/* the choice lasts this visit */}}
 const kits=new Map<string,Promise<Kit>>();
-function request(action:'PING'|'OPEN',kit?:Kit):Promise<{ok:boolean;panelOpened?:boolean;error?:string}>{
+function request(action:'PING'|'OPEN',kit?:Kit,followSeconds?:number):Promise<{ok:boolean;panelOpened?:boolean;error?:string}>{
  return new Promise((resolve,reject)=>{
   const id=crypto.randomUUID();
   const timeout=window.setTimeout(()=>{window.removeEventListener('message',receive);reject(Error(action==='PING'?'Companion not connected':'The extension did not confirm opening. Check your tabs before trying again.'));},action==='PING'?700:15000);
@@ -12,7 +17,7 @@ function request(action:'PING'|'OPEN',kit?:Kit):Promise<{ok:boolean;panelOpened?
    if(event.source!==window||event.origin!==location.origin||event.data?.channel!==CHANNEL||event.data?.source!=='extension'||event.data.id!==id)return;
    clearTimeout(timeout);window.removeEventListener('message',receive);event.data.ok?resolve(event.data):reject(Error(event.data.error||'Extension unavailable'));
   }
-  window.addEventListener('message',receive);window.postMessage({channel:CHANNEL,source:'workspace',id,action,kit},location.origin);
+  window.addEventListener('message',receive);window.postMessage({channel:CHANNEL,source:'workspace',id,action,kit,followSeconds},location.origin);
  });
 }
 const key=(job:CompanionJob)=>`${job.id}|${job.resumeSha256||''}`;
@@ -37,5 +42,5 @@ export async function openWithApplicationCompanion(job:CompanionJob):Promise<{pa
  if(!promise)throw Error('Reload the extension and the matching workspace to connect them.');
  let kit:Kit;try{kit=await promise;}catch(e){kits.delete(key(job));throw e;}
  if(Date.parse(kit.expiresAt)<=Date.now()){kits.delete(key(job));throw Error('This resume kit expired. Click Apply again to prepare it.');}
- return request('OPEN',kit);
+ return request('OPEN',kit,readFollowSeconds());
 }
