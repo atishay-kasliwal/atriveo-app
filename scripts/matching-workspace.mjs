@@ -13,8 +13,7 @@ export function similarJobs(current, docs, limit=4) {
  }).filter(x=>x.relevance>=.12).sort((a,b)=>b.relevance-a.relevance||(b.d.fit?.score??-1)-(a.d.fit?.score??-1)).slice(0,limit).map(({d})=>({id:d.job_url,key:queueKey(d.job_url),company:d.company,title:d.title,location:d.location??null,score:d.fit?.score??null}));
 }
 // Where a job was pulled from (the pipeline's `site`): the rail colors each company by it (src/apply/platform.ts).
-const SOURCES=new Set(['linkedin','staffing','greenhouse','lever','ashby','workday','smartrecruiters']);
-const sourceOf=(d)=>{const s=String(d.site||'').toLowerCase();return SOURCES.has(s)?s:null;};
+import {matchingSource as sourceOf} from './matching-filters.mjs';
 export function companySummary(docs,later,now=new Date()) {
  const groups=new Map();const today=now.toISOString().slice(0,10);
  for(const d of docs){const key=companyKey(d.company);const c=groups.get(key)||{key,name:d.company||'Unknown company',count:0,newToday:0,bestMatch:null,saved:0,bySource:{}};c.count++;if(String(d.run_at instanceof Date?d.run_at.toISOString():d.run_at).slice(0,10)===today)c.newToday++;if(later.has(d.job_url))c.saved++;if(typeof d.fit?.score==='number')c.bestMatch=Math.max(c.bestMatch??0,d.fit.score);const s=sourceOf(d);if(s)c.bySource[s]=(c.bySource[s]||0)+1;groups.set(key,c);}

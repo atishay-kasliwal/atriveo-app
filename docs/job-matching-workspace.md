@@ -42,3 +42,11 @@ Requirement extraction recognizes “What You'll Bring” and “Bonus Points,�
 The saved PDF score and readiness are checked against the current algorithm, configuration, PDF bytes, JD bytes, role title and assessment month. Stale numbers are hidden. The matching queue refreshes assessments only for its bounded selected batch; catalog analytics do not initiate scoring. Refresh writes only the advisory `ats-score.json`; it does not regenerate PDFs or edit candidate facts. A failed refresh leaves a visible needs-refresh state. PDF extraction commands have a 15-second timeout each.
 
 Bank evidence missing from the PDF and requirements unsupported by the bank remain different cases. The former can guide a truthful resume edit; the latter needs additional verified evidence or should remain a gap. A score is an internal comparison, not an employer ATS result or an interview probability. See [the audit](ats-scoring-trust-audit.md) for examples and verification limits.
+
+## Combined matching query and compact rails
+
+Matching defaults to newest posting first (found date is a clearly described fallback). The 30-day candidate window supports Today, Yesterday, 7 days and 30 days; calendar-day filters use the browser's timezone, including DST. Text, multiple source choices, resume track and company all combine before pagination and company summaries. Source choices are ORed; other dimensions intersect. Best-fit order remains optional, and learned preferences never reorder Newest first. Filter state lives in the URL.
+
+The right filter dock is 50–54px on desktop and 40px on narrow screens. Native disclosure popovers open inward for search, dates, sources, role and sort. The company index scrolls independently; the right dock stays still. ATS details and expanded descriptions are inline in one scrolling intelligence pane. Evidence opens inline while keeping its PDF highlight. No separate ATS page or description modal is needed.
+
+The green footer count comes from APPLIED application records and explicit manual confirmations, with linked-job duplicates removed. Opening Apply is tracked separately. A persisted last-opened job allows “Did you apply?” / “Yes, I applied” in the action bar; that explicit choice uses the existing job-applied endpoint. The extension does not submit an application or infer a successful submission from opening a page.
