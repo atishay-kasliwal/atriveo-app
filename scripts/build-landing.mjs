@@ -3,13 +3,23 @@
 // Output: index.html, workflow/index.html, 404.html, styles.css, sitemap.xml, assets/ (captures,
 // font, favicon, og.png) and assets/motion.js (GSAP + Lenis, bundled by Vite).
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import { build } from 'vite';
 import { home, workflow, missing } from '../landing/pages.mjs';
 import { site } from '../landing/content.mjs';
 
 const out = path.resolve(process.argv[2] || 'dist-apply/landing');
+// The stylesheet and script are cached for hours; a stale copy against a new page broke the hero (oversized video, light
+// theme). Their address changes whenever any of the landing sources change, so a browser fetches the matching pair.
+const version = crypto
+  .createHash('sha256')
+  .update(['landing/styles.css', 'landing/motion.js', 'landing/pages.mjs', 'landing/content.mjs'].map((f) => fs.readFileSync(f)).join('\0'))
+  .digest('hex')
+  .slice(0, 10);
+const stamp = (html) => html.replace('/landing/styles.css"', `/landing/styles.css?v=${version}"`).replace('/landing/assets/motion.js"', `/landing/assets/motion.js?v=${version}"`);
 const write = (file, text) => {
+  if (file.endsWith('.html')) text = stamp(text);
   fs.mkdirSync(path.dirname(path.join(out, file)), { recursive: true });
   fs.writeFileSync(path.join(out, file), text);
 };
