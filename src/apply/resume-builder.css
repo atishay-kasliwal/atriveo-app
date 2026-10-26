@@ -237,7 +237,8 @@
 .rb-paste .rb-step, .rb-general .rb-step { display: none; }
 .rb-start h2 { font-size: 17px; }
 .rb-paste textarea { min-height: 160px; height: clamp(150px, 25vh, 230px); font-size: 14px; }
-.rb-paste-fields { gap: 10px; }
+.rb-paste-fields { gap: 10px; grid-template-columns: 1fr 1fr; } /* Company · Role title / Location · Email */
+.rb-paste-fields input[aria-invalid="true"] { border-color: #e07a72; }
 .rb-paste-fields input { min-height: 42px; padding: 10px; font-size: 14px; }
 .rb-paste-acts { gap: 10px; }
 .rb-paste-acts .rv-primary { min-height: 44px; padding: 10px 18px; font-size: 14px; }
@@ -256,7 +257,6 @@
  .rb-paste { padding: 16px; gap: 10px; }
  .rb-paste textarea { min-height: 110px; height: 130px; font-size: 16px; }
  .rb-paste-fields { grid-template-columns: 1fr 1fr; gap: 10px; }
- .rb-paste-fields label:last-child { grid-column: 1 / -1; }
  .rb-paste-fields input { font-size: 16px; }
  .rb-paste-acts > span:empty { display: none; }
  .rb-start .rb-tracks { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -290,3 +290,12 @@
 @media(min-width:901px){.rb-ai-panel{width:min(720px,calc(100vw - 48px));}}
 .rb-ai-settings>summary{cursor:pointer;color:var(--muted-fg);font-size:13px;}.rb-ai-settings[open]>:not(summary){margin-top:12px;}
 .rb-ai-summary{display:grid;gap:12px;}.rb-ai-section-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}.rb-ai-section-summary article{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid var(--border-col);border-radius:12px;min-width:0;}.rb-ai-section-summary article>b{font-size:13px;}.rb-ai-section-summary span{font-size:12px;color:var(--muted-fg);}.rb-ai-section-summary .rb-ai-ready{color:#37cf91;}.rb-ai-section-summary article p,.rb-ai-section-summary summary{font-size:12px;line-height:1.5;}.rb-ai-match-details>summary{font-size:13px;cursor:pointer;color:var(--muted-fg);}.rb-ai-match-details[open]>:not(summary){margin-top:12px;}@media(max-width:700px){.rb-ai-section-summary{grid-template-columns:1fr;}}
+@media (max-width: 420px) { .rb-paste-fields { grid-template-columns: 1fr; } }
+
+/* ATS score beside the page chip: Job Match before → this draft, Resume Ready (same scorer and colours as Job matching / Today). */
+.rb-ats { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted-fg); white-space: nowrap; cursor: default; }
+.rb-ats b { color: var(--foreground); font-weight: 650; font-variant-numeric: tabular-nums; }
+.rb-ats .is-up { color: #69c69a; } .rb-ats .is-down { color: #e07a72; }
+.rb-ats small { font-size: 11px; color: var(--muted-fg); }
+.rb-ready { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 2px 7px; border-radius: 5px; background: var(--secondary-bg); color: #d5ad61; white-space: nowrap; cursor: default; }
+.rb-ready.is-ready { color: #69c69a; } .rb-ready.is-needs-work { color: #e07a72; }
