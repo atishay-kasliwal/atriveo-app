@@ -1,16 +1,139 @@
-import {site,stages,faqs,examples} from './content.mjs';
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const arrow='<span class="arrow" aria-hidden="true">↗</span>';
-const cta=(label='Open workspace',cls='primary',href=site.workspace)=>`<a class="button ${cls}" href="${href}"><span>${label}</span>${arrow}</a>`;
-const brand='<span class="wordmark">atriveo<span>.</span></span>';
-function layout({title,description,canonical,body,kind='home',noindex=false}){return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}"><meta name="theme-color" content="#f4f6f8">${noindex?'<meta name="robots" content="noindex,follow">':''}<link rel="canonical" href="${canonical}"><meta property="og:type" content="website"><meta property="og:site_name" content="Atriveo"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${canonical}"><meta property="og:image" content="${site.url}assets/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(description)}"><meta name="twitter:image" content="${site.url}assets/og.png"><link rel="icon" type="image/svg+xml" href="/landing/assets/favicon.svg"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="preload" href="/landing/assets/fonts/atriveo-sans-400_700-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/landing/styles.css"><script type="application/ld+json">${JSON.stringify({'@context':'https://schema.org','@type':'SoftwareApplication',name:'Atriveo',url:site.url,description:site.description,applicationCategory:'BusinessApplication',operatingSystem:'Web, Chrome'})}</script><script type="module" src="/landing/assets/motion.js"></script></head><body data-page="${kind}"><a class="skip" href="#main">Skip to content</a><header class="site-header wrap"><a class="brand" href="/landing/" aria-label="Atriveo home">${brand}</a><details class="mobile-menu"><summary>Menu</summary><nav aria-label="Mobile"><a href="/landing/#product">The workspace</a><a href="/landing/workflow/">How it works</a><a href="/landing/#questions">Questions</a></nav></details><nav class="desktop-nav" aria-label="Main"><a href="/landing/#product">The workspace</a><a href="/landing/workflow/" ${kind==='workflow'?'aria-current="page"':''}>How it works</a><a href="/landing/#questions">Questions</a></nav><a class="header-cta" href="${site.workspace}">Open workspace ${arrow}</a></header><main id="main" tabindex="-1">${body}</main><footer class="site-footer wrap"><a class="brand" href="/landing/" aria-label="Atriveo home">${brand}</a><span>Your next move, connected.</span><div><a href="/landing/workflow/">How it works</a><a href="${site.workspace}">Open workspace ${arrow}</a></div><small>© 2026 Atriveo</small></footer></body></html>`;}
-function routeFigure(){return `<figure class="route-figure" aria-label="One application connects the role, your evidence, your resume and the application"><div class="route-heading"><span>ONE APPLICATION</span><span aria-hidden="true">↗</span></div><div class="route-drawing"><svg viewBox="0 0 440 440" fill="none" aria-hidden="true"><path class="route-track" d="M80 60 H295 Q350 60 350 115 V135 Q350 190 295 190 H145 Q90 190 90 245 V265 Q90 320 145 320 H300 Q350 320 350 375 V390"/><path class="route-fill" d="M80 60 H295 Q350 60 350 115 V135 Q350 190 295 190 H145 Q90 190 90 245 V265 Q90 320 145 320 H300 Q350 320 350 375 V390"/><circle class="route-dot" cx="80" cy="60" r="7"/><path class="route-end" d="m339 380 11 11 11-11"/></svg><div class="route-stops">${stages.map((s,i)=>`<button type="button" class="route-stop stop-${i}" data-stage="${i}" aria-pressed="${i===0}"><span class="route-index" aria-hidden="true">0${i+1}</span>${s.label}</button>`).join('')}</div></div><figcaption><span class="route-caption">${stages[0].short}</span><span class="route-caption-number" aria-hidden="true">01 / 04</span></figcaption></figure>`;}
-export function home(){return layout({title:'Atriveo | Your next role, all coming together',description:site.description,canonical:site.url,body:`
-<section class="hero wrap"><div class="hero-copy"><p class="intro">A workspace for your next move.</p><h1>Your next role.<br>All coming<br><span>together.</span></h1><p class="hero-description">The job. Your experience. The resume you actually send. Bring every part of your application into one place.</p><div class="hero-actions">${cta()}<a class="text-link" href="#product">Take a closer look <span aria-hidden="true">↓</span></a></div><p class="access-note">Workspace access currently requires an approved account.</p></div>${routeFigure()}<div class="hero-bottom"><span>Find the role. Bring your proof. Make your move.</span><span class="hero-anchor">One selected job. The same resume.</span></div></section>
-<section class="product-section" id="product"><div class="wrap"><div class="section-heading"><h2>See the role.<br>See where you stand.</h2><p>Compare the job with your experience, inspect the evidence and review your tailored resume before you apply.</p></div><figure class="workspace-shot"><img src="/landing/assets/workspace.png" width="906" height="855" loading="lazy" decoding="async" alt="Illustrative Atriveo Matching workspace showing a software role, required skills and their supporting experience"><figcaption><span>The Matching workspace</span><span>${examples.label}</span></figcaption></figure><div class="proof-note"><span class="proof-symbol" aria-hidden="true">↳</span><p>A match score is the beginning of a conversation.<br><strong>The evidence is what helps you decide.</strong></p><a class="text-link" href="/landing/workflow/#evidence">Follow the evidence ${arrow}</a></div></div></section>
-<section class="workflow-section wrap" id="workflow"><div class="workflow-intro"><p class="section-kicker">KEEP THE CONTEXT</p><h2>One application.<br>Every piece.</h2><p>Your job search has enough moving parts. Keep the parts that belong together, together.</p><a class="text-link" href="/landing/workflow/">Walk through the workflow ${arrow}</a></div><ol class="workflow-list">${stages.map((s,i)=>`<li><span class="step-number">0${i+1}</span><div><h3>${s.short}</h3><p>${s.body}</p></div><span class="step-arrow" aria-hidden="true">↗</span></li>`).join('')}</ol></section>
-<section class="companion-section"><div class="wrap companion-grid"><figure class="companion-shot"><img src="/landing/assets/companion.png" width="420" height="918" loading="lazy" decoding="async" alt="Illustrative Atriveo Chrome companion with the selected resume, attachment action and copyable name, email and profile links"><figcaption>Chrome companion · illustrative profile</figcaption></figure><div class="companion-copy"><span class="companion-mark" aria-hidden="true">↗</span><h2>The same resume.<br>Right there.</h2><p>When the application opens, your preparation comes with you. Keep the selected PDF and your basic details beside the employer’s form.</p><ul><li>Copy your name, contact details and profile links.</li><li>Preview or download the exact selected PDF.</li><li>Attach it to supported resume upload fields.</li></ul><p class="human-note">You review the form. You choose when to submit.</p><a class="text-link" href="/landing/workflow/#companion">Meet the companion ${arrow}</a></div></div></section>
-<section class="faq-section wrap" id="questions"><div><p class="section-kicker">BEFORE YOUR NEXT MOVE</p><h2>A few useful<br>answers.</h2></div><div class="faq-list">${faqs.map(([q,a])=>`<details><summary>${q}<span aria-hidden="true">+</span></summary><p>${a}</p></details>`).join('')}</div></section>
-<section class="closing"><div class="wrap closing-inner"><p>Make room for what comes next.</p><h2>Your next move<br>starts here<span>.</span></h2>${cta('Open workspace','paper')}<small>Sign in with an approved workspace account.</small><div class="closing-thread" aria-hidden="true"><svg viewBox="0 0 600 150" fill="none"><path d="M0 30h350q80 0 80 60t80 50h80m-25-20 25 20-25 20"/></svg></div></div></section>`});}
-export function workflow(){return layout({title:'How Atriveo works | From the role to the application',description:'Follow one job through role matching, experience evidence, resume review and the Chrome companion. Learn what stays connected and what you review.',canonical:site.url+'workflow/',kind:'workflow',body:`<section class="guide-hero wrap"><a class="back-link" href="/landing/">← Atriveo</a><p class="intro">How it works</p><h1>A little context.<br>A better next move.</h1><p>Follow the job from the first look to the form you send. Each step keeps the role and your preparation connected.</p></section><div class="guide-body wrap">${stages.map((s,i)=>`<section class="guide-step" id="${i===1?'evidence':i===3?'companion':`step-${i}`}" ><span class="step-number">0${i+1}</span><div><h2>${s.short}</h2><p>${s.body}</p>${i===0?'<p>Use dates, sources, roles and search together. Newest first prioritizes the posting date, with the date found as a fallback.</p>':i===1?'<p>Fit assessments can leave requirements unassessed. Read the concerns and the original posting. A score is not a hiring prediction.</p>':i===2?'<p>The resume you see in Matching is the one carried to the companion. Review it, edit it in the workspace when needed, or download the PDF.</p>':'<p>The companion helps with copy, focused paste and supported PDF uploads. Chrome can request access to the application site. Custom and embedded widgets may need a manual upload.</p>'}</div></section>`).join('')}<section class="setup-note"><h2>Using the Chrome companion</h2><p>The companion is currently distributed as an unpacked extension. Ask your workspace owner for the current build, load the built extension folder in Chrome’s extensions manager, and refresh Atriveo.</p><p>Then choose Apply from Matching. If Chrome keeps the panel closed, open Atriveo from the toolbar. You can choose how long the resume follows the application as it moves between pages.</p><p>Copy and PDF download remain available when a site needs a manual step.</p></section><section class="guide-access"><h2>Ready to bring it together?</h2><p>Workspace access currently requires an approved account.</p>${cta()}</section></div>`});}
-export function missing(){return layout({title:'Page not found | Atriveo',description:'This part of the thread is missing. Return to Atriveo and find your next move.',canonical:site.url,noindex:true,kind:'404',body:`<section class="missing wrap"><p class="intro">404 · A loose end</p><h1>This thread<br>ends here<span>.</span></h1><p>The page you are looking for has moved or does not exist. Let’s bring you back to the right place.</p>${cta('Back to Atriveo','primary','/landing/')}<svg class="missing-thread" viewBox="0 0 600 200" fill="none" aria-hidden="true"><path d="M0 70h240q90 0 90 70t90 50h80"/><circle cx="500" cy="190" r="6"/></svg></section>`});}
+// Templates for the public landing pages. Static HTML, complete without JavaScript;
+// motion.js only adds the route and thread drivers on top.
+import { site, route, stages, ledger, resumeRules, faqs, examples } from './content.mjs';
+
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const arrow = '<span class="arrow" aria-hidden="true">↗</span>';
+const cta = (label = 'Open the workspace', cls = 'primary', href = site.workspace) =>
+  `<a class="button ${cls}" href="${href}"><span>${label}</span>${arrow}</a>`;
+const brand = '<span class="wordmark">atriveo<span>.</span></span>';
+const n2 = (i) => String(i + 1).padStart(2, '0');
+
+function picture({ name, width, height, alt, eager = false }) {
+  return `<picture><source srcset="/landing/assets/${name}.webp" type="image/webp"><img src="/landing/assets/${name}.png" width="${width}" height="${height}" alt="${esc(alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></picture>`;
+}
+
+function layout({ title, description, canonical, body, kind = 'home', noindex = false }) {
+  const og = `${site.url}assets/og.png`;
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Atriveo',
+    url: site.url,
+    description: site.description,
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web, Chrome',
+  };
+  const current = (k) => (kind === k ? ' aria-current="page"' : '');
+  const nav = `<a href="/landing/#story">How it works</a><a href="/landing/workflow/"${current('workflow')}>The details</a><a href="/landing/#questions">Questions</a><a href="${site.login}">Sign in</a>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)}</title><meta name="description" content="${esc(description)}"><meta name="theme-color" content="#f4f6f8">
+${noindex ? '<meta name="robots" content="noindex,follow">' : '<meta name="robots" content="index,follow">'}
+<link rel="canonical" href="${canonical}">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Atriveo"><meta property="og:locale" content="en_US"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${canonical}"><meta property="og:image" content="${og}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Atriveo: one job, one resume, carried through">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(description)}"><meta name="twitter:image" content="${og}">
+<link rel="icon" type="image/svg+xml" href="/landing/assets/favicon.svg"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/landing/assets/fonts/atriveo-sans-400_700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/landing/styles.css">
+<script type="application/ld+json">${JSON.stringify(ld)}</script>
+<script type="module" src="/landing/assets/motion.js"></script></head>
+<body data-page="${kind}"><a class="skip" href="#main">Skip to content</a>
+<header class="site-header wrap"><a class="brand" href="/landing/" aria-label="Atriveo home">${brand}</a>
+<details class="mobile-menu"><summary>Menu</summary><nav aria-label="Mobile">${nav}</nav></details>
+<nav class="desktop-nav" aria-label="Main">${nav}</nav>
+<a class="header-cta" href="${site.workspace}"><span>Open workspace</span> ${arrow}</a></header>
+<main id="main" tabindex="-1">${body}</main>
+<footer class="site-footer wrap"><a class="brand" href="/landing/" aria-label="Atriveo home">${brand}</a><p>One job, one resume, carried through. You submit.</p>
+<nav aria-label="Footer"><a href="/landing/#story">How it works</a><a href="/landing/workflow/">The details</a><a href="${site.login}">Sign in</a><a href="${site.workspace}">Open workspace</a></nav><small>© 2026 Atriveo</small></footer>
+</body></html>`;
+}
+
+const ROUTE_D = 'M80 60 H295 Q350 60 350 115 V135 Q350 190 295 190 H145 Q90 190 90 245 V265 Q90 320 145 320 H300 Q350 320 350 375 V390';
+
+function routeFigure() {
+  const stops = route
+    .map(
+      (s, i) =>
+        `<button type="button" class="route-stop" style="left:${((s.x / 440) * 100).toFixed(2)}%;top:${((s.y / 440) * 100).toFixed(2)}%" data-stage="${i}" data-at="${s.at}" data-caption="${esc(s.caption)}" aria-pressed="${i === route.length - 1}"><span class="route-index" aria-hidden="true">${n2(i)}</span>${s.label}</button>`,
+    )
+    .join('');
+  return `<figure class="route-figure"><div class="route-heading"><span>One application</span><span class="route-heading-note">Choose a stop</span></div>
+<div class="route-drawing"><svg viewBox="0 0 440 440" fill="none" aria-hidden="true"><path class="route-track" d="${ROUTE_D}"/><path class="route-fill" pathLength="1" d="${ROUTE_D}"/><circle class="route-dot" cx="80" cy="60" r="7"/></svg>
+<div class="route-stops" role="group" aria-label="Stages of one application">${stops}</div></div>
+<figcaption aria-live="polite"><span class="route-caption">${esc(route.at(-1).caption)}</span><span class="route-caption-number">04 / 04</span></figcaption></figure>`;
+}
+
+function stageHead(s, i) {
+  return `<p class="stage-label"><span class="stage-num">${n2(i)}</span>${s.label}</p><h3>${s.title}</h3><p class="stage-body">${s.body}</p><p class="stage-detail">${s.detail}</p>`;
+}
+
+function story() {
+  const [find, evidence, resume, submit] = stages;
+  return `<section class="story" id="story" aria-labelledby="story-title"><div class="wrap story-intro"><h2 id="story-title">Four stops.<br>One thread.</h2><p>From the posting to the submit button, the same job and the same resume stay attached. Here is what happens at each stop.</p></div>
+<div class="wrap story-track"><div class="thread" aria-hidden="true"><span class="thread-line"></span><span class="thread-fill"></span></div>
+<article class="stage stage-find" id="${find.id}" data-node><span class="node" aria-hidden="true"></span><div class="stage-text">${stageHead(find, 0)}</div>
+<figure class="shot shot-wide">${picture({ name: 'workspace', width: 906, height: 826, alt: 'Atriveo Matching workspace for an example Software Engineer role: Bank fit 84, This resume 80 out of 100, three of five core skills, with Python, AWS and APIs marked strong and Kubernetes and Go listed as concerns' })}
+<figcaption><span>The Matching workspace</span><span>${examples.label}</span></figcaption></figure>
+<dl class="callouts"><div><dt>Bank fit</dt><dd>Your whole bank against the posting.</dd></div><div><dt>This resume</dt><dd>The tailored PDF, scored on its own.</dd></div><div><dt>Concerns</dt><dd>Gaps shown up front, not hidden.</dd></div></dl></article>
+<article class="stage stage-evidence" id="${evidence.id}" data-node><span class="node" aria-hidden="true"></span><div class="stage-text">${stageHead(evidence, 1)}</div>
+<figure class="ledger"><figcaption>How a requirement is labeled</figcaption><dl>${ledger.map(([k, v], i) => `<div class="ledger-row" style="--w:${100 - i * 20}%"><dt>${k}</dt><dd>${v}</dd><span class="ledger-bar" aria-hidden="true"></span></div>`).join('')}</dl></figure></article>
+<article class="stage stage-resume" id="${resume.id}" data-node><span class="node" aria-hidden="true"></span><div class="stage-text">${stageHead(resume, 2)}</div>
+<figure class="rules"><figcaption>What stays fixed on every resume</figcaption><ol>${resumeRules.map(([k, v]) => `<li><strong>${k}</strong><span>${v}</span></li>`).join('')}</ol></figure></article>
+<article class="stage stage-submit" id="${submit.id}" data-node><span class="node" aria-hidden="true"></span><div class="stage-text">${stageHead(submit, 3)}
+<p class="submit-line"><span class="submit-key">Submit</span> is always your click.</p></div>
+<figure class="shot shot-tall">${picture({ name: 'companion', width: 420, height: 760, alt: 'Atriveo Chrome companion beside an example application: the selected resume Alex Morgan.pdf with Attach resume, Preview and Download, and copyable name, email and LinkedIn fields' })}
+<figcaption>Chrome companion · illustrative profile</figcaption></figure></article></div></section>`;
+}
+
+export function home() {
+  return layout({
+    title: site.title,
+    description: site.description,
+    canonical: site.url,
+    body: `<section class="hero wrap" aria-labelledby="hero-title"><div class="hero-copy"><p class="intro">Job applications, with the evidence attached</p>
+<h1 id="hero-title">One job.<br>One resume.<br><span>Carried through.</span></h1>
+<p class="hero-description">Atriveo shows how your own experience fits each role, builds the resume from that evidence and carries that exact PDF to the employer’s form. You review it. You submit it.</p>
+<div class="hero-actions">${cta()}<a class="text-link" href="#story">See the four stops <span aria-hidden="true">↓</span></a></div>
+<p class="access-note">For approved accounts. <a href="${site.login}">Sign in</a></p></div>${routeFigure()}</section>
+${story()}
+<section class="faq-section wrap" id="questions" aria-labelledby="faq-title"><h2 id="faq-title">Before you<br>sign in.</h2><div class="faq-list">${faqs.map(([q, a]) => `<details><summary>${q}<span aria-hidden="true">+</span></summary><p>${a}</p></details>`).join('')}</div></section>
+<section class="closing" aria-labelledby="closing-title"><div class="wrap closing-inner"><h2 id="closing-title">Pick up the<br>thread<span>.</span></h2><div class="closing-actions">${cta('Open the workspace', 'paper')}<a class="closing-link" href="${site.login}">Sign in ${arrow}</a></div><p class="closing-note">The workspace needs an approved account. There is no open sign-up yet.</p>
+<svg class="closing-thread" viewBox="0 0 600 150" fill="none" aria-hidden="true"><path d="M0 30h350q80 0 80 60t80 50h70"/><circle cx="580" cy="140" r="7"/></svg></div></section>`,
+  });
+}
+
+const workflowDetail = [
+  'Filter by source, date, role and track, or search. Newest first sorts by the posting date and falls back to the date the job was found. Similar roles are other ready jobs that share requirements and title terms with the one in front of you.',
+  'A requirement your bank cannot speak to stays visible as a concern, and anything the parser could not read is listed for you to check by hand. Read the concerns next to the original posting before you decide.',
+  'Highlights on the PDF only appear when the stored evidence matches the exact words on the page; bank evidence without a match on the page is labeled as such. The highlights never change the PDF itself.',
+  'The companion offers Copy, Paste into the focused field and PDF Preview, Download and Attach. Attach may ask Chrome for access to the employer’s site. If the application page changes address, Attach is blocked for that tab, and custom upload widgets keep the download.',
+];
+
+export function workflow() {
+  return layout({
+    title: 'How Atriveo works | From the posting to your submit',
+    description: 'Follow one job through fit, evidence, the tailored resume and the Chrome companion. See what stays connected, what is checked and what is always left to you.',
+    canonical: `${site.url}workflow/`,
+    kind: 'workflow',
+    body: `<section class="guide-hero wrap"><a class="back-link" href="/landing/">← Atriveo</a><p class="intro">The details</p><h1>What happens<br>at each stop<span>.</span></h1><p>One job moves from the first look to the form you send. These are the checks along the way, and the choices that stay yours.</p></section>
+<div class="guide-body wrap">${stages
+      .map(
+        (s, i) =>
+          `<section class="guide-step" id="${s.id}"><span class="step-number">${n2(i)}</span><div><h2>${s.title}</h2><p>${s.body}</p><p>${workflowDetail[i]}</p></div></section>`,
+      )
+      .join('')}
+<section class="setup-note"><h2>Setting up the Chrome companion</h2><p>The companion is distributed as an unpacked extension for approved users. Load the folder you were given in Chrome’s extensions page, then refresh Atriveo.</p><p>Choose Apply from Matching. If Chrome keeps the side panel closed, open Atriveo from the toolbar. You can choose how long the resume follows the application from page to page; after that it stays on the page where you left it.</p><p>Copy and PDF download stay available whenever a site needs a manual step.</p></section>
+<section class="guide-access"><h2>Ready when you are.</h2><p>The workspace needs an approved account.</p><div class="guide-actions">${cta()}<a class="text-link" href="${site.login}">Sign in ${arrow}</a></div></section></div>`,
+  });
+}
+
+export function missing() {
+  return layout({
+    title: 'Page not found | Atriveo',
+    description: 'This part of the thread is missing. Head back to Atriveo.',
+    canonical: site.url,
+    noindex: true,
+    kind: '404',
+    body: `<section class="missing wrap"><p class="intro">404 · A loose end</p><h1>This thread<br>ends here<span>.</span></h1><p>The page you asked for has moved or never existed. The rest of the thread is one click away.</p>${cta('Back to Atriveo', 'primary', '/landing/')}<svg class="missing-thread" viewBox="0 0 600 200" fill="none" aria-hidden="true"><path d="M0 70h240q90 0 90 70t90 50h80"/><circle cx="500" cy="190" r="6"/></svg></section>`,
+  });
+}
