@@ -27,7 +27,7 @@ function layout({ title, description, canonical, body, kind = 'home', noindex = 
   const current = (k) => (kind === k ? ' aria-current="page"' : '');
   const nav = `<a href="/landing/#story">How it works</a><a href="/landing/workflow/"${current('workflow')}>The details</a><a href="/landing/#questions">Questions</a><a href="${site.login}">Sign in</a>`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(title)}</title><meta name="description" content="${esc(description)}"><meta name="theme-color" content="#f4f6f8">
+<title>${esc(title)}</title><meta name="description" content="${esc(description)}"><meta name="theme-color" content="#0b0f17"><meta name="color-scheme" content="dark">
 ${noindex ? '<meta name="robots" content="noindex,follow">' : '<meta name="robots" content="index,follow">'}
 <link rel="canonical" href="${canonical}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Atriveo"><meta property="og:locale" content="en_US"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${canonical}"><meta property="og:image" content="${og}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Atriveo: one job, one resume, carried through">

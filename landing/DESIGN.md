@@ -13,23 +13,23 @@ Three territories, scored originality / fit / feasibility / portability (lower p
 
 ```
 Idea:        One job, one resume, carried through to a submit you make yourself.
-Metaphor:    A blue thread through a paper application folio.
+Metaphor:    A blue thread through a dark application folio.
 Signature:   The hero route: four stops on one drawn line; choosing a stop carries the line and its
              marker there (one driver: route.progress). In the story, the same thread runs down the
              left gutter and fills with scroll; each stage's node lights as the thread reaches it.
 Emotion:     Clear and in control: nothing happens behind your back.
-Motion verb: Carry. Lines draw forward, markers follow, fills sweep left to right. No loader, no GL,
+Motion verb: Carry. Lines draw forward, markers follow, fills sweep left to right (on dark, the button fill sweeps to off-white). No loader, no GL,
              no cursor replacement.
 Screenshot:  "One job. One resume. Carried through." beside the blue route ending on "Submit".
 ```
 
 ## System
 
-- Palette: paper #f4f6f8 (ground), ink #151b25, muted #4f5a6a, line #cbd3de, blue #2455e8 (Atriveo's action color: the thread, the CTA and the closing field), field #e5ecff. No gradients.
+- Palette (single dark look, `color-scheme: dark`, `theme-color` #0b0f17; every colour is a token on :root): `--paper` #0b0f17 ground, a near-black with a blue bias, never pure black; `--raise` #121927 for chips and menus; `--ink` #e8ecf4 off-white text (about 16:1); `--muted` #9ba7ba (about 7:1); `--line` #273146 and `--shot-line` #34425f hairlines; `--blue` #6e98ff the thread, stage labels and accent text, brightened so it reads on dark (about 6.7:1); `--action` #2455e8 the filled-button and closing-field blue, which keeps white text at 6:1; `--field` #141d33 and `--track` #2c3a5c for panels and the undrawn thread. The blue closing field is the one bold place. No gradients. Captures are the dark console, so they get a 1px `--shot-line` border plus a deep shadow and a faint white ring to separate from the page.
 - Type: DM Sans variable 400 to 700, self-hosted as one 36 KB Latin WOFF2 (OFL, see assets/fonts/OFL.txt). Display 60 to 112 px at -0.066em, leading 0.96; h2 40 to 76 px; body 17 to 18 px at 1.55 to 1.6; labels 12 to 14 px.
 - Grid: 12 columns inside a 1280 px max wrap, gutter 64 px desktop, 16 px at phone width. Story stages sit right of a 96 px thread gutter (34 px on phones).
 - Shape: 12 px panels, 999 px chips and buttons.
-- Motion: one GSAP ticker drives Lenis, the route marker and the thread. Ease cubic-bezier(.2,.7,.2,1) in CSS, power3.inOut for the route (0.9 s). Buttons sweep an ink fill left to right; nav links draw an underline; arrows step up and right.
+- Motion: one GSAP ticker drives Lenis, the route marker and the thread. Ease cubic-bezier(.2,.7,.2,1) in CSS, power3.inOut for the route (0.9 s). Buttons sweep an off-white fill left to right; nav links draw an underline; arrows step up and right.
 - Idle: the route marker breathes a short way back along the drawn line while the hero is on screen; it pauses off screen and under reduced motion.
 - Reduced motion: native scroll, no idle, route stops still switch instantly, the thread shows fully drawn with every node lit. Without JS the route shows fully drawn at Submit.
 
