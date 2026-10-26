@@ -56,7 +56,7 @@ import { matchingQueue, recordDecision, resumeImagePath, invalidateMatchingQueue
 import { resumeFileRedirect } from "./resume-store.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
-import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
+import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, resumePipeline, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
 import { compileOwner } from "./worker-id.mjs";
 import { handleFillRoute, isLocalExtensionRequest, runManualFill } from "./fill-routes.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
@@ -1664,6 +1664,22 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // GET /applications/resume-pipeline — the header's resume-queue bar: queued, running (with stage), done and failed in 24 h.
+  if (req.method === "GET" && pathname === "/applications/resume-pipeline") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const data = await withMongo((db) => resumePipeline(db), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
+  }
+
   // GET /compile-queue/stats — active queued + running counts (Mongo)
   // POST /applications/action — your dashboard actions (answer | skip | retry | mark_applied | not_submitted).
   // Runs playatriveo's action CLI on this Mac; answers are saved locally, never in Mongo.
@@ -1875,7 +1891,7 @@ const server = http.createServer(async (req, res) => {
         const params = new URL(req.url, "http://x").searchParams;
         const limit = Math.min(Math.max(Number(params.get("limit")) || 8, 1), 20);
         const offset = Math.max(Number(params.get("offset")) || 0, 0);
-        const data = await withMongo((db) => matchingQueue(db, { limit, offset, period: params.get("period") || "7d", sources: (params.get("sources") || "").split(","), role: params.get("role") || "", query: (params.get("q") || "").slice(0,200), timeZone: params.get("tz") || "America/New_York", sort: params.get("sort") === "fit" ? "fit" : "latest", company: params.get("company"), jobUrl: params.get("job"), exclude: (params.get("exclude") || "").split(",").filter(x=>/^[a-f0-9]{16}$/.test(x)), learn: params.get("learn") !== "0" }), { appName: "AtriveoTailorServer" });
+        const data = await withMongo((db) => matchingQueue(db, { limit, offset, period: params.get("period") || "7d", sources: (params.get("sources") || "").split(","), role: params.get("role") || "", query: (params.get("q") || "").slice(0,200), timeZone: params.get("tz") || "America/New_York", sort: params.get("sort") === "fit" ? "fit" : "latest", company: params.get("company"), jobUrl: params.get("job"), random: params.get("random") === "1", exclude: (params.get("exclude") || "").split(",").filter(x=>/^[a-f0-9]{16}$/.test(x)), learn: params.get("learn") !== "0" }), { appName: "AtriveoTailorServer" });
         // Compressed: the tunnel is slow and this JSON shrinks ~5x.
         const body = Buffer.from(JSON.stringify(data));
         const gzip = /\bgzip\b/.test(String(req.headers["accept-encoding"] || "")) && body.length > 1024;

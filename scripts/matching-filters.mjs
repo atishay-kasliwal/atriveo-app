@@ -33,6 +33,17 @@ export function filterMatchingJobs(docs,{period='7d',sources=[],role='',query=''
   const text=[d.title,d.company,d.location].join(' ').toLowerCase();return tokens.every(token=>text.includes(token));
  });
 }
+// How many jobs each choice would show, with every other filter held as it is now: the numbers beside the filter options.
+export const MATCHING_PERIODS=['today','yesterday','7d','all'];
+export function matchingFacets(docs,{period='7d',sources=[],role='',query='',timeZone='America/New_York',now=new Date()}={}){
+ const base={timeZone,now},count=o=>filterMatchingJobs(docs,{period,sources,role,query,...base,...o});
+ const facets={period:{},sources:{},roles:{}};
+ for(const p of MATCHING_PERIODS)facets.period[p]=count({period:p}).length;
+ for(const src of [...MATCHING_SOURCES,'other'])facets.sources[src]=count({sources:[src]}).length;
+ const byRole=count({role:''});facets.roles['']=byRole.length;
+ for(const d of byRole)if(d.track)facets.roles[d.track]=(facets.roles[d.track]||0)+1;
+ return facets;
+}
 export function confirmedApplicationCount(applications,swipes,{now,timeZone='America/New_York'}={}){
  try{dayIn(new Date(),timeZone);}catch{timeZone='America/New_York';}
  const today=now?dayIn(now,timeZone):null;

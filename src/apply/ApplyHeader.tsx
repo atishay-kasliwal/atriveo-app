@@ -1,4 +1,5 @@
 import AiUsage from './AiUsage';
+import ResumePipeline from './ResumePipeline';
 import { Link, useLocation } from "react-router-dom";
 import ApplyLogo from "./ApplyLogo";
 import { useFillableQueue, useReadyQueue, useReviewCounts } from "./reviewQueue";
@@ -36,7 +37,7 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
         <Link to="/stats" aria-current={page === "stats" ? "page" : undefined}>Stats</Link>
       </nav>
       <div className="apply-header-right">
-        {worker && <span className={`apply-worker ${worker.online ? "is-online" : "is-offline"}`} role="status"><i aria-hidden="true" />{worker.online ? "Worker running" : "Worker offline"}</span>}
+        <ResumePipeline online={worker ? worker.online : null} />
         {todayCount !== undefined && <span className="apply-today-count" aria-label={`Today: ${todayCount ?? "loading"} applications waiting`}>Today <b>{todayCount ?? "…"}</b></span>}
         <AiUsage />
         <a className="apply-ext" href="https://application.atriveo.com" target="_blank" rel="noreferrer">Job feed ↗</a>

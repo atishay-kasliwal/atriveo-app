@@ -222,3 +222,69 @@
 .jm-overview-grid>.jm-edge{grid-column:2;grid-row:3;display:flex;flex-direction:column;align-items:stretch;align-self:stretch!important;gap:3px}
 .jm-overview-grid>.jm-edge>.jm-edge-gap{border-top:1px solid var(--border-col);padding-top:4px;margin-top:2px;grid-column:auto;grid-row:auto}
 }
+
+/* Job block v2: three quiet tiers (who, how it fits, where), one accent colour for the verdict, hairlines instead of boxes. */
+.jm-job-block.jb{gap:0;padding:16px 20px 14px;border:1px solid var(--border-col);border-left:3px solid var(--tone);border-radius:10px}
+.jb-id{display:flex;align-items:center;gap:14px;min-width:0}
+.jb-title{min-width:0;flex:1;display:grid;gap:2px}
+.jb-company{font-size:12px;font-weight:500;letter-spacing:.03em;color:var(--muted-fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jb-title h1{margin:0;font-size:21px;font-weight:600;line-height:1.2;letter-spacing:-.01em;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jb-meta{display:flex;align-items:center;gap:10px;flex:0 0 auto;color:var(--muted-fg);font-size:12px}
+.jb-position{font-variant-numeric:tabular-nums}
+.jb-meta a{color:var(--muted-fg);font-size:17px;line-height:1;text-decoration:none;padding:4px}.jb-meta a:hover{color:var(--foreground)}
+.jb-meta .jb-hide{display:grid;place-items:center;width:30px;height:30px;padding:0;max-width:none;border:0;border-radius:8px;background:transparent;color:var(--muted-fg)}
+.jb-meta .jb-hide:hover:not(:disabled){background:color-mix(in oklab,var(--jm-red) 14%,transparent);color:var(--jm-red);border:0}
+.jb-decision{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:0 28px;margin-top:16px;padding:16px 0 0;border-top:1px solid var(--border-col);flex-wrap:initial}
+.jb-ring{position:relative;display:grid;place-content:center;justify-items:center;width:64px;height:64px;border-radius:50%;background:radial-gradient(closest-side,var(--card-bg) 82%,transparent 84%),conic-gradient(var(--tone) var(--score),var(--secondary-bg) 0)}
+.jb-ring strong{font-size:21px;line-height:1;font-variant-numeric:tabular-nums}.jb-ring small{font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-fg);margin-top:3px;white-space:nowrap}
+.jb-verdict{display:grid;gap:5px;min-width:0;justify-items:start;text-align:left}
+.jb-verdict>strong{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:600;color:var(--tone)}
+.jb-verdict>strong>i{font-style:normal;font-size:11px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--tone);color:var(--card-bg);line-height:1;flex:none}
+.jb-verdict.is-clear{--tone:var(--jm-green)}.jb-verdict.is-caution{--tone:var(--jm-amber)}.jb-verdict.is-blocker{--tone:var(--jm-red)}
+.jb-verdict>span{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted-fg)}
+.jb-metric{display:grid;gap:5px;min-width:104px;padding-left:28px;border-left:1px solid var(--border-col)}
+.jb-metric small{font-size:11px;color:var(--muted-fg);white-space:nowrap}
+.jb-metric strong{font-size:21px;line-height:1;font-variant-numeric:tabular-nums}.jb-metric .jm-outof{font-size:12px;font-weight:400;color:var(--muted-fg);margin-left:2px}
+.jb-metric .jm-meter{width:100%;height:3px}
+.jb-note.jm-warning{margin:14px 0 0;padding:1px 0 1px 12px;border:0;border-left:2px solid var(--tone);border-radius:0;background:none;font-size:12.5px;color:var(--muted-fg)}
+.jb-note.jm-warning>i{display:none}.jb-note.jm-warning>span{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.jb-foot{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px;min-width:0}
+.jb-facts{font-family:inherit;display:flex;flex-wrap:wrap;align-items:center;gap:2px 0;margin:0;padding:0;list-style:none;font-size:12.5px;color:var(--muted-fg);min-width:0}
+.jb-facts li{border:0;background:none;padding:0;border-radius:0;min-height:0;font-size:inherit}
+.jb-facts li+li::before{content:"·";margin:0 9px;opacity:.5}
+.jb-facts .jm-source-tag{display:inline-flex;align-items:center;gap:7px;color:var(--foreground);font-weight:500}
+.jb-facts .jm-source-tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--platform,var(--muted-fg));margin:0;opacity:1}
+.jb-location.jm-location{font-size:13px;font-weight:500;color:var(--foreground)}
+.jm-job-block.jb+.jm-toolbar{margin-top:2px}
+@media(max-width:800px){.jb-decision{grid-template-columns:auto minmax(0,1fr);gap:14px}.jb-metric{padding-left:0;border-left:0;min-width:0}.jb-meta .jb-position{display:none}.jb-title h1{font-size:18px}}
+
+/* Random application: first button in the company rail. */
+.jm-rail>.jm-random{display:grid;place-items:center;gap:3px;color:var(--muted-fg);border-style:dashed}
+.jm-rail>.jm-random:hover:not(:disabled){color:var(--foreground);border-color:var(--primary)}
+.jm-rail>.jm-random svg{transition:transform .4s cubic-bezier(.3,.7,.2,1)}.jm-rail>.jm-random:hover:not(:disabled) svg,.jm-rail>.jm-random:focus-visible svg{transform:rotate(90deg)}
+.jm-rail>.jm-random small{font-size:10px}
+@media(prefers-reduced-motion:reduce){.jm-rail>.jm-random svg{transition:none}}
+
+/* Progress bar at the bottom: applied, opened and saved fill it, the rest of the queue is the empty track. */
+.jm-progress .jm-stat-bar{display:flex;width:min(100%,360px);height:6px;border-radius:6px;overflow:hidden;background:var(--secondary-bg);margin-bottom:6px}
+.jm-stat-bar i{display:block;height:100%;min-width:0;transition:width .4s ease}
+.jm-stat-bar .is-applied,.jm-stat-legend .is-applied b{background:var(--jm-green)}.jm-stat-bar .is-opened{background:var(--primary)}.jm-stat-bar .is-saved{background:var(--jm-amber)}
+.jm-stat-legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted-fg)}
+.jm-stat-legend b{color:var(--foreground);font-variant-numeric:tabular-nums;background:none!important}
+.jm-stat-legend .is-applied b{color:var(--jm-green)}
+.jm-stat-legend>span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;background:var(--border-col)}
+.jm-stat-legend .is-applied::before{background:var(--jm-green)}.jm-stat-legend .is-opened::before{background:var(--primary)}.jm-stat-legend .is-saved::before{background:var(--jm-amber)}
+
+/* Counts beside filter options. */
+.jm-filter-count{margin-left:auto;font-style:normal;font-size:12px;font-variant-numeric:tabular-nums;color:var(--muted-fg);padding:1px 8px;border-radius:99px;background:var(--secondary-bg)}
+.jm-filter-count.is-zero{opacity:.45}
+.jm-filter-choices>button .jm-filter-count{margin-left:auto}
+.jb-decision .jb-verdict>strong,.jb-decision .jb-verdict>span{justify-content:flex-start;text-align:left;margin:0;width:auto;justify-self:start}
+/* The older strip rules style every child of .jm-decision-strip; these win over them. */
+.jm-job-block.jb .jb-decision>.jb-ring{display:grid;place-content:center;justify-items:center;justify-content:center;align-items:center}
+.jm-job-block.jb .jb-decision>.jb-verdict{display:grid;justify-items:start;align-items:center;justify-content:start;margin:0;padding:0;border:0;background:none;gap:5px}
+.jm-job-block.jb .jb-decision>.jb-metric{display:grid;justify-items:start;align-items:center;justify-content:stretch;gap:5px;padding:0 0 0 28px;margin:0;max-width:none}
+@media(max-width:800px){.jm-job-block.jb .jb-decision>.jb-metric{padding-left:0}}
+.jm-job-block.jb .jb-decision{column-gap:28px;row-gap:12px}
+.jm-job-block.jb .jb-decision>.jb-ring{width:68px;height:68px}
+@media(max-width:800px){.jm-job-block.jb .jb-decision{column-gap:14px}}

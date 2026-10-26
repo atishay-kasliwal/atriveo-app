@@ -91,3 +91,30 @@
 .apply-worker i { width: 6px; height: 6px; border-radius: 50%; background: #73b591; flex: none; }
 .apply-worker.is-offline { color: #d9827e; }
 .apply-worker.is-offline i { background: currentColor; }
+
+/* Resume pipeline in the header: worker state, a day's progress bar, and a hover list of what is being built. */
+.apply-pipeline { position: relative; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; color: var(--muted-fg); font-size: 12px; padding: 5px 4px; border-radius: 8px; cursor: default; outline-offset: 2px; }
+.apply-pipeline > i { width: 6px; height: 6px; border-radius: 50%; background: #73b591; flex: none; }
+.apply-pipeline > i.is-busy { animation: apply-pipeline-pulse 1.4s ease-in-out infinite; }
+.apply-pipeline.is-offline { color: #d9827e; }
+.apply-pipeline.is-offline > i { background: currentColor; }
+.apply-pipeline-meter { display: inline-block; width: 64px; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .1); overflow: hidden; flex: none; }
+.apply-pipeline-meter b { display: block; height: 100%; border-radius: 4px; background: #7aa2ff; transition: width .5s ease; }
+.apply-pipeline-count { font-variant-numeric: tabular-nums; color: var(--fg, #e8e9ec); }
+.apply-pipeline-pop { position: absolute; top: calc(100% + 8px); right: 0; z-index: 30; width: 340px; display: grid; gap: 12px; padding: 14px; border-radius: 12px; background: #17181c; border: 1px solid rgba(255, 255, 255, .1); box-shadow: 0 16px 40px rgba(0, 0, 0, .45); white-space: normal; color: #e8e9ec; text-align: left; font-size: 12.5px; }
+.apply-pipeline-pop > b { font-size: 13px; }
+.apply-pipeline-nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.apply-pipeline-nums > span { display: grid; gap: 2px; color: var(--muted-fg); font-size: 11px; }
+.apply-pipeline-nums b { font-size: 18px; color: #e8e9ec; font-variant-numeric: tabular-nums; }
+.apply-pipeline-nums .is-bad b { color: #d9827e; }
+.apply-pipeline-list { display: grid; gap: 8px; }
+.apply-pipeline-list em { font-style: normal; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); }
+.apply-pipeline-job { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.apply-pipeline-job > span:first-child { display: grid; min-width: 0; }
+.apply-pipeline-job small { color: var(--muted-fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px; }
+.apply-pipeline-step { display: grid; gap: 4px; justify-items: end; flex: none; }
+.apply-pipeline-step .apply-pipeline-meter { width: 90px; }
+@keyframes apply-pipeline-pulse { 50% { opacity: .35; transform: scale(.8); } }
+@media (prefers-reduced-motion: reduce) { .apply-pipeline > i.is-busy { animation: none; } .apply-pipeline-meter b { transition: none; } }
+
+.apply-header { z-index: 70; }

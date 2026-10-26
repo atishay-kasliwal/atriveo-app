@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {inServedCountries,filterMatchingJobs,matchingTimestamp,matchingSource,confirmedApplicationCount} from '../scripts/matching-filters.mjs';
+import {inServedCountries,matchingFacets,filterMatchingJobs,matchingTimestamp,matchingSource,confirmedApplicationCount} from '../scripts/matching-filters.mjs';
 const now=new Date('2026-10-26T01:00:00Z'); // still Oct 25 in New York
 const docs=[
  {job_url:'https://www.linkedin.com/jobs/view/1',date_posted:'2026-10-25T15:00:00Z',run_at:'2026-10-26T00:30:00Z',title:'AI Engineer',company:'Alpha',track:'ai-engineer',site:'linkedin'},
@@ -69,4 +69,13 @@ test('only United States and India locations are kept; unknown or plain Remote s
  for(const drop of ['Madrid, Spain','London, United Kingdom','Barcelona','Toronto, Canada','Remote - EMEA','Berlin, Germany','Sydney, Australia'])assert.equal(inServedCountries(drop),false,drop);
  const jobs=[{job_url:'https://x/1',date_posted:'2026-10-25',title:'AI Engineer',company:'A',location:'Madrid, Spain',site:'linkedin'},{job_url:'https://x/2',date_posted:'2026-10-25',title:'AI Engineer',company:'B',location:'Seattle, WA',site:'linkedin'}];
  assert.deepEqual(filterMatchingJobs(jobs,{period:'7d',now}).map(d=>d.company),['B']);
+});
+
+test('facets count each choice with the other filters held: period, source and role', () => {
+ const t=(title,site,date,track)=>({job_url:`https://x/${title}`,date_posted:date,title,company:title,site,track,location:'New York, NY'});
+ const jobs=[t('a','linkedin','2026-10-25','ai-engineer'),t('b','linkedin','2026-10-25','software-engineer'),t('c','greenhouse','2026-10-24','software-engineer')];
+ const f=matchingFacets(jobs,{period:'7d',sources:['linkedin'],now});
+ assert.deepEqual(f.period,{today:2,yesterday:0,'7d':2,all:2});
+ assert.equal(f.sources.linkedin,2);assert.equal(f.sources.greenhouse,1);
+ assert.deepEqual(f.roles,{'':2,'ai-engineer':1,'software-engineer':1});
 });

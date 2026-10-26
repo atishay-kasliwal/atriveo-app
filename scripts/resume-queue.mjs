@@ -618,3 +618,24 @@ export async function loadCompileJobById(db, id) {
   const doc = await db.collection("jobs").findOne({ _id: id }, { projection: COMPILE_JOB_PROJECTION });
   return serializeCompileJob(doc);
 }
+
+/** The tailored-resume pipeline at a glance: what is being built now, what waits, and what finished in the last 24 hours. */
+let pipelineCache = { at: 0, value: null };
+export async function resumePipeline(db, { now = Date.now() } = {}) {
+  if (pipelineCache.value && now - pipelineCache.at < 8000) return pipelineCache.value;
+  const jobs = db.collection("jobs");
+  const since = new Date(now - 24 * 3600_000).toISOString();
+  const pick = { _id: 0, job_url: 1, company: 1, title: 1, "resume.stage": 1, "resume.updated_at": 1 };
+  const [queued, running, done, failed, current, next] = await Promise.all([
+    jobs.countDocuments({ "resume.status": "queued" }),
+    jobs.countDocuments({ "resume.status": "running" }),
+    jobs.countDocuments({ "resume.status": "success", "resume.updated_at": { $gte: since } }),
+    jobs.countDocuments({ "resume.status": "failed", "resume.updated_at": { $gte: since } }),
+    jobs.find({ "resume.status": "running" }, { projection: pick, sort: { "resume.updated_at": 1 }, limit: 6 }).toArray(),
+    jobs.find({ "resume.status": "queued" }, { projection: pick, sort: { score_pct: -1, "resume.updated_at": 1 }, limit: 6 }).toArray(),
+  ]);
+  const row = (j) => ({ company: j.company || "", title: j.title || "", stage: j.resume?.stage || "QUEUED", progress: stageToProgress(j.resume?.stage), updatedAt: j.resume?.updated_at || null });
+  const value = { ok: true, queued, running, done, failed, current: current.map(row), next: next.map(row), at: new Date(now).toISOString() };
+  pipelineCache = { at: now, value };
+  return value;
+}
