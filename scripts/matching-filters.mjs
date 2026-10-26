@@ -5,7 +5,9 @@ export function matchingSource(doc){
  try{const h=new URL(doc.job_url).hostname;return [[/(^|\.)linkedin\.com$/,'linkedin'],[/(^|\.)greenhouse\.(?:io|com)$/,'greenhouse'],[/(^|\.)lever\.co$/,'lever'],[/(^|\.)ashbyhq\.com$/,'ashby'],[/(^|\.)(?:myworkdayjobs|workday)\.com$/,'workday'],[/(^|\.)smartrecruiters\.com$/,'smartrecruiters']].find(([re])=>re.test(h))?.[1]||null;}catch{return null;}
 }
 export function matchingTimestamp(doc){const posted=Date.parse(doc.date_posted);return Number.isFinite(posted)?posted:(Date.parse(doc.run_at)||0);}
-const dayIn=(date,timeZone)=>new Intl.DateTimeFormat('en-CA',{timeZone,year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
+// One formatter per time zone: building one per job cost about a second on a full queue.
+const dayFormats=new Map();
+const dayIn=(date,timeZone)=>{let f=dayFormats.get(timeZone);if(!f){f=new Intl.DateTimeFormat('en-CA',{timeZone,year:'numeric',month:'2-digit',day:'2-digit'});dayFormats.set(timeZone,f);}return f.format(date);};
 export function filterMatchingJobs(docs,{period='7d',sources=[],role='',query='',timeZone='America/New_York',now=new Date()}={}){
  try{dayIn(now,timeZone);}catch{timeZone='America/New_York';}
  const today=dayIn(now,timeZone),dayOffset=n=>new Date(Date.parse(today+'T12:00:00Z')+n*86400000).toISOString().slice(0,10);
