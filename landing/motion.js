@@ -1,0 +1,11 @@
+import {gsap} from 'gsap';
+import Lenis from 'lenis';
+const reduced=matchMedia('(prefers-reduced-motion: reduce)'),figure=document.querySelector('.route-figure'),path=document.querySelector('.route-track'),fill=document.querySelector('.route-fill'),dot=document.querySelector('.route-dot'),buttons=[...document.querySelectorAll('[data-stage]')];
+let cleanup=()=>{};
+function setup(){cleanup();const cleanups=[];let visible=true,phase=0;const driver={progress:0,time:0};
+ const draw=()=>{if(!path||!fill||!dot)return;const length=path.getTotalLength(),base=driver.progress*length;fill.style.strokeDasharray=String(length);fill.style.strokeDashoffset=String(length-base);const idle=reduced.matches?0:(Math.sin(driver.time*.7)*.5+.5)*.035;const point=path.getPointAtLength(Math.min(length,base+idle*length));dot.setAttribute('cx',point.x);dot.setAttribute('cy',point.y);};
+ function select(index){phase=index;buttons.forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));const caption=document.querySelector('.route-caption'),number=document.querySelector('.route-caption-number');if(caption)caption.textContent=['Find your direction.','Start with what you have done.','Give your experience the right context.','Carry it through.'][index];if(number)number.textContent=`0${index+1} / 04`;gsap.killTweensOf(driver);if(reduced.matches){driver.progress=index/3;draw();}else gsap.to(driver,{progress:index/3,duration:.8,ease:'power3.out',onUpdate:draw});}
+ buttons.forEach((button,i)=>{const click=()=>select(i);button.addEventListener('click',click);cleanups.push(()=>button.removeEventListener('click',click));});
+ if(!reduced.matches){const lenis=new Lenis({smoothWheel:true,duration:.85,anchors:true});const tick=time=>{lenis.raf(time*1000);if(visible&&!document.hidden){driver.time=time;draw();}};gsap.ticker.add(tick);cleanups.push(()=>{gsap.ticker.remove(tick);lenis.destroy();});if(figure){const observer=new IntersectionObserver(([entry])=>visible=entry.isIntersecting);observer.observe(figure);cleanups.push(()=>observer.disconnect());}}
+ draw();cleanup=()=>{cleanups.forEach(fn=>fn());gsap.killTweensOf(driver);};}
+setup();reduced.addEventListener('change',setup);addEventListener('pagehide',()=>cleanup());addEventListener('pageshow',event=>{if(event.persisted)setup();});
