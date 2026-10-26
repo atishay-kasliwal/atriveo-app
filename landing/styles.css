@@ -294,3 +294,5 @@ h2{font-size:clamp(40px,5vw,76px);font-weight:500;letter-spacing:-.058em;line-he
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
 @media (prefers-reduced-motion:reduce){.route-motion{display:none}}
+
+.brand-lockup{display:block;width:145px;height:42px;object-fit:contain}
