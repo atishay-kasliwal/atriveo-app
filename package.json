@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test:companion-link": "node --test tests/companion-link.test.mjs",
     "test:open-fill-queue": "node scripts/test-open-fill-queue.mjs",
     "clean:install": "node scripts/clean-install.mjs",
     "tailor": "node --env-file=.env.tailor scripts/tailor-server.mjs",
