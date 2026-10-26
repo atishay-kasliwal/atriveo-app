@@ -9,7 +9,7 @@ const FOLLOW_KEY='atriveo.companion.followSeconds';
 export function readFollowSeconds():number{try{const n=Number(localStorage.getItem(FOLLOW_KEY));return (FOLLOW_OPTIONS as readonly number[]).includes(n)?n:60;}catch{return 60;}}
 export function writeFollowSeconds(seconds:number):void{try{localStorage.setItem(FOLLOW_KEY,String(seconds));}catch{/* the choice lasts this visit */}}
 const kits=new Map<string,Promise<Kit>>();
-function request(action:'PING'|'OPEN',kit?:Kit,followSeconds?:number):Promise<{ok:boolean;panelOpened?:boolean;error?:string}>{
+function request(action:'PING'|'OPEN'|'DOWNLOAD',kit?:Kit,followSeconds?:number):Promise<{ok:boolean;panelOpened?:boolean;error?:string}>{
  return new Promise((resolve,reject)=>{
   const id=crypto.randomUUID();
   const timeout=window.setTimeout(()=>{window.removeEventListener('message',receive);reject(Error(action==='PING'?'Companion not connected':'The extension did not confirm opening. Check your tabs before trying again.'));},action==='PING'?700:15000);
@@ -36,6 +36,13 @@ export async function warmApplicationCompanion(job:CompanionJob):Promise<boolean
  return true;
 }
 export function companionIsConnected():boolean{return connected;}
+/** Save the job's exact resume through the extension: always "Atishay Kasliwal.pdf", replacing an earlier copy. */
+export async function downloadWithCompanion(job:CompanionJob):Promise<void>{
+ let promise=kits.get(key(job));
+ if(!promise){await warmApplicationCompanion(job);promise=kits.get(key(job));}
+ if(!promise)throw Error('Companion not connected');
+ await request('DOWNLOAD',await promise);
+}
 export async function openWithApplicationCompanion(job:CompanionJob):Promise<{panelOpened?:boolean}>{
  let promise=kits.get(key(job));
  if(!promise){await warmApplicationCompanion(job);promise=kits.get(key(job));}

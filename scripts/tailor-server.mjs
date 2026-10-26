@@ -52,7 +52,7 @@ import { syncOverlay } from "./ac-bank-overlay.mjs";
 import { approveDraft, draftResult, startDraft } from "./bank-draft.mjs";
 import { applicationsAnalytics, applicationDetail, dismissJob, linkJobToApplication, markJobApplied, saveLinkedinDirect, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
 import { recordMatchingEvent } from "./matching-workspace.mjs";
-import { matchingQueue, recordDecision, resumeImagePath } from "./job-matching.mjs";
+import { matchingQueue, recordDecision, resumeImagePath, invalidateMatchingQueue } from "./job-matching.mjs";
 import { resumeFileRedirect } from "./resume-store.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
@@ -1817,6 +1817,8 @@ const server = http.createServer(async (req, res) => {
         const data = await withMongo((db) => pathname === "/applications/job-applied" ? markJobApplied(db, body?.jobUrl)
           : pathname === "/applications/fill-linkedin-direct" ? saveLinkedinDirect(db, body?.jobUrl, body?.directUrl)
           : linkJobToApplication(db, body?.applicationId, body?.jobUrl), { appName: "AtriveoTailorServer" });
+        // Saved: the job leaves Matching at once (and its applications linked here), not after the 30 s cache.
+        invalidateMatchingQueue();
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(data));
       } catch (e) {

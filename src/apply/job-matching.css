@@ -97,19 +97,12 @@
 .jm-select-label{display:flex;flex-direction:column;gap:6px}.jm-select-label select{width:100%;font:inherit;font-size:11px;background:var(--background);border:1px solid var(--border-col);border-radius:5px;padding:8px;color:var(--foreground)}
 .jm-reset{align-self:flex-start;background:none;border:0;padding:0;color:var(--primary);font:inherit;font-size:11px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .jm-applied-count{display:flex;align-items:center;gap:9px;border-top:1px solid var(--border-col);padding-top:12px;color:var(--jm-green)}.jm-applied-count strong{font-size:25px;font-variant-numeric:tabular-nums;line-height:1}.jm-applied-count span{font-size:11px;line-height:1.4;max-width:90px}.jm-applied-green{font-weight:500;color:var(--jm-green)}
-.jm-confirm-applied{display:flex;flex-direction:column;gap:5px;border:1px solid color-mix(in oklab,var(--jm-green) 40%,var(--border-col));border-radius:6px;background:color-mix(in oklab,var(--jm-green) 4%,var(--card-bg));padding:10px}.jm-confirm-applied p{font-size:11px;color:var(--jm-green);margin:0}.jm-confirm-applied b{font-size:12px}.jm-confirm-applied>span{font-size:10px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:var(--text-2)}.jm-confirm-applied button{font:inherit;font-size:11px;min-height:29px;background:var(--jm-green);border:1px solid var(--jm-green);border-radius:4px;color:#11251b;cursor:pointer;margin-top:3px}.jm-confirm-applied .jm-confirm-dismiss{color:var(--muted-fg);border:0;background:none;min-height:24px;margin:0}
 .jm-filter-rail :is(button,summary):hover{filter:brightness(1.12)}.jm-page summary:focus-visible,.jm-page input:focus-visible,.jm-page select:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .jm-loading,.jm-empty{grid-column:2 / 4}
 @media(min-width:1800px){.jm-job-header h1{font-size:20px}.jm-card h2{font-size:13px}.jm-role dd{font-size:12px}}
 @media(max-width:1400px){.jm-layout{grid-template-columns:56px minmax(0,1fr) minmax(250px,.8fr) 190px;gap:8px}.jm-filter-rail{padding:12px 10px}.jm-tabs button{padding:6px;font-size:10px}.jm-rhead{flex-wrap:wrap}.jm-overview-grid{grid-template-columns:1fr}.jm-overview-grid>.jm-card{grid-column:auto;grid-row:auto;align-self:start!important}.jm-proof-row em{display:block}}
 @media(max-width:1100px){.jm-layout{grid-template-columns:54px minmax(0,1fr) 200px}.jm-resume{display:none}.jm-workspace{grid-column:2}.jm-filter-rail{grid-column:3}.jm-loading,.jm-empty{grid-column:2}.jm-mobile-download{display:inline-flex}.jm-overview-grid{grid-template-columns:1fr 1fr}}
-@media(max-height:850px){.jm-filter-rail{gap:9px;padding-top:10px;padding-bottom:10px}.jm-filter-rail form>label{margin-bottom:3px}.jm-select-label{gap:3px}.jm-select-label select{padding:6px}.jm-filter-rail legend{margin-bottom:4px}.jm-applied-count{padding-top:8px}.jm-confirm-applied{gap:3px;padding:7px}.jm-date-filters button{padding:5px}}
-@media(max-width:800px){.jm-layout{grid-template-columns:47px minmax(0,1fr);overflow-y:auto;align-content:start}.jm-rail{grid-column:1;grid-row:1 / 3;position:sticky;top:0;max-height:calc(100dvh - 200px)}.jm-workspace{grid-column:2;grid-row:2;overflow:visible;min-height:0}.jm-filter-rail{grid-column:2;grid-row:1;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}.jm-filter-rail>header,.jm-filter-rail>form{grid-column:1 / -1}.jm-filter-rail fieldset small{display:none}.jm-filter-rail>header{flex-direction:row;align-items:baseline;justify-content:space-between}.jm-filter-rail>header h2{font-size:12px}.jm-applied-count{border-top:0;padding:0;justify-content:flex-end}.jm-applied-count strong{font-size:20px}.jm-applied-count span{font-size:10px}.jm-confirm-applied{grid-column:1 / -1;display:grid;grid-template-columns:1fr auto}.jm-confirm-applied p,.jm-confirm-applied b,.jm-confirm-applied>span{grid-column:1}.jm-confirm-applied button{grid-column:2;grid-row:1 / 3;padding:4px 8px}.jm-confirm-applied .jm-confirm-dismiss{grid-row:3}.jm-loading,.jm-empty{grid-column:2}.jm-overview-grid{grid-template-columns:1fr}.jm-proof-inspector{position:static;max-height:none}.jm-decision-strip>.jm-score-metric{min-width:54px}.jm-score-ring{width:44px;height:44px;flex-basis:44px}.jm-score-ring strong{font-size:19px}.jm-verdict{margin-left:0}.jm-content{padding-right:0}.jm-ats-inline>summary>span{font-size:9px}.jm-job-header h1{-webkit-line-clamp:unset}.jm-progress>span{font-size:10px}}
 /* Confirmation belongs with the application actions and never makes the filter rail scroll. */
-.jm-actions:has(.jm-confirm-applied){flex-wrap:wrap;row-gap:8px}
-.jm-actions>.jm-confirm-applied{flex:0 0 100%;display:flex;flex-direction:row;align-items:center;gap:10px;padding:7px 10px;min-width:0}
-.jm-actions>.jm-confirm-applied p{white-space:nowrap}.jm-actions>.jm-confirm-applied b{white-space:nowrap}.jm-actions>.jm-confirm-applied>span{flex:1;min-width:0}.jm-actions>.jm-confirm-applied button{white-space:nowrap;margin:0;padding:4px 10px;min-height:28px}.jm-actions>.jm-confirm-applied .jm-confirm-dismiss{margin-left:0}
-@media(max-width:800px){.jm-actions>.jm-confirm-applied{gap:6px;flex-wrap:wrap}.jm-actions>.jm-confirm-applied>span{display:none}.jm-actions>.jm-confirm-applied p{font-size:10px}.jm-actions>.jm-confirm-applied b{font-size:11px;max-width:100px;overflow:hidden;text-overflow:ellipsis}.jm-actions>.jm-confirm-applied button{font-size:10px;padding:4px 6px}.jm-actions>.jm-confirm-applied .jm-confirm-dismiss{margin-left:auto}}
 
 /* Slim filter dock: the same footprint as the company index, with choices opening inward. */
 .jm-layout{grid-template-columns:64px minmax(0,1.15fr) minmax(280px,.9fr) 54px}
@@ -146,4 +139,19 @@
 .jm-score-ring small{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:4px;white-space:nowrap}
 /* The companion line lives in the resume header, next to "Tailored resume". */
 .jm-rhead .jm-companion-ready{padding:0;font-size:10px}
+/* "Applied?" card: floats at the bottom right, just above the Apply button, after you open an application. */
+.jm-applied-card{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:84px;z-index:30;width:min(320px,calc(100vw - 32px));display:flex;flex-direction:column;gap:12px;padding:14px 16px;border:1px solid color-mix(in oklab,var(--jm-green) 35%,var(--border-col));border-radius:12px;background:color-mix(in oklab,var(--jm-green) 5%,var(--popover-bg,var(--card-bg)));box-shadow:0 12px 32px #0007;animation:jm-applied-in .22s ease-out}
+.jm-applied-text p{margin:0 0 3px;font-size:15px;font-weight:600;color:var(--foreground)}
+.jm-applied-text span{display:block;font-size:12px;color:var(--muted-fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jm-applied-text b{color:var(--foreground);font-weight:600}
+.jm-applied-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.jm-applied-buttons button{height:34px;border-radius:8px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .12s,border-color .12s}
+.jm-applied-yes{border:1px solid var(--jm-green);background:color-mix(in oklab,var(--jm-green) 22%,transparent);color:var(--foreground)}
+.jm-applied-yes:hover:not(:disabled){background:color-mix(in oklab,var(--jm-green) 34%,transparent)}
+.jm-applied-no{border:1px solid var(--border-col);background:transparent;color:var(--muted-fg)}
+.jm-applied-no:hover{border-color:var(--muted-fg);color:var(--foreground)}
+.jm-applied-buttons button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+@keyframes jm-applied-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.jm-applied-card{animation:none}}
+@media(max-width:800px){.jm-applied-card{bottom:120px;right:12px}}
 
