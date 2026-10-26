@@ -58,7 +58,7 @@ function routeFigure() {
     )
     .join('');
   return `<figure class="route-figure"><div class="route-heading"><span>One application</span><span class="route-heading-note">Choose a stop</span></div>
-<div class="route-drawing"><svg viewBox="0 0 440 440" fill="none" aria-hidden="true"><path class="route-track" d="${ROUTE_D}"/><path class="route-fill" pathLength="1" d="${ROUTE_D}"/><circle class="route-dot" cx="80" cy="60" r="7"/></svg>
+<div class="route-drawing"><video class="route-motion" autoplay muted loop playsinline preload="metadata" poster="/landing/assets/route-loop.jpg" width="880" height="880" aria-hidden="true" tabindex="-1" disablepictureinpicture disableremoteplayback><source src="/landing/assets/route-loop.webm" type="video/webm"><source src="/landing/assets/route-loop.mp4" type="video/mp4"></video><svg viewBox="0 0 440 440" fill="none" aria-hidden="true"><path class="route-track" d="${ROUTE_D}"/><path class="route-fill" pathLength="1" d="${ROUTE_D}"/><circle class="route-dot" cx="80" cy="60" r="7"/></svg>
 <div class="route-stops" role="group" aria-label="Stages of one application">${stops}</div></div>
 <figcaption aria-live="polite"><span class="route-caption">${esc(route.at(-1).caption)}</span><span class="route-caption-number">04 / 04</span></figcaption></figure>`;
 }
@@ -81,7 +81,7 @@ function story() {
 <figure class="rules"><figcaption>What stays fixed on every resume</figcaption><ol>${resumeRules.map(([k, v]) => `<li><strong>${k}</strong><span>${v}</span></li>`).join('')}</ol></figure></article>
 <article class="stage stage-submit" id="${submit.id}" data-node><span class="node" aria-hidden="true"></span><div class="stage-text">${stageHead(submit, 3)}
 <p class="submit-line"><span class="submit-key">Submit</span> is always your click.</p></div>
-<figure class="shot shot-tall">${picture({ name: 'companion', width: 420, height: 760, alt: 'Atriveo Chrome companion beside an example application: the selected resume Alex Morgan.pdf with Attach resume, Preview and Download, and copyable name, email and LinkedIn fields' })}
+<figure class="shot shot-tall">${picture({ name: 'companion', width: 420, height: 760, alt: 'Atriveo Chrome companion window over an example application: the selected resume Alex Morgan.pdf with Attach resume, Preview and Download, and copyable name, email and LinkedIn fields' })}
 <figcaption>Chrome companion · illustrative profile</figcaption></figure></article></div></section>`;
 }
 
@@ -122,7 +122,7 @@ export function workflow() {
           `<section class="guide-step" id="${s.id}"><span class="step-number">${n2(i)}</span><div><h2>${s.title}</h2><p>${s.body}</p><p>${workflowDetail[i]}</p></div></section>`,
       )
       .join('')}
-<section class="setup-note"><h2>Setting up the Chrome companion</h2><p>The companion is distributed as an unpacked extension for approved users. Load the folder you were given in Chrome’s extensions page, then refresh Atriveo.</p><p>Choose Apply from Matching. If Chrome keeps the side panel closed, open Atriveo from the toolbar. You can choose how long the resume follows the application from page to page; after that it stays on the page where you left it.</p><p>Copy and PDF download stay available whenever a site needs a manual step.</p></section>
+<section class="setup-note"><h2>Setting up the Chrome companion</h2><p>The companion is distributed as an unpacked extension for approved users. Load the folder you were given in Chrome’s extensions page, then refresh Atriveo.</p><p>Choose Apply from Matching and the companion opens in a small window at the bottom right of your screen; drag it wherever suits you. The toolbar button brings it back if you close it. You can choose how long the resume follows the application from page to page; after that it stays on the page where you left it, and it closes when you confirm you applied.</p><p>Copy and PDF download stay available whenever a site needs a manual step.</p></section>
 <section class="guide-access"><h2>Ready when you are.</h2><p>The workspace needs an approved account.</p><div class="guide-actions">${cta()}<a class="text-link" href="${site.login}">Sign in ${arrow}</a></div></section></div>`,
   });
 }
