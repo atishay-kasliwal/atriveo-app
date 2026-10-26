@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { matchingQueue, recordDecision, invalidateMatchingQueue, fitsFilled } from '../scripts/job-matching.mjs';
+import { matchingQueue, recordDecision, invalidateMatchingQueue, fitsFilled, hiddenCompanies, setCompanyHidden, recentScrapeRuns } from '../scripts/job-matching.mjs';
 import { computeFit, fitIsCurrent } from '../scripts/fit-store.mjs';
 
 const JD = 'Backend Engineer\nRequirements:\n- Python and Java experience.\n- Kubernetes experience.\nResponsibilities:\n- Build backend services in Python.\n';
@@ -37,7 +37,7 @@ function project(doc, projection) {
   return { ...rest, fit: out };
 }
 
-function fakeDb(jobs, { descriptions = {}, swipes = [] } = {}) {
+function fakeDb(jobs, { descriptions = {}, swipes = [], hidden = [], sessions = [], staffingRuns = [] } = {}) {
   const calls = { rankReads: 0, wholeFitReads: 0, writes: [] };
   const cursor = (rows) => ({ sort: () => cursor(rows), limit: (n) => cursor(rows.slice(0, n)), toArray: async () => structuredClone(rows) });
   const db = {
@@ -58,6 +58,13 @@ function fakeDb(jobs, { descriptions = {}, swipes = [] } = {}) {
         updateOne: async (f, u) => { swipes.push(u.$set); },
         deleteOne: async (f) => { const i = swipes.findIndex((s) => s.job_url === f.job_url && s.source === f.source); if (i >= 0) swipes.splice(i, 1); return { deletedCount: i >= 0 ? 1 : 0 }; },
       };
+      if (name === 'matching_hidden_companies') return {
+        find: () => cursor(hidden),
+        updateOne: async (f, u) => { const i = hidden.findIndex((h) => h.key === f.key); if (i >= 0) hidden[i] = u.$set; else hidden.push(u.$set); },
+        deleteOne: async (f) => { const i = hidden.findIndex((h) => h.key === f.key); if (i >= 0) hidden.splice(i, 1); },
+      };
+      if (name === 'sessions') return { find: () => cursor(sessions) };
+      if (name === 'staffing_runs') return { find: () => cursor(staffingRuns) };
       if (name === 'descriptions') {
         const rows = (urls) => urls.filter((u) => descriptions[u]).map((u) => ({ job_url: u, description: descriptions[u] }));
         return { find: (f) => cursor(rows(f.job_url.$in)), aggregate: (p) => cursor(rows(p[0].$match.job_url.$in)) };
@@ -119,3 +126,40 @@ test('a request computes missing Fits only for a short while; the rest are compu
 });
 
 test.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+
+test('a hidden company leaves the queue, the company list and the counts at once, and comes back when restored', async () => {
+  invalidateMatchingQueue();
+  const fit = computeFit(JD, 'Backend Engineer');
+  const jobs = [0, 1, 2, 3, 4, 5].map((i) => job(200 + i, { ...structuredClone(fit), score: 90 - i }));
+  const db = fakeDb(jobs, { descriptions: Object.fromEntries(jobs.map((j) => [j.job_url, JD])) });
+  const all = await matchingQueue(db, { limit: 8, now: NOW, learn: false });
+  assert.equal(all.total, 6);
+  const hide = all.companies[0];
+  const out = await setCompanyHidden(db, { company: `  ${hide.name.toUpperCase()} `, hidden: true, now: NOW });
+  assert.deepEqual(out.hidden.map((h) => h.key), [hide.key], 'matched by the same company key, any case or spacing');
+  const after = await matchingQueue(db, { limit: 8, now: new Date(NOW.getTime() + 1000), learn: false });
+  assert.equal(after.total, 6 - hide.count, 'the queue cache is cleared, so the change shows at once');
+  assert.equal(after.stats.remaining, 6 - hide.count);
+  assert.ok(after.companies.every((c) => c.key !== hide.key));
+  assert.ok(after.jobs.every((j) => j.company.toLowerCase() !== hide.key));
+  assert.deepEqual((await hiddenCompanies(db)).map((h) => h.name), [hide.name.toUpperCase().trim()]);
+  await setCompanyHidden(db, { company: hide.name, hidden: false });
+  assert.deepEqual(await hiddenCompanies(db), []);
+  const back = await matchingQueue(db, { limit: 8, now: new Date(NOW.getTime() + 2000), learn: false });
+  assert.equal(back.total, 6);
+  await assert.rejects(() => setCompanyHidden(db, { company: '  ' }), /company is required/);
+});
+
+test('recent scrape runs group the pipelines of one run, add the staffing runs, and keep the newest five', async () => {
+  const at = (m) => new Date(NOW.getTime() - m * 60_000);
+  const sessions = [];
+  for (let i = 0; i < 6; i++) for (const [p, n] of [['standard', 20], ['keywords', 5]]) sessions.push({ session_id: `s${i}`, pipeline: p, job_count: n, run_at: at(i * 60 + (p === 'keywords' ? -1 : 0)) });
+  const db = fakeDb([], { sessions, staffingRuns: [{ started_at: at(30), finished_at: at(25), new_jobs: 15, status: 'partial' }, { started_at: at(1), status: 'running' }] });
+  const { runs } = await recentScrapeRuns(db);
+  assert.equal(runs.length, 5);
+  assert.deepEqual(runs.map((r) => r.kind), ['Job search', 'Staffing', 'Job search', 'Job search', 'Job search']);
+  assert.equal(runs[0].added, 25, 'both pipelines of the run are added together');
+  assert.equal(runs[1].added, 15);
+  assert.equal(runs[1].status, 'partial');
+  assert.ok(runs.every((r, i) => i === 0 || runs[i - 1].finishedAt >= r.finishedAt), 'newest first');
+});
