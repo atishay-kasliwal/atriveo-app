@@ -5,7 +5,7 @@ import { analyzeMatchingResume } from "./job-matching-analysis.mjs";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { resumeMatchOf, resumeReadyOf, trackOf } from "./applications-analytics.mjs";
+import { resumeMatchOf, resumeReadyOf, readyBrief, trackOf } from "./applications-analytics.mjs";
 import { publishResume, storeFromEnv } from "./resume-store.mjs";
 import { ensureFit } from "./fit-store.mjs";
 
@@ -18,6 +18,15 @@ const IMAGE = "resume-page.png";
 const SOURCE = "job-matching";
 const DAYS = 7;
 const FIT_PER_REQUEST = 40;
+// A Fit costs ~200 ms of CPU, so a request computes missing ones for at most this long; the rest are computed after it answers.
+const FIT_BUDGET_MS = 500;
+// The jobs, applications and decisions behind the queue are read once and reused this long (a decision here clears it).
+const BASE_MS = 30_000;
+// For ranking, similar jobs and the company list only these parts of each Fit are needed; a shown job gets its whole Fit.
+const RANK_PROJECTION = { _id: 0, job_url: 1, job_url_direct: 1, company: 1, title: 1, location: 1, level: 1, score_pct: 1, date_posted: 1, run_at: 1, apply_type: 1, site: 1,
+  "fit.score": 1, "fit.confidence": 1, "fit.knockouts.verdict": 1, "fit.ledger.skills.alternatives": 1,
+  "fit.config_hash": 1, "fit.master_hash": 1, "fit.candidate_hash": 1, "fit.shape": 1, "fit.as_of": 1,
+  "resume.pdf_path": 1, "resume.object": 1 };
 
 const isoOf = (v) => (v ? new Date(v).toISOString() : null);
 const ENT = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", ndash: "–", mdash: "—", rsquo: "’", lsquo: "‘", ldquo: "“", rdquo: "”", bull: "•" };
@@ -109,15 +118,57 @@ export function rankForMatching(docs, later = new Map()) {
   });
 }
 
-export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(), company = null, jobUrl = null, exclude = [], learn = true } = {}) {
-  const since = new Date(now.getTime() - DAYS * 86_400_000);
+let base = null;
+/** Forget the cached jobs and decisions (after a decision, or when new Fits were saved). */
+export function invalidateMatchingQueue() { base = null; }
+async function loadBase(db, now) {
+  const at = now.getTime();
+  if (base && base.db === db && at >= base.at && at - base.at < BASE_MS) return base;
+  const since = new Date(at - DAYS * 86_400_000);
+  const filter = { run_at: { $gte: since }, "resume.status": "success", "resume.pdf_path": { $type: "string" } };
   const [docs, applied, swipes] = await Promise.all([
-    db.collection("jobs").find({ run_at: { $gte: since }, "resume.status": "success", "resume.pdf_path": { $type: "string" } },
-      { projection: { _id: 0, job_url: 1, job_url_direct: 1, company: 1, title: 1, location: 1, level: 1, score_pct: 1, date_posted: 1, run_at: 1, apply_type: 1, site: 1, fit: 1, "resume.pdf_path": 1, "resume.object": 1 } })
+    db.collection("jobs").find(filter, { projection: RANK_PROJECTION })
       .sort({ run_at: -1 }).limit(1500).toArray(),
     db.collection("applications").distinct("jobUrls"),
     db.collection("job_swipes").find({}, { projection: { _id: 0, job_url: 1, direction: 1, swiped_at: 1, source: 1 } }).toArray(),
   ]);
+  base = { db, at, filter, docs, applied, swipes };
+  return base;
+}
+
+// Missing or stale Fits left over by a request are computed here, one at a time (~200 ms of CPU each), and never while a
+// queue request is being answered, so the page is not kept waiting behind them.
+let filling = null;
+let answering = 0;
+const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+function fillFitsLater(db, docs) {
+  if (filling || !docs.length) return;
+  filling = (async () => {
+    let saved = 0;
+    for (let i = 0; i < docs.length; i += 1) {
+      await new Promise((r) => setImmediate(r));
+      while (answering > 0) await pause(50);
+      const batch = docs.slice(i, i + 1);
+      const got = await ensureFit(db, batch, { max: batch.length });
+      const fresh = batch.filter((d) => got.has(d.job_url) && got.get(d.job_url) !== d.fit).length;
+      saved += fresh;
+      if (fresh && saved % 10 < fresh && base?.db === db) base = null; // let the queue pick new Fits up every ~10
+    }
+    if (saved && base?.db === db) base = null;
+  })().catch(() => {}).finally(() => { filling = null; });
+}
+/** Resolves when the background Fit fill (if any) is done. For tests and scripts. */
+export const fitsFilled = () => filling ?? Promise.resolve();
+
+export async function matchingQueue(db, opts = {}) {
+  answering++;
+  try { return await answerQueue(db, opts); } finally { answering--; }
+}
+
+async function answerQueue(db, { limit = 8, offset = 0, now = new Date(), company = null, jobUrl = null, exclude = [], learn = true } = {}) {
+  const { docs: cached, applied, swipes, filter } = await loadBase(db, now);
+  // Copies, so this request's Fits never leak into the cached rows.
+  const docs = cached.map((d) => ({ ...d }));
   const taken = new Set(applied);
   const later = new Map();
   for (const s of swipes) {
@@ -129,11 +180,16 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
     if (taken.has(d.job_url) || d.apply_type === "closed" || byUrl.has(d.job_url)) continue;
     byUrl.set(d.job_url, d);
   }
-  // Fit (master resume against the posting) is kept on each job; up to FIT_PER_REQUEST missing or stale ones are computed here.
-  const fits = await ensureFit(db, [...byUrl.values()], { max: FIT_PER_REQUEST });
-  for (const d of byUrl.values()) d.fit = fits.get(d.job_url) ?? null;
+  // Fit (master resume against the posting) is kept on each job; up to FIT_PER_REQUEST missing or stale ones are computed
+  // here within FIT_BUDGET_MS, and the rest right after this answer (then the queue re-reads them).
+  const live = [...byUrl.values()];
+  const fits = await ensureFit(db, live, { max: FIT_PER_REQUEST, budgetMs: filling ? 0 : FIT_BUDGET_MS });
+  const stored = new Map(live.map((d) => [d.job_url, d.fit]));
+  for (const d of live) d.fit = fits.get(d.job_url) ?? null;
+  if (live.some((d) => d.fit && d.fit !== stored.get(d.job_url))) invalidateMatchingQueue(); // new Fits were saved: re-read next time
+  fillFitsLater(db, live.filter((d) => !fits.has(d.job_url)).map((d) => ({ ...d, fit: stored.get(d.job_url) })));
   const events = learn ? await matchingEvents(db).catch(() => []) : [];
-  const allRanked = rankForMatching([...byUrl.values()], later);
+  const allRanked = rankForMatching(live, later);
   // A bounded preference signal can only reorder nearby scores; it never removes a job.
   if (learn && events.length) {
     const boosts=new Map(allRanked.map(d=>[d.job_url,preferenceBoost({...d,track:trackOf(d.title)},events)]));
@@ -162,9 +218,17 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
     rows.push(d);
   }
   const urls = rows.map((d) => d.job_url);
-  const jds = urls.length ? await db.collection("descriptions").aggregate([
-    { $match: { job_url: { $in: urls } } }, { $project: { _id: 0, job_url: 1, description: 1 } },
-  ]).toArray() : [];
+  // Ranking read only part of each saved Fit; a shown job gets the whole one (a Fit computed in this request is whole already).
+  const partial = rows.filter((d) => d.fit && d.fit === stored.get(d.job_url)).map((d) => d.job_url);
+  const [jds, wholeFits] = urls.length ? await Promise.all([
+    db.collection("descriptions").aggregate([
+      { $match: { job_url: { $in: urls } } }, { $project: { _id: 0, job_url: 1, description: 1 } },
+    ]).toArray(),
+    partial.length ? db.collection("jobs").find({ ...filter, job_url: { $in: partial } }, { projection: { _id: 0, job_url: 1, run_at: 1, fit: 1 } }).sort({ run_at: -1 }).toArray() : [],
+  ]) : [[], []];
+  const whole = new Map();
+  for (const j of wholeFits) if (!whole.has(j.job_url) && j.fit) whole.set(j.job_url, j.fit);
+  for (const d of rows) if (partial.includes(d.job_url) && whole.has(d.job_url)) d.fit = whole.get(d.job_url);
   const jdOf = new Map(jds.map((j) => [j.job_url, j.description]));
   const jobs = await Promise.all(rows.map(async (d) => {
     const jd = shapeJd(jdOf.get(d.job_url) ?? "");
@@ -174,12 +238,20 @@ export async function matchingQueue(db, { limit = 8, offset = 0, now = new Date(
       applyType: d.apply_type ?? null, track: trackOf(d.title),
       // The company's own form when known, else the posting you were shown.
       applyUrl: d.job_url_direct || d.job_url, postingUrl: d.job_url,
-      resumePath: d.resume.pdf_path, resumeSha256: resumeRevision(d.resume), resumeObject: d.resume.object ? { sha256: d.resume.object.sha256, hasImage: Boolean(d.resume.object.image_key) } : null, resumeMatch: resumeMatchOf(d.resume.pdf_path, { refresh: true }), ready: resumeReadyOf(d.resume.pdf_path, d.fit), fit: d.fit,
-      saved: later.has(d.job_url), jd, ats: await analyzeMatchingResume(d.resume.pdf_path, jd.full, d.fit),
+      resumePath: d.resume.pdf_path, resumeSha256: resumeRevision(d.resume), resumeObject: d.resume.object ? { sha256: d.resume.object.sha256, hasImage: Boolean(d.resume.object.image_key) } : null, resumeMatch: resumeMatchOf(d.resume.pdf_path, { refresh: true }), ready: readyBrief(resumeReadyOf(d.resume.pdf_path, d.fit)), fit: wireFit(d.fit),
+      saved: later.has(d.job_url), jd: wireJd(jd), ats: await analyzeMatchingResume(d.resume.pdf_path, jd.full, d.fit),
     };
   }));
   return { ok: true, generatedAt: now.toISOString(), total: scoped.length - skipped, companies, stats, preference: { active: learn && events.filter(e=>["apply_opened","saved","not_apply"].includes(e.kind)).length>=5, limit: 2 }, jobs };
 }
+
+// What the page shows of a description and a Fit; the section lists, hashes and lost points stay on the server.
+const wireJd = ({ full, salary, work, kind, flags }) => ({ full, salary, work, kind, flags });
+const wireFit = (fit) => {
+  if (!fit) return fit;
+  const { config_hash, master_hash, candidate_hash, shape, as_of, jd_chars, applicable_weight, lost, ...shown } = fit;
+  return shown;
+};
 
 /** Not apply (left), Apply (right: you chose to; nothing is submitted), Save for later (later), or undo your last choice on it. */
 export async function recordDecision(db, { jobUrl, decision, now = new Date() }) {
@@ -188,13 +260,14 @@ export async function recordDecision(db, { jobUrl, decision, now = new Date() })
   if (decision === "undo") {
     // Only this page's own rows; a Discard or Mark applied made elsewhere stays.
     const r = await swipes.deleteOne({ job_url: jobUrl, source: SOURCE });
-    if(r.deletedCount)await forgetMatchingDecision(db,jobUrl).catch(()=>{});
+    if(r.deletedCount){invalidateMatchingQueue();await forgetMatchingDecision(db,jobUrl).catch(()=>{});}
     return { ok: true, undone: r.deletedCount > 0 };
   }
   const direction = { skip: "left", apply: "right", later: "later" }[decision];
   if (!direction) throw new Error("Unknown decision");
   await swipes.updateOne({ job_url: jobUrl },
     { $set: { job_url: jobUrl, direction, swiped_at: now.toISOString(), date: now.toISOString().slice(0, 10), source: SOURCE } }, { upsert: true });
+  invalidateMatchingQueue();
   await recordMatchingEvent(db, {jobUrl, kind: {apply:'apply_opened',skip:'not_apply',later:'saved'}[decision], now}).catch(()=>{});
   return { ok: true };
 }

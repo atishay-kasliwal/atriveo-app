@@ -1866,8 +1866,11 @@ const server = http.createServer(async (req, res) => {
         const limit = Math.min(Math.max(Number(params.get("limit")) || 8, 1), 20);
         const offset = Math.max(Number(params.get("offset")) || 0, 0);
         const data = await withMongo((db) => matchingQueue(db, { limit, offset, company: params.get("company"), jobUrl: params.get("job"), exclude: (params.get("exclude") || "").split(",").filter(x=>/^[a-f0-9]{16}$/.test(x)), learn: params.get("learn") !== "0" }), { appName: "AtriveoTailorServer" });
-        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
-        res.end(JSON.stringify(data));
+        // Compressed: the tunnel is slow and this JSON shrinks ~5x.
+        const body = Buffer.from(JSON.stringify(data));
+        const gzip = /\bgzip\b/.test(String(req.headers["accept-encoding"] || "")) && body.length > 1024;
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store", Vary: "Accept-Encoding", ...(gzip && { "Content-Encoding": "gzip" }) });
+        res.end(gzip ? zlib.gzipSync(body, { level: 6 }) : body);
       } catch (e) {
         res.writeHead(503, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
