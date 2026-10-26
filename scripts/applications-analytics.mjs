@@ -18,7 +18,7 @@ const ROLEISH = /\b(engineer|developer|scientist|analyst|intern|manager|designer
 const companyOf = (names = []) => names.find((c) => /[A-Z]/.test(c) && !ROLEISH.test(c)) ?? names.find((c) => !ROLEISH.test(c)) ?? null;
 
 /** Employer responses for the dashboard: counts, recent mails, and the ones waiting for you to confirm. */
-function inboxSummary(rows, records) {
+export function inboxSummary(rows, records) {
   const mail = rows.filter((e) => e.state !== "dismissed" && e.state !== "undone");
   const appLabel = new Map(records.map((r) => [r._id, `${r.company} · ${r.title}`]));
   const base = (e) => ({ id: e._id, at: e.receivedAt, kind: e.kind, subject: e.subject, company: companyOf(e.companies), title: e.titles?.[0] ?? null });
@@ -32,6 +32,9 @@ function inboxSummary(rows, records) {
     days: 60,
     confirmed: mail.filter((e) => e.kind === "applied").length,
     rejected: mail.filter((e) => e.kind === "rejected").length,
+    assessment: mail.filter((e) => e.kind === "assessment").length,
+    interview: mail.filter((e) => e.kind === "interview").length,
+    offer: mail.filter((e) => e.kind === "offer").length,
     recent: mail.slice(0, 25).map((e) => ({ ...base(e), recordedIn: recordedIn(e), note: e.tracker?.reason ?? null })),
     confirm: [
       ...mail.filter((e) => e.tracker?.state === "needs_confirm").map((e) => ({
@@ -39,7 +42,7 @@ function inboxSummary(rows, records) {
         reason: String(e.tracker.reason ?? "").replace(/^tracker: /, "").replace(/ · candidates:.*$/, ""),
         candidates: e.tracker.candidates ?? [],
       })),
-      ...mail.filter((e) => e.state === "needs_confirm" && !e.tracker).map((e) => ({
+      ...mail.filter((e) => ["needs_confirm", "unmatched"].includes(e.state) && !e.tracker).map((e) => ({
         ...base(e), target: "engine", reason: e.match?.reason ?? "",
         candidates: (e.match?.candidates ?? []).map((id) => ({ id, label: appLabel.get(id) ?? id })),
       })),
@@ -666,7 +669,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
     // Worker heartbeats written by playatriveo (`worker:<id>`): online state and Gmail status. No secrets in them.
     db.collection("engine_control").find({ _id: { $regex: "^worker:" } }).toArray(),
     // Inbox watcher (playatriveo): confirmation / rejection mails and where they were recorded. Metadata only.
-    db.collection("inbox_events").find({ receivedAt: { $gte: inboxSince }, kind: { $in: ["applied", "rejected"] } }, {
+    db.collection("inbox_events").find({ receivedAt: { $gte: inboxSince }, kind: { $in: ["applied", "rejected", "assessment", "interview", "offer"] } }, {
       projection: { receivedAt: 1, kind: 1, subject: 1, companies: 1, titles: 1, state: 1, match: 1, tracker: 1, feed: 1 },
     }).sort({ receivedAt: -1 }).limit(500).toArray(),
     // "Why aren't jobs applied" — computed by the playatriveo worker with the engine's own rules.
@@ -804,7 +807,7 @@ export async function applicationsAnalytics(db, { days = 30, limit = 300 } = {})
       attempts: r.attemptCount ?? 0,
       domain: r.domain?.domain ?? null,
       url: r.finalUrl ?? r.applyUrl,
-      outcome: r.outcome ? { status: r.outcome.status, at: r.outcome.rejectedAt ?? r.outcome.confirmedAt ?? null, subject: r.outcome.subject ?? null } : null,
+      outcome: r.outcome ? { status: r.outcome.status, at: r.outcome.stageAt ?? r.outcome.rejectedAt ?? r.outcome.confirmedAt ?? null, subject: r.outcome.subject ?? null } : null,
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
       priority: r.priority ?? 0,
@@ -828,7 +831,7 @@ const LIGHT_ROW = {
   company: 1, title: 1, location: 1, ats: 1, status: 1, priority: 1, applyUrl: 1, finalUrl: 1, attemptCount: 1, createdAt: 1, updatedAt: 1,
   "review.reason": 1, "review.detail": 1, "review.questionReviewStatus": 1, "failure.code": 1, "failure.message": 1,
   "submission.by": 1, "submission.submittedAt": 1, "submission.attemptedAt": 1, "domain.domain": 1,
-  "outcome.status": 1, "outcome.rejectedAt": 1, "outcome.confirmedAt": 1, "outcome.subject": 1,
+  "outcome.stageAt": 1, "outcome.status": 1, "outcome.rejectedAt": 1, "outcome.confirmedAt": 1, "outcome.subject": 1,
   pendingCount: { $size: { $ifNull: ["$review.pending", []] } },
   ...IN_BROWSER_FIELDS,
 };
@@ -843,7 +846,7 @@ const lightRow = (r) => ({
   failureMessage: r.failure?.message ? String(r.failure.message).split("\n")[0].slice(0, 200) : null,
   submittedBy: r.submission?.by ?? null, submittedAt: r.submission?.submittedAt ?? null,
   attempts: r.attemptCount ?? 0, domain: r.domain?.domain ?? null, url: r.finalUrl ?? r.applyUrl,
-  outcome: r.outcome?.status ? { status: r.outcome.status, at: r.outcome.rejectedAt ?? r.outcome.confirmedAt ?? null, subject: r.outcome.subject ?? null } : null,
+  outcome: r.outcome?.status ? { status: r.outcome.status, at: r.outcome.stageAt ?? r.outcome.rejectedAt ?? r.outcome.confirmedAt ?? null, subject: r.outcome.subject ?? null } : null,
   createdAt: r.createdAt, updatedAt: r.updatedAt, priority: r.priority ?? 0,
   // Open in your browser (Apply with Atriveo): the dashboard offers only Return to worker and Skip.
   owner: r.owner === "extension" ? "extension" : "engine",
@@ -920,7 +923,7 @@ export async function overviewSummary(db, { days = 30, from = null, to = null } 
     db.collection("jobs").aggregate([{ $group: { _id: "$job_url" } }, { $count: "n" }]).toArray(),
     db.collection("application_accounts").find({}).sort({ createdAt: -1 }).limit(100).toArray(),
     db.collection("engine_control").find({ _id: { $regex: "^worker:" } }).toArray(),
-    db.collection("inbox_events").find({ receivedAt: { $gte: inboxSince }, kind: { $in: ["applied", "rejected"] } }, {
+    db.collection("inbox_events").find({ receivedAt: { $gte: inboxSince }, kind: { $in: ["applied", "rejected", "assessment", "interview", "offer"] } }, {
       projection: { receivedAt: 1, kind: 1, subject: 1, companies: 1, titles: 1, state: 1, match: 1, tracker: 1, feed: 1 },
     }).sort({ receivedAt: -1 }).limit(500).toArray(),
     db.collection("engine_control").findOne({ _id: "queue_report" }),
@@ -979,7 +982,7 @@ export async function overviewSummary(db, { days = 30, from = null, to = null } 
     atsMap.set(ats, row);
   }
   // Labels for the applications an unsure mail might belong to.
-  const candidateIds = [...new Set(inboxRows.flatMap((e) => (e.state === "needs_confirm" && !e.tracker ? e.match?.candidates ?? [] : [])))];
+  const candidateIds = [...new Set(inboxRows.flatMap((e) => (["needs_confirm", "unmatched"].includes(e.state) && !e.tracker ? e.match?.candidates ?? [] : [])))];
   const labelled = candidateIds.length ? await apps.find({ _id: { $in: candidateIds } }, { projection: { company: 1, title: 1 } }).toArray() : [];
 
   const applied = byStatus.APPLIED ?? 0;
