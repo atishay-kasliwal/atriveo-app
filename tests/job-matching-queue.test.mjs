@@ -163,3 +163,15 @@ test('recent scrape runs group the pipelines of one run, add the staffing runs, 
   assert.equal(runs[1].status, 'partial');
   assert.ok(runs.every((r, i) => i === 0 || runs[i - 1].finishedAt >= r.finishedAt), 'newest first');
 });
+
+test('pipeline stages of one scrape cycle have their own session ids seconds apart: they are one run, and the newest five runs are listed', async () => {
+  const at = (m, s = 0) => new Date(NOW.getTime() - m * 60_000 + s * 1000);
+  const sessions = [];
+  // Seven cycles an hour apart, each with four stages 1 s apart (as on the live pipeline).
+  for (let c = 0; c < 7; c++) [30, 5, 8, 23].forEach((n, k) => sessions.push({ session_id: `c${c}-${k}`, job_count: n, run_at: at(c * 60, k) }));
+  const { runs } = await recentScrapeRuns(fakeDb([], { sessions, staffingRuns: [] }));
+  assert.equal(runs.length, 5);
+  assert.ok(runs.every((r) => r.kind === 'Job search'));
+  assert.deepEqual(runs.map((r) => r.added), [66, 66, 66, 66, 66], 'four stages add up to one run');
+  assert.equal(new Set(runs.map((r) => r.finishedAt.slice(0, 13))).size, 5, 'five different hours, not five stages of one hour');
+});

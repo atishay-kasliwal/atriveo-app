@@ -300,18 +300,20 @@ export async function setCompanyHidden(db, { company, hidden = true, now = new D
  */
 export async function recentScrapeRuns(db, { limit = 5 } = {}) {
   const [sessions, staffing] = await Promise.all([
-    db.collection("sessions").find({ archived: { $ne: true } }, { projection: { _id: 0, session_id: 1, run_at: 1, job_count: 1 } }).sort({ run_at: -1 }).limit(60).toArray().catch(() => []),
+    db.collection("sessions").find({ archived: { $ne: true } }, { projection: { _id: 0, session_id: 1, run_at: 1, job_count: 1 } }).sort({ run_at: -1 }).limit(300).toArray().catch(() => []),
     db.collection("staffing_runs").find({}, { projection: { _id: 0, started_at: 1, finished_at: 1, new_jobs: 1, status: 1 } }).sort({ started_at: -1 }).limit(limit).toArray().catch(() => []),
   ]);
-  const by = new Map();
-  for (const s of sessions) {
-    const at = isoOf(s.run_at); if (!at) continue;
-    const r = by.get(s.session_id) ?? { kind: "Job search", finishedAt: at, added: 0, status: "ok" };
-    r.added += Number(s.job_count) || 0;
-    if (at > r.finishedAt) r.finishedAt = at;
-    by.set(s.session_id, r);
+  // One scrape cycle runs several pipeline stages, each with its own session row seconds apart: sessions that finish within
+  // RUN_GAP_MS of each other are one run, with their job counts added.
+  const RUN_GAP_MS = 20 * 60_000;
+  const runs = [];
+  let open = null;
+  for (const s of sessions.map((x) => ({ at: isoOf(x.run_at), n: Number(x.job_count) || 0 })).filter((x) => x.at).sort((a, b) => b.at.localeCompare(a.at))) {
+    if (open && Date.parse(open.earliest) - Date.parse(s.at) <= RUN_GAP_MS) { open.added += s.n; open.earliest = s.at; continue; }
+    open = { kind: "Job search", finishedAt: s.at, earliest: s.at, added: s.n, status: "ok" };
+    runs.push(open);
   }
-  const runs = [...by.values()];
+  for (const r of runs) delete r.earliest;
   for (const r of staffing) {
     const at = isoOf(r.finished_at);
     if (at) runs.push({ kind: "Staffing", finishedAt: at, added: Number.isFinite(r.new_jobs) ? r.new_jobs : null, status: r.status === "partial" ? "partial" : "ok" });
