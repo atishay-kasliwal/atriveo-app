@@ -16,6 +16,16 @@ const storyTrack = document.querySelector('.story-track');
 const threadFill = document.querySelector('.thread-fill');
 const nodes = [...document.querySelectorAll('[data-node]')];
 
+// The route loop only plays while it is on screen and the tab is visible.
+const loop = document.querySelector('.route-motion');
+if (loop) {
+  const sync = (visible) => { if (reduced.matches || !visible || document.hidden) loop.pause(); else loop.play().catch(() => {}); };
+  let onScreen = true;
+  new IntersectionObserver(([entry]) => { onScreen = entry.isIntersecting; sync(onScreen); }, { threshold: 0.05 }).observe(loop);
+  document.addEventListener('visibilitychange', () => sync(onScreen));
+  reduced.addEventListener('change', () => sync(onScreen));
+}
+
 let cleanup = () => {};
 
 function setup() {

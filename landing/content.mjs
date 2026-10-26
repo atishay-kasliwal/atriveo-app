@@ -51,7 +51,7 @@ export const stages = [
     label: 'Submit',
     title: 'The same PDF reaches the form. You press submit.',
     body:
-      'Apply opens the employer’s page with the Chrome companion beside it. It carries the resume you viewed, checked against the exact file you saw, plus your name, email and links ready to copy or paste. Attach fills supported upload fields; any other form keeps a download.',
+      'Apply opens the employer’s page and a small Chrome companion window at the bottom right of your screen, which you can drag anywhere. It carries the resume you viewed, checked against the exact file you saw, plus your name, email and links ready to copy or paste. Attach fills supported upload fields; any other form keeps a download.',
     detail: 'Opening a form is counted as opened, not applied.',
   },
 ];

@@ -70,11 +70,16 @@ h1>span,.closing h2>span,.guide-hero h1>span,.missing h1>span{color:var(--blue)}
 .route-heading{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:16px}
 .route-heading-note{letter-spacing:0;text-transform:none;font-size:13px}
 .route-drawing{position:relative;aspect-ratio:1;margin-block:8px}
-.route-drawing>svg{width:100%;height:100%;overflow:visible}
+.route-drawing>svg{position:relative;z-index:1;width:100%;height:100%;overflow:visible}
+/* A Blender loop behind the route (resume pages gliding through the four stops). Rendered on pure black and blended with
+   screen, so the black vanishes into the page and only the glow and the pages show; edges fade so no frame is visible. */
+.route-motion{position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;pointer-events:none;mix-blend-mode:screen;opacity:.92;
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 9%,#000 91%,transparent),linear-gradient(to bottom,transparent,#000 9%,#000 91%,transparent);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(to right,transparent,#000 9%,#000 91%,transparent),linear-gradient(to bottom,transparent,#000 9%,#000 91%,transparent);mask-composite:intersect}
 .route-track{stroke:var(--track);stroke-width:3}
 .route-fill{stroke:var(--blue);stroke-width:3;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:0}
 .route-dot{fill:var(--blue);stroke:var(--paper);stroke-width:4}
-.route-stops{position:absolute;inset:0}
+.route-stops{position:absolute;inset:0;z-index:2}
 .route-stop{position:absolute;translate:-50% -50%;display:flex;align-items:center;gap:9px;white-space:nowrap;border:1px solid var(--shot-line);border-radius:99px;padding:11px 16px;background:var(--raise);color:var(--ink);font-size:14px;font-weight:500;min-height:44px;cursor:pointer;transition:background .3s var(--ease),color .3s var(--ease),translate .3s var(--ease),border-color .3s var(--ease)}
 .route-stop:hover{translate:-50% calc(-50% - 3px);border-color:var(--blue);color:var(--blue)}
 .route-stop[aria-pressed=true]{background:var(--action);border-color:var(--blue);color:#fff}
@@ -288,3 +293,4 @@ h2{font-size:clamp(40px,5vw,76px);font-weight:500;letter-spacing:-.058em;line-he
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+@media (prefers-reduced-motion:reduce){.route-motion{display:none}}
