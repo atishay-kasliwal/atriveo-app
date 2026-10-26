@@ -175,3 +175,15 @@ test('pipeline stages of one scrape cycle have their own session ids seconds apa
   assert.deepEqual(runs.map((r) => r.added), [66, 66, 66, 66, 66], 'four stages add up to one run');
   assert.equal(new Set(runs.map((r) => r.finishedAt.slice(0, 13))).size, 5, 'five different hours, not five stages of one hour');
 });
+
+test('a page is prepared in parallel but still taken in ranked order: jobs without a resume file are skipped and the page fills from later ones', async () => {
+  invalidateMatchingQueue();
+  const fit = computeFit(JD, 'Backend Engineer');
+  const jobs = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => job(i, { ...structuredClone(fit), score: 99 - i }));
+  for (const i of [0, 2]) jobs[i].resume.pdf_path = path.join(dir, `missing-${i}`, 'resume.pdf'); // no file on this server
+  const db = fakeDb(jobs, { descriptions: Object.fromEntries(jobs.map((j) => [j.job_url, JD])) });
+  const first = await matchingQueue(db, { limit: 3, now: NOW, learn: false });
+  assert.deepEqual(first.jobs.map((j) => j.id), [1, 3, 4].map((i) => jobs[i].job_url), 'ranked order, the two without files skipped');
+  const second = await matchingQueue(db, { limit: 3, now: NOW, learn: false, exclude: first.jobs.map((j) => j.key) });
+  assert.deepEqual(second.jobs.map((j) => j.id), [5, 6, 7].map((i) => jobs[i].job_url), 'the next page continues from there');
+});

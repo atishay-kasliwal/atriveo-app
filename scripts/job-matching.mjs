@@ -208,19 +208,32 @@ async function answerQueue(db, { limit = 8, offset = 0, now = new Date(), compan
   const stats = { appliedToday: confirmedApplicationCount(confirmed,swipes,{now,timeZone}), applied: confirmedApplicationCount(confirmed,swipes), opened: 0, skipped: 0, saved: 0, remaining: allRanked.length };
   const known = new Set(docs.map(d=>d.job_url));
   for(const swipe of swipes) if(known.has(swipe.job_url)&&swipe.source==='job-matching'){if(swipe.direction==='right')stats.opened++;else if(swipe.direction==='left')stats.skipped++;else if(swipe.direction==='later')stats.saved++;}
-  // A page is the rows with a resume file and a page image; others are skipped, not shown half-ready.
+  // A page is the rows with a resume file and a page image; others are skipped, not shown half-ready. A first view of a job
+  // makes its page image and (with R2 set up) checks it is stored: that is a few network round trips and a pdftoppm each, so a
+  // page's candidates are prepared together, then taken in ranked order, instead of one after another (7-11 s for 8 jobs).
   const rows = [];
   let skipped = 0;
-  for (const d of ranked.slice(offset)) {
-    if (rows.length >= limit) break;
-    const pdf = d.resume.pdf_path;
-    if (!fs.existsSync(pdf) || !(await ensureResumeImage(pdf))) { skipped++; continue; }
-    // With R2 set up, the resume and its page image are kept there too (once per file; the answer says where).
-    if (storeFromEnv() && !published.has(pdf)) {
-      const r = await publishResume(pdf);
-      if (r.object) { d.resume.object = r.object; published.add(pdf); }
+  const candidates = ranked.slice(offset);
+  const ready = new Map();
+  for (let i = 0; i < candidates.length && rows.length < limit; i += limit) {
+    const chunk = candidates.slice(i, i + limit);
+    await Promise.all(chunk.map(async (d) => { const pdf = d.resume.pdf_path; ready.set(d, fs.existsSync(pdf) && Boolean(await ensureResumeImage(pdf))); }));
+    for (const d of chunk) {
+      if (rows.length >= limit) break;
+      if (ready.get(d)) rows.push(d); else skipped++;
     }
-    rows.push(d);
+  }
+  // With R2 set up, the resume and its page image are kept there too. Once stored the job carries the reference
+  // (resume.object.image_key), so this runs once per file ever, not once per server start.
+  if (storeFromEnv()) {
+    await Promise.all(rows.map(async (d) => {
+      const pdf = d.resume.pdf_path;
+      if (published.has(pdf) || d.resume.object?.image_key) return;
+      const r = await publishResume(pdf);
+      if (!r.object) return;
+      d.resume.object = r.object; published.add(pdf);
+      await db.collection("jobs").updateMany?.({ job_url: d.job_url, "resume.pdf_path": pdf }, { $set: { "resume.object": r.object, "resume.object_error": null } }).catch(() => {});
+    }));
   }
   const urls = rows.map((d) => d.job_url);
   // Ranking read only part of each saved Fit; a shown job gets the whole one (a Fit computed in this request is whole already).
