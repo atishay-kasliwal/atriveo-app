@@ -5,14 +5,19 @@ export function matchingSource(doc){
  try{const h=new URL(doc.job_url).hostname;return [[/(^|\.)linkedin\.com$/,'linkedin'],[/(^|\.)greenhouse\.(?:io|com)$/,'greenhouse'],[/(^|\.)lever\.co$/,'lever'],[/(^|\.)ashbyhq\.com$/,'ashby'],[/(^|\.)(?:myworkdayjobs|workday)\.com$/,'workday'],[/(^|\.)smartrecruiters\.com$/,'smartrecruiters']].find(([re])=>re.test(h))?.[1]||null;}catch{return null;}
 }
 export function matchingTimestamp(doc){const posted=Date.parse(doc.date_posted);return Number.isFinite(posted)?posted:(Date.parse(doc.run_at)||0);}
-const dayIn=(date,timeZone)=>new Intl.DateTimeFormat('en-CA',{timeZone,year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
+// One formatter per time zone: building one per job cost about a second on a full queue.
+const dayFormats=new Map();
+const dayIn=(date,timeZone)=>{let f=dayFormats.get(timeZone);if(!f){f=new Intl.DateTimeFormat('en-CA',{timeZone,year:'numeric',month:'2-digit',day:'2-digit'});dayFormats.set(timeZone,f);}return f.format(date);};
 export function filterMatchingJobs(docs,{period='7d',sources=[],role='',query='',timeZone='America/New_York',now=new Date()}={}){
  try{dayIn(now,timeZone);}catch{timeZone='America/New_York';}
  const today=dayIn(now,timeZone),dayOffset=n=>new Date(Date.parse(today+'T12:00:00Z')+n*86400000).toISOString().slice(0,10);
  const selected=new Set((Array.isArray(sources)?sources:String(sources).split(',')).filter(s=>MATCHING_SOURCES.includes(s)||s==='other'));
  const tokens=String(query).trim().toLowerCase().slice(0,200).split(/\s+/).filter(Boolean);
  return docs.filter(d=>{
-  const timestamp=matchingTimestamp(d),date=timestamp?dayIn(new Date(timestamp),timeZone):null;
+  // A posting date without a time (LinkedIn's "2026-10-25") is that calendar day. Read as midnight UTC it fell on the
+  // day before in New York, so "Today" showed no LinkedIn jobs.
+  const posted=String(d.date_posted||''),timestamp=matchingTimestamp(d);
+  const date=/^\d{4}-\d{2}-\d{2}$/.test(posted)?posted:timestamp?dayIn(new Date(timestamp),timeZone):null;
   if(period==='today'&&date!==today||period==='yesterday'&&date!==dayOffset(-1)||period==='7d'&&(!date||date<dayOffset(-6)||date>today))return false;
   if(selected.size&&!selected.has(matchingSource(d)||'other'))return false;
   if(role&&d.track!==role)return false;

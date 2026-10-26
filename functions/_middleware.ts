@@ -27,7 +27,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, env, next }) => {
   }
 
   // Allow assets, auth endpoints, landing page, and login through untouched.
-  if (ASSET_RE.test(path)) {
+  if (ASSET_RE.test(path) || path === "/robots.txt") {
     return next();
   }
   if (PUBLIC_API_PATHS.some((p) => path.startsWith(p))) {

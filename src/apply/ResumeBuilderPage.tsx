@@ -9,6 +9,7 @@ import { getTailorServerBase } from "../utils/tailorServer";
 import { TRACK_LABEL } from "./tracks";
 import ResumeLivePreview, { sbTitle, type Layout, type LiveFit, type PageTarget } from "./ResumeLivePreview";
 import { applyContentChanges, type ContentChange } from "../shared/resumeContent.mjs";
+import type { ResumeMatch, ResumeReadyState } from "./reviewQueue";
 import "./resume-builder.css";
 
 // Resume builder (/resume_builder): edit a resume's content (bullets, title, skills); the template never changes.
@@ -30,11 +31,14 @@ interface Loaded {
   source: Source; headerTitle: string | null; email: string; city: string; skills: string[]; sections: Section[];
   options: Record<string, Bullet[]>; roles: Array<{ role: string; kind: "experience" | "project"; label: string }>;
   current: { pdfPath: string; edited: boolean; generatedPdfPath: string | null; pages?: number | null; room?: number | null }; jd: string | null; layout: Layout;
+  ats?: Ats;
 }
+/** A resume's ATS score (scripts/ats, as Job matching and Today show it): Job Match against the posting, Resume Ready. */
+interface Ats { posting: boolean; match: ResumeMatch | null; ready: ResumeReadyState | null; note?: string | null; error?: string }
 interface AiSuggestion extends ContentChange { id: string; bi: number; suggested: string; reason: string; requirements: string[]; evidence_source: string[] }
 interface AiAnalysis { id: string; score: number; original_match_score: number; optimized_match_score: number; subscores: Record<string, number>; requirements: Array<{requirement: string; importance: string; status: "STRONG" | "PARTIAL" | "MISSING"; evidence: string}>; suggestions: AiSuggestion[]; atsProblems: string[]; resumeVersion: string; jdVersion: string; rejected: Array<{section:string;reason:string}> }
 interface AiPending { requestId:string; mode:"rewrite"|"question"; provider:string; instruction:string; source:Source; sections:Section[]; headerTitle:string; skills:string[]; sessionId:string; startedAt:number; input:string; baseline:string; doneIds?:string[]; draft?:{sections:Section[];skills:string}; }
-interface Draft { draftId: string; pdfPath: string; pages: number | null; room?: number | null; problems: string[]; jdMatch: { before: number | null; after: number | null; missing: string[] } | null; stacks?: Record<string, string[]> }
+interface Draft { draftId: string; pdfPath: string; pages: number | null; room?: number | null; problems: string[]; jdMatch: { before: number | null; after: number | null; missing: string[] } | null; stacks?: Record<string, string[]>; ats?: { before: Ats; after: Ats; ms: number } }
 /** Writing a bullet: rewording one (bi) or a new one (bi = -1, inserted at `at`) in section si. */
 interface Writing { si: number; bi: number; at?: number; text: string; issues: string[] | null; verbs: string[]; busy: boolean; error: string }
 /** The bullet picker: add to a section (at a place), or swap bullet bi for another. */
@@ -53,6 +57,11 @@ async function call<T>(path: string, body?: object): Promise<T> {
 const pdfUrl = (p: string, dl = false) => `${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(p)}${dl ? "&dl=1" : ""}`;
 const verb = (t: string) => (t.trim().match(/^([A-Za-z]+)/)?.[1] ?? "").toLowerCase();
 const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
+/** An email address, by the rule the server checks (scripts/resume-builder.mjs). */
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** "78 · required 5/7 · preferred 2/4": a Job Match for the hover text. */
+const matchLine = (m: ResumeMatch | null | undefined) => m?.score == null ? (m?.status === "stale" ? m.reason ?? "needs refresh" : "not scored")
+  : [String(m.score), m.required?.total ? `required ${m.required.matched}/${m.required.total}` : "", m.preferred?.total ? `preferred ${m.preferred.matched}/${m.preferred.total}` : "", m.coverage?.status === "incomplete" ? "incomplete requirement coverage, manual review needed" : ""].filter(Boolean).join(" · ");
 /** The bullet's text with its opening verb set apart (the verb is what the rules and a reader look at first). */
 const Text = ({ t }: { t: string }) => { const m = t.match(/^(\s*[A-Za-z]+)(.*)$/s); return m ? <><b className="rb-verb">{m[1]}</b>{m[2]}</> : <>{t}</>; };
 
@@ -67,7 +76,10 @@ function StartScreen() {
   const [building, setBuilding] = useState(false);
   const [error, setError] = useState("");
   const [list, setList] = useState<Pasted[] | null>(null);
-  const refresh = useCallback(() => { call<{ resumes: Pasted[] }>("pasted").then((r) => setList(r.resumes), () => setList([])); }, []);
+  // The header's email: the resume profile's until you change it (blank also means the profile's).
+  const [email, setEmail] = useState<string | null>(null);
+  const [defaultEmail, setDefaultEmail] = useState("");
+  const refresh = useCallback(() => { call<{ resumes: Pasted[]; email?: string }>("pasted").then((r) => { setList(r.resumes); setDefaultEmail(r.email ?? ""); }, () => setList([])); }, []);
   useEffect(() => { refresh(); }, [refresh]);
   // A first guess at company, title and location from the text; never over what you typed.
   useEffect(() => {
@@ -81,9 +93,11 @@ function StartScreen() {
   }, [jd]); // eslint-disable-line react-hooks/exhaustive-deps
   const set = (k: keyof typeof fields, v: string) => { setFields((f) => ({ ...f, [k]: v })); setTouched((t) => new Set(t).add(k)); };
   const tooShort = jd.trim().length < 300;
+  const emailValue = email ?? defaultEmail;
+  const badEmail = Boolean(emailValue.trim()) && !EMAIL.test(emailValue.trim());
   const build = async () => {
     setBuilding(true); setError("");
-    try { const r = await call<{ source: { pasted: string } }>("start", { jd, ...fields }); navigate(`/resume_builder?pasted=${r.source.pasted}`); }
+    try { const r = await call<{ source: { pasted: string } }>("start", { jd, ...fields, email: emailValue.trim() }); navigate(`/resume_builder?pasted=${r.source.pasted}`); }
     catch (e) { setError(e instanceof Error ? e.message : String(e)); setBuilding(false); }
   };
   const remove = async (p: Pasted) => {
@@ -101,10 +115,11 @@ function StartScreen() {
           <label><span>Company</span><input value={fields.company} disabled={building} placeholder="e.g. Acme" onChange={(e) => set("company", e.target.value)} /></label>
           <label><span>Role title</span><input value={fields.title} disabled={building} placeholder="e.g. Software Engineer" onChange={(e) => set("title", e.target.value)} /></label>
           <label><span>Location <small>Optional</small></span><input value={fields.location} disabled={building} placeholder="City, ST (optional)" onChange={(e) => set("location", e.target.value)} /></label>
+          <label><span>Email <small>On the resume</small></span><input type="email" autoComplete="email" value={emailValue} disabled={building} placeholder={defaultEmail || "you@example.com"} aria-invalid={badEmail} onChange={(e) => setEmail(e.target.value)} /></label>
         </div>
         <div className="rb-paste-acts">
-          <button className="rv-primary" disabled={building || tooShort || !fields.title.trim()} onClick={() => void build()}>{building ? "Building your resume…" : "Build my resume →"}</button>
-          <span className="apps-muted">{building ? "Choosing bullets and compiling: usually under half a minute." : tooShort && jd.trim() ? "Add at least 300 characters from the posting." : !fields.title.trim() && !tooShort ? "Add the role title." : "Your resume stays here, separate from Today."}</span>
+          <button className="rv-primary" disabled={building || tooShort || !fields.title.trim() || badEmail} onClick={() => void build()}>{building ? "Building your resume…" : "Build my resume →"}</button>
+          <span className="apps-muted">{building ? "Choosing bullets and compiling: usually under half a minute." : tooShort && jd.trim() ? "Add at least 300 characters from the posting." : badEmail ? "Check the email address." : !fields.title.trim() && !tooShort ? "Add the role title." : "Your resume stays here, separate from Today."}</span>
         </div>
         {error && <p className="td-error" role="alert">{error}</p>}
       </section>
@@ -473,6 +488,21 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   // The last PDF said "full": TeX squeezed the gaps, so the live preview squeezes too (kept while the next compiles).
   if (pdfRoom) squeezeRef.current = pdfRoom.pages === 1 && pdfRoom.lines <= 0;
   const roomChip = <span className={`rb-pages ${room ? `is-${room.tone}` : ""}`} title={pdfRoom ? "Measured on the compiled PDF. A line is one line of a bullet; most bullets are two." : "Estimated on the live preview (~) until the PDF compiles. A line is one line of a bullet; most bullets are two."}><i />{room ? room.label : "Measuring…"}</span>;
+  // ATS score: the saved resume's Job Match → this draft's (scored with the render, against the same posting).
+  const atsBefore = loaded?.ats ?? null;
+  const atsAfter = dirty && draftOf === edit && draft?.ats ? draft.ats.after : null;
+  const atsScoring = dirty && !atsAfter && Boolean(atsBefore?.posting);
+  const atsNow = atsAfter ?? atsBefore;
+  const scoreBefore = atsBefore?.match?.score ?? null, scoreAfter = atsAfter?.match?.score ?? null;
+  const counts = atsNow?.match ?? null; // required / preferred met, for the draft once scored
+  const atsTitle = !atsBefore ? "" : atsBefore.error ? atsBefore.error : !atsBefore.posting ? "No posting to score against: a general resume isn't tailored to a job. Resume Ready still checks the page."
+    : ["ATS Job Match: this resume against the job's posting, the same deterministic score Job matching and Today show.", `Saved resume: ${matchLine(atsBefore.match)}`,
+      atsAfter ? `This draft: ${atsAfter.error ?? matchLine(atsAfter.match)}` : atsScoring ? "This draft: scoring once it compiles…" : "", atsNow?.note ?? ""].filter(Boolean).join("\n");
+  const atsChip = atsBefore && <span className="rb-ats" title={atsTitle}>ATS {!atsBefore.posting ? <small>no posting</small> : atsBefore.error && !atsAfter ? <small>unavailable</small> : <>
+    <b>{scoreBefore ?? "–"}</b>{dirty && <> → {atsAfter ? <b className={scoreAfter != null && scoreBefore != null ? (scoreAfter > scoreBefore ? "is-up" : scoreAfter < scoreBefore ? "is-down" : "") : ""}>{scoreAfter ?? "–"}</b> : <small>scoring…</small>}</>}
+    {counts?.required?.total ? <small>· req {counts.required.matched}/{counts.required.total}{counts.preferred?.total ? ` · pref ${counts.preferred.matched}/${counts.preferred.total}` : ""}</small> : null}</>}</span>;
+  const ready = atsNow?.ready ?? null;
+  const readyChip = ready && <span className={`rb-ready is-${ready.status.toLowerCase().replace(" ", "-")}`} title={[`Resume Ready${atsAfter ? " (this draft)" : ""}: ${ready.status}`, ...ready.reasons, ready.skills_checked ? "" : "Skills were not checked against Fit yet"].filter(Boolean).join(". ")}>Resume Ready · {ready.status}</span>;
   const projects = (loaded?.roles ?? []).filter((r) => r.kind === "project" && !sections.some((s) => s.role === r.role));
   const resumeName = !loaded ? "" : loaded.source.kind === "track" ? `${TRACK_LABEL[loaded.source.track] ?? loaded.source.track} general resume` : loaded.source.company;
   const metaOf = (s: Section) => {
@@ -681,7 +711,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
         {error && <p className="ar-error" role="alert">{error}</p>}
         {!loaded && !error && <div className="td-empty">Loading the resume…</div>}
         {loaded && <>
-          <div className="rb-ph-top"><b>{resumeName}</b>{roomChip}</div>
+          <div className="rb-ph-top"><b>{resumeName}</b>{roomChip}{atsChip}</div>
           {problems}
           <div className="rb-ph-page">{livePreview}</div>
           <p className="rb-ph-hint">Tap any line to edit it.</p>
@@ -765,6 +795,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
                 <button role="tab" aria-selected={view === "pdf"} className={view === "pdf" ? "is-on" : ""} onClick={() => setView("pdf")}>PDF</button>
               </span>
               {roomChip}
+              {atsChip}{readyChip}
               {dirty?pdfStatus:savedAt?<span className="rb-saved">Saved ✓</span>:pdfStatus}
               {draft?.jdMatch && <span className="rb-match" title={draft.jdMatch.missing.length ? `Still missing: ${draft.jdMatch.missing.join(", ")}` : "Every skill this job names is on it"}>JD {draft.jdMatch.before ?? "–"} → <b>{draft.jdMatch.after ?? "–"}</b></span>}
               <span className="rb-actions">

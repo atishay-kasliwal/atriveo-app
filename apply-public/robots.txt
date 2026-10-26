@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+Allow: /landing/
+Sitemap: https://apply.atriveo.com/landing/sitemap.xml

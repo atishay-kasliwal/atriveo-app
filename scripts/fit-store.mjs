@@ -22,9 +22,9 @@ export function compactFit(result, { jdChars = null } = {}) {
   };
 }
 
-export const fitIsCurrent = (fit) => {
+// `id` lets a caller checking many Fits hash the bank once instead of once per job (it is ~0.1 ms each).
+export const fitIsCurrent = (fit, id = fitIdentity()) => {
   if (!fit || (fit.score !== null && typeof fit.score !== "number")) return false;
-  const id = fitIdentity();
   return fit.config_hash === id.config_hash && fit.master_hash === id.master_hash && fit.candidate_hash === id.candidate_hash && fit.shape === id.shape
     && fit.as_of?.slice(0, 7) === new Date().toISOString().slice(0, 7);
 };
@@ -39,19 +39,23 @@ export function computeFit(jdText, title) {
  * Make sure up to `max` of these job documents carry a current Fit, saving each to jobs.fit. Returns url -> fit for every
  * document that has one afterwards. A failure to save never fails the caller (the Fit is still returned).
  */
-export async function ensureFit(db, docs, { max = 40 } = {}) {
+export async function ensureFit(db, docs, { max = 40, budgetMs = Infinity } = {}) {
   const have = new Map();
   const stale = [];
+  const id = fitIdentity();
   for (const d of docs) {
-    if (fitIsCurrent(d.fit)) have.set(d.job_url, d.fit);
+    if (fitIsCurrent(d.fit, id)) have.set(d.job_url, d.fit);
     else stale.push(d);
   }
   const todo = stale.slice(0, max);
-  if (!todo.length) return have;
+  if (!todo.length || budgetMs <= 0) return have;
   const rows = await db.collection("descriptions").find({ job_url: { $in: todo.map((d) => d.job_url) } }, { projection: { _id: 0, job_url: 1, description: 1 } }).toArray();
   const jd = new Map(rows.map((r) => [r.job_url, r.description]));
   const writes = [];
+  // A Fit takes ~200 ms of CPU; with `budgetMs` the caller gets what was done in that time and the rest stay missing.
+  const started = Date.now();
   for (const d of todo) {
+    if (Date.now() - started >= budgetMs) break;
     const text = jd.get(d.job_url);
     if (!text && d.fit) { have.set(d.job_url, d.fit); continue; } // no posting text now; keep what we had
     const fit = computeFit(text ?? "", d.title);
