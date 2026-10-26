@@ -24,7 +24,7 @@ interface HistoryRow {
   questionReviewStatus?: "open" | "complete" | null;
   submittedBy: string | null; submittedAt: string | null; attempts: number; domain: string | null; url: string; createdAt: string; updatedAt: string;
   /** What the employer's mail said after you applied (inbox watcher). */
-  outcome?: { status: "confirmed" | "rejected"; at: string | null; subject: string | null } | null;
+  outcome?: { status: "confirmed" | "rejected" | "assessment" | "interview" | "offer"; at: string | null; subject: string | null } | null;
   priority?: number;
   /** "extension": open in your browser (Apply with Atriveo); only Return to worker and Skip apply. */
   owner?: "engine" | "extension";
@@ -90,11 +90,14 @@ const STATUS_META: Record<Status, { label: string; icon: string; cls: string }> 
 const pct = (n: number | null) => (n === null ? "—" : `${Math.round(n * 100)}%`);
 const clock = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString([], { ...(new Date(iso).toDateString() === new Date().toDateString() ? {} : { month: "short", day: "numeric" }), hour: "numeric", minute: "2-digit" }) : null);
 
-interface InboxMail { id: string; at: string; kind: "applied" | "rejected"; subject: string; company: string | null; title: string | null }
+interface InboxMail { id: string; at: string; kind: "applied" | "rejected" | "assessment" | "interview" | "offer"; subject: string; company: string | null; title: string | null }
 interface InboxSummary {
   days: number;
   confirmed: number;
   rejected: number;
+  assessment?: number;
+  interview?: number;
+  offer?: number;
   recent: Array<InboxMail & { recordedIn: Array<"engine" | "tracker" | "feed">; note: string | null }>;
   confirm: Array<InboxMail & { target: "tracker" | "engine"; reason: string; candidates: Array<{ id: string; label: string }> }>;
 }
@@ -109,6 +112,8 @@ interface QueueReport {
   youApply?: Array<{ company: string; title: string; applyUrl: string; score: number | null; site: string }>;
 }
 
+const MAIL_LABEL = { applied: "Receipt", rejected: "Rejected", assessment: "Assessment", interview: "Interview", offer: "Offer" } as const;
+
 const RECORDED_IN = { engine: "engine", tracker: "tracker", feed: "job feed" } as const;
 
 function OutcomePill({ outcome }: { outcome: HistoryRow["outcome"] }) {
@@ -116,7 +121,7 @@ function OutcomePill({ outcome }: { outcome: HistoryRow["outcome"] }) {
   const rejected = outcome.status === "rejected";
   return (
     <span className={`apps-pill ${rejected ? "st-critical" : "st-good"}`} title={outcome.subject ? `From: "${outcome.subject}"` : undefined}>
-      <span aria-hidden>{rejected ? "✕" : "✓"}</span> {rejected ? "Rejected" : "Confirmed"}
+      <span aria-hidden>{rejected ? "✕" : "✓"}</span> {outcome.status === "confirmed" ? "Confirmed" : MAIL_LABEL[outcome.status]}
     </span>
   );
 }
@@ -135,7 +140,7 @@ function InboxConfirmItem({ item, onDone }: { item: InboxSummary["confirm"][numb
     finally { setBusy(false); }
   };
   return <article className="ins-mail-review" aria-busy={busy}>
-    <div className="ins-mail-heading"><CompanyLogo company={item.company} size="md" /><div><h3>{item.company ?? "Unknown company"}</h3><p>{item.title || "Role not named in this email"}</p></div><span className={`apps-tag ${item.kind === "rejected" ? "bad" : "good"}`}>{item.kind === "rejected" ? "Rejection" : "Receipt"}</span></div>
+    <div className="ins-mail-heading"><CompanyLogo company={item.company} size="md" /><div><h3>{item.company ?? "Unknown company"}</h3><p>{item.title || "Role not named in this email"}</p></div><span className={`apps-tag ${item.kind === "rejected" ? "bad" : "good"}`}>{MAIL_LABEL[item.kind]}</span></div>
     <div className="ins-mail-subject"><span className="ins-label">Email received · {when(item.at)}</span><p>{item.subject}</p></div>
     <p className="ins-mail-help">We couldn't confidently match this email to an application. Choose the correct application below.</p>
     <details className="ins-explanation"><summary>Why does this need review?</summary><p>{item.reason}</p></details>
@@ -161,13 +166,13 @@ function EmployerResponses({ inbox, onDone }: { inbox: InboxSummary; onDone: (me
   const index = selected ? waiting.indexOf(selected) : 0;
   const recentPage = Math.min(page, Math.max(0, Math.ceil(inbox.recent.length / 6) - 1));
   return <section className="ins-responses">
-    <div className="ins-view-heading"><div><h2>Employer responses</h2><p>Application receipts and rejections · last {inbox.days} days</p></div><div className="ins-response-counts"><span><b>{inbox.confirmed}</b> receipts</span><span><b>{inbox.rejected}</b> rejections</span></div></div>
+    <div className="ins-view-heading"><div><h2>Employer responses</h2><p>Employer emails · last {inbox.days} days</p></div><div className="ins-response-counts"><span><b>{inbox.confirmed}</b> receipts</span><span><b>{inbox.rejected}</b> rejections</span>{(["assessment", "interview", "offer"] as const).map(kind => <span key={kind}><b>{inbox[kind] ?? 0}</b> {kind === "assessment" ? "assessments" : kind === "interview" ? "interviews" : "offers"}</span>)}</div></div>
     <div className="ins-switch" role="group" aria-label="Employer response view"><button aria-pressed={mode === "review"} onClick={() => setMode("review")}>Needs a match <span>{waiting.length}</span></button><button aria-pressed={mode === "recent"} onClick={() => setMode("recent")}>Recent emails <span>{inbox.recent.length}</span></button></div>
     {mode === "review" ? selected ? <div className="ins-review-layout">
       <aside className="ins-review-context"><span className="ins-label">One email at a time</span><h3>Keep your results up to date.</h3><p>Link each response to the right role. Your application history will reflect the result.</p><div className="ins-pagination"><button className="apps-btn" aria-label="Previous email" disabled={index === 0} onClick={() => setSelectedId(`${waiting[index - 1].target}:${waiting[index - 1].id}`)}>←</button><span>{index + 1} of {waiting.length}</span><button className="apps-btn" aria-label="Next email" disabled={index >= waiting.length - 1} onClick={() => setSelectedId(`${waiting[index + 1].target}:${waiting[index + 1].id}`)}>→</button></div></aside>
       <InboxConfirmItem key={`${selected.target}:${selected.id}`} item={selected} onDone={message => { setResolved(ids => [...ids, `${selected.target}:${selected.id}`]); onDone(message); }} />
     </div> : <div className="ins-empty"><h3>You're all caught up.</h3><p>No emails need matching.</p><button className="apps-btn" onClick={() => setMode("recent")}>View recent emails</button></div> : <>
-      <ul className="ins-response-list">{inbox.recent.slice(recentPage * 6, recentPage * 6 + 6).map(m => <li key={m.id}><CompanyLogo company={m.company} size="sm" /><div className="ins-response-id"><strong>{m.company ?? "Unknown company"}</strong><span>{m.title ?? "Role not named"}</span><details><summary>Email details</summary><p>{m.subject}</p><p>{m.recordedIn.length ? `Recorded in ${m.recordedIn.map(w => RECORDED_IN[w]).join(", ")}` : "Not yet matched"}</p></details></div><span className={`apps-tag ${m.kind === "rejected" ? "bad" : "good"}`}>{m.kind === "rejected" ? "Rejected" : "Receipt"}</span><time>{when(m.at)}</time></li>)}</ul>
+      <ul className="ins-response-list">{inbox.recent.slice(recentPage * 6, recentPage * 6 + 6).map(m => <li key={m.id}><CompanyLogo company={m.company} size="sm" /><div className="ins-response-id"><strong>{m.company ?? "Unknown company"}</strong><span>{m.title ?? "Role not named"}</span><details><summary>Email details</summary><p>{m.subject}</p><p>{m.recordedIn.length ? `Recorded in ${m.recordedIn.map(w => RECORDED_IN[w]).join(", ")}` : "Not yet matched"}</p></details></div><span className={`apps-tag ${m.kind === "rejected" ? "bad" : "good"}`}>{MAIL_LABEL[m.kind]}</span><time>{when(m.at)}</time></li>)}</ul>
       {!inbox.recent.length && <div className="ins-empty">No employer emails in this period.</div>}
       {inbox.recent.length > 6 && <div className="ins-pagination"><button className="apps-btn" disabled={recentPage === 0} onClick={() => setPage(recentPage - 1)}>Previous</button><span>Page {recentPage + 1} of {Math.ceil(inbox.recent.length / 6)}</span><button className="apps-btn" disabled={(recentPage + 1) * 6 >= inbox.recent.length} onClick={() => setPage(recentPage + 1)}>Next</button></div>}
     </>}
@@ -712,10 +717,10 @@ export default function Applications({ header }: { header?: React.ReactNode }) {
               <section className="ins-panel"><div className="ins-view-heading"><div><h2>Your next steps</h2><p>Pick one thing to move forward.</p></div></div><div className="ins-next-steps">
                 <Link to="/"><span><strong>Continue your applications</strong><small>Open Today to continue jobs that are ready for you.</small></span><span>→</span></Link>
                 <Link to="/ready"><span><strong>Review ready applications</strong><small>Check your answers and approve the next submission.</small></span><span>→</span></Link>
-                <button onClick={() => setView('responses')}><span><strong>{data.inbox?.confirm.length ? `Match ${data.inbox.confirm.length} employer emails` : 'Review employer responses'}</strong><small>{data.inbox?.confirm.length ? 'A few emails need to be linked to the right role.' : 'See application receipts and rejections.'}</small></span><span>→</span></button>
+                <button onClick={() => setView('responses')}><span><strong>{data.inbox?.confirm.length ? `Match ${data.inbox.confirm.length} employer emails` : 'Review employer responses'}</strong><small>{data.inbox?.confirm.length ? 'A few emails need to be linked to the right role.' : 'See confirmations, assessments, interviews, offers, and rejections.'}</small></span><span>→</span></button>
                 {k.failed > 0 && <button onClick={() => showHistory('FAILED')}><span><strong>Check {k.failed} failed applications</strong><small>Review what happened and retry when appropriate.</small></span><span>→</span></button>}
               </div></section>
-              <section className="ins-panel"><div className="ins-view-heading"><div><h2>Recent employer responses</h2><p>Latest emails · last {data.inbox?.days ?? 60} days</p></div><button className="apps-link" onClick={() => setView('responses')}>View all →</button></div><ul className="ins-recent-preview">{(data.inbox?.recent ?? []).slice(0,4).map(mail => <li key={mail.id}><CompanyLogo company={mail.company} size="sm" /><div><strong>{mail.company ?? 'Unknown company'}</strong><span>{mail.title || 'Role not named'}</span></div><span className={`apps-tag ${mail.kind === 'rejected' ? 'bad' : 'good'}`}>{mail.kind === 'rejected' ? 'Rejected' : 'Receipt'}</span></li>)}</ul>{!data.inbox?.recent.length && <p className="ins-empty">No employer responses yet.</p>}</section>
+              <section className="ins-panel"><div className="ins-view-heading"><div><h2>Recent employer responses</h2><p>Latest emails · last {data.inbox?.days ?? 60} days</p></div><button className="apps-link" onClick={() => setView('responses')}>View all →</button></div><ul className="ins-recent-preview">{(data.inbox?.recent ?? []).slice(0,4).map(mail => <li key={mail.id}><CompanyLogo company={mail.company} size="sm" /><div><strong>{mail.company ?? 'Unknown company'}</strong><span>{mail.title || 'Role not named'}</span></div><span className={`apps-tag ${mail.kind === 'rejected' ? 'bad' : 'good'}`}>{MAIL_LABEL[mail.kind]}</span></li>)}</ul>{!data.inbox?.recent.length && <p className="ins-empty">No employer responses yet.</p>}</section>
             </div>
             <div className="ins-health"><span><i className={data.worker?.online ? 'is-online' : ''} />{data.worker ? data.worker.online ? 'Worker online' : 'Worker offline' : 'Worker status unavailable'}</span>{cur && <span>{cur.status === 'SUBMITTING' ? 'Submitting' : 'Filling'} · {cur.company}</span>}{data.killSwitch && !data.killSwitch.enabled && <span className="apps-tag bad">Submissions paused{data.killSwitch.reason ? `: ${data.killSwitch.reason}` : ''}</span>}<button className="apps-link" onClick={() => setView('system')}>System details →</button></div>
           </section>}
