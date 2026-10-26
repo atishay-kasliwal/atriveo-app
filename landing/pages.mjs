@@ -6,7 +6,7 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 const arrow = '<span class="arrow" aria-hidden="true">↗</span>';
 const cta = (label = 'Open the workspace', cls = 'primary', href = site.workspace) =>
   `<a class="button ${cls}" href="${href}"><span>${label}</span>${arrow}</a>`;
-const brand = '<span class="wordmark">atriveo<span>.</span></span>';
+const brand = '<img class="brand-lockup" src="/landing/assets/atriveo-horizontal-dark.svg" width="145" height="42" alt="Atriveo">';
 const n2 = (i) => String(i + 1).padStart(2, '0');
 
 function picture({ name, width, height, alt, eager = false }) {
@@ -32,7 +32,7 @@ ${noindex ? '<meta name="robots" content="noindex,follow">' : '<meta name="robot
 <link rel="canonical" href="${canonical}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Atriveo"><meta property="og:locale" content="en_US"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${canonical}"><meta property="og:image" content="${og}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Atriveo: one job, one resume, carried through">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(description)}"><meta name="twitter:image" content="${og}">
-<link rel="icon" type="image/svg+xml" href="/landing/assets/favicon.svg"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="/landing/assets/favicon.svg?v=3"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/landing/assets/fonts/atriveo-sans-400_700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/landing/styles.css">
 <script type="application/ld+json">${JSON.stringify(ld)}</script>

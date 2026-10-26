@@ -49,7 +49,7 @@ export default function AdminLogin() {
   return (
     <main className="apply-login">
       <div className="apply-login-card">
-        <div className="apply-login-brand"><ApplyLogo height={34} /><span className="apply-brand-by">by Atriveo</span></div>
+        <div className="apply-login-brand"><ApplyLogo height={48} /></div>
         <h1>{mode === "login" ? "Admin sign in" : "Create the admin account"}</h1>
         <p className="apply-login-sub">The application engine console. Only allowlisted admin emails can sign in or sign up.</p>
 

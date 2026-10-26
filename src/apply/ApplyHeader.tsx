@@ -20,9 +20,9 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
   const waiting = counts ? (counts.fillable ?? 0) + counts.ready : null;
   return (
     <div className="apply-header">
-      <a className="apply-brand" href="/" aria-label="Atriveo Apply by Atriveo home">
-        <ApplyLogo height={22} />
-        <span className="apply-brand-by">by Atriveo</span>
+      <a className="apply-brand" href="/" aria-label="Atriveo home">
+        <ApplyLogo height={32} />
+
       </a>
       <nav className="apply-nav" aria-label="Console">
         <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/job-matching" ? "page" : undefined}>
