@@ -50,3 +50,16 @@ test('today counting handles both occurrences of the fall-back hour and midnight
  assert.equal(confirmedApplicationCount(apps,[],{now:new Date('2026-11-02T04:59:59Z')}),2);
  assert.equal(confirmedApplicationCount(apps,[],{now:new Date('2026-11-02T05:00:00Z')}),0);
 });
+
+test('a posting date without a time counts as that calendar day in every time zone (LinkedIn jobs on Today)', () => {
+  const now = new Date('2026-10-25T23:30:00Z'); // 7:30 PM in New York, already Oct 26 in UTC
+  const docs = [
+    { job_url: 'https://www.linkedin.com/jobs/view/1', site: 'linkedin', date_posted: '2026-10-25', run_at: '2026-10-25T22:00:00Z', title: 'AI Engineer' },
+    { job_url: 'https://www.linkedin.com/jobs/view/2', site: 'linkedin', date_posted: '2026-10-24', run_at: '2026-10-25T22:00:00Z', title: 'AI Engineer' },
+    { job_url: 'https://x.jobdiva.com/1', site: 'staffing', date_posted: '2026-10-25T15:00:00+00:00', run_at: '2026-10-25T16:00:00Z', title: 'Engineer' },
+  ];
+  const ids = (period, timeZone = 'America/New_York') => filterMatchingJobs(docs, { period, now, timeZone }).map((d) => d.job_url);
+  assert.deepEqual(ids('today'), ['https://www.linkedin.com/jobs/view/1', 'https://x.jobdiva.com/1']);
+  assert.deepEqual(ids('yesterday'), ['https://www.linkedin.com/jobs/view/2']);
+  assert.deepEqual(ids('today', 'America/Los_Angeles'), ['https://www.linkedin.com/jobs/view/1', 'https://x.jobdiva.com/1']);
+});

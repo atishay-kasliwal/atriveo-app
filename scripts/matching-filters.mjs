@@ -14,7 +14,10 @@ export function filterMatchingJobs(docs,{period='7d',sources=[],role='',query=''
  const selected=new Set((Array.isArray(sources)?sources:String(sources).split(',')).filter(s=>MATCHING_SOURCES.includes(s)||s==='other'));
  const tokens=String(query).trim().toLowerCase().slice(0,200).split(/\s+/).filter(Boolean);
  return docs.filter(d=>{
-  const timestamp=matchingTimestamp(d),date=timestamp?dayIn(new Date(timestamp),timeZone):null;
+  // A posting date without a time (LinkedIn's "2026-10-25") is that calendar day. Read as midnight UTC it fell on the
+  // day before in New York, so "Today" showed no LinkedIn jobs.
+  const posted=String(d.date_posted||''),timestamp=matchingTimestamp(d);
+  const date=/^\d{4}-\d{2}-\d{2}$/.test(posted)?posted:timestamp?dayIn(new Date(timestamp),timeZone):null;
   if(period==='today'&&date!==today||period==='yesterday'&&date!==dayOffset(-1)||period==='7d'&&(!date||date<dayOffset(-6)||date>today))return false;
   if(selected.size&&!selected.has(matchingSource(d)||'other'))return false;
   if(role&&d.track!==role)return false;
