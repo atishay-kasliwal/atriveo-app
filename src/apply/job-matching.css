@@ -155,3 +155,70 @@
 @media(prefers-reduced-motion:reduce){.jm-applied-card{animation:none}}
 @media(max-width:800px){.jm-applied-card{bottom:120px;right:12px}}
 
+
+/* One compact job block: title, fit numbers, warning and facts. Its edge and verdict are colour coded:
+   clear (green), caution (amber), blocker (red), so the applications worth attention stand out. */
+.rv-page.jm-page{--jm-red:#ee8a80;--tone:var(--jm-green)}
+.jm-job-block{--tone:var(--jm-green);display:flex;flex-direction:column;gap:7px;min-width:0;padding:9px 12px 8px;background:var(--card-bg);border:1px solid var(--border-col);border-left:4px solid var(--tone);border-radius:8px}
+.jm-job-block.is-caution{--tone:var(--jm-amber)}.jm-job-block.is-blocker{--tone:var(--jm-red)}
+.jm-job-block{border-color:color-mix(in oklab,var(--tone) 38%,var(--border-col));border-left-color:var(--tone)}
+.jm-block-top{display:flex;align-items:center;gap:10px;min-width:0}
+.jm-block-title{min-width:0;flex:1}.jm-block-title h1{margin:0;font-size:17px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.jm-hide-company{flex:0 1 auto;min-width:0;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:inherit;font-size:11px;padding:5px 9px;border:1px solid var(--border-col);border-radius:6px;background:transparent;color:var(--muted-fg);cursor:pointer}
+.jm-hide-company:hover:not(:disabled){border-color:var(--jm-red);color:var(--foreground)}.jm-hide-company:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.jm-job-block .jm-queue-context{align-self:center;display:flex;align-items:center;gap:6px;font-size:11px}.jm-job-block .jm-queue-context a{display:inline;font-size:16px;padding:0}
+.jm-job-block .jm-decision-strip{padding:0;border:0;border-radius:0;background:transparent;flex-wrap:nowrap;column-gap:0;row-gap:0}
+.jm-job-block .jm-score-ring{width:46px;height:46px;flex:0 0 46px;margin:0 12px 14px 0;box-shadow:none}.jm-job-block .jm-score-ring strong{font-size:19px}
+.jm-job-block .jm-score-ring{background:radial-gradient(closest-side,var(--card-bg) 86%,transparent 88%),conic-gradient(var(--tone) var(--score),var(--secondary-bg) 0)}
+.jm-job-block .jm-decision-strip>.jm-score-metric{min-width:78px;max-width:150px;padding:0 12px;gap:3px}.jm-job-block .jm-decision-strip strong{font-size:18px}
+.jm-job-block .jm-verdict{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-size:12px;font-weight:600;padding:6px 10px;border:1px solid color-mix(in oklab,var(--tone) 55%,transparent);color:var(--tone);background:color-mix(in oklab,var(--tone) 12%,transparent)}
+.jm-verdict>i{font-style:normal;font-size:11px;width:15px;height:15px;border-radius:50%;display:grid;place-items:center;background:var(--tone);color:var(--card-bg);line-height:1}
+.jm-verdict.is-clear{--tone:var(--jm-green)}.jm-verdict.is-caution{--tone:var(--jm-amber)}.jm-verdict.is-blocker{--tone:var(--jm-red)}
+.jm-job-block .jm-confidence{display:flex;flex:0 0 auto;margin:0 0 0 12px;max-width:130px;font-size:10px;line-height:1.3;justify-content:flex-start;color:var(--muted-fg)}
+.jm-warning{display:flex;align-items:center;gap:8px;margin:0;padding:6px 9px;border-radius:6px;font-size:12px;line-height:1.35;color:var(--foreground);background:color-mix(in oklab,var(--tone) 11%,transparent);border:1px solid color-mix(in oklab,var(--tone) 40%,transparent)}
+.jm-warning.is-caution{--tone:var(--jm-amber)}.jm-warning.is-blocker{--tone:var(--jm-red)}
+.jm-warning>i{font-style:normal;flex:0 0 auto;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;background:var(--tone);color:var(--card-bg)}
+.jm-warning>span{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.jm-warning>small{flex:0 0 auto;color:var(--muted-fg);font-size:10px}
+.jm-block-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.jm-block-foot .jm-facts{flex:1 1 auto;min-width:0}
+.jm-location{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;color:var(--foreground);white-space:nowrap}.jm-location svg{color:var(--muted-fg)}
+/* Tighter workspace so the block, tabs, overview, similar jobs and footer all fit without scrolling. */
+.jm-workspace{gap:7px;overflow:hidden}
+.jm-toolbar{padding:0}.jm-toolbar .jm-tabs button{padding:5px 10px}
+.jm-content{padding:0}.jm-assessment-note{margin:0 0 6px}.jm-assessment-note>summary{padding:6px 10px}
+.jm-overview-grid{gap:6px}.jm-card{padding:8px 10px}.jm-card h2{margin:0 0 4px}
+.jm-overview-grid .jm-proof-row{padding:5px 0}
+.jm-similar{padding-top:6px}.jm-similar>header{margin-bottom:5px}.jm-similar>div>button{padding:5px 7px}
+.jm-layout{padding-top:8px;padding-bottom:6px}.jm-actions{padding:7px 14px}
+.jm-runs,.jm-hidden-list{list-style:none;margin:0;padding:0 4px 4px;display:flex;flex-direction:column;gap:2px}
+.jm-runs li{display:grid;grid-template-columns:1fr auto;grid-template-areas:"when jobs" "kind jobs";gap:0 12px;padding:8px 6px;border-bottom:1px solid color-mix(in oklab,var(--border-col) 65%,transparent)}
+.jm-runs li:last-child{border-bottom:0}.jm-runs b{grid-area:when;font-size:13px;font-weight:600}.jm-runs span{grid-area:kind;font-size:11px;color:var(--muted-fg)}.jm-runs em{grid-area:jobs;align-self:center;font-style:normal;font-size:12px;color:var(--foreground);font-variant-numeric:tabular-nums}
+.jm-hidden-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px;min-width:0}.jm-hidden-list li>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.jm-hidden-list .apps-btn{flex:0 0 auto;min-height:30px;padding:0 10px;font-size:11px}
+.jm-runs .jm-muted,.jm-hidden-list .jm-muted{padding:8px 6px;font-size:12px}
+@media(max-width:800px){.jm-hide-company{display:none}.jm-job-block .jm-decision-strip{flex-wrap:wrap;row-gap:6px}.jm-job-block .jm-verdict{margin-left:0}.jm-block-foot{flex-wrap:wrap}}
+/* Overview cards: each requirement on one line (name, then where the evidence is), tighter lists. */
+.jm-overview-grid .jm-proof-row{padding:4px 0;gap:7px}.jm-overview-grid .jm-proof-row>span:nth-child(2){flex-direction:row;align-items:baseline;gap:8px;flex-wrap:nowrap;overflow:hidden}
+.jm-overview-grid .jm-proof-row b{flex:0 0 auto}.jm-overview-grid .jm-proof-row small{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jm-overview-grid .jm-proof-icon{width:18px;height:18px;flex-basis:18px}
+.jm-overview-grid .jm-mini-skills{gap:4px}.jm-overview-grid .jm-mini-skills button{font-size:12px}.jm-overview-grid .jm-footnote{margin-top:5px}
+.jm-overview-grid .jm-role dl{gap:4px 10px}.jm-overview-grid .jm-edge{gap:3px}.jm-overview-grid .jm-edge-gap{padding-top:4px;margin-top:2px}
+.jm-overview-grid .jm-card p{margin:2px 0}
+@media(min-width:1401px){
+.jm-overview-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:none;grid-auto-rows:auto;align-items:start}
+.jm-overview-grid>.jm-why{grid-column:1;grid-row:1;align-self:stretch!important}.jm-overview-grid>.jm-concerns{grid-column:2;grid-row:1;align-self:stretch!important}
+.jm-overview-grid>.jm-skills-card{grid-column:1;grid-row:2;align-self:stretch!important}.jm-overview-grid>.jm-role{grid-column:2;grid-row:2;align-self:stretch!important}
+.jm-overview-grid>.jm-edge{grid-column:1/-1;grid-row:3;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:14px;align-items:center}
+.jm-overview-grid>.jm-edge>h2{grid-column:1/-1}.jm-overview-grid>.jm-edge>:not(h2):not(.jm-edge-gap){grid-column:1}
+.jm-overview-grid>.jm-edge>.jm-edge-gap{grid-column:2;grid-row:2/span 4;border-top:0;padding:0;margin:0;align-self:center}
+}
+.jm-overview-grid .jm-concerns p{font-size:11px;line-height:1.35}
+.jm-similar>div>button>span:not(.company-logo){gap:1px}.jm-similar button span span{-webkit-line-clamp:1}
+.jm-overview-grid>.jm-edge{align-content:start;row-gap:2px}.jm-overview-grid .jm-edge>b,.jm-overview-grid .jm-edge>p{margin:0}
+.jm-overview-grid .jm-concerns p{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;margin:1px 0}
+.jm-assessment-note{margin:0 0 5px}.jm-assessment-note>summary{padding:4px 10px}
+.jm-overview-grid .jm-role dl{align-content:start}
+@media(min-width:1401px){
+.jm-overview-grid>.jm-skills-card{grid-row:2/span 2}.jm-overview-grid>.jm-role{grid-row:2;align-self:start!important}
+.jm-overview-grid>.jm-edge{grid-column:2;grid-row:3;display:flex;flex-direction:column;align-items:stretch;align-self:stretch!important;gap:3px}
+.jm-overview-grid>.jm-edge>.jm-edge-gap{border-top:1px solid var(--border-col);padding-top:4px;margin-top:2px;grid-column:auto;grid-row:auto}
+}

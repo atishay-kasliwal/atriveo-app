@@ -17,6 +17,7 @@ import { ensureFit } from "./fit-store.mjs";
 const run = promisify(execFile);
 const IMAGE = "resume-page.png";
 const SOURCE = "job-matching";
+const HIDDEN = "matching_hidden_companies";
 const DAYS = 30;
 const FIT_PER_REQUEST = 40;
 // A Fit costs ~200 ms of CPU, so a request computes missing ones for at most this long; the rest are computed after it answers.
@@ -128,14 +129,15 @@ async function loadBase(db, now) {
   if (base && base.db === db && at >= base.at && at - base.at < BASE_MS) return base;
   const since = new Date(at - DAYS * 86_400_000);
   const filter = { run_at: { $gte: since }, "resume.status": "success", "resume.pdf_path": { $type: "string" } };
-  const [docs, applied, swipes, confirmed] = await Promise.all([
+  const [docs, applied, swipes, confirmed, hiddenRows] = await Promise.all([
     db.collection("jobs").find(filter, { projection: RANK_PROJECTION })
       .sort({ run_at: -1 }).limit(6000).toArray(),
     db.collection("applications").distinct("jobUrls"),
     db.collection("job_swipes").find({}, { projection: { _id: 0, job_url: 1, direction: 1, swiped_at: 1, applied_at: 1, source: 1 } }).toArray(),
     db.collection("applications").find({status:"APPLIED"},{projection:{_id:1,jobUrls:1,"lifecycle.appliedAt":1}}).toArray(),
+    db.collection(HIDDEN).find({}, { projection: { _id: 0, key: 1 } }).toArray().catch(() => []),
   ]);
-  base = { db, at, filter, docs, applied, swipes, confirmed };
+  base = { db, at, filter, docs, applied, swipes, confirmed, hidden: new Set(hiddenRows.map((h) => h.key)) };
   return base;
 }
 
@@ -169,7 +171,7 @@ export async function matchingQueue(db, opts = {}) {
 }
 
 async function answerQueue(db, { limit = 8, offset = 0, now = new Date(), company = null, jobUrl = null, exclude = [], learn = true, period = '7d', sources = [], role = '', query = '', timeZone = 'America/New_York', sort = 'latest' } = {}) {
-  const { docs: cached, applied, swipes, filter, confirmed } = await loadBase(db, now);
+  const { docs: cached, applied, swipes, filter, confirmed, hidden } = await loadBase(db, now);
   // Copies, so this request's Fits never leak into the cached rows.
   const docs = cached.map((d) => ({ ...d }));
   const taken = new Set(applied);
@@ -180,7 +182,7 @@ async function answerQueue(db, { limit = 8, offset = 0, now = new Date(), compan
   }
   const byUrl = new Map();
   for (const d of docs) {
-    if (taken.has(d.job_url) || d.apply_type === "closed" || byUrl.has(d.job_url)) continue;
+    if (taken.has(d.job_url) || d.apply_type === "closed" || byUrl.has(d.job_url) || hidden.has(companyKey(d.company))) continue;
     byUrl.set(d.job_url, d);
   }
   // Fit (master resume against the posting) is kept on each job; up to FIT_PER_REQUEST missing or stale ones are computed
@@ -273,4 +275,48 @@ export async function recordDecision(db, { jobUrl, decision, now = new Date() })
   invalidateMatchingQueue();
   await recordMatchingEvent(db, {jobUrl, kind: {apply:'apply_opened',skip:'not_apply',later:'saved'}[decision], now}).catch(()=>{});
   return { ok: true };
+}
+
+/** Companies the user is not interested in, newest first. Their postings stay out of the queue, rail and counts. */
+export async function hiddenCompanies(db) {
+  const rows = await db.collection(HIDDEN).find({}, { projection: { _id: 0, key: 1, name: 1, hidden_at: 1 } }).toArray();
+  return rows.map((r) => ({ key: r.key, name: r.name || r.key, hiddenAt: r.hidden_at ?? null })).sort((a, b) => String(b.hiddenAt).localeCompare(String(a.hiddenAt)));
+}
+
+/** Hide a company (Not interested) or bring it back. Returns the whole list. */
+export async function setCompanyHidden(db, { company, hidden = true, now = new Date() }) {
+  const name = String(company ?? "").trim().slice(0, 200);
+  if (!name) throw new Error("A company is required");
+  const key = companyKey(name);
+  if (hidden) await db.collection(HIDDEN).updateOne({ key }, { $set: { key, name, hidden_at: now.toISOString() } }, { upsert: true });
+  else await db.collection(HIDDEN).deleteOne({ key });
+  invalidateMatchingQueue();
+  return { ok: true, hidden: await hiddenCompanies(db) };
+}
+
+/**
+ * The last scrape runs, newest first. The job pipeline writes one `sessions` row per pipeline per run (same session_id,
+ * job_count = jobs it kept); a run is those rows together. The staffing scraper keeps its own `staffing_runs`.
+ */
+export async function recentScrapeRuns(db, { limit = 5 } = {}) {
+  const [sessions, staffing] = await Promise.all([
+    db.collection("sessions").find({ archived: { $ne: true } }, { projection: { _id: 0, session_id: 1, run_at: 1, job_count: 1 } }).sort({ run_at: -1 }).limit(300).toArray().catch(() => []),
+    db.collection("staffing_runs").find({}, { projection: { _id: 0, started_at: 1, finished_at: 1, new_jobs: 1, status: 1 } }).sort({ started_at: -1 }).limit(limit).toArray().catch(() => []),
+  ]);
+  // One scrape cycle runs several pipeline stages, each with its own session row seconds apart: sessions that finish within
+  // RUN_GAP_MS of each other are one run, with their job counts added.
+  const RUN_GAP_MS = 20 * 60_000;
+  const runs = [];
+  let open = null;
+  for (const s of sessions.map((x) => ({ at: isoOf(x.run_at), n: Number(x.job_count) || 0 })).filter((x) => x.at).sort((a, b) => b.at.localeCompare(a.at))) {
+    if (open && Date.parse(open.earliest) - Date.parse(s.at) <= RUN_GAP_MS) { open.added += s.n; open.earliest = s.at; continue; }
+    open = { kind: "Job search", finishedAt: s.at, earliest: s.at, added: s.n, status: "ok" };
+    runs.push(open);
+  }
+  for (const r of runs) delete r.earliest;
+  for (const r of staffing) {
+    const at = isoOf(r.finished_at);
+    if (at) runs.push({ kind: "Staffing", finishedAt: at, added: Number.isFinite(r.new_jobs) ? r.new_jobs : null, status: r.status === "partial" ? "partial" : "ok" });
+  }
+  return { ok: true, runs: runs.sort((a, b) => b.finishedAt.localeCompare(a.finishedAt)).slice(0, limit) };
 }

@@ -52,7 +52,7 @@ import { syncOverlay } from "./ac-bank-overlay.mjs";
 import { approveDraft, draftResult, startDraft } from "./bank-draft.mjs";
 import { applicationsAnalytics, applicationDetail, dismissJob, linkJobToApplication, markJobApplied, saveLinkedinDirect, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
 import { recordMatchingEvent } from "./matching-workspace.mjs";
-import { matchingQueue, recordDecision, resumeImagePath, invalidateMatchingQueue } from "./job-matching.mjs";
+import { matchingQueue, recordDecision, resumeImagePath, invalidateMatchingQueue, hiddenCompanies, setCompanyHidden, recentScrapeRuns } from "./job-matching.mjs";
 import { resumeFileRedirect } from "./resume-store.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
@@ -1881,6 +1881,44 @@ const server = http.createServer(async (req, res) => {
         const gzip = /\bgzip\b/.test(String(req.headers["accept-encoding"] || "")) && body.length > 1024;
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store", Vary: "Accept-Encoding", ...(gzip && { "Content-Encoding": "gzip" }) });
         res.end(gzip ? zlib.gzipSync(body, { level: 6 }) : body);
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
+  }
+
+  // GET /applications/matching-hidden — companies hidden from Matching ("Not interested"); POST {company, hidden} hides or restores one.
+  if (pathname === "/applications/matching-hidden" && (req.method === "GET" || req.method === "POST")) {
+    let raw = "";
+    req.on("data", (c) => { raw += c; if (raw.length > 10_000) req.destroy(); });
+    req.on("end", async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const data = await withMongo(async (db) => {
+          if (req.method === "GET") return { ok: true, hidden: await hiddenCompanies(db) };
+          const body = JSON.parse(raw || "{}");
+          return setCompanyHidden(db, { company: body?.company, hidden: body?.hidden !== false });
+        }, { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    });
+    return;
+  }
+
+  // GET /applications/scrape-runs — the last few scrape runs (when they finished, jobs added). Read-only.
+  if (req.method === "GET" && pathname === "/applications/scrape-runs") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const data = await withMongo((db) => recentScrapeRuns(db), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
       } catch (e) {
         res.writeHead(503, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
