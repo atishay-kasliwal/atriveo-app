@@ -12,7 +12,7 @@ Started 2026-10-08. Status: **Phase 1 built, plus writing your own bullets and t
 |---|---|---|
 | A Today card | **Edit** on the card (next to Resume) | The edited PDF becomes that job's resume: Fill, Easy Apply and the Resume button use it. **Revert to generated** undoes it. |
 | A track's general resume | Today → **Resumes** → Edit, or the **Resumes** tab → pick SWE / AI / Data Analyst / DS / FDE | Replaces that general resume (Today's Resumes menu serves it). The generated one is kept for **Revert**. |
-| A job description you paste | **Resumes** → **Start from a job description**: paste the posting; company, role title and location fill in from the text (`guessPosting`; correct them if needed; the title is required, since it steers the track and prints in the header) → **Build resume** | Built by the same pipeline as Today's resumes (`tailorOneAc`: track, bank bullets, skills; a borderline fit still builds, an eligibility block is refused with its reason), about 10 seconds, then opens in the editor with JD match. Saving edits it in place (**Revert** keeps the built one). Listed under **Your resumes** (Edit / Download / Delete). **Standalone**: never a job, never on Today, never queued. |
+| A job description you paste | **Resumes** → **Start from a job description**: paste the posting; company, role title and location fill in from the text (`guessPosting`; correct them if needed; the title is required, since it steers the track and prints in the header), and **Email** (prefilled with your resume profile's email; blank means that one; checked like the editor's) → **Build resume** | Built by the same pipeline as Today's resumes (`tailorOneAc`: track, bank bullets, skills; a borderline fit still builds, an eligibility block is refused with its reason), about 10 seconds, then opens in the editor with JD match. Saving edits it in place (**Revert** keeps the built one). Listed under **Your resumes** (Edit / Download / Delete). **Standalone**: never a job, never on Today, never queued. |
 
 In the editor:
 
@@ -87,6 +87,26 @@ column's width and height), so nothing scrolls on the right.
 - **JD skill match before → after** (jobs only; `ac-jd-skills.mjs`): shown, not enforced. Hover it for the skills
   the job names that the resume still misses.
 
+## ATS score (shown, not enforced)
+
+Beside the "1 page ✓" chip: **ATS 59 → 64 · req 6/8 · pref 2/4** and **Resume Ready · Review**. It is the same
+deterministic scorer as Job matching and Today (`scripts/ats`: `scoreAndSaveRun`, read back with `resumeMatchOf` /
+`resumeReadyOf`), so the numbers agree everywhere.
+
+- **At load** (`atsOf` in `loadResume`): the saved resume's Job Match and Resume Ready. Hover for the counts and,
+  for Resume Ready, its reasons.
+- **Every render**: the draft is scored against the same posting and returned as `ats: { before, after, ms }`; the
+  chip shows before → after (green up, red down) and "scoring…" while the draft compiles. Scoring takes about
+  0.1–0.2 s on top of a render of about 0.7–1 s, and a repeat render of the same draft reuses the saved score.
+- **The posting**: a job's comes from its generated run's `jd.txt` and `meta.json` (what the resume was tailored
+  to), else the job's description; a pasted resume's is what you pasted. A track's general resume has none: the
+  chip says **no posting** and only Resume Ready shows.
+- **Files**: `atsOf` writes `jd.txt`, `meta.json` (`role`) and `page-fill.json` beside a PDF when they're missing (a
+  draft's are always rewritten), then `ats-score.json`. **Save** keeps them with the PDF (a job's `edits/<n>/` gets
+  the whole draft folder; a track's or pasted folder gets them copied, and `generated/` keeps the built one's for
+  Revert), so Job matching and Today show the edited resume's score at once.
+- A PDF the scorer can't read shows **unavailable** (hover for why); rendering and saving never fail on scoring.
+
 ## How it works
 
 ```
@@ -115,7 +135,7 @@ Today card / track ──► GET  /tailor/resume-builder/load      loadResume() 
 | A job's saved edit | `<generated run folder>/edits/<n>/Atishay Kasliwal.pdf` (+ `builder.json`, `resume.tex`); always under the generated run, never nested in another edit |
 | Which PDF a job uses | Mongo `jobs.resume.pdf_path` (all documents of that job URL); `resume.generated_pdf_path` = the generated one while an edit is in use; `resume.edited_at` |
 | Its applications | `applications.resume.path` follows the job (not for APPLIED/SUBMITTING ones); `resume.sha256` is cleared so the file is verified again before it's attached; a pinned choice (`extension.resumeChoice`) is cleared |
-| A pasted resume | `tailored-resumes/pasted/<id>/` (PDF + `composition.json` + `resume.tex`; after an edit `builder.json`, the built one in `generated/`); Mongo `builder_resumes` `{ _id: id, company, title, location, jd, edited, createdAt, updatedAt }`. Built in `pasted/.build/<id>/` (deleted after). |
+| A pasted resume | `tailored-resumes/pasted/<id>/` (PDF + `composition.json` + `resume.tex`, and the ATS files `jd.txt`, `meta.json`, `page-fill.json`, `ats-score.json`; after an edit `builder.json`, the built one in `generated/`); Mongo `builder_resumes` `{ _id: id, company, title, location, jd, email?, edited, createdAt, updatedAt }` (`email` only when you chose one other than the profile's: the built resume is rendered again with it, and the editor opens with it). Built in `pasted/.build/<id>/` (deleted after). |
 | Your bullets in git | `scripts/export-bank-overlay.mjs` (below) writes them into `data/ac-bank`: a new one as `AC-U001.yaml` (`provenance.level: USER_WRITTEN`), a reword into that variant's `text` with the old wording in `earlier_texts` (the builder accepts both, like the overlay's `previous`). Bank file names are `AC-<n>.yaml` or `AC-U<n>.yaml` (`loadBank`, role meta, doctor, match-cli). |
 | A track's edited general resume | `tailored-resumes/general/<Track>/` (PDF + `builder.json` + `resume.tex`); the generated one in `general/<Track>/generated/` |
 
@@ -161,6 +181,8 @@ folders are new files, so nothing is ever overwritten).
 | 2026-10-08 | **Editor polish + phone view** (user asked): controls on hover, picker with line counts, editor and page linked, undo, drag; phones edit by tapping the page (a sheet for typing: the page redraws on each change, which would drop the keyboard). The live preview squeezes its gaps when the PDF says "full", as TeX does. |
 | 2026-10-08 | **Employers' tools line** (user asked): optional, set per resume in the builder, on the company line (not the title line, for parsers); generated resumes unchanged. New macro `\resumeSubheadingTools` in `scripts/ac-tex.mjs`. |
 | 2026-10-10 | **Employers' tools moved to the title line** (user asked: "skills should be with the job title, not with the place where I worked"), in generated resumes, the builder and its preview. `\resumeSubheadingTools` is gone. Readiness keeps its title_extra_text warning (3 points each, cap 9); the checker still credits the tools to that job. |
+| 2026-10-25 | **ATS score in the builder** (user asked): the same scorer as Job matching and Today, before → after on every render, saved with the PDF so the other pages update. Shown, never a Save gate. |
+| 2026-10-25 | **Email on the start form** (user asked): prefilled with the profile's; another one re-renders the built resume with the builder's own render (one extra compile) instead of threading it through the pipeline. |
 | 2026-10-08 | **Room measured on the compiled PDF** (exact, includes TeX's squeeze); the live estimate only fills in while compiling. |
 | 2026-10-08 | **Three ways to write**: this resume only, reword for the bank, new bullet (always to the bank). Bank bullets keep the bank's rules, including a verb of their own. |
 

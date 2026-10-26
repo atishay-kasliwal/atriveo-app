@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { MongoClient } from 'mongodb';
+import { spawnSync } from 'node:child_process';
 
 // A resume from a pasted job description (docs/resume-builder.md): the guess at company / title / location, the
 // pipeline's own build (tailorOneAc) into OUT_ROOT/pasted/<id>/, edit → save → revert, list and delete. It stays
@@ -75,6 +76,45 @@ test('paste → build → edit → save → revert → list → delete, never to
     assert.equal(fs.existsSync(dir), false);
     await assert.rejects(loadResume(db, { pasted: source.pasted }), /deleted/);
     await assert.rejects(deletePasted(db, '../etc'), BuilderError);
+  } finally {
+    await client.close();
+    await mongo.stop();
+    if (snapshots) fs.writeFileSync(SNAPSHOTS, snapshots);
+  }
+});
+
+test('the start screen\'s email: built into the header, shown in the editor, kept by later edits; a bad one is refused', { timeout: 300_000 }, async () => {
+  const snapshots = fs.existsSync(SNAPSHOTS) ? fs.readFileSync(SNAPSHOTS) : null;
+  const mongo = await MongoMemoryServer.create();
+  const client = await MongoClient.connect(mongo.getUri());
+  try {
+    const db = client.db('t');
+    const jd = fs.readFileSync(path.join(FIX, 'jd.txt'), 'utf8');
+    await assert.rejects(startPasted(db, { jd, title: 'Software Engineer', email: 'not-an-email' }), /isn't an email address/);
+    assert.equal(await db.collection('builder_resumes').countDocuments(), 0);
+    assert.equal(typeof (await listPasted(db)).email, 'string', 'the start screen prefills the profile\'s email');
+
+    const email = 'someone.else@example.org';
+    const { source } = await startPasted(db, { jd, company: 'Example Co', title: 'Software Engineer', email });
+    const dir = path.join(out, 'pasted', source.pasted);
+    assert.match(fs.readFileSync(path.join(dir, 'resume.tex'), 'utf8'), /mailto:someone\.else@example\.org/);
+    const text = spawnSync('pdftotext', [path.join(dir, 'Atishay Kasliwal.pdf'), '-'], { encoding: 'utf8' }).stdout;
+    assert.match(text, /someone\.else@example\.org/, 'the first PDF already has it');
+    assert.equal((await db.collection('builder_resumes').findOne({ _id: source.pasted })).email, email);
+
+    const r = await loadResume(db, { pasted: source.pasted });
+    assert.equal(r.email, email, 'the editor opens with it');
+    assert.equal(r.current.pages, 1);
+    assert.equal(r.current.edited, false);
+    // A pasted resume is scored against what you pasted.
+    assert.equal(r.ats.posting, true);
+    assert.ok(Number.isInteger(r.ats.match.score), JSON.stringify(r.ats));
+    assert.ok(fs.existsSync(path.join(dir, 'ats-score.json')) && fs.existsSync(path.join(dir, 'jd.txt')));
+
+    // An edit that doesn't name the email keeps it.
+    const draft = await renderDraft(db, { source: r.source, headerTitle: r.headerTitle, skills: r.skills, sections: r.sections });
+    assert.match(fs.readFileSync(path.join(path.dirname(draft.pdfPath), 'resume.tex'), 'utf8'), /mailto:someone\.else@example\.org/);
+    await deletePasted(db, source.pasted);
   } finally {
     await client.close();
     await mongo.stop();

@@ -11,6 +11,7 @@
 //   saveDraft    keeps a draft: a job gets <run dir>/edits/<n>/ and its resume (and its applications') point there;
 //                a track's general resume is replaced in place, the generated one kept in generated/
 //   revertJob    a job back to its generated resume
+//   atsOf        the ATS score (Job Match + Resume Ready, scripts/ats) of a resume folder, saved as its ats-score.json
 //   startPasted  a resume from a job description you paste: the pipeline's own build (tailorOneAc), kept under
 //                OUT_ROOT/pasted/<id>/ and listed in Mongo builder_resumes; standalone (never a job, never on Today)
 import crypto from "node:crypto";
@@ -29,6 +30,11 @@ import { loadResumeProfile } from "./resume-profile.mjs";
 import { lintBullet, openingVerb as bankVerb, resumeRoles, techPattern } from "./ac-bullet-rules.mjs";
 import { OVERLAY_COLLECTION, readOverlay, syncOverlay } from "./ac-bank-overlay.mjs";
 import { PROJECT_SLUG_TO_NAME, ROLE_SLUG_TO_NAME } from "./ac-role-meta.mjs";
+import { measurePdf } from "./ac-page-fill.mjs";
+import { readyBrief, resumeMatchOf, resumeReadyOf } from "./applications-analytics.mjs";
+import { loadAtsConfig } from "./ats/config.mjs";
+import { loadBank as loadAtsBank } from "./ats/match-cli.mjs";
+import { scoreAndSaveRun } from "./ats/persist.mjs";
 
 export const OUT_ROOT = process.env.TAILOR_OUT_ROOT?.trim() || path.join(os.homedir(), "Documents", "tailored-resumes");
 const PDF = "Atishay Kasliwal.pdf";
@@ -111,12 +117,74 @@ const roleKind = (bank) => Object.fromEntries([...new Set(bank.acs.map((a) => a.
 const labelOf = (role) => ROLE_SLUG_TO_NAME[role] || PROJECT_SLUG_TO_NAME[role] || role;
 
 async function jobDoc(db, jobUrl) {
-  const docs = await db.collection("jobs").find({ job_url: jobUrl }, { projection: { _id: 0, job_url: 1, company: 1, title: 1, location: 1, resume: 1 } }).toArray();
+  const docs = await db.collection("jobs").find({ job_url: jobUrl }, { projection: { _id: 0, job_url: 1, company: 1, title: 1, location: 1, resume: 1, "fit.ledger.skills": 1 } }).toArray();
   const doc = docs.find((d) => d.resume?.status === "success" && d.resume?.pdf_path) ?? null;
   if (!doc) throw new BuilderError("This job has no resume yet.");
   return { doc, docs };
 }
 const jdOf = async (db, jobUrl) => (await db.collection("descriptions").findOne({ job_url: jobUrl }, { projection: { description: 1 } }))?.description ?? null;
+
+// ── ATS score: the same deterministic scorer as Job matching and Today (scripts/ats) ─────────────────────────────
+
+/**
+ * The posting a resume is scored against: { jd, role } (role is the title the scorer aligns the headline with), or
+ * null for a track's general resume. A job's comes from its generated run (jd.txt and meta.json, what the resume was
+ * tailored to, as Job matching scores it), else the job's description; a pasted resume's from what you pasted.
+ */
+function postingFor(source, { doc = null, pasted = null, jd = null } = {}) {
+  if (source.kind === "job") {
+    const runDir = doc?.resume ? path.dirname(doc.resume.generated_pdf_path ?? doc.resume.pdf_path) : null;
+    let runJd = null;
+    try { runJd = runDir ? fs.readFileSync(path.join(runDir, "jd.txt"), "utf8") : null; } catch { /* older run */ }
+    const text = runJd?.trim() ? runJd : jd;
+    if (!String(text ?? "").trim()) return null;
+    return { jd: text, role: (runDir && readJson(path.join(runDir, "meta.json"))?.role) || doc?.title || source.title || null };
+  }
+  if (source.kind === "pasted") return String(pasted?.jd ?? "").trim() ? { jd: pasted.jd, role: pasted.title || source.title || null } : null;
+  return null;
+}
+
+/** The posting and the page measure beside a resume PDF, as a tailoring run leaves them (the scorer reads them there). */
+function preparePosting(dir, posting, { overwrite = false } = {}) {
+  const write = (name, text) => {
+    const f = path.join(dir, name);
+    if (!overwrite && fs.existsSync(f)) return;
+    try { if (fs.readFileSync(f, "utf8") === text) return; } catch { /* new */ }
+    fs.writeFileSync(f, text);
+  };
+  if (posting) {
+    write("jd.txt", posting.jd);
+    write("meta.json", `${JSON.stringify({ role: posting.role ?? null, written_by: "resume-builder" }, null, 2)}\n`);
+  }
+  // Resume Ready counts the empty lines under the last one (page-fill.json, as the build writes it).
+  const fill = path.join(dir, "page-fill.json");
+  if (overwrite || !fs.existsSync(fill)) {
+    try { const m = measurePdf(path.join(dir, PDF)); write("page-fill.json", `${JSON.stringify({ final_pages: m.pages, final_gap_pt: Math.max(0, m.bottom_gap_pt), written_by: "resume-builder" }, null, 2)}\n`); }
+    catch { /* no poppler: Resume Ready skips the empty-line check */ }
+  }
+}
+
+let atsCache = null;
+const atsInputs = () => (atsCache ??= { config: loadAtsConfig(), bank: loadAtsBank() });
+
+/**
+ * The ATS score of the resume in dir, saved beside it as ats-score.json (so Job matching and Today read the same):
+ * { posting, match: Job Match as resumeMatchOf gives it (score, required, preferred, coverage) or null, ready: Resume
+ * Ready (status, reasons) or null, note, error }. Never throws: a resume that can't be scored still renders and saves.
+ * A score saved for these exact inputs today is reused (scoreAndSaveRun), so a repeat costs a file hash.
+ */
+export function atsOf(dir, posting, { fit = null, overwrite = false } = {}) {
+  const pdf = path.join(dir, PDF);
+  try {
+    preparePosting(dir, posting, { overwrite });
+    const { saved } = scoreAndSaveRun(dir, atsInputs());
+    const match = posting ? resumeMatchOf(pdf) : null;
+    return { posting: Boolean(posting), match, ready: readyBrief(resumeReadyOf(pdf, fit)),
+      note: !posting ? "No posting to score against" : match?.score == null ? (saved.note ?? "Job Match needs manual review") : null };
+  } catch (e) {
+    return { posting: Boolean(posting), match: null, ready: null, note: null, error: `Couldn't score this resume: ${String(e?.message || e).slice(0, 200)}` };
+  }
+}
 
 // ── Resumes from a pasted job description ─────────────────────────────────────────────────────────────────────
 
@@ -167,10 +235,18 @@ export function guessPosting(jd) {
   return { company: tidy(company, 60), title: tidy(title, 90), location: tidy(location, 60) };
 }
 
-/** Build a resume for a pasted job description; returns { source } to open in the builder. */
-export async function startPasted(db, { jd, company = "", title = "", location = "" } = {}) {
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Build a resume for a pasted job description; returns { source } to open in the builder. email: the header's email
+ * (blank: the resume profile's); another than the profile's re-renders the built resume with it before it's kept.
+ */
+export async function startPasted(db, { jd, company = "", title = "", location = "", email = "" } = {}) {
   const text = String(jd || "").replace(/\r/g, "").trim().slice(0, 30_000);
   if (text.length < 300) throw new BuilderError("Paste the whole job description: a few paragraphs at least.");
+  const chosenEmail = tidy(email, 80);
+  if (chosenEmail && !EMAIL.test(chosenEmail)) throw new BuilderError(`"${chosenEmail}" isn't an email address`);
+  const ownEmail = chosenEmail && chosenEmail.toLowerCase() !== String(loadResumeProfile().email || "").toLowerCase() ? chosenEmail : null;
   const g = guessPosting(text);
   // The title steers the track and prints in the header, so it's never made up.
   const posting = { company: tidy(company, 60) || g.company || "Pasted job", title: tidy(title, 90) || g.title, location: tidy(location, 60) || g.location || null };
@@ -194,14 +270,29 @@ export async function startPasted(db, { jd, company = "", title = "", location =
     fs.rmSync(buildDir, { recursive: true, force: true });
   }
   const at = new Date().toISOString();
-  await db.collection(PASTED_COLLECTION).insertOne({ _id: id, ...posting, jd: text, edited: false, createdAt: at, updatedAt: at });
-  return { ok: true, source: { kind: "pasted", pasted: id, company: posting.company, title: posting.title, location: posting.location } };
+  await db.collection(PASTED_COLLECTION).insertOne({ _id: id, ...posting, jd: text, ...(ownEmail && { email: ownEmail }), edited: false, createdAt: at, updatedAt: at });
+  const source = { kind: "pasted", pasted: id, company: posting.company, title: posting.title, location: posting.location };
+  // Your email in the header: the built resume rendered again with it (the builder's own render, same template), kept
+  // as the generated resume; the record's email is what the editor shows for it.
+  if (ownEmail) {
+    try {
+      const base = await loadResume(db, source);
+      const draft = await renderDraft(db, { source, headerTitle: base.headerTitle, email: ownEmail, city: base.city, skills: base.skills, sections: base.sections });
+      if (draft.pages !== 1) throw new BuilderError(`With ${ownEmail} the resume runs to ${draft.pages ?? "?"} pages.`);
+      const dir = pastedDir(id);
+      for (const f of [PDF, "resume.tex", ...SCORE_FILES]) if (fs.existsSync(path.join(path.dirname(draft.pdfPath), f))) fs.copyFileSync(path.join(path.dirname(draft.pdfPath), f), path.join(dir, f));
+    } catch (e) {
+      await deletePasted(db, id);
+      throw e instanceof BuilderError ? e : new BuilderError(`Couldn't put your email on it: ${String(e?.message || e).slice(0, 300)}`);
+    }
+  }
+  return { ok: true, source };
 }
 
 /** Your pasted resumes, newest first. */
 export async function listPasted(db) {
   const docs = await db.collection(PASTED_COLLECTION).find({}, { projection: { jd: 0 } }).sort({ createdAt: -1 }).limit(50).toArray();
-  return { ok: true, resumes: docs.map((d) => ({ id: d._id, company: d.company, title: d.title, location: d.location ?? null, edited: Boolean(d.edited), createdAt: d.createdAt, updatedAt: d.updatedAt, pdfPath: fs.existsSync(path.join(pastedDir(d._id), PDF)) ? path.join(pastedDir(d._id), PDF) : null })) };
+  return { ok: true, email: loadResumeProfile().email || "", resumes: docs.map((d) => ({ id: d._id, company: d.company, title: d.title, location: d.location ?? null, edited: Boolean(d.edited), createdAt: d.createdAt, updatedAt: d.updatedAt, pdfPath: fs.existsSync(path.join(pastedDir(d._id), PDF)) ? path.join(pastedDir(d._id), PDF) : null })) };
 }
 
 /** Delete a pasted resume (its record and its folder). */
@@ -213,8 +304,14 @@ export async function deletePasted(db, id) {
   return { ok: true };
 }
 
-/** What the builder opens: { source, headerTitle, skills, sections, options, roles, current, jd }. */
-export async function loadResume(db, { jobUrl = null, track = null, appId = null, pasted = null } = {}) {
+/** What the builder opens: { source, headerTitle, skills, sections, options, roles, current, jd, ats }. */
+export async function loadResume(db, opts = {}) {
+  const { posting, fit, ...resume } = await openResume(db, opts);
+  return resume;
+}
+
+/** loadResume, plus what a draft is scored with: the posting ({ jd, role } or null) and the job's Fit. */
+async function openResume(db, { jobUrl = null, track = null, appId = null, pasted = null } = {}) {
   if (db) await syncOverlay(db);
   // An application (a Today card) edits the resume of its job: the first of its job URLs that has one.
   if (!jobUrl && appId) {
@@ -225,13 +322,15 @@ export async function loadResume(db, { jobUrl = null, track = null, appId = null
     jobUrl = withResume.job_url;
   }
   const bank = loadBank();
-  let source, dir, jd = null, generated = null;
+  let source, dir, jd = null, generated = null, posting = null, fit = null, pastedEmail = null;
   if (jobUrl) {
     const { doc } = await jobDoc(db, jobUrl);
     dir = path.dirname(doc.resume.pdf_path);
     generated = doc.resume.generated_pdf_path ?? null;
     source = { kind: "job", jobUrl, company: doc.company ?? "", title: doc.title ?? "", location: doc.location ?? null };
     jd = await jdOf(db, jobUrl);
+    posting = postingFor(source, { doc, jd });
+    fit = doc.fit ?? null;
   } else if (pasted) {
     const doc = await db.collection(PASTED_COLLECTION).findOne({ _id: String(pasted) });
     if (!doc) throw new BuilderError("That resume was deleted.");
@@ -239,6 +338,8 @@ export async function loadResume(db, { jobUrl = null, track = null, appId = null
     generated = fs.existsSync(path.join(dir, "generated", PDF)) ? path.join(dir, "generated", PDF) : null;
     source = { kind: "pasted", pasted: doc._id, company: doc.company ?? "", title: doc.title ?? "", location: doc.location ?? null };
     jd = doc.jd ?? null;
+    posting = postingFor(source, { pasted: doc });
+    pastedEmail = doc.email ?? null;
   } else if (track && GENERAL_RESUMES[track]) {
     dir = path.join(OUT_ROOT, "general", GENERAL_RESUMES[track].folder);
     generated = fs.existsSync(path.join(dir, "generated", PDF)) ? path.join(dir, "generated", PDF) : null;
@@ -255,7 +356,7 @@ export async function loadResume(db, { jobUrl = null, track = null, appId = null
     ok: true,
     source,
     headerTitle: c.headerTitle,
-    email: c.email ?? me.email ?? "",
+    email: c.email ?? pastedEmail ?? me.email ?? "",
     city: c.city ?? resolveHeaderLocation(source.location, me.location) ?? "",
     skills: c.skills,
     // A project's tools line: yours (stack set) or the one the bullets give (stackAuto), as the PDF shows it.
@@ -269,6 +370,10 @@ export async function loadResume(db, { jobUrl = null, track = null, appId = null
     current: { pdfPath: path.join(dir, PDF), edited: Boolean(generated), generatedPdfPath: generated, pages: pageCount(path.join(dir, PDF)), room: pageRoom(path.join(dir, PDF)) },
     jd: jd ? jd.slice(0, 20_000) : null,
     layout: layoutOf(bank),
+    // The saved resume's ATS score (Job Match and Resume Ready), against the posting a draft is scored against too.
+    ats: atsOf(dir, posting, { fit }),
+    posting,
+    fit,
   };
 }
 
@@ -423,12 +528,13 @@ function validate(edit, bank, track = classifyTrack(edit.headerTitle)) {
 
 /**
  * Render an edit into a draft PDF and check it. edit = { source, headerTitle, skills, sections } as loadResume gave
- * it, changed. Returns { draftId, pdfPath, pages, problems, jdMatch: { before, after, missing } }.
+ * it, changed. Returns { draftId, pdfPath, pages, problems, jdMatch: { before, after, missing }, ats: { before, after, ms } }
+ * (ats: the saved resume's and this draft's ATS score, as atsOf gives them).
  */
 export async function renderDraft(db, edit) {
   if (db) await syncOverlay(db);
   const bank = loadBank();
-  const base = await loadResume(db, edit.source);
+  const base = await openResume(db, edit.source);
   const clean = {
     headerTitle: String(edit.headerTitle || base.headerTitle || "").trim().slice(0, 60),
     email: String(edit.email ?? base.email ?? "").trim().slice(0, 80),
@@ -444,7 +550,7 @@ export async function renderDraft(db, edit) {
     }),
   };
   const problems = validate(clean, bank, base.track);
-  if (clean.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean.email)) problems.push(`"${clean.email}" isn't an email address`);
+  if (clean.email && !EMAIL.test(clean.email)) problems.push(`"${clean.email}" isn't an email address`);
   const composition = {
     experience: clean.sections.filter((s) => s.kind === "experience").map((s) => ({ role: s.role, bullets: s.bullets, stack: s.stack })),
     projects: clean.sections.filter((s) => s.kind === "project").map((s) => ({ role: s.role, bullets: s.bullets, stack: s.stack })),
@@ -474,7 +580,12 @@ export async function renderDraft(db, edit) {
   }
   // Each project's tools line as this draft prints it (the page shows the automatic one while you haven't set yours).
   const stacks = Object.fromEntries(clean.sections.map((s) => [s.role, s.stack ?? (s.kind === "project" ? toolsFromBullets(s.bullets, s.role) : [])]));
-  return { ok: true, draftId, pdfPath, pages, room: pages ? pageRoom(pdfPath) : null, problems, jdMatch, stacks };
+  // The draft's ATS score against the same posting (saved in the draft folder, so Save carries it with the PDF), and the
+  // saved resume's for "before → after". About 0.1-0.2 s on top of a compile of a few seconds; reused for a repeat render.
+  const started = Date.now();
+  const after = atsOf(dir, base.posting, { fit: base.fit, overwrite: true });
+  const ats = { before: base.ats, after, ms: Date.now() - started };
+  return { ok: true, draftId, pdfPath, pages, room: pages ? pageRoom(pdfPath) : null, problems, jdMatch, stacks, ats };
 }
 
 const nextEditDir = (runDir) => {
@@ -493,6 +604,9 @@ async function pointJobAt(db, jobUrl, pdfPath, generated) {
   await db.collection("applications").updateMany({ jobUrls: jobUrl, status: { $nin: ["APPLIED", "SUBMITTING"] } },
     { $set: { "resume.path": pdfPath, "resume.sha256": null, "resume.fileName": PDF }, $unset: { "extension.resumeChoice": "" } });
 }
+
+/** What a resume's ATS score is read from, beside its PDF (atsOf writes them; a job's edit gets them with the folder). */
+const SCORE_FILES = ["ats-score.json", "page-fill.json", "jd.txt", "meta.json"];
 
 /** Keep a draft. Returns { pdfPath }. */
 export async function saveDraft(db, { source, draftId }) {
@@ -520,9 +634,11 @@ export async function saveDraft(db, { source, draftId }) {
   // The first edit keeps the generated resume in generated/ (Revert puts it back).
   if (!fs.existsSync(path.join(dir, "generated", PDF))) {
     fs.mkdirSync(path.join(dir, "generated"), { recursive: true });
-    for (const f of [PDF, "composition.json", "resume.tex"]) if (fs.existsSync(path.join(dir, f))) fs.copyFileSync(path.join(dir, f), path.join(dir, "generated", f));
+    for (const f of [PDF, "composition.json", "resume.tex", ...SCORE_FILES]) if (fs.existsSync(path.join(dir, f))) fs.copyFileSync(path.join(dir, f), path.join(dir, "generated", f));
   }
   for (const f of [PDF, EDIT_FILE, "resume.tex"]) fs.copyFileSync(path.join(draft, f), path.join(dir, f));
+  // The draft's ATS score goes with its PDF (scored against this folder's posting, so it stays current here).
+  for (const f of SCORE_FILES) if (fs.existsSync(path.join(draft, f))) fs.copyFileSync(path.join(draft, f), path.join(dir, f));
   if (source.kind === "pasted") await db.collection(PASTED_COLLECTION).updateOne({ _id: source.pasted }, { $set: { edited: true, updatedAt: new Date().toISOString() } });
   return { ok: true, pdfPath: path.join(dir, PDF) };
 }
@@ -538,8 +654,10 @@ export async function revertResume(db, source) {
   }
   const dir = folderOf(source);
   if (!dir || !fs.existsSync(path.join(dir, "generated", PDF))) throw new BuilderError("No generated resume to go back to.");
-  for (const f of [PDF, "composition.json", "resume.tex"]) if (fs.existsSync(path.join(dir, "generated", f))) fs.copyFileSync(path.join(dir, "generated", f), path.join(dir, f));
+  for (const f of [PDF, "composition.json", "resume.tex", ...SCORE_FILES]) if (fs.existsSync(path.join(dir, "generated", f))) fs.copyFileSync(path.join(dir, "generated", f), path.join(dir, f));
   fs.rmSync(path.join(dir, EDIT_FILE), { force: true });
+  // A score the generated resume never had would belong to the edit: drop it (the builder scores the folder on open).
+  for (const f of ["ats-score.json", "page-fill.json"]) if (!fs.existsSync(path.join(dir, "generated", f))) fs.rmSync(path.join(dir, f), { force: true });
   fs.rmSync(path.join(dir, "generated"), { recursive: true, force: true });
   if (source.kind === "pasted") await db.collection(PASTED_COLLECTION).updateOne({ _id: source.pasted }, { $set: { edited: false, updatedAt: new Date().toISOString() } });
   return { ok: true, pdfPath: path.join(dir, PDF) };
