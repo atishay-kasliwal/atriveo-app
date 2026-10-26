@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {filterMatchingJobs,matchingTimestamp,matchingSource,confirmedApplicationCount} from '../scripts/matching-filters.mjs';
+import {inServedCountries,filterMatchingJobs,matchingTimestamp,matchingSource,confirmedApplicationCount} from '../scripts/matching-filters.mjs';
 const now=new Date('2026-10-26T01:00:00Z'); // still Oct 25 in New York
 const docs=[
  {job_url:'https://www.linkedin.com/jobs/view/1',date_posted:'2026-10-25T15:00:00Z',run_at:'2026-10-26T00:30:00Z',title:'AI Engineer',company:'Alpha',track:'ai-engineer',site:'linkedin'},
@@ -62,4 +62,11 @@ test('a posting date without a time counts as that calendar day in every time zo
   assert.deepEqual(ids('today'), ['https://www.linkedin.com/jobs/view/1', 'https://x.jobdiva.com/1']);
   assert.deepEqual(ids('yesterday'), ['https://www.linkedin.com/jobs/view/2']);
   assert.deepEqual(ids('today', 'America/Los_Angeles'), ['https://www.linkedin.com/jobs/view/1', 'https://x.jobdiva.com/1']);
+});
+
+test('only United States and India locations are kept; unknown or plain Remote stay',()=>{
+ for(const keep of ['','Remote','New York, NY','Austin, TX (Hybrid)','United States','Bengaluru, Karnataka, India','Pune, IN','Remote - USA','London, UK or New York, NY'])assert.equal(inServedCountries(keep),true,keep);
+ for(const drop of ['Madrid, Spain','London, United Kingdom','Barcelona','Toronto, Canada','Remote - EMEA','Berlin, Germany','Sydney, Australia'])assert.equal(inServedCountries(drop),false,drop);
+ const jobs=[{job_url:'https://x/1',date_posted:'2026-10-25',title:'AI Engineer',company:'A',location:'Madrid, Spain',site:'linkedin'},{job_url:'https://x/2',date_posted:'2026-10-25',title:'AI Engineer',company:'B',location:'Seattle, WA',site:'linkedin'}];
+ assert.deepEqual(filterMatchingJobs(jobs,{period:'7d',now}).map(d=>d.company),['B']);
 });
