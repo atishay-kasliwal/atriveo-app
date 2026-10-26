@@ -147,7 +147,7 @@ export function FilterChoices({
 }: {
   label: string;
   value: string;
-  options: { value: string; label: string; description?: string }[];
+  options: { value: string; label: string; description?: string; count?: number }[];
   onChoose: (value: string) => void;
 }) {
   return (
@@ -187,6 +187,9 @@ export function FilterChoices({
             <b>{option.label}</b>
             {option.description && <small>{option.description}</small>}
           </span>
+          {option.count !== undefined && (
+            <span className={`jm-filter-count${option.count === 0 ? " is-zero" : ""}`}>{option.count}</span>
+          )}
           <span className="jm-filter-check" aria-hidden="true">
             {value === option.value ? "✓" : ""}
           </span>

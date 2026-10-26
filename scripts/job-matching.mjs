@@ -1,4 +1,4 @@
-import {matchingSource,matchingTimestamp,filterMatchingJobs,confirmedApplicationCount} from './matching-filters.mjs';
+import {matchingSource,matchingTimestamp,filterMatchingJobs,matchingFacets,confirmedApplicationCount} from './matching-filters.mjs';
 import fs from "node:fs";
 import { resumeRevision } from "./application-kit.mjs";
 import { queueKey, companyKey, companySummary, similarJobs, matchingEvents, preferenceBoost, recordMatchingEvent, forgetMatchingDecision } from "./matching-workspace.mjs";
@@ -170,7 +170,7 @@ export async function matchingQueue(db, opts = {}) {
   try { return await answerQueue(db, opts); } finally { answering--; }
 }
 
-async function answerQueue(db, { limit = 8, offset = 0, now = new Date(), company = null, jobUrl = null, exclude = [], learn = true, period = '7d', sources = [], role = '', query = '', timeZone = 'America/New_York', sort = 'latest' } = {}) {
+async function answerQueue(db, { limit = 8, offset = 0, now = new Date(), company = null, jobUrl = null, random = false, exclude = [], learn = true, period = '7d', sources = [], role = '', query = '', timeZone = 'America/New_York', sort = 'latest' } = {}) {
   const { docs: cached, applied, swipes, filter, confirmed, hidden } = await loadBase(db, now);
   // Copies, so this request's Fits never leak into the cached rows.
   const docs = cached.map((d) => ({ ...d }));
@@ -187,7 +187,8 @@ async function answerQueue(db, { limit = 8, offset = 0, now = new Date(), compan
   }
   // Fit (master resume against the posting) is kept on each job; up to FIT_PER_REQUEST missing or stale ones are computed
   // here within FIT_BUDGET_MS, and the rest right after this answer (then the queue re-reads them).
-  const live=filterMatchingJobs([...byUrl.values()].map(d=>({...d,track:trackOf(d.title)})),{period,sources,role,query,timeZone,now});
+  const tracked=[...byUrl.values()].map(d=>({...d,track:trackOf(d.title)}));
+  const live=filterMatchingJobs(tracked,{period,sources,role,query,timeZone,now});
   const fits = await ensureFit(db, live, { max: FIT_PER_REQUEST, budgetMs: filling ? 0 : FIT_BUDGET_MS });
   const stored = new Map(live.map((d) => [d.job_url, d.fit]));
   for (const d of live) d.fit = fits.get(d.job_url) ?? null;
@@ -205,6 +206,7 @@ async function answerQueue(db, { limit = 8, offset = 0, now = new Date(), compan
   const scoped = company ? allRanked.filter(d=>companyKey(d.company)===companyKey(company)) : allRanked;
   const ranked = scoped.filter(d=>!excluded.has(queueKey(d.job_url)));
   if (jobUrl) { const i=ranked.findIndex(d=>d.job_url===jobUrl); if(i>0)ranked.unshift(...ranked.splice(i,1)); }
+  else if (random && ranked.length > 1) ranked.unshift(...ranked.splice(Math.floor(Math.random() * ranked.length), 1));
   const stats = { appliedToday: confirmedApplicationCount(confirmed,swipes,{now,timeZone}), applied: confirmedApplicationCount(confirmed,swipes), opened: 0, skipped: 0, saved: 0, remaining: allRanked.length };
   const known = new Set(docs.map(d=>d.job_url));
   for(const swipe of swipes) if(known.has(swipe.job_url)&&swipe.source==='job-matching'){if(swipe.direction==='right')stats.opened++;else if(swipe.direction==='left')stats.skipped++;else if(swipe.direction==='later')stats.saved++;}
@@ -260,7 +262,7 @@ async function answerQueue(db, { limit = 8, offset = 0, now = new Date(), compan
       saved: later.has(d.job_url), jd: wireJd(jd), ats: await analyzeMatchingResume(d.resume.pdf_path, jd.full, d.fit),
     };
   }));
-  return { ok: true, generatedAt: now.toISOString(), total: scoped.length - skipped, companies, stats, windowDays: DAYS, sort, preference: { active: sort==='fit' && learn && events.filter(e=>["apply_opened","saved","not_apply"].includes(e.kind)).length>=5, limit: 2 }, jobs };
+  return { ok: true, generatedAt: now.toISOString(), total: scoped.length - skipped, companies, stats, windowDays: DAYS, sort, facets: matchingFacets(tracked, { period, sources, role, query, timeZone, now }), preference: { active: sort==='fit' && learn && events.filter(e=>["apply_opened","saved","not_apply"].includes(e.kind)).length>=5, limit: 2 }, jobs };
 }
 
 // What the page shows of a description and a Fit; the section lists, hashes and lost points stay on the server.
