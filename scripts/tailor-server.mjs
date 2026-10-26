@@ -2412,6 +2412,11 @@ const server = http.createServer(async (req, res) => {
   res.writeHead(404); res.end("not found");
 });
 
+// The tunnel (cloudflared) reuses connections to this server. Node closes an idle connection after 5 s by default, so a
+// request sent on one it had just closed failed with "EOF" and the site showed an HTML 502 page ("Unexpected token '<'").
+// Keep idle connections open longer than the tunnel does.
+server.keepAliveTimeout = 120_000;
+server.headersTimeout = 125_000;
 server.listen(PORT, process.env.TAILOR_HOST?.trim() || "127.0.0.1", () => {
   handleOutreach.start();
   log(`listening on http://localhost:${PORT}`);

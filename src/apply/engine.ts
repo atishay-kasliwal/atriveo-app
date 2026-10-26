@@ -35,9 +35,25 @@ export async function postAction(body: object): Promise<{ ok: boolean; error?: s
   return res.ok ? json : { ok: false, error: json.error || `HTTP ${res.status}` };
 }
 
+/**
+ * fetch + JSON for the sidecar. The tunnel sometimes answers with an HTML error page (502/52x) when it could not reach the
+ * server; the request never ran, so it is tried once more, and a page that still isn't JSON gives a plain message instead of
+ * "Unexpected token '<'".
+ */
+export interface ApiBody { ok?: boolean; error?: string }
+export async function fetchJson<T extends ApiBody = ApiBody>(url: string, init: RequestInit): Promise<{ res: Response; json: T }> {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, init);
+    const type = res.headers.get("content-type") || "";
+    const gateway = res.status === 502 || res.status === 503 || res.status === 504 || (res.status >= 520 && res.status <= 530) || !type.includes("json");
+    if (gateway && !res.ok && attempt === 0) { await new Promise((r) => setTimeout(r, 600)); continue; }
+    const json = (await res.json().catch(() => ({ ok: false, error: gateway ? "The server was briefly unreachable. Try again." : `HTTP ${res.status}` }))) as T;
+    return { res, json };
+  }
+}
+
 export async function getJson<T>(path: string): Promise<T> {
-  const res = await fetch(`${getTailorServerBase()}${path}`, { credentials: "include", cache: "no-store" });
-  const json = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
+  const { res, json } = await fetchJson<ApiBody>(`${getTailorServerBase()}${path}`, { credentials: "include", cache: "no-store" });
   if (!res.ok || json.ok === false) throw new Error(json.error || `HTTP ${res.status}`);
   return json as T;
 }

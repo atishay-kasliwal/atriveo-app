@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import {warmApplicationCompanion,companionIsConnected,openWithApplicationCompanion,downloadWithCompanion,FOLLOW_OPTIONS,readFollowSeconds,writeFollowSeconds} from './applicationCompanion';
 import MatchingFilterPopover,{FilterChoices} from './MatchingFilterPopover';
 import CompanyLogo from '../components/CompanyLogo';
-import { getJson } from './engine';
+import { fetchJson, getJson } from './engine';
 import { ago } from './JobCard';
 import { PLATFORM_LABEL, type Platform } from './platform';
 import { TRACK_LABEL } from './tracks';
@@ -22,7 +22,7 @@ interface Queue {ok:boolean;total:number;jobs:Job[];companies:Company[];stats:{a
 const imageUrl=(j:Job)=>j.resumeObject?.hasImage?`${getTailorServerBase()}/applications/resume-file?sha=${j.resumeObject.sha256}&kind=image`:`${getTailorServerBase()}/applications/resume-image?path=${encodeURIComponent(j.resumePath)}${j.resumeSha256?`&sha=${j.resumeSha256}`:''}`;
 const pdfDownloadUrl=(j:Job)=>j.resumeObject?`${getTailorServerBase()}/applications/resume-file?sha=${j.resumeObject.sha256}&kind=pdf&dl=1`:`${getTailorServerBase()}/serve-pdf?path=${encodeURIComponent(j.resumePath)}${j.resumeSha256?`&sha=${j.resumeSha256}`:''}&dl=1`;
 const typing=(t:EventTarget|null)=>t instanceof HTMLElement&&(t.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(t.tagName));
-async function post(route:string,body:unknown){const r=await fetch(`${getTailorServerBase()}/applications/${route}`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||`HTTP ${r.status}`);}
+async function post(route:string,body:unknown){const {res:r,json:d}=await fetchJson(`${getTailorServerBase()}/applications/${route}`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!r.ok||!d.ok)throw Error(d.error||`HTTP ${r.status}`);}
 function Description({job}:{job:Job}){const text=job.jd.full||'No description was saved for this job.';let cursor=0;const out:ReactNode[]=[];for(const {start,end}of job.ats?.highlights??[]){out.push(text.slice(cursor,start),<mark key={start}>{text.slice(start,end)}</mark>);cursor=end;}out.push(text.slice(cursor));return <div className="jm-description">{out}</div>;}
 function strengthOf(s:Skill):Proof['strength']{return s.status==='missing'?'missing':s.status==='partial'?'partial':s.evidence?.tier==='skills_only'?'weak':s.evidence?.tier?.includes('tools')?'moderate':s.evidence?'strong':'weak';}
 const strengthLabel={strong:'Strong',moderate:'Moderate',weak:'Weak',partial:'Partial',missing:'Missing'};
