@@ -17,6 +17,7 @@ interface Insights {
   funnel: { applied: number; replied: number; interview: number; assessment: number; offer: number; rejected: number; none: number; replyRate: number | null; medianReplyDays: number | null };
   pipeline: { done: number; queued: number; running: number; failed: number } | null;
   waiting: { general: number | null };
+  milestones: { lap: number; need: number; days30: number; daysAll: number }[]; milestoneMore: number;
   assessments: { open: number; unknown: number; next: { company: string; deadlineAt: string; state: string; when: string } | null };
 }
 const fmtDay = (day: string) => new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
@@ -86,7 +87,15 @@ export default function InsightsPage({ header }: { header?: ReactNode }) {
     const top = Math.max(data.today.goal, ...data.days.map((d) => d.applied), 1);
     const delta = data.totals.last7 - data.totals.prev7;
     const f = data.funnel;
-    return { top, delta, steps: [["Applied", f.applied], ["Heard back", f.replied], ["Interview", f.interview], ["Assessment", f.assessment], ["Offer", f.offer]] as [string, number][], maxSrc: Math.max(1, ...data.sources.map((s) => s.count)), maxTrack: Math.max(1, ...data.tracks.map((s) => s.count)) };
+    // Which weekdays you apply on (average per weekday over the 30 days), and a few records from the same days.
+    const wd = [0, 1, 2, 3, 4, 5, 6].map((d) => { const mine = data.days.filter((x) => new Date(`${x.day}T12:00:00Z`).getUTCDay() === d); return { d, avg: mine.length ? mine.reduce((n, x) => n + x.applied, 0) / mine.length : 0 }; });
+    const week = [1, 2, 3, 4, 5, 6, 0].map((d) => wd[d]!), bestWd = week.reduce((b, x) => (x.avg > b.avg ? x : b), week[0]!);
+    const g = data.today.goal, atGoal = data.days.filter((x) => x.applied >= g).length, active = data.days.filter((x) => x.applied > 0);
+    let run = 0, longest = 0; for (const x of data.days) { run = x.applied >= g ? run + 1 : 0; longest = Math.max(longest, run); }
+    let busiest = 0; for (let i = 0; i + 7 <= data.days.length; i += 1) busiest = Math.max(busiest, data.days.slice(i, i + 7).reduce((n, x) => n + x.applied, 0));
+    const rhythm = { week, bestWd, max: Math.max(1, ...week.map((x) => x.avg)) };
+    const records = { atGoal, longest, busiest, perActive: active.length ? Math.round((active.reduce((n, x) => n + x.applied, 0) / active.length) * 10) / 10 : 0 };
+    return { rhythm, records, top, delta, steps: [["Applied", f.applied], ["Heard back", f.replied], ["Interview", f.interview], ["Assessment", f.assessment], ["Offer", f.offer]] as [string, number][], maxSrc: Math.max(1, ...data.sources.map((s) => s.count)), maxTrack: Math.max(1, ...data.tracks.map((s) => s.count)) };
   }, [data]);
   const bestIdx = data ? data.days.findIndex((d) => d.day === data.best.day) : -1;
   const tipIdx = hover ?? bestIdx, tipDay = data && tipIdx >= 0 && data.days[tipIdx]!.applied > 0 ? data.days[tipIdx]! : null;
@@ -141,6 +150,7 @@ export default function InsightsPage({ header }: { header?: ReactNode }) {
                 <ul className="in-list">{data.tracks.map((s) => <li key={s.key}><span>{label("track", s.key)}</span><span className="rail"><b style={{ width: `${(s.count / view.maxTrack) * 100}%`, background: "#a86be0" }} /></span><span className="n">{s.count}</span></li>)}</ul>
               </div>
             </section>
+            <div className="in-rail in-rail-right">
             <section className="in-card in-waiting" aria-label="What is waiting">
               <div className="in-dial in-wide-only" style={{ ["--c" as string]: tone }}>
                 <svg viewBox="0 0 140 140" aria-hidden="true"><circle cx="70" cy="70" r="58" className="track" />{todayLap > 0 && <circle cx="70" cy="70" r="58" className="fill under" style={{ stroke: lapColor(todayLap - 1) }} strokeDasharray={2 * Math.PI * 58} strokeDashoffset={0} transform="rotate(-90 70 70)" />}<circle cx="70" cy="70" r="58" className="fill" strokeDasharray={2 * Math.PI * 58} strokeDashoffset={2 * Math.PI * 58 * (1 - lapProgress(data.today.applied, data.today.goal))} transform="rotate(-90 70 70)" /></svg>
@@ -153,7 +163,23 @@ export default function InsightsPage({ header }: { header?: ReactNode }) {
                 <li><Link to="/general"><span>General jobs</span><b>{data.waiting.general ?? "—"}</b><small>apply with your general resume</small></Link></li>
                 <li><Link to="/assessments"><span>Assessments</span><b>{data.assessments.open}</b><small>{data.assessments.next ? `next: ${data.assessments.next.company || "one"}, ${data.assessments.next.when}` : data.assessments.unknown ? `${data.assessments.unknown} need a deadline` : "none open"}</small></Link></li>
               </ul>
+              {data.milestones.length > 0 && (
+                <div className="in-miles"><h3>Times you hit it</h3>
+                  <ul>{data.milestones.map((m) => <li key={m.lap}><span className="pg"><i style={{ background: lapColor(m.lap) }} aria-hidden="true" />{m.need}</span><b>{m.days30}×</b><small>{m.daysAll} in all</small></li>)}</ul>
+                  <p className="in-foot dim">Days in the last 30 that reached each lap of your goal{data.milestoneMore > 0 ? ` · ${data.milestoneMore} higher laps reached` : ""}</p>
+                </div>)}
             </section>
+            <section className="in-card in-records" aria-label="Records, last 30 days">
+              <h2>Records <small>30 days</small></h2>
+              <ul className="in-recs">
+                <li><span>Days at your goal</span><b>{view.records.atGoal}<i> of {data.days.length}</i></b></li>
+                <li><span>Longest run at goal</span><b>{view.records.longest}<i> {view.records.longest === 1 ? "day" : "days"}</i></b></li>
+                <li><span>Busiest 7 days</span><b>{view.records.busiest}</b></li>
+                <li><span>A typical active day</span><b>{view.records.perActive}</b></li>
+              </ul>
+            </section>
+            </div>
+            <div className="in-rail in-rail-left">
             <aside className="in-card in-usage" aria-label="Your time this week">
               <h2>Your time <small>7 days</small></h2>
               {usage && usage.total > 0 ? (<>
@@ -166,6 +192,14 @@ export default function InsightsPage({ header }: { header?: ReactNode }) {
               </>) : <p className="in-foot dim">{usage ? "Nothing measured this week yet." : "Time appears once the tracker has data."}</p>}
               <Link className="in-more" to="/usage">See all usage →</Link>
             </aside>
+            <section className="in-card in-rhythm" aria-label="Your weekly rhythm">
+              <h2>Your rhythm <small>30 days</small></h2>
+              <div className="in-week" role="img" aria-label={`Average applications per weekday; ${["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"][view.rhythm.bestWd.d]} are your best`}>
+                {view.rhythm.week.map((x, i) => <span key={x.d} className={`in-wd${x.d === view.rhythm.bestWd.d ? " best" : ""}`}><i style={{ height: `${Math.max(4, (x.avg / view.rhythm.max) * 100)}%`, animationDelay: `${i * 60}ms` }} title={`${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][x.d]}: ${Math.round(x.avg)} on average`} /><em>{["S", "M", "T", "W", "T", "F", "S"][x.d]}</em></span>)}
+              </div>
+              <p className="in-foot">{view.rhythm.bestWd.avg > 0 ? <><b>{["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"][view.rhythm.bestWd.d]}</b> are your best, <b>{Math.round(view.rhythm.bestWd.avg)}</b> on average</> : "Your weekdays show once you have applied"}</p>
+            </section>
+            </div>
           </div>)}
       </main>
     </div>

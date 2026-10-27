@@ -26,7 +26,8 @@ test('streak: through yesterday, or including today once it has met the goal',()
  assert.equal(streakOf(days,'2026-10-27',20,5),3,'today not met yet: the run still counts through yesterday');
  assert.equal(streakOf(days,'2026-10-27',20,20),4);
  assert.equal(streakOf([{day:'2026-10-26',applied:3}],'2026-10-27',20,25),1);
- assert.equal(streakOf([],'2026-10-27',20,0),0);});
+ assert.equal(streakOf([],'2026-10-27',20,0),0);
+ assert.equal(streakOf([],'2026-10-27',0,0),0,'a goal of 0 is treated as 1, so empty days never count');});
 
 test('messages are warm, specific and carry no punctuation dashes or personal text',()=>{
  const ctx={day:'2026-10-27',applied:34,goal:20,streak:3,yesterday:25,replies:2,interviews:1,reviewCount:3};

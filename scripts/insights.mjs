@@ -33,6 +33,11 @@ export function buildInsights({ rows, goal, now = Date.now(), pipeline = null, g
     replyRate: settled.length >= 10 ? Math.round((replied(settled) / settled.length) * 100) : null,
     medianReplyDays: delays.length >= 3 ? Math.round(median(delays) * 10) / 10 : null,
   };
+  // How many days reached each lap of the goal (goal, 2x, 3x ...): over the last 30 days and over everything.
+  const g = Math.max(1, goal), perDay = new Map();
+  for (const r of rows) { const day = dayKeyOf(r.appliedAt); if (day) perDay.set(day, (perDay.get(day) ?? 0) + 1); }
+  const counts = [...perDay.values()], topDay = Math.max(0, ...counts), maxLap = Math.min(Math.floor(2000 / g), Math.floor(topDay / g));
+  const milestones = Array.from({ length: Math.min(maxLap, 12) }, (_, i) => { const lap = i + 1, need = lap * g; return { lap, need, days30: days.filter((d) => d.applied >= need).length, daysAll: counts.filter((c) => c >= need).length }; });
   const open = assessments;
   const next = open.find((a) => a.deadlineAt && a.state !== "unknown") ?? null;
   return {
@@ -41,6 +46,7 @@ export function buildInsights({ rows, goal, now = Date.now(), pipeline = null, g
     sources: tally(recent.map((r) => String(r.source || "other").toLowerCase())).slice(0, 6),
     tracks: tally(recent.map((r) => trackOf(r.title) || "other")).slice(0, 6), funnel,
     pipeline: pipeline ? { done: pipeline.done ?? 0, queued: pipeline.queued ?? 0, running: pipeline.running ?? 0, failed: pipeline.failed ?? 0 } : null,
+    milestones, milestoneMore: Math.max(0, maxLap - 12),
     waiting: { general }, assessments: { open: open.length, unknown: open.filter((a) => a.state === "unknown").length, next: next ? { company: next.company, deadlineAt: next.deadlineAt, state: next.state, when: next.when } : null },
   };
 }

@@ -45,3 +45,13 @@ test('what is waiting: the resume pipeline, general jobs and assessments, each o
 test('nothing breaks with no applications at all',()=>{
  const r=buildInsights({rows:[],goal:15,now:NOW});
  assert.equal(r.totals.all,0);assert.equal(r.best.applied,0);assert.equal(r.streak,0);assert.deepEqual(r.sources,[]);assert.equal(r.funnel.replyRate,null);});
+
+test('the lap tally counts the days that reached the goal, double, triple ... over 30 days and over everything',()=>{
+ const rows=[...many(65,0),...many(31,1),...many(95,2),...many(30,3),...many(29,4),...many(125,40)];
+ const m=buildInsights({rows,goal:30,now:NOW}).milestones;
+ assert.deepEqual(m.map(x=>[x.lap,x.need]),[[1,30],[2,60],[3,90],[4,120]],'laps up to the best day (125 is lap 4)');
+ assert.deepEqual(m.map(x=>x.days30),[4,2,1,0],'days 0-4 ago have 65, 31, 95, 30 and 29 applications; day 40 is outside the 30');
+ assert.deepEqual(m.map(x=>x.daysAll),[5,3,2,1],'the day 40 ago counts for all time');
+ const none=buildInsights({rows:many(5,0),goal:30,now:NOW});assert.deepEqual(none.milestones,[]);assert.equal(none.milestoneMore,0);
+ const big=buildInsights({rows:many(30*15,0),goal:30,now:NOW});assert.equal(big.milestones.length,12);assert.equal(big.milestoneMore,3,'laps past the twelfth are only counted');
+ assert.equal(buildInsights({rows:many(1,0),goal:0,now:NOW}).milestones.length,1,'a zero goal is treated as 1');});
