@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
 import {noTextJobs,generalResumes,noTextKey} from '../scripts/no-text-jobs.mjs';
-import {prepareGeneralKit,ApplicationKitError} from '../scripts/application-kit.mjs';
+import {prepareGeneralKit,ApplicationKitError,applicationLocation} from '../scripts/application-kit.mjs';
 
 const outRoot=fs.mkdtempSync(path.join(os.tmpdir(),'general-'));
 const pdf=Buffer.from('%PDF-1.4 general software engineer resume');
@@ -66,4 +66,11 @@ test('the day range keeps today, yesterday, the last 7 and 30 days, and counts e
  assert.deepEqual(t.rows.map(r=>r.company),['Acme']);assert.equal(t.allTotal,1);
  assert.deepEqual(t.counts.byRange,{all:3,today:1,yesterday:1,'7d':2,'30d':3});
  assert.equal((await noTextJobs(d,{outRoot,range:'7d',now})).total,2);assert.equal((await noTextJobs(d,{outRoot,now})).total,3);
+});
+
+test('the kit Location is the job\'s own place, or New York, NY when the job has none',async()=>{
+ const cases=[['Palo Alto, CA, USA','Palo Alto, CA'],['San Francisco Bay Area','San Francisco Bay Area'],['Boston, MA; New York, NY','Boston, MA'],['Austin, TX or Remote','Austin, TX'],['Bengaluru, Karnataka, India','Bengaluru, Karnataka, India'],['Remote, US','New York, NY'],['USA','New York, NY'],['Remote','New York, NY'],['','New York, NY'],[null,'New York, NY']];
+ for(const [raw,want] of cases)assert.equal(applicationLocation(raw),want,String(raw));
+ const loc=async place=>(await prepareGeneralKit(db({...base,jobs:[job(1,'Software Engineer','Acme',{location:place})]}),{jobUrl:'https://www.linkedin.com/jobs/view/1'},{outRoot,profile:{name:'Alex Rivera',location:'Somewhere Else'}})).fields.find(f=>f.key==='location').value;
+ assert.equal(await loc('Denver, CO, USA'),'Denver, CO');assert.equal(await loc(undefined),'New York, NY');assert.equal(await loc('USA'),'New York, NY');
 });
