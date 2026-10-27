@@ -29,7 +29,9 @@ export const PROFILE_DEFAULTS = Object.freeze({
   phone:     "",
   location:  "New York, NY",
   linkedin:  "https://www.linkedin.com/in/atishay-kasliwal",
-  github:    "https://github.com/atishay-kasliwal"
+  github:    "https://github.com/atishay-kasliwal",
+  // Public, so it ships as a default. Without it here, a saved portfolio was dropped and the Website button had nothing to copy.
+  portfolio: "https://atishaykasliwal.com"
 });
 
 export const PROFILE_FIELDS = Object.freeze(Object.keys(PROFILE_DEFAULTS));
