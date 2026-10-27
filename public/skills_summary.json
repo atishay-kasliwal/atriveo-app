@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-27T02:36:19.639797+00:00",
-  "total_analyzed": 10960,
+  "generated_at": "2026-10-27T04:01:49.650819+00:00",
+  "total_analyzed": 10961,
   "categories": {
     "Languages": {
       "color": "#3b82f6",
@@ -55,7 +55,7 @@
       "skills": {
         "AWS": 3373,
         "Azure": 1894,
-        "GCP": 1449,
+        "GCP": 1450,
         "S3": 434,
         "Lambda": 354,
         "Serverless": 271,
@@ -75,12 +75,12 @@
       "color": "#0ea5e9",
       "skills": {
         "Scalability": 4483,
-        "REST API": 2061,
+        "REST API": 2062,
         "Distributed Systems": 1722,
         "Microservices": 1070,
         "System Design": 793,
         "Event-Driven": 700,
-        "Kafka": 593,
+        "Kafka": 594,
         "API Design": 445,
         "Caching": 294,
         "gRPC": 135,
@@ -93,30 +93,30 @@
     "DevOps & Infrastructure": {
       "color": "#10b981",
       "skills": {
-        "CI/CD": 2422,
-        "Kubernetes": 1476,
+        "CI/CD": 2423,
+        "Kubernetes": 1477,
         "Git": 1393,
         "Docker": 1343,
         "Linux": 739,
-        "Terraform": 527,
+        "Terraform": 528,
         "GitHub Actions": 332,
         "Jenkins": 312,
-        "Grafana": 171,
+        "Grafana": 172,
         "Datadog": 131,
         "Prometheus": 111,
         "OpenTelemetry": 99,
         "Helm": 79,
         "Ansible": 69,
-        "ArgoCD": 36
+        "ArgoCD": 37
       }
     },
     "Data & Storage": {
       "color": "#f43f5e",
       "skills": {
         "ETL/ELT": 1797,
-        "PostgreSQL": 925,
+        "PostgreSQL": 926,
         "Spark": 891,
-        "Kafka": 593,
+        "Kafka": 594,
         "Databricks": 541,
         "Vector DB": 500,
         "Snowflake": 493,
@@ -129,14 +129,14 @@
         "BigQuery": 202,
         "Flink": 112,
         "Cassandra": 108,
-        "ClickHouse": 62
+        "ClickHouse": 63
       }
     },
     "AI & Machine Learning": {
       "color": "#ec4899",
       "skills": {
         "Machine Learning": 3366,
-        "Agents": 2733,
+        "Agents": 2734,
         "LLM": 2494,
         "GenAI": 1614,
         "PyTorch": 1326,
