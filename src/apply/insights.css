@@ -37,3 +37,57 @@
 @keyframes in-grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}@keyframes in-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @media(prefers-reduced-motion:reduce){.in-bar,.rail b{animation:none}}
 @media(max-width:1000px){.rv-page.in-page{height:auto;overflow:visible}.in-main{padding:16px 12px 32px}.in-grid{grid-template-columns:1fr;flex:none}.in-chart{min-height:220px;flex:none}.in-two{grid-template-columns:1fr}.in-hero h1{flex-direction:column;align-items:center;gap:4px}}
+
+/* The page as a grid. Narrow: hero, chart, then replies, where you apply and what is waiting. Wide: the empty sides carry your time on the left and what is waiting on the right. */
+.in-layout{flex:1;min-height:0;display:grid;gap:clamp(8px,1.4vh,14px) 14px;grid-template-columns:minmax(0,1.1fr) minmax(0,1.35fr) minmax(0,.9fr);grid-template-rows:auto minmax(0,1fr) clamp(190px,33vh,310px);grid-template-areas:"hero hero hero" "chart chart chart" "replies where waiting"}
+.in-layout>.in-hero{grid-area:hero}.in-layout>.in-chart{grid-area:chart;min-height:0}.in-layout>.in-replies{grid-area:replies}.in-layout>.in-where{grid-area:where}.in-layout>.in-waiting{grid-area:waiting}.in-layout>.in-usage{grid-area:usage;display:none}
+.in-chart-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}.in-chart-head h2{margin-bottom:6px}.in-chart-head p{margin:0;color:var(--in-muted);font-size:13px}.in-chart-head b{color:var(--in-ink);font-variant-numeric:tabular-nums}
+.in-glance{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:2px;text-decoration:none;color:var(--in-muted);font-size:12.5px;max-width:100%}.in-glance:hover{color:var(--in-ink)}
+.in-glance-strip{display:flex;gap:3px;width:min(520px,80vw);height:6px;border-radius:99px;overflow:hidden}.in-glance-strip b{display:block;min-width:4px;border-radius:99px}
+.in-usage{gap:0}.in-strip{display:flex;gap:3px;height:10px;border-radius:99px;overflow:hidden;margin:2px 0 clamp(8px,1.6vh,16px)}.in-strip b{display:block;min-width:4px;border-radius:99px;transform-origin:left;animation:in-fill .9s var(--ease) both}
+.in-pages{list-style:none;margin:0;padding:0;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-around;gap:clamp(4px,1vh,10px)}
+.in-pages li{display:grid;grid-template-columns:minmax(78px,1fr) 56px minmax(0,1fr);gap:10px;align-items:center;font-size:clamp(12.5px,1.7vh,13.5px);white-space:nowrap}
+.in-pages .pg{display:flex;align-items:center;gap:9px}.in-pages .pg i{width:9px;height:9px;border-radius:50%;flex:none}.in-pages .t{text-align:right;font-variant-numeric:tabular-nums;color:#c4c9d2}
+.in-pages .share{height:6px;border-radius:99px;background:var(--in-soft);overflow:hidden}.in-pages .share b{display:block;height:100%;border-radius:99px;transform-origin:left;animation:in-fill .9s var(--ease) both}
+.in-more{margin-top:clamp(6px,1.4vh,12px);font-size:13px;color:var(--in-accent);text-decoration:none}.in-more:hover{text-decoration:underline}
+@media(min-width:1560px){
+ .in-main{width:min(1840px,100%)}
+ .in-layout{grid-template-columns:minmax(270px,1fr) minmax(0,1.5fr) minmax(0,1.5fr) minmax(270px,1fr);grid-template-areas:"usage hero hero waiting" "usage chart chart waiting" "usage replies where waiting"}
+ .in-layout>.in-usage{display:flex}.in-glance{display:none}
+ .in-layout>.in-waiting .in-wait{flex:1}
+}
+@media(max-width:1000px){.in-layout{display:flex;flex-direction:column}.in-layout>.in-chart{min-height:220px}.in-layout>.in-usage{display:flex}.in-glance{display:none}}
+
+.in-dial.in-wide-only{display:none}
+.in-usage h3{margin:clamp(14px,3vh,28px) 0 clamp(5px,1.2vh,12px);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7d8591}
+.in-feats{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:clamp(3px,.8vh,8px)}.in-feats li{display:flex;justify-content:space-between;gap:10px;font-size:clamp(12.5px,1.7vh,13.5px)}.in-feats b{font-variant-numeric:tabular-nums;font-weight:600;color:#c4c9d2}
+.in-dial{position:relative;display:flex;flex-direction:column;align-items:center;margin:0 0 clamp(8px,1.8vh,18px)}
+.in-dial svg{width:min(100%,clamp(120px,19vh,170px));height:auto}.in-dial .track{fill:none;stroke:var(--in-soft);stroke-width:11}.in-dial .fill{fill:none;stroke:var(--c);stroke-width:11;stroke-linecap:round;filter:drop-shadow(0 0 7px color-mix(in oklab,var(--c) 50%,transparent));transition:stroke-dashoffset 1s var(--ease)}
+.in-dial-text{position:absolute;top:0;left:0;right:0;height:min(100%,clamp(120px,19vh,170px));display:grid;place-content:center;text-align:center}.in-dial-text b{font-size:clamp(26px,4.4vh,40px);font-weight:650;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}.in-dial-text span{margin-top:4px;font-size:12px;color:var(--in-muted)}
+.in-dial p{margin:6px 0 0;font-size:13px;font-weight:600;color:var(--c)}
+@media(min-width:1560px){
+ .in-dial.in-wide-only{display:flex}
+ .in-layout>.in-usage,.in-layout>.in-waiting{align-self:start}
+ .in-pages{flex:0 0 auto;justify-content:flex-start;gap:clamp(7px,1.6vh,14px)}
+ .in-layout>.in-waiting .in-wait{flex:0 0 auto;justify-content:flex-start}.in-wait li{padding:clamp(6px,1.4vh,14px) 0}
+ .in-usage .in-more{margin-top:clamp(10px,2vh,18px)}
+}
+
+/* Design pass: the hero glows in the colour of today's tier, the bars have depth and name the best day, time is a ring, and the page arrives in a short, staggered rise. */
+.in-card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.012)),var(--in-card);border-color:rgba(255,255,255,.075);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.in-hero{position:relative;isolation:isolate}.in-hero::before{content:"";position:absolute;z-index:-1;left:50%;top:-30%;width:min(860px,90%);height:150%;transform:translateX(-50%);background:radial-gradient(closest-side,color-mix(in oklab,var(--tone,#6d7bff) 20%,transparent),transparent 70%);pointer-events:none}
+.in-hero h1 b{font-size:clamp(52px,11.5vh,108px);filter:drop-shadow(0 6px 30px color-mix(in oklab,var(--tone,#6d7bff) 35%,transparent))}
+.in-bar{background:linear-gradient(180deg,color-mix(in oklab,var(--c) 68%,#fff),var(--c) 62%);border-radius:7px 7px 3px 3px}
+.in-bar.on,.in-bar.best{box-shadow:0 0 22px -4px var(--c)}.in-bar.best{outline:0;box-shadow:0 0 0 2px rgba(255,255,255,.6),0 0 26px -2px var(--c)}
+.in-tip{position:absolute;z-index:3;transform:translateX(-50%);padding:4px 10px;border-radius:9px;background:rgba(236,238,242,.96);color:#0c0d10;font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none;box-shadow:0 8px 24px -8px rgba(0,0,0,.7)}.in-tip.flip{transform:translateX(-100%)}.in-tip.is-best{background:rgba(247,184,56,.96)}
+.in-chart-head p{display:none}
+.in-donut{position:relative;width:min(100%,clamp(130px,21vh,190px));align-self:center;margin:2px 0 clamp(8px,1.6vh,16px)}.in-donut svg{width:100%;height:auto;display:block}
+.in-donut .track{fill:none;stroke:var(--in-soft);stroke-width:13}.in-donut .seg{fill:none;stroke-width:13;stroke-linecap:butt;animation:in-sweep .9s var(--ease) both}
+.in-donut-text{position:absolute;inset:0;display:grid;place-content:center;text-align:center}.in-donut-text b{font-size:clamp(20px,3.6vh,30px);font-weight:650;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}.in-donut-text span{margin-top:3px;font-size:11.5px;color:var(--in-muted)}
+.in-legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:clamp(4px,.9vh,9px)}.in-legend li{display:flex;justify-content:space-between;gap:10px;font-size:clamp(12.5px,1.7vh,13.5px)}.in-legend .pg{display:flex;align-items:center;gap:9px}.in-legend i{width:9px;height:9px;border-radius:50%;flex:none}.in-legend .t{font-variant-numeric:tabular-nums;color:#c4c9d2}
+.in-block{margin-top:clamp(14px,2.6vh,26px)}.in-block h3{margin:0 0 clamp(5px,1.1vh,10px)}
+@keyframes in-sweep{from{stroke-dasharray:0 999}}@keyframes in-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.in-layout>*{animation:in-rise .7s var(--ease) both}.in-layout>.in-chart{animation-delay:80ms}.in-layout>.in-usage{animation-delay:120ms}.in-layout>.in-replies{animation-delay:160ms}.in-layout>.in-where{animation-delay:200ms}.in-layout>.in-waiting{animation-delay:240ms}
+@media(prefers-reduced-motion:reduce){.in-layout>*,.in-donut .seg{animation:none}.in-hero h1 b{filter:none}}
+@media(min-width:1560px){.in-layout>.in-usage,.in-layout>.in-waiting{align-self:start}}
+.in-tip.side{transform:translateX(calc(-100% - 14px))}.in-tip.side.flip{transform:translateX(calc(-100% - 14px))}
