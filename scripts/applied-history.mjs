@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { appliedItems, appliedCounts } from "./applied-core.mjs";
 
 // Everything you applied to, in one list: applications Atriveo tracked, plus jobs you marked applied ("I applied" in the
 // extension or Matching), each with what the employers' emails said afterwards. The Stats history only has the first kind.
@@ -27,27 +28,24 @@ function eventsFor(row, events, appId) {
 export function buildAppliedRows({ applications, swipes, jobs, events }) {
   const jobBy = new Map();
   for (const j of jobs) if (!jobBy.has(j.job_url)) jobBy.set(j.job_url, j);
-  const linked = new Set(applications.flatMap((a) => a.jobUrls || []));
+  const appBy = new Map(applications.map((a) => [String(a._id), a]));
   const rows = [];
-  for (const a of applications) {
-    const appliedAt = iso(a.lifecycle?.appliedAt) || iso(a.submission?.submittedAt);
-    if (!appliedAt) continue;
-    const job = (a.jobUrls || []).map((u) => jobBy.get(u)).find(Boolean);
-    rows.push({ key: `a:${a._id}`, appId: String(a._id), jobUrl: (a.jobUrls || [])[0] || a.applyUrl || null, company: a.company || job?.company || "", title: a.title || job?.title || "",
-      location: a.location ?? job?.location ?? null, source: a.ats || job?.site || null, appliedAt, via: a.submission?.by === "extension" ? "Apply with Atriveo" : "Atriveo engine",
-      postingUrl: (a.jobUrls || []).find((u) => /linkedin\.com/.test(u)) || a.applyUrl || null, applyUrl: a.finalUrl || a.applyUrl || null,
-      resume: { path: a.resume?.path ?? job?.resume?.pdf_path ?? null, sha256: job?.resume?.object?.sha256 ?? null }, foundAt: iso(job?.run_at), resumeAt: iso(job?.resume?.updated_at), appOutcome: a.outcome || null });
-  }
-  const seen = new Set();
-  for (const s of swipes) {
-    if (s.direction !== "applied" || linked.has(s.job_url) || seen.has(s.job_url)) continue;
-    seen.add(s.job_url);
-    const appliedAt = iso(s.applied_at) || iso(s.swiped_at);
-    if (!appliedAt) continue;
-    const job = jobBy.get(s.job_url);
-    rows.push({ key: swipeKey(s.job_url), appId: null, jobUrl: s.job_url, company: job?.company || "", title: job?.title || `Job on ${hostLabel(s.job_url)}`, location: job?.location ?? null, source: job?.site || null,
-      appliedAt, via: "You marked it applied", postingUrl: s.job_url, applyUrl: job?.job_url_direct || null,
-      resume: { path: job?.resume?.pdf_path ?? null, sha256: job?.resume?.object?.sha256 ?? null }, foundAt: iso(job?.run_at), resumeAt: iso(job?.resume?.updated_at), appOutcome: null });
+  // Which jobs are applied, and when, is the shared definition (applied-core.mjs), so this list and every count agree.
+  for (const it of appliedItems(applications, swipes)) {
+    if (!it.appliedAt) continue;
+    if (it.kind === "application") {
+      const a = appBy.get(it.id);
+      const job = (a.jobUrls || []).map((u) => jobBy.get(u)).find(Boolean);
+      rows.push({ key: it.key, appId: it.id, jobUrl: it.jobUrl || a.applyUrl || null, company: a.company || job?.company || "", title: a.title || job?.title || "",
+        location: a.location ?? job?.location ?? null, source: a.ats || job?.site || null, appliedAt: it.appliedAt, via: a.submission?.by === "extension" ? "Apply with Atriveo" : "Atriveo engine",
+        postingUrl: (a.jobUrls || []).find((u) => /linkedin\.com/.test(u)) || a.applyUrl || null, applyUrl: a.finalUrl || a.applyUrl || null,
+        resume: { path: a.resume?.path ?? job?.resume?.pdf_path ?? null, sha256: job?.resume?.object?.sha256 ?? null }, foundAt: iso(job?.run_at), resumeAt: iso(job?.resume?.updated_at), appOutcome: a.outcome || null });
+    } else {
+      const job = jobBy.get(it.jobUrl);
+      rows.push({ key: swipeKey(it.jobUrl), appId: null, jobUrl: it.jobUrl, company: job?.company || "", title: job?.title || `Job on ${hostLabel(it.jobUrl)}`, location: job?.location ?? null, source: job?.site || null,
+        appliedAt: it.appliedAt, via: "You marked it applied", postingUrl: it.jobUrl, applyUrl: job?.job_url_direct || null,
+        resume: { path: job?.resume?.pdf_path ?? null, sha256: job?.resume?.object?.sha256 ?? null }, foundAt: iso(job?.run_at), resumeAt: iso(job?.resume?.updated_at), appOutcome: null });
+    }
   }
   for (const r of rows) {
     const mail = eventsFor(r, events, r.appId);
@@ -79,7 +77,7 @@ export async function appliedHistory(db, { q = "", outcome = "all", skip = 0, li
   const counts = { all: searched.length, replied: 0, assessment: 0, interview: 0, offer: 0, rejected: 0, none: 0 };
   for (const r of searched) { if (r.outcome) { counts.replied++; counts[r.outcome.status] = (counts[r.outcome.status] || 0) + 1; } else counts.none++; }
   const picked = searched.filter((r) => matchesOutcome(r, outcome));
-  const week = new Date(now - 7 * 86400000).toISOString();
-  return { ok: true, total: picked.length, counts, last7: all.filter((r) => r.appliedAt >= week).length, allTime: all.length,
+  const shared = appliedCounts(appliedItems(applications, swipes), { now: new Date(now), days: 7 });
+  return { ok: true, total: picked.length, counts, last7: shared.last7, allTime: shared.total,
     rows: picked.slice(Math.max(0, skip), Math.max(0, skip) + Math.min(100, Math.max(1, limit))).map(({ mail, ...r }) => ({ ...r, mailCount: mail.length })) };
 }

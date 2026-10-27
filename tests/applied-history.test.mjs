@@ -29,7 +29,7 @@ function fakeDb(){const data={applications,job_swipes:swipes,inbox_events:events
 test('filters, counts and the single-row view',async()=>{
  const now=Date.parse('2026-10-27T12:00:00Z');
  const all=await appliedHistory(fakeDb(),{now});
- assert.equal(all.total,2);assert.equal(all.counts.interview,1);assert.equal(all.counts.assessment,1);assert.equal(all.counts.none,0);assert.equal(all.last7,2);
+ assert.equal(all.total,2);assert.equal(all.counts.interview,1);assert.equal(all.counts.assessment,1);assert.equal(all.counts.none,0);assert.equal(all.last7,1,"calendar days Oct 21-27: only the Oct 24 one");
  const iv=await appliedHistory(fakeDb(),{outcome:'interview',now});assert.deepEqual(iv.rows.map(r=>r.company),['IBM']);
  assert.equal((await appliedHistory(fakeDb(),{q:'databr',now})).total,1);
  const one=await appliedHistory(fakeDb(),{key:'a:app1',now});assert.equal(one.row.mail[0].subject,'Your Databricks assessment');

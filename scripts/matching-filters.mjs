@@ -1,3 +1,4 @@
+import {appliedItems,appliedCounts,dayKeyOf} from './applied-core.mjs';
 // A matching query combines time, sources, role and text before pagination or company counts.
 export const MATCHING_SOURCES=['linkedin','staffing','greenhouse','lever','ashby','workday','smartrecruiters'];
 export function matchingSource(doc){
@@ -44,10 +45,10 @@ export function matchingFacets(docs,{period='7d',sources=[],role='',query='',tim
  for(const d of byRole)if(d.track)facets.roles[d.track]=(facets.roles[d.track]||0)+1;
  return facets;
 }
+// Matching's progress counts: with `now`, applied that day; without, applied ever. The definition is shared (applied-core.mjs).
 export function confirmedApplicationCount(applications,swipes,{now,timeZone='America/New_York'}={}){
- try{dayIn(new Date(),timeZone);}catch{timeZone='America/New_York';}
- const today=now?dayIn(now,timeZone):null;
- const onDay=value=>{const date=new Date(value);return value&&Number.isFinite(date.getTime())&&dayIn(date,timeZone)===today;};
- const linked=new Set(applications.flatMap(a=>a.jobUrls||[]));
- return applications.filter(a=>!today||onDay(a.lifecycle?.appliedAt)).length+new Set(swipes.filter(s=>s.direction==='applied'&&!linked.has(s.job_url)&&(!today||onDay(s.applied_at||s.swiped_at))).map(s=>s.job_url)).size;
+ try{dayKeyOf(new Date(),timeZone);}catch{timeZone='America/New_York';}
+ const items=appliedItems(applications,swipes);
+ if(!now)return items.length;
+ return appliedCounts(items,{now,timeZone,days:1}).today;
 }
