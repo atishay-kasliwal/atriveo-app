@@ -42,3 +42,12 @@ test('general resumes outside the resume folder or missing are ignored',()=>{
  fs.writeFileSync(path.join(elsewhere,'general','manifest.json'),JSON.stringify({resumes:{'software-engineer':{label:'SWE',path:path.join(elsewhere,'x.pdf')}}}));
  assert.deepEqual(generalResumes(elsewhere),{},'a path outside OUT_ROOT/general is not used');
 });
+test('a manifest written on the Mac still finds the same PDF under this server',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'macmanifest-'));fs.mkdirSync(path.join(root,'general','Data Analyst'),{recursive:true});fs.writeFileSync(path.join(root,'general','Data Analyst','Atishay Kasliwal.pdf'),pdf);
+ fs.writeFileSync(path.join(root,'general','manifest.json'),JSON.stringify({resumes:{
+  'data-analytics':{label:'Data Analyst',path:'/Users/someone/Documents/tailored-resumes/general/Data Analyst/Atishay Kasliwal.pdf'},
+  'ai-engineer':{label:'AI',path:'/Users/someone/Documents/tailored-resumes/general/../../../etc/passwd'}}}));
+ const got=generalResumes(root);
+ assert.deepEqual(Object.keys(got),['data-analytics']);
+ assert.equal(got['data-analytics'].path,path.join(root,'general','Data Analyst','Atishay Kasliwal.pdf'));
+});
