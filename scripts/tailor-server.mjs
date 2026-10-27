@@ -53,6 +53,7 @@ import { noTextJobs, generalQueue, generalCount, clearNoTextCache } from "./no-t
 import { readGoal, saveGoal, startPhoneSummaries } from "./phone-summary.mjs";
 import { listAssessments, updateAssessment } from "./assessments.mjs";
 import { insights } from "./insights.mjs";
+import { getResumeEmails, changeResumeEmails, syncDefaultEmail, forgetEmailSync } from "./resume-emails.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, renderDraft, revertResume, saveBullet, saveDraft, setResumeEmail, startPasted } from "./resume-builder.mjs";
@@ -1791,7 +1792,7 @@ const server = http.createServer(async (req, res) => {
       });
       return;
     }
-    const run = (body) => withMongo((db) => op === "load" ? loadResume(db, { jobUrl: body.job || null, track: body.track || null, appId: body.app || null, pasted: body.pasted || null })
+    const run = (body) => withMongo(async (db) => { await syncDefaultEmail(db).catch(() => {}); return (op === "load" ? loadResume(db, { jobUrl: body.job || null, track: body.track || null, appId: body.app || null, pasted: body.pasted || null })
       : op === "pasted" ? listPasted(db)
       : op === "guess" ? Promise.resolve({ ok: true, ...guessPosting(body.jd) })
       : op === "ai-usage" ? dashboardAiUsage(db,body)
@@ -1809,7 +1810,7 @@ const server = http.createServer(async (req, res) => {
       : op === "save" ? saveDraft(db, body)
       : op === "bullet" ? saveBullet(db, body)
       : op === "check" ? Promise.resolve({ ok: true, issues: checkText(body.role, body.text, undefined, { bankWide: body.bank !== false, acId: body.acId ?? null }), freeVerbs: freeVerbs() })
-      : revertResume(db, body.source), { appName: "AtriveoTailorServer" })
+      : revertResume(db, body.source)); }, { appName: "AtriveoTailorServer" })
       .then((data) => reply(200, data), (e) => reply(e instanceof BuilderError ? 400 : 500, { ok: false, error: String(e.message || e) }));
     if (req.method === "GET" && op === "load") {
       const params = new URL(req.url, "http://x").searchParams;
@@ -2019,6 +2020,27 @@ const server = http.createServer(async (req, res) => {
     req.on("end", async () => {
       try { const data = await withMongo(db => recordMatchingEvent(db, JSON.parse(raw || "{}"))); res.writeHead(200, {"Content-Type":"application/json"}); res.end(JSON.stringify(data)); }
       catch(e) { res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({ok:false,error:e.message})); }
+    });
+    return;
+  }
+
+  // GET /applications/resume-emails — the saved list and which address new resumes use; POST {action: add|default|remove, email} changes it.
+  if ((req.method === "GET" || req.method === "POST") && pathname === "/applications/resume-emails") {
+    let raw = "";
+    req.on("data", (c) => { raw += c; if (raw.length > 1_000) req.destroy(); });
+    req.on("end", async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const data = await withMongo(async (db) => {
+          if (req.method === "POST") { const b = JSON.parse(raw || "{}"); const r = await changeResumeEmails(db, { action: b?.action, email: b?.email }); forgetEmailSync(); await syncDefaultEmail(db, { force: true }); return r; }
+          return getResumeEmails(db);
+        }, { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify({ ok: true, ...data, current: loadResumeProfile().email || "" }));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
     });
     return;
   }
