@@ -91,3 +91,4 @@
 
 /* Short laptops: drop the subtitle and the field-name note, and make the text areas shorter, so settings still fit without scrolling. */
 @media(max-height:820px){ .outreach-main .outreach-page-head p, .outreach-main .outreach-eyebrow { display:none; } .outreach-main .outreach-field textarea { height:50px; } .outreach-fields-note { display:none; } .outreach-main .outreach-page-head h1 { margin:0; } }
+.outreach-badges{display:inline-flex;align-items:center;gap:8px;flex-shrink:0}.outreach-badge.is-replied{color:#0c0d10;background:#f7b838}
