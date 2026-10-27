@@ -19,8 +19,11 @@ export function generalResumes(outRoot) {
     const manifest = JSON.parse(fs.readFileSync(path.join(outRoot, "general", "manifest.json"), "utf8"));
     const out = {};
     for (const [track, r] of Object.entries(manifest.resumes ?? {})) {
-      const file = path.resolve(String(r.path || ""));
-      if (file.startsWith(path.resolve(outRoot, "general") + path.sep) && path.extname(file).toLowerCase() === ".pdf" && fs.existsSync(file)) out[track] = { label: r.label || r.title || track, title: r.title || track, path: file };
+      // The manifest is written on the Mac, so its paths name the Mac's folder; the same PDF sits under this server's general folder.
+      const root = path.resolve(outRoot, "general"), raw = String(r.path || "");
+      const tail = raw.includes("/general/") ? raw.slice(raw.lastIndexOf("/general/") + "/general/".length) : null;
+      const file = tail ? path.resolve(root, tail) : path.resolve(raw);
+      if (file.startsWith(root + path.sep) && path.extname(file).toLowerCase() === ".pdf" && fs.existsSync(file)) out[track] = { label: r.label || r.title || track, title: r.title || track, path: file };
     }
     return out;
   } catch { return {}; }
