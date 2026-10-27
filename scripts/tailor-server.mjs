@@ -57,7 +57,7 @@ import { matchingQueue, recordDecision, resumeImagePath, invalidateMatchingQueue
 import { resumeFileRedirect } from "./resume-store.mjs";
 import { readResumeReport, resumeDirFor } from "./resume-report.mjs";
 import { readSavedAts } from "./ats/persist.mjs";
-import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, resumePipeline, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
+import { listCompileJobs, findJobByFingerprint, enqueueJob, enqueueTopJobs, enqueueFreshSessionJobs, cancelCompileJob, enqueueJobs, countActiveCompileJobs, countPipelineKpis, resumePipeline, retryResumes, lookupJobsByUrl, fetchDescription } from "./resume-queue.mjs";
 import { compileOwner } from "./worker-id.mjs";
 import { handleFillRoute, isLocalExtensionRequest, runManualFill } from "./fill-routes.mjs";
 import { serveCompileQueueStream } from "./compile-queue-stream.mjs";
@@ -1678,6 +1678,25 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
       }
     })();
+    return;
+  }
+
+  // POST /applications/resume-retry { scope: "failed" | "stuck" } — put failed (24 h) or stuck resumes back in the queue.
+  if (req.method === "POST" && pathname === "/applications/resume-retry") {
+    let raw = "";
+    req.on("data", (c) => { raw += c; if (raw.length > 2000) req.destroy(); });
+    req.on("end", async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const scope = JSON.parse(raw || "{}").scope === "stuck" ? "stuck" : "failed";
+        const data = await withMongo((db) => retryResumes(db, { scope }), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    });
     return;
   }
 

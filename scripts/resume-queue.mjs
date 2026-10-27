@@ -619,23 +619,70 @@ export async function loadCompileJobById(db, id) {
   return serializeCompileJob(doc);
 }
 
-/** The tailored-resume pipeline at a glance: what is being built now, what waits, and what finished in the last 24 hours. */
+/** Failures that retrying cannot fix (the role itself is out of scope); everything else may be retried. */
+const NOT_RETRYABLE = /no embedded evidence|non-engineering/i;
+/** A failure for lack of job text: worth retrying only once the text exists. */
+const NEEDS_TEXT = /JD not found|too short/i;
 let pipelineCache = { at: 0, value: null };
+
+/** The tailored-resume pipeline at a glance: what is being built now, what waits, what is stuck, and what finished or failed in 24 hours. */
 export async function resumePipeline(db, { now = Date.now() } = {}) {
   if (pipelineCache.value && now - pipelineCache.at < 8000) return pipelineCache.value;
   const jobs = db.collection("jobs");
   const since = new Date(now - 24 * 3600_000).toISOString();
+  const nowDate = new Date(now);
   const pick = { _id: 0, job_url: 1, company: 1, title: 1, "resume.stage": 1, "resume.updated_at": 1 };
-  const [queued, running, done, failed, current, next] = await Promise.all([
+  // Running means a worker holds a live lease; a lease that ran out (a worker that died) is stuck, not building.
+  const active = { "resume.status": "running", $or: [{ "resume.lease_until": { $gte: nowDate } }, { "resume.lease_until": null }] };
+  const [queued, running, stuck, done, failed, current, next, reasonRows] = await Promise.all([
     jobs.countDocuments({ "resume.status": "queued" }),
-    jobs.countDocuments({ "resume.status": "running" }),
+    jobs.countDocuments(active),
+    jobs.countDocuments({ "resume.status": "running", "resume.lease_until": { $lt: nowDate } }),
     jobs.countDocuments({ "resume.status": "success", "resume.updated_at": { $gte: since } }),
     jobs.countDocuments({ "resume.status": "failed", "resume.updated_at": { $gte: since } }),
-    jobs.find({ "resume.status": "running" }, { projection: pick, sort: { "resume.updated_at": 1 }, limit: 6 }).toArray(),
+    jobs.find(active, { projection: pick, sort: { "resume.updated_at": 1 }, limit: 6 }).toArray(),
     jobs.find({ "resume.status": "queued" }, { projection: pick, sort: { score_pct: -1, "resume.updated_at": 1 }, limit: 6 }).toArray(),
+    jobs.aggregate([
+      { $match: { "resume.status": "failed", "resume.updated_at": { $gte: since } } },
+      { $group: { _id: { $substrCP: [{ $ifNull: ["$resume.error", "No reason recorded"] }, 0, 90] }, n: { $sum: 1 } } },
+      { $sort: { n: -1 } }, { $limit: 4 },
+    ]).toArray(),
   ]);
   const row = (j) => ({ company: j.company || "", title: j.title || "", stage: j.resume?.stage || "QUEUED", progress: stageToProgress(j.resume?.stage), updatedAt: j.resume?.updated_at || null });
-  const value = { ok: true, queued, running, done, failed, current: current.map(row), next: next.map(row), at: new Date(now).toISOString() };
+  const reasons = reasonRows.map((r) => ({ reason: r._id, count: r.n, retryable: !NOT_RETRYABLE.test(r._id), needsText: NEEDS_TEXT.test(r._id) }));
+  const value = { ok: true, queued, running, stuck, done, failed, reasons, current: current.map(row), next: next.map(row), at: new Date(now).toISOString() };
   pipelineCache = { at: now, value };
   return value;
+}
+
+/**
+ * Put failed (last 24 h) or stuck resumes back in the queue. A failure for missing job text is retried only once its text
+ * exists (otherwise it would fail again at once); a role that is out of scope is never retried.
+ */
+export async function retryResumes(db, { scope = "failed", now = Date.now(), max = 400 } = {}) {
+  const jobs = db.collection("jobs");
+  const rows = scope === "stuck"
+    ? await jobs.find({ "resume.status": "running", "resume.lease_until": { $lt: new Date(now) } }, { projection: { _id: 0, job_url: 1 }, limit: max }).toArray()
+    : await jobs.find({ "resume.status": "failed", "resume.updated_at": { $gte: new Date(now - 24 * 3600_000).toISOString() } }, { projection: { _id: 0, job_url: 1, "resume.error": 1 }, limit: max }).toArray();
+  const check = rows.filter((r) => scope === "stuck" || NEEDS_TEXT.test(r.resume?.error || "")).map((r) => r.job_url);
+  const withText = new Set((check.length ? await db.collection("descriptions").aggregate([
+    { $match: { job_url: { $in: check } } },
+    { $project: { _id: 0, job_url: 1, len: { $strLenCP: { $ifNull: ["$description", ""] } } } },
+    { $match: { len: { $gte: 200 } } },
+  ]).toArray() : []).map((d) => d.job_url));
+  const todo = [];
+  let waitingForText = 0, notRetryable = 0;
+  for (const r of rows) {
+    const error = r.resume?.error || "";
+    if (NOT_RETRYABLE.test(error)) notRetryable++;
+    else if ((scope === "stuck" || NEEDS_TEXT.test(error)) && !withText.has(r.job_url)) waitingForText++;
+    else todo.push(r.job_url);
+  }
+  let requeued = 0;
+  for (const job_url of todo) {
+    const r = await enqueueJob(db, { job_url, priority: PRIORITY_FRESH, source: "retry" }, { force: true });
+    if (!r.skipped) requeued++;
+  }
+  pipelineCache = { at: 0, value: null };
+  return { ok: true, scope, requeued, waitingForText, notRetryable };
 }
