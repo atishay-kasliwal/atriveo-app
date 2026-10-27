@@ -47,7 +47,8 @@ import { buildSkillsLines, capSkillsLineToOnePhysicalLine } from "./skills-libra
 import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { createHash } from "node:crypto";
-import { prepareApplicationKit, profileDetails } from "./application-kit.mjs";
+import { prepareApplicationKit, prepareGeneralKit, profileDetails } from "./application-kit.mjs";
+import { noTextJobs } from "./no-text-jobs.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, renderDraft, revertResume, saveBullet, saveDraft, setResumeEmail, startPasted } from "./resume-builder.mjs";
@@ -1897,7 +1898,7 @@ const server = http.createServer(async (req, res) => {
     req.on("end", async () => {
       try {
         const input = JSON.parse(raw || "{}");
-        const kit = await withMongo(db => prepareApplicationKit(db, input, { outRoot: OUT_ROOT }));
+        const kit = await withMongo(db => input.general === true ? prepareGeneralKit(db, input, { outRoot: OUT_ROOT }) : prepareApplicationKit(db, input, { outRoot: OUT_ROOT }));
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "private, no-store" });
         res.end(JSON.stringify({ ok: true, kit }));
       } catch (e) {
@@ -1905,6 +1906,24 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ ok: false, error: e.message || "Application kit unavailable" }));
       }
     });
+    return;
+  }
+
+  // GET /applications/no-text?q=&track=&source=&sort=&skip=&limit= — jobs whose posting text could not be read (no tailored resume),
+  // as table rows you can apply to with your general resume for the role.
+  if (req.method === "GET" && pathname === "/applications/no-text") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const p = new URL(req.url, "http://x").searchParams;
+        const data = await withMongo((db) => noTextJobs(db, { q: p.get("q") || "", track: p.get("track") || "", source: p.get("source") || "", sort: p.get("sort") || "new", skip: Number(p.get("skip")) || 0, limit: Number(p.get("limit")) || 50, outRoot: OUT_ROOT }), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
     return;
   }
 
