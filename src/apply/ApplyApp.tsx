@@ -2,6 +2,7 @@ import GeneralPage from "./GeneralPage";
 import UsagePage from "./UsagePage";
 import { startUsageTracking } from "./usage";
 import { syncProfileToExtension } from "./companionProfile";
+import { syncGoalToPhoneMessages } from "./phoneGoal";
 import { useEffect } from "react";
 import AppliedPage from "./AppliedPage";
 import SettingsPage from "./SettingsPage";
@@ -24,8 +25,8 @@ function Console() {
   // Give the extension your shared details whenever the console is open, so its panel always has them.
   useEffect(() => {
     if (!user) return;
-    void syncProfileToExtension();
-    const visible = () => { if (document.visibilityState === "visible") void syncProfileToExtension(); };
+    void syncProfileToExtension(); void syncGoalToPhoneMessages();
+    const visible = () => { if (document.visibilityState === "visible") { void syncProfileToExtension(); void syncGoalToPhoneMessages(); } };
     document.addEventListener("visibilitychange", visible);
     return () => document.removeEventListener("visibilitychange", visible);
   }, [user]);
