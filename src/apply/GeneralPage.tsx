@@ -8,7 +8,8 @@ import { PLATFORM_LABEL } from "./platform";
 import "./general.css";
 
 interface Row { key: string; jobUrl: string; applyUrl: string; company: string; title: string; location: string | null; source: string | null; track: string | null; postedAt: string | null; foundAt: string | null; resume: { track: string; label: string } | null }
-interface List { ok: true; total: number; allTotal: number; generalReady?: Record<string, string>; counts: { byTrack: Record<string, number>; bySource: Record<string, number> }; rows: Row[] }
+interface List { ok: true; total: number; allTotal: number; generalReady?: Record<string, string>; counts: { byTrack: Record<string, number>; bySource: Record<string, number>; byRange: Record<string, number> }; rows: Row[] }
+const RANGES: [string, string][] = [["today", "Today"], ["yesterday", "Yesterday"], ["7d", "7 days"], ["30d", "30 days"], ["", "All time"]];
 const TRACKS: [string, string][] = [["", "All"], ["software-engineer", "SWE"], ["ai-engineer", "AI"], ["data-analytics", "Data Analyst"], ["data-science", "DS"], ["forward-deployed", "FDE"], ["other", "Other"]];
 const PAGE = 50;
 const ago = (iso: string | null) => { if (!iso) return "—"; const d = Math.floor((Date.now() - Date.parse(iso)) / 86400000); return d <= 0 ? "today" : d === 1 ? "1d" : d < 30 ? `${d}d` : `${Math.floor(d / 30)}mo`; };
@@ -20,6 +21,7 @@ async function decide(jobUrl: string, decision: "skip" | "applied") {
 
 /** Jobs whose posting text could not be read, so no tailored resume exists: a table to sort, filter, skip through and apply from with your general resume for the role. */
 export default function GeneralPage({ header }: { header?: ReactNode }) {
+  const [range, setRange] = useState("today");
   const [track, setTrack] = useState("");
   const [sort, setSort] = useState<"new" | "company" | "title">("new");
   const [q, setQ] = useState("");
@@ -34,12 +36,12 @@ export default function GeneralPage({ header }: { header?: ReactNode }) {
   const load = useCallback(async (skip: number, replace: boolean) => {
     setBusy(true); setError("");
     try {
-      const r = await getJson<List>(`/applications/no-text?${new URLSearchParams({ track, sort, q: q.trim(), skip: String(skip), limit: String(PAGE) })}`);
+      const r = await getJson<List>(`/applications/no-text?${new URLSearchParams({ range, track, sort, q: q.trim(), skip: String(skip), limit: String(PAGE) })}`);
       setMeta({ total: r.total, allTotal: r.allTotal, counts: r.counts, generalReady: r.generalReady });
       setRows((cur) => (replace ? r.rows : [...cur, ...r.rows.filter((n) => !cur.some((c) => c.key === n.key))]));
       if (replace) setPicked(new Set());
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); } finally { setBusy(false); }
-  }, [track, sort, q]);
+  }, [range, track, sort, q]);
   useEffect(() => { const t = setTimeout(() => void load(0, true), q ? 250 : 0); return () => clearTimeout(t); }, [load, q]);
   useEffect(() => { void checkCompanion(); }, []); // connect to the extension now, so Apply can use it at once
   const drop = (keys: string[]) => { setRows((r) => r.filter((x) => !keys.includes(x.key))); setPicked((p) => { const n = new Set(p); keys.forEach((k) => n.delete(k)); return n; }); setMeta((m) => (m ? { ...m, total: Math.max(0, m.total - keys.length), allTotal: Math.max(0, m.allTotal - keys.length) } : m)); };
@@ -79,6 +81,9 @@ export default function GeneralPage({ header }: { header?: ReactNode }) {
             <div><small>Need a resume</small><b>{total - ready}</b><span>role has no general resume yet</span></div>
             <div><small>Selected</small><b>{picked.size}</b><span>{picked.size ? "skip them in one go below" : "tick rows to skip in bulk"}</span></div>
           </div>); })()}
+        <nav className="gn-tabs gn-range" aria-label="Found">
+          {RANGES.map(([key, label]) => <button key={key} type="button" className={range === key ? "on" : ""} aria-pressed={range === key} onClick={() => setRange(key)}>{label}{meta ? <small>{meta.counts.byRange?.[key || "all"] ?? 0}</small> : null}</button>)}
+        </nav>
         <nav className="gn-tabs" aria-label="Role">
           {TRACKS.map(([key, label]) => <button key={key} type="button" className={track === key ? "on" : ""} aria-pressed={track === key} onClick={() => setTrack(key)}>{label}{meta ? <small>{key ? meta.counts.byTrack[key] ?? 0 : Object.values(meta.counts.byTrack).reduce((a, b) => a + b, 0)}</small> : null}</button>)}
         </nav>
@@ -112,7 +117,7 @@ export default function GeneralPage({ header }: { header?: ReactNode }) {
               ))}
             </tbody>
           </table>
-          {!error && !busy && rows.length === 0 && <p className="gn-empty">{q || track ? "Nothing matches this filter." : "Nothing waiting. Every job has its text or has been handled."}</p>}
+          {!error && !busy && rows.length === 0 && <p className="gn-empty">{q || track ? "Nothing matches this filter." : range ? "Nothing found in this period. Try a longer one." : "Nothing waiting. Every job has its text or has been handled."}</p>}
           {meta && rows.length < meta.total && <button type="button" className="apps-btn gn-more" onClick={() => void load(rows.length, false)} disabled={busy}>{busy ? "Loading…" : `Show more (${meta.total - rows.length})`}</button>}
         </div>
         <p className="gn-foot">Enter applies the focused row, S skips it, arrow keys move. Applying opens the job with your general resume for its role and your details.</p>

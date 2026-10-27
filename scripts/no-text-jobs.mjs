@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { appliedItems } from "./applied-core.mjs";
+import { appliedItems, APPLIED_TZ } from "./applied-core.mjs";
 import { trackOf } from "./applications-analytics.mjs";
 import { matchingSource } from "./matching-filters.mjs";
 import { companyKey as matchingCompanyKey } from "./matching-workspace.mjs";
@@ -45,13 +45,33 @@ export function buildNoTextRows({ jobs, descriptions, applied, swipes, hidden, g
   return rows;
 }
 
+const dayFmt = new Intl.DateTimeFormat("en-CA", { timeZone: APPLIED_TZ, year: "numeric", month: "2-digit", day: "2-digit" });
+const nyDay = (ms) => dayFmt.format(ms);
+/** The calendar day a row belongs to, the one its "Found" column shows: a date-only posting date is that day; a timestamp is its New York day. */
+export function rowDay(r) {
+  const at = r.postedAt || r.foundAt;
+  if (!at) return null;
+  return at.endsWith("T00:00:00.000Z") ? at.slice(0, 10) : nyDay(Date.parse(at));
+}
+export const RANGES = ["today", "yesterday", "7d", "30d"];
+/** Does a row's day fall in the range? "" (or unknown) means any day. */
+export function inRange(day, range, now = Date.now()) {
+  if (!RANGES.includes(range)) return true;
+  if (!day) return false;
+  const today = nyDay(now), back = (n) => nyDay(now - n * 86400000);
+  if (range === "today") return day === today;
+  if (range === "yesterday") return day === back(1);
+  const first = back(range === "7d" ? 6 : 29);
+  return day >= first && day <= today;
+}
+
 const SORTS = {
   new: (a, b) => String(b.postedAt || b.foundAt).localeCompare(String(a.postedAt || a.foundAt)),
   company: (a, b) => a.company.localeCompare(b.company) || a.title.localeCompare(b.title),
   title: (a, b) => a.title.localeCompare(b.title) || a.company.localeCompare(b.company),
 };
 
-export async function noTextJobs(db, { q = "", track = "", source = "", sort = "new", skip = 0, limit = 50, outRoot } = {}) {
+export async function noTextJobs(db, { q = "", track = "", source = "", range = "", sort = "new", skip = 0, limit = 50, outRoot, now = Date.now() } = {}) {
   const [jobs, applications, swipes, hiddenRows] = await Promise.all([
     db.collection("jobs").find({ "resume.status": "failed", "resume.error": { $regex: "JD not found|too short", $options: "i" } }, { projection: { _id: 0, job_url: 1, job_url_direct: 1, company: 1, title: 1, location: 1, site: 1, date_posted: 1, run_at: 1, apply_type: 1 } }).toArray(),
     db.collection("applications").find({ status: "APPLIED" }, { projection: { _id: 1, jobUrls: 1, "lifecycle.appliedAt": 1, "submission.submittedAt": 1 } }).toArray(),
@@ -64,12 +84,15 @@ export async function noTextJobs(db, { q = "", track = "", source = "", sort = "
   ]).toArray() : [];
   const general = generalResumes(outRoot);
   const applied = appliedItems(applications, swipes).map((i) => i.jobUrl).filter(Boolean);
-  const all = buildNoTextRows({ jobs, descriptions, applied, swipes, hidden: new Set(hiddenRows.map((h) => h.key)), general });
+  const every = buildNoTextRows({ jobs, descriptions, applied, swipes, hidden: new Set(hiddenRows.map((h) => h.key)), general });
+  const rangeCounts = { all: every.length };
+  for (const r of RANGES) rangeCounts[r] = every.filter((x) => inRange(rowDay(x), r, now)).length;
+  const all = every.filter((x) => inRange(rowDay(x), range, now));
   const text = String(q || "").trim().toLowerCase().slice(0, 100);
   const searched = text ? all.filter((r) => `${r.company} ${r.title} ${r.location || ""}`.toLowerCase().includes(text)) : all;
   const byTrack = {}, bySource = {};
   for (const r of searched) { byTrack[r.track || "other"] = (byTrack[r.track || "other"] || 0) + 1; bySource[r.source || "other"] = (bySource[r.source || "other"] || 0) + 1; }
   const picked = searched.filter((r) => (!track || (track === "other" ? !r.track : r.track === track)) && (!source || (source === "other" ? !r.source : r.source === source))).sort(SORTS[sort] ?? SORTS.new);
-  return { ok: true, total: picked.length, allTotal: all.length, counts: { byTrack, bySource }, generalReady: Object.fromEntries(Object.entries(general).map(([t, g]) => [t, g.label])),
+  return { ok: true, total: picked.length, allTotal: all.length, counts: { byTrack, bySource, byRange: rangeCounts }, generalReady: Object.fromEntries(Object.entries(general).map(([t, g]) => [t, g.label])),
     rows: picked.slice(Math.max(0, skip), Math.max(0, skip) + Math.min(200, Math.max(1, limit))) };
 }
