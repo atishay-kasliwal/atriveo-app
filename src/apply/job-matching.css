@@ -144,7 +144,7 @@
 .jm-applied-text p{margin:0 0 3px;font-size:15px;font-weight:600;color:var(--foreground)}
 .jm-applied-text span{display:block;font-size:12px;color:var(--muted-fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .jm-applied-text b{color:var(--foreground);font-weight:600}
-.jm-applied-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.jm-applied-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.jm-applied-closed{grid-column:1 / -1;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid var(--border-col);background:transparent;color:var(--muted-fg)}.jm-applied-closed kbd{font:inherit;font-size:11px;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,.06)}.jm-applied-closed:hover:not(:disabled){border-color:#ee8a80;color:#ee8a80}
 .jm-applied-buttons button{height:34px;border-radius:8px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .12s,border-color .12s}
 .jm-applied-yes{border:1px solid var(--jm-green);background:color-mix(in oklab,var(--jm-green) 22%,transparent);color:var(--foreground)}
 .jm-applied-yes:hover:not(:disabled){background:color-mix(in oklab,var(--jm-green) 34%,transparent)}
