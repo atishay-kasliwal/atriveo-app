@@ -124,3 +124,6 @@
 .apply-pipeline-reason small { color: var(--muted-fg); }
 .apply-pipeline-retry { justify-self: start; margin-top: 4px; }
 .apply-pipeline-note { color: var(--muted-fg); }
+
+/* Ten console pages fit a laptop header: tighter links, and the pipeline's word label gives way before the bar and count do. */
+@media(max-width:1500px){.apply-nav{margin-left:10px}.apply-nav a{padding:6px 7px;font-size:12.5px}.apply-pipeline-label{display:none}}

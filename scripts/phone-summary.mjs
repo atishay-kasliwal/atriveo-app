@@ -1,7 +1,8 @@
 import { widgetProgress, PROGRESS_TIME_ZONE } from "./widget-progress.mjs";
+import { assessmentLines, listAssessments } from "./assessments.mjs";
 
 // Phone messages that keep you going: a morning plan, a push when you pass your daily goal (and double it, and reach four times it),
-// and an evening wrap-up. They go out through ntfy (NTFY_TOPIC, the same topic the health alerts use). Counts only: no job, company,
+// an evening wrap-up, and assessment deadlines (a 9 a.m. list of what is due, a 3 p.m. reminder for anything due today). They go out through ntfy (NTFY_TOPIC, the same topic the health alerts use). Counts only: no job, company,
 // mail or any text of yours is ever put in a message. Each message goes out once per New York day, remembered in Mongo so a restart
 // or a second instance never repeats one.
 
@@ -58,12 +59,25 @@ export function buildMessage(kind, ctx) {
     if (applied >= goal) return { title: `${applied} applied today`, message: `Goal of ${goal} reached${streak >= 2 ? `, ${streak} days in a row` : ""}.${news} Rest well, you earned it.`, tags: ["sparkles"], priority: 3, click };
     return { title: `${applied} of ${goal} today`, message: `${applied ? "A real push." : "A quiet day happens."}${news} Tomorrow starts fresh with a goal of ${goal}.`, tags: ["crescent_moon"], priority: 3, click };
   }
+  if (kind === "assess_am" || kind === "assess_pm") {
+    const { known = [], unknown = [], lines = [] } = ctx.assessments ?? {};
+    const aclick = `${SITE}/assessments`;
+    if (kind === "assess_pm") {
+      const names = known.filter((r) => r.state === "today").map((r) => r.company || "An assessment");
+      return { title: "Due today", message: `${names.slice(0, 3).join(" and ")} ${names.length === 1 ? "is" : "are"} due today. Finish ${names.length === 1 ? "it" : "them"} and take the win.`, tags: ["alarm_clock"], priority: 4, click: aclick };
+    }
+    const shown = lines.slice(0, 3).map((l) => `${l}.`).join(" ");
+    const more = lines.length > 3 ? ` And ${lines.length - 3} more.` : "";
+    const note = unknown.length ? ` ${plural(unknown.length, "assessment")} ${unknown.length === 1 ? "has" : "have"} no deadline yet. Add ${unknown.length === 1 ? "it" : "them"} in Atriveo.` : "";
+    const urgent = known.some((r) => r.state === "today" || r.state === "overdue");
+    return { title: `${plural(known.length + unknown.length, "assessment")} to finish`, message: `${shown}${more}${note} You have got this.`.trim(), tags: ["memo"], priority: urgent ? 4 : 3, click: aclick };
+  }
   throw new Error(`Unknown message kind ${kind}`);
 }
 
 /** Which messages are due now. `sent` holds the kinds already sent today. Milestones only go out between 7 a.m. and 11 p.m. */
-export function dueKinds({ now = new Date(), applied, goal, sent = new Set() }) {
-  const { hour, minute } = nyParts(now);
+export function dueKinds({ now = new Date(), applied, goal, sent = new Set(), assessments = [] }) {
+  const { hour, minute, weekday } = nyParts(now);
   const send = [], silent = [];
   if ((hour > 8 || (hour === 8 && minute >= 30)) && hour < 12 && !sent.has("morning")) send.push("morning");
   if (hour >= 7 && hour < 23 && goal > 0) {
@@ -74,6 +88,11 @@ export function dueKinds({ now = new Date(), applied, goal, sent = new Set() }) 
     }
   }
   if (hour >= 20 && hour < 23 && !sent.has("evening")) send.push("evening");
+  // Assessments: a list at 9 a.m. when something is due soon or overdue (a list of only undated ones only on Mon, Wed and Fri, so it never nags),
+  // and a reminder from 3 p.m. for anything due today.
+  const { known, unknown } = assessmentLines(assessments, new Date(now).getTime());
+  if (hour >= 9 && hour < 12 && !sent.has("assess_am") && (known.length || (unknown.length && ["Mon", "Wed", "Fri"].includes(weekday)))) send.push("assess_am");
+  if (hour >= 15 && hour < 19 && !sent.has("assess_pm") && known.some((r) => r.state === "today")) send.push("assess_pm");
   return { send, silent };
 }
 
@@ -94,19 +113,19 @@ export async function saveGoal(db, goal) {
 }
 
 /** One check: send what is due, once. Returns what was sent. */
-export async function runPhoneTick({ db, now = new Date(), publish = publishNtfy, progress = (d, o) => widgetProgress(d, o), log = () => {} } = {}) {
-  const [goal, p] = await Promise.all([readGoal(db), progress(db, { now })]);
+export async function runPhoneTick({ db, now = new Date(), publish = publishNtfy, progress = (d, o) => widgetProgress(d, o), assessments = (d, o) => listAssessments(d, o), log = () => {} } = {}) {
+  const [goal, p, rows] = await Promise.all([readGoal(db), progress(db, { now }), (async () => assessments(db, { now: new Date(now).getTime() }))().catch(() => [])]);
   const { day } = nyParts(now);
   const notices = db.collection("phone_notices");
   const sent = new Set((await notices.find({ day }).toArray()).map((r) => r.kind));
-  const { send, silent } = dueKinds({ now, applied: p.appliedToday, goal, sent });
+  const { send, silent } = dueKinds({ now, applied: p.appliedToday, goal, sent, assessments: rows });
   const claim = async (kind, extra = {}) => { try { await notices.insertOne({ _id: `${day}:${kind}`, day, kind, at: new Date(now).toISOString(), ...extra }); return true; } catch (e) { if (e?.code === 11000) return false; throw e; } };
   for (const kind of silent) await claim(kind, { silent: true });
   const out = [];
   const days = (p.days ?? []).map((d) => ({ day: d.day, applied: d.applied }));
   const yesterday = days.find((d) => d.day === dayBefore(day))?.applied ?? 0;
   const ctx = { day, applied: p.appliedToday, goal, yesterday, replies: p.responseEmailsToday ?? 0, interviews: p.interviewEmailsToday ?? 0, reviewCount: p.reviewCount ?? 0,
-    streak: streakOf(days, day, goal, p.appliedToday, { includeToday: true }) };
+    streak: streakOf(days, day, goal, p.appliedToday, { includeToday: true }), assessments: assessmentLines(rows, new Date(now).getTime()) };
   for (const kind of send) {
     if (!(await claim(kind))) continue;
     const message = buildMessage(kind, kind === "morning" ? { ...ctx, streak: streakOf(days, day, goal, 0, { includeToday: false }) } : ctx);
