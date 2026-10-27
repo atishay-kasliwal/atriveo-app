@@ -4,6 +4,7 @@ import { claimInference, completeInference } from './resume-ai-queue.mjs';
 import { analyzeResume, recordAiDecision, resumeAiVersion, enqueueResumeAi, resumeAiResult } from './resume-ai.mjs';
 import { enqueueAnswer } from './application-answer.mjs';
 import { widgetProgress } from './widget-progress.mjs';
+import { appliedHistory } from './applied-history.mjs';
 /**
  * Atriveo local tailor sidecar.
  *
@@ -2053,6 +2054,25 @@ const server = http.createServer(async (req, res) => {
           const dir = resumeDirFor(data.resume?.path, OUT_ROOT);
           data.resumeReport = dir ? readResumeReport(dir) : null;
         }
+        res.writeHead(data.ok ? 200 : 404, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
+  }
+
+  // GET /applications/applied?q=&outcome=&skip=&limit= — everything you applied to (tracked and marked), with employer replies;
+  // &key= returns one row with its mail timeline.
+  if (req.method === "GET" && pathname === "/applications/applied") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const p = new URL(req.url, "http://x").searchParams;
+        const outcome = ["all", "replied", "assessment", "interview", "offer", "rejected", "none"].includes(p.get("outcome")) ? p.get("outcome") : "all";
+        const data = await withMongo((db) => appliedHistory(db, { q: p.get("q") || "", outcome, skip: Number(p.get("skip")) || 0, limit: Number(p.get("limit")) || 40, key: /^(a:[\w-]{1,80}|j:[a-f0-9]{12})$/.test(p.get("key") || "") ? p.get("key") : null }), { appName: "AtriveoTailorServer" });
         res.writeHead(data.ok ? 200 : 404, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify(data));
       } catch (e) {

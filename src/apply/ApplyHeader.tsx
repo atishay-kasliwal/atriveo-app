@@ -26,10 +26,11 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
 
       </a>
       <nav className="apply-nav" aria-label="Console">
-        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/job-matching" ? "page" : undefined}>
+        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/job-matching" && !path.startsWith("/applied") && path !== "/settings" ? "page" : undefined}>
           Today{waiting !== null ? <span className="apply-nav-n">{waiting}</span> : null}
         </Link>
         <Link to="/job-matching" aria-current={path === "/job-matching" ? "page" : undefined}>Matching</Link>
+        <Link to="/applied" aria-current={path === "/applied" || path.startsWith("/applied/") ? "page" : undefined}>Applied</Link>
         <Link to="/staffing" aria-current={path === "/staffing" ? "page" : undefined}>Staffing</Link>
         <Link to="/resume_builder" aria-current={path === "/resume_builder" ? "page" : undefined}>Resumes</Link>
         <Link to="/bank" aria-current={path === "/bank" ? "page" : undefined}>Bank</Link>
@@ -41,6 +42,7 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
         {todayCount !== undefined && <span className="apply-today-count" aria-label={`Today: ${todayCount ?? "loading"} applications waiting`}>Today <b>{todayCount ?? "…"}</b></span>}
         <AiUsage />
         <a className="apply-ext" href="https://application.atriveo.com" target="_blank" rel="noreferrer">Job feed ↗</a>
+        <Link className="apply-ext apply-settings" to="/settings" aria-label="Settings" title="Settings" aria-current={path === "/settings" ? "page" : undefined}>⚙</Link>
         <button type="button" className="apply-signout" onClick={() => void signOut()} aria-label="Sign out" title="Sign out"><span aria-hidden="true">🚪</span></button>
       </div>
     </div>
