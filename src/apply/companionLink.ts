@@ -1,10 +1,10 @@
 // The page's side of the bridge to the "Apply with Atriveo" extension: messages, and a connection check that survives a sleeping service worker.
 export const CHANNEL='atriveo-companion-v1';
-export interface Reply {ok:boolean;panelOpened?:boolean;error?:string}
+export interface Reply {ok:boolean;panelOpened?:boolean;error?:string;counts?:Record<string,number>}
 export class BridgeTimeout extends Error {}
 export const NOT_ANSWERING='The Atriveo extension did not answer. If you just updated or reloaded it, refresh this page; otherwise check it is installed and enabled.';
 export const OPEN_UNCONFIRMED='The extension did not confirm opening. Check your tabs before trying again.';
-export function sendToExtension(action:'PING'|'OPEN'|'DOWNLOAD'|'PROFILE',timeoutMs:number,extra:Record<string,unknown>={}):Promise<Reply>{
+export function sendToExtension(action:'PING'|'OPEN'|'DOWNLOAD'|'PROFILE'|'USAGE',timeoutMs:number,extra:Record<string,unknown>={}):Promise<Reply>{
  return new Promise((resolve,reject)=>{
   const id=crypto.randomUUID();
   const timer=setTimeout(()=>{window.removeEventListener('message',receive);reject(new BridgeTimeout(action==='PING'?NOT_ANSWERING:OPEN_UNCONFIRMED));},timeoutMs);

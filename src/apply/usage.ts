@@ -6,12 +6,12 @@
 export interface Feature { key: string; page: string; label: string; test?: RegExp; keys?: string[] }
 
 export const PAGES: Record<string, string> = {
-  today: "Today", matching: "Matching", applied: "Applied", general: "General", assessments: "Assessments", staffing: "Staffing", resumes: "Resumes",
+  today: "Today", matching: "Matching", applied: "Applied", general: "General", assessments: "Assessments", extension: "Extension", staffing: "Staffing", resumes: "Resumes",
   bank: "Bank", outreach: "Outreach", stats: "Stats", ready: "Ready", settings: "Settings", usage: "Usage",
 };
 
 /** One colour per page, so the strip, the rows and the feature groups read as the same thing. */
-export const PAGE_HUE: Record<string, string> = { today: "#6d7bff", matching: "#4f9dff", applied: "#2fb87a", general: "#a86be0", assessments: "#e56fb0", staffing: "#f0a23b", resumes: "#e5584f", bank: "#3fc6c0", outreach: "#e56fb0", stats: "#9bb0ff", ready: "#c9b458", settings: "#8a919c", usage: "#5f6773" };
+export const PAGE_HUE: Record<string, string> = { today: "#6d7bff", matching: "#4f9dff", applied: "#2fb87a", general: "#a86be0", assessments: "#e56fb0", extension: "#9bb0ff", staffing: "#f0a23b", resumes: "#e5584f", bank: "#3fc6c0", outreach: "#e56fb0", stats: "#9bb0ff", ready: "#c9b458", settings: "#8a919c", usage: "#5f6773" };
 
 export function pageIdOf(path: string): string {
   const p = path.replace(/\/+$/, "");
@@ -35,9 +35,9 @@ export const FEATURES: Feature[] = [
   { key: "matching.apply", page: "matching", label: "Apply with the extension", test: /^apply\b/ },
   { key: "matching.skip", page: "matching", label: "Not apply", test: /^not apply/ },
   { key: "matching.later", page: "matching", label: "Save for later", test: /^save for later/ },
-  { key: "matching.random", page: "matching", label: "Random job", test: /^random/ },
-  { key: "matching.next", page: "matching", label: "Next and previous", test: /^(next|previous)\b/ },
-  { key: "matching.shortcuts", page: "matching", label: "Keyboard shortcuts", keys: ["n", "s", "enter", "arrowleft", "arrowright"] },
+  { key: "matching.random", page: "matching", label: "Random job", test: /^(show a random|random)/ },
+  { key: "matching.next", page: "matching", label: "Next and previous", test: /^(next|←\s*previous|previous)/ },
+  { key: "matching.shortcuts", page: "matching", label: "Keyboard shortcuts", keys: ["n", "s", "c", "f", "a", "enter", "arrowleft", "arrowright"] },
   { key: "matching.skills", page: "matching", label: "Skill match tab", test: /^skill match$/ },
   { key: "matching.evidence", page: "matching", label: "Evidence tab", test: /^evidence$/ },
   { key: "matching.description", page: "matching", label: "Description tab", test: /^description$/ },
@@ -45,13 +45,22 @@ export const FEATURES: Feature[] = [
   { key: "matching.answer", page: "matching", label: "Answer tab", test: /^answer$/ },
   { key: "matching.download", page: "matching", label: "Download PDF", test: /^download pdf/ },
   { key: "matching.edit_resume", page: "matching", label: "Edit resume", test: /^edit resume/ },
-  { key: "matching.search", page: "matching", label: "Search", test: /^search$/ },
-  { key: "matching.date", page: "matching", label: "Date filter", test: /^(today|yesterday|7 days|all time)\b/ },
-  { key: "matching.roles", page: "matching", label: "Role filter", test: /^roles$/ },
-  { key: "matching.sort", page: "matching", label: "Sort", test: /^(newest|best fit)/ },
-  { key: "matching.email", page: "matching", label: "Resume email tool", test: /^email$/ },
-  { key: "matching.runs", page: "matching", label: "Scrape runs", test: /^runs\b/ },
-  { key: "matching.hidden", page: "matching", label: "Hidden companies", test: /^hidden\b/ },
+  { key: "matching.search", page: "matching", label: "Search", test: /^search (jobs|filters)/ },
+  { key: "matching.date", page: "matching", label: "Date filter", test: /^date filters/ },
+  { key: "matching.roles", page: "matching", label: "Role filter", test: /^role filters/ },
+  { key: "matching.sort", page: "matching", label: "Sort", test: /^sort jobs/ },
+  { key: "matching.email", page: "matching", label: "Resume email tool", test: /^resume email/ },
+  { key: "matching.runs", page: "matching", label: "Scrape runs", test: /^scrape runs/ },
+  { key: "matching.hidden", page: "matching", label: "Hidden companies", test: /^hidden companies/ },
+  { key: "matching.closed", page: "matching", label: "Closed (the job is gone)", test: /^closed\b/ },
+  { key: "matching.applied_yes", page: "matching", label: "Applied? Yes", test: /^yes$/ },
+  { key: "matching.applied_no", page: "matching", label: "Applied? No", test: /^no$/ },
+  { key: "matching.undo", page: "matching", label: "Undo a choice", test: /undo/ },
+  { key: "matching.source", page: "matching", label: "Source filter", test: /^source filters/ },
+  { key: "matching.reset", page: "matching", label: "Reset filters", test: /^reset filters/ },
+  { key: "matching.hide_company", page: "matching", label: "Not interested in a company", test: /^not interested in/ },
+  { key: "matching.fullscreen", page: "matching", label: "Expand the description", test: /^expand full job description/ },
+  { key: "matching.posting", page: "matching", label: "Open the original posting", test: /^open original posting/ },
   { key: "general.apply", page: "general", label: "Apply with the general resume", test: /^apply\b/ },
   { key: "general.skip", page: "general", label: "Skip a job", test: /^skip\b/ },
   { key: "general.select", page: "general", label: "Tick rows for bulk skip", test: /^select\b/ },
@@ -69,6 +78,10 @@ export const FEATURES: Feature[] = [
   { key: "settings.goal", page: "settings", label: "Daily goal", test: /^(one fewer|one more|\d+)$/ },
   { key: "settings.widget", page: "settings", label: "Widget content", test: /^(responses|interviews|to review|streak|trend|replies|day streak|blue|green|amber|rose)\b/ },
 ];
+
+/** What the extension counts (its fixed list); each is a feature of the "Extension" group, reported by the extension itself. */
+export const EXTENSION_FEATURES: [string, string][] = [["open", "Open an application (Apply)"], ["attach", "Attach resume"], ["paste", "Paste a detail into a form"], ["paste_profile", "Paste a detail on any page"], ["copy", "Copy a detail"], ["applied", "I applied"], ["closed", "Job closed"], ["download", "Download the resume"], ["save_profile", "Save your details"], ["dismiss", "Close the panel"]];
+for (const [k, label] of EXTENSION_FEATURES) FEATURES.push({ key: `extension.${k}`, page: "extension", label });
 
 const INTERACTIVE = "button,a,[role=tab],[role=switch],[role=radio],input[type=checkbox],summary";
 const label = (el: Element) => (el.getAttribute("aria-label") || (el as HTMLElement).innerText || el.getAttribute("title") || "").replace(/\s+/g, " ").trim().toLowerCase().slice(0, 60);
@@ -138,6 +151,7 @@ export function startUsageTracking(current: () => string, send: (items: Item[]) 
   };
 }
 
+export function sendUsage(items: Item[]) { post(items.slice(0, 80)); }
 function post(items: Item[]) {
   try { void fetch("/api/usage", { method: "POST", credentials: "include", keepalive: true, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) }).catch(() => {}); } catch { /* measuring must never break the console */ }
 }

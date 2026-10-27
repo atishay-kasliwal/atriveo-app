@@ -41,3 +41,32 @@ test('pages and features are told apart by route and button label, and unknown l
  assert.equal(reg.featureForKey('matching','S'),'matching.shortcuts');assert.equal(reg.featureForKey('general','s'),null);
  assert.equal(new Set(reg.FEATURES.map(f=>f.key)).size,reg.FEATURES.length,'feature keys are unique');
  for(const f of reg.FEATURES)assert.ok(/^[a-z0-9_.-]{1,60}$/.test(f.key),f.key);});
+
+test('the controls on Matching are matched by what they really say, and each new one has a feature',()=>{
+ const m=l=>reg.featureForClick('matching',l);
+ assert.equal(m('show a random application'),'matching.random');assert.equal(m('next job without deciding'),'matching.next');assert.equal(m('← previous'),'matching.next');
+ assert.equal(m('search jobs'),'matching.search');assert.equal(m('search filters'),'matching.search');
+ assert.equal(m('date filters: today'),'matching.date');assert.equal(m('role filters: roles'),'matching.roles');assert.equal(m('sort jobs: newest'),'matching.sort');assert.equal(m('source filters: from'),'matching.source');
+ assert.equal(m('resume email'),'matching.email');assert.equal(m('scrape runs'),'matching.runs');assert.equal(m('hidden companies: 3'),'matching.hidden');assert.equal(m('reset filters'),'matching.reset');
+ assert.equal(m('closed c'),'matching.closed');assert.equal(m('yes'),'matching.applied_yes');assert.equal(m('no'),'matching.applied_no');assert.equal(m('↶ undo'),'matching.undo');assert.equal(m('undo choice'),'matching.undo');
+ assert.equal(m('not interested in northwind labs'),'matching.hide_company');assert.equal(m('expand full job description'),'matching.fullscreen');assert.equal(m('open original posting'),'matching.posting');
+ assert.equal(m('apply ↗ ↵'),'matching.apply');assert.equal(m('not apply n'),'matching.skip');assert.equal(m('save for later s'),'matching.later');
+ for(const k of ['c','f','a','n','s'])assert.equal(reg.featureForKey('matching',k),'matching.shortcuts');
+ assert.equal(reg.featureForClick('matching','no thanks'),null,'a longer text that starts with no is not the No button');
+ assert.equal(reg.featureForClick('general','closed'),null,'features belong to their own page');});
+
+test('the extension is a group of features of its own, with a fixed list of counted actions',()=>{
+ const ext=reg.FEATURES.filter(f=>f.page==='extension');
+ assert.equal(ext.length,reg.EXTENSION_FEATURES.length);assert.ok(ext.length>=8&&ext.length<=15);
+ for(const f of ext){assert.match(f.key,/^extension\.[a-z_]+$/);assert.ok(f.label.length>2&&!f.test&&!f.keys,'counted by the extension itself, not by a button label');}
+ assert.ok(['open','attach','paste','copy','applied','closed','download'].every(k=>ext.some(f=>f.key==='extension.'+k)));
+ assert.equal(reg.PAGES.extension,'Extension');assert.equal(reg.featureForClick('extension','apply'),null,'no click on any page is ever counted as an extension action');
+ assert.equal(new Set(reg.FEATURES.map(f=>f.key)).size,reg.FEATURES.length);});
+
+test('only the extension\'s known action names become usage items, as whole numbers, with a total',async()=>{
+ const out2=path.join(dir,'ext.mjs');
+ await build({entryPoints:[path.resolve('src/apply/extensionUsage.ts')],bundle:true,format:'esm',platform:'node',outfile:out2,logLevel:'silent',define:{'import.meta.env':'{}'},banner:{js:'globalThis.window=globalThis;globalThis.location={origin:"https://apply.atriveo.com"};globalThis.document={visibilityState:"visible"};'}});
+ const {itemsFromExtension}=await import(out2);
+ assert.deepEqual(itemsFromExtension({attach:2,copy:3}),[{kind:'action',key:'extension.attach',seconds:0,count:2},{kind:'action',key:'extension.copy',seconds:0,count:3},{kind:'action',key:'extension.interactions',seconds:0,count:5}]);
+ assert.deepEqual(itemsFromExtension({evil:5,'../x':1,attach:-1,copy:1.5,open:'3'}),[],'unknown names and bad numbers are dropped');
+ assert.deepEqual(itemsFromExtension(null),[]);assert.equal(itemsFromExtension({download:99999})[0].count,500);});
