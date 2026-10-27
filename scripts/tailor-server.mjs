@@ -2,6 +2,7 @@
 import {dashboardAiUsage} from './resume-ai-usage.mjs';
 import { claimInference, completeInference } from './resume-ai-queue.mjs';
 import { analyzeResume, recordAiDecision, resumeAiVersion, enqueueResumeAi, resumeAiResult } from './resume-ai.mjs';
+import { enqueueAnswer } from './application-answer.mjs';
 /**
  * Atriveo local tailor sidecar.
  *
@@ -1772,6 +1773,7 @@ const server = http.createServer(async (req, res) => {
       : op === "ai-version" ? resumeAiVersion(db, body)
       : op === "ai-result" ? resumeAiResult(db, body)
       : op === "ai-match" ? enqueueResumeAi(db, body)
+      : op === "ai-answer" ? enqueueAnswer(db, body)
       : op === "ai-decision" ? recordAiDecision(db, body)
       : op === "start" ? startPasted(db, body)
       : op === "delete" ? deletePasted(db, body.id)
@@ -1787,7 +1789,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     if (req.method === "GET" && op === "pasted") { void run({}); return; }
-    if (req.method === "POST" && ["render", "save", "revert", "bullet", "check", "guess", "start", "delete", "ai-match", "ai-decision", "ai-version", "ai-result", "ai-worker-claim", "ai-worker-complete", "ai-usage"].includes(op)) {
+    if (req.method === "POST" && ["render", "save", "revert", "bullet", "check", "guess", "start", "delete", "ai-match", "ai-answer", "ai-decision", "ai-version", "ai-result", "ai-worker-claim", "ai-worker-complete", "ai-usage"].includes(op)) {
       let raw = "";
       req.on("data", (c) => { raw += c; if (raw.length > 200_000) req.destroy(); });
       req.on("end", () => { let body; try { body = JSON.parse(raw || "{}"); } catch { return reply(400, { ok: false, error: "Bad JSON" }); } void run(body); });
