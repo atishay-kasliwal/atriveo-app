@@ -1,4 +1,6 @@
 import GeneralPage from "./GeneralPage";
+import UsagePage from "./UsagePage";
+import { startUsageTracking } from "./usage";
 import { syncProfileToExtension } from "./companionProfile";
 import { useEffect } from "react";
 import AppliedPage from "./AppliedPage";
@@ -28,6 +30,8 @@ function Console() {
     return () => document.removeEventListener("visibilitychange", visible);
   }, [user]);
   const path = useLocation().pathname.replace(/\/+$/, "");
+  // Measure time and feature use (counts only) while someone is signed in; read the path fresh so page changes are noticed.
+  useEffect(() => (user ? startUsageTracking(() => window.location.pathname) : undefined), [user]);
   if (loading) return <div className="apply-loading" aria-busy="true"><div className="spin" /></div>;
   if (!user) return <Navigate to="/login" replace />;
   const header = <ApplyHeader user={user} />;
@@ -36,6 +40,7 @@ function Console() {
   if (path === "/applied" || path.startsWith("/applied/")) return <AppliedPage header={header} />;
   if (path === "/settings") return <SettingsPage header={header} />;
   if (path === "/general") return <GeneralPage header={header} />;
+  if (path === "/usage") return <UsagePage header={header} />;
   if (path === "/staffing") return <StaffingPage header={header} />;
   if (path === "/resume_builder") return <ResumeBuilderPage header={header} />;
   if (path === "/bank") return <BankPage header={header} />;
