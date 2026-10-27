@@ -17,6 +17,13 @@ export function resumeRevision(resume) {
 function webUrl(value) {
   try { const url = new URL(value); return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password ? url.href : null; } catch { return null; }
 }
+/** The details you share on every application (name, email, phone, location, links), the same on all of them. */
+export function profileFields(profile) {
+  const name = String(profile.name || '').trim();
+  return [ ['name', 'Full name', name], ['firstName', 'First name', name.split(/\s+/)[0]], ['lastName', 'Last name', name.split(/\s+/).slice(1).join(' ')], ['email', 'Email', profile.email], ['phone', 'Phone', profile.phone], ['location', 'Location', profile.location], ['linkedin', 'LinkedIn', profile.linkedin], ['github', 'GitHub', profile.github], ['portfolio', 'Website', profile.portfolio] ].map(([key, label, value]) => ({ key, label, value: String(value || '').slice(0, 500) }));
+}
+export const profileDetails = () => profileFields(loadResumeProfile());
+
 export async function prepareApplicationKit(db, input, { profile = loadResumeProfile(), store = storeFromEnv(), outRoot = null, now = new Date() } = {}) {
   if (!input || typeof input.jobUrl !== 'string' || !/^[a-f0-9]{64}$/.test(input.resumeSha256 || '')) throw new ApplicationKitError('Refresh the job to load its resume version.', 400);
   const job = await db.collection('jobs').findOne({ job_url: input.jobUrl }, { projection: { job_url: 1, job_url_direct: 1, company: 1, title: 1, resume: 1 } });
@@ -49,7 +56,7 @@ export async function prepareApplicationKit(db, input, { profile = loadResumePro
   return {
     version: 1, id: crypto.randomUUID(), createdAt: now.toISOString(), expiresAt: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
     job: { id: job.job_url, company: String(job.company || ''), title: String(job.title || ''), applyUrl },
-    fields: [ ['name', 'Full name', name], ['firstName', 'First name', name.split(/\s+/)[0]], ['lastName', 'Last name', name.split(/\s+/).slice(1).join(' ')], ['email', 'Email', profile.email], ['phone', 'Phone', profile.phone], ['location', 'Location', profile.location], ['linkedin', 'LinkedIn', profile.linkedin], ['github', 'GitHub', profile.github], ['portfolio', 'Website', profile.portfolio] ].map(([key, label, value]) => ({ key, label, value: String(value || '').slice(0, 500) })),
+    fields: profileFields({ ...profile, name }),
     resume: { sha256: expected, fileName: `${name || 'Resume'}.pdf`, bytes: bytes.length, mimeType: 'application/pdf', base64: bytes.toString('base64') },
   };
 }

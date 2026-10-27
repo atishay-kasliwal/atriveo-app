@@ -1,3 +1,5 @@
+import { syncProfileToExtension } from "./companionProfile";
+import { useEffect } from "react";
 import AppliedPage from "./AppliedPage";
 import SettingsPage from "./SettingsPage";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
@@ -16,6 +18,14 @@ import TodayPage from "./TodayPage";
 /** Signed-in admins see the console; everyone else is sent to the admin login. */
 function Console() {
   const { user, loading } = useAuth();
+  // Give the extension your shared details whenever the console is open, so its panel always has them.
+  useEffect(() => {
+    if (!user) return;
+    void syncProfileToExtension();
+    const visible = () => { if (document.visibilityState === "visible") void syncProfileToExtension(); };
+    document.addEventListener("visibilitychange", visible);
+    return () => document.removeEventListener("visibilitychange", visible);
+  }, [user]);
   const path = useLocation().pathname.replace(/\/+$/, "");
   if (loading) return <div className="apply-loading" aria-busy="true"><div className="spin" /></div>;
   if (!user) return <Navigate to="/login" replace />;
