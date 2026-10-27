@@ -61,7 +61,8 @@ export function buildAppliedRows({ applications, swipes, jobs, events }) {
 
 const matchesOutcome = (r, outcome) => outcome === "all" || (outcome === "replied" ? Boolean(r.outcome) : outcome === "none" ? !r.outcome : r.outcome?.status === outcome);
 
-export async function appliedHistory(db, { q = "", outcome = "all", skip = 0, limit = 40, key = null, now = Date.now() } = {}) {
+/** Every applied job as a row (with its mail), and the raw items the shared counts are built from. */
+export async function loadAppliedRows(db, { now = Date.now() } = {}) {
   const since = new Date(now - 200 * 86400000).toISOString();
   const [applications, swipes, events] = await Promise.all([
     db.collection("applications").find({ status: "APPLIED" }, { projection: { company: 1, title: 1, location: 1, ats: 1, applyUrl: 1, finalUrl: 1, jobUrls: 1, "lifecycle.appliedAt": 1, "submission.submittedAt": 1, "submission.by": 1, outcome: 1, resume: 1 } }).toArray(),
@@ -71,6 +72,11 @@ export async function appliedHistory(db, { q = "", outcome = "all", skip = 0, li
   const urls = [...new Set([...applications.flatMap((a) => a.jobUrls || []), ...swipes.map((s) => s.job_url)])].slice(0, 6000);
   const jobs = urls.length ? await db.collection("jobs").find({ job_url: { $in: urls } }, { projection: { _id: 0, job_url: 1, company: 1, title: 1, location: 1, site: 1, run_at: 1, job_url_direct: 1, "resume.pdf_path": 1, "resume.updated_at": 1, "resume.object.sha256": 1 } }).toArray() : [];
   const all = buildAppliedRows({ applications, swipes, jobs, events });
+  return { all, applications, swipes };
+}
+
+export async function appliedHistory(db, { q = "", outcome = "all", skip = 0, limit = 40, key = null, now = Date.now() } = {}) {
+  const { all, applications, swipes } = await loadAppliedRows(db, { now });
   if (key) { const row = all.find((r) => r.key === key); return row ? { ok: true, row } : { ok: false, error: "That application was not found." }; }
   const text = String(q || "").trim().toLowerCase().slice(0, 100);
   const searched = text ? all.filter((r) => `${r.company} ${r.title} ${r.location || ""}`.toLowerCase().includes(text)) : all;

@@ -1,6 +1,7 @@
 import GeneralPage from "./GeneralPage";
 import UsagePage from "./UsagePage";
 import AssessmentsPage from "./AssessmentsPage";
+import InsightsPage from "./InsightsPage";
 import { startUsageTracking } from "./usage";
 import { syncProfileToExtension } from "./companionProfile";
 import { syncGoalToPhoneMessages } from "./phoneGoal";
@@ -50,7 +51,9 @@ function Console() {
   // The answer pages (To answer, and the full form view) were retired: old links and bookmarks land on Today.
   if (path === "/unanswered" || path === "/answers") return <Navigate to="/" replace />;
   if (path === "/ready" || path === "/review") return <ReadyPage header={header} />;
-  if (path === "/stats" || path === "/overview") return <Applications header={header} />;
+  if (path === "/stats" || path === "/overview") return <InsightsPage header={header} />;
+  // The earlier, heavier analytics page stays reachable for the detail.
+  if (path === "/analytics") return <Applications header={header} />;
   return <TodayPage header={header} />;
 }
 
