@@ -45,7 +45,7 @@ export default function SettingsPage({ header }: { header?: ReactNode }) {
     <div className="rv-page st-page">
       {header}
       <main className="st-main">
-        <div className="st-title"><h1>Settings</h1><p>What your daily goal is, and what the Mac widget shows. Changes save as you make them.</p></div>
+        <div className="st-title"><h1>Settings</h1><p>What your daily goal is, and what the Mac widget shows. Changes save as you make them. <a href="/usage">See how you use Atriveo →</a></p></div>
         {error && goal == null && <p className="st-error" role="alert">{error}</p>}
         <div className="st-grid">
           <div className="st-controls">

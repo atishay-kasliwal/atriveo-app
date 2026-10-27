@@ -26,7 +26,7 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
 
       </a>
       <nav className="apply-nav" aria-label="Console">
-        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/job-matching" && !path.startsWith("/applied") && path !== "/settings" && path !== "/general" ? "page" : undefined}>
+        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/job-matching" && !path.startsWith("/applied") && path !== "/settings" && path !== "/general" && path !== "/usage" ? "page" : undefined}>
           Today{waiting !== null ? <span className="apply-nav-n">{waiting}</span> : null}
         </Link>
         <Link to="/job-matching" aria-current={path === "/job-matching" ? "page" : undefined}>Matching</Link>
