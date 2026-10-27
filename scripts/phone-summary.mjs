@@ -23,12 +23,13 @@ export function tierOf(applied, goal) {
 
 /** Days in a row that met the goal. Today counts once it has met it; with includeToday false the run is counted through yesterday. */
 export function streakOf(days, today, goal, applied, { includeToday = true } = {}) {
+  goal = Math.max(1, goal); // a goal of 0 would count every empty day for ever
   const by = new Map((days ?? []).map((d) => [d.day, d.applied]));
   by.set(today, applied);
   let n = 0, cur = today;
   if (includeToday && (by.get(cur) ?? 0) >= goal) n += 1;
   cur = dayBefore(cur);
-  while ((by.get(cur) ?? 0) >= goal) { n += 1; cur = dayBefore(cur); }
+  while (n < 4000 && (by.get(cur) ?? 0) >= goal) { n += 1; cur = dayBefore(cur); }
   return n;
 }
 

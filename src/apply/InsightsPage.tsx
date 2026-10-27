@@ -17,6 +17,7 @@ interface Insights {
   funnel: { applied: number; replied: number; interview: number; assessment: number; offer: number; rejected: number; none: number; replyRate: number | null; medianReplyDays: number | null };
   pipeline: { done: number; queued: number; running: number; failed: number } | null;
   waiting: { general: number | null };
+  milestones: { lap: number; need: number; days30: number; daysAll: number }[]; milestoneMore: number;
   assessments: { open: number; unknown: number; next: { company: string; deadlineAt: string; state: string; when: string } | null };
 }
 const fmtDay = (day: string) => new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
@@ -153,6 +154,11 @@ export default function InsightsPage({ header }: { header?: ReactNode }) {
                 <li><Link to="/general"><span>General jobs</span><b>{data.waiting.general ?? "—"}</b><small>apply with your general resume</small></Link></li>
                 <li><Link to="/assessments"><span>Assessments</span><b>{data.assessments.open}</b><small>{data.assessments.next ? `next: ${data.assessments.next.company || "one"}, ${data.assessments.next.when}` : data.assessments.unknown ? `${data.assessments.unknown} need a deadline` : "none open"}</small></Link></li>
               </ul>
+              {data.milestones.length > 0 && (
+                <div className="in-miles"><h3>Times you hit it</h3>
+                  <ul>{data.milestones.map((m) => <li key={m.lap}><span className="pg"><i style={{ background: lapColor(m.lap) }} aria-hidden="true" />{m.need}</span><b>{m.days30}×</b><small>{m.daysAll} in all</small></li>)}</ul>
+                  <p className="in-foot dim">Days in the last 30 that reached each lap of your goal{data.milestoneMore > 0 ? ` · ${data.milestoneMore} higher laps reached` : ""}</p>
+                </div>)}
             </section>
             <aside className="in-card in-usage" aria-label="Your time this week">
               <h2>Your time <small>7 days</small></h2>
