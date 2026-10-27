@@ -91,3 +91,4 @@
 @media(prefers-reduced-motion:reduce){.in-layout>*,.in-donut .seg{animation:none}.in-hero h1 b{filter:none}}
 @media(min-width:1560px){.in-layout>.in-usage,.in-layout>.in-waiting{align-self:start}}
 .in-tip.side{transform:translateX(calc(-100% - 14px))}.in-tip.side.flip{transform:translateX(calc(-100% - 14px))}
+.in-dial .fill.under{filter:none;transition:none}

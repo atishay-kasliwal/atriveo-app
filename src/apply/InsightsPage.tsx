@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { getJson } from "./engine";
+import { lapCaption, lapColor, lapOf, lapProgress } from "./lapColors";
 import { duration, FEATURES, loadUsage, PAGES, PAGE_HUE, type UsageSummary } from "./usage";
 import { PLATFORM_LABEL, type Platform } from "./platform";
 import { TRACK_LABEL } from "./tracks";
@@ -18,9 +19,6 @@ interface Insights {
   waiting: { general: number | null };
   assessments: { open: number; unknown: number; next: { company: string; deadlineAt: string; state: string; when: string } | null };
 }
-/** The ring colours: the accent under the goal, then green, red and gold, the same as the Mac widget. */
-const TIER = ["#6d7bff", "#2fb87a", "#ee5d52", "#f7b838"];
-const tierOf = (n: number, goal: number) => { const m = n / Math.max(1, goal); return m >= 4 ? 3 : m >= 2 ? 2 : m >= 1 ? 1 : 0; };
 const fmtDay = (day: string) => new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 const fmtLong = (day: string) => new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
 const label = (kind: "source" | "track", key: string) => (kind === "source" ? PLATFORM_LABEL[key as Platform] ?? (key === "other" ? "Other" : key[0]!.toUpperCase() + key.slice(1)) : TRACK_LABEL[key] ?? "Other");
@@ -93,7 +91,8 @@ export default function InsightsPage({ header }: { header?: ReactNode }) {
   const bestIdx = data ? data.days.findIndex((d) => d.day === data.best.day) : -1;
   const tipIdx = hover ?? bestIdx, tipDay = data && tipIdx >= 0 && data.days[tipIdx]!.applied > 0 ? data.days[tipIdx]! : null;
   const shown = hover != null && data ? data.days[hover] : data?.best.day ? data.days.find((d) => d.day === data.best.day) : null;
-  const tone = data ? TIER[data.today.tier] : TIER[0];
+  const todayLap = data ? lapOf(data.today.applied, data.today.goal) : 0;
+  const tone = lapColor(todayLap);
   const strip = usage && usage.total > 0 ? usage.pages.map((p) => <b key={p.id} title={`${p.label} ${duration(p.seconds)}`} style={{ flexGrow: p.seconds, background: PAGE_HUE[p.id] ?? "#8a919c" }} />) : null;
   return (
     <div className="rv-page in-page">
@@ -122,7 +121,7 @@ export default function InsightsPage({ header }: { header?: ReactNode }) {
                 <i className="in-goal" style={{ bottom: `${(data.today.goal / view.top) * 100}%` }}><em>goal {data.today.goal}</em></i>
                 {data.days.map((d, i) => (
                   <button key={d.day} type="button" className={`in-bar${hover === i ? " on" : ""}${d.day === data.best.day ? " best" : ""}`} aria-label={`${fmtLong(d.day)}: ${d.applied} applied`}
-                    style={{ height: `${Math.max(2, (d.applied / view.top) * 100)}%`, ["--c" as string]: TIER[tierOf(d.applied, data.today.goal)], animationDelay: `${i * 18}ms`, opacity: d.applied ? 1 : 0.25 }}
+                    style={{ height: `${Math.max(2, (d.applied / view.top) * 100)}%`, ["--c" as string]: lapColor(lapOf(d.applied, data.today.goal)), animationDelay: `${i * 18}ms`, opacity: d.applied ? 1 : 0.25 }}
                     onMouseEnter={() => setHover(i)} onFocus={() => setHover(i)} onBlur={() => setHover(null)} />))}
                 {tipDay && <span className={`in-tip${tipIdx >= 24 ? " flip" : ""}${hover == null ? " is-best" : ""}${tipDay.applied / view.top > 0.8 ? " side" : ""}`} style={{ left: `${((tipIdx + 0.5) / data.days.length) * 100}%`, ...(tipDay.applied / view.top > 0.8 ? { top: 4 } : { bottom: `calc(${Math.max(2, (tipDay.applied / view.top) * 100)}% + 8px)` }) }}>{hover == null ? `best · ${tipDay.applied}` : `${tipDay.applied} · ${fmtLong(tipDay.day)}`}</span>}
               </div>
@@ -144,9 +143,9 @@ export default function InsightsPage({ header }: { header?: ReactNode }) {
             </section>
             <section className="in-card in-waiting" aria-label="What is waiting">
               <div className="in-dial in-wide-only" style={{ ["--c" as string]: tone }}>
-                <svg viewBox="0 0 140 140" aria-hidden="true"><circle cx="70" cy="70" r="58" className="track" /><circle cx="70" cy="70" r="58" className="fill" strokeDasharray={2 * Math.PI * 58} strokeDashoffset={2 * Math.PI * 58 * (1 - data.today.fraction)} transform="rotate(-90 70 70)" /></svg>
+                <svg viewBox="0 0 140 140" aria-hidden="true"><circle cx="70" cy="70" r="58" className="track" />{todayLap > 0 && <circle cx="70" cy="70" r="58" className="fill under" style={{ stroke: lapColor(todayLap - 1) }} strokeDasharray={2 * Math.PI * 58} strokeDashoffset={0} transform="rotate(-90 70 70)" />}<circle cx="70" cy="70" r="58" className="fill" strokeDasharray={2 * Math.PI * 58} strokeDashoffset={2 * Math.PI * 58 * (1 - lapProgress(data.today.applied, data.today.goal))} transform="rotate(-90 70 70)" /></svg>
                 <div className="in-dial-text"><b>{data.today.applied}</b><span>of {data.today.goal} today</span></div>
-                <p>{data.today.tier === 0 ? `${data.today.goal - data.today.applied} to go` : ["", "Goal reached", "Double the goal", "Four times the goal"][data.today.tier]}</p>
+                <p>{lapCaption(data.today.applied, data.today.goal)}</p>
               </div>
               <h2>What is waiting</h2>
               <ul className="in-wait">
