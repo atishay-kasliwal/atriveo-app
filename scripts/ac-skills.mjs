@@ -258,10 +258,12 @@ const isTool = (sk) => TOOL_CATEGORIES.has(CATEGORY_OF.get(sk.name)) && !NOT_TOO
 
 /**
  * An employer's tools line for one JD: skills Atishay confirmed at that employer (TRACKS.yaml confirmed_skills) or that
- * its bank bullets already name (signature_technologies), kept only when the JD asks for them. Up to 6, about one
- * line on the company row. Empty when the JD names none of them.
+ * its bank bullets already name (signature_technologies or bullet text). The JD's skills come first, best first, up to 6 and
+ * about one line on the company row. A line never has fewer than `min` (5): when the JD asks for fewer of the employer's tools,
+ * the employer's other tools follow, so the line stays honest (only tools used there) and full. It is shorter only when the
+ * employer has fewer than 5 such tools.
  */
-export function employerTools(roleSlug, jd, bank, { max = 6, maxChars = 58 } = {}) {
+export function employerTools(roleSlug, jd, bank, { max = 6, min = 5, maxChars = 58, hardChars = 72 } = {}) {
   const hay = normJd(jd);
   const confirmed = loadTracks().confirmed_skills?.[roleSlug] || [];
   const fromBank = (bank?.acs || []).filter((a) => a.role === roleSlug)
@@ -270,7 +272,7 @@ export function employerTools(roleSlug, jd, bank, { max = 6, maxChars = 58 } = {
   const texts = normJd((bank?.acs || []).filter((a) => a.role === roleSlug)
     .flatMap((a) => [a.text, ...(a.variants || []).map((v) => v.text)]).filter(Boolean).join(" "));
   const fromTexts = SKILLS_LIBRARY.flatMap((c) => c.skills).filter((sk) => sk.bankBacked !== false && jdMentionsSkill(sk, texts)).map((sk) => sk.displayName);
-  const seen = new Set(); const picked = [];
+  const seen = new Set(); const hits = []; const others = [];
   for (const name of [...confirmed, ...fromBank, ...fromTexts]) {
     const entry = SKILL_BY_DISPLAY.get(String(name).toLowerCase()) || SKILL_BY_NAME.get(String(name).toLowerCase());
     const display = entry?.displayName || name;
@@ -279,13 +281,16 @@ export function employerTools(roleSlug, jd, bank, { max = 6, maxChars = 58 } = {
     seen.add(key);
     if (entry && !isTool(entry)) continue;
     const hit = entry ? jdMentionsSkill(entry, hay) : hay.includes(` ${key} `);
-    if (hit) picked.push({ display, weight: (entry?.marketFrequency || 500) * (entry?.priority || 5) });
+    (hit ? hits : others).push({ display, weight: (entry?.marketFrequency || 500) * (entry?.priority || 5) });
   }
-  picked.sort((a, b) => b.weight - a.weight);
+  const byWeight = (a, b) => b.weight - a.weight;
+  hits.sort(byWeight); others.sort(byWeight);
+  const ordered = [...hits, ...others];
   const out = [];
-  for (const p of picked) {
-    if (out.length >= max || [...out, p.display].join(", ").length > maxChars) continue;
-    out.push(p.display);
-  }
+  const fits = (p, limit) => [...out, p.display].join(", ").length <= limit;
+  // The JD's skills first, within the usual line length.
+  for (const p of hits) if (out.length < max && fits(p, maxChars)) out.push(p.display);
+  // Short of the minimum: the JD's skills that did not fit, then the employer's other tools, up to the hard line length.
+  for (const p of ordered) if (out.length < min && !out.includes(p.display) && fits(p, hardChars)) out.push(p.display);
   return out;
 }
