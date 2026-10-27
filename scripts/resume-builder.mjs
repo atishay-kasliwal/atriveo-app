@@ -643,6 +643,23 @@ export async function saveDraft(db, { source, draftId }) {
   return { ok: true, pdfPath: path.join(dir, PDF) };
 }
 
+/**
+ * Change the email printed on a job's resume: render the same content with the new address and keep that as the job's resume
+ * (Revert still goes back to the generated one). Nothing else on the resume changes.
+ */
+export async function setResumeEmail(db, { jobUrl, email } = {}) {
+  const clean = String(email ?? "").trim().slice(0, 80);
+  if (!EMAIL.test(clean)) throw new BuilderError(`"${clean}" isn't an email address`);
+  if (typeof jobUrl !== "string" || !/^https?:\/\//.test(jobUrl)) throw new BuilderError("Open a job first.");
+  const base = await openResume(db, { jobUrl });
+  if (base.source.kind !== "job") throw new BuilderError("Only a job's resume can be changed here.");
+  if (base.email === clean) return { ok: true, unchanged: true, email: clean };
+  const draft = await renderDraft(db, { source: base.source, headerTitle: base.headerTitle, email: clean, city: base.city, skills: base.skills, sections: base.sections });
+  if (draft.problems.length) throw new BuilderError(`Email not changed: ${draft.problems[0]}`);
+  await saveDraft(db, { source: base.source, draftId: draft.draftId });
+  return { ok: true, email: clean };
+}
+
 /** A job (or a track's general resume) back to the generated resume. */
 export async function revertResume(db, source) {
   if (source.kind === "job") {
