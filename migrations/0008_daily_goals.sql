@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS daily_goals (
+ email TEXT PRIMARY KEY,
+ goal INTEGER NOT NULL DEFAULT 15 CHECK(goal BETWEEN 1 AND 200),
+ updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
