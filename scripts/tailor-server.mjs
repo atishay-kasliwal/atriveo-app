@@ -47,7 +47,7 @@ import { buildSkillsLines, capSkillsLineToOnePhysicalLine } from "./skills-libra
 import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { createHash } from "node:crypto";
-import { prepareApplicationKit } from "./application-kit.mjs";
+import { prepareApplicationKit, profileDetails } from "./application-kit.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, renderDraft, revertResume, saveBullet, saveDraft, setResumeEmail, startPasted } from "./resume-builder.mjs";
@@ -1905,6 +1905,18 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ ok: false, error: e.message || "Application kit unavailable" }));
       }
     });
+    return;
+  }
+
+  // GET /applications/profile-details — the details you share on every application; the website hands them to the extension.
+  if (req.method === "GET" && pathname === "/applications/profile-details") {
+    try {
+      res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "private, no-store" });
+      res.end(JSON.stringify({ ok: true, fields: profileDetails() }));
+    } catch (e) {
+      res.writeHead(503, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+    }
     return;
   }
 
