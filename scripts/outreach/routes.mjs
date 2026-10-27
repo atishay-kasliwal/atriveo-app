@@ -43,7 +43,7 @@ async function body(req) {
   for await (const chunk of req) { size += chunk.length; if (size > 7_100_000) throw new Error('Request too large'); chunks.push(chunk); }
   return JSON.parse(Buffer.concat(chunks).toString() || '{}');
 }
-export function createOutreachRoutes(run = runOutreach, find = discover, auth = authorize) {
+export function createOutreachRoutes(run = runOutreach, find = discover, auth = authorize, replies = null) {
   return async (req, res, url) => {
     if (!url.pathname.startsWith('/outreach/')) return false;
     const json = (value, code = 200) => { res.statusCode = code; res.setHeader('Content-Type', 'application/json'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify(value)); };
@@ -52,6 +52,7 @@ export function createOutreachRoutes(run = runOutreach, find = discover, auth = 
     try {
       const route = url.pathname.slice('/outreach/'.length);
       const read = req.method === 'GET';
+      if (read && route === 'replies') { json({ ok: true, replies: replies ? await replies() : {} }); return true; }
       if (!(read ? ['list', 'detail', 'settings', 'attachment'] : ['POST', 'PUT'].includes(req.method) ? ['create', 'draft', 'action', 'settings', 'test', 'scan', 'auth'] : []).includes(route)) { json({ ok: false, error: 'Unknown outreach route' }, 404); return true; }
       const input = read ? Object.fromEntries(url.searchParams) : await body(req);
       let result;
@@ -72,8 +73,8 @@ export function createOutreachRoutes(run = runOutreach, find = discover, auth = 
     return true;
   };
 }
-export function outreachHandler() {
-  const handler = createOutreachRoutes(); let running = false;
+export function outreachHandler(replies = null) {
+  const handler = createOutreachRoutes(runOutreach, discover, authorize, replies); let running = false;
   handler.start = () => {
     const tick = async () => { if (running) return; running = true; try { await runOutreach('tick'); } catch (e) { console.warn('[outreach]', e.message); } finally { running = false; } };
     void runOutreach('recover').catch(e => console.warn('[outreach]', e.message)).finally(() => { void tick(); const timer = setInterval(() => void tick(), 30000); timer.unref(); });

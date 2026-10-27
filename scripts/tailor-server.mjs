@@ -22,6 +22,7 @@ import { appliedSummary } from './applied-core.mjs';
  * No external dependencies — Node built-ins only.
  */
 import { outreachHandler, outreachCors } from "./outreach/routes.mjs";
+import { outreachReplies } from "./outreach/replies.mjs";
 import { handleStaffing } from "./staffing-routes.mjs";
 import { startStaffingAutoQueue } from "./staffing-workspace.mjs";
 import { handleMuse } from "./muse-http.mjs";
@@ -1156,7 +1157,7 @@ let applicationActions = Promise.resolve();
 let listTailoredCache = null; // { at: number, resumes: [] }
 const LIST_TAILORED_CACHE_MS = 30_000;
 
-const handleOutreach = outreachHandler();
+const handleOutreach = outreachHandler(() => (process.env.MONGO_URI ? withMongo((db) => outreachReplies(db), { appName: "AtriveoTailorServer" }) : {}));
 const server = http.createServer(async (req, res) => {
   // permissive CORS so the Vite dev origin can reach us
   res.setHeader("Access-Control-Allow-Origin", "*");

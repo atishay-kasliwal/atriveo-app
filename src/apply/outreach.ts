@@ -34,11 +34,12 @@ export async function outreachApi<T>(route: string, body?: unknown, method = 'PO
 }
 export function useOutreachList() {
   const [drafts, setDrafts] = useState<OutreachDraft[]>([]);
+  const [replies, setReplies] = useState<Record<string, { at: string; subject: string }>>({});
   const [error, setError] = useState('');
   const refresh = useCallback(async () => {
-    try { const result = await outreachApi<{ drafts: OutreachDraft[] }>('list'); setDrafts(result.drafts); setError(''); }
+    try { const result = await outreachApi<{ drafts: OutreachDraft[] }>('list'); setDrafts(result.drafts); setError(''); void outreachApi<{ replies: Record<string, { at: string; subject: string }> }>('replies').then(r => setReplies(r.replies)).catch(() => {}); }
     catch (e) { setError(e instanceof Error ? e.message : String(e)); }
   }, []);
   useEffect(() => { const first = setTimeout(() => void refresh(), 0); const timer = setInterval(() => { if (document.visibilityState === 'visible') void refresh(); }, 30000); return () => { clearTimeout(first); clearInterval(timer); }; }, [refresh]);
-  return { drafts, error, refresh };
+  return { drafts, replies, error, refresh };
 }
