@@ -3,6 +3,7 @@ import {dashboardAiUsage} from './resume-ai-usage.mjs';
 import { claimInference, completeInference } from './resume-ai-queue.mjs';
 import { analyzeResume, recordAiDecision, resumeAiVersion, enqueueResumeAi, resumeAiResult } from './resume-ai.mjs';
 import { enqueueAnswer } from './application-answer.mjs';
+import { widgetProgress } from './widget-progress.mjs';
 /**
  * Atriveo local tailor sidecar.
  *
@@ -2056,6 +2057,22 @@ const server = http.createServer(async (req, res) => {
       } catch (e) {
         res.writeHead(503, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
+  }
+
+  // Read-only compact native progress for the Mac app and widget: counts only, the same canonical Matching counts.
+  if (req.method === "GET" && pathname === "/applications/widget") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const data = await withMongo((db) => widgetProgress(db), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch {
+        res.writeHead(503, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify({ ok: false, error: "Progress is temporarily unavailable" }));
       }
     })();
     return;
