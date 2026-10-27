@@ -50,6 +50,7 @@ import { createHash } from "node:crypto";
 import { prepareApplicationKit, prepareGeneralKit, profileDetails } from "./application-kit.mjs";
 import { noTextJobs, generalQueue, generalCount, clearNoTextCache } from "./no-text-jobs.mjs";
 import { readGoal, saveGoal, startPhoneSummaries } from "./phone-summary.mjs";
+import { listAssessments, updateAssessment } from "./assessments.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, renderDraft, revertResume, saveBullet, saveDraft, setResumeEmail, startPasted } from "./resume-builder.mjs";
@@ -2016,6 +2017,28 @@ const server = http.createServer(async (req, res) => {
     req.on("end", async () => {
       try { const data = await withMongo(db => recordMatchingEvent(db, JSON.parse(raw || "{}"))); res.writeHead(200, {"Content-Type":"application/json"}); res.end(JSON.stringify(data)); }
       catch(e) { res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({ok:false,error:e.message})); }
+    });
+    return;
+  }
+
+  // GET /applications/assessments — assessments waiting on you, with deadlines; POST /applications/assessment-update {id, deadlineAt?, status?}.
+  if ((req.method === "GET" && pathname === "/applications/assessments") || (req.method === "POST" && pathname === "/applications/assessment-update")) {
+    let raw = "";
+    req.on("data", (c) => { raw += c; if (raw.length > 2_000) req.destroy(); });
+    req.on("end", async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const data = await withMongo(async (db) => {
+          if (req.method === "GET") return { ok: true, rows: await listAssessments(db), now: new Date().toISOString() };
+          const body = JSON.parse(raw || "{}");
+          return updateAssessment(db, { id: body?.id, deadlineAt: body?.deadlineAt, status: body?.status });
+        }, { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
     });
     return;
   }

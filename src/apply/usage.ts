@@ -6,7 +6,7 @@
 export interface Feature { key: string; page: string; label: string; test?: RegExp; keys?: string[] }
 
 export const PAGES: Record<string, string> = {
-  today: "Today", matching: "Matching", applied: "Applied", general: "General", staffing: "Staffing", resumes: "Resumes",
+  today: "Today", matching: "Matching", applied: "Applied", general: "General", assessments: "Assessments", staffing: "Staffing", resumes: "Resumes",
   bank: "Bank", outreach: "Outreach", stats: "Stats", ready: "Ready", settings: "Settings", usage: "Usage",
 };
 
@@ -15,6 +15,7 @@ export function pageIdOf(path: string): string {
   if (p === "/job-matching") return "matching";
   if (p === "/applied" || p.startsWith("/applied/")) return "applied";
   if (p === "/general") return "general";
+  if (p === "/assessments") return "assessments";
   if (p === "/staffing") return "staffing";
   if (p === "/resume_builder") return "resumes";
   if (p === "/bank") return "bank";
@@ -54,6 +55,8 @@ export const FEATURES: Feature[] = [
   { key: "general.range", page: "general", label: "Day range", test: /^(today|yesterday|7 days|30 days|all time)\b/ },
   { key: "general.role", page: "general", label: "Role filter", test: /^(all|swe|ai|data analyst|ds|fde|other)\b/ },
   { key: "general.applied", page: "general", label: "Mark applied", test: /^yes$/ },
+  { key: "assessments.set", page: "assessments", label: "Set a deadline", test: /^(set|change)$/ },
+  { key: "assessments.done", page: "assessments", label: "Mark done", test: /^done\b/ },
   { key: "applied.filter", page: "applied", label: "Reply filter", test: /^(all|replies|interviews|assessments|offers|rejected|no reply)\b/ },
   { key: "settings.goal", page: "settings", label: "Daily goal", test: /^(one fewer|one more|\d+)$/ },
   { key: "settings.widget", page: "settings", label: "Widget content", test: /^(responses|interviews|to review|streak|trend|replies|day streak|blue|green|amber|rose)\b/ },
