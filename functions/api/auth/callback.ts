@@ -116,13 +116,12 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     .setExpirationTime("7d")
     .sign(secret);
 
-  const destination = hasConnectors ? "/" : "/onboarding";
+  // The Mac app started this sign-in (functions/api/auth/mac.ts): finish by handing it back.
+  const macChallenge = (request.headers.get("cookie") || "").match(/(?:^|;\s*)mac_challenge=([A-Za-z0-9_-]{43})/)?.[1];
+  const destination = macChallenge ? `/api/auth/mac?challenge=${macChallenge}` : hasConnectors ? "/" : "/onboarding";
 
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: destination,
-      "Set-Cookie": `atriveo_token=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800`,
-    },
-  });
+  const headers = new Headers({ Location: destination });
+  headers.append("Set-Cookie", `atriveo_token=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800`);
+  if (macChallenge) headers.append("Set-Cookie", "mac_challenge=; HttpOnly; Secure; SameSite=Lax; Path=/api/auth; Max-Age=0");
+  return new Response(null, { status: 302, headers });
 };
