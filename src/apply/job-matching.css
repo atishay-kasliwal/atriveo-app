@@ -422,3 +422,12 @@
 .jm-left>label input{accent-color:var(--primary);width:12px;height:12px;margin:0}
 @media(min-width:801px){.jm-actions .jm-progress{align-items:center}}
 @media(max-width:800px){.jm-left{flex-wrap:wrap;gap:8px}}
+
+/* The General source stands apart from the sites: no readable posting, applied to with your general resume. */
+.jm-source-filters .jm-source-general{margin-top:8px;padding-top:10px;border-top:1px solid var(--line,rgba(255,255,255,.12))}
+.jm-source-filters [data-platform=general] .jm-source-dot{background:#a86be0}
+
+/* Four decisions fit the bar: labels never wrap, the progress block gives way, and the key hints hide on narrower screens. */
+.jm-decision-actions{flex-wrap:nowrap}.jm-decision-actions .apps-btn,.jm-decision-actions .rv-primary{white-space:nowrap;padding:0 14px;gap:9px}.jm-decision-actions .rv-primary{min-width:0}
+@media(min-width:801px){.jm-actions{grid-template-columns:minmax(0,1fr) minmax(180px,300px) auto}.jm-actions .jm-progress{width:100%}}
+@media(max-width:1320px){.jm-decision-actions kbd{display:none}}

@@ -48,7 +48,7 @@ import { tailorOneAc, readAtsFromDir } from "./tailor-ac.mjs";
 import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { createHash } from "node:crypto";
 import { prepareApplicationKit, prepareGeneralKit, profileDetails } from "./application-kit.mjs";
-import { noTextJobs } from "./no-text-jobs.mjs";
+import { noTextJobs, generalQueue, generalCount, clearNoTextCache } from "./no-text-jobs.mjs";
 import { readGoal, saveGoal, startPhoneSummaries } from "./phone-summary.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
@@ -1851,6 +1851,7 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(403, { "Content-Type": "application/json" });
       return res.end(JSON.stringify({ ok: false, error: "Atriveo Fill only" }));
     }
+    clearNoTextCache();
     let raw = "";
     req.on("data", (c) => { raw += c; if (raw.length > 10_000) req.destroy(); });
     req.on("end", async () => {
@@ -1948,7 +1949,16 @@ const server = http.createServer(async (req, res) => {
         const params = new URL(req.url, "http://x").searchParams;
         const limit = Math.min(Math.max(Number(params.get("limit")) || 8, 1), 20);
         const offset = Math.max(Number(params.get("offset")) || 0, 0);
-        const data = await withMongo((db) => matchingQueue(db, { limit, offset, period: params.get("period") || "7d", sources: (params.get("sources") || "").split(","), role: params.get("role") || "", query: (params.get("q") || "").slice(0,200), timeZone: params.get("tz") || "America/New_York", sort: params.get("sort") === "fit" ? "fit" : "latest", company: params.get("company"), jobUrl: params.get("job"), random: params.get("random") === "1", exclude: (params.get("exclude") || "").split(",").filter(x=>/^[a-f0-9]{16}$/.test(x)), learn: params.get("learn") !== "0" }), { appName: "AtriveoTailorServer" });
+        const period = params.get("period") || "7d";
+        const wantsGeneral = (params.get("sources") || "").split(",").includes("general");
+        const data = wantsGeneral
+          ? await withMongo((db) => generalQueue(db, { limit, offset, period, role: params.get("role") || "", query: (params.get("q") || "").slice(0, 200), company: params.get("company") || "", exclude: (params.get("exclude") || "").split(",").filter((x) => /^[a-f0-9]{12}$/.test(x)), outRoot: OUT_ROOT }), { appName: "AtriveoTailorServer" })
+          : await withMongo(async (db) => {
+            const queue = await matchingQueue(db, { limit, offset, period, sources: (params.get("sources") || "").split(","), role: params.get("role") || "", query: (params.get("q") || "").slice(0,200), timeZone: params.get("tz") || "America/New_York", sort: params.get("sort") === "fit" ? "fit" : "latest", company: params.get("company"), jobUrl: params.get("job"), random: params.get("random") === "1", exclude: (params.get("exclude") || "").split(",").filter(x=>/^[a-f0-9]{16}$/.test(x)), learn: params.get("learn") !== "0" });
+            // The source filter shows how many General jobs there are; a failure here must never break the normal queue.
+            try { if (queue?.facets?.sources) queue.facets.sources.general = await generalCount(db, { period, outRoot: OUT_ROOT }); } catch { /* count omitted */ }
+            return queue;
+          }, { appName: "AtriveoTailorServer" });
         // Compressed: the tunnel is slow and this JSON shrinks ~5x.
         const body = Buffer.from(JSON.stringify(data));
         const gzip = /\bgzip\b/.test(String(req.headers["accept-encoding"] || "")) && body.length > 1024;
@@ -2036,6 +2046,7 @@ const server = http.createServer(async (req, res) => {
       try {
         if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
         const body = JSON.parse(raw || "{}");
+        clearNoTextCache();
         const data = await withMongo((db) => recordDecision(db, { jobUrl: body?.jobUrl, decision: body?.decision }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(data));

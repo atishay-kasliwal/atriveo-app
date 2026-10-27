@@ -74,3 +74,22 @@ test('the kit Location is the job\'s own place, or New York, NY when the job has
  const loc=async place=>(await prepareGeneralKit(db({...base,jobs:[job(1,'Software Engineer','Acme',{location:place})]}),{jobUrl:'https://www.linkedin.com/jobs/view/1'},{outRoot,profile:{name:'Alex Rivera',location:'Somewhere Else'}})).fields.find(f=>f.key==='location').value;
  assert.equal(await loc('Denver, CO, USA'),'Denver, CO');assert.equal(await loc(undefined),'New York, NY');assert.equal(await loc('USA'),'New York, NY');
 });
+test("Matching's General source: card-shaped jobs with a general resume, filters, counts and no repeats",async()=>{
+ const {generalQueue,generalCount,clearNoTextCache}=await import('../scripts/no-text-jobs.mjs');
+ clearNoTextCache();
+ const now=Date.parse('2026-10-20T16:00:00Z');
+ const today=n=>({date_posted:`2026-10-20`,run_at:`2026-10-20T1${n}:00:00Z`});
+ const d=db({...base,jobs:[job(1,'Software Engineer','Acme',today(1)),job(2,'Software Engineer II','Beta',today(2)),job(3,'AI Engineer','Gamma',today(3)),job(4,'Software Engineer','Acme',{date_posted:'2026-10-10',run_at:'2026-10-10T10:00:00Z'})]});
+ const q=await generalQueue(d,{outRoot,period:'today',now,limit:8});
+ assert.equal(q.ok,true);assert.deepEqual(q.jobs.map(j=>j.company),['Beta','Acme'],'only jobs with a general resume for their role (AI has none here), newest first, today only');
+ const j=q.jobs[0];
+ assert.equal(j.general,true);assert.equal(j.id,'https://www.linkedin.com/jobs/view/2');assert.equal(j.fit,null);assert.equal(j.ready,null);assert.equal(j.resumePath,path.join(outRoot,'general','Software Engineer','Atishay Kasliwal.pdf'));
+ assert.equal(j.generalLabel,'SWE');assert.equal(j.position,1);assert.deepEqual(j.jd.requirements,[]);
+ assert.equal(q.total,2);assert.equal(q.stats.remaining,2);assert.deepEqual(q.facets.period,{today:2,yesterday:0,'7d':2,all:3});
+ assert.equal(q.companies.find(c=>c.name==='Acme').count,1);
+ const acme=await generalQueue(d,{outRoot,period:'all',now,company:'acme'});assert.deepEqual(acme.jobs.map(x=>x.key).sort(),[noTextKey('https://www.linkedin.com/jobs/view/1'),noTextKey('https://www.linkedin.com/jobs/view/4')].sort());
+ const seen=await generalQueue(d,{outRoot,period:'today',now,exclude:[j.key]});assert.deepEqual(seen.jobs.map(x=>x.company),['Acme']);
+ assert.equal((await generalQueue(d,{outRoot,period:'all',now,role:'ai-engineer'})).total,0,'the AI role has no general resume here, so none is offered');
+ assert.equal(await generalCount(d,{outRoot,period:'7d',now}),2);
+ const find=(await generalQueue(d,{outRoot,period:'all',now,query:'beta'}));assert.deepEqual(find.jobs.map(x=>x.company),['Beta']);
+});

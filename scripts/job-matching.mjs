@@ -283,12 +283,13 @@ export async function recordDecision(db, { jobUrl, decision, now = new Date() })
     if(r.deletedCount){invalidateMatchingQueue();await forgetMatchingDecision(db,jobUrl).catch(()=>{});}
     return { ok: true, undone: r.deletedCount > 0 };
   }
-  const direction = { skip: "left", apply: "right", later: "later" }[decision];
+  const direction = { skip: "left", apply: "right", later: "later", closed: "left" }[decision];
   if (!direction) throw new Error("Unknown decision");
   await swipes.updateOne({ job_url: jobUrl },
-    { $set: { job_url: jobUrl, direction, swiped_at: now.toISOString(), date: now.toISOString().slice(0, 10), source: SOURCE } }, { upsert: true });
+    { $set: { job_url: jobUrl, direction, swiped_at: now.toISOString(), date: now.toISOString().slice(0, 10), source: SOURCE, closed: decision === "closed" } }, { upsert: true });
   invalidateMatchingQueue();
-  await recordMatchingEvent(db, {jobUrl, kind: {apply:'apply_opened',skip:'not_apply',later:'saved'}[decision], now}).catch(()=>{});
+  // A closed posting says nothing about taste, so it is kept out of the learning signal (a skip would mark the company as not wanted).
+  if (decision !== "closed") await recordMatchingEvent(db, {jobUrl, kind: {apply:'apply_opened',skip:'not_apply',later:'saved'}[decision], now}).catch(()=>{});
   return { ok: true };
 }
 

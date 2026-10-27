@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { keywordCoverage, keywordHighlights, pageSpace, analyzeMatchingResume } from '../scripts/job-matching-analysis.mjs';
-import { shapeJd } from '../scripts/job-matching.mjs';
+import { shapeJd, recordDecision } from '../scripts/job-matching.mjs';
 import { loadAtsConfig } from '../scripts/ats/config.mjs';
 const config = loadAtsConfig();
 
@@ -44,4 +44,28 @@ test('space accounts for the bottom margin and never offers room on a multipage 
 
 test('unreadable or absent PDFs have no fabricated score', async () => {
   assert.equal(await analyzeMatchingResume('/nonexistent/job-matching.pdf', 'Required: Python', 'Engineer'), null);
+});
+
+test('Closed is kept as a left swipe marked closed, never feeds the learning signal, and undo removes it', async () => {
+  const swipes = [], events = [], deleted = [];
+  const db = { collection: (name) => ({
+    updateOne: async (q, u) => { swipes.push({ q, set: u.$set }); },
+    deleteOne: async (q) => { deleted.push(q); return { deletedCount: 1 }; },
+    deleteMany: async () => ({}),
+    insertOne: async (d) => { events.push(d); },
+    createIndex: async () => ({}),
+    findOne: async () => (name === 'jobs' ? { company: 'Acme', title: 'Software Engineer' } : null),
+  }) };
+  const url = 'https://jobs.example.test/1';
+  await recordDecision(db, { jobUrl: url, decision: 'closed' });
+  assert.equal(swipes[0].set.direction, 'left');
+  assert.equal(swipes[0].set.closed, true);
+  assert.equal(events.length, 0, 'a closed posting says nothing about taste, so no matching event is recorded');
+  await recordDecision(db, { jobUrl: url, decision: 'skip' });
+  assert.equal(swipes[1].set.direction, 'left');
+  assert.equal(swipes[1].set.closed, false);
+  assert.equal(events.length, 1, 'a plain skip still teaches the ranking');
+  assert.equal((await recordDecision(db, { jobUrl: url, decision: 'undo' })).undone, true);
+  assert.equal(deleted[0].job_url, url);
+  await assert.rejects(() => recordDecision(db, { jobUrl: url, decision: 'gone' }), /Unknown decision/);
 });
