@@ -3937,7 +3937,7 @@
     "summary": "What we're looking for - - A software engineer with experience building production infrastructure.",
     "title": "Software Engineer, Infrastructure",
     "ats_score": 80,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-10-27T05:33:03Z",
@@ -6915,7 +6915,7 @@
     "site": "linkedin",
     "title": "Software Engineer II",
     "ats_score": 46,
-    "fit_score": 11
+    "fit_score": 10
   },
   {
     "session_id": "2026-10-27T05:33:03Z",
@@ -11261,24 +11261,6 @@
     "site": "linkedin",
     "summary": "**Data Scientist (Masters) \u2014 AI Data Trainer** **About The Role** What if your deep knowledge of machine learning, statistical inference, and data engineering could directly shape how the world's mos\u2026",
     "title": "Data Scientist (Masters)",
-    "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": null,
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:40.158Z",
-      "error": null,
-      "company": "Alignerr",
-      "title": "Data Scientist (Masters)",
-      "resume_slot": 36,
-      "session_hour": "02",
-      "batch_time": "2026-10-27T06:36:06Z",
-      "session_id": "2026-10-27T07:43:29Z",
-      "priority": 1000,
-      "source": "hourly"
-    },
     "ats_score": 36,
     "fit_score": 7
   },
@@ -12377,25 +12359,8 @@
     "site": "linkedin",
     "summary": "nan",
     "title": "Product Engineer (Backend)",
-    "resume": {
-      "status": "failed",
-      "stage": "GATED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": "oracle-atriveo",
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T07:41:46.322Z",
-      "error": "JD not found or too short in Mongo descriptions",
-      "company": "Conversion",
-      "title": "Product Engineer (Backend)",
-      "resume_slot": 4,
-      "session_hour": "02",
-      "batch_time": "2026-10-27T06:36:06Z",
-      "session_id": "2026-10-27T06:36:06Z",
-      "priority": 1000,
-      "source": "hourly",
-      "failure_reason": null
-    }
+    "ats_score": 33,
+    "fit_score": 1
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4481836688",
@@ -14040,7 +14005,7 @@
     "apply_type": "offsite",
     "apply_type_at": "2026-10-27T08:14:03.482Z",
     "ats_score": 42,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4484013079",
@@ -14728,25 +14693,7 @@
     "search_term": "backend engineer",
     "site": "linkedin",
     "summary": "nan",
-    "title": "Python Software Engineer - AI Workflows",
-    "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": null,
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:39.989Z",
-      "error": null,
-      "company": "Alignerr",
-      "title": "Python Software Engineer - AI Workflows",
-      "resume_slot": 3,
-      "session_hour": "03",
-      "batch_time": "2026-10-27T07:43:28Z",
-      "session_id": "2026-10-27T07:43:28Z",
-      "priority": 1000,
-      "source": "hourly"
-    }
+    "title": "Python Software Engineer - AI Workflows"
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4481850415",
@@ -16374,7 +16321,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.091Z",
+      "updated_at": "2026-10-27T08:35:14.423Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Accenture",
       "title": "Cybersecurity AI Forward Deployed Engineer - FDE - Consultant",
@@ -16422,7 +16369,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.104Z",
+      "updated_at": "2026-10-27T08:35:14.437Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Accenture",
       "title": "Cybersecurity AI Forward Deployed Engineer - FDE - Consultant",
@@ -16470,7 +16417,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.118Z",
+      "updated_at": "2026-10-27T08:35:14.452Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Cisco",
       "title": "Software Engineer \u2013 Splunk Platform Authorization",
@@ -16518,7 +16465,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.134Z",
+      "updated_at": "2026-10-27T08:35:14.466Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Accenture",
       "title": "Cybersecurity AI Forward Deployed Engineer - FDE - Consultant",
@@ -16566,14 +16513,14 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.147Z",
+      "updated_at": "2026-10-27T09:11:37.775Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Accenture",
       "title": "Forward Deployed Engineer",
-      "resume_slot": 6,
+      "resume_slot": 10,
       "session_hour": "03",
       "batch_time": "2026-10-27T07:43:28Z",
-      "session_id": "2026-10-27T07:43:28Z",
+      "session_id": "2026-10-27T08:37:32Z",
       "priority": 1000,
       "source": "hourly",
       "failure_reason": null
@@ -16614,7 +16561,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.162Z",
+      "updated_at": "2026-10-27T08:35:14.497Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Cisco",
       "title": "Software Engineer \u2013 Splunk Platform Authorization",
@@ -16662,7 +16609,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.177Z",
+      "updated_at": "2026-10-27T08:35:14.511Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "BAE Systems, Inc.",
       "title": "Software Engineer",
@@ -18169,25 +18116,7 @@
     "search_term": "backend engineer",
     "site": "linkedin",
     "summary": "nan",
-    "title": "Backend Developer - AI Data Services",
-    "resume": {
-      "status": "queued",
-      "stage": "QUEUED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": null,
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:40.037Z",
-      "error": null,
-      "company": "Alignerr",
-      "title": "Backend Developer - AI Data Services",
-      "resume_slot": 12,
-      "session_hour": "03",
-      "batch_time": "2026-10-27T07:43:28Z",
-      "session_id": "2026-10-27T07:43:28Z",
-      "priority": 1000,
-      "source": "hourly"
-    }
+    "title": "Backend Developer - AI Data Services"
   },
   {
     "session_id": "2026-10-27T07:43:28Z",
@@ -18224,7 +18153,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.190Z",
+      "updated_at": "2026-10-27T08:35:14.526Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Planet",
       "title": "Data Analyst - Cloud Financial Operations",
@@ -18272,7 +18201,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.205Z",
+      "updated_at": "2026-10-27T08:35:14.541Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Rise Internet",
       "title": "Engineer, Software I",
@@ -18320,7 +18249,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.219Z",
+      "updated_at": "2026-10-27T08:35:14.557Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "General Dynamics Mission Systems",
       "title": "Software Engineer Entry Level",
@@ -18363,7 +18292,7 @@
     "summary": "nan",
     "title": "Software Engineer, Agent Platform",
     "ats_score": 11,
-    "fit_score": 5
+    "fit_score": 4
   },
   {
     "session_id": "2026-10-27T07:43:28Z",
@@ -18741,7 +18670,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.231Z",
+      "updated_at": "2026-10-27T08:35:14.570Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Torentify",
       "title": "Software Engineer (AWS, Azure) - WFH",
@@ -18997,7 +18926,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.247Z",
+      "updated_at": "2026-10-27T08:35:14.585Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Keycard",
       "title": "Software Engineer, Security",
@@ -19045,7 +18974,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.261Z",
+      "updated_at": "2026-10-27T08:35:14.601Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "JPMorganChase",
       "title": "Software Engineering [Multiple Positions Available]",
@@ -19093,7 +19022,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.273Z",
+      "updated_at": "2026-10-27T08:35:14.613Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "TaskVerse",
       "title": "Software Engineer",
@@ -19141,7 +19070,7 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.287Z",
+      "updated_at": "2026-10-27T08:35:14.627Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "TaskVerse",
       "title": "Full Stack Engineer",
@@ -19182,6 +19111,726 @@
     "site": "linkedin",
     "summary": "nan",
     "title": "Software Engineer",
+    "ats_score": 50,
+    "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4476097402",
+    "session_id": "2026-10-27T08:37:31Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "UMATR",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "New York, USA",
+    "max_exp": 3.0,
+    "min_exp": 3.0,
+    "pipeline": "standard",
+    "priority_group": 10,
+    "priority_tags": [
+      "New York",
+      "2\u20135 yrs"
+    ],
+    "priority_version": 2,
+    "score": 173,
+    "score_pct": 69,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "\ud83d\udccdNew York, USA \ud83d\udcb0$175,000 - $230,000 **About the Company** What if the backend systems you built helped power spacecraft, autonomous vehicles and some of the world's most advanced engineering projects?",
+    "title": "Backend Software Engineer (Distributed Systems \u2013 Go / Rust / Java)",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "da1a76d77edb7d041e216d411a927bb29f65e7989d9bf861ed3b73e70e7076bd",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T08:53:34.023Z",
+      "error": null,
+      "company": "UMATR",
+      "title": "Backend Software Engineer (Distributed Systems \u2013 Go / Rust / Java)",
+      "resume_slot": 1,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "UMATR (27thOctober)-2",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/7a/7ac44a741b342b76d6e9a825cc439dbdbbb4d7dbcde5ba71ce61825e21863a17.pdf",
+        "sha256": "7ac44a741b342b76d6e9a825cc439dbdbbb4d7dbcde5ba71ce61825e21863a17",
+        "bytes": 39798,
+        "tex_key": "resumes/7a/7ac44a741b342b76d6e9a825cc439dbdbbb4d7dbcde5ba71ce61825e21863a17.tex",
+        "jd_key": "resumes/7a/7ac44a741b342b76d6e9a825cc439dbdbbb4d7dbcde5ba71ce61825e21863a17.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/UMATR (27thOctober)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/UMATR (27thOctober)-2",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/UMATR (27thOctober)-2/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T08:53:34.023Z"
+      }
+    },
+    "fit": {
+      "score": 80.2,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 10,
+        "unparsed_requirements": 4,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "4 qualification lines need manual review; they were not fully assessed"
+      ],
+      "applicable_weight": 90,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": []
+      },
+      "ledger": {
+        "required": {
+          "matched": 4,
+          "total": 7
+        },
+        "preferred": {
+          "matched": 1,
+          "total": 3
+        },
+        "total": {
+          "matched": 5,
+          "total": 10
+        },
+        "matched": [
+          "Kubernetes",
+          "Docker",
+          "Rust / Java",
+          "AWS / GCP / Azure",
+          "Kafka / Flink / Spark"
+        ],
+        "partial": [
+          "Distributed systems"
+        ],
+        "missing": [
+          "Terraform",
+          "Go",
+          "ClickHouse",
+          "Druid"
+        ],
+        "mentioned": [
+          "API"
+        ],
+        "unrecognized": [],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Experience building systems where performance, scalability and reliability matter."
+          },
+          {
+            "classification": "required",
+            "source": "Someone who enjoys taking ownership, solving difficult engineering problems and seeing their work through to production."
+          },
+          {
+            "classification": "preferred",
+            "source": "Working with high-volume telemetry, event-driven systems or complex data pipelines."
+          },
+          {
+            "classification": "preferred",
+            "source": "If this sounds like you, please apply with your latest CV and we will be in touch to discuss the role further."
+          }
+        ],
+        "skills": [
+          {
+            "label": "Kubernetes",
+            "alternatives": [
+              "Kubernetes"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Work with modern infrastructure, including Kubernetes, Docker, Terraform and cloud platforms.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Jenkins Docker Kubernetes CI/CD for 20 engineers; deploy 6h to 90s; 20+ releases/month.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Docker",
+            "alternatives": [
+              "Docker"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Work with modern infrastructure, including Kubernetes, Docker, Terraform and cloud platforms.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "FastAPI microservices with Docker Redis; sub-200ms REST for enterprise telecom integrations.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Terraform",
+            "alternatives": [
+              "Terraform"
+            ],
+            "class": "required",
+            "status": "missing",
+            "source": "Work with modern infrastructure, including Kubernetes, Docker, Terraform and cloud platforms."
+          },
+          {
+            "label": "Distributed systems",
+            "alternatives": [
+              "Distributed systems"
+            ],
+            "class": "required",
+            "status": "partial",
+            "source": "3+ years of experience building and maintaining backend or distributed systems in production.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "FastAPI microservices with Docker Redis; sub-200ms REST for enterprise telecom integrations.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Go",
+            "alternatives": [
+              "Go"
+            ],
+            "class": "required",
+            "status": "missing",
+            "source": "Strong programming experience in Go, Rust or Java."
+          },
+          {
+            "label": "Rust / Java",
+            "alternatives": [
+              "Rust",
+              "Java"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Strong programming experience in Go, Rust or Java.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "AWS / GCP / Azure",
+            "alternatives": [
+              "AWS",
+              "GCP",
+              "Azure"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Experience working with cloud infrastructure such as AWS, GCP or Azure.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "ClickHouse",
+            "alternatives": [
+              "ClickHouse"
+            ],
+            "class": "preferred",
+            "status": "missing",
+            "source": "Time-series databases, columnar storage or analytics engines such as ClickHouse, TimescaleDB, Druid or InfluxDB."
+          },
+          {
+            "label": "Druid",
+            "alternatives": [
+              "Druid"
+            ],
+            "class": "preferred",
+            "status": "missing",
+            "source": "Time-series databases, columnar storage or analytics engines such as ClickHouse, TimescaleDB, Druid or InfluxDB."
+          },
+          {
+            "label": "Kafka / Flink / Spark",
+            "alternatives": [
+              "Kafka",
+              "Flink",
+              "Spark"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Streaming and data processing technologies such as Kafka, Flink, Spark or Apache Arrow.",
+            "evidence": {
+              "entry": "Stony Brook University",
+              "text": "Designed the FOMC platform's entire backend from Kafka ingestion to FastAPI services on AWS, serving 200+ daily users at under 60 ms API latency.",
+              "tier": "measured_job_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "required_skills",
+          "requirement": "Terraform",
+          "source": "Work with modern infrastructure, including Kubernetes, Docker, Terraform and cloud platforms.",
+          "lost": 4.8
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Go",
+          "source": "Strong programming experience in Go, Rust or Java.",
+          "lost": 4.7
+        },
+        {
+          "category": "preferred_skills",
+          "requirement": "ClickHouse",
+          "source": "Time-series databases, columnar storage or analytics engines such as ClickHouse, TimescaleDB, Druid or InfluxDB.",
+          "lost": 3.7
+        },
+        {
+          "category": "preferred_skills",
+          "requirement": "Druid",
+          "source": "Time-series databases, columnar storage or analytics engines such as ClickHouse, TimescaleDB, Druid or InfluxDB.",
+          "lost": 3.7
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Distributed systems",
+          "source": "3+ years of experience building and maintaining backend or distributed systems in production.",
+          "lost": 2.4
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 3054,
+      "as_of": "2026-10-27"
+    },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-27T09:26:29.048Z",
+    "ats_score": 62,
+    "fit_score": 19
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4481863008",
+    "session_id": "2026-10-27T08:37:31Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "TalentHop",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "New Grad",
+    "location": "USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 12,
+    "priority_tags": [
+      "New grad"
+    ],
+    "priority_version": 2,
+    "score": 169,
+    "score_pct": 68,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "**This is a Fully Remote Job** **About Our Client:** This organization operates in the software engineering sector, focusing on developing internal tools, services, workflows, and AI-powered products\u2026",
+    "title": "Software Engineer, New Grad | Remote - Full-time",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "40d54bc9d95f275917c7028efda1db63cb856d08ec9d548154a6f72a52a3ae3b",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T08:53:35.662Z",
+      "error": null,
+      "company": "TalentHop",
+      "title": "Software Engineer, New Grad | Remote - Full-time",
+      "resume_slot": 2,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "TalentHop (27thOctober)-3",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/2d/2d582bcfb7225af64282f8d0c478d685d99237aaf2115476e44bd808c89600df.pdf",
+        "sha256": "2d582bcfb7225af64282f8d0c478d685d99237aaf2115476e44bd808c89600df",
+        "bytes": 39642,
+        "jd_key": "resumes/2d/2d582bcfb7225af64282f8d0c478d685d99237aaf2115476e44bd808c89600df.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-3/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-3",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-3/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T08:53:35.662Z"
+      }
+    },
+    "fit": {
+      "score": 89,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 13,
+        "unparsed_requirements": 8,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "8 qualification lines need manual review; they were not fully assessed"
+      ],
+      "applicable_weight": 80,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": []
+      },
+      "ledger": {
+        "required": {
+          "matched": 6,
+          "total": 7
+        },
+        "preferred": {
+          "matched": 4,
+          "total": 6
+        },
+        "total": {
+          "matched": 10,
+          "total": 13
+        },
+        "matched": [
+          "API",
+          "JavaScript",
+          "TypeScript",
+          "React",
+          "PostgreSQL",
+          "REST",
+          "Node.js",
+          "AWS / GCP / Azure",
+          "CI/CD",
+          "Microservices"
+        ],
+        "partial": [
+          "Git",
+          "NestJS",
+          "DevOps"
+        ],
+        "missing": [],
+        "mentioned": [],
+        "unrecognized": [],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Experience through internships, co-ops, research, or personal projects in software application development."
+          },
+          {
+            "classification": "required",
+            "source": "Strong problem-solving skills, curiosity, attention to detail, and a growth mindset."
+          },
+          {
+            "classification": "required",
+            "source": "Motivation to learn quickly and contribute in a fast-paced engineering environment."
+          },
+          {
+            "classification": "preferred",
+            "source": "Internship or professional software engineering experience."
+          },
+          {
+            "classification": "preferred",
+            "source": "Interest in AI-powered products, workflow automation, or data-intensive applications."
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience contributing to team projects, hackathons, open-source software, or startup environments."
+          },
+          {
+            "classification": "preferred",
+            "source": "Pay Range and Compensation Package:"
+          },
+          {
+            "classification": "preferred",
+            "source": "The pay range and compensation package for this role will be determined based on the candidate's experience, skills, and other relevant factors."
+          }
+        ],
+        "skills": [
+          {
+            "label": "API",
+            "alternatives": [
+              "API"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Build maintainable backend services and APIs following scalable engineering practices.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Enhanced British Telecom partner integrations with FastAPI and Redis microservices, delivering sub-200ms REST responses across 10K+ API calls.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "JavaScript",
+            "alternatives": [
+              "JavaScript"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Strong fundamentals in JavaScript and/or TypeScript.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Created an in-house payroll platform on React, Node.js and Firebase that generates payslips and runs finance workflows for 3,000 employees, retiring a high-maintenance Oracle setup.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "TypeScript",
+            "alternatives": [
+              "TypeScript"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Strong fundamentals in JavaScript and/or TypeScript.",
+            "evidence": {
+              "entry": "Wake Forest \u2013 CAIR",
+              "text": "React and TypeScript clinician dashboard with Redux state management for a 20-person team reviewing MRIs and AI segmentations.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "React",
+            "alternatives": [
+              "React"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Familiarity with frontend development using React or similar frameworks.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Guided 3,000 employees through onboarding in React and MongoDB workflows that auto-assign new hires to teams by skill, cutting onboarding from weeks to days.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "PostgreSQL",
+            "alternatives": [
+              "PostgreSQL"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Understanding of relational databases such as PostgreSQL and data modeling principles.",
+            "evidence": {
+              "entry": "Atriveo",
+              "text": "FastAPI and PostgreSQL backend for application tracking, search APIs, and production data sync.",
+              "tier": "project_bullet"
+            }
+          },
+          {
+            "label": "REST",
+            "alternatives": [
+              "REST"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Knowledge of RESTful APIs and distributed application communication.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "British Telecom REST and GraphQL APIs with Resilience4j; 10K+ daily transactions; 200ms P99; 99% uptime.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Git",
+            "alternatives": [
+              "Git"
+            ],
+            "class": "required",
+            "status": "partial",
+            "source": "Exposure to Git and modern software development workflows.",
+            "evidence": {
+              "entry": "Atriveo Job Intelligence Pipeline",
+              "text": "GitHub Contents API deploy to Pages \u2014 hourly dashboard updates without CI runners.",
+              "tier": "project_bullet"
+            }
+          },
+          {
+            "label": "Node.js",
+            "alternatives": [
+              "Node.js"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Familiarity with backend development using Node.js (NestJS is a plus).",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Created an in-house payroll platform on React, Node.js and Firebase that generates payslips and runs finance workflows for 3,000 employees, retiring a high-maintenance Oracle setup.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "NestJS",
+            "alternatives": [
+              "NestJS"
+            ],
+            "class": "preferred",
+            "status": "partial",
+            "source": "Familiarity with backend development using Node.js (NestJS is a plus).",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Created an in-house payroll platform on React, Node.js and Firebase that generates payslips and runs finance workflows for 3,000 employees, retiring a high-maintenance Oracle setup.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "AWS / GCP / Azure",
+            "alternatives": [
+              "AWS",
+              "GCP",
+              "Azure"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Exposure to cloud platforms like AWS, GCP, or Azure.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "CI/CD",
+            "alternatives": [
+              "CI/CD"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Familiarity with CI/CD, deployment pipelines, or DevOps fundamentals.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Jenkins Docker Kubernetes CI/CD for 20 engineers; deploy 6h to 90s; 20+ releases/month.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "DevOps",
+            "alternatives": [
+              "DevOps"
+            ],
+            "class": "preferred",
+            "status": "partial",
+            "source": "Familiarity with CI/CD, deployment pipelines, or DevOps fundamentals.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Jenkins Docker Kubernetes CI/CD for 20 engineers; deploy 6h to 90s; 20+ releases/month.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Microservices",
+            "alternatives": [
+              "Microservices"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Exposure to modern architectures such as microservices, serverless, or event-driven systems.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "FastAPI microservices with Docker Redis; sub-200ms REST for enterprise telecom integrations.",
+              "tier": "measured_job_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "required_skills",
+          "requirement": "Git",
+          "source": "Exposure to Git and modern software development workflows.",
+          "lost": 4.1
+        },
+        {
+          "category": "required_skills",
+          "requirement": "PostgreSQL",
+          "source": "Understanding of relational databases such as PostgreSQL and data modeling principles.",
+          "lost": 2
+        },
+        {
+          "category": "preferred_skills",
+          "requirement": "DevOps",
+          "source": "Familiarity with CI/CD, deployment pipelines, or DevOps fundamentals.",
+          "lost": 1.4
+        },
+        {
+          "category": "experience_alignment",
+          "requirement": "Code quality",
+          "source": "Build maintainable backend services and APIs following scalable engineering practices.",
+          "lost": 1
+        },
+        {
+          "category": "preferred_skills",
+          "requirement": "NestJS",
+          "source": "Familiarity with backend development using Node.js (NestJS is a plus).",
+          "lost": 1
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 3954,
+      "as_of": "2026-10-27"
+    },
+    "ats_score": 58,
+    "fit_score": 10
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4483615036",
+    "session_id": "2026-10-27T08:37:31Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "Accenture",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "New Jersey, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 69,
+    "score_pct": 28,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "*Full Stack Java Developer 6566277",
     "resume": {
       "status": "failed",
       "stage": "GATED",
@@ -19189,17 +19838,1635 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T08:17:44.302Z",
+      "updated_at": "2026-10-27T09:11:37.759Z",
       "error": "JD not found or too short in Mongo descriptions",
-      "company": "TalentHop",
-      "title": "Software Engineer",
-      "resume_slot": 16,
-      "session_hour": "03",
-      "batch_time": "2026-10-27T07:43:28Z",
-      "session_id": "2026-10-27T07:43:28Z",
+      "company": "Accenture",
+      "title": "*Full Stack Java Developer 6566277",
+      "resume_slot": 3,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
       "priority": 1000,
       "source": "hourly",
       "failure_reason": null
+    }
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4477939295",
+    "session_id": "2026-10-27T08:37:31Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "Accenture",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Milwaukee, WI, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 64,
+    "score_pct": 26,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Cybersecurity AI Forward Deployed Engineer - FDE - Consultant",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T09:11:37.790Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Accenture",
+      "title": "Cybersecurity AI Forward Deployed Engineer - FDE - Consultant",
+      "resume_slot": 5,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4477944085",
+    "session_id": "2026-10-27T08:37:31Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "Accenture",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Atlanta, GA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 64,
+    "score_pct": 26,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Cybersecurity AI Forward Deployed Engineer - FDE - Consultant",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T09:11:37.804Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Accenture",
+      "title": "Cybersecurity AI Forward Deployed Engineer - FDE - Consultant",
+      "resume_slot": 8,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:32Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
+  },
+  {
+    "session_id": "2026-10-27T08:37:31Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4477929548",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "Accenture",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Miami, FL, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 64,
+    "score_pct": 26,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Cybersecurity AI Forward Deployed Engineer - FDE - Consultant",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T09:11:37.819Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Accenture",
+      "title": "Cybersecurity AI Forward Deployed Engineer - FDE - Consultant",
+      "resume_slot": 7,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:32Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
+  },
+  {
+    "session_id": "2026-10-27T08:37:31Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4484010306",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "Cisco",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Phoenix, AZ, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 64,
+    "score_pct": 26,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Software Engineer \u2013 Splunk Platform Authorization",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T09:11:37.832Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Cisco",
+      "title": "Software Engineer \u2013 Splunk Platform Authorization",
+      "resume_slot": 9,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:32Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
+  },
+  {
+    "session_id": "2026-10-27T08:37:31Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4477924909",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "Accenture",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Boston, MA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 64,
+    "score_pct": 26,
+    "search_term": "AI engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Cybersecurity AI Forward Deployed Engineer - FDE - Consultant",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T09:11:37.845Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Accenture",
+      "title": "Cybersecurity AI Forward Deployed Engineer - FDE - Consultant",
+      "resume_slot": 6,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:32Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
+  },
+  {
+    "session_id": "2026-10-27T08:37:31Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4481863009",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "TalentHop",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 61,
+    "score_pct": 24,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "This position is responsible for building and maintaining customer-facing interfaces, backend services, and data models, collaborating closely with product, design, and quality teams.",
+    "title": "Full-Stack Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "ad1dd7a779f6127b4d3df0a1e6bbf2ff302edafed24cb44bd2fa27950c1f6383",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T08:53:37.246Z",
+      "error": null,
+      "company": "TalentHop",
+      "title": "Full-Stack Software Engineer",
+      "resume_slot": 14,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "TalentHop (27thOctober)-4",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/99/9990fc2ea478ac37df5559438d1c8b84fb3fa36d7dc4e90d0c4e0a7fbc055167.pdf",
+        "sha256": "9990fc2ea478ac37df5559438d1c8b84fb3fa36d7dc4e90d0c4e0a7fbc055167",
+        "bytes": 39477,
+        "jd_key": "resumes/99/9990fc2ea478ac37df5559438d1c8b84fb3fa36d7dc4e90d0c4e0a7fbc055167.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-4/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-4",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-4/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T08:53:37.246Z"
+      }
+    },
+    "fit": {
+      "score": 99.2,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 6,
+        "unparsed_requirements": 6,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "6 qualification lines need manual review; they were not fully assessed",
+        "1 requirement groups contain unrecognized technologies"
+      ],
+      "applicable_weight": 75,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": []
+      },
+      "ledger": {
+        "required": {
+          "matched": 5,
+          "total": 5
+        },
+        "preferred": {
+          "matched": 1,
+          "total": 1
+        },
+        "total": {
+          "matched": 6,
+          "total": 6
+        },
+        "matched": [
+          "Spring Boot",
+          "TypeScript",
+          "Lambda",
+          "API",
+          "Java",
+          "Node.js"
+        ],
+        "partial": [],
+        "missing": [],
+        "mentioned": [
+          "JavaScript",
+          "AWS"
+        ],
+        "unrecognized": [
+          "Vue"
+        ],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Minimum of three years experience developing and deploying enterprise web applications"
+          },
+          {
+            "classification": "required",
+            "source": "Knowledge of relational and non-relational databases, with an understanding of scalable query design"
+          },
+          {
+            "classification": "required",
+            "source": "Experience writing automated tests"
+          },
+          {
+            "classification": "required",
+            "source": "Strong written communication skills suitable for a distributed work environment"
+          },
+          {
+            "classification": "required",
+            "source": "Pay Range and Compensation Package:"
+          },
+          {
+            "classification": "required",
+            "source": "Total compensation includes bonus, equity, and benefits, varying by experience, skills, industry knowledge, and location"
+          }
+        ],
+        "skills": [
+          {
+            "label": "Spring Boot",
+            "alternatives": [
+              "Spring Boot"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Develop and deploy full-stack features including frontend Vue components, backend services in Laravel, Spring Boot, and TypeScript AWS Lambda functions, and associated data models",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Achieved 99% uptime on British Telecom order APIs across 10K+ daily transactions with Java and Spring Boot fault-tolerance patterns.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "TypeScript",
+            "alternatives": [
+              "TypeScript"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Develop and deploy full-stack features including frontend Vue components, backend services in Laravel, Spring Boot, and TypeScript AWS Lambda functions, and associated data models",
+            "evidence": {
+              "entry": "Wake Forest \u2013 CAIR",
+              "text": "React and TypeScript clinician dashboard with Redux state management for a 20-person team reviewing MRIs and AI segmentations.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Lambda",
+            "alternatives": [
+              "Lambda"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Develop and deploy full-stack features including frontend Vue components, backend services in Laravel, Spring Boot, and TypeScript AWS Lambda functions, and associated data models",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Serverless Python Lambda Firebase platform for 3K+ users; API latency 350ms to 80ms.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "API",
+            "alternatives": [
+              "API"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Design and document API endpoints with robust support for pagination, filtering, and error handling",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Enhanced British Telecom partner integrations with FastAPI and Redis microservices, delivering sub-200ms REST responses across 10K+ API calls.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Java",
+            "alternatives": [
+              "Java"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Server-side development experience with object-oriented languages; Java with Spring Boot and TypeScript on Node.js preferred",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Node.js",
+            "alternatives": [
+              "Node.js"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Server-side development experience with object-oriented languages; Java with Spring Boot and TypeScript on Node.js preferred",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Created an in-house payroll platform on React, Node.js and Firebase that generates payslips and runs finance workflows for 3,000 employees, retiring a high-maintenance Oracle setup.",
+              "tier": "measured_job_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "required_skills",
+          "requirement": "TypeScript",
+          "source": "Develop and deploy full-stack features including frontend Vue components, backend services in Laravel, Spring Boot, and TypeScript AWS Lambda functions, and associated data models",
+          "lost": 0.8
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 3651,
+      "as_of": "2026-10-27"
+    },
+    "ats_score": 63,
+    "fit_score": 12
+  },
+  {
+    "session_id": "2026-10-27T08:37:31Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4481852868",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "TalentHop",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 33,
+    "score_pct": 13,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "**Responsibilities:** * Develop, test, and maintain backend product features primarily using Python, Django, and relational databases.",
+    "title": "Software Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "805b5925c8c7bcb87db55b047b8aabce66d54b756fd18ad95be14ea08d9feff9",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T08:53:38.785Z",
+      "error": null,
+      "company": "TalentHop",
+      "title": "Software Engineer",
+      "resume_slot": 15,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "TalentHop (27thOctober)-5",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/46/461d82fc71c539546571097ccddbcc30eb3f4aa3c2de5eb9107e66207dfdbd87.pdf",
+        "sha256": "461d82fc71c539546571097ccddbcc30eb3f4aa3c2de5eb9107e66207dfdbd87",
+        "bytes": 39465,
+        "jd_key": "resumes/46/461d82fc71c539546571097ccddbcc30eb3f4aa3c2de5eb9107e66207dfdbd87.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-5/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-5",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-5/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T08:53:38.785Z"
+      }
+    },
+    "fit": {
+      "score": 79.2,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 6,
+        "unparsed_requirements": 8,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "8 qualification lines need manual review; they were not fully assessed"
+      ],
+      "applicable_weight": 70,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": []
+      },
+      "ledger": {
+        "required": {
+          "matched": 3,
+          "total": 6
+        },
+        "preferred": {
+          "matched": 0,
+          "total": 0
+        },
+        "total": {
+          "matched": 3,
+          "total": 6
+        },
+        "matched": [
+          "Python",
+          "API",
+          "Observability"
+        ],
+        "partial": [
+          "Git"
+        ],
+        "missing": [
+          "Django",
+          "Debugging"
+        ],
+        "mentioned": [],
+        "unrecognized": [],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Early-to-mid-career professional software engineering experience."
+          },
+          {
+            "classification": "required",
+            "source": "Experience using AI-assisted coding tools responsibly."
+          },
+          {
+            "classification": "required",
+            "source": "Understanding of application concerns like authorization, concurrency, retries, and failure handling."
+          },
+          {
+            "classification": "required",
+            "source": "Clear written and verbal communication."
+          },
+          {
+            "classification": "required",
+            "source": "Careful approach to handling sensitive financial data."
+          },
+          {
+            "classification": "required",
+            "source": "Comfortable with broad ownership in a small team environment."
+          },
+          {
+            "classification": "required",
+            "source": "Curiosity, humility, and willingness to learn."
+          },
+          {
+            "classification": "required",
+            "source": "Pay Range and Compensation Package:"
+          }
+        ],
+        "skills": [
+          {
+            "label": "Python",
+            "alternatives": [
+              "Python"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Develop, test, and maintain backend product features primarily using Python, Django, and relational databases.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Django",
+            "alternatives": [
+              "Django"
+            ],
+            "class": "required",
+            "status": "missing",
+            "source": "Develop, test, and maintain backend product features primarily using Python, Django, and relational databases."
+          },
+          {
+            "label": "API",
+            "alternatives": [
+              "API"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Build and maintain APIs, asynchronous jobs, integrations, internal tools, and data workflows.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Enhanced British Telecom partner integrations with FastAPI and Redis microservices, delivering sub-200ms REST responses across 10K+ API calls.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Observability",
+            "alternatives": [
+              "Observability"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Enhance system reliability, observability, documentation, and development processes.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Fidelity pipeline monitoring and audit trails for encrypted insurance transfer compliance.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Debugging",
+            "alternatives": [
+              "Debugging"
+            ],
+            "class": "required",
+            "status": "missing",
+            "source": "Experience with relational databases including design, querying, and debugging."
+          },
+          {
+            "label": "Git",
+            "alternatives": [
+              "Git"
+            ],
+            "class": "required",
+            "status": "partial",
+            "source": "Familiarity with APIs, automated testing, Git, and collaborative development.",
+            "evidence": {
+              "entry": "Atriveo Job Intelligence Pipeline",
+              "text": "GitHub Contents API deploy to Pages \u2014 hourly dashboard updates without CI runners.",
+              "tier": "project_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "required_skills",
+          "requirement": "Django",
+          "source": "Develop, test, and maintain backend product features primarily using Python, Django, and relational databases.",
+          "lost": 7.2
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Debugging",
+          "source": "Experience with relational databases including design, querying, and debugging.",
+          "lost": 7.1
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Git",
+          "source": "Familiarity with APIs, automated testing, Git, and collaborative development.",
+          "lost": 4.7
+        },
+        {
+          "category": "experience_alignment",
+          "requirement": "Code quality",
+          "source": "Write clear, maintainable code with automated test coverage.",
+          "lost": 1.4
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Observability",
+          "source": "Enhance system reliability, observability, documentation, and development processes.",
+          "lost": 0.4
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 3443,
+      "as_of": "2026-10-27"
+    },
+    "ats_score": 25,
+    "fit_score": 9
+  },
+  {
+    "session_id": "2026-10-27T08:37:31Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4484018072",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "Aurora",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Pittsburgh, PA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 16,
+    "priority_tags": [
+      "Exp. not stated",
+      "Internship"
+    ],
+    "priority_version": 2,
+    "score": 14,
+    "score_pct": 6,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "**What We Are Looking For** We're searching for Summer 2027 Full Stack Engineering Interns.",
+    "title": "Full Stack Intern",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "2be8b0df64582b8d0585b22ba8b2bbed3b7125a7e29e8944686e985540d6fd1c",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T08:54:01.416Z",
+      "error": null,
+      "company": "Aurora",
+      "title": "Full Stack Intern",
+      "resume_slot": 18,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "Aurora (27thOctober)",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/ae/aee0012d2402a5f37805128adcff5e9d6cd0ca319ea9a9d8eb663c2b160697fe.pdf",
+        "sha256": "aee0012d2402a5f37805128adcff5e9d6cd0ca319ea9a9d8eb663c2b160697fe",
+        "bytes": 39432,
+        "tex_key": "resumes/ae/aee0012d2402a5f37805128adcff5e9d6cd0ca319ea9a9d8eb663c2b160697fe.tex",
+        "jd_key": "resumes/ae/aee0012d2402a5f37805128adcff5e9d6cd0ca319ea9a9d8eb663c2b160697fe.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Aurora (27thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Aurora (27thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Aurora (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T08:54:01.416Z"
+      }
+    },
+    "fit": {
+      "score": 86.4,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 6,
+        "unparsed_requirements": 6,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "6 qualification lines need manual review; they were not fully assessed"
+      ],
+      "applicable_weight": 70,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": [
+          {
+            "type": "location",
+            "status": "clear",
+            "reason": "You are open to relocating",
+            "source": "We believe in-person work increases collaboration, empathy, and our ability to lead effectively. As a result, Aurorans are expected to work from the office at least 3 days per week, with some roles..."
+          }
+        ]
+      },
+      "ledger": {
+        "required": {
+          "matched": 5,
+          "total": 6
+        },
+        "preferred": {
+          "matched": 0,
+          "total": 0
+        },
+        "total": {
+          "matched": 5,
+          "total": 6
+        },
+        "matched": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "LLM",
+          "Claude"
+        ],
+        "partial": [],
+        "missing": [
+          "Debugging"
+        ],
+        "mentioned": [],
+        "unrecognized": [],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "We're searching for Summer 2027 Full Stack Engineering Interns. You'll work on the product layer of Aurora's autonomy \u2014 customer apps, operator interfaces, and real-time visualizations that make a self-driving freight system legible, trustworthy, and usable."
+          },
+          {
+            "classification": "required",
+            "source": "Has shipped a web application that real users used"
+          },
+          {
+            "classification": "required",
+            "source": "Solid CS fundamentals"
+          },
+          {
+            "classification": "required",
+            "source": "Can describe the full request/response data flow for loading a web page"
+          },
+          {
+            "classification": "required",
+            "source": "Desirable Qualifications"
+          },
+          {
+            "classification": "required",
+            "source": "Experience with backend services, databases, caching, or authentication beyond a static site"
+          }
+        ],
+        "skills": [
+          {
+            "label": "React",
+            "alternatives": [
+              "React"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Work with modern web technologies (React, TypeScript) and, depending on team, real-time graphics (Three.js, WebGL) or cloud services",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Guided 3,000 employees through onboarding in React and MongoDB workflows that auto-assign new hires to teams by skill, cutting onboarding from weeks to days.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "TypeScript",
+            "alternatives": [
+              "TypeScript"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Work with modern web technologies (React, TypeScript) and, depending on team, real-time graphics (Three.js, WebGL) or cloud services",
+            "evidence": {
+              "entry": "Wake Forest \u2013 CAIR",
+              "text": "React and TypeScript clinician dashboard with Redux state management for a 20-person team reviewing MRIs and AI segmentations.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "JavaScript",
+            "alternatives": [
+              "JavaScript"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Work with modern web technologies (React, TypeScript) and, depending on team, real-time graphics (Three.js, WebGL) or cloud services",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Created an in-house payroll platform on React, Node.js and Firebase that generates payslips and runs finance workflows for 3,000 employees, retiring a high-maintenance Oracle setup.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "LLM",
+            "alternatives": [
+              "LLM"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Use AI-native tooling (LLMs, agents, tools like Claude Code) as part of your normal engineering workflow",
+            "evidence": {
+              "entry": "Stony Brook University",
+              "text": "Assessed GPT-4o LLM market-reaction predictions against minute-level SPY moves at 1, 5 and 10-minute windows, reaching 0.74 weighted F1 with Whisper transcripts and Pinecone retrieval.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Claude",
+            "alternatives": [
+              "Claude"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Use AI-native tooling (LLMs, agents, tools like Claude Code) as part of your normal engineering workflow",
+            "evidence": {
+              "entry": "Wake Forest \u2013 CAIR",
+              "text": "Radiomics-driven survival analysis surfacing prognosis insights to speed clinical decision-making. Anthropic Claude summarized the histories of 10K+ similar patients; a separate PyTorch / scikit-learn model predicted ...",
+              "tier": "job_bullet"
+            }
+          },
+          {
+            "label": "Debugging",
+            "alternatives": [
+              "Debugging"
+            ],
+            "class": "required",
+            "status": "missing",
+            "source": "Judgment about when and how to use AI coding tools without outsourcing debugging or critical thinking"
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "required_skills",
+          "requirement": "Debugging",
+          "source": "Judgment about when and how to use AI coding tools without outsourcing debugging or critical thinking",
+          "lost": 7.1
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Role title words",
+          "source": null,
+          "lost": 4.1
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Claude",
+          "source": "Use AI-native tooling (LLMs, agents, tools like Claude Code) as part of your normal engineering workflow",
+          "lost": 1.3
+        },
+        {
+          "category": "required_skills",
+          "requirement": "TypeScript",
+          "source": "Work with modern web technologies (React, TypeScript) and, depending on team, real-time graphics (Three.js, WebGL) or cloud services",
+          "lost": 0.7
+        },
+        {
+          "category": "required_skills",
+          "requirement": "JavaScript",
+          "source": "Work with modern web technologies (React, TypeScript) and, depending on team, real-time graphics (Three.js, WebGL) or cloud services",
+          "lost": 0.4
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 4655,
+      "as_of": "2026-10-27"
+    },
+    "ats_score": 66,
+    "fit_score": 4
+  },
+  {
+    "session_id": "2026-10-27T08:37:31Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4481852878",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "TalentHop",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 14,
+    "score_pct": 6,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Backend Engineer",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T09:11:37.860Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "TalentHop",
+      "title": "Backend Engineer",
+      "resume_slot": 12,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
+  },
+  {
+    "session_id": "2026-10-27T08:37:31Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4481864346",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "TalentHop",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 14,
+    "score_pct": 6,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "**This is a Fully Remote Job** **About Our Client:** The organization operates in the engineering software industry, focusing on automating the design and engineering processes for data centers and l\u2026",
+    "title": "Founding Engineer - Software",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "14d8b290f2dd8b20fa9cfc3c7542d58fb83f42596b00960ba9b36250a6520142",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T08:54:23.659Z",
+      "error": null,
+      "company": "TalentHop",
+      "title": "Founding Engineer - Software",
+      "resume_slot": 16,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "TalentHop (27thOctober)-6",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/2e/2e842fc4713c445706150f1b90beafa94fdb336e836701c140959eb965a71b77.pdf",
+        "sha256": "2e842fc4713c445706150f1b90beafa94fdb336e836701c140959eb965a71b77",
+        "bytes": 39566,
+        "tex_key": "resumes/2e/2e842fc4713c445706150f1b90beafa94fdb336e836701c140959eb965a71b77.tex",
+        "jd_key": "resumes/2e/2e842fc4713c445706150f1b90beafa94fdb336e836701c140959eb965a71b77.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-6/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-6",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-6/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T08:54:23.659Z"
+      }
+    },
+    "fit": {
+      "score": 42.9,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 2,
+        "unparsed_requirements": 6,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "6 qualification lines need manual review; they were not fully assessed",
+        "1 requirement groups contain unrecognized technologies"
+      ],
+      "applicable_weight": 65,
+      "outside_roles": true,
+      "knockouts": {
+        "verdict": "blocked",
+        "items": [
+          {
+            "type": "weak_overlap",
+            "status": "blocked",
+            "reason": "0 of 2 required skills have evidence in your whole bank",
+            "source": null
+          }
+        ]
+      },
+      "ledger": {
+        "required": {
+          "matched": 0,
+          "total": 2
+        },
+        "preferred": {
+          "matched": 0,
+          "total": 0
+        },
+        "total": {
+          "matched": 0,
+          "total": 2
+        },
+        "matched": [],
+        "partial": [],
+        "missing": [
+          "Data structures",
+          "Algorithms"
+        ],
+        "mentioned": [],
+        "unrecognized": [
+          "CAD / BIM"
+        ],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Proven experience building and shipping end-to-end software products."
+          },
+          {
+            "classification": "required",
+            "source": "Ability to work across the full technology stack from backend to user interfaces."
+          },
+          {
+            "classification": "required",
+            "source": "Proficiency with AI coding agents to enhance development speed."
+          },
+          {
+            "classification": "required",
+            "source": "Curiosity to learn engineering principles and physical constraints relevant to construction."
+          },
+          {
+            "classification": "required",
+            "source": "Strong ownership mentality, capable of initiating solutions without detailed specifications."
+          },
+          {
+            "classification": "required",
+            "source": "Pay Range and Compensation Package:"
+          }
+        ],
+        "skills": [
+          {
+            "label": "Data structures",
+            "alternatives": [
+              "Data structures"
+            ],
+            "class": "required",
+            "status": "missing",
+            "source": "Deep understanding of systems including data structures, algorithms, and software architecture."
+          },
+          {
+            "label": "Algorithms",
+            "alternatives": [
+              "Algorithms"
+            ],
+            "class": "required",
+            "status": "missing",
+            "source": "Deep understanding of systems including data structures, algorithms, and software architecture."
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "required_skills",
+          "requirement": "Data structures",
+          "source": "Deep understanding of systems including data structures, algorithms, and software architecture.",
+          "lost": 23.1
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Algorithms",
+          "source": "Deep understanding of systems including data structures, algorithms, and software architecture.",
+          "lost": 23
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Past position titles",
+          "source": null,
+          "lost": 11
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 3171,
+      "as_of": "2026-10-27"
+    },
+    "ats_score": 50,
+    "fit_score": 3
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4476400652",
+    "session_id": "2026-10-27T08:37:31Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "UMATR",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Rust Software Engineer (Remote)",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T09:11:37.874Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "UMATR",
+      "title": "Rust Software Engineer (Remote)",
+      "resume_slot": 15,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
+  },
+  {
+    "session_id": "2026-10-27T08:37:31Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4484000671",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "More Recruits",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Software Engineer",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T09:11:37.886Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "More Recruits",
+      "title": "Software Engineer",
+      "resume_slot": 16,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
+  },
+  {
+    "session_id": "2026-10-27T08:37:31Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4483285640",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "Freeleaps",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 16,
+    "priority_tags": [
+      "Exp. not stated",
+      "Internship"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "**Project Description \uff1a** Freeleaps.com is a platform where software development is made easier than ever through the latest AI technology and a community of elite engineers.",
+    "title": "Software Developer Intern",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "5bc6d93b7c1ebdb2796ea4005bdbba76880dd7ac9cdb9d89bed08d4a95e6a4eb",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T08:54:37.488Z",
+      "error": null,
+      "company": "Freeleaps",
+      "title": "Software Developer Intern",
+      "resume_slot": 19,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Freeleaps (27thOctober)",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/2a/2ad338cd17df1830efba9bb40265b7d8763df031fd27cc1de034e6e7b703bba4.pdf",
+        "sha256": "2ad338cd17df1830efba9bb40265b7d8763df031fd27cc1de034e6e7b703bba4",
+        "bytes": 39805,
+        "tex_key": "resumes/2a/2ad338cd17df1830efba9bb40265b7d8763df031fd27cc1de034e6e7b703bba4.tex",
+        "jd_key": "resumes/2a/2ad338cd17df1830efba9bb40265b7d8763df031fd27cc1de034e6e7b703bba4.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Freeleaps (27thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Freeleaps (27thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Freeleaps (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T08:54:37.488Z"
+      }
+    },
+    "fit": {
+      "score": 57.1,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 1,
+        "unparsed_requirements": 7,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "low",
+      "confidence_reasons": [
+        "Only 2 scorable requirements found",
+        "7 qualification lines need manual review; they were not fully assessed"
+      ],
+      "applicable_weight": 70,
+      "outside_roles": true,
+      "knockouts": {
+        "verdict": "clear",
+        "items": []
+      },
+      "ledger": {
+        "required": {
+          "matched": 0,
+          "total": 1
+        },
+        "preferred": {
+          "matched": 0,
+          "total": 0
+        },
+        "total": {
+          "matched": 0,
+          "total": 1
+        },
+        "matched": [],
+        "partial": [],
+        "missing": [
+          "Algorithms"
+        ],
+        "mentioned": [],
+        "unrecognized": [],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Feeling comfortable to work in an environment requires good English reading and writing skills."
+          },
+          {
+            "classification": "required",
+            "source": "Effective communication and collaboration skills."
+          },
+          {
+            "classification": "required",
+            "source": "Being good at least one programming language and love coding things up."
+          },
+          {
+            "classification": "required",
+            "source": "Always strive to go beyond expectations."
+          },
+          {
+            "classification": "preferred",
+            "source": "Having some proven records in delivering a large scale of industrial software."
+          },
+          {
+            "classification": "preferred",
+            "source": "Having foreign companies or overseas study experience."
+          },
+          {
+            "classification": "preferred",
+            "source": "Large \u2013scale distributed system development experience is preferred."
+          }
+        ],
+        "skills": [
+          {
+            "label": "Algorithms",
+            "alternatives": [
+              "Algorithms"
+            ],
+            "class": "required",
+            "status": "missing",
+            "source": "Familiar with fundamental computer science concepts and algorithms."
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "required_skills",
+          "requirement": "Algorithms",
+          "source": "Familiar with fundamental computer science concepts and algorithms.",
+          "lost": 42.9
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 1994,
+      "as_of": "2026-10-27"
+    },
+    "ats_score": 0,
+    "fit_score": 4
+  },
+  {
+    "session_id": "2026-10-27T08:37:31Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4483604713",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "Rovicare",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Tempe, AZ, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Data & AI Engineer",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T09:11:37.901Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Rovicare",
+      "title": "Data & AI Engineer",
+      "resume_slot": 13,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    }
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4483772877",
+    "session_id": "2026-10-27T08:37:31Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T08:37:31Z",
+    "company": "TEKsystems",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Baltimore, MD, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "backend engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "AI/ML Engineer II",
+    "resume": {
+      "status": "queued",
+      "stage": "QUEUED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": null,
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T09:11:28.174Z",
+      "error": null,
+      "company": "TEKsystems",
+      "title": "AI/ML Engineer II",
+      "resume_slot": 14,
+      "session_hour": "04",
+      "batch_time": "2026-10-27T08:37:31Z",
+      "session_id": "2026-10-27T08:37:31Z",
+      "priority": 1000,
+      "source": "hourly"
     }
   }
 ]
