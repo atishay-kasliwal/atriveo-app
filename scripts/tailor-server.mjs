@@ -49,6 +49,7 @@ import { readManifest, getArtifactsRoot } from "./ac-artifact-store.mjs";
 import { createHash } from "node:crypto";
 import { prepareApplicationKit, prepareGeneralKit, profileDetails } from "./application-kit.mjs";
 import { noTextJobs } from "./no-text-jobs.mjs";
+import { readGoal, saveGoal, startPhoneSummaries } from "./phone-summary.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, renderDraft, revertResume, saveBullet, saveDraft, setResumeEmail, startPasted } from "./resume-builder.mjs";
@@ -2009,6 +2010,24 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // GET/POST /applications/daily-goal — the daily goal the phone messages use; the console copies it here whenever it changes.
+  if ((req.method === "GET" || req.method === "POST") && pathname === "/applications/daily-goal") {
+    let raw = "";
+    req.on("data", (c) => { raw += c; if (raw.length > 1_000) req.destroy(); });
+    req.on("end", async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const goal = await withMongo((db) => (req.method === "POST" ? saveGoal(db, Number(JSON.parse(raw || "{}")?.goal)) : readGoal(db)), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify({ ok: true, goal }));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    });
+    return;
+  }
+
   // POST /applications/job-decision {jobUrl, decision: skip|apply|later|undo} — records the choice; submits nothing.
   if (req.method === "POST" && pathname === "/applications/job-decision") {
     let raw = "";
@@ -2582,6 +2601,7 @@ server.keepAliveTimeout = 120_000;
 server.headersTimeout = 125_000;
 server.listen(PORT, process.env.TAILOR_HOST?.trim() || "127.0.0.1", () => {
   handleOutreach.start();
+  startPhoneSummaries({ withMongo, log });
   log(`listening on http://localhost:${PORT}`);
   // Bound to loopback, so this only matters once cloudflared publishes it — but
   // then /scrape/start is reachable by anyone who knows the tunnel URL, and it
