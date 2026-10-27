@@ -399,3 +399,19 @@
 .re-form input{font:inherit;font-size:14px;color:var(--foreground);background:var(--background);border:1px solid var(--border-col);border-radius:8px;padding:10px 12px;width:100%}
 .re-form input:focus-visible{outline:2px solid var(--primary);outline-offset:1px}.re-form input[aria-invalid="true"]{border-color:var(--jm-red)}
 .re-form .jm-filter-done:disabled{opacity:.5;cursor:default}
+
+/* Resume Ready chip: the checks to review open from the chip itself, so there is no extra row under the header. */
+.jm-ready-pop{position:relative}
+.jm-ready-pop>summary{list-style:none;cursor:pointer}.jm-ready-pop>summary::-webkit-details-marker{display:none}
+.jm-ready-pop>summary i{font-style:normal;opacity:.7}
+.jm-ready-pop>summary:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.jm-ready-pop>ul{position:absolute;top:calc(100% + 8px);left:0;z-index:40;width:300px;margin:0;padding:12px 14px 12px 28px;border-radius:12px;background:#17181c;border:1px solid rgba(255,255,255,.12);box-shadow:0 16px 40px rgba(0,0,0,.5);display:grid;gap:6px;font-size:12.5px;line-height:1.45;color:var(--muted-fg)}
+
+/* Resume header: always one line. The companion timer label shrinks away first; Download and Edit resume stay. */
+.jm-rhead{flex-wrap:nowrap;gap:8px;overflow:visible}
+.jm-rhead>b{flex:none;white-space:nowrap}
+.jm-rhead>.jm-ready-pop,.jm-rhead>.jm-companion-ready{flex:0 1 auto;min-width:0;white-space:nowrap}
+.jm-rhead>.jm-companion-ready{overflow:hidden;text-overflow:ellipsis}
+.jm-rhead>.jm-download,.jm-rhead>.jm-download+a,.jm-rhead>a{flex:none;white-space:nowrap}
+.jm-rhead>.jm-download+a{margin-left:0}
+@media(max-width:1500px){.jm-rhead .jm-companion-ready{font-size:0}.jm-rhead .jm-companion-ready select{font-size:11px}}
