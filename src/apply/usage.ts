@@ -10,6 +10,9 @@ export const PAGES: Record<string, string> = {
   bank: "Bank", outreach: "Outreach", stats: "Stats", ready: "Ready", settings: "Settings", usage: "Usage",
 };
 
+/** One colour per page, so the strip, the rows and the feature groups read as the same thing. */
+export const PAGE_HUE: Record<string, string> = { today: "#6d7bff", matching: "#4f9dff", applied: "#2fb87a", general: "#a86be0", assessments: "#e56fb0", staffing: "#f0a23b", resumes: "#e5584f", bank: "#3fc6c0", outreach: "#e56fb0", stats: "#9bb0ff", ready: "#c9b458", settings: "#8a919c", usage: "#5f6773" };
+
 export function pageIdOf(path: string): string {
   const p = path.replace(/\/+$/, "");
   if (p === "/job-matching") return "matching";

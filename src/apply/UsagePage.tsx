@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { duration, FEATURES, loadUsage, PAGES, type UsageSummary } from "./usage";
+import { duration, FEATURES, loadUsage, PAGES, PAGE_HUE, type UsageSummary } from "./usage";
 import "./usage.css";
 
-/** One colour per page, so the strip, the rows and the feature groups read as the same thing. */
-const PAGE_HUE: Record<string, string> = { today: "#6d7bff", matching: "#4f9dff", applied: "#2fb87a", general: "#a86be0", assessments: "#e56fb0", staffing: "#f0a23b", resumes: "#e5584f", bank: "#3fc6c0", outreach: "#e56fb0", stats: "#9bb0ff", ready: "#c9b458", settings: "#8a919c", usage: "#5f6773" };
 
 const RANGES: [string, string][] = [["today", "Today"], ["7d", "7 days"], ["30d", "30 days"], ["all", "All time"]];
 const ago = (day: string | null, today: string) => { if (!day) return "never"; const d = Math.round((Date.parse(today) - Date.parse(day)) / 86400000); return d <= 0 ? "today" : d === 1 ? "yesterday" : `${d} days ago`; };
