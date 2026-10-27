@@ -4,6 +4,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { loadResumeProfile } from './resume-profile.mjs';
 import { storeFromEnv, resumeKey } from './resume-store.mjs';
+import { generalResumes } from './no-text-jobs.mjs';
+import { trackOf } from './applications-analytics.mjs';
 
 export const MAX_KIT_PDF_BYTES = 5 * 1024 * 1024;
 export class ApplicationKitError extends Error {
@@ -58,5 +60,31 @@ export async function prepareApplicationKit(db, input, { profile = loadResumePro
     job: { id: job.job_url, company: String(job.company || ''), title: String(job.title || ''), applyUrl },
     fields: profileFields({ ...profile, name }),
     resume: { sha256: expected, fileName: `${name || 'Resume'}.pdf`, bytes: bytes.length, mimeType: 'application/pdf', base64: bytes.toString('base64') },
+  };
+}
+
+/**
+ * A kit for a job that has no tailored resume (its posting text could not be read): your general resume for the job's role, from the
+ * general resumes built per track. The job and profile are the same as any kit's; only the file is the general one.
+ */
+export async function prepareGeneralKit(db, input, { profile = loadResumeProfile(), outRoot = null, now = new Date() } = {}) {
+  if (!input || typeof input.jobUrl !== 'string') throw new ApplicationKitError('Choose a job first.', 400);
+  const job = await db.collection('jobs').findOne({ job_url: input.jobUrl }, { projection: { job_url: 1, job_url_direct: 1, company: 1, title: 1 } });
+  if (!job) throw new ApplicationKitError('That job was not found.', 404);
+  const applyUrl = webUrl(job.job_url_direct || job.job_url);
+  if (!applyUrl) throw new ApplicationKitError('This job has no valid application link.', 400);
+  const track = trackOf(job.title);
+  const general = track ? generalResumes(outRoot)[track] : null;
+  if (!general) throw new ApplicationKitError(`No general resume is built for this role${track ? ` (${track})` : ''}.`);
+  let bytes;
+  try { if (fs.statSync(general.path).size > MAX_KIT_PDF_BYTES) throw new ApplicationKitError('The general resume is too large for the companion. Use Download PDF.'); bytes = fs.readFileSync(general.path); } catch (e) { if (e instanceof ApplicationKitError) throw e; throw new ApplicationKitError('The general resume is unavailable.'); }
+  if (!bytes?.length || !bytes.subarray(0, 5).equals(Buffer.from('%PDF-'))) throw new ApplicationKitError('The general resume is not an available PDF.');
+  const name = String(profile.name || '').trim();
+  return {
+    version: 1, id: crypto.randomUUID(), createdAt: now.toISOString(), expiresAt: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+    job: { id: job.job_url, company: String(job.company || ''), title: String(job.title || ''), applyUrl },
+    fields: profileFields({ ...profile, name }),
+    resume: { sha256: hash(bytes), fileName: `${name || 'Resume'}.pdf`, bytes: bytes.length, mimeType: 'application/pdf', base64: bytes.toString('base64') },
+    general: { track, label: general.label },
   };
 }
