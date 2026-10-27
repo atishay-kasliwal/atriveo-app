@@ -8,7 +8,7 @@ import { PLATFORM_LABEL } from "./platform";
 import "./general.css";
 
 interface Row { key: string; jobUrl: string; applyUrl: string; company: string; title: string; location: string | null; source: string | null; track: string | null; postedAt: string | null; foundAt: string | null; resume: { track: string; label: string } | null }
-interface List { ok: true; total: number; allTotal: number; counts: { byTrack: Record<string, number>; bySource: Record<string, number> }; rows: Row[] }
+interface List { ok: true; total: number; allTotal: number; generalReady?: Record<string, string>; counts: { byTrack: Record<string, number>; bySource: Record<string, number> }; rows: Row[] }
 const TRACKS: [string, string][] = [["", "All"], ["software-engineer", "SWE"], ["ai-engineer", "AI"], ["data-analytics", "Data Analyst"], ["data-science", "DS"], ["forward-deployed", "FDE"], ["other", "Other"]];
 const PAGE = 50;
 const ago = (iso: string | null) => { if (!iso) return "—"; const d = Math.floor((Date.now() - Date.parse(iso)) / 86400000); return d <= 0 ? "today" : d === 1 ? "1d" : d < 30 ? `${d}d` : `${Math.floor(d / 30)}mo`; };
@@ -24,7 +24,7 @@ export default function GeneralPage({ header }: { header?: ReactNode }) {
   const [sort, setSort] = useState<"new" | "company" | "title">("new");
   const [q, setQ] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
-  const [meta, setMeta] = useState<Pick<List, "total" | "allTotal" | "counts"> | null>(null);
+  const [meta, setMeta] = useState<Pick<List, "total" | "allTotal" | "counts" | "generalReady"> | null>(null);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -35,7 +35,7 @@ export default function GeneralPage({ header }: { header?: ReactNode }) {
     setBusy(true); setError("");
     try {
       const r = await getJson<List>(`/applications/no-text?${new URLSearchParams({ track, sort, q: q.trim(), skip: String(skip), limit: String(PAGE) })}`);
-      setMeta({ total: r.total, allTotal: r.allTotal, counts: r.counts });
+      setMeta({ total: r.total, allTotal: r.allTotal, counts: r.counts, generalReady: r.generalReady });
       setRows((cur) => (replace ? r.rows : [...cur, ...r.rows.filter((n) => !cur.some((c) => c.key === n.key))]));
       if (replace) setPicked(new Set());
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); } finally { setBusy(false); }
@@ -72,6 +72,13 @@ export default function GeneralPage({ header }: { header?: ReactNode }) {
           <div><h1>General resume</h1><p>{meta ? <><b>{meta.allTotal}</b> jobs whose posting text could not be read, so no tailored resume was built. Apply with your general resume for the role.</> : "Jobs without a tailored resume"}</p></div>
           <input className="gn-search" type="search" placeholder="Search company, role or place" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search" />
         </div>
+        {meta && (() => { const by = meta.counts.byTrack, ready = Object.keys(meta.generalReady ?? {}).reduce((n, t) => n + (by[t] ?? 0), 0), total = Object.values(by).reduce((a, b) => a + b, 0); return (
+          <div className="gn-stats">
+            <div><small>Waiting</small><b>{meta.allTotal}</b><span>jobs with no readable posting</span></div>
+            <div><small>Ready to apply</small><b>{ready}</b><span>have a general resume for their role</span></div>
+            <div><small>Need a resume</small><b>{total - ready}</b><span>role has no general resume yet</span></div>
+            <div><small>Selected</small><b>{picked.size}</b><span>{picked.size ? "skip them in one go below" : "tick rows to skip in bulk"}</span></div>
+          </div>); })()}
         <nav className="gn-tabs" aria-label="Role">
           {TRACKS.map(([key, label]) => <button key={key} type="button" className={track === key ? "on" : ""} aria-pressed={track === key} onClick={() => setTrack(key)}>{label}{meta ? <small>{key ? meta.counts.byTrack[key] ?? 0 : Object.values(meta.counts.byTrack).reduce((a, b) => a + b, 0)}</small> : null}</button>)}
         </nav>
@@ -85,20 +92,18 @@ export default function GeneralPage({ header }: { header?: ReactNode }) {
           <table className="gn-table">
             <thead><tr>
               <th scope="col" className="gn-check"><input type="checkbox" aria-label="Select all shown" checked={all} onChange={() => setPicked(all ? new Set() : new Set(rows.map((r) => r.key)))} /></th>
-              {sortHead("company", "Company")}{sortHead("title", "Role")}<th scope="col">Location</th><th scope="col">Track</th><th scope="col">Source</th>{sortHead("new", "Found")}<th scope="col">Resume</th><th scope="col" className="gn-act"><span className="jm-sr-only">Actions</span></th>
+              {sortHead("company", "Company")}{sortHead("title", "Role")}<th scope="col">Track</th>{sortHead("new", "Found")}<th scope="col">Resume</th><th scope="col" className="gn-act"><span className="jm-sr-only">Actions</span></th>
             </tr></thead>
             <tbody ref={body}>
               {rows.map((r) => (
                 <tr key={r.key} data-row tabIndex={0} className={picked.has(r.key) ? "sel" : ""}
                   onKeyDown={(e) => { if ((e.target as HTMLElement).closest("button,input,a")) return; if (e.key === "Enter") { e.preventDefault(); void apply(r); } else if (e.key === "s") { e.preventDefault(); void skip([r.key]); } else if (e.key === "ArrowDown") { e.preventDefault(); move(e.currentTarget, 1); } else if (e.key === "ArrowUp") { e.preventDefault(); move(e.currentTarget, -1); } }}>
                   <td className="gn-check"><input type="checkbox" aria-label={`Select ${r.company}`} checked={picked.has(r.key)} onChange={() => setPicked((p) => { const n = new Set(p); n.has(r.key) ? n.delete(r.key) : n.add(r.key); return n; })} /></td>
-                  <td className="gn-company"><CompanyLogo company={r.company} size="sm" /><span title={r.company}>{r.company || "Unknown"}</span></td>
-                  <td className="gn-role"><a href={r.jobUrl} target="_blank" rel="noreferrer" title={r.title}>{r.title}</a></td>
-                  <td className="gn-where" title={r.location ?? ""}>{r.location || "—"}</td>
-                  <td>{r.track ? <span className="gn-chip">{TRACK_LABEL[r.track] || r.track}</span> : <span className="gn-muted">—</span>}</td>
-                  <td className="gn-src" data-platform={r.source ?? undefined}>{r.source ? <><i />{PLATFORM_LABEL[r.source as keyof typeof PLATFORM_LABEL] || r.source}</> : "—"}</td>
+                  <td className="gn-company"><CompanyLogo company={r.company} size="sm" /><span className="gn-two"><b title={r.company}>{r.company || "Unknown"}</b><small>{r.source ? PLATFORM_LABEL[r.source as keyof typeof PLATFORM_LABEL] || r.source : "—"}</small></span></td>
+                  <td className="gn-role"><span className="gn-two"><a href={r.jobUrl} target="_blank" rel="noreferrer" title={r.title}>{r.title}</a><small title={r.location ?? ""}>{r.location || "—"}</small></span></td>
+                  <td>{r.track ? <span className="gn-chip" data-track={r.track}><i />{TRACK_LABEL[r.track] || r.track}</span> : <span className="gn-muted">—</span>}</td>
                   <td className="gn-found">{ago(r.postedAt || r.foundAt)}</td>
-                  <td>{r.resume ? <span className="gn-resume">{r.resume.label}</span> : <span className="gn-muted" title="Build this track's general resume first">None yet</span>}</td>
+                  <td>{r.resume ? <span className="gn-resume"><i />{r.resume.label}</span> : <span className="gn-muted" title="Build this track's general resume first">None yet</span>}</td>
                   <td className="gn-act">
                     {opened === r.key ? <span className="gn-ask"><small>Applied?</small><button type="button" className="gn-yes" onClick={() => void applied(r)}>Yes</button><button type="button" className="gn-no" onClick={() => setOpened(null)}>No</button></span>
                       : <><button type="button" className="gn-apply" onClick={() => void apply(r)} disabled={!r.resume}>Apply ↗</button><button type="button" className="gn-skip" onClick={() => void skip([r.key])} aria-label={`Skip ${r.company}`} title="Skip (S)">✕</button></>}
