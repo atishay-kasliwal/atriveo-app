@@ -312,3 +312,14 @@
 .ak-sources ul{margin:0;padding:0;list-style:none;display:grid;gap:8px;font-size:12.5px;line-height:1.5}
 .ak-sources li b{display:block;font-size:11px;color:var(--muted-fg);font-weight:500}
 @media(max-width:800px){.ak-sources{grid-template-columns:1fr}}
+
+/* Bottom bar: browse on the left, progress in the exact middle, decisions on the right. */
+@media(min-width:801px){
+ .jm-actions{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center}
+ .jm-actions .jm-browse{justify-self:start}
+ .jm-actions .jm-decision-actions{justify-self:end}
+ .jm-actions .jm-progress{justify-self:center;width:min(420px,100%);display:flex;flex-direction:column;align-items:center;text-align:center;margin:0}
+ .jm-actions .jm-progress .jm-stat-bar{width:100%}
+ .jm-actions .jm-progress .jm-stat-legend{justify-content:center}
+ .jm-actions .jm-progress>label{justify-content:center}
+}
