@@ -415,3 +415,10 @@
 .jm-rhead>.jm-download,.jm-rhead>.jm-download+a,.jm-rhead>a{flex:none;white-space:nowrap}
 .jm-rhead>.jm-download+a{margin-left:0}
 @media(max-width:1500px){.jm-rhead .jm-companion-ready{font-size:0}.jm-rhead .jm-companion-ready select{font-size:11px}}
+
+/* Bottom bar: browse and "Learn preferences" together on the left, the progress bar alone in the exact middle, decisions on the right. */
+.jm-left{display:flex;align-items:center;gap:18px;min-width:0;justify-self:start}
+.jm-left>label{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted-fg);white-space:nowrap}
+.jm-left>label input{accent-color:var(--primary);width:12px;height:12px;margin:0}
+@media(min-width:801px){.jm-actions .jm-progress{align-items:center}}
+@media(max-width:800px){.jm-left{flex-wrap:wrap;gap:8px}}
