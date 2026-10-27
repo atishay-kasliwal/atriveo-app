@@ -1909,14 +1909,14 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // GET /applications/no-text?q=&track=&source=&sort=&skip=&limit= — jobs whose posting text could not be read (no tailored resume),
+  // GET /applications/no-text?q=&track=&source=&range=today|yesterday|7d|30d&sort=&skip=&limit= — jobs whose posting text could not be read (no tailored resume),
   // as table rows you can apply to with your general resume for the role.
   if (req.method === "GET" && pathname === "/applications/no-text") {
     (async () => {
       try {
         if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
         const p = new URL(req.url, "http://x").searchParams;
-        const data = await withMongo((db) => noTextJobs(db, { q: p.get("q") || "", track: p.get("track") || "", source: p.get("source") || "", sort: p.get("sort") || "new", skip: Number(p.get("skip")) || 0, limit: Number(p.get("limit")) || 50, outRoot: OUT_ROOT }), { appName: "AtriveoTailorServer" });
+        const data = await withMongo((db) => noTextJobs(db, { q: p.get("q") || "", track: p.get("track") || "", source: p.get("source") || "", range: p.get("range") || "", sort: p.get("sort") || "new", skip: Number(p.get("skip")) || 0, limit: Number(p.get("limit")) || 50, outRoot: OUT_ROOT }), { appName: "AtriveoTailorServer" });
         res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify(data));
       } catch (e) {

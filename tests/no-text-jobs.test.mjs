@@ -51,3 +51,19 @@ test('a manifest written on the Mac still finds the same PDF under this server',
  assert.deepEqual(Object.keys(got),['data-analytics']);
  assert.equal(got['data-analytics'].path,path.join(root,'general','Data Analyst','Atishay Kasliwal.pdf'));
 });
+test('the day range keeps today, yesterday, the last 7 and 30 days, and counts each',async()=>{
+ const {inRange,rowDay}=await import('../scripts/no-text-jobs.mjs');
+ const now=Date.parse('2026-10-27T16:00:00Z');
+ assert.equal(inRange('2026-10-27','today',now),true);assert.equal(inRange('2026-10-26','today',now),false);
+ assert.equal(inRange('2026-10-26','yesterday',now),true);assert.equal(inRange('2026-10-27','yesterday',now),false);
+ assert.equal(inRange('2026-10-21','7d',now),true);assert.equal(inRange('2026-10-20','7d',now),false);
+ assert.equal(inRange('2026-09-28','30d',now),true);assert.equal(inRange('2026-09-27','30d',now),false);
+ assert.equal(inRange(null,'today',now),false);assert.equal(inRange(null,'',now),true);
+ assert.equal(rowDay({postedAt:'2026-10-27T00:00:00.000Z'}),'2026-10-27','a date-only posting date is that day, not the evening before in New York');
+ assert.equal(rowDay({postedAt:null,foundAt:'2026-10-28T02:30:00.000Z'}),'2026-10-27','a timestamp is its New York day');
+ const d=db({...base,jobs:[job(1,'Software Engineer','Acme',{date_posted:'2026-10-27',run_at:'2026-10-27T10:00:00Z'}),job(2,'AI Engineer','Beta',{date_posted:'2026-10-26',run_at:'2026-10-26T10:00:00Z'}),job(3,'Software Engineer','Gamma',{date_posted:'2026-10-10',run_at:'2026-10-10T10:00:00Z'})]});
+ const t=await noTextJobs(d,{outRoot,range:'today',now});
+ assert.deepEqual(t.rows.map(r=>r.company),['Acme']);assert.equal(t.allTotal,1);
+ assert.deepEqual(t.counts.byRange,{all:3,today:1,yesterday:1,'7d':2,'30d':3});
+ assert.equal((await noTextJobs(d,{outRoot,range:'7d',now})).total,2);assert.equal((await noTextJobs(d,{outRoot,now})).total,3);
+});
