@@ -118,3 +118,9 @@
 @media (prefers-reduced-motion: reduce) { .apply-pipeline > i.is-busy { animation: none; } .apply-pipeline-meter b { transition: none; } }
 
 .apply-header { z-index: 70; }
+.apply-pipeline-reason { display: flex; gap: 12px; align-items: baseline; }
+.apply-pipeline-reason > b { min-width: 30px; font-size: 16px; font-variant-numeric: tabular-nums; }
+.apply-pipeline-reason > span { display: grid; gap: 2px; min-width: 0; }
+.apply-pipeline-reason small { color: var(--muted-fg); }
+.apply-pipeline-retry { justify-self: start; margin-top: 4px; }
+.apply-pipeline-note { color: var(--muted-fg); }
