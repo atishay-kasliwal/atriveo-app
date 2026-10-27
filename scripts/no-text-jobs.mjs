@@ -139,8 +139,8 @@ export async function generalQueue(db, { limit = 8, offset = 0, period = "7d", r
   const searched = text ? inPeriod.filter((r) => `${r.company} ${r.title} ${r.location || ""}`.toLowerCase().includes(text)) : inPeriod;
   const byCompany = new Map();
   for (const r of searched) { const key = matchingCompanyKey(r.company), c = byCompany.get(key) ?? { key, name: r.company || "Unknown company", count: 0, newToday: 0, bestMatch: null, saved: 0, source: r.source, sources: [r.source].filter(Boolean) }; c.count += 1; byCompany.set(key, c); }
-  const skip = new Set(exclude);
-  const picked = searched.filter((r) => (!role || r.track === role) && (!company || matchingCompanyKey(r.company) === company) && !skip.has(r.key)).sort(SORTS.new);
+  const skip = new Set(exclude), wanted = new Set((Array.isArray(role) ? role : String(role || "").split(",")).map((x) => String(x).trim()).filter(Boolean));
+  const picked = searched.filter((r) => (!wanted.size || wanted.has(r.track)) && (!company || matchingCompanyKey(r.company) === company) && !skip.has(r.key)).sort(SORTS.new);
   const roles = {}; for (const r of searched) roles[r.track || "other"] = (roles[r.track || "other"] || 0) + 1;
   const period_ = {}; for (const p of ["today", "yesterday", "7d"]) period_[p] = ready.filter((r) => inRange(rowDay(r), p, now)).length; period_.all = ready.length;
   const jobs = picked.slice(Math.max(0, offset), Math.max(0, offset) + Math.min(20, Math.max(1, limit))).map((r, i) => asMatchingJob(r, general, offset + i + 1));

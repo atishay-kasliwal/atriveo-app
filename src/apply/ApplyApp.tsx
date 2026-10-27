@@ -3,6 +3,7 @@ import UsagePage from "./UsagePage";
 import AssessmentsPage from "./AssessmentsPage";
 import InsightsPage from "./InsightsPage";
 import { startUsageTracking } from "./usage";
+import { startExtensionUsage } from "./extensionUsage";
 import { syncProfileToExtension } from "./companionProfile";
 import { syncGoalToPhoneMessages } from "./phoneGoal";
 import { useEffect } from "react";
@@ -35,6 +36,7 @@ function Console() {
   const path = useLocation().pathname.replace(/\/+$/, "");
   // Measure time and feature use (counts only) while someone is signed in; read the path fresh so page changes are noticed.
   useEffect(() => (user ? startUsageTracking(() => window.location.pathname) : undefined), [user]);
+  useEffect(() => (user ? startExtensionUsage() : undefined), [user]);
   if (loading) return <div className="apply-loading" aria-busy="true"><div className="spin" /></div>;
   if (!user) return <Navigate to="/login" replace />;
   const header = <ApplyHeader user={user} />;

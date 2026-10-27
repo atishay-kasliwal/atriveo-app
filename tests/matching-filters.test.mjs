@@ -79,3 +79,17 @@ test('facets count each choice with the other filters held: period, source and r
  assert.equal(f.sources.linkedin,2);assert.equal(f.sources.greenhouse,1);
  assert.deepEqual(f.roles,{'':2,'ai-engineer':1,'software-engineer':1});
 });
+
+test('several roles can be chosen at once; none means every role; unknown ids match nothing; counts per role ignore the role choice',()=>{
+ const now=new Date('2026-10-27T16:00:00Z');
+ const docs=[['swe','software-engineer'],['ai','ai-engineer'],['da','data-analytics'],['ds','data-science'],['swe2','software-engineer']].map(([n,track])=>({job_url:'https://x/'+n,title:'T '+n,company:'Co '+n,location:'New York, NY',site:'linkedin',date_posted:'2026-10-27',track}));
+ const ids=o=>filterMatchingJobs(docs,{period:'today',now,...o}).map(d=>d.job_url.split('/').pop()).sort().join(',');
+ assert.equal(ids({role:''}),'ai,da,ds,swe,swe2');
+ assert.equal(ids({role:'software-engineer'}),'swe,swe2');
+ assert.equal(ids({role:'software-engineer,ai-engineer'}),'ai,swe,swe2');
+ assert.equal(ids({role:['data-analytics','data-science']}),'da,ds');
+ assert.equal(ids({role:' ai-engineer , ,'}),'ai','blank parts are ignored');
+ assert.equal(ids({role:'not-a-role'}),'');
+ const f=matchingFacets(docs,{period:'today',now,role:'software-engineer,ai-engineer'});
+ assert.equal(f.roles['software-engineer'],2);assert.equal(f.roles['data-science'],1,'each role is counted as if it were the only choice');assert.equal(f.roles[''],5);
+});

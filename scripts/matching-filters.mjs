@@ -21,6 +21,7 @@ export function filterMatchingJobs(docs,{period='7d',sources=[],role='',query=''
  try{dayIn(now,timeZone);}catch{timeZone='America/New_York';}
  const today=dayIn(now,timeZone),dayOffset=n=>new Date(Date.parse(today+'T12:00:00Z')+n*86400000).toISOString().slice(0,10);
  const selected=new Set((Array.isArray(sources)?sources:String(sources).split(',')).filter(s=>MATCHING_SOURCES.includes(s)||s==='other'));
+ const wanted=new Set((Array.isArray(role)?role:String(role||'').split(',')).map(r=>String(r).trim()).filter(Boolean));
  const tokens=String(query).trim().toLowerCase().slice(0,200).split(/\s+/).filter(Boolean);
  return docs.filter(d=>{
   // A posting date without a time (LinkedIn's "2026-10-25") is that calendar day. Read as midnight UTC it fell on the
@@ -30,7 +31,7 @@ export function filterMatchingJobs(docs,{period='7d',sources=[],role='',query=''
   if(period==='today'&&date!==today||period==='yesterday'&&date!==dayOffset(-1)||period==='7d'&&(!date||date<dayOffset(-6)||date>today))return false;
   if(selected.size&&!selected.has(matchingSource(d)||'other'))return false;
   if(!inServedCountries(d.location))return false;
-  if(role&&d.track!==role)return false;
+  if(wanted.size&&!wanted.has(d.track))return false;
   const text=[d.title,d.company,d.location].join(' ').toLowerCase();return tokens.every(token=>text.includes(token));
  });
 }

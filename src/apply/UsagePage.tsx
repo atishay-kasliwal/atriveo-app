@@ -16,7 +16,7 @@ export default function UsagePage({ header }: { header?: ReactNode }) {
   useEffect(() => { let on = true; loadUsage("all").then((d) => on && setAll(d)).catch(() => {}); return () => { on = false; }; }, []);
   const view = useMemo(() => {
     const rows = data?.rows ?? [], everUsed = new Set((all?.rows ?? []).filter((r) => r.kind === "action" && r.count > 0).map((r) => r.key));
-    const pages = Object.entries(PAGES).map(([id, label]) => { const r = rows.find((x) => x.kind === "page" && x.key === id); const i = rows.find((x) => x.kind === "action" && x.key === `${id}.interactions`); return { id, label, seconds: r?.seconds ?? 0, visits: r?.count ?? 0, interactions: i?.count ?? 0, last: r?.last ?? null }; }).sort((a, b) => b.seconds - a.seconds);
+    const pages = Object.entries(PAGES).filter(([id]) => id !== "extension").map(([id, label]) => { const r = rows.find((x) => x.kind === "page" && x.key === id); const i = rows.find((x) => x.kind === "action" && x.key === `${id}.interactions`); return { id, label, seconds: r?.seconds ?? 0, visits: r?.count ?? 0, interactions: i?.count ?? 0, last: r?.last ?? null }; }).sort((a, b) => b.seconds - a.seconds);
     const total = pages.reduce((n, p) => n + p.seconds, 0), top = Math.max(1, ...pages.map((p) => p.seconds));
     const feats = FEATURES.map((f) => { const r = rows.find((x) => x.kind === "action" && x.key === f.key); return { ...f, count: r?.count ?? 0, last: r?.last ?? null, never: !everUsed.has(f.key) }; });
     return { pages, total, top, feats, usedPages: pages.filter((p) => p.seconds > 0).length, usedFeats: feats.filter((f) => f.count > 0).length };

@@ -93,3 +93,11 @@ test("Matching's General source: card-shaped jobs with a general resume, filters
  assert.equal(await generalCount(d,{outRoot,period:'7d',now}),2);
  const find=(await generalQueue(d,{outRoot,period:'all',now,query:'beta'}));assert.deepEqual(find.jobs.map(x=>x.company),['Beta']);
 });
+
+test("General source honours several roles at once",async()=>{
+ const {generalQueue,clearNoTextCache}=await import('../scripts/no-text-jobs.mjs');clearNoTextCache();
+ const now=Date.parse('2026-10-20T16:00:00Z'),today=n=>({date_posted:'2026-10-20',run_at:`2026-10-20T1${n}:00:00Z`});
+ const d=db({...base,jobs:[job(1,'Software Engineer','Acme',today(1)),job(2,'Software Engineer II','Beta',today(2)),job(3,'AI Engineer','Gamma',today(3))]});
+ assert.equal((await generalQueue(d,{outRoot,period:'today',now,role:'software-engineer'})).total,2);
+ assert.equal((await generalQueue(d,{outRoot,period:'today',now,role:'software-engineer,ai-engineer'})).total,2,'the AI role has no general resume here, so only the software jobs');
+});
