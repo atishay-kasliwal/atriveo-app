@@ -1,7 +1,7 @@
 .outreach-page { color: var(--foreground, #e8e9ed); }
-.outreach-page.rv-page { display:block; height:auto; min-height:100dvh; overflow:visible; }
+.outreach-page.rv-page { display:flex; flex-direction:column; height:100vh; min-height:0; overflow:hidden; }
 .outreach-page > :not(.apply-header, .outreach-overlay) { margin-left:24px; margin-right:24px; }
-.outreach-page { padding-bottom:32px; }
+.outreach-page { padding-bottom:0; }
 .outreach-page-head { display:flex; align-items:center; justify-content:space-between; gap:24px; margin:30px 0 22px; }
 .outreach-page-head h1 { margin:7px 0; font-size:30px; letter-spacing:-1px; }
 .outreach-page-head p,.outreach-muted { color:var(--muted-fg, #9299a6); font-size:13px; line-height:1.6; }
@@ -51,3 +51,43 @@
 .td-outreach { display:inline-flex; align-items:center; margin-left:0; }
 .td-outreach button { min-width:28px; padding:0 4px; font-size:16px; line-height:1; }
 @media(max-width:600px) { .outreach-two { grid-template-columns:1fr; gap:0; }.outreach-panel-head,.outreach-panel-body,.outreach-panel-foot { padding-left:18px; padding-right:18px; }.outreach-page-head { align-items:flex-start; flex-direction:column; gap:10px; }.outreach-list-row { padding:15px; }.outreach-panel-foot button { flex:1; }.outreach-settings { padding:16px; } }
+
+/* One screen, centred: head, tabs and toolbar stay put, the list scrolls inside its own area, and settings run in two columns. */
+.outreach-page > .outreach-main { flex:1; min-height:0; width:min(1200px,100%); margin:0 auto; padding:clamp(8px,1.6vh,18px) clamp(14px,2vw,28px) clamp(10px,1.8vh,20px); display:flex; flex-direction:column; gap:clamp(8px,1.4vh,14px); box-sizing:border-box; }
+.outreach-main .outreach-page-head { margin:0; background:none; }
+.outreach-main .outreach-page-head h1 { margin:4px 0 2px; font-size:clamp(24px,3.6vh,30px); }
+.outreach-main .outreach-page-head p { margin:0; }
+.outreach-main .outreach-tabs, .outreach-main .outreach-toolbar { margin:0; }
+.outreach-scroll { flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column; border-radius:14px; }
+.outreach-scroll .outreach-empty { flex:1; display:grid; place-content:center; padding:24px; }
+.outreach-scroll .outreach-list { align-content:start; }
+.outreach-settings { flex:1; min-height:0; overflow:auto; max-width:none; box-sizing:border-box; }
+.outreach-cols { column-count:2; column-gap:56px; }
+.outreach-cols > * { break-inside:avoid; }.outreach-cols h2 { break-after:avoid; margin-top:22px; }.outreach-cols > h2:first-child { margin-top:0; }
+.outreach-start { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:12px 16px; border:1px solid var(--border-col,#30343c); border-radius:14px; background:var(--card-bg,#191b20); }
+.outreach-start ol { display:flex; gap:8px 22px; flex-wrap:wrap; list-style:none; margin:0; padding:0; font-size:13px; color:var(--muted-fg,#9299a6); }
+.outreach-start li { display:inline-flex; align-items:center; gap:9px; }
+.outreach-start li i { display:inline-grid; place-content:center; width:22px; height:22px; border-radius:50%; font-style:normal; font-size:12px; font-weight:650; background:#263142; color:#a6b7cd; }
+.outreach-start li.is-done { color:#76d9af; }.outreach-start li.is-done i { background:#18362b; color:#76d9af; }
+.outreach-start li.is-next { color:var(--foreground,#e8e9ed); }.outreach-start li.is-next i { background:#7ca6d9; color:#0c0d10; }
+@media(max-width:1000px){ .outreach-page.rv-page { height:auto; overflow:visible; } .outreach-cols { column-count:1; } .outreach-scroll,.outreach-settings { overflow:visible; } }
+
+/* Denser: one line per message, and settings in three columns on a laptop so neither needs scrolling for a normal list. */
+.outreach-main .outreach-list { gap:8px; }
+.outreach-main .outreach-list-row { padding:11px 18px; }
+.outreach-main .outreach-list-row > span:first-child { grid-template-columns:minmax(0,1.1fr) minmax(0,1.4fr) minmax(0,1.4fr); gap:6px 18px; align-items:center; flex:1; min-width:0; }
+.outreach-main .outreach-list-row > span:first-child > * { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.outreach-main .outreach-settings { padding:clamp(12px,2vh,22px) 24px; }
+.outreach-main .outreach-settings h2 { font-size:15px; margin:clamp(10px,1.8vh,20px) 0 clamp(4px,.9vh,10px); }
+.outreach-main .outreach-field { margin:clamp(5px,1vh,12px) 0; gap:5px; }
+.outreach-main .outreach-check { margin:clamp(4px,.8vh,10px) 0; }
+.outreach-main .outreach-settings .outreach-muted { margin:clamp(3px,.7vh,8px) 0; line-height:1.45; }
+@media(min-width:1100px){ .outreach-cols { column-count:auto; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0 40px; align-items:start; } .outreach-cols h2 { margin-top:0; } }
+.outreach-col > h2:first-child { margin-top:0; }
+@media(max-width:700px){ .outreach-main .outreach-list-row > span:first-child { grid-template-columns:1fr; } .outreach-main .outreach-list-row > span:first-child > * { white-space:normal; } }
+
+.outreach-main .outreach-field textarea { height:clamp(60px,9.5vh,120px); min-height:0; }
+.outreach-save { display:flex; justify-content:flex-end; padding-top:clamp(8px,1.6vh,16px); margin-top:clamp(6px,1.2vh,12px); border-top:1px solid var(--border-col,#30343c); }
+
+/* Short laptops: drop the subtitle and the field-name note, and make the text areas shorter, so settings still fit without scrolling. */
+@media(max-height:820px){ .outreach-main .outreach-page-head p, .outreach-main .outreach-eyebrow { display:none; } .outreach-main .outreach-field textarea { height:50px; } .outreach-fields-note { display:none; } .outreach-main .outreach-page-head h1 { margin:0; } }
