@@ -1,3 +1,5 @@
+import AppliedPage from "./AppliedPage";
+import SettingsPage from "./SettingsPage";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Applications from "../pages/Applications";
@@ -20,6 +22,8 @@ function Console() {
   const header = <ApplyHeader user={user} />;
   if (path === "/outreach") return <OutreachPage header={header} />;
   if (path === "/job-matching") return <JobMatchingPage header={header} />;
+  if (path === "/applied" || path.startsWith("/applied/")) return <AppliedPage header={header} />;
+  if (path === "/settings") return <SettingsPage header={header} />;
   if (path === "/staffing") return <StaffingPage header={header} />;
   if (path === "/resume_builder") return <ResumeBuilderPage header={header} />;
   if (path === "/bank") return <BankPage header={header} />;

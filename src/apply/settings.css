@@ -1,0 +1,42 @@
+/* Settings: the daily goal and what the Mac widget shows, beside a live preview. */
+.st-main{flex:1;min-height:0;overflow:auto;width:min(1040px,100%);margin:0 auto;padding:28px 24px 64px}
+.st-title h1{font-size:30px;letter-spacing:-.02em}.st-title p{margin:6px 0 26px;color:var(--muted-fg);font-size:14px}
+.st-grid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:44px;align-items:start}
+.st-controls{display:grid;gap:30px}
+.st-controls h2{font-size:16px;margin-bottom:6px}.st-hint{margin:0 0 14px;color:var(--muted-fg);font-size:13.5px;line-height:1.5}
+.st-presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.st-presets button{font:inherit;font-size:15px;font-weight:500;min-width:52px;padding:10px 14px;border:1px solid var(--border-col);border-radius:10px;background:transparent;color:var(--muted-fg);cursor:pointer;font-variant-numeric:tabular-nums}
+.st-presets button:hover{color:var(--foreground);border-color:var(--muted-fg)}.st-presets button.on{color:var(--foreground);border-color:var(--primary);background:color-mix(in oklab,var(--primary) 18%,transparent)}
+.st-stepper{display:flex;align-items:center;gap:8px}
+.st-stepper button{font:inherit;font-size:18px;width:38px;height:38px;border:1px solid var(--border-col);border-radius:10px;background:transparent;color:var(--foreground);cursor:pointer}
+.st-stepper button:disabled{opacity:.4;cursor:default}
+.st-stepper input{font:inherit;font-size:16px;width:76px;text-align:center;padding:9px 6px;border:1px solid var(--border-col);border-radius:10px;background:var(--card-bg);color:var(--foreground);font-variant-numeric:tabular-nums}
+.st-stepper input:focus-visible,.st-presets button:focus-visible,.st-stepper button:focus-visible,.st-flags button:focus-visible,.st-accents button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.st-saved{font-size:12.5px;color:var(--muted-fg);margin-left:6px}
+.st-flags{list-style:none;margin:0;padding:0;border:1px solid var(--border-col);border-radius:14px;overflow:hidden}
+.st-flags li{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px}.st-flags li+li{border-top:1px solid var(--border-col)}
+.st-flags span{display:grid;gap:2px}.st-flags b{font-size:14.5px;font-weight:600}.st-flags small{font-size:12.5px;color:var(--muted-fg)}
+.st-flags button{position:relative;width:44px;height:26px;border-radius:99px;border:0;background:rgba(255,255,255,.14);cursor:pointer;flex:none;transition:background .18s}
+.st-flags button i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .18s}
+.st-flags button.on{background:var(--primary)}.st-flags button.on i{transform:translateX(18px)}
+.st-accents{display:flex;gap:12px}
+.st-accents button{width:34px;height:34px;border-radius:50%;border:2px solid transparent;cursor:pointer;box-shadow:0 0 0 2px var(--background) inset}
+.st-accents button.on{border-color:var(--foreground)}
+.st-note{margin:0;color:var(--muted-fg);font-size:12.5px;line-height:1.55}
+.st-error{color:#ee8a80;font-size:14px}
+.st-preview{position:sticky;top:20px;display:grid;gap:18px}
+.st-card{border:1px solid var(--border-col);border-radius:22px;padding:20px;background:linear-gradient(180deg,color-mix(in oklab,var(--card-bg) 92%,#fff 8%),var(--card-bg));box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 18px 40px -20px rgba(0,0,0,.7)}
+.st-card-small{width:176px}
+/* The widget card itself (shared with the Mac app's look). */
+.wp{color:var(--foreground);font-family:inherit}.wp-logo{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600}.wp-logo i{display:inline-block;width:14px;height:14px;border-radius:4px}
+.wp-ring{position:relative;flex:none}.wp-ring svg{display:block}
+.wp-ring-text{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;line-height:1.05}
+.wp-ring-text b{font-weight:600;font-variant-numeric:tabular-nums}.wp-ring-text span{color:var(--muted-fg);font-weight:500}.wp-ring-text i{font-style:normal;font-weight:700;font-size:15px}
+.wp-medium{display:flex;align-items:center;gap:22px}.wp-left{display:grid;justify-items:center;gap:8px}.wp-left p{margin:0;font-size:12px;font-weight:500;color:var(--muted-fg)}
+.wp-right{display:grid;gap:13px;min-width:0;flex:1}.wp-head{display:flex;justify-content:space-between;align-items:center}.wp-head>span{font-size:11px;color:var(--muted-fg);font-weight:500}
+.wp-streak{margin:0;font-size:15px;font-weight:600}
+.wp-bars{display:flex;align-items:flex-end;gap:3px;height:34px}.wp-bars i{flex:1;border-radius:2.5px}.wp-right small{display:block;margin-top:5px;font-size:10px;color:var(--muted-fg)}
+.wp-counts{display:flex;gap:18px}.wp-counts span{display:grid;font-size:10px;color:var(--muted-fg)}.wp-counts b{font-size:17px;font-weight:600;color:var(--foreground);font-variant-numeric:tabular-nums}
+.wp-small{display:grid;gap:8px;justify-items:stretch}.wp-center{display:flex;justify-content:center}.wp-foot{margin:0;text-align:center;font-size:11px;font-weight:600;color:var(--muted-fg)}
+@media(max-width:860px){.st-grid{grid-template-columns:1fr;gap:28px}.st-preview{position:static}.st-card-medium{max-width:400px}}
+@media(prefers-reduced-motion:reduce){.st-flags button,.st-flags button i{transition:none}}
