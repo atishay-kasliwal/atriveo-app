@@ -422,3 +422,7 @@
 .jm-left>label input{accent-color:var(--primary);width:12px;height:12px;margin:0}
 @media(min-width:801px){.jm-actions .jm-progress{align-items:center}}
 @media(max-width:800px){.jm-left{flex-wrap:wrap;gap:8px}}
+
+/* The General source stands apart from the sites: no readable posting, applied to with your general resume. */
+.jm-source-filters .jm-source-general{margin-top:8px;padding-top:10px;border-top:1px solid var(--line,rgba(255,255,255,.12))}
+.jm-source-filters [data-platform=general] .jm-source-dot{background:#a86be0}
