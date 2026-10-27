@@ -440,4 +440,13 @@
  .jm-actions .jm-stat-legend b{font-size:13px;font-weight:650;margin-right:4px}
 }
 @media(max-width:1100px){.jm-actions .jm-stat-legend{flex-wrap:wrap}}
-@media(min-width:801px) and (max-width:1380px){.jm-learn-note{display:none}}
+@media(min-width:801px) and (max-width:1520px){.jm-learn-note{display:none}}
+
+/* The message toast: bottom right, closes itself, can be closed, and steps above the Applied? box when that is open. */
+.jm-notice{pointer-events:auto;left:auto;right:24px;bottom:84px;display:flex;align-items:center;gap:6px;animation:jm-toast-in .22s cubic-bezier(.2,.7,.2,1) both}
+.jm-notice.has-card{bottom:calc(84px + 168px)}
+.jm-notice span{overflow-wrap:anywhere}
+.jm-notice-close{margin-left:6px!important;width:22px;height:22px;border-radius:50%!important;display:grid;place-content:center;color:var(--muted-fg)!important;font-size:11px!important;line-height:1}.jm-notice-close:hover{background:rgba(255,255,255,.1)!important;color:var(--foreground)!important}.jm-notice-close:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
+@keyframes jm-toast-in{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.jm-notice{animation:none}}
+@media(max-width:800px){.jm-notice{left:12px;right:12px;bottom:108px;max-width:none}.jm-notice.has-card{bottom:calc(108px + 168px)}}
