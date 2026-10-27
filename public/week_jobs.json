@@ -1775,7 +1775,7 @@
     },
     "scraped_date": "2026-10-27",
     "ats_score": 69,
-    "fit_score": 17
+    "fit_score": 18
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4481863008",
@@ -3004,6 +3004,240 @@
     "scraped_date": "2026-10-27",
     "ats_score": 41,
     "fit_score": 9
+  },
+  {
+    "session_id": "2026-10-27T11:33:36Z",
+    "job_url": "https://job-boards.greenhouse.io/addepar1/jobs/8906234002",
+    "application_key": "greenhouse:8906234002",
+    "ats": "greenhouse",
+    "ats_board": "addepar1",
+    "ats_posting_id": "8906234002",
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "Addepar",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": "https://job-boards.greenhouse.io/addepar1/jobs/8906234002",
+    "level": "Entry",
+    "location": "New York, NY",
+    "max_exp": 3.0,
+    "min_exp": 1.0,
+    "pipeline": "standard",
+    "priority_group": 9,
+    "priority_tags": [
+      "New York",
+      "1\u20132 yrs"
+    ],
+    "priority_version": 2,
+    "score": 161,
+    "score_pct": 64,
+    "search_term": "ats:greenhouse",
+    "site": "greenhouse",
+    "summary": "As an AI Engineer, you will be responsible for designing, building, and productionizing the core AI capabilities that power our platform.",
+    "title": "AI Engineer - AI Platform",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "f7e73483962eb47e046e19b850586521fefb563ed6ecbbb71d9a7063f1b3aa07",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T11:37:54.229Z",
+      "error": null,
+      "company": "Addepar",
+      "title": "AI Engineer - AI Platform",
+      "resume_slot": 2,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Addepar (27thOctober)",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/a4/a4ddc4e29a2d10e6292893b454924c9d094f7690fc87570125047b16e67ea115.pdf",
+        "sha256": "a4ddc4e29a2d10e6292893b454924c9d094f7690fc87570125047b16e67ea115",
+        "bytes": 40657,
+        "tex_key": "resumes/a4/a4ddc4e29a2d10e6292893b454924c9d094f7690fc87570125047b16e67ea115.tex",
+        "jd_key": "resumes/a4/a4ddc4e29a2d10e6292893b454924c9d094f7690fc87570125047b16e67ea115.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Addepar (27thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Addepar (27thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Addepar (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T11:37:54.229Z"
+      }
+    },
+    "fit": {
+      "score": 92.5,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 5,
+        "unparsed_requirements": 4,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "4 qualification lines need manual review; they were not fully assessed"
+      ],
+      "applicable_weight": 95,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "unknown",
+        "items": [
+          {
+            "type": "sponsorship",
+            "status": "unknown",
+            "reason": "Authorized now (f1_opt, 3 years) but the posting also rules out future sponsorship; your need after that is unknown",
+            "source": "Applicants must be legally authorized to work in the United States for any employer without requiring current or future visa sponsorship (for example, employment-based visas such as H-1B , F-1 /OPT..."
+          }
+        ]
+      },
+      "ledger": {
+        "required": {
+          "matched": 4,
+          "total": 4
+        },
+        "preferred": {
+          "matched": 1,
+          "total": 1
+        },
+        "total": {
+          "matched": 5,
+          "total": 5
+        },
+        "matched": [
+          "LLM",
+          "MCP",
+          "Python / Go / gRPC / AWS / Kubernetes",
+          "Microservices / API",
+          "Databricks / LangChain / MLFlow"
+        ],
+        "partial": [],
+        "missing": [],
+        "mentioned": [],
+        "unrecognized": [],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Proven experience shipping and maintaining AI-native products or features, or demonstrable passion through significant personal projects in AI."
+          },
+          {
+            "classification": "required",
+            "source": "A strong bias for action, with a passion for shipping rapidly and iterating with feedback."
+          },
+          {
+            "classification": "required",
+            "source": "Passion for proactivity, deep ownership, and a desire to learn and build on the frontier of AI."
+          },
+          {
+            "classification": "preferred",
+            "source": "Preferred) Experience building AI products in highly accuracy-sensitive domains such as finance is a plus."
+          }
+        ],
+        "skills": [
+          {
+            "label": "LLM",
+            "alternatives": [
+              "LLM"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "LLMs and the surrounding ecosystem (e.g., vector DBs, prompt tuning, etc.)",
+            "evidence": {
+              "entry": "Stony Brook University",
+              "text": "Assessed GPT-4o LLM market-reaction predictions against minute-level SPY moves at 1, 5 and 10-minute windows, reaching 0.74 weighted F1 with Whisper transcripts and Pinecone retrieval.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "MCP",
+            "alternatives": [
+              "MCP"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Core agent capabilities like MCP/ cross-platform tool use, web browsing, computer use",
+            "evidence": {
+              "entry": "Stony Brook University",
+              "text": "hushh Kai fetchers: yfinance, Finnhub, Financial Modeling Prep, NewsAPI, SEC EDGAR (consent-protocol/hushh_mcp/operons/kai/fetchers.py).",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Python / Go / gRPC / AWS / Kubernetes",
+            "alternatives": [
+              "Python",
+              "Go",
+              "gRPC",
+              "AWS",
+              "Kubernetes"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "1-3+ years of professional experience in backend software engineering, with expertise in programming languages/technologies like Python, Golang, gRPC, AWS, and Kubernetes.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Microservices / API",
+            "alternatives": [
+              "Microservices",
+              "API"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "A strong, systems-level foundation in building and scaling backend services (e.g., understanding microservices, APIs, and concurrency).",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Enhanced British Telecom partner integrations with FastAPI and Redis microservices, delivering sub-200ms REST responses across 10K+ API calls.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Databricks / LangChain / MLFlow",
+            "alternatives": [
+              "Databricks",
+              "LangChain",
+              "MLFlow"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Preferred) Hands-on experience with technologies in the modern AI/LLM ecosystem, such as Databricks, Langchain, or MLFlow.",
+            "evidence": {
+              "entry": "Stony Brook University",
+              "text": "Validated the multi-agent pipeline across 13 live sessions at approximately 68% directional accuracy (vs 50% chance), then hardened retrieval with LangChain and Pinecone for an 18% evaluation accuracy lift.",
+              "tier": "measured_job_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "role_alignment",
+          "requirement": "Past position titles",
+          "source": null,
+          "lost": 7.5
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 6196,
+      "as_of": "2026-10-27"
+    },
+    "scraped_date": "2026-10-27",
+    "ats_score": 38,
+    "fit_score": 6
   },
   {
     "job_url": "https://www1.jobdiva.com/candidates/myjobs/openjob_outside.jsp?a=f6jdnwfgzljyt8nrqe1m5h4azs51kh0512je8vr38o1mau4o0pj56y1nwo2ig9o1&from=COMP&id=32829598",
@@ -5874,6 +6108,7 @@
         "key": "resumes/3d/3d84d33610d6d233e7b3a92eb8e81fbfc68dff28576906de2c8b0aabbe0ef81d.pdf",
         "sha256": "3d84d33610d6d233e7b3a92eb8e81fbfc68dff28576906de2c8b0aabbe0ef81d",
         "bytes": 39767,
+        "image_key": "resumes/3d/3d84d33610d6d233e7b3a92eb8e81fbfc68dff28576906de2c8b0aabbe0ef81d.png",
         "tex_key": "resumes/3d/3d84d33610d6d233e7b3a92eb8e81fbfc68dff28576906de2c8b0aabbe0ef81d.tex",
         "jd_key": "resumes/3d/3d84d33610d6d233e7b3a92eb8e81fbfc68dff28576906de2c8b0aabbe0ef81d.jd.txt"
       },
@@ -6009,7 +6244,7 @@
         }
       ],
       "config_hash": "64abdf97758f3d12",
-      "master_hash": "494ebd17cdf7baa9",
+      "master_hash": "ebb3762af0bc518d",
       "candidate_hash": "a1f9884b7ab7dce7",
       "shape": 5,
       "jd_chars": 2305,
@@ -7317,6 +7552,8 @@
       "jd_chars": 2300,
       "as_of": "2026-10-27"
     },
+    "apply_type": "easy_apply",
+    "apply_type_at": "2026-10-27T11:33:51.962Z",
     "scraped_date": "2026-10-27",
     "ats_score": 33,
     "fit_score": 4
@@ -13127,6 +13364,24 @@
     "site": "linkedin",
     "summary": "**Responsibilities** The Knowledge Graph team is responsible for the neural network of e-commerce, which includes tasks such as categorizing products, influencers, and merchants, mining product infor\u2026",
     "title": "Machine Learning Engineer Graduate (E-Commerce Knowledge Graph) - 2027 Start (PhD)",
+    "resume": {
+      "status": "queued",
+      "stage": "QUEUED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": null,
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T12:52:48.968Z",
+      "error": null,
+      "company": "TikTok",
+      "title": "Machine Learning Engineer Graduate (E-Commerce Knowledge Graph) - 2027 Start (PhD)",
+      "resume_slot": 6,
+      "session_hour": "06",
+      "batch_time": "2026-10-27T10:35:42Z",
+      "session_id": "2026-10-27T12:31:53Z",
+      "priority": 1000,
+      "source": "hourly"
+    },
     "scraped_date": "2026-10-27",
     "ats_score": 27,
     "fit_score": 4
@@ -14974,7 +15229,7 @@
     },
     "scraped_date": "2026-10-27",
     "ats_score": 62,
-    "fit_score": 17
+    "fit_score": 18
   },
   {
     "session_id": "2026-10-27T06:36:06Z",
@@ -21536,6 +21791,36 @@
     "fit_score": 8
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4483615900",
+    "session_id": "2026-10-27T11:33:36Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "Google",
+    "competition_score": 5,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "San Francisco, CA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 66,
+    "score_pct": 26,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Business Data Scientist, Google Customer Solutions",
+    "scraped_date": "2026-10-27"
+  },
+  {
     "job_url": "https://jobs.ashbyhq.com/lumos/37ecfa5a-f047-4b70-a29b-79cc885df706",
     "session_id": "2026-10-27T07:43:28Z",
     "application_key": "ashby:37ecfa5a-f047-4b70-a29b-79cc885df706",
@@ -22401,14 +22686,14 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T10:23:50.671Z",
+      "updated_at": "2026-10-27T12:13:48.539Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Booz Allen Hamilton",
       "title": "Data Analyst",
-      "resume_slot": 31,
+      "resume_slot": 8,
       "session_hour": "05",
       "batch_time": "2026-10-27T09:36:18Z",
-      "session_id": "2026-10-27T09:36:18Z",
+      "session_id": "2026-10-27T11:33:36Z",
       "priority": 1000,
       "source": "hourly",
       "failure_reason": null
@@ -22531,14 +22816,14 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T10:23:50.706Z",
+      "updated_at": "2026-10-27T12:53:15.218Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Booz Allen Hamilton",
       "title": "Computer Vision AI Engineer",
-      "resume_slot": 33,
+      "resume_slot": 4,
       "session_hour": "05",
       "batch_time": "2026-10-27T09:36:18Z",
-      "session_id": "2026-10-27T09:36:18Z",
+      "session_id": "2026-10-27T12:31:53Z",
       "priority": 1000,
       "source": "hourly",
       "failure_reason": null
@@ -22749,14 +23034,14 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T10:23:50.734Z",
+      "updated_at": "2026-10-27T12:13:48.583Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Booz Allen Hamilton",
       "title": "Data Analyst",
-      "resume_slot": 34,
+      "resume_slot": 7,
       "session_hour": "05",
       "batch_time": "2026-10-27T09:36:18Z",
-      "session_id": "2026-10-27T09:36:18Z",
+      "session_id": "2026-10-27T11:33:36Z",
       "priority": 1000,
       "source": "hourly",
       "failure_reason": null
@@ -22890,25 +23175,250 @@
     "summary": "nan",
     "title": "Data Scientist",
     "resume": {
-      "status": "failed",
-      "stage": "GATED",
-      "fingerprint": null,
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "9691c98f1a6b519baf001751dc60a74afd298edee90819ff69f587af9a3d1ea0",
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T11:00:29.015Z",
-      "error": "JD not found or too short in Mongo descriptions",
+      "updated_at": "2026-10-27T11:38:10.398Z",
+      "error": null,
       "company": "Fidelity Investments",
       "title": "Data Scientist",
-      "resume_slot": 21,
+      "resume_slot": 3,
       "session_hour": "06",
       "batch_time": "2026-10-27T10:35:42Z",
-      "session_id": "2026-10-27T10:35:42Z",
+      "session_id": "2026-10-27T11:33:36Z",
       "priority": 1000,
       "source": "hourly",
-      "failure_reason": null
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "FidelityInvestments (27thOctober)",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/25/25f5e016b92824508a5eda5159128b198af57fc75bd427fd21fec74671efd3e8.pdf",
+        "sha256": "25f5e016b92824508a5eda5159128b198af57fc75bd427fd21fec74671efd3e8",
+        "bytes": 40568,
+        "tex_key": "resumes/25/25f5e016b92824508a5eda5159128b198af57fc75bd427fd21fec74671efd3e8.tex",
+        "jd_key": "resumes/25/25f5e016b92824508a5eda5159128b198af57fc75bd427fd21fec74671efd3e8.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/FidelityInvestments (27thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/FidelityInvestments (27thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/FidelityInvestments (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T11:38:10.398Z"
+      }
     },
-    "scraped_date": "2026-10-27"
+    "fit": {
+      "score": 77.1,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 5,
+        "unparsed_requirements": 7,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "7 qualification lines need manual review; they were not fully assessed",
+        "2 requirement groups contain unrecognized technologies"
+      ],
+      "applicable_weight": 80,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": [
+          {
+            "type": "sponsorship",
+            "status": "clear",
+            "reason": "You need no sponsorship during your 3 years of authorization",
+            "source": "**Fidelity will not provide immigration sponsorship for this position.**"
+          },
+          {
+            "type": "location",
+            "status": "clear",
+            "reason": "You are open to relocating",
+            "source": "Fidelity\u2019s Onsite Working Model"
+          }
+        ]
+      },
+      "ledger": {
+        "required": {
+          "matched": 2,
+          "total": 2
+        },
+        "preferred": {
+          "matched": 3,
+          "total": 3
+        },
+        "total": {
+          "matched": 5,
+          "total": 5
+        },
+        "matched": [
+          "Machine learning",
+          "NLP",
+          "Docker",
+          "Power BI",
+          "Tableau"
+        ],
+        "partial": [],
+        "missing": [],
+        "mentioned": [
+          "Python"
+        ],
+        "unrecognized": [
+          "Sagemaker",
+          "PyCharm"
+        ],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Strong communication skills, you are able to work collaboratively with both technical and non-technical stakeholders to drive problem definitions and meet business requirements"
+          },
+          {
+            "classification": "required",
+            "source": "The Value You Deliver"
+          },
+          {
+            "classification": "required",
+            "source": "Build data science applications from inception to production"
+          },
+          {
+            "classification": "required",
+            "source": "Work well as part of an interdisciplinary team whose members will include data scientists, software engineers, data engineers and product managers."
+          },
+          {
+            "classification": "required",
+            "source": "Be able to present and communicate key findings and project progress to senior business leaders"
+          },
+          {
+            "classification": "required",
+            "source": "Fidelity's Onsite Working Model"
+          },
+          {
+            "classification": "required",
+            "source": "Fidelity is transitioning to a full-time onsite working model through a phased rollout across regions and roles. Currently, some roles and locations require 100% onsite presence, while others require less. Onsite expectations are likely to evolve as the rollout continues. This transition does not apply to fully remote roles."
+          }
+        ],
+        "skills": [
+          {
+            "label": "Machine learning",
+            "alternatives": [
+              "Machine learning"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Excellent experience in standard machine learning approaches, statistics, Natural Language Processing (NLP) and deep learning techniques",
+            "evidence": {
+              "entry": "Wake Forest \u2013 CAIR",
+              "text": "Forecasted stroke patients' functional outcomes at 6, 12 and 24 months with PyTorch and scikit-learn machine learning models, using Claude summaries of 10K+ similar patients from a 90-field thrombectomy registry.",
+              "tier": "job_bullet"
+            }
+          },
+          {
+            "label": "NLP",
+            "alternatives": [
+              "NLP"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Excellent experience in standard machine learning approaches, statistics, Natural Language Processing (NLP) and deep learning techniques",
+            "evidence": {
+              "entry": "Stony Brook University",
+              "text": "Kafka streaming consumers for live market feeds and NLP feature extraction.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Docker",
+            "alternatives": [
+              "Docker"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Bonus points for building production ML model containers at scale (Docker, SageMaker, Flask, Aerospike)",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "FastAPI microservices with Docker Redis; sub-200ms REST for enterprise telecom integrations.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Power BI",
+            "alternatives": [
+              "Power BI"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Bonus points for dashboarding capabilities (PowerBI, Tableau, Looker)",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Standardized SQL queries, KPI definitions, data-validation rules; SQL-driven platforms for 3 Fortune 500 clients, 100K+ users; Power BI dashboards for onboarding, timesheets, reviews for 3,000 employees (your DS resume).",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Tableau",
+            "alternatives": [
+              "Tableau"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Bonus points for dashboarding capabilities (PowerBI, Tableau, Looker)",
+            "evidence": {
+              "entry": "Bayesian Marketing Mix Model",
+              "text": "Tableau-ready CSVs \u2014 156-row mmm_results, channel_metrics, scenario_results.",
+              "tier": "project_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "role_alignment",
+          "requirement": "Past position titles",
+          "source": null,
+          "lost": 8.9
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Machine learning",
+          "source": "Excellent experience in standard machine learning approaches, statistics, Natural Language Processing (NLP) and deep learning techniques",
+          "lost": 5.3
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Role title words",
+          "source": null,
+          "lost": 3.6
+        },
+        {
+          "category": "required_skills",
+          "requirement": "NLP",
+          "source": "Excellent experience in standard machine learning approaches, statistics, Natural Language Processing (NLP) and deep learning techniques",
+          "lost": 1.9
+        },
+        {
+          "category": "preferred_skills",
+          "requirement": "Tableau",
+          "source": "Bonus points for dashboarding capabilities (PowerBI, Tableau, Looker)",
+          "lost": 1.9
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 3977,
+      "as_of": "2026-10-27"
+    },
+    "scraped_date": "2026-10-27",
+    "ats_score": 22,
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4484021058",
@@ -22994,14 +23504,14 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T11:00:29.044Z",
+      "updated_at": "2026-10-27T12:53:15.231Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "Booz Allen Hamilton",
       "title": "Computer Vision AI Engineer",
-      "resume_slot": 23,
+      "resume_slot": 3,
       "session_hour": "06",
       "batch_time": "2026-10-27T10:35:42Z",
-      "session_id": "2026-10-27T10:35:42Z",
+      "session_id": "2026-10-27T12:31:53Z",
       "priority": 1000,
       "source": "hourly",
       "failure_reason": null
@@ -23132,6 +23642,55 @@
       "session_hour": "06",
       "batch_time": "2026-10-27T10:35:42Z",
       "session_id": "2026-10-27T10:35:43Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    },
+    "scraped_date": "2026-10-27"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4475868358",
+    "session_id": "2026-10-27T11:33:36Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "Booz Allen Hamilton",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Reston, VA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 64,
+    "score_pct": 26,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Data Analyst",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T12:13:48.622Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Booz Allen Hamilton",
+      "title": "Data Analyst",
+      "resume_slot": 6,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
       "priority": 1000,
       "source": "hourly",
       "failure_reason": null
@@ -23931,6 +24490,55 @@
     "scraped_date": "2026-10-27",
     "ats_score": 63,
     "fit_score": 12
+  },
+  {
+    "session_id": "2026-10-27T12:31:53Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4420681236",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T12:31:53Z",
+    "company": "Zoox",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Foster City, CA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 61,
+    "score_pct": 24,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Software Engineer, ML Inference Optimization",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T12:53:15.246Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Zoox",
+      "title": "Software Engineer, ML Inference Optimization",
+      "resume_slot": 2,
+      "session_hour": "08",
+      "batch_time": "2026-10-27T12:31:53Z",
+      "session_id": "2026-10-27T12:31:53Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    },
+    "scraped_date": "2026-10-27"
   },
   {
     "job_url": "https://insightglobal.com/jobs/566185bc-29c8-49d5-9b28-b7c58a9a598f",
@@ -26924,6 +27532,38 @@
     "fit_score": 14
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4476107503",
+    "session_id": "2026-10-27T11:33:36Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "Slate Auto",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Washington, USA",
+    "max_exp": 3.0,
+    "min_exp": 3.0,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "2\u20135 yrs"
+    ],
+    "priority_version": 2,
+    "score": 53,
+    "score_pct": 21,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "This role is for an engineer ready to work on real AI/ML problems in production: GenAI features, data pipelines, and AI applied to manufacturing and supply chain operations.",
+    "title": "AI/ML Engineer",
+    "scraped_date": "2026-10-27",
+    "ats_score": 31,
+    "fit_score": 5
+  },
+  {
     "job_url": "https://www.kforce.com/find-work/search-jobs#/detail/MTY5Nn5UVlR-MjE5MTgzNVQxfjk5/",
     "batch_time": "2026-10-27T11:11:44.982073+00:00",
     "company": "Kforce",
@@ -27912,7 +28552,300 @@
     },
     "scraped_date": "2026-10-27",
     "ats_score": 66,
-    "fit_score": 11
+    "fit_score": 12
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4481879143",
+    "session_id": "2026-10-27T11:33:36Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "Amazon Science",
+    "competition_score": 5,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Austin, TX, USA",
+    "max_exp": 3.0,
+    "min_exp": 2.0,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "2\u20135 yrs"
+    ],
+    "priority_version": 2,
+    "score": 51,
+    "score_pct": 20,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Description** The OTS ANCHOR (Analytics, Insights, and Centralized Hub for OTS Reporting) team is part of the WW IT Operations & RME organization, responsible for delivering data solutions that dri\u2026",
+    "title": "Data Scientist, OTS - Data ANCHOR Team",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "ba9bef7d7136185653529e3e0feaa97be345282deab3c8c96278e9eac4c774c1",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T11:38:31.801Z",
+      "error": null,
+      "company": "Amazon Science",
+      "title": "Data Scientist, OTS - Data ANCHOR Team",
+      "resume_slot": 14,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "AmazonScience (27thOctober)",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/85/853e929011c8d928e49adc679b6f6cfa22558878091e99097fb7d4bde813d2e7.pdf",
+        "sha256": "853e929011c8d928e49adc679b6f6cfa22558878091e99097fb7d4bde813d2e7",
+        "bytes": 40314,
+        "tex_key": "resumes/85/853e929011c8d928e49adc679b6f6cfa22558878091e99097fb7d4bde813d2e7.tex",
+        "jd_key": "resumes/85/853e929011c8d928e49adc679b6f6cfa22558878091e99097fb7d4bde813d2e7.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/AmazonScience (27thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/AmazonScience (27thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/AmazonScience (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T11:38:31.801Z"
+      }
+    },
+    "fit": {
+      "score": 80.3,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 8,
+        "unparsed_requirements": 3,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "3 qualification lines need manual review; they were not fully assessed",
+        "2 requirement groups contain unrecognized technologies"
+      ],
+      "applicable_weight": 95,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": []
+      },
+      "ledger": {
+        "required": {
+          "matched": 6,
+          "total": 7
+        },
+        "preferred": {
+          "matched": 1,
+          "total": 1
+        },
+        "total": {
+          "matched": 7,
+          "total": 8
+        },
+        "matched": [
+          "Machine learning",
+          "AWS",
+          "Lambda",
+          "Observability",
+          "SQL",
+          "Python",
+          "Tableau"
+        ],
+        "partial": [
+          "Generative AI"
+        ],
+        "missing": [],
+        "mentioned": [
+          "S3"
+        ],
+        "unrecognized": [
+          "QuickSight",
+          "Shiny"
+        ],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Experience with statistical models e.g. multinomial logistic regression"
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience managing data pipelines"
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience with written and verbal communication and presentation"
+          }
+        ],
+        "skills": [
+          {
+            "label": "Machine learning",
+            "alternatives": [
+              "Machine learning"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Design, develop, and deploy machine learning models for IT operations forecasting, including incident volume prediction, capacity planning, and workforce demand modeling",
+            "evidence": {
+              "entry": "Wake Forest \u2013 CAIR",
+              "text": "Forecasted stroke patients' functional outcomes at 6, 12 and 24 months with PyTorch and scikit-learn machine learning models, using Claude summaries of 10K+ similar patients from a 90-field thrombectomy registry.",
+              "tier": "job_bullet"
+            }
+          },
+          {
+            "label": "AWS",
+            "alternatives": [
+              "AWS"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Partner with engineering teams to productionize ML models via automated pipelines using AWS services (SageMaker, Step Functions, Lambda, Redshift)",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Lambda",
+            "alternatives": [
+              "Lambda"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Partner with engineering teams to productionize ML models via automated pipelines using AWS services (SageMaker, Step Functions, Lambda, Redshift)",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Serverless Python Lambda Firebase platform for 3K+ users; API latency 350ms to 80ms.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Observability",
+            "alternatives": [
+              "Observability"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Contribute to data quality monitoring frameworks and help maintain standards for operational data integrity",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Fidelity pipeline monitoring and audit trails for encrypted insurance transfer compliance.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Generative AI",
+            "alternatives": [
+              "Generative AI"
+            ],
+            "class": "required",
+            "status": "partial",
+            "source": "Contribute to the team's science roadmap, identifying opportunities to apply ML/AI (including Generative AI) to operational challenges",
+            "evidence": {
+              "entry": "Stony Brook University",
+              "text": "Assessed GPT-4o LLM market-reaction predictions against minute-level SPY moves at 1, 5 and 10-minute windows, reaching 0.74 weighted F1 with Whisper transcripts and Pinecone retrieval.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "SQL",
+            "alternatives": [
+              "SQL"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "3+ years of data querying languages (e.g. SQL), scripting languages (e.g. Python) or statistical/mathematical software (e.g. R, SAS, Matlab, etc.) experience",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Python",
+            "alternatives": [
+              "Python"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "3+ years of data querying languages (e.g. SQL), scripting languages (e.g. Python) or statistical/mathematical software (e.g. R, SAS, Matlab, etc.) experience",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Tableau",
+            "alternatives": [
+              "Tableau"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "2+ years of data visualization using AWS QuickSight, Tableau, R Shiny, etc. experience",
+            "evidence": {
+              "entry": "Bayesian Marketing Mix Model",
+              "text": "Tableau-ready CSVs \u2014 156-row mmm_results, channel_metrics, scenario_results.",
+              "tier": "project_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "role_alignment",
+          "requirement": "Past position titles",
+          "source": null,
+          "lost": 7.5
+        },
+        {
+          "category": "preferred_skills",
+          "requirement": "Tableau",
+          "source": "2+ years of data visualization using AWS QuickSight, Tableau, R Shiny, etc. experience",
+          "lost": 5
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Role title words",
+          "source": null,
+          "lost": 3
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Generative AI",
+          "source": "Contribute to the team's science roadmap, identifying opportunities to apply ML/AI (including Generative AI) to operational challenges",
+          "lost": 2.2
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Machine learning",
+          "source": "Design, develop, and deploy machine learning models for IT operations forecasting, including incident volume prediction, capacity planning, and workforce demand modeling",
+          "lost": 1.3
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 5456,
+      "as_of": "2026-10-27"
+    },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-27T12:28:54.097Z",
+    "scraped_date": "2026-10-27",
+    "ats_score": 46,
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4484013156",
@@ -29851,6 +30784,7 @@
         "key": "resumes/53/539db6d563d9a89bdf51fe88a655d6aaaca09ffc947a7a214106d1bcd80e0ed6.pdf",
         "sha256": "539db6d563d9a89bdf51fe88a655d6aaaca09ffc947a7a214106d1bcd80e0ed6",
         "bytes": 40127,
+        "image_key": "resumes/53/539db6d563d9a89bdf51fe88a655d6aaaca09ffc947a7a214106d1bcd80e0ed6.png",
         "tex_key": "resumes/53/539db6d563d9a89bdf51fe88a655d6aaaca09ffc947a7a214106d1bcd80e0ed6.tex",
         "jd_key": "resumes/53/539db6d563d9a89bdf51fe88a655d6aaaca09ffc947a7a214106d1bcd80e0ed6.jd.txt"
       },
@@ -29999,7 +30933,7 @@
         }
       ],
       "config_hash": "64abdf97758f3d12",
-      "master_hash": "494ebd17cdf7baa9",
+      "master_hash": "ebb3762af0bc518d",
       "candidate_hash": "a1f9884b7ab7dce7",
       "shape": 5,
       "jd_chars": 3480,
@@ -32044,6 +32978,237 @@
     "fit_score": 14
   },
   {
+    "job_url": "https://www.linkedin.com/jobs/view/4481861615",
+    "session_id": "2026-10-27T11:33:36Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "TalentHop",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "USA",
+    "max_exp": 2.0,
+    "min_exp": 2.0,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "2\u20135 yrs"
+    ],
+    "priority_version": 2,
+    "score": 44,
+    "score_pct": 18,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**This is a Fully Remote Job** **About Our Client:** The organization operates within the criminal justice reform sector, addressing challenges related to improving outcomes for people involved in th\u2026",
+    "title": "Impact Analytics Data Analyst",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "e3f3064a87c71abf9b6500fc482d77afc42d832ca0e7bd5de9c5b37ab0aca194",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T11:38:47.501Z",
+      "error": null,
+      "company": "TalentHop",
+      "title": "Impact Analytics Data Analyst",
+      "resume_slot": 15,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "TalentHop (27thOctober)-9",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/49/4941d3ceca215293058adf6aa7b8bed4737f95b2f58c88c571fbf510dd34c57a.pdf",
+        "sha256": "4941d3ceca215293058adf6aa7b8bed4737f95b2f58c88c571fbf510dd34c57a",
+        "bytes": 39477,
+        "tex_key": "resumes/49/4941d3ceca215293058adf6aa7b8bed4737f95b2f58c88c571fbf510dd34c57a.tex",
+        "jd_key": "resumes/49/4941d3ceca215293058adf6aa7b8bed4737f95b2f58c88c571fbf510dd34c57a.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-9/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-9",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/TalentHop (27thOctober)-9/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T11:38:47.501Z"
+      }
+    },
+    "fit": {
+      "score": 84,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 3,
+        "unparsed_requirements": 8,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "8 qualification lines need manual review; they were not fully assessed",
+        "1 requirement groups contain unrecognized technologies"
+      ],
+      "applicable_weight": 85,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": []
+      },
+      "ledger": {
+        "required": {
+          "matched": 2,
+          "total": 2
+        },
+        "preferred": {
+          "matched": 1,
+          "total": 1
+        },
+        "total": {
+          "matched": 3,
+          "total": 3
+        },
+        "matched": [
+          "Python",
+          "SQL",
+          "GCP / BigQuery / Looker / Jupyter"
+        ],
+        "partial": [],
+        "missing": [],
+        "mentioned": [],
+        "unrecognized": [
+          "Pandas"
+        ],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Ability to communicate and collaborate effectively with diverse internal and external partners"
+          },
+          {
+            "classification": "required",
+            "source": "Skilled in inspecting data sources, reasoning about data models, and preparing analyses for multiple uses"
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience with statistical forecasting and causal inference"
+          },
+          {
+            "classification": "preferred",
+            "source": "Capability to translate research questions into strategic analyses and recommend actions"
+          },
+          {
+            "classification": "preferred",
+            "source": "Background working in cross-functional, product-focused environments"
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience with public sector datasets, particularly in criminal justice"
+          },
+          {
+            "classification": "preferred",
+            "source": "Pay Range and Compensation Package:"
+          },
+          {
+            "classification": "preferred",
+            "source": "The annual compensation for this role is: $97,000."
+          }
+        ],
+        "skills": [
+          {
+            "label": "Python",
+            "alternatives": [
+              "Python"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Build statistical models using Python and SQL to assess historical and forecast future impacts of interventions",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "SQL",
+            "alternatives": [
+              "SQL"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Build statistical models using Python and SQL to assess historical and forecast future impacts of interventions",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "GCP / BigQuery / Looker / Jupyter",
+            "alternatives": [
+              "GCP",
+              "BigQuery",
+              "Looker",
+              "Jupyter"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Familiarity with tools such as Google Cloud Platform, BigQuery, Looker, and Jupyter notebooks",
+            "evidence": {
+              "entry": "Wake Forest \u2013 CAIR",
+              "text": "GCP clinical pipeline delivering clinician-ready MRI insights within 2 minutes of upload.",
+              "tier": "measured_job_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "role_alignment",
+          "requirement": "Past position titles",
+          "source": null,
+          "lost": 8.4
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Role title words",
+          "source": null,
+          "lost": 3.4
+        },
+        {
+          "category": "preferred_skills",
+          "requirement": "GCP / BigQuery / Looker / Jupyter",
+          "source": "Familiarity with tools such as Google Cloud Platform, BigQuery, Looker, and Jupyter notebooks",
+          "lost": 2.4
+        },
+        {
+          "category": "required_skills",
+          "requirement": "SQL",
+          "source": "Build statistical models using Python and SQL to assess historical and forecast future impacts of interventions",
+          "lost": 1.8
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 3645,
+      "as_of": "2026-10-27"
+    },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-27T12:28:45.253Z",
+    "scraped_date": "2026-10-27",
+    "ats_score": 50,
+    "fit_score": 6
+  },
+  {
     "job_url": "https://www.randstadusa.com/jobs/4/1363672/software-developers_woburn",
     "batch_time": "2026-10-27T11:11:44.982073+00:00",
     "company": "Randstad USA",
@@ -33777,6 +34942,7 @@
         "key": "resumes/9b/9bf79cb9f54eea857a7c323b9c40ba287c10fafb9c1a49335be8ab7ef948df83.pdf",
         "sha256": "9bf79cb9f54eea857a7c323b9c40ba287c10fafb9c1a49335be8ab7ef948df83",
         "bytes": 40185,
+        "image_key": "resumes/9b/9bf79cb9f54eea857a7c323b9c40ba287c10fafb9c1a49335be8ab7ef948df83.png",
         "tex_key": "resumes/9b/9bf79cb9f54eea857a7c323b9c40ba287c10fafb9c1a49335be8ab7ef948df83.tex",
         "jd_key": "resumes/9b/9bf79cb9f54eea857a7c323b9c40ba287c10fafb9c1a49335be8ab7ef948df83.jd.txt"
       },
@@ -33998,7 +35164,7 @@
         }
       ],
       "config_hash": "64abdf97758f3d12",
-      "master_hash": "494ebd17cdf7baa9",
+      "master_hash": "ebb3762af0bc518d",
       "candidate_hash": "a1f9884b7ab7dce7",
       "shape": 5,
       "jd_chars": 3693,
@@ -35056,6 +36222,14 @@
       "shape": 5,
       "jd_chars": 5106,
       "as_of": "2026-10-27"
+    },
+    "application": {
+      "applicationId": "042675ab-ed81-47a1-b087-8b0a74db6208",
+      "applicationKey": "greenhouse:8002099003",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-27T12:55:12.517Z"
     },
     "scraped_date": "2026-10-27",
     "ats_score": 33,
@@ -36499,7 +37673,7 @@
     },
     "scraped_date": "2026-10-27",
     "ats_score": 42,
-    "fit_score": 11
+    "fit_score": 12
   },
   {
     "job_url": "https://www1.jobdiva.com/candidates/myjobs/openjob_outside.jsp?a=kvjdnwtsxgckrpsoozx5qc0oueybw1005779v7x6soig8eyqqmzaubfdl9tcx21s&from=COMP&id=33286329",
@@ -37232,7 +38406,7 @@
     },
     "scraped_date": "2026-10-27",
     "ats_score": 42,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www1.jobdiva.com/candidates/myjobs/openjob_outside.jsp?a=kvjdnwtsxgckrpsoozx5qc0oueybw1005779v7x6soig8eyqqmzaubfdl9tcx21s&from=COMP&id=32814546",
@@ -41123,6 +42297,204 @@
     "fit_score": 6
   },
   {
+    "session_id": "2026-10-27T11:33:36Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4467094636",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "Fin",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "San Francisco, CA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 33,
+    "score_pct": 13,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "Fin, now part of Salesforce, is on a mission to help businesses provide perfect customer experiences.",
+    "title": "Forward Deployed Data Scientist",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "d3cd17dd453331649a72b63d29e8b06ba983ed9592641c4890382901735d4d79",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T11:39:04.572Z",
+      "error": null,
+      "company": "Fin",
+      "title": "Forward Deployed Data Scientist",
+      "resume_slot": 16,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Fin (27thOctober)",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/15/158a9743aee4c7d41af759e0eb1e770178647b35f01c6fd8f1ecbc9bf7589876.pdf",
+        "sha256": "158a9743aee4c7d41af759e0eb1e770178647b35f01c6fd8f1ecbc9bf7589876",
+        "bytes": 40078,
+        "image_key": "resumes/15/158a9743aee4c7d41af759e0eb1e770178647b35f01c6fd8f1ecbc9bf7589876.png",
+        "tex_key": "resumes/15/158a9743aee4c7d41af759e0eb1e770178647b35f01c6fd8f1ecbc9bf7589876.tex",
+        "jd_key": "resumes/15/158a9743aee4c7d41af759e0eb1e770178647b35f01c6fd8f1ecbc9bf7589876.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Fin (27thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Fin (27thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Fin (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T11:39:04.572Z"
+      }
+    },
+    "fit": {
+      "score": 89.1,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 2,
+        "unparsed_requirements": 4,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "4 qualification lines need manual review; they were not fully assessed",
+        "1 requirement groups contain unrecognized technologies"
+      ],
+      "applicable_weight": 65,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": [
+          {
+            "type": "location",
+            "status": "clear",
+            "reason": "You are open to relocating",
+            "source": "* Willing to travel and work on-site with customers to build deep relationships and uncover insights firsthand."
+          }
+        ]
+      },
+      "ledger": {
+        "required": {
+          "matched": 2,
+          "total": 2
+        },
+        "preferred": {
+          "matched": 0,
+          "total": 0
+        },
+        "total": {
+          "matched": 2,
+          "total": 2
+        },
+        "matched": [
+          "Machine learning",
+          "LLM"
+        ],
+        "partial": [],
+        "missing": [],
+        "mentioned": [
+          "Python",
+          "SQL",
+          "Salesforce",
+          "CRM"
+        ],
+        "unrecognized": [
+          "SaaS"
+        ],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Willing to travel and work on-site with customers to build deep relationships and uncover insights firsthand."
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience reframing the problem, not just solving it, you've spotted when the question you were handed wasn't the right one, and changed what got worked on."
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience applying AI to scale the data science workflow."
+          },
+          {
+            "classification": "required",
+            "source": "Proof of eligibility to work in the United States is required."
+          }
+        ],
+        "skills": [
+          {
+            "label": "Machine learning",
+            "alternatives": [
+              "Machine learning"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Experience with AI/ML evaluation, LLM-driven applications, or conversational AI.",
+            "evidence": {
+              "entry": "Wake Forest \u2013 CAIR",
+              "text": "Forecasted stroke patients' functional outcomes at 6, 12 and 24 months with PyTorch and scikit-learn machine learning models, using Claude summaries of 10K+ similar patients from a 90-field thrombectomy registry.",
+              "tier": "job_bullet"
+            }
+          },
+          {
+            "label": "LLM",
+            "alternatives": [
+              "LLM"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Experience with AI/ML evaluation, LLM-driven applications, or conversational AI.",
+            "evidence": {
+              "entry": "Stony Brook University",
+              "text": "Assessed GPT-4o LLM market-reaction predictions against minute-level SPY moves at 1, 5 and 10-minute windows, reaching 0.74 weighted F1 with Whisper transcripts and Pinecone retrieval.",
+              "tier": "measured_job_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "required_skills",
+          "requirement": "Machine learning",
+          "source": "Experience with AI/ML evaluation, LLM-driven applications, or conversational AI.",
+          "lost": 6.5
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Role title words",
+          "source": null,
+          "lost": 4.4
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "ebb3762af0bc518d",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 8640,
+      "as_of": "2026-10-27"
+    },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-27T12:28:32.346Z",
+    "scraped_date": "2026-10-27",
+    "ats_score": 50,
+    "fit_score": 4
+  },
+  {
     "job_url": "https://www1.jobdiva.com/candidates/myjobs/openjob_outside.jsp?a=kvjdnwtsxgckrpsoozx5qc0oueybw1005779v7x6soig8eyqqmzaubfdl9tcx21s&from=COMP&id=33165952",
     "batch_time": "2026-10-27T11:11:44.982073+00:00",
     "company": "Artech",
@@ -43000,6 +44372,377 @@
     "scraped_date": "2026-10-27",
     "ats_score": 50,
     "fit_score": 9
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4483640200",
+    "session_id": "2026-10-27T12:31:53Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T12:31:53Z",
+    "company": "AbilityLinks",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Atlanta, GA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 30,
+    "score_pct": 12,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "**Levels 5-7** **Location:** The Energy Center, Birmingham, AL or Ivan Allen, Atlanta, GA **4 days in-office / 1 day remote** Designs, builds, and evolves AI solutions that deliver measurable busines\u2026",
+    "title": "AI Engineer",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "5b22bc5504679235a070bb97b0a542659876a27863a2834342b4a89e8d325dbe",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T12:34:20.640Z",
+      "error": null,
+      "company": "AbilityLinks",
+      "title": "AI Engineer",
+      "resume_slot": 1627,
+      "session_hour": "08",
+      "batch_time": "2026-10-27T12:31:53Z",
+      "session_id": "2026-10-27T12:31:53Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": true,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "AbilityLinks (27thOctober)",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/5b/5bd5e6fd5f164187399d0d56bbddf5d6e056dcf4d137b951e2dbdfbe3e588265.pdf",
+        "sha256": "5bd5e6fd5f164187399d0d56bbddf5d6e056dcf4d137b951e2dbdfbe3e588265",
+        "bytes": 39955,
+        "jd_key": "resumes/5b/5bd5e6fd5f164187399d0d56bbddf5d6e056dcf4d137b951e2dbdfbe3e588265.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/AbilityLinks (27thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/AbilityLinks (27thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/AbilityLinks (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T12:34:20.640Z"
+      }
+    },
+    "fit": {
+      "score": 70.3,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 10,
+        "unparsed_requirements": 18,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "18 qualification lines need manual review; they were not fully assessed"
+      ],
+      "applicable_weight": 80,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": [
+          {
+            "type": "location",
+            "status": "clear",
+            "reason": "You are open to relocating",
+            "source": "**4 days in-office / 1 day remote**"
+          }
+        ]
+      },
+      "ledger": {
+        "required": {
+          "matched": 8,
+          "total": 9
+        },
+        "preferred": {
+          "matched": 0,
+          "total": 1
+        },
+        "total": {
+          "matched": 8,
+          "total": 10
+        },
+        "matched": [
+          "Machine learning",
+          "API",
+          "Python",
+          "LLM",
+          "RAG",
+          "CI/CD",
+          "Observability",
+          "MLOps"
+        ],
+        "partial": [],
+        "missing": [
+          "Embeddings",
+          "Databricks"
+        ],
+        "mentioned": [],
+        "unrecognized": [],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Experience, Knowledge, Skills"
+          },
+          {
+            "classification": "required",
+            "source": "Domain Expertise"
+          },
+          {
+            "classification": "required",
+            "source": "Practical understanding of agentic AI concepts, including planners, tool-calling, memory, and multi-agent collaboration."
+          },
+          {
+            "classification": "required",
+            "source": "Awareness of AI governance, risk, and compliance considerations in regulated environments"
+          },
+          {
+            "classification": "required",
+            "source": "Individual Skills"
+          },
+          {
+            "classification": "required",
+            "source": "Strong problem-solving skills with the ability to decompose complex use cases into modular agent behaviors."
+          },
+          {
+            "classification": "required",
+            "source": "Product-oriented mindset, focused on delivering tangible outcomes rather than experimentation alone."
+          },
+          {
+            "classification": "required",
+            "source": "Ability to work effectively within defined architectural and governance constraints."
+          },
+          {
+            "classification": "required",
+            "source": "Clear communicator who can explain AI behavior and limitations to non-technical stakeholders."
+          },
+          {
+            "classification": "required",
+            "source": "Experience with prompt engineering, evaluation techniques, and structured outputs."
+          },
+          {
+            "classification": "required",
+            "source": "MAJOR JOB RESPONSIBILITIES:"
+          },
+          {
+            "classification": "required",
+            "source": "Develop AI solutions. Build and configure agents that reason, plan, and act using models, tools, and enterprise data, aligned to approved patterns."
+          },
+          {
+            "classification": "required",
+            "source": "Implement use-case workflows end-to-end. Translate business and operational requirements into AI workflows spanning data ingestion, inference, tool execution, and human-in-the-loop review."
+          },
+          {
+            "classification": "required",
+            "source": "Apply responsible AI and guardrails. Embed safety controls, validation steps, and explainability mechanisms into agent logic and prompts by design."
+          },
+          {
+            "classification": "required",
+            "source": "Optimize performance and cost. Tune prompts, models, and agent interactions to improve accuracy, latency, and cost efficiency."
+          },
+          {
+            "classification": "required",
+            "source": "Support experimentation to production. Rapidly prototype new AI capabilities while adhering to standards that enable promotion to enterprise-grade deployments."
+          },
+          {
+            "classification": "required",
+            "source": "Continuously improve agent behavior. Use feedback, evaluations, and operational signals to refine agent performance and reliability over time"
+          },
+          {
+            "classification": "required",
+            "source": "This position falls under the company's Insider Threat Program and will have access to, and control over sensitive data, systems or assets. Enhanced personnel screening, which includes a background review, drug screen and psychological assessment, will be required if you are selected for this position"
+          }
+        ],
+        "skills": [
+          {
+            "label": "Machine learning",
+            "alternatives": [
+              "Machine learning"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Experience building AI and machine learning applications in enterprise settings.",
+            "evidence": {
+              "entry": "Wake Forest \u2013 CAIR",
+              "text": "Forecasted stroke patients' functional outcomes at 6, 12 and 24 months with PyTorch and scikit-learn machine learning models, using Claude summaries of 10K+ similar patients from a 90-field thrombectomy registry.",
+              "tier": "job_bullet"
+            }
+          },
+          {
+            "label": "API",
+            "alternatives": [
+              "API"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Familiarity with enterprise data platforms and APIs, including structured, unstructured, and document-based data.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Enhanced British Telecom partner integrations with FastAPI and Redis microservices, delivering sub-200ms REST responses across 10K+ API calls.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Python",
+            "alternatives": [
+              "Python"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Proficiency in Python and AI frameworks for LLMs and agents.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "LLM",
+            "alternatives": [
+              "LLM"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Proficiency in Python and AI frameworks for LLMs and agents.",
+            "evidence": {
+              "entry": "Stony Brook University",
+              "text": "Assessed GPT-4o LLM market-reaction predictions against minute-level SPY moves at 1, 5 and 10-minute windows, reaching 0.74 weighted F1 with Whisper transcripts and Pinecone retrieval.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Embeddings",
+            "alternatives": [
+              "Embeddings"
+            ],
+            "class": "required",
+            "status": "missing",
+            "source": "Familiarity with vector databases, embeddings, and retrieval-augmented generation (RAG) patterns."
+          },
+          {
+            "label": "RAG",
+            "alternatives": [
+              "RAG"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Familiarity with vector databases, embeddings, and retrieval-augmented generation (RAG) patterns.",
+            "evidence": {
+              "entry": "Stony Brook University",
+              "text": "Production RAG with LangChain and AWS \u2014 18% accuracy lift in evaluations; retrieval moved from ChromaDB to Pinecone, while ChromaDB remains in lower-cost workflows.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "CI/CD",
+            "alternatives": [
+              "CI/CD"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Exposure to CI/CD, model deployment, and observability concepts sufficient to operate within pipelines.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Jenkins Docker Kubernetes CI/CD for 20 engineers; deploy 6h to 90s; 20+ releases/month.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Observability",
+            "alternatives": [
+              "Observability"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Exposure to CI/CD, model deployment, and observability concepts sufficient to operate within pipelines.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Fidelity pipeline monitoring and audit trails for encrypted insurance transfer compliance.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "MLOps",
+            "alternatives": [
+              "MLOps"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Collaborate across the AI delivery lifecycle. Partner with architects on design decisions and with ML Ops to ensure smooth deployment, monitoring, and iteration.",
+            "evidence": {
+              "entry": "Stony Brook University",
+              "text": "Live MLOps workflow (confirmed 2026-10-05): when a Federal Reserve press conference goes live, FinBERT and other Hugging Face models run on AWS Bedrock (A100 GPUs) with MLflow tracking. About 110 Fed events a year (pr...",
+              "tier": "job_bullet"
+            }
+          },
+          {
+            "label": "Databricks",
+            "alternatives": [
+              "Databricks"
+            ],
+            "class": "preferred",
+            "status": "missing",
+            "source": "Proficiency with Databricks preferred."
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "preferred_skills",
+          "requirement": "Databricks",
+          "source": "Proficiency with Databricks preferred.",
+          "lost": 12.5
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Past position titles",
+          "source": null,
+          "lost": 8.9
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Embeddings",
+          "source": "Familiarity with vector databases, embeddings, and retrieval-augmented generation (RAG) patterns.",
+          "lost": 4.2
+        },
+        {
+          "category": "required_skills",
+          "requirement": "MLOps",
+          "source": "Collaborate across the AI delivery lifecycle. Partner with architects on design decisions and with ML Ops to ensure smooth deployment, monitoring, and iteration.",
+          "lost": 1.5
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Machine learning",
+          "source": "Experience building AI and machine learning applications in enterprise settings.",
+          "lost": 1.2
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 5883,
+      "as_of": "2026-10-27"
+    },
+    "scraped_date": "2026-10-27",
+    "ats_score": 36,
+    "fit_score": 6
   },
   {
     "job_url": "https://www1.jobdiva.com/candidates/myjobs/openjob_outside.jsp?a=f6jdnwfgzljyt8nrqe1m5h4azs51kh0512je8vr38o1mau4o0pj56y1nwo2ig9o1&from=COMP&id=31436125",
@@ -45066,6 +46809,225 @@
     "fit_score": 4
   },
   {
+    "session_id": "2026-10-27T11:33:36Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4475826693",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "Burtch Works",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Mid",
+    "location": "USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 28,
+    "score_pct": 11,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "Its Network Analytics team uses data science to shape how the company builds and contracts its provider networks.",
+    "title": "Data Scientist",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "0516385fce6cd511a8ac45e69eec01ce8a5e0b92f765dc80d495565ebd3c3ae9",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T11:39:21.720Z",
+      "error": null,
+      "company": "Burtch Works",
+      "title": "Data Scientist",
+      "resume_slot": 17,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "BurtchWorks (27thOctober)",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/30/3049b53787fc4805321449fbcbdbf02145eb06f20650700cd145c71dcd90aeb5.pdf",
+        "sha256": "3049b53787fc4805321449fbcbdbf02145eb06f20650700cd145c71dcd90aeb5",
+        "bytes": 40515,
+        "tex_key": "resumes/30/3049b53787fc4805321449fbcbdbf02145eb06f20650700cd145c71dcd90aeb5.tex",
+        "jd_key": "resumes/30/3049b53787fc4805321449fbcbdbf02145eb06f20650700cd145c71dcd90aeb5.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/BurtchWorks (27thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/BurtchWorks (27thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/BurtchWorks (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T11:39:21.720Z"
+      }
+    },
+    "fit": {
+      "score": 83.7,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 3,
+        "unparsed_requirements": 5,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "5 qualification lines need manual review; they were not fully assessed",
+        "4 requirement groups contain unrecognized technologies"
+      ],
+      "applicable_weight": 80,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": []
+      },
+      "ledger": {
+        "required": {
+          "matched": 3,
+          "total": 3
+        },
+        "preferred": {
+          "matched": 0,
+          "total": 0
+        },
+        "total": {
+          "matched": 3,
+          "total": 3
+        },
+        "matched": [
+          "SQL",
+          "Python",
+          "GCP"
+        ],
+        "partial": [],
+        "missing": [],
+        "mentioned": [],
+        "unrecognized": [
+          "BigQuery",
+          "Medicare",
+          "Transparency",
+          "Coverage"
+        ],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Solid statistical foundation: regression, comparative analysis, normalization"
+          },
+          {
+            "classification": "required",
+            "source": "Able to explain technical results clearly to business partners"
+          },
+          {
+            "classification": "preferred",
+            "source": "Healthcare claims, provider reimbursement or contract pricing data experience"
+          },
+          {
+            "classification": "preferred",
+            "source": "Scenario modeling or simulation experience"
+          },
+          {
+            "classification": "preferred",
+            "source": "Graduate degree in a quantitative field"
+          }
+        ],
+        "skills": [
+          {
+            "label": "SQL",
+            "alternatives": [
+              "SQL"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Build rate benchmarking and comparison models in SQL and Python",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Python",
+            "alternatives": [
+              "Python"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Build rate benchmarking and comparison models in SQL and Python",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "GCP",
+            "alternatives": [
+              "GCP"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Partner with the Data Engineer on data needs and pipeline design in GCP/BigQuery",
+            "evidence": {
+              "entry": "Wake Forest \u2013 CAIR",
+              "text": "GCP clinical pipeline delivering clinician-ready MRI insights within 2 minutes of upload.",
+              "tier": "measured_job_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "role_alignment",
+          "requirement": "Past position titles",
+          "source": null,
+          "lost": 8.9
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Role title words",
+          "source": null,
+          "lost": 3.6
+        },
+        {
+          "category": "required_skills",
+          "requirement": "GCP",
+          "source": "Partner with the Data Engineer on data needs and pipeline design in GCP/BigQuery",
+          "lost": 2.5
+        },
+        {
+          "category": "required_skills",
+          "requirement": "SQL",
+          "source": "Build rate benchmarking and comparison models in SQL and Python",
+          "lost": 1.3
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 2089,
+      "as_of": "2026-10-27"
+    },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-27T12:28:36.266Z",
+    "scraped_date": "2026-10-27",
+    "ats_score": 42,
+    "fit_score": 6
+  },
+  {
     "job_url": "https://insightglobal.com/jobs/c205af87-132e-4ec0-b308-75bdedd64037",
     "batch_time": "2026-10-27T11:11:44.982073+00:00",
     "company": "Insight Global",
@@ -46146,6 +48108,8 @@
       "jd_chars": 2108,
       "as_of": "2026-10-27"
     },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-27T11:33:46.935Z",
     "scraped_date": "2026-10-27",
     "ats_score": 50,
     "fit_score": 3
@@ -47669,7 +49633,7 @@
     },
     "scraped_date": "2026-10-27",
     "ats_score": 45,
-    "fit_score": 8
+    "fit_score": 9
   },
   {
     "session_id": "2026-10-27T05:33:03Z",
@@ -50475,6 +52439,539 @@
     "scraped_date": "2026-10-27",
     "ats_score": 50,
     "fit_score": 3
+  },
+  {
+    "session_id": "2026-10-27T11:33:36Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4481883172",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "Generac",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Waukesha, WI, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 16,
+    "priority_tags": [
+      "Exp. not stated",
+      "Internship"
+    ],
+    "priority_version": 2,
+    "score": 21,
+    "score_pct": 8,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "Position Overview Generac is seeking a highly motivated Master's-level Engineering Intern to join the AI Solutions team supporting Corporate Operations and Supply Chain.",
+    "title": "Intern AI Engineering",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "7ed30851a91d80df1e44a028c6461e6a478562abe65c7603f6d67d702a94a094",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T11:39:39.552Z",
+      "error": null,
+      "company": "Generac",
+      "title": "Intern AI Engineering",
+      "resume_slot": 19,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "Generac (27thOctober)",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/4c/4c4af218b4714f36fa4eb50a73efd4cb6244ce23012b4c66b7da3d06332d5ee6.pdf",
+        "sha256": "4c4af218b4714f36fa4eb50a73efd4cb6244ce23012b4c66b7da3d06332d5ee6",
+        "bytes": 40879,
+        "tex_key": "resumes/4c/4c4af218b4714f36fa4eb50a73efd4cb6244ce23012b4c66b7da3d06332d5ee6.tex",
+        "jd_key": "resumes/4c/4c4af218b4714f36fa4eb50a73efd4cb6244ce23012b4c66b7da3d06332d5ee6.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Generac (27thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Generac (27thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Generac (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T11:39:39.552Z"
+      }
+    },
+    "fit": {
+      "score": 64.9,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 6,
+        "unparsed_requirements": 3,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "3 qualification lines need manual review; they were not fully assessed"
+      ],
+      "applicable_weight": 80,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": []
+      },
+      "ledger": {
+        "required": {
+          "matched": 1,
+          "total": 3
+        },
+        "preferred": {
+          "matched": 3,
+          "total": 3
+        },
+        "total": {
+          "matched": 4,
+          "total": 6
+        },
+        "matched": [
+          "Machine learning",
+          "Python",
+          "SQL",
+          "With / Power BI / Tableau / Another / Visualization"
+        ],
+        "partial": [
+          "Generative AI"
+        ],
+        "missing": [
+          "Algorithms"
+        ],
+        "mentioned": [],
+        "unrecognized": [],
+        "unparsed": [
+          {
+            "classification": "preferred",
+            "source": "Familiarity with manufacturing, supply chain, or operations environments."
+          },
+          {
+            "classification": "preferred",
+            "source": "Knowledge of simulation, operations research, or process-improvement methodologies."
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience working with large datasets or cloud-based analytics environments."
+          }
+        ],
+        "skills": [
+          {
+            "label": "Machine learning",
+            "alternatives": [
+              "Machine learning"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Contribute to pilot projects involving machine learning, generative AI, optimization algorithms, process automation, and intelligent workflows.",
+            "evidence": {
+              "entry": "Wake Forest \u2013 CAIR",
+              "text": "Forecasted stroke patients' functional outcomes at 6, 12 and 24 months with PyTorch and scikit-learn machine learning models, using Claude summaries of 10K+ similar patients from a 90-field thrombectomy registry.",
+              "tier": "job_bullet"
+            }
+          },
+          {
+            "label": "Generative AI",
+            "alternatives": [
+              "Generative AI"
+            ],
+            "class": "required",
+            "status": "partial",
+            "source": "Contribute to pilot projects involving machine learning, generative AI, optimization algorithms, process automation, and intelligent workflows.",
+            "evidence": {
+              "entry": "Stony Brook University",
+              "text": "Assessed GPT-4o LLM market-reaction predictions against minute-level SPY moves at 1, 5 and 10-minute windows, reaching 0.74 weighted F1 with Whisper transcripts and Pinecone retrieval.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Algorithms",
+            "alternatives": [
+              "Algorithms"
+            ],
+            "class": "required",
+            "status": "missing",
+            "source": "Contribute to pilot projects involving machine learning, generative AI, optimization algorithms, process automation, and intelligent workflows."
+          },
+          {
+            "label": "Python",
+            "alternatives": [
+              "Python"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Experience with Python, R, SQL, or a similar programming language.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "SQL",
+            "alternatives": [
+              "SQL"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Experience with Python, R, SQL, or a similar programming language.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "With / Power BI / Tableau / Another / Visualization",
+            "alternatives": [
+              "With",
+              "Power BI",
+              "Tableau",
+              "Another",
+              "Visualization"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Experience With Power BI, Tableau, Or Another Visualization Platform.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Standardized SQL queries, KPI definitions, data-validation rules; SQL-driven platforms for 3 Fortune 500 clients, 100K+ users; Power BI dashboards for onboarding, timesheets, reviews for 3,000 employees (your DS resume).",
+              "tier": "measured_job_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "required_skills",
+          "requirement": "Algorithms",
+          "source": "Contribute to pilot projects involving machine learning, generative AI, optimization algorithms, process automation, and intelligent workflows.",
+          "lost": 12.5
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Past position titles",
+          "source": null,
+          "lost": 8.9
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Generative AI",
+          "source": "Contribute to pilot projects involving machine learning, generative AI, optimization algorithms, process automation, and intelligent workflows.",
+          "lost": 6.2
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Role title words",
+          "source": null,
+          "lost": 3.6
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Machine learning",
+          "source": "Contribute to pilot projects involving machine learning, generative AI, optimization algorithms, process automation, and intelligent workflows.",
+          "lost": 3.5
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 3616,
+      "as_of": "2026-10-27"
+    },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-27T12:28:58.657Z",
+    "scraped_date": "2026-10-27",
+    "ats_score": 40,
+    "fit_score": 3
+  },
+  {
+    "session_id": "2026-10-27T11:33:36Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4484030747",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "Publix Super Markets",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Lakeland, FL, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 21,
+    "score_pct": 8,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Department** Marketing **Job Category** Data Analysis & Business Intelligence **Description** Publix is able to offer virtual/remote employment for this position in the following states: FL, GA, AL\u2026",
+    "title": "Marketing Analytics Data Scientist",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "d4136a0ad8c6a854793578af13634feac54095719cfad65051587177d07d57c2",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T11:39:58.132Z",
+      "error": null,
+      "company": "Publix Super Markets",
+      "title": "Marketing Analytics Data Scientist",
+      "resume_slot": 18,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "PublixSuperMarkets (27thOctober)",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/ab/ab271237cb6350feb4887e2eb5c0aee5ee99bf7391844b63e72d946c03ce54ed.pdf",
+        "sha256": "ab271237cb6350feb4887e2eb5c0aee5ee99bf7391844b63e72d946c03ce54ed",
+        "bytes": 40402,
+        "tex_key": "resumes/ab/ab271237cb6350feb4887e2eb5c0aee5ee99bf7391844b63e72d946c03ce54ed.tex",
+        "jd_key": "resumes/ab/ab271237cb6350feb4887e2eb5c0aee5ee99bf7391844b63e72d946c03ce54ed.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/PublixSuperMarkets (27thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/PublixSuperMarkets (27thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/PublixSuperMarkets (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T11:39:58.132Z"
+      }
+    },
+    "fit": {
+      "score": 69.6,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 6,
+        "unparsed_requirements": 5,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "5 qualification lines need manual review; they were not fully assessed",
+        "11 requirement groups contain unrecognized technologies"
+      ],
+      "applicable_weight": 75,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": []
+      },
+      "ledger": {
+        "required": {
+          "matched": 3,
+          "total": 6
+        },
+        "preferred": {
+          "matched": 0,
+          "total": 0
+        },
+        "total": {
+          "matched": 3,
+          "total": 6
+        },
+        "matched": [
+          "SQL",
+          "Python",
+          "Tableau / MicroStrategy"
+        ],
+        "partial": [
+          "NoSQL",
+          "Distributed systems"
+        ],
+        "missing": [
+          "Spark"
+        ],
+        "mentioned": [
+          "Machine learning"
+        ],
+        "unrecognized": [
+          "Management",
+          "DMPs",
+          "SPSS",
+          "SAS",
+          "Visual",
+          "Basic",
+          "Enterprise",
+          "Manager",
+          "Desktop",
+          "Coding",
+          "ETL"
+        ],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "At least five (5) years of analytics, computer science, marketing, finance, or similar analytics field work-related experience"
+          },
+          {
+            "classification": "required",
+            "source": "Advance knowledge in Microsoft Excel"
+          },
+          {
+            "classification": "required",
+            "source": "Ability to exhibit a natural curiosity when developing research"
+          },
+          {
+            "classification": "preferred",
+            "source": "Seven (7) or more years of relevant research related experience"
+          },
+          {
+            "classification": "preferred",
+            "source": "Basic knowledge in Alteryx and the Alteryx Server or similar Business Intelligence (BI) Tools"
+          }
+        ],
+        "skills": [
+          {
+            "label": "SQL",
+            "alternatives": [
+              "SQL"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "At least three (3) years' experience writing SQL",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Python",
+            "alternatives": [
+              "Python"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "At least five (5) years' experience writing R code, Python, Syntax or similar functionality within other statistical tools",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "NoSQL",
+            "alternatives": [
+              "NoSQL"
+            ],
+            "class": "required",
+            "status": "partial",
+            "source": "Knowledge of NoSQL databases, data lakes and formats including text, image, sentiment and audio/video",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Guided 3,000 employees through onboarding in React and MongoDB workflows that auto-assign new hires to teams by skill, cutting onboarding from weeks to days.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Tableau / MicroStrategy",
+            "alternatives": [
+              "Tableau",
+              "MicroStrategy"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Intermediate knowledge of data visualization tools (i.e., Tableau or MicroStrategy Desktop) and Python Coding",
+            "evidence": {
+              "entry": "Bayesian Marketing Mix Model",
+              "text": "Tableau-ready CSVs \u2014 156-row mmm_results, channel_metrics, scenario_results.",
+              "tier": "project_bullet"
+            }
+          },
+          {
+            "label": "Distributed systems",
+            "alternatives": [
+              "Distributed systems"
+            ],
+            "class": "required",
+            "status": "partial",
+            "source": "Basic working with large data sets and distributed computing tools like Spark",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "FastAPI microservices with Docker Redis; sub-200ms REST for enterprise telecom integrations.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Spark",
+            "alternatives": [
+              "Spark"
+            ],
+            "class": "required",
+            "status": "missing",
+            "source": "Basic working with large data sets and distributed computing tools like Spark"
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "role_alignment",
+          "requirement": "Past position titles",
+          "source": null,
+          "lost": 9.5
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Spark",
+          "source": "Basic working with large data sets and distributed computing tools like Spark",
+          "lost": 6.6
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Role title words",
+          "source": null,
+          "lost": 3.8
+        },
+        {
+          "category": "required_skills",
+          "requirement": "NoSQL",
+          "source": "Knowledge of NoSQL databases, data lakes and formats including text, image, sentiment and audio/video",
+          "lost": 3.3
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Distributed systems",
+          "source": "Basic working with large data sets and distributed computing tools like Spark",
+          "lost": 3.3
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 5259,
+      "as_of": "2026-10-27"
+    },
+    "scraped_date": "2026-10-27",
+    "ats_score": 57,
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4484024757",
@@ -70604,14 +73101,14 @@
       "lease_until": null,
       "worker_id": "oracle-atriveo",
       "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T11:00:29.090Z",
+      "updated_at": "2026-10-27T12:13:48.638Z",
       "error": "JD not found or too short in Mongo descriptions",
       "company": "ZS",
       "title": "Advanced Data Science Associate Consultant - Generative AI and Machine Learning",
-      "resume_slot": 33,
+      "resume_slot": 16,
       "session_hour": "05",
       "batch_time": "2026-10-27T09:36:18Z",
-      "session_id": "2026-10-27T10:35:43Z",
+      "session_id": "2026-10-27T11:33:36Z",
       "priority": 1000,
       "source": "hourly",
       "failure_reason": null
@@ -71072,26 +73569,9 @@
     "site": "linkedin",
     "summary": "nan",
     "title": "Software Engineer, Agents",
-    "resume": {
-      "status": "failed",
-      "stage": "GATED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": "oracle-atriveo",
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T11:00:29.118Z",
-      "error": "JD not found or too short in Mongo descriptions",
-      "company": "Harvey",
-      "title": "Software Engineer, Agents",
-      "resume_slot": 28,
-      "session_hour": "06",
-      "batch_time": "2026-10-27T10:35:42Z",
-      "session_id": "2026-10-27T10:35:42Z",
-      "priority": 1000,
-      "source": "hourly",
-      "failure_reason": null
-    },
-    "scraped_date": "2026-10-27"
+    "scraped_date": "2026-10-27",
+    "ats_score": 40,
+    "fit_score": 5
   },
   {
     "session_id": "2026-10-27T10:35:42Z",
@@ -78833,7 +81313,7 @@
     },
     "scraped_date": "2026-10-27",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www1.jobdiva.com/candidates/myjobs/openjob_outside.jsp?a=f6jdnwfgzljyt8nrqe1m5h4azs51kh0512je8vr38o1mau4o0pj56y1nwo2ig9o1&from=COMP&id=31600323",
@@ -80022,7 +82502,7 @@
     },
     "scraped_date": "2026-10-27",
     "ats_score": 61,
-    "fit_score": 14
+    "fit_score": 15
   },
   {
     "job_url": "https://www2.jobdiva.com/candidates/myjobs/openjob_outside.jsp?a=3bjdnwaxpar6fqztzu6mhx5d0xyrn100fc3iv75z44r9e0v7xa2dz7r3fyz3ex0n&from=COMP&id=29308150",
@@ -83061,7 +85541,7 @@
     },
     "scraped_date": "2026-10-27",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "job_url": "https://www.collabera.com/job-description?post=371482",
@@ -89397,7 +91877,7 @@
     },
     "scraped_date": "2026-10-27",
     "ats_score": 100,
-    "fit_score": 3
+    "fit_score": 4
   },
   {
     "job_url": "https://www.judge.com/jobs/details/1159050",
@@ -90444,6 +92924,1287 @@
     "scraped_date": "2026-10-27",
     "ats_score": 100,
     "fit_score": 3
+  },
+  {
+    "session_id": "2026-10-27T11:33:36Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4476157869",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "Emory Healthcare",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Atlanta, GA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Data Scientist, Data & AI",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T12:13:48.652Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Emory Healthcare",
+      "title": "Data Scientist, Data & AI",
+      "resume_slot": 15,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    },
+    "scraped_date": "2026-10-27"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4466179295",
+    "session_id": "2026-10-27T11:33:36Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "NYU Langone Health",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "New York, NY, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 10,
+    "priority_tags": [
+      "New York",
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "1163549\\_RR00121540 Job ID: 1163549\\_RR00121540 NYU Grossman School of Medicine is one of the nation's top-ranked medical schools.",
+    "title": "Data Analyst",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "4c6bb51dcca369932d1fad8c928be0fb25c0a7d7e121da4baeca6a364b88891b",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T11:40:24.462Z",
+      "error": null,
+      "company": "NYU Langone Health",
+      "title": "Data Analyst",
+      "resume_slot": 26,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "NYULangoneHealth (27thOctober)",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/d5/d5fc91e5f389d22e7e50415db7d0134e8ec0e224c77b6b22a69043be16c693fb.pdf",
+        "sha256": "d5fc91e5f389d22e7e50415db7d0134e8ec0e224c77b6b22a69043be16c693fb",
+        "bytes": 39445,
+        "tex_key": "resumes/d5/d5fc91e5f389d22e7e50415db7d0134e8ec0e224c77b6b22a69043be16c693fb.tex",
+        "jd_key": "resumes/d5/d5fc91e5f389d22e7e50415db7d0134e8ec0e224c77b6b22a69043be16c693fb.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/NYULangoneHealth (27thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/NYULangoneHealth (27thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/NYULangoneHealth (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T11:40:24.462Z"
+      }
+    },
+    "fit": {
+      "score": 74.1,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 3,
+        "unparsed_requirements": 18,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "18 qualification lines need manual review; they were not fully assessed"
+      ],
+      "applicable_weight": 70,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": [
+          {
+            "type": "location",
+            "status": "clear",
+            "reason": "You are open to relocating",
+            "source": "This is a hybrid position. Candidates must be willing and able to commute to mid-town"
+          }
+        ]
+      },
+      "ledger": {
+        "required": {
+          "matched": 2,
+          "total": 3
+        },
+        "preferred": {
+          "matched": 0,
+          "total": 0
+        },
+        "total": {
+          "matched": 2,
+          "total": 3
+        },
+        "matched": [
+          "Observability",
+          "SQL"
+        ],
+        "partial": [
+          "Git"
+        ],
+        "missing": [],
+        "mentioned": [],
+        "unrecognized": [],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "To qualify you must have a A masters degree in a related field (biostatistics, epidemiology, public health) or equivalent combination of education and experience"
+          },
+          {
+            "classification": "required",
+            "source": "Skill and experience in the R statistical programming software"
+          },
+          {
+            "classification": "required",
+            "source": "Familiarity with commonly used public health metrics"
+          },
+          {
+            "classification": "required",
+            "source": "Familiarity with U.S. administrative geographies (counties, congressional districts, consolidated and incorporated places, census tracts, etc.)"
+          },
+          {
+            "classification": "required",
+            "source": "Demonstrated interest in public health and health equity"
+          },
+          {
+            "classification": "required",
+            "source": "Ability to perform basic statistical and descriptive analyses and interpret the results"
+          },
+          {
+            "classification": "required",
+            "source": "Ability and interest in working respectfully, reliably, and collaboratively with other team"
+          },
+          {
+            "classification": "required",
+            "source": "members on multiple projects simultaneously."
+          },
+          {
+            "classification": "required",
+            "source": "Ability to be detail-oriented, organized, and take initiative on projects"
+          },
+          {
+            "classification": "required",
+            "source": "This is a hybrid position. Candidates must be willing and able to commute to mid-town"
+          },
+          {
+            "classification": "required",
+            "source": "Manhattan at least once per week"
+          },
+          {
+            "classification": "preferred",
+            "source": "Familiarity with major US federal datasets"
+          },
+          {
+            "classification": "preferred",
+            "source": "Ability to read manuscripts and technical documents and assess the validity of methodological approaches"
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience and interest in working with various types of geospatial data and performing common spatial manipulations (intersects, centroids, reprojections, buffers, etc.)"
+          },
+          {
+            "classification": "preferred",
+            "source": "An attitude of creative and collective problem solving and openness to new ideas"
+          },
+          {
+            "classification": "preferred",
+            "source": "Ability to be detail-oriented, organized, and take initiative on projects"
+          },
+          {
+            "classification": "preferred",
+            "source": "Qualified candidates must be able to effectively communicate with all levels of the organization."
+          },
+          {
+            "classification": "preferred",
+            "source": "NYU Grossman School of Medicine provides its staff with far more than just a place to work. Rather, we are an institution you can be proud of, an institution where you'll feel good about devoting your time and your talents. At NYU Langone Health, we are committed to supporting our workforce and their loved ones with a comprehensive benefits and wellness package. Our offerings provide a robust support system for any stage of life, whether it's developing your career, starting a family, or saving for retirement. The support employees receive goes beyond a standard benefit offering, where employees have access to financial security benefits, a generous time-off program and employee resources groups for peer support. Additionally, all employees have access to our holistic employee wellness program, which focuses on seven key areas of well-being: physical, mental, nutritional, sleep, social, financial, and preventive care. The benefits and wellness package is designed to allow you to focus on what truly matters. Join us and experience the extensive resources and services designed to enhance your overall quality of life for you and your family."
+          }
+        ],
+        "skills": [
+          {
+            "label": "Observability",
+            "alternatives": [
+              "Observability"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Exploring new geospatial calculation methods, monitoring administrative boundary updates, and generating geographic boundaries for website release",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Fidelity pipeline monitoring and audit trails for encrypted insurance transfer compliance.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "SQL",
+            "alternatives": [
+              "SQL"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Providing background research, code development, and workflow testing for the team's data infrastructure systems, and maintaining existing R functions and SQL databases",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Git",
+            "alternatives": [
+              "Git"
+            ],
+            "class": "required",
+            "status": "partial",
+            "source": "Experience in R tidyverse packages, writing functions in R, SQL, and Git",
+            "evidence": {
+              "entry": "Atriveo Job Intelligence Pipeline",
+              "text": "GitHub Contents API deploy to Pages \u2014 hourly dashboard updates without CI runners.",
+              "tier": "project_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "role_alignment",
+          "requirement": "Past position titles",
+          "source": null,
+          "lost": 10.2
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Git",
+          "source": "Experience in R tidyverse packages, writing functions in R, SQL, and Git",
+          "lost": 9.5
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Role title words",
+          "source": null,
+          "lost": 4.1
+        },
+        {
+          "category": "required_skills",
+          "requirement": "SQL",
+          "source": "Providing background research, code development, and workflow testing for the team's data infrastructure systems, and maintaining existing R functions and SQL databases",
+          "lost": 1.4
+        },
+        {
+          "category": "required_skills",
+          "requirement": "Observability",
+          "source": "Exploring new geospatial calculation methods, monitoring administrative boundary updates, and generating geographic boundaries for website release",
+          "lost": 0.7
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 7133,
+      "as_of": "2026-10-27"
+    },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-27T11:52:16.546Z",
+    "scraped_date": "2026-10-27",
+    "ats_score": 50,
+    "fit_score": 3
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4476108950",
+    "session_id": "2026-10-27T11:33:36Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "Nisga'a CIOPS",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Colorado Springs, CO, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "MRT-C Data Analyst",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T12:13:48.667Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Nisga'a CIOPS",
+      "title": "MRT-C Data Analyst",
+      "resume_slot": 14,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    },
+    "scraped_date": "2026-10-27"
+  },
+  {
+    "session_id": "2026-10-27T11:33:36Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4466114922",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "NYU Langone Health",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "New York, NY, USA",
+    "max_exp": 3.0,
+    "min_exp": 3.0,
+    "pipeline": "standard",
+    "priority_group": 10,
+    "priority_tags": [
+      "New York",
+      "2\u20135 yrs"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "1162515\\_RR00120318 Job ID: 1162515\\_RR00120318 NYU Grossman School of Medicine is one of the nation's top-ranked medical schools.",
+    "title": "Data Analyst II - Medical Informaticist",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "d32f25c1278fdddcd7abd32173e99f086a6efdcadb785a6d4ded937d07716453",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T11:41:00.492Z",
+      "error": null,
+      "company": "NYU Langone Health",
+      "title": "Data Analyst II - Medical Informaticist",
+      "resume_slot": 25,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "NYULangoneHealth (27thOctober)-2",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/09/093ddeaa0cbcd07dfb7ca4313b6d16d9f44a2b00a7628dd68fc108b63b8a5b70.pdf",
+        "sha256": "093ddeaa0cbcd07dfb7ca4313b6d16d9f44a2b00a7628dd68fc108b63b8a5b70",
+        "bytes": 39445,
+        "tex_key": "resumes/09/093ddeaa0cbcd07dfb7ca4313b6d16d9f44a2b00a7628dd68fc108b63b8a5b70.tex",
+        "jd_key": "resumes/09/093ddeaa0cbcd07dfb7ca4313b6d16d9f44a2b00a7628dd68fc108b63b8a5b70.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/NYULangoneHealth (27thOctober)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/NYULangoneHealth (27thOctober)-2",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/NYULangoneHealth (27thOctober)-2/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T11:41:00.492Z"
+      }
+    },
+    "fit": {
+      "score": 85,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 2,
+        "unparsed_requirements": 7,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "7 qualification lines need manual review; they were not fully assessed",
+        "2 requirement groups contain unrecognized technologies"
+      ],
+      "applicable_weight": 80,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": []
+      },
+      "ledger": {
+        "required": {
+          "matched": 2,
+          "total": 2
+        },
+        "preferred": {
+          "matched": 0,
+          "total": 0
+        },
+        "total": {
+          "matched": 2,
+          "total": 2
+        },
+        "matched": [
+          "Python",
+          "SQL"
+        ],
+        "partial": [],
+        "missing": [],
+        "mentioned": [
+          "GitHub",
+          "Claude"
+        ],
+        "unrecognized": [
+          "Epic",
+          "EHR"
+        ],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "To qualify you must have a Education"
+          },
+          {
+            "classification": "required",
+            "source": "Bachelors degree in Biomedical Informatics, Health Informatics, Data Science, Biostatistics, Computer Science, Public Health, Epidemiology, or related field required; Masters degree preferred."
+          },
+          {
+            "classification": "required",
+            "source": "Experience"
+          },
+          {
+            "classification": "required",
+            "source": "Experience working with OMOP Common Data Model, OHDSI tools or methods, or other common clinical research data models is strongly preferred."
+          },
+          {
+            "classification": "required",
+            "source": "Experience supporting cohort definition/identification, phenotyping, registry-style datasets, chart review workflows, data quality assessment, or observational analytics."
+          },
+          {
+            "classification": "required",
+            "source": "Qualified candidates must be able to effectively communicate with all levels of the organization."
+          },
+          {
+            "classification": "required",
+            "source": "NYU Grossman School of Medicine provides its staff with far more than just a place to work. Rather, we are an institution you can be proud of, an institution where you'll feel good about devoting your time and your talents. At NYU Langone Health, we are committed to supporting our workforce and their loved ones with a comprehensive benefits and wellness package. Our offerings provide a robust support system for any stage of life, whether it's developing your career, starting a family, or saving for retirement. The support employees receive goes beyond a standard benefit offering, where employees have access to financial security benefits, a generous time-off program and employee resources groups for peer support. Additionally, all employees have access to our holistic employee wellness program, which focuses on seven key areas of well-being: physical, mental, nutritional, sleep, social, financial, and preventive care. The benefits and wellness package is designed to allow you to focus on what truly matters. Join us and experience the extensive resources and services designed to enhance your overall quality of life for you and your family."
+          }
+        ],
+        "skills": [
+          {
+            "label": "Python",
+            "alternatives": [
+              "Python"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Experience using Python, R, SQL, and related analytic tools for healthcare data management and reproducible analysis.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "SQL",
+            "alternatives": [
+              "SQL"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Experience using Python, R, SQL, and related analytic tools for healthcare data management and reproducible analysis.",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "role_alignment",
+          "requirement": "Past position titles",
+          "source": null,
+          "lost": 8.9
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Role title words",
+          "source": null,
+          "lost": 3.6
+        },
+        {
+          "category": "required_skills",
+          "requirement": "SQL",
+          "source": "Experience using Python, R, SQL, and related analytic tools for healthcare data management and reproducible analysis.",
+          "lost": 1.9
+        },
+        {
+          "category": "experience_alignment",
+          "requirement": "Testing",
+          "source": "Implement validation checks and quality assurance workflows that identify anomalies, mapping issues, transformation errors, and inconsistencies that could affect research validity.",
+          "lost": 0.6
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 9567,
+      "as_of": "2026-10-27"
+    },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-27T11:52:12.549Z",
+    "scraped_date": "2026-10-27",
+    "ats_score": 60,
+    "fit_score": 7
+  },
+  {
+    "session_id": "2026-10-27T11:33:36Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4474632039",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "IMEG",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "New Grad",
+    "location": "Charlotte, NC, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 12,
+    "priority_tags": [
+      "New grad"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "new grad",
+    "site": "linkedin",
+    "summary": "100% Employee-Owned * Big-firm resources, local-team relationships, ONE IMEG culture This posting is for December 2026 New Graduate opportunities.",
+    "title": "Mechanical Engineering New Graduate | Charlotte, NC",
+    "scraped_date": "2026-10-27",
+    "ats_score": 0,
+    "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4481868753",
+    "session_id": "2026-10-27T11:33:36Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "Amazon Science",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Sunnyvale, CA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Description** Amazon is seeking exceptional talent to help develop the next generation of advanced robotics systems that will transform automation at Amazon's scale.",
+    "title": "Robotics Applied Scientist",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "5c76fe8fefc41d1f66d00d9fe1c808ef8c63239e6bcc65106b3f65b1be7caba9",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T11:41:30.509Z",
+      "error": null,
+      "company": "Amazon Science",
+      "title": "Robotics Applied Scientist",
+      "resume_slot": 23,
+      "session_hour": "07",
+      "batch_time": "2026-10-27T11:33:36Z",
+      "session_id": "2026-10-27T11:33:36Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": null,
+      "folder": "AmazonScience (27thOctober)-2",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/40/40cdd92306456e613e9d25be25f0ead70e89165d483dfdb950d5d429e886065a.pdf",
+        "sha256": "40cdd92306456e613e9d25be25f0ead70e89165d483dfdb950d5d429e886065a",
+        "bytes": 40803,
+        "tex_key": "resumes/40/40cdd92306456e613e9d25be25f0ead70e89165d483dfdb950d5d429e886065a.tex",
+        "jd_key": "resumes/40/40cdd92306456e613e9d25be25f0ead70e89165d483dfdb950d5d429e886065a.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/AmazonScience (27thOctober)-2/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/AmazonScience (27thOctober)-2",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/AmazonScience (27thOctober)-2/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T11:41:30.509Z"
+      }
+    },
+    "fit": {
+      "score": 72.4,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 5,
+        "unparsed_requirements": 10,
+        "missing_job_title": false,
+        "no_skill_requirements": false
+      },
+      "confidence": "medium",
+      "confidence_reasons": [
+        "10 qualification lines need manual review; they were not fully assessed",
+        "2 requirement groups contain unrecognized technologies"
+      ],
+      "applicable_weight": 80,
+      "outside_roles": false,
+      "knockouts": {
+        "verdict": "clear",
+        "items": [
+          {
+            "type": "location",
+            "status": "clear",
+            "reason": "You are open to relocating",
+            "source": "* Design and train manipulation policies that leverage tactile and force feedback for dexterous grasping, in-hand manipulation, and contact-rich tasks, using reinforcement learning, imitation learn..."
+          }
+        ]
+      },
+      "ledger": {
+        "required": {
+          "matched": 3,
+          "total": 4
+        },
+        "preferred": {
+          "matched": 1,
+          "total": 1
+        },
+        "total": {
+          "matched": 4,
+          "total": 5
+        },
+        "matched": [
+          "Java",
+          "C++",
+          "Python",
+          "Machine learning"
+        ],
+        "partial": [],
+        "missing": [
+          "Algorithms"
+        ],
+        "mentioned": [
+          "Debugging"
+        ],
+        "unrecognized": [
+          "Isaac / MuJoCo",
+          "URDF"
+        ],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Research or applied experience in one or more of: tactile sensing, manipulation policy learning, contact-rich manipulation, dexterous grasping, or multi-modal perception for robotics"
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience leading technical initiatives and key deliverables"
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience bridging research with practical engineering implementation in physical robotic systems"
+          },
+          {
+            "classification": "preferred",
+            "source": "Hands-on experience with modern tactile sensing hardware and tactile signal processing"
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience developing manipulation policies using reinforcement learning, imitation learning, or foundation models for contact-rich tasks"
+          },
+          {
+            "classification": "preferred",
+            "source": "Demonstrated experience with sim-to-real transfer for tactile-enabled manipulation"
+          },
+          {
+            "classification": "preferred",
+            "source": "Familiarity with both learned and classical approaches to contact dynamics, including impedance and admittance control"
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience with force and torque control, and with proprioceptive force estimation on torque- or current-controlled actuators"
+          },
+          {
+            "classification": "preferred",
+            "source": "Experience with teleoperation and demonstration-collection pipelines for dexterous hands"
+          },
+          {
+            "classification": "preferred",
+            "source": "Familiarity with multi-finger or multi-contact gripper platforms"
+          }
+        ],
+        "skills": [
+          {
+            "label": "Java",
+            "alternatives": [
+              "Java"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Experience programming in Java, C++, Python or related language",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "C++",
+            "alternatives": [
+              "C++"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Experience programming in Java, C++, Python or related language",
+            "evidence": {
+              "entry": "InsureRaft",
+              "text": "Modeled C++ end-to-end insurance workflows across 8 event types from policy creation through claim approval and payment settlement on the replicated log.",
+              "tier": "project_bullet"
+            }
+          },
+          {
+            "label": "Python",
+            "alternatives": [
+              "Python"
+            ],
+            "class": "required",
+            "status": "matched",
+            "source": "Experience programming in Java, C++, Python or related language",
+            "evidence": {
+              "entry": "Accolite Digital",
+              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
+              "tier": "measured_job_bullet"
+            }
+          },
+          {
+            "label": "Algorithms",
+            "alternatives": [
+              "Algorithms"
+            ],
+            "class": "required",
+            "status": "missing",
+            "source": "Experience deploying learned policies or control algorithms on physical robotic hardware"
+          },
+          {
+            "label": "Machine learning",
+            "alternatives": [
+              "Machine learning"
+            ],
+            "class": "preferred",
+            "status": "matched",
+            "source": "Strong publication record at major robotics/ML venues (e.g., RSS, CoRL, ICRA, IROS, NeurIPS, ICML, ICLR), including impactful first-author work in tactile sensing or dexterous manipulation",
+            "evidence": {
+              "entry": "Wake Forest \u2013 CAIR",
+              "text": "Forecasted stroke patients' functional outcomes at 6, 12 and 24 months with PyTorch and scikit-learn machine learning models, using Claude summaries of 10K+ similar patients from a 90-field thrombectomy registry.",
+              "tier": "job_bullet"
+            }
+          }
+        ]
+      },
+      "lost": [
+        {
+          "category": "required_skills",
+          "requirement": "Algorithms",
+          "source": "Experience deploying learned policies or control algorithms on physical robotic hardware",
+          "lost": 9.3
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Past position titles",
+          "source": null,
+          "lost": 8.9
+        },
+        {
+          "category": "role_alignment",
+          "requirement": "Role title words",
+          "source": null,
+          "lost": 3.6
+        },
+        {
+          "category": "preferred_skills",
+          "requirement": "Machine learning",
+          "source": "Strong publication record at major robotics/ML venues (e.g., RSS, CoRL, ICRA, IROS, NeurIPS, ICML, ICLR), including impactful first-author work in tactile sensing or dexterous manipulation",
+          "lost": 3.5
+        },
+        {
+          "category": "required_skills",
+          "requirement": "C++",
+          "source": "Experience programming in Java, C++, Python or related language",
+          "lost": 2.3
+        }
+      ],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 9752,
+      "as_of": "2026-10-27"
+    },
+    "apply_type": "offsite",
+    "apply_type_at": "2026-10-27T12:28:49.272Z",
+    "scraped_date": "2026-10-27",
+    "ats_score": 50,
+    "fit_score": 4
+  },
+  {
+    "session_id": "2026-10-27T11:33:36Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4474618559",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T11:33:36Z",
+    "company": "IMEG",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "New Grad",
+    "location": "Atlanta, GA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 12,
+    "priority_tags": [
+      "New grad"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "new grad",
+    "site": "linkedin",
+    "summary": "100% Employee-Owned * Big-firm resources, local-team relationships, ONE IMEG culture This posting is for Summer 2027 New Graduate opportunities.",
+    "title": "Mechanical Engineering New Graduate | Atlanta, GA",
+    "scraped_date": "2026-10-27",
+    "ats_score": 0,
+    "fit_score": 4
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4481881655",
+    "session_id": "2026-10-27T12:31:53Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T12:31:53Z",
+    "company": "Wayve",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Sunnyvale, CA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Applied Scientist / Machine Learning Engineer",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T12:53:15.263Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Wayve",
+      "title": "Applied Scientist / Machine Learning Engineer",
+      "resume_slot": 8,
+      "session_hour": "08",
+      "batch_time": "2026-10-27T12:31:53Z",
+      "session_id": "2026-10-27T12:31:53Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    },
+    "scraped_date": "2026-10-27"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4484052695",
+    "session_id": "2026-10-27T12:31:53Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T12:31:53Z",
+    "company": "Addepar",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "New York City Metropolitan Area",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 10,
+    "priority_tags": [
+      "New York",
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "AI Engineer - AI Platform",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T12:53:15.274Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Addepar",
+      "title": "AI Engineer - AI Platform",
+      "resume_slot": 9,
+      "session_hour": "08",
+      "batch_time": "2026-10-27T12:31:53Z",
+      "session_id": "2026-10-27T12:31:53Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    },
+    "scraped_date": "2026-10-27"
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4473682848",
+    "session_id": "2026-10-27T12:31:53Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T12:31:53Z",
+    "company": "Walmart",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Sunnyvale, CA, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "Distinguished, Software Engineer - Machine Learning",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T12:53:15.288Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "Walmart",
+      "title": "Distinguished, Software Engineer - Machine Learning",
+      "resume_slot": 10,
+      "session_hour": "08",
+      "batch_time": "2026-10-27T12:31:53Z",
+      "session_id": "2026-10-27T12:31:53Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    },
+    "scraped_date": "2026-10-27"
+  },
+  {
+    "session_id": "2026-10-27T12:31:53Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4483636389",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-27T12:31:53Z",
+    "company": "AbilityLinks",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Birmingham, AL, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "machine learning engineer",
+    "site": "linkedin",
+    "summary": "nan",
+    "title": "AI Engineer",
+    "resume": {
+      "status": "failed",
+      "stage": "GATED",
+      "fingerprint": null,
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T12:53:15.302Z",
+      "error": "JD not found or too short in Mongo descriptions",
+      "company": "AbilityLinks",
+      "title": "AI Engineer",
+      "resume_slot": 11,
+      "session_hour": "08",
+      "batch_time": "2026-10-27T12:31:53Z",
+      "session_id": "2026-10-27T12:31:53Z",
+      "priority": 1000,
+      "source": "hourly",
+      "failure_reason": null
+    },
+    "scraped_date": "2026-10-27"
+  },
+  {
+    "session_id": "2026-10-27T12:31:53Z",
+    "job_url": "https://jobs.ashbyhq.com/assembledhq/25d50672-8e19-4c6d-b406-4222dea68ff2",
+    "application_key": "ashby:25d50672-8e19-4c6d-b406-4222dea68ff2",
+    "ats": "ashby",
+    "ats_board": "assembledhq",
+    "ats_posting_id": "25d50672-8e19-4c6d-b406-4222dea68ff2",
+    "batch_time": "2026-10-27T12:31:53Z",
+    "company": "Assembledhq",
+    "competition_score": 0,
+    "date_posted": "2026-10-27",
+    "job_url_direct": "https://jobs.ashbyhq.com/assembledhq/25d50672-8e19-4c6d-b406-4222dea68ff2/application",
+    "level": "Entry",
+    "location": "United States",
+    "max_exp": 2.0,
+    "min_exp": 2.0,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "2\u20135 yrs"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "ats:ashby",
+    "site": "ashby",
+    "summary": "ABOUT ASSEMBLED Assembled helps companies scale great customer support.",
+    "title": "Software Engineer, Workforce Operations",
+    "resume": {
+      "status": "success",
+      "stage": "SUCCESS",
+      "fingerprint": "39021cc6805c0f997edbe936a022116161ebd0a468d085f14c8756dbc393e150",
+      "lease_until": null,
+      "worker_id": "oracle-atriveo",
+      "owner": "oracle-atriveo",
+      "updated_at": "2026-10-27T12:34:45.057Z",
+      "error": null,
+      "company": "Assembledhq",
+      "title": "Software Engineer, Workforce Operations",
+      "resume_slot": 1635,
+      "session_hour": "08",
+      "batch_time": "2026-10-27T12:31:53Z",
+      "session_id": "2026-10-27T12:31:53Z",
+      "priority": 1000,
+      "source": "hourly",
+      "cached": false,
+      "failure_reason": null,
+      "fallback": "basic",
+      "folder": "Assembledhq (27thOctober)",
+      "object": {
+        "bucket": "atriveo-resume",
+        "key": "resumes/c0/c0bca1059f988d8f1d8352855fd6c80d85ae4bcb1bb5ac0ec819649de1d8f650.pdf",
+        "sha256": "c0bca1059f988d8f1d8352855fd6c80d85ae4bcb1bb5ac0ec819649de1d8f650",
+        "bytes": 39445,
+        "tex_key": "resumes/c0/c0bca1059f988d8f1d8352855fd6c80d85ae4bcb1bb5ac0ec819649de1d8f650.tex",
+        "jd_key": "resumes/c0/c0bca1059f988d8f1d8352855fd6c80d85ae4bcb1bb5ac0ec819649de1d8f650.jd.txt"
+      },
+      "object_error": null,
+      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Assembledhq (27thOctober)/Atishay Kasliwal.pdf",
+      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Assembledhq (27thOctober)",
+      "cover_letter": {
+        "status": "draft",
+        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Assembledhq (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
+        "built_at": "2026-10-27T12:34:45.057Z"
+      }
+    },
+    "fit": {
+      "score": null,
+      "coverage": {
+        "status": "incomplete",
+        "scored_requirements": 0,
+        "unparsed_requirements": 6,
+        "missing_job_title": false,
+        "no_skill_requirements": true
+      },
+      "confidence": "low",
+      "confidence_reasons": [
+        "No skills found to compare",
+        "The posting gave us something to score for only 0 of 100 points",
+        "Only 0 scorable requirements found",
+        "6 qualification lines need manual review; they were not fully assessed"
+      ],
+      "applicable_weight": 0,
+      "outside_roles": true,
+      "knockouts": {
+        "verdict": "clear",
+        "items": []
+      },
+      "ledger": {
+        "required": {
+          "matched": 0,
+          "total": 0
+        },
+        "preferred": {
+          "matched": 0,
+          "total": 0
+        },
+        "total": {
+          "matched": 0,
+          "total": 0
+        },
+        "matched": [],
+        "partial": [],
+        "missing": [],
+        "mentioned": [
+          "Observability",
+          "Stripe",
+          "Salesforce"
+        ],
+        "unrecognized": [],
+        "unparsed": [
+          {
+            "classification": "required",
+            "source": "Experience with real-time or data-intensive products. You've built systems where fresh data, reliability, and making sense of many changing signals matter."
+          },
+          {
+            "classification": "required",
+            "source": "We know great candidates don't always meet every requirement listed in a job description. If the role excites you and you believe you can make an impact at Assembled, we encourage you to apply. We value diverse perspectives and are committed to building an inclusive workplace where everyone feels like they belong and has the opportunity to do their best work. We look forward to hearing from you!"
+          },
+          {
+            "classification": "required",
+            "source": "For United States Applicants:"
+          },
+          {
+            "classification": "required",
+            "source": "Assembled participates in E-Verify and will provide the federal government with your Form I-9 information to confirm that you are authorized to work in the United States."
+          },
+          {
+            "classification": "required",
+            "source": "For United Kingdom Applicants:"
+          },
+          {
+            "classification": "required",
+            "source": "Assembled is required to verify your right to work in the UK and will conduct a Right to Work check prior to employment in accordance with applicable law."
+          }
+        ],
+        "skills": []
+      },
+      "lost": [],
+      "config_hash": "64abdf97758f3d12",
+      "master_hash": "494ebd17cdf7baa9",
+      "candidate_hash": "a1f9884b7ab7dce7",
+      "shape": 5,
+      "jd_chars": 5156,
+      "as_of": "2026-10-27"
+    },
+    "scraped_date": "2026-10-27",
+    "ats_score": 0,
+    "fit_score": 6
   },
   {
     "job_url": "https://www1.jobdiva.com/candidates/myjobs/openjob_outside.jsp?a=kvjdnwtsxgckrpsoozx5qc0oueybw1005779v7x6soig8eyqqmzaubfdl9tcx21s&from=COMP&id=32906034",
@@ -107735,6 +111496,14 @@
       "shape": 5,
       "jd_chars": 6872,
       "as_of": "2026-10-27"
+    },
+    "application": {
+      "applicationId": "17325ba8-8eec-4c6f-972b-01f07d2c429d",
+      "applicationKey": "greenhouse:4745013005",
+      "status": "APPLYING",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-27T12:56:48.496Z"
     },
     "scraped_date": "2026-10-26",
     "ats_score": 37,
@@ -156474,7 +160243,7 @@
     "apply_type_at": "2026-10-26T18:19:40.702Z",
     "scraped_date": "2026-10-26",
     "ats_score": 38,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-10-26T18:25:50Z",
@@ -159531,7 +163300,7 @@
     "apply_type_at": "2026-10-27T04:59:47.355Z",
     "scraped_date": "2026-10-26",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://job-boards.greenhouse.io/relativity/jobs/8917327002",
@@ -175235,7 +179004,7 @@
     },
     "scraped_date": "2026-10-26",
     "ats_score": 57,
-    "fit_score": 11
+    "fit_score": 12
   },
   {
     "session_id": "2026-10-26T19:26:54Z",
@@ -175680,7 +179449,7 @@
     "apply_type_at": "2026-10-26T21:44:20.394Z",
     "scraped_date": "2026-10-26",
     "ats_score": 100,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "session_id": "2026-10-26T20:38:10Z",
@@ -190132,7 +193901,7 @@
     },
     "scraped_date": "2026-10-26",
     "ats_score": 0,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-10-26T10:10:57Z",
@@ -195272,7 +199041,7 @@
     "apply_type_at": "2026-10-26T14:14:01.220Z",
     "scraped_date": "2026-10-26",
     "ats_score": 50,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "session_id": "2026-10-26T13:00:11Z",
@@ -203491,6 +207260,14 @@
     },
     "job_url_direct_at": "2026-10-26T19:54:57.483Z",
     "job_url_direct_from": "board-match",
+    "application": {
+      "applicationId": "30df1ccb-2073-4ee2-b02e-d5f3cc3c6566",
+      "applicationKey": "ashby:706c16cf-f3ec-4a64-aad1-923ad1ce4131",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "ashby",
+      "updatedAt": "2026-10-27T12:53:23.691Z"
+    },
     "scraped_date": "2026-10-26",
     "ats_score": 0,
     "fit_score": 5
@@ -229980,7 +233757,7 @@
     },
     "scraped_date": "2026-10-25",
     "ats_score": 33,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4457306902",
@@ -230012,7 +233789,7 @@
     "title": "Software Dev Engineer - AWS Glacier",
     "scraped_date": "2026-10-25",
     "ats_score": 60,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4466461413",
@@ -273885,7 +277662,7 @@
     "apply_type_at": "2026-10-25T08:10:41.761Z",
     "scraped_date": "2026-10-25",
     "ats_score": 44,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "session_id": "2026-10-25T13:07:22Z",
@@ -284238,7 +288015,7 @@
     "apply_type_at": "2026-10-26T01:11:18.679Z",
     "scraped_date": "2026-10-25",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://www.judge.com/jobs/details/1146568",
@@ -285151,7 +288928,7 @@
     "apply_type_at": "2026-10-25T05:15:57.235Z",
     "scraped_date": "2026-10-25",
     "ats_score": 0,
-    "fit_score": 6
+    "fit_score": 7
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4483377131",
@@ -335911,7 +339688,7 @@
     "apply_type_at": "2026-10-24T19:35:45.909Z",
     "scraped_date": "2026-10-24",
     "ats_score": 39,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "session_id": "2026-10-24T04:12:47Z",
@@ -342506,7 +346283,7 @@
     "apply_type_at": "2026-10-25T00:36:14.222Z",
     "scraped_date": "2026-10-24",
     "ats_score": 50,
-    "fit_score": 5
+    "fit_score": 6
   },
   {
     "job_url": "https://job-boards.greenhouse.io/calm/jobs/8912981002",
@@ -349902,6 +353679,14 @@
       "jd_chars": 12530,
       "as_of": "2026-10-25"
     },
+    "application": {
+      "applicationId": "361030ed-b204-4898-9c10-0a81a27a2b6f",
+      "applicationKey": "greenhouse:4722054006",
+      "status": "READY_TO_APPLY",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-27T12:52:16.536Z"
+    },
     "scraped_date": "2026-10-24",
     "ats_score": 44,
     "fit_score": 6
@@ -354045,7 +357830,7 @@
     "apply_type_at": "2026-10-24T21:38:02.544Z",
     "scraped_date": "2026-10-24",
     "ats_score": 50,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "session_id": "2026-10-24T04:34:05Z",
@@ -361032,7 +364817,7 @@
     "apply_type_at": "2026-10-25T02:22:47.497Z",
     "scraped_date": "2026-10-24",
     "ats_score": 25,
-    "fit_score": 4
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4483183853",
@@ -363968,7 +367753,7 @@
     },
     "scraped_date": "2026-10-24",
     "ats_score": 58,
-    "fit_score": 12
+    "fit_score": 11
   },
   {
     "session_id": "2026-10-24T17:24:59Z",
@@ -367562,7 +371347,7 @@
     "apply_type_at": "2026-10-25T01:27:56.881Z",
     "scraped_date": "2026-10-24",
     "ats_score": 100,
-    "fit_score": 6
+    "fit_score": 5
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4481078331",
@@ -367794,7 +371579,7 @@
     "apply_type_at": "2026-10-25T04:16:49.877Z",
     "scraped_date": "2026-10-24",
     "ats_score": 33,
-    "fit_score": 7
+    "fit_score": 8
   },
   {
     "session_id": "2026-10-24T05:18:47Z",
@@ -373459,7 +377244,7 @@
     "apply_type_at": "2026-10-24T17:52:29.416Z",
     "scraped_date": "2026-10-24",
     "ats_score": 50,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4464248359",
@@ -390025,7 +393810,7 @@
     "apply_type_at": "2026-10-24T13:29:39.641Z",
     "scraped_date": "2026-10-24",
     "ats_score": 60,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "job_url": "https://job-boards.greenhouse.io/zscaler/jobs/5261571007",
@@ -398125,7 +401910,7 @@
     "title": "Software Engineer, New Grad (2027)",
     "scraped_date": "2026-10-24",
     "ats_score": 57,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "job_url": "https://www.linkedin.com/jobs/view/4483324728",
@@ -399466,7 +403251,7 @@
     },
     "scraped_date": "2026-10-24",
     "ats_score": 57,
-    "fit_score": 7
+    "fit_score": 6
   },
   {
     "session_id": "2026-10-24T17:24:59Z",
@@ -402802,7 +406587,7 @@
     "title": "New Grad RN - Skyline",
     "scraped_date": "2026-10-24",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-10-24T19:15:11Z",
@@ -407102,7 +410887,7 @@
     "apply_type_at": "2026-10-25T01:28:26.839Z",
     "scraped_date": "2026-10-24",
     "ats_score": 0,
-    "fit_score": 4
+    "fit_score": 3
   },
   {
     "session_id": "2026-10-25T00:56:48Z",
@@ -411489,10 +415274,10 @@
     "application": {
       "applicationId": "f8cc9aa0-59c3-46a4-90b9-1e70429c9181",
       "applicationKey": "ashby:341a5ad4-9134-4bad-88e1-2ce0f70bf519",
-      "status": "READY_TO_APPLY",
-      "reviewReason": null,
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
       "ats": "ashby",
-      "updatedAt": "2026-10-27T04:37:48.959Z"
+      "updatedAt": "2026-10-27T12:30:58.584Z"
     },
     "scraped_date": "2026-10-23",
     "ats_score": 33,
@@ -415829,7 +419614,7 @@
     },
     "scraped_date": "2026-10-23",
     "ats_score": 37,
-    "fit_score": 8
+    "fit_score": 7
   },
   {
     "job_url": "https://job-boards.greenhouse.io/dvtrading/jobs/4744268005",
@@ -417077,6 +420862,14 @@
       "shape": 5,
       "jd_chars": 2687,
       "as_of": "2026-10-26"
+    },
+    "application": {
+      "applicationId": "e43bfc12-d8df-4347-b6e4-0c57722cbdc6",
+      "applicationKey": "greenhouse:8314235",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-27T12:56:00.989Z"
     },
     "scraped_date": "2026-10-23",
     "ats_score": 50,
@@ -423332,7 +427125,7 @@
     "apply_type_at": "2026-10-24T06:54:48.508Z",
     "scraped_date": "2026-10-23",
     "ats_score": 65,
-    "fit_score": 20
+    "fit_score": 21
   },
   {
     "session_id": "2026-10-23T23:01:45Z",
@@ -427105,6 +430898,14 @@
       "jd_chars": 3557,
       "as_of": "2026-10-25"
     },
+    "application": {
+      "applicationId": "a91ea65e-a9ee-41e2-9f04-96b4ef4b553d",
+      "applicationKey": "greenhouse:8896679002",
+      "status": "NEEDS_REVIEW",
+      "reviewReason": "UNKNOWN_QUESTION",
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-27T12:54:09.994Z"
+    },
     "scraped_date": "2026-10-23",
     "ats_score": 38,
     "fit_score": 3
@@ -428494,6 +432295,14 @@
       "shape": 5,
       "jd_chars": 4530,
       "as_of": "2026-10-25"
+    },
+    "application": {
+      "applicationId": "ec8cf16c-d796-4ac8-aac8-2a45b6c929bd",
+      "applicationKey": "greenhouse:8033261003",
+      "status": "READY_TO_APPLY",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-27T12:51:08.952Z"
     },
     "scraped_date": "2026-10-23",
     "ats_score": 33,
@@ -432591,6 +436400,14 @@
       "shape": 5,
       "jd_chars": 8945,
       "as_of": "2026-10-26"
+    },
+    "application": {
+      "applicationId": "c35c4e4c-56e9-4359-a778-b3207f876ab0",
+      "applicationKey": "greenhouse:5271092007",
+      "status": "READY_TO_APPLY",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-27T12:51:32.286Z"
     },
     "scraped_date": "2026-10-23",
     "ats_score": 47,
@@ -443191,6 +447008,14 @@
       "jd_chars": 6317,
       "as_of": "2026-10-26"
     },
+    "application": {
+      "applicationId": "6c66ca35-c414-4d9a-a6ca-5a951d711a47",
+      "applicationKey": "greenhouse:4746910005",
+      "status": "READY_TO_APPLY",
+      "reviewReason": null,
+      "ats": "greenhouse",
+      "updatedAt": "2026-10-27T12:52:32.230Z"
+    },
     "scraped_date": "2026-10-23",
     "ats_score": 33,
     "fit_score": 8
@@ -444753,7 +448578,7 @@
     },
     "scraped_date": "2026-10-23",
     "ats_score": 75,
-    "fit_score": 9
+    "fit_score": 8
   },
   {
     "session_id": "2026-10-24T00:58:45Z",
