@@ -51,6 +51,7 @@ import { prepareApplicationKit, prepareGeneralKit, profileDetails } from "./appl
 import { noTextJobs, generalQueue, generalCount, clearNoTextCache } from "./no-text-jobs.mjs";
 import { readGoal, saveGoal, startPhoneSummaries } from "./phone-summary.mjs";
 import { listAssessments, updateAssessment } from "./assessments.mjs";
+import { insights } from "./insights.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, renderDraft, revertResume, saveBullet, saveDraft, setResumeEmail, startPasted } from "./resume-builder.mjs";
@@ -2018,6 +2019,22 @@ const server = http.createServer(async (req, res) => {
       try { const data = await withMongo(db => recordMatchingEvent(db, JSON.parse(raw || "{}"))); res.writeHead(200, {"Content-Type":"application/json"}); res.end(JSON.stringify(data)); }
       catch(e) { res.writeHead(400, {"Content-Type":"application/json"}); res.end(JSON.stringify({ok:false,error:e.message})); }
     });
+    return;
+  }
+
+  // GET /applications/insights — the Stats page: applying pace, replies funnel, where you apply, what is waiting (counts only).
+  if (req.method === "GET" && pathname === "/applications/insights") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const data = await withMongo((db) => insights(db, { outRoot: OUT_ROOT }), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
     return;
   }
 
