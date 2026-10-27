@@ -27,10 +27,11 @@ export function useAppliedToday() {
     const request = ++sequence.current;
     const day = todayKey();
     try {
-      const res = await fetch(`${getTailorServerBase()}/applications/analytics?view=summary&from=${day}&to=${day}`, { credentials: "include", cache: "no-store" });
+      // The shared applied count (scripts/applied-core.mjs): the same one Matching, the Applied page and the Mac widget show.
+      const res = await fetch(`${getTailorServerBase()}/applications/applied-summary?days=1`, { credentials: "include", cache: "no-store" });
       const json = await res.json();
-      if (!res.ok || json.ok === false || request !== sequence.current) return;
-      setServer({ n: (json.range?.applied ?? 0) + (json.range?.linkedinApplied ?? 0), day });
+      if (!res.ok || json.ok === false || request !== sequence.current || json.dayKey !== day) return;
+      setServer({ n: json.today ?? 0, day });
     } catch { /* keep the last count */ }
   }, []);
   useEffect(() => { const first = setTimeout(load, 0); const t = setInterval(load, 30_000); const unsubscribe = onApplicationsChanged(() => void load()); return () => { clearTimeout(first); clearInterval(t); unsubscribe(); sequence.current++; }; }, [load]);
@@ -64,11 +65,10 @@ export function useApplyHistory(days = 84): DayCount[] | null {
   const [rows, setRows] = useState<DayCount[] | null>(null);
   useEffect(() => {
     const load = async () => {
-      const to = todayKey(), from = dayShift(to, -(days - 1));
       try {
-        const res = await fetch(`${getTailorServerBase()}/applications/analytics?view=summary&from=${from}&to=${to}`, { credentials: "include", cache: "no-store" });
+        const res = await fetch(`${getTailorServerBase()}/applications/applied-summary?days=${days}`, { credentials: "include", cache: "no-store" });
         const json = await res.json();
-        if (res.ok && json.ok !== false && Array.isArray(json.daily)) setRows(json.daily.map((d: { day: string; applied: number }) => ({ day: d.day, applied: d.applied ?? 0 })));
+        if (res.ok && json.ok !== false && Array.isArray(json.days)) setRows(json.days.map((d: { day: string; applied: number }) => ({ day: d.day, applied: d.applied ?? 0 })));
       } catch { /* keep the last history */ }
     };
     const first = setTimeout(load, 0);

@@ -5,6 +5,7 @@ import { analyzeResume, recordAiDecision, resumeAiVersion, enqueueResumeAi, resu
 import { enqueueAnswer } from './application-answer.mjs';
 import { widgetProgress } from './widget-progress.mjs';
 import { appliedHistory } from './applied-history.mjs';
+import { appliedSummary } from './applied-core.mjs';
 /**
  * Atriveo local tailor sidecar.
  *
@@ -2055,6 +2056,24 @@ const server = http.createServer(async (req, res) => {
           data.resumeReport = dir ? readResumeReport(dir) : null;
         }
         res.writeHead(data.ok ? 200 : 404, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    })();
+    return;
+  }
+
+  // GET /applications/applied-summary?days=N — the one applied count and per-day history that Today, Matching, the Applied page and the
+  // Mac widget all read (scripts/applied-core.mjs).
+  if (req.method === "GET" && pathname === "/applications/applied-summary") {
+    (async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const p = new URL(req.url, "http://x").searchParams;
+        const data = await withMongo((db) => appliedSummary(db, { days: Number(p.get("days")) || 14 }), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
         res.end(JSON.stringify(data));
       } catch (e) {
         res.writeHead(503, { "Content-Type": "application/json" });
