@@ -32,3 +32,6 @@ tailored/
 output/
 data/artifacts/
 data/resume-profile.json
+
+# Local Web Push credentials (private key stays server-side)
+.env.push.local

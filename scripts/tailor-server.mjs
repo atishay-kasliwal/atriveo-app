@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { handlePushRoute } from "./web-push.mjs";
+import { startPushEvents } from "./push-events.mjs";
 import {dashboardAiUsage} from './resume-ai-usage.mjs';
 import { claimInference, completeInference, queueInference } from './resume-ai-queue.mjs';
 import { analyzeResume, recordAiDecision, resumeAiVersion, enqueueResumeAi, resumeAiResult } from './resume-ai.mjs';
@@ -1177,6 +1179,7 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(401, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({ ok: false, error: "Unauthorized" }));
   }
+  if (await handlePushRoute(req, res, pathname, withMongo)) return;
   if (await handleStaffing(req, res, reqUrl)) return;
   if (await handleNetwork(req, res, reqUrl, {
     withDb: process.env.MONGO_URI ? (fn) => withMongo(fn, { appName: "AtriveoTailorServer" }) : null,
@@ -2688,6 +2691,7 @@ server.listen(PORT, process.env.TAILOR_HOST?.trim() || "127.0.0.1", () => {
   handleOutreach.start();
   startPhoneSummaries({ withMongo, log });
   startNetworkReminders({ withMongo, log });
+  startPushEvents({ withMongo, log });
   log(`listening on http://localhost:${PORT}`);
   // Bound to loopback, so this only matters once cloudflared publishes it — but
   // then /scrape/start is reachable by anyone who knows the tunnel URL, and it

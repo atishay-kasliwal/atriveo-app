@@ -5,7 +5,8 @@ interface Env extends AdminEnv {
   JWT_SECRET: string;
 }
 
-const PUBLIC_API_PATHS = ["/api/auth/login", "/api/auth/logout", "/api/auth/google", "/api/auth/callback", "/api/auth/signup",
+// Push health is authenticated by its server credential in the route itself.
+const PUBLIC_API_PATHS = ["/api/push/health", "/api/auth/login", "/api/auth/logout", "/api/auth/google", "/api/auth/callback", "/api/auth/signup",
   // The Mac app signs in through your browser (a code the app trades with its own secret).
   "/api/auth/mac",
   // Token-checked by the route itself (inbox watcher on the Mac), not a login cookie.

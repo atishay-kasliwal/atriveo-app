@@ -14,7 +14,7 @@ function GetStarted({ settings, onOpen }: { settings: OutreachSettingsData | nul
 
 export default function OutreachPage({ header }: { header?: React.ReactNode }) {
   const { drafts, replies, error: listError, refresh } = useOutreachList();
-  const [target, setTarget] = useState<OutreachTarget | null>(null);
+  const [target, setTarget] = useState<OutreachTarget | null>(() => { const id = new URLSearchParams(window.location.search).get('id'); return id ? { id } : null; });
   const [settings, setSettings] = useState<OutreachSettingsData | null>(null);
   const [tab, setTab] = useState<'messages' | 'settings'>('messages');
   const [jobUrl, setJobUrl] = useState('');

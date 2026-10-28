@@ -92,8 +92,8 @@ echo "live now: $DEPLOYED   dashboard $DASH_IMAGE   workers $WORK_IMAGE"
 [ "$ONLY_SCRAPER" = 1 ] || [ "$DEPLOYED" != "$COMMIT" ] || { echo "The live commit is already $COMMIT."; [ "$WEBSITE" = 1 ] || exit 0; }
 
 # Files that change on the server: everything under scripts/ and data/ats that differs between the live commit and this one.
-CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats deploy | grep -v -e '^scripts/ship\.sh$' -e '^scripts/ship-lib\.sh$' -e '^scripts/ats/validate' -e '^scripts/test-' || true)"
-SRC_CHANGED="$(git diff --name-only "$DEPLOYED" HEAD -- src public vite.apply.config.ts apply.html | head -1 || true)"
+CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats deploy package.json package-lock.json | grep -v -e '^scripts/ship\.sh$' -e '^scripts/ship-lib\.sh$' -e '^scripts/ats/validate' -e '^scripts/test-' || true)"
+SRC_CHANGED="$(git diff --name-only "$DEPLOYED" HEAD -- src public apply-public functions vite.apply.config.ts apply.html | head -1 || true)"
 if [ "$ONLY_SCRAPER" = 1 ]; then CHANGED="$(git ls-files deploy)"; fi
 # The scraper step copies loop.sh, Dockerfile.loop and patch_storage.py from the shipped set, so --scraper always ships them, changed or not.
 # The after-scrape loop's own scripts go with it (the two LinkedIn ones ran only on the Mac before, so they were never in the image).
@@ -102,6 +102,10 @@ if [ "$SCRAPER" = 1 ]; then CHANGED="$(printf '%s\n%s\n%s\n' "$CHANGED" "$(git l
 if echo "$CHANGED" | grep -q -E '^(data/ats|scripts/ats|scripts/(fit-|job-matching|applications-analytics|resume-queue|tailor-worker))'; then
   CHANGED="$(printf '%s\n%s\n' "$CHANGED" "$(bundle_files)" | grep -v '^$' | sort -u)"
 fi
+# Dependency manifests must travel together; the dashboard runs Node push delivery.
+if echo "$CHANGED" | grep -q -E '^package(-lock)?\.json$'; then
+  CHANGED="$(printf '%s\n%s\n' "$CHANGED" 'package.json' 'package-lock.json' | sort -u)"
+fi
 say "Files to ship ($(echo "$CHANGED" | grep -c . || true))"
 echo "$CHANGED" | sed 's/^/  /'
 [ -n "$CHANGED" ] || echo "  (no server files changed)"
@@ -109,6 +113,7 @@ echo "$CHANGED" | sed 's/^/  /'
 if [ "$TESTS" = 1 ]; then
   say "Tests"
   if [ "$DRY" = 1 ]; then echo "[dry-run] tsc + fit/store tests"; else
+    node --check scripts/tailor-server.mjs
     npx tsc -p tsconfig.app.json --noEmit
     node --test tests/ats/fit.test.mjs tests/review/fitStore.test.mjs tests/review/resumeStore.test.mjs tests/review/resumeRetention.test.mjs tests/review/pageFill.test.mjs
   fi
@@ -161,7 +166,11 @@ if [ -n "$CHANGED" ]; then
   NEW_WORK_STARTS="${NEW_WORK_STARTS# }"
 
   say "Building overlays and start scripts"
-  OVERLAY="cd $ROOT_REMOTE/staging/ship-$COMMIT && mkdir -p scripts data deploy && printf 'FROM %s\nCOPY scripts /app/scripts\nCOPY data /app/data\nCOPY deploy /app/deploy\n' '$DASH_IMAGE' > Dockerfile.dash && docker build -q -f Dockerfile.dash -t $NEW_DASH_IMAGE . \
+  DASH_DEPS=""
+  if echo "$CHANGED" | grep -q '^package.json$'; then
+    DASH_DEPS='USER 0\nCOPY package.json package-lock.json /app/\nWORKDIR /app\nRUN npm ci --ignore-scripts\nUSER 1001:1001\n'
+  fi
+  OVERLAY="cd $ROOT_REMOTE/staging/ship-$COMMIT && mkdir -p scripts data deploy && printf 'FROM %s\nCOPY scripts /app/scripts\nCOPY data /app/data\nCOPY deploy /app/deploy\n%b' '$DASH_IMAGE' '$DASH_DEPS' > Dockerfile.dash && docker build -q -f Dockerfile.dash -t $NEW_DASH_IMAGE . \
     && printf 'FROM %s\nCOPY scripts /app/scripts\nCOPY data /app/data\n' '$WORK_IMAGE' > Dockerfile.work && docker build -q -f Dockerfile.work -t $NEW_WORK_IMAGE . \
     && cd ~/$ROOT_REMOTE && sed 's#$DASH_IMAGE#$NEW_DASH_IMAGE#' $DASH_START > $NEW_DASH_START && chmod +x $NEW_DASH_START"
   i=0; for old in $WORK_STARTS; do i=$((i+1)); new="$(echo "$NEW_WORK_STARTS" | cut -d' ' -f$i)"; OVERLAY="$OVERLAY && sed 's#$WORK_IMAGE#$NEW_WORK_IMAGE#' $old > $new && chmod +x $new"; done
