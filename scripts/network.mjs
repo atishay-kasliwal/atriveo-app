@@ -300,3 +300,27 @@ export async function removeLink(db, { id } = {}) {
   if (!r?.deletedCount) fail("That connection no longer exists. Reload the page.");
   return { id: String(id) };
 }
+
+/**
+ * One person from their LinkedIn profile (the extension's toolbar button): found again by their profile link or name, else added to a
+ * "LinkedIn" source with their headline, company and city. Returns the person and whether they were already here.
+ */
+export async function addFromLinkedIn(db, input = {}, now = new Date()) {
+  const name = str(input.name, 80);
+  if (!name || !/\p{L}/u.test(name)) fail("No name on that LinkedIn page. Open a person's profile and click again.");
+  let profile = "";
+  try { profile = link(input.linkedin); } catch { profile = ""; }
+  if (!/^https:\/\/([a-z]+\.)?linkedin\.com\/in\/[^/?#]+/i.test(profile)) fail("That is not a LinkedIn profile link");
+  profile = profile.replace(/^https:\/\/([a-z]+\.)?linkedin\.com\/in\/([^/?#]+).*$/i, "https://www.linkedin.com/in/$2/");
+  const people = (await all(db, PEOPLE)).filter((p) => !p.archived);
+  const slug = (u) => String(u || "").toLowerCase().replace(/^https:\/\/([a-z]+\.)?linkedin\.com\/in\//, "").replace(/\/.*$/, "");
+  const same = people.find((p) => p.linkedin && slug(p.linkedin) === slug(profile)) ?? people.find((p) => key(p.name) === key(name));
+  if (same) {
+    const fill = {};
+    for (const [k, v] of [["linkedin", profile], ["role", str(input.role, 80)], ["company", str(input.company, 80)], ["city", str(input.city, 80)]]) if (v && !same[k]) fill[k] = v;
+    return { person: Object.keys(fill).length ? await savePerson(db, { id: same.id, ...fill }, now) : same, existed: true };
+  }
+  const source = await saveSource(db, { name: "LinkedIn", type: "other" }, now);
+  const person = await savePerson(db, { name, role: str(input.role, 80), company: str(input.company, 80), city: str(input.city, 80), linkedin: profile, sourceId: source.id }, now);
+  return { person: await logHistory(db, { id: person.id, type: "note", text: "Added from LinkedIn" }, now), existed: false };
+}

@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {Readable} from 'node:stream';
-import {parseContacts,csvRows,previewContacts,savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
+import {addFromLinkedIn,parseContacts,csvRows,previewContacts,savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
 import {handleNetwork} from '../scripts/network-routes.mjs';
 
 // An in-memory stand-in for the three collections, with just the calls the store makes. Every name here is invented.
@@ -126,3 +126,15 @@ test('importing contacts: details come along, people already here (by name or em
  assert.deepEqual(prev.rows.map(r=>r.exists),[true,false],'same email counts as already here');
  const r=await addPeople(db,{rows:prev.rows,newSource:{name:'LinkedIn connections',type:'other'}},T);
  assert.deepEqual(r.skipped,['Bo K']);const ann=r.added[0];assert.deepEqual([ann.email,ann.company,ann.role,ann.linkedin],['ann@example.test','Expo Co','Organizer','']);});
+
+test('from a LinkedIn profile: added once to a LinkedIn source; found again by profile link or name; gaps filled, nothing overwritten',async()=>{
+ const db=fakeDb();
+ const a=await addFromLinkedIn(db,{name:'Dana Whit',role:'Senior Recruiter',company:'Randstad',city:'Raleigh, NC',linkedin:'https://ca.linkedin.com/in/dana-whit/details/experience?x=1'},T);
+ assert.equal(a.existed,false);assert.equal(a.person.linkedin,'https://www.linkedin.com/in/dana-whit/');assert.equal(a.person.company,'Randstad');assert.equal(a.person.history[0].text,'Added from LinkedIn');
+ const src=(await networkView(db)).sources[0];assert.equal(src.name,'LinkedIn');assert.equal(a.person.sourceId,src.id);
+ const b=await addFromLinkedIn(db,{name:'Dana W.',role:'Lead Recruiter',linkedin:'https://www.linkedin.com/in/Dana-Whit'},T);assert.equal(b.existed,true);assert.equal(b.person.id,a.person.id);assert.equal(b.person.role,'Senior Recruiter','not overwritten');
+ const c=await savePerson(db,{name:'Bo Kim'},T);const d=await addFromLinkedIn(db,{name:'bo kim',company:'Acme',linkedin:'https://www.linkedin.com/in/bokim'},T);
+ assert.equal(d.person.id,c.id);assert.equal(d.person.company,'Acme','a gap is filled');assert.equal(d.person.linkedin,'https://www.linkedin.com/in/bokim/');
+ await assert.rejects(()=>addFromLinkedIn(db,{name:'X Y',linkedin:'https://www.linkedin.com/company/acme'}),/not a LinkedIn profile/);
+ await assert.rejects(()=>addFromLinkedIn(db,{name:'',linkedin:'https://www.linkedin.com/in/x'}),/No name/);
+ assert.equal((await networkView(db)).people.length,2);});

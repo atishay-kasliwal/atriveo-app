@@ -1,4 +1,4 @@
-import { NetworkError, savePositions, previewContacts, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
+import { NetworkError, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
 import { boardView, readImage, removeBoardItem, saveBoardItem, saveImage } from "./network-board.mjs";
@@ -8,6 +8,7 @@ import { jobsForPerson, knownCompanies, warmJobs } from "./network-jobs.mjs";
 const WRITES = {
   "/network/preview": (db, b) => previewList(db, b.text).then((rows) => ({ rows })),
   "/network/import/preview": (db, b) => previewContacts(db, b.text),
+  "/network/linkedin": (db, b) => addFromLinkedIn(db, b),
   "/network/people": (db, b) => addPeople(db, b),
   "/network/person": (db, b) => savePerson(db, b).then((person) => ({ person })),
   "/network/history": (db, b) => logHistory(db, b).then((person) => ({ person })),
