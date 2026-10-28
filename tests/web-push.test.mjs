@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import { gzipSync, gunzipSync } from 'node:zlib';
 import fs from 'node:fs';
 import { validateSubscription, safePushUrl, sendPushNotification, handlePushRoute } from '../scripts/web-push.mjs';
 import { inboxPush, deliverEvent } from '../scripts/push-events.mjs';
@@ -63,5 +64,14 @@ test('Pages push proxy rejects anonymous and cross-origin requests and overrides
   try {
     const response = await onRequest({ request: request({ Origin: 'https://apply.atriveo.com', Cookie: `atriveo_token=${token}`, 'Content-Type': 'application/json', 'X-Atriveo-Push-User': 'victim@example.com' }), env });
     assert.equal(response.status, 200); assert.equal(forwarded.headers['X-Atriveo-Push-User'], 'owner@example.com'); assert.ok(!forwarded.headers.Cookie);
+    // Cloudflare can return an encoded upstream stream. Its encoding header must
+    // survive the relay, or Safari cannot parse the config before subscribing.
+    const payload = JSON.stringify({ publicKey: 'test-public-key' });
+    globalThis.fetch = async () => new Response(gzipSync(payload), { headers: { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip', 'Vary': 'Accept-Encoding' } });
+    const compressed = await onRequest({ request: new Request('https://apply.atriveo.com/api/push/config', { headers: { Cookie: `atriveo_token=${token}` } }), env });
+    assert.equal(compressed.headers.get('Content-Encoding'), 'gzip');
+    assert.equal(compressed.headers.get('Vary'), 'Accept-Encoding');
+    assert.equal(compressed.headers.get('Cache-Control'), 'no-store');
+    assert.equal(gunzipSync(Buffer.from(await compressed.arrayBuffer())).toString(), payload);
   } finally { globalThis.fetch = previous; }
 });

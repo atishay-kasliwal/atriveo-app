@@ -22,6 +22,10 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
       method: request.method, redirect: 'error', signal: AbortSignal.timeout(20000), body,
       headers: { 'Content-Type': 'application/json', 'X-Tailor-Token': env.TAILOR_TOKEN, 'X-Atriveo-Push-User': userId },
     });
-    return new Response(res.body, { status: res.status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+    // Workers may pass the upstream compressed stream through unchanged. Preserve
+    // Content-Encoding so the browser can decode it before parsing the JSON.
+    const headers = new Headers(res.headers);
+    headers.set('Cache-Control', 'no-store');
+    return new Response(res.body, { status: res.status, headers });
   } catch { return Response.json({ error: 'Push backend unreachable' }, { status: 502 }); }
 };

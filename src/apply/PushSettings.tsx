@@ -7,7 +7,10 @@ function bounded<T>(promise: Promise<T>, label: string): Promise<T> {
 
 async function api(route: string, method = 'GET', body?: object) {
   const res = await fetch(`/api/push/${route}`, { method, credentials: 'include', cache: 'no-store', signal: AbortSignal.timeout(20000), ...(method !== 'GET' ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) } : {}) });
-  const data = await res.json();
+  if (!res.headers.get('content-type')?.includes('application/json')) throw new Error(`Notification ${route} returned an unexpected response (HTTP ${res.status}). Please try again.`);
+  let data;
+  try { data = await res.json(); }
+  catch { throw new Error(`Could not read notification ${route} (HTTP ${res.status}). Please try again.`); }
   if (!res.ok) throw new Error(data.error || 'Notifications could not be saved');
   return data;
 }
@@ -31,7 +34,7 @@ export default function PushSettings() {
     let active = true;
     setMessage('Preparing notifications…');
     // Prepare registration and public key ahead of the click, preserving iOS user activation.
-    Promise.all([bounded(navigator.serviceWorker.register('/sw.js').then(() => navigator.serviceWorker.ready), 'Notification setup'), api('config')]).then(async ([reg, config]) => {
+    Promise.all([bounded(navigator.serviceWorker.register('/sw.js').then(() => navigator.serviceWorker.ready), 'Notification setup').catch(e => { throw new Error(`Service worker: ${e.message}`); }), api('config')]).then(async ([reg, config]) => {
       if (!active) return;
       setRegistration(reg); setKey(config.publicKey || '');
       const sub = await reg.pushManager.getSubscription();
