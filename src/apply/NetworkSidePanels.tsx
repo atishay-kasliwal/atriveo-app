@@ -251,8 +251,8 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
  * A company nobody added, worked out from where your people work: who is there, its open jobs and who to ask, and "Keep as a source"
  * to make it a card of your own (logo, place, notes, links).
  */
-export function AutoCompanyPanel({ company: s, data, colors, onClose, onPerson, onReferral, onKeep, say }: {
-  company: Source; data: NetworkData; colors: ReturnType<typeof colorsFor>; onClose: () => void; onPerson: (id: string) => void;
+export function AutoCompanyPanel({ company: s, position, positions, data, colors, onClose, onPerson, onReferral, onKeep, say }: {
+  company: Source; position: { x: number; y: number } | null; positions: { id: string; x: number; y: number }[]; data: NetworkData; colors: ReturnType<typeof colorsFor>; onClose: () => void; onPerson: (id: string) => void;
   onReferral: (personId: string, job: JobRow) => void; onKeep: (s: Source) => void; say: Say;
 }) {
   const members = data.people.filter((p) => s.auto?.includes(p.id));
@@ -263,7 +263,7 @@ export function AutoCompanyPanel({ company: s, data, colors, onClose, onPerson, 
   useEffect(() => { if (!first) return; let on = true; loadPersonJobs(first).then((r) => on && setJobs(r.jobs)).catch(() => on && setJobs([])); return () => { on = false; }; }, [first]);
   async function keep() {
     setBusy(true);
-    try { const r = await post<{ source: Source }>("source", { name: s.name, type: "company" }); say({ text: `${s.name} is a source now. Add its logo and place here.` }); onKeep(r.source); }
+    try { const r = await post<{ source: Source }>("source", { name: s.name, type: "company", position, positions }); say({ text: `${s.name} saved near its people.` }); onKeep(r.source); }
     catch (e) { setBusy(false); say({ text: String((e as Error).message) }); }
   }
   const askWho = asker || first, open = (jobs ?? []).filter((j) => j.status === "new" || j.status === "ready");
@@ -273,13 +273,17 @@ export function AutoCompanyPanel({ company: s, data, colors, onClose, onPerson, 
         <span className="pp-pic sq" style={{ "--c": "var(--nw-muted)" } as CSSProperties}><span>{s.name[0]?.toUpperCase() ?? "?"}</span></span>
         <div className="pp-id">
           <h2 className="nw-name">{s.name}</h2>
-          <p className="pp-where">Added for you: {members.length} of your people work here</p>
+          <p className="pp-where">Suggested company · {members.length} people in your network</p>
         </div>
         <button type="button" className="nw-x" aria-label="Close" onClick={onClose}>×</button>
       </header>
-      <div className="pp-actions">
-        <button type="button" className="nw-btn main" disabled={busy} onClick={() => void keep()}>Keep as a source</button>
-      </div>
+      <section className="pp-source-confirm" aria-label="Confirm source">
+        <span className="pp-source-eyebrow">From your network</span>
+        <h3>Keep {s.name} on your map?</h3>
+        <p>Save this company as a source. Its card stays near {members.length === 1 ? members[0].name : "the people who work here"}, with their connections intact.</p>
+        <div className="pp-source-faces" aria-label="Connected people">{members.slice(0, 3).map((p) => <span key={p.id}><i style={{ "--c": colors.person.get(p.id) } as CSSProperties}>{initials(p.name)}</i>{p.name}</span>)}{members.length > 3 && <span>+{members.length - 3} more</span>}</div>
+        <div className="pp-source-buttons"><button type="button" className="nw-btn main" disabled={busy} onClick={() => void keep()}>{busy ? "Saving source…" : "Confirm source"}</button><button type="button" className="nw-btn ghost" disabled={busy} onClick={onClose}>Not now</button></div>
+      </section>
       <div className="pp-body">
         <span className="pp-h">People there</span>
         <ul className="pp-people">{members.map((p) => (

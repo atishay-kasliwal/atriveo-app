@@ -12,12 +12,13 @@ const stamp = '2026-10-01T12:00:00.000Z';
 function person(id, name, sourceId, company = '') {
   return { id, name, role: 'Software engineer', company, city: 'New York', photoId: null, watchJobs: false, email: '', linkedin: '', phone: '', notes: '', sourceId, via: null, color: null, tags: [], lastContact: null, nextFollowUp: null, history: [], archived: false, createdAt: stamp, updatedAt: stamp };
 }
-async function fixture(t, width, linkedin = false) {
+async function fixture(t, width, linkedin = false, suggested = false) {
   const errors = [], writes = [];
   const data = {
     sources: [{ id: 'company-1', name: 'Northstar', type: 'company', about: 'Technology', color: null, createdAt: stamp }, { id: 'family-1', name: 'Family', type: 'family', about: 'People close to you', color: null, createdAt: stamp }, { id: 'event-1', name: 'Design meetup', type: 'event', about: 'Brooklyn', color: null, createdAt: stamp }],
     people: [person('person-1', 'Mira Chen', 'company-1', 'Northstar'), person('person-2', 'Alex Rivera', 'company-1', 'Northstar'), person('person-3', 'Sam Patel', 'family-1', 'Example Research'), person('person-4', 'Robin Park', 'event-1', 'Orchid'), person('person-5', 'Jordan Lee', 'event-1', 'Fieldwork')], links: [],
   };
+  if (suggested) data.people.find(p => p.id === "person-5").company = "Orchid";
   if (linkedin) {
     data.sources.push({ id: 'linkedin', name: 'LinkedIn', type: 'other', createdAt: stamp });
     data.people.push(person('old-linkedin', 'Old Contact', 'linkedin'));
@@ -48,7 +49,7 @@ async function fixture(t, width, linkedin = false) {
           data.people.find(p => p.id === 'old-linkedin').sourceId = 'linkedin-day';
           return route.fulfill({ json: { moved: 1, days: 1 } });
         }
-        if (u.pathname === '/network/source') { const source = { id: body.id || 'new-source', createdAt: stamp, about: '', color: null, ...body }; data.sources.push(source); return route.fulfill({ json: { source } }); }
+        if (u.pathname === '/network/source') { const source = { id: body.id || 'new-source', createdAt: stamp, about: '', color: null, ...body, ...(body.position || {}) }; if (body.positions) for (const item of body.positions) { const card = [...data.people, ...data.sources].find(c => c.id === item.id); if (card) Object.assign(card, item); } data.sources.push(source); return route.fulfill({ json: { source } }); }
         if (u.pathname === '/network/person') { const p = person(body.id || 'added-person', body.name || 'Mira Chen', body.sourceId || null, body.company || ''); data.people.push(p); return route.fulfill({ json: { person: p } }); }
         if (u.pathname === '/network/board/save') { const item = { id: 'added-note', ...body }; board.push(item); return route.fulfill({ json: { item } }); }
         return route.fulfill({ json: { ok: true } });
@@ -173,4 +174,25 @@ test('LinkedIn opens today’s day card for bulk entry and sorts older contacts'
   await panel.waitFor(); await panel.getByText('Old Contact', { exact: true }).waitFor();
   assert.ok(writes.some(w => w.path === '/network/linkedin/today'));
   assert.deepEqual(errors, []);
+});
+
+for (const width of [1440,390]) test(`confirm a suggested source stays near its people at ${width}px and after reload`,async t=>{
+ const {page,errors,writes}=await fixture(t,width,false,true);
+ const suggested=page.locator('[data-node="auto:orchid"]');await suggested.waitFor();
+ const before=await suggested.getAttribute('transform');
+ const personBefore=await page.locator('[data-node="person-4"]').getAttribute('transform');
+ await suggested.focus();await page.keyboard.press('Enter');
+ const panel=page.getByRole('complementary',{name:'Orchid',exact:true});
+ await panel.getByRole('region',{name:'Confirm source'}).waitFor();
+ if(process.env.NETWORK_QA_DIR) await page.screenshot({path:path.join(process.env.NETWORK_QA_DIR,`confirm-source-${width}.png`)});
+ await panel.getByRole('button',{name:'Not now',exact:true}).click();assert.equal(writes.filter(w=>w.path==='/network/source').length,0);
+ await suggested.focus();await page.keyboard.press('Enter');
+ await panel.getByRole('button',{name:'Confirm source',exact:true}).click();
+ const saved=page.locator('[data-node="new-source"]');await saved.waitFor();
+ assert.equal(await saved.getAttribute('transform'),before,'saved source keeps its suggested position');
+ assert.equal(await page.locator('[data-node="person-4"]').getAttribute('transform'),personBefore,'people stay put');
+ const body=writes.find(w=>w.path==='/network/source').body;assert.ok(Number.isFinite(body.position.x));assert.ok(body.positions.some(p=>p.id==='person-4'));
+ await page.reload();await saved.waitFor();assert.equal(await saved.getAttribute('transform'),before,'source position survives reload');
+ assert.equal(await page.locator('[data-node="person-4"]').getAttribute('transform'),personBefore);
+ assert.deepEqual(errors,[]);
 });

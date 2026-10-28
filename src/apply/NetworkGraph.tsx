@@ -40,7 +40,7 @@ const inkOf = (c?: string) => (!c || c === "ink" ? "var(--nw-ink)" : c);
 export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer, colors, visible, selected, selectedWork, board, setBoard, onPerson, onSource, onYou, onWork, onLinks, onPeople, onBulkMail, say }: {
   data: NetworkData; layers: CanvasLayers; stackPeople: boolean; onRevealLayer: (layer: keyof CanvasLayers) => void; colors: Colors; visible: Set<string> | null; selected: string | null; selectedWork: string | null;
   board: BoardItem[]; setBoard: (f: (b: BoardItem[]) => BoardItem[]) => void;
-  onPerson: (id: string) => void; onSource: (id: string) => void; onYou: () => void; onWork: (id: string) => void; onLinks: (links: Link[]) => void;
+  onPerson: (id: string) => void; onSource: (id: string, position: Point, positions: { id: string; x: number; y: number }[]) => void; onYou: () => void; onWork: (id: string) => void; onLinks: (links: Link[]) => void;
   onPeople: (people: Person[]) => void; onBulkMail: (ids: string[]) => void; say: (t: { text: string } | null) => void;
 }) {
   const stage = useRef<HTMLDivElement>(null);
@@ -48,6 +48,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
   const base = useMemo(() => autoLayout(data), [data]);
   const [moved, setMoved] = useState<Map<string, Point>>(new Map());
   const pos = useCallback((id: string) => moved.get(id) ?? base.get(id) ?? { x: 0, y: 0 }, [moved, base]);
+  const cardPositions = () => [...data.people, ...data.sources.filter((s) => !s.auto)].map((card) => ({ id: card.id, ...pos(card.id) }));
   const [view, setView] = useState<View>({ x: 0, y: 0, k: 1 });
   const [hover, setHover] = useState<string | null>(null);
   const [editing, setEditing] = useState<{ edge: Edge; at: Point } | null>(null);
@@ -288,7 +289,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
         return;
       }
       if (g.id === "you") { onYou(); return; }
-      if (people.has(g.id)) onPerson(g.id); else onSource(g.id);
+      if (people.has(g.id)) onPerson(g.id); else onSource(g.id, pos(g.id), cardPositions());
     }
   }
   function cardAt(w: Point): string | null {
@@ -385,7 +386,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
                 ? <><clipPath id={`nwg-src-${s.id}`}><rect x={x} y={y} width={size} height={size} rx={rx} /></clipPath><image href={imageUrl(s.photoId)} x={x} y={y} width={size} height={size} clipPath={`url(#nwg-src-${s.id})`} preserveAspectRatio="xMidYMid slice" /></> : null;
               return (
                 <g key={s.id} data-node={s.id} className={`nwg-node nwg-src is-${s.type}`} transform={`translate(${p.x} ${p.y})`} style={{ opacity: dim ? 0.18 : 1 }} tabIndex={0} role="button" aria-label={`${sourceLabel(s, data.sources, data.people)}: open it`}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSource(s.id); } }} onPointerEnter={() => setHover(s.id)} onPointerLeave={() => setHover(null)}>
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSource(s.id, pos(s.id), cardPositions()); } }} onPointerEnter={() => setHover(s.id)} onPointerLeave={() => setHover(null)}>
                   <title>{sourceLabel(s, data.sources, data.people)}</title>
                   {event ? <>
                     {/* An event is a ticket: notched sides, a perforation, a calendar, its place and its date. */}

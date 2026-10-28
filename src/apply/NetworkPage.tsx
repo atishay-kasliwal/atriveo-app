@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
-  sourceLabel, throughFields, throughValue, introducersOf, setActiveMap, HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, plusDays, post, uploadPhoto,
+  autoLayout, sourceLabel, throughFields, throughValue, introducersOf, setActiveMap, HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, plusDays, post, uploadPhoto,
   type BoardItem, type HistoryType, type JobRow, companyOfPerson, loadPersonJobs, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
 } from "./network";
 import NetworkGraph from "./NetworkGraph";
@@ -70,6 +70,8 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
   const [work, setWork] = useState<string | null>(null);
   // The other things the panel can show: you, or a source.
   const [side, setSide] = useState<null | "you" | { source: string }>(null);
+  const [sourcePositions, setSourcePositions] = useState<{ id: string; x: number; y: number }[]>([]);
+  const [sourcePosition, setSourcePosition] = useState<{ x: number; y: number } | null>(null);
   const [bulkSource, setBulkSource] = useState<string | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
   const say = useCallback((t: Toast) => { setToast(t); window.clearTimeout(toastTimer.current); if (t) toastTimer.current = window.setTimeout(() => setToast(null), t.undo ? 6000 : 3000); }, []);
@@ -146,7 +148,7 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
   const workItem = work ? board.find((b) => b.id === work && b.kind === "work") ?? null : null;
   const openPerson = (id: string | null) => { setWork(null); setSide(null); setSelected(id); };
   const openWork = (id: string) => { setSelected(null); setSide(null); setWork(id); };
-  const openSource = (id: string) => { setSelected(null); setWork(null); setSide({ source: id }); setView({ kind: "source", id }); };
+  const openSource = (id: string, position?: { x: number; y: number }, positions?: { id: string; x: number; y: number }[]) => { setSourcePositions(positions ?? []); setSourcePosition(position ?? autoLayout(mapData).get(id) ?? null); setSelected(null); setWork(null); setSide({ source: id }); setView({ kind: "source", id }); };
   const openYou = () => { setSelected(null); setWork(null); setSide("you"); };
   const sideSource = side && typeof side === "object" ? sourceById.get(side.source) ?? null : null;
   const replacePerson = (p: Person) => setData((d) => ({ ...d, people: d.people.map((x) => (x.id === p.id ? p : x)) }));
@@ -232,7 +234,7 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
           <section className="nw-list nw-canvas" aria-label="Network canvas">
             {loaded ? <NetworkGraph data={mapData} layers={layers} stackPeople={stackPeople} onRevealLayer={(key) => setLayers((old) => ({ ...old, [key]: true }))} colors={colors} visible={visible} selected={selected} selectedWork={work} board={board} setBoard={setBoard}
                 onPerson={(id) => openPerson(id === selected ? null : id)} onWork={openWork}
-                onSource={(id) => { if (sideSource?.id === id) { setSide(null); setView({ kind: "all" }); } else openSource(id); }} onYou={() => (side === "you" ? setSide(null) : openYou())}
+                onSource={(id, position, positions) => { if (sideSource?.id === id) { setSide(null); setView({ kind: "all" }); } else openSource(id, position, positions); }} onYou={() => (side === "you" ? setSide(null) : openYou())}
                 onLinks={(links) => setData((d) => ({ ...d, links }))} onPeople={(list) => setData((d) => ({ ...d, people: d.people.map((p) => list.find((x) => x.id === p.id) ?? p) }))}
                 onBulkMail={setBulkMail} say={say} /> : <p className="nw-canvas-loading" role="status">Loading your network…</p>}
             {loaded && !data.people.length && mode === 'graph' && <div className="nw-canvas-welcome"><h2>Your network starts here</h2><p>Add a person, drop a note, or import your contacts.</p><button type="button" className="nw-btn" onClick={() => setDialog('person')}>Add your first person</button></div>}
@@ -265,8 +267,8 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
 
 
           {side === "you" && <YouPanel data={data} onChange={(you) => setData((d) => ({ ...d, you }))} onClose={() => setSide(null)} say={say} />}
-          {sideSource?.auto && <AutoCompanyPanel key={sideSource.id} company={sideSource} data={data} colors={colors} onClose={() => { setSide(null); setView({ kind: "all" }); }} onPerson={(id) => openPerson(id)}
-            onReferral={(id, job) => setMailFor({ id, job })} onKeep={(s) => { setData((d) => ({ ...d, sources: [...d.sources, s] })); openSource(s.id); }} say={say} />}
+          {sideSource?.auto && <AutoCompanyPanel key={sideSource.id} company={sideSource} position={sourcePosition} positions={sourcePositions} data={data} colors={colors} onClose={() => { setSide(null); setView({ kind: "all" }); }} onPerson={(id) => openPerson(id)}
+            onReferral={(id, job) => setMailFor({ id, job })} onKeep={(s) => { const positions = new Map(sourcePositions.map((p) => [p.id, p])); setData((d) => ({ ...d, people: d.people.map((p) => ({ ...p, ...positions.get(p.id) })), sources: [...d.sources.filter((x) => x.id !== s.id).map((x) => ({ ...x, ...positions.get(x.id) })), s], ...(d.onMap ? { onMap: [...new Set([...d.onMap, s.id])] } : {}) })); openSource(s.id); }} say={say} />}
           {sideSource && !sideSource.auto && <SourcePanel key={sideSource.id} source={sideSource} data={data} colors={colors} onChange={(s) => setData((d) => ({ ...d, sources: d.sources.map((x) => (x.id === s.id ? { ...x, ...s } : x)) }))}
             onClose={() => { setSide(null); setView({ kind: "all" }); }} onPerson={(id) => openPerson(id)} onAddPeople={(id) => { setBulkSource(id ?? sideSource.id); setDialog("list"); }} onSource={openSource} onReload={reload} onReferral={(id, job) => setMailFor({ id, job })}
             onLinks={(links) => setData((d) => ({ ...d, links }))} say={say} />}

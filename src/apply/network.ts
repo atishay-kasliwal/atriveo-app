@@ -159,11 +159,12 @@ export function autoLayout(data: NetworkData): Map<string, Point> {
   }
   for (const [index, source] of sources.entries()) if (!pos.has(source.id)) pos.set(source.id, ring(you.x, you.y, 460, index * 2.4));
   for (const p of data.people) if (!pos.has(p.id)) pos.set(p.id, ring(you.x, you.y, 300, Math.random() * Math.PI * 2));
-  // A company worked out from "Works at" sits between its people, a little further out from you.
+  // A suggested company sits next to an actual person, even when its people are far apart.
   for (const s of data.sources) {
     if (!s.auto || pos.has(s.id)) continue;
     const pts = s.auto.map((id) => pos.get(id)).filter((p): p is Point => Boolean(p)), c = { x: pts.reduce((n, p) => n + p.x, 0) / (pts.length || 1), y: pts.reduce((n, p) => n + p.y, 0) / (pts.length || 1) };
-    pos.set(s.id, ring(c.x, c.y, 170, Math.atan2(c.y - you.y, c.x - you.x)));
+    const anchor = pts.reduce((best, p) => Math.hypot(p.x - c.x, p.y - c.y) < Math.hypot(best.x - c.x, best.y - c.y) ? p : best, pts[0] ?? c);
+    pos.set(s.id, ring(anchor.x, anchor.y, 320, away(anchor)));
   }
   return pos;
 }

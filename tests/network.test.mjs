@@ -229,3 +229,16 @@ test('LinkedIn by day: one card per New York day under LinkedIn, reused all day;
  assert.deepEqual([oldDay.name,oldDay.parentSourceId],['Oct 20, 2026',root.id]);
  assert.equal(v.people.find(p=>p.id===kid.id).sourceId,root.id,'someone introduced by a person is left where they are');
  assert.deepEqual(await sortLinkedInByDay(db,T),{moved:0,days:0});});
+
+test('confirming a company keeps its card and people in place; custom maps keep separate positions',async()=>{
+ const db=fakeDb();const person=await savePerson(db,{name:'Mira Chen',company:'Orchid'},T);
+ const body={name:'Orchid',type:'company',position:{x:920,y:180},positions:[{id:person.id,x:730,y:200}]};
+ const created=await call(db,'POST','/network/source',body);assert.equal(created.code,200);
+ const v=await networkView(db);assert.equal(v.sources[0].x,920);assert.equal(v.sources[0].y,180);assert.equal(v.people[0].x,730);
+ const again=await call(db,'POST','/network/source',{...body,position:{x:0,y:0}});assert.equal(again.json.source.id,created.json.source.id);assert.equal((await networkView(db)).sources[0].x,920,'reusing a source preserves its saved position');
+ await db.collection('network_maps').insertOne({_id:'map-a',name:'My map'});
+ const custom=await call(db,'POST','/network/source',{...body,name:'Another company',mapId:'map-a',position:{x:1100,y:300}});assert.equal(custom.code,200);
+ const card=await db.collection('network_map_cards').findOne({_id:`map-a:${custom.json.source.id}`});assert.deepEqual([card.x,card.y],[1100,300]);
+ const global=await db.collection('network_sources').findOne({_id:custom.json.source.id});assert.equal(global.x,undefined,'custom map coordinates do not change main');
+ assert.equal((await networkView(db)).people[0].x,730);
+});

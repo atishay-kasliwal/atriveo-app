@@ -127,3 +127,9 @@ test('a source reached more than once: the main line carries its year, and each 
  assert.deepEqual(e.map(x=>[x.a,x.kind,x.label]),[['uncle','via','introduced · 2024'],['ato','intro','also introduced · 2026']]);
  assert.deepEqual(warmPath(edgesFor(data,colorsFor(data)).filter(x=>x.key!=='source-rh'),'rh').nodes,['you','ato','rh']);
 });
+
+test('suggested companies sit near a person even when coworkers are on opposite sides of the map',()=>{
+ const data=withAutoCompanies({sources:[],links:[],people:[person('a',{company:'Orchid',x:-2000,y:800}),person('b',{company:'Orchid',x:2000,y:-800})]});
+ const positions=autoLayout(data),company=positions.get(data.sources[0].id);
+ assert.ok(data.people.some(p=>Math.hypot(company.x-p.x,company.y-p.y)<325));
+});
