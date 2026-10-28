@@ -41,14 +41,31 @@ export function parseList(input) {
 
 async function all(db, name) { return (await db.collection(name).find({}).toArray()).map(out); }
 
-/** Everything the page shows: people (archived ones left out unless asked), sources and links. */
+/** Everything the page shows: people (archived ones left out unless asked), sources, links, and where "You" sits on the canvas. */
 export async function networkView(db, { archived = false } = {}) {
-  const [people, sources, links] = await Promise.all([all(db, PEOPLE), all(db, SOURCES), all(db, LINKS)]);
+  const [people, sources, links, you] = await Promise.all([all(db, PEOPLE), all(db, SOURCES), all(db, LINKS), db.collection("app_settings").findOne({ _id: YOU })]);
   return {
     people: people.filter((p) => archived || !p.archived).sort((a, b) => a.name.localeCompare(b.name)),
     sources: sources.sort((a, b) => a.name.localeCompare(b.name)),
     links,
+    you: { x: you?.x ?? 0, y: you?.y ?? 0 },
   };
+}
+
+const YOU = "network_you";
+const coord = (v) => { const n = Number(v); if (!Number.isFinite(n)) fail("A position must be a number"); return Math.round(Math.max(-100000, Math.min(100000, n)) * 10) / 10; };
+
+/** Where cards sit on the canvas, saved after a drag: people, sources, or "you". Unknown ids are ignored (someone may have archived them). */
+export async function savePositions(db, { items } = {}) {
+  if (!Array.isArray(items) || !items.length) fail("Nothing to save");
+  if (items.length > 2000) fail("Too many positions at once");
+  let saved = 0;
+  for (const it of items) {
+    const id = String(it?.id ?? ""), set = { x: coord(it?.x), y: coord(it?.y) };
+    if (id === "you") { await db.collection("app_settings").updateOne({ _id: YOU }, { $set: set }, { upsert: true }); saved++; continue; }
+    for (const name of [PEOPLE, SOURCES]) if (await db.collection(name).findOne({ _id: id })) { await db.collection(name).updateOne({ _id: id }, { $set: set }); saved++; break; }
+  }
+  return { saved };
 }
 
 /** Rows from a pasted list, marked when the name is already in your network (or repeated in the list). */

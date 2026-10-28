@@ -3,6 +3,7 @@ import {
   HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, initials, loadNetwork, plusDays, post,
   type HistoryType, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
 } from "./network";
+import NetworkGraph from "./NetworkGraph";
 import "./network.css";
 
 type View = { kind: "all" } | { kind: "source"; id: string | null } | { kind: "due" } | { kind: "never" } | { kind: "introduced" };
@@ -18,6 +19,8 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const [view, setView] = useState<View>({ kind: "all" });
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("name");
+  const [mode, setModeState] = useState<"graph" | "list">(() => { try { return localStorage.getItem("nw-mode") === "list" ? "list" : "graph"; } catch { return "graph"; } });
+  const setMode = (m: "graph" | "list") => { setModeState(m); try { localStorage.setItem("nw-mode", m); } catch { /* the choice just is not remembered */ } };
   const [selected, setSelected] = useState<string | null>(null);
   const [dialog, setDialog] = useState<null | "list" | "person" | { source: Source | null }>(null);
   const [toast, setToast] = useState<Toast>(null);
@@ -25,7 +28,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const say = useCallback((t: Toast) => { setToast(t); window.clearTimeout(toastTimer.current); if (t) toastTimer.current = window.setTimeout(() => setToast(null), t.undo ? 6000 : 3000); }, []);
 
   const reload = useCallback(async () => {
-    try { const d = await loadNetwork(); setData({ people: d.people, sources: d.sources, links: d.links }); setError(""); }
+    try { const d = await loadNetwork(); setData({ people: d.people, sources: d.sources, links: d.links, you: d.you }); setError(""); }
     catch (e) { setError(String((e as Error).message || e)); }
     finally { setLoaded(true); }
   }, []);
@@ -62,6 +65,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
     return list;
   }, [data.people, view, query, sort, sourceById]);
 
+  const visible = useMemo(() => (view.kind === "all" && !query.trim() ? null : new Set(shown.map((p) => p.id))), [view, query, shown]);
   const person = selected ? personById.get(selected) ?? null : null;
   const replacePerson = (p: Person) => setData((d) => ({ ...d, people: d.people.map((x) => (x.id === p.id ? p : x)) }));
   const viewName = view.kind === "source" ? (view.id ? sourceById.get(view.id)?.name ?? "Source" : "No source") : view.kind === "due" ? "Follow-up due" : view.kind === "never" ? "Never contacted" : view.kind === "introduced" ? "Introduced by someone" : "Everyone";
@@ -114,9 +118,19 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
           <section className="nw-list" aria-label={viewName}>
             <div className="nw-list-head">
               <h2>{viewName} <span>{shown.length}</span></h2>
-              <label className="nw-sort">Sort <select id="nw-sort" value={sort} onChange={(e) => setSort(e.target.value)}>{SORTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>
+              <div className="nw-head-r">
+                {mode === "list" && <label className="nw-sort">Sort <select id="nw-sort" value={sort} onChange={(e) => setSort(e.target.value)}>{SORTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>}
+                <div className="nw-mode" role="group" aria-label="Show as">
+                  <button type="button" aria-pressed={mode === "graph"} onClick={() => setMode("graph")}>Map</button>
+                  <button type="button" aria-pressed={mode === "list"} onClick={() => setMode("list")}>List</button>
+                </div>
+              </div>
             </div>
-            {loaded && !data.people.length ? (
+            {loaded && data.people.length > 0 && mode === "graph" ? (
+              <NetworkGraph data={data} colors={colors} visible={visible} selected={selected} onPerson={(id) => setSelected(id === selected ? null : id)}
+                onSource={(id) => { setSelected(null); setView(view.kind === "source" && view.id === id ? { kind: "all" } : { kind: "source", id }); }}
+                onLinks={(links) => setData((d) => ({ ...d, links }))} say={say} />
+            ) : loaded && !data.people.length ? (
               <div className="nw-empty">
                 <h3>Start with the people you already talk to</h3>
                 <p>Paste a list of names from LinkedIn, pick where they come from, and each one becomes a person you can keep notes on and follow up with.</p>

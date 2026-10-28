@@ -34,3 +34,18 @@ test('wording: follow-up due or late, last contact, quick dates, initials',()=>{
  assert.equal(ago(null),'never');assert.equal(ago(new Date().toISOString()),'today');assert.equal(ago(new Date(Date.now()-3*864e5).toISOString()),'3 days ago');
  assert.equal(ago(new Date(Date.now()-21*864e5).toISOString()),'3 weeks ago');
  assert.equal(initials('Dana  Whitlock'),'DW');assert.equal(initials('  '),'?');});
+
+test('layout: saved spots win; new people fan out around their source without two cards overlapping, even a list of 40',async()=>{
+ const {autoLayout}=await import(out);
+ const overlap=(a,b)=>Math.abs(a.x-b.x)<196+8&&Math.abs(a.y-b.y)<52+8;
+ for(const n of [1,2,3,5,8,9,15,40])for(const angle of [0,1,2,3,4,5]){
+  const sources=Array.from({length:6},(_,i)=>src('s'+i,String(i)));
+  const people=Array.from({length:n},(_,i)=>person('p'+i,{sourceId:'s'+angle}));
+  const pos=autoLayout({sources,links:[],people});
+  const pts=people.map(p=>pos.get(p.id));
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++)assert.ok(!overlap(pts[i],pts[j]),`${n} people around source ${angle}: cards ${i} and ${j} overlap`);
+ }
+ const saved=autoLayout({sources:[{...src('s','1'),x:10,y:20}],links:[],people:[person('a',{sourceId:'s',x:5,y:6})],you:{x:-3,y:4}});
+ assert.deepEqual(saved.get('s'),{x:10,y:20});assert.deepEqual(saved.get('a'),{x:5,y:6});assert.deepEqual(saved.get('you'),{x:-3,y:4});
+ const chain=autoLayout({sources:[src('s','1')],links:[],people:[person('a',{sourceId:'s'}),person('b',{sourceId:'s',via:'a'}),person('c',{sourceId:'s',via:'b'})]});
+ const d=(p,q)=>Math.hypot(p.x-q.x,p.y-q.y);assert.ok(d(chain.get('b'),chain.get('a'))<260&&d(chain.get('c'),chain.get('b'))<260,'each introduction sits next to who made it');});

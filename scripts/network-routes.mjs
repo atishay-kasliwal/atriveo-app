@@ -1,4 +1,4 @@
-import { NetworkError, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
+import { NetworkError, savePositions, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 
 // /network/*: the Network page's API. The sidecar's own token check runs first; every call is one small Mongo operation.
 const WRITES = {
@@ -12,6 +12,7 @@ const WRITES = {
   "/network/source/remove": (db, b) => removeSource(db, b),
   "/network/link": (db, b) => saveLink(db, b).then((link) => ({ link })),
   "/network/link/remove": (db, b) => removeLink(db, b),
+  "/network/positions": (db, b) => savePositions(db, b),
 };
 
 async function readBody(req, limit = 300_000) {

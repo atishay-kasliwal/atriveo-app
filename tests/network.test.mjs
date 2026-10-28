@@ -1,12 +1,12 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {Readable} from 'node:stream';
-import {parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
+import {savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
 import {handleNetwork} from '../scripts/network-routes.mjs';
 
 // An in-memory stand-in for the three collections, with just the calls the store makes. Every name here is invented.
 const fakeDb=()=>{const cols=new Map();const col=n=>{if(!cols.has(n))cols.set(n,new Map());const m=cols.get(n);const clone=d=>structuredClone(d);return{
  find:()=>({toArray:async()=>[...m.values()].map(clone)}),findOne:async q=>m.has(q._id)?clone(m.get(q._id)):null,
  insertOne:async d=>{m.set(d._id,clone(d))},insertMany:async ds=>{for(const d of ds)m.set(d._id,clone(d))},
- updateOne:async(q,u)=>{if(m.has(q._id))m.set(q._id,{...m.get(q._id),...clone(u.$set)})},deleteOne:async q=>({deletedCount:m.delete(q._id)?1:0})}};return{collection:col,cols}};
+ updateOne:async(q,u,o)=>{if(m.has(q._id))m.set(q._id,{...m.get(q._id),...clone(u.$set)});else if(o?.upsert)m.set(q._id,{_id:q._id,...clone(u.$set)})},deleteOne:async q=>({deletedCount:m.delete(q._id)?1:0})}};return{collection:col,cols}};
 const T=new Date('2026-10-28T15:00:00Z');
 
 test('a pasted list: bullets and numbers go, text after a dash is the city, repeats are marked, junk lines are skipped',()=>{
@@ -92,3 +92,12 @@ test('routes: read, preview, bulk add, a store error, unknown paths, and other p
  assert.equal((await call(db,'DELETE','/network')).code,404);assert.equal((await call(db,'POST','/network/everything',{})).code,404);
  const none=await (async()=>{const req=Readable.from([]);req.method='GET';const res={writeHead(c){this.code=c},end(b){this.body=b}};await handleNetwork(req,res,new URL('/network','http://x'),{withDb:null});return res})();
  assert.equal(none.code,400);assert.match(JSON.parse(none.body).error,/MONGO_URI/);});
+
+test('positions: people, sources and "you" keep where you dragged them; unknown ids are skipped; bad numbers are refused',async()=>{
+ const db=fakeDb();const s=await saveSource(db,{name:'Expo',type:'event'},T);const p=await savePerson(db,{name:'Cy Ro',sourceId:s.id},T);
+ assert.deepEqual((await networkView(db)).you,{x:0,y:0});
+ assert.deepEqual(await savePositions(db,{items:[{id:p.id,x:120.04,y:-40},{id:s.id,x:300,y:5},{id:'you',x:-10,y:20},{id:'gone',x:1,y:1}]}),{saved:3});
+ const v=await networkView(db);assert.deepEqual([v.people[0].x,v.people[0].y],[120,-40]);assert.deepEqual([v.sources[0].x,v.sources[0].y],[300,5]);assert.deepEqual(v.you,{x:-10,y:20});
+ await assert.rejects(()=>savePositions(db,{items:[{id:p.id,x:'left',y:0}]}),/must be a number/);
+ await assert.rejects(()=>savePositions(db,{items:[]}),/Nothing to save/);
+ await savePositions(db,{items:[{id:p.id,x:9e9,y:-9e9}]});const far=(await networkView(db)).people[0];assert.deepEqual([far.x,far.y],[100000,-100000]);});
