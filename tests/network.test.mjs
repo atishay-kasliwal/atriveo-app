@@ -241,4 +241,9 @@ test('confirming a company keeps its card and people in place; custom maps keep 
  const card=await db.collection('network_map_cards').findOne({_id:`map-a:${custom.json.source.id}`});assert.deepEqual([card.x,card.y],[1100,300]);
  const global=await db.collection('network_sources').findOne({_id:custom.json.source.id});assert.equal(global.x,undefined,'custom map coordinates do not change main');
  assert.equal((await networkView(db)).people[0].x,730);
+ const reused=await call(db,'POST','/network/source',{...body,mapId:'map-a',position:{x:500,y:600}});
+ assert.deepEqual([reused.json.source.x,reused.json.source.y],[500,600],'an existing company newly confirmed on a custom map keeps its nearby position');
+ const kept=await call(db,'POST','/network/source',{...body,mapId:'map-a',position:{x:0,y:0}});
+ assert.deepEqual([kept.json.source.x,kept.json.source.y],[500,600],'a company already placed on the map keeps that map’s position');
+ assert.equal((await networkView(db)).sources.find(s=>s.name==='Orchid').x,920);
 });

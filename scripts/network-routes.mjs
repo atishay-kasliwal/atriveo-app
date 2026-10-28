@@ -26,14 +26,18 @@ const WRITES = {
   "/network/archive": (db, b) => archivePerson(db, b),
   "/network/source": (db, b) => saveSource(db, b).then(async (source) => {
     if (!b.id) await onMap(db, b, [source.id]);
-    // A suggested company becomes a real source in the same spot, on this map only.
-    if (!b.id && !source.existed && Number.isFinite(b.position?.x) && Number.isFinite(b.position?.y)) {
+    // A company may already exist in the address book but be new to this map.
+    const custom = b.mapId && b.mapId !== MAIN;
+    const card = custom ? await db.collection("network_map_cards").findOne({ _id: `${b.mapId}:${source.id}` }) : null;
+    const placed = custom ? card?.x != null && card?.y != null : source.existed;
+    // Keep the suggested location when confirming it for the first time on this map.
+    if (!b.id && !placed && Number.isFinite(b.position?.x) && Number.isFinite(b.position?.y)) {
       const items = [...(Array.isArray(b.positions) ? b.positions.slice(0, 1999).filter((p) => p?.id !== source.id && Number.isFinite(p?.x) && Number.isFinite(p?.y)) : []), { id: source.id, x: b.position.x, y: b.position.y }];
       if (b.mapId && b.mapId !== MAIN) await saveMapPositions(db, { mapId: b.mapId, items });
       else await savePositions(db, { items });
       return { source: { ...source, x: b.position.x, y: b.position.y } };
     }
-    return { source };
+    return { source: card?.x != null && card?.y != null ? { ...source, x: card.x, y: card.y } : source };
   }),
   "/network/source/remove": (db, b) => removeSource(db, b),
   "/network/link": (db, b) => saveLink(db, b).then((link) => ({ link })),
