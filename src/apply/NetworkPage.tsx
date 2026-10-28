@@ -161,7 +161,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
         </div>}
         {drawer === 'add' && <div id="nw-canvas-add" className="nw-canvas-popover nw-canvas-add" role="group" aria-label="Add to network" data-canvas-controls>
           <CanvasMenuAction icon="person" onClick={() => { setDialog('person'); setDrawer(null); }}>Add person</CanvasMenuAction>
-          <CanvasMenuAction icon="source" onClick={() => { setDialog({ source: null }); setDrawer(null); }}>New source</CanvasMenuAction>
+          <CanvasMenuAction icon="source" onClick={() => { setDialog({ source: null }); setDrawer(null); }}>New source or company</CanvasMenuAction>
           <CanvasMenuAction icon="list" onClick={() => { setDialog('list'); setDrawer(null); }}>Add a list</CanvasMenuAction>
           <CanvasMenuAction icon="import" onClick={() => { setDialog('import'); setDrawer(null); }}>Import contacts</CanvasMenuAction>
         </div>}
@@ -597,11 +597,12 @@ function SourceEditor({ source, sources, people, count, color, onClose, onDone }
   const [name, setName] = useState(source?.name ?? ""); const [type, setType] = useState<SourceType>(source?.type ?? "company");
   const [parentSourceId, setParentSourceId] = useState(throughValue(source));
   const [context, setContext] = useState(source?.context ?? "");
+  const [place, setPlace] = useState(source?.place ?? ""); const [when, setWhen] = useState(source?.when ?? "");
   const [about, setAbout] = useState(source?.about ?? ""); const [pick, setPick] = useState<string | null>(source?.color ?? null);
   const [confirm, setConfirm] = useState(false); const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
   async function save() {
     setBusy(true); setError("");
-    try { const r = await post<{ source: Source & { existed?: boolean } }>("source", { ...(source ? { id: source.id } : {}), name, type, about, color: pick, ...throughFields(parentSourceId), context }); onDone(source ? `${name.trim()} saved.` : r.source.existed ? `You already have ${r.source.name} in that context.` : `${name.trim()} added. Add people to it with Add a list.`); }
+    try { const r = await post<{ source: Source & { existed?: boolean } }>("source", { ...(source ? { id: source.id } : {}), name, type, about, place, ...(type === "event" ? { when } : {}), color: pick, ...throughFields(parentSourceId), context }); onDone(source ? `${name.trim()} saved.` : r.source.existed ? `You already have ${r.source.name} in that context.` : `${name.trim()} added. Add people to it with Add a list.`); }
     catch (e) { setError(String((e as Error).message)); setBusy(false); }
   }
   async function remove() {
@@ -616,6 +617,10 @@ function SourceEditor({ source, sources, people, count, color, onClose, onDone }
         <label className="nw-f"><span>Kind</span><select id="nw-src-type" value={type} onChange={(e) => setType(e.target.value as SourceType)}>{SOURCE_TYPES.map(([t, l]) => <option key={t} value={t}>{l}</option>)}</select></label>
         <NetworkSourceContext sources={sources} people={people} parentSourceId={parentSourceId} onParent={setParentSourceId} context={context} onContext={setContext} excludeId={source?.id} prefix="nw-src" />
         <label className="nw-f"><span>About</span><input id="nw-src-about" value={about} onChange={(e) => setAbout(e.target.value)} placeholder="Staffing agency, open-source conference…" /></label>
+        <div className="nw-pair">
+          <label className="nw-f"><span>Where</span><input id="nw-new-place" value={place} onChange={(e) => setPlace(e.target.value)} placeholder="Raleigh, NC or Global" /></label>
+          {type === "event" && <label className="nw-f"><span>When</span><input id="nw-new-when" value={when} onChange={(e) => setWhen(e.target.value)} placeholder="Oct 2024" /></label>}
+        </div>
         <div className="nw-lab">Colour</div>
         <Swatches value={pick} fallback={color} label="Source colour" onPick={setPick} />
       </div>
