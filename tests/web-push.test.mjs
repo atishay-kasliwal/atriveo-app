@@ -64,17 +64,26 @@ test('Pages push proxy rejects anonymous and cross-origin requests and overrides
   globalThis.fetch = async (_, init) => { forwarded = init; return Response.json({ sent: 1 }); };
   try {
     const health = await onRequest({ request: new Request('https://apply.atriveo.com/api/push/health', { headers: { Authorization: 'Bearer backend-secret' } }), env });
-    assert.equal(health.status, 200); assert.equal((await health.json()).upstreamStatus, 200);
+    assert.equal(health.status, 200); assert.deepEqual(await health.json(), { sent: 1 });
     const response = await onRequest({ request: request({ Origin: 'https://apply.atriveo.com', Cookie: `atriveo_token=${token}`, 'Content-Type': 'application/json', 'X-Atriveo-Push-User': 'victim@example.com' }), env });
     assert.equal(response.status, 200); assert.equal(forwarded.headers['X-Atriveo-Push-User'], 'owner@example.com'); assert.ok(!forwarded.headers.Cookie);
-    // Cloudflare can return an encoded upstream stream. Its encoding header must
-    // survive the relay, or Safari cannot parse the config before subscribing.
+    // Native fetch exposes decoded JSON when its body is consumed. Rebuild a
+    // JSON response instead of forwarding transport headers from the origin.
     const payload = JSON.stringify({ publicKey: 'test-public-key' });
-    globalThis.fetch = async () => new Response(gzipSync(payload), { headers: { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip', 'Vary': 'Accept-Encoding' } });
-    const compressed = await onRequest({ request: new Request('https://apply.atriveo.com/api/push/config', { headers: { Cookie: `atriveo_token=${token}` } }), env });
-    assert.equal(compressed.headers.get('Content-Encoding'), 'gzip');
-    assert.equal(compressed.headers.get('Vary'), 'Accept-Encoding');
-    assert.equal(compressed.headers.get('Cache-Control'), 'no-store');
-    assert.equal(gunzipSync(Buffer.from(await compressed.arrayBuffer())).toString(), payload);
+    const encoded = gzipSync(payload);
+    globalThis.fetch = async () => {
+      const upstream = new Response(encoded, { headers: { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip', 'Content-Length': String(encoded.length) } });
+      upstream.json = async () => JSON.parse(gunzipSync(encoded).toString());
+      return upstream;
+    };
+    const decoded = await onRequest({ request: new Request('https://apply.atriveo.com/api/push/config', { headers: { Cookie: `atriveo_token=${token}` } }), env });
+    assert.equal(decoded.headers.get('Content-Encoding'), null);
+    assert.equal(decoded.headers.get('Content-Length'), null);
+    assert.equal(decoded.headers.get('Cache-Control'), 'no-store');
+    assert.equal(await decoded.text(), payload);
+    globalThis.fetch = async () => new Response('<html>Bad gateway</html>', { status: 502, headers: { 'Content-Type': 'text/html' } });
+    const failure = await onRequest({ request: new Request('https://apply.atriveo.com/api/push/config', { headers: { Cookie: `atriveo_token=${token}` } }), env });
+    assert.equal(failure.status, 502);
+    assert.match((await failure.json()).error, /Push backend returned an unexpected response/);
   } finally { globalThis.fetch = previous; }
 });
