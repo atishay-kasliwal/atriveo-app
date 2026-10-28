@@ -1,6 +1,7 @@
+import NetworkFollowUp from "./NetworkFollowUp";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
-  autoLayout, sourceLabel, throughFields, throughValue, introducersOf, setActiveMap, HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, plusDays, post, uploadPhoto,
+  followUpSummary, historyLabel, autoLayout, sourceLabel, throughFields, throughValue, introducersOf, setActiveMap, HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, post, uploadPhoto,
   type BoardItem, type HistoryType, type JobRow, companyOfPerson, loadPersonJobs, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
 } from "./network";
 import NetworkGraph from "./NetworkGraph";
@@ -256,7 +257,7 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
                         <span className="src">{src ? <><i style={{ background: colors.source.get(src.id) }} />{sourceLabel(src, data.sources, data.people)}</> : <em>No source</em>}</span>
                         <span className="city">{p.city}</span>
                         <span className="last">{ago(p.lastContact)}</span>
-                        <span className={`fu${f?.due ? " due" : ""}`}>{f ? f.text : ""}</span>
+                        <span className={`fu nf-row-status${f?.due ? " due" : ""}`}><b>{followUpSummary(p).title}</b><small>{followUpSummary(p).detail}</small></span>
                       </button>
                     </li>
                   );
@@ -316,8 +317,8 @@ function Swatches({ value, fallback, onPick, label }: { value: string | null; fa
   );
 }
 
-type PanelTab = "overview" | "jobs" | "history" | "details";
-const TABS: [PanelTab, string][] = [["overview", "Overview"], ["jobs", "Jobs"], ["history", "History"], ["details", "Details"]];
+type PanelTab = "follow" | "overview" | "jobs" | "history" | "details";
+const TABS: [PanelTab, string][] = [["overview", "Overview"], ["follow", "Follow-up"], ["jobs", "Jobs"], ["history", "History"], ["details", "Details"]];
 // Fewer entries per page on a short screen, so the panel never scrolls.
 const historyPage = () => (typeof window !== "undefined" && window.innerHeight < 800 ? 4 : 6);
 
@@ -395,7 +396,7 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
     if (s.viaPersonId && personById.has(s.viaPersonId)) { const who = personById.get(s.viaPersonId)!; upstream.unshift({ id: who.id, name: who.name, color: colors.person.get(who.id), person: true }); break; }
     s = s.parentSourceId ? sourceById.get(s.parentSourceId) : undefined;
   }
-  const tabCount: Record<PanelTab, string> = { overview: "", jobs: "", history: p.history.length ? String(p.history.length) : "", details: "" };
+  const tabCount: Record<PanelTab, string> = { follow: "", overview: "", jobs: "", history: p.history.length ? String(p.history.length) : "", details: "" };
   const keyTabs = (e: React.KeyboardEvent) => {
     const i = TABS.findIndex(([t]) => t === tab), n = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
     if (!n) return; e.preventDefault(); const next = TABS[(i + n + TABS.length) % TABS.length][0]; setTab(next); document.getElementById(`pp-tab-${next}`)?.focus();
@@ -426,14 +427,7 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
 
       <div className="pp-actions">
         <button type="button" className="nw-btn main" onClick={onWrite}>Write email</button>
-        <div className="pp-popwrap">
-          <button type="button" className={`pp-pill pp-popbtn${f?.due ? " due" : f ? " set" : ""}`} aria-expanded={pop === "follow"} onClick={() => setPop(pop === "follow" ? null : "follow")}>{f ? `Follow up ${f.text}` : "Set follow-up"}</button>
-          {pop === "follow" && <div className="pp-pop" role="dialog" aria-label="Follow-up">
-            <div className="pp-pop-row">{[["In 3 days", 3], ["In a week", 7], ["In 2 weeks", 14]].map(([l, n]) => <button key={l} type="button" className="nw-chip" onClick={() => { void save({ nextFollowUp: plusDays(n as number) }); setPop(null); }}>{l}</button>)}</div>
-            <label className="nw-f"><span>Or a date</span><input id="nw-followup" type="date" value={p.nextFollowUp ?? ""} onChange={(e) => { void save({ nextFollowUp: e.target.value || null }); setPop(null); }} /></label>
-            {p.nextFollowUp && <button type="button" className="pp-link" onClick={() => { void save({ nextFollowUp: null }); setPop(null); }}>Clear the follow-up</button>}
-          </div>}
-        </div>
+        <button type="button" className={`pp-pill${f?.due ? " due" : f ? " set" : ""}`} onClick={() => setTab("follow")}>{f ? `Follow up ${f.text}` : "Plan follow-up"}</button>
         <div className="pp-popwrap">
           <button type="button" className="pp-pill pp-popbtn" aria-expanded={pop === "log"} onClick={() => setPop(pop === "log" ? null : "log")}>Log</button>
           {pop === "log" && <div className="pp-pop" role="dialog" aria-label="Log something">
@@ -459,7 +453,9 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
       </div>
 
       <div id="pp-panel" key={tab} className={`pp-body pp-${tab}`} role="tabpanel" aria-labelledby={`pp-tab-${tab}`}>
+        {tab === "follow" && <NetworkFollowUp person={p} onChange={onChange} />}
         {tab === "overview" && <>
+          <button type="button" className="nf-overview" onClick={() => setTab("follow")}><span><b>{followUpSummary(p).title}</b><small>{followUpSummary(p).detail}</small></span><span aria-hidden="true">↗</span></button>
           <div className="pp-status">
             <span>Last contact <b>{ago(p.lastContact)}</b></span>
             <span className={f?.due ? "due" : ""}>Follow-up <b>{f ? f.text : "not set"}</b></span>
@@ -484,7 +480,7 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
           </section>
           <section className="pp-sec">
             <div className="pp-sec-h"><span className="pp-h">Latest</span>{history.length > 3 && <button type="button" className="pp-link" onClick={() => setTab("history")}>All {history.length}</button>}</div>
-            <ul className="pp-tl">{history.slice(0, 3).map((h) => <li key={h.id}><time dateTime={h.at}>{new Date(h.at).toLocaleDateString([], { month: "short", day: "numeric" })}</time><span><b>{HISTORY_TYPES.find(([k]) => k === h.type)?.[1]}</b>{h.text ? ` · ${h.text}` : ""}</span></li>)}
+            <ul className="pp-tl">{history.slice(0, 3).map((h) => <li key={h.id}><time dateTime={h.at}>{new Date(h.at).toLocaleDateString([], { month: "short", day: "numeric" })}</time><span><b>{historyLabel(h)}</b>{h.text ? ` · ${h.text}` : ""}{h.followUp?.nextNotes && <small className="nf-history-next">Next time: {h.followUp.nextNotes}{h.followUp.nextFollowUp ? ` · ${h.followUp.nextFollowUp}` : ""}</small>}</span></li>)}
               {!history.length && <li className="nw-muted">Nothing yet. Use Log above after a message, call or meeting.</li>}</ul>
           </section>
         </>}
@@ -494,7 +490,7 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
         {tab === "history" && <>
           <ul className="pp-tl long">{history.slice(page * per, page * per + per).map((h) => (
             <li key={h.id}><time dateTime={h.at}>{new Date(h.at).toLocaleDateString([], { month: "short", day: "numeric", year: new Date(h.at).getFullYear() === new Date().getFullYear() ? undefined : "numeric" })}</time>
-              <span><b>{HISTORY_TYPES.find(([k]) => k === h.type)?.[1]}</b>{h.text ? ` · ${h.text}` : ""}</span>
+              <span><b>{historyLabel(h)}</b>{h.text ? ` · ${h.text}` : ""}{h.followUp?.nextNotes && <small className="nf-history-next">Next time: {h.followUp.nextNotes}{h.followUp.nextFollowUp ? ` · ${h.followUp.nextFollowUp}` : ""}</small>}</span>
               <button type="button" className="nw-x small" aria-label="Remove this entry" onClick={() => void dropHistory(h.id)}>×</button></li>))}
             {!history.length && <li className="nw-muted">Nothing yet. Use Log above after a message, call or meeting.</li>}</ul>
           {pages > 1 && <div className="pp-pager"><button type="button" className="nw-chip" disabled={page === 0} onClick={() => setHPage(page - 1)}>Newer</button><span>{page + 1} of {pages}</span><button type="button" className="nw-chip" disabled={page >= pages - 1} onClick={() => setHPage(page + 1)}>Older</button></div>}

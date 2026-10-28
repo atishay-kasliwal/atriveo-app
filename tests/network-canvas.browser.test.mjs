@@ -51,6 +51,12 @@ async function fixture(t, width, linkedin = false, suggested = false, mapId = "m
           return route.fulfill({ json: { moved: 1, days: 1 } });
         }
         if (u.pathname === '/network/source') { const source = { id: body.id || 'new-source', createdAt: stamp, about: '', color: null, ...body, ...(body.position || {}) }; if (body.positions) for (const item of body.positions) { const card = [...data.people, ...data.sources].find(c => c.id === item.id); if (card) Object.assign(card, item); } data.sources.push(source); if (data.onMap) data.onMap.push(source.id); return route.fulfill({ json: { source } }); }
+        if (u.pathname === '/network/follow-up') {
+          const p = data.people.find(p => p.id === body.id);
+          if (body.outcome) p.history.push({ id: 'follow-up-entry', at: stamp, type: body.outcome.completed ? 'message' : 'note', text: body.outcome.notes, followUp: { completed: body.outcome.completed, platform: p.followUpPlan?.platform || body.plan.platform, regarding: p.followUpPlan?.regarding || body.plan.regarding, nextNotes: body.plan.nextNotes, nextFollowUp: body.nextFollowUp } });
+          Object.assign(p, { followUpPlan: body.plan, nextFollowUp: body.plan.enabled ? body.nextFollowUp : null });
+          return route.fulfill({ json: { person: p } });
+        }
         if (u.pathname === '/network/person') { const p = person(body.id || 'added-person', body.name || 'Mira Chen', body.sourceId || null, body.company || ''); data.people.push(p); return route.fulfill({ json: { person: p } }); }
         if (u.pathname === '/network/board/save') { const item = { id: 'added-note', ...body }; board.push(item); return route.fulfill({ json: { item } }); }
         return route.fulfill({ json: { ok: true } });
@@ -213,4 +219,30 @@ test('company counts employer contacts and introduced members, with a two-letter
   assert.equal(await card.locator('.nwg-face').count(), 3);
   await card.focus(); await page.keyboard.press('Enter');
   assert.match(await page.locator('.pp-where').textContent(), /3 people/);
+});
+
+for (const width of [1440, 390]) test(`follow-up plan, outcome and next notes survive reload at ${width}px`, async t => {
+ const {page,writes}=await fixture(t,width);
+ await page.locator('[data-node="person-1"]').focus();await page.keyboard.press('Enter');
+ await page.getByRole('tab',{name:'Follow-up',exact:true}).click();
+ const form=page.getByRole('form',{name:'Follow-up plan'});
+ await form.getByLabel('Platform',{exact:true}).selectOption('linkedin');
+ await form.getByLabel('Regarding',{exact:true}).fill('Referral for platform engineer');
+ await form.getByRole('button',{name:'1 week',exact:true}).click();
+ await form.getByLabel('Notes for the next follow-up').fill('Ask which team is hiring');
+ await form.getByRole('button',{name:'Save plan',exact:true}).click();
+ await page.getByRole('status').filter({hasText:'Follow-up plan saved.'}).waitFor();
+ await form.getByRole('button',{name:'Log an outcome'}).click();
+ await form.getByRole('button',{name:'Yes, contacted'}).click();
+ await form.getByLabel('Notes from this follow-up').fill('They asked for a portfolio');
+ await form.getByRole('button',{name:'2 weeks',exact:true}).click();
+ await form.getByLabel('Notes for the next follow-up').fill('Send the updated portfolio');
+ await form.getByRole('button',{name:'Save outcome & next step'}).click();
+ await page.getByRole('status').filter({hasText:'Outcome recorded.'}).waitFor();
+ assert.equal(writes.filter(x=>x.path==='/network/follow-up').length,2);
+ await page.reload(); await page.locator('[data-node="person-1"]').focus();await page.keyboard.press('Enter');
+ await page.getByRole('tab',{name:'Follow-up',exact:true}).click();
+ assert.equal(await form.getByLabel('Notes for the next follow-up').inputValue(),'Send the updated portfolio');
+ await page.getByRole('tab',{name:/^History/}).click();
+ assert.match(await page.locator('.pp-tl.long').textContent(),/Followed up.*Referral for platform engineer.*They asked for a portfolio.*Send the updated portfolio/);
 });
