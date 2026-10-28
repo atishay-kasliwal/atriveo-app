@@ -1,8 +1,8 @@
-import { NetworkError, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
+import { NetworkError, saveYou, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
 import { boardView, readImage, removeBoardItem, saveBoardItem, saveImage } from "./network-board.mjs";
-import { jobsForPerson, knownCompanies, warmJobs } from "./network-jobs.mjs";
+import { jobsForPerson, jobsForSource, knownCompanies, warmJobs } from "./network-jobs.mjs";
 
 // /network/*: the Network page's API. The sidecar's own token check runs first; every call is one small Mongo operation.
 const WRITES = {
@@ -19,6 +19,7 @@ const WRITES = {
   "/network/link": (db, b) => saveLink(db, b).then((link) => ({ link })),
   "/network/link/remove": (db, b) => removeLink(db, b),
   "/network/positions": (db, b) => savePositions(db, b),
+  "/network/you": (db, b) => saveYou(db, b).then((you) => ({ you })),
   "/network/mail/settings": (db, b) => saveMailSettings(db, b).then((settings) => ({ settings })),
   "/network/mail/send": (db, b, o) => sendNetworkMail(db, b, { sender: o.sender?.(), outRoot: o.outRoot }),
   "/network/reminders/snooze": (db, b) => snoozeReminder(db, b),
@@ -34,7 +35,7 @@ const READS = {
   "/network/mail/draft": (db, q) => draftStatus(db, q.get("id")),
   "/network/reminders": (db) => listReminders(db),
   "/network/board": (db) => boardView(db),
-  "/network/jobs": (db, q) => (q.get("person") ? jobsForPerson(db, q.get("person")) : warmJobs(db).then((groups) => ({ groups }))),
+  "/network/jobs": (db, q) => (q.get("person") ? jobsForPerson(db, q.get("person")) : q.get("source") ? jobsForSource(db, q.get("source")) : warmJobs(db).then((groups) => ({ groups }))),
   "/network/companies": (db) => knownCompanies(db).then((companies) => ({ companies })),
 };
 

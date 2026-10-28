@@ -48,7 +48,7 @@ export async function networkView(db, { archived = false } = {}) {
     people: people.filter((p) => archived || !p.archived).sort((a, b) => a.name.localeCompare(b.name)),
     sources: sources.sort((a, b) => a.name.localeCompare(b.name)),
     links,
-    you: { x: you?.x ?? 0, y: you?.y ?? 0 },
+    you: { x: you?.x ?? 0, y: you?.y ?? 0, name: you?.name ?? "", title: you?.title ?? "", photoId: you?.photoId ?? null, note: you?.note ?? "" },
   };
 }
 
@@ -56,6 +56,23 @@ const YOU = "network_you";
 const coord = (v) => { const n = Number(v); if (!Number.isFinite(n)) fail("A position must be a number"); return Math.round(Math.max(-100000, Math.min(100000, n)) * 10) / 10; };
 
 /** Where cards sit on the canvas, saved after a drag: people, sources, or "you". Unknown ids are ignored (someone may have archived them). */
+/** "You" on the map: your name, a title ("Data engineer, open to roles in NYC"), a photo and a note. Only the fields sent change. */
+export async function saveYou(db, input = {}) {
+  const set = {};
+  if ("name" in input) set.name = str(input.name, 80);
+  if ("title" in input) set.title = str(input.title, 120);
+  if ("note" in input) set.note = text(input.note, 2000);
+  if ("photoId" in input) {
+    set.photoId = input.photoId ? String(input.photoId) : null;
+    if (set.photoId && !(await db.collection("network_images").findOne({ _id: set.photoId }))) fail("Upload the photo first");
+  }
+  const cur = await db.collection("app_settings").findOne({ _id: YOU });
+  await db.collection("app_settings").updateOne({ _id: YOU }, { $set: { ...set, updatedAt: new Date().toISOString() } }, { upsert: true });
+  if ("photoId" in set && cur?.photoId && cur.photoId !== set.photoId) await db.collection("network_images").deleteOne({ _id: cur.photoId });
+  const next = { ...cur, ...set };
+  return { x: next.x ?? 0, y: next.y ?? 0, name: next.name ?? "", title: next.title ?? "", photoId: next.photoId ?? null, note: next.note ?? "" };
+}
+
 export async function savePositions(db, { items } = {}) {
   if (!Array.isArray(items) || !items.length) fail("Nothing to save");
   if (items.length > 2000) fail("Too many positions at once");
@@ -157,12 +174,18 @@ export async function addPeople(db, { rows, sourceId, newSource } = {}, now = ne
 
 function blank(fields, now) {
   const at = now.toISOString();
-  return { _id: randomUUID(), name: "", role: "", city: "", company: "", email: "", linkedin: "", phone: "", notes: "", sourceId: null, via: null, color: null, photoId: null, watchJobs: false, tags: [],
+  return { _id: randomUUID(), name: "", role: "", city: "", company: "", email: "", linkedin: "", phone: "", notes: "", sourceId: null, via: null, alsoVia: [], color: null, photoId: null, watchJobs: false, tags: [],
     lastContact: null, nextFollowUp: null, history: [], archived: false, createdAt: at, updatedAt: at, ...fields };
 }
 
 async function checkPersonRefs(db, id, { sourceId, via, photoId }) {
   if (sourceId && !(await db.collection(SOURCES).findOne({ _id: sourceId }))) fail("That source no longer exists");
+  if (sourceId) {
+    // Someone who introduced a source (or a source above it) cannot also belong to it: that would make a loop back to themselves.
+    const sources = await all(db, SOURCES);
+    for (let s = sources.find((x) => x.id === sourceId), seen = new Set(); s && !seen.has(s.id); seen.add(s.id), s = s.parentSourceId ? sources.find((x) => x.id === s.parentSourceId) : null)
+      if (s.viaPersonId === id) fail(`They introduced ${s.name}, so they cannot belong to it. Keep their own source and set "Works at" instead.`);
+  }
   if (photoId && !(await db.collection("network_images").findOne({ _id: photoId }))) fail("Upload the photo first");
   if (via) { if (via === id) fail("Someone cannot introduce themselves"); if (!(await db.collection(PEOPLE).findOne({ _id: via }))) fail("The person who introduced them is not in your network"); }
 }
@@ -176,6 +199,8 @@ function personPatch(input) {
   if ("notes" in input) p.notes = text(input.notes, 4000);
   if ("sourceId" in input) p.sourceId = input.sourceId ? String(input.sourceId) : null;
   if ("via" in input) p.via = input.via ? String(input.via) : null;
+  // More than one person can have introduced someone: the first is "via" (it decides their colour and place), the rest are kept here.
+  if ("alsoVia" in input) p.alsoVia = [...new Set((Array.isArray(input.alsoVia) ? input.alsoVia : []).map((x) => String(x ?? "")).filter(Boolean))].slice(0, 12);
   if ("color" in input) p.color = color(input.color);
   if ("nextFollowUp" in input) p.nextFollowUp = day(input.nextFollowUp);
   if ("photoId" in input) p.photoId = input.photoId ? String(input.photoId) : null;
@@ -197,6 +222,10 @@ export async function savePerson(db, input = {}, now = new Date()) {
   }
   const id = String(input.id), cur = await db.collection(PEOPLE).findOne({ _id: id });
   if (!cur) fail("That person is no longer in your network. Reload the page.");
+  const vias = patch.alsoVia ?? cur.alsoVia ?? [], first = "via" in patch ? patch.via : cur.via;
+  if (!first && vias.length) { patch.via = vias[0]; patch.alsoVia = vias.slice(1); }
+  else if (first && vias.includes(first)) patch.alsoVia = vias.filter((x) => x !== first);
+  for (const other of patch.alsoVia ?? []) await checkPersonRefs(db, id, { via: other });
   await checkPersonRefs(db, id, { sourceId: patch.sourceId, via: patch.via, photoId: patch.photoId });
   const next = { ...patch, updatedAt: now.toISOString() };
   await db.collection(PEOPLE).updateOne({ _id: id }, { $set: next });
@@ -238,7 +267,26 @@ export async function archivePerson(db, { id, archived = true } = {}, now = new 
   return { id: cur._id, archived: Boolean(archived) };
 }
 
-/** Sources are distinct by name + parent source + context, not employer name alone. */
+/**
+ * The source a person belongs to, then whatever brought that source to you (a parent source, or the person who introduced it), and so
+ * on: every source on the way from this person back to you. Used to refuse loops.
+ */
+function upstreamSources(personId, people, sources) {
+  const seen = new Set();
+  let sid = people.find((p) => p.id === personId)?.sourceId ?? null;
+  while (sid && !seen.has(sid)) {
+    seen.add(sid);
+    const s = sources.find((x) => x.id === sid);
+    if (!s) break;
+    sid = s.parentSourceId || (s.viaPersonId ? people.find((p) => p.id === s.viaPersonId)?.sourceId ?? null : null);
+  }
+  return seen;
+}
+
+/**
+ * Sources are distinct by name + what brought them (a parent source or the person who introduced them) + context, not employer name
+ * alone: NKHS introduced by Chani is a different record from NKHS you found yourself. A source comes through a source or a person, not both.
+ */
 export async function saveSource(db, input = {}, now = new Date()) {
   const sources = await all(db, SOURCES);
   const cur = input.id ? sources.find((s) => s.id === String(input.id)) : null;
@@ -248,9 +296,23 @@ export async function saveSource(db, input = {}, now = new Date()) {
   if ("type" in input || !cur) patch.type = SOURCE_TYPES.includes(input.type) ? input.type : "other";
   if ("about" in input) patch.about = str(input.about, 120);
   if ("color" in input) patch.color = color(input.color);
+  if ("notes" in input) patch.notes = text(input.notes, 4000);
+  if ("photoId" in input) {
+    patch.photoId = input.photoId ? String(input.photoId) : null;
+    if (patch.photoId && !(await db.collection("network_images").findOne({ _id: patch.photoId }))) fail("Upload the picture first");
+  }
   if ("context" in input || !cur) patch.context = str(input.context, 100);
   if ("parentSourceId" in input || !cur) patch.parentSourceId = input.parentSourceId ? str(input.parentSourceId, 80) : null;
+  if ("viaPersonId" in input || !cur) patch.viaPersonId = input.viaPersonId ? str(input.viaPersonId, 80) : null;
+  if (patch.viaPersonId) patch.parentSourceId = null;
+  else if (patch.parentSourceId) patch.viaPersonId = null;
   const next = { ...cur, ...patch };
+  if (next.viaPersonId) {
+    const people = (await all(db, PEOPLE)).filter((p) => !p.archived);
+    const who = people.find((p) => p.id === next.viaPersonId);
+    if (!who) fail("The person who introduced it is not in your network. Pick someone else.");
+    if (cur && upstreamSources(who.id, people, sources).has(cur.id)) fail(`${who.name} belongs to ${cur.name}, so they cannot be the one who introduced it. Put them in their own source and set "Works at".`);
+  }
   if (next.parentSourceId) {
     let parent = sources.find((s) => s.id === next.parentSourceId);
     if (!parent) fail("The parent source no longer exists. Pick another source.");
@@ -261,7 +323,7 @@ export async function saveSource(db, input = {}, now = new Date()) {
       parent = parent.parentSourceId ? sources.find((s) => s.id === parent.parentSourceId) : null;
     }
   }
-  const sameIdentity = (a, b) => key(a.name) === key(b.name) && (a.parentSourceId || null) === (b.parentSourceId || null) && str(a.context, 100).toLowerCase() === str(b.context, 100).toLowerCase();
+  const sameIdentity = (a, b) => key(a.name) === key(b.name) && (a.parentSourceId || null) === (b.parentSourceId || null) && (a.viaPersonId || null) === (b.viaPersonId || null) && str(a.context, 100).toLowerCase() === str(b.context, 100).toLowerCase();
   const clash = sources.find((s) => s.id !== cur?.id && sameIdentity(s, next));
   if (!cur) {
     if (clash) return { ...clash, existed: true };
@@ -272,6 +334,8 @@ export async function saveSource(db, input = {}, now = new Date()) {
   if (clash && !sameIdentity(cur, next)) fail(`You already have a source called ${clash.name} in that context. Choose a different context.`);
   const update = { ...patch, updatedAt: now.toISOString() };
   await db.collection(SOURCES).updateOne({ _id: cur.id }, { $set: update });
+  // A replaced or removed logo's bytes go with it.
+  if ("photoId" in patch && cur.photoId && cur.photoId !== patch.photoId) await db.collection("network_images").deleteOne({ _id: cur.photoId });
   return { ...cur, ...update };
 }
 
@@ -279,7 +343,7 @@ export async function saveSource(db, input = {}, now = new Date()) {
 export async function removeSource(db, { id } = {}, now = new Date()) {
   const sid = String(id);
   if (!(await db.collection(SOURCES).findOne({ _id: sid }))) fail("That source no longer exists. Reload the page.");
-  // Child contexts remain separate records if their parent is removed.
+  // Child contexts remain separate records if their parent is removed. (A source introduced by a person keeps that person.)
   const removed = await db.collection(SOURCES).findOne({ _id: sid });
   for (const child of (await all(db, SOURCES)).filter((s) => s.parentSourceId === sid)) await db.collection(SOURCES).updateOne({ _id: child.id }, { $set: { parentSourceId: null, context: child.context || `Via ${removed.name}`, updatedAt: now.toISOString() } });
   const people = (await all(db, PEOPLE)).filter((p) => p.sourceId === sid);

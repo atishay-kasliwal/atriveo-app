@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {Readable} from 'node:stream';
-import {addFromLinkedIn,parseContacts,csvRows,previewContacts,savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
+import {saveYou,addFromLinkedIn,parseContacts,csvRows,previewContacts,savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
 import {handleNetwork} from '../scripts/network-routes.mjs';
 
 // An in-memory stand-in for the three collections, with just the calls the store makes. Every name here is invented.
@@ -95,9 +95,9 @@ test('routes: read, preview, bulk add, a store error, unknown paths, and other p
 
 test('positions: people, sources and "you" keep where you dragged them; unknown ids are skipped; bad numbers are refused',async()=>{
  const db=fakeDb();const s=await saveSource(db,{name:'Expo',type:'event'},T);const p=await savePerson(db,{name:'Cy Ro',sourceId:s.id},T);
- assert.deepEqual((await networkView(db)).you,{x:0,y:0});
+ assert.deepEqual([(await networkView(db)).you.x,(await networkView(db)).you.y],[0,0]);
  assert.deepEqual(await savePositions(db,{items:[{id:p.id,x:120.04,y:-40},{id:s.id,x:300,y:5},{id:'you',x:-10,y:20},{id:'gone',x:1,y:1}]}),{saved:3});
- const v=await networkView(db);assert.deepEqual([v.people[0].x,v.people[0].y],[120,-40]);assert.deepEqual([v.sources[0].x,v.sources[0].y],[300,5]);assert.deepEqual(v.you,{x:-10,y:20});
+ const v=await networkView(db);assert.deepEqual([v.people[0].x,v.people[0].y],[120,-40]);assert.deepEqual([v.sources[0].x,v.sources[0].y],[300,5]);assert.deepEqual([v.you.x,v.you.y],[-10,20]);
  await assert.rejects(()=>savePositions(db,{items:[{id:p.id,x:'left',y:0}]}),/must be a number/);
  await assert.rejects(()=>savePositions(db,{items:[]}),/Nothing to save/);
  await savePositions(db,{items:[{id:p.id,x:9e9,y:-9e9}]});const far=(await networkView(db)).people[0];assert.deepEqual([far.x,far.y],[100000,-100000]);});
@@ -162,3 +162,40 @@ test('same-name sources stay separate by origin/context; staffing and parent val
  assert.equal(child.parentSourceId,null);assert.equal(child.context,'Via Open Summit');assert.equal(view.people.find(p=>p.id===second.id).sourceId,introduced.id);
  assert.ok(view.sources.some(s=>s.id===direct.id),'the independent same-name record remains');
 });
+
+test('a source introduced by a person: the person is kept, a source has one way in, loops are refused, the same name through someone else is a new record',async()=>{
+ const db=fakeDb();const fam=await saveSource(db,{name:'Kasliwal',type:'family'},T);
+ const chani=await savePerson(db,{name:'Chani Jain',sourceId:fam.id,company:'NKHS'},T);
+ const nkhs=await saveSource(db,{name:'NKHS',type:'company',viaPersonId:chani.id},T);assert.equal(nkhs.viaPersonId,chani.id);assert.equal(nkhs.parentSourceId,null);
+ const direct=await saveSource(db,{name:'NKHS',type:'company'},T);assert.notEqual(direct.id,nkhs.id,'found yourself is another record');assert.equal(direct.existed,undefined);
+ assert.equal((await saveSource(db,{name:'nkhs',viaPersonId:chani.id},T)).existed,true,'same name through the same person is the same source');
+ const a=await savePerson(db,{name:'Ann Lee',sourceId:nkhs.id},T);assert.equal(a.via,null,'belongs to the company, not through Chani');
+ await assert.rejects(()=>savePerson(db,{id:chani.id,sourceId:nkhs.id}),/introduced NKHS, so they cannot belong to it/);
+ const sub=await saveSource(db,{name:'NKHS Labs',parentSourceId:nkhs.id},T);
+ await assert.rejects(()=>savePerson(db,{id:chani.id,sourceId:sub.id}),/introduced NKHS/,'nor to a source below it');
+ await assert.rejects(()=>saveSource(db,{id:fam.id,viaPersonId:chani.id}),/belongs to Kasliwal, so they cannot be the one who introduced it/);
+ const moved=await saveSource(db,{id:nkhs.id,parentSourceId:fam.id},T);assert.equal(moved.viaPersonId,null,'one way in: a parent source replaces the person');
+ assert.equal((await saveSource(db,{id:nkhs.id,viaPersonId:chani.id},T)).parentSourceId,null,'and the other way round');
+ await assert.rejects(()=>saveSource(db,{name:'X',viaPersonId:'gone'}),/not in your network/);});
+
+test('introduced by more than one person: the first decides colour and place, the rest are kept; no repeats, no self, all must exist',async()=>{
+ const db=fakeDb();const a=await savePerson(db,{name:'Pri K'},T),b=await savePerson(db,{name:'Ani K'},T),c=await savePerson(db,{name:'Raj K'},T);
+ const p=await savePerson(db,{name:'Arp T',via:a.id},T);
+ const two=await savePerson(db,{id:p.id,alsoVia:[b.id,b.id,a.id,c.id]},T);assert.equal(two.via,a.id);assert.deepEqual(two.alsoVia,[b.id,c.id],'the first is not repeated');
+ const promoted=await savePerson(db,{id:p.id,via:null},T);assert.equal(promoted.via,b.id,'removing the first moves the next one up');assert.deepEqual(promoted.alsoVia,[c.id]);
+ await assert.rejects(()=>savePerson(db,{id:p.id,alsoVia:[p.id]}),/introduce themselves/);
+ await assert.rejects(()=>savePerson(db,{id:p.id,alsoVia:['gone']}),/not in your network/);});
+
+test('"You" and sources: a name, a title, a note, a photo or logo; old pictures are removed when replaced',async()=>{
+ const db=fakeDb();
+ assert.deepEqual((await networkView(db)).you,{x:0,y:0,name:'',title:'',photoId:null,note:''});
+ await db.collection('network_images').insertOne({_id:'me1'});await db.collection('network_images').insertOne({_id:'me2'});
+ const y=await saveYou(db,{name:' Alex  Rivera ',title:'Data engineer, open to roles',note:'Finishing a master\'s in May.',photoId:'me1'});
+ assert.deepEqual([y.name,y.title,y.photoId],['Alex Rivera','Data engineer, open to roles','me1']);
+ await savePositions(db,{items:[{id:'you',x:5,y:6}]});const v=(await networkView(db)).you;assert.deepEqual([v.x,v.y,v.name],[5,6,'Alex Rivera'],'moving you keeps the rest');
+ await saveYou(db,{photoId:'me2'});assert.equal(await db.collection('network_images').findOne({_id:'me1'}),null);
+ await assert.rejects(()=>saveYou(db,{photoId:'nope'}),/Upload the photo/);
+ const s=await saveSource(db,{name:'Randall Co',type:'company'},T);await db.collection('network_images').insertOne({_id:'logo1'});
+ const s2=await saveSource(db,{id:s.id,photoId:'logo1',notes:'Their recruiters answer on Tuesdays.'},T);assert.deepEqual([s2.photoId,s2.notes],['logo1','Their recruiters answer on Tuesdays.']);
+ await saveSource(db,{id:s.id,photoId:null},T);assert.equal(await db.collection('network_images').findOne({_id:'logo1'}),null);
+ await assert.rejects(()=>saveSource(db,{id:s.id,photoId:'zzz'}),/Upload the picture/);});

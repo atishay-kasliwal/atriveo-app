@@ -107,3 +107,10 @@ export async function knownCompanies(db) {
   }
   return out;
 }
+
+/** A source's own jobs, when it is a company or a staffing agency: what the job board and the staffing scraper have under its name. */
+export async function jobsForSource(db, id, opts = {}) {
+  const s = await db.collection("network_sources").findOne({ _id: String(id ?? "") });
+  if (!s || !["company", "staffing"].includes(s.type)) return { company: "", jobs: [] };
+  return { company: s.name, jobs: await jobsForCompanies(db, [s.name], opts) };
+}

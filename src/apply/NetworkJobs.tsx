@@ -17,7 +17,8 @@ function JobLine({ job, ask, askLabel }: { job: JobRow; ask?: () => void; askLab
 }
 
 /** In a person's panel: the open jobs at their company (with a referral button each) and your applications there. */
-export function PersonJobs({ person, company, onReferral, watching, onWatch }: { person: Person; company: string; onReferral: (j: JobRow) => void; watching: boolean; onWatch: (on: boolean) => void }) {
+export function PersonJobs({ person, company, onReferral, watching, onWatch, pageSize = 12 }: { person: Person; company: string; onReferral: (j: JobRow) => void; watching: boolean; onWatch: (on: boolean) => void; pageSize?: number }) {
+  const [page, setPage] = useState(0);
   const [state, setState] = useState<{ key: string; jobs: JobRow[] | null; error: string }>({ key: "", jobs: null, error: "" });
   const key = `${person.id}|${company}`;
   useEffect(() => {
@@ -26,17 +27,17 @@ export function PersonJobs({ person, company, onReferral, watching, onWatch }: {
     loadPersonJobs(person.id).then((r) => on && setState({ key, jobs: r.jobs, error: "" })).catch((e) => on && setState({ key, jobs: [], error: String(e.message || e) }));
     return () => { on = false; };
   }, [person.id, company, key]);
-  if (!company) return <p className="nw-muted">Add where {person.name.split(" ")[0]} works to see that company's jobs here.</p>;
+  if (!company) return <p className="nw-muted">Add where {person.name.split(" ")[0]} works (Details) to see that company's jobs here.</p>;
   const jobs = state.key === key ? state.jobs : null;
   const openJobs = (jobs ?? []).filter(open), mine = (jobs ?? []).filter((j) => j.status === "applied");
   return (
     <div className="nwj-person">
       <label className="nwj-watch"><input type="checkbox" checked={watching} onChange={(e) => onWatch(e.target.checked)} /><span>Tell me about new jobs at {company}</span></label>
       {jobs === null ? <p className="nw-muted">Looking for jobs at {company}…</p> : state.error ? <p className="nw-error">{state.error}</p> : <>
-        {openJobs.length ? <ul className="nwj-list">{openJobs.slice(0, 12).map((j) => <JobLine key={j.url} job={j} ask={() => onReferral(j)} />)}</ul>
+        {openJobs.length ? <ul className="nwj-list">{openJobs.slice(page * pageSize, page * pageSize + pageSize).map((j) => <JobLine key={j.url} job={j} ask={() => onReferral(j)} />)}</ul>
           : <p className="nw-muted">No open jobs at {company} on your job board right now.{watching ? " You will hear when one shows up." : ""}</p>}
-        {openJobs.length > 12 && <p className="nw-muted">And {openJobs.length - 12} more in the Jobs tab.</p>}
-        {mine.length > 0 && <><div className="nw-lab">Your applications there</div><ul className="nwj-list">{mine.slice(0, 8).map((j) => <JobLine key={j.url} job={j} />)}</ul></>}
+        {openJobs.length > pageSize && <div className="pp-pager"><button type="button" className="nw-chip" disabled={page === 0} onClick={() => setPage(page - 1)}>Previous</button><span>{page + 1} of {Math.ceil(openJobs.length / pageSize)}</span><button type="button" className="nw-chip" disabled={(page + 1) * pageSize >= openJobs.length} onClick={() => setPage(page + 1)}>Next</button></div>}
+        {mine.length > 0 && <p className="nwj-mine">You applied to {mine.length} {mine.length === 1 ? "job" : "jobs"} there{mine[0].appliedAt ? `, last ${ago(mine[0].appliedAt)}` : ""}: {mine.slice(0, 2).map((j) => j.title).join(", ")}{mine.length > 2 ? ` and ${mine.length - 2} more` : ""}.</p>}
       </>}
     </div>
   );
