@@ -197,3 +197,35 @@ export function starter(p: Person, tone: string, intent: string, signature: stri
 /* ---------- reminders ---------- */
 export interface Reminder { key: string; kind: "reply" | "due" | "quiet" | "never"; personId?: string; sourceId?: string; title: string; detail: string }
 export const loadReminders = () => getJson<{ reminders: Reminder[] } & ApiBody>("/network/reminders").then((r) => r.reminders);
+
+/* ---------- the board: notes, text, pen strokes, images ---------- */
+export interface BoardItem {
+  id: string; kind: "text" | "note" | "stroke" | "image"; x: number; y: number; w?: number; h?: number; text?: string; color?: string;
+  points?: [number, number][]; width?: number; opacity?: number; imageId?: string; pin?: { id: string; dx: number; dy: number } | null; createdAt: string;
+}
+export const loadBoard = () => getJson<{ items: BoardItem[] } & ApiBody>("/network/board").then((r) => r.items);
+export const imageUrl = (id: string) => `${getTailorServerBase()}/network/image?id=${encodeURIComponent(id)}`;
+export type Tool = "select" | "hand" | "text" | "note" | "pen" | "eraser";
+export type Pen = { color: string; width: number; opacity: number };
+export const TOOL_KEYS: Record<string, Tool> = { v: "select", h: "hand", t: "text", n: "note", d: "pen", e: "eraser" };
+export const NOTE_COLORS = ["#fbbf24", "#f9a8d4", "#86efac", "#93c5fd", "#c4b5fd"];
+export const PEN_COLORS = ["ink", "#f87171", "#fbbf24", "#34d399", "#60a5fa", "#a78bfa"];
+export const PEN_SIZES: [string, number, number][] = [["Fine", 2.4, 0.9], ["Medium", 4.5, 0.9], ["Thick", 8, 0.9], ["Marker", 18, 0.32]];
+
+/** A smooth path through pen points (quadratic curves through the midpoints). */
+export function smoothPath(pts: [number, number][]): string {
+  if (!pts.length) return "";
+  if (pts.length < 3) return `M${pts.map((p) => p.join(" ")).join("L")}${pts.length === 1 ? `L${pts[0][0] + 0.01} ${pts[0][1]}` : ""}`;
+  let d = `M${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 1; i < pts.length - 1; i++) d += `Q${pts[i][0]} ${pts[i][1]} ${(pts[i][0] + pts[i + 1][0]) / 2} ${(pts[i][1] + pts[i + 1][1]) / 2}`;
+  const last = pts[pts.length - 1];
+  return `${d}L${last[0]} ${last[1]}`;
+}
+/** Drop points closer than `min` to the last kept one, so a long stroke stays small. */
+export function thinPoints(pts: [number, number][], min = 1.5): [number, number][] {
+  const out: [number, number][] = [];
+  for (const p of pts) { const l = out[out.length - 1]; if (!l || Math.hypot(p[0] - l[0], p[1] - l[1]) >= min) out.push([Math.round(p[0] * 10) / 10, Math.round(p[1] * 10) / 10]); }
+  const end = pts[pts.length - 1];
+  if (end && out.length > 1 && out[out.length - 1] !== end) out[out.length - 1] = [Math.round(end[0] * 10) / 10, Math.round(end[1] * 10) / 10];
+  return out.slice(0, 4000);
+}

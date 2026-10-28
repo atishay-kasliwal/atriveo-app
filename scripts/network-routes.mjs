@@ -1,6 +1,7 @@
 import { NetworkError, savePositions, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
+import { boardView, readImage, removeBoardItem, saveBoardItem, saveImage } from "./network-board.mjs";
 
 // /network/*: the Network page's API. The sidecar's own token check runs first; every call is one small Mongo operation.
 const WRITES = {
@@ -18,6 +19,9 @@ const WRITES = {
   "/network/mail/settings": (db, b) => saveMailSettings(db, b).then((settings) => ({ settings })),
   "/network/mail/send": (db, b, o) => sendNetworkMail(db, b, { sender: o.sender?.(), outRoot: o.outRoot }),
   "/network/reminders/snooze": (db, b) => snoozeReminder(db, b),
+  "/network/board/save": (db, b) => saveBoardItem(db, b).then((item) => ({ item })),
+  "/network/board/remove": (db, b) => removeBoardItem(db, b),
+  "/network/board/image": (db, b) => saveImage(db, b),
   "/network/mail/draft": (db, b, o) => startDraft(db, b, { generate: (request) => o.generate(request, db) }),
 };
 const READS = {
@@ -25,6 +29,7 @@ const READS = {
   "/network/mail": (db, _q, o) => mailSettings(db, { outRoot: o.outRoot }).then((settings) => ({ settings })),
   "/network/mail/draft": (db, q) => draftStatus(db, q.get("id")),
   "/network/reminders": (db) => listReminders(db),
+  "/network/board": (db) => boardView(db),
 };
 
 async function readBody(req, limit) {
@@ -38,10 +43,20 @@ export async function handleNetwork(req, res, url, opts = {}) {
   if (url.pathname !== "/network" && !url.pathname.startsWith("/network/")) return false;
   const send = (code, body) => { res.writeHead(code, { "Content-Type": "application/json", "Cache-Control": "no-store" }); res.end(JSON.stringify(body)); };
   const read = req.method === "GET" ? READS[url.pathname] : null, write = req.method === "POST" ? WRITES[url.pathname] : null;
+  if (req.method === "GET" && url.pathname === "/network/image") {
+    try {
+      if (!opts.withDb) throw new NetworkError("MONGO_URI not configured");
+      const img = await opts.withDb((db) => readImage(db, url.searchParams.get("id")));
+      // An image never changes once saved (a new upload gets a new id), so the browser may keep it.
+      res.writeHead(200, { "Content-Type": img.type, "Content-Length": img.bytes.length, "Cache-Control": "private, max-age=31536000, immutable", "X-Content-Type-Options": "nosniff" });
+      res.end(img.bytes);
+    } catch (e) { send(e instanceof NetworkError ? 404 : 500, { ok: false, error: e instanceof NetworkError ? e.message : "That image could not be read" }); }
+    return true;
+  }
   if (!read && !write) { send(404, { ok: false, error: "Not found" }); return true; }
   try {
     if (!opts.withDb) throw new NetworkError("MONGO_URI not configured");
-    const body = read ? null : await readBody(req, url.pathname === "/network/mail/send" ? 8_000_000 : 300_000);
+    const body = read ? null : await readBody(req, url.pathname === "/network/mail/send" || url.pathname === "/network/board/image" ? 8_000_000 : 300_000);
     const data = await opts.withDb((db) => (read ? read(db, url.searchParams, opts) : write(db, body, opts)));
     send(200, { ok: true, ...data });
   } catch (e) {
