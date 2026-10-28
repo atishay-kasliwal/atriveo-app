@@ -12,7 +12,7 @@ export interface Person {
   sourceId: string | null; via: string | null; alsoVia?: string[]; color: string | null; tags: string[];
   lastContact: string | null; nextFollowUp: string | null; history: HistoryEntry[]; archived: boolean; createdAt: string; updatedAt: string; x?: number; y?: number;
 }
-export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; photoId?: string | null; notes?: string; place?: string; when?: string; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
+export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; photoId?: string | null; notes?: string; place?: string; when?: string; auto?: string[]; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
 export interface Link { id: string; a: string; b: string; kind: LinkKind; label: string; color: string | null }
 export interface You { x: number; y: number; name?: string; title?: string; photoId?: string | null; note?: string }
 export interface NetworkData { people: Person[]; sources: Source[]; links: Link[]; you?: You }
@@ -59,13 +59,14 @@ export function colorsFor(data: NetworkData): { source: Map<string, string>; per
   const taken = new Set(ordered.map((s) => s.color).filter(Boolean) as string[]);
   let i = 0;
   for (const s of ordered) {
+    if (s.auto) { source.set(s.id, NEUTRAL); continue; }
     if (s.color) { source.set(s.id, s.color); continue; }
     let c = PALETTE[i++ % PALETTE.length];
     for (let k = 0; k < PALETTE.length && taken.has(c); k++) c = PALETTE[i++ % PALETTE.length];
     taken.add(c); source.set(s.id, c);
   }
   // An introduced person's colour must not be mistaken for a source's, so close hues (pink and magenta, amber and orange) are left out too.
-  const used = [...new Set(source.values())], own = PALETTE.filter((c) => used.every((u) => hueGap(c, u) > 40));
+  const used = [...new Set(ordered.filter((s) => !s.auto).map((s) => source.get(s.id)!))], own = PALETTE.filter((c) => used.every((u) => hueGap(c, u) > 40));
   const person = new Map<string, string>();
   for (const p of data.people) {
     if (p.color) person.set(p.id, p.color);
@@ -107,7 +108,7 @@ export function autoLayout(data: NetworkData): Map<string, Point> {
   const pos = new Map<string, Point>();
   const you = data.you ?? { x: 0, y: 0 };
   pos.set("you", { x: you.x, y: you.y });
-  const sources = [...data.sources].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
+  const sources = data.sources.filter((s) => !s.auto).sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
   const sourceIds = new Set(sources.map((s) => s.id)), personIds = new Set(data.people.map((p) => p.id));
   // A source arrives through a parent source, through a person (placed next to them once they have a place), or straight from you.
   const throughPerson = (s: Source) => Boolean(s.viaPersonId && personIds.has(s.viaPersonId));
@@ -149,6 +150,12 @@ export function autoLayout(data: NetworkData): Map<string, Point> {
   }
   for (const [index, source] of sources.entries()) if (!pos.has(source.id)) pos.set(source.id, ring(you.x, you.y, 460, index * 2.4));
   for (const p of data.people) if (!pos.has(p.id)) pos.set(p.id, ring(you.x, you.y, 300, Math.random() * Math.PI * 2));
+  // A company worked out from "Works at" sits between its people, a little further out from you.
+  for (const s of data.sources) {
+    if (!s.auto || pos.has(s.id)) continue;
+    const pts = s.auto.map((id) => pos.get(id)).filter((p): p is Point => Boolean(p)), c = { x: pts.reduce((n, p) => n + p.x, 0) / (pts.length || 1), y: pts.reduce((n, p) => n + p.y, 0) / (pts.length || 1) };
+    pos.set(s.id, ring(c.x, c.y, 170, Math.atan2(c.y - you.y, c.x - you.x)));
+  }
   return pos;
 }
 
@@ -191,6 +198,7 @@ export function edgesFor(data: NetworkData, colors: ReturnType<typeof colorsFor>
   const out: Edge[] = [];
   const typeName = (t: SourceType) => SOURCE_TYPES.find(([k]) => k === t)?.[1].toLowerCase() ?? "";
   for (const s of data.sources) {
+    if (s.auto) continue; // hangs off its people only, through their "works at" lines
     const parent = s.parentSourceId && data.sources.some((source) => source.id === s.parentSourceId && source.id !== s.id) ? s.parentSourceId : null;
     const person = !parent && s.viaPersonId && data.people.some((p) => p.id === s.viaPersonId) ? s.viaPersonId : null;
     out.push({ key: `source-${s.id}`, a: parent || person || "you", b: s.id, kind: parent || person ? (person ? "via" : "intro") : "you", label: parent ? "introduced through" : person ? "introduced" : typeName(s.type), color: colors.source.get(s.id) ?? NEUTRAL });
@@ -340,6 +348,22 @@ export interface CanvasLayers { people: boolean; sources: boolean; connections: 
 export const DEFAULT_CANVAS_LAYERS: CanvasLayers = { people: true, sources: true, connections: true, board: true, work: true };
 
 /** The picker's value ("" | a source id | "p:" + a person id) as the two fields a source is saved with. */
+/**
+ * Companies on the map that nobody added: when two or more people work at the same place ("Works at") and no company or agency card
+ * matches it, a card for it joins the map, linked to each of them by a "works at" line. Nothing is saved; it is worked out every time,
+ * so it goes away when one of them moves on or a real card for that company is added.
+ */
+export function withAutoCompanies(data: NetworkData): NetworkData {
+  const groups: { name: string; ids: string[] }[] = [];
+  for (const p of data.people) {
+    if (!p.company || data.sources.some((s) => (s.type === "company" || s.type === "staffing") && sameCompany(s.name, p.company))) continue;
+    const g = groups.find((x) => sameCompany(x.name, p.company));
+    if (g) g.ids.push(p.id); else groups.push({ name: p.company.trim(), ids: [p.id] });
+  }
+  const auto = groups.filter((g) => g.ids.length >= 2).map((g): Source => ({ id: `auto:${g.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`, name: g.name, type: "company", about: "", color: null, createdAt: "", auto: g.ids }));
+  return auto.length ? { ...data, sources: [...data.sources, ...auto] } : data;
+}
+
 export const throughFields = (value: string) => (value.startsWith("p:") ? { parentSourceId: null, viaPersonId: value.slice(2) } : { parentSourceId: value || null, viaPersonId: null });
 /** And back: a saved source as the picker's value. */
 export const throughValue = (s?: Source | null) => (s?.viaPersonId ? `p:${s.viaPersonId}` : s?.parentSourceId ?? "");

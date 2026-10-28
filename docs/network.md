@@ -36,6 +36,13 @@ Companies and staffing agencies show a logo on white, where they are (Details â†
 count. Events are tickets with a date (Details â†’ When). Family people carry a small house tag. A source's **Connected** tab links it to
 another source or a person (Randstad and the conference where you met them) without changing where it came from.
 
+## Companies nobody added
+
+When two or more people share a "Works at" (Dana met at All Things Open, Priya introduced by Chani, both at Randstad) and no company or
+agency card matches it, the map shows a dashed Randstad card linked to each of them by a "works at" line. Their sources, introducers
+and colours stay as they are; the warm path can go through the company. It is worked out each time and never saved: it goes when one of
+them moves on, and **Keep as a source** in its panel makes it a real card (logo, place, notes, links). A company with one person gets no card.
+
 ## Colour rule
 
 A source has one colour, and every first connection from it shares it. Someone introduced by another person starts their own branch:

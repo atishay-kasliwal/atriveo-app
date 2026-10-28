@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import NetworkSourceContext from "./NetworkSourceContext";
 import {
-  JOB_STATUS, LINK_KINDS, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadMailSettings, loadNetwork, loadSourceJobs, post, sourceLabel, throughFields, throughValue, uploadPhoto,
+  JOB_STATUS, LINK_KINDS, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadMailSettings, loadNetwork, loadPersonJobs, loadSourceJobs, post, sourceLabel, throughFields, throughValue, uploadPhoto,
   type JobRow, type LinkKind, type MailSettings, type NetworkData, type Source, type SourceType, type You,
 } from "./network";
 
@@ -200,6 +200,60 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
           <NetworkSourceContext sources={data.sources} people={data.people} parentSourceId={through} onParent={(v) => { setThrough(v); void save(throughFields(v)); }} context={d.context} onContext={(v) => setD({ ...d, context: v })} excludeId={s.id} prefix="nw-srcp" />
           <button type="button" className="pp-link" onClick={() => { if (d.context !== (s.context ?? "")) void save({ context: d.context }); }}>Save the context</button>
           <p className="pp-hint">{sourceLabel(s, data.sources, data.people)}</p>
+        </>}
+      </div>
+    </aside>
+  );
+}
+
+/**
+ * A company nobody added, worked out from where your people work: who is there, its open jobs and who to ask, and "Keep as a source"
+ * to make it a card of your own (logo, place, notes, links).
+ */
+export function AutoCompanyPanel({ company: s, data, colors, onClose, onPerson, onReferral, onKeep, say }: {
+  company: Source; data: NetworkData; colors: ReturnType<typeof colorsFor>; onClose: () => void; onPerson: (id: string) => void;
+  onReferral: (personId: string, job: JobRow) => void; onKeep: (s: Source) => void; say: Say;
+}) {
+  const members = data.people.filter((p) => s.auto?.includes(p.id));
+  const [asker, setAsker] = useState("");
+  const [jobs, setJobs] = useState<JobRow[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const first = members[0]?.id ?? "";
+  useEffect(() => { if (!first) return; let on = true; loadPersonJobs(first).then((r) => on && setJobs(r.jobs)).catch(() => on && setJobs([])); return () => { on = false; }; }, [first]);
+  async function keep() {
+    setBusy(true);
+    try { const r = await post<{ source: Source }>("source", { name: s.name, type: "company" }); say({ text: `${s.name} is a source now. Add its logo and place here.` }); onKeep(r.source); }
+    catch (e) { setBusy(false); say({ text: String((e as Error).message) }); }
+  }
+  const askWho = asker || first, open = (jobs ?? []).filter((j) => j.status === "new" || j.status === "ready");
+  return (
+    <aside className="nw-panel pp" aria-label={s.name}>
+      <header className="pp-head">
+        <span className="pp-pic sq" style={{ "--c": "var(--nw-muted)" } as CSSProperties}><span>{s.name[0]?.toUpperCase() ?? "?"}</span></span>
+        <div className="pp-id">
+          <h2 className="nw-name">{s.name}</h2>
+          <p className="pp-where">Added for you: {members.length} of your people work here</p>
+        </div>
+        <button type="button" className="nw-x" aria-label="Close" onClick={onClose}>×</button>
+      </header>
+      <div className="pp-actions">
+        <button type="button" className="nw-btn main" disabled={busy} onClick={() => void keep()}>Keep as a source</button>
+      </div>
+      <div className="pp-body">
+        <span className="pp-h">People there</span>
+        <ul className="pp-people">{members.map((p) => (
+          <li key={p.id}><button type="button" onClick={() => onPerson(p.id)}>
+            <span className={`nw-av${p.photoId ? " ph" : ""}`} style={{ "--c": colors.person.get(p.id) } as CSSProperties} aria-hidden="true">{p.photoId ? <img src={imageUrl(p.photoId)} alt="" /> : initials(p.name)}</span>
+            <span className="who"><b>{p.name}</b><small>{[p.role, p.sourceId ? `met through ${data.sources.find((x) => x.id === p.sourceId)?.name ?? "a source"}` : ""].filter(Boolean).join(" · ") || " "}</small></span>
+            <span className="when">{ago(p.lastContact)}</span>
+          </button></li>))}</ul>
+        <span className="pp-h">Open jobs</span>
+        {jobs === null ? <p className="nw-muted">Looking for jobs at {s.name}…</p> : <>
+          {open.length > 0 && <label className="pp-ask">Ask <select value={askWho} onChange={(e) => setAsker(e.target.value)}>{members.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select> for a referral</label>}
+          {open.length ? <ul className="nwj-list">{open.slice(0, 4).map((j) => (
+            <li key={j.url} className={`nwj-job is-${j.status}`}><div className="nwj-what"><a href={j.applyUrl} target="_blank" rel="noreferrer">{j.title}</a><small>{[j.location, j.foundAt ? `found ${ago(j.foundAt)}` : ""].filter(Boolean).join(" · ")}</small></div>
+              <span className={`nwj-st is-${j.status}`}>{JOB_STATUS[j.status]}</span><button type="button" className="nw-chip nwj-ask" onClick={() => onReferral(askWho, j)}>Ask</button></li>))}</ul>
+            : <p className="nw-muted">No open jobs at {s.name} on your job board right now.</p>}
         </>}
       </div>
     </aside>

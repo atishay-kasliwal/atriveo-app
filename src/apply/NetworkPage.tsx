@@ -6,14 +6,14 @@ import {
 import NetworkGraph from "./NetworkGraph";
 import NetworkSourceContext from "./NetworkSourceContext";
 import { CanvasButton, CanvasIcon, CanvasMenuAction } from "./NetworkCanvasControls";
-import { DEFAULT_CANVAS_LAYERS, type CanvasLayers } from "./network";
+import { DEFAULT_CANVAS_LAYERS, withAutoCompanies, type CanvasLayers } from "./network";
 import NetworkMail from "./NetworkMail";
 import NetworkBell from "./NetworkBell";
 import NetworkWork from "./NetworkWork";
 import { BulkMail } from "./NetworkMail";
 import { PersonJobs, WarmJobs } from "./NetworkJobs";
 import NetworkImport from "./NetworkImport";
-import { SourcePanel, YouPanel } from "./NetworkSidePanels";
+import { AutoCompanyPanel, SourcePanel, YouPanel } from "./NetworkSidePanels";
 import "./network.css";
 
 type View = { kind: "all" } | { kind: "source"; id: string | null } | { kind: "due" } | { kind: "never" } | { kind: "introduced" };
@@ -87,8 +87,10 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   }, [say]);
   useEffect(() => { void reload(); }, [reload]);
 
-  const colors = useMemo(() => colorsFor(data), [data]);
-  const sourceById = useMemo(() => new Map(data.sources.map((s) => [s.id, s])), [data.sources]);
+  // The map also shows companies nobody added, where two or more of your people work (worked out, never saved).
+  const mapData = useMemo(() => withAutoCompanies(data), [data]);
+  const colors = useMemo(() => colorsFor(mapData), [mapData]);
+  const sourceById = useMemo(() => new Map(mapData.sources.map((s) => [s.id, s])), [mapData.sources]);
   const personById = useMemo(() => new Map(data.people.map((p) => [p.id, p])), [data.people]);
   const counts = useMemo(() => {
     const by = new Map<string | null, number>();
@@ -104,7 +106,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
     const match = (p: Person) => {
-      if (view.kind === "source" && p.sourceId !== view.id) return false;
+      if (view.kind === "source" && (view.id && sourceById.get(view.id)?.auto ? !sourceById.get(view.id)!.auto!.includes(p.id) : p.sourceId !== view.id)) return false;
       if (view.kind === "due" && !followUp(p.nextFollowUp)?.due) return false;
       if (view.kind === "never" && p.lastContact) return false;
       if (view.kind === "introduced" && !p.via) return false;
@@ -192,7 +194,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
           </nav>}
 
           <section className="nw-list nw-canvas" aria-label="Network canvas">
-            {loaded ? <NetworkGraph data={data} layers={layers} stackPeople={stackPeople} onRevealLayer={(key) => setLayers((old) => ({ ...old, [key]: true }))} colors={colors} visible={visible} selected={selected} selectedWork={work} board={board} setBoard={setBoard}
+            {loaded ? <NetworkGraph data={mapData} layers={layers} stackPeople={stackPeople} onRevealLayer={(key) => setLayers((old) => ({ ...old, [key]: true }))} colors={colors} visible={visible} selected={selected} selectedWork={work} board={board} setBoard={setBoard}
                 onPerson={(id) => openPerson(id === selected ? null : id)} onWork={openWork}
                 onSource={(id) => { if (sideSource?.id === id) { setSide(null); setView({ kind: "all" }); } else openSource(id); }} onYou={() => (side === "you" ? setSide(null) : openYou())}
                 onLinks={(links) => setData((d) => ({ ...d, links }))} onPeople={(list) => setData((d) => ({ ...d, people: d.people.map((p) => list.find((x) => x.id === p.id) ?? p) }))}
@@ -227,7 +229,9 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
 
 
           {side === "you" && <YouPanel data={data} onChange={(you) => setData((d) => ({ ...d, you }))} onClose={() => setSide(null)} say={say} />}
-          {sideSource && <SourcePanel key={sideSource.id} source={sideSource} data={data} colors={colors} onChange={(s) => setData((d) => ({ ...d, sources: d.sources.map((x) => (x.id === s.id ? { ...x, ...s } : x)) }))}
+          {sideSource?.auto && <AutoCompanyPanel key={sideSource.id} company={sideSource} data={data} colors={colors} onClose={() => { setSide(null); setView({ kind: "all" }); }} onPerson={(id) => openPerson(id)}
+            onReferral={(id, job) => setMailFor({ id, job })} onKeep={(s) => { setData((d) => ({ ...d, sources: [...d.sources, s] })); openSource(s.id); }} say={say} />}
+          {sideSource && !sideSource.auto && <SourcePanel key={sideSource.id} source={sideSource} data={data} colors={colors} onChange={(s) => setData((d) => ({ ...d, sources: d.sources.map((x) => (x.id === s.id ? { ...x, ...s } : x)) }))}
             onClose={() => { setSide(null); setView({ kind: "all" }); }} onPerson={(id) => openPerson(id)} onAddPeople={() => { setBulkSource(sideSource.id); setDialog("list"); }} onReferral={(id, job) => setMailFor({ id, job })}
             onLinks={(links) => setData((d) => ({ ...d, links }))} say={say} />}
           {workItem && <NetworkWork key={workItem.id} item={workItem} data={data} colors={colors} onClose={() => setWork(null)} onOpen={openPerson} say={say}
