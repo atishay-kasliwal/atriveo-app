@@ -32,8 +32,17 @@ Draft with AI goes through the same path as application answers (`RESUME_AI_REMO
 ## Reminders
 
 On the page: a reply waiting for your answer, follow-ups due or late, work ending within a week or late, people quiet for two weeks,
-and sources whose people have never heard from you. On the phone (ntfy, `NTFY_TOPIC`): counts only, at 9 a.m. New York daily and a
-weekly digest on Sunday from 6 p.m. Turn off with `NETWORK_REMINDERS=off` (or `PHONE_SUMMARIES=off` for every phone message).
+and sources whose people have never heard from you.
+
+On the phone, at 9 a.m. New York daily and a weekly digest on Sunday from 6 p.m.:
+
+- **Web Push** (the Atriveo app on your phone, see `docs/WEB_PUSH.md`) when `VAPID_*` and `PUSH_EVENT_USER_ID` are set. It goes only
+  to your own devices, encrypted, so it names people ("Follow up with Dana today"), and a tap opens them (`/network?person=…`,
+  `?work=…`, or `?view=due` when several need you).
+- **ntfy** (`NTFY_TOPIC`) otherwise, counts only, since an ntfy topic is readable by anyone who knows its name.
+
+`NETWORK_PUSH=both` sends to both, `NETWORK_PUSH=ntfy` keeps ntfy only. Turn Network's phone messages off with
+`NETWORK_REMINDERS=off` (or `PHONE_SUMMARIES=off` for every phone message).
 
 ## Deploy
 

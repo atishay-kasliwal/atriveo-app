@@ -1,9 +1,10 @@
 import { nyParts, publishNtfy } from "./phone-summary.mjs";
+import { sendPushNotification } from "./web-push.mjs";
 import { NetworkError } from "./network.mjs";
 
 // What needs you in your network, newest worries first: someone replied and waits for an answer, a follow-up is due, someone has gone
-// quiet, people in a source have never heard from you. Each reminder has a stable key so it can be snoozed. A short morning phone
-// message gives the counts only (never a name), once per New York day, like the other phone messages.
+// quiet, people in a source have never heard from you. Each reminder has a stable key so it can be snoozed. A morning phone message
+// goes out once per New York day: through Web Push to your own phone (names, tap to open) or, without it, ntfy (counts only).
 
 const QUIET_DAYS = 14, NEVER_AFTER_DAYS = 2, REPLY_AFTER_DAYS = 1;
 const DAY = 86_400_000;
@@ -91,35 +92,68 @@ export async function weeklyDigest(db, now = new Date()) {
   return { title: "Your week in Network", message: `${week ? `${week}. ` : "A quiet week. "}${open ? `${n(open, "thing waits", "things wait")} for you.` : "Nothing is waiting."}`, tags: ["calendar"], priority: 2, click: "https://apply.atriveo.com/network" };
 }
 
-async function sendOnce(db, id, now, build, publish, log, label) {
+/** The same reminders for Web Push, which goes only to your own devices, encrypted: names are fine there, and a tap opens the right place. */
+export function webMessage(list) {
+  const open = list.filter((r) => r.kind !== "never");
+  if (!open.length) return null;
+  const link = (r) => (r.personId ? `/network?person=${encodeURIComponent(r.personId)}` : r.workId ? `/network?work=${encodeURIComponent(r.workId)}` : "/network");
+  if (open.length === 1) return { title: open[0].title, body: open[0].detail, url: link(open[0]), type: "network" };
+  const shown = open.slice(0, 3).map((r) => r.title).join(" · ");
+  return { title: `${open.length} things need you in Network`, body: open.length > 3 ? `${shown} · and ${open.length - 3} more` : shown, url: "/network?view=due", type: "network" };
+}
+
+/**
+ * Where Network's phone messages go. Web Push (the Atriveo app on your phone) when it is configured; otherwise ntfy. NETWORK_PUSH=both
+ * sends to both, NETWORK_PUSH=ntfy keeps ntfy only.
+ */
+export function channels(env = process.env) {
+  const web = Boolean(env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY && env.VAPID_SUBJECT && env.PUSH_EVENT_USER_ID?.trim());
+  const ntfy = Boolean(env.NTFY_TOPIC), mode = String(env.NETWORK_PUSH || "").toLowerCase();
+  return { web: web && mode !== "ntfy", ntfy: ntfy && (mode === "ntfy" || mode === "both" || !web) };
+}
+
+// Each message is claimed once (phone_notices) before it is sent; if no channel took it, the claim is dropped and the next check retries.
+async function sendOnce(db, id, now, build, out, log, label) {
   const notices = db.collection("phone_notices");
   if (await notices.findOne({ _id: id })) return null;
   const msg = await build();
   try { await notices.insertOne({ _id: id, day: id.split(":")[0], kind: label, at: now.toISOString(), ...(msg ? {} : { silent: true }) }); } catch (e) { if (e?.code === 11000) return null; throw e; }
   if (!msg) return null;
-  let ok = false;
-  try { ok = await publish(msg); } catch (e) { log(`${label}: ${e.message}`); }
+  let ok = true;
+  if (out.ch.ntfy && msg.ntfy) { let sent = false; try { sent = await out.publish(msg.ntfy); } catch (e) { log(`${label} (ntfy): ${e.message}`); } ok &&= sent; }
+  if (out.ch.web && msg.web) { let r = { sent: 0, failed: 1 }; try { r = await out.webPush(db, msg.web); } catch (e) { log(`${label} (web push): ${e.message}`); } ok &&= r.sent > 0 || r.failed === 0; }
   if (!ok) { await notices.deleteOne({ _id: id }); return null; }
-  log(`phone message sent: ${label}`);
+  log(`phone message sent: ${label}${out.ch.web ? " (web push)" : ""}${out.ch.ntfy ? " (ntfy)" : ""}`);
   return msg;
 }
 
-/** From 9 a.m. New York time, once per day: send the counts if anything needs you. On Sunday from 6 p.m., the week's digest too. */
-export async function runNetworkTick({ db, now = new Date(), publish = publishNtfy, log = () => {} } = {}) {
+/** From 9 a.m. New York time, once per day: what needs you. On Sunday from 6 p.m., the week's digest too. */
+export async function runNetworkTick({ db, now = new Date(), publish = publishNtfy, webPush, env = process.env, log = () => {} } = {}) {
+  const ch = channels(env);
+  if (!ch.web && !ch.ntfy) return null;
+  const userId = env.PUSH_EVENT_USER_ID?.trim().toLowerCase();
+  const out = { ch, publish, webPush: webPush ?? ((d, m) => sendPushNotification(d, userId, m, { env })) };
   const { day, hour, weekday } = nyParts(now);
-  if (weekday === "Sun" && hour >= 18) await sendOnce(db, `${day}:network-week`, now, () => weeklyDigest(db, now), publish, log, "network-week");
+  if (weekday === "Sun" && hour >= 18) await sendOnce(db, `${day}:network-week`, now, async () => {
+    const w = await weeklyDigest(db, now);
+    return w && { ntfy: w, web: { title: w.title, body: w.message, url: "/network", type: "network_week" } };
+  }, out, log, "network-week");
   if (hour < 9) return null;
-  return sendOnce(db, `${day}:network`, now, async () => phoneMessage((await listReminders(db, { now })).reminders), publish, log, "network");
+  return sendOnce(db, `${day}:network`, now, async () => {
+    const list = (await listReminders(db, { now })).reminders, ntfy = phoneMessage(list), web = webMessage(list);
+    return ntfy || web ? { ntfy, web } : null;
+  }, out, log, "network");
 }
 
-/** Checks every few minutes inside the sidecar; off without NTFY_TOPIC, or with PHONE_SUMMARIES=off or NETWORK_REMINDERS=off. */
+/** Checks every few minutes inside the sidecar; off when neither Web Push nor ntfy is set up, or with PHONE_SUMMARIES=off / NETWORK_REMINDERS=off. */
 export function startNetworkReminders({ withMongo, log = console.log, everyMs = 5 * 60_000, publish = publishNtfy } = {}) {
   const off = (v) => /^(off|0|false)$/i.test(v || "");
-  if (!process.env.NTFY_TOPIC || off(process.env.PHONE_SUMMARIES) || off(process.env.NETWORK_REMINDERS)) { log("network reminders on the phone: off"); return null; }
+  const ch = channels();
+  if ((!ch.web && !ch.ntfy) || off(process.env.PHONE_SUMMARIES) || off(process.env.NETWORK_REMINDERS)) { log("network reminders on the phone: off"); return null; }
   let running = false;
   const tick = async () => { if (running) return; running = true; try { await withMongo((db) => runNetworkTick({ db, publish, log }), { appName: "AtriveoNetworkReminders" }); } catch (e) { log(`network reminders: ${e.message}`); } finally { running = false; } };
   setTimeout(tick, 30_000).unref?.();
   const timer = setInterval(tick, everyMs); timer.unref?.();
-  log("network reminders on the phone: on (9 a.m. New York daily, Sunday 6 p.m. weekly digest; counts only)");
+  log(`network reminders on the phone: on through ${[ch.web && "Web Push (names, tap to open)", ch.ntfy && "ntfy (counts only)"].filter(Boolean).join(" and ")}; 9 a.m. New York daily, Sunday 6 p.m. weekly`);
   return timer;
 }

@@ -35,8 +35,20 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const toastTimer = useRef<number | undefined>(undefined);
   const say = useCallback((t: Toast) => { setToast(t); window.clearTimeout(toastTimer.current); if (t) toastTimer.current = window.setTimeout(() => setToast(null), t.undo ? 6000 : 3000); }, []);
 
+  // A phone notification opens /network?person=…, ?work=… or ?view=due: honoured once, on the first load, then the address is tidied.
+  const linked = useRef(false);
   const reload = useCallback(async () => {
-    try { const [d, b] = await Promise.all([loadNetwork(), loadBoard().catch(() => null)]); setData({ people: d.people, sources: d.sources, links: d.links, you: d.you }); if (b) setBoard(b); setError(""); }
+    try {
+      const [d, b] = await Promise.all([loadNetwork(), loadBoard().catch(() => null)]); setData({ people: d.people, sources: d.sources, links: d.links, you: d.you }); if (b) setBoard(b); setError("");
+      if (!linked.current) {
+        linked.current = true;
+        const q = new URLSearchParams(window.location.search), person = q.get("person"), work = q.get("work");
+        if (person && d.people.some((p) => p.id === person)) setSelected(person);
+        else if (work && b?.some((x) => x.id === work)) setWork(work);
+        else if (q.get("view") === "due") setView({ kind: "due" });
+        if ([...q.keys()].length) window.history.replaceState(null, "", "/network");
+      }
+    }
     catch (e) { setError(String((e as Error).message || e)); }
     finally { setLoaded(true); }
   }, []);

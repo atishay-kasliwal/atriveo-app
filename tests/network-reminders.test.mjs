@@ -1,10 +1,11 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {reminders,listReminders,snoozeReminder,phoneMessage,runNetworkTick,weeklyDigest} from '../scripts/network-reminders.mjs';
+import {reminders,listReminders,snoozeReminder,phoneMessage,webMessage,channels,runNetworkTick,weeklyDigest} from '../scripts/network-reminders.mjs';
 
 // Invented people; "today" is a New York day. History entries are in date order, as the store keeps them.
 const P=(id,f={})=>({id,name:id,archived:false,sourceId:null,via:null,lastContact:null,nextFollowUp:null,history:[],...f});
 const H=(type,at,id=type+at)=>({id,type,at:`${at}T15:00:00.000Z`,text:''});
 const today='2026-10-28';
+const NTFY={NTFY_TOPIC:'test-topic'};
 
 test('who needs you: a reply waiting, follow-ups due or late, people gone quiet, sources nobody has written to; most urgent first',()=>{
  const people=[
@@ -50,12 +51,12 @@ test('snooze hides one reminder for a while; bad keys and lengths are refused',a
 test('phone: nothing before 9 a.m. New York; then one message a day, retried if it could not be sent; a quiet day is remembered silently',async()=>{
  const people=[P('Marco',{nextFollowUp:'2026-10-25'})];let sent=[];const publish=async m=>{sent.push(m);return true};
  const db=fakeDb(people);
- assert.equal(await runNetworkTick({db,now:new Date('2026-10-28T12:30:00Z'),publish}),null,'8:30 in New York');
+ assert.equal(await runNetworkTick({env:NTFY,db,now:new Date('2026-10-28T12:30:00Z'),publish}),null,'8:30 in New York');
  let failing=true;const flaky=async m=>{sent.push(m);return !failing};
- assert.equal(await runNetworkTick({db,now:new Date('2026-10-28T13:05:00Z'),publish:flaky}),null);
- failing=false;const m=await runNetworkTick({db,now:new Date('2026-10-28T13:10:00Z'),publish:flaky});assert.match(m.message,/1 follow-up due/);
- assert.equal(await runNetworkTick({db,now:new Date('2026-10-28T20:00:00Z'),publish}),null,'once a day');assert.equal(sent.length,2);
- const calm=fakeDb([]);sent=[];assert.equal(await runNetworkTick({db:calm,now:new Date('2026-10-28T14:00:00Z'),publish}),null);assert.equal(sent.length,0);
+ assert.equal(await runNetworkTick({env:NTFY,db,now:new Date('2026-10-28T13:05:00Z'),publish:flaky}),null);
+ failing=false;const m=await runNetworkTick({env:NTFY,db,now:new Date('2026-10-28T13:10:00Z'),publish:flaky});assert.match(m.ntfy.message,/1 follow-up due/);
+ assert.equal(await runNetworkTick({env:NTFY,db,now:new Date('2026-10-28T20:00:00Z'),publish}),null,'once a day');assert.equal(sent.length,2);
+ const calm=fakeDb([]);sent=[];assert.equal(await runNetworkTick({env:NTFY,db:calm,now:new Date('2026-10-28T14:00:00Z'),publish}),null);assert.equal(sent.length,0);
  assert.ok(await calm.collection('phone_notices').findOne({_id:'2026-10-28:network'}),'remembered so it is not recounted every few minutes');});
 
 test('work items: a week before the end, on the day, and when it has run over; done work is quiet',()=>{
@@ -72,7 +73,32 @@ test('weekly digest: Sunday from 6 p.m. New York, counts only, once a week, noth
  const sunday=new Date('2026-11-01T23:30:00Z');// 6:30 p.m. in New York, Sunday Nov 1
  const d=await weeklyDigest(db,sunday);assert.equal(d.message,'2 emails, 1 reply, 1 new person. 1 thing waits for you.');assert.ok(!/Dana/.test(JSON.stringify(d)));
  const sent=[];const publish=async m=>{sent.push(m);return true};
- await runNetworkTick({db,now:new Date('2026-11-01T21:00:00Z'),publish});assert.ok(!sent.some(m=>m.title==='Your week in Network'),'not before 6 p.m.');
- await runNetworkTick({db,now:sunday,publish});await runNetworkTick({db,now:new Date('2026-11-02T00:30:00Z'),publish});
+ await runNetworkTick({env:NTFY,db,now:new Date('2026-11-01T21:00:00Z'),publish});assert.ok(!sent.some(m=>m.title==='Your week in Network'),'not before 6 p.m.');
+ await runNetworkTick({env:NTFY,db,now:sunday,publish});await runNetworkTick({env:NTFY,db,now:new Date('2026-11-02T00:30:00Z'),publish});
  assert.equal(sent.filter(m=>m.title==='Your week in Network').length,1,'once that Sunday');
  assert.equal(await weeklyDigest(fakeDb([]),sunday),null);});
+
+test('channels: Web Push when it is set up, else ntfy; NETWORK_PUSH=both or ntfy; nothing when neither',()=>{
+ const WEB={VAPID_PUBLIC_KEY:'p',VAPID_PRIVATE_KEY:'k',VAPID_SUBJECT:'mailto:x@example.test',PUSH_EVENT_USER_ID:'me@example.test'};
+ assert.deepEqual(channels({...WEB,...NTFY}),{web:true,ntfy:false},'no doubles on the phone');
+ assert.deepEqual(channels({...WEB,...NTFY,NETWORK_PUSH:'both'}),{web:true,ntfy:true});
+ assert.deepEqual(channels({...WEB,...NTFY,NETWORK_PUSH:'ntfy'}),{web:false,ntfy:true});
+ assert.deepEqual(channels(NTFY),{web:false,ntfy:true});assert.deepEqual(channels({...WEB,PUSH_EVENT_USER_ID:' '}),{web:false,ntfy:false});});
+
+test('web push: names and a link that opens the right place; one item opens that person, several open the follow-up list',()=>{
+ assert.equal(webMessage([{kind:'never',title:'3 people at X have never heard from you'}]),null);
+ assert.deepEqual(webMessage([{kind:'due',personId:'p 1',title:'Follow up with Dana',detail:'Due today'}]),{title:'Follow up with Dana',body:'Due today',url:'/network?person=p%201',type:'network'});
+ assert.deepEqual(webMessage([{kind:'work',workId:'w1',title:'Docs ends in 2 days',detail:'Next: PR'}]).url,'/network?work=w1');
+ const many=webMessage(['A','B','C','D','E'].map(n=>({kind:'due',personId:n,title:`Follow up with ${n}`,detail:''})));
+ assert.equal(many.title,'5 things need you in Network');assert.equal(many.body,'Follow up with A · Follow up with B · Follow up with C · and 2 more');assert.equal(many.url,'/network?view=due');});
+
+test('web push delivery: sent once a day through your devices; retried when every device failed; no devices is not an error',async()=>{
+ const WEB={VAPID_PUBLIC_KEY:'p',VAPID_PRIVATE_KEY:'k',VAPID_SUBJECT:'mailto:x@example.test',PUSH_EVENT_USER_ID:'Me@Example.test'};
+ const db=fakeDb([P('Marco',{nextFollowUp:'2026-10-25'})]);const got=[];let result={sent:0,failed:2};
+ const webPush=async(_d,m)=>{got.push(m);return result};const publish=async()=>{throw new Error('ntfy must not be used')};
+ assert.equal(await runNetworkTick({db,env:WEB,webPush,publish,now:new Date('2026-10-28T13:05:00Z')}),null,'every device failed: try again');
+ result={sent:1,failed:1};const m=await runNetworkTick({db,env:WEB,webPush,publish,now:new Date('2026-10-28T13:10:00Z')});
+ assert.equal(m.web.title,'Follow up with Marco');assert.equal(m.web.url,'/network?person=Marco');
+ await runNetworkTick({db,env:WEB,webPush,publish,now:new Date('2026-10-28T15:00:00Z')});assert.equal(got.length,2,'once that day');
+ const none=fakeDb([P('Ann',{nextFollowUp:'2026-10-25'})]);assert.ok(await runNetworkTick({db:none,env:WEB,webPush:async()=>({sent:0,failed:0}),now:new Date('2026-10-28T13:10:00Z')}));
+ assert.equal(await runNetworkTick({db:fakeDb([P('Z',{nextFollowUp:'2026-10-25'})]),env:{},now:new Date('2026-10-28T13:10:00Z')}),null,'no channel, nothing to do');});
