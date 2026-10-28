@@ -199,3 +199,7 @@ test('"You" and sources: a name, a title, a note, a photo or logo; old pictures 
  const s2=await saveSource(db,{id:s.id,photoId:'logo1',notes:'Their recruiters answer on Tuesdays.'},T);assert.deepEqual([s2.photoId,s2.notes],['logo1','Their recruiters answer on Tuesdays.']);
  await saveSource(db,{id:s.id,photoId:null},T);assert.equal(await db.collection('network_images').findOne({_id:'logo1'}),null);
  await assert.rejects(()=>saveSource(db,{id:s.id,photoId:'zzz'}),/Upload the picture/);});
+
+test('a source can say where it is and, for an event, when',async()=>{
+ const db=fakeDb();const s=await saveSource(db,{name:'Open Summit',type:'event',place:'  Raleigh,   NC ',when:'Oct 2024'},T);
+ assert.deepEqual([s.place,s.when],['Raleigh, NC','Oct 2024']);assert.equal((await saveSource(db,{id:s.id,place:''},T)).place,'');});

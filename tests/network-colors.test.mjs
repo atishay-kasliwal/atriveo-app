@@ -93,3 +93,13 @@ test('introduced by two people: a line from each, and everyone else keeps their 
  const e=edgesFor(data,colorsFor(data));
  assert.deepEqual(e.filter(x=>x.b==='c').map(x=>[x.a,x.label]),[['a','introduced'],['b','also introduced']]);
  for(const id of ['a','b','d'])assert.deepEqual(e.filter(x=>x.b===id).map(x=>x.kind),['belongs']);});
+
+test('met at one place, works at another: a faint "works at" line to the company card, colour and place still from where you met',async()=>{
+ const {edgesFor,colorsFor,warmPath}=await import(out);
+ const data={sources:[{...src('ato','1'),type:'event'},{...src('rs','2'),name:'Randstad',type:'company'}],links:[],people:[person('el',{sourceId:'ato',company:'Randstad USA'}),person('dana',{sourceId:'rs',company:'Randstad'}),person('x',{sourceId:'ato',company:'Elsewhere'})]};
+ const c=colorsFor(data),e=edgesFor(data,c);
+ assert.deepEqual(e.filter(x=>x.b==='el').map(x=>[x.a,x.kind,x.label]),[['ato','belongs','first connection'],['rs','employer','works at']]);
+ assert.equal(c.person.get('el'),c.source.get('ato'),'colour from where you met');
+ assert.deepEqual(e.filter(x=>x.b==='dana').map(x=>x.kind),['belongs'],'met at the company itself: no second line');
+ assert.deepEqual(e.filter(x=>x.b==='x').map(x=>x.kind),['belongs'],'no card for where they work: nothing extra');
+ assert.deepEqual(warmPath(e,'rs').nodes,['you','rs']);});
