@@ -653,8 +653,8 @@ button.pp-step{cursor:pointer;transition:color .15s}button.pp-step:hover{color:v
 .pp-source-buttons{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
 .pp-source-buttons .main{flex:1;min-width:140px}
 
-/* Organisation cards share the reference's logo, metadata, faces and violet frame. */
-.nwg-org-card{fill:url(#nwg-org-fill);stroke:#9880eb;stroke-width:1.8}
+/* Organisation cards: neutral canvas surface, contact details and violet frame. */
+.nwg-org-card{fill:var(--nw-bg);stroke:#9880eb;stroke-width:1.8}
 .nwg-src.is-company .nwg-halo,.nwg-src.is-staffing .nwg-halo{stroke:#c1b2f2}
 .nwg-src.is-company .nwg-sname,.nwg-src.is-staffing .nwg-sname{fill:#f0edf9}
 .nwg-src.is-company .nwg-kind,.nwg-src.is-staffing .nwg-kind,.nwg-org-place{fill:#c8c1df;font-size:12px}

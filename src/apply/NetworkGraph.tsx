@@ -28,10 +28,11 @@ type Gesture =
   | { kind: "pen"; points: [number, number][] }
   | { kind: "erase" }
   | { kind: "area"; sx: number; sy: number; x: number; y: number; add: boolean };
+const ORGANISATION = { w: 330, h: 94 }, ORGANISATION_SCALE = 0.9;
 const PERSON = { w: 196, h: 52 }, YOU = { w: 246, h: 80 }, WORK = { w: 176, h: 58 };
 const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 /** Card size by kind: organisations and events have their own wider cards; everything else grows with its name. */
-const sourceSize = (s: Source) => (s.type === "company" || s.type === "staffing" ? { w: 330, h: 94 } : s.type === "event" ? { w: 276, h: 80 }
+const sourceSize = (s: Source) => (s.type === "company" || s.type === "staffing" ? { w: ORGANISATION.w * ORGANISATION_SCALE, h: ORGANISATION.h * ORGANISATION_SCALE } : s.type === "event" ? { w: 276, h: 80 }
   : { w: Math.round(Math.max(180, 86 + Math.max(s.name.length * 9.6, (s.about || s.type).length * 6.8))), h: 68 });
 /** A ticket: a rounded card with a half-circle notch cut into each side. */
 function ticketPath(w: number, h: number, r = 14, n = 9) {
@@ -339,7 +340,6 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
       onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const f = [...e.dataTransfer.files].find((x) => x.type.startsWith("image/")); if (f) void addImage(f); }}
       role="application" aria-label="Your network as a map. Drag cards to arrange them; Enter opens the focused card.">
       <svg ref={svgEl} className="nwg-svg" style={{ backgroundSize: `${28 * view.k}px ${28 * view.k}px`, backgroundPosition: `${view.x}px ${view.y}px` }}>
-        <defs><linearGradient id="nwg-org-fill" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#302b52" /><stop offset="1" stopColor="#1a172f" /></linearGradient></defs>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>
           <g>
             {board.filter((it) => layers.board && it.kind === "group").map((gr) => {
@@ -392,7 +392,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
               <text x={-YOU.w / 2 + 86} y={data.you?.title ? 24 : 16} className="nwg-you-sub">{youSub}</text>
             </g>
             {shownSources.map((s) => {
-              const p = pos(s.id), c = colors.source.get(s.id) ?? PALETTE[0], sz = sourceSize(s), n = sourceMembers.get(s.id)?.length ?? 0, dim = lit && !lit.has(s.id);
+              const p = pos(s.id), c = colors.source.get(s.id) ?? PALETTE[0], sz = s.type === "company" || s.type === "staffing" ? ORGANISATION : sourceSize(s), n = sourceMembers.get(s.id)?.length ?? 0, dim = lit && !lit.has(s.id);
               const kind = SOURCE_TYPES.find(([type]) => type === s.type)?.[1] || s.type, org = s.type === "company" || s.type === "staffing", event = s.type === "event";
               const via = s.context || (s.parentSourceId ? `Via ${data.sources.find((parent) => parent.id === s.parentSourceId)?.name || "another source"}` : s.viaPersonId && people.has(s.viaPersonId) ? `Via ${people.get(s.viaPersonId)!.name}` : "");
               const faces = (sourceMembers.get(s.id) ?? []).slice(0, 3), x0 = -sz.w / 2;
@@ -414,7 +414,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
                     {s.place && <><path d={PIN} transform={`translate(${x0 + 85} 21) scale(.85)`} fill="none" stroke="var(--nw-muted)" strokeWidth={1.6} /><text x={x0 + 94} y={25} className="nwg-sub">{clip(s.place, 18)}</text></>}
                     {s.when && <><rect x={sz.w / 2 - 22 - s.when.length * 6.4} y={10} width={s.when.length * 6.4 + 14} height={19} rx={9.5} fill={c} fillOpacity={0.18} /><text x={sz.w / 2 - 15 - (s.when.length * 6.4) / 2} y={20} className="nwg-pill" fill={c}>{s.when}</text></>}
                     {n > 0 && <><circle cx={sz.w / 2 - 4} cy={-sz.h / 2 + 4} r={12} fill={c} stroke={bg} strokeWidth={3} /><text x={sz.w / 2 - 4} y={-sz.h / 2 + 4.5} className="nwg-badge">{n}</text></>}
-                  </> : org ? <>
+                  </> : org ? <g transform={`scale(${ORGANISATION_SCALE})`}>
                     {/* A company or agency: its logo on white, what it is, where, and the faces of the people you know there. */}
                     <rect x={x0 - 4} y={-sz.h / 2 - 4} width={sz.w + 8} height={sz.h + 8} rx={23} className="nwg-halo" />
                     <rect x={x0} y={-sz.h / 2} width={sz.w} height={sz.h} rx={20} className="nwg-org-card" />
@@ -430,7 +430,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
                     <rect x={sz.w / 2 - 108} y={18} width={85} height={22} rx={11} className="nwg-pplpill" />
                     <text x={sz.w / 2 - 65.5} y={29} className="nwg-pill">{n} {n === 1 ? "person" : "people"}</text>
                     <path d={`M${sz.w / 2 - 18} -4l7 7-7 7`} className="nwg-org-chevron" />
-                  </> : <>
+                  </g> : <>
                     <rect x={x0 - 5} y={-sz.h / 2 - 5} width={sz.w + 10} height={sz.h + 10} rx={19} className="nwg-halo" />
                     <rect x={x0} y={-sz.h / 2} width={sz.w} height={sz.h} rx={14} fill={card} stroke={c} strokeWidth={1.8} />
                     <rect x={x0 + 14} y={-22} width={44} height={44} rx={11} fill={c} fillOpacity={0.16} stroke={c} strokeWidth={1.5} />
