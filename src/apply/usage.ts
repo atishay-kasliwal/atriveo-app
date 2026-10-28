@@ -88,7 +88,7 @@ export const FEATURES: Feature[] = [
 ];
 
 /** What the extension counts (its fixed list); each is a feature of the "Extension" group, reported by the extension itself. */
-export const EXTENSION_FEATURES: [string, string][] = [["open", "Open an application (Apply)"], ["attach", "Attach resume"], ["paste", "Paste a detail into a form"], ["paste_profile", "Paste a detail on any page"], ["copy", "Copy a detail"], ["applied", "I applied"], ["closed", "Job closed"], ["download", "Download the resume"], ["save_profile", "Save your details"], ["dismiss", "Close the panel"]];
+export const EXTENSION_FEATURES: [string, string][] = [["open", "Open an application (Apply)"], ["attach", "Attach resume"], ["paste", "Paste a detail into a form"], ["paste_profile", "Paste a detail on any page"], ["copy", "Copy a detail"], ["applied", "I applied"], ["closed", "Job closed"], ["download", "Download the resume"], ["save_profile", "Save your details"], ["dismiss", "Close the panel"], ["network_add", "Add to Network from LinkedIn"]];
 for (const [k, label] of EXTENSION_FEATURES) FEATURES.push({ key: `extension.${k}`, page: "extension", label });
 
 const INTERACTIVE = "button,a,[role=tab],[role=switch],[role=radio],input[type=checkbox],summary";

@@ -51,13 +51,22 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
         else if (q.get("view") === "due") setView({ kind: "due" });
         if (q.get("view") === "jobs") setModeState("jobs");
         const jobUrl = q.get("job");
+        const fromLinkedIn = q.get("linkedin");
+        if (fromLinkedIn) {
+          // The extension's LinkedIn button, when no Atriveo tab was open: add the person it read, then open them.
+          let profile: unknown = null; try { profile = JSON.parse(fromLinkedIn); } catch { /* a broken link adds nobody */ }
+          if (profile && typeof profile === "object") void post<{ person: Person; existed: boolean }>("linkedin", profile).then(async (r) => {
+            const fresh = await loadNetwork(); setData({ people: fresh.people, sources: fresh.sources, links: fresh.links, you: fresh.you });
+            setSelected(r.person.id); say({ text: r.existed ? `${r.person.name} is already in your Network.` : `Added ${r.person.name} from LinkedIn.` });
+          }).catch((e: Error) => say({ text: e.message }));
+        }
         if (person && jobUrl && d.people.some((p) => p.id === person)) void loadPersonJobs(person).then((r) => { const job = r.jobs.find((j) => j.url === jobUrl); if (job) setMailFor({ id: person, job }); }).catch(() => { /* the panel is open; the jobs show there */ });
         if ([...q.keys()].length) window.history.replaceState(null, "", "/network");
       }
     }
     catch (e) { setError(String((e as Error).message || e)); }
     finally { setLoaded(true); }
-  }, []);
+  }, [say]);
   useEffect(() => { void reload(); }, [reload]);
 
   const colors = useMemo(() => colorsFor(data), [data]);
