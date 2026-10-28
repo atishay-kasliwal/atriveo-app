@@ -190,6 +190,7 @@ for (const [width,mapId] of [[1440,"main"],[390,"main"],[1440,"custom-map"]]) te
  await suggested.focus();await page.keyboard.press('Enter');
  await panel.getByRole('button',{name:'Confirm source',exact:true}).click();
  const saved=page.locator('[data-node="new-source"]');await saved.waitFor();
+ await panel.waitFor({state:"hidden"});
  assert.equal(await saved.getAttribute('transform'),before,'saved source keeps its suggested position');
  assert.equal(await page.locator('[data-node="person-4"]').getAttribute('transform'),personBefore,'people stay put');
  const body=writes.find(w=>w.path==='/network/source').body;assert.ok(Number.isFinite(body.position.x));assert.ok(body.positions.some(p=>p.id==='person-4'));
