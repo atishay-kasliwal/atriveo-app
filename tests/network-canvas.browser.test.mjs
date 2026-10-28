@@ -198,3 +198,19 @@ for (const [width,mapId] of [[1440,"main"],[390,"main"],[1440,"custom-map"]]) te
  assert.equal(await page.locator('[data-node="person-4"]').getAttribute('transform'),personBefore);
  assert.deepEqual(errors,[]);
 });
+
+
+test('company counts employer contacts and introduced members, with a two-letter logo fallback', async t => {
+  const { page, data } = await fixture(t, 1440);
+  await page.route('https://logo.clearbit.com/**', route => route.abort());
+  await page.route('https://www.google.com/s2/favicons**', route => route.abort());
+  data.people.find(p => p.id === 'person-2').via = 'person-1';
+  data.people.find(p => p.id === 'person-3').company = 'Northstar';
+  await page.reload();
+  const card = page.locator('[data-node="company-1"]');
+  await page.waitForFunction(() => document.querySelector('[data-node="company-1"] .nwg-tile')?.textContent === 'NO');
+  assert.equal(await card.locator('.nwg-pill').textContent(), '3 people');
+  assert.equal(await card.locator('.nwg-face').count(), 3);
+  await card.focus(); await page.keyboard.press('Enter');
+  assert.match(await page.locator('.pp-where').textContent(), /3 people/);
+});

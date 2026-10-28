@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import NetworkSourceContext from "./NetworkSourceContext";
 import {
-  JOB_STATUS, LINK_KINDS, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadMailSettings, loadNetwork, loadPersonJobs, loadSourceJobs, post, sourceLabel, throughFields, throughValue, uploadPhoto,
+  peopleForSource, organisationInitials, JOB_STATUS, LINK_KINDS, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadMailSettings, loadNetwork, loadPersonJobs, loadSourceJobs, post, sourceLabel, throughFields, throughValue, uploadPhoto,
   type JobRow, type LinkKind, type MailSettings, type NetworkData, type Source, type SourceType, type You,
 } from "./network";
 
@@ -111,7 +111,7 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
     catch (e) { setSaving(""); say({ text: String((e as Error).message) }); }
   }
   const color = colors.source.get(s.id) ?? "var(--nw-accent)";
-  const members = data.people.filter((p) => p.sourceId === s.id).sort((a, b) => (b.lastContact ?? "").localeCompare(a.lastContact ?? "") || a.name.localeCompare(b.name));
+  const members = peopleForSource(s, data).sort((a, b) => (b.lastContact ?? "").localeCompare(a.lastContact ?? "") || a.name.localeCompare(b.name));
   const per = typeof window !== "undefined" && window.innerHeight < 800 ? 5 : 7, pages = Math.max(1, Math.ceil(members.length / per)), pg = Math.min(page, pages - 1);
   const parent = s.parentSourceId ? data.sources.find((x) => x.id === s.parentSourceId) : null, introducer = s.viaPersonId ? data.people.find((p) => p.id === s.viaPersonId) : null;
   // Your own lines from this source to a person or another source (Randstad and the conference where you met them).
@@ -146,7 +146,7 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
   return (
     <aside className="nw-panel pp" aria-label={s.name}>
       <header className="pp-head">
-        <Picture square photo={s.photoId} label={s.name[0]?.toUpperCase() ?? "?"} color={color} onFile={(f) => { setSaving("Uploading…"); uploadPhoto(f).then((id) => save({ photoId: id })).catch((e: Error) => { setSaving(""); say({ text: e.message }); }); }} />
+        <Picture square photo={s.photoId} label={organisationInitials(s.name)} color={color} onFile={(f) => { setSaving("Uploading…"); uploadPhoto(f).then((id) => save({ photoId: id })).catch((e: Error) => { setSaving(""); say({ text: e.message }); }); }} />
         <div className="pp-id">
           <input className="nw-name" aria-label="Name" value={d.name} onChange={(e) => setD({ ...d, name: e.target.value })} onBlur={() => { if (d.name.trim() && d.name !== s.name) void save({ name: d.name }); else setD({ ...d, name: s.name }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
           <input className="nw-role" aria-label="About" placeholder="What it is, like Staffing agency in Raleigh" value={d.about} onChange={(e) => setD({ ...d, about: e.target.value })} onBlur={() => { if (d.about !== (s.about ?? "")) void save({ about: d.about }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
@@ -179,7 +179,7 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
           {/* Sources under this one (LinkedIn's days, a conference's companies), newest first, each with how many people it holds. */}
           {children.length > 0 && <div className="pp-days" aria-label="Under it">{children.map((c) => (
             <button key={c.id} type="button" className="pp-day" style={{ "--c": colors.source.get(c.id) } as CSSProperties} onClick={() => onSource(c.id)}>
-              <span>{c.name}</span><small>{data.people.filter((p) => p.sourceId === c.id).length}</small></button>))}</div>}
+              <span>{c.name}</span><small>{peopleForSource(c, data).length}</small></button>))}</div>}
           <ul className="pp-people">{members.slice(pg * per, pg * per + per).map((p) => { const f = followUp(p.nextFollowUp); return (
             <li key={p.id}><button type="button" onClick={() => onPerson(p.id)}>
               <span className={`nw-av${p.photoId ? " ph" : ""}`} style={{ "--c": colors.person.get(p.id) } as CSSProperties} aria-hidden="true">{p.photoId ? <img src={imageUrl(p.photoId)} alt="" /> : initials(p.name)}</span>

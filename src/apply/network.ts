@@ -350,6 +350,20 @@ export function sameCompany(a: string, b: string): boolean {
   const x = companyWords(a), y = companyWords(b), [short, long] = x.length <= y.length ? [x, y] : [y, x];
   return short.join("").length >= 3 && short.every((w, i) => long[i] === w);
 }
+/** Everyone represented by a source card, counted once even when several links match. */
+export function peopleForSource(source: Source, data: NetworkData): Person[] {
+  const org = source.type === "company" || source.type === "staffing";
+  const linked = new Set(data.links.filter((link) => link.kind === "works" && (link.a === source.id || link.b === source.id)).map((link) => link.a === source.id ? link.b : link.a));
+  return data.people.filter((person) => person.sourceId === source.id || source.auto?.includes(person.id)
+    || (org && (sameCompany(source.name, person.company || "") || linked.has(person.id))));
+}
+
+/** Two letters for organisations, including single-word names such as Fidelity → FI. */
+export function organisationInitials(name: string): string {
+  const words = name.trim().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  return (words.length > 1 ? words.slice(0, 2).map((word) => [...word][0]).join("") : [...(words[0] || "")].slice(0, 2).join("")).toUpperCase() || "?";
+}
+
 /** Where someone works: their own "works at", else their source when it is a company. */
 export const companyOfPerson = (p: Person, sources: Map<string, Source>) => p.company || (p.sourceId && (sources.get(p.sourceId)?.type === "company" || sources.get(p.sourceId)?.type === "staffing") ? sources.get(p.sourceId)!.name : "");
 

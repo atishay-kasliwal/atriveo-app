@@ -4,7 +4,7 @@ import {build} from 'esbuild';
 // The Network colour rule and its wording helpers, bundled from the page's own module.
 const dir=fs.mkdtempSync(path.join(os.tmpdir(),'nwc-'));const out=path.join(dir,'network.mjs');
 await build({entryPoints:[path.resolve('src/apply/network.ts')],bundle:true,format:'esm',platform:'node',outfile:out,logLevel:'silent'});
-const {colorsFor,PALETTE,followUp,ago,plusDays,initials,sourceLabel,edgesFor,autoLayout,warmPath,withAutoCompanies}=await import(out);
+const {peopleForSource,organisationInitials,colorsFor,PALETTE,followUp,ago,plusDays,initials,sourceLabel,edgesFor,autoLayout,warmPath,withAutoCompanies}=await import(out);
 const src=(id,at,color=null)=>({id,name:id,type:'company',about:'',color,createdAt:at});
 const person=(id,f={})=>({id,name:id,sourceId:null,via:null,color:null,...f});
 
@@ -132,4 +132,26 @@ test('suggested companies sit near a person even when coworkers are on opposite 
  const data=withAutoCompanies({sources:[],links:[],people:[person('a',{company:'Orchid',x:-2000,y:800}),person('b',{company:'Orchid',x:2000,y:-800})]});
  const positions=autoLayout(data),company=positions.get(data.sources[0].id);
  assert.ok(data.people.some(p=>Math.hypot(company.x-p.x,company.y-p.y)<325));
+});
+
+
+test('source cards include introduced people, matching employers and explicit work links once', () => {
+ const company={...src('company','1'),name:'Fidelity'};
+ const data={sources:[company, {...src('event','2'),type:'event'}],links:[{a:'linked',b:'company',kind:'works'},{a:'company',b:'direct',kind:'works'}],people:[
+  person('direct',{sourceId:'company',company:'Fidelity Investments'}),
+  person('introduced',{sourceId:'company',via:'direct'}),
+  person('coworker',{sourceId:'event',company:'Fidelity Investments'}),
+  person('linked'),person('unrelated',{sourceId:'event',company:'Other'})]};
+ assert.deepEqual(peopleForSource(company,data).map(p=>p.id),['direct','introduced','coworker','linked']);
+ assert.deepEqual(peopleForSource(data.sources[1],data).map(p=>p.id),['coworker','unrelated']);
+ assert.deepEqual(peopleForSource({...company,id:'auto',name:'Other',auto:['linked','unrelated','missing']},data).map(p=>p.id),['linked','unrelated']);
+ assert.equal(peopleForSource({...company,id:'empty',name:'Unconnected'},data).length,0);
+});
+
+test('organisation fallback has two letters for single and multiword names', () => {
+ assert.equal(organisationInitials('Fidelity'),'FI');
+ assert.equal(organisationInitials('Randstad'),'RA');
+ assert.equal(organisationInitials('Fidelity Investments'),'FI');
+ assert.equal(organisationInitials('  Northstar   Labs '),'NL');
+ assert.equal(organisationInitials(''),'?' );
 });
