@@ -1,3 +1,5 @@
+import { handlePushRoute } from "./web-push.mjs";
+import { startPushEvents } from "./push-events.mjs";
 #!/usr/bin/env node
 import {dashboardAiUsage} from './resume-ai-usage.mjs';
 import { claimInference, completeInference } from './resume-ai-queue.mjs';
@@ -1173,6 +1175,7 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(401, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({ ok: false, error: "Unauthorized" }));
   }
+  if (await handlePushRoute(req, res, pathname, withMongo)) return;
   if (await handleStaffing(req, res, reqUrl)) return;
   if (await handleOutreach(req, res, reqUrl)) return;
   // Open & Fill: the Atriveo Fill extension on this Mac only (never through the relay); see fill-routes.mjs.
@@ -2676,6 +2679,7 @@ server.headersTimeout = 125_000;
 server.listen(PORT, process.env.TAILOR_HOST?.trim() || "127.0.0.1", () => {
   handleOutreach.start();
   startPhoneSummaries({ withMongo, log });
+  startPushEvents({ withMongo, log });
   log(`listening on http://localhost:${PORT}`);
   // Bound to loopback, so this only matters once cloudflared publishes it — but
   // then /scrape/start is reachable by anyone who knows the tunnel URL, and it

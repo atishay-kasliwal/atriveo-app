@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test:push": "node --test tests/web-push.test.mjs tests/web-push-mongo.test.mjs",
     "test:companion-link": "node --test tests/companion-link.test.mjs",
     "test:open-fill-queue": "node scripts/test-open-fill-queue.mjs",
     "clean:install": "node scripts/clean-install.mjs",
@@ -97,7 +98,8 @@
     "pagedjs": "^0.4.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router-dom": "^7.14.0"
+    "react-router-dom": "^7.14.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260409.1",

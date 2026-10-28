@@ -42,6 +42,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, env, params }) =>
 
   const forwardHeaders = new Headers(request.headers);
   forwardHeaders.set("Authorization", `Bearer ${connector.api_key}`);
+  forwardHeaders.delete("X-Atriveo-Push-User");
   forwardHeaders.delete("Cookie"); // Don't forward session cookie to the backend
 
   try {

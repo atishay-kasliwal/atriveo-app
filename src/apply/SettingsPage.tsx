@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { getJson } from "./engine";
 import WidgetPreview, { ACCENT_COLOR, DEFAULT_WIDGET, SAMPLE, type WidgetData, type WidgetPrefs } from "./WidgetPreview";
 import "./settings.css";
+import PushSettings from "./PushSettings";
 
 const PRESETS = [10, 15, 20, 25, 30];
 const FLAGS: { key: "responses" | "interviews" | "review" | "streak" | "trend"; label: string; hint: string }[] = [
@@ -49,6 +50,7 @@ export default function SettingsPage({ header }: { header?: ReactNode }) {
         {error && goal == null && <p className="st-error" role="alert">{error}</p>}
         <div className="st-grid">
           <div className="st-controls">
+            <PushSettings />
             <section aria-labelledby="st-goal">
               <h2 id="st-goal">Daily goal</h2>
               <p className="st-hint">How many applications make a day complete. It drives the ring, the streak and the goal on Today.</p>

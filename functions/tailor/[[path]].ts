@@ -40,10 +40,13 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
 
   const url = new URL(request.url);
   const subpath = url.pathname.replace(/^\/tailor/, "") || "/";
+  // Push identity must only come from /api/push's verified JWT, never caller headers.
+  if (subpath.replace(/\/+/g, '/').startsWith('/push')) return Response.json({ error: 'Use /api/push' }, { status: 403 });
   const target = new URL(subpath + url.search, origin.replace(/\/$/, ""));
 
   const headers = new Headers(request.headers);
   headers.delete("host");
+  headers.delete("X-Atriveo-Push-User");
   if (env.TAILOR_TOKEN) {
     headers.set("X-Tailor-Token", env.TAILOR_TOKEN);
   }
