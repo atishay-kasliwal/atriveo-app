@@ -1,19 +1,83 @@
 [
   {
-    "session_id": "2026-10-27T13:32:23Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4484045084",
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4482518849",
     "application_key": null,
     "ats": null,
     "ats_board": null,
     "ats_posting_id": null,
-    "batch_time": "2026-10-27T13:32:23Z",
-    "company": "Deep Sync",
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "New York City Office of Technology & Innovation",
     "competition_score": 0,
-    "date_posted": "2026-10-27",
+    "date_posted": "2026-10-28",
     "job_url_direct": null,
-    "level": "Mid",
-    "location": "Kirkland, WA, USA",
-    "max_exp": 2.0,
+    "level": "Entry",
+    "location": "Brooklyn, NY, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 10,
+    "priority_tags": [
+      "New York",
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 124,
+    "score_pct": 50,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "The Office of Technology and Innovation (OTI) leverages technology to drive opportunity, improve public safety, and help government run better across New York City.",
+    "title": "Data Scientist",
+    "ats_score": 100,
+    "fit_score": 8
+  },
+  {
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://jobs.ashbyhq.com/legora/5fd9fc81-e9af-4d6b-af86-94a1c3d4fdce",
+    "application_key": "ashby:5fd9fc81-e9af-4d6b-af86-94a1c3d4fdce",
+    "ats": "ashby",
+    "ats_board": "legora",
+    "ats_posting_id": "5fd9fc81-e9af-4d6b-af86-94a1c3d4fdce",
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Legora",
+    "competition_score": 0,
+    "date_posted": "2026-10-28",
+    "job_url_direct": "https://jobs.ashbyhq.com/legora/5fd9fc81-e9af-4d6b-af86-94a1c3d4fdce/application",
+    "level": "Entry",
+    "location": "New York City",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 10,
+    "priority_tags": [
+      "New York",
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 122,
+    "score_pct": 49,
+    "search_term": "ats:ashby",
+    "site": "ashby",
+    "summary": "ABOUT US Legora is redefining how legal work gets done.",
+    "title": "Data Scientist - Growth",
+    "ats_score": 60,
+    "fit_score": 6
+  },
+  {
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4467296806",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Amazon Web Services (AWS)",
+    "competition_score": 5,
+    "date_posted": "2026-10-28",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Seattle, WA, USA",
+    "max_exp": 3.0,
     "min_exp": 2.0,
     "pipeline": "standard",
     "priority_group": 14,
@@ -21,1711 +85,509 @@
       "2\u20135 yrs"
     ],
     "priority_version": 2,
-    "score": 125,
-    "score_pct": 50,
-    "search_term": "backend engineer",
+    "score": 121,
+    "score_pct": 48,
+    "search_term": "software engineer",
     "site": "linkedin",
-    "summary": "**Position Overview:** Software Engineer II joining our India engineering team to help design and build large-scale data pipelines and the platforms and services built on top of them.",
-    "title": "Software Engineer II",
-    "resume": {
-      "status": "success",
-      "stage": "SUCCESS",
-      "fingerprint": "6f285c2a2046a5461664e180ce596cc52eb974c5b64eea13ec11802aa2b03d86",
-      "lease_until": null,
-      "worker_id": "oracle-atriveo",
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T13:50:34.198Z",
-      "error": null,
-      "company": "Deep Sync",
-      "title": "Software Engineer II",
-      "resume_slot": 1703,
-      "session_hour": "09",
-      "batch_time": "2026-10-27T13:32:23Z",
-      "session_id": "2026-10-27T13:32:23Z",
-      "priority": 1000,
-      "source": "hourly",
-      "cached": false,
-      "failure_reason": null,
-      "fallback": null,
-      "folder": "DeepSync (27thOctober)",
-      "object": {
-        "bucket": "atriveo-resume",
-        "key": "resumes/bf/bff924a1843225cd21ae4cc638cd4e33120d767f5099a0fd76159e567bc4b88d.pdf",
-        "sha256": "bff924a1843225cd21ae4cc638cd4e33120d767f5099a0fd76159e567bc4b88d",
-        "bytes": 39694,
-        "tex_key": "resumes/bf/bff924a1843225cd21ae4cc638cd4e33120d767f5099a0fd76159e567bc4b88d.tex",
-        "jd_key": "resumes/bf/bff924a1843225cd21ae4cc638cd4e33120d767f5099a0fd76159e567bc4b88d.jd.txt"
-      },
-      "object_error": null,
-      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/DeepSync (27thOctober)/Atishay Kasliwal.pdf",
-      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/DeepSync (27thOctober)",
-      "cover_letter": {
-        "status": "draft",
-        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/DeepSync (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
-        "built_at": "2026-10-27T13:50:34.198Z"
-      }
-    },
-    "fit": {
-      "score": 83,
-      "coverage": {
-        "status": "incomplete",
-        "scored_requirements": 6,
-        "unparsed_requirements": 6,
-        "missing_job_title": false,
-        "no_skill_requirements": false
-      },
-      "confidence": "medium",
-      "confidence_reasons": [
-        "6 qualification lines need manual review; they were not fully assessed",
-        "3 requirement groups contain unrecognized technologies"
-      ],
-      "applicable_weight": 80,
-      "outside_roles": false,
-      "knockouts": {
-        "verdict": "clear",
-        "items": []
-      },
-      "ledger": {
-        "required": {
-          "matched": 4,
-          "total": 6
-        },
-        "preferred": {
-          "matched": 0,
-          "total": 0
-        },
-        "total": {
-          "matched": 4,
-          "total": 6
-        },
-        "matched": [
-          "API",
-          "CI/CD",
-          "SQL",
-          "AWS"
-        ],
-        "partial": [],
-        "missing": [
-          "Spark",
-          "Debugging"
-        ],
-        "mentioned": [
-          "Terraform"
-        ],
-        "unrecognized": [
-          "IAM",
-          "EMR",
-          "PII"
-        ],
-        "unparsed": [
-          {
-            "classification": "required",
-            "source": "Design, develop, test, and deploy features across our data pipelines and platform services, owning them through to production."
-          },
-          {
-            "classification": "required",
-            "source": "Implement distributed data processing jobs, along with the orchestration and configuration that drive them."
-          },
-          {
-            "classification": "required",
-            "source": "Integrate external systems\u2014including data vendors, client delivery endpoints, cloud warehouses, and third-party software\u2014and make those integrations observable and recoverable when they fail."
-          },
-          {
-            "classification": "required",
-            "source": "Add instrumentation, alerting, and automated tests so problems surface before reaching a client."
-          },
-          {
-            "classification": "required",
-            "source": "Participate in code reviews, incident response, and knowledge sharing across the team."
-          },
-          {
-            "classification": "required",
-            "source": "Strong programming ability in at least one modern language, with the judgment and adaptability to pick up others."
-          }
-        ],
-        "skills": [
-          {
-            "label": "API",
-            "alternatives": [
-              "API"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Build services and APIs that expose pipeline data and platform capabilities to internal teams and clients.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Enhanced British Telecom partner integrations with FastAPI and Redis microservices, delivering sub-200ms REST responses across 10K+ API calls.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "CI/CD",
-            "alternatives": [
-              "CI/CD"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Contribute to infrastructure-as-code and CI/CD pipelines.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Jenkins Docker Kubernetes CI/CD for 20 engineers; deploy 6h to 90s; 20+ releases/month.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "SQL",
-            "alternatives": [
-              "SQL"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Solid SQL skills, with experience across relational databases and/or cloud data warehouses.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "Spark",
-            "alternatives": [
-              "Spark"
-            ],
-            "class": "required",
-            "status": "missing",
-            "source": "Experience with distributed data processing at scale (e.g., Spark) or comparable large-scale data systems."
-          },
-          {
-            "label": "AWS",
-            "alternatives": [
-              "AWS"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Hands-on experience with a major cloud platform (ideally AWS)\u2014specifically object storage, IAM, and at least one compute service.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "Debugging",
-            "alternatives": [
-              "Debugging"
-            ],
-            "class": "required",
-            "status": "missing",
-            "source": "Sound production habits: automated testing, version control, code review, and debugging from logs and metrics rather than guesswork."
-          }
-        ]
-      },
-      "lost": [
-        {
-          "category": "required_skills",
-          "requirement": "Spark",
-          "source": "Experience with distributed data processing at scale (e.g., Spark) or comparable large-scale data systems.",
-          "lost": 6.2
-        },
-        {
-          "category": "required_skills",
-          "requirement": "Debugging",
-          "source": "Sound production habits: automated testing, version control, code review, and debugging from logs and metrics rather than guesswork.",
-          "lost": 6.2
-        },
-        {
-          "category": "experience_alignment",
-          "requirement": "Code quality",
-          "source": "Sound production habits: automated testing, version control, code review, and debugging from logs and metrics rather than guesswork.",
-          "lost": 2.1
-        },
-        {
-          "category": "required_skills",
-          "requirement": "CI/CD",
-          "source": "Contribute to infrastructure-as-code and CI/CD pipelines.",
-          "lost": 1.9
-        },
-        {
-          "category": "required_skills",
-          "requirement": "SQL",
-          "source": "Solid SQL skills, with experience across relational databases and/or cloud data warehouses.",
-          "lost": 0.6
-        }
-      ],
-      "config_hash": "64abdf97758f3d12",
-      "master_hash": "494ebd17cdf7baa9",
-      "candidate_hash": "a1f9884b7ab7dce7",
-      "shape": 5,
-      "jd_chars": 3081,
-      "as_of": "2026-10-27"
-    },
-    "ats_score": 71,
-    "fit_score": 12
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4481866799",
-    "session_id": "2026-10-27T13:32:23Z",
-    "application_key": null,
-    "ats": null,
-    "ats_board": null,
-    "ats_posting_id": null,
-    "batch_time": "2026-10-27T13:32:23Z",
-    "company": "Setec Alpha",
-    "competition_score": 0,
-    "date_posted": "2026-10-27",
-    "job_url_direct": null,
-    "level": "Entry",
-    "location": "New York City Metropolitan Area",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "priority_group": 10,
-    "priority_tags": [
-      "New York",
-      "Exp. not stated"
-    ],
-    "priority_version": 2,
-    "score": 118,
-    "score_pct": 47,
-    "search_term": "backend engineer",
-    "site": "linkedin",
-    "summary": "nan",
-    "title": "Python Developer",
-    "resume": {
-      "status": "failed",
-      "stage": "GATED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": "oracle-atriveo",
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T13:50:34.219Z",
-      "error": "JD not found or too short in Mongo descriptions",
-      "company": "Setec Alpha",
-      "title": "Python Developer",
-      "resume_slot": 1,
-      "session_hour": "09",
-      "batch_time": "2026-10-27T13:32:23Z",
-      "session_id": "2026-10-27T13:32:23Z",
-      "priority": 1000,
-      "source": "hourly",
-      "failure_reason": null
-    }
-  },
-  {
-    "session_id": "2026-10-27T13:32:23Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4483617388",
-    "application_key": null,
-    "ats": null,
-    "ats_board": null,
-    "ats_posting_id": null,
-    "batch_time": "2026-10-27T13:32:23Z",
-    "company": "ByteDance",
-    "competition_score": 0,
-    "date_posted": "2026-10-27",
-    "job_url_direct": null,
-    "level": "Entry",
-    "location": "San Jose, CA, USA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "priority_group": 14,
-    "priority_tags": [
-      "Exp. not stated"
-    ],
-    "priority_version": 2,
-    "score": 100,
-    "score_pct": 40,
-    "search_term": "backend engineer",
-    "site": "linkedin",
-    "summary": "**Responsibilities** The Global Payment Tech team is the core engine powering ByteDance's global payment and financial services, spanning payment acquiring, wallets, financial products, insurance, an\u2026",
-    "title": "Software Engineer, Global Payment - Global Payment",
-    "resume": {
-      "status": "success",
-      "stage": "SUCCESS",
-      "fingerprint": "f6728cbbc4aca9a08932ee4f082211c0d7840f08d643e973493486b71c4da75c",
-      "lease_until": null,
-      "worker_id": "oracle-atriveo",
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T13:50:53.973Z",
-      "error": null,
-      "company": "ByteDance",
-      "title": "Software Engineer, Global Payment - Global Payment",
-      "resume_slot": 1717,
-      "session_hour": "09",
-      "batch_time": "2026-10-27T13:32:23Z",
-      "session_id": "2026-10-27T13:32:23Z",
-      "priority": 1000,
-      "source": "hourly",
-      "cached": false,
-      "failure_reason": null,
-      "fallback": null,
-      "folder": "ByteDance (27thOctober)-2",
-      "object": {
-        "bucket": "atriveo-resume",
-        "key": "resumes/80/80fcbba9e945be9713d9093067160bef739a113857a50b24a02fd9c43620c69b.pdf",
-        "sha256": "80fcbba9e945be9713d9093067160bef739a113857a50b24a02fd9c43620c69b",
-        "bytes": 39205,
-        "tex_key": "resumes/80/80fcbba9e945be9713d9093067160bef739a113857a50b24a02fd9c43620c69b.tex",
-        "jd_key": "resumes/80/80fcbba9e945be9713d9093067160bef739a113857a50b24a02fd9c43620c69b.jd.txt"
-      },
-      "object_error": null,
-      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/ByteDance (27thOctober)-2/Atishay Kasliwal.pdf",
-      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/ByteDance (27thOctober)-2",
-      "cover_letter": {
-        "status": "draft",
-        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/ByteDance (27thOctober)-2/Atishay Kasliwal - Cover Letter.pdf",
-        "built_at": "2026-10-27T13:50:53.973Z"
-      }
-    },
-    "fit": {
-      "score": 76.4,
-      "coverage": {
-        "status": "incomplete",
-        "scored_requirements": 6,
-        "unparsed_requirements": 4,
-        "missing_job_title": false,
-        "no_skill_requirements": false
-      },
-      "confidence": "medium",
-      "confidence_reasons": [
-        "4 qualification lines need manual review; they were not fully assessed",
-        "1 requirement groups contain unrecognized technologies"
-      ],
-      "applicable_weight": 75,
-      "outside_roles": false,
-      "knockouts": {
-        "verdict": "clear",
-        "items": []
-      },
-      "ledger": {
-        "required": {
-          "matched": 2,
-          "total": 6
-        },
-        "preferred": {
-          "matched": 0,
-          "total": 0
-        },
-        "total": {
-          "matched": 2,
-          "total": 6
-        },
-        "matched": [
-          "Observability",
-          "Java / Python / Go / C++"
-        ],
-        "partial": [
-          "Distributed systems"
-        ],
-        "missing": [
-          "Data structures",
-          "Algorithms",
-          "Debugging"
-        ],
-        "mentioned": [],
-        "unrecognized": [
-          "Internet"
-        ],
-        "unparsed": [
-          {
-            "classification": "required",
-            "source": "Rich experience in architecture design, with ability to accurately and comprehensively understand business operations, and design reasonable architecture solutions according to business development"
-          },
-          {
-            "classification": "required",
-            "source": "Strong communication and excellent teamwork skills; flexible and motivated"
-          },
-          {
-            "classification": "required",
-            "source": "Strong learning ability and sense of product ownership"
-          },
-          {
-            "classification": "preferred",
-            "source": "Responsible for the business structure of multiple business lines or the entire product line, organized projects of medium or above scale, and have good business awareness/business understanding;"
-          }
-        ],
-        "skills": [
-          {
-            "label": "Observability",
-            "alternatives": [
-              "Observability"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "The Global Payment team of ByteDance provides payment solutions - including payment acquisitions, disbursements, transaction monitoring, payment method management, foreign exchange conversion, accounting, reconciliations, and so on to ensure that our users have a smooth and secure payment experience on ByteDance platforms including TikTok.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Fidelity pipeline monitoring and audit trails for encrypted insurance transfer compliance.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "Distributed systems",
-            "alternatives": [
-              "Distributed systems"
-            ],
-            "class": "required",
-            "status": "partial",
-            "source": "Experience in designing and developing massive data and large-scale distributed systems",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "FastAPI microservices with Docker Redis; sub-200ms REST for enterprise telecom integrations.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "Data structures",
-            "alternatives": [
-              "Data structures"
-            ],
-            "class": "required",
-            "status": "missing",
-            "source": "Deep understanding of computer architectures, data structures, and algorithms, and can apply to practical work"
-          },
-          {
-            "label": "Algorithms",
-            "alternatives": [
-              "Algorithms"
-            ],
-            "class": "required",
-            "status": "missing",
-            "source": "Deep understanding of computer architectures, data structures, and algorithms, and can apply to practical work"
-          },
-          {
-            "label": "Debugging",
-            "alternatives": [
-              "Debugging"
-            ],
-            "class": "required",
-            "status": "missing",
-            "source": "Excellent programming, debugging, and optimization skills, proficient in at least one of the following: Java / Python / Golang / C++ / PHP"
-          },
-          {
-            "label": "Java / Python / Go / C++",
-            "alternatives": [
-              "Java",
-              "Python",
-              "Go",
-              "C++"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Excellent programming, debugging, and optimization skills, proficient in at least one of the following: Java / Python / Golang / C++ / PHP",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees.",
-              "tier": "measured_job_bullet"
-            }
-          }
-        ]
-      },
-      "lost": [
-        {
-          "category": "required_skills",
-          "requirement": "Data structures",
-          "source": "Deep understanding of computer architectures, data structures, and algorithms, and can apply to practical work",
-          "lost": 6.7
-        },
-        {
-          "category": "required_skills",
-          "requirement": "Algorithms",
-          "source": "Deep understanding of computer architectures, data structures, and algorithms, and can apply to practical work",
-          "lost": 6.7
-        },
-        {
-          "category": "required_skills",
-          "requirement": "Debugging",
-          "source": "Excellent programming, debugging, and optimization skills, proficient in at least one of the following: Java / Python / Golang / C++ / PHP",
-          "lost": 6.6
-        },
-        {
-          "category": "required_skills",
-          "requirement": "Distributed systems",
-          "source": "Experience in designing and developing massive data and large-scale distributed systems",
-          "lost": 3.3
-        },
-        {
-          "category": "required_skills",
-          "requirement": "Observability",
-          "source": "The Global Payment team of ByteDance provides payment solutions - including payment acquisitions, disbursements, transaction monitoring, payment method management, foreign exchange conversion, accounting, reconciliations, and so on to ensure that our users have a smooth and secure payment experience on ByteDance platforms including TikTok.",
-          "lost": 0.3
-        }
-      ],
-      "config_hash": "64abdf97758f3d12",
-      "master_hash": "494ebd17cdf7baa9",
-      "candidate_hash": "a1f9884b7ab7dce7",
-      "shape": 5,
-      "jd_chars": 7087,
-      "as_of": "2026-10-27"
-    },
-    "ats_score": 28,
-    "fit_score": 4
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4262573291",
-    "session_id": "2026-10-27T13:32:23Z",
-    "application_key": null,
-    "ats": null,
-    "ats_board": null,
-    "ats_posting_id": null,
-    "batch_time": "2026-10-27T13:32:23Z",
-    "company": "SpaceX Super Intelligence",
-    "competition_score": 0,
-    "date_posted": "2026-10-27",
-    "job_url_direct": null,
-    "level": "Entry",
-    "location": "Palo Alto, CA, USA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "priority_group": 14,
-    "priority_tags": [
-      "Exp. not stated"
-    ],
-    "priority_version": 2,
-    "score": 74,
-    "score_pct": 30,
-    "search_term": "backend engineer",
-    "site": "linkedin",
-    "summary": "About xAI xAI\u2019s mission is to create AI systems that can accurately understand the universe and aid humanity in its pursuit of knowledge.",
-    "title": "Rust/C++ Backend Engineer - Enterprise Agent",
+    "summary": "**Description** AWS Applied AI Solutions (AAIS) is building toward a future where every business innovates with Amazon AI teammates.",
+    "title": "Software Development Engineer, Agentic Workspaces - Watchtower",
     "ats_score": 50,
     "fit_score": 6
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4466165590",
-    "session_id": "2026-10-27T13:32:23Z",
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4468161569",
     "application_key": null,
     "ats": null,
     "ats_board": null,
     "ats_posting_id": null,
-    "batch_time": "2026-10-27T13:32:23Z",
-    "company": "OpenAI",
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Millennial Software",
     "competition_score": 0,
-    "date_posted": "2026-10-27",
+    "date_posted": "2026-10-28",
     "job_url_direct": null,
     "level": "Entry",
-    "location": "San Francisco, CA, USA",
+    "location": "Chantilly, VA, USA",
     "max_exp": null,
     "min_exp": null,
     "pipeline": "standard",
-    "priority_group": 14,
+    "priority_group": 12,
     "priority_tags": [
-      "Exp. not stated"
+      "New grad"
     ],
     "priority_version": 2,
-    "score": 61,
-    "score_pct": 24,
-    "search_term": "backend engineer",
+    "score": 86,
+    "score_pct": 34,
+    "search_term": "new grad",
     "site": "linkedin",
-    "summary": "nan",
-    "title": "Software Engineer, Healthcare",
-    "ats_score": 50,
-    "fit_score": 5
+    "summary": "* Experience creating and maintaining Docker containers, Helm charts, orchestration platforms such as Kubernetes clusters, and using cloud infrastructure services (AWS/Azure/GCP).",
+    "title": "Entry Level Full Stack Developer- $65K-$116K + 15% 401k",
+    "ats_score": 60,
+    "fit_score": 12
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4467238258",
-    "session_id": "2026-10-27T13:32:23Z",
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4484491354",
     "application_key": null,
     "ats": null,
     "ats_board": null,
     "ats_posting_id": null,
-    "batch_time": "2026-10-27T13:32:23Z",
-    "company": "Mimecast",
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Webologix Ltd/ INC",
     "competition_score": 0,
-    "date_posted": "2026-10-27",
+    "date_posted": "2026-10-28",
     "job_url_direct": null,
-    "level": "Entry",
-    "location": "Minneapolis, MN, USA",
-    "max_exp": null,
-    "min_exp": null,
+    "level": "New Grad",
+    "location": "USA",
+    "max_exp": 3.0,
+    "min_exp": 0.0,
     "pipeline": "standard",
-    "priority_group": 14,
+    "priority_group": 12,
     "priority_tags": [
-      "Exp. not stated"
+      "0\u20131 yrs"
     ],
     "priority_version": 2,
-    "score": 61,
+    "score": 60,
     "score_pct": 24,
-    "search_term": "software engineer",
+    "search_term": "data scientist",
     "site": "linkedin",
-    "summary": "nan",
-    "title": "Software Engineer I, Endpoint Sensor",
-    "ats_score": 0,
-    "fit_score": 5
+    "summary": "\ud83d\ude80 **WE\u2019RE HIRING: MACHINE LEARNING ENGINEER** \ud83d\udccd **Location:** United States \ud83d\udcbc **Experience:** 0\u20133 Years \ud83d\udd52 **Employment Type:** Full-Time \ud83c\udf93 **Minimum Qualification:** Master\u2019s Degree **About the Role*\u2026",
+    "title": "Machine Learning Engineer",
+    "ats_score": 47,
+    "fit_score": 8
   },
   {
-    "session_id": "2026-10-27T13:32:23Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4467715468",
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4482519936",
     "application_key": null,
     "ats": null,
     "ats_board": null,
     "ats_posting_id": null,
-    "batch_time": "2026-10-27T13:32:23Z",
-    "company": "JPMorganChase",
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "AT&T",
     "competition_score": 0,
-    "date_posted": "2026-10-27",
+    "date_posted": "2026-10-28",
     "job_url_direct": null,
     "level": "Mid",
-    "location": "Plano, TX, USA",
-    "max_exp": null,
-    "min_exp": null,
+    "location": "Denver, CO, USA",
+    "max_exp": 3.0,
+    "min_exp": 3.0,
     "pipeline": "standard",
     "priority_group": 14,
     "priority_tags": [
-      "Exp. not stated"
+      "2\u20135 yrs"
     ],
     "priority_version": 2,
-    "score": 16,
-    "score_pct": 6,
+    "score": 57,
+    "score_pct": 23,
     "search_term": "software engineer",
     "site": "linkedin",
-    "summary": "nan",
-    "title": "Backend Java Software Engineer III",
-    "resume": {
-      "status": "failed",
-      "stage": "GATED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": "oracle-atriveo",
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T13:50:53.989Z",
-      "error": "JD not found or too short in Mongo descriptions",
-      "company": "JPMorganChase",
-      "title": "Backend Java Software Engineer III",
-      "resume_slot": 8,
-      "session_hour": "09",
-      "batch_time": "2026-10-27T13:32:23Z",
-      "session_id": "2026-10-27T13:32:23Z",
-      "priority": 1000,
-      "source": "hourly",
-      "failure_reason": null
-    }
+    "summary": "**The Role** We are seeking a **Software Engineer II** with strong proficiency in Golang to design, build, test, deploy, and support reliable backend services and APIs.",
+    "title": "Software Engineer II - Location is HYBRID in either Dallas, TX or Denver, CO",
+    "ats_score": 58,
+    "fit_score": 10
   },
   {
-    "session_id": "2026-10-27T13:32:23Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4409908267",
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4484476824",
     "application_key": null,
     "ats": null,
     "ats_board": null,
     "ats_posting_id": null,
-    "batch_time": "2026-10-27T13:32:23Z",
-    "company": "HAVI",
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Dealer Tire",
     "competition_score": 0,
-    "date_posted": "2026-10-27",
+    "date_posted": "2026-10-28",
     "job_url_direct": null,
     "level": "Entry",
-    "location": "Chicago, IL, USA",
-    "max_exp": null,
-    "min_exp": null,
+    "location": "Powderhorn, CO, USA",
+    "max_exp": 2.0,
+    "min_exp": 0.0,
     "pipeline": "standard",
-    "priority_group": 14,
+    "priority_group": 12,
     "priority_tags": [
-      "Exp. not stated"
+      "0\u20131 yrs"
     ],
     "priority_version": 2,
-    "score": 0,
-    "score_pct": 0,
+    "score": 48,
+    "score_pct": 19,
     "search_term": "data scientist",
     "site": "linkedin",
-    "summary": "nan",
+    "summary": "**Who We Are** We\u2019re Dealer Tire, a family-owned, international distributor of tires and parts established in 1918 in Cleveland, OH.",
     "title": "Associate Data Scientist",
-    "apply_type": "offsite",
-    "apply_type_at": "2026-10-27T13:46:07.235Z",
-    "ats_score": 25,
-    "fit_score": 3
+    "ats_score": 26,
+    "fit_score": 7
   },
   {
-    "session_id": "2026-10-27T13:32:23Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4458286874",
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4484470864",
     "application_key": null,
     "ats": null,
     "ats_board": null,
     "ats_posting_id": null,
-    "batch_time": "2026-10-27T13:32:23Z",
-    "company": "Confido",
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "TaskVerse",
     "competition_score": 0,
-    "date_posted": "2026-10-27",
-    "job_url_direct": null,
-    "level": "Entry",
-    "location": "New York, NY, USA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "priority_group": 10,
-    "priority_tags": [
-      "New York",
-      "Exp. not stated"
-    ],
-    "priority_version": 2,
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "data scientist",
-    "site": "linkedin",
-    "summary": "nan",
-    "title": "Data Scientist",
-    "ats_score": 60,
-    "fit_score": 4
-  },
-  {
-    "session_id": "2026-10-27T13:32:23Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4475885733",
-    "application_key": null,
-    "ats": null,
-    "ats_board": null,
-    "ats_posting_id": null,
-    "batch_time": "2026-10-27T13:32:23Z",
-    "company": "Physical Intelligence",
-    "competition_score": 0,
-    "date_posted": "2026-10-27",
-    "job_url_direct": null,
-    "level": "Entry",
-    "location": "San Francisco, CA, USA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "priority_group": 14,
-    "priority_tags": [
-      "Exp. not stated"
-    ],
-    "priority_version": 2,
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "backend engineer",
-    "site": "linkedin",
-    "summary": "nan",
-    "title": "ML Engineer, Platform",
-    "resume": {
-      "status": "failed",
-      "stage": "GATED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": "oracle-atriveo",
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T13:51:16.291Z",
-      "error": "JD not found or too short in Mongo descriptions",
-      "company": "Physical Intelligence",
-      "title": "ML Engineer, Platform",
-      "resume_slot": 11,
-      "session_hour": "09",
-      "batch_time": "2026-10-27T13:32:23Z",
-      "session_id": "2026-10-27T13:32:23Z",
-      "priority": 1000,
-      "source": "hourly",
-      "failure_reason": null
-    }
-  },
-  {
-    "session_id": "2026-10-27T13:32:23Z",
-    "job_url": "https://www.linkedin.com/jobs/view/4481860979",
-    "application_key": null,
-    "ats": null,
-    "ats_board": null,
-    "ats_posting_id": null,
-    "batch_time": "2026-10-27T13:32:23Z",
-    "company": "Amazon Science",
-    "competition_score": 0,
-    "date_posted": "2026-10-27",
-    "job_url_direct": null,
-    "level": "Entry",
-    "location": "San Francisco, CA, USA",
-    "max_exp": null,
-    "min_exp": null,
-    "pipeline": "standard",
-    "priority_group": 14,
-    "priority_tags": [
-      "Exp. not stated"
-    ],
-    "priority_version": 2,
-    "score": 0,
-    "score_pct": 0,
-    "search_term": "data scientist",
-    "site": "linkedin",
-    "summary": "nan",
-    "title": "Applied Scientist, Amazon Ads",
-    "resume": {
-      "status": "failed",
-      "stage": "GATED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": "oracle-atriveo",
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T13:51:16.304Z",
-      "error": "JD not found or too short in Mongo descriptions",
-      "company": "Amazon Science",
-      "title": "Applied Scientist, Amazon Ads",
-      "resume_slot": 12,
-      "session_hour": "09",
-      "batch_time": "2026-10-27T13:32:23Z",
-      "session_id": "2026-10-27T13:32:23Z",
-      "priority": 1000,
-      "source": "hourly",
-      "failure_reason": null
-    }
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4473673487",
-    "session_id": "2026-10-27T13:32:23Z",
-    "application_key": null,
-    "ats": null,
-    "ats_board": null,
-    "ats_posting_id": null,
-    "company": "Netflix",
-    "date_posted": "2026-10-27",
+    "date_posted": "2026-10-28",
     "job_url_direct": null,
     "level": "Entry",
     "location": "USA",
     "max_exp": null,
     "min_exp": null,
-    "pipeline": "important",
-    "priority_score": 63,
-    "score_pct": 25,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 44,
+    "score_pct": 18,
+    "search_term": "AI engineer",
     "site": "linkedin",
-    "summary": "nan",
-    "title": "Machine Learning Scientist 5 - Ads Demand Science",
-    "ats_score": 60,
-    "fit_score": 4
+    "summary": "**About The Company** Jobot is supporting a US-based engineering team transforming how government agencies digitize forms and automate workflows.",
+    "title": "Machine Learning Engineer",
+    "ats_score": 30,
+    "fit_score": 7
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4484024817",
-    "session_id": "2026-10-27T13:32:23Z",
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4467791155",
     "application_key": null,
     "ats": null,
     "ats_board": null,
     "ats_posting_id": null,
-    "company": "Fidelity Investments",
-    "date_posted": "2026-10-27",
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Anduril Industries",
+    "competition_score": 0,
+    "date_posted": "2026-10-28",
     "job_url_direct": null,
     "level": "Entry",
-    "location": "Boston, MA, USA",
-    "max_exp": 2.0,
-    "min_exp": 2.0,
-    "pipeline": "top500",
-    "priority_score": 105,
-    "score_pct": 42,
-    "site": "linkedin",
-    "summary": "**Fidelity will not provide immigration sponsorship for this position.** **Job Description** **Job Description** Fraud Risk & Control Detection Team is looking for a Data Scientist to join a growing \u2026",
-    "title": "Data Scientist",
-    "ats_score": 22,
-    "fit_score": 6
-  },
-  {
-    "job_url": "https://www.linkedin.com/jobs/view/4353793471",
-    "session_id": "2026-10-27T13:32:23Z",
-    "application_key": null,
-    "ats": null,
-    "ats_board": null,
-    "ats_posting_id": null,
-    "company": "ZS",
-    "date_posted": "2026-10-27",
-    "job_url_direct": null,
-    "level": "Mid",
-    "location": "Princeton, NJ, USA",
+    "location": "Costa Mesa, CA, USA",
     "max_exp": null,
     "min_exp": null,
-    "pipeline": "h1b2026",
-    "priority_score": 48,
-    "score_pct": 19,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 40,
+    "score_pct": 16,
+    "search_term": "software engineer",
     "site": "linkedin",
-    "summary": "**ZS** is a place where passion changes lives.",
-    "title": "Advanced Data Science Associate Consultant - Generative AI and Machine Learning",
-    "ats_score": 23,
+    "summary": "Anduril Industries is a defense technology company with a mission to transform U.S.",
+    "title": "Software Engineer - Maritime",
+    "ats_score": 33,
     "fit_score": 5
   },
   {
-    "session_id": "2026-10-27T13:32:23Z",
-    "job_url": "https://jobs.ashbyhq.com/uipath/212db31c-5b6a-4462-8e01-76f4d017d83b",
-    "company": "Uipath",
-    "date_posted": "2026-10-27",
-    "keyword_score": 70,
-    "level": "Mid",
-    "location": "Bangalore",
-    "min_exp": 3.0,
-    "pipeline": "keywords",
-    "site": "ashby",
-    "title": "Software Engineer II",
-    "resume": {
-      "status": "success",
-      "stage": "SUCCESS",
-      "fingerprint": "d274a882332845d1c28ea00676c5afe1a678d4782eea36dbe8bc132e60b84de9",
-      "lease_until": null,
-      "worker_id": "oracle-atriveo",
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T13:51:45.249Z",
-      "error": null,
-      "company": "Uipath",
-      "title": "Software Engineer II",
-      "resume_slot": 1745,
-      "session_hour": "00",
-      "batch_time": null,
-      "session_id": "2026-10-27T13:32:23Z",
-      "priority": 1000,
-      "source": "hourly",
-      "cached": false,
-      "failure_reason": null,
-      "fallback": null,
-      "folder": "Uipath (27thOctober)-2",
-      "object": {
-        "bucket": "atriveo-resume",
-        "key": "resumes/48/4836a8c90a8e8f3cd5b9eb22575fd64f3375079df276493ddc25f78bc42f3009.pdf",
-        "sha256": "4836a8c90a8e8f3cd5b9eb22575fd64f3375079df276493ddc25f78bc42f3009",
-        "bytes": 39312,
-        "tex_key": "resumes/48/4836a8c90a8e8f3cd5b9eb22575fd64f3375079df276493ddc25f78bc42f3009.tex",
-        "jd_key": "resumes/48/4836a8c90a8e8f3cd5b9eb22575fd64f3375079df276493ddc25f78bc42f3009.jd.txt"
-      },
-      "object_error": null,
-      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Uipath (27thOctober)-2/Atishay Kasliwal.pdf",
-      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Uipath (27thOctober)-2",
-      "cover_letter": {
-        "status": "draft",
-        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Uipath (27thOctober)-2/Atishay Kasliwal - Cover Letter.pdf",
-        "built_at": "2026-10-27T13:51:45.249Z"
-      }
-    },
-    "fit": {
-      "score": 83.9,
-      "coverage": {
-        "status": "incomplete",
-        "scored_requirements": 24,
-        "unparsed_requirements": 15,
-        "missing_job_title": false,
-        "no_skill_requirements": false
-      },
-      "confidence": "medium",
-      "confidence_reasons": [
-        "15 qualification lines need manual review; they were not fully assessed",
-        "3 requirement groups contain unrecognized technologies"
-      ],
-      "applicable_weight": 95,
-      "outside_roles": false,
-      "knockouts": {
-        "verdict": "clear",
-        "items": [
-          {
-            "type": "location",
-            "status": "clear",
-            "reason": "You are open to relocating",
-            "source": "Many of our roles allow for flexibility in when and where work gets done. Depending on the needs of the business and the role, the number of hybrid, office-based, and remote workers will vary from ..."
-          }
-        ]
-      },
-      "ledger": {
-        "required": {
-          "matched": 11,
-          "total": 18
-        },
-        "preferred": {
-          "matched": 5,
-          "total": 6
-        },
-        "total": {
-          "matched": 16,
-          "total": 24
-        },
-        "matched": [
-          "Claude",
-          "GitHub",
-          "React",
-          "Python",
-          "LLM",
-          "LangGraph / LangChain",
-          "REST / GraphQL",
-          "API",
-          "Azure / AWS / GCP",
-          "Docker / Kubernetes",
-          "CI/CD",
-          "Machine learning",
-          "RAG",
-          "TypeScript",
-          "Airflow",
-          "Kubernetes"
-        ],
-        "partial": [
-          "Distributed systems",
-          "DevOps"
-        ],
-        "missing": [
-          "C#",
-          "System design",
-          "Data structures",
-          "Algorithms",
-          "Agile",
-          "Snowflake"
-        ],
-        "mentioned": [
-          "Java",
-          "JavaScript",
-          "Go"
-        ],
-        "unrecognized": [
-          "Vertical",
-          "Willingness",
-          "Tech"
-        ],
-        "unparsed": [
-          {
-            "classification": "required",
-            "source": "Builder mindset \u2014 you enjoy turning ideas into working systems and taking ownership from Concept through, Customer impact and Production"
-          },
-          {
-            "classification": "required",
-            "source": "Strong analytical thinking \u2014 able to reason quantitatively about system quality and make sound decisions using imperfect signals"
-          },
-          {
-            "classification": "required",
-            "source": "Comfortable with ambiguity and rapid prototyping \u2014 able to move from idea to proof-of-concept quickly and iterate based on customer feedback."
-          },
-          {
-            "classification": "required",
-            "source": "Strong grasp of multithreading, asynchronous programming, synchronization, and cloud-native programming models."
-          },
-          {
-            "classification": "required",
-            "source": "Experience driving team adoption of AI-powered productivity tools \u2013 setting norms, measuring impact, and iterating on usage patterns."
-          },
-          {
-            "classification": "required",
-            "source": "Excellent verbal and written communication skills; proven success collaborating with globally distributed teams and managing complex, time-bound deliverables."
-          },
-          {
-            "classification": "required",
-            "source": "Ability to understand, communicate, and drive complex technical decisions with stakeholders at all levels."
-          },
-          {
-            "classification": "preferred",
-            "source": "Data science and evaluation"
-          },
-          {
-            "classification": "preferred",
-            "source": "Experience evaluating AI systems using experimentation, metrics, and empirical analysis to improve quality and reliability"
-          },
-          {
-            "classification": "preferred",
-            "source": "Data and retrieval systems"
-          },
-          {
-            "classification": "preferred",
-            "source": "Engineering for trustworthy AI"
-          },
-          {
-            "classification": "preferred",
-            "source": "Experience blending deterministic and probabilistic systems (rules engines + AI)"
-          },
-          {
-            "classification": "preferred",
-            "source": "Platform and product development"
-          },
-          {
-            "classification": "preferred",
-            "source": "Experience in startups, applied research, or 0\u21921 product environments"
-          },
-          {
-            "classification": "preferred",
-            "source": "Open-source contributions"
-          }
-        ],
-        "skills": [
-          {
-            "label": "Claude",
-            "alternatives": [
-              "Claude"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Hands-On Development: Write production-quality code daily, leveraging AI tools (Claude, GitHub Copilot, etc.) to enhance your development workflow",
-            "evidence": {
-              "entry": "Wake Forest \u2013 CAIR",
-              "text": "Radiomics-driven survival analysis surfacing prognosis insights to speed clinical decision-making. Anthropic Claude summarized the histories of 10K+ similar patients; a separate PyTorch / scikit-learn model predicted ...",
-              "tier": "job_bullet"
-            }
-          },
-          {
-            "label": "GitHub",
-            "alternatives": [
-              "GitHub"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Hands-On Development: Write production-quality code daily, leveraging AI tools (Claude, GitHub Copilot, etc.) to enhance your development workflow",
-            "evidence": {
-              "entry": "Atriveo Job Intelligence Pipeline",
-              "text": "GitHub Contents API deploy to Pages \u2014 hourly dashboard updates without CI runners.",
-              "tier": "project_bullet"
-            }
-          },
-          {
-            "label": "Distributed systems",
-            "alternatives": [
-              "Distributed systems"
-            ],
-            "class": "required",
-            "status": "partial",
-            "source": "Ensure Reliability: Contribute to building highly scalable, reliable distributed systems that enterprises depend on.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "FastAPI microservices with Docker Redis; sub-200ms REST for enterprise telecom integrations.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "React",
-            "alternatives": [
-              "React"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Strong full stack knowledge including frontend systems like React and backend systems -Python and/or C# \u2014 most Vertical Solutions product development is Python (agents, APIs, ETL), while core platform work includes C#, frontend in React. Willingness to work across both is important.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Guided 3,000 employees through onboarding in React and MongoDB workflows that auto-assign new hires to teams by skill, cutting onboarding from weeks to days.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "Python",
-            "alternatives": [
-              "Python"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Strong full stack knowledge including frontend systems like React and backend systems -Python and/or C# \u2014 most Vertical Solutions product development is Python (agents, APIs, ETL), while core platform work includes C#, frontend in React. Willingness to work across both is important.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Reduced reconciliation errors 90% by automating transaction matching, validation and exception reporting with SQL and Python.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "C#",
-            "alternatives": [
-              "C#"
-            ],
-            "class": "required",
-            "status": "missing",
-            "source": "Strong full stack knowledge including frontend systems like React and backend systems -Python and/or C# \u2014 most Vertical Solutions product development is Python (agents, APIs, ETL), while core platform work includes C#, frontend in React. Willingness to work across both is important."
-          },
-          {
-            "label": "LLM",
-            "alternatives": [
-              "LLM"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Experience building production AI systems \u2014 LLMs, tool-calling, multi-agent architectures, orchestration frameworks (LangGraph, LangChain, or equivalent), structured outputs, orchestration, and evaluation of model behavior in real-world workflows",
-            "evidence": {
-              "entry": "Stony Brook University",
-              "text": "Assessed GPT-4o LLM market-reaction predictions against minute-level SPY moves at 1, 5 and 10-minute windows, reaching 0.74 weighted F1 with Whisper transcripts and Pinecone retrieval.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "LangGraph / LangChain",
-            "alternatives": [
-              "LangGraph",
-              "LangChain"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Experience building production AI systems \u2014 LLMs, tool-calling, multi-agent architectures, orchestration frameworks (LangGraph, LangChain, or equivalent), structured outputs, orchestration, and evaluation of model behavior in real-world workflows",
-            "evidence": {
-              "entry": "Stony Brook University",
-              "text": "Validated the multi-agent pipeline across 13 live sessions at approximately 68% directional accuracy (vs 50% chance), then hardened retrieval with LangChain and Pinecone for an 18% evaluation accuracy lift.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "REST / GraphQL",
-            "alternatives": [
-              "REST",
-              "GraphQL"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Full-stack experience: ability to work across backend services and frontend layers (REST/GraphQL APIs, basic UI integration, component contracts).",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "British Telecom REST and GraphQL APIs with Resilience4j; 10K+ daily transactions; 200ms P99; 99% uptime.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "API",
-            "alternatives": [
-              "API"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Full-stack experience: ability to work across backend services and frontend layers (REST/GraphQL APIs, basic UI integration, component contracts).",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Enhanced British Telecom partner integrations with FastAPI and Redis microservices, delivering sub-200ms REST responses across 10K+ API calls.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "System design",
-            "alternatives": [
-              "System design"
-            ],
-            "class": "required",
-            "status": "missing",
-            "source": "Deep understanding of object-oriented programming, architectural design patterns, system design, and data structures & algorithms."
-          },
-          {
-            "label": "Data structures",
-            "alternatives": [
-              "Data structures"
-            ],
-            "class": "required",
-            "status": "missing",
-            "source": "Deep understanding of object-oriented programming, architectural design patterns, system design, and data structures & algorithms."
-          },
-          {
-            "label": "Algorithms",
-            "alternatives": [
-              "Algorithms"
-            ],
-            "class": "required",
-            "status": "missing",
-            "source": "Deep understanding of object-oriented programming, architectural design patterns, system design, and data structures & algorithms."
-          },
-          {
-            "label": "Azure / AWS / GCP",
-            "alternatives": [
-              "Azure",
-              "AWS",
-              "GCP"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Hands-on experience with cloud ecosystems: Azure, AWS, or GCP.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "Docker / Kubernetes",
-            "alternatives": [
-              "Docker",
-              "Kubernetes"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Proficiency with containerization and orchestration: Docker, Kubernetes, or equivalent.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "FastAPI microservices with Docker Redis; sub-200ms REST for enterprise telecom integrations.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "Agile",
-            "alternatives": [
-              "Agile"
-            ],
-            "class": "required",
-            "status": "missing",
-            "source": "Familiarity with modern engineering practices: agile development, CI/CD, DevOps, and infrastructure as code."
-          },
-          {
-            "label": "CI/CD",
-            "alternatives": [
-              "CI/CD"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Familiarity with modern engineering practices: agile development, CI/CD, DevOps, and infrastructure as code.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Jenkins Docker Kubernetes CI/CD for 20 engineers; deploy 6h to 90s; 20+ releases/month.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "DevOps",
-            "alternatives": [
-              "DevOps"
-            ],
-            "class": "required",
-            "status": "partial",
-            "source": "Familiarity with modern engineering practices: agile development, CI/CD, DevOps, and infrastructure as code.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Jenkins Docker Kubernetes CI/CD for 20 engineers; deploy 6h to 90s; 20+ releases/month.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "Machine learning",
-            "alternatives": [
-              "Machine learning"
-            ],
-            "class": "preferred",
-            "status": "matched",
-            "source": "Experience with applied ML techniques such as classification, anomaly detection, ranking, or predictive modeling",
-            "evidence": {
-              "entry": "Wake Forest \u2013 CAIR",
-              "text": "Forecasted stroke patients' functional outcomes at 6, 12 and 24 months with PyTorch and scikit-learn machine learning models, using Claude summaries of 10K+ similar patients from a 90-field thrombectomy registry.",
-              "tier": "job_bullet"
-            }
-          },
-          {
-            "label": "Snowflake",
-            "alternatives": [
-              "Snowflake"
-            ],
-            "class": "preferred",
-            "status": "missing",
-            "source": "Experience with large-scale data platforms (Snowflake, columnar warehouses, denormalized data models)"
-          },
-          {
-            "label": "RAG",
-            "alternatives": [
-              "RAG"
-            ],
-            "class": "preferred",
-            "status": "matched",
-            "source": "Familiarity with retrieval-heavy architectures, RAG systems, or citation-grounded AI workflows",
-            "evidence": {
-              "entry": "Stony Brook University",
-              "text": "Production RAG with LangChain and AWS \u2014 18% accuracy lift in evaluations; retrieval moved from ChromaDB to Pinecone, while ChromaDB remains in lower-cost workflows.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "TypeScript",
-            "alternatives": [
-              "TypeScript"
-            ],
-            "class": "preferred",
-            "status": "matched",
-            "source": "Frontend familiarity (React, TypeScript)",
-            "evidence": {
-              "entry": "Wake Forest \u2013 CAIR",
-              "text": "React and TypeScript clinician dashboard with Redux state management for a 20-person team reviewing MRIs and AI segmentations.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "Airflow",
-            "alternatives": [
-              "Airflow"
-            ],
-            "class": "preferred",
-            "status": "matched",
-            "source": "Workflow orchestration platforms (Temporal, Airflow, Maestro, BPMN, Step Functions)",
-            "evidence": {
-              "entry": "Wake Forest \u2013 CAIR",
-              "text": "Apache Airflow ETL workflows integrating 10+ heterogeneous MRI scan types into research-ready datasets.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "Kubernetes",
-            "alternatives": [
-              "Kubernetes"
-            ],
-            "class": "preferred",
-            "status": "matched",
-            "source": "Kubernetes and distributed infrastructure",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Jenkins Docker Kubernetes CI/CD for 20 engineers; deploy 6h to 90s; 20+ releases/month.",
-              "tier": "measured_job_bullet"
-            }
-          }
-        ]
-      },
-      "lost": [
-        {
-          "category": "required_skills",
-          "requirement": "C#",
-          "source": "Strong full stack knowledge including frontend systems like React and backend systems -Python and/or C# \u2014 most Vertical Solutions product development is Python (agents, APIs, ETL), while core platform work includes C#, frontend in React. Willingness to work across both is important.",
-          "lost": 1.9
-        },
-        {
-          "category": "required_skills",
-          "requirement": "System design",
-          "source": "Deep understanding of object-oriented programming, architectural design patterns, system design, and data structures & algorithms.",
-          "lost": 1.9
-        },
-        {
-          "category": "required_skills",
-          "requirement": "Data structures",
-          "source": "Deep understanding of object-oriented programming, architectural design patterns, system design, and data structures & algorithms.",
-          "lost": 1.9
-        },
-        {
-          "category": "required_skills",
-          "requirement": "Algorithms",
-          "source": "Deep understanding of object-oriented programming, architectural design patterns, system design, and data structures & algorithms.",
-          "lost": 1.8
-        },
-        {
-          "category": "required_skills",
-          "requirement": "Agile",
-          "source": "Familiarity with modern engineering practices: agile development, CI/CD, DevOps, and infrastructure as code.",
-          "lost": 1.8
-        }
-      ],
-      "config_hash": "64abdf97758f3d12",
-      "master_hash": "494ebd17cdf7baa9",
-      "candidate_hash": "a1f9884b7ab7dce7",
-      "shape": 5,
-      "jd_chars": 8463,
-      "as_of": "2026-10-27"
-    },
-    "ats_score": 50,
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://job-boards.greenhouse.io/startree/jobs/6235909004",
+    "application_key": "greenhouse:6235909004",
+    "ats": "greenhouse",
+    "ats_board": "startree",
+    "ats_posting_id": "6235909004",
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "StarTree",
+    "competition_score": 0,
+    "date_posted": "2026-10-28",
+    "job_url_direct": "https://job-boards.greenhouse.io/startree/jobs/6235909004",
+    "level": "Entry",
+    "location": "US (Remote)",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 28,
+    "score_pct": 11,
+    "search_term": "ats:greenhouse",
+    "site": "greenhouse",
+    "summary": "At StarTree we're a group of passionate individuals that desire to improve the lives of many by developing tools and technologies that support availability and speed in the world of real-time analyti\u2026",
+    "title": "Software Engineer I",
+    "ats_score": 25,
     "fit_score": 9
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4484031163",
-    "session_id": "2026-10-27T13:32:23Z",
-    "company": "USA Tech Recruit",
-    "date_posted": "2026-10-27",
-    "keyword_score": 34,
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4484486874",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Paynada",
+    "competition_score": 0,
+    "date_posted": "2026-10-28",
+    "job_url_direct": null,
     "level": "Entry",
-    "location": "San Francisco Bay Area",
+    "location": "USA",
+    "max_exp": null,
     "min_exp": null,
-    "pipeline": "keywords",
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 24,
+    "score_pct": 10,
+    "search_term": "data scientist",
     "site": "linkedin",
-    "title": "Backend Engineer, AI",
-    "resume": {
-      "status": "failed",
-      "stage": "GATED",
-      "fingerprint": null,
-      "lease_until": null,
-      "worker_id": "oracle-atriveo",
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T13:51:45.271Z",
-      "error": "JD not found or too short in Mongo descriptions",
-      "company": "USA Tech Recruit",
-      "title": "Backend Engineer, AI",
-      "resume_slot": 13,
-      "session_hour": null,
-      "batch_time": null,
-      "session_id": "2026-10-27T13:32:23Z",
-      "priority": 1000,
-      "source": "hourly",
-      "failure_reason": null
-    }
+    "summary": "**Responsibilities** * Develop the overall research, data and AI strategy for a proprietary merchant lead-intelligence platform.",
+    "title": "AI Data Analyst - Merchant Acquisition",
+    "ats_score": 40,
+    "fit_score": 7
   },
   {
-    "session_id": "2026-10-27T13:32:23Z",
-    "job_url": "https://jobs.ashbyhq.com/clera/fe922946-a255-4f3f-8a65-372c8330f958",
-    "company": "Clera",
-    "date_posted": "2026-10-27",
-    "keyword_score": 28,
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4482513992",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Eliassen Group",
+    "competition_score": 0,
+    "date_posted": "2026-10-28",
+    "job_url_direct": null,
     "level": "Entry",
-    "location": "San Francisco",
-    "min_exp": null,
-    "pipeline": "keywords",
-    "site": "ashby",
-    "title": "Forward Deployed Engineer",
-    "resume": {
-      "status": "success",
-      "stage": "SUCCESS",
-      "fingerprint": "07b48858940469ad0e3da49a190e8fce780f3dc1b946dfa5c6ec3472eef58782",
-      "lease_until": null,
-      "worker_id": "oracle-atriveo",
-      "owner": "oracle-atriveo",
-      "updated_at": "2026-10-27T13:52:02.091Z",
-      "error": null,
-      "company": "Clera",
-      "title": "Forward Deployed Engineer",
-      "resume_slot": 1759,
-      "session_hour": "00",
-      "batch_time": null,
-      "session_id": "2026-10-27T13:32:23Z",
-      "priority": 1000,
-      "source": "hourly",
-      "cached": false,
-      "failure_reason": null,
-      "fallback": null,
-      "folder": "Clera (27thOctober)",
-      "object": {
-        "bucket": "atriveo-resume",
-        "key": "resumes/c2/c20b48841739320b9cf4a94fa3c6e2f5f67fb3933bf6b6d3f7fcb2c3f8bd6a33.pdf",
-        "sha256": "c20b48841739320b9cf4a94fa3c6e2f5f67fb3933bf6b6d3f7fcb2c3f8bd6a33",
-        "bytes": 39673,
-        "tex_key": "resumes/c2/c20b48841739320b9cf4a94fa3c6e2f5f67fb3933bf6b6d3f7fcb2c3f8bd6a33.tex",
-        "jd_key": "resumes/c2/c20b48841739320b9cf4a94fa3c6e2f5f67fb3933bf6b6d3f7fcb2c3f8bd6a33.jd.txt"
-      },
-      "object_error": null,
-      "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Clera (27thOctober)/Atishay Kasliwal.pdf",
-      "run_dir": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Clera (27thOctober)",
-      "cover_letter": {
-        "status": "draft",
-        "pdf_path": "/Users/atishaykasliwal/Documents/tailored-resumes/2026-10-27/Clera (27thOctober)/Atishay Kasliwal - Cover Letter.pdf",
-        "built_at": "2026-10-27T13:52:02.091Z"
-      }
-    },
-    "fit": {
-      "score": 96.2,
-      "coverage": {
-        "status": "incomplete",
-        "scored_requirements": 3,
-        "unparsed_requirements": 3,
-        "missing_job_title": false,
-        "no_skill_requirements": false
-      },
-      "confidence": "medium",
-      "confidence_reasons": [
-        "3 qualification lines need manual review; they were not fully assessed"
-      ],
-      "applicable_weight": 75,
-      "outside_roles": false,
-      "knockouts": {
-        "verdict": "clear",
-        "items": [
-          {
-            "type": "sponsorship",
-            "status": "clear",
-            "reason": "The posting offers visa sponsorship",
-            "source": "Base salary range: $150,000 to $250,000 USD annually. Visa sponsorship is available where an O-1 visa is a realistic option."
-          },
-          {
-            "type": "location",
-            "status": "clear",
-            "reason": "You are open to relocating",
-            "source": "On-site in San Francisco, California, five days per week. Candidates elsewhere in the United States should have a concrete, dated plan to relocate to San Francisco."
-          }
-        ]
-      },
-      "ledger": {
-        "required": {
-          "matched": 3,
-          "total": 3
-        },
-        "preferred": {
-          "matched": 0,
-          "total": 0
-        },
-        "total": {
-          "matched": 3,
-          "total": 3
-        },
-        "matched": [
-          "Machine learning",
-          "TypeScript / React / Bun / Effect",
-          "PostgreSQL / Kubernetes / AWS"
-        ],
-        "partial": [],
-        "missing": [],
-        "mentioned": [],
-        "unrecognized": [],
-        "unparsed": [
-          {
-            "classification": "required",
-            "source": "Experience repeatedly shipping and owning production systems end to end, with demonstrated ability across agent platforms, infrastructure, and integration runtimes."
-          },
-          {
-            "classification": "required",
-            "source": "Comfort using multiple AI coding agents while applying sound judgment to production quality."
-          },
-          {
-            "classification": "required",
-            "source": "Experience founding a startup with outside funding or full-time employees, or engineering at an early-stage startup backed by a recognized accelerator or venture capital firm."
-          }
-        ],
-        "skills": [
-          {
-            "label": "Machine learning",
-            "alternatives": [
-              "Machine learning"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Two to nine years of professional software engineering experience, with a broad background beyond machine learning alone.",
-            "evidence": {
-              "entry": "Wake Forest \u2013 CAIR",
-              "text": "Forecasted stroke patients' functional outcomes at 6, 12 and 24 months with PyTorch and scikit-learn machine learning models, using Claude summaries of 10K+ similar patients from a 90-field thrombectomy registry.",
-              "tier": "job_bullet"
-            }
-          },
-          {
-            "label": "TypeScript / React / Bun / Effect",
-            "alternatives": [
-              "TypeScript",
-              "React",
-              "Bun",
-              "Effect"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Familiarity with TypeScript, React, Bun, Effect-TS, PostgreSQL, Kubernetes, or AWS is relevant to the stack.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Guided 3,000 employees through onboarding in React and MongoDB workflows that auto-assign new hires to teams by skill, cutting onboarding from weeks to days.",
-              "tier": "measured_job_bullet"
-            }
-          },
-          {
-            "label": "PostgreSQL / Kubernetes / AWS",
-            "alternatives": [
-              "PostgreSQL",
-              "Kubernetes",
-              "AWS"
-            ],
-            "class": "required",
-            "status": "matched",
-            "source": "Familiarity with TypeScript, React, Bun, Effect-TS, PostgreSQL, Kubernetes, or AWS is relevant to the stack.",
-            "evidence": {
-              "entry": "Accolite Digital",
-              "text": "Delivered Fortune 500 Java systems for Fidelity, British Telecom and T-Mobile over 3 years spanning secure insurance exchange, telecom commerce and an AWS operations platform for 3K employees.",
-              "tier": "measured_job_bullet"
-            }
-          }
-        ]
-      },
-      "lost": [
-        {
-          "category": "required_skills",
-          "requirement": "Machine learning",
-          "source": "Two to nine years of professional software engineering experience, with a broad background beyond machine learning alone.",
-          "lost": 3.8
-        }
-      ],
-      "config_hash": "64abdf97758f3d12",
-      "master_hash": "494ebd17cdf7baa9",
-      "candidate_hash": "a1f9884b7ab7dce7",
-      "shape": 5,
-      "jd_chars": 1772,
-      "as_of": "2026-10-27"
-    },
+    "location": "USA",
+    "max_exp": 3.0,
+    "min_exp": 3.0,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "2\u20135 yrs"
+    ],
+    "priority_version": 2,
+    "score": 24,
+    "score_pct": 10,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "The role designs, develops, and implements analytical, statistical, and machine learning solutions that drive customer growth, portfolio performance, profitability, and strategic decision-making.",
+    "title": "Data Scientist",
     "ats_score": 66,
     "fit_score": 7
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4481852868",
-    "session_id": "2026-10-27T13:32:23Z",
-    "company": "TalentHop",
-    "date_posted": "2026-10-27",
-    "keyword_score": 19,
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4484493297",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Mindlance",
+    "competition_score": 0,
+    "date_posted": "2026-10-28",
+    "job_url_direct": null,
     "level": "Entry",
     "location": "USA",
+    "max_exp": null,
     "min_exp": null,
-    "pipeline": "keywords",
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 18,
+    "score_pct": 7,
+    "search_term": "data scientist",
     "site": "linkedin",
-    "title": "Software Engineer",
-    "ats_score": 25,
-    "fit_score": 9
+    "summary": "**Title : Data Scientist , Marketing Analytics** **Contract Role** **100% Remote** **Details:** Travel is required once every quarter for PI planning ( Mandatory).",
+    "title": "Data Scientist",
+    "ats_score": 100,
+    "fit_score": 2
   },
   {
-    "job_url": "https://www.linkedin.com/jobs/view/4467094636",
-    "session_id": "2026-10-27T13:32:23Z",
-    "company": "Fin",
-    "date_posted": "2026-10-27",
-    "keyword_score": 19,
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4483893325",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Aequor",
+    "competition_score": 0,
+    "date_posted": "2026-10-28",
+    "job_url_direct": null,
     "level": "Entry",
-    "location": "San Francisco, CA, USA",
+    "location": "South San Francisco, CA, USA",
+    "max_exp": null,
     "min_exp": null,
-    "pipeline": "keywords",
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
     "site": "linkedin",
-    "title": "Forward Deployed Data Scientist",
-    "ats_score": 50,
-    "fit_score": 4
+    "summary": "* Agile prototyping mindset with software engineering skills tailored for data science.",
+    "title": "Data Analyst (AI Prototyping, ML, Agile) Pharma/Biotech",
+    "ats_score": 0,
+    "fit_score": 3
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4476373923",
+    "session_id": "2026-10-28T17:04:37Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Premier Inc.",
+    "competition_score": 0,
+    "date_posted": "2026-10-28",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**What you will be doing:** This position will have responsibility for conceptualizing, designing, implementing, and validating new machine learning algorithms to enhance our Clinical Decision Suppor\u2026",
+    "title": "Data Scientist",
+    "ats_score": 33,
+    "fit_score": 8
+  },
+  {
+    "job_url": "https://www.linkedin.com/jobs/view/4483882841",
+    "session_id": "2026-10-28T17:04:37Z",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "US Tech Solutions",
+    "competition_score": 0,
+    "date_posted": "2026-10-28",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Pittsburgh, PA, USA",
+    "max_exp": 2.0,
+    "min_exp": 0.0,
+    "pipeline": "standard",
+    "priority_group": 12,
+    "priority_tags": [
+      "New grad"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**Duration: 6 Months Contract** **Job Description** * This is an entry-level, hybrid role based in Pittsburgh, PA.",
+    "title": "Junior AI Engineer (Entry Level role) #26-27359",
+    "ats_score": 44,
+    "fit_score": 5
+  },
+  {
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4483891336",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Silicontek Inc",
+    "competition_score": 0,
+    "date_posted": "2026-10-28",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "Irving, TX, USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "Irving, TX | Contract **About The Role** We are looking for a Senior Data Scientist to design, build and deploy AI-powered analytics for customer care.",
+    "title": "Data Scientist (Agents)",
+    "ats_score": 0,
+    "fit_score": 5
+  },
+  {
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4484474878",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "TaskVerse",
+    "competition_score": 0,
+    "date_posted": "2026-10-28",
+    "job_url_direct": null,
+    "level": "Entry",
+    "location": "USA",
+    "max_exp": null,
+    "min_exp": null,
+    "pipeline": "standard",
+    "priority_group": 14,
+    "priority_tags": [
+      "Exp. not stated"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "data scientist",
+    "site": "linkedin",
+    "summary": "**About The Company** Guidehouse is a global professional services firm that works with public and commercial sector organizations to address complex challenges and deliver meaningful change.",
+    "title": "AI Engineer",
+    "ats_score": 33,
+    "fit_score": 3
+  },
+  {
+    "session_id": "2026-10-28T17:04:37Z",
+    "job_url": "https://www.linkedin.com/jobs/view/4474419388",
+    "application_key": null,
+    "ats": null,
+    "ats_board": null,
+    "ats_posting_id": null,
+    "batch_time": "2026-10-28T17:04:36Z",
+    "company": "Dematic",
+    "competition_score": 0,
+    "date_posted": "2026-10-28",
+    "job_url_direct": null,
+    "level": "New Grad",
+    "location": "Wauwatosa, WI, USA",
+    "max_exp": 5.0,
+    "min_exp": 0.0,
+    "pipeline": "standard",
+    "priority_group": 12,
+    "priority_tags": [
+      "New grad"
+    ],
+    "priority_version": 2,
+    "score": 0,
+    "score_pct": 0,
+    "search_term": "new grad",
+    "site": "linkedin",
+    "summary": "The successful candidate will have 0-5 years of experience contributing to and leading material handling system design and application on varying scale projects.",
+    "title": "Mechanical Engineer (New Graduate/Early Career)",
+    "ats_score": 0,
+    "fit_score": 2
   }
 ]
