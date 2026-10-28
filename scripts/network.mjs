@@ -6,7 +6,7 @@ import { cleanEmail } from "./resume-emails.mjs";
 // been introduced by another person (via); other connections are explicit links. Archived people are kept, never deleted.
 
 const PEOPLE = "network_people", SOURCES = "network_sources", LINKS = "network_links";
-export const SOURCE_TYPES = ["company", "event", "family", "other"];
+export const SOURCE_TYPES = ["company", "staffing", "event", "family", "other"];
 export const LINK_KINDS = ["works", "family", "intro", "other"];
 export const HISTORY_TYPES = ["note", "email", "message", "call", "met", "reply"];
 const CONTACT = new Set(["email", "message", "call", "met"]);
@@ -238,33 +238,50 @@ export async function archivePerson(db, { id, archived = true } = {}, now = new 
   return { id: cur._id, archived: Boolean(archived) };
 }
 
-/** Create a source (a company, an event, family...) or change one. Names are unique: saving "randstad" again returns Randstad. */
+/** Sources are distinct by name + parent source + context, not employer name alone. */
 export async function saveSource(db, input = {}, now = new Date()) {
+  const sources = await all(db, SOURCES);
+  const cur = input.id ? sources.find((s) => s.id === String(input.id)) : null;
+  if (input.id && !cur) fail("That source no longer exists. Reload the page.");
   const patch = {};
-  if ("name" in input || !input.id) { patch.name = str(input.name, 80); if (!patch.name) fail("Give the source a name"); }
-  if ("type" in input || !input.id) { patch.type = SOURCE_TYPES.includes(input.type) ? input.type : "other"; }
+  if ("name" in input || !cur) { patch.name = str(input.name, 80); if (!patch.name) fail("Give the source a name"); }
+  if ("type" in input || !cur) patch.type = SOURCE_TYPES.includes(input.type) ? input.type : "other";
   if ("about" in input) patch.about = str(input.about, 120);
   if ("color" in input) patch.color = color(input.color);
-  const sources = await all(db, SOURCES);
-  const clash = patch.name && sources.find((s) => key(s.name) === key(patch.name) && s.id !== input.id);
-  if (!input.id) {
+  if ("context" in input || !cur) patch.context = str(input.context, 100);
+  if ("parentSourceId" in input || !cur) patch.parentSourceId = input.parentSourceId ? str(input.parentSourceId, 80) : null;
+  const next = { ...cur, ...patch };
+  if (next.parentSourceId) {
+    let parent = sources.find((s) => s.id === next.parentSourceId);
+    if (!parent) fail("The parent source no longer exists. Pick another source.");
+    const visited = new Set(cur ? [cur.id] : []);
+    while (parent) {
+      if (visited.has(parent.id)) fail("A source cannot be introduced through itself or its descendants.");
+      visited.add(parent.id);
+      parent = parent.parentSourceId ? sources.find((s) => s.id === parent.parentSourceId) : null;
+    }
+  }
+  const sameIdentity = (a, b) => key(a.name) === key(b.name) && (a.parentSourceId || null) === (b.parentSourceId || null) && str(a.context, 100).toLowerCase() === str(b.context, 100).toLowerCase();
+  const clash = sources.find((s) => s.id !== cur?.id && sameIdentity(s, next));
+  if (!cur) {
     if (clash) return { ...clash, existed: true };
     const at = now.toISOString(), doc = { _id: randomUUID(), about: "", color: null, createdAt: at, updatedAt: at, ...patch };
     await db.collection(SOURCES).insertOne(doc);
     return out(doc);
   }
-  const cur = sources.find((s) => s.id === String(input.id));
-  if (!cur) fail("That source no longer exists. Reload the page.");
-  if (clash) fail(`You already have a source called ${clash.name}`);
-  const next = { ...patch, updatedAt: now.toISOString() };
-  await db.collection(SOURCES).updateOne({ _id: cur.id }, { $set: next });
-  return { ...cur, ...next };
+  if (clash && !sameIdentity(cur, next)) fail(`You already have a source called ${clash.name} in that context. Choose a different context.`);
+  const update = { ...patch, updatedAt: now.toISOString() };
+  await db.collection(SOURCES).updateOne({ _id: cur.id }, { $set: update });
+  return { ...cur, ...update };
 }
 
 /** Remove a source; its people stay and simply have no source. */
 export async function removeSource(db, { id } = {}, now = new Date()) {
   const sid = String(id);
   if (!(await db.collection(SOURCES).findOne({ _id: sid }))) fail("That source no longer exists. Reload the page.");
+  // Child contexts remain separate records if their parent is removed.
+  const removed = await db.collection(SOURCES).findOne({ _id: sid });
+  for (const child of (await all(db, SOURCES)).filter((s) => s.parentSourceId === sid)) await db.collection(SOURCES).updateOne({ _id: child.id }, { $set: { parentSourceId: null, context: child.context || `Via ${removed.name}`, updatedAt: now.toISOString() } });
   const people = (await all(db, PEOPLE)).filter((p) => p.sourceId === sid);
   for (const p of people) await db.collection(PEOPLE).updateOne({ _id: p.id }, { $set: { sourceId: null, updatedAt: now.toISOString() } });
   for (const l of (await all(db, LINKS)).filter((l) => l.a === sid || l.b === sid)) await db.collection(LINKS).deleteOne({ _id: l.id });

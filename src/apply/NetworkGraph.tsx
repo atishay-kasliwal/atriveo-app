@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import {
-  LINK_KINDS, PALETTE, TOOL_KEYS, autoLayout, edgesFor, followUp, imageUrl, initials, plusDays, post, smoothPath, thinPoints, warmPath, workProgress,
-  type BoardItem, type Edge, type Link, type LinkKind, type NetworkData, type Pen, type Person, type Point, type Tool, colorsFor,
+  sourceLabel, SOURCE_TYPES, LINK_KINDS, PALETTE, TOOL_KEYS, autoLayout, edgesFor, followUp, imageUrl, initials, plusDays, post, smoothPath, thinPoints, warmPath, workProgress,
+  type CanvasLayers, type BoardItem, type Edge, type Link, type LinkKind, type NetworkData, type Pen, type Person, type Point, type Tool, colorsFor,
 } from "./network";
 import { BoardBox, PenBar, Toolbar } from "./NetworkBoard";
 
@@ -26,8 +26,8 @@ const inkOf = (c?: string) => (!c || c === "ink" ? "var(--nw-ink)" : c);
  * sticky notes, pen strokes, images). Drag cards (positions are saved), drag the background to pan, scroll to zoom. Clicking a person
  * opens them; a source shows only its people; one of your own links can be renamed, recoloured or removed.
  */
-export default function NetworkGraph({ data, colors, visible, selected, selectedWork, board, setBoard, onPerson, onSource, onWork, onLinks, onPeople, onBulkMail, say }: {
-  data: NetworkData; colors: Colors; visible: Set<string> | null; selected: string | null; selectedWork: string | null;
+export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer, colors, visible, selected, selectedWork, board, setBoard, onPerson, onSource, onWork, onLinks, onPeople, onBulkMail, say }: {
+  data: NetworkData; layers: CanvasLayers; stackPeople: boolean; onRevealLayer: (layer: keyof CanvasLayers) => void; colors: Colors; visible: Set<string> | null; selected: string | null; selectedWork: string | null;
   board: BoardItem[]; setBoard: (f: (b: BoardItem[]) => BoardItem[]) => void;
   onPerson: (id: string) => void; onSource: (id: string) => void; onWork: (id: string) => void; onLinks: (links: Link[]) => void;
   onPeople: (people: Person[]) => void; onBulkMail: (ids: string[]) => void; say: (t: { text: string } | null) => void;
@@ -47,6 +47,7 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
   const [added, setAdded] = useState<string[]>([]);
   const [multi, setMulti] = useState<Set<string>>(new Set());
   const [marquee, setMarquee] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const [expandedStacks, setExpandedStacks] = useState<Set<string>>(new Set());
   const [pathOpen, setPathOpen] = useState(false);
   const [pathTo, setPathTo] = useState("");
   const [groupEdit, setGroupEdit] = useState<{ id: string; at: Point } | null>(null);
@@ -55,7 +56,20 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
   const peopleCount = useMemo(() => { const m = new Map<string, number>(); for (const p of data.people) if (p.sourceId && !p.via) m.set(p.sourceId, (m.get(p.sourceId) ?? 0) + 1); return m; }, [data.people]);
   const people = useMemo(() => new Map(data.people.map((p) => [p.id, p])), [data.people]);
 
-  const works = useMemo(() => board.filter((b) => b.kind === "work"), [board]);
+  const works = useMemo(() => board.filter((b) => b.kind === "work" && layers.work), [board, layers.work]);
+  const stacks = useMemo(() => {
+    if (!stackPeople || !layers.people) return [];
+    return data.sources.flatMap((source) => {
+      const members = data.people.filter((person) => person.sourceId === source.id);
+      if (members.length < 2 || expandedStacks.has(source.id)) return [];
+      const point = pos(source.id);
+      return [{ id: source.id, name: sourceLabel(source, data.sources), members, x: point.x, y: point.y + 100 }];
+    });
+  }, [stackPeople, layers.people, data.sources, data.people, expandedStacks, pos]);
+  const collapsedPeople = useMemo(() => new Set(stacks.flatMap((stack) => stack.members.map((person) => person.id))), [stacks]);
+  const shownPeople = useMemo(() => layers.people ? data.people.filter((person) => !collapsedPeople.has(person.id)) : [], [layers.people, data.people, collapsedPeople]);
+  const shownSources = useMemo(() => layers.sources ? data.sources : [], [layers.sources, data.sources]);
+  const nodeShown = (id: string) => id === 'you' || (people.has(id) ? layers.people && !collapsedPeople.has(id) : layers.sources);
   const route = useMemo(() => (pathOpen && pathTo ? warmPath(edges, pathTo) : null), [pathOpen, pathTo, edges]);
 
   // Where a board item is drawn: a pinned note follows its card; anything else stays where it was put.
@@ -66,14 +80,15 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
 
   const fit = useCallback(() => {
     const el = stage.current; if (!el) return;
-    const pts = ["you", ...data.sources.map((s) => s.id), ...data.people.map((p) => p.id)].map((id) => moved.get(id) ?? base.get(id) ?? { x: 0, y: 0 });
-    for (const it of board) { if (it.kind === "stroke" || it.kind === "group") continue; const p = at(it); pts.push(p, { x: p.x + (it.w ?? 0), y: p.y + (it.h ?? 0) }); }
+    const pts = ["you", ...shownSources.map((s) => s.id), ...shownPeople.map((p) => p.id)].map((id) => moved.get(id) ?? base.get(id) ?? { x: 0, y: 0 });
+    pts.push(...stacks.map(({ x, y }) => ({ x, y })));
+    for (const it of board) { if (it.kind === "stroke" || it.kind === "group" || (it.kind === "work" ? !layers.work : !layers.board)) continue; const p = at(it); pts.push(p, { x: p.x + (it.w ?? 0), y: p.y + (it.h ?? 0) }); }
     const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
     // Leave the strips at the top (tools) and bottom (zoom and legend) clear.
     const w = el.clientWidth, h = el.clientHeight - 112, bw = Math.max(...xs) - Math.min(...xs) + 320, bh = Math.max(...ys) - Math.min(...ys) + 160;
     const k = Math.max(0.25, Math.min(1.1, w / bw, h / bh));
     setView({ k, x: w / 2 - ((Math.max(...xs) + Math.min(...xs)) / 2) * k, y: 56 + h / 2 - ((Math.max(...ys) + Math.min(...ys)) / 2) * k });
-  }, [data.sources, data.people, moved, base, board, at]);
+  }, [shownSources, shownPeople, stacks, layers.work, layers.board, moved, base, board, at]);
   const fitted = useRef(false);
   useEffect(() => { if (!fitted.current && stage.current) { fitted.current = true; fit(); } }, [fit]);
 
@@ -108,6 +123,7 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
   const undo = useCallback(() => { const id = added[added.length - 1]; if (id) void remove(id); else say({ text: "Nothing to undo." }); }, [added, remove, say]);
 
   async function addImage(file: File) {
+    onRevealLayer('board');
     if (!/^image\/(png|jpeg|gif|webp)$/.test(file.type)) { say({ text: "Add a PNG, JPEG, GIF or WebP image." }); return; }
     try {
       const { blob, w, h } = await shrink(file);
@@ -132,11 +148,11 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
       const k = e.key.toLowerCase();
       if (k === "i") { fileInput.current?.click(); return; }
       if (k === "f") { setPathOpen((o) => !o); return; }
-      if (TOOL_KEYS[k]) setTool(TOOL_KEYS[k]);
+      if (TOOL_KEYS[k]) { const next = TOOL_KEYS[k]; if (['text', 'note', 'pen', 'eraser'].includes(next)) onRevealLayer('board'); if (next === 'work') onRevealLayer('work'); setTool(next); }
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [picked, undo, remove]);
+  }, [picked, undo, remove, onRevealLayer]);
   useEffect(() => {
     const paste = (e: ClipboardEvent) => { if (typing(e.target) || document.querySelector(".nw-dim")) return; const f = [...(e.clipboardData?.files ?? [])].find((x) => x.type.startsWith("image/")); if (f) { e.preventDefault(); void addImage(f); } };
     window.addEventListener("paste", paste);
@@ -229,7 +245,7 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
       setMarquee(null);
       const r = stage.current!.getBoundingClientRect(), x0 = Math.min(g.sx, g.x) - r.left, x1 = Math.max(g.sx, g.x) - r.left, y0 = Math.min(g.sy, g.y) - r.top, y1 = Math.max(g.sy, g.y) - r.top;
       if (x1 - x0 < 6 && y1 - y0 < 6) return;
-      const inside = data.people.filter((p) => { const c = pos(p.id), sx = c.x * view.k + view.x, sy = c.y * view.k + view.y; return sx >= x0 && sx <= x1 && sy >= y0 && sy <= y1; }).map((p) => p.id);
+      const inside = shownPeople.filter((p) => { const c = pos(p.id), sx = c.x * view.k + view.x, sy = c.y * view.k + view.y; return sx >= x0 && sx <= x1 && sy >= y0 && sy <= y1; }).map((p) => p.id);
       setMulti((m) => new Set([...(g.add ? m : []), ...inside]));
       if (inside.length) say({ text: `${inside.length} selected. Pick an action below, or drag any of them to move them all.` });
       return;
@@ -260,8 +276,8 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
     }
   }
   function cardAt(w: Point): string | null {
-    for (const p of data.people) { const c = pos(p.id); if (Math.abs(w.x - c.x) <= PERSON.w / 2 + 6 && Math.abs(w.y - c.y) <= PERSON.h / 2 + 6) return p.id; }
-    for (const s of data.sources) { const c = pos(s.id), sz = sourceSize(s.name, s.about || s.type); if (Math.abs(w.x - c.x) <= sz.w / 2 && Math.abs(w.y - c.y) <= sz.h / 2) return s.id; }
+    for (const p of shownPeople) { const c = pos(p.id); if (Math.abs(w.x - c.x) <= PERSON.w / 2 + 6 && Math.abs(w.y - c.y) <= PERSON.h / 2 + 6) return p.id; }
+    for (const s of shownSources) { const c = pos(s.id), sz = sourceSize(s.name, s.about || s.type); if (Math.abs(w.x - c.x) <= sz.w / 2 && Math.abs(w.y - c.y) <= sz.h / 2) return s.id; }
     return null;
   }
 
@@ -294,8 +310,8 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
       <svg className="nwg-svg" style={{ backgroundSize: `${28 * view.k}px ${28 * view.k}px`, backgroundPosition: `${view.x}px ${view.y}px` }}>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>
           <g>
-            {board.filter((it) => it.kind === "group").map((gr) => {
-              const pts = (gr.ids ?? []).filter((id) => people.has(id)).map((id) => pos(id));
+            {board.filter((it) => layers.board && it.kind === "group").map((gr) => {
+              const pts = (gr.ids ?? []).filter((id) => layers.people && people.has(id) && !collapsedPeople.has(id)).map((id) => pos(id));
               if (!pts.length) return null;
               const x0 = Math.min(...pts.map((p) => p.x)) - PERSON.w / 2 - 24, x1 = Math.max(...pts.map((p) => p.x)) + PERSON.w / 2 + 24;
               const y0 = Math.min(...pts.map((p) => p.y)) - PERSON.h / 2 - 38, y1 = Math.max(...pts.map((p) => p.y)) + PERSON.h / 2 + 24;
@@ -304,14 +320,14 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
             })}
           </g>
           <g>
-            {works.flatMap((wk) => (wk.people ?? []).filter((id) => people.has(id)).map((id) => {
+            {(layers.connections ? works : []).flatMap((wk) => (wk.people ?? []).filter((id) => nodeShown(id)).map((id) => {
               const a = { x: wk.x, y: wk.y }, b = pos(id), pr = workProgress(wk), c = wk.done ? "var(--nw-ok)" : pr.late ? "var(--nw-bad)" : pr.ending ? "var(--nw-warn)" : "var(--nw-accent)";
               const dim = lit && !lit.has(id), hot = selectedWork === wk.id;
               return <path key={`${wk.id}-${id}`} d={`M${a.x} ${a.y}L${b.x} ${b.y}`} stroke={c} strokeDasharray="10 3 2 3" strokeWidth={hot ? 2.6 : 1.7} fill="none" style={{ opacity: dim ? 0.07 : hot ? 1 : 0.75 }} />;
             }))}
           </g>
           <g>
-            {edges.map((e) => {
+            {edges.filter((edge) => layers.connections && nodeShown(edge.a) && nodeShown(edge.b)).map((e) => {
               const p = path(e), hot = onRoute.has(e.key) || (!route && focus != null && (e.a === focus || e.b === focus)), dim = lit && !(lit.has(e.a) && lit.has(e.b));
               return (
                 <g key={e.key} className={`nwg-edge${hot ? " hot" : ""}`} style={{ opacity: dim ? 0.07 : hot ? 1 : e.kind === "you" ? 0.45 : 0.7 }}>
@@ -323,13 +339,13 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
             })}
           </g>
           <g>
-            {board.filter((it) => it.kind === "image").map((it) => { const p = at(it); return (
+            {board.filter((it) => layers.board && it.kind === "image").map((it) => { const p = at(it); return (
               <foreignObject key={it.id} x={p.x} y={p.y} width={it.w} height={it.h} data-board={it.id} data-kind="image" className="nwgb-fo">
                 <div className={`nwgb-img${picked === it.id ? " sel" : ""}`}><img src={imageUrl(it.imageId!)} alt="" draggable={false} /><i className="nwgb-rz" /><button type="button" className="del" aria-label="Delete image" onClick={() => void remove(it.id)}>×</button></div>
               </foreignObject>); })}
-            {board.filter((it) => it.kind === "stroke").map((it) => { const d = smoothPath(it.points ?? []); return (
+            {board.filter((it) => layers.board && it.kind === "stroke").map((it) => { const d = smoothPath(it.points ?? []); return (
               <g key={it.id}><path d={d} className="nwgb-stroke" style={{ stroke: inkOf(it.color), strokeWidth: it.width, opacity: it.opacity }} /><path d={d} className="nwgb-hit" data-stroke={it.id} style={{ strokeWidth: Math.max(16, (it.width ?? 4) + 10) }} /></g>); })}
-            {drawing && <path d={smoothPath(drawing)} className="nwgb-stroke" style={{ stroke: inkOf(pen.color), strokeWidth: pen.width, opacity: pen.opacity }} />}
+            {layers.board && drawing && <path d={smoothPath(drawing)} className="nwgb-stroke" style={{ stroke: inkOf(pen.color), strokeWidth: pen.width, opacity: pen.opacity }} />}
           </g>
           <g>
             <g data-node="you" className="nwg-node" transform={`translate(${youPos.x} ${youPos.y})`} tabIndex={0} role="button" aria-label="You">
@@ -339,22 +355,35 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
               <text x={-YOU.w / 2 + 86} y={-4} className="nwg-you-name">You</text>
               <text x={-YOU.w / 2 + 86} y={16} className="nwg-you-sub">{youSub}</text>
             </g>
-            {data.sources.map((s) => {
+            {shownSources.map((s) => {
               const p = pos(s.id), c = colors.source.get(s.id) ?? PALETTE[0], sz = sourceSize(s.name, s.about || s.type), n = peopleCount.get(s.id) ?? 0, dim = lit && !lit.has(s.id);
               return (
-                <g key={s.id} data-node={s.id} className="nwg-node" transform={`translate(${p.x} ${p.y})`} style={{ opacity: dim ? 0.18 : 1 }} tabIndex={0} role="button" aria-label={`${s.name}: show only its people`}
+                <g key={s.id} data-node={s.id} className="nwg-node" transform={`translate(${p.x} ${p.y})`} style={{ opacity: dim ? 0.18 : 1 }} tabIndex={0} role="button" aria-label={`${sourceLabel(s, data.sources)}: show only its people`}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSource(s.id); } }} onPointerEnter={() => setHover(s.id)} onPointerLeave={() => setHover(null)}>
+                  <title>{sourceLabel(s, data.sources)}</title>
                   <rect x={-sz.w / 2 - 5} y={-sz.h / 2 - 5} width={sz.w + 10} height={sz.h + 10} rx={19} className="nwg-halo" />
                   <rect x={-sz.w / 2} y={-sz.h / 2} width={sz.w} height={sz.h} rx={14} fill={card} stroke={c} strokeWidth={1.8} />
                   <rect x={-sz.w / 2 + 14} y={-22} width={44} height={44} rx={11} fill={c} fillOpacity={0.16} stroke={c} strokeWidth={1.5} />
                   <text x={-sz.w / 2 + 36} y={1} className="nwg-tile" fill={c}>{s.name[0]?.toUpperCase()}</text>
                   <text x={-sz.w / 2 + 72} y={-3} className="nwg-sname">{clip(s.name, 26)}</text>
-                  <text x={-sz.w / 2 + 72} y={16} className="nwg-sub">{clip(s.about || s.type, 30)}</text>
+                  <text x={-sz.w / 2 + 72} y={16} className="nwg-sub">{clip(s.context || (s.parentSourceId ? `Via ${data.sources.find((parent) => parent.id === s.parentSourceId)?.name || "another source"}` : s.about || SOURCE_TYPES.find(([type]) => type === s.type)?.[1] || s.type), 30)}</text>
                   {n > 0 && <><circle cx={sz.w / 2 - 4} cy={-sz.h / 2 + 4} r={12} fill={c} stroke={bg} strokeWidth={3} /><text x={sz.w / 2 - 4} y={-sz.h / 2 + 4.5} className="nwg-badge">{n}</text></>}
                 </g>
               );
             })}
-            {data.people.map((p) => {
+            {stacks.map((stack) => {
+              const color = colors.source.get(stack.id) || PALETTE[0];
+              const expand = () => setExpandedStacks((old) => new Set(old).add(stack.id));
+              return <g key={`stack-${stack.id}`} className="nwg-stack" style={{ opacity: lit && !stack.members.some((member) => lit.has(member.id)) ? 0.16 : 1 }} transform={`translate(${stack.x} ${stack.y})`} role="button" tabIndex={0} aria-label={`Expand ${stack.name} stack: ${stack.members.length} people`}
+                onPointerDown={(e) => e.stopPropagation()} onClick={expand} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); expand(); } }}>
+                <rect x={-98} y={-24} width={196} height={58} rx={12} fill={card} stroke={color} opacity={0.35} transform="rotate(-4) translate(-3 5)" />
+                <rect x={-98} y={-24} width={196} height={58} rx={12} fill={card} stroke={color} opacity={0.65} transform="rotate(3) translate(3 2)" />
+                <rect x={-98} y={-24} width={196} height={58} rx={12} fill={card} stroke={color} strokeWidth={1.6} />
+                {stack.members.slice(0, 3).map((person, index) => <g key={person.id}><circle cx={-72 + index * 19} cy={4} r={15} fill={card} stroke={colors.person.get(person.id) || color} strokeWidth={1.5} /><text x={-72 + index * 19} y={5} className="nwg-stack-initials">{initials(person.name)}</text></g>)}
+                <text x={0} y={0} className="nwg-pname">{stack.members.length} people</text><text x={0} y={17} className="nwg-sub">Click to expand</text>
+              </g>;
+            })}
+            {shownPeople.map((p) => {
               const pt = pos(p.id), c = colors.person.get(p.id) ?? "#8a919c", dim = lit && !lit.has(p.id), ax = -PERSON.w / 2 + 28;
               const due = followUp(p.nextFollowUp)?.due, replied = p.history.length > 0 && p.history[p.history.length - 1].type === "reply";
               const lineage = p.via && p.sourceId ? colors.source.get(p.sourceId) : undefined;
@@ -368,8 +397,8 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
                     : <text x={ax} y={1} className="nwg-ini" fill={c}>{initials(p.name)}</text>}
                   {(due || replied) && <circle cx={ax + 14} cy={14} r={6} fill={due ? "var(--nw-warn)" : "var(--nw-ok)"} stroke={card} strokeWidth={2.5}><title>{due ? "Follow-up due" : "They replied"}</title></circle>}
                   {lineage && <circle cx={PERSON.w / 2 - 2} cy={-PERSON.h / 2 + 2} r={7} fill={lineage} stroke={bg} strokeWidth={2.5}><title>Belongs to {data.sources.find((s) => s.id === p.sourceId)?.name}, introduced by {people.get(p.via!)?.name}</title></circle>}
-                  <text x={ax + 30} y={p.role ? -3 : 5} className="nwg-pname">{clip(p.name, 20)}</text>
-                  {p.role && <text x={ax + 30} y={13} className="nwg-sub">{clip(p.role, 22)}</text>}
+                  <text x={ax + 30} y={p.role || p.company ? -3 : 5} className="nwg-pname">{clip(p.name, 20)}</text>
+                  {(p.role || p.company) && <text x={ax + 30} y={13} className="nwg-sub"><title>{[p.role, p.company].filter(Boolean).join(" · ")}</title>{clip(p.company || p.role, 22)}</text>}
                 </g>
               );
             })}
@@ -391,7 +420,7 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
             })}
           </g>
           <g>
-            {board.filter((it) => it.kind === "text" || it.kind === "note").map((it) => { const p = at(it); return (
+            {board.filter((it) => layers.board && (it.kind === "text" || it.kind === "note")).map((it) => { const p = at(it); return (
               <BoardBox key={it.id} item={it} x={p.x} y={p.y} selected={picked === it.id} pinnedTo={pinName(it)}
                 onText={(text) => { replace({ ...it, text }); void saveItem({ id: it.id, text }); }}
                 onColor={(color) => { replace({ ...it, color }); void saveItem({ id: it.id, color }); }}
@@ -399,7 +428,7 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
           </g>
         </g>
       </svg>
-      <Toolbar tool={tool} setTool={setTool} onImage={() => fileInput.current?.click()} onUndo={undo} canUndo={added.length > 0} onPath={() => setPathOpen((o) => !o)} pathOpen={pathOpen} />
+      <Toolbar tool={tool} setTool={(next) => { if (['text', 'note', 'pen', 'eraser'].includes(next)) onRevealLayer('board'); if (next === 'work') onRevealLayer('work'); setTool(next); }} onImage={() => { onRevealLayer('board'); fileInput.current?.click(); }} onUndo={undo} canUndo={added.length > 0} onPath={() => setPathOpen((o) => !o)} pathOpen={pathOpen} />
       {marquee && <div className="nwg-marquee" style={{ left: marquee.x, top: marquee.y, width: marquee.w, height: marquee.h }} />}
       {pathOpen && <PathFinder data={data} to={pathTo} setTo={setPathTo} route={route} colors={colors} onClose={() => { setPathOpen(false); setPathTo(""); }} onOpen={onPerson} />}
       {multi.size > 0 && <BulkBar ids={[...multi]} people={people} onDone={(list, msg) => { onPeople(list); say({ text: msg }); }} say={say}
@@ -410,7 +439,8 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
       {(tool === "pen" || tool === "eraser") && <PenBar pen={pen} setPen={setPen} eraser={tool === "eraser"} />}
       <input ref={fileInput} type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void addImage(f); }} />
       <div className="nwg-ui nwg-zoom"><button type="button" aria-label="Zoom out" onClick={() => zoomBy(1 / 1.2)}>−</button><span>{Math.round(view.k * 100)}%</span><button type="button" aria-label="Zoom in" onClick={() => zoomBy(1.2)}>+</button><button type="button" className="txt" onClick={fit}>Fit</button></div>
-      <div className="nwg-ui nwg-legend" aria-hidden="true" hidden={multi.size > 0}>
+      {stackPeople && expandedStacks.size > 0 && <button type="button" className="nwg-ui nwg-restack" onClick={() => setExpandedStacks(new Set())}>Collapse stacks</button>}
+      <div className="nwg-ui nwg-legend" aria-hidden="true" hidden={multi.size > 0 || !layers.connections}>
         <span><svg viewBox="0 0 30 6"><path d="M0 3H30" /></svg>first connection</span>
         <span><svg viewBox="0 0 30 6"><path d="M0 3H30" strokeDasharray="7 5" /></svg>introduced</span>
         <span><svg viewBox="0 0 30 6"><path d="M0 3H30" strokeDasharray="2 5" strokeLinecap="round" /></svg>family</span>
@@ -446,7 +476,7 @@ function PathFinder({ data, to, setTo, route, colors, onClose, onOpen }: { data:
       <div className="nwg-rel-h"><b>Who do you want to reach?</b><button type="button" className="nw-x" aria-label="Close" onClick={onClose}>×</button></div>
       <select id="nwg-path-to" value={to} onChange={(e) => setTo(e.target.value)} autoFocus>
         <option value="">Choose a person or a source…</option>
-        <optgroup label="Sources">{data.sources.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</optgroup>
+        <optgroup label="Sources">{data.sources.map((s) => <option key={s.id} value={s.id}>{sourceLabel(s, data.sources)}</option>)}</optgroup>
         <optgroup label="People">{data.people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</optgroup>
       </select>
       {to && !route && <p className="nw-muted">No way there yet. Add who knows them, or connect someone you know to them.</p>}

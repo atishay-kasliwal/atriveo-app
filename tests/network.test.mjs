@@ -138,3 +138,27 @@ test('from a LinkedIn profile: added once to a LinkedIn source; found again by p
  await assert.rejects(()=>addFromLinkedIn(db,{name:'X Y',linkedin:'https://www.linkedin.com/company/acme'}),/not a LinkedIn profile/);
  await assert.rejects(()=>addFromLinkedIn(db,{name:'',linkedin:'https://www.linkedin.com/in/x'}),/No name/);
  assert.equal((await networkView(db)).people.length,2);});
+
+test('same-name sources stay separate by origin/context; staffing and parent validation preserve people', async () => {
+ const db=fakeDb();
+ const event=await saveSource(db,{name:'Open Summit',type:'event'},T);
+ const direct=await saveSource(db,{name:'Northwind Staffing',type:'staffing'},T);
+ const introduced=await saveSource(db,{name:'Northwind Staffing',type:'staffing',parentSourceId:event.id},T);
+ assert.notEqual(direct.id,introduced.id);assert.equal(introduced.parentSourceId,event.id);assert.equal(introduced.type,'staffing');
+ const repeat=await saveSource(db,{name:' northwind staffing ',type:'staffing',parentSourceId:event.id},T);
+ assert.equal(repeat.id,introduced.id);assert.equal(repeat.existed,true);
+ const another=await saveSource(db,{name:'Northwind Staffing',type:'staffing',context:'Reached out last year'},T);
+ assert.notEqual(another.id,direct.id);
+ const first=await savePerson(db,{name:'Ari Vale',sourceId:direct.id},T);
+ const second=await savePerson(db,{name:'Noa Reed',sourceId:introduced.id},T);
+ await logHistory(db,{id:second.id,type:'met',text:'Met at Open Summit'},T);
+ await assert.rejects(()=>saveSource(db,{id:event.id,parentSourceId:introduced.id}),/descendants/);
+ await assert.rejects(()=>saveSource(db,{id:introduced.id,parentSourceId:introduced.id}),/itself/);
+ await assert.rejects(()=>saveSource(db,{name:'Missing origin',parentSourceId:'missing'}),/no longer exists/);
+ await assert.rejects(()=>saveSource(db,{id:introduced.id,parentSourceId:null}),/in that context/);
+ let view=await networkView(db);assert.equal(view.people.find(p=>p.id===first.id).history.length,0);assert.equal(view.people.find(p=>p.id===second.id).history.length,1);
+ await removeSource(db,{id:event.id},T);
+ view=await networkView(db);const child=view.sources.find(s=>s.id===introduced.id);
+ assert.equal(child.parentSourceId,null);assert.equal(child.context,'Via Open Summit');assert.equal(view.people.find(p=>p.id===second.id).sourceId,introduced.id);
+ assert.ok(view.sources.some(s=>s.id===direct.id),'the independent same-name record remains');
+});

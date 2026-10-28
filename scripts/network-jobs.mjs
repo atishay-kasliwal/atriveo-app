@@ -23,7 +23,7 @@ export function sameCompany(a, b) {
 export function companyOf(person, sourcesById) {
   if (person.company) return person.company;
   const s = person.sourceId ? sourcesById.get(person.sourceId) : null;
-  return s?.type === "company" ? s.name : "";
+  return (s?.type === "company" || s?.type === "staffing") ? s.name : "";
 }
 
 /** A Mongo filter that keeps only names starting with one of these companies' first words; null when there is nothing to look for. */

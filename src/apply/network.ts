@@ -3,7 +3,7 @@ import { getTailorServerBase } from "../utils/tailorServer";
 
 // The Network page's data: people, the sources they come from (a company, an event, family), and the links between them.
 
-export type SourceType = "company" | "event" | "family" | "other";
+export type SourceType = "company" | "staffing" | "event" | "family" | "other";
 export type LinkKind = "works" | "family" | "intro" | "other";
 export type HistoryType = "note" | "email" | "message" | "call" | "met" | "reply";
 export interface HistoryEntry { id: string; at: string; type: HistoryType; text: string }
@@ -12,12 +12,17 @@ export interface Person {
   sourceId: string | null; via: string | null; color: string | null; tags: string[];
   lastContact: string | null; nextFollowUp: string | null; history: HistoryEntry[]; archived: boolean; createdAt: string; updatedAt: string; x?: number; y?: number;
 }
-export interface Source { id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
+export interface Source { parentSourceId?: string | null; context?: string; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
 export interface Link { id: string; a: string; b: string; kind: LinkKind; label: string; color: string | null }
 export interface NetworkData { people: Person[]; sources: Source[]; links: Link[]; you?: { x: number; y: number } }
 export interface ListRow { name: string; city: string; repeat: boolean; exists: boolean }
 
-export const SOURCE_TYPES: [SourceType, string][] = [["company", "Company"], ["event", "Event"], ["family", "Family"], ["other", "Other"]];
+export function sourceLabel(source: Source, sources: Source[]): string {
+  const parent = source.parentSourceId ? sources.find((s) => s.id === source.parentSourceId) : null;
+  return [source.name, source.context, parent ? `via ${parent.name}` : null].filter(Boolean).join(' · ');
+}
+
+export const SOURCE_TYPES: [SourceType, string][] = [["company", "Company"], ["staffing", "Staffing agency"], ["event", "Event"], ["family", "Family"], ["other", "Other"]];
 export const LINK_KINDS: [LinkKind, string][] = [["works", "Works with"], ["family", "Family"], ["intro", "Introduced"], ["other", "Other"]];
 export const HISTORY_TYPES: [HistoryType, string][] = [["note", "Note"], ["email", "Email"], ["message", "Message"], ["call", "Call"], ["met", "Met"], ["reply", "They replied"]];
 
@@ -100,7 +105,22 @@ export function autoLayout(data: NetworkData): Map<string, Point> {
   const you = data.you ?? { x: 0, y: 0 };
   pos.set("you", { x: you.x, y: you.y });
   const sources = [...data.sources].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
-  sources.forEach((s, i) => pos.set(s.id, s.x != null && s.y != null ? { x: s.x, y: s.y } : ring(you.x, you.y, 460 + (sources.length > 6 ? 120 : 0), (i / Math.max(1, sources.length)) * Math.PI * 2 - Math.PI / 2)));
+  const sourceIds = new Set(sources.map((s) => s.id));
+  const roots = sources.filter((s) => !s.parentSourceId || !sourceIds.has(s.parentSourceId));
+  roots.forEach((s, i) => pos.set(s.id, s.x != null && s.y != null ? { x: s.x, y: s.y } : ring(you.x, you.y, 460 + (roots.length > 6 ? 120 : 0), (i / Math.max(1, roots.length)) * Math.PI * 2 - Math.PI / 2)));
+  for (const s of sources) if (s.x != null && s.y != null) pos.set(s.id, { x: s.x, y: s.y });
+  for (let guard = 0; guard < sources.length; guard++) {
+    let added = false;
+    for (const parent of sources) {
+      const center = pos.get(parent.id); if (!center) continue;
+      const children = sources.filter((s) => s.parentSourceId === parent.id && !pos.has(s.id));
+      if (!children.length) continue;
+      placeGroup(children.map((s) => s.id), center, Math.atan2(center.y - you.y, center.x - you.x) + Math.PI / 3, 380, pos); added = true;
+    }
+    if (!added) break;
+  }
+  for (const [index, source] of sources.entries()) if (!pos.has(source.id)) pos.set(source.id, ring(you.x, you.y, 460, index * 2.4));
+
   for (const p of data.people) if (p.x != null && p.y != null) pos.set(p.id, { x: p.x, y: p.y });
   const bySource = new Map<string | null, Person[]>(), byVia = new Map<string, Person[]>();
   for (const p of data.people) {
@@ -163,7 +183,10 @@ export interface Edge { key: string; a: string; b: string; kind: "belongs" | "vi
 export function edgesFor(data: NetworkData, colors: ReturnType<typeof colorsFor>): Edge[] {
   const out: Edge[] = [];
   const typeName = (t: SourceType) => SOURCE_TYPES.find(([k]) => k === t)?.[1].toLowerCase() ?? "";
-  for (const s of data.sources) out.push({ key: `you-${s.id}`, a: "you", b: s.id, kind: "you", label: typeName(s.type), color: colors.source.get(s.id) ?? NEUTRAL });
+  for (const s of data.sources) {
+    const parent = s.parentSourceId && data.sources.some((source) => source.id === s.parentSourceId && source.id !== s.id) ? s.parentSourceId : null;
+    out.push({ key: `source-${s.id}`, a: parent || 'you', b: s.id, kind: parent ? 'intro' : 'you', label: parent ? 'introduced through' : typeName(s.type), color: colors.source.get(s.id) ?? NEUTRAL });
+  }
   const ids = new Set(data.people.map((p) => p.id));
   for (const p of data.people) {
     const c = colors.person.get(p.id) ?? NEUTRAL;
@@ -291,7 +314,7 @@ export function sameCompany(a: string, b: string): boolean {
   return short.join("").length >= 3 && short.every((w, i) => long[i] === w);
 }
 /** Where someone works: their own "works at", else their source when it is a company. */
-export const companyOfPerson = (p: Person, sources: Map<string, Source>) => p.company || (p.sourceId && sources.get(p.sourceId)?.type === "company" ? sources.get(p.sourceId)!.name : "");
+export const companyOfPerson = (p: Person, sources: Map<string, Source>) => p.company || (p.sourceId && (sources.get(p.sourceId)?.type === "company" || sources.get(p.sourceId)?.type === "staffing") ? sources.get(p.sourceId)!.name : "");
 
 let known: { at: number; list: Promise<KnownCompany[]> } | null = null;
 /** Who you know at which company, fetched once every few minutes for the job cards on other pages. */
@@ -299,3 +322,7 @@ export function knownCompanies(): Promise<KnownCompany[]> {
   if (!known || Date.now() - known.at > 5 * 60_000) known = { at: Date.now(), list: getJson<{ companies: KnownCompany[] } & ApiBody>("/network/companies").then((r) => r.companies).catch(() => []) };
   return known.list;
 }
+
+/** Local canvas visibility; changing these never changes saved people or board items. */
+export interface CanvasLayers { people: boolean; sources: boolean; connections: boolean; board: boolean; work: boolean }
+export const DEFAULT_CANVAS_LAYERS: CanvasLayers = { people: true, sources: true, connections: true, board: true, work: true };
