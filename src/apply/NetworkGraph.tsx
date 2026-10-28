@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import {
   sourceLabel, SOURCE_TYPES, LINK_KINDS, PALETTE, TOOL_KEYS, autoLayout, edgesFor, followUp, imageUrl, initials, plusDays, post, smoothPath, thinPoints, warmPath, workProgress,
-  type CanvasLayers, type BoardItem, type Edge, type Link, type LinkKind, type NetworkData, type Pen, type Person, type Point, type Tool, colorsFor,
+  type CanvasLayers, type BoardItem, type Edge, type Link, type LinkKind, type NetworkData, type Pen, type Person, type Point, type Source, type Tool, colorsFor,
 } from "./network";
 import { BoardBox, PenBar, Toolbar } from "./NetworkBoard";
 

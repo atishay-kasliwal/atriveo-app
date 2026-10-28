@@ -1,8 +1,8 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import NetworkSourceContext from "./NetworkSourceContext";
 import {
-  JOB_STATUS, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadMailSettings, loadSourceJobs, post, sourceLabel, throughFields, throughValue, uploadPhoto,
-  type JobRow, type MailSettings, type NetworkData, type Source, type SourceType, type You,
+  JOB_STATUS, LINK_KINDS, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadMailSettings, loadNetwork, loadSourceJobs, post, sourceLabel, throughFields, throughValue, uploadPhoto,
+  type JobRow, type LinkKind, type MailSettings, type NetworkData, type Source, type SourceType, type You,
 } from "./network";
 
 type Say = (t: { text: string } | null) => void;
@@ -88,13 +88,14 @@ export function YouPanel({ data, onChange, onClose, say }: { data: NetworkData; 
  * A source (a company, an event, family): its picture or logo, what it is, how it came to you, its people, its jobs when it is a company,
  * and your notes about it.
  */
-export function SourcePanel({ source: s, data, colors, onChange, onClose, onPerson, onAddPeople, onReferral, say }: {
+export function SourcePanel({ source: s, data, colors, onChange, onClose, onPerson, onAddPeople, onReferral, onLinks, say }: {
   source: Source; data: NetworkData; colors: ReturnType<typeof colorsFor>; onChange: (s: Source) => void; onClose: () => void; onPerson: (id: string) => void;
-  onAddPeople: () => void; onReferral: (personId: string, job: JobRow) => void; say: Say;
+  onAddPeople: () => void; onReferral: (personId: string, job: JobRow) => void; onLinks: (l: NetworkData["links"]) => void; say: Say;
 }) {
   const [d, setD] = useState({ name: s.name, about: s.about ?? "", notes: s.notes ?? "", context: s.context ?? "", place: s.place ?? "", when: s.when ?? "" });
   const [through, setThrough] = useState(throughValue(s));
-  const [tab, setTab] = useState<"people" | "jobs" | "notes" | "details">("people");
+  const [tab, setTab] = useState<"people" | "jobs" | "links" | "notes" | "details">("people");
+  const [link, setLink] = useState<{ to: string; kind: LinkKind; label: string } | null>(null);
   const [page, setPage] = useState(0);
   const [jobs, setJobs] = useState<{ id: string; list: JobRow[] } | null>(null);
   const [asker, setAsker] = useState("");
@@ -112,6 +113,19 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
   const members = data.people.filter((p) => p.sourceId === s.id).sort((a, b) => (b.lastContact ?? "").localeCompare(a.lastContact ?? "") || a.name.localeCompare(b.name));
   const per = typeof window !== "undefined" && window.innerHeight < 800 ? 5 : 7, pages = Math.max(1, Math.ceil(members.length / per)), pg = Math.min(page, pages - 1);
   const parent = s.parentSourceId ? data.sources.find((x) => x.id === s.parentSourceId) : null, introducer = s.viaPersonId ? data.people.find((p) => p.id === s.viaPersonId) : null;
+  // Your own lines from this source to a person or another source (Randstad and the conference where you met them).
+  const links = data.links.filter((l) => l.a === s.id || l.b === s.id).map((l) => {
+    const id = l.a === s.id ? l.b : l.a, person = data.people.find((p) => p.id === id), other = data.sources.find((x) => x.id === id);
+    return { l, id, name: person?.name ?? other?.name ?? "Someone archived", isPerson: Boolean(person), c: l.color ?? (person ? colors.person.get(id) : colors.source.get(id)) };
+  });
+  async function connect() {
+    if (!link?.to) return;
+    try { await post("link", { a: s.id, b: link.to, kind: link.kind, label: link.label }); onLinks((await loadNetwork()).links); setLink(null); }
+    catch (e) { say({ text: String((e as Error).message) }); }
+  }
+  async function disconnect(id: string) {
+    try { await post("link/remove", { id }); onLinks(data.links.filter((l) => l.id !== id)); } catch (e) { say({ text: String((e as Error).message) }); }
+  }
   const askWho = asker || members[0]?.id || "";
   const openJobs = jobs?.id === s.id ? jobs.list.filter((j) => j.status === "new" || j.status === "ready") : null;
   return (
@@ -137,7 +151,7 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
         {s.photoId && <button type="button" className="pp-pill" onClick={() => void save({ photoId: null })}>Remove picture</button>}
       </div>
       <div className="pp-tabs" role="tablist" aria-label={`About ${s.name}`}>
-        {([["people", `People`], ...(hiring ? [["jobs", "Jobs"]] : []), ["notes", "Notes"], ["details", "Details"]] as [typeof tab, string][]).map(([t, l]) => <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>{l}{t === "people" && <small>{members.length}</small>}</button>)}
+        {([["people", `People`], ...(hiring ? [["jobs", "Jobs"]] : []), ["links", "Connected"], ["notes", "Notes"], ["details", "Details"]] as [typeof tab, string][]).map(([t, l]) => <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>{l}{t === "people" && <small>{members.length}</small>}{t === "links" && links.length > 0 && <small>{links.length}</small>}</button>)}
       </div>
       <div key={tab} className="pp-body" role="tabpanel">
         {tab === "people" && <>
@@ -158,6 +172,24 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
             : <p className="nw-muted">No open jobs at {s.name} on your job board right now.</p>}
           {openJobs.length > 5 && <p className="nw-muted">And {openJobs.length - 5} more in the Jobs tab of Network.</p>}
         </>)}
+        {tab === "links" && <section className="pp-sec">
+          <div className="pp-sec-h"><span className="pp-h">Connected to</span><button type="button" className="pp-link pp-popbtn" onClick={() => setLink(link ? null : { to: "", kind: "other", label: "" })}>+ Connect</button></div>
+          {link ? <div className="pp-pop inline" role="group" aria-label="Connect">
+            <select id="nw-srclink-to" aria-label="Connect to" value={link.to} onChange={(e) => setLink({ ...link, to: e.target.value })}><option value="">Who or what…</option>
+              <optgroup label="Sources">{data.sources.filter((x) => x.id !== s.id).map((x) => <option key={x.id} value={x.id}>{sourceLabel(x, data.sources, data.people)}</option>)}</optgroup>
+              <optgroup label="People">{data.people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</optgroup></select>
+            <select id="nw-srclink-kind" aria-label="Kind of connection" value={link.kind} onChange={(e) => setLink({ ...link, kind: e.target.value as LinkKind })}>{LINK_KINDS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+            <input id="nw-srclink-label" aria-label="What is it" placeholder="Met their recruiters there…" value={link.label} onChange={(e) => setLink({ ...link, label: e.target.value })} />
+            <button type="button" className="nw-btn" disabled={!link.to} onClick={() => void connect()}>Connect</button>
+          </div> : <div className="pp-chips">
+            {links.map(({ l, id, name, isPerson, c }) => (
+              <span key={l.id} className="pp-chip" style={{ "--c": c } as CSSProperties}>
+                {isPerson ? <button type="button" onClick={() => onPerson(id)}>{name}</button> : <span>{name}</span>}<small>{l.label || LINK_KINDS.find(([k]) => k === l.kind)?.[1]}</small>
+                <button type="button" className="x" aria-label={`Remove the connection to ${name}`} onClick={() => void disconnect(l.id)}>×</button></span>
+            ))}
+            {!links.length && <span className="nw-muted">Not linked to anything else yet. Connect it to the event where you met them, or to a person.</span>}
+          </div>}
+        </section>}
         {tab === "notes" && <label className="pp-notes"><span className="pp-h">Notes</span><textarea id="nw-src-notes" value={d.notes} placeholder="Who hires there, how they like to be approached, what you learned." onChange={(e) => setD({ ...d, notes: e.target.value })} onBlur={() => { if (d.notes !== (s.notes ?? "")) void save({ notes: d.notes }); }} /></label>}
         {tab === "details" && <>
           <div className="nw-pair">

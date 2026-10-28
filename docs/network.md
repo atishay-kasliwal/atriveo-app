@@ -30,6 +30,12 @@ Two records can both be named Randstad: one direct connection, another introduce
 
 The graph connects the child source to its parent with an introduction line. Each record keeps its own ID, colour and people; company matching still uses the original employer name, so jobs aren't duplicated just because two contexts name the same company. Existing sources remain direct roots. No migration is needed. Self-parenting and cycles are rejected; deleting a parent preserves its child sources and their people.
 
+## Source cards and links
+
+Companies and staffing agencies show a logo on white, where they are (Details → Where), the faces of up to three of their people and a
+count. Events are tickets with a date (Details → When). Family people carry a small house tag. A source's **Connected** tab links it to
+another source or a person (Randstad and the conference where you met them) without changing where it came from.
+
 ## Colour rule
 
 A source has one colour, and every first connection from it shares it. Someone introduced by another person starts their own branch:
