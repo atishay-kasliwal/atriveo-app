@@ -80,6 +80,7 @@ export default function PushSettings() {
       <button type="button" disabled={busy || !key} onClick={() => enabled ? void action(false) : void enable()}>{busy ? 'Please wait…' : enabled ? 'Disable notifications' : 'Enable notifications'}</button>
       {enabled && <button type="button" disabled={busy} onClick={() => void action(true)}>Send test notification</button>}
     </div>}
+    {enabled && <p className="st-hint">Assessment reminders: 9 AM the day before and 3 PM on the due date while still open. Daily summary: 8 PM. All times New York.</p>}
     {message && <p className="st-hint" role="status">{message}</p>}
   </section>;
 }

@@ -1,5 +1,7 @@
 import { ensurePushIndexes, sendPushNotification } from './web-push.mjs';
 import { widgetProgress } from './widget-progress.mjs';
+import { listAssessments } from './assessments.mjs';
+import { pushSchedule, scheduledPushes } from './push-scheduled.mjs';
 import { readGoal } from './phone-summary.mjs';
 
 export function inboxPush(event) {
@@ -37,6 +39,12 @@ export async function pollPushEvents(db, userId, { now = new Date(), send = send
   }, { now, send });
   const [progress, goal] = await Promise.all([widgetProgress(db, { now }), readGoal(db)]);
   if (progress.appliedToday >= goal) await deliverEvent(db, userId, `goal:${progress.dayKey}`, { title: 'Daily application goal reached', body: `You reached your goal of ${goal} applications today.`, url: '/job-matching', type: 'daily_goal' }, { now, send });
+  const schedule = pushSchedule(now);
+  const [assessments, dailyReplies] = await Promise.all([
+    schedule.assessmentStage ? listAssessments(db, { now: +now }) : [],
+    schedule.summary ? db.collection('outreach').find({ 'reply.at': { $gte: new Date(+now - 48 * 3600000).toISOString() } }, { projection: { 'reply.at': 1 } }).toArray() : [],
+  ]);
+  for (const { id, notification } of scheduledPushes({ now, assessments, progress, replies: dailyReplies })) await deliverEvent(db, userId, id, notification, { now, send });
 }
 export function startPushEvents({ withMongo, log }) {
   const userId = process.env.PUSH_EVENT_USER_ID?.trim().toLowerCase();

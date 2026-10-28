@@ -33,6 +33,20 @@ test('Mongo indexes enforce ownership, multiple devices, event leases and pollin
   await db.collection('job_swipes').insertOne({ job_url: 'https://example.com/job', direction: 'applied', applied_at: now.toISOString() });
   await pollPushEvents(db, userId, { now, send }); assert.equal(count, 5);
   await pollPushEvents(db, userId, { now, send }); assert.equal(count, 5);
+  const tomorrow = '2026-10-30T03:59:00.000Z'; // Oct 29, 11:59 PM NY
+  await db.collection('assessments').insertMany([
+    { _id: 'due-tomorrow', company: 'Example', status: 'open', deadlineAt: tomorrow },
+    { _id: 'finished', company: 'Finished', status: 'done', deadlineAt: tomorrow },
+    { _id: 'dismissed', company: 'Dismissed', status: 'dismissed', deadlineAt: tomorrow },
+  ]);
+  await pollPushEvents(db, userId, { now, send }); assert.equal(count, 6, 'only the open assessment alerts');
+  await pollPushEvents(db, userId, { now: new Date(+now + 60000), send }); assert.equal(count, 6, 'no repeat on the next minute');
+  await Promise.all([pollPushEvents(db, userId, { now: new Date('2026-10-29T00:00:00Z'), send }), pollPushEvents(db, userId, { now: new Date('2026-10-29T00:00:00Z'), send })]);
+  assert.equal(count, 7, 'one daily summary across concurrent pollers');
+  await pollPushEvents(db, userId, { now: new Date('2026-10-29T01:00:00Z'), send }); assert.equal(count, 7, 'summary remains deduplicated on restart');
+  // Finishing the assessment suppresses its due-date reminder.
+  await db.collection('assessments').updateOne({ _id: 'due-tomorrow' }, { $set: { status: 'done' } });
+  await pollPushEvents(db, userId, { now: new Date('2026-10-29T19:00:00Z'), send }); assert.equal(count, 7);
   let attempts = 0;
   const retry = async () => { attempts++; return { sent: 0, failed: 1 }; };
   await deliverEvent(db, userId, 'retry', {}, { now, send: retry });
