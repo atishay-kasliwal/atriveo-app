@@ -43,6 +43,13 @@ agency card matches it, the map shows a dashed Randstad card linked to each of t
 and colours stay as they are; the warm path can go through the company. It is worked out each time and never saved: it goes when one of
 them moves on, and **Keep as a source** in its panel makes it a real card (logo, place, notes, links). A company with one person gets no card.
 
+## Export
+
+**Export** (next to Fit, or Ctrl/Cmd+Shift+E), like Excalidraw's: PNG, SVG or Copy to clipboard (PNG), with a preview and the options
+Only selected (when cards are selected), Background, Dark mode and Scale 1x/2x/3x, plus a file name. Pictures are embedded, hover and
+editing controls are left out, and nothing is faded. **Save a copy (.json)** downloads the whole map: people, sources, links, the board
+and positions (it holds contact details, so keep it private). There is no import from that file yet.
+
 ## Colour rule
 
 A source has one colour, and every first connection from it shares it. Someone introduced by another person starts their own branch:

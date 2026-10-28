@@ -4,6 +4,7 @@ import {
   type CanvasLayers, type BoardItem, type Edge, type Link, type LinkKind, type NetworkData, type Pen, type Person, type Point, type Source, type Tool, colorsFor,
 } from "./network";
 import { BoardBox, PenBar, Toolbar } from "./NetworkBoard";
+import ExportDialog from "./NetworkExport";
 
 type Colors = ReturnType<typeof colorsFor>;
 type View = { x: number; y: number; k: number };
@@ -62,6 +63,9 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
   const [pathTo, setPathTo] = useState("");
   const [groupEdit, setGroupEdit] = useState<{ id: string; at: Point } | null>(null);
   const gesture = useRef<Gesture | null>(null);
+  const svgEl = useRef<SVGSVGElement>(null);
+  const getSvg = useCallback(() => svgEl.current, []);
+  const [exporting, setExporting] = useState(false);
   const edges = useMemo(() => edgesFor(data, colors), [data, colors]);
   const peopleCount = useMemo(() => { const m = new Map<string, number>(); for (const p of data.people) if (p.sourceId && !p.via) m.set(p.sourceId, (m.get(p.sourceId) ?? 0) + 1); for (const s of data.sources) if (s.auto) m.set(s.id, s.auto.length); return m; }, [data.people, data.sources]);
   const people = useMemo(() => new Map(data.people.map((p) => [p.id, p])), [data.people]);
@@ -152,6 +156,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
     const key = (e: KeyboardEvent) => {
       if (typing(e.target) || document.querySelector(".nw-dim")) return;
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); return; }
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "e") { e.preventDefault(); setExporting(true); return; }
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if ((e.key === "Delete" || e.key === "Backspace") && picked) { e.preventDefault(); void remove(picked); return; }
       if (e.key === "Escape") { setTool("select"); setPicked(null); setMulti(new Set()); setPathOpen(false); return; }
@@ -300,7 +305,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
     for (const p of data.people) if (visible.has(p.id) && p.sourceId) s.add(p.sourceId);
     for (const src of data.sources) if (src.auto?.some((id) => visible.has(id))) s.add(src.id);
     return s;
-  }, [selected, visible, edges, data.people, route]);
+  }, [selected, visible, edges, data.people, data.sources, route]);
   const focus = selected ?? hover;
   const onRoute = useMemo(() => new Set(route?.edges.map((e) => e.key) ?? []), [route]);
 
@@ -318,7 +323,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
     <div ref={stage} className={`nwg tool-${tool}`} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
       onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const f = [...e.dataTransfer.files].find((x) => x.type.startsWith("image/")); if (f) void addImage(f); }}
       role="application" aria-label="Your network as a map. Drag cards to arrange them; Enter opens the focused card.">
-      <svg className="nwg-svg" style={{ backgroundSize: `${28 * view.k}px ${28 * view.k}px`, backgroundPosition: `${view.x}px ${view.y}px` }}>
+      <svg ref={svgEl} className="nwg-svg" style={{ backgroundSize: `${28 * view.k}px ${28 * view.k}px`, backgroundPosition: `${view.x}px ${view.y}px` }}>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>
           <g>
             {board.filter((it) => layers.board && it.kind === "group").map((gr) => {
@@ -334,14 +339,14 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
             {(layers.connections ? works : []).flatMap((wk) => (wk.people ?? []).filter((id) => nodeShown(id)).map((id) => {
               const a = { x: wk.x, y: wk.y }, b = pos(id), pr = workProgress(wk), c = wk.done ? "var(--nw-ok)" : pr.late ? "var(--nw-bad)" : pr.ending ? "var(--nw-warn)" : "var(--nw-accent)";
               const dim = lit && !lit.has(id), hot = selectedWork === wk.id;
-              return <path key={`${wk.id}-${id}`} d={`M${a.x} ${a.y}L${b.x} ${b.y}`} stroke={c} strokeDasharray="10 3 2 3" strokeWidth={hot ? 2.6 : 1.7} fill="none" style={{ opacity: dim ? 0.07 : hot ? 1 : 0.75 }} />;
+              return <path key={`${wk.id}-${id}`} className="nwg-workline" d={`M${a.x} ${a.y}L${b.x} ${b.y}`} stroke={c} strokeDasharray="10 3 2 3" strokeWidth={hot ? 2.6 : 1.7} fill="none" style={{ opacity: dim ? 0.07 : hot ? 1 : 0.75 }} />;
             }))}
           </g>
           <g>
             {edges.filter((edge) => layers.connections && nodeShown(edge.a) && nodeShown(edge.b)).map((e) => {
               const p = path(e), hot = onRoute.has(e.key) || (!route && focus != null && (e.a === focus || e.b === focus)), dim = lit && !(lit.has(e.a) && lit.has(e.b));
               return (
-                <g key={e.key} className={`nwg-edge${hot ? " hot" : ""}`} style={{ opacity: dim ? 0.07 : hot ? 1 : e.kind === "you" ? 0.45 : 0.7 }}>
+                <g key={e.key} data-a={e.a} data-b={e.b} className={`nwg-edge${hot ? " hot" : ""}`} style={{ opacity: dim ? 0.07 : hot ? 1 : e.kind === "you" ? 0.45 : 0.7 }}>
                   <path d={p.d} stroke={e.color} strokeDasharray={DASH[e.kind]} strokeWidth={hot ? 3 : e.kind === "you" ? 1.4 : 1.9} fill="none" strokeLinecap="round" />
                   {e.link && <path d={p.d} className="nwg-hit" data-edge={e.key}><title>{`${e.label} (click to edit)`}</title></path>}
                   {hot && <text x={p.mx} y={p.my} className="nwg-elabel" fill={e.color}>{e.label}</text>}
@@ -397,7 +402,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
                     {/* A company or agency: its logo on white, what it is, where, and the faces of the people you know there. */}
                     <rect x={x0 - 5} y={-sz.h / 2 - 5} width={sz.w + 10} height={sz.h + 10} rx={21} className="nwg-halo" />
                     <rect x={x0} y={-sz.h / 2} width={sz.w} height={sz.h} rx={16} fill={card} stroke={c} strokeWidth={1.8} strokeDasharray={s.auto ? "6 5" : undefined} />
-                    <rect x={x0 + 12} y={-26} width={52} height={52} rx={12} fill="#ffffff" />
+                    <rect x={x0 + 12} y={-26} width={52} height={52} rx={12} fill="#ffffff" stroke="var(--nw-line-strong)" />
                     {picture(x0 + 14, -24, 48, 10) ?? <text x={x0 + 38} y={1} className="nwg-tile big" fill={c}>{s.name[0]?.toUpperCase()}</text>}
                     <text x={x0 + 76} y={-12} className="nwg-sname">{clip(s.name, 20)}</text>
                     <text x={x0 + 76} y={5} className="nwg-kind">{s.auto ? "Where they work" : clip(via || kind, 24)}</text>
@@ -489,7 +494,8 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
         onRename={(label) => { replace({ ...gr, label }); void saveItem({ id: gr.id, label }); }} onRemove={() => { void remove(gr.id); setGroupEdit(null); }} /> : null; })()}
       {(tool === "pen" || tool === "eraser") && <PenBar pen={pen} setPen={setPen} eraser={tool === "eraser"} />}
       <input ref={fileInput} type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void addImage(f); }} />
-      <div className="nwg-ui nwg-zoom"><button type="button" aria-label="Zoom out" onClick={() => zoomBy(1 / 1.2)}>−</button><span>{Math.round(view.k * 100)}%</span><button type="button" aria-label="Zoom in" onClick={() => zoomBy(1.2)}>+</button><button type="button" className="txt" onClick={fit}>Fit</button></div>
+      <div className="nwg-ui nwg-zoom"><button type="button" aria-label="Zoom out" onClick={() => zoomBy(1 / 1.2)}>−</button><span>{Math.round(view.k * 100)}%</span><button type="button" aria-label="Zoom in" onClick={() => zoomBy(1.2)}>+</button><button type="button" className="txt" onClick={fit}>Fit</button><button type="button" className="txt" title="Export (Ctrl/Cmd+Shift+E)" onClick={() => setExporting(true)}>Export</button></div>
+      {exporting && <ExportDialog svg={getSvg} selection={multi} data={data} board={board} onClose={() => setExporting(false)} say={say} />}
       {stackPeople && expandedStacks.size > 0 && <button type="button" className="nwg-ui nwg-restack" onClick={() => setExpandedStacks(new Set())}>Collapse stacks</button>}
       <div className="nwg-ui nwg-legend" aria-hidden="true" hidden={multi.size > 0 || !layers.connections}>
         <span><svg viewBox="0 0 30 6"><path d="M0 3H30" /></svg>first connection</span>

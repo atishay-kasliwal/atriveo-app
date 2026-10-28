@@ -546,3 +546,24 @@ button.pp-step{cursor:pointer;transition:color .15s}button.pp-step:hover{color:v
 .pp-ask select{background:var(--nw-bg);color:var(--nw-ink);border:1px solid var(--nw-line-strong);border-radius:9px;padding:5px 8px;font:inherit;font-size:13px}
 @media (max-height:800px) and (min-width:761px){.pp-pic{width:48px;height:48px;font-size:16px}.pp-nums{margin:0 14px 8px}.pp-nums div{padding:6px 9px}.pp-nums dd{font-size:16px}}
 @media (max-height:800px) and (min-width:761px){.pp-body .nw-f small{display:none}}
+
+/* Export */
+.nwx.nw-dialog{width:min(860px,100%)}
+.nwx-body{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px}
+.nwx-preview{min-height:280px;max-height:52dvh;border-radius:14px;border:1px solid var(--nw-line);display:grid;place-items:center;padding:14px;overflow:hidden;
+  background:#fff}
+.nwx-preview.dark{background:#0c0d10}
+.nwx-preview.clear{background:repeating-conic-gradient(#d9dce2 0 25%,#f4f5f7 0 50%) 0 0/18px 18px}
+.nwx-preview.clear.dark{background:repeating-conic-gradient(#1b1d22 0 25%,#24272e 0 50%) 0 0/18px 18px}
+.nwx-preview img{max-width:100%;max-height:calc(52dvh - 30px);object-fit:contain;display:block}
+.nwx-side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.nwx-opt{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--nw-line);cursor:pointer}
+.nwx-opt>span{display:flex;flex-direction:column;gap:2px;min-width:0}.nwx-opt b{font-weight:500;font-size:13.5px}.nwx-opt small{color:var(--nw-muted);font-size:12px}
+.nwx-opt input[type=checkbox]{appearance:none;width:34px;height:20px;border-radius:10px;background:var(--nw-line-strong);position:relative;cursor:pointer;flex:none;transition:background .15s;margin:0}
+.nwx-opt input[type=checkbox]::after{content:"";position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s}
+.nwx-opt input[type=checkbox]:checked{background:var(--nw-accent)}.nwx-opt input[type=checkbox]:checked::after{transform:translateX(14px)}
+.nwx-opt input[type=checkbox]:focus-visible{outline:2px solid var(--nw-accent);outline-offset:2px}
+.nwx-seg{display:flex;background:var(--nw-bg);border:1px solid var(--nw-line-strong);border-radius:10px;padding:2px}
+.nwx-seg button{border:0;background:none;padding:4px 10px;border-radius:8px;font-size:13px}
+.nwx-seg button[aria-checked=true]{background:var(--nw-soft);box-shadow:inset 0 0 0 1px var(--nw-line-strong);font-weight:600}
+@media (max-width:640px){.nwx-body{grid-template-columns:1fr}.nwx-preview{min-height:180px}}
