@@ -77,21 +77,39 @@ export function phoneMessage(list) {
   return { title: "Network", message: `${parts.join(", ")}. A two-line note keeps the door open.`, tags: ["handshake"], priority: 3, click: "https://apply.atriveo.com/network" };
 }
 
-/** From 9 a.m. New York time, once per day: send the counts if anything needs you. */
-export async function runNetworkTick({ db, now = new Date(), publish = publishNtfy, log = () => {} } = {}) {
-  const { day, hour } = nyParts(now);
-  if (hour < 9) return null;
-  const notices = db.collection("phone_notices"), id = `${day}:network`;
+/** The week in your network, counts only: emails you sent, replies logged, people added, and what is waiting. Null on an empty week. */
+export async function weeklyDigest(db, now = new Date()) {
+  const since = new Date(now.getTime() - 7 * DAY).toISOString();
+  const [people, mail, { reminders: waiting }] = await Promise.all([db.collection("network_people").find({}).toArray(), db.collection("network_mail_log").find({}).toArray(), listReminders(db, { now })]);
+  const sent = mail.filter((m) => m.at >= since && m.state !== "failed").length;
+  const replies = people.reduce((n, p) => n + (p.history ?? []).filter((h) => h.type === "reply" && h.at >= since).length, 0);
+  const added = people.filter((p) => !p.archived && p.createdAt >= since).length;
+  const open = waiting.filter((r) => r.kind !== "never").length;
+  if (!sent && !replies && !added && !open) return null;
+  const n = (c, one, many) => `${c} ${c === 1 ? one : many}`;
+  const week = [sent && n(sent, "email", "emails"), replies && n(replies, "reply", "replies"), added && n(added, "new person", "new people")].filter(Boolean).join(", ");
+  return { title: "Your week in Network", message: `${week ? `${week}. ` : "A quiet week. "}${open ? `${n(open, "thing waits", "things wait")} for you.` : "Nothing is waiting."}`, tags: ["calendar"], priority: 2, click: "https://apply.atriveo.com/network" };
+}
+
+async function sendOnce(db, id, now, build, publish, log, label) {
+  const notices = db.collection("phone_notices");
   if (await notices.findOne({ _id: id })) return null;
-  const { reminders: list } = await listReminders(db, { now });
-  const msg = phoneMessage(list);
-  try { await notices.insertOne({ _id: id, day, kind: "network", at: now.toISOString(), ...(msg ? {} : { silent: true }) }); } catch (e) { if (e?.code === 11000) return null; throw e; }
+  const msg = await build();
+  try { await notices.insertOne({ _id: id, day: id.split(":")[0], kind: label, at: now.toISOString(), ...(msg ? {} : { silent: true }) }); } catch (e) { if (e?.code === 11000) return null; throw e; }
   if (!msg) return null;
   let ok = false;
-  try { ok = await publish(msg); } catch (e) { log(`network reminder: ${e.message}`); }
+  try { ok = await publish(msg); } catch (e) { log(`${label}: ${e.message}`); }
   if (!ok) { await notices.deleteOne({ _id: id }); return null; }
-  log("phone message sent: network");
+  log(`phone message sent: ${label}`);
   return msg;
+}
+
+/** From 9 a.m. New York time, once per day: send the counts if anything needs you. On Sunday from 6 p.m., the week's digest too. */
+export async function runNetworkTick({ db, now = new Date(), publish = publishNtfy, log = () => {} } = {}) {
+  const { day, hour, weekday } = nyParts(now);
+  if (weekday === "Sun" && hour >= 18) await sendOnce(db, `${day}:network-week`, now, () => weeklyDigest(db, now), publish, log, "network-week");
+  if (hour < 9) return null;
+  return sendOnce(db, `${day}:network`, now, async () => phoneMessage((await listReminders(db, { now })).reminders), publish, log, "network");
 }
 
 /** Checks every few minutes inside the sidecar; off without NTFY_TOPIC, or with PHONE_SUMMARIES=off or NETWORK_REMINDERS=off. */
@@ -102,6 +120,6 @@ export function startNetworkReminders({ withMongo, log = console.log, everyMs = 
   const tick = async () => { if (running) return; running = true; try { await withMongo((db) => runNetworkTick({ db, publish, log }), { appName: "AtriveoNetworkReminders" }); } catch (e) { log(`network reminders: ${e.message}`); } finally { running = false; } };
   setTimeout(tick, 30_000).unref?.();
   const timer = setInterval(tick, everyMs); timer.unref?.();
-  log("network reminders on the phone: on (9 a.m. New York, counts only)");
+  log("network reminders on the phone: on (9 a.m. New York daily, Sunday 6 p.m. weekly digest; counts only)");
   return timer;
 }

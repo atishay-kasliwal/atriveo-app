@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {reminders,listReminders,snoozeReminder,phoneMessage,runNetworkTick} from '../scripts/network-reminders.mjs';
+import {reminders,listReminders,snoozeReminder,phoneMessage,runNetworkTick,weeklyDigest} from '../scripts/network-reminders.mjs';
 
 // Invented people; "today" is a New York day. History entries are in date order, as the store keeps them.
 const P=(id,f={})=>({id,name:id,archived:false,sourceId:null,via:null,lastContact:null,nextFollowUp:null,history:[],...f});
@@ -64,3 +64,15 @@ test('work items: a week before the end, on the day, and when it has run over; d
  assert.deepEqual(r.map(x=>x.title),['Mock interview is 8 days past its end','Resume review ends today','Docs contribution ends in 6 days']);
  assert.equal(r[2].detail,'Next: Open the pull request');assert.equal(r[0].workId,'w3');
  assert.match(phoneMessage(r).message,/^3 pieces of work ending\./);});
+
+test('weekly digest: Sunday from 6 p.m. New York, counts only, once a week, nothing on an empty week',async()=>{
+ const db=fakeDb([P('Dana',{createdAt:'2026-10-27T10:00:00.000Z',history:[H('reply','2026-10-30')],nextFollowUp:'2026-10-30'}),P('Old',{createdAt:'2026-09-01T10:00:00.000Z'})]);
+ await db.collection('network_mail_log').insertOne({_id:'m1',state:'sent',at:'2026-10-29T15:00:00.000Z'});await db.collection('network_mail_log').insertOne({_id:'m2',state:'uncertain',at:'2026-10-30T15:00:00.000Z'});
+ await db.collection('network_mail_log').insertOne({_id:'m3',state:'sent',at:'2026-10-01T15:00:00.000Z'});
+ const sunday=new Date('2026-11-01T23:30:00Z');// 6:30 p.m. in New York, Sunday Nov 1
+ const d=await weeklyDigest(db,sunday);assert.equal(d.message,'2 emails, 1 reply, 1 new person. 1 thing waits for you.');assert.ok(!/Dana/.test(JSON.stringify(d)));
+ const sent=[];const publish=async m=>{sent.push(m);return true};
+ await runNetworkTick({db,now:new Date('2026-11-01T21:00:00Z'),publish});assert.ok(!sent.some(m=>m.title==='Your week in Network'),'not before 6 p.m.');
+ await runNetworkTick({db,now:sunday,publish});await runNetworkTick({db,now:new Date('2026-11-02T00:30:00Z'),publish});
+ assert.equal(sent.filter(m=>m.title==='Your week in Network').length,1,'once that Sunday');
+ assert.equal(await weeklyDigest(fakeDb([]),sunday),null);});
