@@ -297,6 +297,9 @@ export async function saveSource(db, input = {}, now = new Date()) {
   if ("about" in input) patch.about = str(input.about, 120);
   if ("color" in input) patch.color = color(input.color);
   if ("notes" in input) patch.notes = text(input.notes, 4000);
+  // Shown on the card: where it is ("Raleigh, NC", "Global") and, for an event, when ("Oct 2024").
+  if ("place" in input) patch.place = str(input.place, 60);
+  if ("when" in input) patch.when = str(input.when, 30);
   if ("photoId" in input) {
     patch.photoId = input.photoId ? String(input.photoId) : null;
     if (patch.photoId && !(await db.collection("network_images").findOne({ _id: patch.photoId }))) fail("Upload the picture first");
@@ -306,7 +309,23 @@ export async function saveSource(db, input = {}, now = new Date()) {
   if ("viaPersonId" in input || !cur) patch.viaPersonId = input.viaPersonId ? str(input.viaPersonId, 80) : null;
   if (patch.viaPersonId) patch.parentSourceId = null;
   else if (patch.parentSourceId) patch.viaPersonId = null;
+  // When it reached you that way ("2024"), and anyone or anything else that also brought it to you later, each with its own year.
+  const year = (v) => { const s = str(v, 4); if (s && !/^(19|20)\d\d$/.test(s)) fail("Give the year as four digits, like 2024"); return s; };
+  if ("introYear" in input) patch.introYear = year(input.introYear);
+  if ("alsoVia" in input) {
+    const people = await all(db, PEOPLE), seen = new Set();
+    patch.alsoVia = [];
+    for (const raw of (Array.isArray(input.alsoVia) ? input.alsoVia : []).slice(0, 12)) {
+      const id = str(raw?.id, 80);
+      if (!id || seen.has(id)) continue;
+      if (id === cur?.id) fail("A source cannot introduce itself");
+      if (!people.some((p) => p.id === id) && !sources.some((s) => s.id === id)) fail("One of those who also introduced it is no longer in your network. Reload the page.");
+      seen.add(id); patch.alsoVia.push({ id, year: year(raw?.year) });
+    }
+  }
   const next = { ...cur, ...patch };
+  // The main introducer is not listed again as an extra one.
+  if (next.alsoVia?.length && (next.viaPersonId || next.parentSourceId)) { const main = next.viaPersonId || next.parentSourceId; if (next.alsoVia.some((v) => v.id === main)) patch.alsoVia = next.alsoVia = next.alsoVia.filter((v) => v.id !== main); }
   if (next.viaPersonId) {
     const people = (await all(db, PEOPLE)).filter((p) => !p.archived);
     const who = people.find((p) => p.id === next.viaPersonId);

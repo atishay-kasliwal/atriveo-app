@@ -14,7 +14,11 @@ const color = (v, fallback) => (v == null || v === "" ? fallback : /^#[0-9a-f]{6
 const out = ({ _id, ...d }) => ({ id: _id, ...d });
 
 /** Everything on the board, without image bytes. */
-export async function boardView(db) { return { items: (await db.collection(BOARD).find({}).toArray()).map(out).sort((a, b) => a.createdAt.localeCompare(b.createdAt)) }; }
+/** Everything on one map's board ("main", or no map, is My network's), without image bytes. */
+export async function boardView(db, mapId = "main") {
+  const main = !mapId || mapId === "main";
+  return { items: (await db.collection(BOARD).find({}).toArray()).filter((it) => (main ? !it.mapId || it.mapId === "main" : it.mapId === mapId)).map(out).sort((a, b) => a.createdAt.localeCompare(b.createdAt)) };
+}
 
 function shape(kind, input, cur) {
   const it = {};
@@ -71,6 +75,8 @@ export async function saveBoardItem(db, input = {}, now = new Date()) {
   if (!BOARD_KINDS.includes(input.kind)) fail("Pick text, note, stroke or image");
   if (input.kind === "image" && !(await db.collection(IMAGES).findOne({ _id: String(input.imageId ?? "") }))) fail("Upload the image first");
   const at = now.toISOString(), doc = { _id: randomUUID(), kind: input.kind, pin: null, createdAt: at, updatedAt: at, ...shape(input.kind, input, null) };
+  // Drawn on a map other than My network: it belongs to that map's board.
+  if (input.mapId && input.mapId !== "main") doc.mapId = String(input.mapId);
   if ((await db.collection(BOARD).find({}).toArray()).length >= 3000) fail("The board is full (3,000 items). Remove some first.");
   await db.collection(BOARD).insertOne(doc);
   return out(doc);

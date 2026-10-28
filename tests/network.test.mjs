@@ -199,3 +199,16 @@ test('"You" and sources: a name, a title, a note, a photo or logo; old pictures 
  const s2=await saveSource(db,{id:s.id,photoId:'logo1',notes:'Their recruiters answer on Tuesdays.'},T);assert.deepEqual([s2.photoId,s2.notes],['logo1','Their recruiters answer on Tuesdays.']);
  await saveSource(db,{id:s.id,photoId:null},T);assert.equal(await db.collection('network_images').findOne({_id:'logo1'}),null);
  await assert.rejects(()=>saveSource(db,{id:s.id,photoId:'zzz'}),/Upload the picture/);});
+
+test('a source can say where it is and, for an event, when',async()=>{
+ const db=fakeDb();const s=await saveSource(db,{name:'Open Summit',type:'event',place:'  Raleigh,   NC ',when:'Oct 2024'},T);
+ assert.deepEqual([s.place,s.when],['Raleigh, NC','Oct 2024']);assert.equal((await saveSource(db,{id:s.id,place:''},T)).place,'');});
+
+test('a source reached you more than once: the main introducer with a year, and others (people or sources) with theirs',async()=>{
+ const db=fakeDb();const uncle=await savePerson(db,{name:'Uncle Ravi'},T);const ato=await saveSource(db,{name:'All Things Open',type:'event'},T);
+ const rh=await saveSource(db,{name:'Red Hat',type:'company',viaPersonId:uncle.id,introYear:'2024',alsoVia:[{id:ato.id,year:'2026'},{id:ato.id,year:'2027'},{id:uncle.id,year:'2024'}]},T);
+ assert.deepEqual([rh.viaPersonId,rh.introYear,rh.alsoVia],[uncle.id,'2024',[{id:ato.id,year:'2026'}]],'no repeats, and the main introducer is not listed twice');
+ await assert.rejects(()=>saveSource(db,{id:rh.id,introYear:'24'},T),/four digits/);
+ await assert.rejects(()=>saveSource(db,{id:rh.id,alsoVia:[{id:rh.id}]},T),/introduce itself/);
+ await assert.rejects(()=>saveSource(db,{id:rh.id,alsoVia:[{id:'gone'}]},T),/no longer in your network/);
+ assert.deepEqual((await saveSource(db,{id:rh.id,alsoVia:[]},T)).alsoVia,[]);});

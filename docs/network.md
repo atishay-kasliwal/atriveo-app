@@ -14,6 +14,7 @@ The people around the job search: who they are, where they came from, what happe
 | `network_mail_log` | Every email sent from the page |
 | `network_drafts` | AI drafts while they are written (kept a day) |
 | `network_snoozes` | Snoozed reminders |
+| `network_maps`, `network_map_cards` | Maps other than My network: name, preview, where You sits; and which people and sources are on each, and where |
 | `app_settings` `network_you`, `network_mail` | Where "You" sits on the map; the sender name, address, "about you" and signature |
 
 Nothing here is in the repository. Tests use invented people.
@@ -29,6 +30,48 @@ Add Person asks for Company / employer independently of its source (for example,
 Two records can both be named Randstad: one direct connection, another introduced through All Things Open. Create the second with **Introduced through another source → All Things Open**. Add **Context / when you met** for labels such as “Reached out last year.” Parent/context fields are available in source editing and inline source creation while adding/importing people. Pickers show the context and parent so the records are distinguishable.
 
 The graph connects the child source to its parent with an introduction line. Each record keeps its own ID, colour and people; company matching still uses the original employer name, so jobs aren't duplicated just because two contexts name the same company. Existing sources remain direct roots. No migration is needed. Self-parenting and cycles are rejected; deleting a parent preserves its child sources and their people.
+
+## Source cards and links
+
+Companies and staffing agencies show a logo on white, where they are (Details → Where), the faces of up to three of their people and a
+count. Events are tickets with a date (Details → When). Family people carry a small house tag. A source's **Connected** tab links it to
+another source or a person (Randstad and the conference where you met them) without changing where it came from.
+
+## Companies nobody added
+
+When two or more people share a "Works at" (Dana met at All Things Open, Priya introduced by Chani, both at Randstad) and no company or
+agency card matches it, the map shows a dashed Randstad card linked to each of them by a "works at" line. Their sources, introducers
+and colours stay as they are; the warm path can go through the company. It is worked out each time and never saved: it goes when one of
+them moves on, and **Keep as a source** in its panel makes it a real card (logo, place, notes, links). A company with one person gets no card.
+
+## Maps
+
+/network opens on your maps: cards with a preview, **New map** and **Open a saved file** (or drop the .json file on the page).
+**My network** (id `main`) is the map you already had: everyone, with the layout people and sources carry themselves. Any other map is
+a selection of the same people and sources (`network_map_cards`: which cards are on it and where), with its own board
+(`network_board.mapId`) and its own place for You (`network_maps`). Editing a person or source changes them on every map; adding someone
+on a map also adds them to your network. On a map, **+ → From your network…** puts people (or a source with its people) on it, and a
+person's **⋯ → Remove from this map** takes them off without archiving them. Deleting a map removes its layout, board and preview only.
+
+**Open a saved file** turns a copy made with Export → Save a copy into a new map. Sources match on name, kind and context; people on
+email, then LinkedIn, then name. Matches are reused exactly as they are; everything else is added with its layout, links, introducers
+and board. Pictures are not in the file, so photos and board images are left out. A preview of each map is saved when you go back to
+all maps. Links from notifications and the extension (`?person=`, `?work=`, `?view=`, `?linkedin=`) open My network.
+
+## Export
+
+**Export** (next to Fit, or Ctrl/Cmd+Shift+E), like Excalidraw's: PNG, SVG or Copy to clipboard (PNG), with a preview and the options
+Only selected (when cards are selected), Background, Dark mode and Scale 1x/2x/3x, plus a file name. Pictures are embedded, hover and
+editing controls are left out, and nothing is faded. **Save a copy (.json)** downloads the whole map: people, sources, links, the board
+and positions (it holds contact details, so keep it private). Open it again from the maps page as a new map.
+
+## A source that reached you more than once
+
+Red Hat through your uncle in 2024, then All Things Open in 2026: keep one Red Hat. Its **Introduced** tab has the main way in
+(Introduced through, with the year it happened) and **Also introduced by**: more people or sources, each with a year. The main one
+places the card; each extra one draws an "also introduced · 2026" line, shows in the trail ("You › Uncle 2024 › Red Hat, also All
+Things Open 2026") and counts for the warm path. Someone you met at the conference keeps All Things Open as their source and Red Hat
+as Works at.
 
 ## Colour rule
 

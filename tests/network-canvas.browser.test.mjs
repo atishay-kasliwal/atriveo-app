@@ -51,7 +51,7 @@ async function fixture(t, width) {
     return route.continue();
   });
   t.after(async () => { await browser.close(); await new Promise(resolve => server.close(resolve)); });
-  await page.goto(base + '/network'); await page.locator('.nwg').waitFor();
+  await page.goto(base + '/network?map=main'); await page.locator('.nwg').waitFor();
   return { page, errors, writes, data };
 }
 for (const width of [1440, 1024, 390, 320]) test(`Network canvas fills the viewport below navigation at ${width}px`, async t => {
@@ -106,7 +106,7 @@ test('layers, stacks, details, company search and new employer field preserve th
 test('a same-name staffing source can be introduced through a different source', async t => {
   const { page, data, writes, errors } = await fixture(t, 1440);
   await page.getByRole('button', { name: 'Add to network', exact: true }).click();
-  await page.getByRole('button', { name: 'New source', exact: true }).click();
+  await page.getByRole('button', { name: 'New source or company', exact: true }).click();
   const dialog=page.getByRole('dialog',{name:'New source'});
   await dialog.locator('#nw-src-name').fill('Northstar');
   await dialog.locator('#nw-src-type').selectOption('staffing');

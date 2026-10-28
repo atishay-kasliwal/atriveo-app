@@ -4,7 +4,7 @@ import {build} from 'esbuild';
 // The Network colour rule and its wording helpers, bundled from the page's own module.
 const dir=fs.mkdtempSync(path.join(os.tmpdir(),'nwc-'));const out=path.join(dir,'network.mjs');
 await build({entryPoints:[path.resolve('src/apply/network.ts')],bundle:true,format:'esm',platform:'node',outfile:out,logLevel:'silent'});
-const {colorsFor,PALETTE,followUp,ago,plusDays,initials,sourceLabel,edgesFor,autoLayout,warmPath}=await import(out);
+const {colorsFor,PALETTE,followUp,ago,plusDays,initials,sourceLabel,edgesFor,autoLayout,warmPath,withAutoCompanies}=await import(out);
 const src=(id,at,color=null)=>({id,name:id,type:'company',about:'',color,createdAt:at});
 const person=(id,f={})=>({id,name:id,sourceId:null,via:null,color:null,...f});
 
@@ -93,3 +93,37 @@ test('introduced by two people: a line from each, and everyone else keeps their 
  const e=edgesFor(data,colorsFor(data));
  assert.deepEqual(e.filter(x=>x.b==='c').map(x=>[x.a,x.label]),[['a','introduced'],['b','also introduced']]);
  for(const id of ['a','b','d'])assert.deepEqual(e.filter(x=>x.b===id).map(x=>x.kind),['belongs']);});
+
+test('met at one place, works at another: a faint "works at" line to the company card, colour and place still from where you met',async()=>{
+ const {edgesFor,colorsFor,warmPath}=await import(out);
+ const data={sources:[{...src('ato','1'),type:'event'},{...src('rs','2'),name:'Randstad',type:'company'}],links:[],people:[person('el',{sourceId:'ato',company:'Randstad USA'}),person('dana',{sourceId:'rs',company:'Randstad'}),person('x',{sourceId:'ato',company:'Elsewhere'})]};
+ const c=colorsFor(data),e=edgesFor(data,c);
+ assert.deepEqual(e.filter(x=>x.b==='el').map(x=>[x.a,x.kind,x.label]),[['ato','belongs','first connection'],['rs','employer','works at']]);
+ assert.equal(c.person.get('el'),c.source.get('ato'),'colour from where you met');
+ assert.deepEqual(e.filter(x=>x.b==='dana').map(x=>x.kind),['belongs'],'met at the company itself: no second line');
+ assert.deepEqual(e.filter(x=>x.b==='x').map(x=>x.kind),['belongs'],'no card for where they work: nothing extra');
+ assert.deepEqual(warmPath(e,'rs').nodes,['you','rs']);});
+
+test('two people at the same company nobody added: a company card joins the map, linked to both, and goes when a real card exists',()=>{
+ const people=[person('dana',{sourceId:'ato',company:'Randstad USA'}),person('priya',{sourceId:'fam',company:'randstad inc.'}),person('solo',{company:'Acme Corp'}),person('ben',{sourceId:'ato'})];
+ const data={sources:[src('ato','2026-10-01'),src('fam','2026-10-02')],links:[],people};
+ const m=withAutoCompanies(data),auto=m.sources.filter(s=>s.auto);
+ assert.deepEqual(auto.map(s=>[s.name,s.type,s.auto]),[['Randstad USA','company',['dana','priya']]]);
+ const colors=colorsFor(m);assert.deepEqual([colors.person.get('dana'),colors.person.get('priya')],[colors.source.get('ato'),colors.source.get('fam')]);
+ assert.deepEqual(colorsFor(data).source,new Map([...colors.source].filter(([id])=>!id.startsWith('auto:'))),'adding it changes no colour');
+ const e=edgesFor(m,colors),id=auto[0].id;
+ assert.equal(e.some(x=>x.b===id&&x.a==='you'),false,'it does not hang off you');
+ assert.deepEqual(e.filter(x=>x.a===id).map(x=>[x.b,x.kind]),[['dana','employer'],['priya','employer']]);
+ const pos=autoLayout(m);assert.ok(pos.has(id));
+ assert.deepEqual(warmPath(e.filter(x=>x.key!=='src-priya'),'priya').nodes,['you','ato','dana',id,'priya']);
+ const real={...data,sources:[...data.sources,{...src('rs','2026-10-03'),name:'Randstad'}]};
+ assert.equal(withAutoCompanies(real).sources.some(s=>s.auto),false);
+});
+
+test('a source reached more than once: the main line carries its year, and each other introducer (person or source) gets an "also introduced" line',()=>{
+ const rh={...src('rh','2026-10-03'),name:'Red Hat',viaPersonId:'uncle',introYear:'2024',alsoVia:[{id:'ato',year:'2026'},{id:'gone',year:''},{id:'rh',year:''}]};
+ const data={sources:[src('ato','2026-10-01'),rh],links:[],people:[person('uncle')]};
+ const e=edgesFor(data,colorsFor(data)).filter(x=>x.b==='rh');
+ assert.deepEqual(e.map(x=>[x.a,x.kind,x.label]),[['uncle','via','introduced · 2024'],['ato','intro','also introduced · 2026']]);
+ assert.deepEqual(warmPath(edgesFor(data,colorsFor(data)).filter(x=>x.key!=='source-rh'),'rh').nodes,['you','ato','rh']);
+});
