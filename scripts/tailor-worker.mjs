@@ -21,6 +21,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { closeMongo, withMongo } from "./mongo-client.mjs";
+import { syncDefaultEmail } from "./resume-emails.mjs";
 import { computeFit } from "./fit-store.mjs";
 import {
   claimNextJob,
@@ -105,6 +106,8 @@ async function processOneJob(db) {
   }
 
   const jobDoc = await claimNextJob(db, WORKER_ID, LEASE_SEC, { minPriority: MIN_PRIORITY });
+  // Build with the email you chose for new resumes (this container's profile file is its own copy).
+  if (jobDoc) await syncDefaultEmail(db).catch(() => {});
   if (!jobDoc?.job_url) return false;
 
   const jobUrl = jobDoc.job_url;
