@@ -1,4 +1,4 @@
-import { NetworkError, savePositions, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
+import { NetworkError, savePositions, previewContacts, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
 import { boardView, readImage, removeBoardItem, saveBoardItem, saveImage } from "./network-board.mjs";
@@ -7,6 +7,7 @@ import { jobsForPerson, knownCompanies, warmJobs } from "./network-jobs.mjs";
 // /network/*: the Network page's API. The sidecar's own token check runs first; every call is one small Mongo operation.
 const WRITES = {
   "/network/preview": (db, b) => previewList(db, b.text).then((rows) => ({ rows })),
+  "/network/import/preview": (db, b) => previewContacts(db, b.text),
   "/network/people": (db, b) => addPeople(db, b),
   "/network/person": (db, b) => savePerson(db, b).then((person) => ({ person })),
   "/network/history": (db, b) => logHistory(db, b).then((person) => ({ person })),
@@ -60,7 +61,7 @@ export async function handleNetwork(req, res, url, opts = {}) {
   if (!read && !write) { send(404, { ok: false, error: "Not found" }); return true; }
   try {
     if (!opts.withDb) throw new NetworkError("MONGO_URI not configured");
-    const body = read ? null : await readBody(req, url.pathname === "/network/mail/send" || url.pathname === "/network/board/image" || url.pathname === "/network/photo" ? 8_000_000 : 300_000);
+    const body = read ? null : await readBody(req, url.pathname === "/network/mail/send" || url.pathname === "/network/board/image" || url.pathname === "/network/photo" || url.pathname === "/network/import/preview" ? 8_000_000 : url.pathname === "/network/people" ? 2_000_000 : 300_000);
     const data = await opts.withDb((db) => (read ? read(db, url.searchParams, opts) : write(db, body, opts)));
     send(200, { ok: true, ...data });
   } catch (e) {

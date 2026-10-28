@@ -9,6 +9,7 @@ import NetworkBell from "./NetworkBell";
 import NetworkWork from "./NetworkWork";
 import { BulkMail } from "./NetworkMail";
 import { PersonJobs, WarmJobs } from "./NetworkJobs";
+import NetworkImport from "./NetworkImport";
 import "./network.css";
 
 type View = { kind: "all" } | { kind: "source"; id: string | null } | { kind: "due" } | { kind: "never" } | { kind: "introduced" };
@@ -28,7 +29,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const [mode, setModeState] = useState<Mode>(() => { try { const m = localStorage.getItem("nw-mode"); return m === "list" || m === "jobs" ? m : "graph"; } catch { return "graph"; } });
   const setMode = (m: Mode) => { setModeState(m); try { localStorage.setItem("nw-mode", m); } catch { /* the choice just is not remembered */ } };
   const [selected, setSelected] = useState<string | null>(null);
-  const [dialog, setDialog] = useState<null | "list" | "person" | { source: Source | null }>(null);
+  const [dialog, setDialog] = useState<null | "list" | "person" | "import" | { source: Source | null }>(null);
   const [toast, setToast] = useState<Toast>(null);
   const [mailFor, setMailFor] = useState<{ id: string; job?: JobRow } | null>(null);
   const [bulkMail, setBulkMail] = useState<string[] | null>(null);
@@ -119,6 +120,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
             <label className="nw-search"><span className="sr">Search people</span><input id="nw-search" type="search" placeholder="Search name, company, city, email" value={query} onChange={(e) => setQuery(e.target.value)} /></label>
             <button type="button" className="nw-btn" onClick={() => setDialog({ source: null })}>New source</button>
             <button type="button" className="nw-btn" onClick={() => setDialog("person")}>Add person</button>
+            <button type="button" className="nw-btn" onClick={() => setDialog("import")}>Import</button>
             <button type="button" className="nw-btn main" onClick={() => setDialog("list")}>Add a list</button>
             {loaded && <NetworkBell data={data} board={board} colors={colors} onPerson={(id) => openPerson(id)} onWork={openWork} onSource={(id) => { openPerson(null); setView({ kind: "source", id }); }} say={say} />}
           </div>
@@ -206,6 +208,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
       </main>
 
       {dialog === "list" && <BulkAdd sources={data.sources} onClose={() => setDialog(null)} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
+      {dialog === "import" && <NetworkImport sources={data.sources} onClose={() => setDialog(null)} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
       {dialog === "person" && <AddPerson sources={data.sources} people={data.people} onClose={() => setDialog(null)} onDone={async (p) => { setDialog(null); await reload(); setSelected(p.id); say({ text: `${p.name} added.` }); }} />}
       {dialog && typeof dialog === "object" && <SourceEditor source={dialog.source} count={dialog.source ? counts.by.get(dialog.source.id) ?? 0 : 0} color={dialog.source ? colors.source.get(dialog.source.id) ?? PALETTE[0] : PALETTE[0]} onClose={() => setDialog(null)}
         onDone={async (msg, removed) => { setDialog(null); if (removed && view.kind === "source" && view.id === removed) setView({ kind: "all" }); await reload(); say({ text: msg }); }} />}

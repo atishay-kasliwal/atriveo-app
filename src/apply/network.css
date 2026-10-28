@@ -284,6 +284,19 @@ button.nw-linkname:hover{text-decoration:underline}
 .nwm-job{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:10px 20px;border-bottom:1px solid var(--nw-line);background:color-mix(in oklab,var(--nw-ok) 8%,var(--nw-card));font-size:13.5px}
 .nwm-job span{color:var(--nw-muted)}.nwm-job a{color:var(--nw-ink)!important;font-weight:600}.nwm-job small{font:400 12px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--nw-muted)}
 
+/* import */
+.nwi-how{display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:13px;color:var(--nw-muted)}
+.nwi-how b{color:var(--nw-ink)}.nwi-how ol{margin:6px 0 0;padding-left:18px;line-height:1.55}
+.nwi-drop{display:flex;align-items:center;justify-content:center;min-height:70px;border:1.5px dashed var(--nw-line-strong);border-radius:12px;padding:14px;text-align:center;cursor:pointer;font-size:13.5px;color:var(--nw-muted)}
+.nwi-drop:hover{border-color:var(--nw-accent);color:var(--nw-ink)}.nwi-drop b{color:var(--nw-ink)}
+.nwi-sum{margin:0;font-size:13.5px}
+.nwi-prev{max-height:min(280px,36vh);overflow:auto;border:1px solid var(--nw-line);border-radius:10px}
+.nwi-prev table{width:100%;border-collapse:collapse;font-size:12.5px}
+.nwi-prev th{position:sticky;top:0;background:var(--nw-soft);text-align:left;font-weight:600;padding:7px 10px}
+.nwi-prev td{padding:6px 10px;border-top:1px solid var(--nw-line);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nwi-prev tr.skip td{color:var(--nw-warn)}
+@media (max-width:760px){.nwi-how{grid-template-columns:1fr}}
+
 /* reminders */
 .nw-bell{position:relative;display:flex;align-items:center;gap:6px}
 .nw-bell-top{display:flex;align-items:center;gap:9px;max-width:300px;border:1px solid var(--nw-line-strong);background:var(--nw-card);border-radius:10px;padding:8px 12px;font-size:13px}

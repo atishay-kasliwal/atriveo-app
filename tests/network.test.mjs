@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {Readable} from 'node:stream';
-import {savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
+import {parseContacts,csvRows,previewContacts,savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
 import {handleNetwork} from '../scripts/network-routes.mjs';
 
 // An in-memory stand-in for the three collections, with just the calls the store makes. Every name here is invented.
@@ -110,3 +110,19 @@ test('photos and "works at": a photo must be uploaded first; replacing or removi
  await savePerson(db,{id:p.id,photoId:'img2'},T);assert.equal(await db.collection('network_images').findOne({_id:'img1'}),null,'old photo removed');
  await savePerson(db,{id:p.id,photoId:null},T);assert.equal(await db.collection('network_images').findOne({_id:'img2'}),null);
  assert.equal((await savePerson(db,{id:p.id,watchJobs:1},T)).watchJobs,true);});
+
+test('contacts files: LinkedIn connections (notes above the header) and Google exports, quotes and commas inside cells, duplicates',()=>{
+ const li='Notes:\n"When exporting your connection data, you may notice..."\n\nFirst Name,Last Name,URL,Email Address,Company,Position,Connected On\nDana,Whit,https://www.linkedin.com/in/dana-w,,"Northwind, Inc.",Senior Recruiter,12 Oct 2026\nBo,Kim,https://www.linkedin.com/in/bo,bo@example.test,Acme,"Engineer, ""Platform""",01 Jan 2026\nDana,Whit,https://www.linkedin.com/in/dana-w,,"Northwind, Inc.",Senior Recruiter,12 Oct 2026\n';
+ const a=parseContacts(li);assert.equal(a.format,'linkedin');
+ assert.deepEqual(a.rows.map(r=>[r.name,r.company,r.role,r.email,r.linkedin]),[['Dana Whit','Northwind, Inc.','Senior Recruiter','','https://www.linkedin.com/in/dana-w'],['Bo Kim','Acme','Engineer, "Platform"','bo@example.test','https://www.linkedin.com/in/bo']]);
+ const g='\uFEFFFirst Name,Middle Name,Last Name,E-mail 1 - Label,E-mail 1 - Value,Phone 1 - Value,Organization Name,Organization Title\r\nAnn,,Lee,* Home,ann@example.test,+1 555 0100,Expo Co,Organizer\r\n,,,,,,,\r\n';
+ const b=parseContacts(g);assert.equal(b.format,'google');assert.deepEqual(b.rows,[{name:'Ann Lee',email:'ann@example.test',phone:'+1 555 0100',company:'Expo Co',role:'Organizer',city:'',linkedin:''}]);
+ assert.deepEqual(csvRows('a,"b\nc",d'),[['a','b\nc','d']]);
+ assert.throws(()=>parseContacts('foo,bar\n1,2'),/no name column/);});
+
+test('importing contacts: details come along, people already here (by name or email) are skipped, a bad link is just left out',async()=>{
+ const db=fakeDb();await savePerson(db,{name:'Bo Kim',email:'bo@example.test'},T);
+ const prev=await previewContacts(db,'First Name,Last Name,Email Address,Company,Position,URL\nBo,K,bo@example.test,Acme,Engineer,\nAnn,Lee,ann@example.test,Expo Co,Organizer,javascript:alert(1)\n');
+ assert.deepEqual(prev.rows.map(r=>r.exists),[true,false],'same email counts as already here');
+ const r=await addPeople(db,{rows:prev.rows,newSource:{name:'LinkedIn connections',type:'other'}},T);
+ assert.deepEqual(r.skipped,['Bo K']);const ann=r.added[0];assert.deepEqual([ann.email,ann.company,ann.role,ann.linkedin],['ann@example.test','Expo Co','Organizer','']);});

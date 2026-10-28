@@ -80,18 +80,76 @@ async function sourceFor(db, { sourceId, newSource }, now) {
   return null;
 }
 
+/** Split CSV text into rows of cells: quoted cells may hold commas, quotes ("") and line breaks. */
+export function csvRows(text) {
+  const rows = [];
+  let row = [], cell = "", quoted = false;
+  const s = String(text ?? "").replace(/^\uFEFF/, "");
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (quoted) { if (c === '"') { if (s[i + 1] === '"') { cell += '"'; i++; } else quoted = false; } else cell += c; continue; }
+    if (c === '"') quoted = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && s[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+
+/**
+ * People from a contacts file: LinkedIn's Connections.csv (First Name, Last Name, URL, Email Address, Company, Position) or a Google
+ * Contacts export (First/Last Name or Name, E-mail 1 - Value, Phone 1 - Value, Organization Name / Organization 1 - Name and Title).
+ * LinkedIn puts a few lines of notes above its header; the header is found wherever it is.
+ */
+export function parseContacts(text) {
+  const rows = csvRows(text);
+  const at = rows.findIndex((r) => r.some((c) => /^(first name|given name|name)$/i.test(c.trim())));
+  if (at < 0) fail("That file has no name column. Use LinkedIn's Connections.csv or a Google Contacts export (CSV).");
+  const head = rows[at].map((c) => c.trim().toLowerCase());
+  const col = (...names) => { for (const n of names) { const i = head.indexOf(n); if (i >= 0) return i; } return -1; };
+  const format = head.includes("connected on") || head.includes("position") ? "linkedin" : "google";
+  const c = { first: col("first name", "given name"), last: col("last name", "family name"), name: col("name"), email: col("email address", "e-mail 1 - value", "email 1 - value", "e-mail address"),
+    phone: col("phone 1 - value", "phone"), company: col("company", "organization name", "organization 1 - name"), role: col("position", "organization title", "organization 1 - title"), url: col("url", "website 1 - value"), city: col("address 1 - city", "location") };
+  const get = (r, i) => (i >= 0 ? String(r[i] ?? "").trim() : "");
+  const out = [], seen = new Set();
+  for (const r of rows.slice(at + 1)) {
+    const name = str(get(r, c.name) || [get(r, c.first), get(r, c.last)].filter(Boolean).join(" "), 80);
+    if (!name || !/\p{L}/u.test(name)) continue;
+    const email = cleanEmail(get(r, c.email)) ?? "", key = `${name.toLowerCase()}|${email}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const url = get(r, c.url);
+    out.push({ name, email, phone: str(get(r, c.phone), 40), company: str(get(r, c.company), 80), role: str(get(r, c.role), 80), city: str(get(r, c.city), 80), linkedin: /linkedin\.com\//i.test(url) ? url : "" });
+    if (out.length >= 5000) break;
+  }
+  return { format, rows: out };
+}
+
+/** A contacts file, previewed: each row marked when the person is already in your network (same name or same email). */
+export async function previewContacts(db, text) {
+  const { format, rows } = parseContacts(text);
+  const people = (await all(db, PEOPLE)).filter((p) => !p.archived);
+  const names = new Set(people.map((p) => key(p.name))), emails = new Set(people.map((p) => p.email).filter(Boolean));
+  return { format, rows: rows.map((r) => ({ ...r, exists: names.has(r.name.toLowerCase()) || Boolean(r.email && emails.has(r.email)) })) };
+}
+
 /** Bulk add from a pasted list: new names become people in one source; names already in your network are skipped and reported. */
 export async function addPeople(db, { rows, sourceId, newSource } = {}, now = new Date()) {
   if (!Array.isArray(rows) || !rows.length) fail("Paste at least one name");
   if (rows.length > MAX_LIST) fail(`Add up to ${MAX_LIST} people at a time`);
   const src = await sourceFor(db, { sourceId, newSource }, now);
-  const have = new Set((await all(db, PEOPLE)).filter((p) => !p.archived).map((p) => key(p.name)));
+  const current = (await all(db, PEOPLE)).filter((p) => !p.archived);
+  const have = new Set(current.map((p) => key(p.name))), mails = new Set(current.map((p) => p.email).filter(Boolean));
   const docs = [], skipped = [];
   for (const r of rows) {
     const name = str(r?.name, 80); if (!name) continue;
-    if (have.has(name.toLowerCase())) { skipped.push(name); continue; }
-    have.add(name.toLowerCase());
-    docs.push(blank({ name, city: str(r?.city, 80), sourceId: src }, now));
+    const email = cleanEmail(r?.email) ?? "";
+    if (have.has(name.toLowerCase()) || (email && mails.has(email))) { skipped.push(name); continue; }
+    have.add(name.toLowerCase()); if (email) mails.add(email);
+    // A contacts file brings more than a name; anything that does not check out is simply left empty.
+    let linkedin = ""; try { linkedin = r?.linkedin ? link(r.linkedin) : ""; } catch { linkedin = ""; }
+    docs.push(blank({ name, city: str(r?.city, 80), sourceId: src, email, linkedin, company: str(r?.company, 80), role: str(r?.role, 80), phone: str(r?.phone, 40) }, now));
   }
   if (docs.length) await db.collection(PEOPLE).insertMany(docs);
   return { added: docs.map(out), skipped, sourceId: src };
