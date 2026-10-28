@@ -52,6 +52,10 @@ Subscriptions are capability credentials: restrict database/backups like other p
 
 The one-minute poller consumes existing `outreach.reply.at` records (recruiter replies), `inbox_events` interview/offer classifications, and the existing `widgetProgress`/`readGoal` application totals. It does not rescan Gmail or modify detection. Dismissed/undone/ignored mail is excluded. The engine's existing daily-goal value in Mongo is used, consistent with its phone summaries.
 
+Assessment reminders run at 9 AM New York on the day before a known deadline (catch-up until noon), and at 3 PM on the due date if still open and before its deadline (catch-up until 7 PM). Done, dismissed, expired and undated assessments do not alert. Each assessment/deadline/reminder stage has its own persistent delivery ID; changing a deadline allows a fresh reminder for the new date.
+
+The daily summary runs at 8 PM New York (catch-up until 11 PM), once per calendar day. It reports the existing applied count, first recruiter replies recorded on outreach messages that day, and interview-email updates. It includes zero-activity days. Schedule calculations use New York calendar dates, including daylight-saving changes. No new environment variables or migrations are needed.
+
 Replies open `/outreach?id=<id>` with the corresponding message panel. Interviews/offers open `/applied/<applicationId>` when linked, otherwise `/applied`. Daily goals open `/job-matching`.
 
 There is no existing follow-up reminder detector/schedule in the inspected engine, so no invented reminder schedule has been added. A future detector can call the same abstraction:
