@@ -25,9 +25,10 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
   if (body && body.length > 8192) return Response.json({ error: 'Payload too large' }, { status: 413 });
   try {
     const res = await fetch(new URL(`/push/${health ? 'config' : route}`, env.TAILOR_ORIGIN.trim()), {
-      method: request.method, redirect: 'error', signal: AbortSignal.timeout(20000), body,
+      method: request.method, redirect: 'manual', signal: AbortSignal.timeout(20000), body,
       headers: { 'Accept-Encoding': 'identity', 'Content-Type': 'application/json', 'X-Tailor-Token': env.TAILOR_TOKEN, 'X-Atriveo-Push-User': userId },
     });
+    if (res.status >= 300 && res.status < 400) return Response.json({ error: 'Push backend redirect refused' }, { status: 502, headers: { 'Cache-Control': 'no-store' } });
     // These endpoints return small JSON objects, not streams. Consume the
     // upstream response so transport encoding and headers cannot leak through.
     if (!res.headers.get('Content-Type')?.includes('application/json')) return Response.json({ error: `Push backend returned an unexpected response (HTTP ${res.status})` }, { status: 502, headers: { 'Cache-Control': 'no-store' } });
