@@ -4,7 +4,7 @@ import {build} from 'esbuild';
 // The Network colour rule and its wording helpers, bundled from the page's own module.
 const dir=fs.mkdtempSync(path.join(os.tmpdir(),'nwc-'));const out=path.join(dir,'network.mjs');
 await build({entryPoints:[path.resolve('src/apply/network.ts')],bundle:true,format:'esm',platform:'node',outfile:out,logLevel:'silent'});
-const {colorsFor,PALETTE,followUp,ago,plusDays,initials}=await import(out);
+const {colorsFor,PALETTE,followUp,ago,plusDays,initials,sourceLabel,edgesFor,autoLayout,warmPath}=await import(out);
 const src=(id,at,color=null)=>({id,name:id,type:'company',about:'',color,createdAt:at});
 const person=(id,f={})=>({id,name:id,sourceId:null,via:null,color:null,...f});
 
@@ -61,3 +61,14 @@ test('warm path: the fewest steps from you, through sources and people; none whe
  const w=workProgress({start:'2026-10-12',end:'2026-11-30'},'2026-10-28');assert.deepEqual([w.day,w.total,w.left,w.ending,w.late],[16,49,33,false,false]);
  assert.equal(workProgress({start:'2026-10-18',end:'2026-11-04'},'2026-10-28').ending,true);assert.equal(workProgress({start:'2026-10-01',end:'2026-10-20'},'2026-10-28').late,true);
  assert.equal(workProgress({start:'2026-10-01',end:'2026-10-20',done:true},'2026-10-28').late,false);});
+
+
+test('introduced source contexts have their own nodes, labels and paths without merging same-name sources',()=>{
+ const sources=[{...src('event','2026-01-01'),name:'Open Summit',type:'event'}, {...src('direct','2026-01-02'),name:'Northwind',type:'staffing',context:'Reached out last year'}, {...src('at-event','2026-01-03'),name:'Northwind',type:'staffing',parentSourceId:'event'}];
+ const data={sources,people:[],links:[]};const colors=colorsFor(data),edges=edgesFor(data,colors),positions=autoLayout(data);
+ assert.equal(sourceLabel(sources[1],sources),'Northwind · Reached out last year');assert.equal(sourceLabel(sources[2],sources),'Northwind · via Open Summit');
+ assert.deepEqual(warmPath(edges,'direct').nodes,['you','direct']);assert.deepEqual(warmPath(edges,'at-event').nodes,['you','event','at-event']);
+ assert.ok(edges.some(e=>e.a==='event'&&e.b==='at-event'&&e.kind==='intro'));
+ assert.notDeepEqual(positions.get('direct'),positions.get('at-event'));assert.notEqual(colors.source.get('direct'),colors.source.get('at-event'));
+ sources[2].x=123;sources[2].y=456;assert.deepEqual(autoLayout(data).get('at-event'),{x:123,y:456});
+});

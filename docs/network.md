@@ -7,7 +7,7 @@ The people around the job search: who they are, where they came from, what happe
 | Collection | What |
 |---|---|
 | `network_people` | A person: name, role, city, email, LinkedIn, phone, notes, `sourceId` (where they came from), `via` (who introduced them), colour, follow-up date, history, map position, archived |
-| `network_sources` | Where people come from: a company, an event, family, other. Unique by name |
+| `network_sources` | Where people come from: company, staffing agency, event, family or other; optional parentSourceId and context. Identity is name + parent + context |
 | `network_links` | Your own connections between two people (or a person and a source), one per pair |
 | `network_board` | The free layer on the map: text boxes, sticky notes, pen strokes, images, groups, work items |
 | `network_images` | Image and GIF bytes (PNG, JPEG, GIF, WebP, under 2.5 MB) |
@@ -17,6 +17,18 @@ The people around the job search: who they are, where they came from, what happe
 | `app_settings` `network_you`, `network_mail` | Where "You" sits on the map; the sender name, address, "about you" and signature |
 
 Nothing here is in the repository. Tests use invented people.
+
+## Canvas workspace
+
+The map fills the viewport below navigation. Compact floating controls open layers/filters, search, add/import actions, people and jobs views. Details and views overlay the map without resizing it. Board tools, pan, zoom and saved positions use the existing graph implementation. Layer visibility and source stacks are presentation controls; they never delete or rewrite people. Expand a stack by click or Enter; Collapse stacks restores the overview.
+
+Add Person asks for Company / employer independently of its source (for example, Family). That employer drives the existing jobs/application matching. Staffing sources also act as employer fallbacks, like company sources.
+
+## Separate source contexts
+
+Two records can both be named Randstad: one direct connection, another introduced through All Things Open. Create the second with **Introduced through another source → All Things Open**. Add **Context / when you met** for labels such as “Reached out last year.” Parent/context fields are available in source editing and inline source creation while adding/importing people. Pickers show the context and parent so the records are distinguishable.
+
+The graph connects the child source to its parent with an introduction line. Each record keeps its own ID, colour and people; company matching still uses the original employer name, so jobs aren't duplicated just because two contexts name the same company. Existing sources remain direct roots. No migration is needed. Self-parenting and cycles are rejected; deleting a parent preserves its child sources and their people.
 
 ## Colour rule
 
@@ -49,5 +61,7 @@ On the phone, at 9 a.m. New York daily and a weekly digest on Sunday from 6 p.m.
 Website and the dashboard sidecar (`npm run ship`, answer `y` at the Oracle prompt). No migration: collections are created on first write.
 
 ## Tests
+
+`npm run test:network:browser` checks desktop/mobile viewport geometry, floating panels, visibility, source stacks, company input, source context creation, pan/zoom and board tools against a local fake API.
 
 `node --test tests/network.test.mjs tests/network-colors.test.mjs tests/network-mail.test.mjs tests/network-reminders.test.mjs tests/network-board.test.mjs`

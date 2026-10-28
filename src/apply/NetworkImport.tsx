@@ -1,5 +1,6 @@
+import NetworkSourceContext from "./NetworkSourceContext";
 import { useEffect, useState } from "react";
-import { post, SOURCE_TYPES, type Source, type SourceType } from "./network";
+import { post, sourceLabel, SOURCE_TYPES, type Source, type SourceType } from "./network";
 
 interface Row { name: string; email: string; phone: string; company: string; role: string; city: string; linkedin: string; exists: boolean }
 
@@ -13,6 +14,7 @@ export default function NetworkImport({ sources, onClose, onDone }: { sources: S
   const [file, setFile] = useState("");
   const [source, setSource] = useState("__new");
   const [newName, setNewName] = useState("");
+  const [newParent, setNewParent] = useState(""); const [newContext, setNewContext] = useState("");
   const [newType, setNewType] = useState<SourceType>("other");
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
@@ -34,7 +36,7 @@ export default function NetworkImport({ sources, onClose, onDone }: { sources: S
       for (let i = 0; i < fresh.length; i += 500) {
         setBusy(`Adding ${Math.min(i + 500, fresh.length)} of ${fresh.length}…`);
         const part = fresh.slice(i, i + 500).map((r) => ({ name: r.name, email: r.email, phone: r.phone, company: r.company, role: r.role, city: r.city, linkedin: r.linkedin }));
-        const r = await post<{ added: unknown[]; skipped: string[]; sourceId: string | null }>("people", { rows: part, ...(sourceId ? { sourceId } : source === "__new" ? { newSource: { name: newName, type: newType } } : {}) });
+        const r = await post<{ added: unknown[]; skipped: string[]; sourceId: string | null }>("people", { rows: part, ...(sourceId ? { sourceId } : source === "__new" ? { newSource: { name: newName, type: newType, parentSourceId: newParent || null, context: newContext } } : {}) });
         added += r.added.length; skipped += r.skipped.length; sourceId = r.sourceId ?? sourceId;
       }
       onDone(`Imported ${added} ${added === 1 ? "person" : "people"}${skipped ? `, skipped ${skipped} already here` : ""}.`, sourceId);
@@ -58,9 +60,9 @@ export default function NetworkImport({ sources, onClose, onDone }: { sources: S
             {rows.slice(0, 200).map((r, i) => <tr key={i} className={r.exists ? "skip" : ""}><td>{r.name}</td><td>{r.company}</td><td>{r.role}</td><td>{r.exists ? "already here" : r.email}</td></tr>)}
           </tbody></table>{rows.length > 200 && <p className="nw-muted">And {rows.length - 200} more.</p>}</div>
           <div className="nw-pick">
-            <label className="nw-f"><span>Put them in</span><select id="nwi-source" value={source} onChange={(e) => setSource(e.target.value)}><option value="__new">A new source…</option><option value="">No source</option>{sources.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
+            <label className="nw-f"><span>Put them in</span><select id="nwi-source" value={source} onChange={(e) => setSource(e.target.value)}><option value="__new">A new source…</option><option value="">No source</option>{sources.map((s) => <option key={s.id} value={s.id}>{sourceLabel(s, sources)}</option>)}</select></label>
             {source === "__new" && <><label className="nw-f"><span>Source name</span><input id="nwi-new-name" value={newName} onChange={(e) => setNewName(e.target.value)} /></label>
-              <label className="nw-f"><span>Kind</span><select id="nwi-new-type" value={newType} onChange={(e) => setNewType(e.target.value as SourceType)}>{SOURCE_TYPES.map(([t, l]) => <option key={t} value={t}>{l}</option>)}</select></label></>}
+              <label className="nw-f"><span>Kind</span><select id="nwi-new-type" value={newType} onChange={(e) => setNewType(e.target.value as SourceType)}>{SOURCE_TYPES.map(([t, l]) => <option key={t} value={t}>{l}</option>)}</select></label><NetworkSourceContext sources={sources} parentSourceId={newParent} onParent={setNewParent} context={newContext} onContext={setNewContext} prefix="nwi-new" /></>}
           </div>
           <p className="nw-muted">Each person keeps their own company as "Works at", so the Jobs tab and job cards find them.</p>
         </>}

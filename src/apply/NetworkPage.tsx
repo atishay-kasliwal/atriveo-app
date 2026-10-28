@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
-  HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, plusDays, post, uploadPhoto,
+  sourceLabel, HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, plusDays, post, uploadPhoto,
   type BoardItem, type HistoryType, type JobRow, companyOfPerson, loadPersonJobs, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
 } from "./network";
 import NetworkGraph from "./NetworkGraph";
+import NetworkSourceContext from "./NetworkSourceContext";
+import { CanvasButton, CanvasIcon, CanvasMenuAction } from "./NetworkCanvasControls";
+import { DEFAULT_CANVAS_LAYERS, type CanvasLayers } from "./network";
 import NetworkMail from "./NetworkMail";
 import NetworkBell from "./NetworkBell";
 import NetworkWork from "./NetworkWork";
@@ -28,6 +31,17 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   type Mode = "graph" | "list" | "jobs";
   const [mode, setModeState] = useState<Mode>(() => { try { const m = localStorage.getItem("nw-mode"); return m === "list" || m === "jobs" ? m : "graph"; } catch { return "graph"; } });
   const setMode = (m: Mode) => { setModeState(m); try { localStorage.setItem("nw-mode", m); } catch { /* the choice just is not remembered */ } };
+  const [drawer, setDrawer] = useState<null | "layers" | "search" | "add">(null);
+  const [layers, setLayers] = useState<CanvasLayers>({ ...DEFAULT_CANVAS_LAYERS });
+  const [stackPeople, setStackPeople] = useState(false);
+  const toggleDrawer = (next: "layers" | "search" | "add") => setDrawer((current) => current === next ? null : next);
+  useEffect(() => {
+    if (!drawer) return;
+    const away = (e: PointerEvent) => { if (!(e.target as Element).closest('[data-canvas-controls]')) setDrawer(null); };
+    const escape = (e: KeyboardEvent) => { if (e.key === 'Escape') setDrawer(null); };
+    document.addEventListener('pointerdown', away); window.addEventListener('keydown', escape);
+    return () => { document.removeEventListener('pointerdown', away); window.removeEventListener('keydown', escape); };
+  }, [drawer]);
   const [selected, setSelected] = useState<string | null>(null);
   const [dialog, setDialog] = useState<null | "list" | "person" | "import" | { source: Source | null }>(null);
   const [toast, setToast] = useState<Toast>(null);
@@ -92,7 +106,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
       if (view.kind === "introduced" && !p.via) return false;
       if (!q) return true;
       const src = p.sourceId ? sourceById.get(p.sourceId)?.name ?? "" : "";
-      return [p.name, p.role, p.city, p.email, src, ...p.tags].some((v) => v.toLowerCase().includes(q));
+      return [p.name, p.role, p.company, p.city, p.email, src, ...p.tags].some((v) => v.toLowerCase().includes(q));
     };
     const list = data.people.filter(match);
     if (sort === "recent") list.sort((a, b) => (b.lastContact ?? "").localeCompare(a.lastContact ?? "") || a.name.localeCompare(b.name));
@@ -106,7 +120,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const openPerson = (id: string | null) => { setWork(null); setSelected(id); };
   const openWork = (id: string) => { setSelected(null); setWork(id); };
   const replacePerson = (p: Person) => setData((d) => ({ ...d, people: d.people.map((x) => (x.id === p.id ? p : x)) }));
-  const viewName = view.kind === "source" ? (view.id ? sourceById.get(view.id)?.name ?? "Source" : "No source") : view.kind === "due" ? "Follow-up due" : view.kind === "never" ? "Never contacted" : view.kind === "introduced" ? "Introduced by someone" : "Everyone";
+  const viewName = view.kind === "source" ? (view.id ? (sourceById.has(view.id) ? sourceLabel(sourceById.get(view.id)!, data.sources) : "Source") : "No source") : view.kind === "due" ? "Follow-up due" : view.kind === "never" ? "Never contacted" : view.kind === "introduced" ? "Introduced by someone" : "Everyone";
 
   async function archive(p: Person) {
     try {
@@ -120,24 +134,39 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
     <div className="rv-page nw-page">
       {header}
       <main className="nw-main">
-        <div className="nw-top">
-          <div className="nw-title">
-            <h1>Network</h1>
-            <p>{loaded ? <><b>{counts.all}</b> {counts.all === 1 ? "person" : "people"} · <b>{data.sources.length}</b> {data.sources.length === 1 ? "source" : "sources"} · <b className={counts.due ? "due" : ""}>{counts.due}</b> to follow up</> : "Loading your network…"}</p>
+        <div className="nw-top" data-canvas-controls>
+          <div className="nw-canvas-island nw-canvas-left" role="toolbar" aria-label="Network controls">
+            <h1 className="nw-canvas-title" title={`${counts.all} people · ${data.sources.length} sources`}>Network<span>{counts.all}</span></h1>
+            <CanvasButton label="Show layers and filters" icon="layers" expanded={drawer === 'layers'} controls="nw-canvas-layers" onClick={() => toggleDrawer('layers')} />
+            <CanvasButton label="Search network" icon="search" expanded={drawer === 'search'} controls="nw-canvas-search" onClick={() => toggleDrawer('search')} />
+            <CanvasButton label="Add to network" icon="add" expanded={drawer === 'add'} controls="nw-canvas-add" onClick={() => toggleDrawer('add')} />
           </div>
-          <div className="nw-actions">
-            <label className="nw-search"><span className="sr">Search people</span><input id="nw-search" type="search" placeholder="Search name, company, city, email" value={query} onChange={(e) => setQuery(e.target.value)} /></label>
-            <button type="button" className="nw-btn" onClick={() => setDialog({ source: null })}>New source</button>
-            <button type="button" className="nw-btn" onClick={() => setDialog("person")}>Add person</button>
-            <button type="button" className="nw-btn" onClick={() => setDialog("import")}>Import</button>
-            <button type="button" className="nw-btn main" onClick={() => setDialog("list")}>Add a list</button>
-            {loaded && <NetworkBell data={data} board={board} colors={colors} onPerson={(id) => openPerson(id)} onWork={openWork} onSource={(id) => { openPerson(null); setView({ kind: "source", id }); }} say={say} />}
+          <div className="nw-canvas-island nw-canvas-right" role="toolbar" aria-label="Network views">
+            <CanvasButton label="Map view" icon="map" active={mode === 'graph'} onClick={() => setMode('graph')} />
+            <CanvasButton label="People list" icon="list" active={mode === 'list'} onClick={() => setMode(mode === 'list' ? 'graph' : 'list')} />
+            <CanvasButton label="Jobs view" icon="jobs" active={mode === 'jobs'} onClick={() => setMode(mode === 'jobs' ? 'graph' : 'jobs')} />
+            {loaded && <NetworkBell data={data} board={board} colors={colors} onPerson={openPerson} onWork={openWork} onSource={(id) => { openPerson(null); setView({ kind: 'source', id }); }} say={say} />}
           </div>
         </div>
+        {drawer === 'search' && <div id="nw-canvas-search" className="nw-canvas-popover nw-canvas-search" data-canvas-controls>
+          <CanvasIcon name="search" /><label className="nw-search"><span className="sr">Search people</span><input id="nw-search" autoFocus type="search" placeholder="Name, company, city…" value={query} onChange={(e) => setQuery(e.target.value)} /></label>
+          {query && <button type="button" className="nw-x" aria-label="Clear search" onClick={() => setQuery('')}>×</button>}
+        </div>}
+        {drawer === 'add' && <div id="nw-canvas-add" className="nw-canvas-popover nw-canvas-add" role="group" aria-label="Add to network" data-canvas-controls>
+          <CanvasMenuAction icon="person" onClick={() => { setDialog('person'); setDrawer(null); }}>Add person</CanvasMenuAction>
+          <CanvasMenuAction icon="source" onClick={() => { setDialog({ source: null }); setDrawer(null); }}>New source</CanvasMenuAction>
+          <CanvasMenuAction icon="list" onClick={() => { setDialog('list'); setDrawer(null); }}>Add a list</CanvasMenuAction>
+          <CanvasMenuAction icon="import" onClick={() => { setDialog('import'); setDrawer(null); }}>Import contacts</CanvasMenuAction>
+        </div>}
         {error && <p className="nw-error" role="alert">{error} <button type="button" onClick={() => void reload()}>Try again</button></p>}
         <div className={`nw-body${person || workItem ? " has-panel" : ""}`}>
-          <nav className="nw-rail" aria-label="Show">
-            <h2>Show</h2>
+          {drawer === 'layers' && <nav id="nw-canvas-layers" className="nw-rail nw-canvas-popover" aria-label="Show layers and filters" data-canvas-controls>
+            <div className="nw-canvas-panel-head"><b>Show on canvas</b><button type="button" className="nw-x" aria-label="Close layers" onClick={() => setDrawer(null)}>×</button></div>
+            <div className="nw-canvas-layers">
+              {([['people', 'People'], ['sources', 'Sources & companies'], ['connections', 'Connection lines'], ['board', 'Notes, images & drawings'], ['work', 'Work cards']] as const).map(([key, label]) => <label key={key}><input type="checkbox" checked={layers[key]} onChange={(e) => setLayers((old) => ({ ...old, [key]: e.target.checked }))} /><span>{label}</span></label>)}
+              <label className="nw-canvas-stack-toggle"><input type="checkbox" checked={stackPeople} onChange={(e) => setStackPeople(e.target.checked)} /><CanvasIcon name="stack" /><span>Stack people by source</span></label>
+            </div>
+            <h2>Filter people</h2>
             <RailItem on={view.kind === "all"} color="var(--nw-muted)" label="Everyone" n={counts.all} onClick={() => setView({ kind: "all" })} />
             <RailItem on={view.kind === "due"} color="var(--nw-warn)" label="Follow-up due" n={counts.due} onClick={() => setView({ kind: "due" })} />
             <RailItem on={view.kind === "never"} color="var(--nw-muted)" label="Never contacted" n={counts.never} onClick={() => setView({ kind: "never" })} />
@@ -146,45 +175,29 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
             <div className="nw-rail-scroll">
               {data.sources.map((s) => (
                 <div key={s.id} className="nw-rail-row">
-                  <RailItem on={view.kind === "source" && view.id === s.id} color={colors.source.get(s.id) ?? ""} label={s.name} n={counts.by.get(s.id) ?? 0} onClick={() => setView({ kind: "source", id: s.id })} />
-                  <button type="button" className="nw-edit" aria-label={`Edit ${s.name}`} title="Edit" onClick={() => setDialog({ source: s })}>⋯</button>
+                  <RailItem on={view.kind === "source" && view.id === s.id} color={colors.source.get(s.id) ?? ""} label={sourceLabel(s, data.sources)} n={counts.by.get(s.id) ?? 0} onClick={() => setView({ kind: "source", id: s.id })} />
+                  <button type="button" className="nw-edit" aria-label={`Edit ${sourceLabel(s, data.sources)}`} title="Edit" onClick={() => setDialog({ source: s })}>⋯</button>
                 </div>
               ))}
               {(counts.by.get(null) ?? 0) > 0 && <RailItem on={view.kind === "source" && view.id === null} color="var(--nw-line-strong)" label="No source" n={counts.by.get(null) ?? 0} onClick={() => setView({ kind: "source", id: null })} />}
               {loaded && !data.sources.length && <p className="nw-hint">A source is where people come from: a company, an event, family. Make one, or add a list.</p>}
             </div>
-          </nav>
+          </nav>}
 
-          <section className="nw-list" aria-label={viewName}>
-            <div className="nw-list-head">
-              <h2>{viewName} <span>{shown.length}</span></h2>
-              <div className="nw-head-r">
-                {mode === "list" && <label className="nw-sort">Sort <select id="nw-sort" value={sort} onChange={(e) => setSort(e.target.value)}>{SORTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>}
-                <div className="nw-mode" role="group" aria-label="Show as">
-                  <button type="button" aria-pressed={mode === "graph"} onClick={() => setMode("graph")}>Map</button>
-                  <button type="button" aria-pressed={mode === "list"} onClick={() => setMode("list")}>List</button>
-                  <button type="button" aria-pressed={mode === "jobs"} onClick={() => setMode("jobs")}>Jobs</button>
-                </div>
-              </div>
-            </div>
-            {loaded && mode === "jobs" ? (
-              <WarmJobs colors={colors.person} onPerson={(id) => openPerson(id)} onReferral={(id, job) => setMailFor({ id, job })}
-                onWatch={(id, on) => { void post<{ person: Person }>("person", { id, watchJobs: on }).then((r) => replacePerson(r.person)).catch((e: Error) => say({ text: e.message })); }} />
-            ) : loaded && data.people.length > 0 && mode === "graph" ? (
-              <NetworkGraph data={data} colors={colors} visible={visible} selected={selected} selectedWork={work} board={board} setBoard={setBoard}
+          <section className="nw-list nw-canvas" aria-label="Network canvas">
+            {loaded ? <NetworkGraph data={data} layers={layers} stackPeople={stackPeople} onRevealLayer={(key) => setLayers((old) => ({ ...old, [key]: true }))} colors={colors} visible={visible} selected={selected} selectedWork={work} board={board} setBoard={setBoard}
                 onPerson={(id) => openPerson(id === selected ? null : id)} onWork={openWork}
                 onSource={(id) => { openPerson(null); setView(view.kind === "source" && view.id === id ? { kind: "all" } : { kind: "source", id }); }}
                 onLinks={(links) => setData((d) => ({ ...d, links }))} onPeople={(list) => setData((d) => ({ ...d, people: d.people.map((p) => list.find((x) => x.id === p.id) ?? p) }))}
-                onBulkMail={setBulkMail} say={say} />
-            ) : loaded && !data.people.length ? (
-              <div className="nw-empty">
-                <h3>Start with the people you already talk to</h3>
-                <p>Paste a list of names from LinkedIn, pick where they come from, and each one becomes a person you can keep notes on and follow up with.</p>
-                <button type="button" className="nw-btn main" onClick={() => setDialog("list")}>Add a list</button>
-              </div>
-            ) : loaded && !shown.length ? (
-              <p className="nw-none">Nobody here{query ? ` matches "${query}"` : ""}.</p>
-            ) : (
+                onBulkMail={setBulkMail} say={say} /> : <p className="nw-canvas-loading" role="status">Loading your network…</p>}
+            {loaded && !data.people.length && mode === 'graph' && <div className="nw-canvas-welcome"><h2>Your network starts here</h2><p>Add a person, drop a note, or import your contacts.</p><button type="button" className="nw-btn" onClick={() => setDialog('person')}>Add your first person</button></div>}
+          </section>
+          {mode !== 'graph' && <section className="nw-view-surface" aria-label={mode === 'list' ? 'People list' : 'Jobs where you know someone'}>
+            <div className="nw-list-head"><h2>{mode === 'list' ? viewName : 'Jobs'} <span>{mode === 'list' ? shown.length : ''}</span></h2><div className="nw-head-r">
+              {mode === 'list' && <label className="nw-sort">Sort <select id="nw-sort" value={sort} onChange={(e) => setSort(e.target.value)}>{SORTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>}
+              <button type="button" className="nw-x" aria-label="Close view" onClick={() => setMode('graph')}>×</button>
+            </div></div>
+            {mode === 'jobs' ? <WarmJobs colors={colors.person} onPerson={openPerson} onReferral={(id, job) => setMailFor({ id, job })} onWatch={(id, on) => { void post<{ person: Person }>('person', { id, watchJobs: on }).then((r) => replacePerson(r.person)).catch((e: Error) => say({ text: e.message })); }} /> : !shown.length ? <p className="nw-none">{loaded ? 'No people match this view.' : 'Loading people…'}</p> : (
               <ul className="nw-rows">
                 {shown.map((p) => {
                   const f = followUp(p.nextFollowUp), src = p.sourceId ? sourceById.get(p.sourceId) : null, via = p.via ? personById.get(p.via) : null;
@@ -193,7 +206,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
                       <button type="button" className={`nw-row${p.id === selected ? " on" : ""}`} onClick={() => openPerson(p.id === selected ? null : p.id)} aria-pressed={p.id === selected}>
                         <Avatar name={p.name} photo={p.photoId} color={colors.person.get(p.id) ?? ""} source={via && src ? colors.source.get(src.id) : undefined} />
                         <span className="who"><b>{p.name}</b><small>{p.role || (via ? `Introduced by ${via.name}` : "\u00a0")}</small></span>
-                        <span className="src">{src ? <><i style={{ background: colors.source.get(src.id) }} />{src.name}</> : <em>No source</em>}</span>
+                        <span className="src">{src ? <><i style={{ background: colors.source.get(src.id) }} />{sourceLabel(src, data.sources)}</> : <em>No source</em>}</span>
                         <span className="city">{p.city}</span>
                         <span className="last">{ago(p.lastContact)}</span>
                         <span className={`fu${f?.due ? " due" : ""}`}>{f ? f.text : ""}</span>
@@ -203,7 +216,8 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
                 })}
               </ul>
             )}
-          </section>
+          </section>}
+
 
           {workItem && <NetworkWork key={workItem.id} item={workItem} data={data} colors={colors} onClose={() => setWork(null)} onOpen={openPerson} say={say}
             onChange={(it) => setBoard((b) => b.map((x) => (x.id === it.id ? it : x)))} onRemove={(id) => { setBoard((b) => b.filter((x) => x.id !== id)); setWork(null); }}
@@ -219,7 +233,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
       {dialog === "list" && <BulkAdd sources={data.sources} onClose={() => setDialog(null)} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
       {dialog === "import" && <NetworkImport sources={data.sources} onClose={() => setDialog(null)} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
       {dialog === "person" && <AddPerson sources={data.sources} people={data.people} onClose={() => setDialog(null)} onDone={async (p) => { setDialog(null); await reload(); setSelected(p.id); say({ text: `${p.name} added.` }); }} />}
-      {dialog && typeof dialog === "object" && <SourceEditor source={dialog.source} count={dialog.source ? counts.by.get(dialog.source.id) ?? 0 : 0} color={dialog.source ? colors.source.get(dialog.source.id) ?? PALETTE[0] : PALETTE[0]} onClose={() => setDialog(null)}
+      {dialog && typeof dialog === "object" && <SourceEditor source={dialog.source} sources={data.sources} count={dialog.source ? counts.by.get(dialog.source.id) ?? 0 : 0} color={dialog.source ? colors.source.get(dialog.source.id) ?? PALETTE[0] : PALETTE[0]} onClose={() => setDialog(null)}
         onDone={async (msg, removed) => { setDialog(null); if (removed && view.kind === "source" && view.id === removed) setView({ kind: "all" }); await reload(); say({ text: msg }); }} />}
       {bulkMail && <BulkMail people={bulkMail.map((id) => personById.get(id)).filter((p): p is Person => Boolean(p))} onClose={() => setBulkMail(null)} onSent={replacePerson} say={say} />}
       {mailFor && personById.get(mailFor.id) && <NetworkMail key={`${mailFor.id}|${mailFor.job?.url ?? ""}`} person={personById.get(mailFor.id)!} job={mailFor.job} color={colors.person.get(mailFor.id) ?? ""} onClose={() => setMailFor(null)} onSent={replacePerson} say={say} />}
@@ -314,7 +328,7 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
         <div className="nw-pair">
           <label className="nw-f"><span>Belongs to</span>
             <select id="nw-source" value={p.sourceId ?? ""} onChange={(e) => void save({ sourceId: e.target.value || null })}>
-              <option value="">No source</option>{data.sources.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              <option value="">No source</option>{data.sources.map((s) => <option key={s.id} value={s.id}>{sourceLabel(s, data.sources)}</option>)}
             </select></label>
           <label className="nw-f"><span>Introduced by</span>
             <select id="nw-via" value={p.via ?? ""} onChange={(e) => void save({ via: e.target.value || null })}>
@@ -393,16 +407,17 @@ function Dialog({ title, sub, onClose, children, wide }: { title: string; sub?: 
   );
 }
 
-function SourcePicker({ sources, value, onChange, newName, setNewName, newType, setNewType }: { sources: Source[]; value: string; onChange: (v: string) => void; newName: string; setNewName: (v: string) => void; newType: SourceType; setNewType: (v: SourceType) => void }) {
+function SourcePicker({ sources, value, onChange, newName, setNewName, newType, setNewType, newParent, setNewParent, newContext, setNewContext }: { sources: Source[]; value: string; onChange: (v: string) => void; newName: string; setNewName: (v: string) => void; newType: SourceType; setNewType: (v: SourceType) => void; newParent: string; setNewParent: (value: string) => void; newContext: string; setNewContext: (value: string) => void }) {
   return (
     <div className="nw-pick">
       <label className="nw-f"><span>They belong to</span>
         <select id="nw-pick-source" value={value} onChange={(e) => onChange(e.target.value)}>
-          <option value="__new">A new source…</option><option value="">No source</option>{sources.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          <option value="__new">A new source…</option><option value="">No source</option>{sources.map((s) => <option key={s.id} value={s.id}>{sourceLabel(s, sources)}</option>)}
         </select></label>
       {value === "__new" && <>
         <label className="nw-f"><span>Source name</span><input id="nw-new-source" placeholder="Randstad, All Things Open, Family…" value={newName} onChange={(e) => setNewName(e.target.value)} /></label>
         <label className="nw-f"><span>Kind</span><select id="nw-new-type" value={newType} onChange={(e) => setNewType(e.target.value as SourceType)}>{SOURCE_TYPES.map(([t, l]) => <option key={t} value={t}>{l}</option>)}</select></label>
+        <NetworkSourceContext sources={sources} parentSourceId={newParent} onParent={setNewParent} context={newContext} onContext={setNewContext} prefix="nw-new" />
       </>}
     </div>
   );
@@ -414,6 +429,7 @@ function BulkAdd({ sources, onClose, onDone }: { sources: Source[]; onClose: () 
   const [checking, setChecking] = useState(false);
   const [source, setSource] = useState(sources.length ? sources[0].id : "__new");
   const [newName, setNewName] = useState("");
+  const [newParent, setNewParent] = useState(""); const [newContext, setNewContext] = useState("");
   const [newType, setNewType] = useState<SourceType>("company");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -429,7 +445,7 @@ function BulkAdd({ sources, onClose, onDone }: { sources: Source[]; onClose: () 
   async function add() {
     setBusy(true); setError("");
     try {
-      const r = await post<{ added: Person[]; skipped: string[]; sourceId: string | null }>("people", { rows: fresh.map(({ name, city }) => ({ name, city })), ...(source === "__new" ? { newSource: { name: newName, type: newType } } : { sourceId: source || null }) });
+      const r = await post<{ added: Person[]; skipped: string[]; sourceId: string | null }>("people", { rows: fresh.map(({ name, city }) => ({ name, city })), ...(source === "__new" ? { newSource: { name: newName, type: newType, parentSourceId: newParent || null, context: newContext } } : { sourceId: source || null }) });
       const where = source === "__new" ? newName.trim() : sources.find((s) => s.id === source)?.name;
       onDone(`Added ${r.added.length} ${r.added.length === 1 ? "person" : "people"}${where ? ` to ${where}` : ""}.${r.skipped.length ? ` Skipped ${r.skipped.length} already here.` : ""}`, r.sourceId);
     } catch (e) { setError(String((e as Error).message)); setBusy(false); }
@@ -444,7 +460,7 @@ function BulkAdd({ sources, onClose, onDone }: { sources: Source[]; onClose: () 
           ))}
         </div>
       </div>
-      <SourcePicker sources={sources} value={source} onChange={setSource} newName={newName} setNewName={setNewName} newType={newType} setNewType={setNewType} />
+      <SourcePicker sources={sources} value={source} onChange={setSource} newName={newName} setNewName={setNewName} newType={newType} setNewType={setNewType} newParent={newParent} setNewParent={setNewParent} newContext={newContext} setNewContext={setNewContext} />
       {error && <p className="nw-error" role="alert">{error}</p>}
       <div className="nw-df"><button type="button" className="nw-btn" onClick={onClose}>Cancel</button><button type="button" className="nw-btn main" disabled={!ready} onClick={() => void add()}>{busy ? "Adding…" : fresh.length ? `Add ${fresh.length} ${fresh.length === 1 ? "person" : "people"}` : "Add"}</button></div>
     </Dialog>
@@ -452,17 +468,18 @@ function BulkAdd({ sources, onClose, onDone }: { sources: Source[]; onClose: () 
 }
 
 function AddPerson({ sources, people, onClose, onDone }: { sources: Source[]; people: Person[]; onClose: () => void; onDone: (p: Person) => void }) {
-  const [name, setName] = useState(""); const [role, setRole] = useState(""); const [email, setEmail] = useState("");
+  const [name, setName] = useState(""); const [role, setRole] = useState(""); const [email, setEmail] = useState(""); const [company, setCompany] = useState("");
   const [source, setSource] = useState(sources.length ? sources[0].id : "");
-  const [newName, setNewName] = useState(""); const [newType, setNewType] = useState<SourceType>("company");
+  const [newName, setNewName] = useState("");
+  const [newParent, setNewParent] = useState(""); const [newContext, setNewContext] = useState(""); const [newType, setNewType] = useState<SourceType>("company");
   const [via, setVia] = useState("");
   const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
   async function add() {
     setBusy(true); setError("");
     try {
       let sourceId: string | null = source || null;
-      if (source === "__new") sourceId = (await post<{ source: Source }>("source", { name: newName, type: newType })).source.id;
-      const r = await post<{ person: Person }>("person", { name, role, email, sourceId, via: via || null });
+      if (source === "__new") sourceId = (await post<{ source: Source }>("source", { name: newName, type: newType, parentSourceId: newParent || null, context: newContext })).source.id;
+      const r = await post<{ person: Person }>("person", { name, role, email, company, sourceId, via: via || null });
       onDone(r.person);
     } catch (e) { setError(String((e as Error).message)); setBusy(false); }
   }
@@ -471,8 +488,10 @@ function AddPerson({ sources, people, onClose, onDone }: { sources: Source[]; pe
       <div className="nw-form">
         <label className="nw-f"><span>Name</span><input id="nw-add-name" autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="First and last name" /></label>
         <label className="nw-f"><span>Role</span><input id="nw-add-role" value={role} onChange={(e) => setRole(e.target.value)} placeholder="Senior recruiter" /></label>
+        <label className="nw-f"><span>Company / employer</span><input id="nw-add-company" list="nw-company-options" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Where they currently work" /><small>Used to match jobs and applications. Separate from how you know them.</small></label>
+        <datalist id="nw-company-options">{[...new Set([...people.map((p) => p.company), ...sources.filter((s) => s.type === 'company' || s.type === 'staffing').map((s) => s.name)].filter(Boolean))].map((name) => <option key={name} value={name} />)}</datalist>
         <label className="nw-f"><span>Email</span><input id="nw-add-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Optional" /></label>
-        <SourcePicker sources={sources} value={source} onChange={setSource} newName={newName} setNewName={setNewName} newType={newType} setNewType={setNewType} />
+        <SourcePicker sources={sources} value={source} onChange={setSource} newName={newName} setNewName={setNewName} newType={newType} setNewType={setNewType} newParent={newParent} setNewParent={setNewParent} newContext={newContext} setNewContext={setNewContext} />
         <label className="nw-f"><span>Introduced by</span><select id="nw-add-via" value={via} onChange={(e) => setVia(e.target.value)}><option value="">Nobody (a first connection)</option>{people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
       </div>
       {error && <p className="nw-error" role="alert">{error}</p>}
@@ -481,13 +500,15 @@ function AddPerson({ sources, people, onClose, onDone }: { sources: Source[]; pe
   );
 }
 
-function SourceEditor({ source, count, color, onClose, onDone }: { source: Source | null; count: number; color: string; onClose: () => void; onDone: (msg: string, removed?: string) => void }) {
+function SourceEditor({ source, sources, count, color, onClose, onDone }: { source: Source | null; sources: Source[]; count: number; color: string; onClose: () => void; onDone: (msg: string, removed?: string) => void }) {
   const [name, setName] = useState(source?.name ?? ""); const [type, setType] = useState<SourceType>(source?.type ?? "company");
+  const [parentSourceId, setParentSourceId] = useState(source?.parentSourceId ?? "");
+  const [context, setContext] = useState(source?.context ?? "");
   const [about, setAbout] = useState(source?.about ?? ""); const [pick, setPick] = useState<string | null>(source?.color ?? null);
   const [confirm, setConfirm] = useState(false); const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
   async function save() {
     setBusy(true); setError("");
-    try { const r = await post<{ source: Source & { existed?: boolean } }>("source", { ...(source ? { id: source.id } : {}), name, type, about, color: pick }); onDone(source ? `${name.trim()} saved.` : r.source.existed ? `You already have ${r.source.name}. Nothing new was made.` : `${name.trim()} added. Add people to it with Add a list.`); }
+    try { const r = await post<{ source: Source & { existed?: boolean } }>("source", { ...(source ? { id: source.id } : {}), name, type, about, color: pick, parentSourceId: parentSourceId || null, context }); onDone(source ? `${name.trim()} saved.` : r.source.existed ? `You already have ${r.source.name} in that context.` : `${name.trim()} added. Add people to it with Add a list.`); }
     catch (e) { setError(String((e as Error).message)); setBusy(false); }
   }
   async function remove() {
@@ -500,6 +521,7 @@ function SourceEditor({ source, count, color, onClose, onDone }: { source: Sourc
       <div className="nw-form">
         <label className="nw-f"><span>Name</span><input id="nw-src-name" autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Randstad, All Things Open, Family…" /></label>
         <label className="nw-f"><span>Kind</span><select id="nw-src-type" value={type} onChange={(e) => setType(e.target.value as SourceType)}>{SOURCE_TYPES.map(([t, l]) => <option key={t} value={t}>{l}</option>)}</select></label>
+        <NetworkSourceContext sources={sources} parentSourceId={parentSourceId} onParent={setParentSourceId} context={context} onContext={setContext} excludeId={source?.id} prefix="nw-src" />
         <label className="nw-f"><span>About</span><input id="nw-src-about" value={about} onChange={(e) => setAbout(e.target.value)} placeholder="Staffing agency, open-source conference…" /></label>
         <div className="nw-lab">Colour</div>
         <Swatches value={pick} fallback={color} label="Source colour" onPick={setPick} />

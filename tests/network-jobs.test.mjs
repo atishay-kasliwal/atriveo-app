@@ -57,3 +57,13 @@ test('alerts: the first check only starts the clock; then each new job at a watc
  const failing=fakeDb(seed());await runJobAlerts({db:failing,env:WEB,webPush,now:ago(10)});
  assert.equal(await runJobAlerts({db:failing,env:WEB,webPush:async()=>({sent:0,failed:1}),now:NOW}),null);
  assert.equal((await runJobAlerts({db:failing,env:WEB,webPush,now:new Date(NOW.getTime()+600e3)})).jobs.length,2,'retried after a failed send');});
+
+test('staffing source contexts remain separate in Network but share canonical employer job matches', async () => {
+ const records=seed();records.network_sources[0].type='staffing';
+ records.network_sources.push({_id:'rs-event',name:'Randstad',type:'staffing',parentSourceId:'ev',context:'Met at the summit'});
+ records.network_people.push({_id:'new-contact',name:'Ari Vale',sourceId:'rs-event',watchJobs:false});
+ const db=fakeDb(records);
+ const person=await jobsForPerson(db,'new-contact',{now:NOW});assert.equal(person.company,'Randstad');assert.ok(person.jobs.some(j=>j.url==='j1'));
+ const groups=await warmJobs(db,{now:NOW});const matches=groups.filter(g=>g.company==='Randstad');
+ assert.equal(matches.length,1);assert.deepEqual(matches[0].people.map(p=>p.id).sort(),['dana','new-contact']);
+});
