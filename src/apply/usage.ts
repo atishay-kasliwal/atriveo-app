@@ -7,11 +7,11 @@ export interface Feature { key: string; page: string; label: string; test?: RegE
 
 export const PAGES: Record<string, string> = {
   today: "Today", matching: "Matching", applied: "Applied", general: "General", assessments: "Assessments", extension: "Extension", staffing: "Staffing", resumes: "Resumes",
-  bank: "Bank", outreach: "Outreach", stats: "Stats", ready: "Ready", settings: "Settings", usage: "Usage",
+  bank: "Bank", outreach: "Outreach", network: "Network", stats: "Stats", ready: "Ready", settings: "Settings", usage: "Usage",
 };
 
 /** One colour per page, so the strip, the rows and the feature groups read as the same thing. */
-export const PAGE_HUE: Record<string, string> = { today: "#6d7bff", matching: "#4f9dff", applied: "#2fb87a", general: "#a86be0", assessments: "#e56fb0", extension: "#9bb0ff", staffing: "#f0a23b", resumes: "#e5584f", bank: "#3fc6c0", outreach: "#e56fb0", stats: "#9bb0ff", ready: "#c9b458", settings: "#8a919c", usage: "#5f6773" };
+export const PAGE_HUE: Record<string, string> = { today: "#6d7bff", matching: "#4f9dff", applied: "#2fb87a", general: "#a86be0", assessments: "#e56fb0", extension: "#9bb0ff", staffing: "#f0a23b", resumes: "#e5584f", bank: "#3fc6c0", outreach: "#e56fb0", network: "#34d399", stats: "#9bb0ff", ready: "#c9b458", settings: "#8a919c", usage: "#5f6773" };
 
 export function pageIdOf(path: string): string {
   const p = path.replace(/\/+$/, "");
@@ -23,6 +23,7 @@ export function pageIdOf(path: string): string {
   if (p === "/resume_builder") return "resumes";
   if (p === "/bank") return "bank";
   if (p === "/outreach") return "outreach";
+  if (p === "/network") return "network";
   if (p === "/stats" || p === "/overview") return "stats";
   if (p === "/ready" || p === "/review") return "ready";
   if (p === "/settings") return "settings";
@@ -72,6 +73,13 @@ export const FEATURES: Feature[] = [
   { key: "outreach.settings", page: "outreach", label: "Mailbox and settings", test: /^mailbox & settings/ },
   { key: "outreach.save", page: "outreach", label: "Save settings or send a test", test: /^(save settings|save & send test)/ },
   { key: "outreach.setup", page: "outreach", label: "Finish setup", test: /^(finish setup|review and unpause)/ },
+  { key: "network.list", page: "network", label: "Add a list", test: /^(add a list|add \d+ (people|person))/ },
+  { key: "network.person", page: "network", label: "Add person", test: /^add person/ },
+  { key: "network.source", page: "network", label: "New or edit source", test: /^(new source|create source|edit )/ },
+  { key: "network.history", page: "network", label: "Add to history", test: /^add to history/ },
+  { key: "network.followup", page: "network", label: "Set a follow-up", test: /^(\+3 days|\+1 week|\+2 weeks)/ },
+  { key: "network.connect", page: "network", label: "Connect two people", test: /^connect$/ },
+  { key: "network.archive", page: "network", label: "Archive", test: /^archive$/ },
   { key: "assessments.set", page: "assessments", label: "Set a deadline", test: /^(set|change)$/ },
   { key: "assessments.done", page: "assessments", label: "Mark done", test: /^done\b/ },
   { key: "applied.filter", page: "applied", label: "Reply filter", test: /^(all|replies|interviews|assessments|offers|rejected|no reply)\b/ },
@@ -80,7 +88,7 @@ export const FEATURES: Feature[] = [
 ];
 
 /** What the extension counts (its fixed list); each is a feature of the "Extension" group, reported by the extension itself. */
-export const EXTENSION_FEATURES: [string, string][] = [["open", "Open an application (Apply)"], ["attach", "Attach resume"], ["paste", "Paste a detail into a form"], ["paste_profile", "Paste a detail on any page"], ["copy", "Copy a detail"], ["applied", "I applied"], ["closed", "Job closed"], ["download", "Download the resume"], ["save_profile", "Save your details"], ["dismiss", "Close the panel"]];
+export const EXTENSION_FEATURES: [string, string][] = [["open", "Open an application (Apply)"], ["attach", "Attach resume"], ["paste", "Paste a detail into a form"], ["paste_profile", "Paste a detail on any page"], ["copy", "Copy a detail"], ["applied", "I applied"], ["closed", "Job closed"], ["download", "Download the resume"], ["save_profile", "Save your details"], ["dismiss", "Close the panel"], ["network_add", "Add to Network from LinkedIn"]];
 for (const [k, label] of EXTENSION_FEATURES) FEATURES.push({ key: `extension.${k}`, page: "extension", label });
 
 const INTERACTIVE = "button,a,[role=tab],[role=switch],[role=radio],input[type=checkbox],summary";

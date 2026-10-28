@@ -1,4 +1,5 @@
 import { formatLocation } from "../utils/location";
+import KnownHere from "./KnownHere";
 import { useEffect, useState, type ReactNode } from "react";
 import CompanyLogo from "../components/CompanyLogo";
 import CardActions from "./CardActions";
@@ -91,7 +92,7 @@ export default function JobCard(p: Props) {
       <header className="td-head">
         {p.onSelect && <input type="checkbox" className="td-check" disabled={p.selectDisabled} aria-label={`Select ${p.company} ${p.title}`} checked={Boolean(p.selected)} onChange={(e) => p.onSelect!(e.target.checked)} />}
         <CompanyLogo company={p.company} size="md" />
-        <div className="td-id"><strong title={p.company}>{p.company}</strong></div>
+        <div className="td-id"><strong title={p.company}>{p.company}</strong><KnownHere company={p.company} /></div>
         {p.onSkip && <button type="button" className="td-skip-co" disabled={p.busy} title={p.skipTitle ?? `Skip ${p.company}: hide its jobs until you remove it from Skipped companies (S)`} aria-label={`Skip ${p.company}`} onClick={p.onSkip}><svg aria-hidden="true" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" strokeWidth="1.5"/><path d="M4.1 11.9l7.8-7.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg></button>}
         {p.onApplied && <button type="button" className={`td-skip-co td-mark-applied ${p.applied ? "is-applied" : ""}`} disabled={p.busy || p.applied} title={p.applied ? "Applied" : p.appliedTitle ?? "Mark applied (A)"} aria-label={p.applied ? "Applied" : "Mark applied"} onClick={p.onApplied}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m3 12 4 4L17 6"/><path d="m12 16 9-10"/></svg></button>}
       </header>
