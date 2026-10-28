@@ -20,6 +20,7 @@ import ResumeBuilderPage from "./ResumeBuilderPage";
 import StaffingPage from "./StaffingPage";
 import JobMatchingPage from "./JobMatchingPage";
 import OutreachPage from "./OutreachPage";
+import NetworkPage from "./NetworkPage";
 import TodayPage from "./TodayPage";
 
 /** Signed-in admins see the console; everyone else is sent to the admin login. */
@@ -41,6 +42,7 @@ function Console() {
   if (!user) return <Navigate to="/login" replace />;
   const header = <ApplyHeader user={user} />;
   if (path === "/outreach") return <OutreachPage header={header} />;
+  if (path === "/network") return <NetworkPage header={header} />;
   if (path === "/job-matching") return <JobMatchingPage header={header} />;
   if (path === "/applied" || path.startsWith("/applied/")) return <AppliedPage header={header} />;
   if (path === "/settings") return <SettingsPage header={header} />;
