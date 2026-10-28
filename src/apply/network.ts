@@ -8,7 +8,7 @@ export type LinkKind = "works" | "family" | "intro" | "other";
 export type HistoryType = "note" | "email" | "message" | "call" | "met" | "reply";
 export interface HistoryEntry { id: string; at: string; type: HistoryType; text: string }
 export interface Person {
-  id: string; name: string; role: string; city: string; email: string; linkedin: string; phone: string; notes: string;
+  id: string; name: string; role: string; city: string; company: string; photoId: string | null; watchJobs: boolean; email: string; linkedin: string; phone: string; notes: string;
   sourceId: string | null; via: string | null; color: string | null; tags: string[];
   lastContact: string | null; nextFollowUp: string | null; history: HistoryEntry[]; archived: boolean; createdAt: string; updatedAt: string; x?: number; y?: number;
 }
@@ -257,4 +257,45 @@ export function warmPath(edges: Edge[], to: string): { nodes: string[]; edges: E
   const nodes = [to], path: Edge[] = [];
   for (let c = to, step = prev.get(c); step; c = step[0], step = prev.get(c)) { path.unshift(step[1]); nodes.unshift(step[0]); }
   return { nodes, edges: path };
+}
+
+/** A person's photo: the centre square of the picture, 256 px, as JPEG, uploaded once; returns the new image id. */
+export async function uploadPhoto(file: File): Promise<string> {
+  if (!/^image\/(png|jpeg|gif|webp)$/.test(file.type)) throw new Error("Pick a PNG, JPEG, GIF or WebP picture");
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => bad(new Error("That picture could not be opened")); i.src = url; });
+    const side = Math.min(img.naturalWidth, img.naturalHeight), c = document.createElement("canvas");
+    c.width = c.height = 256;
+    c.getContext("2d")!.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, 256, 256);
+    const blob = await new Promise<Blob | null>((ok) => c.toBlob(ok, "image/jpeg", 0.86));
+    if (!blob) throw new Error("That picture could not be resized");
+    const base64 = await new Promise<string>((ok, bad) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1] ?? ""); r.onerror = () => bad(new Error("That picture could not be read")); r.readAsDataURL(blob); });
+    return (await post<{ id: string }>("photo", { type: "image/jpeg", base64 })).id;
+  } finally { URL.revokeObjectURL(url); }
+}
+
+/* ---------- jobs where you know someone ---------- */
+export interface JobRow { url: string; applyUrl: string; company: string; title: string; location: string; foundAt: string | null; site: string; status: "new" | "ready" | "applied" | "passed"; appliedAt: string | null; resumeReady: boolean }
+export interface CompanyGroup { company: string; people: { id: string; name: string; watchJobs: boolean }[]; jobs: JobRow[] }
+export interface KnownCompany { key: string; name: string; people: { id: string; name: string }[] }
+export const loadPersonJobs = (id: string) => getJson<{ company: string; jobs: JobRow[] } & ApiBody>(`/network/jobs?person=${encodeURIComponent(id)}`);
+export const loadWarmJobs = () => getJson<{ groups: CompanyGroup[] } & ApiBody>("/network/jobs").then((r) => r.groups);
+export const JOB_STATUS: Record<JobRow["status"], string> = { new: "New", ready: "Resume ready", applied: "Applied", passed: "Passed" };
+
+const SUFFIXES = new Set(["incorporated", "inc", "llc", "ltd", "limited", "corp", "corporation", "co", "company", "plc", "gmbh", "the"]);
+const companyWords = (name: string) => name.toLowerCase().replace(/&/g, " and ").split(/[^a-z0-9]+/).filter((w) => w && !SUFFIXES.has(w));
+/** The same company, whole words only ("Randstad" and "Randstad USA" yes, "Randstadt Logistics" no); the server uses the same rule. */
+export function sameCompany(a: string, b: string): boolean {
+  const x = companyWords(a), y = companyWords(b), [short, long] = x.length <= y.length ? [x, y] : [y, x];
+  return short.join("").length >= 3 && short.every((w, i) => long[i] === w);
+}
+/** Where someone works: their own "works at", else their source when it is a company. */
+export const companyOfPerson = (p: Person, sources: Map<string, Source>) => p.company || (p.sourceId && sources.get(p.sourceId)?.type === "company" ? sources.get(p.sourceId)!.name : "");
+
+let known: { at: number; list: Promise<KnownCompany[]> } | null = null;
+/** Who you know at which company, fetched once every few minutes for the job cards on other pages. */
+export function knownCompanies(): Promise<KnownCompany[]> {
+  if (!known || Date.now() - known.at > 5 * 60_000) known = { at: Date.now(), list: getJson<{ companies: KnownCompany[] } & ApiBody>("/network/companies").then((r) => r.companies).catch(() => []) };
+  return known.list;
 }

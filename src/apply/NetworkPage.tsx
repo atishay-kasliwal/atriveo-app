@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
-  HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, initials, loadBoard, loadNetwork, plusDays, post,
-  type BoardItem, type HistoryType, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
+  HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, plusDays, post, uploadPhoto,
+  type BoardItem, type HistoryType, type JobRow, companyOfPerson, loadPersonJobs, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
 } from "./network";
 import NetworkGraph from "./NetworkGraph";
 import NetworkMail from "./NetworkMail";
 import NetworkBell from "./NetworkBell";
 import NetworkWork from "./NetworkWork";
 import { BulkMail } from "./NetworkMail";
+import { PersonJobs, WarmJobs } from "./NetworkJobs";
 import "./network.css";
 
 type View = { kind: "all" } | { kind: "source"; id: string | null } | { kind: "due" } | { kind: "never" } | { kind: "introduced" };
@@ -23,12 +24,13 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const [view, setView] = useState<View>({ kind: "all" });
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("name");
-  const [mode, setModeState] = useState<"graph" | "list">(() => { try { return localStorage.getItem("nw-mode") === "list" ? "list" : "graph"; } catch { return "graph"; } });
-  const setMode = (m: "graph" | "list") => { setModeState(m); try { localStorage.setItem("nw-mode", m); } catch { /* the choice just is not remembered */ } };
+  type Mode = "graph" | "list" | "jobs";
+  const [mode, setModeState] = useState<Mode>(() => { try { const m = localStorage.getItem("nw-mode"); return m === "list" || m === "jobs" ? m : "graph"; } catch { return "graph"; } });
+  const setMode = (m: Mode) => { setModeState(m); try { localStorage.setItem("nw-mode", m); } catch { /* the choice just is not remembered */ } };
   const [selected, setSelected] = useState<string | null>(null);
   const [dialog, setDialog] = useState<null | "list" | "person" | { source: Source | null }>(null);
   const [toast, setToast] = useState<Toast>(null);
-  const [mailFor, setMailFor] = useState<string | null>(null);
+  const [mailFor, setMailFor] = useState<{ id: string; job?: JobRow } | null>(null);
   const [bulkMail, setBulkMail] = useState<string[] | null>(null);
   const [board, setBoard] = useState<BoardItem[]>([]);
   const [work, setWork] = useState<string | null>(null);
@@ -46,6 +48,9 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
         if (person && d.people.some((p) => p.id === person)) setSelected(person);
         else if (work && b?.some((x) => x.id === work)) setWork(work);
         else if (q.get("view") === "due") setView({ kind: "due" });
+        if (q.get("view") === "jobs") setModeState("jobs");
+        const jobUrl = q.get("job");
+        if (person && jobUrl && d.people.some((p) => p.id === person)) void loadPersonJobs(person).then((r) => { const job = r.jobs.find((j) => j.url === jobUrl); if (job) setMailFor({ id: person, job }); }).catch(() => { /* the panel is open; the jobs show there */ });
         if ([...q.keys()].length) window.history.replaceState(null, "", "/network");
       }
     }
@@ -147,10 +152,14 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
                 <div className="nw-mode" role="group" aria-label="Show as">
                   <button type="button" aria-pressed={mode === "graph"} onClick={() => setMode("graph")}>Map</button>
                   <button type="button" aria-pressed={mode === "list"} onClick={() => setMode("list")}>List</button>
+                  <button type="button" aria-pressed={mode === "jobs"} onClick={() => setMode("jobs")}>Jobs</button>
                 </div>
               </div>
             </div>
-            {loaded && data.people.length > 0 && mode === "graph" ? (
+            {loaded && mode === "jobs" ? (
+              <WarmJobs colors={colors.person} onPerson={(id) => openPerson(id)} onReferral={(id, job) => setMailFor({ id, job })}
+                onWatch={(id, on) => { void post<{ person: Person }>("person", { id, watchJobs: on }).then((r) => replacePerson(r.person)).catch((e: Error) => say({ text: e.message })); }} />
+            ) : loaded && data.people.length > 0 && mode === "graph" ? (
               <NetworkGraph data={data} colors={colors} visible={visible} selected={selected} selectedWork={work} board={board} setBoard={setBoard}
                 onPerson={(id) => openPerson(id === selected ? null : id)} onWork={openWork}
                 onSource={(id) => { openPerson(null); setView(view.kind === "source" && view.id === id ? { kind: "all" } : { kind: "source", id }); }}
@@ -171,7 +180,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
                   return (
                     <li key={p.id}>
                       <button type="button" className={`nw-row${p.id === selected ? " on" : ""}`} onClick={() => openPerson(p.id === selected ? null : p.id)} aria-pressed={p.id === selected}>
-                        <Avatar name={p.name} color={colors.person.get(p.id) ?? ""} source={via && src ? colors.source.get(src.id) : undefined} />
+                        <Avatar name={p.name} photo={p.photoId} color={colors.person.get(p.id) ?? ""} source={via && src ? colors.source.get(src.id) : undefined} />
                         <span className="who"><b>{p.name}</b><small>{p.role || (via ? `Introduced by ${via.name}` : "\u00a0")}</small></span>
                         <span className="src">{src ? <><i style={{ background: colors.source.get(src.id) }} />{src.name}</> : <em>No source</em>}</span>
                         <span className="city">{p.city}</span>
@@ -187,10 +196,10 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
 
           {workItem && <NetworkWork key={workItem.id} item={workItem} data={data} colors={colors} onClose={() => setWork(null)} onOpen={openPerson} say={say}
             onChange={(it) => setBoard((b) => b.map((x) => (x.id === it.id ? it : x)))} onRemove={(id) => { setBoard((b) => b.filter((x) => x.id !== id)); setWork(null); }}
-            onWrite={(id) => setMailFor(id)} />}
+            onWrite={(id) => setMailFor({ id })} />}
           {person && (
             <PersonPanel key={person.id} person={person} data={data} colors={colors} sourceById={sourceById} personById={personById}
-              onClose={() => setSelected(null)} onChange={replacePerson} onOpen={setSelected} onArchive={() => void archive(person)} onWrite={() => setMailFor(person.id)} say={say}
+              onClose={() => setSelected(null)} onChange={replacePerson} onOpen={setSelected} onArchive={() => void archive(person)} onWrite={() => setMailFor({ id: person.id })} onReferral={(job) => setMailFor({ id: person.id, job })} say={say}
               onLinks={(links) => setData((d) => ({ ...d, links }))} />
           )}
         </div>
@@ -201,7 +210,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
       {dialog && typeof dialog === "object" && <SourceEditor source={dialog.source} count={dialog.source ? counts.by.get(dialog.source.id) ?? 0 : 0} color={dialog.source ? colors.source.get(dialog.source.id) ?? PALETTE[0] : PALETTE[0]} onClose={() => setDialog(null)}
         onDone={async (msg, removed) => { setDialog(null); if (removed && view.kind === "source" && view.id === removed) setView({ kind: "all" }); await reload(); say({ text: msg }); }} />}
       {bulkMail && <BulkMail people={bulkMail.map((id) => personById.get(id)).filter((p): p is Person => Boolean(p))} onClose={() => setBulkMail(null)} onSent={replacePerson} say={say} />}
-      {mailFor && personById.get(mailFor) && <NetworkMail person={personById.get(mailFor)!} color={colors.person.get(mailFor) ?? ""} onClose={() => setMailFor(null)} onSent={replacePerson} say={say} />}
+      {mailFor && personById.get(mailFor.id) && <NetworkMail key={`${mailFor.id}|${mailFor.job?.url ?? ""}`} person={personById.get(mailFor.id)!} job={mailFor.job} color={colors.person.get(mailFor.id) ?? ""} onClose={() => setMailFor(null)} onSent={replacePerson} say={say} />}
       {toast && <div className="nw-toast" role="status"><span>{toast.text}</span>{toast.undo && <button type="button" onClick={toast.undo}>Undo</button>}<button type="button" className="x" aria-label="Close" onClick={() => say(null)}>×</button></div>}
     </div>
   );
@@ -211,8 +220,8 @@ function RailItem({ on, color, label, sub, n, onClick }: { on: boolean; color: s
   return <button type="button" className={`nw-rail-item${on ? " on" : ""}`} aria-pressed={on} onClick={onClick}><i style={{ background: color }} /><span>{label}{sub && <small>{sub}</small>}</span><b>{n}</b></button>;
 }
 
-function Avatar({ name, color, source, big }: { name: string; color: string; source?: string; big?: boolean }) {
-  return <span className={`nw-av${big ? " big" : ""}`} style={{ "--c": color } as CSSProperties} aria-hidden="true">{initials(name)}{source && <i style={{ background: source }} />}</span>;
+function Avatar({ name, color, source, big, photo }: { name: string; color: string; source?: string; big?: boolean; photo?: string | null }) {
+  return <span className={`nw-av${big ? " big" : ""}${photo ? " ph" : ""}`} style={{ "--c": color } as CSSProperties} aria-hidden="true">{photo ? <img src={imageUrl(photo)} alt="" /> : initials(name)}{source && <i style={{ background: source }} />}</span>;
 }
 
 function Swatches({ value, fallback, onPick, label }: { value: string | null; fallback: string; onPick: (c: string | null) => void; label: string }) {
@@ -227,9 +236,9 @@ function Swatches({ value, fallback, onPick, label }: { value: string | null; fa
   );
 }
 
-function PersonPanel({ person: p, data, colors, sourceById, personById, onClose, onChange, onOpen, onArchive, onWrite, say, onLinks }: {
+function PersonPanel({ person: p, data, colors, sourceById, personById, onClose, onChange, onOpen, onArchive, onWrite, onReferral, say, onLinks }: {
   person: Person; data: NetworkData; colors: ReturnType<typeof colorsFor>; sourceById: Map<string, Source>; personById: Map<string, Person>;
-  onClose: () => void; onChange: (p: Person) => void; onOpen: (id: string) => void; onArchive: () => void; onWrite: () => void; say: (t: Toast) => void; onLinks: (l: NetworkData["links"]) => void;
+  onClose: () => void; onChange: (p: Person) => void; onOpen: (id: string) => void; onArchive: () => void; onWrite: () => void; onReferral: (job: JobRow) => void; say: (t: Toast) => void; onLinks: (l: NetworkData["links"]) => void;
 }) {
   const [draft, setDraft] = useState(p);
   const [saving, setSaving] = useState("");
@@ -277,7 +286,11 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
   return (
     <aside className="nw-panel" aria-label={p.name}>
       <div className="nw-ph">
-        <Avatar big name={draft.name || p.name} color={color} source={via && src ? colors.source.get(src.id) : undefined} />
+        <label className="nw-photo" title={p.photoId ? "Change the photo" : "Add a photo"}>
+          <Avatar big name={draft.name || p.name} photo={p.photoId} color={color} source={via && src ? colors.source.get(src.id) : undefined} />
+          <span className="nw-photo-tip">{p.photoId ? "Change" : "+ Photo"}</span>
+          <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) { setSaving("Uploading…"); uploadPhoto(f).then((id) => save({ photoId: id })).catch((err: Error) => { setSaving(""); say({ text: err.message }); }); } }} />
+        </label>
         <div className="nw-ph-text">
           <input className="nw-name" aria-label="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} onBlur={() => { if (draft.name.trim() && draft.name !== p.name) void save({ name: draft.name }); else setDraft({ ...draft, name: p.name }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
           <input className="nw-role" aria-label="Role" placeholder="Role, like Senior recruiter" value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })} onBlur={() => { if (draft.role !== p.role) void save({ role: draft.role }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
@@ -297,12 +310,17 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
             </select></label>
         </div>
         {via && <p className="nw-lineage"><i style={{ background: src ? colors.source.get(src.id) : "var(--nw-muted)" }} />{src ? <>Belongs to <b>{src.name}</b>, </> : null}introduced by <button type="button" onClick={() => onOpen(via.id)}>{via.name}</button>. Their own colour starts a new branch.</p>}
+        {p.photoId && <button type="button" className="nw-chip nw-photo-rm" onClick={() => void save({ photoId: null })}>Remove photo</button>}
         <div className="nw-lab">Colour</div>
         <Swatches value={p.color} fallback={color} label="Colour" onPick={(c) => void save({ color: c })} />
         <div className="nw-grid">
           {field("city", "City")}{field("email", "Email", "email")}{field("linkedin", "LinkedIn")}{field("phone", "Phone", "tel")}
         </div>
         {p.linkedin && <a className="nw-out" href={p.linkedin} target="_blank" rel="noreferrer">Open LinkedIn profile ↗</a>}
+        <label className="nw-f nw-works"><span>Works at</span><input id="nw-company" value={draft.company} placeholder={companyOfPerson({ ...p, company: "" }, sourceById) || "Company"}
+          onChange={(e) => setDraft({ ...draft, company: e.target.value })} onBlur={() => { if (draft.company !== p.company) void save({ company: draft.company }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} /></label>
+        <div className="nw-lab">Jobs at {companyOfPerson(p, sourceById) || "their company"}</div>
+        <PersonJobs person={p} company={companyOfPerson(p, sourceById)} onReferral={onReferral} watching={p.watchJobs} onWatch={(on) => void save({ watchJobs: on })} />
         <div className="nw-lab">Follow up</div>
         <div className="nw-fu">
           <input id="nw-followup" type="date" aria-label="Follow-up date" value={p.nextFollowUp ?? ""} onChange={(e) => void save({ nextFollowUp: e.target.value || null })} />

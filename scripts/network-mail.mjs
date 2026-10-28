@@ -6,6 +6,8 @@ import { cleanEmail } from "./resume-emails.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
 import { generalResumes } from "./no-text-jobs.mjs";
 import { NetworkError, logHistory, savePerson } from "./network.mjs";
+import { storeFromEnv, resumeKey } from "./resume-store.mjs";
+import { resumeRevision } from "./application-kit.mjs";
 
 // Email from the Network page: sent from your own Gmail through the same send-only connection Outreach uses (gmail.send: it can send,
 // never read), only when you press Send. Each email is logged in that person's history and can set the next follow-up.
@@ -89,7 +91,23 @@ export function gmailSender({ env = process.env, fetchImpl = fetch, timeoutMs = 
 const DAYS = { "3d": 3, "1w": 7, "2w": 14 };
 const addDays = (now, n) => new Date(now.getTime() + n * 86_400_000).toISOString().slice(0, 10);
 
-function attachmentFor(input, outRoot) {
+/** The resume built for one job (the one you would apply with), from the resume store or the server's resume folder. */
+async function jobResume(db, jobUrl, outRoot, store = storeFromEnv()) {
+  const job = await db.collection("jobs").findOne({ job_url: String(jobUrl) }, { projection: { resume: 1 } });
+  if (job?.resume?.status !== "success") fail("That job's resume is not built yet. Attach your general resume instead.");
+  let bytes = null;
+  if (job.resume.object && store) bytes = await store.get(resumeKey(resumeRevision(job.resume)));
+  else {
+    const file = path.resolve(String(job.resume.pdf_path || ""));
+    if (path.extname(file).toLowerCase() !== ".pdf" || (outRoot && !file.startsWith(path.resolve(outRoot) + path.sep)) || !fs.existsSync(file)) fail("That job's resume is not on the server. Attach your general resume instead.");
+    bytes = fs.readFileSync(file);
+  }
+  if (!bytes?.length || bytes.length > 5_000_000 || bytes.subarray(0, 5).toString("latin1") !== "%PDF-") fail("That job's resume could not be read. Attach your general resume instead.");
+  return bytes;
+}
+
+async function attachmentFor(input, outRoot, db) {
+  if (input.jobResume) return { fileName: `${(loadResumeProfile().name || "Resume").replace(/[^\w .-]/g, "")}.pdf`, bytes: await jobResume(db, input.jobResume, outRoot) };
   if (input.upload) {
     const name = line(input.upload.name, 120).replace(/[^\w .()-]/g, "_") || "attachment.pdf";
     const bytes = Buffer.from(String(input.upload.base64 ?? ""), "base64");
@@ -116,11 +134,13 @@ export async function sendNetworkMail(db, input = {}, { sender = gmailSender(), 
   const body = text(input.body, 20_000); if (!body) fail("Write the message first");
   const settings = await mailSettings(db, { outRoot });
   if (!settings.fromEmail) fail("Set the address you send from (Sender, at the bottom of the mail window)");
-  const attachment = attachmentFor(input, outRoot);
+  const attachment = await attachmentFor(input, outRoot, db);
   const result = await sender.send({ from: settings.fromEmail, fromName: settings.fromName, to, subject, body, attachment });
   if (result.state === "failed") fail(result.error);
-  await db.collection(LOG).insertOne({ _id: crypto.randomUUID(), personId: person._id, to, subject, body, attachment: attachment?.fileName ?? null, state: result.state, messageId: result.messageId ?? null, error: result.error ?? null, at: now.toISOString() });
-  const note = result.state === "sent" ? subject : `${subject} (Gmail did not confirm it; check Sent before sending again)`;
+  const referral = input.referral?.title ? { title: line(input.referral.title, 120), company: line(input.referral.company, 80), url: line(input.referral.url, 500) } : null;
+  await db.collection(LOG).insertOne({ _id: crypto.randomUUID(), personId: person._id, to, subject, body, attachment: attachment?.fileName ?? null, referral, state: result.state, messageId: result.messageId ?? null, error: result.error ?? null, at: now.toISOString() });
+  const what = referral ? `Asked for a referral: ${referral.title}${referral.company ? ` at ${referral.company}` : ""}` : subject;
+  const note = result.state === "sent" ? what : `${what} (Gmail did not confirm it; check Sent before sending again)`;
   let updated = await logHistory(db, { id: person._id, type: "email", text: note, at: now.toISOString() }, now);
   const days = DAYS[input.followUp];
   const patch = { ...(days ? { nextFollowUp: addDays(now, days) } : {}), ...(!person.email ? { email: to } : {}) };
@@ -132,7 +152,7 @@ export async function sendNetworkMail(db, input = {}, { sender = gmailSender(), 
 export const DRAFT_SCHEMA = { type: "object", additionalProperties: false, required: ["subject", "body"], properties: { subject: { type: "string", maxLength: 120 }, body: { type: "string", maxLength: 3000 } } };
 const TONES = { friendly: "warm and friendly, like a message to someone you know", short: "short: four sentences at most", formal: "polite and formal" };
 
-export function draftRequest({ person, source, via, settings, tone = "friendly", intent = "" }) {
+export function draftRequest({ person, source, via, settings, tone = "friendly", intent = "", job = null }) {
   const recent = (person.history ?? []).slice(-6).map((h) => `${h.at.slice(0, 10)} ${h.type}${h.text ? `: ${h.text}` : ""}`).join("\n") || "(nothing yet)";
   return {
     purpose: "network-email",
@@ -153,6 +173,7 @@ export function draftRequest({ person, source, via, settings, tone = "friendly",
       `Notes about them: ${person.notes || "(none)"}`,
       `What happened so far:\n${recent}`,
       `What this email is for: ${intent || "stay in touch and ask whether they know of roles that fit"}`,
+      job ? `The job: ${job.title} at ${job.company}${job.location ? ` (${job.location})` : ""}. Link: ${job.url}. Ask whether they would refer you or pass your resume to the hiring team, and include the link.` : "",
     ].filter(Boolean).join("\n"),
   };
 }
@@ -167,7 +188,8 @@ export async function startDraft(db, input = {}, { generate, now = new Date() } 
     db.collection("app_settings").findOne({ _id: SETTINGS }),
   ]);
   const profile = loadResumeProfile();
-  const request = draftRequest({ person, source, via, settings: { fromName: settings?.fromName || profile.name || "", about: settings?.about || "", signature: settings?.signature ?? (profile.name || "") }, tone: input.tone, intent: line(input.intent, 300) });
+  const job = input.job?.title ? { title: line(input.job.title, 120), company: line(input.job.company, 80), location: line(input.job.location, 80), url: line(input.job.url, 500) } : null;
+  const request = draftRequest({ person, source, via, settings: { fromName: settings?.fromName || profile.name || "", about: settings?.about || "", signature: settings?.signature ?? (profile.name || "") }, tone: input.tone, intent: line(input.intent, 300), job });
   const id = crypto.randomUUID();
   await db.collection(DRAFTS).insertOne({ _id: id, personId: person._id, status: "writing", createdAt: now.toISOString(), expiresAt: new Date(now.getTime() + 86_400_000) });
   void Promise.resolve().then(() => generate(request)).then(

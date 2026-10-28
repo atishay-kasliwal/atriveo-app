@@ -99,12 +99,13 @@ export async function addPeople(db, { rows, sourceId, newSource } = {}, now = ne
 
 function blank(fields, now) {
   const at = now.toISOString();
-  return { _id: randomUUID(), name: "", role: "", city: "", email: "", linkedin: "", phone: "", notes: "", sourceId: null, via: null, color: null, tags: [],
+  return { _id: randomUUID(), name: "", role: "", city: "", company: "", email: "", linkedin: "", phone: "", notes: "", sourceId: null, via: null, color: null, photoId: null, watchJobs: false, tags: [],
     lastContact: null, nextFollowUp: null, history: [], archived: false, createdAt: at, updatedAt: at, ...fields };
 }
 
-async function checkPersonRefs(db, id, { sourceId, via }) {
+async function checkPersonRefs(db, id, { sourceId, via, photoId }) {
   if (sourceId && !(await db.collection(SOURCES).findOne({ _id: sourceId }))) fail("That source no longer exists");
+  if (photoId && !(await db.collection("network_images").findOne({ _id: photoId }))) fail("Upload the photo first");
   if (via) { if (via === id) fail("Someone cannot introduce themselves"); if (!(await db.collection(PEOPLE).findOne({ _id: via }))) fail("The person who introduced them is not in your network"); }
 }
 
@@ -119,6 +120,9 @@ function personPatch(input) {
   if ("via" in input) p.via = input.via ? String(input.via) : null;
   if ("color" in input) p.color = color(input.color);
   if ("nextFollowUp" in input) p.nextFollowUp = day(input.nextFollowUp);
+  if ("photoId" in input) p.photoId = input.photoId ? String(input.photoId) : null;
+  if ("company" in input) p.company = str(input.company, 80);
+  if ("watchJobs" in input) p.watchJobs = Boolean(input.watchJobs);
   if ("tags" in input) p.tags = [...new Set((Array.isArray(input.tags) ? input.tags : []).map((t) => str(t, 30)).filter(Boolean))].slice(0, MAX_TAGS);
   return p;
 }
@@ -135,9 +139,11 @@ export async function savePerson(db, input = {}, now = new Date()) {
   }
   const id = String(input.id), cur = await db.collection(PEOPLE).findOne({ _id: id });
   if (!cur) fail("That person is no longer in your network. Reload the page.");
-  await checkPersonRefs(db, id, { sourceId: patch.sourceId, via: patch.via });
+  await checkPersonRefs(db, id, { sourceId: patch.sourceId, via: patch.via, photoId: patch.photoId });
   const next = { ...patch, updatedAt: now.toISOString() };
   await db.collection(PEOPLE).updateOne({ _id: id }, { $set: next });
+  // A replaced or removed photo's bytes go with it.
+  if ("photoId" in patch && cur.photoId && cur.photoId !== patch.photoId) await db.collection("network_images").deleteOne({ _id: cur.photoId });
   return out({ ...cur, ...next });
 }
 

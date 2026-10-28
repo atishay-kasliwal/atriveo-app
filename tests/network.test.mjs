@@ -101,3 +101,12 @@ test('positions: people, sources and "you" keep where you dragged them; unknown 
  await assert.rejects(()=>savePositions(db,{items:[{id:p.id,x:'left',y:0}]}),/must be a number/);
  await assert.rejects(()=>savePositions(db,{items:[]}),/Nothing to save/);
  await savePositions(db,{items:[{id:p.id,x:9e9,y:-9e9}]});const far=(await networkView(db)).people[0];assert.deepEqual([far.x,far.y],[100000,-100000]);});
+
+test('photos and "works at": a photo must be uploaded first; replacing or removing one drops the old bytes',async()=>{
+ const db=fakeDb();const p=await savePerson(db,{name:'Pia Lo',company:'  Northwind   Labs '},T);assert.equal(p.company,'Northwind Labs');assert.equal(p.photoId,null);assert.equal(p.watchJobs,false);
+ await assert.rejects(()=>savePerson(db,{id:p.id,photoId:'nope'}),/Upload the photo first/);
+ await db.collection('network_images').insertOne({_id:'img1'});await db.collection('network_images').insertOne({_id:'img2'});
+ assert.equal((await savePerson(db,{id:p.id,photoId:'img1'},T)).photoId,'img1');
+ await savePerson(db,{id:p.id,photoId:'img2'},T);assert.equal(await db.collection('network_images').findOne({_id:'img1'}),null,'old photo removed');
+ await savePerson(db,{id:p.id,photoId:null},T);assert.equal(await db.collection('network_images').findOne({_id:'img2'}),null);
+ assert.equal((await savePerson(db,{id:p.id,watchJobs:1},T)).watchJobs,true);});

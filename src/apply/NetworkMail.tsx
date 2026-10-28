@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type ChangeEvent } from "react";
-import { initials, loadDraft, loadMailSettings, post, starter, type MailSettings, type Person } from "./network";
+import { initials, loadDraft, loadMailSettings, post, starter, type JobRow, type MailSettings, type Person } from "./network";
 
 type Saved = { to: string; subject: string; body: string; intent: string; tone: string };
 const KEY = (id: string) => `nw-draft-${id}`;
@@ -10,17 +10,18 @@ const FOLLOW: [string, string][] = [["3d", "3 days"], ["1w", "1 week"], ["2w", "
  * A full mail window for one person: subject, message, an optional resume, and "remind me to follow up". Draft with AI writes from their
  * record and your notes; nothing is sent until you press Send. An unsent draft is kept in this browser until you send or discard it.
  */
-export default function NetworkMail({ person, color, onClose, onSent, say }: { person: Person; color: string; onClose: () => void; onSent: (p: Person) => void; say: (t: { text: string } | null) => void }) {
-  const saved = useRef(readSaved(person.id)).current;
+export default function NetworkMail({ person, job, color, onClose, onSent, say }: { person: Person; job?: JobRow; color: string; onClose: () => void; onSent: (p: Person) => void; say: (t: { text: string } | null) => void }) {
+  const draftKey = job ? `${person.id}:${job.url}` : person.id;
+  const saved = useRef(readSaved(draftKey)).current;
   const [settings, setSettings] = useState<MailSettings | null>(null);
   const [loadError, setLoadError] = useState("");
   const [to, setTo] = useState(saved?.to ?? person.email);
   const [editTo, setEditTo] = useState(!person.email);
-  const [subject, setSubject] = useState(saved?.subject ?? "");
+  const [subject, setSubject] = useState(saved?.subject ?? (job ? `Referral for ${job.title} at ${job.company}?` : ""));
   const [body, setBody] = useState(saved?.body ?? "");
-  const [intent, setIntent] = useState(saved?.intent ?? "");
+  const [intent, setIntent] = useState(saved?.intent ?? (job ? `ask whether they would refer me for the ${job.title} role` : ""));
   const [tone, setTone] = useState(saved?.tone ?? "friendly");
-  const [attach, setAttach] = useState<string>("");
+  const [attach, setAttach] = useState<string>(job?.resumeReady ? "job" : "");
   const [upload, setUpload] = useState<{ name: string; base64: string } | null>(null);
   const [follow, setFollow] = useState(true);
   const [followIn, setFollowIn] = useState("1w");
@@ -39,19 +40,19 @@ export default function NetworkMail({ person, color, onClose, onSent, say }: { p
     loadMailSettings().then((s) => { if (!alive.current) return; setSettings(s); if (s.resumes.length) setAttach((a) => a || s.resumes[0].track); }).catch((e) => alive.current && setLoadError(String(e.message || e)));
     return () => { alive.current = false; };
   }, []);
-  useEffect(() => { try { localStorage.setItem(KEY(person.id), JSON.stringify({ to, subject, body, intent, tone })); } catch { /* not kept; the window still works */ } }, [person.id, to, subject, body, intent, tone]);
+  useEffect(() => { try { localStorage.setItem(KEY(draftKey), JSON.stringify({ to, subject, body, intent, tone })); } catch { /* not kept; the window still works */ } }, [draftKey, to, subject, body, intent, tone]);
   useEffect(() => { (editTo ? document.getElementById("nwm-to") : bodyRef.current)?.focus(); }, [editTo]);
 
   const validTo = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(to.trim());
   const canSend = Boolean(settings?.connected && validTo && subject.trim() && body.trim() && !sending && !writing);
   const dirty = Boolean(body.trim() || subject.trim());
   const close = () => { if (dirty && !confirm) { setConfirm(true); return; } onClose(); };
-  const discard = () => { try { localStorage.removeItem(KEY(person.id)); } catch { /* nothing kept */ } onClose(); };
+  const discard = () => { try { localStorage.removeItem(KEY(draftKey)); } catch { /* nothing kept */ } onClose(); };
 
   async function draft() {
     setAiError(""); setWriting(true);
     try {
-      const { id } = await post<{ id: string }>("mail/draft", { personId: person.id, tone, intent });
+      const { id } = await post<{ id: string }>("mail/draft", { personId: person.id, tone, intent, ...(job ? { job: { title: job.title, company: job.company, location: job.location, url: job.applyUrl } } : {}) });
       for (const started = Date.now(); Date.now() - started < 240_000;) {
         await new Promise((r) => setTimeout(r, 1500));
         if (!alive.current) return;
@@ -79,9 +80,10 @@ export default function NetworkMail({ person, color, onClose, onSent, say }: { p
     try {
       const r = await post<{ state: "sent" | "uncertain"; person: Person; warning?: string }>("mail/send", {
         personId: person.id, to: to.trim(), subject, body, followUp: follow ? followIn : null,
-        ...(attach === "upload" && upload ? { upload } : attach && attach !== "upload" ? { resume: attach } : {}),
+        ...(attach === "upload" && upload ? { upload } : attach === "job" && job ? { jobResume: job.url } : attach && attach !== "upload" ? { resume: attach } : {}),
+        ...(job ? { referral: { title: job.title, company: job.company, url: job.applyUrl } } : {}),
       });
-      try { localStorage.removeItem(KEY(person.id)); } catch { /* nothing kept */ }
+      try { localStorage.removeItem(KEY(draftKey)); } catch { /* nothing kept */ }
       onSent(r.person);
       say({ text: r.state === "sent" ? `Sent to ${person.name}.${follow ? ` Follow-up set for ${FOLLOW.find(([k]) => k === followIn)?.[1]} from now.` : ""}` : `Gmail did not confirm it. Check your Sent folder before sending again.` });
       onClose();
@@ -108,6 +110,7 @@ export default function NetworkMail({ person, color, onClose, onSent, say }: { p
           {editTo ? <input id="nwm-to" type="email" value={to} placeholder={`${person.name.split(" ")[0]}'s email`} onChange={(e) => setTo(e.target.value)} onBlur={() => { if (validTo) setEditTo(false); }} />
             : <button type="button" className="nwm-chip" style={{ "--c": color } as CSSProperties} onClick={() => setEditTo(true)} title="Change the address"><i>{initials(person.name)}</i><span>{person.name} &lt;{to}&gt;</span></button>}
         </div>
+        {job && <div className="nwm-job"><span>Referral for</span><a href={job.applyUrl} target="_blank" rel="noreferrer">{job.title}</a><small>{job.company}{job.location ? ` · ${job.location}` : ""}</small></div>}
         <div className="nwm-row"><label htmlFor="nwm-subject">Subject</label><input id="nwm-subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="What it's about" /></div>
         <div className="nwm-ai">
           <input id="nwm-intent" aria-label="What is this email for" value={intent} onChange={(e) => setIntent(e.target.value)} placeholder="What is it for? Ask for a referral, thank them, catch up…" />
@@ -120,6 +123,7 @@ export default function NetworkMail({ person, color, onClose, onSent, say }: { p
           <label htmlFor="nwm-attach">Attach</label>
           <select id="nwm-attach" value={attach} onChange={(e) => { if (e.target.value === "pick") file.current?.click(); else setAttach(e.target.value); }}>
             <option value="">Nothing</option>
+            {job?.resumeReady && <option value="job">The resume built for this job</option>}
             {settings?.resumes.map((r) => <option key={r.track} value={r.track}>General resume: {r.label}</option>)}
             {upload && <option value="upload">{upload.name}</option>}
             <option value="pick">Upload a PDF…</option>

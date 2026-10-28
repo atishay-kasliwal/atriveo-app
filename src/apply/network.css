@@ -54,6 +54,11 @@
 .nw-body.has-panel .nw-row{grid-template-columns:38px minmax(130px,1.5fr) minmax(0,1fr) 96px 88px}.nw-body.has-panel .nw-row .city{display:none}
 .nw-av{--c:#8a919c;position:relative;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:600;font-size:12.5px;color:var(--c);background:color-mix(in oklab,var(--c) 14%,var(--nw-card));box-shadow:inset 0 0 0 2px var(--c)}
 .nw-av.big{width:58px;height:58px;font-size:19px;box-shadow:inset 0 0 0 2.5px var(--c)}
+.nw-av.ph{overflow:visible;background:var(--nw-soft)}.nw-av img{width:100%;height:100%;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px var(--c)}
+.nw-photo{position:relative;cursor:pointer;flex:none;border-radius:50%}
+.nw-photo-tip{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);font-size:10.5px;font-weight:600;white-space:nowrap;padding:1px 7px;border-radius:999px;background:var(--nw-soft);border:1px solid var(--nw-line-strong);opacity:0;transition:opacity .15s}
+.nw-photo:hover .nw-photo-tip,.nw-photo:focus-within .nw-photo-tip{opacity:1}
+.nw-photo-rm{margin-top:10px}
 .nw-av i{position:absolute;right:-2px;top:-2px;width:11px;height:11px;border-radius:50%;border:2px solid var(--nw-card)}
 .nw-av.big i{width:15px;height:15px}
 .nw-empty{margin:auto;max-width:440px;text-align:center;padding:24px;display:flex;flex-direction:column;align-items:center;gap:10px}
@@ -251,6 +256,33 @@ button.nw-linkname:hover{text-decoration:underline}
 .nwm-bulk-r em{font-style:normal;font-size:12.5px;color:var(--nw-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nwm-bulk-r li.done b::after{content:" ✓";color:var(--nw-ok)}
 @media (max-width:760px){.nwm-bulk-cols{grid-template-columns:1fr;overflow:auto}.nwm-bulk-l{border-right:0;min-height:320px}}
+
+/* jobs where you know someone */
+.nw-works{margin-top:14px}
+.nwj-person{display:flex;flex-direction:column;gap:8px}
+.nwj-watch{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--nw-ink);cursor:pointer}
+.nwj-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.nwj-job{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:var(--nw-bg);border:1px solid var(--nw-line)}
+.nwj-what{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.nwj-what a{color:var(--nw-ink)!important;font-weight:550;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nwj-what small{font:400 11.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--nw-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nwj-st{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--nw-soft);color:var(--nw-muted);white-space:nowrap}
+.nwj-st.is-ready{color:var(--nw-ok)}.nwj-st.is-applied{color:var(--nw-accent)}.nwj-st.is-new{color:var(--nw-warn)}
+.nwj-ask{white-space:nowrap}
+.nwj-tab{flex:1;min-height:0;overflow:auto;padding:12px 16px 20px;display:flex;flex-direction:column;gap:14px}
+.nwj-pad{padding:16px}
+.nwj-sum{margin:0;color:var(--nw-muted);font-size:13.5px}.nwj-sum b{color:var(--nw-ink)}
+.nwj-co{border:1px solid var(--nw-line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:var(--nw-card)}
+.nwj-co header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.nwj-co h3{margin:0;font-size:16px;font-weight:650}
+.nwj-count{font:400 12px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--nw-muted)}
+.nwj-people{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.nwj-pp{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--nw-line-strong);background:var(--nw-soft);border-radius:999px;padding:3px 10px;font-size:12.5px}
+.nwj-pp i{width:8px;height:8px;border-radius:50%}
+.nwj-co-bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--nw-muted)}
+.nwj-co-bar label{display:flex;align-items:center;gap:8px}
+.nwm-job{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:10px 20px;border-bottom:1px solid var(--nw-line);background:color-mix(in oklab,var(--nw-ok) 8%,var(--nw-card));font-size:13.5px}
+.nwm-job span{color:var(--nw-muted)}.nwm-job a{color:var(--nw-ink)!important;font-weight:600}.nwm-job small{font:400 12px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--nw-muted)}
 
 /* reminders */
 .nw-bell{position:relative;display:flex;align-items:center;gap:6px}

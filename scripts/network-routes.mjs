@@ -2,6 +2,7 @@ import { NetworkError, savePositions, addPeople, archivePerson, logHistory, netw
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
 import { boardView, readImage, removeBoardItem, saveBoardItem, saveImage } from "./network-board.mjs";
+import { jobsForPerson, knownCompanies, warmJobs } from "./network-jobs.mjs";
 
 // /network/*: the Network page's API. The sidecar's own token check runs first; every call is one small Mongo operation.
 const WRITES = {
@@ -22,6 +23,7 @@ const WRITES = {
   "/network/board/save": (db, b) => saveBoardItem(db, b).then((item) => ({ item })),
   "/network/board/remove": (db, b) => removeBoardItem(db, b),
   "/network/board/image": (db, b) => saveImage(db, b),
+  "/network/photo": (db, b) => saveImage(db, b),
   "/network/mail/draft": (db, b, o) => startDraft(db, b, { generate: (request) => o.generate(request, db) }),
 };
 const READS = {
@@ -30,6 +32,8 @@ const READS = {
   "/network/mail/draft": (db, q) => draftStatus(db, q.get("id")),
   "/network/reminders": (db) => listReminders(db),
   "/network/board": (db) => boardView(db),
+  "/network/jobs": (db, q) => (q.get("person") ? jobsForPerson(db, q.get("person")) : warmJobs(db).then((groups) => ({ groups }))),
+  "/network/companies": (db) => knownCompanies(db).then((companies) => ({ companies })),
 };
 
 async function readBody(req, limit) {
@@ -56,7 +60,7 @@ export async function handleNetwork(req, res, url, opts = {}) {
   if (!read && !write) { send(404, { ok: false, error: "Not found" }); return true; }
   try {
     if (!opts.withDb) throw new NetworkError("MONGO_URI not configured");
-    const body = read ? null : await readBody(req, url.pathname === "/network/mail/send" || url.pathname === "/network/board/image" ? 8_000_000 : 300_000);
+    const body = read ? null : await readBody(req, url.pathname === "/network/mail/send" || url.pathname === "/network/board/image" || url.pathname === "/network/photo" ? 8_000_000 : 300_000);
     const data = await opts.withDb((db) => (read ? read(db, url.searchParams, opts) : write(db, body, opts)));
     send(200, { ok: true, ...data });
   } catch (e) {

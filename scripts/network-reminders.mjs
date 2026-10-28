@@ -1,5 +1,6 @@
 import { nyParts, publishNtfy } from "./phone-summary.mjs";
 import { sendPushNotification } from "./web-push.mjs";
+import { companyOf, jobsForCompanies, sameCompany } from "./network-jobs.mjs";
 import { NetworkError } from "./network.mjs";
 
 // What needs you in your network, newest worries first: someone replied and waits for an answer, a follow-up is due, someone has gone
@@ -145,15 +146,54 @@ export async function runNetworkTick({ db, now = new Date(), publish = publishNt
   }, out, log, "network");
 }
 
+/**
+ * New jobs at the companies of people you asked to watch ("Tell me about new jobs at …"). Checked every few minutes; the job board
+ * scrapes hourly, so an alert comes within the hour. Each job alerts once (network_job_alerts); jobs you applied to or passed are skipped.
+ * Web Push names the person and the job and opens them; ntfy says how many, nothing more.
+ */
+export async function runJobAlerts({ db, now = new Date(), publish = publishNtfy, webPush, env = process.env, log = () => {} } = {}) {
+  const ch = channels(env);
+  if (!ch.web && !ch.ntfy) return null;
+  const settings = db.collection("app_settings"), state = await settings.findOne({ _id: "network_job_watch" });
+  // The first check only starts the clock, so turning this on never sends a flood of old postings.
+  if (!state) { await settings.updateOne({ _id: "network_job_watch" }, { $set: { since: now.toISOString() } }, { upsert: true }); return null; }
+  const [people, sources] = await Promise.all([db.collection("network_people").find({}).toArray(), db.collection("network_sources").find({}).toArray()]);
+  const byId = new Map(sources.map((s) => [s._id, s]));
+  const watched = people.filter((p) => p.watchJobs && !p.archived).map((p) => ({ id: p._id, name: p.name, company: companyOf(p, byId) })).filter((p) => p.company);
+  if (!watched.length) { await settings.updateOne({ _id: "network_job_watch" }, { $set: { since: now.toISOString() } }); return null; }
+  // A scrape stamps jobs with the time it started, which can be before the last check: look back two hours and let the alert log dedupe.
+  const after = new Date(Math.max(Date.parse(state.since), now.getTime() - 2 * DAY)) - 2 * 3_600_000;
+  const jobs = (await jobsForCompanies(db, watched.map((p) => p.company), { now, days: 3 })).filter((j) => (j.status === "new" || j.status === "ready") && j.foundAt && Date.parse(j.foundAt) > after);
+  const alerts = db.collection("network_job_alerts"), fresh = [];
+  for (const j of jobs) { try { await alerts.insertOne({ _id: j.url, company: j.company, at: now.toISOString() }); fresh.push(j); } catch (e) { if (e?.code !== 11000) throw e; } }
+  if (!fresh.length) { await settings.updateOne({ _id: "network_job_watch" }, { $set: { since: now.toISOString() } }); return null; }
+  const groups = [];
+  for (const j of fresh) { const p = watched.find((w) => sameCompany(w.company, j.company)); const g = groups.find((x) => x.person.id === p.id); if (g) g.jobs.push(j); else groups.push({ person: p, jobs: [j] }); }
+  const n = fresh.length, first = groups[0], job = first.jobs[0];
+  const web = groups.length === 1
+    ? { title: `${first.person.company} posted ${first.jobs.length === 1 ? job.title : `${first.jobs.length} new jobs`}`, body: `${first.person.name} works there.${first.jobs.length === 1 ? (job.location ? ` ${job.location}.` : "") : ` ${first.jobs.slice(0, 3).map((x) => x.title).join(" · ")}.`} Ask for a referral?`, url: `/network?person=${encodeURIComponent(first.person.id)}&jobs=1`, type: "network_job" }
+    : { title: `${n} new jobs where you know someone`, body: groups.slice(0, 3).map((g) => `${g.person.company}: ${g.jobs[0].title}${g.jobs.length > 1 ? ` +${g.jobs.length - 1}` : ""}`).join(" · "), url: "/network?view=jobs", type: "network_job" };
+  const ntfy = { title: "Network", message: `${n} new ${n === 1 ? "job" : "jobs"} at ${groups.length === 1 ? "a company" : `${groups.length} companies`} where you know someone.`, tags: ["briefcase"], priority: 3, click: "https://apply.atriveo.com/network?view=jobs" };
+  const userId = env.PUSH_EVENT_USER_ID?.trim().toLowerCase();
+  let ok = true;
+  if (ch.ntfy) { let sent = false; try { sent = await publish(ntfy); } catch (e) { log(`job alert (ntfy): ${e.message}`); } ok &&= sent; }
+  if (ch.web) { let r = { sent: 0, failed: 1 }; try { r = await (webPush ?? ((d, m) => sendPushNotification(d, userId, m, { env })))(db, web); } catch (e) { log(`job alert (web push): ${e.message}`); } ok &&= r.sent > 0 || r.failed === 0; }
+  // Nothing got through: forget these alerts so the next check tries again.
+  if (!ok) { for (const j of fresh) await alerts.deleteOne({ _id: j.url }); return null; }
+  await settings.updateOne({ _id: "network_job_watch" }, { $set: { since: now.toISOString() } });
+  log(`job alert sent: ${n} new`);
+  return { web, ntfy, jobs: fresh };
+}
+
 /** Checks every few minutes inside the sidecar; off when neither Web Push nor ntfy is set up, or with PHONE_SUMMARIES=off / NETWORK_REMINDERS=off. */
-export function startNetworkReminders({ withMongo, log = console.log, everyMs = 5 * 60_000, publish = publishNtfy } = {}) {
+export function startNetworkReminders({ withMongo, log = console.log, everyMs = 10 * 60_000, publish = publishNtfy } = {}) {
   const off = (v) => /^(off|0|false)$/i.test(v || "");
   const ch = channels();
   if ((!ch.web && !ch.ntfy) || off(process.env.PHONE_SUMMARIES) || off(process.env.NETWORK_REMINDERS)) { log("network reminders on the phone: off"); return null; }
   let running = false;
-  const tick = async () => { if (running) return; running = true; try { await withMongo((db) => runNetworkTick({ db, publish, log }), { appName: "AtriveoNetworkReminders" }); } catch (e) { log(`network reminders: ${e.message}`); } finally { running = false; } };
+  const tick = async () => { if (running) return; running = true; try { await withMongo(async (db) => { await runNetworkTick({ db, publish, log }); await runJobAlerts({ db, publish, log }); }, { appName: "AtriveoNetworkReminders" }); } catch (e) { log(`network reminders: ${e.message}`); } finally { running = false; } };
   setTimeout(tick, 30_000).unref?.();
   const timer = setInterval(tick, everyMs); timer.unref?.();
-  log(`network reminders on the phone: on through ${[ch.web && "Web Push (names, tap to open)", ch.ntfy && "ntfy (counts only)"].filter(Boolean).join(" and ")}; 9 a.m. New York daily, Sunday 6 p.m. weekly`);
+  log(`network reminders on the phone: on through ${[ch.web && "Web Push (names, tap to open)", ch.ntfy && "ntfy (counts only)"].filter(Boolean).join(" and ")}; 9 a.m. New York daily, Sunday 6 p.m. weekly, new jobs at watched people's companies within the hour`);
   return timer;
 }

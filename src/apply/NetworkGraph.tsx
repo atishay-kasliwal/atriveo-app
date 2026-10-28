@@ -364,7 +364,8 @@ export default function NetworkGraph({ data, colors, visible, selected, selected
                   <rect x={-PERSON.w / 2 - 5} y={-PERSON.h / 2 - 5} width={PERSON.w + 10} height={PERSON.h + 10} rx={17} className="nwg-halo" />
                   <rect x={-PERSON.w / 2} y={-PERSON.h / 2} width={PERSON.w} height={PERSON.h} rx={13} fill={card} stroke={c} strokeWidth={p.id === selected ? 3 : 1.6} />
                   <circle cx={ax} r={19} fill={c} fillOpacity={0.15} stroke={c} strokeWidth={1.8} />
-                  <text x={ax} y={1} className="nwg-ini" fill={c}>{initials(p.name)}</text>
+                  {p.photoId ? <><clipPath id={`nwph-${p.id}`}><circle cx={ax} r={17.5} /></clipPath><image href={imageUrl(p.photoId)} x={ax - 17.5} y={-17.5} width={35} height={35} clipPath={`url(#nwph-${p.id})`} preserveAspectRatio="xMidYMid slice" /></>
+                    : <text x={ax} y={1} className="nwg-ini" fill={c}>{initials(p.name)}</text>}
                   {(due || replied) && <circle cx={ax + 14} cy={14} r={6} fill={due ? "var(--nw-warn)" : "var(--nw-ok)"} stroke={card} strokeWidth={2.5}><title>{due ? "Follow-up due" : "They replied"}</title></circle>}
                   {lineage && <circle cx={PERSON.w / 2 - 2} cy={-PERSON.h / 2 + 2} r={7} fill={lineage} stroke={bg} strokeWidth={2.5}><title>Belongs to {data.sources.find((s) => s.id === p.sourceId)?.name}, introduced by {people.get(p.via!)?.name}</title></circle>}
                   <text x={ax + 30} y={p.role ? -3 : 5} className="nwg-pname">{clip(p.name, 20)}</text>

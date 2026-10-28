@@ -9,7 +9,7 @@ fs.writeFileSync(path.join(outRoot,'general','manifest.json'),JSON.stringify({re
 const {buildMime,mailSettings,saveMailSettings,sendNetworkMail,startDraft,draftStatus,draftRequest}=await import('../scripts/network-mail.mjs');
 const {savePerson,saveSource}=await import('../scripts/network.mjs');
 const fakeDb=()=>{const cols=new Map();const col=n=>{if(!cols.has(n))cols.set(n,new Map());const m=cols.get(n);const clone=d=>structuredClone(d);return{
- find:()=>({toArray:async()=>[...m.values()].map(clone)}),findOne:async q=>m.has(q._id)?clone(m.get(q._id)):null,
+ find:()=>({toArray:async()=>[...m.values()].map(clone)}),findOne:async q=>{const d=q._id!==undefined?m.get(q._id):[...m.values()].find(x=>Object.entries(q).every(([k,v])=>x[k]===v));return d?clone(d):null},
  insertOne:async d=>{m.set(d._id,clone(d))},insertMany:async ds=>{for(const d of ds)m.set(d._id,clone(d))},
  updateOne:async(q,u,o)=>{if(m.has(q._id))m.set(q._id,{...m.get(q._id),...clone(u.$set)});else if(o?.upsert)m.set(q._id,{_id:q._id,...clone(u.$set)})},deleteOne:async q=>({deletedCount:m.delete(q._id)?1:0})}};return{collection:col,cols}};
 const T=new Date('2026-10-28T15:00:00Z');
@@ -68,3 +68,14 @@ test('drafts: written in the background from their record; the request carries o
  assert.deepEqual(await draftStatus(db,f.id),{status:'failed',subject:'',body:'',error:'Your Mac AI worker is offline.'});
  await assert.rejects(()=>draftStatus(db,'nope'),/expired/);await assert.rejects(()=>startDraft(db,{personId:'nope'},{generate:async()=>({})}),/no longer/);
  assert.match(draftRequest({person:{name:'Q',history:[]},settings:{},tone:'odd'}).system,/warm and friendly/);});
+
+test('referral: the job\'s own resume is attached, the history says what was asked, and a job without a built resume is refused',async()=>{
+ const db=fakeDb();const p=await savePerson(db,{name:'Ria Sen'},T);
+ const pdf=path.join(outRoot,'tailored','r1');fs.mkdirSync(pdf,{recursive:true});fs.writeFileSync(path.join(pdf,'Alex.pdf'),'%PDF-1.7 tailored for this job');
+ await db.collection('jobs').insertOne({_id:'j1',job_url:'https://jobs.example.test/1',resume:{status:'success',pdf_path:path.join(pdf,'Alex.pdf')}});
+ await db.collection('jobs').insertOne({_id:'j2',job_url:'https://jobs.example.test/2',resume:{status:'queued'}});
+ const s=sender({state:'sent',messageId:'m'});
+ const r=await sendNetworkMail(db,{personId:p.id,to:'ria@example.test',subject:'Referral?',body:'Hi Ria',jobResume:'https://jobs.example.test/1',referral:{title:'Data Engineer',company:'Northwind',url:'https://jobs.example.test/1'}},{sender:s,outRoot,now:T});
+ assert.equal(s.sent[0].attachment.bytes.toString(),'%PDF-1.7 tailored for this job');assert.equal(r.person.history.at(-1).text,'Asked for a referral: Data Engineer at Northwind');
+ await assert.rejects(()=>sendNetworkMail(db,{personId:p.id,to:'ria@example.test',subject:'s',body:'b',jobResume:'https://jobs.example.test/2'},{sender:s,outRoot,now:T}),/not built yet/);
+ const req=draftRequest({person:{name:'Ria Sen',history:[]},settings:{},job:{title:'Data Engineer',company:'Northwind',url:'https://jobs.example.test/1'}});assert.match(req.user,/The job: Data Engineer at Northwind\. Link: https:\/\/jobs\.example\.test\/1/);});
