@@ -35,6 +35,13 @@ The graph connects the child source to its parent with an introduction line. Eac
 A source has one colour, and every first connection from it shares it. Someone introduced by another person starts their own branch:
 a colour of their own (never close to a source's hue) and a small dot in the source's colour. Anything picked by hand wins.
 
+## How a source came to you
+
+A source comes straight from you, through another source (a separate Randstad met through All Things Open), or through a person (NKHS,
+introduced by Chani). Through a person, the map draws that person to the source, and the source's own people still belong to the
+source, not to the person; only someone marked "introduced by Chani" hangs off Chani. A person cannot belong to a source they introduced
+(that would loop back to them): keep their own source and set "Works at". If the introducer is archived, the source comes straight from you.
+
 ## Email
 
 Sent from your Gmail through the send-only connection Outreach sets up (`PLAYATRIVEO_HOME/gmail-send-token.json` with

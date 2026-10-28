@@ -63,7 +63,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
       const members = data.people.filter((person) => person.sourceId === source.id);
       if (members.length < 2 || expandedStacks.has(source.id)) return [];
       const point = pos(source.id);
-      return [{ id: source.id, name: sourceLabel(source, data.sources), members, x: point.x, y: point.y + 100 }];
+      return [{ id: source.id, name: sourceLabel(source, data.sources, data.people), members, x: point.x, y: point.y + 100 }];
     });
   }, [stackPeople, layers.people, data.sources, data.people, expandedStacks, pos]);
   const collapsedPeople = useMemo(() => new Set(stacks.flatMap((stack) => stack.members.map((person) => person.id))), [stacks]);
@@ -358,15 +358,15 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
             {shownSources.map((s) => {
               const p = pos(s.id), c = colors.source.get(s.id) ?? PALETTE[0], sz = sourceSize(s.name, s.about || s.type), n = peopleCount.get(s.id) ?? 0, dim = lit && !lit.has(s.id);
               return (
-                <g key={s.id} data-node={s.id} className="nwg-node" transform={`translate(${p.x} ${p.y})`} style={{ opacity: dim ? 0.18 : 1 }} tabIndex={0} role="button" aria-label={`${sourceLabel(s, data.sources)}: show only its people`}
+                <g key={s.id} data-node={s.id} className="nwg-node" transform={`translate(${p.x} ${p.y})`} style={{ opacity: dim ? 0.18 : 1 }} tabIndex={0} role="button" aria-label={`${sourceLabel(s, data.sources, data.people)}: show only its people`}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSource(s.id); } }} onPointerEnter={() => setHover(s.id)} onPointerLeave={() => setHover(null)}>
-                  <title>{sourceLabel(s, data.sources)}</title>
+                  <title>{sourceLabel(s, data.sources, data.people)}</title>
                   <rect x={-sz.w / 2 - 5} y={-sz.h / 2 - 5} width={sz.w + 10} height={sz.h + 10} rx={19} className="nwg-halo" />
                   <rect x={-sz.w / 2} y={-sz.h / 2} width={sz.w} height={sz.h} rx={14} fill={card} stroke={c} strokeWidth={1.8} />
                   <rect x={-sz.w / 2 + 14} y={-22} width={44} height={44} rx={11} fill={c} fillOpacity={0.16} stroke={c} strokeWidth={1.5} />
                   <text x={-sz.w / 2 + 36} y={1} className="nwg-tile" fill={c}>{s.name[0]?.toUpperCase()}</text>
                   <text x={-sz.w / 2 + 72} y={-3} className="nwg-sname">{clip(s.name, 26)}</text>
-                  <text x={-sz.w / 2 + 72} y={16} className="nwg-sub">{clip(s.context || (s.parentSourceId ? `Via ${data.sources.find((parent) => parent.id === s.parentSourceId)?.name || "another source"}` : s.about || SOURCE_TYPES.find(([type]) => type === s.type)?.[1] || s.type), 30)}</text>
+                  <text x={-sz.w / 2 + 72} y={16} className="nwg-sub">{clip(s.context || (s.parentSourceId ? `Via ${data.sources.find((parent) => parent.id === s.parentSourceId)?.name || "another source"}` : s.viaPersonId && people.has(s.viaPersonId) ? `Via ${people.get(s.viaPersonId)!.name}` : s.about || SOURCE_TYPES.find(([type]) => type === s.type)?.[1] || s.type), 30)}</text>
                   {n > 0 && <><circle cx={sz.w / 2 - 4} cy={-sz.h / 2 + 4} r={12} fill={c} stroke={bg} strokeWidth={3} /><text x={sz.w / 2 - 4} y={-sz.h / 2 + 4.5} className="nwg-badge">{n}</text></>}
                 </g>
               );
@@ -476,7 +476,7 @@ function PathFinder({ data, to, setTo, route, colors, onClose, onOpen }: { data:
       <div className="nwg-rel-h"><b>Who do you want to reach?</b><button type="button" className="nw-x" aria-label="Close" onClick={onClose}>×</button></div>
       <select id="nwg-path-to" value={to} onChange={(e) => setTo(e.target.value)} autoFocus>
         <option value="">Choose a person or a source…</option>
-        <optgroup label="Sources">{data.sources.map((s) => <option key={s.id} value={s.id}>{sourceLabel(s, data.sources)}</option>)}</optgroup>
+        <optgroup label="Sources">{data.sources.map((s) => <option key={s.id} value={s.id}>{sourceLabel(s, data.sources, data.people)}</option>)}</optgroup>
         <optgroup label="People">{data.people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</optgroup>
       </select>
       {to && !route && <p className="nw-muted">No way there yet. Add who knows them, or connect someone you know to them.</p>}

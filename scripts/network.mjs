@@ -163,6 +163,12 @@ function blank(fields, now) {
 
 async function checkPersonRefs(db, id, { sourceId, via, photoId }) {
   if (sourceId && !(await db.collection(SOURCES).findOne({ _id: sourceId }))) fail("That source no longer exists");
+  if (sourceId) {
+    // Someone who introduced a source (or a source above it) cannot also belong to it: that would make a loop back to themselves.
+    const sources = await all(db, SOURCES);
+    for (let s = sources.find((x) => x.id === sourceId), seen = new Set(); s && !seen.has(s.id); seen.add(s.id), s = s.parentSourceId ? sources.find((x) => x.id === s.parentSourceId) : null)
+      if (s.viaPersonId === id) fail(`They introduced ${s.name}, so they cannot belong to it. Keep their own source and set "Works at" instead.`);
+  }
   if (photoId && !(await db.collection("network_images").findOne({ _id: photoId }))) fail("Upload the photo first");
   if (via) { if (via === id) fail("Someone cannot introduce themselves"); if (!(await db.collection(PEOPLE).findOne({ _id: via }))) fail("The person who introduced them is not in your network"); }
 }
@@ -238,7 +244,26 @@ export async function archivePerson(db, { id, archived = true } = {}, now = new 
   return { id: cur._id, archived: Boolean(archived) };
 }
 
-/** Sources are distinct by name + parent source + context, not employer name alone. */
+/**
+ * The source a person belongs to, then whatever brought that source to you (a parent source, or the person who introduced it), and so
+ * on: every source on the way from this person back to you. Used to refuse loops.
+ */
+function upstreamSources(personId, people, sources) {
+  const seen = new Set();
+  let sid = people.find((p) => p.id === personId)?.sourceId ?? null;
+  while (sid && !seen.has(sid)) {
+    seen.add(sid);
+    const s = sources.find((x) => x.id === sid);
+    if (!s) break;
+    sid = s.parentSourceId || (s.viaPersonId ? people.find((p) => p.id === s.viaPersonId)?.sourceId ?? null : null);
+  }
+  return seen;
+}
+
+/**
+ * Sources are distinct by name + what brought them (a parent source or the person who introduced them) + context, not employer name
+ * alone: NKHS introduced by Chani is a different record from NKHS you found yourself. A source comes through a source or a person, not both.
+ */
 export async function saveSource(db, input = {}, now = new Date()) {
   const sources = await all(db, SOURCES);
   const cur = input.id ? sources.find((s) => s.id === String(input.id)) : null;
@@ -250,7 +275,16 @@ export async function saveSource(db, input = {}, now = new Date()) {
   if ("color" in input) patch.color = color(input.color);
   if ("context" in input || !cur) patch.context = str(input.context, 100);
   if ("parentSourceId" in input || !cur) patch.parentSourceId = input.parentSourceId ? str(input.parentSourceId, 80) : null;
+  if ("viaPersonId" in input || !cur) patch.viaPersonId = input.viaPersonId ? str(input.viaPersonId, 80) : null;
+  if (patch.viaPersonId) patch.parentSourceId = null;
+  else if (patch.parentSourceId) patch.viaPersonId = null;
   const next = { ...cur, ...patch };
+  if (next.viaPersonId) {
+    const people = (await all(db, PEOPLE)).filter((p) => !p.archived);
+    const who = people.find((p) => p.id === next.viaPersonId);
+    if (!who) fail("The person who introduced it is not in your network. Pick someone else.");
+    if (cur && upstreamSources(who.id, people, sources).has(cur.id)) fail(`${who.name} belongs to ${cur.name}, so they cannot be the one who introduced it. Put them in their own source and set "Works at".`);
+  }
   if (next.parentSourceId) {
     let parent = sources.find((s) => s.id === next.parentSourceId);
     if (!parent) fail("The parent source no longer exists. Pick another source.");
@@ -261,7 +295,7 @@ export async function saveSource(db, input = {}, now = new Date()) {
       parent = parent.parentSourceId ? sources.find((s) => s.id === parent.parentSourceId) : null;
     }
   }
-  const sameIdentity = (a, b) => key(a.name) === key(b.name) && (a.parentSourceId || null) === (b.parentSourceId || null) && str(a.context, 100).toLowerCase() === str(b.context, 100).toLowerCase();
+  const sameIdentity = (a, b) => key(a.name) === key(b.name) && (a.parentSourceId || null) === (b.parentSourceId || null) && (a.viaPersonId || null) === (b.viaPersonId || null) && str(a.context, 100).toLowerCase() === str(b.context, 100).toLowerCase();
   const clash = sources.find((s) => s.id !== cur?.id && sameIdentity(s, next));
   if (!cur) {
     if (clash) return { ...clash, existed: true };
@@ -279,7 +313,7 @@ export async function saveSource(db, input = {}, now = new Date()) {
 export async function removeSource(db, { id } = {}, now = new Date()) {
   const sid = String(id);
   if (!(await db.collection(SOURCES).findOne({ _id: sid }))) fail("That source no longer exists. Reload the page.");
-  // Child contexts remain separate records if their parent is removed.
+  // Child contexts remain separate records if their parent is removed. (A source introduced by a person keeps that person.)
   const removed = await db.collection(SOURCES).findOne({ _id: sid });
   for (const child of (await all(db, SOURCES)).filter((s) => s.parentSourceId === sid)) await db.collection(SOURCES).updateOne({ _id: child.id }, { $set: { parentSourceId: null, context: child.context || `Via ${removed.name}`, updatedAt: now.toISOString() } });
   const people = (await all(db, PEOPLE)).filter((p) => p.sourceId === sid);

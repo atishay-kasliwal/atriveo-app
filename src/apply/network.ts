@@ -12,14 +12,16 @@ export interface Person {
   sourceId: string | null; via: string | null; color: string | null; tags: string[];
   lastContact: string | null; nextFollowUp: string | null; history: HistoryEntry[]; archived: boolean; createdAt: string; updatedAt: string; x?: number; y?: number;
 }
-export interface Source { parentSourceId?: string | null; context?: string; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
+export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
 export interface Link { id: string; a: string; b: string; kind: LinkKind; label: string; color: string | null }
 export interface NetworkData { people: Person[]; sources: Source[]; links: Link[]; you?: { x: number; y: number } }
 export interface ListRow { name: string; city: string; repeat: boolean; exists: boolean }
 
-export function sourceLabel(source: Source, sources: Source[]): string {
+/** "NKHS · via Chani Jain", "Randstad · met at the conference · via All Things Open": the name plus how it came to you. */
+export function sourceLabel(source: Source, sources: Source[], people: { id: string; name: string }[] = []): string {
   const parent = source.parentSourceId ? sources.find((s) => s.id === source.parentSourceId) : null;
-  return [source.name, source.context, parent ? `via ${parent.name}` : null].filter(Boolean).join(' · ');
+  const person = source.viaPersonId ? people.find((p) => p.id === source.viaPersonId) : null;
+  return [source.name, source.context, parent ? `via ${parent.name}` : person ? `via ${person.name}` : null].filter(Boolean).join(' · ');
 }
 
 export const SOURCE_TYPES: [SourceType, string][] = [["company", "Company"], ["staffing", "Staffing agency"], ["event", "Event"], ["family", "Family"], ["other", "Other"]];
@@ -105,42 +107,46 @@ export function autoLayout(data: NetworkData): Map<string, Point> {
   const you = data.you ?? { x: 0, y: 0 };
   pos.set("you", { x: you.x, y: you.y });
   const sources = [...data.sources].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
-  const sourceIds = new Set(sources.map((s) => s.id));
-  const roots = sources.filter((s) => !s.parentSourceId || !sourceIds.has(s.parentSourceId));
+  const sourceIds = new Set(sources.map((s) => s.id)), personIds = new Set(data.people.map((p) => p.id));
+  // A source arrives through a parent source, through a person (placed next to them once they have a place), or straight from you.
+  const throughPerson = (s: Source) => Boolean(s.viaPersonId && personIds.has(s.viaPersonId));
+  const roots = sources.filter((s) => (!s.parentSourceId || !sourceIds.has(s.parentSourceId)) && !throughPerson(s));
   roots.forEach((s, i) => pos.set(s.id, s.x != null && s.y != null ? { x: s.x, y: s.y } : ring(you.x, you.y, 460 + (roots.length > 6 ? 120 : 0), (i / Math.max(1, roots.length)) * Math.PI * 2 - Math.PI / 2)));
   for (const s of sources) if (s.x != null && s.y != null) pos.set(s.id, { x: s.x, y: s.y });
-  for (let guard = 0; guard < sources.length; guard++) {
-    let added = false;
-    for (const parent of sources) {
-      const center = pos.get(parent.id); if (!center) continue;
-      const children = sources.filter((s) => s.parentSourceId === parent.id && !pos.has(s.id));
-      if (!children.length) continue;
-      placeGroup(children.map((s) => s.id), center, Math.atan2(center.y - you.y, center.x - you.x) + Math.PI / 3, 380, pos); added = true;
-    }
-    if (!added) break;
-  }
-  for (const [index, source] of sources.entries()) if (!pos.has(source.id)) pos.set(source.id, ring(you.x, you.y, 460, index * 2.4));
-
   for (const p of data.people) if (p.x != null && p.y != null) pos.set(p.id, { x: p.x, y: p.y });
   const bySource = new Map<string | null, Person[]>(), byVia = new Map<string, Person[]>();
   for (const p of data.people) {
     if (pos.has(p.id)) continue;
-    if (p.via && data.people.some((q) => q.id === p.via)) byVia.set(p.via, [...(byVia.get(p.via) ?? []), p]);
-    else bySource.set(p.sourceId, [...(bySource.get(p.sourceId) ?? []), p]);
+    if (p.via && personIds.has(p.via)) byVia.set(p.via, [...(byVia.get(p.via) ?? []), p]);
+    else bySource.set(p.sourceId && sourceIds.has(p.sourceId) ? p.sourceId : null, [...(bySource.get(p.sourceId && sourceIds.has(p.sourceId) ? p.sourceId : null) ?? []), p]);
   }
-  for (const [sid, list] of bySource) {
-    const c = (sid && pos.get(sid)) || you;
-    const out = sid ? Math.atan2(c.y - you.y, c.x - you.x) : -Math.PI / 2;
-    placeGroup(list.map((p) => p.id), c, out, sid ? 250 : 300, pos);
+  const away = (c: Point) => Math.atan2(c.y - you.y, c.x - you.x);
+  const done = new Set<string | null>();
+  // Each pass places whatever now has something to hang from; a chain (you, Kasliwal, Chani, NKHS, its people) takes a few passes.
+  for (let pass = 0; pass < 50; pass++) {
+    let moved = false;
+    for (const parent of sources) {
+      const c = pos.get(parent.id); if (!c) continue;
+      const kids = sources.filter((s) => s.parentSourceId === parent.id && !pos.has(s.id));
+      if (kids.length) { placeGroup(kids.map((s) => s.id), c, away(c) + Math.PI / 3, 380, pos); moved = true; }
+    }
+    for (const person of data.people) {
+      const c = pos.get(person.id); if (!c) continue;
+      const kids = sources.filter((s) => s.viaPersonId === person.id && throughPerson(s) && !pos.has(s.id));
+      if (kids.length) { placeGroup(kids.map((s) => s.id), c, away(c) - Math.PI / 5, 300, pos); moved = true; }
+    }
+    for (const [sid, list] of bySource) {
+      if (done.has(sid)) continue;
+      const c = sid ? pos.get(sid) : you; if (!c) continue;
+      placeGroup(list.map((p) => p.id), c, sid ? away(c) : -Math.PI / 2, sid ? 250 : 300, pos); done.add(sid); moved = true;
+    }
+    for (const [via, kids] of byVia) {
+      const c = pos.get(via); if (!c || kids.every((k) => pos.has(k.id))) continue;
+      kids.forEach((p, i) => pos.set(p.id, ring(c.x, c.y, 210, away(c) + (i - (kids.length - 1) / 2) * 0.55))); moved = true;
+    }
+    if (!moved) break;
   }
-  // Introduced people after everyone else, so a chain of introductions places each one next to the last.
-  const queue = [...byVia.keys()];
-  for (let guard = 0; queue.length && guard < 10000; guard++) {
-    const via = queue.shift()!; const c = pos.get(via);
-    if (!c) { queue.push(via); continue; }
-    const kids = byVia.get(via) ?? [], out = Math.atan2(c.y - you.y, c.x - you.x);
-    kids.forEach((p, i) => { pos.set(p.id, ring(c.x, c.y, 210, out + (i - (kids.length - 1) / 2) * 0.55)); });
-  }
+  for (const [index, source] of sources.entries()) if (!pos.has(source.id)) pos.set(source.id, ring(you.x, you.y, 460, index * 2.4));
   for (const p of data.people) if (!pos.has(p.id)) pos.set(p.id, ring(you.x, you.y, 300, Math.random() * Math.PI * 2));
   return pos;
 }
@@ -185,7 +191,8 @@ export function edgesFor(data: NetworkData, colors: ReturnType<typeof colorsFor>
   const typeName = (t: SourceType) => SOURCE_TYPES.find(([k]) => k === t)?.[1].toLowerCase() ?? "";
   for (const s of data.sources) {
     const parent = s.parentSourceId && data.sources.some((source) => source.id === s.parentSourceId && source.id !== s.id) ? s.parentSourceId : null;
-    out.push({ key: `source-${s.id}`, a: parent || 'you', b: s.id, kind: parent ? 'intro' : 'you', label: parent ? 'introduced through' : typeName(s.type), color: colors.source.get(s.id) ?? NEUTRAL });
+    const person = !parent && s.viaPersonId && data.people.some((p) => p.id === s.viaPersonId) ? s.viaPersonId : null;
+    out.push({ key: `source-${s.id}`, a: parent || person || "you", b: s.id, kind: parent || person ? (person ? "via" : "intro") : "you", label: parent ? "introduced through" : person ? "introduced" : typeName(s.type), color: colors.source.get(s.id) ?? NEUTRAL });
   }
   const ids = new Set(data.people.map((p) => p.id));
   for (const p of data.people) {
@@ -326,3 +333,8 @@ export function knownCompanies(): Promise<KnownCompany[]> {
 /** Local canvas visibility; changing these never changes saved people or board items. */
 export interface CanvasLayers { people: boolean; sources: boolean; connections: boolean; board: boolean; work: boolean }
 export const DEFAULT_CANVAS_LAYERS: CanvasLayers = { people: true, sources: true, connections: true, board: true, work: true };
+
+/** The picker's value ("" | a source id | "p:" + a person id) as the two fields a source is saved with. */
+export const throughFields = (value: string) => (value.startsWith("p:") ? { parentSourceId: null, viaPersonId: value.slice(2) } : { parentSourceId: value || null, viaPersonId: null });
+/** And back: a saved source as the picker's value. */
+export const throughValue = (s?: Source | null) => (s?.viaPersonId ? `p:${s.viaPersonId}` : s?.parentSourceId ?? "");

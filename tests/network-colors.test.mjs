@@ -72,3 +72,17 @@ test('introduced source contexts have their own nodes, labels and paths without 
  assert.notDeepEqual(positions.get('direct'),positions.get('at-event'));assert.notEqual(colors.source.get('direct'),colors.source.get('at-event'));
  sources[2].x=123;sources[2].y=456;assert.deepEqual(autoLayout(data).get('at-event'),{x:123,y:456});
 });
+
+test('a source introduced by a person: the line runs from that person, the source sits near them, its own people hang off the source, and paths go through them',async()=>{
+ const {autoLayout,edgesFor,colorsFor,warmPath,sourceLabel}=await import(out);
+ const fam={...src('fam','1'),type:'family'},nkhs={...src('nkhs','2'),viaPersonId:'chani'};
+ const data={sources:[fam,nkhs],links:[],people:[person('chani',{sourceId:'fam'}),person('a',{sourceId:'nkhs'}),person('b',{sourceId:'nkhs'}),person('c',{sourceId:'nkhs'}),person('d',{sourceId:'nkhs',via:'chani'})]};
+ const edges=edgesFor(data,colorsFor(data));
+ const e=edges.find(x=>x.b==='nkhs');assert.deepEqual([e.a,e.kind,e.label],['chani','via','introduced']);assert.ok(!edges.some(x=>x.a==='you'&&x.b==='nkhs'),'not straight from you');
+ for(const p of ['a','b','c'])assert.deepEqual(edges.filter(x=>x.b===p).map(x=>[x.a,x.kind]),[['nkhs','belongs']],'the company\'s own people, not through Chani');
+ assert.deepEqual(edges.filter(x=>x.b==='d').map(x=>x.a),['chani'],'one came through Chani herself');
+ const pos=autoLayout(data),d=(p,q)=>Math.hypot(p.x-q.x,p.y-q.y);
+ assert.ok(d(pos.get('nkhs'),pos.get('chani'))<=320,'next to Chani');assert.ok(['a','b','c'].every(id=>d(pos.get(id),pos.get('nkhs'))<=420),'its people around it');
+ assert.deepEqual(warmPath(edges,'a').nodes,['you','fam','chani','nkhs','a']);
+ assert.equal(sourceLabel(nkhs,data.sources,[{id:'chani',name:'Chani Jain'}]),'nkhs · via Chani Jain');
+ const gone=edgesFor({...data,people:data.people.filter(p=>p.id!=='chani')},colorsFor(data));assert.equal(gone.find(x=>x.b==='nkhs').a,'you','if Chani is archived, the source comes straight from you again');});

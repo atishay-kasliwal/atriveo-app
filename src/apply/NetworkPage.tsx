@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
-  sourceLabel, HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, plusDays, post, uploadPhoto,
+  sourceLabel, throughFields, throughValue, HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, plusDays, post, uploadPhoto,
   type BoardItem, type HistoryType, type JobRow, companyOfPerson, loadPersonJobs, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
 } from "./network";
 import NetworkGraph from "./NetworkGraph";
@@ -120,7 +120,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const openPerson = (id: string | null) => { setWork(null); setSelected(id); };
   const openWork = (id: string) => { setSelected(null); setWork(id); };
   const replacePerson = (p: Person) => setData((d) => ({ ...d, people: d.people.map((x) => (x.id === p.id ? p : x)) }));
-  const viewName = view.kind === "source" ? (view.id ? (sourceById.has(view.id) ? sourceLabel(sourceById.get(view.id)!, data.sources) : "Source") : "No source") : view.kind === "due" ? "Follow-up due" : view.kind === "never" ? "Never contacted" : view.kind === "introduced" ? "Introduced by someone" : "Everyone";
+  const viewName = view.kind === "source" ? (view.id ? (sourceById.has(view.id) ? sourceLabel(sourceById.get(view.id)!, data.sources, data.people) : "Source") : "No source") : view.kind === "due" ? "Follow-up due" : view.kind === "never" ? "Never contacted" : view.kind === "introduced" ? "Introduced by someone" : "Everyone";
 
   async function archive(p: Person) {
     try {
@@ -175,8 +175,8 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
             <div className="nw-rail-scroll">
               {data.sources.map((s) => (
                 <div key={s.id} className="nw-rail-row">
-                  <RailItem on={view.kind === "source" && view.id === s.id} color={colors.source.get(s.id) ?? ""} label={sourceLabel(s, data.sources)} n={counts.by.get(s.id) ?? 0} onClick={() => setView({ kind: "source", id: s.id })} />
-                  <button type="button" className="nw-edit" aria-label={`Edit ${sourceLabel(s, data.sources)}`} title="Edit" onClick={() => setDialog({ source: s })}>⋯</button>
+                  <RailItem on={view.kind === "source" && view.id === s.id} color={colors.source.get(s.id) ?? ""} label={sourceLabel(s, data.sources, data.people)} n={counts.by.get(s.id) ?? 0} onClick={() => setView({ kind: "source", id: s.id })} />
+                  <button type="button" className="nw-edit" aria-label={`Edit ${sourceLabel(s, data.sources, data.people)}`} title="Edit" onClick={() => setDialog({ source: s })}>⋯</button>
                 </div>
               ))}
               {(counts.by.get(null) ?? 0) > 0 && <RailItem on={view.kind === "source" && view.id === null} color="var(--nw-line-strong)" label="No source" n={counts.by.get(null) ?? 0} onClick={() => setView({ kind: "source", id: null })} />}
@@ -206,7 +206,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
                       <button type="button" className={`nw-row${p.id === selected ? " on" : ""}`} onClick={() => openPerson(p.id === selected ? null : p.id)} aria-pressed={p.id === selected}>
                         <Avatar name={p.name} photo={p.photoId} color={colors.person.get(p.id) ?? ""} source={via && src ? colors.source.get(src.id) : undefined} />
                         <span className="who"><b>{p.name}</b><small>{p.role || (via ? `Introduced by ${via.name}` : "\u00a0")}</small></span>
-                        <span className="src">{src ? <><i style={{ background: colors.source.get(src.id) }} />{sourceLabel(src, data.sources)}</> : <em>No source</em>}</span>
+                        <span className="src">{src ? <><i style={{ background: colors.source.get(src.id) }} />{sourceLabel(src, data.sources, data.people)}</> : <em>No source</em>}</span>
                         <span className="city">{p.city}</span>
                         <span className="last">{ago(p.lastContact)}</span>
                         <span className={`fu${f?.due ? " due" : ""}`}>{f ? f.text : ""}</span>
@@ -230,10 +230,10 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
         </div>
       </main>
 
-      {dialog === "list" && <BulkAdd sources={data.sources} onClose={() => setDialog(null)} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
-      {dialog === "import" && <NetworkImport sources={data.sources} onClose={() => setDialog(null)} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
+      {dialog === "list" && <BulkAdd sources={data.sources} people={data.people} onClose={() => setDialog(null)} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
+      {dialog === "import" && <NetworkImport sources={data.sources} people={data.people} onClose={() => setDialog(null)} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
       {dialog === "person" && <AddPerson sources={data.sources} people={data.people} onClose={() => setDialog(null)} onDone={async (p) => { setDialog(null); await reload(); setSelected(p.id); say({ text: `${p.name} added.` }); }} />}
-      {dialog && typeof dialog === "object" && <SourceEditor source={dialog.source} sources={data.sources} count={dialog.source ? counts.by.get(dialog.source.id) ?? 0 : 0} color={dialog.source ? colors.source.get(dialog.source.id) ?? PALETTE[0] : PALETTE[0]} onClose={() => setDialog(null)}
+      {dialog && typeof dialog === "object" && <SourceEditor source={dialog.source} sources={data.sources} people={data.people} count={dialog.source ? counts.by.get(dialog.source.id) ?? 0 : 0} color={dialog.source ? colors.source.get(dialog.source.id) ?? PALETTE[0] : PALETTE[0]} onClose={() => setDialog(null)}
         onDone={async (msg, removed) => { setDialog(null); if (removed && view.kind === "source" && view.id === removed) setView({ kind: "all" }); await reload(); say({ text: msg }); }} />}
       {bulkMail && <BulkMail people={bulkMail.map((id) => personById.get(id)).filter((p): p is Person => Boolean(p))} onClose={() => setBulkMail(null)} onSent={replacePerson} say={say} />}
       {mailFor && personById.get(mailFor.id) && <NetworkMail key={`${mailFor.id}|${mailFor.job?.url ?? ""}`} person={personById.get(mailFor.id)!} job={mailFor.job} color={colors.person.get(mailFor.id) ?? ""} onClose={() => setMailFor(null)} onSent={replacePerson} say={say} />}
@@ -328,7 +328,7 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
         <div className="nw-pair">
           <label className="nw-f"><span>Belongs to</span>
             <select id="nw-source" value={p.sourceId ?? ""} onChange={(e) => void save({ sourceId: e.target.value || null })}>
-              <option value="">No source</option>{data.sources.map((s) => <option key={s.id} value={s.id}>{sourceLabel(s, data.sources)}</option>)}
+              <option value="">No source</option>{data.sources.map((s) => <option key={s.id} value={s.id}>{sourceLabel(s, data.sources, data.people)}</option>)}
             </select></label>
           <label className="nw-f"><span>Introduced by</span>
             <select id="nw-via" value={p.via ?? ""} onChange={(e) => void save({ via: e.target.value || null })}>
@@ -407,7 +407,7 @@ function Dialog({ title, sub, onClose, children, wide }: { title: string; sub?: 
   );
 }
 
-function SourcePicker({ sources, value, onChange, newName, setNewName, newType, setNewType, newParent, setNewParent, newContext, setNewContext }: { sources: Source[]; value: string; onChange: (v: string) => void; newName: string; setNewName: (v: string) => void; newType: SourceType; setNewType: (v: SourceType) => void; newParent: string; setNewParent: (value: string) => void; newContext: string; setNewContext: (value: string) => void }) {
+function SourcePicker({ sources, people, value, onChange, newName, setNewName, newType, setNewType, newParent, setNewParent, newContext, setNewContext }: { sources: Source[]; people: Person[]; value: string; onChange: (v: string) => void; newName: string; setNewName: (v: string) => void; newType: SourceType; setNewType: (v: SourceType) => void; newParent: string; setNewParent: (value: string) => void; newContext: string; setNewContext: (value: string) => void }) {
   return (
     <div className="nw-pick">
       <label className="nw-f"><span>They belong to</span>
@@ -417,13 +417,13 @@ function SourcePicker({ sources, value, onChange, newName, setNewName, newType, 
       {value === "__new" && <>
         <label className="nw-f"><span>Source name</span><input id="nw-new-source" placeholder="Randstad, All Things Open, Family…" value={newName} onChange={(e) => setNewName(e.target.value)} /></label>
         <label className="nw-f"><span>Kind</span><select id="nw-new-type" value={newType} onChange={(e) => setNewType(e.target.value as SourceType)}>{SOURCE_TYPES.map(([t, l]) => <option key={t} value={t}>{l}</option>)}</select></label>
-        <NetworkSourceContext sources={sources} parentSourceId={newParent} onParent={setNewParent} context={newContext} onContext={setNewContext} prefix="nw-new" />
+        <NetworkSourceContext sources={sources} people={people} parentSourceId={newParent} onParent={setNewParent} context={newContext} onContext={setNewContext} prefix="nw-new" />
       </>}
     </div>
   );
 }
 
-function BulkAdd({ sources, onClose, onDone }: { sources: Source[]; onClose: () => void; onDone: (msg: string, sourceId: string | null) => void }) {
+function BulkAdd({ sources, people, onClose, onDone }: { sources: Source[]; people: Person[]; onClose: () => void; onDone: (msg: string, sourceId: string | null) => void }) {
   const [text, setText] = useState("");
   const [rows, setRows] = useState<ListRow[]>([]);
   const [checking, setChecking] = useState(false);
@@ -445,7 +445,7 @@ function BulkAdd({ sources, onClose, onDone }: { sources: Source[]; onClose: () 
   async function add() {
     setBusy(true); setError("");
     try {
-      const r = await post<{ added: Person[]; skipped: string[]; sourceId: string | null }>("people", { rows: fresh.map(({ name, city }) => ({ name, city })), ...(source === "__new" ? { newSource: { name: newName, type: newType, parentSourceId: newParent || null, context: newContext } } : { sourceId: source || null }) });
+      const r = await post<{ added: Person[]; skipped: string[]; sourceId: string | null }>("people", { rows: fresh.map(({ name, city }) => ({ name, city })), ...(source === "__new" ? { newSource: { name: newName, type: newType, ...throughFields(newParent), context: newContext } } : { sourceId: source || null }) });
       const where = source === "__new" ? newName.trim() : sources.find((s) => s.id === source)?.name;
       onDone(`Added ${r.added.length} ${r.added.length === 1 ? "person" : "people"}${where ? ` to ${where}` : ""}.${r.skipped.length ? ` Skipped ${r.skipped.length} already here.` : ""}`, r.sourceId);
     } catch (e) { setError(String((e as Error).message)); setBusy(false); }
@@ -460,7 +460,7 @@ function BulkAdd({ sources, onClose, onDone }: { sources: Source[]; onClose: () 
           ))}
         </div>
       </div>
-      <SourcePicker sources={sources} value={source} onChange={setSource} newName={newName} setNewName={setNewName} newType={newType} setNewType={setNewType} newParent={newParent} setNewParent={setNewParent} newContext={newContext} setNewContext={setNewContext} />
+      <SourcePicker sources={sources} people={people} value={source} onChange={setSource} newName={newName} setNewName={setNewName} newType={newType} setNewType={setNewType} newParent={newParent} setNewParent={setNewParent} newContext={newContext} setNewContext={setNewContext} />
       {error && <p className="nw-error" role="alert">{error}</p>}
       <div className="nw-df"><button type="button" className="nw-btn" onClick={onClose}>Cancel</button><button type="button" className="nw-btn main" disabled={!ready} onClick={() => void add()}>{busy ? "Adding…" : fresh.length ? `Add ${fresh.length} ${fresh.length === 1 ? "person" : "people"}` : "Add"}</button></div>
     </Dialog>
@@ -478,7 +478,7 @@ function AddPerson({ sources, people, onClose, onDone }: { sources: Source[]; pe
     setBusy(true); setError("");
     try {
       let sourceId: string | null = source || null;
-      if (source === "__new") sourceId = (await post<{ source: Source }>("source", { name: newName, type: newType, parentSourceId: newParent || null, context: newContext })).source.id;
+      if (source === "__new") sourceId = (await post<{ source: Source }>("source", { name: newName, type: newType, ...throughFields(newParent), context: newContext })).source.id;
       const r = await post<{ person: Person }>("person", { name, role, email, company, sourceId, via: via || null });
       onDone(r.person);
     } catch (e) { setError(String((e as Error).message)); setBusy(false); }
@@ -491,7 +491,7 @@ function AddPerson({ sources, people, onClose, onDone }: { sources: Source[]; pe
         <label className="nw-f"><span>Company / employer</span><input id="nw-add-company" list="nw-company-options" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Where they currently work" /><small>Used to match jobs and applications. Separate from how you know them.</small></label>
         <datalist id="nw-company-options">{[...new Set([...people.map((p) => p.company), ...sources.filter((s) => s.type === 'company' || s.type === 'staffing').map((s) => s.name)].filter(Boolean))].map((name) => <option key={name} value={name} />)}</datalist>
         <label className="nw-f"><span>Email</span><input id="nw-add-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Optional" /></label>
-        <SourcePicker sources={sources} value={source} onChange={setSource} newName={newName} setNewName={setNewName} newType={newType} setNewType={setNewType} newParent={newParent} setNewParent={setNewParent} newContext={newContext} setNewContext={setNewContext} />
+        <SourcePicker sources={sources} people={people} value={source} onChange={setSource} newName={newName} setNewName={setNewName} newType={newType} setNewType={setNewType} newParent={newParent} setNewParent={setNewParent} newContext={newContext} setNewContext={setNewContext} />
         <label className="nw-f"><span>Introduced by</span><select id="nw-add-via" value={via} onChange={(e) => setVia(e.target.value)}><option value="">Nobody (a first connection)</option>{people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
       </div>
       {error && <p className="nw-error" role="alert">{error}</p>}
@@ -500,15 +500,15 @@ function AddPerson({ sources, people, onClose, onDone }: { sources: Source[]; pe
   );
 }
 
-function SourceEditor({ source, sources, count, color, onClose, onDone }: { source: Source | null; sources: Source[]; count: number; color: string; onClose: () => void; onDone: (msg: string, removed?: string) => void }) {
+function SourceEditor({ source, sources, people, count, color, onClose, onDone }: { source: Source | null; sources: Source[]; people: Person[]; count: number; color: string; onClose: () => void; onDone: (msg: string, removed?: string) => void }) {
   const [name, setName] = useState(source?.name ?? ""); const [type, setType] = useState<SourceType>(source?.type ?? "company");
-  const [parentSourceId, setParentSourceId] = useState(source?.parentSourceId ?? "");
+  const [parentSourceId, setParentSourceId] = useState(throughValue(source));
   const [context, setContext] = useState(source?.context ?? "");
   const [about, setAbout] = useState(source?.about ?? ""); const [pick, setPick] = useState<string | null>(source?.color ?? null);
   const [confirm, setConfirm] = useState(false); const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
   async function save() {
     setBusy(true); setError("");
-    try { const r = await post<{ source: Source & { existed?: boolean } }>("source", { ...(source ? { id: source.id } : {}), name, type, about, color: pick, parentSourceId: parentSourceId || null, context }); onDone(source ? `${name.trim()} saved.` : r.source.existed ? `You already have ${r.source.name} in that context.` : `${name.trim()} added. Add people to it with Add a list.`); }
+    try { const r = await post<{ source: Source & { existed?: boolean } }>("source", { ...(source ? { id: source.id } : {}), name, type, about, color: pick, ...throughFields(parentSourceId), context }); onDone(source ? `${name.trim()} saved.` : r.source.existed ? `You already have ${r.source.name} in that context.` : `${name.trim()} added. Add people to it with Add a list.`); }
     catch (e) { setError(String((e as Error).message)); setBusy(false); }
   }
   async function remove() {
@@ -521,7 +521,7 @@ function SourceEditor({ source, sources, count, color, onClose, onDone }: { sour
       <div className="nw-form">
         <label className="nw-f"><span>Name</span><input id="nw-src-name" autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Randstad, All Things Open, Family…" /></label>
         <label className="nw-f"><span>Kind</span><select id="nw-src-type" value={type} onChange={(e) => setType(e.target.value as SourceType)}>{SOURCE_TYPES.map(([t, l]) => <option key={t} value={t}>{l}</option>)}</select></label>
-        <NetworkSourceContext sources={sources} parentSourceId={parentSourceId} onParent={setParentSourceId} context={context} onContext={setContext} excludeId={source?.id} prefix="nw-src" />
+        <NetworkSourceContext sources={sources} people={people} parentSourceId={parentSourceId} onParent={setParentSourceId} context={context} onContext={setContext} excludeId={source?.id} prefix="nw-src" />
         <label className="nw-f"><span>About</span><input id="nw-src-about" value={about} onChange={(e) => setAbout(e.target.value)} placeholder="Staffing agency, open-source conference…" /></label>
         <div className="nw-lab">Colour</div>
         <Swatches value={pick} fallback={color} label="Source colour" onPick={setPick} />
