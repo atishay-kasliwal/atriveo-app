@@ -4,6 +4,7 @@ import {
   type HistoryType, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
 } from "./network";
 import NetworkGraph from "./NetworkGraph";
+import NetworkMail from "./NetworkMail";
 import "./network.css";
 
 type View = { kind: "all" } | { kind: "source"; id: string | null } | { kind: "due" } | { kind: "never" } | { kind: "introduced" };
@@ -24,6 +25,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [dialog, setDialog] = useState<null | "list" | "person" | { source: Source | null }>(null);
   const [toast, setToast] = useState<Toast>(null);
+  const [mailFor, setMailFor] = useState<string | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
   const say = useCallback((t: Toast) => { setToast(t); window.clearTimeout(toastTimer.current); if (t) toastTimer.current = window.setTimeout(() => setToast(null), t.undo ? 6000 : 3000); }, []);
 
@@ -161,7 +163,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
 
           {person && (
             <PersonPanel key={person.id} person={person} data={data} colors={colors} sourceById={sourceById} personById={personById}
-              onClose={() => setSelected(null)} onChange={replacePerson} onOpen={setSelected} onArchive={() => void archive(person)} say={say}
+              onClose={() => setSelected(null)} onChange={replacePerson} onOpen={setSelected} onArchive={() => void archive(person)} onWrite={() => setMailFor(person.id)} say={say}
               onLinks={(links) => setData((d) => ({ ...d, links }))} />
           )}
         </div>
@@ -171,6 +173,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
       {dialog === "person" && <AddPerson sources={data.sources} people={data.people} onClose={() => setDialog(null)} onDone={async (p) => { setDialog(null); await reload(); setSelected(p.id); say({ text: `${p.name} added.` }); }} />}
       {dialog && typeof dialog === "object" && <SourceEditor source={dialog.source} count={dialog.source ? counts.by.get(dialog.source.id) ?? 0 : 0} color={dialog.source ? colors.source.get(dialog.source.id) ?? PALETTE[0] : PALETTE[0]} onClose={() => setDialog(null)}
         onDone={async (msg, removed) => { setDialog(null); if (removed && view.kind === "source" && view.id === removed) setView({ kind: "all" }); await reload(); say({ text: msg }); }} />}
+      {mailFor && personById.get(mailFor) && <NetworkMail person={personById.get(mailFor)!} color={colors.person.get(mailFor) ?? ""} onClose={() => setMailFor(null)} onSent={replacePerson} say={say} />}
       {toast && <div className="nw-toast" role="status"><span>{toast.text}</span>{toast.undo && <button type="button" onClick={toast.undo}>Undo</button>}<button type="button" className="x" aria-label="Close" onClick={() => say(null)}>×</button></div>}
     </div>
   );
@@ -196,9 +199,9 @@ function Swatches({ value, fallback, onPick, label }: { value: string | null; fa
   );
 }
 
-function PersonPanel({ person: p, data, colors, sourceById, personById, onClose, onChange, onOpen, onArchive, say, onLinks }: {
+function PersonPanel({ person: p, data, colors, sourceById, personById, onClose, onChange, onOpen, onArchive, onWrite, say, onLinks }: {
   person: Person; data: NetworkData; colors: ReturnType<typeof colorsFor>; sourceById: Map<string, Source>; personById: Map<string, Person>;
-  onClose: () => void; onChange: (p: Person) => void; onOpen: (id: string) => void; onArchive: () => void; say: (t: Toast) => void; onLinks: (l: NetworkData["links"]) => void;
+  onClose: () => void; onChange: (p: Person) => void; onOpen: (id: string) => void; onArchive: () => void; onWrite: () => void; say: (t: Toast) => void; onLinks: (l: NetworkData["links"]) => void;
 }) {
   const [draft, setDraft] = useState(p);
   const [saving, setSaving] = useState("");
@@ -313,8 +316,8 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
         </ul>
       </div>
       <div className="nw-pf">
+        <button type="button" className="nw-btn main nw-write" onClick={onWrite}>Write email to {p.name.split(" ")[0]}</button>
         <button type="button" className="nw-btn ghost" onClick={onArchive}>Archive</button>
-        <span>Email from here arrives in the next release.</span>
       </div>
     </aside>
   );

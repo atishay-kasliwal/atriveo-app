@@ -178,3 +178,18 @@ export function edgesFor(data: NetworkData, colors: ReturnType<typeof colorsFor>
   }
   return out;
 }
+
+/* ---------- email ---------- */
+export interface MailSettings { fromName: string; fromEmail: string; about: string; signature: string; connected: boolean; resumes: { track: string; label: string }[] }
+export const loadMailSettings = () => getJson<{ settings: MailSettings } & ApiBody>("/network/mail").then((r) => r.settings);
+export const loadDraft = (id: string) => getJson<{ status: "writing" | "done" | "failed"; subject: string; body: string; error: string } & ApiBody>(`/network/mail/draft?id=${encodeURIComponent(id)}`);
+
+/** A plain starting point when the AI worker is not available: greeting, one line for the reason, signature. */
+export function starter(p: Person, tone: string, intent: string, signature: string): { subject: string; body: string } {
+  const first = p.name.split(/\s+/)[0] || "there";
+  const why = intent.trim() || "I'm looking for my next role and wanted to stay in touch";
+  const sign = signature.trim() || "";
+  if (tone === "formal") return { subject: "Following up", body: `Dear ${first},\n\nThank you for your time. ${why.replace(/^\w/, (c) => c.toUpperCase())}. I would be glad to talk whenever it suits you.\n\nKind regards,\n${sign}` };
+  if (tone === "short") return { subject: "Quick hello", body: `Hi ${first},\n\n${why.replace(/^\w/, (c) => c.toUpperCase())}. Would you have ten minutes this week?\n\nThanks,\n${sign}` };
+  return { subject: "Checking in", body: `Hi ${first},\n\nHope you're doing well. ${why.replace(/^\w/, (c) => c.toUpperCase())}. Is there anything you'd suggest, or someone I should talk to?\n\nThanks so much,\n${sign}` };
+}
