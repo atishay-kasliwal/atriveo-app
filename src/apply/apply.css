@@ -17,7 +17,8 @@
 .apply-signout { background: none; border: 1px solid var(--border-col); color: var(--foreground); border-radius: 6px; padding: 5px 12px; font: inherit; font-size: 12.5px; cursor: pointer; }
 .apply-signout:hover { background: var(--accent-bg); }
 @media (max-width: 720px) {
-  .apply-ext, .apply-user-name { display: none; }
+  .apply-ext:not(.apply-settings), .apply-user-name { display: none; }
+  .apply-header-right .apply-settings { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 44px; min-height: 44px; }
   .apply-signout { min-height: 40px; }
 }
 
