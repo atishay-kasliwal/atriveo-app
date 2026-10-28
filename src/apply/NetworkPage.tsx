@@ -460,7 +460,7 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
             {text("company", "Works at", "text", companyOfPerson({ ...p, company: "" }, sourceById) || "Company")}{text("city", "City")}
             {text("email", "Email", "email")}{text("phone", "Phone", "tel")}
             <div className="pp-span">{text("linkedin", "LinkedIn", "url", "linkedin.com/in/…")}</div>
-            <label className="nw-f"><span>Belongs to</span>
+            <label className="nw-f"><span>Met through</span>
               <select id="nw-source" value={p.sourceId ?? ""} onChange={(e) => void save({ sourceId: e.target.value || null })}>
                 <option value="">No source</option>{data.sources.map((s) => <option key={s.id} value={s.id}>{sourceLabel(s, data.sources, data.people)}</option>)}
               </select></label>
@@ -479,7 +479,7 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
               <button type="button" className="pp-dot pp-popbtn" style={{ background: color }} aria-label="Change their colour" aria-expanded={pop === "colour"} onClick={() => setPop(pop === "colour" ? null : "colour")} />
               {pop === "colour" && <div className="pp-pop up" role="dialog" aria-label="Colour"><Swatches value={p.color} fallback={color} label="Colour" onPick={(c) => void save({ color: c })} /></div>}
             </div>
-            <small>{p.color ? "One you picked" : introducers.length ? "Their own branch, since someone introduced them" : src ? `The colour of ${src.name}` : "No source yet"}</small>
+            <small>{p.color ? "One you picked" : introducers.length ? "Their own branch, since someone introduced them" : src ? `The colour of where you met: ${src.name}` : "No source yet"}</small>
           </div>
         </>}
       </div>
@@ -502,7 +502,7 @@ function Dialog({ title, sub, onClose, children, wide }: { title: string; sub?: 
 function SourcePicker({ sources, people, value, onChange, newName, setNewName, newType, setNewType, newParent, setNewParent, newContext, setNewContext }: { sources: Source[]; people: Person[]; value: string; onChange: (v: string) => void; newName: string; setNewName: (v: string) => void; newType: SourceType; setNewType: (v: SourceType) => void; newParent: string; setNewParent: (value: string) => void; newContext: string; setNewContext: (value: string) => void }) {
   return (
     <div className="nw-pick">
-      <label className="nw-f"><span>They belong to</span>
+      <label className="nw-f"><span>Where you met them</span>
         <select id="nw-pick-source" value={value} onChange={(e) => onChange(e.target.value)}>
           <option value="__new">A new source…</option><option value="">No source</option>{sources.map((s) => <option key={s.id} value={s.id}>{sourceLabel(s, sources)}</option>)}
         </select></label>

@@ -23,7 +23,7 @@ export default function NetworkSourceContext({ sources, people, parentSourceId, 
       <option value="">Nobody — a direct connection</option>
       {introducers.length > 0 && <optgroup label="A person">{introducers.map((p) => <option key={p.id} value={`p:${p.id}`}>{p.name}</option>)}</optgroup>}
       {options.length > 0 && <optgroup label="Another source">{options.map((source) => <option key={source.id} value={source.id}>{sourceLabel(source, sources, people)}</option>)}</optgroup>}
-    </select><small>A person: NKHS, introduced by Chani. Its own people still belong to NKHS, not to Chani. A source: a separate Randstad met through All Things Open.</small></label>
+    </select><small>A person: NKHS, introduced by Chani. The people you meet through NKHS are its own, not Chani's. A source: a separate Randstad met through All Things Open.</small></label>
     <label className="nw-f"><span>Context / when you met</span><input id={`${prefix}-context`} value={context} onChange={(e) => onContext(e.target.value)} placeholder="Reached out last year, met at the event…" maxLength={100} /><small>The same name can have separate records in different contexts.</small></label>
   </>;
 }

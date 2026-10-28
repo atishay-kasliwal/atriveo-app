@@ -17,7 +17,7 @@ type Gesture =
 const PERSON = { w: 196, h: 52 }, YOU = { w: 246, h: 80 }, WORK = { w: 176, h: 58 };
 const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 const sourceSize = (name: string, about: string) => ({ w: Math.round(Math.max(180, 86 + Math.max(name.length * 9.6, about.length * 6.8))), h: 68 });
-const DASH: Record<string, string | undefined> = { via: "7 5", intro: "7 5", family: "2 5", other: "10 3 2 3" };
+const DASH: Record<string, string | undefined> = { via: "7 5", intro: "7 5", family: "2 5", other: "10 3 2 3", employer: "1 5" };
 const typing = (t: EventTarget | null) => t instanceof HTMLElement && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName));
 const inkOf = (c?: string) => (!c || c === "ink" ? "var(--nw-ink)" : c);
 
@@ -401,7 +401,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
                   {p.photoId ? <><clipPath id={`nwph-${p.id}`}><circle cx={ax} r={17.5} /></clipPath><image href={imageUrl(p.photoId)} x={ax - 17.5} y={-17.5} width={35} height={35} clipPath={`url(#nwph-${p.id})`} preserveAspectRatio="xMidYMid slice" /></>
                     : <text x={ax} y={1} className="nwg-ini" fill={c}>{initials(p.name)}</text>}
                   {(due || replied) && <circle cx={ax + 14} cy={14} r={6} fill={due ? "var(--nw-warn)" : "var(--nw-ok)"} stroke={card} strokeWidth={2.5}><title>{due ? "Follow-up due" : "They replied"}</title></circle>}
-                  {lineage && <circle cx={PERSON.w / 2 - 2} cy={-PERSON.h / 2 + 2} r={7} fill={lineage} stroke={bg} strokeWidth={2.5}><title>Belongs to {data.sources.find((s) => s.id === p.sourceId)?.name}, introduced by {people.get(p.via!)?.name}</title></circle>}
+                  {lineage && <circle cx={PERSON.w / 2 - 2} cy={-PERSON.h / 2 + 2} r={7} fill={lineage} stroke={bg} strokeWidth={2.5}><title>Met through {data.sources.find((s) => s.id === p.sourceId)?.name}, introduced by {people.get(p.via!)?.name}</title></circle>}
                   <text x={ax + 30} y={p.role || p.company ? -3 : 5} className="nwg-pname">{clip(p.name, 20)}</text>
                   {(p.role || p.company) && <text x={ax + 30} y={13} className="nwg-sub"><title>{[p.role, p.company].filter(Boolean).join(" · ")}</title>{clip(p.company || p.role, 22)}</text>}
                 </g>

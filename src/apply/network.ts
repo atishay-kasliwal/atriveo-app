@@ -184,7 +184,7 @@ export function placeGroup(ids: string[], c: Point, out: number, r0: number, pos
   });
 }
 
-export interface Edge { key: string; a: string; b: string; kind: "belongs" | "via" | "you" | LinkKind; label: string; color: string; link?: Link }
+export interface Edge { key: string; a: string; b: string; kind: "belongs" | "via" | "you" | "employer" | LinkKind; label: string; color: string; link?: Link }
 
 /** The lines: you to each source, each source to its first connections, each introducer to who they introduced, then your own links. */
 export function edgesFor(data: NetworkData, colors: ReturnType<typeof colorsFor>): Edge[] {
@@ -201,6 +201,8 @@ export function edgesFor(data: NetworkData, colors: ReturnType<typeof colorsFor>
     if (p.via && ids.has(p.via)) out.push({ key: `via-${p.id}`, a: p.via, b: p.id, kind: "via", label: "introduced", color: c });
     else if (p.sourceId && data.sources.some((s) => s.id === p.sourceId)) out.push({ key: `src-${p.id}`, a: p.sourceId, b: p.id, kind: "belongs", label: "first connection", color: colors.source.get(p.sourceId) ?? c });
     else out.push({ key: `you-${p.id}`, a: "you", b: p.id, kind: "you", label: "you know them", color: c });
+    // Where they work, when that company is on your map and is not where you met them: a faint "works at" line (colour and place stay with where you met).
+    if (p.company) { const employer = data.sources.find((s) => (s.type === "company" || s.type === "staffing") && s.id !== p.sourceId && sameCompany(s.name, p.company)); if (employer) out.push({ key: `works-${p.id}`, a: employer.id, b: p.id, kind: "employer", label: "works at", color: colors.source.get(employer.id) ?? NEUTRAL }); }
     // Everyone else who also introduced them gets a line too.
     for (const other of p.alsoVia ?? []) if (other !== p.via && ids.has(other)) out.push({ key: `via-${p.id}-${other}`, a: other, b: p.id, kind: "via", label: "also introduced", color: c });
   }
