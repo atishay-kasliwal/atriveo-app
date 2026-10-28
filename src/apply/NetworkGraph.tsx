@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import {
-  sourceLabel, SOURCE_TYPES, LINK_KINDS, PALETTE, TOOL_KEYS, autoLayout, edgesFor, followUp, imageUrl, initials, plusDays, post, smoothPath, thinPoints, warmPath, workProgress,
+  peopleForSource, organisationInitials, sourceLabel, SOURCE_TYPES, LINK_KINDS, PALETTE, TOOL_KEYS, autoLayout, edgesFor, followUp, imageUrl, initials, plusDays, post, smoothPath, thinPoints, warmPath, workProgress,
   type CanvasLayers, type BoardItem, type Edge, type Link, type LinkKind, type NetworkData, type Pen, type Person, type Point, type Source, type Tool, colorsFor,
 } from "./network";
 import { BoardBox, PenBar, Toolbar } from "./NetworkBoard";
@@ -14,7 +14,7 @@ function OrganisationLogo({ source, x }: { source: Source; x: number }) {
   const url = urls[failed];
   return <>
     <rect x={x} y={-34} width={68} height={68} rx={12} fill="white" stroke="#d8d9e3" />
-    {!url && <text x={x + 34} y={1} className="nwg-tile big" fill="#7462c9">{source.name[0]?.toUpperCase()}</text>}
+    {!url && <text x={x + 34} y={1} className="nwg-tile big" fill="#7462c9">{organisationInitials(source.name)}</text>}
     {url && <image key={url} href={url} x={x + 5} y={-29} width={58} height={58} preserveAspectRatio="xMidYMid meet" onError={() => setFailed((n) => n + 1)} />}
   </>;
 }
@@ -81,7 +81,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
   const getSvg = useCallback(() => svgEl.current, []);
   const [exporting, setExporting] = useState(false);
   const edges = useMemo(() => edgesFor(data, colors), [data, colors]);
-  const peopleCount = useMemo(() => { const m = new Map<string, number>(); for (const p of data.people) if (p.sourceId && !p.via) m.set(p.sourceId, (m.get(p.sourceId) ?? 0) + 1); for (const s of data.sources) if (s.auto) m.set(s.id, s.auto.length); return m; }, [data.people, data.sources]);
+  const sourceMembers = useMemo(() => new Map(data.sources.map((source) => [source.id, peopleForSource(source, data)])), [data]);
   const people = useMemo(() => new Map(data.people.map((p) => [p.id, p])), [data.people]);
 
   const works = useMemo(() => board.filter((b) => b.kind === "work" && layers.work), [board, layers.work]);
@@ -392,10 +392,10 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
               <text x={-YOU.w / 2 + 86} y={data.you?.title ? 24 : 16} className="nwg-you-sub">{youSub}</text>
             </g>
             {shownSources.map((s) => {
-              const p = pos(s.id), c = colors.source.get(s.id) ?? PALETTE[0], sz = sourceSize(s), n = peopleCount.get(s.id) ?? 0, dim = lit && !lit.has(s.id);
+              const p = pos(s.id), c = colors.source.get(s.id) ?? PALETTE[0], sz = sourceSize(s), n = sourceMembers.get(s.id)?.length ?? 0, dim = lit && !lit.has(s.id);
               const kind = SOURCE_TYPES.find(([type]) => type === s.type)?.[1] || s.type, org = s.type === "company" || s.type === "staffing", event = s.type === "event";
               const via = s.context || (s.parentSourceId ? `Via ${data.sources.find((parent) => parent.id === s.parentSourceId)?.name || "another source"}` : s.viaPersonId && people.has(s.viaPersonId) ? `Via ${people.get(s.viaPersonId)!.name}` : "");
-              const faces = data.people.filter((x) => (s.auto ? s.auto.includes(x.id) : x.sourceId === s.id)).slice(0, 3), x0 = -sz.w / 2;
+              const faces = (sourceMembers.get(s.id) ?? []).slice(0, 3), x0 = -sz.w / 2;
               const picture = (x: number, y: number, size: number, rx: number) => s.photoId
                 ? <><clipPath id={`nwg-src-${s.id}`}><rect x={x} y={y} width={size} height={size} rx={rx} /></clipPath><image href={imageUrl(s.photoId)} x={x} y={y} width={size} height={size} clipPath={`url(#nwg-src-${s.id})`} preserveAspectRatio="xMidYMid slice" /></> : null;
               return (
