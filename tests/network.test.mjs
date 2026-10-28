@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {Readable} from 'node:stream';
-import {addFromLinkedIn,parseContacts,csvRows,previewContacts,savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
+import {saveYou,addFromLinkedIn,parseContacts,csvRows,previewContacts,savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
 import {handleNetwork} from '../scripts/network-routes.mjs';
 
 // An in-memory stand-in for the three collections, with just the calls the store makes. Every name here is invented.
@@ -95,9 +95,9 @@ test('routes: read, preview, bulk add, a store error, unknown paths, and other p
 
 test('positions: people, sources and "you" keep where you dragged them; unknown ids are skipped; bad numbers are refused',async()=>{
  const db=fakeDb();const s=await saveSource(db,{name:'Expo',type:'event'},T);const p=await savePerson(db,{name:'Cy Ro',sourceId:s.id},T);
- assert.deepEqual((await networkView(db)).you,{x:0,y:0});
+ assert.deepEqual([(await networkView(db)).you.x,(await networkView(db)).you.y],[0,0]);
  assert.deepEqual(await savePositions(db,{items:[{id:p.id,x:120.04,y:-40},{id:s.id,x:300,y:5},{id:'you',x:-10,y:20},{id:'gone',x:1,y:1}]}),{saved:3});
- const v=await networkView(db);assert.deepEqual([v.people[0].x,v.people[0].y],[120,-40]);assert.deepEqual([v.sources[0].x,v.sources[0].y],[300,5]);assert.deepEqual(v.you,{x:-10,y:20});
+ const v=await networkView(db);assert.deepEqual([v.people[0].x,v.people[0].y],[120,-40]);assert.deepEqual([v.sources[0].x,v.sources[0].y],[300,5]);assert.deepEqual([v.you.x,v.you.y],[-10,20]);
  await assert.rejects(()=>savePositions(db,{items:[{id:p.id,x:'left',y:0}]}),/must be a number/);
  await assert.rejects(()=>savePositions(db,{items:[]}),/Nothing to save/);
  await savePositions(db,{items:[{id:p.id,x:9e9,y:-9e9}]});const far=(await networkView(db)).people[0];assert.deepEqual([far.x,far.y],[100000,-100000]);});
@@ -185,3 +185,17 @@ test('introduced by more than one person: the first decides colour and place, th
  const promoted=await savePerson(db,{id:p.id,via:null},T);assert.equal(promoted.via,b.id,'removing the first moves the next one up');assert.deepEqual(promoted.alsoVia,[c.id]);
  await assert.rejects(()=>savePerson(db,{id:p.id,alsoVia:[p.id]}),/introduce themselves/);
  await assert.rejects(()=>savePerson(db,{id:p.id,alsoVia:['gone']}),/not in your network/);});
+
+test('"You" and sources: a name, a title, a note, a photo or logo; old pictures are removed when replaced',async()=>{
+ const db=fakeDb();
+ assert.deepEqual((await networkView(db)).you,{x:0,y:0,name:'',title:'',photoId:null,note:''});
+ await db.collection('network_images').insertOne({_id:'me1'});await db.collection('network_images').insertOne({_id:'me2'});
+ const y=await saveYou(db,{name:' Alex  Rivera ',title:'Data engineer, open to roles',note:'Finishing a master\'s in May.',photoId:'me1'});
+ assert.deepEqual([y.name,y.title,y.photoId],['Alex Rivera','Data engineer, open to roles','me1']);
+ await savePositions(db,{items:[{id:'you',x:5,y:6}]});const v=(await networkView(db)).you;assert.deepEqual([v.x,v.y,v.name],[5,6,'Alex Rivera'],'moving you keeps the rest');
+ await saveYou(db,{photoId:'me2'});assert.equal(await db.collection('network_images').findOne({_id:'me1'}),null);
+ await assert.rejects(()=>saveYou(db,{photoId:'nope'}),/Upload the photo/);
+ const s=await saveSource(db,{name:'Randall Co',type:'company'},T);await db.collection('network_images').insertOne({_id:'logo1'});
+ const s2=await saveSource(db,{id:s.id,photoId:'logo1',notes:'Their recruiters answer on Tuesdays.'},T);assert.deepEqual([s2.photoId,s2.notes],['logo1','Their recruiters answer on Tuesdays.']);
+ await saveSource(db,{id:s.id,photoId:null},T);assert.equal(await db.collection('network_images').findOne({_id:'logo1'}),null);
+ await assert.rejects(()=>saveSource(db,{id:s.id,photoId:'zzz'}),/Upload the picture/);});

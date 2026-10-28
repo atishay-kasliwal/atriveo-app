@@ -510,3 +510,34 @@ button.pp-step{cursor:pointer;transition:color .15s}button.pp-step:hover{color:v
 .pp-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--nw-card);box-shadow:0 0 0 1px var(--nw-line-strong);cursor:pointer;transition:transform .15s}
 .pp-dot:hover{transform:scale(1.1)}.pp-dot[aria-expanded=true]{box-shadow:0 0 0 2px var(--nw-ink)}
 .pp-pop.up{top:auto;bottom:calc(100% + 8px);width:300px}
+
+/* You on the map: your own card, breathing slowly so the centre is always easy to find. */
+.nwg-you-node{cursor:pointer}
+.nwg-you-pulse{fill:none;stroke:var(--nw-accent);stroke-width:2;opacity:.35;transform-box:fill-box;transform-origin:center;animation:nwg-breathe 3.2s ease-in-out infinite}
+@keyframes nwg-breathe{0%,100%{opacity:.12;scale:.985}50%{opacity:.45;scale:1.015}}
+.nwg-you-title{font-size:11.5px;font-weight:500;fill:#0c0d10;fill-opacity:.82}
+.nwg-you-node:hover .nwg-you,.nwg-you-node:focus-visible .nwg-you{filter:brightness(1.08)}
+@media (prefers-reduced-motion:reduce){.nwg-you-pulse{animation:none;opacity:.25}}
+/* Pictures in panels */
+.pp-pic{--c:var(--nw-accent);position:relative;flex:none;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:color-mix(in oklab,var(--c) 16%,var(--nw-card));box-shadow:inset 0 0 0 2.5px var(--c);color:var(--c);font-weight:650;font-size:19px;overflow:visible}
+.pp-pic.sq{border-radius:14px}
+.pp-pic img{width:100%;height:100%;object-fit:cover;border-radius:inherit;box-shadow:0 0 0 2.5px var(--c)}
+.pp-pic em{position:absolute;left:50%;bottom:-7px;translate:-50% 0;font-style:normal;font-size:10.5px;font-weight:600;white-space:nowrap;padding:1px 7px;border-radius:999px;background:var(--nw-soft);border:1px solid var(--nw-line-strong);color:var(--nw-ink);opacity:0;transition:opacity .15s}
+.pp-pic:hover em,.pp-pic:focus-within em{opacity:1}
+.pp-nums{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:0 16px 12px;border:1px solid var(--nw-line);border-radius:12px;overflow:hidden}
+.pp-nums div{padding:9px 10px;border-left:1px solid var(--nw-line)}.pp-nums div:first-child{border-left:0}
+.pp-nums dt{font-size:11px;color:var(--nw-muted)}.pp-nums dd{margin:2px 0 0;font-size:19px;font-weight:650;font-variant-numeric:tabular-nums}
+.pp-nums .due dd{color:var(--nw-warn)}
+.pp-hint{margin:0;font-size:12px;color:var(--nw-muted);line-height:1.45}.pp-hint.ok{color:var(--nw-ok)}.pp-hint.warn{color:var(--nw-warn)}
+.pp-ctx{margin-left:10px;font-size:12px;color:var(--nw-muted);font-style:italic}
+.pp-people{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.pp-people button{width:100%;display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:6px 8px;border-radius:10px;cursor:pointer;color:var(--nw-ink)}
+.pp-people button:hover{background:var(--nw-soft)}
+.pp-people .nw-av{width:30px;height:30px;font-size:11px}
+.pp-people .who{display:flex;flex-direction:column;min-width:0}.pp-people b{font-size:13.5px;font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pp-people small{font-size:12px;color:var(--nw-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pp-people .when{font:400 11.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--nw-muted);white-space:nowrap}.pp-people .when.due{color:var(--nw-warn)}
+.pp-ask{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--nw-muted)}
+.pp-ask select{background:var(--nw-bg);color:var(--nw-ink);border:1px solid var(--nw-line-strong);border-radius:9px;padding:5px 8px;font:inherit;font-size:13px}
+@media (max-height:800px) and (min-width:761px){.pp-pic{width:48px;height:48px;font-size:16px}.pp-nums{margin:0 14px 8px}.pp-nums div{padding:6px 9px}.pp-nums dd{font-size:16px}}
+@media (max-height:800px) and (min-width:761px){.pp-body .nw-f small{display:none}}

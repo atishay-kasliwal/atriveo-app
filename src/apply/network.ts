@@ -12,9 +12,10 @@ export interface Person {
   sourceId: string | null; via: string | null; alsoVia?: string[]; color: string | null; tags: string[];
   lastContact: string | null; nextFollowUp: string | null; history: HistoryEntry[]; archived: boolean; createdAt: string; updatedAt: string; x?: number; y?: number;
 }
-export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
+export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; photoId?: string | null; notes?: string; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
 export interface Link { id: string; a: string; b: string; kind: LinkKind; label: string; color: string | null }
-export interface NetworkData { people: Person[]; sources: Source[]; links: Link[]; you?: { x: number; y: number } }
+export interface You { x: number; y: number; name?: string; title?: string; photoId?: string | null; note?: string }
+export interface NetworkData { people: Person[]; sources: Source[]; links: Link[]; you?: You }
 export interface ListRow { name: string; city: string; repeat: boolean; exists: boolean }
 
 /** "NKHS · via Chani Jain", "Randstad · met at the conference · via All Things Open": the name plus how it came to you. */
@@ -343,3 +344,4 @@ export const throughValue = (s?: Source | null) => (s?.viaPersonId ? `p:${s.viaP
 
 /** Everyone who introduced this person, first one first. */
 export const introducersOf = (p: Person) => [p.via, ...(p.alsoVia ?? [])].filter((x): x is string => Boolean(x));
+export const loadSourceJobs = (id: string) => getJson<{ company: string; jobs: JobRow[] } & ApiBody>(`/network/jobs?source=${encodeURIComponent(id)}`);

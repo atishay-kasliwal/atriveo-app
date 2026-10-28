@@ -13,6 +13,7 @@ import NetworkWork from "./NetworkWork";
 import { BulkMail } from "./NetworkMail";
 import { PersonJobs, WarmJobs } from "./NetworkJobs";
 import NetworkImport from "./NetworkImport";
+import { SourcePanel, YouPanel } from "./NetworkSidePanels";
 import "./network.css";
 
 type View = { kind: "all" } | { kind: "source"; id: string | null } | { kind: "due" } | { kind: "never" } | { kind: "introduced" };
@@ -49,6 +50,9 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const [bulkMail, setBulkMail] = useState<string[] | null>(null);
   const [board, setBoard] = useState<BoardItem[]>([]);
   const [work, setWork] = useState<string | null>(null);
+  // The other things the panel can show: you, or a source.
+  const [side, setSide] = useState<null | "you" | { source: string }>(null);
+  const [bulkSource, setBulkSource] = useState<string | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
   const say = useCallback((t: Toast) => { setToast(t); window.clearTimeout(toastTimer.current); if (t) toastTimer.current = window.setTimeout(() => setToast(null), t.undo ? 6000 : 3000); }, []);
 
@@ -117,8 +121,11 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const visible = useMemo(() => (view.kind === "all" && !query.trim() ? null : new Set(shown.map((p) => p.id))), [view, query, shown]);
   const person = selected ? personById.get(selected) ?? null : null;
   const workItem = work ? board.find((b) => b.id === work && b.kind === "work") ?? null : null;
-  const openPerson = (id: string | null) => { setWork(null); setSelected(id); };
-  const openWork = (id: string) => { setSelected(null); setWork(id); };
+  const openPerson = (id: string | null) => { setWork(null); setSide(null); setSelected(id); };
+  const openWork = (id: string) => { setSelected(null); setSide(null); setWork(id); };
+  const openSource = (id: string) => { setSelected(null); setWork(null); setSide({ source: id }); setView({ kind: "source", id }); };
+  const openYou = () => { setSelected(null); setWork(null); setSide("you"); };
+  const sideSource = side && typeof side === "object" ? sourceById.get(side.source) ?? null : null;
   const replacePerson = (p: Person) => setData((d) => ({ ...d, people: d.people.map((x) => (x.id === p.id ? p : x)) }));
   const viewName = view.kind === "source" ? (view.id ? (sourceById.has(view.id) ? sourceLabel(sourceById.get(view.id)!, data.sources, data.people) : "Source") : "No source") : view.kind === "due" ? "Follow-up due" : view.kind === "never" ? "Never contacted" : view.kind === "introduced" ? "Introduced by someone" : "Everyone";
 
@@ -159,7 +166,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
           <CanvasMenuAction icon="import" onClick={() => { setDialog('import'); setDrawer(null); }}>Import contacts</CanvasMenuAction>
         </div>}
         {error && <p className="nw-error" role="alert">{error} <button type="button" onClick={() => void reload()}>Try again</button></p>}
-        <div className={`nw-body${person || workItem ? " has-panel" : ""}`}>
+        <div className={`nw-body${person || workItem || side ? " has-panel" : ""}`}>
           {drawer === 'layers' && <nav id="nw-canvas-layers" className="nw-rail nw-canvas-popover" aria-label="Show layers and filters" data-canvas-controls>
             <div className="nw-canvas-panel-head"><b>Show on canvas</b><button type="button" className="nw-x" aria-label="Close layers" onClick={() => setDrawer(null)}>×</button></div>
             <div className="nw-canvas-layers">
@@ -187,7 +194,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
           <section className="nw-list nw-canvas" aria-label="Network canvas">
             {loaded ? <NetworkGraph data={data} layers={layers} stackPeople={stackPeople} onRevealLayer={(key) => setLayers((old) => ({ ...old, [key]: true }))} colors={colors} visible={visible} selected={selected} selectedWork={work} board={board} setBoard={setBoard}
                 onPerson={(id) => openPerson(id === selected ? null : id)} onWork={openWork}
-                onSource={(id) => { openPerson(null); setView(view.kind === "source" && view.id === id ? { kind: "all" } : { kind: "source", id }); }}
+                onSource={(id) => { if (sideSource?.id === id) { setSide(null); setView({ kind: "all" }); } else openSource(id); }} onYou={() => (side === "you" ? setSide(null) : openYou())}
                 onLinks={(links) => setData((d) => ({ ...d, links }))} onPeople={(list) => setData((d) => ({ ...d, people: d.people.map((p) => list.find((x) => x.id === p.id) ?? p) }))}
                 onBulkMail={setBulkMail} say={say} /> : <p className="nw-canvas-loading" role="status">Loading your network…</p>}
             {loaded && !data.people.length && mode === 'graph' && <div className="nw-canvas-welcome"><h2>Your network starts here</h2><p>Add a person, drop a note, or import your contacts.</p><button type="button" className="nw-btn" onClick={() => setDialog('person')}>Add your first person</button></div>}
@@ -219,6 +226,9 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
           </section>}
 
 
+          {side === "you" && <YouPanel data={data} onChange={(you) => setData((d) => ({ ...d, you }))} onClose={() => setSide(null)} say={say} />}
+          {sideSource && <SourcePanel key={sideSource.id} source={sideSource} data={data} colors={colors} onChange={(s) => setData((d) => ({ ...d, sources: d.sources.map((x) => (x.id === s.id ? { ...x, ...s } : x)) }))}
+            onClose={() => { setSide(null); setView({ kind: "all" }); }} onPerson={(id) => openPerson(id)} onAddPeople={() => { setBulkSource(sideSource.id); setDialog("list"); }} onReferral={(id, job) => setMailFor({ id, job })} say={say} />}
           {workItem && <NetworkWork key={workItem.id} item={workItem} data={data} colors={colors} onClose={() => setWork(null)} onOpen={openPerson} say={say}
             onChange={(it) => setBoard((b) => b.map((x) => (x.id === it.id ? it : x)))} onRemove={(id) => { setBoard((b) => b.filter((x) => x.id !== id)); setWork(null); }}
             onWrite={(id) => setMailFor({ id })} />}
@@ -230,7 +240,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
         </div>
       </main>
 
-      {dialog === "list" && <BulkAdd sources={data.sources} people={data.people} onClose={() => setDialog(null)} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
+      {dialog === "list" && <BulkAdd sources={data.sources} people={data.people} initialSource={bulkSource} onClose={() => { setDialog(null); setBulkSource(null); }} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
       {dialog === "import" && <NetworkImport sources={data.sources} people={data.people} onClose={() => setDialog(null)} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
       {dialog === "person" && <AddPerson sources={data.sources} people={data.people} onClose={() => setDialog(null)} onDone={async (p) => { setDialog(null); await reload(); setSelected(p.id); say({ text: `${p.name} added.` }); }} />}
       {dialog && typeof dialog === "object" && <SourceEditor source={dialog.source} sources={data.sources} people={data.people} count={dialog.source ? counts.by.get(dialog.source.id) ?? 0 : 0} color={dialog.source ? colors.source.get(dialog.source.id) ?? PALETTE[0] : PALETTE[0]} onClose={() => setDialog(null)}
@@ -505,11 +515,11 @@ function SourcePicker({ sources, people, value, onChange, newName, setNewName, n
   );
 }
 
-function BulkAdd({ sources, people, onClose, onDone }: { sources: Source[]; people: Person[]; onClose: () => void; onDone: (msg: string, sourceId: string | null) => void }) {
+function BulkAdd({ sources, people, initialSource, onClose, onDone }: { sources: Source[]; people: Person[]; initialSource?: string | null; onClose: () => void; onDone: (msg: string, sourceId: string | null) => void }) {
   const [text, setText] = useState("");
   const [rows, setRows] = useState<ListRow[]>([]);
   const [checking, setChecking] = useState(false);
-  const [source, setSource] = useState(sources.length ? sources[0].id : "__new");
+  const [source, setSource] = useState(initialSource || (sources.length ? sources[0].id : "__new"));
   const [newName, setNewName] = useState("");
   const [newParent, setNewParent] = useState(""); const [newContext, setNewContext] = useState("");
   const [newType, setNewType] = useState<SourceType>("company");

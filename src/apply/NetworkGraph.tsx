@@ -26,10 +26,10 @@ const inkOf = (c?: string) => (!c || c === "ink" ? "var(--nw-ink)" : c);
  * sticky notes, pen strokes, images). Drag cards (positions are saved), drag the background to pan, scroll to zoom. Clicking a person
  * opens them; a source shows only its people; one of your own links can be renamed, recoloured or removed.
  */
-export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer, colors, visible, selected, selectedWork, board, setBoard, onPerson, onSource, onWork, onLinks, onPeople, onBulkMail, say }: {
+export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer, colors, visible, selected, selectedWork, board, setBoard, onPerson, onSource, onYou, onWork, onLinks, onPeople, onBulkMail, say }: {
   data: NetworkData; layers: CanvasLayers; stackPeople: boolean; onRevealLayer: (layer: keyof CanvasLayers) => void; colors: Colors; visible: Set<string> | null; selected: string | null; selectedWork: string | null;
   board: BoardItem[]; setBoard: (f: (b: BoardItem[]) => BoardItem[]) => void;
-  onPerson: (id: string) => void; onSource: (id: string) => void; onWork: (id: string) => void; onLinks: (links: Link[]) => void;
+  onPerson: (id: string) => void; onSource: (id: string) => void; onYou: () => void; onWork: (id: string) => void; onLinks: (links: Link[]) => void;
   onPeople: (people: Person[]) => void; onBulkMail: (ids: string[]) => void; say: (t: { text: string } | null) => void;
 }) {
   const stage = useRef<HTMLDivElement>(null);
@@ -271,7 +271,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
         post("positions", { items }).catch((err: Error) => say({ text: `That position was not saved: ${err.message}` }));
         return;
       }
-      if (g.id === "you") return;
+      if (g.id === "you") { onYou(); return; }
       if (people.has(g.id)) onPerson(g.id); else onSource(g.id);
     }
   }
@@ -348,12 +348,16 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
             {layers.board && drawing && <path d={smoothPath(drawing)} className="nwgb-stroke" style={{ stroke: inkOf(pen.color), strokeWidth: pen.width, opacity: pen.opacity }} />}
           </g>
           <g>
-            <g data-node="you" className="nwg-node" transform={`translate(${youPos.x} ${youPos.y})`} tabIndex={0} role="button" aria-label="You">
+            <g data-node="you" className="nwg-node nwg-you-node" transform={`translate(${youPos.x} ${youPos.y})`} tabIndex={0} role="button" aria-label="You: open your profile"
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onYou(); } }}>
+              <rect x={-YOU.w / 2 - 7} y={-YOU.h / 2 - 7} width={YOU.w + 14} height={YOU.h + 14} rx={24} className="nwg-you-pulse" />
               <rect x={-YOU.w / 2} y={-YOU.h / 2} width={YOU.w} height={YOU.h} rx={18} className="nwg-you" />
               <circle cx={-YOU.w / 2 + 44} r={28} className="nwg-you-av" />
-              <text x={-YOU.w / 2 + 44} y={1} className="nwg-you-ini">YOU</text>
-              <text x={-YOU.w / 2 + 86} y={-4} className="nwg-you-name">You</text>
-              <text x={-YOU.w / 2 + 86} y={16} className="nwg-you-sub">{youSub}</text>
+              {data.you?.photoId ? <><clipPath id="nwg-you-photo"><circle cx={-YOU.w / 2 + 44} r={26} /></clipPath><image href={imageUrl(data.you.photoId)} x={-YOU.w / 2 + 18} y={-26} width={52} height={52} clipPath="url(#nwg-you-photo)" preserveAspectRatio="xMidYMid slice" /></>
+                : <text x={-YOU.w / 2 + 44} y={1} className="nwg-you-ini">{data.you?.name ? initials(data.you.name) : "YOU"}</text>}
+              <text x={-YOU.w / 2 + 86} y={data.you?.title ? -10 : -4} className="nwg-you-name">{clip(data.you?.name || "You", 16)}</text>
+              {data.you?.title && <text x={-YOU.w / 2 + 86} y={7} className="nwg-you-title">{clip(data.you.title, 24)}</text>}
+              <text x={-YOU.w / 2 + 86} y={data.you?.title ? 24 : 16} className="nwg-you-sub">{youSub}</text>
             </g>
             {shownSources.map((s) => {
               const p = pos(s.id), c = colors.source.get(s.id) ?? PALETTE[0], sz = sourceSize(s.name, s.about || s.type), n = peopleCount.get(s.id) ?? 0, dim = lit && !lit.has(s.id);
@@ -364,7 +368,8 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
                   <rect x={-sz.w / 2 - 5} y={-sz.h / 2 - 5} width={sz.w + 10} height={sz.h + 10} rx={19} className="nwg-halo" />
                   <rect x={-sz.w / 2} y={-sz.h / 2} width={sz.w} height={sz.h} rx={14} fill={card} stroke={c} strokeWidth={1.8} />
                   <rect x={-sz.w / 2 + 14} y={-22} width={44} height={44} rx={11} fill={c} fillOpacity={0.16} stroke={c} strokeWidth={1.5} />
-                  <text x={-sz.w / 2 + 36} y={1} className="nwg-tile" fill={c}>{s.name[0]?.toUpperCase()}</text>
+                  {s.photoId ? <><clipPath id={`nwg-src-${s.id}`}><rect x={-sz.w / 2 + 15} y={-21} width={42} height={42} rx={10} /></clipPath><image href={imageUrl(s.photoId)} x={-sz.w / 2 + 15} y={-21} width={42} height={42} clipPath={`url(#nwg-src-${s.id})`} preserveAspectRatio="xMidYMid slice" /></>
+                    : <text x={-sz.w / 2 + 36} y={1} className="nwg-tile" fill={c}>{s.name[0]?.toUpperCase()}</text>}
                   <text x={-sz.w / 2 + 72} y={-3} className="nwg-sname">{clip(s.name, 26)}</text>
                   <text x={-sz.w / 2 + 72} y={16} className="nwg-sub">{clip(s.context || (s.parentSourceId ? `Via ${data.sources.find((parent) => parent.id === s.parentSourceId)?.name || "another source"}` : s.viaPersonId && people.has(s.viaPersonId) ? `Via ${people.get(s.viaPersonId)!.name}` : s.about || SOURCE_TYPES.find(([type]) => type === s.type)?.[1] || s.type), 30)}</text>
                   {n > 0 && <><circle cx={sz.w / 2 - 4} cy={-sz.h / 2 + 4} r={12} fill={c} stroke={bg} strokeWidth={3} /><text x={sz.w / 2 - 4} y={-sz.h / 2 + 4.5} className="nwg-badge">{n}</text></>}

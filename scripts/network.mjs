@@ -48,7 +48,7 @@ export async function networkView(db, { archived = false } = {}) {
     people: people.filter((p) => archived || !p.archived).sort((a, b) => a.name.localeCompare(b.name)),
     sources: sources.sort((a, b) => a.name.localeCompare(b.name)),
     links,
-    you: { x: you?.x ?? 0, y: you?.y ?? 0 },
+    you: { x: you?.x ?? 0, y: you?.y ?? 0, name: you?.name ?? "", title: you?.title ?? "", photoId: you?.photoId ?? null, note: you?.note ?? "" },
   };
 }
 
@@ -56,6 +56,23 @@ const YOU = "network_you";
 const coord = (v) => { const n = Number(v); if (!Number.isFinite(n)) fail("A position must be a number"); return Math.round(Math.max(-100000, Math.min(100000, n)) * 10) / 10; };
 
 /** Where cards sit on the canvas, saved after a drag: people, sources, or "you". Unknown ids are ignored (someone may have archived them). */
+/** "You" on the map: your name, a title ("Data engineer, open to roles in NYC"), a photo and a note. Only the fields sent change. */
+export async function saveYou(db, input = {}) {
+  const set = {};
+  if ("name" in input) set.name = str(input.name, 80);
+  if ("title" in input) set.title = str(input.title, 120);
+  if ("note" in input) set.note = text(input.note, 2000);
+  if ("photoId" in input) {
+    set.photoId = input.photoId ? String(input.photoId) : null;
+    if (set.photoId && !(await db.collection("network_images").findOne({ _id: set.photoId }))) fail("Upload the photo first");
+  }
+  const cur = await db.collection("app_settings").findOne({ _id: YOU });
+  await db.collection("app_settings").updateOne({ _id: YOU }, { $set: { ...set, updatedAt: new Date().toISOString() } }, { upsert: true });
+  if ("photoId" in set && cur?.photoId && cur.photoId !== set.photoId) await db.collection("network_images").deleteOne({ _id: cur.photoId });
+  const next = { ...cur, ...set };
+  return { x: next.x ?? 0, y: next.y ?? 0, name: next.name ?? "", title: next.title ?? "", photoId: next.photoId ?? null, note: next.note ?? "" };
+}
+
 export async function savePositions(db, { items } = {}) {
   if (!Array.isArray(items) || !items.length) fail("Nothing to save");
   if (items.length > 2000) fail("Too many positions at once");
@@ -279,6 +296,11 @@ export async function saveSource(db, input = {}, now = new Date()) {
   if ("type" in input || !cur) patch.type = SOURCE_TYPES.includes(input.type) ? input.type : "other";
   if ("about" in input) patch.about = str(input.about, 120);
   if ("color" in input) patch.color = color(input.color);
+  if ("notes" in input) patch.notes = text(input.notes, 4000);
+  if ("photoId" in input) {
+    patch.photoId = input.photoId ? String(input.photoId) : null;
+    if (patch.photoId && !(await db.collection("network_images").findOne({ _id: patch.photoId }))) fail("Upload the picture first");
+  }
   if ("context" in input || !cur) patch.context = str(input.context, 100);
   if ("parentSourceId" in input || !cur) patch.parentSourceId = input.parentSourceId ? str(input.parentSourceId, 80) : null;
   if ("viaPersonId" in input || !cur) patch.viaPersonId = input.viaPersonId ? str(input.viaPersonId, 80) : null;
@@ -312,6 +334,8 @@ export async function saveSource(db, input = {}, now = new Date()) {
   if (clash && !sameIdentity(cur, next)) fail(`You already have a source called ${clash.name} in that context. Choose a different context.`);
   const update = { ...patch, updatedAt: now.toISOString() };
   await db.collection(SOURCES).updateOne({ _id: cur.id }, { $set: update });
+  // A replaced or removed logo's bytes go with it.
+  if ("photoId" in patch && cur.photoId && cur.photoId !== patch.photoId) await db.collection("network_images").deleteOne({ _id: cur.photoId });
   return { ...cur, ...update };
 }
 
