@@ -167,7 +167,7 @@ if [ -n "$CHANGED" ]; then
   say "Building overlays and start scripts"
   DASH_DEPS=""
   if echo "$CHANGED" | grep -q '^package.json$'; then
-    DASH_DEPS='COPY package.json package-lock.json /app/\nWORKDIR /app\nRUN npm ci --ignore-scripts\n'
+    DASH_DEPS='USER 0\nCOPY package.json package-lock.json /app/\nWORKDIR /app\nRUN npm ci --ignore-scripts\nUSER 1001:1001\n'
   fi
   OVERLAY="cd $ROOT_REMOTE/staging/ship-$COMMIT && mkdir -p scripts data deploy && printf 'FROM %s\nCOPY scripts /app/scripts\nCOPY data /app/data\nCOPY deploy /app/deploy\n%b' '$DASH_IMAGE' '$DASH_DEPS' > Dockerfile.dash && docker build -q -f Dockerfile.dash -t $NEW_DASH_IMAGE . \
     && printf 'FROM %s\nCOPY scripts /app/scripts\nCOPY data /app/data\n' '$WORK_IMAGE' > Dockerfile.work && docker build -q -f Dockerfile.work -t $NEW_WORK_IMAGE . \
