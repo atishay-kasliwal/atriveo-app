@@ -1,5 +1,6 @@
 import { NetworkError, savePositions, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
+import { listReminders, snoozeReminder } from "./network-reminders.mjs";
 
 // /network/*: the Network page's API. The sidecar's own token check runs first; every call is one small Mongo operation.
 const WRITES = {
@@ -16,12 +17,14 @@ const WRITES = {
   "/network/positions": (db, b) => savePositions(db, b),
   "/network/mail/settings": (db, b) => saveMailSettings(db, b).then((settings) => ({ settings })),
   "/network/mail/send": (db, b, o) => sendNetworkMail(db, b, { sender: o.sender?.(), outRoot: o.outRoot }),
+  "/network/reminders/snooze": (db, b) => snoozeReminder(db, b),
   "/network/mail/draft": (db, b, o) => startDraft(db, b, { generate: (request) => o.generate(request, db) }),
 };
 const READS = {
   "/network": (db, q) => networkView(db, { archived: q.get("archived") === "1" }),
   "/network/mail": (db, _q, o) => mailSettings(db, { outRoot: o.outRoot }).then((settings) => ({ settings })),
   "/network/mail/draft": (db, q) => draftStatus(db, q.get("id")),
+  "/network/reminders": (db) => listReminders(db),
 };
 
 async function readBody(req, limit) {

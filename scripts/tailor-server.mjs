@@ -26,6 +26,7 @@ import { outreachReplies } from "./outreach/replies.mjs";
 import { handleStaffing } from "./staffing-routes.mjs";
 import { handleNetwork } from "./network-routes.mjs";
 import { gmailSender } from "./network-mail.mjs";
+import { startNetworkReminders } from "./network-reminders.mjs";
 import { subscriptionGenerate } from "./resume-ai-provider.mjs";
 import { startStaffingAutoQueue } from "./staffing-workspace.mjs";
 import { handleMuse } from "./muse-http.mjs";
@@ -2686,6 +2687,7 @@ server.headersTimeout = 125_000;
 server.listen(PORT, process.env.TAILOR_HOST?.trim() || "127.0.0.1", () => {
   handleOutreach.start();
   startPhoneSummaries({ withMongo, log });
+  startNetworkReminders({ withMongo, log });
   log(`listening on http://localhost:${PORT}`);
   // Bound to loopback, so this only matters once cloudflared publishes it — but
   // then /scrape/start is reachable by anyone who knows the tunnel URL, and it

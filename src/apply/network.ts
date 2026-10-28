@@ -47,7 +47,7 @@ const hash = (s: string) => { let h = 0; for (const c of s) h = (h * 31 + c.char
  */
 export function colorsFor(data: NetworkData): { source: Map<string, string>; person: Map<string, string> } {
   const source = new Map<string, string>();
-  const ordered = [...data.sources].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const ordered = [...data.sources].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
   const taken = new Set(ordered.map((s) => s.color).filter(Boolean) as string[]);
   let i = 0;
   for (const s of ordered) {
@@ -99,7 +99,7 @@ export function autoLayout(data: NetworkData): Map<string, Point> {
   const pos = new Map<string, Point>();
   const you = data.you ?? { x: 0, y: 0 };
   pos.set("you", { x: you.x, y: you.y });
-  const sources = [...data.sources].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const sources = [...data.sources].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
   sources.forEach((s, i) => pos.set(s.id, s.x != null && s.y != null ? { x: s.x, y: s.y } : ring(you.x, you.y, 460 + (sources.length > 6 ? 120 : 0), (i / Math.max(1, sources.length)) * Math.PI * 2 - Math.PI / 2)));
   for (const p of data.people) if (p.x != null && p.y != null) pos.set(p.id, { x: p.x, y: p.y });
   const bySource = new Map<string | null, Person[]>(), byVia = new Map<string, Person[]>();
@@ -193,3 +193,7 @@ export function starter(p: Person, tone: string, intent: string, signature: stri
   if (tone === "short") return { subject: "Quick hello", body: `Hi ${first},\n\n${why.replace(/^\w/, (c) => c.toUpperCase())}. Would you have ten minutes this week?\n\nThanks,\n${sign}` };
   return { subject: "Checking in", body: `Hi ${first},\n\nHope you're doing well. ${why.replace(/^\w/, (c) => c.toUpperCase())}. Is there anything you'd suggest, or someone I should talk to?\n\nThanks so much,\n${sign}` };
 }
+
+/* ---------- reminders ---------- */
+export interface Reminder { key: string; kind: "reply" | "due" | "quiet" | "never"; personId?: string; sourceId?: string; title: string; detail: string }
+export const loadReminders = () => getJson<{ reminders: Reminder[] } & ApiBody>("/network/reminders").then((r) => r.reminders);

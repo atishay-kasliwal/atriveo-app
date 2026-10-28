@@ -5,6 +5,7 @@ import {
 } from "./network";
 import NetworkGraph from "./NetworkGraph";
 import NetworkMail from "./NetworkMail";
+import NetworkBell from "./NetworkBell";
 import "./network.css";
 
 type View = { kind: "all" } | { kind: "source"; id: string | null } | { kind: "due" } | { kind: "never" } | { kind: "introduced" };
@@ -94,6 +95,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
             <button type="button" className="nw-btn" onClick={() => setDialog({ source: null })}>New source</button>
             <button type="button" className="nw-btn" onClick={() => setDialog("person")}>Add person</button>
             <button type="button" className="nw-btn main" onClick={() => setDialog("list")}>Add a list</button>
+            {loaded && <NetworkBell data={data} colors={colors} onPerson={(id) => setSelected(id)} onSource={(id) => { setSelected(null); setView({ kind: "source", id }); }} say={say} />}
           </div>
         </div>
         {error && <p className="nw-error" role="alert">{error} <button type="button" onClick={() => void reload()}>Try again</button></p>}
