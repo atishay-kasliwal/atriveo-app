@@ -635,3 +635,20 @@ button.pp-step{cursor:pointer;transition:color .15s}button.pp-step:hover{color:v
 .pp-also-add .nw-btn{padding:6px 12px}.pp-also-add select,.pp-also-add input{padding:5px 8px;background:var(--nw-bg);color:var(--nw-ink);border:1px solid var(--nw-line-strong);border-radius:9px;font:inherit;font-size:13px;min-width:0}
 @media (max-height:800px){.pp-also-add .nw-btn{padding:5px 12px}.pp-chips:has(.pp-chip){min-height:0}.pp-intro+.pp-year{margin-top:-2px}}
 .pp-tabs{overflow-x:auto;scrollbar-width:none}.pp-tabs button{padding-inline:8px;flex:none}.pp-tabs button::after{left:8px;right:8px}
+
+/* Sources under a source: LinkedIn's day cards */
+.pp-days{display:flex;flex-wrap:wrap;gap:6px}
+.pp-day{--c:#8a919c;display:inline-flex;align-items:center;gap:7px;border:1px solid color-mix(in oklab,var(--c) 45%,var(--nw-line-strong));background:color-mix(in oklab,var(--c) 10%,var(--nw-card));border-radius:999px;padding:4px 10px;font-size:12.5px}
+.pp-day small{font:600 11px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--c)}
+.pp-day:hover{border-color:var(--c)}
+
+/* Confirm a suggested company without losing its place on the map. */
+.pp-source-confirm{margin:0 18px 16px;padding:18px;border:1px solid var(--nw-line-strong);border-radius:16px;background:linear-gradient(135deg,color-mix(in oklab,var(--nw-accent) 9%,var(--nw-card)),var(--nw-card))}
+.pp-source-eyebrow{font-size:10px;font-weight:650;letter-spacing:.1em;text-transform:uppercase;color:var(--nw-accent)}
+.pp-source-confirm h3{margin:8px 0;font-size:18px;line-height:1.3;font-weight:600;overflow-wrap:anywhere}
+.pp-source-confirm p{margin:0;color:var(--nw-muted);font-size:13px;line-height:1.6}
+.pp-source-faces{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 18px}
+.pp-source-faces>span{display:inline-flex;align-items:center;gap:6px;font-size:12px}
+.pp-source-faces i{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:color-mix(in oklab,var(--c) 16%,var(--nw-card));color:var(--c);font-size:10px;font-style:normal;font-weight:600}
+.pp-source-buttons{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.pp-source-buttons .main{flex:1;min-width:140px}

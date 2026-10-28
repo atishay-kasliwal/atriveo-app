@@ -1,4 +1,4 @@
-import { NetworkError, saveYou, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
+import { linkedinDay, sortLinkedInByDay, NetworkError, saveYou, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
 import { boardView, readImage, removeBoardItem, saveBoardItem, saveImage } from "./network-board.mjs";
@@ -13,6 +13,8 @@ const WRITES = {
   "/network/preview": (db, b) => previewList(db, b.text).then((rows) => ({ rows })),
   "/network/import/preview": (db, b) => previewContacts(db, b.text),
   "/network/linkedin": (db, b) => addFromLinkedIn(db, b).then(async (r) => { await onMap(db, b, [r.person?.id].filter(Boolean)); return r; }),
+  "/network/linkedin/today": (db, b) => linkedinDay(db).then(async (source) => { await onMap(db, b, [source.id]); return { source }; }),
+  "/network/linkedin/sort": (db) => sortLinkedInByDay(db),
   "/network/people": (db, b) => addPeople(db, b).then(async (r) => {
     // On a map, names already in your network are not added again, but they are put on this map.
     const known = b.mapId && b.mapId !== MAIN && r.skipped.length ? (await db.collection("network_people").find({}).toArray()).filter((p) => !p.archived && r.skipped.some((n) => n.toLowerCase() === p.name.toLowerCase())).map((p) => p._id) : [];
@@ -22,7 +24,21 @@ const WRITES = {
   "/network/history": (db, b) => logHistory(db, b).then((person) => ({ person })),
   "/network/history/remove": (db, b) => removeHistory(db, b).then((person) => ({ person })),
   "/network/archive": (db, b) => archivePerson(db, b),
-  "/network/source": (db, b) => saveSource(db, b).then(async (source) => { if (!b.id) await onMap(db, b, [source.id]); return { source }; }),
+  "/network/source": (db, b) => saveSource(db, b).then(async (source) => {
+    if (!b.id) await onMap(db, b, [source.id]);
+    // A company may already exist in the address book but be new to this map.
+    const custom = b.mapId && b.mapId !== MAIN;
+    const card = custom ? await db.collection("network_map_cards").findOne({ _id: `${b.mapId}:${source.id}` }) : null;
+    const placed = custom ? card?.x != null && card?.y != null : source.existed;
+    // Keep the suggested location when confirming it for the first time on this map.
+    if (!b.id && !placed && Number.isFinite(b.position?.x) && Number.isFinite(b.position?.y)) {
+      const items = [...(Array.isArray(b.positions) ? b.positions.slice(0, 1999).filter((p) => p?.id !== source.id && Number.isFinite(p?.x) && Number.isFinite(p?.y)) : []), { id: source.id, x: b.position.x, y: b.position.y }];
+      if (b.mapId && b.mapId !== MAIN) await saveMapPositions(db, { mapId: b.mapId, items });
+      else await savePositions(db, { items });
+      return { source: { ...source, x: b.position.x, y: b.position.y } };
+    }
+    return { source: card?.x != null && card?.y != null ? { ...source, x: card.x, y: card.y } : source };
+  }),
   "/network/source/remove": (db, b) => removeSource(db, b),
   "/network/link": (db, b) => saveLink(db, b).then((link) => ({ link })),
   "/network/link/remove": (db, b) => removeLink(db, b),

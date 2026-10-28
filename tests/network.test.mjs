@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {Readable} from 'node:stream';
-import {saveYou,addFromLinkedIn,parseContacts,csvRows,previewContacts,savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
+import {saveYou,addFromLinkedIn,sortLinkedInByDay,parseContacts,csvRows,previewContacts,savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
 import {handleNetwork} from '../scripts/network-routes.mjs';
 
 // An in-memory stand-in for the three collections, with just the calls the store makes. Every name here is invented.
@@ -127,11 +127,12 @@ test('importing contacts: details come along, people already here (by name or em
  const r=await addPeople(db,{rows:prev.rows,newSource:{name:'LinkedIn connections',type:'other'}},T);
  assert.deepEqual(r.skipped,['Bo K']);const ann=r.added[0];assert.deepEqual([ann.email,ann.company,ann.role,ann.linkedin],['ann@example.test','Expo Co','Organizer','']);});
 
-test('from a LinkedIn profile: added once to a LinkedIn source; found again by profile link or name; gaps filled, nothing overwritten',async()=>{
+test('from a LinkedIn profile: added once, to that day card under LinkedIn; found again by profile link or name; gaps filled, nothing overwritten',async()=>{
  const db=fakeDb();
  const a=await addFromLinkedIn(db,{name:'Dana Whit',role:'Senior Recruiter',company:'Randstad',city:'Raleigh, NC',linkedin:'https://ca.linkedin.com/in/dana-whit/details/experience?x=1'},T);
  assert.equal(a.existed,false);assert.equal(a.person.linkedin,'https://www.linkedin.com/in/dana-whit/');assert.equal(a.person.company,'Randstad');assert.equal(a.person.history[0].text,'Added from LinkedIn');
- const src=(await networkView(db)).sources[0];assert.equal(src.name,'LinkedIn');assert.equal(a.person.sourceId,src.id);
+ const v0=await networkView(db),root=v0.sources.find(x=>x.name==='LinkedIn'),day=v0.sources.find(x=>x.id===a.person.sourceId);
+ assert.deepEqual([day.name,day.parentSourceId,day.when],['Oct 28, 2026',root.id,'2026-10-28'],'You, LinkedIn, the day, the person');
  const b=await addFromLinkedIn(db,{name:'Dana W.',role:'Lead Recruiter',linkedin:'https://www.linkedin.com/in/Dana-Whit'},T);assert.equal(b.existed,true);assert.equal(b.person.id,a.person.id);assert.equal(b.person.role,'Senior Recruiter','not overwritten');
  const c=await savePerson(db,{name:'Bo Kim'},T);const d=await addFromLinkedIn(db,{name:'bo kim',company:'Acme',linkedin:'https://www.linkedin.com/in/bokim'},T);
  assert.equal(d.person.id,c.id);assert.equal(d.person.company,'Acme','a gap is filled');assert.equal(d.person.linkedin,'https://www.linkedin.com/in/bokim/');
@@ -212,3 +213,37 @@ test('a source reached you more than once: the main introducer with a year, and 
  await assert.rejects(()=>saveSource(db,{id:rh.id,alsoVia:[{id:rh.id}]},T),/introduce itself/);
  await assert.rejects(()=>saveSource(db,{id:rh.id,alsoVia:[{id:'gone'}]},T),/no longer in your network/);
  assert.deepEqual((await saveSource(db,{id:rh.id,alsoVia:[]},T)).alsoVia,[]);});
+
+test('LinkedIn by day: one card per New York day under LinkedIn, reused all day; people already on LinkedIn are sorted into their days',async()=>{
+ const db=fakeDb();
+ const late=new Date('2026-10-29T03:30:00Z');// still Oct 28 in New York
+ const a=await addFromLinkedIn(db,{name:'Ann Lee',linkedin:'https://www.linkedin.com/in/ann'},T);const b=await addFromLinkedIn(db,{name:'Ben Ode',linkedin:'https://www.linkedin.com/in/ben'},late);
+ const c=await addFromLinkedIn(db,{name:'Cy Park',linkedin:'https://www.linkedin.com/in/cy'},new Date('2026-10-29T15:00:00Z'));
+ assert.equal(a.person.sourceId,b.person.sourceId,'the same New York day is the same card');assert.notEqual(a.person.sourceId,c.person.sourceId);
+ let v=await networkView(db);assert.deepEqual(v.sources.map(s=>s.name).sort(),['LinkedIn','Oct 28, 2026','Oct 29, 2026']);
+ const root=v.sources.find(s=>s.name==='LinkedIn');
+ const old=await savePerson(db,{name:'Old Contact',sourceId:root.id},new Date('2026-10-20T15:00:00Z'));
+ const kid=await savePerson(db,{name:'Their Friend',sourceId:root.id,via:old.id},T);
+ assert.deepEqual(await sortLinkedInByDay(db,T),{moved:1,days:1});
+ v=await networkView(db);const oldDay=v.sources.find(s=>s.id===v.people.find(p=>p.id===old.id).sourceId);
+ assert.deepEqual([oldDay.name,oldDay.parentSourceId],['Oct 20, 2026',root.id]);
+ assert.equal(v.people.find(p=>p.id===kid.id).sourceId,root.id,'someone introduced by a person is left where they are');
+ assert.deepEqual(await sortLinkedInByDay(db,T),{moved:0,days:0});});
+
+test('confirming a company keeps its card and people in place; custom maps keep separate positions',async()=>{
+ const db=fakeDb();const person=await savePerson(db,{name:'Mira Chen',company:'Orchid'},T);
+ const body={name:'Orchid',type:'company',position:{x:920,y:180},positions:[{id:person.id,x:730,y:200}]};
+ const created=await call(db,'POST','/network/source',body);assert.equal(created.code,200);
+ const v=await networkView(db);assert.equal(v.sources[0].x,920);assert.equal(v.sources[0].y,180);assert.equal(v.people[0].x,730);
+ const again=await call(db,'POST','/network/source',{...body,position:{x:0,y:0}});assert.equal(again.json.source.id,created.json.source.id);assert.equal((await networkView(db)).sources[0].x,920,'reusing a source preserves its saved position');
+ await db.collection('network_maps').insertOne({_id:'map-a',name:'My map'});
+ const custom=await call(db,'POST','/network/source',{...body,name:'Another company',mapId:'map-a',position:{x:1100,y:300}});assert.equal(custom.code,200);
+ const card=await db.collection('network_map_cards').findOne({_id:`map-a:${custom.json.source.id}`});assert.deepEqual([card.x,card.y],[1100,300]);
+ const global=await db.collection('network_sources').findOne({_id:custom.json.source.id});assert.equal(global.x,undefined,'custom map coordinates do not change main');
+ assert.equal((await networkView(db)).people[0].x,730);
+ const reused=await call(db,'POST','/network/source',{...body,mapId:'map-a',position:{x:500,y:600}});
+ assert.deepEqual([reused.json.source.x,reused.json.source.y],[500,600],'an existing company newly confirmed on a custom map keeps its nearby position');
+ const kept=await call(db,'POST','/network/source',{...body,mapId:'map-a',position:{x:0,y:0}});
+ assert.deepEqual([kept.json.source.x,kept.json.source.y],[500,600],'a company already placed on the map keeps that map’s position');
+ assert.equal((await networkView(db)).sources.find(s=>s.name==='Orchid').x,920);
+});
