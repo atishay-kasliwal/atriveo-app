@@ -113,6 +113,7 @@ echo "$CHANGED" | sed 's/^/  /'
 if [ "$TESTS" = 1 ]; then
   say "Tests"
   if [ "$DRY" = 1 ]; then echo "[dry-run] tsc + fit/store tests"; else
+    node --check scripts/tailor-server.mjs
     npx tsc -p tsconfig.app.json --noEmit
     node --test tests/ats/fit.test.mjs tests/review/fitStore.test.mjs tests/review/resumeStore.test.mjs tests/review/resumeRetention.test.mjs tests/review/pageFill.test.mjs
   fi
