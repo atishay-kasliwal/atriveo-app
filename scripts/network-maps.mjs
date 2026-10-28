@@ -181,7 +181,9 @@ export async function openMapFile(db, { name, file } = {}, now = new Date()) {
   }
   for (const s of newSources) {
     const parent = s.parentSourceId ? ids.get(String(s.parentSourceId)) : null, person = s.viaPersonId ? ids.get(String(s.viaPersonId)) : null;
-    if (parent || person) { try { await saveSource(db, { id: ids.get(String(s.id)), parentSourceId: parent ?? null, viaPersonId: parent ? null : person }, now); } catch { /* a loop or a missing link: it stays a direct source */ } }
+    if (parent || person) { try { await saveSource(db, { id: ids.get(String(s.id)), parentSourceId: parent ?? null, viaPersonId: parent ? null : person, introYear: s.introYear ?? "" }, now); } catch { /* a loop or a missing link: it stays a direct source */ } }
+    const also = (Array.isArray(s.alsoVia) ? s.alsoVia : []).map((v) => ({ id: ids.get(String(v?.id ?? "")), year: v?.year ?? "" })).filter((v) => v.id);
+    if (also.length) { try { await saveSource(db, { id: ids.get(String(s.id)), alsoVia: also }, now); } catch { /* left without the extra introducers */ } }
   }
 
   const links = await db.collection("network_links").find({}).toArray();

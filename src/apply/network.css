@@ -620,3 +620,18 @@ button.pp-step{cursor:pointer;transition:color .15s}button.pp-step:hover{color:v
 .nwh-card{position:relative}
 .nwh-meta>.nwh-tools{position:absolute;top:10px;right:10px;margin:0}
 .nwh-tools .nw-chip{background:rgba(12,13,16,.82);backdrop-filter:blur(4px)}
+
+/* A source that reached you more than once */
+.pp-trail small{color:var(--nw-muted);font-weight:400}
+.pp-also{flex-basis:100%;margin-top:4px;color:var(--nw-muted);font-size:12px;display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.pp-also .pp-step{font-size:12px}
+.pp-year input{width:90px}
+.pp-also-add{display:grid;grid-template-columns:minmax(0,1fr) 70px auto;gap:8px;align-items:center}
+.pp-body .nw-f>small{display:none}
+.pp-year{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--nw-muted)}
+.pp-year input{width:84px;background:var(--nw-bg);color:var(--nw-ink);border:1px solid var(--nw-line-strong);border-radius:9px;padding:6px 9px;font:inherit;font-size:13px}
+.pp-intro{display:flex;flex-direction:column;gap:10px}
+@media (max-height:800px){.pp-intro{gap:6px}.pp-year input{padding:4px 8px}.pp-intro .nw-f input,.pp-intro .nw-f select{padding-top:5px;padding-bottom:5px}}
+.pp-also-add .nw-btn{padding:6px 12px}.pp-also-add select,.pp-also-add input{padding:5px 8px;background:var(--nw-bg);color:var(--nw-ink);border:1px solid var(--nw-line-strong);border-radius:9px;font:inherit;font-size:13px;min-width:0}
+@media (max-height:800px){.pp-also-add .nw-btn{padding:5px 12px}.pp-chips:has(.pp-chip){min-height:0}.pp-intro+.pp-year{margin-top:-2px}}
+.pp-tabs{overflow-x:auto;scrollbar-width:none}.pp-tabs button{padding-inline:8px;flex:none}.pp-tabs button::after{left:8px;right:8px}

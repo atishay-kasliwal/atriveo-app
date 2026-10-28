@@ -12,7 +12,7 @@ export interface Person {
   sourceId: string | null; via: string | null; alsoVia?: string[]; color: string | null; tags: string[];
   lastContact: string | null; nextFollowUp: string | null; history: HistoryEntry[]; archived: boolean; createdAt: string; updatedAt: string; x?: number; y?: number;
 }
-export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; photoId?: string | null; notes?: string; place?: string; when?: string; auto?: string[]; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
+export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; photoId?: string | null; notes?: string; place?: string; when?: string; auto?: string[]; introYear?: string; alsoVia?: { id: string; year: string }[]; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
 export interface Link { id: string; a: string; b: string; kind: LinkKind; label: string; color: string | null }
 export interface You { x: number; y: number; name?: string; title?: string; photoId?: string | null; note?: string }
 export interface NetworkData { people: Person[]; sources: Source[]; links: Link[]; you?: You; map?: { id: string; name: string }; onMap?: string[] }
@@ -210,7 +210,14 @@ export function edgesFor(data: NetworkData, colors: ReturnType<typeof colorsFor>
     if (s.auto) continue; // hangs off its people only, through their "works at" lines
     const parent = s.parentSourceId && data.sources.some((source) => source.id === s.parentSourceId && source.id !== s.id) ? s.parentSourceId : null;
     const person = !parent && s.viaPersonId && data.people.some((p) => p.id === s.viaPersonId) ? s.viaPersonId : null;
-    out.push({ key: `source-${s.id}`, a: parent || person || "you", b: s.id, kind: parent || person ? (person ? "via" : "intro") : "you", label: parent ? "introduced through" : person ? "introduced" : typeName(s.type), color: colors.source.get(s.id) ?? NEUTRAL });
+    const yr = s.introYear ? ` · ${s.introYear}` : "";
+    out.push({ key: `source-${s.id}`, a: parent || person || "you", b: s.id, kind: parent || person ? (person ? "via" : "intro") : "you", label: parent ? `introduced through${yr}` : person ? `introduced${yr}` : typeName(s.type), color: colors.source.get(s.id) ?? NEUTRAL });
+    // Whoever (or wherever) else also brought it to you, later or another way: Red Hat through your uncle in 2024, All Things Open in 2026.
+    for (const v of s.alsoVia ?? []) {
+      const isPerson = data.people.some((p) => p.id === v.id);
+      if (v.id === s.id || (!isPerson && !data.sources.some((x) => x.id === v.id))) continue;
+      out.push({ key: `also-${s.id}-${v.id}`, a: v.id, b: s.id, kind: isPerson ? "via" : "intro", label: `also introduced${v.year ? ` · ${v.year}` : ""}`, color: colors.source.get(s.id) ?? NEUTRAL });
+    }
   }
   const ids = new Set(data.people.map((p) => p.id));
   for (const p of data.people) {

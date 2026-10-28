@@ -92,16 +92,16 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
   source: Source; data: NetworkData; colors: ReturnType<typeof colorsFor>; onChange: (s: Source) => void; onClose: () => void; onPerson: (id: string) => void;
   onAddPeople: () => void; onReferral: (personId: string, job: JobRow) => void; onLinks: (l: NetworkData["links"]) => void; say: Say;
 }) {
-  const [d, setD] = useState({ name: s.name, about: s.about ?? "", notes: s.notes ?? "", context: s.context ?? "", place: s.place ?? "", when: s.when ?? "" });
+  const [d, setD] = useState({ name: s.name, about: s.about ?? "", notes: s.notes ?? "", context: s.context ?? "", place: s.place ?? "", when: s.when ?? "", introYear: s.introYear ?? "" });
   const [through, setThrough] = useState(throughValue(s));
-  const [tab, setTab] = useState<"people" | "jobs" | "links" | "notes" | "details">("people");
+  const [tab, setTab] = useState<"people" | "jobs" | "links" | "intro" | "notes" | "details">("people");
   const [link, setLink] = useState<{ to: string; kind: LinkKind; label: string } | null>(null);
   const [page, setPage] = useState(0);
   const [jobs, setJobs] = useState<{ id: string; list: JobRow[] } | null>(null);
   const [asker, setAsker] = useState("");
   const [saving, setSaving] = useState("");
   const [seen, setSeen] = useState(s);
-  if (seen !== s) { setSeen(s); setD({ name: s.name, about: s.about ?? "", notes: s.notes ?? "", context: s.context ?? "", place: s.place ?? "", when: s.when ?? "" }); setThrough(throughValue(s)); }
+  if (seen !== s) { setSeen(s); setD({ name: s.name, about: s.about ?? "", notes: s.notes ?? "", context: s.context ?? "", place: s.place ?? "", when: s.when ?? "", introYear: s.introYear ?? "" }); setThrough(throughValue(s)); }
   const hiring = s.type === "company" || s.type === "staffing";
   useEffect(() => { if (!hiring || tab !== "jobs") return; let on = true; loadSourceJobs(s.id).then((r) => on && setJobs({ id: s.id, list: r.jobs })).catch(() => on && setJobs({ id: s.id, list: [] })); return () => { on = false; }; }, [s.id, hiring, tab]);
   async function save(fields: Record<string, unknown>) {
@@ -126,6 +126,9 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
   async function disconnect(id: string) {
     try { await post("link/remove", { id }); onLinks(data.links.filter((l) => l.id !== id)); } catch (e) { say({ text: String((e as Error).message) }); }
   }
+  // Who or what else also brought it to you, with names for the trail and the Details list.
+  const also = (s.alsoVia ?? []).map((v) => { const p = data.people.find((x) => x.id === v.id), o = data.sources.find((x) => x.id === v.id); return p || o ? { ...v, name: (p ?? o)!.name, person: Boolean(p) } : null; }).filter((v): v is { id: string; year: string; name: string; person: boolean } => Boolean(v));
+  const [adding, setAdding] = useState({ id: "", year: "" });
   const askWho = asker || members[0]?.id || "";
   const openJobs = jobs?.id === s.id ? jobs.list.filter((j) => j.status === "new" || j.status === "ready") : null;
   return (
@@ -142,16 +145,19 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
       </header>
       <nav className="pp-trail" aria-label="How it reached you">
         <span className="pp-step you">You</span>
-        {(parent || introducer) && <span className="pp-hop"><i aria-hidden="true">›</i>{introducer ? <button type="button" className="pp-step" style={{ "--c": colors.person.get(introducer.id) } as CSSProperties} onClick={() => onPerson(introducer.id)}>{introducer.name}</button> : <span className="pp-step" style={{ "--c": colors.source.get(parent!.id) } as CSSProperties}>{parent!.name}</span>}</span>}
+        {(parent || introducer) && <span className="pp-hop"><i aria-hidden="true">›</i>{introducer ? <button type="button" className="pp-step" style={{ "--c": colors.person.get(introducer.id) } as CSSProperties} onClick={() => onPerson(introducer.id)}>{introducer.name}{s.introYear && <small> {s.introYear}</small>}</button> : <span className="pp-step" style={{ "--c": colors.source.get(parent!.id) } as CSSProperties}>{parent!.name}{s.introYear && <small> {s.introYear}</small>}</span>}</span>}
         <span className="pp-hop"><i aria-hidden="true">›</i><span className="pp-step me" style={{ "--c": color } as CSSProperties}>{s.name}</span></span>
         {s.context && <span className="pp-ctx">{s.context}</span>}
+        {also.length > 0 && <span className="pp-also">also {also.map((v, i) => <span key={v.id}>{i > 0 && ", "}{v.person
+          ? <button type="button" className="pp-step" style={{ "--c": colors.person.get(v.id) } as CSSProperties} onClick={() => onPerson(v.id)}>{v.name}{v.year && <small> {v.year}</small>}</button>
+          : <span className="pp-step" style={{ "--c": colors.source.get(v.id) } as CSSProperties}>{v.name}{v.year && <small> {v.year}</small>}</span>}</span>)}</span>}
       </nav>
       <div className="pp-actions">
         <button type="button" className="nw-btn main" onClick={onAddPeople}>Add people</button>
         {s.photoId && <button type="button" className="pp-pill" onClick={() => void save({ photoId: null })}>Remove picture</button>}
       </div>
       <div className="pp-tabs" role="tablist" aria-label={`About ${s.name}`}>
-        {([["people", `People`], ...(hiring ? [["jobs", "Jobs"]] : []), ["links", "Connected"], ["notes", "Notes"], ["details", "Details"]] as [typeof tab, string][]).map(([t, l]) => <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>{l}{t === "people" && <small>{members.length}</small>}{t === "links" && links.length > 0 && <small>{links.length}</small>}</button>)}
+        {([["people", `People`], ...(hiring ? [["jobs", "Jobs"]] : []), ["links", "Connected"], ["intro", "Introduced"], ["notes", "Notes"], ["details", "Details"]] as [typeof tab, string][]).map(([t, l]) => <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>{l}{t === "people" && <small>{members.length}</small>}{t === "links" && links.length > 0 && <small>{links.length}</small>}</button>)}
       </div>
       <div key={tab} className="pp-body" role="tabpanel">
         {tab === "people" && <>
@@ -197,9 +203,25 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
             {s.type === "event" && <label className="nw-f"><span>When</span><input id="nw-src-when" placeholder="Oct 2024" value={d.when} onChange={(e) => setD({ ...d, when: e.target.value })} onBlur={() => { if (d.when !== (s.when ?? "")) void save({ when: d.when }); }} /></label>}
           </div>
           <label className="nw-f"><span>Kind</span><select id="nw-src-kind" value={s.type} onChange={(e) => void save({ type: e.target.value as SourceType })}>{SOURCE_TYPES.map(([t, l]) => <option key={t} value={t}>{l}</option>)}</select></label>
-          <NetworkSourceContext sources={data.sources} people={data.people} parentSourceId={through} onParent={(v) => { setThrough(v); void save(throughFields(v)); }} context={d.context} onContext={(v) => setD({ ...d, context: v })} excludeId={s.id} prefix="nw-srcp" />
-          <button type="button" className="pp-link" onClick={() => { if (d.context !== (s.context ?? "")) void save({ context: d.context }); }}>Save the context</button>
           <p className="pp-hint">{sourceLabel(s, data.sources, data.people)}</p>
+        </>}
+        {tab === "intro" && <>
+          {/* The context saves when you leave its field. */}
+          <div className="pp-intro" onBlur={(e) => { if ((e.target as HTMLElement).id === "nw-srcp-context" && d.context !== (s.context ?? "")) void save({ context: d.context }); }}>
+            <NetworkSourceContext sources={data.sources} people={data.people} parentSourceId={through} onParent={(v) => { setThrough(v); void save(throughFields(v)); }} context={d.context} onContext={(v) => setD({ ...d, context: v })} excludeId={s.id} prefix="nw-srcp" />
+          </div>
+          {through && <label className="pp-year"><span>Year it reached you that way</span><input id="nw-src-year" inputMode="numeric" maxLength={4} placeholder="2024" value={d.introYear} onChange={(e) => setD({ ...d, introYear: e.target.value.replace(/\D/g, "") })} onBlur={() => { if (d.introYear !== (s.introYear ?? "")) void save({ introYear: d.introYear }); }} /></label>}
+          <div className="pp-sec-h"><span className="pp-h">Also introduced by</span></div>
+          <div className="pp-chips">{also.map((v) => <span key={v.id} className="pp-chip" style={{ "--c": v.person ? colors.person.get(v.id) : colors.source.get(v.id) } as CSSProperties}><span>{v.name}</span>{v.year && <small>{v.year}</small>}
+            <button type="button" className="x" aria-label={`${v.name} did not introduce it`} onClick={() => void save({ alsoVia: (s.alsoVia ?? []).filter((x) => x.id !== v.id) })}>×</button></span>)}
+            {!also.length && <span className="nw-muted">Nobody else. Met them again another way? Add it here with the year.</span>}</div>
+          <div className="pp-also-add">
+            <select id="nw-src-also" aria-label="Also introduced by" value={adding.id} onChange={(e) => setAdding({ ...adding, id: e.target.value })}><option value="">Who or what…</option>
+              <optgroup label="People">{data.people.filter((p) => p.id !== s.viaPersonId && !also.some((v) => v.id === p.id)).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</optgroup>
+              <optgroup label="Sources">{data.sources.filter((x) => x.id !== s.id && x.id !== s.parentSourceId && !also.some((v) => v.id === x.id)).map((x) => <option key={x.id} value={x.id}>{sourceLabel(x, data.sources, data.people)}</option>)}</optgroup></select>
+            <input id="nw-src-also-year" aria-label="Year" inputMode="numeric" maxLength={4} placeholder="Year" value={adding.year} onChange={(e) => setAdding({ ...adding, year: e.target.value.replace(/\D/g, "") })} />
+            <button type="button" className="nw-btn" disabled={!adding.id} onClick={() => { void save({ alsoVia: [...(s.alsoVia ?? []), adding] }); setAdding({ id: "", year: "" }); }}>Add</button>
+          </div>
         </>}
       </div>
     </aside>

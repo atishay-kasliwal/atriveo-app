@@ -119,3 +119,11 @@ test('two people at the same company nobody added: a company card joins the map,
  const real={...data,sources:[...data.sources,{...src('rs','2026-10-03'),name:'Randstad'}]};
  assert.equal(withAutoCompanies(real).sources.some(s=>s.auto),false);
 });
+
+test('a source reached more than once: the main line carries its year, and each other introducer (person or source) gets an "also introduced" line',()=>{
+ const rh={...src('rh','2026-10-03'),name:'Red Hat',viaPersonId:'uncle',introYear:'2024',alsoVia:[{id:'ato',year:'2026'},{id:'gone',year:''},{id:'rh',year:''}]};
+ const data={sources:[src('ato','2026-10-01'),rh],links:[],people:[person('uncle')]};
+ const e=edgesFor(data,colorsFor(data)).filter(x=>x.b==='rh');
+ assert.deepEqual(e.map(x=>[x.a,x.kind,x.label]),[['uncle','via','introduced · 2024'],['ato','intro','also introduced · 2026']]);
+ assert.deepEqual(warmPath(edgesFor(data,colorsFor(data)).filter(x=>x.key!=='source-rh'),'rh').nodes,['you','ato','rh']);
+});

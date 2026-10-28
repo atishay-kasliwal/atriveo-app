@@ -65,6 +65,14 @@ Only selected (when cards are selected), Background, Dark mode and Scale 1x/2x/3
 editing controls are left out, and nothing is faded. **Save a copy (.json)** downloads the whole map: people, sources, links, the board
 and positions (it holds contact details, so keep it private). Open it again from the maps page as a new map.
 
+## A source that reached you more than once
+
+Red Hat through your uncle in 2024, then All Things Open in 2026: keep one Red Hat. Its **Introduced** tab has the main way in
+(Introduced through, with the year it happened) and **Also introduced by**: more people or sources, each with a year. The main one
+places the card; each extra one draws an "also introduced · 2026" line, shows in the trail ("You › Uncle 2024 › Red Hat, also All
+Things Open 2026") and counts for the warm path. Someone you met at the conference keeps All Things Open as their source and Red Hat
+as Works at.
+
 ## Colour rule
 
 A source has one colour, and every first connection from it shares it. Someone introduced by another person starts their own branch:
