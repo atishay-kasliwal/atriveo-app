@@ -15,7 +15,8 @@ export interface Person {
 export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; photoId?: string | null; notes?: string; place?: string; when?: string; auto?: string[]; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
 export interface Link { id: string; a: string; b: string; kind: LinkKind; label: string; color: string | null }
 export interface You { x: number; y: number; name?: string; title?: string; photoId?: string | null; note?: string }
-export interface NetworkData { people: Person[]; sources: Source[]; links: Link[]; you?: You }
+export interface NetworkData { people: Person[]; sources: Source[]; links: Link[]; you?: You; map?: { id: string; name: string }; onMap?: string[] }
+export interface MapInfo { id: string; name: string; people: number; thumbId: string | null; updatedAt: string | null; main: boolean }
 export interface ListRow { name: string; city: string; repeat: boolean; exists: boolean }
 
 /** "NKHS · via Chani Jain", "Randstad · met at the conference · via All Things Open": the name plus how it came to you. */
@@ -29,9 +30,17 @@ export const SOURCE_TYPES: [SourceType, string][] = [["company", "Company"], ["s
 export const LINK_KINDS: [LinkKind, string][] = [["works", "Works with"], ["family", "Family"], ["intro", "Introduced"], ["other", "Other"]];
 export const HISTORY_TYPES: [HistoryType, string][] = [["note", "Note"], ["email", "Email"], ["message", "Message"], ["call", "Call"], ["met", "Met"], ["reply", "They replied"]];
 
-export const loadNetwork = (archived = false) => getJson<NetworkData & ApiBody>(`/network${archived ? "?archived=1" : ""}`);
+// The map that is open ("main" is My network). Every request carries it, so what you add or draw lands on that map.
+let activeMap = "main";
+export const setActiveMap = (id: string) => { activeMap = id || "main"; };
+const onMap = () => (activeMap === "main" ? "" : `map=${encodeURIComponent(activeMap)}`);
+export const loadNetwork = (archived = false) => getJson<NetworkData & ApiBody>(`/network?${[onMap(), archived ? "archived=1" : ""].filter(Boolean).join("&")}`);
+/** Everyone and every source, whichever map is open (the "From your network" picker). */
+export const loadWholeNetwork = () => getJson<NetworkData & ApiBody>("/network");
+export const loadMaps = () => getJson<{ maps: MapInfo[] } & ApiBody>("/network/maps").then((r) => r.maps);
 export async function post<T>(path: string, body: object): Promise<T> {
-  const { res, json } = await fetchJson<ApiBody & T>(`${getTailorServerBase()}/network/${path}`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const payload = activeMap === "main" || "mapId" in body ? body : { mapId: activeMap, ...body };
+  const { res, json } = await fetchJson<ApiBody & T>(`${getTailorServerBase()}/network/${path}`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
   if (!res.ok || json.ok === false) throw new Error(json.error || `HTTP ${res.status}`);
   return json;
 }
@@ -247,7 +256,7 @@ export interface BoardItem {
   points?: [number, number][]; width?: number; opacity?: number; imageId?: string; pin?: { id: string; dx: number; dy: number } | null; createdAt: string;
   ids?: string[]; label?: string; title?: string; start?: string; end?: string; people?: string[]; next?: string; notes?: string; done?: boolean;
 }
-export const loadBoard = () => getJson<{ items: BoardItem[] } & ApiBody>("/network/board").then((r) => r.items);
+export const loadBoard = () => getJson<{ items: BoardItem[] } & ApiBody>(`/network/board?${onMap()}`).then((r) => r.items);
 export const imageUrl = (id: string) => `${getTailorServerBase()}/network/image?id=${encodeURIComponent(id)}`;
 export type Tool = "select" | "area" | "hand" | "text" | "note" | "pen" | "eraser" | "work";
 export type Pen = { color: string; width: number; opacity: number };

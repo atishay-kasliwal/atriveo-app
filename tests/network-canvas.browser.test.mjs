@@ -51,7 +51,7 @@ async function fixture(t, width) {
     return route.continue();
   });
   t.after(async () => { await browser.close(); await new Promise(resolve => server.close(resolve)); });
-  await page.goto(base + '/network'); await page.locator('.nwg').waitFor();
+  await page.goto(base + '/network?map=main'); await page.locator('.nwg').waitFor();
   return { page, errors, writes, data };
 }
 for (const width of [1440, 1024, 390, 320]) test(`Network canvas fills the viewport below navigation at ${width}px`, async t => {

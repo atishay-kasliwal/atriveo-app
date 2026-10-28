@@ -3,22 +3,35 @@ import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraf
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
 import { boardView, readImage, removeBoardItem, saveBoardItem, saveImage } from "./network-board.mjs";
 import { jobsForPerson, jobsForSource, knownCompanies, warmJobs } from "./network-jobs.mjs";
+import { MAIN, addToMap, listMaps, mapView, openMapFile, removeFromMap, removeMap, saveMap, saveMapPositions } from "./network-maps.mjs";
+
+// Made while a map other than My network is open: it goes on that map too.
+const onMap = async (db, b, ids) => { if (b.mapId && b.mapId !== MAIN && ids.length) await addToMap(db, { mapId: b.mapId, ids }); };
 
 // /network/*: the Network page's API. The sidecar's own token check runs first; every call is one small Mongo operation.
 const WRITES = {
   "/network/preview": (db, b) => previewList(db, b.text).then((rows) => ({ rows })),
   "/network/import/preview": (db, b) => previewContacts(db, b.text),
-  "/network/linkedin": (db, b) => addFromLinkedIn(db, b),
-  "/network/people": (db, b) => addPeople(db, b),
-  "/network/person": (db, b) => savePerson(db, b).then((person) => ({ person })),
+  "/network/linkedin": (db, b) => addFromLinkedIn(db, b).then(async (r) => { await onMap(db, b, [r.person?.id].filter(Boolean)); return r; }),
+  "/network/people": (db, b) => addPeople(db, b).then(async (r) => {
+    // On a map, names already in your network are not added again, but they are put on this map.
+    const known = b.mapId && b.mapId !== MAIN && r.skipped.length ? (await db.collection("network_people").find({}).toArray()).filter((p) => !p.archived && r.skipped.some((n) => n.toLowerCase() === p.name.toLowerCase())).map((p) => p._id) : [];
+    await onMap(db, b, [...r.added.map((p) => p.id), ...known, r.sourceId].filter(Boolean)); return { ...r, placed: known.length };
+  }),
+  "/network/person": (db, b) => savePerson(db, b).then(async (person) => { if (!b.id) await onMap(db, b, [person.id]); return { person }; }),
   "/network/history": (db, b) => logHistory(db, b).then((person) => ({ person })),
   "/network/history/remove": (db, b) => removeHistory(db, b).then((person) => ({ person })),
   "/network/archive": (db, b) => archivePerson(db, b),
-  "/network/source": (db, b) => saveSource(db, b).then((source) => ({ source })),
+  "/network/source": (db, b) => saveSource(db, b).then(async (source) => { if (!b.id) await onMap(db, b, [source.id]); return { source }; }),
   "/network/source/remove": (db, b) => removeSource(db, b),
   "/network/link": (db, b) => saveLink(db, b).then((link) => ({ link })),
   "/network/link/remove": (db, b) => removeLink(db, b),
-  "/network/positions": (db, b) => savePositions(db, b),
+  "/network/positions": (db, b) => (b.mapId && b.mapId !== MAIN ? saveMapPositions(db, b) : savePositions(db, b)),
+  "/network/maps/save": (db, b) => saveMap(db, b).then((map) => ({ map })),
+  "/network/maps/remove": (db, b) => removeMap(db, b),
+  "/network/maps/add": (db, b) => addToMap(db, b),
+  "/network/maps/take": (db, b) => removeFromMap(db, b),
+  "/network/maps/open": (db, b) => openMapFile(db, b),
   "/network/you": (db, b) => saveYou(db, b).then((you) => ({ you })),
   "/network/mail/settings": (db, b) => saveMailSettings(db, b).then((settings) => ({ settings })),
   "/network/mail/send": (db, b, o) => sendNetworkMail(db, b, { sender: o.sender?.(), outRoot: o.outRoot }),
@@ -30,11 +43,12 @@ const WRITES = {
   "/network/mail/draft": (db, b, o) => startDraft(db, b, { generate: (request) => o.generate(request, db) }),
 };
 const READS = {
-  "/network": (db, q) => networkView(db, { archived: q.get("archived") === "1" }),
+  "/network": (db, q) => (q.get("map") && q.get("map") !== MAIN ? mapView(db, q.get("map"), { archived: q.get("archived") === "1" }) : networkView(db, { archived: q.get("archived") === "1" })),
+  "/network/maps": (db) => listMaps(db),
   "/network/mail": (db, _q, o) => mailSettings(db, { outRoot: o.outRoot }).then((settings) => ({ settings })),
   "/network/mail/draft": (db, q) => draftStatus(db, q.get("id")),
   "/network/reminders": (db) => listReminders(db),
-  "/network/board": (db) => boardView(db),
+  "/network/board": (db, q) => boardView(db, q.get("map") || MAIN),
   "/network/jobs": (db, q) => (q.get("person") ? jobsForPerson(db, q.get("person")) : q.get("source") ? jobsForSource(db, q.get("source")) : warmJobs(db).then((groups) => ({ groups }))),
   "/network/companies": (db) => knownCompanies(db).then((companies) => ({ companies })),
 };
@@ -63,7 +77,7 @@ export async function handleNetwork(req, res, url, opts = {}) {
   if (!read && !write) { send(404, { ok: false, error: "Not found" }); return true; }
   try {
     if (!opts.withDb) throw new NetworkError("MONGO_URI not configured");
-    const body = read ? null : await readBody(req, url.pathname === "/network/mail/send" || url.pathname === "/network/board/image" || url.pathname === "/network/photo" || url.pathname === "/network/import/preview" ? 8_000_000 : url.pathname === "/network/people" ? 2_000_000 : 300_000);
+    const body = read ? null : await readBody(req, url.pathname === "/network/mail/send" || url.pathname === "/network/board/image" || url.pathname === "/network/photo" || url.pathname === "/network/import/preview" || url.pathname === "/network/maps/open" ? 8_000_000 : url.pathname === "/network/people" ? 2_000_000 : 300_000);
     const data = await opts.withDb((db) => (read ? read(db, url.searchParams, opts) : write(db, body, opts)));
     send(200, { ok: true, ...data });
   } catch (e) {

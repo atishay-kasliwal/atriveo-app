@@ -103,8 +103,9 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
     const k = Math.max(0.25, Math.min(1.1, w / bw, h / bh));
     setView({ k, x: w / 2 - ((Math.max(...xs) + Math.min(...xs)) / 2) * k, y: 56 + h / 2 - ((Math.max(...ys) + Math.min(...ys)) / 2) * k });
   }, [shownSources, shownPeople, stacks, layers.work, layers.board, moved, base, board, at]);
-  const fitted = useRef(false);
-  useEffect(() => { if (!fitted.current && stage.current) { fitted.current = true; fit(); } }, [fit]);
+  // Fit on the first draw, and again whenever several cards arrive at once (a list, an import, people put on this map).
+  const fitted = useRef(-1), cardCount = data.people.length + data.sources.length;
+  useEffect(() => { if (stage.current && (fitted.current < 0 || cardCount - fitted.current >= 2)) fit(); if (stage.current) fitted.current = cardCount; }, [fit, cardCount]);
 
   useEffect(() => {
     const el = stage.current; if (!el) return;

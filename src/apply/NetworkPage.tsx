@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
-  sourceLabel, throughFields, throughValue, introducersOf, HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, plusDays, post, uploadPhoto,
+  sourceLabel, throughFields, throughValue, introducersOf, setActiveMap, HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, plusDays, post, uploadPhoto,
   type BoardItem, type HistoryType, type JobRow, companyOfPerson, loadPersonJobs, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
 } from "./network";
 import NetworkGraph from "./NetworkGraph";
@@ -14,6 +14,8 @@ import { BulkMail } from "./NetworkMail";
 import { PersonJobs, WarmJobs } from "./NetworkJobs";
 import NetworkImport from "./NetworkImport";
 import { AutoCompanyPanel, SourcePanel, YouPanel } from "./NetworkSidePanels";
+import NetworkHome, { PickFromNetwork } from "./NetworkHome";
+import { savePreview, setPendingPreview } from "./networkPicture";
 import "./network.css";
 
 type View = { kind: "all" } | { kind: "source"; id: string | null } | { kind: "due" } | { kind: "never" } | { kind: "introduced" };
@@ -21,8 +23,24 @@ type Toast = { text: string; undo?: () => void } | null;
 const EMPTY: NetworkData = { people: [], sources: [], links: [] };
 const SORTS: [string, string][] = [["name", "Name"], ["recent", "Last contact"], ["follow", "Follow-up"]];
 
-/** The people around your job search: who they are, where they came from, what happened, and when to follow up. */
+/**
+ * /network: the home page with your maps (and New map, Open a saved file), or one map when the address names it (?map=…). A link from
+ * a phone notification or the extension (?person=…, ?work=…, ?view=…, ?linkedin=…) opens My network.
+ */
 export default function NetworkPage({ header }: { header?: ReactNode }) {
+  const read = () => { const q = new URLSearchParams(window.location.search); return q.get("map") || (["person", "work", "view", "linkedin", "job"].some((k) => q.has(k)) ? "main" : null); };
+  const [mapId, setMapId] = useState<string | null>(read);
+  const [notice, setNotice] = useState("");
+  useEffect(() => { const back = () => setMapId(read()); window.addEventListener("popstate", back); return () => window.removeEventListener("popstate", back); }, []);
+  const go = (id: string | null, message = "") => { window.history.pushState(null, "", id ? `/network?map=${encodeURIComponent(id)}` : "/network"); setNotice(message); setMapId(id); };
+  if (!mapId) return <NetworkHome header={header} onOpen={(id, message) => go(id, message)} />;
+  return <NetworkMap key={mapId} header={header} mapId={mapId} notice={notice} onHome={() => go(null)} />;
+}
+
+/** One map: the people around your job search, where they came from, what happened, and when to follow up. */
+function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; mapId: string; notice: string; onHome: () => void }) {
+  setActiveMap(mapId);
+  const main = mapId === "main";
   const [data, setData] = useState<NetworkData>(EMPTY);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
@@ -44,7 +62,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
     return () => { document.removeEventListener('pointerdown', away); window.removeEventListener('keydown', escape); };
   }, [drawer]);
   const [selected, setSelected] = useState<string | null>(null);
-  const [dialog, setDialog] = useState<null | "list" | "person" | "import" | { source: Source | null }>(null);
+  const [dialog, setDialog] = useState<null | "list" | "person" | "import" | "pick" | { source: Source | null }>(null);
   const [toast, setToast] = useState<Toast>(null);
   const [mailFor, setMailFor] = useState<{ id: string; job?: JobRow } | null>(null);
   const [bulkMail, setBulkMail] = useState<string[] | null>(null);
@@ -60,7 +78,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const linked = useRef(false);
   const reload = useCallback(async () => {
     try {
-      const [d, b] = await Promise.all([loadNetwork(), loadBoard().catch(() => null)]); setData({ people: d.people, sources: d.sources, links: d.links, you: d.you }); if (b) setBoard(b); setError("");
+      const [d, b] = await Promise.all([loadNetwork(), loadBoard().catch(() => null)]); setData({ people: d.people, sources: d.sources, links: d.links, you: d.you, map: d.map, onMap: d.onMap }); if (b) setBoard(b); setError("");
       if (!linked.current) {
         linked.current = true;
         const q = new URLSearchParams(window.location.search), person = q.get("person"), work = q.get("work");
@@ -74,23 +92,26 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
           // The extension's LinkedIn button, when no Atriveo tab was open: add the person it read, then open them.
           let profile: unknown = null; try { profile = JSON.parse(fromLinkedIn); } catch { /* a broken link adds nobody */ }
           if (profile && typeof profile === "object") void post<{ person: Person; existed: boolean }>("linkedin", profile).then(async (r) => {
-            const fresh = await loadNetwork(); setData({ people: fresh.people, sources: fresh.sources, links: fresh.links, you: fresh.you });
+            const fresh = await loadNetwork(); setData({ people: fresh.people, sources: fresh.sources, links: fresh.links, you: fresh.you, map: fresh.map, onMap: fresh.onMap });
             setSelected(r.person.id); say({ text: r.existed ? `${r.person.name} is already in your Network.` : `Added ${r.person.name} from LinkedIn.` });
           }).catch((e: Error) => say({ text: e.message }));
         }
         if (person && jobUrl && d.people.some((p) => p.id === person)) void loadPersonJobs(person).then((r) => { const job = r.jobs.find((j) => j.url === jobUrl); if (job) setMailFor({ id: person, job }); }).catch(() => { /* the panel is open; the jobs show there */ });
-        if ([...q.keys()].length) window.history.replaceState(null, "", "/network");
+        if (notice) say({ text: notice });
+        if ([...q.keys()].some((k) => k !== "map")) window.history.replaceState(null, "", `/network?map=${encodeURIComponent(mapId)}`);
       }
     }
     catch (e) { setError(String((e as Error).message || e)); }
     finally { setLoaded(true); }
-  }, [say]);
+  }, [say, mapId, notice]);
   useEffect(() => { void reload(); }, [reload]);
 
   // The map also shows companies nobody added, where two or more of your people work (worked out, never saved).
-  const mapData = useMemo(() => withAutoCompanies(data), [data]);
-  const colors = useMemo(() => colorsFor(mapData), [mapData]);
-  const sourceById = useMemo(() => new Map(mapData.sources.map((s) => [s.id, s])), [mapData.sources]);
+  // A map other than My network draws only its own sources (onMap); every source stays in data for the pickers.
+  const mapData = useMemo(() => withAutoCompanies(data.onMap ? { ...data, sources: data.sources.filter((s) => data.onMap!.includes(s.id)) } : data), [data]);
+  // Colours come from your whole network, so a source looks the same on every map.
+  const colors = useMemo(() => colorsFor({ ...data, sources: [...data.sources, ...mapData.sources.filter((s) => s.auto)] }), [data, mapData]);
+  const sourceById = useMemo(() => new Map([...data.sources, ...mapData.sources].map((s) => [s.id, s])), [data.sources, mapData.sources]);
   const personById = useMemo(() => new Map(data.people.map((p) => [p.id, p])), [data.people]);
   const counts = useMemo(() => {
     const by = new Map<string | null, number>();
@@ -138,6 +159,19 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
       say({ text: `${p.name} archived.`, undo: async () => { await post("archive", { id: p.id, archived: false }).catch(() => {}); say(null); void reload(); } });
     } catch (e) { say({ text: String((e as Error).message) }); }
   }
+  async function takeOff(id: string, name: string) {
+    try {
+      await post("maps/take", { id });
+      setData((d) => ({ ...d, people: d.people.filter((x) => x.id !== id) })); setSelected(null);
+      say({ text: `${name} is off this map. They stay in your network.`, undo: async () => { await post("maps/add", { ids: [id] }).catch(() => {}); say(null); void reload(); } });
+    } catch (e) { say({ text: String((e as Error).message) }); }
+  }
+  // Back to all maps, leaving a fresh preview picture of this one behind for its card.
+  async function leave() {
+    const el = document.querySelector<SVGSVGElement>(".nwg-svg");
+    if (el && loaded) setPendingPreview(savePreview(el, mapId));
+    onHome();
+  }
 
   return (
     <div className="rv-page nw-page">
@@ -145,7 +179,8 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
       <main className="nw-main">
         <div className="nw-top" data-canvas-controls>
           <div className="nw-canvas-island nw-canvas-left" role="toolbar" aria-label="Network controls">
-            <h1 className="nw-canvas-title" title={`${counts.all} people · ${data.sources.length} sources`}>Network<span>{counts.all}</span></h1>
+            <button type="button" className="nw-home-btn" aria-label="All maps" title="All maps" onClick={() => void leave()}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
+            <h1 className="nw-canvas-title" title={`${counts.all} people · ${mapData.sources.filter((s) => !s.auto).length} sources`}>{data.map?.name ?? (main ? "My network" : "Map")}<span>{counts.all}</span></h1>
             <CanvasButton label="Show layers and filters" icon="layers" expanded={drawer === 'layers'} controls="nw-canvas-layers" onClick={() => toggleDrawer('layers')} />
             <CanvasButton label="Search network" icon="search" expanded={drawer === 'search'} controls="nw-canvas-search" onClick={() => toggleDrawer('search')} />
             <CanvasButton label="Add to network" icon="add" expanded={drawer === 'add'} controls="nw-canvas-add" onClick={() => toggleDrawer('add')} />
@@ -162,6 +197,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
           {query && <button type="button" className="nw-x" aria-label="Clear search" onClick={() => setQuery('')}>×</button>}
         </div>}
         {drawer === 'add' && <div id="nw-canvas-add" className="nw-canvas-popover nw-canvas-add" role="group" aria-label="Add to network" data-canvas-controls>
+          {!main && <CanvasMenuAction icon="list" onClick={() => { setDialog('pick'); setDrawer(null); }}>From your network…</CanvasMenuAction>}
           <CanvasMenuAction icon="person" onClick={() => { setDialog('person'); setDrawer(null); }}>Add person</CanvasMenuAction>
           <CanvasMenuAction icon="source" onClick={() => { setDialog({ source: null }); setDrawer(null); }}>New source or company</CanvasMenuAction>
           <CanvasMenuAction icon="list" onClick={() => { setDialog('list'); setDrawer(null); }}>Add a list</CanvasMenuAction>
@@ -240,11 +276,12 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
           {person && (
             <PersonPanel key={person.id} person={person} data={data} colors={colors} sourceById={sourceById} personById={personById}
               onClose={() => setSelected(null)} onChange={replacePerson} onOpen={setSelected} onArchive={() => void archive(person)} onWrite={() => setMailFor({ id: person.id })} onReferral={(job) => setMailFor({ id: person.id, job })} say={say}
-              onLinks={(links) => setData((d) => ({ ...d, links }))} />
+              onLinks={(links) => setData((d) => ({ ...d, links }))} onTakeOff={main ? undefined : () => void takeOff(person.id, person.name)} />
           )}
         </div>
       </main>
 
+      {dialog === "pick" && <PickFromNetwork mapName={data.map?.name ?? "this map"} onClose={() => setDialog(null)} onDone={async (n) => { setDialog(null); await reload(); say({ text: `Put ${n} on this map.` }); }} />}
       {dialog === "list" && <BulkAdd sources={data.sources} people={data.people} initialSource={bulkSource} onClose={() => { setDialog(null); setBulkSource(null); }} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
       {dialog === "import" && <NetworkImport sources={data.sources} people={data.people} onClose={() => setDialog(null)} onDone={async (msg, sourceId) => { setDialog(null); await reload(); if (sourceId) setView({ kind: "source", id: sourceId }); say({ text: msg }); }} />}
       {dialog === "person" && <AddPerson sources={data.sources} people={data.people} onClose={() => setDialog(null)} onDone={async (p) => { setDialog(null); await reload(); setSelected(p.id); say({ text: `${p.name} added.` }); }} />}
@@ -286,9 +323,9 @@ const historyPage = () => (typeof window !== "undefined" && window.innerHeight <
  * One person, on one screen: who they are, how they reached you (a trail you can follow back), one row of actions, and four tabs so
  * nothing scrolls: an overview, the jobs at their company, everything that happened, and their details.
  */
-function PersonPanel({ person: p, data, colors, sourceById, personById, onClose, onChange, onOpen, onArchive, onWrite, onReferral, say, onLinks }: {
+function PersonPanel({ person: p, data, colors, sourceById, personById, onClose, onChange, onOpen, onArchive, onWrite, onReferral, say, onLinks, onTakeOff }: {
   person: Person; data: NetworkData; colors: ReturnType<typeof colorsFor>; sourceById: Map<string, Source>; personById: Map<string, Person>;
-  onClose: () => void; onChange: (p: Person) => void; onOpen: (id: string) => void; onArchive: () => void; onWrite: () => void; onReferral: (job: JobRow) => void; say: (t: Toast) => void; onLinks: (l: NetworkData["links"]) => void;
+  onClose: () => void; onChange: (p: Person) => void; onOpen: (id: string) => void; onArchive: () => void; onWrite: () => void; onReferral: (job: JobRow) => void; say: (t: Toast) => void; onLinks: (l: NetworkData["links"]) => void; onTakeOff?: () => void;
 }) {
   const [draft, setDraft] = useState(p);
   const [saving, setSaving] = useState("");
@@ -409,6 +446,7 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
           {pop === "more" && <div className="pp-pop right" role="menu">
             {p.linkedin && <a role="menuitem" className="pp-mi" href={p.linkedin} target="_blank" rel="noreferrer">Open LinkedIn profile ↗</a>}
             {p.photoId && <button type="button" role="menuitem" className="pp-mi" onClick={() => { void save({ photoId: null }); setPop(null); }}>Remove photo</button>}
+            {onTakeOff && <button type="button" role="menuitem" className="pp-mi" onClick={() => { setPop(null); onTakeOff(); }}>Remove from this map</button>}
             <button type="button" role="menuitem" className="pp-mi danger" onClick={() => { setPop(null); onArchive(); }}>Archive</button>
           </div>}
         </div>
