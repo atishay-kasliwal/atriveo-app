@@ -58,10 +58,13 @@ test('Pages push proxy rejects anonymous and cross-origin requests and overrides
   const request = headers => new Request('https://apply.atriveo.com/api/push/test', { method: 'POST', headers, body: '{}' });
   assert.equal((await onRequest({ request: request({ Origin: 'https://apply.atriveo.com', 'Content-Type': 'application/json' }), env })).status, 401);
   assert.equal((await onRequest({ request: request({ Origin: 'https://evil.test', Cookie: `atriveo_token=${token}`, 'Content-Type': 'application/json' }), env })).status, 403);
+  assert.equal((await onRequest({ request: new Request('https://apply.atriveo.com/api/push/health'), env })).status, 401);
   const previous = globalThis.fetch;
   let forwarded;
   globalThis.fetch = async (_, init) => { forwarded = init; return Response.json({ sent: 1 }); };
   try {
+    const health = await onRequest({ request: new Request('https://apply.atriveo.com/api/push/health', { headers: { Authorization: 'Bearer backend-secret' } }), env });
+    assert.equal(health.status, 200); assert.equal((await health.json()).upstreamStatus, 200);
     const response = await onRequest({ request: request({ Origin: 'https://apply.atriveo.com', Cookie: `atriveo_token=${token}`, 'Content-Type': 'application/json', 'X-Atriveo-Push-User': 'victim@example.com' }), env });
     assert.equal(response.status, 200); assert.equal(forwarded.headers['X-Atriveo-Push-User'], 'owner@example.com'); assert.ok(!forwarded.headers.Cookie);
     // Cloudflare can return an encoded upstream stream. Its encoding header must
