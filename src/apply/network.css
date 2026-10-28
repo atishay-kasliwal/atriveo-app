@@ -652,3 +652,12 @@ button.pp-step{cursor:pointer;transition:color .15s}button.pp-step:hover{color:v
 .pp-source-faces i{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:color-mix(in oklab,var(--c) 16%,var(--nw-card));color:var(--c);font-size:10px;font-style:normal;font-weight:600}
 .pp-source-buttons{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
 .pp-source-buttons .main{flex:1;min-width:140px}
+
+/* Organisation cards share the reference's logo, metadata, faces and violet frame. */
+.nwg-org-card{fill:url(#nwg-org-fill);stroke:#9880eb;stroke-width:1.8}
+.nwg-src.is-company .nwg-halo,.nwg-src.is-staffing .nwg-halo{stroke:#c1b2f2}
+.nwg-src.is-company .nwg-sname,.nwg-src.is-staffing .nwg-sname{fill:#f0edf9}
+.nwg-src.is-company .nwg-kind,.nwg-src.is-staffing .nwg-kind,.nwg-org-place{fill:#c8c1df;font-size:12px}
+.nwg-src .nwg-pplpill{fill:#4a3c78;stroke:#594787}
+.nwg-src .nwg-pill{fill:#eee8ff}
+.nwg-org-chevron{fill:none;stroke:#9783cc;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}

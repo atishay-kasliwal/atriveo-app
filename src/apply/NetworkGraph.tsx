@@ -5,6 +5,19 @@ import {
 } from "./network";
 import { BoardBox, PenBar, Toolbar } from "./NetworkBoard";
 import ExportDialog from "./NetworkExport";
+import { companyLogoUrls } from "../utils/jobPresentation";
+
+/** Keep uploaded logos, then try the same company assets as the job cards. */
+function OrganisationLogo({ source, x }: { source: Source; x: number }) {
+  const urls = source.photoId ? [imageUrl(source.photoId)] : companyLogoUrls(source.name);
+  const [failed, setFailed] = useState(0);
+  const url = urls[failed];
+  return <>
+    <rect x={x} y={-34} width={68} height={68} rx={12} fill="white" stroke="#d8d9e3" />
+    {!url && <text x={x + 34} y={1} className="nwg-tile big" fill="#7462c9">{source.name[0]?.toUpperCase()}</text>}
+    {url && <image key={url} href={url} x={x + 5} y={-29} width={58} height={58} preserveAspectRatio="xMidYMid meet" onError={() => setFailed((n) => n + 1)} />}
+  </>;
+}
 
 type Colors = ReturnType<typeof colorsFor>;
 type View = { x: number; y: number; k: number };
@@ -18,7 +31,7 @@ type Gesture =
 const PERSON = { w: 196, h: 52 }, YOU = { w: 246, h: 80 }, WORK = { w: 176, h: 58 };
 const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 /** Card size by kind: organisations and events have their own wider cards; everything else grows with its name. */
-const sourceSize = (s: Source) => (s.type === "company" || s.type === "staffing" ? { w: 330, h: 78 } : s.type === "event" ? { w: 276, h: 80 }
+const sourceSize = (s: Source) => (s.type === "company" || s.type === "staffing" ? { w: 330, h: 94 } : s.type === "event" ? { w: 276, h: 80 }
   : { w: Math.round(Math.max(180, 86 + Math.max(s.name.length * 9.6, (s.about || s.type).length * 6.8))), h: 68 });
 /** A ticket: a rounded card with a half-circle notch cut into each side. */
 function ticketPath(w: number, h: number, r = 14, n = 9) {
@@ -326,6 +339,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
       onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const f = [...e.dataTransfer.files].find((x) => x.type.startsWith("image/")); if (f) void addImage(f); }}
       role="application" aria-label="Your network as a map. Drag cards to arrange them; Enter opens the focused card.">
       <svg ref={svgEl} className="nwg-svg" style={{ backgroundSize: `${28 * view.k}px ${28 * view.k}px`, backgroundPosition: `${view.x}px ${view.y}px` }}>
+        <defs><linearGradient id="nwg-org-fill" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#302b52" /><stop offset="1" stopColor="#1a172f" /></linearGradient></defs>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>
           <g>
             {board.filter((it) => layers.board && it.kind === "group").map((gr) => {
@@ -402,18 +416,20 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
                     {n > 0 && <><circle cx={sz.w / 2 - 4} cy={-sz.h / 2 + 4} r={12} fill={c} stroke={bg} strokeWidth={3} /><text x={sz.w / 2 - 4} y={-sz.h / 2 + 4.5} className="nwg-badge">{n}</text></>}
                   </> : org ? <>
                     {/* A company or agency: its logo on white, what it is, where, and the faces of the people you know there. */}
-                    <rect x={x0 - 5} y={-sz.h / 2 - 5} width={sz.w + 10} height={sz.h + 10} rx={21} className="nwg-halo" />
-                    <rect x={x0} y={-sz.h / 2} width={sz.w} height={sz.h} rx={16} fill={card} stroke={c} strokeWidth={1.8} strokeDasharray={s.auto ? "6 5" : undefined} />
-                    <rect x={x0 + 12} y={-26} width={52} height={52} rx={12} fill="#ffffff" stroke="var(--nw-line-strong)" />
-                    {picture(x0 + 14, -24, 48, 10) ?? <text x={x0 + 38} y={1} className="nwg-tile big" fill={c}>{s.name[0]?.toUpperCase()}</text>}
-                    <text x={x0 + 76} y={-12} className="nwg-sname">{clip(s.name, 20)}</text>
-                    <text x={x0 + 76} y={5} className="nwg-kind">{s.auto ? "Where they work" : clip(via || kind, 24)}</text>
-                    {s.place && <><path d={PIN} transform={`translate(${x0 + 81} 21) scale(.85)`} fill="none" stroke="var(--nw-muted)" strokeWidth={1.6} /><text x={x0 + 90} y={25} className="nwg-sub">{clip(s.place, 14)}</text></>}
-                    {faces.map((f, k) => { const cx = sz.w / 2 - 22 - (faces.length - 1 - k) * 20; return (
-                      <g key={f.id}><circle cx={cx} cy={-14} r={13} fill={colors.person.get(f.id) ?? c} fillOpacity={0.25} stroke={card} strokeWidth={2.5} />
-                        {f.photoId ? <><clipPath id={`nwg-face-${s.id}-${k}`}><circle cx={cx} cy={-14} r={11.5} /></clipPath><image href={imageUrl(f.photoId)} x={cx - 11.5} y={-25.5} width={23} height={23} clipPath={`url(#nwg-face-${s.id}-${k})`} preserveAspectRatio="xMidYMid slice" /></>
-                          : <text x={cx} y={-13.5} className="nwg-face" fill={colors.person.get(f.id) ?? c}>{initials(f.name)}</text>}</g>); })}
-                    {n > 0 && <><rect x={sz.w / 2 - 92} y={8} width={80} height={21} rx={10.5} className="nwg-pplpill" /><text x={sz.w / 2 - 52} y={19} className="nwg-pill">{n} {n === 1 ? "person" : "people"} ›</text></>}
+                    <rect x={x0 - 4} y={-sz.h / 2 - 4} width={sz.w + 8} height={sz.h + 8} rx={23} className="nwg-halo" />
+                    <rect x={x0} y={-sz.h / 2} width={sz.w} height={sz.h} rx={20} className="nwg-org-card" />
+                    <OrganisationLogo key={`${s.id}-${s.photoId || s.name}`} source={s} x={x0 + 10} />
+                    <text x={x0 + 89} y={-18} className="nwg-sname"><title>{s.name}</title>{clip(s.name, 15)}</text>
+                    <text x={x0 + 89} y={3} className="nwg-kind"><title>{via || kind}</title>{clip(via || kind, 19)}</text>
+                    <path d={PIN} transform={`translate(${x0 + 94} 22)`} fill="none" stroke="#c8c1e8" strokeWidth={1.6} />
+                    <text x={x0 + 104} y={27} className="nwg-org-place"><title>{s.place || "Location not set"}</title>{clip(s.place || "Location not set", 16)}</text>
+                    {faces.map((f, k) => { const cx = sz.w / 2 - 43 - (faces.length - 1 - k) * 27; return (
+                      <g key={f.id}><circle cx={cx} cy={-13} r={19} fill="#302c4d" stroke="#c7c0df" strokeWidth={1.6} />
+                        {f.photoId ? <><clipPath id={`nwg-face-${s.id}-${k}`}><circle cx={cx} cy={-13} r={17} /></clipPath><image href={imageUrl(f.photoId)} x={cx - 17} y={-30} width={34} height={34} clipPath={`url(#nwg-face-${s.id}-${k})`} preserveAspectRatio="xMidYMid slice" /></>
+                          : <text x={cx} y={-12.5} className="nwg-face" fill="#e5defb">{initials(f.name)}</text>}</g>); })}
+                    <rect x={sz.w / 2 - 108} y={18} width={85} height={22} rx={11} className="nwg-pplpill" />
+                    <text x={sz.w / 2 - 65.5} y={29} className="nwg-pill">{n} {n === 1 ? "person" : "people"}</text>
+                    <path d={`M${sz.w / 2 - 18} -4l7 7-7 7`} className="nwg-org-chevron" />
                   </> : <>
                     <rect x={x0 - 5} y={-sz.h / 2 - 5} width={sz.w + 10} height={sz.h + 10} rx={19} className="nwg-halo" />
                     <rect x={x0} y={-sz.h / 2} width={sz.w} height={sz.h} rx={14} fill={card} stroke={c} strokeWidth={1.8} />
