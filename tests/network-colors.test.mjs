@@ -86,3 +86,10 @@ test('a source introduced by a person: the line runs from that person, the sourc
  assert.deepEqual(warmPath(edges,'a').nodes,['you','fam','chani','nkhs','a']);
  assert.equal(sourceLabel(nkhs,data.sources,[{id:'chani',name:'Chani Jain'}]),'nkhs · via Chani Jain');
  const gone=edgesFor({...data,people:data.people.filter(p=>p.id!=='chani')},colorsFor(data));assert.equal(gone.find(x=>x.b==='nkhs').a,'you','if Chani is archived, the source comes straight from you again');});
+
+test('introduced by two people: a line from each, and everyone else keeps their own line',async()=>{
+ const {edgesFor,colorsFor}=await import(out);
+ const data={sources:[src('s','1')],links:[],people:[person('a',{sourceId:'s'}),person('b',{sourceId:'s'}),person('c',{sourceId:'s',via:'a',alsoVia:['b','a']}),person('d',{sourceId:'s'})]};
+ const e=edgesFor(data,colorsFor(data));
+ assert.deepEqual(e.filter(x=>x.b==='c').map(x=>[x.a,x.label]),[['a','introduced'],['b','also introduced']]);
+ for(const id of ['a','b','d'])assert.deepEqual(e.filter(x=>x.b===id).map(x=>x.kind),['belongs']);});

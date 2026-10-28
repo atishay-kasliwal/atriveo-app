@@ -177,3 +177,11 @@ test('a source introduced by a person: the person is kept, a source has one way 
  const moved=await saveSource(db,{id:nkhs.id,parentSourceId:fam.id},T);assert.equal(moved.viaPersonId,null,'one way in: a parent source replaces the person');
  assert.equal((await saveSource(db,{id:nkhs.id,viaPersonId:chani.id},T)).parentSourceId,null,'and the other way round');
  await assert.rejects(()=>saveSource(db,{name:'X',viaPersonId:'gone'}),/not in your network/);});
+
+test('introduced by more than one person: the first decides colour and place, the rest are kept; no repeats, no self, all must exist',async()=>{
+ const db=fakeDb();const a=await savePerson(db,{name:'Pri K'},T),b=await savePerson(db,{name:'Ani K'},T),c=await savePerson(db,{name:'Raj K'},T);
+ const p=await savePerson(db,{name:'Arp T',via:a.id},T);
+ const two=await savePerson(db,{id:p.id,alsoVia:[b.id,b.id,a.id,c.id]},T);assert.equal(two.via,a.id);assert.deepEqual(two.alsoVia,[b.id,c.id],'the first is not repeated');
+ const promoted=await savePerson(db,{id:p.id,via:null},T);assert.equal(promoted.via,b.id,'removing the first moves the next one up');assert.deepEqual(promoted.alsoVia,[c.id]);
+ await assert.rejects(()=>savePerson(db,{id:p.id,alsoVia:[p.id]}),/introduce themselves/);
+ await assert.rejects(()=>savePerson(db,{id:p.id,alsoVia:['gone']}),/not in your network/);});

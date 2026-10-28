@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
-  sourceLabel, throughFields, throughValue, HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, plusDays, post, uploadPhoto,
+  sourceLabel, throughFields, throughValue, introducersOf, HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, plusDays, post, uploadPhoto,
   type BoardItem, type HistoryType, type JobRow, companyOfPerson, loadPersonJobs, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
 } from "./network";
 import NetworkGraph from "./NetworkGraph";
@@ -262,32 +262,52 @@ function Swatches({ value, fallback, onPick, label }: { value: string | null; fa
   );
 }
 
+type PanelTab = "overview" | "jobs" | "history" | "details";
+const TABS: [PanelTab, string][] = [["overview", "Overview"], ["jobs", "Jobs"], ["history", "History"], ["details", "Details"]];
+// Fewer entries per page on a short screen, so the panel never scrolls.
+const historyPage = () => (typeof window !== "undefined" && window.innerHeight < 800 ? 4 : 6);
+
+/**
+ * One person, on one screen: who they are, how they reached you (a trail you can follow back), one row of actions, and four tabs so
+ * nothing scrolls: an overview, the jobs at their company, everything that happened, and their details.
+ */
 function PersonPanel({ person: p, data, colors, sourceById, personById, onClose, onChange, onOpen, onArchive, onWrite, onReferral, say, onLinks }: {
   person: Person; data: NetworkData; colors: ReturnType<typeof colorsFor>; sourceById: Map<string, Source>; personById: Map<string, Person>;
   onClose: () => void; onChange: (p: Person) => void; onOpen: (id: string) => void; onArchive: () => void; onWrite: () => void; onReferral: (job: JobRow) => void; say: (t: Toast) => void; onLinks: (l: NetworkData["links"]) => void;
 }) {
   const [draft, setDraft] = useState(p);
   const [saving, setSaving] = useState("");
+  const [tab, setTab] = useState<PanelTab>("overview");
+  const [pop, setPop] = useState<null | "follow" | "log" | "more" | "connect" | "colour">(null);
   const [hType, setHType] = useState<HistoryType>("note");
   const [hText, setHText] = useState("");
+  const [hPage, setHPage] = useState(0);
   const [linkTo, setLinkTo] = useState("");
   const [linkKind, setLinkKind] = useState<LinkKind>("other");
   const [linkLabel, setLinkLabel] = useState("");
+  const [addVia, setAddVia] = useState("");
   // A save (or a reload) brings a new copy of this person: start editing from it.
   const [seen, setSeen] = useState(p);
   if (seen !== p) { setSeen(p); setDraft(p); }
+  useEffect(() => {
+    if (!pop) return;
+    const away = (e: PointerEvent) => { if (!(e.target as Element).closest?.(".pp-pop,.pp-popbtn")) setPop(null); };
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setPop(null); };
+    document.addEventListener("pointerdown", away); window.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("pointerdown", away); window.removeEventListener("keydown", esc); };
+  }, [pop]);
 
   async function save(fields: Partial<Person>) {
     setSaving("Saving…");
     try { const r = await post<{ person: Person }>("person", { id: p.id, ...fields }); onChange(r.person); setSaving("Saved"); window.setTimeout(() => setSaving(""), 1200); }
     catch (e) { setSaving(""); setDraft(p); say({ text: String((e as Error).message) }); }
   }
-  const field = (k: "name" | "role" | "city" | "email" | "linkedin" | "phone", label: string, type = "text") => (
-    <label className="nw-f"><span>{label}</span><input id={`nw-${k}`} type={type} value={draft[k]} onChange={(e) => setDraft({ ...draft, [k]: e.target.value })}
+  const text = (k: "name" | "role" | "city" | "email" | "linkedin" | "phone" | "company", label: string, type = "text", placeholder = "") => (
+    <label className="nw-f"><span>{label}</span><input id={`nw-${k}`} type={type} value={draft[k]} placeholder={placeholder} onChange={(e) => setDraft({ ...draft, [k]: e.target.value })}
       onBlur={() => { if (draft[k] !== p[k]) void save({ [k]: draft[k] }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} /></label>
   );
   async function addHistory() {
-    try { const r = await post<{ person: Person }>("history", { id: p.id, type: hType, text: hText }); onChange(r.person); setHText(""); }
+    try { const r = await post<{ person: Person }>("history", { id: p.id, type: hType, text: hText }); onChange(r.person); setHText(""); setPop(null); setHPage(0); say({ text: "Added to their history." }); }
     catch (e) { say({ text: String((e as Error).message) }); }
   }
   async function dropHistory(entryId: string) {
@@ -295,101 +315,163 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
   }
   async function connect() {
     if (!linkTo) return;
-    try { await post("link", { a: p.id, b: linkTo, kind: linkKind, label: linkLabel }); const d = await loadNetwork(); onLinks(d.links); setLinkTo(""); setLinkLabel(""); }
+    try { await post("link", { a: p.id, b: linkTo, kind: linkKind, label: linkLabel }); const d = await loadNetwork(); onLinks(d.links); setLinkTo(""); setLinkLabel(""); setPop(null); }
     catch (e) { say({ text: String((e as Error).message) }); }
   }
   async function disconnect(id: string) {
     try { await post("link/remove", { id }); onLinks(data.links.filter((l) => l.id !== id)); } catch (e) { say({ text: String((e as Error).message) }); }
   }
-  const src = p.sourceId ? sourceById.get(p.sourceId) : null, via = p.via ? personById.get(p.via) : null;
+  const introducers = introducersOf(p).map((id) => personById.get(id)).filter((x): x is Person => Boolean(x));
+  const saveIntroducers = (ids: string[]) => save({ via: ids[0] ?? null, alsoVia: ids.slice(1) });
+  const src = p.sourceId ? sourceById.get(p.sourceId) : null;
   const color = colors.person.get(p.id) ?? "";
+  const company = companyOfPerson(p, sourceById);
   const links = data.links.filter((l) => l.a === p.id || l.b === p.id).map((l) => {
     const other = l.a === p.id ? l.b : l.a;
     return { l, name: personById.get(other)?.name ?? sourceById.get(other)?.name ?? "Someone archived", id: other, isPerson: personById.has(other) };
   });
   const f = followUp(p.nextFollowUp);
+  const replied = p.history.length > 0 && p.history[p.history.length - 1].type === "reply";
+  const per = historyPage(), history = [...p.history].reverse(), pages = Math.max(1, Math.ceil(history.length / per)), page = Math.min(hPage, pages - 1);
   const others = [...data.people.filter((x) => x.id !== p.id).map((x) => ({ id: x.id, name: x.name })), ...data.sources.map((s) => ({ id: s.id, name: `${s.name} (source)` }))];
+  // The trail back to you: what brought their source (a parent source or a person), the source, who introduced them, then them.
+  const upstream: { id: string; name: string; color?: string; person?: boolean }[] = [];
+  for (let s = src ?? undefined, guard = 0; s && guard < 6; guard++) {
+    upstream.unshift({ id: s.id, name: s.name, color: colors.source.get(s.id) });
+    if (s.viaPersonId && personById.has(s.viaPersonId)) { const who = personById.get(s.viaPersonId)!; upstream.unshift({ id: who.id, name: who.name, color: colors.person.get(who.id), person: true }); break; }
+    s = s.parentSourceId ? sourceById.get(s.parentSourceId) : undefined;
+  }
+  const tabCount: Record<PanelTab, string> = { overview: "", jobs: "", history: p.history.length ? String(p.history.length) : "", details: "" };
+  const keyTabs = (e: React.KeyboardEvent) => {
+    const i = TABS.findIndex(([t]) => t === tab), n = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (!n) return; e.preventDefault(); const next = TABS[(i + n + TABS.length) % TABS.length][0]; setTab(next); document.getElementById(`pp-tab-${next}`)?.focus();
+  };
   return (
-    <aside className="nw-panel" aria-label={p.name}>
-      <div className="nw-ph">
+    <aside className="nw-panel pp" aria-label={p.name}>
+      <header className="pp-head">
         <label className="nw-photo" title={p.photoId ? "Change the photo" : "Add a photo"}>
-          <Avatar big name={draft.name || p.name} photo={p.photoId} color={color} source={via && src ? colors.source.get(src.id) : undefined} />
+          <Avatar big name={draft.name || p.name} photo={p.photoId} color={color} source={introducers.length && src ? colors.source.get(src.id) : undefined} />
           <span className="nw-photo-tip">{p.photoId ? "Change" : "+ Photo"}</span>
-          <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) { setSaving("Uploading…"); uploadPhoto(f).then((id) => save({ photoId: id })).catch((err: Error) => { setSaving(""); say({ text: err.message }); }); } }} />
+          <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) { setSaving("Uploading…"); uploadPhoto(file).then((id) => save({ photoId: id })).catch((err: Error) => { setSaving(""); say({ text: err.message }); }); } }} />
         </label>
-        <div className="nw-ph-text">
+        <div className="pp-id">
           <input className="nw-name" aria-label="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} onBlur={() => { if (draft.name.trim() && draft.name !== p.name) void save({ name: draft.name }); else setDraft({ ...draft, name: p.name }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
-          <input className="nw-role" aria-label="Role" placeholder="Role, like Senior recruiter" value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })} onBlur={() => { if (draft.role !== p.role) void save({ role: draft.role }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
+          <input className="nw-role" aria-label="Role" placeholder="Add their role" value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })} onBlur={() => { if (draft.role !== p.role) void save({ role: draft.role }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
+          <p className="pp-where">{[company, p.city].filter(Boolean).join(" · ") || <button type="button" className="pp-link" onClick={() => setTab("details")}>Add where they work</button>}</p>
         </div>
         <span className="nw-saving" aria-live="polite">{saving}</span>
         <button type="button" className="nw-x" aria-label="Close" onClick={onClose}>×</button>
+      </header>
+
+      <nav className="pp-trail" aria-label="How they reached you">
+        <span className="pp-step you">You</span>
+        {upstream.map((s) => <span key={s.id} className="pp-hop"><i aria-hidden="true">›</i>{s.person ? <button type="button" className="pp-step" onClick={() => onOpen(s.id)} style={{ "--c": s.color } as CSSProperties}>{s.name}</button> : <span className="pp-step" style={{ "--c": s.color } as CSSProperties}>{s.name}</span>}</span>)}
+        {introducers.length > 0 && <span className="pp-hop"><i aria-hidden="true">›</i><span className="pp-group">{introducers.map((x, n) => <span key={x.id}>{n > 0 && <em>+</em>}<button type="button" className="pp-step" onClick={() => onOpen(x.id)} style={{ "--c": colors.person.get(x.id) } as CSSProperties}>{x.name}</button></span>)}</span></span>}
+        <span className="pp-hop"><i aria-hidden="true">›</i><span className="pp-step me" style={{ "--c": color } as CSSProperties}>{p.name.split(" ")[0]}</span></span>
+      </nav>
+
+      <div className="pp-actions">
+        <button type="button" className="nw-btn main" onClick={onWrite}>Write email</button>
+        <div className="pp-popwrap">
+          <button type="button" className={`pp-pill pp-popbtn${f?.due ? " due" : f ? " set" : ""}`} aria-expanded={pop === "follow"} onClick={() => setPop(pop === "follow" ? null : "follow")}>{f ? `Follow up ${f.text}` : "Set follow-up"}</button>
+          {pop === "follow" && <div className="pp-pop" role="dialog" aria-label="Follow-up">
+            <div className="pp-pop-row">{[["In 3 days", 3], ["In a week", 7], ["In 2 weeks", 14]].map(([l, n]) => <button key={l} type="button" className="nw-chip" onClick={() => { void save({ nextFollowUp: plusDays(n as number) }); setPop(null); }}>{l}</button>)}</div>
+            <label className="nw-f"><span>Or a date</span><input id="nw-followup" type="date" value={p.nextFollowUp ?? ""} onChange={(e) => { void save({ nextFollowUp: e.target.value || null }); setPop(null); }} /></label>
+            {p.nextFollowUp && <button type="button" className="pp-link" onClick={() => { void save({ nextFollowUp: null }); setPop(null); }}>Clear the follow-up</button>}
+          </div>}
+        </div>
+        <div className="pp-popwrap">
+          <button type="button" className="pp-pill pp-popbtn" aria-expanded={pop === "log"} onClick={() => setPop(pop === "log" ? null : "log")}>Log</button>
+          {pop === "log" && <div className="pp-pop" role="dialog" aria-label="Log something">
+            <div className="pp-types" role="radiogroup" aria-label="What happened">{HISTORY_TYPES.map(([k, l]) => <button key={k} type="button" role="radio" aria-checked={hType === k} onClick={() => setHType(k)}>{l}</button>)}</div>
+            <input id="nw-htext" aria-label="Details" autoFocus placeholder={hType === "note" ? "Write a note" : "Details (optional)"} value={hText} onChange={(e) => setHText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void addHistory(); }} />
+            <button type="button" className="nw-btn main" onClick={() => void addHistory()}>Add to history</button>
+          </div>}
+        </div>
+        <span className="grow" />
+        <div className="pp-popwrap">
+          <button type="button" className="pp-icon pp-popbtn" aria-label="More" aria-expanded={pop === "more"} onClick={() => setPop(pop === "more" ? null : "more")}>⋯</button>
+          {pop === "more" && <div className="pp-pop right" role="menu">
+            {p.linkedin && <a role="menuitem" className="pp-mi" href={p.linkedin} target="_blank" rel="noreferrer">Open LinkedIn profile ↗</a>}
+            {p.photoId && <button type="button" role="menuitem" className="pp-mi" onClick={() => { void save({ photoId: null }); setPop(null); }}>Remove photo</button>}
+            <button type="button" role="menuitem" className="pp-mi danger" onClick={() => { setPop(null); onArchive(); }}>Archive</button>
+          </div>}
+        </div>
       </div>
-      <div className="nw-scroll">
-        <div className="nw-pair">
-          <label className="nw-f"><span>Belongs to</span>
-            <select id="nw-source" value={p.sourceId ?? ""} onChange={(e) => void save({ sourceId: e.target.value || null })}>
-              <option value="">No source</option>{data.sources.map((s) => <option key={s.id} value={s.id}>{sourceLabel(s, data.sources, data.people)}</option>)}
-            </select></label>
-          <label className="nw-f"><span>Introduced by</span>
-            <select id="nw-via" value={p.via ?? ""} onChange={(e) => void save({ via: e.target.value || null })}>
-              <option value="">Nobody (a first connection)</option>{data.people.filter((x) => x.id !== p.id).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-            </select></label>
-        </div>
-        {via && <p className="nw-lineage"><i style={{ background: src ? colors.source.get(src.id) : "var(--nw-muted)" }} />{src ? <>Belongs to <b>{src.name}</b>, </> : null}introduced by <button type="button" onClick={() => onOpen(via.id)}>{via.name}</button>. Their own colour starts a new branch.</p>}
-        {p.photoId && <button type="button" className="nw-chip nw-photo-rm" onClick={() => void save({ photoId: null })}>Remove photo</button>}
-        <div className="nw-lab">Colour</div>
-        <Swatches value={p.color} fallback={color} label="Colour" onPick={(c) => void save({ color: c })} />
-        <div className="nw-grid">
-          {field("city", "City")}{field("email", "Email", "email")}{field("linkedin", "LinkedIn")}{field("phone", "Phone", "tel")}
-        </div>
-        {p.linkedin && <a className="nw-out" href={p.linkedin} target="_blank" rel="noreferrer">Open LinkedIn profile ↗</a>}
-        <label className="nw-f nw-works"><span>Works at</span><input id="nw-company" value={draft.company} placeholder={companyOfPerson({ ...p, company: "" }, sourceById) || "Company"}
-          onChange={(e) => setDraft({ ...draft, company: e.target.value })} onBlur={() => { if (draft.company !== p.company) void save({ company: draft.company }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} /></label>
-        <div className="nw-lab">Jobs at {companyOfPerson(p, sourceById) || "their company"}</div>
-        <PersonJobs person={p} company={companyOfPerson(p, sourceById)} onReferral={onReferral} watching={p.watchJobs} onWatch={(on) => void save({ watchJobs: on })} />
-        <div className="nw-lab">Follow up</div>
-        <div className="nw-fu">
-          <input id="nw-followup" type="date" aria-label="Follow-up date" value={p.nextFollowUp ?? ""} onChange={(e) => void save({ nextFollowUp: e.target.value || null })} />
-          {[["+3 days", 3], ["+1 week", 7], ["+2 weeks", 14]].map(([l, n]) => <button key={l} type="button" className="nw-chip" onClick={() => void save({ nextFollowUp: plusDays(n as number) })}>{l}</button>)}
-          {p.nextFollowUp && <button type="button" className="nw-chip" onClick={() => void save({ nextFollowUp: null })}>Clear</button>}
-          <span className={`nw-fu-say${f?.due ? " due" : ""}`}>{f ? `Due ${f.text}` : "Not set"} · last contact {ago(p.lastContact)}</span>
-        </div>
-        <div className="nw-lab">Connected to</div>
-        <ul className="nw-links">
-          {links.map(({ l, name, id, isPerson }) => (
-            <li key={l.id}><i style={{ background: l.color ?? (isPerson ? colors.person.get(id) : colors.source.get(id)) }} />
-              {isPerson ? <button type="button" className="nw-linkname" onClick={() => onOpen(id)}>{name}</button> : <span className="nw-linkname">{name}</span>}
-              <small>{l.label || LINK_KINDS.find(([k]) => k === l.kind)?.[1]}</small>
-              <button type="button" className="nw-x small" aria-label={`Remove the connection to ${name}`} onClick={() => void disconnect(l.id)}>×</button></li>
-          ))}
-          {!links.length && <li className="nw-muted">No other connections yet.</li>}
-        </ul>
-        <div className="nw-connect">
-          <select id="nw-link-to" aria-label="Connect to" value={linkTo} onChange={(e) => setLinkTo(e.target.value)}><option value="">Connect to…</option>{others.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}</select>
-          <select id="nw-link-kind" aria-label="Kind of connection" value={linkKind} onChange={(e) => setLinkKind(e.target.value as LinkKind)}>{LINK_KINDS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
-          <input id="nw-link-label" aria-label="What is it" placeholder="What is it, like same office" value={linkLabel} onChange={(e) => setLinkLabel(e.target.value)} />
-          <button type="button" className="nw-btn" disabled={!linkTo} onClick={() => void connect()}>Connect</button>
-        </div>
-        <div className="nw-lab">Notes</div>
-        <textarea id="nw-notes" className="nw-notes" aria-label="Notes" placeholder="What they said, what they prefer, what you promised." value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} onBlur={() => { if (draft.notes !== p.notes) void save({ notes: draft.notes }); }} />
-        <div className="nw-lab">History</div>
-        <div className="nw-hadd">
-          <select id="nw-htype" aria-label="What happened" value={hType} onChange={(e) => setHType(e.target.value as HistoryType)}>{HISTORY_TYPES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
-          <input id="nw-htext" aria-label="Details" placeholder={hType === "note" ? "Write a note" : "Details (optional)"} value={hText} onChange={(e) => setHText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void addHistory(); }} />
-          <button type="button" className="nw-btn" onClick={() => void addHistory()}>Add to history</button>
-        </div>
-        <ul className="nw-hist">
-          {[...p.history].reverse().map((h) => (
-            <li key={h.id}><time dateTime={h.at}>{new Date(h.at).toLocaleDateString([], { month: "short", day: "numeric" })}</time>
+
+      <div className="pp-tabs" role="tablist" aria-label="About them" onKeyDown={keyTabs}>
+        {TABS.map(([t, l]) => <button key={t} id={`pp-tab-${t}`} type="button" role="tab" aria-selected={tab === t} aria-controls="pp-panel" tabIndex={tab === t ? 0 : -1} onClick={() => setTab(t)}>{l}{tabCount[t] && <small>{tabCount[t]}</small>}</button>)}
+      </div>
+
+      <div id="pp-panel" key={tab} className={`pp-body pp-${tab}`} role="tabpanel" aria-labelledby={`pp-tab-${tab}`}>
+        {tab === "overview" && <>
+          <div className="pp-status">
+            <span>Last contact <b>{ago(p.lastContact)}</b></span>
+            <span className={f?.due ? "due" : ""}>Follow-up <b>{f ? f.text : "not set"}</b></span>
+            {replied && <span className="ok"><b>They replied</b></span>}
+          </div>
+          <label className="pp-notes"><span className="pp-h">Notes</span><textarea id="nw-notes" aria-label="Notes" placeholder="What they said, what they prefer, what you promised." value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} onBlur={() => { if (draft.notes !== p.notes) void save({ notes: draft.notes }); }} /></label>
+          <section className="pp-sec">
+            <div className="pp-sec-h"><span className="pp-h">Connected to</span><button type="button" className="pp-link pp-popbtn" onClick={() => setPop(pop === "connect" ? null : "connect")}>+ Connect</button></div>
+            {pop === "connect" ? <div className="pp-pop inline" role="group" aria-label="Connect">
+              <select id="nw-link-to" aria-label="Connect to" value={linkTo} onChange={(e) => setLinkTo(e.target.value)}><option value="">Who…</option>{others.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}</select>
+              <select id="nw-link-kind" aria-label="Kind of connection" value={linkKind} onChange={(e) => setLinkKind(e.target.value as LinkKind)}>{LINK_KINDS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+              <input id="nw-link-label" aria-label="What is it" placeholder="Same office…" value={linkLabel} onChange={(e) => setLinkLabel(e.target.value)} />
+              <button type="button" className="nw-btn" disabled={!linkTo} onClick={() => void connect()}>Connect</button>
+            </div> : <div className="pp-chips">
+              {links.map(({ l, name, id, isPerson }) => (
+                <span key={l.id} className="pp-chip" style={{ "--c": l.color ?? (isPerson ? colors.person.get(id) : colors.source.get(id)) } as CSSProperties}>
+                  {isPerson ? <button type="button" onClick={() => onOpen(id)}>{name}</button> : <span>{name}</span>}<small>{l.label || LINK_KINDS.find(([k]) => k === l.kind)?.[1]}</small>
+                  <button type="button" className="x" aria-label={`Remove the connection to ${name}`} onClick={() => void disconnect(l.id)}>×</button></span>
+              ))}
+              {!links.length && <span className="nw-muted">Nobody else yet.</span>}
+            </div>}
+          </section>
+          <section className="pp-sec">
+            <div className="pp-sec-h"><span className="pp-h">Latest</span>{history.length > 3 && <button type="button" className="pp-link" onClick={() => setTab("history")}>All {history.length}</button>}</div>
+            <ul className="pp-tl">{history.slice(0, 3).map((h) => <li key={h.id}><time dateTime={h.at}>{new Date(h.at).toLocaleDateString([], { month: "short", day: "numeric" })}</time><span><b>{HISTORY_TYPES.find(([k]) => k === h.type)?.[1]}</b>{h.text ? ` · ${h.text}` : ""}</span></li>)}
+              {!history.length && <li className="nw-muted">Nothing yet. Use Log above after a message, call or meeting.</li>}</ul>
+          </section>
+        </>}
+
+        {tab === "jobs" && <PersonJobs person={p} company={company} onReferral={onReferral} watching={p.watchJobs} onWatch={(on) => void save({ watchJobs: on })} pageSize={4} />}
+
+        {tab === "history" && <>
+          <ul className="pp-tl long">{history.slice(page * per, page * per + per).map((h) => (
+            <li key={h.id}><time dateTime={h.at}>{new Date(h.at).toLocaleDateString([], { month: "short", day: "numeric", year: new Date(h.at).getFullYear() === new Date().getFullYear() ? undefined : "numeric" })}</time>
               <span><b>{HISTORY_TYPES.find(([k]) => k === h.type)?.[1]}</b>{h.text ? ` · ${h.text}` : ""}</span>
-              <button type="button" className="nw-x small" aria-label="Remove this entry" onClick={() => void dropHistory(h.id)}>×</button></li>
-          ))}
-          {!p.history.length && <li className="nw-muted">Nothing yet. Log a message, call or note above.</li>}
-        </ul>
-      </div>
-      <div className="nw-pf">
-        <button type="button" className="nw-btn main nw-write" onClick={onWrite}>Write email to {p.name.split(" ")[0]}</button>
-        <button type="button" className="nw-btn ghost" onClick={onArchive}>Archive</button>
+              <button type="button" className="nw-x small" aria-label="Remove this entry" onClick={() => void dropHistory(h.id)}>×</button></li>))}
+            {!history.length && <li className="nw-muted">Nothing yet. Use Log above after a message, call or meeting.</li>}</ul>
+          {pages > 1 && <div className="pp-pager"><button type="button" className="nw-chip" disabled={page === 0} onClick={() => setHPage(page - 1)}>Newer</button><span>{page + 1} of {pages}</span><button type="button" className="nw-chip" disabled={page >= pages - 1} onClick={() => setHPage(page + 1)}>Older</button></div>}
+        </>}
+
+        {tab === "details" && <>
+          <div className="pp-grid">
+            {text("company", "Works at", "text", companyOfPerson({ ...p, company: "" }, sourceById) || "Company")}{text("city", "City")}
+            {text("email", "Email", "email")}{text("phone", "Phone", "tel")}
+            <div className="pp-span">{text("linkedin", "LinkedIn", "url", "linkedin.com/in/…")}</div>
+            <label className="nw-f"><span>Belongs to</span>
+              <select id="nw-source" value={p.sourceId ?? ""} onChange={(e) => void save({ sourceId: e.target.value || null })}>
+                <option value="">No source</option>{data.sources.map((s) => <option key={s.id} value={s.id}>{sourceLabel(s, data.sources, data.people)}</option>)}
+              </select></label>
+            <div className="nw-f"><span>Introduced by</span>
+              <div className="pp-vias">
+                {introducers.map((x) => <span key={x.id} className="pp-chip" style={{ "--c": colors.person.get(x.id) } as CSSProperties}><button type="button" onClick={() => onOpen(x.id)}>{x.name}</button><button type="button" className="x" aria-label={`${x.name} did not introduce them`} onClick={() => void saveIntroducers(introducersOf(p).filter((id) => id !== x.id))}>×</button></span>)}
+                <select id="nw-via-add" aria-label="Add who introduced them" value={addVia} onChange={(e) => { const id = e.target.value; setAddVia(""); if (id) void saveIntroducers([...introducersOf(p), id]); }}>
+                  <option value="">{introducers.length ? "+ Another person" : "Nobody (a first connection)"}</option>
+                  {data.people.filter((x) => x.id !== p.id && !introducersOf(p).includes(x.id)).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+                </select>
+              </div></div>
+          </div>
+          <div className="pp-colourrow">
+            <span className="pp-h">Colour</span>
+            <div className="pp-popwrap">
+              <button type="button" className="pp-dot pp-popbtn" style={{ background: color }} aria-label="Change their colour" aria-expanded={pop === "colour"} onClick={() => setPop(pop === "colour" ? null : "colour")} />
+              {pop === "colour" && <div className="pp-pop up" role="dialog" aria-label="Colour"><Swatches value={p.color} fallback={color} label="Colour" onPick={(c) => void save({ color: c })} /></div>}
+            </div>
+            <small>{p.color ? "One you picked" : introducers.length ? "Their own branch, since someone introduced them" : src ? `The colour of ${src.name}` : "No source yet"}</small>
+          </div>
+        </>}
       </div>
     </aside>
   );

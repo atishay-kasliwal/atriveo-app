@@ -157,7 +157,7 @@ export async function addPeople(db, { rows, sourceId, newSource } = {}, now = ne
 
 function blank(fields, now) {
   const at = now.toISOString();
-  return { _id: randomUUID(), name: "", role: "", city: "", company: "", email: "", linkedin: "", phone: "", notes: "", sourceId: null, via: null, color: null, photoId: null, watchJobs: false, tags: [],
+  return { _id: randomUUID(), name: "", role: "", city: "", company: "", email: "", linkedin: "", phone: "", notes: "", sourceId: null, via: null, alsoVia: [], color: null, photoId: null, watchJobs: false, tags: [],
     lastContact: null, nextFollowUp: null, history: [], archived: false, createdAt: at, updatedAt: at, ...fields };
 }
 
@@ -182,6 +182,8 @@ function personPatch(input) {
   if ("notes" in input) p.notes = text(input.notes, 4000);
   if ("sourceId" in input) p.sourceId = input.sourceId ? String(input.sourceId) : null;
   if ("via" in input) p.via = input.via ? String(input.via) : null;
+  // More than one person can have introduced someone: the first is "via" (it decides their colour and place), the rest are kept here.
+  if ("alsoVia" in input) p.alsoVia = [...new Set((Array.isArray(input.alsoVia) ? input.alsoVia : []).map((x) => String(x ?? "")).filter(Boolean))].slice(0, 12);
   if ("color" in input) p.color = color(input.color);
   if ("nextFollowUp" in input) p.nextFollowUp = day(input.nextFollowUp);
   if ("photoId" in input) p.photoId = input.photoId ? String(input.photoId) : null;
@@ -203,6 +205,10 @@ export async function savePerson(db, input = {}, now = new Date()) {
   }
   const id = String(input.id), cur = await db.collection(PEOPLE).findOne({ _id: id });
   if (!cur) fail("That person is no longer in your network. Reload the page.");
+  const vias = patch.alsoVia ?? cur.alsoVia ?? [], first = "via" in patch ? patch.via : cur.via;
+  if (!first && vias.length) { patch.via = vias[0]; patch.alsoVia = vias.slice(1); }
+  else if (first && vias.includes(first)) patch.alsoVia = vias.filter((x) => x !== first);
+  for (const other of patch.alsoVia ?? []) await checkPersonRefs(db, id, { via: other });
   await checkPersonRefs(db, id, { sourceId: patch.sourceId, via: patch.via, photoId: patch.photoId });
   const next = { ...patch, updatedAt: now.toISOString() };
   await db.collection(PEOPLE).updateOne({ _id: id }, { $set: next });

@@ -9,7 +9,7 @@ export type HistoryType = "note" | "email" | "message" | "call" | "met" | "reply
 export interface HistoryEntry { id: string; at: string; type: HistoryType; text: string }
 export interface Person {
   id: string; name: string; role: string; city: string; company: string; photoId: string | null; watchJobs: boolean; email: string; linkedin: string; phone: string; notes: string;
-  sourceId: string | null; via: string | null; color: string | null; tags: string[];
+  sourceId: string | null; via: string | null; alsoVia?: string[]; color: string | null; tags: string[];
   lastContact: string | null; nextFollowUp: string | null; history: HistoryEntry[]; archived: boolean; createdAt: string; updatedAt: string; x?: number; y?: number;
 }
 export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
@@ -200,6 +200,8 @@ export function edgesFor(data: NetworkData, colors: ReturnType<typeof colorsFor>
     if (p.via && ids.has(p.via)) out.push({ key: `via-${p.id}`, a: p.via, b: p.id, kind: "via", label: "introduced", color: c });
     else if (p.sourceId && data.sources.some((s) => s.id === p.sourceId)) out.push({ key: `src-${p.id}`, a: p.sourceId, b: p.id, kind: "belongs", label: "first connection", color: colors.source.get(p.sourceId) ?? c });
     else out.push({ key: `you-${p.id}`, a: "you", b: p.id, kind: "you", label: "you know them", color: c });
+    // Everyone else who also introduced them gets a line too.
+    for (const other of p.alsoVia ?? []) if (other !== p.via && ids.has(other)) out.push({ key: `via-${p.id}-${other}`, a: other, b: p.id, kind: "via", label: "also introduced", color: c });
   }
   const known = new Set([...ids, ...data.sources.map((s) => s.id)]);
   for (const l of data.links) {
@@ -338,3 +340,6 @@ export const DEFAULT_CANVAS_LAYERS: CanvasLayers = { people: true, sources: true
 export const throughFields = (value: string) => (value.startsWith("p:") ? { parentSourceId: null, viaPersonId: value.slice(2) } : { parentSourceId: value || null, viaPersonId: null });
 /** And back: a saved source as the picker's value. */
 export const throughValue = (s?: Source | null) => (s?.viaPersonId ? `p:${s.viaPersonId}` : s?.parentSourceId ?? "");
+
+/** Everyone who introduced this person, first one first. */
+export const introducersOf = (p: Person) => [p.via, ...(p.alsoVia ?? [])].filter((x): x is string => Boolean(x));
