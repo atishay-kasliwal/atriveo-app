@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test:push:browser": "npm run build:apply && node --test tests/push-browser.test.mjs",
     "test:push": "node --test tests/web-push.test.mjs tests/web-push-mongo.test.mjs",
     "test:companion-link": "node --test tests/companion-link.test.mjs",
     "test:open-fill-queue": "node scripts/test-open-fill-queue.mjs",

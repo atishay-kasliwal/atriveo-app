@@ -1,7 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+function bounded<T>(promise: Promise<T>, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  return Promise.race([promise, new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error(`${label} timed out. Close and reopen Atriveo, then try again.`)), 15000); })]).finally(() => clearTimeout(timer));
+}
 
 async function api(route: string, method = 'GET', body?: object) {
-  const res = await fetch(`/api/push/${route}`, { method, credentials: 'include', cache: 'no-store', ...(method !== 'GET' ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) } : {}) });
+  const res = await fetch(`/api/push/${route}`, { method, credentials: 'include', cache: 'no-store', signal: AbortSignal.timeout(20000), ...(method !== 'GET' ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) } : {}) });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Notifications could not be saved');
   return data;
@@ -19,30 +24,37 @@ export default function PushSettings() {
   const [busy, setBusy] = useState(true);
   const [message, setMessage] = useState('');
   const [key, setKey] = useState('');
+  const subscription = useRef<PushSubscription | null>(null);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
   useEffect(() => {
     if (!supported || needsInstall) { setBusy(false); return; }
     let active = true;
+    setMessage('Preparing notifications…');
     // Prepare registration and public key ahead of the click, preserving iOS user activation.
-    Promise.all([navigator.serviceWorker.register('/sw.js').then(() => navigator.serviceWorker.ready), api('config')]).then(async ([reg, config]) => {
+    Promise.all([bounded(navigator.serviceWorker.register('/sw.js').then(() => navigator.serviceWorker.ready), 'Notification setup'), api('config')]).then(async ([reg, config]) => {
       if (!active) return;
       setRegistration(reg); setKey(config.publicKey || '');
       const sub = await reg.pushManager.getSubscription();
+      subscription.current = sub;
       if (sub && Notification.permission === 'granted') { await api('subscription', 'POST', sub.toJSON()); if (active) setEnabled(true); }
-      if (!config.publicKey && active) setMessage('Notifications are not configured on the server yet.');
-    }).catch(e => { if (active) setMessage(e.message); }).finally(() => { if (active) setBusy(false); });
+      if (active) setMessage(config.publicKey ? '' : 'Notifications are not configured on the server yet.');
+    }).catch(e => { if (active) setMessage(`Prepare notifications: ${e.message}`); }).finally(() => { if (active) setBusy(false); });
     return () => { active = false; };
   }, [supported, needsInstall]);
   async function enable() {
-    if (!registration || !key) return;
-    setBusy(true); setMessage('');
+    if (!registration || !key) { setMessage('Notifications are still preparing. Close and reopen Atriveo, then try again.'); return; }
+    setBusy(true); setMessage('Waiting for notification permission…');
+    let stage = 'Enable notifications';
     try {
-      // Permission is requested directly in the explicit click handler, before network work.
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') throw new Error('Notifications disabled. Allow notifications in your browser or iPhone notification settings.');
-      const sub = await registration.pushManager.getSubscription() || await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) });
-      await api('subscription', 'POST', sub.toJSON()); setEnabled(true);
-    } catch (e) { setMessage(e instanceof Error ? e.message : 'Could not enable notifications'); }
+      if (Notification.permission === 'denied') throw new Error('Notifications are blocked. Allow Atriveo in iPhone notification settings, then reopen the app.');
+      // Safari requires subscribe() itself to run directly in the tap handler.
+      // Use the subscription read during preparation: no asynchronous work before subscribe.
+      const pending = subscription.current ? Promise.resolve(subscription.current) : registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key).buffer });
+      const sub = await pending;
+      subscription.current = sub;
+      stage = 'Save this device'; setMessage('Saving this device…');
+      await api('subscription', 'POST', sub.toJSON()); setEnabled(true); setMessage('');
+    } catch (e) { setMessage(`${stage}: ${e instanceof Error ? `${e.name}: ${e.message}` : 'Could not enable notifications'}`); }
     finally { setBusy(false); }
   }
   async function action(test: boolean) {
@@ -52,6 +64,7 @@ export default function PushSettings() {
       else {
         const sub = await registration?.pushManager.getSubscription();
         if (sub) { await api('subscription', 'DELETE', { endpoint: sub.endpoint }); await sub.unsubscribe(); }
+        subscription.current = null;
         setEnabled(false);
       }
     } catch (e) { setMessage(e instanceof Error ? e.message : 'Notification request failed'); }
@@ -61,7 +74,7 @@ export default function PushSettings() {
     <h2 id="push-heading">Atriveo notifications</h2>
     <p className="st-hint" role="status">{needsInstall ? 'On iPhone, open Atriveo in Safari, tap Share → Add to Home Screen, then launch Atriveo from that icon to enable notifications.' : !supported ? 'Notifications unsupported in this browser.' : enabled ? 'Notifications enabled' : 'Notifications disabled'}</p>
     {supported && !needsInstall && <div className="st-presets">
-      <button type="button" disabled={busy || !key} onClick={() => enabled ? void action(false) : void enable()}>{enabled ? 'Disable notifications' : 'Enable notifications'}</button>
+      <button type="button" disabled={busy || !key} onClick={() => enabled ? void action(false) : void enable()}>{busy ? 'Please wait…' : enabled ? 'Disable notifications' : 'Enable notifications'}</button>
       {enabled && <button type="button" disabled={busy} onClick={() => void action(true)}>Send test notification</button>}
     </div>}
     {message && <p className="st-hint" role="status">{message}</p>}
