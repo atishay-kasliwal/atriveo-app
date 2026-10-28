@@ -92,7 +92,7 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
   source: Source; data: NetworkData; colors: ReturnType<typeof colorsFor>; onChange: (s: Source) => void; onClose: () => void; onPerson: (id: string) => void;
   onAddPeople: () => void; onReferral: (personId: string, job: JobRow) => void; say: Say;
 }) {
-  const [d, setD] = useState({ name: s.name, about: s.about ?? "", notes: s.notes ?? "", context: s.context ?? "" });
+  const [d, setD] = useState({ name: s.name, about: s.about ?? "", notes: s.notes ?? "", context: s.context ?? "", place: s.place ?? "", when: s.when ?? "" });
   const [through, setThrough] = useState(throughValue(s));
   const [tab, setTab] = useState<"people" | "jobs" | "notes" | "details">("people");
   const [page, setPage] = useState(0);
@@ -100,7 +100,7 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
   const [asker, setAsker] = useState("");
   const [saving, setSaving] = useState("");
   const [seen, setSeen] = useState(s);
-  if (seen !== s) { setSeen(s); setD({ name: s.name, about: s.about ?? "", notes: s.notes ?? "", context: s.context ?? "" }); setThrough(throughValue(s)); }
+  if (seen !== s) { setSeen(s); setD({ name: s.name, about: s.about ?? "", notes: s.notes ?? "", context: s.context ?? "", place: s.place ?? "", when: s.when ?? "" }); setThrough(throughValue(s)); }
   const hiring = s.type === "company" || s.type === "staffing";
   useEffect(() => { if (!hiring || tab !== "jobs") return; let on = true; loadSourceJobs(s.id).then((r) => on && setJobs({ id: s.id, list: r.jobs })).catch(() => on && setJobs({ id: s.id, list: [] })); return () => { on = false; }; }, [s.id, hiring, tab]);
   async function save(fields: Record<string, unknown>) {
@@ -160,6 +160,10 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
         </>)}
         {tab === "notes" && <label className="pp-notes"><span className="pp-h">Notes</span><textarea id="nw-src-notes" value={d.notes} placeholder="Who hires there, how they like to be approached, what you learned." onChange={(e) => setD({ ...d, notes: e.target.value })} onBlur={() => { if (d.notes !== (s.notes ?? "")) void save({ notes: d.notes }); }} /></label>}
         {tab === "details" && <>
+          <div className="nw-pair">
+            <label className="nw-f"><span>Where</span><input id="nw-src-place" placeholder="Raleigh, NC or Global" value={d.place} onChange={(e) => setD({ ...d, place: e.target.value })} onBlur={() => { if (d.place !== (s.place ?? "")) void save({ place: d.place }); }} /></label>
+            {s.type === "event" && <label className="nw-f"><span>When</span><input id="nw-src-when" placeholder="Oct 2024" value={d.when} onChange={(e) => setD({ ...d, when: e.target.value })} onBlur={() => { if (d.when !== (s.when ?? "")) void save({ when: d.when }); }} /></label>}
+          </div>
           <label className="nw-f"><span>Kind</span><select id="nw-src-kind" value={s.type} onChange={(e) => void save({ type: e.target.value as SourceType })}>{SOURCE_TYPES.map(([t, l]) => <option key={t} value={t}>{l}</option>)}</select></label>
           <NetworkSourceContext sources={data.sources} people={data.people} parentSourceId={through} onParent={(v) => { setThrough(v); void save(throughFields(v)); }} context={d.context} onContext={(v) => setD({ ...d, context: v })} excludeId={s.id} prefix="nw-srcp" />
           <button type="button" className="pp-link" onClick={() => { if (d.context !== (s.context ?? "")) void save({ context: d.context }); }}>Save the context</button>

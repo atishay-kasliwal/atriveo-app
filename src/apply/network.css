@@ -130,6 +130,11 @@ button.nw-linkname:hover{text-decoration:underline}
 .nwg-ini{font-size:12.5px}.nwg-tile{font-size:19px}.nwg-badge{font-size:11.5px;fill:var(--nw-bg)}
 .nwg-pname{font-size:13.5px;font-weight:600;fill:var(--nw-ink)}.nwg-sname{font-size:15.5px;font-weight:650;fill:var(--nw-ink)}
 .nwg-sub{font:400 11px ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--nw-muted)}
+.nwg-tile.big{font-size:22px}
+.nwg-kind{font-size:12px;font-weight:500;fill:var(--nw-muted)}
+.nwg-face{text-anchor:middle;dominant-baseline:central;font-size:9.5px;font-weight:650}
+.nwg-pill{text-anchor:middle;dominant-baseline:central;font-size:11px;font-weight:600;fill:var(--nw-ink)}
+.nwg-pplpill{fill:var(--nw-raised,rgba(127,127,127,.14));stroke:var(--nw-line)}
 .nwg-you{fill:var(--nw-accent)}.nwg-you-av{fill:#0c0d10;fill-opacity:.16;stroke:#0c0d10;stroke-opacity:.5;stroke-width:2}
 .nwg-you-ini{font-size:13px;fill:#0c0d10}.nwg-you-name{font-size:19px;font-weight:650;fill:#0c0d10}.nwg-you-sub{font:400 11px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#0c0d10;fill-opacity:.75}
 .nwg-ui{position:absolute;z-index:2;cursor:default}

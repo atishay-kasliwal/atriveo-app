@@ -297,6 +297,9 @@ export async function saveSource(db, input = {}, now = new Date()) {
   if ("about" in input) patch.about = str(input.about, 120);
   if ("color" in input) patch.color = color(input.color);
   if ("notes" in input) patch.notes = text(input.notes, 4000);
+  // Shown on the card: where it is ("Raleigh, NC", "Global") and, for an event, when ("Oct 2024").
+  if ("place" in input) patch.place = str(input.place, 60);
+  if ("when" in input) patch.when = str(input.when, 30);
   if ("photoId" in input) {
     patch.photoId = input.photoId ? String(input.photoId) : null;
     if (patch.photoId && !(await db.collection("network_images").findOne({ _id: patch.photoId }))) fail("Upload the picture first");
