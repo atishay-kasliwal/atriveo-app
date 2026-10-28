@@ -12,12 +12,16 @@ const stamp = '2026-10-01T12:00:00.000Z';
 function person(id, name, sourceId, company = '') {
   return { id, name, role: 'Software engineer', company, city: 'New York', photoId: null, watchJobs: false, email: '', linkedin: '', phone: '', notes: '', sourceId, via: null, color: null, tags: [], lastContact: null, nextFollowUp: null, history: [], archived: false, createdAt: stamp, updatedAt: stamp };
 }
-async function fixture(t, width) {
+async function fixture(t, width, linkedin = false) {
   const errors = [], writes = [];
   const data = {
     sources: [{ id: 'company-1', name: 'Northstar', type: 'company', about: 'Technology', color: null, createdAt: stamp }, { id: 'family-1', name: 'Family', type: 'family', about: 'People close to you', color: null, createdAt: stamp }, { id: 'event-1', name: 'Design meetup', type: 'event', about: 'Brooklyn', color: null, createdAt: stamp }],
     people: [person('person-1', 'Mira Chen', 'company-1', 'Northstar'), person('person-2', 'Alex Rivera', 'company-1', 'Northstar'), person('person-3', 'Sam Patel', 'family-1', 'Example Research'), person('person-4', 'Robin Park', 'event-1', 'Orchid'), person('person-5', 'Jordan Lee', 'event-1', 'Fieldwork')], links: [],
   };
+  if (linkedin) {
+    data.sources.push({ id: 'linkedin', name: 'LinkedIn', type: 'other', createdAt: stamp });
+    data.people.push(person('old-linkedin', 'Old Contact', 'linkedin'));
+  }
   const board = [{ id: 'note-1', kind: 'note', text: 'A warm introduction starts here.', x: -250, y: -260, w: 190, h: 120, color: '#fbbf24' }];
   const server = http.createServer((req, res) => {
     const requested = path.join(root, new URL(req.url, 'http://localhost').pathname);
@@ -35,6 +39,15 @@ async function fixture(t, width) {
     if (u.origin !== base && u.pathname.startsWith('/network')) {
       if (route.request().method() === 'POST') {
         const body = route.request().postDataJSON(); writes.push({ path: u.pathname, body });
+        if (u.pathname === '/network/linkedin/today') {
+          const source = { id: 'linkedin-day', name: 'Oct 28, 2026', type: 'other', parentSourceId: 'linkedin', when: '2026-10-28', createdAt: stamp };
+          if (!data.sources.some(s => s.id === source.id)) data.sources.push(source);
+          return route.fulfill({ json: { source } });
+        }
+        if (u.pathname === '/network/linkedin/sort') {
+          data.people.find(p => p.id === 'old-linkedin').sourceId = 'linkedin-day';
+          return route.fulfill({ json: { moved: 1, days: 1 } });
+        }
         if (u.pathname === '/network/source') { const source = { id: body.id || 'new-source', createdAt: stamp, about: '', color: null, ...body }; data.sources.push(source); return route.fulfill({ json: { source } }); }
         if (u.pathname === '/network/person') { const p = person(body.id || 'added-person', body.name || 'Mira Chen', body.sourceId || null, body.company || ''); data.people.push(p); return route.fulfill({ json: { person: p } }); }
         if (u.pathname === '/network/board/save') { const item = { id: 'added-note', ...body }; board.push(item); return route.fulfill({ json: { item } }); }
@@ -142,4 +155,22 @@ test('pan, zoom and board tools work on the full canvas and reveal a hidden draw
   await page.locator('[data-board="added-note"]').waitFor();
   assert.equal(writes.find(w=>w.path==='/network/board/save').body.kind,'note');
   assert.deepEqual(errors,[]);
+});
+
+test('LinkedIn opens today’s day card for bulk entry and sorts older contacts', async t => {
+  const { page, errors, writes } = await fixture(t, 1440, true);
+  await page.locator('[data-node="linkedin"]').focus(); await page.keyboard.press('Enter');
+  let panel = page.getByRole('complementary', { name: 'LinkedIn', exact: true });
+  await panel.getByRole('button', { name: "Add today's reach-outs" }).click();
+  const dialog = page.getByRole('dialog'); await dialog.waitFor();
+  assert.equal(await dialog.locator('select').first().inputValue(), 'linkedin-day');
+  await dialog.getByRole('button', { name: 'Close', exact: true }).click();
+  await panel.getByRole('button', { name: 'Sort 1 into day cards' }).click();
+  await page.getByText('Sorted 1 person into 1 day card.', { exact: true }).waitFor();
+  assert.equal(await panel.getByRole('button', { name: 'Sort 1 into day cards' }).count(), 0);
+  await panel.locator('.pp-day').click();
+  panel = page.getByRole('complementary', { name: 'Oct 28, 2026', exact: true });
+  await panel.waitFor(); await panel.getByText('Old Contact', { exact: true }).waitFor();
+  assert.ok(writes.some(w => w.path === '/network/linkedin/today'));
+  assert.deepEqual(errors, []);
 });

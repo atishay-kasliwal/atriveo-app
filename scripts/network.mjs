@@ -401,9 +401,40 @@ export async function removeLink(db, { id } = {}) {
   return { id: String(id) };
 }
 
+// LinkedIn reach-outs are sorted by day: You, then LinkedIn, then a card for each day ("Oct 28, 2026"), then the people you reached that
+// day. Days follow New York time, like the rest of the app's dates.
+const DAY_TZ = "America/New_York";
+const dayOf = (d) => new Date(d).toLocaleDateString("en-CA", { timeZone: DAY_TZ });
+const dayName = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+
+/** The LinkedIn source (made once). */
+const linkedinRoot = (db, now) => saveSource(db, { name: "LinkedIn", type: "other" }, now);
+
+/** The card for one day's LinkedIn reach-outs under LinkedIn, made the first time it is needed and the same one after that. */
+export async function linkedinDay(db, now = new Date(), day = dayOf(now)) {
+  const root = await linkedinRoot(db, now);
+  return saveSource(db, { name: dayName(day), type: "other", parentSourceId: root.id, about: "LinkedIn reach-outs", when: day }, now);
+}
+
 /**
- * One person from their LinkedIn profile (the extension's toolbar button): found again by their profile link or name, else added to a
- * "LinkedIn" source with their headline, company and city. Returns the person and whether they were already here.
+ * People sitting straight on the LinkedIn card (added before day cards existed, or put there by hand) move to the card for the day
+ * they were added. Their own details do not change. Returns how many moved and into how many days.
+ */
+export async function sortLinkedInByDay(db, now = new Date()) {
+  const root = await linkedinRoot(db, now);
+  const people = (await all(db, PEOPLE)).filter((p) => p.sourceId === root.id && !p.via);
+  const days = new Map();
+  for (const p of people) { const d = dayOf(p.createdAt || now); days.set(d, [...(days.get(d) ?? []), p]); }
+  for (const [d, list] of days) {
+    const card = await linkedinDay(db, now, d);
+    for (const p of list) await db.collection(PEOPLE).updateOne({ _id: p.id }, { $set: { sourceId: card.id, updatedAt: now.toISOString() } });
+  }
+  return { moved: people.length, days: days.size };
+}
+
+/**
+ * One person from their LinkedIn profile (the extension's toolbar button): found again by their profile link or name, else added to
+ * today's card under LinkedIn with their headline, company and city. Returns the person and whether they were already here.
  */
 export async function addFromLinkedIn(db, input = {}, now = new Date()) {
   const name = str(input.name, 80);
@@ -420,7 +451,7 @@ export async function addFromLinkedIn(db, input = {}, now = new Date()) {
     for (const [k, v] of [["linkedin", profile], ["role", str(input.role, 80)], ["company", str(input.company, 80)], ["city", str(input.city, 80)]]) if (v && !same[k]) fill[k] = v;
     return { person: Object.keys(fill).length ? await savePerson(db, { id: same.id, ...fill }, now) : same, existed: true };
   }
-  const source = await saveSource(db, { name: "LinkedIn", type: "other" }, now);
+  const source = await linkedinDay(db, now);
   const person = await savePerson(db, { name, role: str(input.role, 80), company: str(input.company, 80), city: str(input.city, 80), linkedin: profile, sourceId: source.id }, now);
   return { person: await logHistory(db, { id: person.id, type: "note", text: "Added from LinkedIn" }, now), existed: false };
 }

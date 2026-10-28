@@ -635,3 +635,9 @@ button.pp-step{cursor:pointer;transition:color .15s}button.pp-step:hover{color:v
 .pp-also-add .nw-btn{padding:6px 12px}.pp-also-add select,.pp-also-add input{padding:5px 8px;background:var(--nw-bg);color:var(--nw-ink);border:1px solid var(--nw-line-strong);border-radius:9px;font:inherit;font-size:13px;min-width:0}
 @media (max-height:800px){.pp-also-add .nw-btn{padding:5px 12px}.pp-chips:has(.pp-chip){min-height:0}.pp-intro+.pp-year{margin-top:-2px}}
 .pp-tabs{overflow-x:auto;scrollbar-width:none}.pp-tabs button{padding-inline:8px;flex:none}.pp-tabs button::after{left:8px;right:8px}
+
+/* Sources under a source: LinkedIn's day cards */
+.pp-days{display:flex;flex-wrap:wrap;gap:6px}
+.pp-day{--c:#8a919c;display:inline-flex;align-items:center;gap:7px;border:1px solid color-mix(in oklab,var(--c) 45%,var(--nw-line-strong));background:color-mix(in oklab,var(--c) 10%,var(--nw-card));border-radius:999px;padding:4px 10px;font-size:12.5px}
+.pp-day small{font:600 11px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--c)}
+.pp-day:hover{border-color:var(--c)}

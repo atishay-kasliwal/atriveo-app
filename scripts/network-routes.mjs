@@ -1,4 +1,4 @@
-import { NetworkError, saveYou, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
+import { linkedinDay, sortLinkedInByDay, NetworkError, saveYou, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
 import { boardView, readImage, removeBoardItem, saveBoardItem, saveImage } from "./network-board.mjs";
@@ -13,6 +13,8 @@ const WRITES = {
   "/network/preview": (db, b) => previewList(db, b.text).then((rows) => ({ rows })),
   "/network/import/preview": (db, b) => previewContacts(db, b.text),
   "/network/linkedin": (db, b) => addFromLinkedIn(db, b).then(async (r) => { await onMap(db, b, [r.person?.id].filter(Boolean)); return r; }),
+  "/network/linkedin/today": (db, b) => linkedinDay(db).then(async (source) => { await onMap(db, b, [source.id]); return { source }; }),
+  "/network/linkedin/sort": (db) => sortLinkedInByDay(db),
   "/network/people": (db, b) => addPeople(db, b).then(async (r) => {
     // On a map, names already in your network are not added again, but they are put on this map.
     const known = b.mapId && b.mapId !== MAIN && r.skipped.length ? (await db.collection("network_people").find({}).toArray()).filter((p) => !p.archived && r.skipped.some((n) => n.toLowerCase() === p.name.toLowerCase())).map((p) => p._id) : [];

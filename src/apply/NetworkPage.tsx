@@ -268,7 +268,7 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
           {sideSource?.auto && <AutoCompanyPanel key={sideSource.id} company={sideSource} data={data} colors={colors} onClose={() => { setSide(null); setView({ kind: "all" }); }} onPerson={(id) => openPerson(id)}
             onReferral={(id, job) => setMailFor({ id, job })} onKeep={(s) => { setData((d) => ({ ...d, sources: [...d.sources, s] })); openSource(s.id); }} say={say} />}
           {sideSource && !sideSource.auto && <SourcePanel key={sideSource.id} source={sideSource} data={data} colors={colors} onChange={(s) => setData((d) => ({ ...d, sources: d.sources.map((x) => (x.id === s.id ? { ...x, ...s } : x)) }))}
-            onClose={() => { setSide(null); setView({ kind: "all" }); }} onPerson={(id) => openPerson(id)} onAddPeople={() => { setBulkSource(sideSource.id); setDialog("list"); }} onReferral={(id, job) => setMailFor({ id, job })}
+            onClose={() => { setSide(null); setView({ kind: "all" }); }} onPerson={(id) => openPerson(id)} onAddPeople={(id) => { setBulkSource(id ?? sideSource.id); setDialog("list"); }} onSource={openSource} onReload={reload} onReferral={(id, job) => setMailFor({ id, job })}
             onLinks={(links) => setData((d) => ({ ...d, links }))} say={say} />}
           {workItem && <NetworkWork key={workItem.id} item={workItem} data={data} colors={colors} onClose={() => setWork(null)} onOpen={openPerson} say={say}
             onChange={(it) => setBoard((b) => b.map((x) => (x.id === it.id ? it : x)))} onRemove={(id) => { setBoard((b) => b.filter((x) => x.id !== id)); setWork(null); }}

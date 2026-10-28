@@ -417,7 +417,8 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
                     <rect x={x0 - 5} y={-sz.h / 2 - 5} width={sz.w + 10} height={sz.h + 10} rx={19} className="nwg-halo" />
                     <rect x={x0} y={-sz.h / 2} width={sz.w} height={sz.h} rx={14} fill={card} stroke={c} strokeWidth={1.8} />
                     <rect x={x0 + 14} y={-22} width={44} height={44} rx={11} fill={c} fillOpacity={0.16} stroke={c} strokeWidth={1.5} />
-                    {picture(x0 + 15, -21, 42, 10) ?? (s.type === "family" ? <path d={HOUSE} transform={`translate(${x0 + 36} 0) scale(1.7)`} fill="none" stroke={c} strokeWidth={1.3} strokeLinejoin="round" strokeLinecap="round" /> : <text x={x0 + 36} y={1} className="nwg-tile" fill={c}>{s.name[0]?.toUpperCase()}</text>)}
+                    {picture(x0 + 15, -21, 42, 10) ?? (s.type === "family" ? <path d={HOUSE} transform={`translate(${x0 + 36} 0) scale(1.7)`} fill="none" stroke={c} strokeWidth={1.3} strokeLinejoin="round" strokeLinecap="round" />
+                      : s.when ? <path d={CALENDAR} transform={`translate(${x0 + 36} 1)`} fill="none" stroke={c} strokeWidth={1.7} strokeLinejoin="round" strokeLinecap="round" /> : <text x={x0 + 36} y={1} className="nwg-tile" fill={c}>{s.name[0]?.toUpperCase()}</text>)}
                     <text x={x0 + 72} y={-3} className="nwg-sname">{clip(s.name, 26)}</text>
                     <text x={x0 + 72} y={16} className="nwg-sub">{clip(via || s.about || kind, 30)}</text>
                     {n > 0 && <><circle cx={sz.w / 2 - 4} cy={-sz.h / 2 + 4} r={12} fill={c} stroke={bg} strokeWidth={3} /><text x={sz.w / 2 - 4} y={-sz.h / 2 + 4.5} className="nwg-badge">{n}</text></>}

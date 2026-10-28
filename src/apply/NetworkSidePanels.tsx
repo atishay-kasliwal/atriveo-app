@@ -88,9 +88,10 @@ export function YouPanel({ data, onChange, onClose, say }: { data: NetworkData; 
  * A source (a company, an event, family): its picture or logo, what it is, how it came to you, its people, its jobs when it is a company,
  * and your notes about it.
  */
-export function SourcePanel({ source: s, data, colors, onChange, onClose, onPerson, onAddPeople, onReferral, onLinks, say }: {
+export function SourcePanel({ source: s, data, colors, onChange, onClose, onPerson, onSource, onAddPeople, onReferral, onLinks, onReload, say }: {
   source: Source; data: NetworkData; colors: ReturnType<typeof colorsFor>; onChange: (s: Source) => void; onClose: () => void; onPerson: (id: string) => void;
-  onAddPeople: () => void; onReferral: (personId: string, job: JobRow) => void; onLinks: (l: NetworkData["links"]) => void; say: Say;
+  onSource: (id: string) => void; onReload: () => Promise<void>;
+  onAddPeople: (sourceId?: string) => void; onReferral: (personId: string, job: JobRow) => void; onLinks: (l: NetworkData["links"]) => void; say: Say;
 }) {
   const [d, setD] = useState({ name: s.name, about: s.about ?? "", notes: s.notes ?? "", context: s.context ?? "", place: s.place ?? "", when: s.when ?? "", introYear: s.introYear ?? "" });
   const [through, setThrough] = useState(throughValue(s));
@@ -126,6 +127,17 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
   async function disconnect(id: string) {
     try { await post("link/remove", { id }); onLinks(data.links.filter((l) => l.id !== id)); } catch (e) { say({ text: String((e as Error).message) }); }
   }
+  // LinkedIn holds a card per day of reach-outs (You, LinkedIn, the day, the people).
+  const linkedin = s.name === "LinkedIn" && !s.parentSourceId && !s.viaPersonId;
+  const sortable = members.filter((p) => !p.via).length;
+  const children = data.sources.filter((x) => x.parentSourceId === s.id).sort((a, b) => String(b.when ?? b.createdAt).localeCompare(String(a.when ?? a.createdAt)));
+  async function today() {
+    try { const r = await post<{ source: Source }>("linkedin/today", {}); await onReload(); onAddPeople(r.source.id); } catch (e) { say({ text: String((e as Error).message) }); }
+  }
+  async function sortDays() {
+    try { const r = await post<{ moved: number; days: number }>("linkedin/sort", {}); await onReload(); say({ text: `Sorted ${r.moved} ${r.moved === 1 ? "person" : "people"} into ${r.days} day ${r.days === 1 ? "card" : "cards"}.` }); }
+    catch (e) { say({ text: String((e as Error).message) }); }
+  }
   // Who or what else also brought it to you, with names for the trail and the Details list.
   const also = (s.alsoVia ?? []).map((v) => { const p = data.people.find((x) => x.id === v.id), o = data.sources.find((x) => x.id === v.id); return p || o ? { ...v, name: (p ?? o)!.name, person: Boolean(p) } : null; }).filter((v): v is { id: string; year: string; name: string; person: boolean } => Boolean(v));
   const [adding, setAdding] = useState({ id: "", year: "" });
@@ -153,7 +165,10 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
           : <span className="pp-step" style={{ "--c": colors.source.get(v.id) } as CSSProperties}>{v.name}{v.year && <small> {v.year}</small>}</span>}</span>)}</span>}
       </nav>
       <div className="pp-actions">
-        <button type="button" className="nw-btn main" onClick={onAddPeople}>Add people</button>
+        {linkedin
+          ? <button type="button" className="nw-btn main" onClick={() => void today()}>Add today's reach-outs</button>
+          : <button type="button" className="nw-btn main" onClick={() => onAddPeople()}>Add people</button>}
+        {linkedin && sortable > 0 && <button type="button" className="pp-pill" onClick={() => void sortDays()}>Sort {sortable} into day cards</button>}
         {s.photoId && <button type="button" className="pp-pill" onClick={() => void save({ photoId: null })}>Remove picture</button>}
       </div>
       <div className="pp-tabs" role="tablist" aria-label={`About ${s.name}`}>
@@ -161,6 +176,10 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
       </div>
       <div key={tab} className="pp-body" role="tabpanel">
         {tab === "people" && <>
+          {/* Sources under this one (LinkedIn's days, a conference's companies), newest first, each with how many people it holds. */}
+          {children.length > 0 && <div className="pp-days" aria-label="Under it">{children.map((c) => (
+            <button key={c.id} type="button" className="pp-day" style={{ "--c": colors.source.get(c.id) } as CSSProperties} onClick={() => onSource(c.id)}>
+              <span>{c.name}</span><small>{data.people.filter((p) => p.sourceId === c.id).length}</small></button>))}</div>}
           <ul className="pp-people">{members.slice(pg * per, pg * per + per).map((p) => { const f = followUp(p.nextFollowUp); return (
             <li key={p.id}><button type="button" onClick={() => onPerson(p.id)}>
               <span className={`nw-av${p.photoId ? " ph" : ""}`} style={{ "--c": colors.person.get(p.id) } as CSSProperties} aria-hidden="true">{p.photoId ? <img src={imageUrl(p.photoId)} alt="" /> : initials(p.name)}</span>
