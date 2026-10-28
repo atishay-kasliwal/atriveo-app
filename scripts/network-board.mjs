@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { NetworkError } from "./network.mjs";
 
-// The free-form layer of the Network map: text boxes, sticky notes, pen strokes and images. None of it is linked to anything, except
-// that a note or text box can be pinned to a card and then moves with it. Images are kept in their own collection and served one by one.
+// The free-form layer of the Network map: text boxes, sticky notes, pen strokes and images (none linked to anything, except that a
+// note or text box can be pinned to a card and then moves with it), plus groups (a labelled frame around some people) and work items
+// (something you do with people, with a start, an end and a next step). Images are kept in their own collection and served one by one.
 
 const BOARD = "network_board", IMAGES = "network_images";
-export const BOARD_KINDS = ["text", "note", "stroke", "image"];
+export const BOARD_KINDS = ["text", "note", "stroke", "image", "group", "work"];
 const MAX_POINTS = 4000, MAX_IMAGE = 2_500_000, IMAGE_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"];
 const fail = (m) => { throw new NetworkError(m); };
 const num = (v, lo, hi) => { const n = Number(v); if (!Number.isFinite(n)) fail("A board position must be a number"); return Math.round(Math.max(lo, Math.min(hi, n)) * 10) / 10; };
@@ -35,6 +36,23 @@ function shape(kind, input, cur) {
     if (has("color")) it.color = color(input.color, "ink");
     if (has("width")) it.width = num(input.width ?? 4, 1, 40);
     if (has("opacity")) it.opacity = Math.round(num((input.opacity ?? 0.9) * 100, 10, 100)) / 100;
+  }
+  const ids = (v, max, what) => { const a = [...new Set((Array.isArray(v) ? v : []).map((x) => String(x)).filter(Boolean))]; if (a.length > max) fail(`A ${what} holds up to ${max} people`); return a; };
+  if (kind === "group") {
+    if (has("ids")) { it.ids = ids(input.ids, 500, "group"); if (!it.ids.length) fail("Pick the people to group first"); }
+    if (has("label")) it.label = String(input.label ?? "").replace(/\s+/g, " ").trim().slice(0, 60) || "Group";
+  }
+  if (kind === "work") {
+    const day = (v, what) => { const s = String(v ?? ""); if (!/^\d{4}-\d{2}-\d{2}$/.test(s) || Number.isNaN(Date.parse(s))) fail(`Give the ${what} as a date like 2026-11-04`); return s; };
+    if (has("title")) { it.title = String(input.title ?? "").replace(/\s+/g, " ").trim().slice(0, 80); if (!it.title) fail("Give the work a name"); }
+    if (has("start")) it.start = day(input.start, "start");
+    if (has("end")) it.end = day(input.end, "end");
+    if (has("people")) it.people = ids(input.people, 50, "piece of work");
+    if (has("next")) it.next = String(input.next ?? "").replace(/\s+/g, " ").trim().slice(0, 200);
+    if (has("notes")) it.notes = String(input.notes ?? "").replace(/\r\n?/g, "\n").slice(0, 4000);
+    if (has("done")) it.done = Boolean(input.done);
+    const start = it.start ?? cur?.start, end = it.end ?? cur?.end;
+    if (start && end && end < start) fail("The end date is before the start");
   }
   if (kind === "image" && has("imageId")) { it.imageId = String(input.imageId ?? ""); if (!it.imageId) fail("Upload the image first"); }
   if ((kind === "text" || kind === "note") && "pin" in input) it.pin = input.pin && input.pin.id ? { id: String(input.pin.id), dx: num(input.pin.dx, -5000, 5000), dy: num(input.pin.dy, -5000, 5000) } : null;

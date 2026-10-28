@@ -45,3 +45,15 @@ test('routes: the board list, an image served with its own type and long cache, 
  assert.equal((await call('GET','/network/image?id=zzz')).code,404);
  const saved=await call('POST','/network/board/save',{kind:'note',x:1,y:1});assert.equal(saved.code,200);
  const list=JSON.parse((await call('GET','/network/board')).body);assert.equal(list.items.length,1);});
+
+test('groups and work items: people lists, labels, dates in order, done',async()=>{
+ const db=fakeDb();
+ const g=await saveBoardItem(db,{kind:'group',ids:['a','b','a',''],label:'  Raleigh   office '});assert.deepEqual(g.ids,['a','b']);assert.equal(g.label,'Raleigh office');
+ assert.equal((await saveBoardItem(db,{id:g.id,label:''})).label,'Group');
+ await assert.rejects(()=>saveBoardItem(db,{kind:'group',ids:[]}),/Pick the people/);
+ const w=await saveBoardItem(db,{kind:'work',title:'Docs contribution',start:'2026-10-12',end:'2026-11-30',people:['ben'],next:'Open the pull request',x:5,y:6});
+ assert.deepEqual([w.title,w.start,w.end,w.people,w.done],['Docs contribution','2026-10-12','2026-11-30',['ben'],false]);
+ assert.equal((await saveBoardItem(db,{id:w.id,done:true})).done,true);
+ await assert.rejects(()=>saveBoardItem(db,{id:w.id,end:'2026-10-01'}),/end date is before the start/);
+ await assert.rejects(()=>saveBoardItem(db,{kind:'work',title:'x',start:'soon',end:'2026-11-01'}),/date like/);
+ await assert.rejects(()=>saveBoardItem(db,{kind:'work',title:' ',start:'2026-10-01',end:'2026-11-01'}),/name/);});

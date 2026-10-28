@@ -57,3 +57,10 @@ test('phone: nothing before 9 a.m. New York; then one message a day, retried if 
  assert.equal(await runNetworkTick({db,now:new Date('2026-10-28T20:00:00Z'),publish}),null,'once a day');assert.equal(sent.length,2);
  const calm=fakeDb([]);sent=[];assert.equal(await runNetworkTick({db:calm,now:new Date('2026-10-28T14:00:00Z'),publish}),null);assert.equal(sent.length,0);
  assert.ok(await calm.collection('phone_notices').findOne({_id:'2026-10-28:network'}),'remembered so it is not recounted every few minutes');});
+
+test('work items: a week before the end, on the day, and when it has run over; done work is quiet',()=>{
+ const work=[{id:'w1',title:'Docs contribution',end:'2026-11-03',next:'Open the pull request'},{id:'w2',title:'Resume review',end:'2026-10-28'},{id:'w3',title:'Mock interview',end:'2026-10-20'},{id:'w4',title:'Far',end:'2026-12-20'},{id:'w5',title:'Done',end:'2026-10-27',done:true}];
+ const r=reminders({people:[],sources:[],work},{today});
+ assert.deepEqual(r.map(x=>x.title),['Mock interview is 8 days past its end','Resume review ends today','Docs contribution ends in 6 days']);
+ assert.equal(r[2].detail,'Next: Open the pull request');assert.equal(r[0].workId,'w3');
+ assert.match(phoneMessage(r).message,/^3 pieces of work ending\./);});

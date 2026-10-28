@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { loadReminders, post, type NetworkData, type Reminder, colorsFor } from "./network";
+import { loadReminders, post, type BoardItem, type NetworkData, type Reminder, colorsFor } from "./network";
 
 /** The bell: how many things need you, the most urgent one beside it, and the full list on click. Each can be opened or snoozed for a week. */
-export default function NetworkBell({ data, colors, onPerson, onSource, say }: { data: NetworkData; colors: ReturnType<typeof colorsFor>; onPerson: (id: string) => void; onSource: (id: string) => void; say: (t: { text: string } | null) => void }) {
+export default function NetworkBell({ data, board, colors, onPerson, onSource, onWork, say }: { data: NetworkData; board: BoardItem[]; colors: ReturnType<typeof colorsFor>; onPerson: (id: string) => void; onSource: (id: string) => void; onWork: (id: string) => void; say: (t: { text: string } | null) => void }) {
   const [list, setList] = useState<Reminder[]>([]);
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   // Recount a moment after anything changes (a message logged, a follow-up moved).
-  useEffect(() => { let on = true; const t = window.setTimeout(() => { loadReminders().then((r) => on && setList(r)).catch(() => { /* the bell keeps its last list */ }); }, 400); return () => { on = false; window.clearTimeout(t); }; }, [data]);
+  useEffect(() => { let on = true; const t = window.setTimeout(() => { loadReminders().then((r) => on && setList(r)).catch(() => { /* the bell keeps its last list */ }); }, 400); return () => { on = false; window.clearTimeout(t); }; }, [data, board]);
   useEffect(() => {
     if (!open) return;
     const away = (e: PointerEvent) => { if (!box.current?.contains(e.target as Node)) setOpen(false); };
@@ -15,8 +15,8 @@ export default function NetworkBell({ data, colors, onPerson, onSource, say }: {
     document.addEventListener("pointerdown", away); window.addEventListener("keydown", esc);
     return () => { document.removeEventListener("pointerdown", away); window.removeEventListener("keydown", esc); };
   }, [open]);
-  const color = (r: Reminder) => (r.personId ? colors.person.get(r.personId) : r.sourceId ? colors.source.get(r.sourceId) : undefined) ?? "var(--nw-muted)";
-  const go = (r: Reminder) => { setOpen(false); if (r.personId) onPerson(r.personId); else if (r.sourceId) onSource(r.sourceId); };
+  const color = (r: Reminder) => (r.personId ? colors.person.get(r.personId) : r.sourceId ? colors.source.get(r.sourceId) : r.workId ? "var(--nw-accent)" : undefined) ?? "var(--nw-muted)";
+  const go = (r: Reminder) => { setOpen(false); if (r.personId) onPerson(r.personId); else if (r.workId) onWork(r.workId); else if (r.sourceId) onSource(r.sourceId); };
   async function snooze(r: Reminder) {
     try { await post("reminders/snooze", { key: r.key, days: 7 }); setList((l) => l.filter((x) => x.key !== r.key)); say({ text: "Snoozed for a week." }); }
     catch (e) { say({ text: String((e as Error).message) }); }

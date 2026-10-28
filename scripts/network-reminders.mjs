@@ -12,7 +12,7 @@ const weeks = (d) => (d < 14 ? `${d} days` : d < 60 ? `${Math.round(d / 7)} week
 const CONTACT = new Set(["email", "message", "call", "met"]);
 
 /** The reminders for a network as it is now. `today` is a New York day (YYYY-MM-DD); snoozed keys are left out. */
-export function reminders({ people, sources }, { today, snoozed = new Set() }) {
+export function reminders({ people, sources, work = [] }, { today, snoozed = new Set() }) {
   const out = [], t = dayNum(today);
   for (const p of people) {
     if (p.archived) continue;
@@ -38,6 +38,11 @@ export function reminders({ people, sources }, { today, snoozed = new Set() }) {
     const never = people.filter((p) => !p.archived && p.sourceId === s.id && !p.via && !p.lastContact).length;
     if (never) out.push({ key: `never:${s.id}:${never}`, kind: "never", sourceId: s.id, title: `${never} ${never === 1 ? "person" : "people"} at ${s.name} ${never === 1 ? "has" : "have"} never heard from you`, detail: "Write one note and reuse it", rank: 3 - never / 1000 });
   }
+  for (const w of work) {
+    if (w.done || !w.end) continue;
+    const left = Math.round(dayNum(w.end) - t);
+    if (left <= 7) out.push({ key: `work:${w.id}:${w.end}`, kind: "work", workId: w.id, title: left < 0 ? `${w.title} is ${-left} day${left === -1 ? "" : "s"} past its end` : left === 0 ? `${w.title} ends today` : `${w.title} ends in ${left} day${left === 1 ? "" : "s"}`, detail: w.next ? `Next: ${w.next}` : "Set the next step, or mark it done", rank: 1.5 + left / 1000 });
+  }
   return out.filter((r) => !snoozed.has(r.key)).sort((a, b) => a.rank - b.rank).map(({ rank, ...r }) => r);
 }
 
@@ -47,15 +52,15 @@ async function snoozedKeys(db, now) {
 }
 
 export async function listReminders(db, { now = new Date() } = {}) {
-  const [people, sources, snoozed] = await Promise.all([db.collection("network_people").find({}).toArray(), db.collection("network_sources").find({}).toArray(), snoozedKeys(db, now)]);
+  const [people, sources, board, snoozed] = await Promise.all([db.collection("network_people").find({}).toArray(), db.collection("network_sources").find({}).toArray(), db.collection("network_board").find({}).toArray(), snoozedKeys(db, now)]);
   const id = ({ _id, ...d }) => ({ id: _id, ...d });
-  return { reminders: reminders({ people: people.map(id), sources: sources.map(id) }, { today: nyParts(now).day, snoozed }) };
+  return { reminders: reminders({ people: people.map(id), sources: sources.map(id), work: board.filter((b) => b.kind === "work").map(id) }, { today: nyParts(now).day, snoozed }) };
 }
 
 /** Hide one reminder for a few days (1 to 60). */
 export async function snoozeReminder(db, { key, days = 7 } = {}, now = new Date()) {
   const k = String(key ?? "");
-  if (!/^(reply|due|quiet|never):[\w-]+:[\w.-]+$/.test(k)) throw new NetworkError("That reminder is not known");
+  if (!/^(reply|due|quiet|never|work):[\w-]+:[\w.-]+$/.test(k)) throw new NetworkError("That reminder is not known");
   const n = Number(days);
   if (!Number.isInteger(n) || n < 1 || n > 60) throw new NetworkError("Snooze for 1 to 60 days");
   const until = new Date(now.getTime() + n * DAY).toISOString();
@@ -66,7 +71,7 @@ export async function snoozeReminder(db, { key, days = 7 } = {}, now = new Date(
 /** The phone message: counts only. Null when nothing needs you. */
 export function phoneMessage(list) {
   const n = (k) => list.filter((r) => r.kind === k).length;
-  const parts = [[n("reply"), "waiting for your answer", "waiting for your answer"], [n("due"), "follow-up due", "follow-ups due"], [n("quiet"), "person gone quiet", "people gone quiet"]]
+  const parts = [[n("reply"), "waiting for your answer", "waiting for your answer"], [n("due"), "follow-up due", "follow-ups due"], [n("work"), "piece of work ending", "pieces of work ending"], [n("quiet"), "person gone quiet", "people gone quiet"]]
     .filter(([c]) => c > 0).map(([c, one, many]) => `${c} ${c === 1 ? one : many}`);
   if (!parts.length) return null;
   return { title: "Network", message: `${parts.join(", ")}. A two-line note keeps the door open.`, tags: ["handshake"], priority: 3, click: "https://apply.atriveo.com/network" };

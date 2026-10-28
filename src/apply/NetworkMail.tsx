@@ -163,3 +163,53 @@ function SenderSettings({ settings, onClose, onSaved }: { settings: MailSettings
     </div>
   );
 }
+
+/**
+ * One note for several people: write it once with {first} where their first name goes, then send it to each person with their own
+ * Send button (nothing goes out in one click). Each send is logged in that person's history like any other email.
+ */
+export function BulkMail({ people, onClose, onSent, say }: { people: Person[]; onClose: () => void; onSent: (p: Person) => void; say: (t: { text: string } | null) => void }) {
+  const [settings, setSettings] = useState<MailSettings | null>(null);
+  const [subject, setSubject] = useState("Quick hello");
+  const [body, setBody] = useState("Hi {first},\n\n\n\nThanks,\n");
+  const [attach, setAttach] = useState("");
+  const [followIn, setFollowIn] = useState("1w");
+  const [state, setState] = useState<Record<string, "sending" | "sent" | string>>({});
+  useEffect(() => { let on = true; loadMailSettings().then((s) => { if (!on) return; setSettings(s); setBody((b) => (b.endsWith("Thanks,\n") ? b + (s.signature || s.fromName) : b)); }).catch((e) => say({ text: String(e.message || e) })); return () => { on = false; }; }, [say]);
+  useEffect(() => { const k = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); }, [onClose]);
+  const fill = (p: Person) => body.replace(/\{first\}/g, p.name.split(/\s+/)[0] || p.name).replace(/\{name\}/g, p.name);
+  async function send(p: Person) {
+    setState((s) => ({ ...s, [p.id]: "sending" }));
+    try {
+      const r = await post<{ state: string; person: Person }>("mail/send", { personId: p.id, to: p.email, subject: subject.replace(/\{first\}/g, p.name.split(/\s+/)[0]), body: fill(p), followUp: followIn || null, ...(attach ? { resume: attach } : {}) });
+      onSent(r.person); setState((s) => ({ ...s, [p.id]: r.state === "sent" ? "sent" : "Gmail did not confirm it; check Sent" }));
+    } catch (e) { setState((s) => ({ ...s, [p.id]: String((e as Error).message) })); }
+  }
+  const ready = Boolean(settings?.connected && subject.trim() && body.trim());
+  const sent = Object.values(state).filter((v) => v === "sent").length;
+  return (
+    <div className="nw-dim nwm-dim" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="nwm nwm-bulk" role="dialog" aria-modal="true" aria-label={`One note for ${people.length} people`}>
+        <div className="nwm-h"><b>One note for {people.length} {people.length === 1 ? "person" : "people"}</b><span>{sent ? `${sent} sent` : "Each one sends on its own button"}</span><button type="button" className="nw-x" aria-label="Close" onClick={onClose}>×</button></div>
+        {settings && !settings.connected && <p className="nwm-warn">Gmail is not connected yet. Connect it once in <a href="/outreach">Outreach</a> (Mailbox and settings).</p>}
+        <div className="nwm-bulk-cols">
+          <div className="nwm-bulk-l">
+            <div className="nwm-row"><label htmlFor="nwmb-subject">Subject</label><input id="nwmb-subject" value={subject} onChange={(e) => setSubject(e.target.value)} /></div>
+            <textarea id="nwmb-body" aria-label="Message; {first} becomes their first name" value={body} onChange={(e) => setBody(e.target.value)} />
+            <div className="nwm-att"><span>{"{first}"} becomes each first name.</span>
+              <label htmlFor="nwmb-attach">Attach</label><select id="nwmb-attach" value={attach} onChange={(e) => setAttach(e.target.value)}><option value="">Nothing</option>{settings?.resumes.map((r) => <option key={r.track} value={r.track}>General resume: {r.label}</option>)}</select>
+              <label htmlFor="nwmb-follow">Follow up</label><select id="nwmb-follow" value={followIn} onChange={(e) => setFollowIn(e.target.value)}><option value="">Not set</option>{FOLLOW.map(([k, l]) => <option key={k} value={k}>in {l}</option>)}</select>
+            </div>
+          </div>
+          <ul className="nwm-bulk-r" aria-label="Recipients">
+            {people.map((p) => { const st = state[p.id]; return (
+              <li key={p.id} className={st === "sent" ? "done" : ""}>
+                <div><b>{p.name}</b><small>{p.email || "No email yet. Add one in their panel."}</small><em>{fill(p).split("\n")[0]}</em>{st && st !== "sent" && st !== "sending" && <span className="nw-error">{st}</span>}</div>
+                <button type="button" className="nw-btn" disabled={!ready || !p.email || st === "sending" || st === "sent"} onClick={() => void send(p)}>{st === "sent" ? "Sent" : st === "sending" ? "Sending…" : "Send"}</button>
+              </li>); })}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}

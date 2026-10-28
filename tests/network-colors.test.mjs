@@ -49,3 +49,15 @@ test('layout: saved spots win; new people fan out around their source without tw
  assert.deepEqual(saved.get('s'),{x:10,y:20});assert.deepEqual(saved.get('a'),{x:5,y:6});assert.deepEqual(saved.get('you'),{x:-3,y:4});
  const chain=autoLayout({sources:[src('s','1')],links:[],people:[person('a',{sourceId:'s'}),person('b',{sourceId:'s',via:'a'}),person('c',{sourceId:'s',via:'b'})]});
  const d=(p,q)=>Math.hypot(p.x-q.x,p.y-q.y);assert.ok(d(chain.get('b'),chain.get('a'))<260&&d(chain.get('c'),chain.get('b'))<260,'each introduction sits next to who made it');});
+
+test('warm path: the fewest steps from you, through sources and people; none when there is no way; work progress',async()=>{
+ const {warmPath,edgesFor,colorsFor,workProgress}=await import(out);
+ const data={sources:[src('ev','1'),src('nw','2')],links:[{id:'l1',a:'ben',b:'nw',kind:'works',label:'works at',color:null}],people:[person('ben',{sourceId:'ev'}),person('ivy',{sourceId:'ev',via:'ben'}),person('kofi',{sourceId:'nw'}),person('lone')]};
+ const edges=edgesFor(data,colorsFor(data));
+ assert.deepEqual(warmPath(edges,'kofi').nodes,['you','nw','kofi'],'you reached the source directly');
+ assert.deepEqual(warmPath(edges,'ivy').nodes,['you','ev','ben','ivy']);
+ const cut=edges.filter(e=>!(e.a==='you'&&e.b==='nw'));assert.deepEqual(warmPath(cut,'kofi').nodes,['you','ev','ben','nw','kofi'],'through Ben, who works there');
+ assert.equal(warmPath(cut.filter(e=>e.kind!=='works'&&!(e.a==='nw')),'kofi'),null);assert.equal(warmPath(edges,'you'),null);
+ const w=workProgress({start:'2026-10-12',end:'2026-11-30'},'2026-10-28');assert.deepEqual([w.day,w.total,w.left,w.ending,w.late],[16,49,33,false,false]);
+ assert.equal(workProgress({start:'2026-10-18',end:'2026-11-04'},'2026-10-28').ending,true);assert.equal(workProgress({start:'2026-10-01',end:'2026-10-20'},'2026-10-28').late,true);
+ assert.equal(workProgress({start:'2026-10-01',end:'2026-10-20',done:true},'2026-10-28').late,false);});

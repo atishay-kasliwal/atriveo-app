@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
-  HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, initials, loadNetwork, plusDays, post,
-  type HistoryType, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
+  HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, initials, loadBoard, loadNetwork, plusDays, post,
+  type BoardItem, type HistoryType, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
 } from "./network";
 import NetworkGraph from "./NetworkGraph";
 import NetworkMail from "./NetworkMail";
 import NetworkBell from "./NetworkBell";
+import NetworkWork from "./NetworkWork";
+import { BulkMail } from "./NetworkMail";
 import "./network.css";
 
 type View = { kind: "all" } | { kind: "source"; id: string | null } | { kind: "due" } | { kind: "never" } | { kind: "introduced" };
@@ -27,11 +29,14 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
   const [dialog, setDialog] = useState<null | "list" | "person" | { source: Source | null }>(null);
   const [toast, setToast] = useState<Toast>(null);
   const [mailFor, setMailFor] = useState<string | null>(null);
+  const [bulkMail, setBulkMail] = useState<string[] | null>(null);
+  const [board, setBoard] = useState<BoardItem[]>([]);
+  const [work, setWork] = useState<string | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
   const say = useCallback((t: Toast) => { setToast(t); window.clearTimeout(toastTimer.current); if (t) toastTimer.current = window.setTimeout(() => setToast(null), t.undo ? 6000 : 3000); }, []);
 
   const reload = useCallback(async () => {
-    try { const d = await loadNetwork(); setData({ people: d.people, sources: d.sources, links: d.links, you: d.you }); setError(""); }
+    try { const [d, b] = await Promise.all([loadNetwork(), loadBoard().catch(() => null)]); setData({ people: d.people, sources: d.sources, links: d.links, you: d.you }); if (b) setBoard(b); setError(""); }
     catch (e) { setError(String((e as Error).message || e)); }
     finally { setLoaded(true); }
   }, []);
@@ -70,6 +75,9 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
 
   const visible = useMemo(() => (view.kind === "all" && !query.trim() ? null : new Set(shown.map((p) => p.id))), [view, query, shown]);
   const person = selected ? personById.get(selected) ?? null : null;
+  const workItem = work ? board.find((b) => b.id === work && b.kind === "work") ?? null : null;
+  const openPerson = (id: string | null) => { setWork(null); setSelected(id); };
+  const openWork = (id: string) => { setSelected(null); setWork(id); };
   const replacePerson = (p: Person) => setData((d) => ({ ...d, people: d.people.map((x) => (x.id === p.id ? p : x)) }));
   const viewName = view.kind === "source" ? (view.id ? sourceById.get(view.id)?.name ?? "Source" : "No source") : view.kind === "due" ? "Follow-up due" : view.kind === "never" ? "Never contacted" : view.kind === "introduced" ? "Introduced by someone" : "Everyone";
 
@@ -95,11 +103,11 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
             <button type="button" className="nw-btn" onClick={() => setDialog({ source: null })}>New source</button>
             <button type="button" className="nw-btn" onClick={() => setDialog("person")}>Add person</button>
             <button type="button" className="nw-btn main" onClick={() => setDialog("list")}>Add a list</button>
-            {loaded && <NetworkBell data={data} colors={colors} onPerson={(id) => setSelected(id)} onSource={(id) => { setSelected(null); setView({ kind: "source", id }); }} say={say} />}
+            {loaded && <NetworkBell data={data} board={board} colors={colors} onPerson={(id) => openPerson(id)} onWork={openWork} onSource={(id) => { openPerson(null); setView({ kind: "source", id }); }} say={say} />}
           </div>
         </div>
         {error && <p className="nw-error" role="alert">{error} <button type="button" onClick={() => void reload()}>Try again</button></p>}
-        <div className={`nw-body${person ? " has-panel" : ""}`}>
+        <div className={`nw-body${person || workItem ? " has-panel" : ""}`}>
           <nav className="nw-rail" aria-label="Show">
             <h2>Show</h2>
             <RailItem on={view.kind === "all"} color="var(--nw-muted)" label="Everyone" n={counts.all} onClick={() => setView({ kind: "all" })} />
@@ -131,9 +139,11 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
               </div>
             </div>
             {loaded && data.people.length > 0 && mode === "graph" ? (
-              <NetworkGraph data={data} colors={colors} visible={visible} selected={selected} onPerson={(id) => setSelected(id === selected ? null : id)}
-                onSource={(id) => { setSelected(null); setView(view.kind === "source" && view.id === id ? { kind: "all" } : { kind: "source", id }); }}
-                onLinks={(links) => setData((d) => ({ ...d, links }))} say={say} />
+              <NetworkGraph data={data} colors={colors} visible={visible} selected={selected} selectedWork={work} board={board} setBoard={setBoard}
+                onPerson={(id) => openPerson(id === selected ? null : id)} onWork={openWork}
+                onSource={(id) => { openPerson(null); setView(view.kind === "source" && view.id === id ? { kind: "all" } : { kind: "source", id }); }}
+                onLinks={(links) => setData((d) => ({ ...d, links }))} onPeople={(list) => setData((d) => ({ ...d, people: d.people.map((p) => list.find((x) => x.id === p.id) ?? p) }))}
+                onBulkMail={setBulkMail} say={say} />
             ) : loaded && !data.people.length ? (
               <div className="nw-empty">
                 <h3>Start with the people you already talk to</h3>
@@ -148,7 +158,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
                   const f = followUp(p.nextFollowUp), src = p.sourceId ? sourceById.get(p.sourceId) : null, via = p.via ? personById.get(p.via) : null;
                   return (
                     <li key={p.id}>
-                      <button type="button" className={`nw-row${p.id === selected ? " on" : ""}`} onClick={() => setSelected(p.id === selected ? null : p.id)} aria-pressed={p.id === selected}>
+                      <button type="button" className={`nw-row${p.id === selected ? " on" : ""}`} onClick={() => openPerson(p.id === selected ? null : p.id)} aria-pressed={p.id === selected}>
                         <Avatar name={p.name} color={colors.person.get(p.id) ?? ""} source={via && src ? colors.source.get(src.id) : undefined} />
                         <span className="who"><b>{p.name}</b><small>{p.role || (via ? `Introduced by ${via.name}` : "\u00a0")}</small></span>
                         <span className="src">{src ? <><i style={{ background: colors.source.get(src.id) }} />{src.name}</> : <em>No source</em>}</span>
@@ -163,6 +173,9 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
             )}
           </section>
 
+          {workItem && <NetworkWork key={workItem.id} item={workItem} data={data} colors={colors} onClose={() => setWork(null)} onOpen={openPerson} say={say}
+            onChange={(it) => setBoard((b) => b.map((x) => (x.id === it.id ? it : x)))} onRemove={(id) => { setBoard((b) => b.filter((x) => x.id !== id)); setWork(null); }}
+            onWrite={(id) => setMailFor(id)} />}
           {person && (
             <PersonPanel key={person.id} person={person} data={data} colors={colors} sourceById={sourceById} personById={personById}
               onClose={() => setSelected(null)} onChange={replacePerson} onOpen={setSelected} onArchive={() => void archive(person)} onWrite={() => setMailFor(person.id)} say={say}
@@ -175,6 +188,7 @@ export default function NetworkPage({ header }: { header?: ReactNode }) {
       {dialog === "person" && <AddPerson sources={data.sources} people={data.people} onClose={() => setDialog(null)} onDone={async (p) => { setDialog(null); await reload(); setSelected(p.id); say({ text: `${p.name} added.` }); }} />}
       {dialog && typeof dialog === "object" && <SourceEditor source={dialog.source} count={dialog.source ? counts.by.get(dialog.source.id) ?? 0 : 0} color={dialog.source ? colors.source.get(dialog.source.id) ?? PALETTE[0] : PALETTE[0]} onClose={() => setDialog(null)}
         onDone={async (msg, removed) => { setDialog(null); if (removed && view.kind === "source" && view.id === removed) setView({ kind: "all" }); await reload(); say({ text: msg }); }} />}
+      {bulkMail && <BulkMail people={bulkMail.map((id) => personById.get(id)).filter((p): p is Person => Boolean(p))} onClose={() => setBulkMail(null)} onSent={replacePerson} say={say} />}
       {mailFor && personById.get(mailFor) && <NetworkMail person={personById.get(mailFor)!} color={colors.person.get(mailFor) ?? ""} onClose={() => setMailFor(null)} onSent={replacePerson} say={say} />}
       {toast && <div className="nw-toast" role="status"><span>{toast.text}</span>{toast.undo && <button type="button" onClick={toast.undo}>Undo</button>}<button type="button" className="x" aria-label="Close" onClick={() => say(null)}>×</button></div>}
     </div>

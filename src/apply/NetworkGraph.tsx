@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import {
-  LINK_KINDS, PALETTE, TOOL_KEYS, autoLayout, edgesFor, followUp, imageUrl, initials, loadBoard, post, smoothPath, thinPoints,
-  type BoardItem, type Edge, type Link, type LinkKind, type NetworkData, type Pen, type Point, type Tool, colorsFor,
+  LINK_KINDS, PALETTE, TOOL_KEYS, autoLayout, edgesFor, followUp, imageUrl, initials, plusDays, post, smoothPath, thinPoints, warmPath, workProgress,
+  type BoardItem, type Edge, type Link, type LinkKind, type NetworkData, type Pen, type Person, type Point, type Tool, colorsFor,
 } from "./network";
 import { BoardBox, PenBar, Toolbar } from "./NetworkBoard";
 
@@ -12,8 +12,9 @@ type Gesture =
   | { kind: "drag"; id: string; dx: number; dy: number; moved: boolean; sx: number; sy: number }
   | { kind: "box"; id: string; mode: "move" | "size"; dx: number; dy: number; moved: boolean }
   | { kind: "pen"; points: [number, number][] }
-  | { kind: "erase" };
-const PERSON = { w: 196, h: 52 }, YOU = { w: 246, h: 80 };
+  | { kind: "erase" }
+  | { kind: "area"; sx: number; sy: number; x: number; y: number; add: boolean };
+const PERSON = { w: 196, h: 52 }, YOU = { w: 246, h: 80 }, WORK = { w: 176, h: 58 };
 const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 const sourceSize = (name: string, about: string) => ({ w: Math.round(Math.max(180, 86 + Math.max(name.length * 9.6, about.length * 6.8))), h: 68 });
 const DASH: Record<string, string | undefined> = { via: "7 5", intro: "7 5", family: "2 5", other: "10 3 2 3" };
@@ -25,9 +26,11 @@ const inkOf = (c?: string) => (!c || c === "ink" ? "var(--nw-ink)" : c);
  * sticky notes, pen strokes, images). Drag cards (positions are saved), drag the background to pan, scroll to zoom. Clicking a person
  * opens them; a source shows only its people; one of your own links can be renamed, recoloured or removed.
  */
-export default function NetworkGraph({ data, colors, visible, selected, onPerson, onSource, onLinks, say }: {
-  data: NetworkData; colors: Colors; visible: Set<string> | null; selected: string | null;
-  onPerson: (id: string) => void; onSource: (id: string) => void; onLinks: (links: Link[]) => void; say: (t: { text: string } | null) => void;
+export default function NetworkGraph({ data, colors, visible, selected, selectedWork, board, setBoard, onPerson, onSource, onWork, onLinks, onPeople, onBulkMail, say }: {
+  data: NetworkData; colors: Colors; visible: Set<string> | null; selected: string | null; selectedWork: string | null;
+  board: BoardItem[]; setBoard: (f: (b: BoardItem[]) => BoardItem[]) => void;
+  onPerson: (id: string) => void; onSource: (id: string) => void; onWork: (id: string) => void; onLinks: (links: Link[]) => void;
+  onPeople: (people: Person[]) => void; onBulkMail: (ids: string[]) => void; say: (t: { text: string } | null) => void;
 }) {
   const stage = useRef<HTMLDivElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -37,18 +40,23 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
   const [view, setView] = useState<View>({ x: 0, y: 0, k: 1 });
   const [hover, setHover] = useState<string | null>(null);
   const [editing, setEditing] = useState<{ edge: Edge; at: Point } | null>(null);
-  const [board, setBoard] = useState<BoardItem[]>([]);
   const [tool, setTool] = useState<Tool>("select");
   const [pen, setPen] = useState<Pen>({ color: "ink", width: 4.5, opacity: 0.9 });
   const [picked, setPicked] = useState<string | null>(null);
   const [drawing, setDrawing] = useState<[number, number][] | null>(null);
   const [added, setAdded] = useState<string[]>([]);
+  const [multi, setMulti] = useState<Set<string>>(new Set());
+  const [marquee, setMarquee] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const [pathOpen, setPathOpen] = useState(false);
+  const [pathTo, setPathTo] = useState("");
+  const [groupEdit, setGroupEdit] = useState<{ id: string; at: Point } | null>(null);
   const gesture = useRef<Gesture | null>(null);
   const edges = useMemo(() => edgesFor(data, colors), [data, colors]);
   const peopleCount = useMemo(() => { const m = new Map<string, number>(); for (const p of data.people) if (p.sourceId && !p.via) m.set(p.sourceId, (m.get(p.sourceId) ?? 0) + 1); return m; }, [data.people]);
   const people = useMemo(() => new Map(data.people.map((p) => [p.id, p])), [data.people]);
 
-  useEffect(() => { let on = true; loadBoard().then((b) => on && setBoard(b)).catch(() => { /* the map works without its board */ }); return () => { on = false; }; }, []);
+  const works = useMemo(() => board.filter((b) => b.kind === "work"), [board]);
+  const route = useMemo(() => (pathOpen && pathTo ? warmPath(edges, pathTo) : null), [pathOpen, pathTo, edges]);
 
   // Where a board item is drawn: a pinned note follows its card; anything else stays where it was put.
   const at = useCallback((it: BoardItem): Point => {
@@ -59,7 +67,7 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
   const fit = useCallback(() => {
     const el = stage.current; if (!el) return;
     const pts = ["you", ...data.sources.map((s) => s.id), ...data.people.map((p) => p.id)].map((id) => moved.get(id) ?? base.get(id) ?? { x: 0, y: 0 });
-    for (const it of board) { if (it.kind === "stroke") continue; const p = at(it); pts.push(p, { x: p.x + (it.w ?? 0), y: p.y + (it.h ?? 0) }); }
+    for (const it of board) { if (it.kind === "stroke" || it.kind === "group") continue; const p = at(it); pts.push(p, { x: p.x + (it.w ?? 0), y: p.y + (it.h ?? 0) }); }
     const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
     // Leave the strips at the top (tools) and bottom (zoom and legend) clear.
     const w = el.clientWidth, h = el.clientHeight - 112, bw = Math.max(...xs) - Math.min(...xs) + 320, bh = Math.max(...ys) - Math.min(...ys) + 160;
@@ -96,7 +104,7 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
   const remove = useCallback(async (id: string) => {
     setBoard((b) => b.filter((x) => x.id !== id)); setAdded((a) => a.filter((x) => x !== id)); setPicked((p) => (p === id ? null : p));
     try { await post("board/remove", { id }); } catch (e) { say({ text: String((e as Error).message) }); }
-  }, [say]);
+  }, [say, setBoard]);
   const undo = useCallback(() => { const id = added[added.length - 1]; if (id) void remove(id); else say({ text: "Nothing to undo." }); }, [added, remove, say]);
 
   async function addImage(file: File) {
@@ -120,9 +128,10 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); return; }
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if ((e.key === "Delete" || e.key === "Backspace") && picked) { e.preventDefault(); void remove(picked); return; }
-      if (e.key === "Escape") { setTool("select"); setPicked(null); return; }
+      if (e.key === "Escape") { setTool("select"); setPicked(null); setMulti(new Set()); setPathOpen(false); return; }
       const k = e.key.toLowerCase();
       if (k === "i") { fileInput.current?.click(); return; }
+      if (k === "f") { setPathOpen((o) => !o); return; }
       if (TOOL_KEYS[k]) setTool(TOOL_KEYS[k]);
     };
     window.addEventListener("keydown", key);
@@ -149,8 +158,15 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
     stage.current?.setPointerCapture(e.pointerId);
     setEditing(null);
     const w = world(e);
+    const groupEl = t.closest<SVGElement>("[data-group]");
+    if ((tool === "select" || tool === "area") && groupEl) { const r = stage.current!.getBoundingClientRect(); setGroupEdit({ id: groupEl.getAttribute("data-group")!, at: { x: e.clientX - r.left, y: e.clientY - r.top } }); gesture.current = null; return; }
     if (tool === "pen") { gesture.current = { kind: "pen", points: [[w.x, w.y]] }; setDrawing([[w.x, w.y]]); return; }
     if (tool === "eraser") { gesture.current = { kind: "erase" }; eraseAt(e); return; }
+    if (tool === "area") { gesture.current = { kind: "area", sx: e.clientX, sy: e.clientY, x: e.clientX, y: e.clientY, add: e.shiftKey }; return; }
+    if (tool === "work") {
+      void create({ kind: "work", title: "New work", start: plusDays(0), end: plusDays(14), people: [], next: "", x: Math.round(w.x), y: Math.round(w.y) }).then((it) => { if (it) onWork(it.id); });
+      setTool("select"); gesture.current = null; return;
+    }
     if (tool === "text" || tool === "note") {
       const note = tool === "note";
       void create({ kind: tool, x: Math.round(w.x - 20), y: Math.round(w.y - 12), w: note ? 190 : 230, h: note ? 150 : 70, text: "", ...(note ? { color: "#fbbf24" } : {}) }).then((it) => {
@@ -168,7 +184,15 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
     setPicked(null);
     const line = t.closest<SVGPathElement>("[data-edge]"), node = t.closest<SVGGElement>("[data-node]");
     if (tool === "select" && line && !node) { const edge = edges.find((x) => x.key === line.dataset.edge); if (edge?.link) { const r = stage.current!.getBoundingClientRect(); setEditing({ edge, at: { x: e.clientX - r.left, y: e.clientY - r.top } }); } gesture.current = null; return; }
-    if (tool === "select" && node) { const id = node.dataset.node!, p = pos(id); gesture.current = { kind: "drag", id, dx: w.x - p.x, dy: w.y - p.y, moved: false, sx: e.clientX, sy: e.clientY }; return; }
+    const workEl = t.closest<SVGGElement>("[data-work]");
+    if (tool === "select" && workEl) { const id = workEl.dataset.work!, it = works.find((x) => x.id === id)!; gesture.current = { kind: "box", id, mode: "move", dx: w.x - it.x, dy: w.y - it.y, moved: false }; return; }
+    if (tool === "select" && node) {
+      const id = node.dataset.node!;
+      if (e.shiftKey && people.has(id)) { setMulti((m) => { const n = new Set(m); if (n.has(id)) n.delete(id); else n.add(id); return n; }); gesture.current = null; return; }
+      if (!multi.has(id)) setMulti(new Set());
+      const p = pos(id); gesture.current = { kind: "drag", id, dx: w.x - p.x, dy: w.y - p.y, moved: false, sx: e.clientX, sy: e.clientY }; return;
+    }
+    setMulti(new Set());
     gesture.current = { kind: "pan", sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y, moved: false };
   }
   function move(e: RPointerEvent<HTMLDivElement>) {
@@ -176,18 +200,22 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
     if (g.kind === "pan") { if (Math.abs(e.clientX - g.sx) + Math.abs(e.clientY - g.sy) > 3) g.moved = true; setView((v) => ({ ...v, x: g.vx + e.clientX - g.sx, y: g.vy + e.clientY - g.sy })); return; }
     if (g.kind === "pen") { const w = world(e); g.points.push([w.x, w.y]); setDrawing([...g.points]); return; }
     if (g.kind === "erase") { eraseAt(e); return; }
+    if (g.kind === "area") { g.x = e.clientX; g.y = e.clientY; const r = stage.current!.getBoundingClientRect(); setMarquee({ x: Math.min(g.sx, g.x) - r.left, y: Math.min(g.sy, g.y) - r.top, w: Math.abs(g.x - g.sx), h: Math.abs(g.y - g.sy) }); return; }
     if (g.kind === "box") {
       g.moved = true; const w = world(e);
       setBoard((b) => b.map((it) => {
         if (it.id !== g.id) return it;
         if (g.mode === "size") { const p = at(it); return { ...it, w: Math.max(80, Math.round(w.x - p.x)), h: Math.max(40, Math.round(w.y - p.y)) }; }
+        if (it.kind === "work") return { ...it, x: Math.round(w.x - g.dx), y: Math.round(w.y - g.dy) };
         return { ...it, pin: null, x: Math.round(w.x - g.dx), y: Math.round(w.y - g.dy) };
       }));
       return;
     }
     if (!g.moved && Math.abs(e.clientX - g.sx) + Math.abs(e.clientY - g.sy) < 4) return;
     g.moved = true; const w = world(e);
-    setMoved((m) => new Map(m).set(g.id, { x: Math.round(w.x - g.dx), y: Math.round(w.y - g.dy) }));
+    const to = { x: Math.round(w.x - g.dx), y: Math.round(w.y - g.dy) }, from = pos(g.id), dx = to.x - from.x, dy = to.y - from.y;
+    // Dragging one of several picked people moves them all.
+    setMoved((m) => { const n = new Map(m).set(g.id, to); if (multi.has(g.id)) for (const id of multi) if (id !== g.id) { const p = n.get(id) ?? base.get(id) ?? { x: 0, y: 0 }; n.set(id, { x: p.x + dx, y: p.y + dy }); } return n; });
   }
   function up(e: RPointerEvent<HTMLDivElement>) {
     const g = gesture.current; gesture.current = null; if (!g) return;
@@ -197,8 +225,19 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
       void create({ kind: "stroke", points, color: pen.color, width: pen.width, opacity: pen.opacity });
       return;
     }
+    if (g.kind === "area") {
+      setMarquee(null);
+      const r = stage.current!.getBoundingClientRect(), x0 = Math.min(g.sx, g.x) - r.left, x1 = Math.max(g.sx, g.x) - r.left, y0 = Math.min(g.sy, g.y) - r.top, y1 = Math.max(g.sy, g.y) - r.top;
+      if (x1 - x0 < 6 && y1 - y0 < 6) return;
+      const inside = data.people.filter((p) => { const c = pos(p.id), sx = c.x * view.k + view.x, sy = c.y * view.k + view.y; return sx >= x0 && sx <= x1 && sy >= y0 && sy <= y1; }).map((p) => p.id);
+      setMulti((m) => new Set([...(g.add ? m : []), ...inside]));
+      if (inside.length) say({ text: `${inside.length} selected. Pick an action below, or drag any of them to move them all.` });
+      return;
+    }
     if (g.kind === "box") {
-      const it = board.find((x) => x.id === g.id); if (!it || !g.moved) return;
+      const it = board.find((x) => x.id === g.id); if (!it) return;
+      if (it.kind === "work") { if (g.moved) void saveItem({ id: it.id, x: it.x, y: it.y }); else onWork(it.id); return; }
+      if (!g.moved) return;
       if (g.mode === "size") { void saveItem({ id: it.id, w: it.w, h: it.h }).then((s) => s && replace(s)); return; }
       // Dropped with the pointer over a person (or source) card: pin it there, so it moves with them.
       const w = world(e), hit = it.kind === "image" ? null : cardAt(w);
@@ -210,7 +249,12 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
       return;
     }
     if (g.kind === "drag") {
-      if (g.moved) { const p = moved.get(g.id); if (p) post("positions", { items: [{ id: g.id, ...p }] }).catch((err: Error) => say({ text: `That position was not saved: ${err.message}` })); return; }
+      if (g.moved) {
+        const ids = multi.has(g.id) ? [...multi] : [g.id];
+        const items = ids.map((id) => ({ id, ...(moved.get(id) ?? pos(id)) }));
+        post("positions", { items }).catch((err: Error) => say({ text: `That position was not saved: ${err.message}` }));
+        return;
+      }
       if (g.id === "you") return;
       if (people.has(g.id)) onPerson(g.id); else onSource(g.id);
     }
@@ -223,13 +267,15 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
 
   // What stays bright: the filter's people (and their sources), or the person you opened and everyone directly linked to them.
   const lit = useMemo(() => {
+    if (route) return new Set(route.nodes);
     if (selected) { const s = new Set([selected]); for (const e of edges) { if (e.a === selected) s.add(e.b); if (e.b === selected) s.add(e.a); } return s; }
     if (!visible) return null;
     const s = new Set<string>(["you", ...visible]);
     for (const p of data.people) if (visible.has(p.id) && p.sourceId) s.add(p.sourceId);
     return s;
-  }, [selected, visible, edges, data.people]);
+  }, [selected, visible, edges, data.people, route]);
   const focus = selected ?? hover;
+  const onRoute = useMemo(() => new Set(route?.edges.map((e) => e.key) ?? []), [route]);
 
   const path = (e: Edge) => {
     const a = pos(e.a), b = pos(e.b), dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, c = Math.min(60, d * 0.12);
@@ -248,8 +294,25 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
       <svg className="nwg-svg" style={{ backgroundSize: `${28 * view.k}px ${28 * view.k}px`, backgroundPosition: `${view.x}px ${view.y}px` }}>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>
           <g>
+            {board.filter((it) => it.kind === "group").map((gr) => {
+              const pts = (gr.ids ?? []).filter((id) => people.has(id)).map((id) => pos(id));
+              if (!pts.length) return null;
+              const x0 = Math.min(...pts.map((p) => p.x)) - PERSON.w / 2 - 24, x1 = Math.max(...pts.map((p) => p.x)) + PERSON.w / 2 + 24;
+              const y0 = Math.min(...pts.map((p) => p.y)) - PERSON.h / 2 - 38, y1 = Math.max(...pts.map((p) => p.y)) + PERSON.h / 2 + 24;
+              return (<g key={gr.id} className="nwg-group"><rect x={x0} y={y0} width={x1 - x0} height={y1 - y0} rx={22} />
+                <text x={x0 + 16} y={y0 + 23} data-group={gr.id} className="nwg-glabel">{gr.label} · {pts.length}<title>Rename or remove this group</title></text></g>);
+            })}
+          </g>
+          <g>
+            {works.flatMap((wk) => (wk.people ?? []).filter((id) => people.has(id)).map((id) => {
+              const a = { x: wk.x, y: wk.y }, b = pos(id), pr = workProgress(wk), c = wk.done ? "var(--nw-ok)" : pr.late ? "var(--nw-bad)" : pr.ending ? "var(--nw-warn)" : "var(--nw-accent)";
+              const dim = lit && !lit.has(id), hot = selectedWork === wk.id;
+              return <path key={`${wk.id}-${id}`} d={`M${a.x} ${a.y}L${b.x} ${b.y}`} stroke={c} strokeDasharray="10 3 2 3" strokeWidth={hot ? 2.6 : 1.7} fill="none" style={{ opacity: dim ? 0.07 : hot ? 1 : 0.75 }} />;
+            }))}
+          </g>
+          <g>
             {edges.map((e) => {
-              const p = path(e), hot = focus != null && (e.a === focus || e.b === focus), dim = lit && !(lit.has(e.a) && lit.has(e.b));
+              const p = path(e), hot = onRoute.has(e.key) || (!route && focus != null && (e.a === focus || e.b === focus)), dim = lit && !(lit.has(e.a) && lit.has(e.b));
               return (
                 <g key={e.key} className={`nwg-edge${hot ? " hot" : ""}`} style={{ opacity: dim ? 0.07 : hot ? 1 : e.kind === "you" ? 0.45 : 0.7 }}>
                   <path d={p.d} stroke={e.color} strokeDasharray={DASH[e.kind]} strokeWidth={hot ? 3 : e.kind === "you" ? 1.4 : 1.9} fill="none" strokeLinecap="round" />
@@ -296,7 +359,7 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
               const due = followUp(p.nextFollowUp)?.due, replied = p.history.length > 0 && p.history[p.history.length - 1].type === "reply";
               const lineage = p.via && p.sourceId ? colors.source.get(p.sourceId) : undefined;
               return (
-                <g key={p.id} data-node={p.id} className={`nwg-node${p.id === selected ? " sel" : ""}`} transform={`translate(${pt.x} ${pt.y})`} style={{ opacity: dim ? 0.16 : 1 }} tabIndex={0} role="button" aria-label={`${p.name}${p.role ? `, ${p.role}` : ""}`}
+                <g key={p.id} data-node={p.id} className={`nwg-node${p.id === selected ? " sel" : ""}${multi.has(p.id) ? " msel" : ""}`} transform={`translate(${pt.x} ${pt.y})`} style={{ opacity: dim ? 0.16 : 1 }} tabIndex={0} role="button" aria-label={`${p.name}${p.role ? `, ${p.role}` : ""}`}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPerson(p.id); } }} onPointerEnter={() => setHover(p.id)} onPointerLeave={() => setHover(null)}>
                   <rect x={-PERSON.w / 2 - 5} y={-PERSON.h / 2 - 5} width={PERSON.w + 10} height={PERSON.h + 10} rx={17} className="nwg-halo" />
                   <rect x={-PERSON.w / 2} y={-PERSON.h / 2} width={PERSON.w} height={PERSON.h} rx={13} fill={card} stroke={c} strokeWidth={p.id === selected ? 3 : 1.6} />
@@ -306,6 +369,22 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
                   {lineage && <circle cx={PERSON.w / 2 - 2} cy={-PERSON.h / 2 + 2} r={7} fill={lineage} stroke={bg} strokeWidth={2.5}><title>Belongs to {data.sources.find((s) => s.id === p.sourceId)?.name}, introduced by {people.get(p.via!)?.name}</title></circle>}
                   <text x={ax + 30} y={p.role ? -3 : 5} className="nwg-pname">{clip(p.name, 20)}</text>
                   {p.role && <text x={ax + 30} y={13} className="nwg-sub">{clip(p.role, 22)}</text>}
+                </g>
+              );
+            })}
+            {works.map((wk) => {
+              const pr = workProgress(wk), c = wk.done ? "var(--nw-ok)" : pr.late ? "var(--nw-bad)" : pr.ending ? "var(--nw-warn)" : "var(--nw-accent)";
+              const fmt = (d?: string) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "");
+              const dim = lit && !(wk.people ?? []).some((id) => lit.has(id)) && selectedWork !== wk.id;
+              return (
+                <g key={wk.id} data-work={wk.id} className={`nwg-node nwg-work${selectedWork === wk.id ? " sel" : ""}`} transform={`translate(${wk.x} ${wk.y})`} style={{ opacity: dim ? 0.2 : 1 }} tabIndex={0} role="button" aria-label={`${wk.title}, ${fmt(wk.start)} to ${fmt(wk.end)}`}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onWork(wk.id); } }}>
+                  <rect x={-WORK.w / 2 - 5} y={-WORK.h / 2 - 5} width={WORK.w + 10} height={WORK.h + 10} rx={16} className="nwg-halo" />
+                  <rect x={-WORK.w / 2} y={-WORK.h / 2} width={WORK.w} height={WORK.h} rx={12} fill={card} stroke={c} strokeWidth={selectedWork === wk.id ? 3 : 1.8} />
+                  <text x={-WORK.w / 2 + 12} y={-7} className="nwg-wtitle">{clip(wk.title ?? "", 21)}</text>
+                  <text x={-WORK.w / 2 + 12} y={9} className="nwg-sub">{wk.done ? "done" : `${fmt(wk.start)} – ${fmt(wk.end)}`}</text>
+                  <rect x={-WORK.w / 2 + 12} y={17} width={WORK.w - 24} height={3.5} rx={1.75} fill="var(--nw-line-strong)" />
+                  <rect x={-WORK.w / 2 + 12} y={17} width={(WORK.w - 24) * (wk.done ? 1 : pr.f)} height={3.5} rx={1.75} fill={c} />
                 </g>
               );
             })}
@@ -319,11 +398,18 @@ export default function NetworkGraph({ data, colors, visible, selected, onPerson
           </g>
         </g>
       </svg>
-      <Toolbar tool={tool} setTool={setTool} onImage={() => fileInput.current?.click()} onUndo={undo} canUndo={added.length > 0} />
+      <Toolbar tool={tool} setTool={setTool} onImage={() => fileInput.current?.click()} onUndo={undo} canUndo={added.length > 0} onPath={() => setPathOpen((o) => !o)} pathOpen={pathOpen} />
+      {marquee && <div className="nwg-marquee" style={{ left: marquee.x, top: marquee.y, width: marquee.w, height: marquee.h }} />}
+      {pathOpen && <PathFinder data={data} to={pathTo} setTo={setPathTo} route={route} colors={colors} onClose={() => { setPathOpen(false); setPathTo(""); }} onOpen={onPerson} />}
+      {multi.size > 0 && <BulkBar ids={[...multi]} people={people} onDone={(list, msg) => { onPeople(list); say({ text: msg }); }} say={say}
+        onGroup={() => { const ids = [...multi]; void create({ kind: "group", ids, label: "Group" }).then((it) => { if (it) { setMulti(new Set()); say({ text: "Grouped. Click the label to rename it. The frame follows them when you move them." }); } }); }}
+        onWrite={() => onBulkMail([...multi])} onClear={() => setMulti(new Set())} />}
+      {groupEdit && (() => { const gr = board.find((b) => b.id === groupEdit.id); return gr ? <GroupEditor key={gr.id} group={gr} at={groupEdit.at} onClose={() => setGroupEdit(null)}
+        onRename={(label) => { replace({ ...gr, label }); void saveItem({ id: gr.id, label }); }} onRemove={() => { void remove(gr.id); setGroupEdit(null); }} /> : null; })()}
       {(tool === "pen" || tool === "eraser") && <PenBar pen={pen} setPen={setPen} eraser={tool === "eraser"} />}
       <input ref={fileInput} type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void addImage(f); }} />
       <div className="nwg-ui nwg-zoom"><button type="button" aria-label="Zoom out" onClick={() => zoomBy(1 / 1.2)}>−</button><span>{Math.round(view.k * 100)}%</span><button type="button" aria-label="Zoom in" onClick={() => zoomBy(1.2)}>+</button><button type="button" className="txt" onClick={fit}>Fit</button></div>
-      <div className="nwg-ui nwg-legend" aria-hidden="true">
+      <div className="nwg-ui nwg-legend" aria-hidden="true" hidden={multi.size > 0}>
         <span><svg viewBox="0 0 30 6"><path d="M0 3H30" /></svg>first connection</span>
         <span><svg viewBox="0 0 30 6"><path d="M0 3H30" strokeDasharray="7 5" /></svg>introduced</span>
         <span><svg viewBox="0 0 30 6"><path d="M0 3H30" strokeDasharray="2 5" strokeLinecap="round" /></svg>family</span>
@@ -348,6 +434,63 @@ async function shrink(file: File): Promise<{ blob: Blob; w: number; h: number }>
     const blob = await new Promise<Blob | null>((ok) => c.toBlob(ok, file.type === "image/png" ? "image/png" : "image/jpeg", 0.86));
     return { blob: blob ?? file, w: c.width, h: c.height };
   } finally { URL.revokeObjectURL(url); }
+}
+
+/** "Who do you want to reach?": the fewest steps from you along your lines, lit on the map, with the first person to write to. */
+function PathFinder({ data, to, setTo, route, colors, onClose, onOpen }: { data: NetworkData; to: string; setTo: (v: string) => void; route: ReturnType<typeof warmPath>; colors: Colors; onClose: () => void; onOpen: (id: string) => void }) {
+  const first = route?.nodes.map((id) => data.people.find((p) => p.id === id)).find(Boolean);
+  const dot = (id: string) => (id === "you" ? "var(--nw-accent)" : colors.person.get(id) ?? colors.source.get(id) ?? "var(--nw-muted)");
+  return (
+    <div className="nwg-ui nwg-path" role="region" aria-label="Find a path">
+      <div className="nwg-rel-h"><b>Who do you want to reach?</b><button type="button" className="nw-x" aria-label="Close" onClick={onClose}>×</button></div>
+      <select id="nwg-path-to" value={to} onChange={(e) => setTo(e.target.value)} autoFocus>
+        <option value="">Choose a person or a source…</option>
+        <optgroup label="Sources">{data.sources.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</optgroup>
+        <optgroup label="People">{data.people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</optgroup>
+      </select>
+      {to && !route && <p className="nw-muted">No way there yet. Add who knows them, or connect someone you know to them.</p>}
+      {route && <>
+        <div className="nwg-steps">{route.nodes.map((id, i) => <span key={id} className="nwg-step">{i > 0 && <em>{route.edges[i - 1].label} →</em>}<span><i style={{ background: dot(id) }} />{name(data, id)}</span></span>)}</div>
+        <p className="nwg-path-say">{route.edges.length === 1 ? "You are already linked to them." : `${route.edges.length} steps.${first ? ` Start with ${first.name}.` : ""}`}</p>
+        {first && route.edges.length > 1 && <button type="button" className="nw-btn" onClick={() => onOpen(first.id)}>Open {first.name.split(" ")[0]}</button>}
+      </>}
+    </div>
+  );
+}
+
+/** Actions for several picked people at once. Each email still goes out on its own Send. */
+function BulkBar({ ids, people, onDone, onGroup, onWrite, onClear, say }: { ids: string[]; people: Map<string, Person>; onDone: (list: Person[], msg: string) => void; onGroup: () => void; onWrite: () => void; onClear: () => void; say: (t: { text: string } | null) => void }) {
+  const [busy, setBusy] = useState(false);
+  async function each(fields: (p: Person) => Partial<Person>, msg: string) {
+    setBusy(true);
+    try { const out: Person[] = []; for (const id of ids) { const p = people.get(id); if (!p) continue; out.push((await post<{ person: Person }>("person", { id, ...fields(p) })).person); } onDone(out, msg); }
+    catch (e) { say({ text: String((e as Error).message) }); } finally { setBusy(false); }
+  }
+  const random = () => `#${[0, 0, 0].map(() => Math.floor(80 + Math.random() * 160).toString(16).padStart(2, "0")).join("")}`;
+  return (
+    <div className="nwg-ui nwg-bulk" role="toolbar" aria-label={`${ids.length} selected`}>
+      <b>{ids.length} selected</b>
+      <select id="nwg-bulk-follow" aria-label="Set a follow-up for all" value="" disabled={busy} onChange={(e) => { const n = Number(e.target.value); if (n) void each(() => ({ nextFollowUp: plusDays(n) }), `Follow-up set for ${ids.length} ${ids.length === 1 ? "person" : "people"}.`); }}>
+        <option value="">Follow up…</option><option value="3">In 3 days</option><option value="7">In a week</option><option value="14">In 2 weeks</option>
+      </select>
+      <span className="dots">{PALETTE.slice(0, 6).map((c) => <button key={c} type="button" style={{ background: c }} aria-label={`Colour them ${c}`} disabled={busy} onClick={() => void each(() => ({ color: c }), "Colour changed.")} />)}</span>
+      <button type="button" className="nw-btn" disabled={busy} onClick={() => void each(() => ({ color: random() }), "Each one has a new colour.")}>Random</button>
+      <button type="button" className="nw-btn" disabled={busy} onClick={onGroup}>Group</button>
+      <button type="button" className="nw-btn main" disabled={busy} onClick={onWrite}>Write to all</button>
+      <button type="button" className="nw-x" aria-label="Clear the selection" onClick={onClear}>×</button>
+    </div>
+  );
+}
+
+function GroupEditor({ group, at, onClose, onRename, onRemove }: { group: BoardItem; at: Point; onClose: () => void; onRename: (label: string) => void; onRemove: () => void }) {
+  const [label, setLabel] = useState(group.label ?? "");
+  return (
+    <div className="nwg-ui nwg-rel" role="dialog" aria-label="Group" style={{ left: Math.max(10, at.x + 10), top: Math.max(10, at.y + 10) }}>
+      <div className="nwg-rel-h"><b>Group</b><button type="button" className="nw-x" aria-label="Close" onClick={onClose}>×</button></div>
+      <label className="nw-f"><span>Name</span><input id="nwg-group-label" autoFocus value={label} onChange={(e) => setLabel(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { onRename(label); onClose(); } }} /></label>
+      <div className="nw-df"><button type="button" className="nw-btn ghost" onClick={onRemove}>Remove the frame</button><span className="grow" /><button type="button" className="nw-btn main" onClick={() => { onRename(label); onClose(); }}>Save</button></div>
+    </div>
+  );
 }
 
 const name = (d: NetworkData, id: string) => d.people.find((p) => p.id === id)?.name ?? d.sources.find((s) => s.id === id)?.name ?? "You";

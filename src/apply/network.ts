@@ -195,19 +195,20 @@ export function starter(p: Person, tone: string, intent: string, signature: stri
 }
 
 /* ---------- reminders ---------- */
-export interface Reminder { key: string; kind: "reply" | "due" | "quiet" | "never"; personId?: string; sourceId?: string; title: string; detail: string }
+export interface Reminder { key: string; kind: "reply" | "due" | "quiet" | "never" | "work"; personId?: string; sourceId?: string; workId?: string; title: string; detail: string }
 export const loadReminders = () => getJson<{ reminders: Reminder[] } & ApiBody>("/network/reminders").then((r) => r.reminders);
 
 /* ---------- the board: notes, text, pen strokes, images ---------- */
 export interface BoardItem {
-  id: string; kind: "text" | "note" | "stroke" | "image"; x: number; y: number; w?: number; h?: number; text?: string; color?: string;
+  id: string; kind: "text" | "note" | "stroke" | "image" | "group" | "work"; x: number; y: number; w?: number; h?: number; text?: string; color?: string;
   points?: [number, number][]; width?: number; opacity?: number; imageId?: string; pin?: { id: string; dx: number; dy: number } | null; createdAt: string;
+  ids?: string[]; label?: string; title?: string; start?: string; end?: string; people?: string[]; next?: string; notes?: string; done?: boolean;
 }
 export const loadBoard = () => getJson<{ items: BoardItem[] } & ApiBody>("/network/board").then((r) => r.items);
 export const imageUrl = (id: string) => `${getTailorServerBase()}/network/image?id=${encodeURIComponent(id)}`;
-export type Tool = "select" | "hand" | "text" | "note" | "pen" | "eraser";
+export type Tool = "select" | "area" | "hand" | "text" | "note" | "pen" | "eraser" | "work";
 export type Pen = { color: string; width: number; opacity: number };
-export const TOOL_KEYS: Record<string, Tool> = { v: "select", h: "hand", t: "text", n: "note", d: "pen", e: "eraser" };
+export const TOOL_KEYS: Record<string, Tool> = { v: "select", s: "area", h: "hand", t: "text", n: "note", d: "pen", e: "eraser", w: "work" };
 export const NOTE_COLORS = ["#fbbf24", "#f9a8d4", "#86efac", "#93c5fd", "#c4b5fd"];
 export const PEN_COLORS = ["ink", "#f87171", "#fbbf24", "#34d399", "#60a5fa", "#a78bfa"];
 export const PEN_SIZES: [string, number, number][] = [["Fine", 2.4, 0.9], ["Medium", 4.5, 0.9], ["Thick", 8, 0.9], ["Marker", 18, 0.32]];
@@ -228,4 +229,32 @@ export function thinPoints(pts: [number, number][], min = 1.5): [number, number]
   const end = pts[pts.length - 1];
   if (end && out.length > 1 && out[out.length - 1] !== end) out[out.length - 1] = [Math.round(end[0] * 10) / 10, Math.round(end[1] * 10) / 10];
   return out.slice(0, 4000);
+}
+
+/* ---------- work items and the warm path ---------- */
+/** How far along a piece of work is: day n of total, days left, and whether it is ending (a week or less) or late. */
+export function workProgress(w: BoardItem, today = new Date().toLocaleDateString("en-CA")) {
+  const a = dayOf(w.start ?? today), b = dayOf(w.end ?? today), t = dayOf(today), total = Math.max(1, Math.round((b - a) / DAY));
+  const day = Math.round((t - a) / DAY), left = Math.round((b - t) / DAY);
+  return { day: Math.max(0, Math.min(total, day)), total, left, f: Math.max(0, Math.min(1, day / total)), ending: !w.done && left <= 7 && left >= 0, late: !w.done && left < 0 };
+}
+
+/**
+ * The warmest way from you to someone: the fewest steps along your lines (through people, sources and events), never through a
+ * piece of work. Null when there is no way yet.
+ */
+export function warmPath(edges: Edge[], to: string): { nodes: string[]; edges: Edge[] } | null {
+  if (to === "you") return null;
+  const adj = new Map<string, [string, Edge][]>();
+  for (const e of edges) { adj.set(e.a, [...(adj.get(e.a) ?? []), [e.b, e]]); adj.set(e.b, [...(adj.get(e.b) ?? []), [e.a, e]]); }
+  const prev = new Map<string, [string, Edge] | null>([["you", null]]), queue = ["you"];
+  while (queue.length) {
+    const u = queue.shift()!;
+    if (u === to) break;
+    for (const [v, e] of adj.get(u) ?? []) if (!prev.has(v)) { prev.set(v, [u, e]); queue.push(v); }
+  }
+  if (!prev.has(to)) return null;
+  const nodes = [to], path: Edge[] = [];
+  for (let c = to, step = prev.get(c); step; c = step[0], step = prev.get(c)) { path.unshift(step[1]); nodes.unshift(step[0]); }
+  return { nodes, edges: path };
 }
