@@ -262,3 +262,19 @@ for (const width of [1440, 390]) test(`follow-up plan, outcome and next notes su
  }
 
 });
+
+for (const width of [1440, 390]) test(`Fit centres on you at 75% and the calendar close button is easy to hit at ${width}px`, async t => {
+  const { page, errors } = await fixture(t, width);
+  await page.getByRole('button', { name: 'Fit', exact: true }).click();
+  assert.equal((await page.locator('.nwg-zoom span').textContent()).trim(), '75%');
+  const canvas = await page.locator('.nwg').boundingBox(), you = await page.locator('[data-node="you"]').boundingBox();
+  assert.ok(Math.abs(you.x + you.width / 2 - (canvas.x + canvas.width / 2)) < 30, 'you is horizontally centred');
+  assert.ok(Math.abs(you.y + you.height / 2 - (canvas.y + 56 + (canvas.height - 112) / 2)) < 30, 'you is vertically centred between the strips');
+  await page.getByRole('button', { name: 'Calendar', exact: true }).click();
+  if (process.env.NETWORK_QA_DIR) { fs.mkdirSync(process.env.NETWORK_QA_DIR, { recursive: true }); await page.screenshot({ path: path.join(process.env.NETWORK_QA_DIR, `calendar-${width}.png`) }); }
+  const close = await page.getByRole('button', { name: 'Close calendar', exact: true }).boundingBox();
+  assert.ok(close.width >= 36 && close.height >= 36, 'close target is at least 36 px');
+  await page.getByRole('button', { name: 'Close calendar', exact: true }).click();
+  assert.equal(await page.locator('#nw-canvas-calendar').count(), 0);
+  assert.deepEqual(errors, []);
+});

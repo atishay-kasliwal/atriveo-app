@@ -131,17 +131,14 @@ export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeo
     return { x: it.x, y: it.y };
   }, [pos, people, data.sources]);
 
+  // Fit always brings "you" to the middle of the canvas at 75%, so the view opens in the same place every time.
   const fit = useCallback(() => {
     const el = stage.current; if (!el) return;
-    const pts = ["you", ...shownSources.map((s) => s.id), ...shownPeople.map((p) => p.id)].map((id) => moved.get(id) ?? base.get(id) ?? { x: 0, y: 0 });
-    pts.push(...stacks.map(({ x, y }) => ({ x, y })));
-    for (const it of board) { if (it.kind === "stroke" || it.kind === "group" || (it.kind === "work" ? !layers.work : !layers.board)) continue; const p = at(it); pts.push(p, { x: p.x + (it.w ?? 0), y: p.y + (it.h ?? 0) }); }
-    const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+    const you = moved.get("you") ?? base.get("you") ?? { x: 0, y: 0 };
     // Leave the strips at the top (tools) and bottom (zoom and legend) clear.
-    const w = el.clientWidth, h = el.clientHeight - 112, bw = Math.max(...xs) - Math.min(...xs) + 320, bh = Math.max(...ys) - Math.min(...ys) + 160;
-    const k = Math.max(0.25, Math.min(1.1, w / bw, h / bh));
-    setView({ k, x: w / 2 - ((Math.max(...xs) + Math.min(...xs)) / 2) * k, y: 56 + h / 2 - ((Math.max(...ys) + Math.min(...ys)) / 2) * k });
-  }, [shownSources, shownPeople, stacks, layers.work, layers.board, moved, base, board, at]);
+    const w = el.clientWidth, h = el.clientHeight - 112, k = 0.75;
+    setView({ k, x: w / 2 - you.x * k, y: 56 + h / 2 - you.y * k });
+  }, [moved, base]);
   // Fit on the first draw, and again whenever several cards arrive at once (a list, an import, people put on this map).
   const fitted = useRef(-1), cardCount = data.people.length + data.sources.length;
   useEffect(() => { if (stage.current && (fitted.current < 0 || cardCount - fitted.current >= 2)) fit(); if (stage.current) fitted.current = cardCount; }, [fit, cardCount]);
