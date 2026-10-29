@@ -4,6 +4,7 @@ import { listAssessments, updateAssessment } from './assessments.mjs';
 import { warmJobs, sameCompany, companyOf } from './network-jobs.mjs';
 import { NetworkError, withFollowUps, saveFollowUp } from './network.mjs';
 import { nyParts } from './phone-summary.mjs';
+import { markEventDone, reminderStart } from './network-events.mjs';
 
 const DAY = 86400000;
 const dayNumber = d => Date.parse(`${String(d).slice(0,10)}T12:00:00Z`) / DAY;
@@ -12,7 +13,7 @@ const contact = new Set(['email','message','call','met']);
 const fingerprint = jobs => createHash('sha256').update(jobs.map(j=>j.url).sort().join('\n')).digest('hex').slice(0,16);
 
 /** Deterministic facts, never generated claims. An opportunity is a company overlap, not an uncomputed fit score. */
-export function buildIntelligence({ people, sources, work = [], reminders = [], groups = [], assessments = [] }, { now = new Date() } = {}) {
+export function buildIntelligence({ people, sources, work = [], reminders = [], groups = [], assessments = [], events = [] }, { now = new Date() } = {}) {
  const today = nyParts(now).day, t = dayNumber(today);
  const active = withFollowUps(people.filter(p=>!p.archived),sources), byId = new Map(active.map(p=>[p.id,p]));
  const items = reminders.map(r=>({...r, ...(r.workId?{mapId:work.find(w=>w.id===r.workId)?.mapId||'main'}:{}), kind:r.kind==='due'?'follow_up':r.kind==='quiet'?'relationship':r.kind==='never'?'introduction':r.kind==='work'?'work':r.kind,
@@ -61,6 +62,17 @@ export function buildIntelligence({ people, sources, work = [], reminders = [], 
    stage:overdue||daysLeft!==null&&daysLeft<=2?'urgent':!dated||daysLeft<=4?'actionable':'discovered',
    rank:dated?(overdue?-30:daysLeft===0?-20:daysLeft<=2?-10:12+daysLeft):18});
  }
+ // A calendar event shows here from its reminder time until a day after it starts, unless it is done.
+ for (const event of events) {
+  const at = Date.parse(event.at), started = +now >= at;
+  if (event.done || +now < reminderStart(event) || +now - at >= DAY) continue;
+  const personId = active.find(p=>p.id===event.personId)?.id;
+  const when = deadlineFormat.format(at);
+  items.push({key:`event:${event.id}:${event.at}`,kind:'event',title:event.title,detail:started?`Started ${when}.`:`Starts ${when}.`,
+   next:event.note||(personId?'Review what you know about this person before you go.':'Prepare, then mark it done when it is over.'),
+   eventId:event.id,subject:'',company:'',deadlineAt:event.at,deadlineLabel:when,daysLeft:null,personId,people:personId?[personId]:[],jobs:[],
+   stage:started||at-+now<=60*60000?'urgent':'actionable',rank:started?-25:-15});
+ }
  for (const g of groups) {
   const members=g.people.map(p=>byId.get(p.id)).filter(Boolean).sort((a,b)=>Number(Boolean(a.via))-Number(Boolean(b.via))||String(b.lastContact||'').localeCompare(String(a.lastContact||''))||a.name.localeCompare(b.name));
   if(!members.length)continue;
@@ -75,10 +87,10 @@ export function buildIntelligence({ people, sources, work = [], reminders = [], 
 }
 
 export async function listIntelligence(db,{now=new Date()}={}) {
- const [rawPeople,rawSources,rawWork,{reminders},groups,assessments] = await Promise.all([
-  db.collection('network_people').find({}).toArray(),db.collection('network_sources').find({}).toArray(),db.collection('network_board').find({kind:'work'}).toArray(),listReminders(db,{now}),warmJobs(db,{now}),listAssessments(db,{now:+now})]);
+ const [rawPeople,rawSources,rawWork,{reminders},groups,assessments,rawEvents] = await Promise.all([
+  db.collection('network_people').find({}).toArray(),db.collection('network_sources').find({}).toArray(),db.collection('network_board').find({kind:'work'}).toArray(),listReminders(db,{now}),warmJobs(db,{now}),listAssessments(db,{now:+now}),db.collection('network_events').find({done:false}).toArray()]);
  const id=({_id,...r})=>({id:String(_id),...r});
- const items=buildIntelligence({people:rawPeople.map(id),sources:rawSources.map(id),work:rawWork.map(id),reminders,groups,assessments},{now});
+ const items=buildIntelligence({people:rawPeople.map(id),sources:rawSources.map(id),work:rawWork.map(id),reminders,groups,assessments,events:rawEvents.map(id)},{now});
  const state=db.collection('network_intelligence_state');
  const [states,prefs]=await Promise.all([state.find({}).toArray(),db.collection('app_settings').findOne({_id:'network_intelligence'})]);
  const byKey=new Map(states.map(s=>[s._id,s]));
@@ -115,6 +127,9 @@ export async function intelligenceAction(db,input={},now=new Date()) {
   if(!key.startsWith('assessment:'))throw new NetworkError('Choose an assessment');
   try { await updateAssessment(db,{id:key.split(':')[1],status:'done',now:+now}); }
   catch(e){throw new NetworkError(e.message);}
+ } else if(input.action==='event_done') {
+  if(!key.startsWith('event:'))throw new NetworkError('Choose an event');
+  await markEventDone(db,key.split(':')[1]);
  } else if(input.action==='contacted') {
   if(state.dismissed)return {ok:true};
   const id=key.split(':')[1];

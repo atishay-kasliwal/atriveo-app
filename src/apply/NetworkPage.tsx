@@ -12,6 +12,7 @@ import { CanvasButton, CanvasIcon, CanvasMenuAction } from "./NetworkCanvasContr
 import { DEFAULT_CANVAS_LAYERS, withAutoCompanies, type CanvasLayers } from "./network";
 import NetworkMail from "./NetworkMail";
 import NetworkBell from "./NetworkBell";
+import NetworkCalendar from "./NetworkCalendar";
 import NetworkWork from "./NetworkWork";
 import { BulkMail } from "./NetworkMail";
 import { PersonJobs, WarmJobs } from "./NetworkJobs";
@@ -61,10 +62,11 @@ function NetworkMap({ initialIntelligence, header, mapId, notice, onHome }: { in
   type Mode = "graph" | "list" | "jobs";
   const [mode, setModeState] = useState<Mode>(() => { try { const m = localStorage.getItem("nw-mode"); return m === "list" || m === "jobs" ? m : "graph"; } catch { return "graph"; } });
   const setMode = (m: Mode) => { setModeState(m); try { localStorage.setItem("nw-mode", m); } catch { /* the choice just is not remembered */ } };
-  const [drawer, setDrawer] = useState<null | "layers" | "search" | "add">(null);
+  // A reminder tap (/network?map=main&event=…) opens the calendar.
+  const [drawer, setDrawer] = useState<null | "layers" | "search" | "add" | "calendar">(() => (new URLSearchParams(window.location.search).has("event") ? "calendar" : null));
   const [layers, setLayers] = useState<CanvasLayers>({ ...DEFAULT_CANVAS_LAYERS });
   const [stackPeople, setStackPeople] = useState(false);
-  const toggleDrawer = (next: "layers" | "search" | "add") => setDrawer((current) => current === next ? null : next);
+  const toggleDrawer = (next: "layers" | "search" | "add" | "calendar") => setDrawer((current) => current === next ? null : next);
   useEffect(() => {
     if (!drawer) return;
     const away = (e: PointerEvent) => { if (!(e.target as Element).closest('[data-canvas-controls]')) setDrawer(null); };
@@ -174,7 +176,7 @@ function NetworkMap({ initialIntelligence, header, mapId, notice, onHome }: { in
     if (!item) { setIntelligenceFocus(null); return; }
     const people = item.people.filter(id=>data.people.some(p=>p.id===id));
     const sourceId = item.sourceId && (!data.onMap || data.onMap.includes(item.sourceId)) ? item.sourceId : undefined;
-    if (item.kind==='assessment'&&!people.length&&!sourceId) {setIntelligenceFocus(null);return;}
+    if ((item.kind==='assessment'||item.kind==='event')&&!people.length&&!sourceId) {setIntelligenceFocus(null);return;}
     setModeState('graph'); setSelected(null); setSide(null); setWork(null); setQuery(''); setView({kind:'all'});
     setStackPeople(false); setLayers(old=>({...old,people:true,sources:true,connections:true,work:true}));
     setIntelligenceFocus({ ids: [...people, ...(sourceId?[sourceId]:[])], target: people[0] || sourceId || item.workId || 'you', company:item.company||item.jobs[0]?.company, token: Date.now() });
@@ -222,9 +224,11 @@ function NetworkMap({ initialIntelligence, header, mapId, notice, onHome }: { in
             <CanvasButton label="Map view" icon="map" active={mode === 'graph'} onClick={() => setMode('graph')} />
             <CanvasButton label="People list" icon="list" active={mode === 'list'} onClick={() => setMode(mode === 'list' ? 'graph' : 'list')} />
             <CanvasButton label="Jobs view" icon="jobs" active={mode === 'jobs'} onClick={() => setMode(mode === 'jobs' ? 'graph' : 'jobs')} />
+            <CanvasButton label="Calendar" icon="calendar" expanded={drawer === 'calendar'} controls="nw-canvas-calendar" onClick={() => toggleDrawer('calendar')} />
             {loaded && <NetworkBell data={data} board={board} colors={colors} onPerson={openPerson} onWork={openWork} onSource={(id) => { openPerson(null); setView({ kind: 'source', id }); }} say={say} />}
           </div>
         </div>
+        {drawer === 'calendar' && <NetworkCalendar people={data.people} onClose={() => setDrawer(null)} />}
         {drawer === 'search' && <div id="nw-canvas-search" className="nw-canvas-popover nw-canvas-search" data-canvas-controls>
           <CanvasIcon name="search" /><label className="nw-search"><span className="sr">Search people</span><input id="nw-search" autoFocus type="search" placeholder="Name, company, city…" value={query} onChange={(e) => setQuery(e.target.value)} /></label>
           {query && <button type="button" className="nw-x" aria-label="Clear search" onClick={() => setQuery('')}>×</button>}

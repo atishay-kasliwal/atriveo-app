@@ -11,6 +11,7 @@ const paths = {
   source: 'M4 21V5l8-2v18M12 9h8v12M7 8h2M7 12h2M7 16h2M16 13h1M16 17h1M2 21h20',
   import: 'M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5',
   stack: 'M5 7h14v14H5V7Zm2-4h10M3 5h18',
+  calendar: 'M4 6h16v15H4V6Zm0 4h16M8 3v4m8-4v4',
 } as const;
 export function CanvasIcon({ name }: { name: keyof typeof paths }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d={paths[name]} /></svg>;

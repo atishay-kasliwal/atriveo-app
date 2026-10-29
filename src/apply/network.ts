@@ -42,6 +42,11 @@ const onMap = () => (activeMap === "main" ? "" : `map=${encodeURIComponent(activ
 export const loadNetwork = (archived = false) => getJson<NetworkData & ApiBody>(`/network?${[onMap(), archived ? "archived=1" : ""].filter(Boolean).join("&")}`);
 /** Everyone and every source, whichever map is open (the "From your network" picker). */
 export const loadWholeNetwork = () => getJson<NetworkData & ApiBody>("/network");
+export interface CalendarEvent { id: string; title: string; at: string; remind: number; personId: string | null; note: string; done: boolean }
+export const loadEvents = () => getJson<{ events: CalendarEvent[] } & ApiBody>("/network/events").then((r) => r.events);
+export const saveEvent = (event: { title: string; at: string; remind: number; personId: string | null; note: string }) => post<{ event: CalendarEvent }>("events/save", event);
+export const finishEvent = (id: string) => post<object>("events/done", { id });
+export const removeEvent = (id: string) => post<object>("events/remove", { id });
 export const loadMaps = () => getJson<{ maps: MapInfo[] } & ApiBody>("/network/maps").then((r) => r.maps);
 export async function post<T>(path: string, body: object): Promise<T> {
   const payload = activeMap === "main" || "mapId" in body ? body : { mapId: activeMap, ...body };
@@ -441,7 +446,7 @@ export function historyLabel(entry: HistoryEntry): string {
 
 export interface IntelligenceItem {
  key: string; kind: string; stage: 'discovered' | 'actionable' | 'urgent'; title: string; detail: string; next: string;
- assessmentId?: string; company?: string; subject?: string; deadlineAt?: string | null; deadlineLabel?: string | null; daysLeft?: number | null;
+ assessmentId?: string; eventId?: string; company?: string; subject?: string; deadlineAt?: string | null; deadlineLabel?: string | null; daysLeft?: number | null;
  personId?: string; sourceId?: string; workId?: string; mapId?: string; people: string[]; jobs: JobRow[]; relationship?: string; via?: string | null; firstSeen: string;
 }
 export interface IntelligenceFeed { items: IntelligenceItem[]; expanded: boolean; generatedAt: string }
