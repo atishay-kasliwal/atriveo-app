@@ -48,7 +48,7 @@ test('what is due when: morning from 8:30, milestones 7am to 11pm, evening 8pm t
  assert.deepEqual(due(8,29,0).send,[]);assert.deepEqual(due(8,30,0).send,['morning']);assert.deepEqual(due(12,0,0).send,[],'a morning message at noon would be stale');
  assert.deepEqual(due(9,0,0,['morning']).send,[]);
  const M=['morning'];
- assert.deepEqual(due(10,0,20,M).send,['m1']);assert.deepEqual(due(10,0,45,M).send,['m2']);assert.deepEqual(due(10,0,45,M).silent,['m1'],'jumping past a tier records the lower ones without sending them');
+ assert.deepEqual(due(10,0,20,M).send,['m1']);assert.deepEqual(due(10,0,45,M).send,['m2']);assert.deepEqual(due(10,0,45,M).silent,['first','half','m1'],'jumping past milestones records the lower ones without sending them');
  assert.deepEqual(due(10,0,85,M).send,['m3']);assert.deepEqual(due(10,0,21,['morning','m1']).send,[]);assert.deepEqual(due(10,0,40,['morning','m1']).send,['m2']);
  assert.deepEqual(due(10,0,20).send,['morning','m1'],'a first check mid-morning still sends the plan');
  assert.deepEqual(due(23,30,25,M).send,[],'no milestone pings at night');assert.deepEqual(due(6,0,25,M).send,[]);
@@ -60,9 +60,9 @@ test('a tick sends each message once per day, remembers it, and retries a failed
  assert.equal(sent[0],'Day 4 starts now');
  assert.deepEqual(await runPhoneTick({db,now:ny(8,32),publish,progress:progress(0)}),[],'not sent again');
  assert.deepEqual(await runPhoneTick({db,now:ny(11,0),publish,progress:progress(20)}),['m1']);
- assert.deepEqual(await runPhoneTick({db,now:ny(13,0),publish,progress:progress(41)}),['m2']);
+ assert.deepEqual(await runPhoneTick({db,now:ny(13,0),publish,progress:progress(41)}),['m2','best'],'41 beats the best day (25)');
  assert.deepEqual(await runPhoneTick({db,now:ny(20,5),publish,progress:progress(41)}),['evening']);
- assert.deepEqual(sent,['Day 4 starts now','Goal reached','Double the goal','41 applied today']);
+ assert.deepEqual(sent,['Day 4 starts now','Goal reached','Double the goal','New personal best','41 applied today']);
  let fail=true;const flaky=async()=>{if(fail)throw new Error('ntfy down');return true;};const db2=fakeDb({goal:20});
  assert.deepEqual(await runPhoneTick({db:db2,now:ny(9,0),publish:flaky,progress:progress(0)}),[]);
  fail=false;assert.deepEqual(await runPhoneTick({db:db2,now:ny(9,1),publish:flaky,progress:progress(0)}),['morning'],'a failed send is tried again');});
@@ -82,3 +82,20 @@ test('nothing runs without NTFY_TOPIC or when switched off',()=>{
  process.env.NTFY_TOPIC='t';process.env.PHONE_SUMMARIES='off';assert.equal(startPhoneSummaries({withMongo:async()=>{},log:l=>lines.push(l)}),null);
  for(const [k,v] of [['NTFY_TOPIC',keep.t],['PHONE_SUMMARIES',keep.o]])v===undefined?delete process.env[k]:process.env[k]=v;
  assert.equal(lines.length,2);});
+
+test('more milestones: the first application of the day, halfway, a new personal best and streaks worth marking',()=>{
+ const due=(applied,{sent=['morning'],best=0,streak=0,goal=20}={})=>dueKinds({now:ny(10,0),applied,goal,best,streak,sent:new Set(sent)}).send;
+ assert.deepEqual(due(1),['first']);assert.deepEqual(due(3,{sent:['morning','first']}),[]);assert.deepEqual(due(10,{sent:['morning','first']}),['half']);
+ assert.deepEqual(dueKinds({now:ny(19,30),applied:3,goal:20,sent:new Set(['morning'])}).send,[],'no first-of-the-day at night');assert.deepEqual(dueKinds({now:ny(21,0),applied:20,goal:20,sent:new Set(['morning','evening','first','half'])}).send,['m1'],'the goal still counts in the evening');
+ assert.deepEqual(due(10),['half'],'a first check at 10 sends only the highest, halfway');assert.deepEqual(due(2,{goal:3}),['first'],'no halfway for a goal under 4');
+ assert.deepEqual(due(26,{sent:['morning','first','half','m1'],best:25}),['best']);assert.deepEqual(due(19,{sent:['morning','first','half'],best:12}),[],'a best counts once the goal is met');
+ assert.deepEqual(due(26,{sent:['morning','first','half','m1','best'],best:25}),[],'one best a day');assert.deepEqual(due(20,{sent:['morning','first','half'],best:0}),['m1'],'no history, no best');
+ assert.deepEqual(due(20,{sent:['morning','first','half'],streak:7}),['m1','streak']);assert.deepEqual(due(20,{sent:['morning','first','half'],streak:8}),['m1']);
+ const ctx={day:'2026-10-27',applied:1,goal:20,best:25,streak:7};
+ assert.deepEqual([buildMessage('first',ctx).title,buildMessage('first',ctx).message],['First one in','1 of 20 today. The hardest one is done.']);
+ assert.equal(buildMessage('first',{...ctx,applied:4}).message,'4 of 20 today. A good start.');
+ assert.equal(buildMessage('half',{...ctx,applied:12}).message,'12 of 20 today. 8 to go.');
+ assert.equal(buildMessage('best',{...ctx,applied:31}).message,'31 applied today, more than any day before. The last best was 25.');
+ assert.equal(buildMessage('streak',ctx).title,'7 days in a row');
+ for(const k of ['first','half','best','streak']){const m=buildMessage(k,ctx);assert.ok(!/[—–]|\s-\s/.test(m.title+m.message),k);}
+});

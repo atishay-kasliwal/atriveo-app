@@ -32,3 +32,10 @@ test('the 14-day history counts each confirmed application once on its New York 
  assert.equal(days.find(d=>d.day==='2026-10-24').applied,1);
  assert.equal(days.reduce((n,d)=>n+d.applied,0),3);
 });
+
+test('notification history includes older records and submission fallback without changing widget history',()=>{
+ const applications=[{_id:'old',submission:{submittedAt:'2025-01-01T15:00:00Z'}},{_id:'missing'}];
+ const full=buildWidgetProgress(applications,[],[],{now,fullHistory:true});
+ assert.deepEqual(full.days,[{day:'2025-01-01',applied:1}]);
+ assert.equal(buildWidgetProgress(applications,[],[],{now}).days.length,14);
+});
