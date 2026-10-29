@@ -441,6 +441,7 @@ export function historyLabel(entry: HistoryEntry): string {
 
 export interface IntelligenceItem {
  key: string; kind: string; stage: 'discovered' | 'actionable' | 'urgent'; title: string; detail: string; next: string;
+ assessmentId?: string; company?: string; subject?: string; deadlineAt?: string | null; deadlineLabel?: string | null; daysLeft?: number | null;
  personId?: string; sourceId?: string; workId?: string; mapId?: string; people: string[]; jobs: JobRow[]; relationship?: string; via?: string | null; firstSeen: string;
 }
 export interface IntelligenceFeed { items: IntelligenceItem[]; expanded: boolean; generatedAt: string }

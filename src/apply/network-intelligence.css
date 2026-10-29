@@ -25,3 +25,7 @@
 @keyframes ni-appear{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.ni-panel{animation:none}}
 .nw-intelligence-home>.ni-dock{position:fixed;--nw-card:#1c1d24;--nw-ink:#e6e5ed;--nw-muted:#9794a5;--nw-line:#30303a;--nw-line-strong:#42414f;--nw-bg:#131319;--nw-soft:#292735}
+.ni-card-meta i.is-assessment{background:#d5b27a}
+.ni-assessment-deadline{display:grid;gap:7px;padding:13px 12px;margin:14px 0;border:1px solid #a7784a44;border-radius:8px;background:#a7784a0c}
+.ni-assessment-deadline>span{font-size:10px;color:var(--nw-muted)}.ni-assessment-deadline>strong{font-size:13px;font-weight:550;line-height:1.6;color:#e6c7ac}.ni-assessment-deadline>small{font-size:11px;color:var(--nw-muted);line-height:1.6}
+.ni-actions a{display:inline-flex;align-items:center;box-sizing:border-box;border:1px solid var(--nw-line-strong);border-radius:7px;padding:6px 9px;font-size:11px;min-height:32px;text-decoration:none;color:var(--nw-ink)}.ni-actions a:hover{background:var(--nw-soft)}

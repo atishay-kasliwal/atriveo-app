@@ -5,7 +5,7 @@ import fs from 'node:fs';import path from 'node:path';import os from 'node:os';i
 const {chromium}=createRequire(path.join(process.env.PLAYATRIVEO_DIR||path.join(os.homedir(),'playatriveo'),'package.json'))('playwright');
 const stamp='2026-10-27T15:00:00Z';
 const person=(id,name,company)=>({id,name,company,sourceId:'event',role:'Engineer',city:'Raleigh',email:`${id}@example.com`,linkedin:'',phone:'',notes:'',photoId:null,via:null,color:null,tags:[],lastContact:null,nextFollowUp:'2026-11-01',history:[],archived:false,createdAt:stamp,updatedAt:stamp,watchJobs:false});
-async function fixture(t,width){
+async function fixture(t,width,withAssessment=false){
  const root=path.resolve('dist-apply');const server=http.createServer((req,res)=>{const requested=path.join(root,new URL(req.url,'http://localhost').pathname);const file=fs.existsSync(requested)&&fs.statSync(requested).isFile()?requested:path.join(root,'index.html');res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':file.endsWith('.ttf')?'font/ttf':'text/html');res.end(fs.readFileSync(file));});
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base=`http://127.0.0.1:${server.address().port}`;const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width,height:900},reducedMotion:'reduce'});page.setDefaultTimeout(10000);
  t.after(async()=>{await browser.close();await new Promise(r=>server.close(r));});
@@ -15,6 +15,7 @@ async function fixture(t,width){
  {key:'due:colleen:2026-11-01',kind:'follow_up',stage:'discovered',title:'Follow up with Colleen Bott',detail:'Planned for Nov 1.',next:'Prepare your message.',personId:'colleen',people:['colleen'],jobs:[],firstSeen:stamp},
  {key:'reply:ankit:r',kind:'reply',stage:'actionable',title:'Ankit replied',detail:'Read their reply.',next:'Answer Ankit.',personId:'ankit',people:['ankit'],jobs:[],firstSeen:stamp},
  {key:'upcoming:work:2026-11-04',kind:'upcoming',stage:'discovered',title:'Prepare for a conversation',detail:'Starts Nov 4.',next:'Review your notes.',workId:'work',people:['ankit'],jobs:[],firstSeen:stamp}];
+ if(withAssessment){data.onMap=['event'];items.unshift({key:'assessment:assess01:2026-11-04T17:00:00.000Z',kind:'assessment',stage:'urgent',title:'Northwind assessment',detail:'Complete today before 12:00 PM EST.',next:'Complete and submit before Wed, Nov 4, 2026, 12:00 PM EST.',assessmentId:'assess01',company:'Northwind',subject:'Your online assessment invitation',deadlineAt:'2026-11-04T17:00:00.000Z',deadlineLabel:'Wed, Nov 4, 2026, 12:00 PM EST',daysLeft:0,people:[],jobs:[],firstSeen:stamp});}
  const writes=[],errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.pathname==='/api/auth/me')return route.fulfill({json:{user:{name:'Test',email:'test@example.com'}}});
  if(u.origin!==base&&u.pathname.startsWith('/network')){
@@ -27,6 +28,7 @@ async function fixture(t,width){
   if(u.pathname==='/network/jobs')return route.fulfill({json:{jobs,company:'Amazon',groups:[]}});
   return route.fulfill({json:{ok:true,companies:[]}});
  }
+ if(u.pathname==='/applications/assessments')return route.fulfill({json:{rows:items.filter(i=>i.kind==='assessment').map(i=>({id:i.assessmentId,company:i.company,subject:i.subject,deadlineAt:i.deadlineAt,receivedAt:stamp,state:'today',when:'today at 12:00 PM',deadlineSource:'mail',deadlineText:'Complete by noon'}))}});
  if(u.pathname.startsWith('/api/')||u.origin!==base)return route.fulfill({json:{ok:true,counts:{fillable:0,ready:0},fillable:[],ready:[],manual:[],approved:[],linkedin:[],worker:null}});
  return route.continue();});
  return{page,base,writes,errors};
@@ -59,3 +61,18 @@ for(const width of [1440,390])test(`intelligence at ${width}px: persistent dock,
  await min.focus();assert.equal(await min.evaluate(el=>getComputedStyle(el).outlineStyle),'solid');assert.deepEqual(errors,[]);
 });
 test('dock is available on maps home and opens canvas context',async t=>{const{page,base,errors}=await fixture(t,1440);await page.goto(base+'/network');const tab=page.getByRole('button',{name:/Network Intelligence.*4 actionable things/});await tab.click();await page.getByRole('button',{name:'See 6 jobs',exact:true}).click();await page.getByRole('heading',{name:'Amazon',exact:true}).waitFor();assert.ok(page.url().includes('map=main'));assert.deepEqual(errors,[]);});
+
+for(const width of [1440,390])test(`assessment deadline and completion in the dock at ${width}px, including an unconnected company on a custom map`,async t=>{
+ const {page,base,writes,errors}=await fixture(t,width,true);await page.goto(base+'/network?map=custom-map');
+ const tab=page.getByRole('button',{name:/Network Intelligence.*5 actionable things/});await tab.click();
+ const assessment=page.locator('.ni-card').filter({hasText:'Northwind assessment'});await assessment.getByText('Complete today before 12:00 PM EST.',{exact:true}).waitFor();
+ assert.equal(await assessment.getByRole('button',{name:'Remind me…'}).count(),0);
+ await assessment.getByRole('button',{name:'View assessment',exact:true}).click();
+ await page.getByText('Wed, Nov 4, 2026, 12:00 PM EST',{exact:true}).waitFor();
+ await page.screenshot({path:`/tmp/atriveo-intelligence-assessment-${width}.png`});
+ await page.getByRole('link',{name:'Open assessment',exact:true}).click();
+ await page.locator('#as-assess01.on').waitFor();assert.ok(page.url().endsWith('/assessments#as-assess01'));
+ await page.goto(base+'/network?map=custom-map');await page.getByRole('button',{name:'View assessment',exact:true}).click();
+ await page.getByRole('button',{name:'Mark completed'}).click();await page.getByRole('button',{name:/Network Intelligence.*4 actionable things/}).waitFor();
+ assert.ok(writes.some(w=>w.action==='assessment_done'));assert.equal(await page.getByRole('button',{name:'Northwind assessment',exact:true}).count(),0);assert.deepEqual(errors,[]);
+});

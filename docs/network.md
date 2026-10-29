@@ -85,7 +85,7 @@ added. A **Day** source is named after its date unless you name it.
 
 A persistent tab at the bottom right of the maps home and canvas shows a count of actionable items. It expands upward into a floating
 400 px feed; the canvas keeps its full width. The server remembers expanded/minimized state across logins. The top three items appear
-first, with View all for the rest. On a custom map, the feed is limited to people, sources and work on that map.
+first, with View all for the rest. On a custom map, the relationship feed is limited to people, sources and work on that map; assessments remain visible on every map.
 
 The feed combines company openings (including staffing), recent applications with no logged contact since applying, replies, follow-ups
 already due or coming in the next seven days, introductions, quiet relationships, and dated work. These are facts from Network and the
@@ -96,6 +96,15 @@ dates, not inferred meetings or invented times.
 Selecting a card keeps the dock open, frames its connection path and fades unrelated graph cards. Company cards can be suggested for
 one connection while its opportunity is focused, without changing saved sources. Job details and external role links appear inside the
 dock. People, sources and work use their existing panels, and Draft message opens the existing composer; it never sends automatically.
+
+Assessment cards read the existing open assessment records, even when you do not know anyone at the company. They count remaining
+New York calendar days (6, 5, 4, 2, tomorrow, today), display the exact recorded deadline with EST/EDT, and rank more urgently as the
+deadline approaches. A missing deadline is labeled unknown, never assumed to be noon or end of day. Open assessment links to that
+specific row on the Assessments page. Mark completed updates the real record, removing it from both views and future assessment
+reminders. Snoozes cannot extend beyond the deadline day; an expired deadline is described as passed. The existing one-day overdue
+visibility window still applies. Changed deadlines create a fresh item so an extension is not hidden by an old dismissal.
+
+Unselected connection lines are subdued and slightly thinner. Hovered/selected connections and an Intelligence-focused path remain bright.
 
 Discovered items can be acted on immediately. Unreviewed company opportunities become Actionable after two days from first seeing them;
 waiting replies, late follow-ups and recent applications without contact receive higher priority. Reviewing a card is remembered. These

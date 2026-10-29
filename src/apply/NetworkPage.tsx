@@ -172,10 +172,13 @@ function NetworkMap({ initialIntelligence, header, mapId, notice, onHome }: { in
   const openYou = () => { setSelected(null); setWork(null); setSide("you"); };
   const focusIntelligence = useCallback((item: IntelligenceItem | null) => {
     if (!item) { setIntelligenceFocus(null); return; }
+    const people = item.people.filter(id=>data.people.some(p=>p.id===id));
+    const sourceId = item.sourceId && (!data.onMap || data.onMap.includes(item.sourceId)) ? item.sourceId : undefined;
+    if (item.kind==='assessment'&&!people.length&&!sourceId) {setIntelligenceFocus(null);return;}
     setModeState('graph'); setSelected(null); setSide(null); setWork(null); setQuery(''); setView({kind:'all'});
     setStackPeople(false); setLayers(old=>({...old,people:true,sources:true,connections:true,work:true}));
-    setIntelligenceFocus({ ids: [...item.people, ...(item.sourceId?[item.sourceId]:[])], target: item.personId || item.sourceId || item.workId || 'you', company:item.jobs[0]?.company, token: Date.now() });
-  }, []);
+    setIntelligenceFocus({ ids: [...people, ...(sourceId?[sourceId]:[])], target: people[0] || sourceId || item.workId || 'you', company:item.company||item.jobs[0]?.company, token: Date.now() });
+  }, [data.people,data.onMap]);
   const appliedInitialIntelligence = useRef(false);
   useEffect(()=>{if(loaded&&initialIntelligence&&!appliedInitialIntelligence.current){appliedInitialIntelligence.current=true;focusIntelligence(initialIntelligence);}},[loaded,initialIntelligence,focusIntelligence]);
   const sideSource = side && typeof side === "object" ? sourceById.get(side.source) ?? null : null;
