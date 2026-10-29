@@ -73,6 +73,21 @@ places the card; each extra one draws an "also introduced · 2026" line, shows i
 Things Open 2026") and counts for the warm path. Someone you met at the conference keeps All Things Open as their source and Red Hat
 as Works at.
 
+## Kinds of source
+
+Company, Staffing agency, Event, Online assessment (OA), LinkedIn reach-out, Day, Family, Other, or **Something else…** with a name
+you type ("Hackathon", "Discord community"), shown on the card. A **LinkedIn reach-out** source (or one named "LinkedIn…") holds a
+card per day: **Add today's reach-outs** makes or reuses today's card (New York time) and opens Add a list on it; the extension's
+LinkedIn button adds people to today's card; **Sort N into day cards** moves people sitting straight on it into the day they were
+added. A **Day** source is named after its date unless you name it.
+
+## Follow-ups by default
+
+Everyone but family has a follow-up every week, opt-out: due 7 days after you last reached them (or after they were added, if you
+never have). Someone reached through LinkedIn is first due 3 days after being added. A date you set wins; Follow-up → "No follow-up"
+switches it off for that person. It is worked out when the page, the bell or the phone message reads people, never stored, so it
+covers everyone already in your network.
+
 ## Colour rule
 
 A source has one colour, and every first connection from it shares it. Someone introduced by another person starts their own branch:

@@ -1,7 +1,7 @@
 import { nyParts, publishNtfy } from "./phone-summary.mjs";
 import { sendPushNotification } from "./web-push.mjs";
 import { companyOf, jobsForCompanies, sameCompany } from "./network-jobs.mjs";
-import { NetworkError } from "./network.mjs";
+import { NetworkError, withFollowUps } from "./network.mjs";
 
 // What needs you in your network, newest worries first: someone replied and waits for an answer, a follow-up is due, someone has gone
 // quiet, people in a source have never heard from you. Each reminder has a stable key so it can be snoozed. A morning phone message
@@ -14,7 +14,9 @@ const weeks = (d) => (d < 14 ? `${d} days` : d < 60 ? `${Math.round(d / 7)} week
 const CONTACT = new Set(["email", "message", "call", "met"]);
 
 /** The reminders for a network as it is now. `today` is a New York day (YYYY-MM-DD); snoozed keys are left out. */
-export function reminders({ people, sources, work = [] }, { today, snoozed = new Set() }) {
+export function reminders({ people: all, sources, work = [] }, { today, snoozed = new Set() }) {
+  // Everyone but family has a weekly follow-up unless switched off (see autoFollowUp).
+  const people = withFollowUps(all, sources);
   const out = [], t = dayNum(today);
   for (const p of people) {
     if (p.archived) continue;

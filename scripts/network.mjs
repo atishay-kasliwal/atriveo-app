@@ -6,7 +6,7 @@ import { cleanEmail } from "./resume-emails.mjs";
 // been introduced by another person (via); other connections are explicit links. Archived people are kept, never deleted.
 
 const PEOPLE = "network_people", SOURCES = "network_sources", LINKS = "network_links";
-export const SOURCE_TYPES = ["company", "staffing", "event", "family", "other"];
+export const SOURCE_TYPES = ["company", "staffing", "event", "family", "linkedin", "day", "oa", "other"];
 export const LINK_KINDS = ["works", "family", "intro", "other"];
 export const HISTORY_TYPES = ["note", "email", "message", "call", "met", "reply"];
 const CONTACT = new Set(["email", "message", "call", "met"]);
@@ -45,12 +45,33 @@ async function all(db, name) { return (await db.collection(name).find({}).toArra
 export async function networkView(db, { archived = false } = {}) {
   const [people, sources, links, you] = await Promise.all([all(db, PEOPLE), all(db, SOURCES), all(db, LINKS), db.collection("app_settings").findOne({ _id: YOU })]);
   return {
-    people: people.filter((p) => archived || !p.archived).sort((a, b) => a.name.localeCompare(b.name)),
+    people: withFollowUps(people.filter((p) => archived || !p.archived), sources).sort((a, b) => a.name.localeCompare(b.name)),
     sources: sources.sort((a, b) => a.name.localeCompare(b.name)),
     links,
     you: { x: you?.x ?? 0, y: you?.y ?? 0, name: you?.name ?? "", title: you?.title ?? "", photoId: you?.photoId ?? null, note: you?.note ?? "" },
   };
 }
+
+/**
+ * Follow-ups are on by default, every week, for everyone but family: due 7 days after you last reached them (or after they were
+ * added, if you never have). Someone reached through LinkedIn is first due 3 days after being added. A date you set yourself always
+ * wins, and switching follow-ups off for a person (their plan's "No follow-up") stops it. Worked out each time, never stored.
+ */
+export function autoFollowUp(p, sources) {
+  if (p.archived || p.followUpPlan?.enabled === false || p.nextFollowUp) return null;
+  const byId = new Map(sources.map((s) => [s.id ?? s._id, s]));
+  let family = false, linkedin = false;
+  for (let s = byId.get(p.sourceId), n = 0; s && n < 8; s = s.parentSourceId ? byId.get(s.parentSourceId) : null, n++) {
+    if (s.type === "family") family = true;
+    if (s.type === "linkedin" || (!s.parentSourceId && /^linkedin\b/i.test(s.name))) linkedin = true;
+  }
+  const base = p.lastContact || p.createdAt;
+  if (family || !base || Number.isNaN(Date.parse(base))) return null;
+  return dayOf(Date.parse(base) + (!p.lastContact && linkedin ? 3 : 7) * 86_400_000);
+}
+
+/** People with their automatic follow-up filled in (followUpAuto marks it as not set by hand). */
+export const withFollowUps = (people, sources) => people.map((p) => { const d = autoFollowUp(p, sources); return d ? { ...p, nextFollowUp: d, followUpAuto: true } : p; });
 
 const YOU = "network_you";
 const coord = (v) => { const n = Number(v); if (!Number.isFinite(n)) fail("A position must be a number"); return Math.round(Math.max(-100000, Math.min(100000, n)) * 10) / 10; };
@@ -323,6 +344,8 @@ export async function saveSource(db, input = {}, now = new Date()) {
   if ("name" in input || !cur) { patch.name = str(input.name, 80); if (!patch.name) fail("Give the source a name"); }
   if ("type" in input || !cur) patch.type = SOURCE_TYPES.includes(input.type) ? input.type : "other";
   if ("about" in input) patch.about = str(input.about, 120);
+  // Any kind you like ("Discord community", "Hackathon"): shown instead of the kind's own name; the kind itself stays "other".
+  if ("kindName" in input) patch.kindName = str(input.kindName, 30);
   if ("color" in input) patch.color = color(input.color);
   if ("notes" in input) patch.notes = text(input.notes, 4000);
   // Shown on the card: where it is ("Raleigh, NC", "Global") and, for an event, when ("Oct 2024").
@@ -436,25 +459,28 @@ const dayOf = (d) => new Date(d).toLocaleDateString("en-CA", { timeZone: DAY_TZ 
 const dayName = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 
 /** The LinkedIn source (made once). */
-const linkedinRoot = (db, now) => saveSource(db, { name: "LinkedIn", type: "other" }, now);
+async function linkedinRoot(db, now) {
+  const sources = (await all(db, SOURCES)).filter((s) => !s.parentSourceId && !s.viaPersonId).sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+  return sources.find((s) => s.type === "linkedin") ?? sources.find((s) => /^linkedin$/i.test(s.name)) ?? saveSource(db, { name: "LinkedIn", type: "linkedin" }, now);
+}
 
 /** The card for one day's LinkedIn reach-outs under LinkedIn, made the first time it is needed and the same one after that. */
-export async function linkedinDay(db, now = new Date(), day = dayOf(now)) {
-  const root = await linkedinRoot(db, now);
-  return saveSource(db, { name: dayName(day), type: "other", parentSourceId: root.id, about: "LinkedIn reach-outs", when: day }, now);
+export async function linkedinDay(db, now = new Date(), day = dayOf(now), rootId = null) {
+  const root = rootId ? (await all(db, SOURCES)).find((s) => s.id === String(rootId)) ?? fail("That source no longer exists. Reload the page.") : await linkedinRoot(db, now);
+  return saveSource(db, { name: dayName(day), type: "day", parentSourceId: root.id, about: "LinkedIn reach-outs", when: day }, now);
 }
 
 /**
  * People sitting straight on the LinkedIn card (added before day cards existed, or put there by hand) move to the card for the day
  * they were added. Their own details do not change. Returns how many moved and into how many days.
  */
-export async function sortLinkedInByDay(db, now = new Date()) {
-  const root = await linkedinRoot(db, now);
+export async function sortLinkedInByDay(db, now = new Date(), rootId = null) {
+  const root = rootId ? (await all(db, SOURCES)).find((s) => s.id === String(rootId)) ?? fail("That source no longer exists. Reload the page.") : await linkedinRoot(db, now);
   const people = (await all(db, PEOPLE)).filter((p) => p.sourceId === root.id && !p.via);
   const days = new Map();
   for (const p of people) { const d = dayOf(p.createdAt || now); days.set(d, [...(days.get(d) ?? []), p]); }
   for (const [d, list] of days) {
-    const card = await linkedinDay(db, now, d);
+    const card = await linkedinDay(db, now, d, root.id);
     for (const p of list) await db.collection(PEOPLE).updateOne({ _id: p.id }, { $set: { sourceId: card.id, updatedAt: now.toISOString() } });
   }
   return { moved: people.length, days: days.size };

@@ -1,8 +1,9 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import NetworkSourceContext from "./NetworkSourceContext";
+import KindPicker from "./NetworkKind";
 import {
-  peopleForSource, organisationInitials, JOB_STATUS, LINK_KINDS, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadMailSettings, loadNetwork, loadPersonJobs, loadSourceJobs, post, sourceLabel, throughFields, throughValue, uploadPhoto,
-  type JobRow, type LinkKind, type MailSettings, type NetworkData, type Source, type SourceType, type You,
+  peopleForSource, organisationInitials, JOB_STATUS, LINK_KINDS, kindLabel, ago, colorsFor, followUp, imageUrl, initials, loadMailSettings, loadNetwork, loadPersonJobs, loadSourceJobs, post, sourceLabel, throughFields, throughValue, uploadPhoto,
+  type JobRow, type LinkKind, type MailSettings, type NetworkData, type Source, type You,
 } from "./network";
 
 type Say = (t: { text: string } | null) => void;
@@ -128,14 +129,15 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
     try { await post("link/remove", { id }); onLinks(data.links.filter((l) => l.id !== id)); } catch (e) { say({ text: String((e as Error).message) }); }
   }
   // LinkedIn holds a card per day of reach-outs (You, LinkedIn, the day, the people).
-  const linkedin = s.name === "LinkedIn" && !s.parentSourceId && !s.viaPersonId;
+  // A LinkedIn reach-out source (the kind, or one you named "LinkedIn…" before the kind existed) holds a card per day.
+  const linkedin = !s.parentSourceId && !s.viaPersonId && (s.type === "linkedin" || /^linkedin\b/i.test(s.name));
   const sortable = members.filter((p) => !p.via).length;
   const children = data.sources.filter((x) => x.parentSourceId === s.id).sort((a, b) => String(b.when ?? b.createdAt).localeCompare(String(a.when ?? a.createdAt)));
   async function today() {
-    try { const r = await post<{ source: Source }>("linkedin/today", {}); await onReload(); onAddPeople(r.source.id); } catch (e) { say({ text: String((e as Error).message) }); }
+    try { const r = await post<{ source: Source }>("linkedin/today", { rootId: s.id }); await onReload(); onAddPeople(r.source.id); } catch (e) { say({ text: String((e as Error).message) }); }
   }
   async function sortDays() {
-    try { const r = await post<{ moved: number; days: number }>("linkedin/sort", {}); await onReload(); say({ text: `Sorted ${r.moved} ${r.moved === 1 ? "person" : "people"} into ${r.days} day ${r.days === 1 ? "card" : "cards"}.` }); }
+    try { const r = await post<{ moved: number; days: number }>("linkedin/sort", { rootId: s.id }); await onReload(); say({ text: `Sorted ${r.moved} ${r.moved === 1 ? "person" : "people"} into ${r.days} day ${r.days === 1 ? "card" : "cards"}.` }); }
     catch (e) { say({ text: String((e as Error).message) }); }
   }
   // Who or what else also brought it to you, with names for the trail and the Details list.
@@ -150,7 +152,7 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
         <div className="pp-id">
           <input className="nw-name" aria-label="Name" value={d.name} onChange={(e) => setD({ ...d, name: e.target.value })} onBlur={() => { if (d.name.trim() && d.name !== s.name) void save({ name: d.name }); else setD({ ...d, name: s.name }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
           <input className="nw-role" aria-label="About" placeholder="What it is, like Staffing agency in Raleigh" value={d.about} onChange={(e) => setD({ ...d, about: e.target.value })} onBlur={() => { if (d.about !== (s.about ?? "")) void save({ about: d.about }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
-          <p className="pp-where">{SOURCE_TYPES.find(([t]) => t === s.type)?.[1]} · {members.length} {members.length === 1 ? "person" : "people"}</p>
+          <p className="pp-where">{kindLabel(s)} · {members.length} {members.length === 1 ? "person" : "people"}</p>
         </div>
         <span className="nw-saving" aria-live="polite">{saving}</span>
         <button type="button" className="nw-x" aria-label="Close" onClick={onClose}>×</button>
@@ -219,9 +221,10 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
         {tab === "details" && <>
           <div className="nw-pair">
             <label className="nw-f"><span>Where</span><input id="nw-src-place" placeholder="Raleigh, NC or Global" value={d.place} onChange={(e) => setD({ ...d, place: e.target.value })} onBlur={() => { if (d.place !== (s.place ?? "")) void save({ place: d.place }); }} /></label>
+            {s.type === "day" && <label className="nw-f"><span>Day</span><input id="nw-src-day" type="date" value={/^\d{4}-\d{2}-\d{2}$/.test(s.when ?? "") ? s.when : ""} onChange={(e) => e.target.value && void save({ when: e.target.value })} /></label>}
             {s.type === "event" && <label className="nw-f"><span>When</span><input id="nw-src-when" placeholder="Oct 2024" value={d.when} onChange={(e) => setD({ ...d, when: e.target.value })} onBlur={() => { if (d.when !== (s.when ?? "")) void save({ when: d.when }); }} /></label>}
           </div>
-          <label className="nw-f"><span>Kind</span><select id="nw-src-kind" value={s.type} onChange={(e) => void save({ type: e.target.value as SourceType })}>{SOURCE_TYPES.map(([t, l]) => <option key={t} value={t}>{l}</option>)}</select></label>
+          <KindPicker key={`${s.id}-${s.type}`} id="nw-src-kind" type={s.type} kindName={s.kindName} onChange={(type, kindName) => void save({ type, kindName })} />
           <p className="pp-hint">{sourceLabel(s, data.sources, data.people)}</p>
         </>}
         {tab === "intro" && <>
