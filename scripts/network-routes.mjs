@@ -1,9 +1,12 @@
-import { saveFollowUp, linkedinDay, sortLinkedInByDay, NetworkError, saveYou, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
+import { withFollowUps, saveFollowUp, linkedinDay, sortLinkedInByDay, NetworkError, saveYou, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
 import { boardView, readImage, removeBoardItem, saveBoardItem, saveImage } from "./network-board.mjs";
 import { jobsForPerson, jobsForSource, knownCompanies, warmJobs } from "./network-jobs.mjs";
 import { MAIN, addToMap, listMaps, mapView, openMapFile, removeFromMap, removeMap, saveMap, saveMapPositions } from "./network-maps.mjs";
+
+// A person as the page shows them: with their automatic weekly follow-up when they have no date of their own.
+const auto = async (db, person) => withFollowUps([person], await db.collection("network_sources").find({}).toArray())[0];
 
 // Made while a map other than My network is open: it goes on that map too.
 const onMap = async (db, b, ids) => { if (b.mapId && b.mapId !== MAIN && ids.length) await addToMap(db, { mapId: b.mapId, ids }); };
@@ -13,17 +16,17 @@ const WRITES = {
   "/network/preview": (db, b) => previewList(db, b.text).then((rows) => ({ rows })),
   "/network/import/preview": (db, b) => previewContacts(db, b.text),
   "/network/linkedin": (db, b) => addFromLinkedIn(db, b).then(async (r) => { await onMap(db, b, [r.person?.id].filter(Boolean)); return r; }),
-  "/network/linkedin/today": (db, b) => linkedinDay(db).then(async (source) => { await onMap(db, b, [source.id]); return { source }; }),
-  "/network/linkedin/sort": (db) => sortLinkedInByDay(db),
+  "/network/linkedin/today": (db, b) => linkedinDay(db, new Date(), undefined, b.rootId || null).then(async (source) => { await onMap(db, b, [source.id]); return { source }; }),
+  "/network/linkedin/sort": (db, b) => sortLinkedInByDay(db, new Date(), b.rootId || null),
   "/network/people": (db, b) => addPeople(db, b).then(async (r) => {
     // On a map, names already in your network are not added again, but they are put on this map.
     const known = b.mapId && b.mapId !== MAIN && r.skipped.length ? (await db.collection("network_people").find({}).toArray()).filter((p) => !p.archived && r.skipped.some((n) => n.toLowerCase() === p.name.toLowerCase())).map((p) => p._id) : [];
     await onMap(db, b, [...r.added.map((p) => p.id), ...known, r.sourceId].filter(Boolean)); return { ...r, placed: known.length };
   }),
-  "/network/person": (db, b) => savePerson(db, b).then(async (person) => { if (!b.id) await onMap(db, b, [person.id]); return { person }; }),
-  "/network/follow-up": (db, b) => saveFollowUp(db, b).then((person) => ({ person })),
-  "/network/history": (db, b) => logHistory(db, b).then((person) => ({ person })),
-  "/network/history/remove": (db, b) => removeHistory(db, b).then((person) => ({ person })),
+  "/network/person": (db, b) => savePerson(db, b).then(async (person) => { if (!b.id) await onMap(db, b, [person.id]); return { person: await auto(db, person) }; }),
+  "/network/follow-up": (db, b) => saveFollowUp(db, b).then(async (person) => ({ person: await auto(db, person) })),
+  "/network/history": (db, b) => logHistory(db, b).then(async (person) => ({ person: await auto(db, person) })),
+  "/network/history/remove": (db, b) => removeHistory(db, b).then(async (person) => ({ person: await auto(db, person) })),
   "/network/archive": (db, b) => archivePerson(db, b),
   "/network/source": (db, b) => saveSource(db, b).then(async (source) => {
     if (!b.id) await onMap(db, b, [source.id]);

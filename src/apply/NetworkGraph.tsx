@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import {
-  peopleForSource, organisationInitials, sourceLabel, SOURCE_TYPES, LINK_KINDS, PALETTE, TOOL_KEYS, autoLayout, edgesFor, followUp, imageUrl, initials, plusDays, post, smoothPath, thinPoints, warmPath, workProgress,
+  peopleForSource, organisationInitials, sourceLabel, kindLabel, LINK_KINDS, PALETTE, TOOL_KEYS, autoLayout, edgesFor, followUp, imageUrl, initials, plusDays, post, smoothPath, thinPoints, warmPath, workProgress,
   type CanvasLayers, type BoardItem, type Edge, type Link, type LinkKind, type NetworkData, type Pen, type Person, type Point, type Source, type Tool, colorsFor,
 } from "./network";
 import { BoardBox, PenBar, Toolbar } from "./NetworkBoard";
@@ -393,7 +393,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
             </g>
             {shownSources.map((s) => {
               const p = pos(s.id), c = colors.source.get(s.id) ?? PALETTE[0], sz = s.type === "company" || s.type === "staffing" ? ORGANISATION : sourceSize(s), n = sourceMembers.get(s.id)?.length ?? 0, dim = lit && !lit.has(s.id);
-              const kind = SOURCE_TYPES.find(([type]) => type === s.type)?.[1] || s.type, org = s.type === "company" || s.type === "staffing", event = s.type === "event";
+              const kind = kindLabel(s), org = s.type === "company" || s.type === "staffing", event = s.type === "event";
               const via = s.context || (s.parentSourceId ? `Via ${data.sources.find((parent) => parent.id === s.parentSourceId)?.name || "another source"}` : s.viaPersonId && people.has(s.viaPersonId) ? `Via ${people.get(s.viaPersonId)!.name}` : "");
               const faces = (sourceMembers.get(s.id) ?? []).slice(0, 3), x0 = -sz.w / 2;
               const picture = (x: number, y: number, size: number, rx: number) => s.photoId
@@ -435,6 +435,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
                     <rect x={x0} y={-sz.h / 2} width={sz.w} height={sz.h} rx={14} fill={card} stroke={c} strokeWidth={1.8} />
                     <rect x={x0 + 14} y={-22} width={44} height={44} rx={11} fill={c} fillOpacity={0.16} stroke={c} strokeWidth={1.5} />
                     {picture(x0 + 15, -21, 42, 10) ?? (s.type === "family" ? <path d={HOUSE} transform={`translate(${x0 + 36} 0) scale(1.7)`} fill="none" stroke={c} strokeWidth={1.3} strokeLinejoin="round" strokeLinecap="round" />
+                      : s.type === "linkedin" ? <text x={x0 + 36} y={1} className="nwg-tile" fill={c}>in</text>
                       : s.when ? <path d={CALENDAR} transform={`translate(${x0 + 36} 1)`} fill="none" stroke={c} strokeWidth={1.7} strokeLinejoin="round" strokeLinecap="round" /> : <text x={x0 + 36} y={1} className="nwg-tile" fill={c}>{s.name[0]?.toUpperCase()}</text>)}
                     <text x={x0 + 72} y={-3} className="nwg-sname">{clip(s.name, 26)}</text>
                     <text x={x0 + 72} y={16} className="nwg-sub">{clip(via || s.about || kind, 30)}</text>

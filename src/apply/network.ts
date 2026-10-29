@@ -3,7 +3,7 @@ import { getTailorServerBase } from "../utils/tailorServer";
 
 // The Network page's data: people, the sources they come from (a company, an event, family), and the links between them.
 
-export type SourceType = "company" | "staffing" | "event" | "family" | "other";
+export type SourceType = "company" | "staffing" | "event" | "oa" | "linkedin" | "day" | "family" | "other";
 export type LinkKind = "works" | "family" | "intro" | "other";
 export type HistoryType = "note" | "email" | "message" | "call" | "met" | "reply";
 export type FollowUpPlatform = "linkedin" | "email" | "whatsapp" | "phone" | "in-person" | "other";
@@ -13,9 +13,9 @@ export interface HistoryEntry { followUp?: { completed: boolean; platform: Follo
 export interface Person {
   id: string; name: string; role: string; city: string; company: string; photoId: string | null; watchJobs: boolean; email: string; linkedin: string; phone: string; notes: string;
   sourceId: string | null; via: string | null; alsoVia?: string[]; color: string | null; tags: string[];
-  followUpPlan?: FollowUpPlan; lastContact: string | null; nextFollowUp: string | null; history: HistoryEntry[]; archived: boolean; createdAt: string; updatedAt: string; x?: number; y?: number;
+  followUpPlan?: FollowUpPlan; followUpAuto?: boolean; lastContact: string | null; nextFollowUp: string | null; history: HistoryEntry[]; archived: boolean; createdAt: string; updatedAt: string; x?: number; y?: number;
 }
-export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; photoId?: string | null; notes?: string; place?: string; when?: string; auto?: string[]; introYear?: string; alsoVia?: { id: string; year: string }[]; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
+export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; photoId?: string | null; notes?: string; place?: string; when?: string; kindName?: string; auto?: string[]; introYear?: string; alsoVia?: { id: string; year: string }[]; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
 export interface Link { id: string; a: string; b: string; kind: LinkKind; label: string; color: string | null }
 export interface You { x: number; y: number; name?: string; title?: string; photoId?: string | null; note?: string }
 export interface NetworkData { people: Person[]; sources: Source[]; links: Link[]; you?: You; map?: { id: string; name: string }; onMap?: string[] }
@@ -29,7 +29,9 @@ export function sourceLabel(source: Source, sources: Source[], people: { id: str
   return [source.name, source.context, parent ? `via ${parent.name}` : person ? `via ${person.name}` : null].filter(Boolean).join(' · ');
 }
 
-export const SOURCE_TYPES: [SourceType, string][] = [["company", "Company"], ["staffing", "Staffing agency"], ["event", "Event"], ["family", "Family"], ["other", "Other"]];
+export const SOURCE_TYPES: [SourceType, string][] = [["company", "Company"], ["staffing", "Staffing agency"], ["event", "Event"], ["oa", "Online assessment (OA)"], ["linkedin", "LinkedIn reach-out"], ["day", "Day"], ["family", "Family"], ["other", "Other"]];
+/** What a source is called on its card: the name you typed for "Something else…", else its kind. */
+export const kindLabel = (s: Pick<Source, "type" | "kindName">) => s.kindName || SOURCE_TYPES.find(([t]) => t === s.type)?.[1] || s.type;
 export const LINK_KINDS: [LinkKind, string][] = [["works", "Works with"], ["family", "Family"], ["intro", "Introduced"], ["other", "Other"]];
 export const HISTORY_TYPES: [HistoryType, string][] = [["note", "Note"], ["email", "Email"], ["message", "Message"], ["call", "Call"], ["met", "Met"], ["reply", "They replied"]];
 
@@ -410,6 +412,8 @@ export function followUpSummary(person: Person): { title: string; detail: string
   const plan = person.followUpPlan;
   if (plan && !plan.enabled) return { title: "Not needed", detail: "Follow-up paused", due: false };
   const when = followUp(person.nextFollowUp);
+  // No plan and no date of your own: the weekly follow-up everyone but family gets (3 days first for a LinkedIn reach-out).
+  if (!plan && person.followUpAuto && when) return { title: `Follow up ${when.text}`, detail: "Automatic, every week. Switch it off under Follow-up.", due: when.due };
   return { title: when ? `Follow up ${when.text}` : "Plan a follow-up", detail: plan ? `${FOLLOW_UP_PLATFORMS.find(([key]) => key === plan.platform)?.[1] || "Other"} · ${plan.regarding}` : "Choose a platform and topic", due: Boolean(when?.due) };
 }
 export function historyLabel(entry: HistoryEntry): string {

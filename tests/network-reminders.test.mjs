@@ -21,12 +21,15 @@ test('who needs you: a reply waiting, follow-ups due or late, people gone quiet,
  ];
  const sources=[{id:'rs',name:'Northwind',createdAt:'2026-10-01T00:00:00Z'},{id:'new',name:'Fresh',createdAt:'2026-10-28T00:00:00Z'}];
  const r=reminders({people,sources},{today});
- assert.deepEqual(r.map(x=>[x.kind,x.personId??x.sourceId]),[['reply','Dana'],['due','Marco'],['due','Priya'],['quiet','Kofi'],['never','rs']]);
- assert.equal(r[0].title,'Dana replied 2 days ago');assert.equal(r[1].detail,'3 days late');assert.equal(r[2].detail,'Due today');
- assert.equal(r[3].title,'It has been 3 weeks since you reached out to Kofi');assert.equal(r[4].title,'2 people at Northwind have never heard from you');
- // Ann replied today (give it a day), Answered already got an answer, Hana is only 8 days quiet, Lena has a follow-up set, Ivy came through Dana.
- const snoozed=reminders({people,sources},{today,snoozed:new Set([r[1].key])});assert.ok(!snoozed.some(x=>x.personId==='Marco'));
- const moved=reminders({people:people.map(p=>p.id==='Marco'?{...p,nextFollowUp:'2026-10-27'}:p),sources},{today,snoozed:new Set([r[1].key])});
+ // Follow-ups are weekly by default: Kofi (met 3 weeks ago), Hana (a call 8 days ago) and Answered (an email a week ago) are due
+ // without a date of their own, so nobody is merely "quiet" any more.
+ assert.deepEqual(r.map(x=>[x.kind,x.personId??x.sourceId]),[['reply','Dana'],['due','Kofi'],['due','Marco'],['due','Hana'],['due','Priya'],['due','Answered'],['never','rs']]);
+ assert.equal(r[0].title,'Dana replied 2 days ago');assert.equal(r[1].detail,'14 days late');assert.equal(r[2].detail,'3 days late');assert.equal(r[4].detail,'Due today');
+ assert.equal(r[6].title,'2 people at Northwind have never heard from you');
+ // Ann replied today (give it a day), Lena has a follow-up set for later, Ivy came through Dana.
+ const mk=r.find(x=>x.personId==='Marco').key;
+ const snoozed=reminders({people,sources},{today,snoozed:new Set([mk])});assert.ok(!snoozed.some(x=>x.personId==='Marco'));
+ const moved=reminders({people:people.map(p=>p.id==='Marco'?{...p,nextFollowUp:'2026-10-27'}:p),sources},{today,snoozed:new Set([mk])});
  assert.ok(moved.some(x=>x.personId==='Marco'),'a new follow-up date is a new reminder, even if the old one was snoozed');});
 
 test('the phone message has counts only, never a name, and nothing at all when nothing needs you',()=>{
@@ -43,7 +46,7 @@ const fakeDb=(people=[],sources=[])=>{const cols=new Map();const col=n=>{if(!col
 
 test('snooze hides one reminder for a while; bad keys and lengths are refused',async()=>{
  const db=fakeDb([P('Kofi',{lastContact:'2026-10-01T15:00:00.000Z',history:[H('met','2026-10-01')]})]);const now=new Date('2026-10-28T16:00:00Z');
- const {reminders:[r]}=await listReminders(db,{now});assert.equal(r.kind,'quiet');
+ const {reminders:[r]}=await listReminders(db,{now});assert.equal(r.kind,'due','weekly by default: due a week after they were met');
  await snoozeReminder(db,{key:r.key,days:7},now);assert.equal((await listReminders(db,{now})).reminders.length,0);
  assert.equal((await listReminders(db,{now:new Date('2026-11-05T16:00:00Z')})).reminders.length,1,'back after a week');
  await assert.rejects(()=>snoozeReminder(db,{key:'x;drop',days:7}),/not known/);await assert.rejects(()=>snoozeReminder(db,{key:r.key,days:0}),/1 to 60/);});
@@ -71,7 +74,7 @@ test('weekly digest: Sunday from 6 p.m. New York, counts only, once a week, noth
  await db.collection('network_mail_log').insertOne({_id:'m1',state:'sent',at:'2026-10-29T15:00:00.000Z'});await db.collection('network_mail_log').insertOne({_id:'m2',state:'uncertain',at:'2026-10-30T15:00:00.000Z'});
  await db.collection('network_mail_log').insertOne({_id:'m3',state:'sent',at:'2026-10-01T15:00:00.000Z'});
  const sunday=new Date('2026-11-01T23:30:00Z');// 6:30 p.m. in New York, Sunday Nov 1
- const d=await weeklyDigest(db,sunday);assert.equal(d.message,'2 emails, 1 reply, 1 new person. 1 thing waits for you.');assert.ok(!/Dana/.test(JSON.stringify(d)));
+ const d=await weeklyDigest(db,sunday);assert.equal(d.message,'2 emails, 1 reply, 1 new person. 2 things wait for you.','Dana, and Old: never contacted, so a weekly follow-up is due');assert.ok(!/Dana/.test(JSON.stringify(d)));
  const sent=[];const publish=async m=>{sent.push(m);return true};
  await runNetworkTick({env:NTFY,db,now:new Date('2026-11-01T21:00:00Z'),publish});assert.ok(!sent.some(m=>m.title==='Your week in Network'),'not before 6 p.m.');
  await runNetworkTick({env:NTFY,db,now:sunday,publish});await runNetworkTick({env:NTFY,db,now:new Date('2026-11-02T00:30:00Z'),publish});
@@ -111,4 +114,14 @@ test('paused follow-ups stay quiet and planned contacts do not receive early nev
  const due=reminders({people,sources},{today:'2026-11-04'});assert.deepEqual(due.map(r=>[r.kind,r.personId]),[['due','scheduled']]);
  const replied=reminders({people:[{...people[0],history:[H('reply','2026-10-25')]}],sources:[]},{today});
  assert.equal(replied[0].kind,'reply','pausing follow-ups does not hide an incoming reply');
+});
+
+test('follow-ups by default: weekly for everyone but family, 3 days for a LinkedIn reach-out, never over a date you set or a follow-up switched off',()=>{
+ const sources=[{id:'fam',name:'Kasliwal',type:'family'},{id:'li',name:'LinkedIn',type:'linkedin'},{id:'d28',name:'Oct 28, 2026',type:'day',parentSourceId:'li'},{id:'old',name:'Linkedin Reach out',type:'other'},{id:'rs',name:'Randstad',type:'company'}];
+ const at='2026-10-20T15:00:00.000Z',base={createdAt:at};
+ const r=reminders({people:[P('Aunt',{...base,sourceId:'fam'}),P('Recruiter',{...base,sourceId:'rs'}),P('Reached',{...base,sourceId:'d28'}),P('Legacy',{...base,sourceId:'old'}),
+  P('Called',{...base,sourceId:'d28',lastContact:'2026-10-24T15:00:00.000Z'}),P('Set',{...base,sourceId:'rs',nextFollowUp:'2026-11-02'}),P('Off',{...base,sourceId:'rs',followUpPlan:{enabled:false}}),P('Loose',base)],sources},{today:'2026-10-27'});
+ const due=Object.fromEntries(r.filter(x=>x.kind==='due').map(x=>[x.personId,x.detail]));
+ assert.deepEqual(due,{Recruiter:'Due today',Reached:'4 days late',Legacy:'4 days late',Loose:'Due today'},'a source named Linkedin… counts as LinkedIn too; '+'family, a later date of your own, a switched-off follow-up and a recent contact are not due');
+ assert.deepEqual(reminders({people:[P('Called',{...base,sourceId:'d28',lastContact:'2026-10-24T15:00:00.000Z'})],sources},{today:'2026-10-31'}).map(x=>x.detail),['Due today'],'after a contact, a week from it');
 });
