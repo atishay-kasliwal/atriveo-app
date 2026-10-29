@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useLocation } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { fetchJson, getJson, type ApiBody } from "./engine";
 import { getTailorServerBase } from "../utils/tailorServer";
 import "./assessments.css";
@@ -38,6 +39,8 @@ export function countdown(ms: number): string {
 
 /** Assessments waiting on you: a live countdown to the next one, a seven-day runway showing where each lands, and the list to act on. */
 export default function AssessmentsPage({ header }: { header?: ReactNode }) {
+  const { hash } = useLocation();
+  const handledHash = useRef('');
   const [rows, setRows] = useState<Row[] | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -49,6 +52,14 @@ export default function AssessmentsPage({ header }: { header?: ReactNode }) {
   }, []);
   useEffect(() => { void load(); const t = window.setInterval(() => document.visibilityState === "visible" && void load(), 60_000); return () => window.clearInterval(t); }, [load]);
   useEffect(() => { const t = window.setInterval(() => document.visibilityState === "visible" && setNow(Date.now()), 1000); return () => window.clearInterval(t); }, []);
+  useEffect(() => {
+    if (!rows || !hash || handledHash.current === hash) return;
+    let id: string; try { id = decodeURIComponent(hash.slice(1)).replace(/^as-/, ''); } catch { return; }
+    if (!rows.some(r => r.id === id)) return;
+    const element = document.getElementById(`as-${id}`); if (!element) return;
+    handledHash.current = hash; setFocus(id);
+    element.scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+  }, [rows,hash]);
   const run = async (what: () => Promise<void>, ok: string) => { try { await what(); setNotice(ok); await load(); } catch (e) { setNotice(e instanceof Error ? e.message : String(e)); } };
   const save = (r: Row) => { const iso = nyToIso(edit[r.id] ?? ""); if (!iso) { setNotice("Pick a date and time first."); return; } void run(() => update({ id: r.id, deadlineAt: iso }), `Deadline saved for ${r.company || "the assessment"}.`).then(() => setEdit((e) => { const n = { ...e }; delete n[r.id]; return n; })); };
 

@@ -48,3 +48,30 @@ test('persistent dock state, aging, dismissal, New York snooze and completed fol
  await intelligenceAction(db,{action:'dismiss',key:opportunity.key},now);feed=await listIntelligence(db,{now});assert.ok(!feed.items.some(i=>i.key===opportunity.key||i.key===due.key));
  await assert.rejects(intelligenceAction(db,{action:'dismiss',key:'unknown'},now),/Refresh/);
 });
+
+test('assessments count down 6, 5, 4 and 2 New York calendar days, including the DST change',()=>{
+ const assessment={id:'assess01',company:'Amazon',subject:'Online assessment',deadlineAt:'2026-11-04T17:00:00Z'};
+ const at=iso=>buildIntelligence({people:[p('ankit')],sources:[source],assessments:[assessment]},{now:new Date(iso)}).find(i=>i.kind==='assessment');
+ for(const[iso,days,stage]of [['2026-10-29T14:00:00Z',6,'discovered'],['2026-10-30T14:00:00Z',5,'discovered'],['2026-10-31T14:00:00Z',4,'actionable'],['2026-11-02T15:00:00Z',2,'urgent']]){
+  const item=at(iso);assert.equal(item.daysLeft,days);assert.match(item.detail,new RegExp(`${days} days left`));assert.equal(item.stage,stage);assert.equal(item.personId,'ankit');assert.match(item.deadlineLabel,/12:00 PM EST/);
+ }
+ const due=at('2026-11-04T16:00:00Z');assert.equal(due.detail,'Complete today before 12:00 PM EST.');assert.equal(due.stage,'urgent');assert.equal(due.key,at('2026-10-29T14:00:00Z').key,'same assessment updates in place instead of adding daily cards');
+ const passed=at('2026-11-04T17:00:01Z');assert.match(passed.detail,/Deadline passed/);assert.doesNotMatch(passed.detail,/Complete today/);
+ assert.equal(at('2026-11-05T18:00:00Z'),undefined,'matches the existing assessment expiry window');
+});
+test('assessments appear with no network connection, never invent deadlines, and rank due today above opportunities',()=>{
+ const items=buildIntelligence({people:[],sources:[],assessments:[{id:'assess01',company:'Unknown Deadline',deadlineAt:null},{id:'assess02',company:'Due Now',deadlineAt:'2026-10-29T18:00:00Z'},{id:'assess03',company:'Done',deadlineAt:'2026-10-29T18:00:00Z',status:'done'}]},{now});
+ assert.equal(items[0].assessmentId,'assess02');assert.equal(items[0].people.length,0);assert.match(items[1].detail,/No deadline/);assert.equal(items[1].deadlineLabel,null);assert.ok(!items.some(i=>i.assessmentId==='assess03'));
+});
+test('assessment completion updates its real record; snoozes cannot skip its deadline and deadline changes resurface',async t=>{
+ const mongod=await MongoMemoryServer.create(),client=new MongoClient(mongod.getUri());await client.connect();t.after(async()=>{await client.close();await mongod.stop();});const db=client.db('assessment_intelligence');
+ await db.collection('assessments').insertMany([{_id:'assess01',company:'Amazon',status:'open',receivedAt:now.toISOString(),deadlineAt:'2026-11-04T17:00:00Z'},{_id:'assess02',company:'Finished',status:'done',deadlineAt:'2026-11-04T17:00:00Z'}]);
+ const item=(await listIntelligence(db,{now})).items.find(i=>i.kind==='assessment');assert.equal(item.assessmentId,'assess01');
+ await assert.rejects(intelligenceAction(db,{action:'snooze',key:item.key,until:'2026-11-05'},now),/on or before/);
+ await intelligenceAction(db,{action:'snooze',key:item.key,until:'2026-11-04'},now);assert.equal((await listIntelligence(db,{now})).items.length,0);
+ assert.equal((await listIntelligence(db,{now:new Date('2026-11-04T05:00:00Z')})).items[0].stage,'urgent');
+ await intelligenceAction(db,{action:'dismiss',key:item.key},now);assert.equal((await listIntelligence(db,{now})).items.length,0);
+ await db.collection('assessments').updateOne({_id:'assess01'},{$set:{deadlineAt:'2026-11-05T17:00:00Z'}});
+ const changed=(await listIntelligence(db,{now})).items[0];assert.notEqual(changed.key,item.key);
+ await intelligenceAction(db,{action:'assessment_done',key:changed.key},now);assert.equal((await db.collection('assessments').findOne({_id:'assess01'})).status,'done');assert.equal((await listIntelligence(db,{now})).items.length,0);
+});

@@ -383,15 +383,15 @@ export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeo
             {(layers.connections ? works : []).flatMap((wk) => (wk.people ?? []).filter((id) => nodeShown(id)).map((id) => {
               const a = { x: wk.x, y: wk.y }, b = pos(id), pr = workProgress(wk), c = wk.done ? "var(--nw-ok)" : pr.late ? "var(--nw-bad)" : pr.ending ? "var(--nw-warn)" : "var(--nw-accent)";
               const dim = lit && !lit.has(id), hot = selectedWork === wk.id;
-              return <path key={`${wk.id}-${id}`} className="nwg-workline" d={`M${a.x} ${a.y}L${b.x} ${b.y}`} stroke={c} strokeDasharray="10 3 2 3" strokeWidth={hot ? 2.6 : 1.7} fill="none" style={{ opacity: dim ? 0.07 : hot ? 1 : 0.75 }} />;
+              return <path key={`${wk.id}-${id}`} className="nwg-workline" d={`M${a.x} ${a.y}L${b.x} ${b.y}`} stroke={c} strokeDasharray="10 3 2 3" strokeWidth={hot ? 2.6 : 1.7} fill="none" style={{ opacity: dim ? 0.07 : hot ? 1 : 0.3 }} />;
             }))}
           </g>
           <g>
             {edges.filter((edge) => layers.connections && nodeShown(edge.a) && nodeShown(edge.b)).map((e) => {
-              const p = path(e), hot = onRoute.has(e.key) || (!route && focus != null && (e.a === focus || e.b === focus)), dim = lit && !(lit.has(e.a) && lit.has(e.b));
+              const p = path(e), hot = onRoute.has(e.key) || (Boolean(intelligenceNodes?.has(e.a)&&intelligenceNodes?.has(e.b))) || (!route && focus != null && (e.a === focus || e.b === focus)), dim = lit && !(lit.has(e.a) && lit.has(e.b));
               return (
-                <g key={e.key} data-a={e.a} data-b={e.b} className={`nwg-edge${hot ? " hot" : ""}`} style={{ opacity: dim ? 0.07 : hot ? 1 : e.kind === "you" ? 0.45 : 0.7 }}>
-                  <path d={p.d} stroke={e.color} strokeDasharray={DASH[e.kind]} strokeWidth={hot ? 3 : e.kind === "you" ? 1.4 : 1.9} fill="none" strokeLinecap="round" />
+                <g key={e.key} data-a={e.a} data-b={e.b} className={`nwg-edge${hot ? " hot" : ""}`} style={{ opacity: dim ? 0.07 : hot ? 1 : e.kind === "you" ? 0.22 : 0.32 }}>
+                  <path d={p.d} stroke={e.color} strokeDasharray={DASH[e.kind]} strokeWidth={hot ? 3 : e.kind === "you" ? 1.2 : 1.4} fill="none" strokeLinecap="round" />
                   {e.link && <path d={p.d} className="nwg-hit" data-edge={e.key}><title>{`${e.label} (click to edit)`}</title></path>}
                   {hot && <text x={p.mx} y={p.my} className="nwg-elabel" fill={e.color}>{e.label}</text>}
                 </g>
