@@ -2,7 +2,7 @@ import { ensurePushIndexes, sendPushNotification } from './web-push.mjs';
 import { widgetProgress } from './widget-progress.mjs';
 import { listAssessments } from './assessments.mjs';
 import { pushSchedule, scheduledPushes } from './push-scheduled.mjs';
-import { readGoal } from './phone-summary.mjs';
+import { buildMessage, nyParts, reached, readGoal, streakOf } from './phone-summary.mjs';
 
 export function inboxPush(event) {
   if (!['interview', 'offer'].includes(event.kind) || ['dismissed', 'undone', 'ignored'].includes(event.state)) return null;
@@ -38,7 +38,20 @@ export async function pollPushEvents(db, userId, { now = new Date(), send = send
     title: 'Recruiter replied', body: `${String(record.company || 'A recruiter').slice(0, 100)} responded to your outreach.`, type: 'recruiter_reply', url: `/outreach?id=${encodeURIComponent(record._id)}`,
   }, { now, send });
   const [progress, goal] = await Promise.all([widgetProgress(db, { now }), readGoal(db)]);
-  if (progress.appliedToday >= goal) await deliverEvent(db, userId, `goal:${progress.dayKey}`, { title: 'Daily application goal reached', body: `You reached your goal of ${goal} applications today.`, url: '/job-matching', type: 'daily_goal' }, { now, send });
+  // The same milestones as the ntfy messages (first of the day, halfway, goal, twice, four times, personal best, streak), each once a day.
+  if (goal > 0) {
+    const { hour } = nyParts(now), day = progress.dayKey;
+    const history = (progress.days ?? []).map((d) => ({ day: d.day, applied: d.applied }));
+    const best = Math.max(0, ...history.filter((d) => d.day !== day).map((d) => d.applied));
+    const streak = streakOf(history, day, goal, progress.appliedToday, { includeToday: true });
+    const ctx = { day, applied: progress.appliedToday, goal, best, streak };
+    // "goal" keeps the id the goal push always had, so a day that already had it is not sent it again.
+    const idOf = (k) => `${k === "m1" ? "goal" : k}:${day}`, push = (k) => { const m = buildMessage(k, ctx); return { title: m.title, body: m.message, url: '/job-matching', type: k === "m1" ? 'daily_goal' : `progress_${k}` }; };
+    const r = hour >= 7 && hour < 23 ? reached(ctx) : { tiers: [], extra: [] }, extra = r.extra;
+    const tiers = hour < 19 ? r.tiers : r.tiers.filter((k) => k.startsWith("m"));
+    for (const k of tiers.slice(0, -1)) await db.collection('push_deliveries').updateOne({ _id: `${userId}:${idOf(k)}` }, { $setOnInsert: { sentAt: now, silent: true, expiresAt: new Date(+now + 90 * 86400000) } }, { upsert: true });
+    for (const k of [...tiers.slice(-1), ...extra]) await deliverEvent(db, userId, idOf(k), push(k), { now, send });
+  }
   const schedule = pushSchedule(now);
   const [assessments, dailyReplies] = await Promise.all([
     schedule.assessmentStage ? listAssessments(db, { now: +now }) : [],
