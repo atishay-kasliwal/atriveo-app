@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import {
-  peopleForSource, organisationInitials, sourceLabel, kindLabel, LINK_KINDS, PALETTE, TOOL_KEYS, autoLayout, edgesFor, followUp, imageUrl, initials, plusDays, post, smoothPath, thinPoints, warmPath, workProgress,
+  peopleForSource, organisationInitials, sourceLabel, kindLabel, branchOf, LINK_KINDS, PALETTE, TOOL_KEYS, autoLayout, edgesFor, followUp, imageUrl, initials, plusDays, post, smoothPath, thinPoints, warmPath, workProgress,
   type CanvasLayers, type BoardItem, type Edge, type Link, type LinkKind, type NetworkData, type Pen, type Person, type Point, type Source, type Tool, colorsFor,
 } from "./network";
 import { BoardBox, PenBar, Toolbar } from "./NetworkBoard";
@@ -23,7 +23,7 @@ type Colors = ReturnType<typeof colorsFor>;
 type View = { x: number; y: number; k: number };
 type Gesture =
   | { kind: "pan"; sx: number; sy: number; vx: number; vy: number; moved: boolean }
-  | { kind: "drag"; id: string; dx: number; dy: number; moved: boolean; sx: number; sy: number }
+  | { kind: "drag"; id: string; dx: number; dy: number; moved: boolean; sx: number; sy: number; group: string[] }
   | { kind: "box"; id: string; mode: "move" | "size"; dx: number; dy: number; moved: boolean }
   | { kind: "pen"; points: [number, number][] }
   | { kind: "erase" }
@@ -237,7 +237,10 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
       const id = node.dataset.node!;
       if (e.shiftKey && people.has(id)) { setMulti((m) => { const n = new Set(m); if (n.has(id)) n.delete(id); else n.add(id); return n; }); gesture.current = null; return; }
       if (!multi.has(id)) setMulti(new Set());
-      const p = pos(id); gesture.current = { kind: "drag", id, dx: w.x - p.x, dy: w.y - p.y, moved: false, sx: e.clientX, sy: e.clientY }; return;
+      // What moves with it: the picked cards, and (unless Alt is held) everything hanging off each of them.
+      const picked = multi.has(id) ? [...multi] : [id];
+      const group = [...new Set([...picked, ...(e.altKey ? [] : picked.flatMap((x) => branchOf(x, data)))])].filter((x) => x !== id);
+      const p = pos(id); gesture.current = { kind: "drag", id, dx: w.x - p.x, dy: w.y - p.y, moved: false, sx: e.clientX, sy: e.clientY, group }; return;
     }
     setMulti(new Set());
     gesture.current = { kind: "pan", sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y, moved: false };
@@ -261,8 +264,8 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
     if (!g.moved && Math.abs(e.clientX - g.sx) + Math.abs(e.clientY - g.sy) < 4) return;
     g.moved = true; const w = world(e);
     const to = { x: Math.round(w.x - g.dx), y: Math.round(w.y - g.dy) }, from = pos(g.id), dx = to.x - from.x, dy = to.y - from.y;
-    // Dragging one of several picked people moves them all.
-    setMoved((m) => { const n = new Map(m).set(g.id, to); if (multi.has(g.id)) for (const id of multi) if (id !== g.id) { const p = n.get(id) ?? base.get(id) ?? { x: 0, y: 0 }; n.set(id, { x: p.x + dx, y: p.y + dy }); } return n; });
+    // The picked cards and their branches move by the same amount.
+    setMoved((m) => { const n = new Map(m).set(g.id, to); for (const id of g.group) { const p = n.get(id) ?? base.get(id) ?? { x: 0, y: 0 }; n.set(id, { x: p.x + dx, y: p.y + dy }); } return n; });
   }
   function up(e: RPointerEvent<HTMLDivElement>) {
     const g = gesture.current; gesture.current = null; if (!g) return;
@@ -297,7 +300,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
     }
     if (g.kind === "drag") {
       if (g.moved) {
-        const ids = multi.has(g.id) ? [...multi] : [g.id];
+        const ids = [g.id, ...g.group];
         const items = ids.filter((id) => !id.startsWith("auto:")).map((id) => ({ id, ...(moved.get(id) ?? pos(id)) }));
         if (items.length) post("positions", { items }).catch((err: Error) => say({ text: `That position was not saved: ${err.message}` }));
         return;
@@ -338,7 +341,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
   return (
     <div ref={stage} className={`nwg tool-${tool}`} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
       onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const f = [...e.dataTransfer.files].find((x) => x.type.startsWith("image/")); if (f) void addImage(f); }}
-      role="application" aria-label="Your network as a map. Drag cards to arrange them; Enter opens the focused card.">
+      role="application" aria-label="Your network as a map. Drag cards to arrange them; a card brings everything under it, hold Alt to move it alone. Enter opens the focused card.">
       <svg ref={svgEl} className="nwg-svg" style={{ backgroundSize: `${28 * view.k}px ${28 * view.k}px`, backgroundPosition: `${view.x}px ${view.y}px` }}>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>
           <g>
