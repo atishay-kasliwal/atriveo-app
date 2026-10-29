@@ -2,23 +2,15 @@ import { useLocation } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { fetchJson, getJson, type ApiBody } from "./engine";
 import { getTailorServerBase } from "../utils/tailorServer";
+import { fmt, nyToIso } from "./ny-time";
+
+const shown = (iso: string) => { const p = Object.fromEntries(fmt.formatToParts(new Date(iso)).map((x) => [x.type, x.value])); return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`; };
 import "./assessments.css";
 
 interface Row { id: string; company: string; subject: string; receivedAt: string; deadlineAt: string | null; deadlineText: string | null; deadlineSource: "mail" | "you" | null; state: "unknown" | "overdue" | "today" | "soon" | "later"; when: string }
 const TZ = "America/New_York";
 const STATE_LABEL: Record<Row["state"], string> = { unknown: "Needs a deadline", overdue: "Overdue", today: "Due today", soon: "Due soon", later: "Later" };
 
-/** The wall clock in New York as an input value ("2026-10-30T23:59"), and back to the real moment. */
-const fmt = new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
-const shown = (iso: string) => { const p = Object.fromEntries(fmt.formatToParts(new Date(iso)).map((x) => [x.type, x.value])); return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`; };
-export function nyToIso(value: string): string | null {
-  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value);
-  if (!m) return null;
-  const want = Date.UTC(+m[1]!, +m[2]! - 1, +m[3]!, +m[4]!, +m[5]!);
-  let guess = want;
-  for (let i = 0; i < 3; i += 1) { const p = Object.fromEntries(fmt.formatToParts(new Date(guess)).map((x) => [x.type, x.value])); guess += want - Date.UTC(+p.year!, +p.month! - 1, +p.day!, +p.hour!, +p.minute!); }
-  return new Date(guess).toISOString();
-}
 const received = (iso: string) => new Date(iso).toLocaleDateString("en-US", { timeZone: TZ, month: "short", day: "numeric" });
 const absolute = (iso: string) => new Date(iso).toLocaleString("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 

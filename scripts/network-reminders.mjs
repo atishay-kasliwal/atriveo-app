@@ -2,6 +2,7 @@ import { nyParts, publishNtfy } from "./phone-summary.mjs";
 import { sendPushNotification } from "./web-push.mjs";
 import { companyOf, jobsForCompanies, sameCompany } from "./network-jobs.mjs";
 import { NetworkError, withFollowUps } from "./network.mjs";
+import { LATE_ALERT_MS, reminderStart } from "./network-events.mjs";
 
 // What needs you in your network, newest worries first: someone replied and waits for an answer, a follow-up is due, someone has gone
 // quiet, people in a source have never heard from you. Each reminder has a stable key so it can be snoozed. A morning phone message
@@ -188,6 +189,35 @@ export async function runJobAlerts({ db, now = new Date(), publish = publishNtfy
   return { web, ntfy, jobs: fresh };
 }
 
+const eventTime = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+
+/**
+ * A calendar event's reminder, once: Web Push with the title, time and person (tap to open), or ntfy with the title and time. A send
+ * that nothing took is undone, so the next check (a minute later) tries again.
+ */
+export async function runEventAlerts({ db, now = new Date(), publish = publishNtfy, webPush, env = process.env, log = () => {} } = {}) {
+  const ch = channels(env);
+  if (!ch.web && !ch.ntfy) return [];
+  const userId = env.PUSH_EVENT_USER_ID?.trim().toLowerCase();
+  const events = db.collection("network_events"), sent = [];
+  const due = (await events.find({ done: false, notifiedAt: null }).toArray()).filter((e) => reminderStart(e) <= +now && +now - Date.parse(e.at) < LATE_ALERT_MS);
+  for (const e of due) {
+    const claim = await events.updateOne({ _id: e._id, notifiedAt: null }, { $set: { notifiedAt: now.toISOString() } });
+    if (!claim.modifiedCount) continue;
+    const person = e.personId ? await db.collection("network_people").findOne({ _id: e.personId }) : null;
+    const when = eventTime.format(Date.parse(e.at));
+    const web = { title: `Reminder: ${e.title}`, body: `${when}${person ? ` · ${person.name}` : ""}`, url: `/network?map=main&event=${encodeURIComponent(e._id)}`, type: "network_event" };
+    const ntfy = { title: "Network", message: `Reminder: ${e.title}, ${when}.`, tags: ["bell"], priority: 4, click: "https://apply.atriveo.com/network" };
+    let ok = true;
+    if (ch.ntfy) { let got = false; try { got = await publish(ntfy); } catch (err) { log(`event reminder (ntfy): ${err.message}`); } ok &&= got; }
+    if (ch.web) { let r = { sent: 0, failed: 1 }; try { r = await (webPush ?? ((d, m) => sendPushNotification(d, userId, m, { env })))(db, web); } catch (err) { log(`event reminder (web push): ${err.message}`); } ok &&= r.sent > 0 || r.failed === 0; }
+    if (!ok) { await events.updateOne({ _id: e._id }, { $set: { notifiedAt: null } }); continue; }
+    sent.push(e);
+    log(`event reminder sent: ${e.title}`);
+  }
+  return sent;
+}
+
 /** Checks every few minutes inside the sidecar; off when neither Web Push nor ntfy is set up, or with PHONE_SUMMARIES=off / NETWORK_REMINDERS=off. */
 export function startNetworkReminders({ withMongo, log = console.log, everyMs = 10 * 60_000, publish = publishNtfy } = {}) {
   const off = (v) => /^(off|0|false)$/i.test(v || "");
@@ -197,6 +227,10 @@ export function startNetworkReminders({ withMongo, log = console.log, everyMs = 
   const tick = async () => { if (running) return; running = true; try { await withMongo(async (db) => { await runNetworkTick({ db, publish, log }); await runJobAlerts({ db, publish, log }); }, { appName: "AtriveoNetworkReminders" }); } catch (e) { log(`network reminders: ${e.message}`); } finally { running = false; } };
   setTimeout(tick, 30_000).unref?.();
   const timer = setInterval(tick, everyMs); timer.unref?.();
+  // Calendar reminders are checked every minute, so they arrive close to their lead time.
+  let eventRunning = false;
+  const eventTick = async () => { if (eventRunning) return; eventRunning = true; try { await withMongo((db) => runEventAlerts({ db, publish, log }), { appName: "AtriveoNetworkReminders" }); } catch (e) { log(`event reminders: ${e.message}`); } finally { eventRunning = false; } };
+  const eventTimer = setInterval(eventTick, 60_000); eventTimer.unref?.();
   log(`network reminders on the phone: on through ${[ch.web && "Web Push (names, tap to open)", ch.ntfy && "ntfy (counts only)"].filter(Boolean).join(" and ")}; 9 a.m. New York daily, Sunday 6 p.m. weekly, new jobs at watched people's companies within the hour`);
   return timer;
 }

@@ -381,6 +381,22 @@ button.nw-linkname:hover{text-decoration:underline}
 .nw-canvas-search .nw-search{flex:1;min-width:0}.nw-canvas-search input{width:100%;padding:5px 0;border:0;background:transparent;font-size:12px;border-radius:0}
 .nw-canvas-search input:focus{outline:none}.nw-canvas-search .nw-x{width:24px;height:24px;font-size:18px}
 .nw-canvas-add{width:194px;padding:5px}
+.nw-canvas-calendar{left:auto;right:14px;width:300px;max-height:calc(100% - 88px);overflow:auto;padding:12px;box-sizing:border-box}
+.nw-cal-form{display:grid;gap:9px}
+.nw-cal-form label{display:grid;gap:4px;font-size:11px;color:var(--nw-muted)}
+.nw-cal-form input,.nw-cal-form select{box-sizing:border-box;width:100%;min-height:32px;border:1px solid var(--nw-line-strong);border-radius:7px;background:var(--nw-bg);color:var(--nw-ink);padding:6px 8px;font:inherit;font-size:12px}
+.nw-cal-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nw-cal-save{min-height:34px;border:0;border-radius:8px;background:var(--nw-accent);color:#101014;font-weight:600;font-size:12px;cursor:pointer}
+.nw-cal-save:disabled{opacity:.6;cursor:default}
+.nw-cal-heading{margin:14px 0 6px;font-size:11px;color:var(--nw-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.nw-cal-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.nw-cal-list li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center;border:1px solid var(--nw-line);border-radius:8px;padding:8px}
+.nw-cal-list li>div{display:grid;gap:2px;min-width:0}
+.nw-cal-list b{font-size:12px;color:var(--nw-ink);overflow-wrap:anywhere}
+.nw-cal-list small{font-size:11px;color:var(--nw-muted)}
+.nw-cal-list button:not(.nw-x){font-size:11px;border:1px solid var(--nw-line-strong);border-radius:6px;background:transparent;color:var(--nw-ink);padding:4px 8px;cursor:pointer}
+.nw-cal-empty,.nw-cal-error{font-size:12px;color:var(--nw-muted);margin:8px 0}
+.nw-cal-error{color:#f0a0a0}
 .nw-canvas-menu-action{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;background:transparent;border-radius:8px;text-align:left;font-size:12px}
 .nw-canvas-menu-action:hover{background:var(--nw-soft)}.nw-canvas-menu-action svg{color:var(--nw-muted);width:15px;height:15px}
 .nw-page .nw-view-surface{position:absolute;top:64px;bottom:62px;left:14px;width:min(660px,calc(100% - 28px));display:flex;flex-direction:column;min-height:0;overflow:hidden;z-index:6}
@@ -414,6 +430,7 @@ button.nw-linkname:hover{text-decoration:underline}
  .nw-page .nw-view-surface{left:10px;width:calc(100% - 20px);bottom:54px;top:110px}
  .nw-page .nw-rail{left:10px;top:62px;max-height:calc(100% - 120px)}
  .nw-canvas-popover{left:10px;top:62px;max-width:calc(100% - 20px)}
+ .nw-canvas-calendar{left:auto;right:10px;top:62px;width:min(300px,calc(100% - 20px))}
  .nw-canvas-search input{font-size:16px}
  .nw-page .nwg-legend{display:none}.nw-page .nwg-zoom{left:10px;bottom:max(10px,env(safe-area-inset-bottom))}
  .nw-page .nwg-path{top:110px;right:10px}.nw-page .nwg-penbar{max-width:calc(100% - 20px);overflow:auto}

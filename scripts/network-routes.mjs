@@ -2,6 +2,7 @@ import { listIntelligence, intelligenceAction } from './network-intelligence.mjs
 import { withFollowUps, saveFollowUp, linkedinDay, sortLinkedInByDay, NetworkError, saveYou, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
+import { listEvents, markEventDone, removeEvent, saveEvent } from "./network-events.mjs";
 import { boardView, readImage, removeBoardItem, saveBoardItem, saveImage } from "./network-board.mjs";
 import { jobsForPerson, jobsForSource, knownCompanies, warmJobs } from "./network-jobs.mjs";
 import { MAIN, addToMap, listMaps, mapView, openMapFile, removeFromMap, removeMap, saveMap, saveMapPositions } from "./network-maps.mjs";
@@ -58,6 +59,9 @@ const WRITES = {
   "/network/mail/settings": (db, b) => saveMailSettings(db, b).then((settings) => ({ settings })),
   "/network/mail/send": (db, b, o) => sendNetworkMail(db, b, { sender: o.sender?.(), outRoot: o.outRoot }),
   "/network/reminders/snooze": (db, b) => snoozeReminder(db, b),
+  "/network/events/save": (db, b) => saveEvent(db, b),
+  "/network/events/done": (db, b) => markEventDone(db, b.id),
+  "/network/events/remove": (db, b) => removeEvent(db, b.id),
   "/network/board/save": (db, b) => saveBoardItem(db, b).then((item) => ({ item })),
   "/network/board/remove": (db, b) => removeBoardItem(db, b),
   "/network/board/image": (db, b) => saveImage(db, b),
@@ -71,6 +75,7 @@ const READS = {
   "/network/mail": (db, _q, o) => mailSettings(db, { outRoot: o.outRoot }).then((settings) => ({ settings })),
   "/network/mail/draft": (db, q) => draftStatus(db, q.get("id")),
   "/network/reminders": (db) => listReminders(db),
+  "/network/events": (db) => listEvents(db),
   "/network/board": (db, q) => boardView(db, q.get("map") || MAIN),
   "/network/jobs": (db, q) => (q.get("person") ? jobsForPerson(db, q.get("person")) : q.get("source") ? jobsForSource(db, q.get("source")) : warmJobs(db).then((groups) => ({ groups }))),
   "/network/companies": (db) => knownCompanies(db).then((companies) => ({ companies })),
