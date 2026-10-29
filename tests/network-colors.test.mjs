@@ -4,7 +4,7 @@ import {build} from 'esbuild';
 // The Network colour rule and its wording helpers, bundled from the page's own module.
 const dir=fs.mkdtempSync(path.join(os.tmpdir(),'nwc-'));const out=path.join(dir,'network.mjs');
 await build({entryPoints:[path.resolve('src/apply/network.ts')],bundle:true,format:'esm',platform:'node',outfile:out,logLevel:'silent'});
-const {peopleForSource,organisationInitials,colorsFor,PALETTE,followUp,ago,plusDays,initials,sourceLabel,edgesFor,autoLayout,warmPath,withAutoCompanies}=await import(out);
+const {branchOf,peopleForSource,organisationInitials,colorsFor,PALETTE,followUp,ago,plusDays,initials,sourceLabel,edgesFor,autoLayout,warmPath,withAutoCompanies}=await import(out);
 const src=(id,at,color=null)=>({id,name:id,type:'company',about:'',color,createdAt:at});
 const person=(id,f={})=>({id,name:id,sourceId:null,via:null,color:null,...f});
 
@@ -154,4 +154,13 @@ test('organisation fallback has two letters for single and multiword names', () 
  assert.equal(organisationInitials('Fidelity Investments'),'FI');
  assert.equal(organisationInitials('  Northstar   Labs '),'NL');
  assert.equal(organisationInitials(''),'?' );
+});
+
+test('dragging a card brings its branch: a source its people and the sources under it, all the way down; a person their introductions',()=>{
+ const data={sources:[src('li','1'),{...src('d28','2'),parentSourceId:'li'},{...src('d29','3'),parentSourceId:'li'},{...src('nkhs','4'),viaPersonId:'chani'},src('fam','5'),{...src('co','6'),auto:['x','y']}],
+  people:[person('ann',{sourceId:'d28'}),person('ben',{sourceId:'d29'}),person('cy',{sourceId:'d29',via:'ben'}),person('chani',{sourceId:'fam'}),person('dev',{sourceId:'nkhs'}),person('eve',{sourceId:'fam',via:'gone'}),person('li-direct',{sourceId:'li'})]};
+ assert.deepEqual(branchOf('li',data).sort(),['ann','ben','cy','d28','d29','li-direct']);
+ assert.deepEqual(branchOf('d29',data).sort(),['ben','cy'],'cy hangs off Ben, who is in this day');
+ assert.deepEqual(branchOf('fam',data).sort(),['chani','dev','eve','nkhs'],'Chani brought NKHS and its people; Eve\'s introducer is gone, so she hangs off the source');
+ assert.deepEqual(branchOf('ann',data),[]);assert.deepEqual(branchOf('co',data),[],'an automatic company card carries nothing');
 });

@@ -21,7 +21,7 @@ Nothing here is in the repository. Tests use invented people.
 
 ## Canvas workspace
 
-The map fills the viewport below navigation. Compact floating controls open layers/filters, search, add/import actions, people and jobs views. Details and views overlay the map without resizing it. Board tools, pan, zoom and saved positions use the existing graph implementation. Layer visibility and source stacks are presentation controls; they never delete or rewrite people. Expand a stack by click or Enter; Collapse stacks restores the overview.
+The map fills the viewport below navigation. Compact floating controls open layers/filters, search, add/import actions, people and jobs views. Details and views overlay the map without resizing it. Board tools, pan, zoom and saved positions use the existing graph implementation. Dragging a card brings everything under it (a source its people and sub-sources, a person their introductions); hold Alt to move only that card. Layer visibility and source stacks are presentation controls; they never delete or rewrite people. Expand a stack by click or Enter; Collapse stacks restores the overview.
 
 Add Person asks for Company / employer independently of its source (for example, Family). That employer drives the existing jobs/application matching. Staffing sources also act as employer fallbacks, like company sources.
 

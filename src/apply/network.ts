@@ -176,6 +176,24 @@ export function autoLayout(data: NetworkData): Map<string, Point> {
 
 const CARD_W = 196, CARD_H = 52, GAP_X = 24, GAP_Y = 18;
 /**
+ * Everything that hangs off a card on the map, all the way down: a source's people, the sources under it (LinkedIn's days) and theirs;
+ * a person's introductions (people and sources). Dragging a card brings its branch along.
+ */
+export function branchOf(id: string, data: Pick<NetworkData, "people" | "sources">): string[] {
+  const personIds = new Set(data.people.map((p) => p.id)), out = new Set<string>(), queue = [id];
+  while (queue.length) {
+    const cur = queue.shift()!;
+    const kids = [
+      ...data.sources.filter((s) => !s.auto && (s.parentSourceId === cur || s.viaPersonId === cur)).map((s) => s.id),
+      // Someone introduced by a person hangs off that person; everyone else off their source.
+      ...data.people.filter((p) => (p.via && personIds.has(p.via) ? p.via === cur : p.sourceId === cur)).map((p) => p.id),
+    ];
+    for (const k of kids) if (k !== id && !out.has(k)) { out.add(k); queue.push(k); }
+  }
+  return [...out];
+}
+
+/**
  * Up to eight cards fan out on an arc facing away from you, the arc growing until neighbours clear each other; a bigger group (a pasted
  * list of forty recruiters) becomes a tidy block of rows behind its source instead.
  */
