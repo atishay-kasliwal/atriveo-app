@@ -102,3 +102,13 @@ test('web push delivery: sent once a day through your devices; retried when ever
  await runNetworkTick({db,env:WEB,webPush,publish,now:new Date('2026-10-28T15:00:00Z')});assert.equal(got.length,2,'once that day');
  const none=fakeDb([P('Ann',{nextFollowUp:'2026-10-25'})]);assert.ok(await runNetworkTick({db:none,env:WEB,webPush:async()=>({sent:0,failed:0}),now:new Date('2026-10-28T13:10:00Z')}));
  assert.equal(await runNetworkTick({db:fakeDb([P('Z',{nextFollowUp:'2026-10-25'})]),env:{},now:new Date('2026-10-28T13:10:00Z')}),null,'no channel, nothing to do');});
+
+
+test('paused follow-ups stay quiet and planned contacts do not receive early never-contacted reminders',()=>{
+ const sources=[{id:'source',name:'Northstar',createdAt:'2026-10-01T00:00:00Z'}];
+ const people=[P('paused',{sourceId:'source',lastContact:'2026-10-01T12:00:00Z',followUpPlan:{enabled:false}}),P('not-needed',{sourceId:'source',followUpPlan:{enabled:false}}),P('scheduled',{sourceId:'source',nextFollowUp:'2026-11-04',followUpPlan:{enabled:true}})];
+ assert.deepEqual(reminders({people,sources},{today}),[]);
+ const due=reminders({people,sources},{today:'2026-11-04'});assert.deepEqual(due.map(r=>[r.kind,r.personId]),[['due','scheduled']]);
+ const replied=reminders({people:[{...people[0],history:[H('reply','2026-10-25')]}],sources:[]},{today});
+ assert.equal(replied[0].kind,'reply','pausing follow-ups does not hide an incoming reply');
+});
