@@ -265,7 +265,7 @@ test('follow-up plans and outcomes persist atomically, preserve context and dist
  assert.equal(saved.lastContact,T.toISOString());assert.equal(saved.nextFollowUp,null);assert.equal(saved.history[1].type,'note');assert.equal(saved.history[1].followUp.completed,false);
  const reloaded=(await networkView(db)).people.find(x=>x.id===p.id);assert.deepEqual(reloaded.followUpPlan,saved.followUpPlan);assert.deepEqual(reloaded.history,saved.history);
  const before=structuredClone(saved);
- for(const input of [{plan:{...plan,platform:'invalid'},nextFollowUp:'2026-11-20'},{plan,nextFollowUp:null},{plan:{...plan,regarding:''},nextFollowUp:'2026-11-20'},{plan,nextFollowUp:'2026-11-20',outcome:{completed:'yes'}}])await assert.rejects(()=>saveFollowUp(db,{id:p.id,...input},later),NetworkError);
+ for(const input of [{plan,nextFollowUp:"2026-02-31"},{plan:{...plan,platform:'invalid'},nextFollowUp:'2026-11-20'},{plan,nextFollowUp:null},{plan:{...plan,regarding:''},nextFollowUp:'2026-11-20'},{plan,nextFollowUp:'2026-11-20',outcome:{completed:'yes'}}])await assert.rejects(()=>saveFollowUp(db,{id:p.id,...input},later),NetworkError);
  assert.deepEqual((await networkView(db)).people.find(x=>x.id===p.id),before,'invalid data cannot partially update a plan or history');
 });
 

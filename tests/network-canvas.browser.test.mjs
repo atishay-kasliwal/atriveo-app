@@ -230,6 +230,16 @@ for (const width of [1440, 390]) test(`follow-up plan, outcome and next notes su
  await form.getByLabel('Regarding',{exact:true}).fill('Referral for platform engineer');
  await form.getByRole('button',{name:'1 week',exact:true}).click();
  await form.getByLabel('Notes for the next follow-up').fill('Ask which team is hiring');
+ if(width===390){
+  const dialog=page.getByRole('dialog',{name:'Mira Chen',exact:true});
+  assert.equal(await dialog.count(),1);
+  const first=dialog.getByRole('textbox',{name:'Name',exact:true});
+  await form.getByRole('button',{name:'Save plan',exact:true}).focus();
+  await page.keyboard.press('Tab');
+  assert.equal(await first.evaluate(e=>e===document.activeElement),true,'Tab wraps to the first editable field');
+  await page.keyboard.press('Shift+Tab');
+  assert.equal(await form.getByRole('button',{name:'Save plan',exact:true}).evaluate(e=>e===document.activeElement),true,'Shift+Tab stays inside the sheet');
+ }
  await form.getByRole('button',{name:'Save plan',exact:true}).click();
  await page.getByRole('status').filter({hasText:'Follow-up plan saved.'}).waitFor();
  await form.getByRole('button',{name:'Log an outcome'}).click();

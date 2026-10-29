@@ -245,6 +245,7 @@ export async function saveFollowUp(db, input = {}, now = new Date()) {
   if (!FOLLOW_UP_PLATFORMS.includes(plan.platform)) fail("Choose a follow-up platform");
   const followUpPlan = { enabled: plan.enabled, platform: plan.platform, regarding: str(plan.regarding, 240), nextNotes: text(plan.nextNotes, 2000) };
   const nextFollowUp = plan.enabled ? day(input.nextFollowUp) : null;
+  if (nextFollowUp && new Date(nextFollowUp).toISOString().slice(0, 10) !== nextFollowUp) fail("Choose a valid follow-up date");
   if (plan.enabled && (!nextFollowUp || !followUpPlan.regarding)) fail("Add a topic and date for the next follow-up");
   const set = { followUpPlan, nextFollowUp, updatedAt: now.toISOString() };
   if (input.outcome) {

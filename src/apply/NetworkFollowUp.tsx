@@ -10,9 +10,9 @@ export default function NetworkFollowUp({ person, onChange }: { person: Person; 
   const [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState("");
   const summary = followUpSummary(person);
   function changeMode(next: "plan" | "log") {
+    if (next === mode) return;
     setMode(next); setError(""); setMessage("");
     setDate(next === "log" ? "" : person.nextFollowUp || "");
-    setCompleted(null); setNotes("");
   }
   async function submit(event: FormEvent) {
     event.preventDefault(); if (busy) return; setError(""); setMessage("");

@@ -330,10 +330,27 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
   person: Person; data: NetworkData; colors: ReturnType<typeof colorsFor>; sourceById: Map<string, Source>; personById: Map<string, Person>;
   onClose: () => void; onChange: (p: Person) => void; onOpen: (id: string) => void; onArchive: () => void; onWrite: () => void; onReferral: (job: JobRow) => void; say: (t: Toast) => void; onLinks: (l: NetworkData["links"]) => void; onTakeOff?: () => void;
 }) {
+  const panelRef = useRef<HTMLElement>(null);
+  const [mobile, setMobile] = useState(() => window.matchMedia("(max-width: 760px)").matches);
+  useEffect(() => { const query = window.matchMedia("(max-width: 760px)"); const update = () => setMobile(query.matches); query.addEventListener("change", update); return () => query.removeEventListener("change", update); }, []);
   const [draft, setDraft] = useState(p);
   const [saving, setSaving] = useState("");
   const [tab, setTab] = useState<PanelTab>("overview");
   const [pop, setPop] = useState<null | "follow" | "log" | "more" | "connect" | "colour">(null);
+  useEffect(() => {
+    if (!mobile || tab !== "follow") return;
+    const panel = panelRef.current;
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); onClose(); return; }
+      if (event.key !== "Tab" || !panel) return;
+      const targets = [...panel.querySelectorAll<HTMLElement>('button:not(:disabled),input:not([type="file"]),select,textarea,[tabindex="0"]')].filter(el => el.tabIndex >= 0 && el.getClientRects().length);
+      const first = targets[0], last = targets[targets.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) { event.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [mobile, tab, onClose]);
   const [hType, setHType] = useState<HistoryType>("note");
   const [hText, setHText] = useState("");
   const [hPage, setHPage] = useState(0);
@@ -402,7 +419,7 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
     if (!n) return; e.preventDefault(); const next = TABS[(i + n + TABS.length) % TABS.length][0]; setTab(next); document.getElementById(`pp-tab-${next}`)?.focus();
   };
   return (
-    <aside className="nw-panel pp" aria-label={p.name}>
+    <aside ref={panelRef} className="nw-panel pp" role={mobile && tab === "follow" ? "dialog" : undefined} aria-modal={mobile && tab === "follow" ? true : undefined} aria-label={p.name}>
       <header className="pp-head">
         <label className="nw-photo" title={p.photoId ? "Change the photo" : "Add a photo"}>
           <Avatar big name={draft.name || p.name} photo={p.photoId} color={color} source={introducers.length && src ? colors.source.get(src.id) : undefined} />
