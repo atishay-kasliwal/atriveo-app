@@ -695,3 +695,5 @@ button.pp-step{cursor:pointer;transition:color .15s}button.pp-step:hover{color:v
 @media(max-width:760px){.nw-page .nw-main:has(.pp-follow){isolation:auto;z-index:100}.nw-page .nw-panel:has(.pp-follow){z-index:120}.nw-panel:has(.pp-follow) .pp-head>.nw-x{min-width:44px;min-height:44px}}
 
 @media(max-width:760px){.nw-panel:has(.pp-follow) .pp-actions>.pp-pill{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nw-panel:has(.pp-follow) .pp-actions>.nw-btn.main{padding-left:10px;padding-right:10px}}
+
+@media(max-width:760px){.nw-panel:has(.pp-follow) .pp-trail,.nw-panel:has(.pp-follow) .pp-actions,.nw-panel:has(.pp-follow) .pp-head .nw-role,.nw-panel:has(.pp-follow) .pp-head .pp-where{display:none}.nw-panel:has(.pp-follow) .pp-head{min-height:64px;padding:10px 14px;align-items:center}.nw-panel:has(.pp-follow) .nw-photo{width:42px;height:42px;flex:0 0 42px}.nw-panel:has(.pp-follow) .nw-photo .nw-av{width:42px;height:42px;font-size:15px}.nw-panel:has(.pp-follow) .nf input,.nw-panel:has(.pp-follow) .nf select,.nw-panel:has(.pp-follow) .nf textarea{font-size:16px!important}}

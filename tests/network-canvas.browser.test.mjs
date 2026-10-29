@@ -255,4 +255,10 @@ for (const width of [1440, 390]) test(`follow-up plan, outcome and next notes su
  assert.equal(await form.getByLabel('Notes for the next follow-up').inputValue(),'Send the updated portfolio');
  await page.getByRole('tab',{name:/^History/}).click();
  assert.match(await page.locator('.pp-tl.long').textContent(),/Followed up.*Referral for platform engineer.*They asked for a portfolio.*Send the updated portfolio/);
+ if(width===390){
+  await page.getByRole('tab',{name:'Follow-up',exact:true}).click();await page.keyboard.press('Escape');
+  assert.equal(await page.locator('.nw-panel.pp').count(),0);
+  assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('data-node')),'person-1','closing returns focus to the selected contact');
+ }
+
 });

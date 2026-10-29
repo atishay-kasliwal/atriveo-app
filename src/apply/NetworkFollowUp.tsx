@@ -33,7 +33,7 @@ export default function NetworkFollowUp({ person, onChange }: { person: Person; 
       <p className="nf-context">{person.followUpPlan?.regarding || "Your latest conversation"}{person.followUpPlan?.platform && <small>{FOLLOW_UP_PLATFORMS.find(([key]) => key === person.followUpPlan?.platform)?.[1]}</small>}</p>
       {person.followUpPlan?.nextNotes && <p className="nf-planned-note"><b>Your planned note</b>{person.followUpPlan.nextNotes}</p>}
       <fieldset className="nf-choice"><legend>Did you follow up?</legend><div>{[[true, "Yes, contacted"], [false, "Not yet"]].map(([value, label]) => <button key={String(value)} type="button" aria-pressed={completed === value} onClick={() => setCompleted(value as boolean)}>{label}</button>)}</div></fieldset>
-      {completed === false && <p className="nf-help">No contact will be recorded. Choose when to try again below.</p>}
+      {completed === false && <p className="nf-help">This attempt will be saved. Your last-contact date stays the same.</p>}
       <label className="nw-f"><span>Notes from this follow-up</span><textarea maxLength={2000} value={notes} onChange={e => setNotes(e.target.value)} placeholder={completed === false ? "What got in the way?" : "What did you discuss? What did they say?"} /></label>
     </section>}
     {mode === "log" && <div className="nf-next-heading"><h4 className="nf-section-title">Next follow-up</h4><p>Decide what happens after this attempt.</p></div>}
@@ -45,6 +45,6 @@ export default function NetworkFollowUp({ person, onChange }: { person: Person; 
       <label className="nw-f"><span>Notes for the next follow-up</span><textarea maxLength={2000} value={plan.nextNotes} onChange={e => setPlan({ ...plan, nextNotes: e.target.value })} placeholder="What should you remember or ask next time?" /></label>
     </> : <p className="nf-help">No reminder will be scheduled. Your conversation history stays here.</p>}
     {error && <p className="nf-error" role="alert">{error}</p>}{message && <p className="nf-success" role="status">{message}</p>}
-    <div className="nf-footer"><span>{mode === "log" ? "Records the outcome and next step together." : "A reminder for you. No message is sent."}</span><button type="submit" disabled={busy} className="nw-btn main">{busy ? "Saving…" : mode === "log" ? "Save outcome & next step" : "Save plan"}</button></div>
+    <div className="nf-footer"><span>{mode === "log" ? "Records the outcome and next step together." : "A reminder for you. No message is sent."}</span><button type="submit" disabled={busy} className="nw-btn main">{busy ? "Saving…" : mode === "log" ? completed === false ? "Save attempt & next step" : "Save outcome & next step" : "Save plan"}</button></div>
   </form>;
 }

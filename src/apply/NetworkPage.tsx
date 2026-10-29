@@ -251,7 +251,7 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
                   const f = followUp(p.nextFollowUp), src = p.sourceId ? sourceById.get(p.sourceId) : null, via = p.via ? personById.get(p.via) : null;
                   return (
                     <li key={p.id}>
-                      <button type="button" className={`nw-row${p.id === selected ? " on" : ""}`} onClick={() => openPerson(p.id === selected ? null : p.id)} aria-pressed={p.id === selected}>
+                      <button type="button" data-person={p.id} className={`nw-row${p.id === selected ? " on" : ""}`} onClick={() => openPerson(p.id === selected ? null : p.id)} aria-pressed={p.id === selected}>
                         <Avatar name={p.name} photo={p.photoId} color={colors.person.get(p.id) ?? ""} source={via && src ? colors.source.get(src.id) : undefined} />
                         <span className="who"><b>{p.name}</b><small>{p.role || (via ? `Introduced by ${via.name}` : "\u00a0")}</small></span>
                         <span className="src">{src ? <><i style={{ background: colors.source.get(src.id) }} />{sourceLabel(src, data.sources, data.people)}</> : <em>No source</em>}</span>
@@ -349,8 +349,15 @@ function PersonPanel({ person: p, data, colors, sourceById, personById, onClose,
       else if (!event.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) { event.preventDefault(); first?.focus(); }
     };
     document.addEventListener("keydown", key);
-    return () => document.removeEventListener("keydown", key);
-  }, [mobile, tab, onClose]);
+    return () => {
+      document.removeEventListener("keydown", key);
+      queueMicrotask(() => {
+        if (panel && !panel.isConnected && !document.querySelector(".nw-panel.pp")) {
+          (document.querySelector<HTMLElement>(`[data-person="${CSS.escape(p.id)}"]`) || document.querySelector<HTMLElement>(`[data-node="${CSS.escape(p.id)}"]`))?.focus();
+        }
+      });
+    };
+  }, [mobile, tab, onClose, p.id]);
   const [hType, setHType] = useState<HistoryType>("note");
   const [hText, setHText] = useState("");
   const [hPage, setHPage] = useState(0);
