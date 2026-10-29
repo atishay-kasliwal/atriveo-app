@@ -1,4 +1,4 @@
-import { linkedinDay, sortLinkedInByDay, NetworkError, saveYou, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
+import { saveFollowUp, linkedinDay, sortLinkedInByDay, NetworkError, saveYou, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
 import { boardView, readImage, removeBoardItem, saveBoardItem, saveImage } from "./network-board.mjs";
@@ -21,6 +21,7 @@ const WRITES = {
     await onMap(db, b, [...r.added.map((p) => p.id), ...known, r.sourceId].filter(Boolean)); return { ...r, placed: known.length };
   }),
   "/network/person": (db, b) => savePerson(db, b).then(async (person) => { if (!b.id) await onMap(db, b, [person.id]); return { person }; }),
+  "/network/follow-up": (db, b) => saveFollowUp(db, b).then((person) => ({ person })),
   "/network/history": (db, b) => logHistory(db, b).then((person) => ({ person })),
   "/network/history/remove": (db, b) => removeHistory(db, b).then((person) => ({ person })),
   "/network/archive": (db, b) => archivePerson(db, b),

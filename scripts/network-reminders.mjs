@@ -25,6 +25,7 @@ export function reminders({ people, sources, work = [] }, { today, snoozed = new
       out.push({ key: `reply:${p.id}:${last.id}`, kind: "reply", personId: p.id, title: `${p.name} replied ${d === 1 ? "yesterday" : `${weeks(d)} ago`}`, detail: "Answer them while it is fresh", rank: 0 - d / 1000 });
       continue;
     }
+    if (p.followUpPlan?.enabled === false) continue;
     if (p.nextFollowUp && dayNum(p.nextFollowUp) <= t) {
       const late = Math.round(t - dayNum(p.nextFollowUp));
       out.push({ key: `due:${p.id}:${p.nextFollowUp}`, kind: "due", personId: p.id, title: `Follow up with ${p.name}`, detail: late ? `${late} day${late === 1 ? "" : "s"} late` : "Due today", rank: 1 - late / 1000 });
@@ -37,7 +38,7 @@ export function reminders({ people, sources, work = [] }, { today, snoozed = new
   }
   for (const s of sources) {
     if (t - dayNum(s.createdAt) < NEVER_AFTER_DAYS) continue;
-    const never = people.filter((p) => !p.archived && p.sourceId === s.id && !p.via && !p.lastContact).length;
+    const never = people.filter((p) => !p.archived && p.sourceId === s.id && !p.via && !p.lastContact && p.followUpPlan?.enabled !== false && !p.nextFollowUp).length;
     if (never) out.push({ key: `never:${s.id}:${never}`, kind: "never", sourceId: s.id, title: `${never} ${never === 1 ? "person" : "people"} at ${s.name} ${never === 1 ? "has" : "have"} never heard from you`, detail: "Write one note and reuse it", rank: 3 - never / 1000 });
   }
   for (const w of work) {

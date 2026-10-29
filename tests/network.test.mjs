@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {Readable} from 'node:stream';
-import {saveYou,addFromLinkedIn,sortLinkedInByDay,parseContacts,csvRows,previewContacts,savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
+import {saveFollowUp,saveYou,addFromLinkedIn,sortLinkedInByDay,parseContacts,csvRows,previewContacts,savePositions,parseList,previewList,addPeople,savePerson,logHistory,removeHistory,archivePerson,saveSource,removeSource,saveLink,removeLink,networkView,NetworkError} from '../scripts/network.mjs';
 import {handleNetwork} from '../scripts/network-routes.mjs';
 
 // An in-memory stand-in for the three collections, with just the calls the store makes. Every name here is invented.
@@ -246,4 +246,34 @@ test('confirming a company keeps its card and people in place; custom maps keep 
  const kept=await call(db,'POST','/network/source',{...body,mapId:'map-a',position:{x:0,y:0}});
  assert.deepEqual([kept.json.source.x,kept.json.source.y],[500,600],'a company already placed on the map keeps that map’s position');
  assert.equal((await networkView(db)).sources.find(s=>s.name==='Orchid').x,920);
+});
+
+
+test('follow-up plans and outcomes persist atomically, preserve context and distinguish no contact', async()=>{
+ const db=fakeDb(),p=await savePerson(db,{name:'Taylor Lake'},T);
+ const plan={enabled:true,platform:'linkedin',regarding:'Engineering referral',nextNotes:'Ask about the team'};
+ let saved=await saveFollowUp(db,{id:p.id,plan,nextFollowUp:'2026-11-04'},T);
+ assert.deepEqual(saved.followUpPlan,plan);assert.equal(saved.history.length,0);
+ const next={...plan,platform:'email',regarding:'Interview update',nextNotes:'Bring the portfolio link'};
+ saved=await saveFollowUp(db,{id:p.id,plan:next,nextFollowUp:'2026-11-11',outcome:{completed:true,notes:'They offered an introduction'}},T);
+ assert.equal(saved.history.length,1);assert.equal(saved.history[0].type,'message');
+ assert.equal(saved.history[0].followUp.platform,'linkedin');assert.equal(saved.history[0].followUp.regarding,'Engineering referral');
+ assert.equal(saved.history[0].followUp.nextNotes,next.nextNotes);assert.equal(saved.history[0].text,'They offered an introduction');
+ assert.equal(saved.lastContact,T.toISOString());assert.equal(saved.nextFollowUp,'2026-11-11');
+ const later=new Date('2026-11-12T12:00:00Z');
+ saved=await saveFollowUp(db,{id:p.id,plan:{...next,enabled:false},outcome:{completed:false,notes:'Waiting for an opening'}},later);
+ assert.equal(saved.lastContact,T.toISOString());assert.equal(saved.nextFollowUp,null);assert.equal(saved.history[1].type,'note');assert.equal(saved.history[1].followUp.completed,false);
+ const reloaded=(await networkView(db)).people.find(x=>x.id===p.id);assert.deepEqual(reloaded.followUpPlan,saved.followUpPlan);assert.deepEqual(reloaded.history,saved.history);
+ const before=structuredClone(saved);
+ for(const input of [{plan,nextFollowUp:"2026-02-31"},{plan:{...plan,platform:'invalid'},nextFollowUp:'2026-11-20'},{plan,nextFollowUp:null},{plan:{...plan,regarding:''},nextFollowUp:'2026-11-20'},{plan,nextFollowUp:'2026-11-20',outcome:{completed:'yes'}}])await assert.rejects(()=>saveFollowUp(db,{id:p.id,...input},later),NetworkError);
+ assert.deepEqual((await networkView(db)).people.find(x=>x.id===p.id),before,'invalid data cannot partially update a plan or history');
+});
+
+
+test('follow-up route validates requests and returns the persisted person', async()=>{
+ const db=fakeDb(), p=await savePerson(db,{name:'Morgan Lane'},T);
+ const body={id:p.id,plan:{enabled:true,platform:'whatsapp',regarding:'Role update',nextNotes:'Ask for timing'},nextFollowUp:'2026-11-04'};
+ const ok=await call(db,'POST','/network/follow-up',body);assert.equal(ok.code,200);assert.equal(ok.json.person.followUpPlan.platform,'whatsapp');
+ const bad=await call(db,'POST','/network/follow-up',{...body,nextFollowUp:''});assert.equal(bad.code,400);
+ const missing=await call(db,'POST','/network/follow-up',{...body,id:'missing'});assert.equal(missing.code,400);
 });

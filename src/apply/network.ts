@@ -6,11 +6,14 @@ import { getTailorServerBase } from "../utils/tailorServer";
 export type SourceType = "company" | "staffing" | "event" | "family" | "other";
 export type LinkKind = "works" | "family" | "intro" | "other";
 export type HistoryType = "note" | "email" | "message" | "call" | "met" | "reply";
-export interface HistoryEntry { id: string; at: string; type: HistoryType; text: string }
+export type FollowUpPlatform = "linkedin" | "email" | "whatsapp" | "phone" | "in-person" | "other";
+export interface FollowUpPlan { enabled: boolean; platform: FollowUpPlatform; regarding: string; nextNotes: string }
+export const FOLLOW_UP_PLATFORMS: [FollowUpPlatform, string][] = [["linkedin", "LinkedIn"], ["email", "Email"], ["whatsapp", "WhatsApp"], ["phone", "Phone"], ["in-person", "In person"], ["other", "Other"]];
+export interface HistoryEntry { followUp?: { completed: boolean; platform: FollowUpPlatform; regarding: string; nextNotes: string; nextFollowUp: string | null }; id: string; at: string; type: HistoryType; text: string }
 export interface Person {
   id: string; name: string; role: string; city: string; company: string; photoId: string | null; watchJobs: boolean; email: string; linkedin: string; phone: string; notes: string;
   sourceId: string | null; via: string | null; alsoVia?: string[]; color: string | null; tags: string[];
-  lastContact: string | null; nextFollowUp: string | null; history: HistoryEntry[]; archived: boolean; createdAt: string; updatedAt: string; x?: number; y?: number;
+  followUpPlan?: FollowUpPlan; lastContact: string | null; nextFollowUp: string | null; history: HistoryEntry[]; archived: boolean; createdAt: string; updatedAt: string; x?: number; y?: number;
 }
 export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; photoId?: string | null; notes?: string; place?: string; when?: string; auto?: string[]; introYear?: string; alsoVia?: { id: string; year: string }[]; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
 export interface Link { id: string; a: string; b: string; kind: LinkKind; label: string; color: string | null }
@@ -402,3 +405,14 @@ export const throughValue = (s?: Source | null) => (s?.viaPersonId ? `p:${s.viaP
 /** Everyone who introduced this person, first one first. */
 export const introducersOf = (p: Person) => [p.via, ...(p.alsoVia ?? [])].filter((x): x is string => Boolean(x));
 export const loadSourceJobs = (id: string) => getJson<{ company: string; jobs: JobRow[] } & ApiBody>(`/network/jobs?source=${encodeURIComponent(id)}`);
+
+export function followUpSummary(person: Person): { title: string; detail: string; due: boolean } {
+  const plan = person.followUpPlan;
+  if (plan && !plan.enabled) return { title: "Not needed", detail: "Follow-up paused", due: false };
+  const when = followUp(person.nextFollowUp);
+  return { title: when ? `Follow up ${when.text}` : "Plan a follow-up", detail: plan ? `${FOLLOW_UP_PLATFORMS.find(([key]) => key === plan.platform)?.[1] || "Other"} · ${plan.regarding}` : "Choose a platform and topic", due: Boolean(when?.due) };
+}
+export function historyLabel(entry: HistoryEntry): string {
+  if (entry.followUp) return `${entry.followUp.completed ? "Followed up" : "Not contacted"} · ${FOLLOW_UP_PLATFORMS.find(([key]) => key === entry.followUp!.platform)?.[1] || "Other"}${entry.followUp.regarding ? ` · ${entry.followUp.regarding}` : ""}`;
+  return HISTORY_TYPES.find(([key]) => key === entry.type)?.[1] || entry.type;
+}

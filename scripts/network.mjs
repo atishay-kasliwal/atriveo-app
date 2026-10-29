@@ -234,6 +234,34 @@ export async function savePerson(db, input = {}, now = new Date()) {
   return out({ ...cur, ...next });
 }
 
+export const FOLLOW_UP_PLATFORMS = ["linkedin", "email", "whatsapp", "phone", "in-person", "other"];
+
+/** Save the next step and, optionally, the previous attempt together in one database update. */
+export async function saveFollowUp(db, input = {}, now = new Date()) {
+  const cur = await db.collection(PEOPLE).findOne({ _id: String(input.id) });
+  if (!cur) fail("That person is no longer in your network. Reload the page.");
+  const plan = input.plan;
+  if (!plan || typeof plan.enabled !== "boolean") fail("Choose whether a follow-up is needed");
+  if (!FOLLOW_UP_PLATFORMS.includes(plan.platform)) fail("Choose a follow-up platform");
+  const followUpPlan = { enabled: plan.enabled, platform: plan.platform, regarding: str(plan.regarding, 240), nextNotes: text(plan.nextNotes, 2000) };
+  const nextFollowUp = plan.enabled ? day(input.nextFollowUp) : null;
+  if (nextFollowUp && new Date(nextFollowUp).toISOString().slice(0, 10) !== nextFollowUp) fail("Choose a valid follow-up date");
+  if (plan.enabled && (!nextFollowUp || !followUpPlan.regarding)) fail("Add a topic and date for the next follow-up");
+  const set = { followUpPlan, nextFollowUp, updatedAt: now.toISOString() };
+  if (input.outcome) {
+    if (typeof input.outcome.completed !== "boolean") fail("Did you follow up? Choose yes or no");
+    const previous = cur.followUpPlan || followUpPlan;
+    const platform = previous.platform || followUpPlan.platform;
+    const completed = input.outcome.completed;
+    const type = completed ? (platform === "email" ? "email" : platform === "phone" ? "call" : platform === "in-person" ? "met" : "message") : "note";
+    const entry = { id: randomUUID(), at: now.toISOString(), type, text: text(input.outcome.notes, 2000), followUp: { completed, platform, regarding: previous.regarding || followUpPlan.regarding, nextNotes: followUpPlan.nextNotes, nextFollowUp } };
+    set.history = [...(cur.history || []), entry].sort((a, b) => a.at.localeCompare(b.at)).slice(-MAX_HISTORY);
+    if (completed && (!cur.lastContact || now.toISOString() > cur.lastContact)) set.lastContact = now.toISOString();
+  }
+  await db.collection(PEOPLE).updateOne({ _id: cur._id }, { $set: set });
+  return out({ ...cur, ...set });
+}
+
 /** Add something that happened (a note, an email, a call...). Contact of any kind moves "last contact" forward. */
 export async function logHistory(db, { id, type, text: body, at } = {}, now = new Date()) {
   if (!HISTORY_TYPES.includes(type)) fail("Pick what happened: note, email, message, call, met or reply");
