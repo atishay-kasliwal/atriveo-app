@@ -53,3 +53,21 @@ test('Mongo indexes enforce ownership, multiple devices, event leases and pollin
   await deliverEvent(db, userId, 'retry', {}, { now, send: retry }); assert.equal(attempts, 1);
   await deliverEvent(db, userId, 'retry', {}, { now: new Date(+now + 121000), send: retry }); assert.equal(attempts, 2);
 });
+
+ test('progress pushes collapse jumps, preserve the old goal ID and send each milestone once', async t => {
+  const mongod = await MongoMemoryServer.create(); const client = new MongoClient(mongod.getUri()); await client.connect();
+  t.after(async () => { await client.close(); await mongod.stop(); });
+  const db=client.db('milestones'), userId='owner@example.com', now=new Date('2026-10-28T18:00:00Z');
+  await db.collection('push_subscriptions').insertOne({userId});
+  await db.collection('app_settings').insertOne({_id:'daily_goal',goal:4});
+  const sent=[], send=async (_db,_user,n)=>{sent.push(n.tag);return {sent:1,failed:0};};
+  const add=async n=>db.collection('job_swipes').insertOne({job_url:`https://example.com/${n}`,direction:'applied',applied_at:now.toISOString()});
+  await add(1); await pollPushEvents(db,userId,{now,send});
+  await add(2); await pollPushEvents(db,userId,{now,send});
+  await add(3); await add(4); await pollPushEvents(db,userId,{now,send});
+  for(let i=5;i<=16;i++) await add(i);
+  await Promise.all([pollPushEvents(db,userId,{now,send}),pollPushEvents(db,userId,{now,send})]);
+  await pollPushEvents(db,userId,{now,send});
+  assert.deepEqual(sent,['first:2026-10-28','half:2026-10-28','goal:2026-10-28','m3:2026-10-28']);
+  assert.equal((await db.collection('push_deliveries').findOne({_id:`${userId}:m2:2026-10-28`})).silent,true);
+ });
