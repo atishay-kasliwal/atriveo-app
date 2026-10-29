@@ -438,3 +438,10 @@ export function historyLabel(entry: HistoryEntry): string {
   if (entry.followUp) return `${entry.followUp.completed ? "Followed up" : "Not contacted"} · ${FOLLOW_UP_PLATFORMS.find(([key]) => key === entry.followUp!.platform)?.[1] || "Other"}${entry.followUp.regarding ? ` · ${entry.followUp.regarding}` : ""}`;
   return HISTORY_TYPES.find(([key]) => key === entry.type)?.[1] || entry.type;
 }
+
+export interface IntelligenceItem {
+ key: string; kind: string; stage: 'discovered' | 'actionable' | 'urgent'; title: string; detail: string; next: string;
+ personId?: string; sourceId?: string; workId?: string; mapId?: string; people: string[]; jobs: JobRow[]; relationship?: string; via?: string | null; firstSeen: string;
+}
+export interface IntelligenceFeed { items: IntelligenceItem[]; expanded: boolean; generatedAt: string }
+export const loadIntelligence = () => getJson<IntelligenceFeed & ApiBody>('/network/intelligence');

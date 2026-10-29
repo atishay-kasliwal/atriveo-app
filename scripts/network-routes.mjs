@@ -1,3 +1,4 @@
+import { listIntelligence, intelligenceAction } from './network-intelligence.mjs';
 import { withFollowUps, saveFollowUp, linkedinDay, sortLinkedInByDay, NetworkError, saveYou, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
@@ -13,6 +14,7 @@ const onMap = async (db, b, ids) => { if (b.mapId && b.mapId !== MAIN && ids.len
 
 // /network/*: the Network page's API. The sidecar's own token check runs first; every call is one small Mongo operation.
 const WRITES = {
+  "/network/intelligence/action": (db,b) => intelligenceAction(db,b),
   "/network/preview": (db, b) => previewList(db, b.text).then((rows) => ({ rows })),
   "/network/import/preview": (db, b) => previewContacts(db, b.text),
   "/network/linkedin": (db, b) => addFromLinkedIn(db, b).then(async (r) => { await onMap(db, b, [r.person?.id].filter(Boolean)); return r; }),
@@ -63,6 +65,7 @@ const WRITES = {
   "/network/mail/draft": (db, b, o) => startDraft(db, b, { generate: (request) => o.generate(request, db) }),
 };
 const READS = {
+  "/network/intelligence": db => listIntelligence(db),
   "/network": (db, q) => (q.get("map") && q.get("map") !== MAIN ? mapView(db, q.get("map"), { archived: q.get("archived") === "1" }) : networkView(db, { archived: q.get("archived") === "1" })),
   "/network/maps": (db) => listMaps(db),
   "/network/mail": (db, _q, o) => mailSettings(db, { outRoot: o.outRoot }).then((settings) => ({ settings })),

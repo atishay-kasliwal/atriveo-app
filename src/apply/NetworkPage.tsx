@@ -1,8 +1,9 @@
+import NetworkIntelligence from "./NetworkIntelligence";
 import NetworkFollowUp from "./NetworkFollowUp";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   followUpSummary, historyLabel, autoLayout, sourceLabel, throughFields, throughValue, introducersOf, setActiveMap, HISTORY_TYPES, LINK_KINDS, PALETTE, SOURCE_TYPES, ago, colorsFor, followUp, imageUrl, initials, loadBoard, loadNetwork, post, uploadPhoto,
-  type BoardItem, type HistoryType, type JobRow, companyOfPerson, loadPersonJobs, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
+  loadWholeNetwork, type IntelligenceItem, type BoardItem, type HistoryType, type JobRow, companyOfPerson, loadPersonJobs, type LinkKind, type ListRow, type NetworkData, type Person, type Source, type SourceType,
 } from "./network";
 import NetworkGraph from "./NetworkGraph";
 import NetworkSourceContext from "./NetworkSourceContext";
@@ -30,17 +31,25 @@ const SORTS: [string, string][] = [["name", "Name"], ["recent", "Last contact"],
  * a phone notification or the extension (?person=…, ?work=…, ?view=…, ?linkedin=…) opens My network.
  */
 export default function NetworkPage({ header }: { header?: ReactNode }) {
-  const read = () => { const q = new URLSearchParams(window.location.search); return q.get("map") || (["person", "work", "view", "linkedin", "job"].some((k) => q.has(k)) ? "main" : null); };
+  const read = () => { const q = new URLSearchParams(window.location.search); return q.get("map") || (["person", "source", "work", "view", "linkedin", "job"].some((k) => q.has(k)) ? "main" : null); };
   const [mapId, setMapId] = useState<string | null>(read);
+  const [homeData, setHomeData] = useState<NetworkData>(EMPTY);
+  const [pendingIntelligence, setPendingIntelligence] = useState<IntelligenceItem | null>(null);
+  useEffect(()=>{if(mapId)return;let active=true;loadWholeNetwork().then(d=>{if(active)setHomeData(d);}).catch(()=>{});return()=>{active=false;};},[mapId]);
   const [notice, setNotice] = useState("");
   useEffect(() => { const back = () => setMapId(read()); window.addEventListener("popstate", back); return () => window.removeEventListener("popstate", back); }, []);
   const go = (id: string | null, message = "") => { window.history.pushState(null, "", id ? `/network?map=${encodeURIComponent(id)}` : "/network"); setNotice(message); setMapId(id); };
-  if (!mapId) return <NetworkHome header={header} onOpen={(id, message) => go(id, message)} />;
-  return <NetworkMap key={mapId} header={header} mapId={mapId} notice={notice} onHome={() => go(null)} />;
+  const openFromHome = (kind: 'person' | 'source' | 'work', id: string, draft = false, targetMap = 'main') => {
+    setPendingIntelligence(null);
+    window.history.pushState(null,'',`/network?map=${encodeURIComponent(targetMap)}&${kind}=${encodeURIComponent(id)}${draft?'&draft=1':''}`);
+    setMapId(targetMap);
+  };
+  if (!mapId) return <div className="nw-intelligence-home"><NetworkHome header={header} onOpen={(id, message) => go(id, message)} /><NetworkIntelligence global data={homeData} onFocus={item=>{if(item){setPendingIntelligence(item);go(item.workId&&item.mapId?item.mapId:'main');}}} onPerson={id=>openFromHome('person',id)} onSource={id=>openFromHome('source',id)} onWork={(id,map)=>openFromHome('work',id,false,map)} onDraft={id=>openFromHome('person',id,true)} onChange={p=>setHomeData(d=>({...d,people:d.people.map(x=>x.id===p.id?p:x)}))} /></div>;
+  return <NetworkMap initialIntelligence={pendingIntelligence} key={mapId} header={header} mapId={mapId} notice={notice} onHome={() => {setPendingIntelligence(null);go(null);}} />;
 }
 
 /** One map: the people around your job search, where they came from, what happened, and when to follow up. */
-function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; mapId: string; notice: string; onHome: () => void }) {
+function NetworkMap({ initialIntelligence, header, mapId, notice, onHome }: { initialIntelligence?: IntelligenceItem | null; header?: ReactNode; mapId: string; notice: string; onHome: () => void }) {
   setActiveMap(mapId);
   const main = mapId === "main";
   const [data, setData] = useState<NetworkData>(EMPTY);
@@ -63,6 +72,7 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
     document.addEventListener('pointerdown', away); window.addEventListener('keydown', escape);
     return () => { document.removeEventListener('pointerdown', away); window.removeEventListener('keydown', escape); };
   }, [drawer]);
+  const [intelligenceFocus, setIntelligenceFocus] = useState<{ ids: string[]; target: string; token: number; company?: string } | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [dialog, setDialog] = useState<null | "list" | "person" | "import" | "pick" | { source: Source | null }>(null);
   const [toast, setToast] = useState<Toast>(null);
@@ -86,7 +96,8 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
       if (!linked.current) {
         linked.current = true;
         const q = new URLSearchParams(window.location.search), person = q.get("person"), work = q.get("work");
-        if (person && d.people.some((p) => p.id === person)) setSelected(person);
+        if (person && d.people.some((p) => p.id === person)) { setSelected(person); if(q.get("draft")==="1")setMailFor({id:person}); }
+        else if (q.get("source") && d.sources.some(s=>s.id===q.get("source"))) {setSide({source:q.get("source")!});setView({kind:"source",id:q.get("source")});}
         else if (work && b?.some((x) => x.id === work)) setWork(work);
         else if (q.get("view") === "due") setView({ kind: "due" });
         if (q.get("view") === "jobs") setModeState("jobs");
@@ -112,7 +123,14 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
 
   // The map also shows companies nobody added, where two or more of your people work (worked out, never saved).
   // A map other than My network draws only its own sources (onMap); every source stays in data for the pickers.
-  const mapData = useMemo(() => withAutoCompanies(data.onMap ? { ...data, sources: data.sources.filter((s) => data.onMap!.includes(s.id)) } : data), [data]);
+  const mapData = useMemo(() => {
+    const result = withAutoCompanies(data.onMap ? { ...data, sources: data.sources.filter((s) => data.onMap!.includes(s.id)) } : data);
+    const company = intelligenceFocus?.company;
+    if (company && !result.sources.some(s=>s.name.toLowerCase()===company.toLowerCase()&&['company','staffing'].includes(s.type))) {
+      return {...result,sources:[...result.sources,{id:'intelligence-company',name:company,type:'company' as const,about:'',color:null,createdAt:'',auto:intelligenceFocus.ids.filter(id=>result.people.some(p=>p.id===id))}]};
+    }
+    return result;
+  }, [data,intelligenceFocus]);
   // Colours come from your whole network, so a source looks the same on every map.
   const colors = useMemo(() => colorsFor({ ...data, sources: [...data.sources, ...mapData.sources.filter((s) => s.auto)] }), [data, mapData]);
   const sourceById = useMemo(() => new Map([...data.sources, ...mapData.sources].map((s) => [s.id, s])), [data.sources, mapData.sources]);
@@ -148,10 +166,18 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
   const visible = useMemo(() => (view.kind === "all" && !query.trim() ? null : new Set(shown.map((p) => p.id))), [view, query, shown]);
   const person = selected ? personById.get(selected) ?? null : null;
   const workItem = work ? board.find((b) => b.id === work && b.kind === "work") ?? null : null;
-  const openPerson = (id: string | null) => { setWork(null); setSide(null); setSelected(id); };
-  const openWork = (id: string) => { setSelected(null); setSide(null); setWork(id); };
+  const openPerson = (id: string | null) => { setIntelligenceFocus(null); setWork(null); setSide(null); setSelected(id); };
+  const openWork = (id: string) => { setIntelligenceFocus(null); setSelected(null); setSide(null); setWork(id); };
   const openSource = (id: string, position?: { x: number; y: number }, positions?: { id: string; x: number; y: number }[]) => { setSourcePositions(positions ?? []); setSourcePosition(position ?? autoLayout(mapData).get(id) ?? null); setSelected(null); setWork(null); setSide({ source: id }); setView({ kind: "source", id }); };
   const openYou = () => { setSelected(null); setWork(null); setSide("you"); };
+  const focusIntelligence = useCallback((item: IntelligenceItem | null) => {
+    if (!item) { setIntelligenceFocus(null); return; }
+    setModeState('graph'); setSelected(null); setSide(null); setWork(null); setQuery(''); setView({kind:'all'});
+    setStackPeople(false); setLayers(old=>({...old,people:true,sources:true,connections:true,work:true}));
+    setIntelligenceFocus({ ids: [...item.people, ...(item.sourceId?[item.sourceId]:[])], target: item.personId || item.sourceId || item.workId || 'you', company:item.jobs[0]?.company, token: Date.now() });
+  }, []);
+  const appliedInitialIntelligence = useRef(false);
+  useEffect(()=>{if(loaded&&initialIntelligence&&!appliedInitialIntelligence.current){appliedInitialIntelligence.current=true;focusIntelligence(initialIntelligence);}},[loaded,initialIntelligence,focusIntelligence]);
   const sideSource = side && typeof side === "object" ? sourceById.get(side.source) ?? null : null;
   const replacePerson = (p: Person) => setData((d) => ({ ...d, people: d.people.map((x) => (x.id === p.id ? p : x)) }));
   const viewName = view.kind === "source" ? (view.id ? (sourceById.has(view.id) ? sourceLabel(sourceById.get(view.id)!, data.sources, data.people) : "Source") : "No source") : view.kind === "due" ? "Follow-up due" : view.kind === "never" ? "Never contacted" : view.kind === "introduced" ? "Introduced by someone" : "Everyone";
@@ -234,7 +260,7 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
           </nav>}
 
           <section className="nw-list nw-canvas" aria-label="Network canvas">
-            {loaded ? <NetworkGraph data={mapData} layers={layers} stackPeople={stackPeople} onRevealLayer={(key) => setLayers((old) => ({ ...old, [key]: true }))} colors={colors} visible={visible} selected={selected} selectedWork={work} board={board} setBoard={setBoard}
+            {loaded ? <NetworkGraph intelligenceFocus={intelligenceFocus} data={mapData} layers={layers} stackPeople={stackPeople} onRevealLayer={(key) => setLayers((old) => ({ ...old, [key]: true }))} colors={colors} visible={visible} selected={selected} selectedWork={work} board={board} setBoard={setBoard}
                 onPerson={(id) => openPerson(id === selected ? null : id)} onWork={openWork}
                 onSource={(id, position, positions) => { if (sideSource?.id === id) { setSide(null); setView({ kind: "all" }); } else openSource(id, position, positions); }} onYou={() => (side === "you" ? setSide(null) : openYou())}
                 onLinks={(links) => setData((d) => ({ ...d, links }))} onPeople={(list) => setData((d) => ({ ...d, people: d.people.map((p) => list.find((x) => x.id === p.id) ?? p) }))}
@@ -268,6 +294,7 @@ function NetworkMap({ header, mapId, notice, onHome }: { header?: ReactNode; map
           </section>}
 
 
+          {loaded && <NetworkIntelligence workIds={board.map(w=>w.id)} initialKey={initialIntelligence?.key} data={data} onFocus={focusIntelligence} onPerson={openPerson} onSource={openSource} onWork={openWork} onDraft={(id)=>setMailFor({id})} onChange={replacePerson} />}
           {side === "you" && <YouPanel data={data} onChange={(you) => setData((d) => ({ ...d, you }))} onClose={() => setSide(null)} say={say} />}
           {sideSource?.auto && <AutoCompanyPanel key={sideSource.id} company={sideSource} position={sourcePosition} positions={sourcePositions} data={data} colors={colors} onClose={() => { setSide(null); setView({ kind: "all" }); }} onPerson={(id) => openPerson(id)}
             onReferral={(id, job) => setMailFor({ id, job })} onKeep={(s) => { const positions = new Map(sourcePositions.map((p) => [p.id, p])); setData((d) => ({ ...d, people: d.people.map((p) => ({ ...p, ...positions.get(p.id) })), sources: [...d.sources.filter((x) => x.id !== s.id).map((x) => ({ ...x, ...positions.get(x.id) })), s], ...(d.onMap ? { onMap: [...new Set([...d.onMap, s.id])] } : {}) })); setSide(null); setView({ kind: "all" }); }} say={say} />}
