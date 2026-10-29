@@ -81,6 +81,34 @@ card per day: **Add today's reach-outs** makes or reuses today's card (New York 
 LinkedIn button adds people to today's card; **Sort N into day cards** moves people sitting straight on it into the day they were
 added. A **Day** source is named after its date unless you name it.
 
+## Network Intelligence dock
+
+A persistent tab at the bottom right of the maps home and canvas shows a count of actionable items. It expands upward into a floating
+400 px feed; the canvas keeps its full width. The server remembers expanded/minimized state across logins. The top three items appear
+first, with View all for the rest. On a custom map, the feed is limited to people, sources and work on that map.
+
+The feed combines company openings (including staffing), recent applications with no logged contact since applying, replies, follow-ups
+already due or coming in the next seven days, introductions, quiet relationships, and dated work. These are facts from Network and the
+existing jobs query, not AI-generated fit scores. Openings use the existing 45-day job-board window and query limits. A first connection
+is preferred for the suggested contact; this is not a scored claim about relationship strength. Future work uses recorded start/end
+dates, not inferred meetings or invented times.
+
+Selecting a card keeps the dock open, frames its connection path and fades unrelated graph cards. Company cards can be suggested for
+one connection while its opportunity is focused, without changing saved sources. Job details and external role links appear inside the
+dock. People, sources and work use their existing panels, and Draft message opens the existing composer; it never sends automatically.
+
+Discovered items can be acted on immediately. Unreviewed company opportunities become Actionable after two days from first seeing them;
+waiting replies, late follow-ups and recent applications without contact receive higher priority. Reviewing a card is remembered. These
+stages rank the dock; they do not add new phone interruptions or replace the existing notification schedules.
+
+Remind me accepts a date up to a year ahead and returns the item on that New York day. Don't show again hides that specific item;
+changed job sets can create a new opportunity. I followed up records an actual contact outcome and keeps a future follow-up date or
+advances it by a week. It is a manual record, not a claim that Atriveo sent a message. Sending mail or logging contact elsewhere also
+updates the feed. It refreshes after Network changes, on window focus, and every minute while visible.
+
+State lives in `network_intelligence_state` (first seen, review, dismissal, snooze) and `app_settings.network_intelligence` (dock preference).
+The authenticated API is GET `/network/intelligence` and POST `/network/intelligence/action`. No migration is required.
+
 ## Follow-ups by default
 
 Everyone but family has a follow-up every week, opt-out: due 7 days after you last reached them (or after they were added, if you

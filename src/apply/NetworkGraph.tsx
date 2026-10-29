@@ -51,7 +51,8 @@ const inkOf = (c?: string) => (!c || c === "ink" ? "var(--nw-ink)" : c);
  * sticky notes, pen strokes, images). Drag cards (positions are saved), drag the background to pan, scroll to zoom. Clicking a person
  * opens them; a source shows only its people; one of your own links can be renamed, recoloured or removed.
  */
-export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer, colors, visible, selected, selectedWork, board, setBoard, onPerson, onSource, onYou, onWork, onLinks, onPeople, onBulkMail, say }: {
+export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeople, onRevealLayer, colors, visible, selected, selectedWork, board, setBoard, onPerson, onSource, onYou, onWork, onLinks, onPeople, onBulkMail, say }: {
+  intelligenceFocus?: { ids: string[]; target: string; token: number } | null;
   data: NetworkData; layers: CanvasLayers; stackPeople: boolean; onRevealLayer: (layer: keyof CanvasLayers) => void; colors: Colors; visible: Set<string> | null; selected: string | null; selectedWork: string | null;
   board: BoardItem[]; setBoard: (f: (b: BoardItem[]) => BoardItem[]) => void;
   onPerson: (id: string) => void; onSource: (id: string, position: Point, positions: { id: string; x: number; y: number }[]) => void; onYou: () => void; onWork: (id: string) => void; onLinks: (links: Link[]) => void;
@@ -100,6 +101,29 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
   const shownSources = useMemo(() => layers.sources ? data.sources : [], [layers.sources, data.sources]);
   const nodeShown = (id: string) => id === 'you' || (people.has(id) ? layers.people && !collapsedPeople.has(id) : layers.sources);
   const route = useMemo(() => (pathOpen && pathTo ? warmPath(edges, pathTo) : null), [pathOpen, pathTo, edges]);
+
+  const intelligenceNodes = useMemo(() => {
+    if (!intelligenceFocus) return null;
+    const ids = new Set(['you', ...intelligenceFocus.ids, ...(data.sources.some(s=>s.id==='intelligence-company')?['intelligence-company']:[])]);
+    for (const id of intelligenceFocus.ids) for (const node of warmPath(edges, id)?.nodes ?? []) ids.add(node);
+    return ids;
+  }, [intelligenceFocus, edges, data.sources]);
+  useEffect(() => {
+    if (!intelligenceFocus || !intelligenceNodes || !stage.current) return;
+    const el=stage.current, nodes=[...intelligenceNodes].filter(id=>base.has(id));
+    const points=nodes.map(pos);
+    const work=board.find(w=>w.id===intelligenceFocus.target); if(work)points.push({x:work.x,y:work.y});
+    if(!points.length)return;
+    const xs=points.map(p=>p.x),ys=points.map(p=>p.y);
+    // Frame the path in the remaining canvas, keeping the floating dock clear.
+    const available=Math.max(240,el.clientWidth-(el.clientWidth>760?440:0)), height=Math.max(200,el.clientHeight-180);
+    const k=Math.max(.2,Math.min(1.05,available/(Math.max(...xs)-Math.min(...xs)+320),height/(Math.max(...ys)-Math.min(...ys)+180)));
+    const next={k,x:available/2-(Math.max(...xs)+Math.min(...xs))/2*k,y:80+height/2-(Math.max(...ys)+Math.min(...ys))/2*k};
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){setView(next);return;}
+    let frame=0,from:View|null=null,start=0;
+    const animate=(time:number)=>{if(!start)start=time;const t=Math.min(1,(time-start)/260),ease=1-Math.pow(1-t,3);setView(current=>{if(!from)from=current;return {x:from.x+(next.x-from.x)*ease,y:from.y+(next.y-from.y)*ease,k:from.k+(next.k-from.k)*ease};});if(t<1)frame=requestAnimationFrame(animate);};
+    frame=requestAnimationFrame(animate);return()=>cancelAnimationFrame(frame);
+  }, [intelligenceFocus, intelligenceNodes, base, pos, board]);
 
   // Where a board item is drawn: a pinned note follows its card; anything else stays where it was put.
   const at = useCallback((it: BoardItem): Point => {
@@ -317,6 +341,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
 
   // What stays bright: the filter's people (and their sources), or the person you opened and everyone directly linked to them.
   const lit = useMemo(() => {
+    if (intelligenceNodes) return intelligenceNodes;
     if (route) return new Set(route.nodes);
     if (selected) { const s = new Set([selected]); for (const e of edges) { if (e.a === selected) s.add(e.b); if (e.b === selected) s.add(e.a); } return s; }
     if (!visible) return null;
@@ -324,7 +349,7 @@ export default function NetworkGraph({ data, layers, stackPeople, onRevealLayer,
     for (const p of data.people) if (visible.has(p.id) && p.sourceId) s.add(p.sourceId);
     for (const src of data.sources) if (src.auto?.some((id) => visible.has(id))) s.add(src.id);
     return s;
-  }, [selected, visible, edges, data.people, data.sources, route]);
+  }, [selected, visible, edges, data.people, data.sources, route, intelligenceNodes]);
   const focus = selected ?? hover;
   const onRoute = useMemo(() => new Set(route?.edges.map((e) => e.key) ?? []), [route]);
 
