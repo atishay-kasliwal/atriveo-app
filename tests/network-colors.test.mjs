@@ -4,7 +4,7 @@ import {build} from 'esbuild';
 // The Network colour rule and its wording helpers, bundled from the page's own module.
 const dir=fs.mkdtempSync(path.join(os.tmpdir(),'nwc-'));const out=path.join(dir,'network.mjs');
 await build({entryPoints:[path.resolve('src/apply/network.ts')],bundle:true,format:'esm',platform:'node',outfile:out,logLevel:'silent'});
-const {branchOf,peopleForSource,organisationInitials,colorsFor,PALETTE,followUp,ago,plusDays,initials,sourceLabel,edgesFor,autoLayout,warmPath,withAutoCompanies}=await import(out);
+const {branchOf,peopleForSource,organisationInitials,colorsFor,PALETTE,followUp,ago,plusDays,initials,sourceLabel,edgesFor,autoLayout,placeCells,warmPath,withAutoCompanies}=await import(out);
 const src=(id,at,color=null)=>({id,name:id,type:'company',about:'',color,createdAt:at});
 const person=(id,f={})=>({id,name:id,sourceId:null,via:null,color:null,...f});
 
@@ -163,4 +163,17 @@ test('dragging a card brings its branch: a source its people and the sources und
  assert.deepEqual(branchOf('d29',data).sort(),['ben','cy'],'cy hangs off Ben, who is in this day');
  assert.deepEqual(branchOf('fam',data).sort(),['chani','dev','eve','nkhs'],'Chani brought NKHS and its people; Eve\'s introducer is gone, so she hangs off the source');
  assert.deepEqual(branchOf('ann',data),[]);assert.deepEqual(branchOf('co',data),[],'an automatic company card carries nothing');
+});
+
+test('an event with many employers lays out as a grid of cells: each employer with its people beside it, nothing overlapping',()=>{
+ const sources=[{...src('ev','2026-10-01'),type:'event'},...Array.from({length:60},(_,i)=>({...src('co'+i,'2026-10-02'),parentSourceId:'ev'}))];
+ const people=[];for(let i=0;i<60;i++)for(let k=0;k<(i%4===0?3:1);k++)people.push(person(`p${i}-${k}`,{sourceId:'co'+i}));
+ const pos=autoLayout({sources,people,links:[]});
+ for(const s of sources)assert.ok(pos.has(s.id));for(const p of people)assert.ok(pos.has(p.id));
+ const near=(a,b)=>Math.abs(pos.get(a).x-pos.get(b).x)<196+24&&Math.abs(pos.get(a).y-pos.get(b).y)<52+18;
+ const ids=[...sources.slice(1).map(s=>s.id),...people.map(p=>p.id)];
+ let overlaps=0;for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++)if(near(ids[i],ids[j]))overlaps++;
+ assert.equal(overlaps,0,'no two cards overlap');
+ const p0=pos.get('p0-0'),c0=pos.get('co0');assert.ok(p0.x>c0.x&&Math.abs(p0.y-c0.y)<5,'the first person sits right beside their employer');
+ const xs=ids.map(i=>pos.get(i).x),ys=ids.map(i=>pos.get(i).y);assert.ok((Math.max(...xs)-Math.min(...xs))/(Math.max(...ys)-Math.min(...ys))<4,'a block, not one long strip');
 });

@@ -45,6 +45,8 @@ const onMap = () => (activeMap === "main" ? "" : `map=${encodeURIComponent(activ
 export const loadNetwork = (archived = false) => getJson<NetworkData & ApiBody>(`/network?${[onMap(), archived ? "archived=1" : ""].filter(Boolean).join("&")}`);
 /** Everyone and every source, whichever map is open (the "From your network" picker). */
 export const loadWholeNetwork = () => getJson<NetworkData & ApiBody>("/network");
+/** Everyone including people kept off My network (the Day plan marks them on the talks). */
+export const loadEverything = () => getJson<NetworkData & ApiBody>("/network?everything=1");
 export interface CalendarEvent { id: string; title: string; at: string; remind: number; personId: string | null; note: string; done: boolean }
 export const loadEvents = () => getJson<{ events: CalendarEvent[] } & ApiBody>("/network/events").then((r) => r.events);
 export const saveEvent = (event: { title: string; at: string; remind: number; personId: string | null; note: string }) => post<{ event: CalendarEvent }>("events/save", event);
@@ -152,16 +154,20 @@ export function autoLayout(data: NetworkData): Map<string, Point> {
     for (const parent of sources) {
       const c = pos.get(parent.id); if (!c) continue;
       const kids = sources.filter((s) => s.parentSourceId === parent.id && !pos.has(s.id));
-      if (kids.length) { placeGroup(kids.map((s) => s.id), c, away(c) + Math.PI / 3, 380, pos); moved = true; }
+      // An event with a hundred employers under it: each employer with its own people beside it, in a grid, not one blob.
+      if (kids.length > 8 && kids.some((k) => (bySource.get(k.id) ?? []).length)) { placeCells(kids.map((k) => ({ id: k.id, people: (bySource.get(k.id) ?? []).map((p) => p.id) })), c, Math.sin(away(c) + Math.PI / 3) < 0 ? -1 : 1, pos); moved = true; }
+      else if (kids.length) { placeGroup(kids.map((s) => s.id), c, away(c) + Math.PI / 3, 380, pos); moved = true; }
     }
     for (const person of data.people) {
       const c = pos.get(person.id); if (!c) continue;
       const kids = sources.filter((s) => s.viaPersonId === person.id && throughPerson(s) && !pos.has(s.id));
       if (kids.length) { placeGroup(kids.map((s) => s.id), c, away(c) - Math.PI / 5, 300, pos); moved = true; }
     }
-    for (const [sid, list] of bySource) {
+    for (const [sid, all] of bySource) {
       if (done.has(sid)) continue;
       const c = sid ? pos.get(sid) : you; if (!c) continue;
+      const list = all.filter((p) => !pos.has(p.id));
+      if (!list.length) { done.add(sid); continue; }
       placeGroup(list.map((p) => p.id), c, sid ? away(c) : -Math.PI / 2, sid ? 250 : 300, pos); done.add(sid); moved = true;
     }
     for (const [via, kids] of byVia) {
@@ -230,6 +236,25 @@ export function placeGroup(ids: string[], c: Point, out: number, r0: number, pos
     const y = sideways ? c.y + (row - (rows - 1) / 2) * (CARD_H + GAP_Y) : c.y + Math.sign(uy) * (start + row * (CARD_H + GAP_Y + 10));
     pos.set(id, { x: Math.round(x), y: Math.round(y) });
   });
+}
+
+/**
+ * Cells for a big group of sources (an event's employers): each source with its people in a column beside it, the cells in a grid below
+ * (dir 1) or above (dir -1) the parent, the busiest first so the rows stay short. Nothing overlaps however many employers there are.
+ */
+export function placeCells(cells: { id: string; people: string[] }[], c: Point, dir: 1 | -1, pos: Map<string, Point>) {
+  const list = [...cells].sort((a, b) => b.people.length - a.people.length), n = list.length;
+  const cols = Math.min(8, Math.max(3, Math.round(Math.sqrt(n * 0.9)))), cellW = 2 * (CARD_W + GAP_X) + 36, rowGap = CARD_H + GAP_Y;
+  let y = c.y + dir * (CARD_H * 3);
+  for (let r = 0; r * cols < n; r++) {
+    const row = list.slice(r * cols, r * cols + cols), tall = Math.max(1, ...row.map((k) => k.people.length));
+    row.forEach((cell, i) => {
+      const x = c.x + (i - (row.length - 1) / 2) * cellW - (CARD_W + GAP_X) / 2, top = dir === 1 ? y : y - (tall - 1) * rowGap;
+      pos.set(cell.id, { x: Math.round(x), y: Math.round(top) });
+      cell.people.forEach((pid, k) => pos.set(pid, { x: Math.round(x + CARD_W + GAP_X), y: Math.round(top + k * rowGap) }));
+    });
+    y += dir * (tall * rowGap + 30);
+  }
 }
 
 export interface Edge { key: string; a: string; b: string; kind: "belongs" | "via" | "you" | "employer" | LinkKind; label: string; color: string; link?: Link }

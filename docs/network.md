@@ -58,6 +58,13 @@ email, then LinkedIn, then name. Matches are reused exactly as they are; everyth
 and board. Pictures are not in the file, so photos and board images are left out. A preview of each map is saved when you go back to
 all maps. Links from notifications and the extension (`?person=`, `?work=`, `?view=`, `?linkedin=`) open My network.
 
+**Keep off My network.** Tick it next to **Open a saved file** (or a file can say `"separate": true`) and what the file adds belongs to
+the new map only: its new people and sources carry `mapOnly: <map id>`, My network and the "From your network…" picker leave them out,
+and the map shows them. People you already had are reused exactly as they are and stay on My network. `GET /network?everything=1`
+returns everyone including these (the Day plan reads it). For a file opened before this existed, `scripts/network-ato-companies.mjs`
+does the same for the ATO 2026 map (dry run by default, `--apply` to change), and also gives each employer its own card and colour
+under the event and moves each person onto their employer's card. Big events lay out as cells: each employer with its people beside it.
+
 ## Export
 
 **Export** (next to Fit, or Ctrl/Cmd+Shift+E), like Excalidraw's: PNG, SVG or Copy to clipboard (PNG), with a preview and the options
