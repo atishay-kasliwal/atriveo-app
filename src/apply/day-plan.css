@@ -1,0 +1,59 @@
+/* Day plan (/day-plan): room lanes across the day with a time cursor; the panel on the right lists your Network people speaking that
+   day, or the opened talk. Flat surfaces, no gradients. Phones (≤900px): the panel stacks under the lanes and the lanes scroll sideways. */
+.dp-page { --dp-accent: #8b7bf0; --dp-hire: #34d399; --dp-due: #e0a526; }
+.dp-controls { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; }
+.dp-days { display: flex; gap: 4px; }
+.dp-days button { border: 1px solid var(--border-col); background: none; color: var(--muted-fg); border-radius: 999px; padding: 4px 12px; font: inherit; font-size: 12.5px; cursor: pointer; }
+.dp-days button.is-on { color: var(--foreground); border-color: var(--foreground); }
+.dp-time { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--muted-fg); }
+.dp-time b { color: var(--foreground); min-width: 62px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.dp-time input { width: 240px; max-width: 40vw; accent-color: var(--dp-accent); }
+.dp-main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); gap: 12px; padding: 12px 16px 16px; }
+.dp-board, .dp-side { min-height: 0; min-width: 0; overflow: auto; border: 1px solid var(--border-col); border-radius: 12px; background: var(--surface-elev); padding: 14px; }
+.dp-note { margin: 0 0 10px; color: var(--muted-fg); font-size: 12.5px; }
+.dp-scroll { min-width: 680px; }
+.dp-axis { position: relative; height: 18px; margin-left: 96px; font-size: 11px; color: var(--muted-fg); }
+.dp-axis span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.dp-lane { display: flex; align-items: center; margin-top: 6px; }
+.dp-room { width: 96px; flex: none; padding-right: 8px; font-size: 11.5px; color: var(--muted-fg); }
+.dp-track { position: relative; flex: 1; height: 42px; border-radius: 8px; background: var(--secondary-bg); }
+.dp-grid { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--border-col); }
+.dp-cursor { position: absolute; top: -3px; bottom: -3px; width: 2px; border-radius: 1px; background: var(--foreground); pointer-events: none; }
+.dp-block { position: absolute; top: 4px; bottom: 4px; overflow: hidden; padding: 0 6px; border: 1px solid var(--border-col); border-radius: 6px; background: var(--surface-elev); color: var(--foreground); font: inherit; font-size: 11px; text-align: left; cursor: pointer; }
+.dp-block span { display: block; overflow: hidden; line-height: 32px; text-overflow: ellipsis; white-space: nowrap; }
+.dp-block.is-live { border-color: var(--foreground); }
+.dp-block.is-top { box-shadow: inset 0 0 0 1.5px var(--dp-accent); }
+.dp-block.is-mine { background: var(--dp-accent); border-color: var(--dp-accent); color: #fff; }
+.dp-block.is-sel { outline: 2px solid var(--foreground); outline-offset: 1px; z-index: 2; }
+.dp-hire { display: inline-block; width: 7px; height: 7px; margin-right: 5px; vertical-align: middle; background: var(--dp-hire); transform: rotate(45deg); }
+.dp-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 14px 0 4px; color: var(--muted-fg); font-size: 12px; }
+.dp-legend i { display: inline-block; width: 11px; height: 11px; margin-right: 5px; vertical-align: -1px; border: 1px solid var(--border-col); border-radius: 3px; }
+.dp-legend i.is-mine { background: var(--dp-accent); border-color: var(--dp-accent); }
+.dp-legend i.is-top { box-shadow: inset 0 0 0 1.5px var(--dp-accent); }
+.dp-legend i.is-hire { background: var(--dp-hire); border: 0; border-radius: 0; transform: rotate(45deg) scale(.8); }
+.dp-legend i.is-live { border-color: var(--foreground); }
+.dp-now { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-col); }
+.dp-now h2, .dp-card h3 { margin: 0 0 6px; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-fg); }
+.dp-now h2 span, .dp-card h3 span { margin-left: 4px; color: var(--foreground); }
+.dp-now ul { margin: 0; padding: 0; list-style: none; }
+.dp-now li button, .dp-meet-row, .dp-person { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 6px; border: 0; border-radius: 7px; background: none; color: var(--foreground); font: inherit; font-size: 12.5px; text-align: left; text-decoration: none; cursor: pointer; }
+.dp-now li button:hover, .dp-meet-row:hover, .dp-person:hover { background: var(--secondary-bg); }
+.dp-now li button > span:nth-child(2), .dp-meet-row > span, .dp-person > span { flex: 1; min-width: 0; }
+.dp-now small, .dp-meet-row small, .dp-person small { display: block; margin-top: 1px; color: var(--muted-fg); font-size: 11px; }
+.dp-r { width: 90px; flex: none; color: var(--muted-fg); font-size: 11.5px; }
+.dp-star { color: var(--dp-accent); }
+.dp-card h2 { margin: 8px 0 8px; font-size: 18px; font-weight: 500; line-height: 1.3; }
+.dp-kind { font-size: 10px; letter-spacing: .12em; color: var(--muted-fg); }
+.dp-card-head { display: flex; align-items: center; justify-content: space-between; }
+.dp-x { width: 28px; height: 28px; border: 0; border-radius: 8px; background: none; color: var(--muted-fg); font: inherit; cursor: pointer; }
+.dp-x:hover { background: var(--secondary-bg); color: var(--foreground); }
+.dp-card dl { display: grid; grid-template-columns: 84px 1fr; gap: 6px 10px; margin: 12px 0; font-size: 12.5px; }
+.dp-card dt { color: var(--muted-fg); } .dp-card dd { margin: 0; overflow-wrap: anywhere; }
+.dp-card section { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-col); }
+.dp-tier { flex: none; padding: 2px 6px; border-radius: 5px; background: var(--secondary-bg); font-size: 10.5px; font-weight: 600; }
+.dp-tier.is-A { background: var(--dp-accent); color: #fff; }
+.dp-clash { margin: 4px 0; color: var(--dp-due); font-size: 12.5px; }
+.dp-btn { margin-top: 14px; min-height: 32px; padding: 0 12px; border: 1px solid var(--border-col); border-radius: 8px; background: none; color: var(--foreground); font: inherit; font-size: 12.5px; cursor: pointer; }
+.dp-btn[aria-pressed="true"] { border-color: var(--dp-accent); color: var(--dp-accent); }
+.dp-foot { margin-top: 14px; font-size: 12px; }
+@media (max-width: 900px) { .dp-main { grid-template-columns: minmax(0, 1fr); } .dp-board { overflow-x: auto; } .dp-time input { width: 160px; } .dp-x { width: 40px; height: 40px; } }
