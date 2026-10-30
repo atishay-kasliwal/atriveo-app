@@ -47,6 +47,9 @@
 .cd-open-title { font-size: 13.5px; line-height: 1.35; }
 .cd-open-meta { font-size: 12px; color: var(--muted-fg); }
 .cd-open-actions { display: flex; gap: 14px; }
+.cd-all { display: inline-block; margin-top: 10px; color: var(--muted-fg); font-size: 12.5px; text-decoration: none; }
+.cd-all:hover { color: var(--foreground); text-decoration: underline; }
+.cd-all:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .cd-link { padding: 0; border: 0; background: none; color: var(--primary); font: inherit; font-size: 12.5px; cursor: pointer; }
 .cd-link:hover:not(:disabled) { text-decoration: underline; }
 .cd-link:disabled { opacity: .5; cursor: default; }

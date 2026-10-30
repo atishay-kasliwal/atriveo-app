@@ -23,6 +23,7 @@ import OutreachPage from "./OutreachPage";
 import NetworkPage from "./NetworkPage";
 import TodayPage from "./TodayPage";
 import CaptureDock from "./CaptureDock";
+import LoopsPage from "./LoopsPage";
 
 /** Signed-in admins see the console; everyone else is sent to the admin login. */
 function Console() {
@@ -46,6 +47,7 @@ function Console() {
   const page = (() => {
     if (path === "/outreach") return <OutreachPage header={header} />;
     if (path === "/network") return <NetworkPage header={header} />;
+    if (path === "/loops") return <LoopsPage header={header} />;
     if (path === "/job-matching") return <JobMatchingPage header={header} />;
     if (path === "/applied" || path.startsWith("/applied/")) return <AppliedPage header={header} />;
     if (path === "/settings") return <SettingsPage header={header} />;
