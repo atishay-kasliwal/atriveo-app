@@ -75,7 +75,7 @@ const WRITES = {
 };
 const READS = {
   "/network/intelligence": db => listIntelligence(db),
-  "/network": (db, q) => (q.get("map") && q.get("map") !== MAIN ? mapView(db, q.get("map"), { archived: q.get("archived") === "1" }) : networkView(db, { archived: q.get("archived") === "1" })),
+  "/network": (db, q) => (q.get("map") && q.get("map") !== MAIN ? mapView(db, q.get("map"), { archived: q.get("archived") === "1" }) : networkView(db, { archived: q.get("archived") === "1", separate: q.get("everything") === "1" })),
   "/network/maps": (db) => listMaps(db),
   "/network/mail": (db, _q, o) => mailSettings(db, { outRoot: o.outRoot }).then((settings) => ({ settings })),
   "/network/mail/draft": (db, q) => draftStatus(db, q.get("id")),

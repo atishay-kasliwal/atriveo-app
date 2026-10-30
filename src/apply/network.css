@@ -721,3 +721,6 @@ button.pp-step{cursor:pointer;transition:color .15s}button.pp-step:hover{color:v
 .pp-people .nw-oc{padding:2px 8px;border-radius:999px;border:1px solid var(--nw-line-strong)}
 .pp-people .nw-oc.is-ask{color:var(--nw-warn);border-color:var(--nw-warn)}.pp-people .nw-oc.is-yes{color:var(--nw-ink);border-color:var(--nw-ink)}.pp-people .nw-oc.is-gone{opacity:.6}
 .nw-bell-pop .nw-asks{display:flex;flex-direction:column;gap:4px;padding:6px 4px}.nw-bell-pop .nw-asks button{border:1px solid var(--nw-line-strong);background:transparent;color:var(--nw-ink);border-radius:8px;font-size:12px;padding:4px 8px;white-space:nowrap}.nw-bell-pop .nw-asks button:hover{background:var(--nw-soft)}
+
+.nwh-separate{display:inline-flex;align-items:center;gap:6px;margin-right:6px;color:var(--nw-muted,#9aa3b2);font-size:12.5px;cursor:pointer}
+.nwh-separate input{accent-color:var(--nw-accent)}

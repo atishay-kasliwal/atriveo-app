@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ATO_DAYS, ATO_SESSIONS, type AtoSession } from "./atoSchedule";
-import { followUp, loadWholeNetwork, type Person } from "./network";
+import { followUp, loadEverything, type Person } from "./network";
 import "./review-pages.css";
 import "./day-plan.css";
 
 // Day plan (/day-plan): the All Things Open program as room lanes across the day, with a time cursor. Your people from Network are
 // marked on the talks they give (Priority A/B and any follow-up), and companies hiring at the job board get a dot. The schedule is
-// public and ships with the app; everything about people is read from Network (Mongo) and never stored here. Your agenda lives in
+// public and ships with the app; everything about people is read from Network (Mongo, including people kept off My network) and never stored here. Your agenda lives in
 // this browser.
 
 const AGENDA_KEY = "ato-day-plan-agenda";
@@ -28,7 +28,7 @@ export default function DayPlanPage({ header }: { header: React.ReactNode }) {
 
   useEffect(() => {
     let live = true;
-    loadWholeNetwork().then((n) => {
+    loadEverything().then((n) => {
       if (!live) return;
       setPeople(n.people.filter((p) => !p.archived));
       setHiring(new Set(n.sources.filter((s) => /^hiring/i.test(s.about ?? "")).map((s) => fold(s.name))));

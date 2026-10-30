@@ -42,12 +42,15 @@ export function parseList(input) {
 async function all(db, name) { return (await db.collection(name).find({}).toArray()).map(out); }
 
 /** Everything the page shows: people (archived ones left out unless asked), sources, links, and where "You" sits on the canvas. */
-export async function networkView(db, { archived = false } = {}) {
+export async function networkView(db, { archived = false, separate = false } = {}) {
   const [people, sources, links, you] = await Promise.all([all(db, PEOPLE), all(db, SOURCES), all(db, LINKS), db.collection("app_settings").findOne({ _id: YOU })]);
+  // People and sources that belong to one map only (an event file opened with "keep off My network") are not part of My network.
+  const shown = (x) => separate || !x.mapOnly, hidden = new Set([...people, ...sources].filter((x) => !shown(x)).map((x) => x.id));
+  const mine = sources.filter(shown);
   return {
-    people: withFollowUps(people.filter((p) => archived || !p.archived), sources).sort((a, b) => a.name.localeCompare(b.name)),
-    sources: sources.sort((a, b) => a.name.localeCompare(b.name)),
-    links,
+    people: withFollowUps(people.filter((p) => shown(p) && (archived || !p.archived)), mine).sort((a, b) => a.name.localeCompare(b.name)),
+    sources: mine.sort((a, b) => a.name.localeCompare(b.name)),
+    links: links.filter((l) => !hidden.has(l.a) && !hidden.has(l.b)),
     you: { x: you?.x ?? 0, y: you?.y ?? 0, name: you?.name ?? "", title: you?.title ?? "", photoId: you?.photoId ?? null, note: you?.note ?? "" },
   };
 }
