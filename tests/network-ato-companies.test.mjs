@@ -60,3 +60,19 @@ test('opening a file with "keep off My network" adds its people and sources to t
  const flagged=await openMapFile(db,{name:'File says so',file:{...file,separate:true,people:[{id:'p4',name:'Ann Flagged',sourceId:'e'}],sources:[]}},T);
  assert.equal(flagged.separate,true,'a file can ask to be kept off My network itself');void addToMap;
 });
+
+test('the same employer spelled several ways gets one card, and cards the file put under the event with nobody on them go off My network too',async()=>{
+ const db=fakeDb();
+ const map=await saveMap(db,{name:'ATO 2026 network map'},T);
+ const ato=await saveSource(db,{name:'All Things Open 2026',type:'event'},T);
+ const quiet=await saveSource(db,{name:'Quiet Hiring Co',type:'company',parentSourceId:ato.id,about:'Hiring at ATO: Engineer'},T);
+ const ids=[ato.id,quiet.id];
+ for(const [n,c] of [['A One','AWS'],['B Two','Amazon Web Services'],['C Three','Amazon / Linux TV'],['D Four','Google Cloud'],['E Five','Google'],['F Six','CISSP / VCSO (independent security leadership)'],['G Seven','']]) ids.push((await savePerson(db,{name:n,company:c,sourceId:ato.id,tags:['ATO 2026']},T)).id);
+ await addToMap(db,{mapId:map.id,ids});
+ const plan=await planAtoCompanies(db,{apply:true,map:'ATO 2026 network map'},T);
+ assert.deepEqual(plan.created.sort(),['Amazon','Google','Independent'],'three employers, not seven');
+ const home=await networkView(db);assert.deepEqual([home.people.length,home.sources.length],[0,0],'nothing from the file is left on My network, including the quiet company');
+ const v=await mapView(db,map.id);assert.equal(v.people.length,7);
+ const amazon=v.sources.find(s=>s.name==='Amazon');assert.equal(v.people.filter(p=>p.sourceId===amazon.id).length,3);
+ assert.ok(v.sources.some(s=>s.name==='Quiet Hiring Co'),'and it is still on the map');
+});
