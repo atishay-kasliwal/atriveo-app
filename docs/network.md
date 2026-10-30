@@ -143,6 +143,22 @@ Sent from your Gmail through the send-only connection Outreach sets up (`PLAYATR
 `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`), only when you press Send. "Write to all" still has one Send per person.
 Draft with AI goes through the same path as application answers (`RESUME_AI_REMOTE_WORKER=mac` uses the Mac AI worker).
 
+## LinkedIn outreach (check-ins)
+
+A source of kind **LinkedIn outreach (check-ins)** (`outreach`) is one day's batch of LinkedIn reach-outs; it is separate from the older
+LinkedIn reach-out / Day cards. New source: the date starts as today and can be changed (Details tab later). Everyone added to it
+(Add people, Paste list, or one person) gets `outreach: { reachedAt, status, answers[] }`; today's reach-outs start the clock now, an
+earlier date at noon that day. The source stores `checkHours` (default 24, 48, 72).
+
+At each check-in "Did they respond?" appears in the source panel and the bell: **Accepted** or **Replied** keeps them (a reply is logged
+in their history); **No** before the last check-in means "message again" and they keep waiting; **No** at the last check-in archives them
+(restore with `/network/outreach/restore`). People in an outreach source get no automatic weekly follow-up.
+
+Web Push (ntfy: a count) goes once per person and hour from the 10-minute tick (`runOutreachAlerts`, claims in
+`network_outreach_alerts`), held until 8 a.m. New York time. From the second check on it says to message again if they have not
+answered. Routes: `/network/outreach/source`, `/people`, `/answer`, `/restore`. Code: `scripts/network-outreach.mjs`;
+tests: `tests/network-outreach.test.mjs`.
+
 ## Reminders
 
 On the page: a reply waiting for your answer, follow-ups due or late, work ending within a week or late, people quiet for two weeks,

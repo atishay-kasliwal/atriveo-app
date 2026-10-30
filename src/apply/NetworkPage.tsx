@@ -701,11 +701,11 @@ function SourceEditor({ source, sources, people, count, color, onClose, onDone }
   const [kindName, setKindName] = useState(source?.kindName ?? "");
   // A day is named after its date ("Oct 28, 2026") unless you name it.
   const dayName = (iso: string) => (iso ? new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }) : "");
-  const finalName = name.trim() || (type === "day" ? dayName(when) : "");
+  const finalName = name.trim() || (type === "day" ? dayName(when) : type === "outreach" ? `LinkedIn outreach · ${dayName(when)}` : "");
   const [confirm, setConfirm] = useState(false); const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
   async function save() {
     setBusy(true); setError("");
-    try { const r = await post<{ source: Source & { existed?: boolean } }>("source", { ...(source ? { id: source.id } : {}), name: finalName, type, kindName, about, place, ...(type === "event" || type === "day" ? { when } : {}), color: pick, ...throughFields(parentSourceId), context }); onDone(source ? `${finalName} saved.` : r.source.existed ? `You already have ${r.source.name} in that context.` : `${finalName} added. Add people to it with Add a list.`); }
+    try { const r = await post<{ source: Source & { existed?: boolean } }>("source", { ...(source ? { id: source.id } : {}), name: finalName, type, kindName, about, place, ...(type === "event" || type === "day" || type === "outreach" ? { when } : {}), color: pick, ...throughFields(parentSourceId), context }); onDone(source ? `${finalName} saved.` : r.source.existed ? `You already have ${r.source.name} in that context.` : `${finalName} added. Add people to it with Add a list.`); }
     catch (e) { setError(String((e as Error).message)); setBusy(false); }
   }
   async function remove() {
@@ -717,13 +717,13 @@ function SourceEditor({ source, sources, people, count, color, onClose, onDone }
     <Dialog title={source ? `Edit ${source.name}` : "New source"} sub="Where people come from. Everyone you reach through it shares its colour." onClose={onClose}>
       <div className="nw-form">
         <label className="nw-f"><span>Name</span><input id="nw-src-name" autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Randstad, All Things Open, Family…" /></label>
-        <KindPicker id="nw-src-type" type={type} kindName={kindName} onChange={(t, k) => { setType(t); setKindName(k); }} />
+        <KindPicker id="nw-src-type" type={type} kindName={kindName} onChange={(t, k) => { setType(t); setKindName(k); if (t === "outreach" && !/^\d{4}-\d{2}-\d{2}$/.test(when)) setWhen(new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" })); }} />
         <NetworkSourceContext sources={sources} people={people} parentSourceId={parentSourceId} onParent={setParentSourceId} context={context} onContext={setContext} excludeId={source?.id} prefix="nw-src" />
         <label className="nw-f"><span>About</span><input id="nw-src-about" value={about} onChange={(e) => setAbout(e.target.value)} placeholder="Staffing agency, open-source conference…" /></label>
         <div className="nw-pair">
           <label className="nw-f"><span>Where</span><input id="nw-new-place" value={place} onChange={(e) => setPlace(e.target.value)} placeholder="Raleigh, NC or Global" /></label>
           {type === "event" && <label className="nw-f"><span>When</span><input id="nw-new-when" value={when} onChange={(e) => setWhen(e.target.value)} placeholder="Oct 2024" /></label>}
-          {type === "day" && <label className="nw-f"><span>Day</span><input id="nw-new-day" type="date" value={/^\d{4}-\d{2}-\d{2}$/.test(when) ? when : ""} onChange={(e) => setWhen(e.target.value)} /></label>}
+          {(type === "day" || type === "outreach") && <label className="nw-f"><span>{type === "outreach" ? "Reached out on" : "Day"}</span><input id="nw-new-day" type="date" value={/^\d{4}-\d{2}-\d{2}$/.test(when) ? when : ""} onChange={(e) => setWhen(e.target.value)} /></label>}
         </div>
         <div className="nw-lab">Colour</div>
         <Swatches value={pick} fallback={color} label="Source colour" onPick={setPick} />
