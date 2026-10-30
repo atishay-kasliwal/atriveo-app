@@ -161,11 +161,12 @@ test('unfinished intentions: a small count on the ring, listed in the dock with 
   assert.equal((await ring.locator('.cd-count').textContent()).trim(), '1');
   assert.ok(await ring.evaluate((el) => el.classList.contains('is-due')), 'past its reminder time: the dot breathes');
   await ring.click();
-  await page.getByText('Message Sarah about the NVIDIA role').waitFor();
-  await page.getByText(/NVIDIA · Software Engineer · Waiting 18h/).waitFor();
+  const dock = page.getByRole('dialog', { name: 'Capture a thought' });
+  await dock.getByText('Message Sarah about the NVIDIA role').waitFor();
+  await dock.getByText(/NVIDIA · Software Engineer · Waiting 18h/).waitFor();
   await page.waitForTimeout(400);
   await shot(page, 'open-with-loop');
-  await page.getByRole('button', { name: 'Done' }).click();
+  await dock.getByRole('button', { name: 'Done' }).click();
   assert.ok(f.calls.some((c) => c.path === '/api/loops/cap_000001/done'));
   await page.waitForFunction(() => !document.querySelector('.cd-open'));
 });

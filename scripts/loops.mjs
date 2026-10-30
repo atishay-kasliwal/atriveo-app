@@ -369,7 +369,9 @@ const ago = (from, now) => { const h = Math.max(0, Math.floor((+now - +from) / H
 export function reminderNotification(c, now = new Date()) {
   const open = c.tasks.find((t) => !t.done);
   const where = [c.view?.company, c.view?.position].filter(Boolean).join(" · ");
-  return { title: "Atriveo", body: [`Still open: ${open?.title ?? c.view?.summary ?? "something you wanted to do"}`, where, `Waiting ${ago(c.confirmedAt ?? c.createdAt, now)}`].filter(Boolean).join("\n"), url: `/loops?id=${encodeURIComponent(c._id)}`, type: "loop_reminder", tag: `loop:${c._id}` };
+  return { title: "Atriveo", body: [`Still open: ${open?.title ?? c.view?.summary ?? "something you wanted to do"}`, where, `Waiting ${ago(c.confirmedAt ?? c.createdAt, now)}`].filter(Boolean).join("\n"), url: `/loops?id=${encodeURIComponent(c._id)}`, type: "loop_reminder", tag: `loop:${c._id}`,
+    // Done and Snooze buttons where the platform shows them (desktop, Android); iOS ignores buttons, and tapping the notification opens the capture.
+    actions: [{ action: "done", title: "Done" }, { action: "snooze", title: "Snooze 6h" }], data: { loopId: c._id } };
 }
 /**
  * Called every minute with the push poller. One atomic claim per due capture (advancing nextAt as it claims), then the push: a second
@@ -414,7 +416,25 @@ async function publicCapture(db, id, userId) { const c = await caps(db).findOne(
 export async function getCapture(db, userId, id) {
   const c = await mine(db, userId, id);
   const story = await events(db).find({ captureId: c._id }).sort({ at: 1 }).toArray();
-  return { capture: shape(c), events: story.map((e) => ({ type: e.type, at: e.at, data: e.data })) };
+  // What the links point at, by name (the capture stores only ids).
+  const l = c.links?.linked ?? {}, linked = {};
+  if (l.personId) { const p = await db.collection("network_people").findOne({ _id: l.personId }, { projection: { name: 1, company: 1 } }).catch(() => null); if (p) linked.person = { id: String(p._id), name: p.name, company: p.company ?? null }; }
+  if (l.sourceId) { const x = await db.collection("network_sources").findOne({ _id: l.sourceId }, { projection: { name: 1 } }).catch(() => null); if (x) linked.company = { id: String(x._id), name: x.name }; }
+  if (l.jobUrl) { const j = await db.collection("jobs").findOne({ job_url: l.jobUrl }, { projection: { title: 1, company: 1 } }).catch(() => null); linked.job = { url: l.jobUrl, title: j?.title ?? null, company: j?.company ?? null }; }
+  return { capture: shape(c), events: story.map((e) => ({ type: e.type, at: e.at, data: e.data })), linked };
+}
+/** Thoughts tied to a Network person or company (by id): counts per state and the latest few. Read by the Loops page; Network can show it later. */
+export async function relatedLoops(db, userId, { personId = null, sourceId = null } = {}) {
+  const or = [personId && { "links.linked.personId": String(personId) }, sourceId && { "links.linked.sourceId": String(sourceId) }].filter(Boolean);
+  if (!or.length) throw new LoopsError("Give a person or a company");
+  const filter = { userId, $or: or, status: { $nin: ["DISMISSED"] } };
+  const [counts, latest] = await Promise.all([
+    caps(db).aggregate([{ $match: filter }, { $group: { _id: "$status", n: { $sum: 1 } } }]).toArray(),
+    caps(db).find(filter).sort({ createdAt: -1 }).limit(5).toArray(),
+  ]);
+  const by = Object.fromEntries(counts.map((c) => [c._id, c.n]));
+  const total = counts.reduce((n, c) => n + c.n, 0);
+  return { related: { total, open: (by.ACTIVE ?? 0) + (by.SNOOZED ?? 0), completed: by.COMPLETED ?? 0, latest: latest.map((c) => ({ id: c._id, status: c.status, summary: c.view?.summary ?? null, createdAt: c.createdAt })) } };
 }
 /** The list: filter by section or status, and search company, person, position, text, status and date. */
 export async function listCaptures(db, userId, { section = null, status = null, q = "", from = null, to = null, limit = 100, skip = 0 } = {}) {

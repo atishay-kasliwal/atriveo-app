@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
-import { audioUrl, clock, getLoop, listLoops, loopConfirm, loopDismiss, loopDone, loopEdit, loopReopen, loopRetry, loopSnooze, loopsSummary, loopTranscript, type Loop, type LoopEvent, type LoopStatus } from "./loops";
+import { audioUrl, clock, getLoop, listLoops, loopConfirm, loopDismiss, loopDone, loopEdit, loopReopen, loopRetry, loopSnooze, loopsSummary, loopTranscript, type Loop, type LoopEvent, type LoopLinked, type LoopStatus } from "./loops";
 import "./loops-page.css";
 
 // Loops: every thought you captured and where it stands. Unfinished intentions first; opening one tells its story:
@@ -149,7 +149,7 @@ const EVENT_TEXT: Record<string, (d: Record<string, unknown>) => string> = {
 };
 
 function Detail({ id, now, mac, onChanged, onClose }: { id: string; now: number; mac: string | null; onChanged: () => void; onClose: () => void }) {
-  const [data, setData] = useState<{ capture: Loop; events: LoopEvent[] } | null>(null);
+  const [data, setData] = useState<{ capture: Loop; events: LoopEvent[]; linked: LoopLinked } | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
@@ -161,7 +161,7 @@ function Detail({ id, now, mac, onChanged, onClose }: { id: string; now: number;
   };
   if (error && !data) return <div className="lp-detail-in"><button className="lp-back" onClick={onClose}>← Loops</button><p className="lp-note" role="alert">{error}</p></div>;
   if (!data) return <div className="lp-detail-in"><button className="lp-back" onClick={onClose}>← Loops</button><p className="lp-empty">Loading…</p></div>;
-  const c = data.capture, v = c.view;
+  const c = data.capture, v = c.view, linked = data.linked ?? {};
   const reviewing = c.status === "NEEDS_REVIEW", live = c.status === "ACTIVE" || c.status === "SNOOZED";
   return (
     <article className={`lp-detail-in ${celebrate ? "is-done-now" : ""}`}>
@@ -224,7 +224,7 @@ function Detail({ id, now, mac, onChanged, onClose }: { id: string; now: number;
           <h3>Understood as</h3>
           <dl className="lp-kv">{([["Company", v.company], ["Role", v.position], ["Person", v.person], ["Intent", v.intent]] as const).filter(([, x]) => x).map(([k, x]) => <div key={k}><dt>{k}</dt><dd>{x}</dd></div>)}</dl>
           {v.context.length > 0 && <ul className="lp-context">{v.context.map((x, i) => <li key={i}>{x}</li>)}</ul>}
-          {(c.links?.linked.personId || c.links?.linked.sourceId || c.links?.linked.jobUrl) && <p className="lp-hint">Linked in Atriveo: {[c.links.linked.personId && "a person in your Network", c.links.linked.sourceId && "a company", c.links.linked.jobUrl && "a job"].filter(Boolean).join(", ")}.</p>}
+          {(linked.person || linked.company || linked.job) && <p className="lp-hint lp-linked">Linked in Atriveo: {[linked.person && `${linked.person.name} in your Network`, linked.company && linked.company.name, linked.job && (linked.job.title ? `${linked.job.title} job` : "a job")].filter(Boolean).join(" · ")}</p>}
         </section>
       )}
 

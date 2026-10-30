@@ -17,6 +17,7 @@ import { useExclusions } from "../hooks/useExclusions";
 import { TRACK_LABEL } from "./tracks";
 import { getTailorServerBase } from "../utils/tailorServer";
 import "../styles/applications.css";
+import LoopsDoNow from "./LoopsDoNow";
 import "./review-pages.css";
 import "./today.css";
 
@@ -469,6 +470,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {approvable.length > 0 && <button className="apps-btn" disabled={busy !== null || queueRunning} onClick={() => setConfirmAll("approve")}>Approve all {approvable.length} ready</button>}
         </div>
       </div>
+      <LoopsDoNow />
       {(queue.error || ready.error) && <p className="ar-error" role="alert">{queue.error || ready.error}</p>}
       <main className="td-grid" style={mobile ? undefined : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(min-content, 1fr))` }}>
         {loading && <div className="td-empty">Loading your applications…</div>}

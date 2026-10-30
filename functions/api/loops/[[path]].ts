@@ -11,7 +11,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
   const parts = url.pathname.replace(/^\/api\/loops\/?/, '').split('/').filter(Boolean);
   const audioUpload = request.method === 'POST' && parts[0] === 'capture' && parts[1] === 'audio' && parts.length === 2;
   const known = parts.length === 0 ? request.method === 'GET'
-    : parts[0] === 'summary' ? request.method === 'GET' && parts.length === 1
+    : parts[0] === 'summary' || parts[0] === 'related' ? request.method === 'GET' && parts.length === 1
     : parts[0] === 'capture' ? (parts.length === 1 && request.method === 'POST') || audioUpload
     : ID.test(parts[0]) && ((parts.length === 1 && request.method === 'GET') || (parts.length === 2 && parts[1] === 'audio' && request.method === 'GET') || (parts.length === 2 && ACTIONS.has(parts[1]) && request.method === 'POST'));
   if (!known) return Response.json({ error: 'Not found' }, { status: 404 });

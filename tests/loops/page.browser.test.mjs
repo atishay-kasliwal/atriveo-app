@@ -53,7 +53,7 @@ async function fixture(t, { viewport = { width: 1440, height: 900 }, empty = fal
       }
       const c = find(parts[0]);
       if (!c) return route.fulfill({ status: 404, json: { ok: false, error: 'That capture was not found' } });
-      if (req.method() === 'GET' && parts.length === 1) return ok({ capture: c, events: EVENTS(c) });
+      if (req.method() === 'GET' && parts.length === 1) return ok({ capture: c, events: EVENTS(c), linked: c.id === 'cap_active01' ? { person: { id: 'p1', name: 'Sarah Chen', company: 'NVIDIA' }, company: { id: 's1', name: 'NVIDIA' } } : {} });
       const body = req.postDataJSON() ?? {};
       if (parts[1] === 'edit') { if (body.person) c.view.person = body.person; if (body.tasks) c.tasks = body.tasks.map((t, i) => ({ ...task(`t${i + 1}`, t.title) })); }
       if (parts[1] === 'confirm') { c.status = 'ACTIVE'; c.confirmedAt = new Date().toISOString(); c.reminder = { ...c.reminder, intervalHours: body.reminderHours, nextAt: new Date(Date.now() + body.reminderHours * H).toISOString() }; }
@@ -108,6 +108,7 @@ test('an open intention tells its story and finishing it completes it', async (t
   await page.getByText('Reminder sent').waitFor();
   await page.getByText('Original thought').waitFor();
   await page.getByText('Met at All Things Open').waitFor();
+  await page.getByText('Linked in Atriveo: Sarah Chen in your Network · NVIDIA').waitFor();
   await shot(page, 'story');
   await page.getByRole('button', { name: 'Mark done: Message Sarah about the NVIDIA role' }).click();
   await page.getByRole('button', { name: 'Message Sarah about the NVIDIA role, done' }).waitFor();
