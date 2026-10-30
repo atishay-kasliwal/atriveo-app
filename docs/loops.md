@@ -1,7 +1,7 @@
 # Loops
 
 Say or type a thought once; Atriveo keeps it, has your Mac's Codex read it, asks you to confirm, then reminds you until you finish it.
-Phase 1 is the backend and the Mac worker; Phase 2 is the capture dock and Phase 3 the /loops page, and Phase 4 the Today strip, notification buttons and links (all below). Phases: 2 the capture dock, 3 the /loops page, 4 Today + push action
+Phase 1 is the backend and the Mac worker; Phase 2 is the capture dock and Phase 3 the /loops page, Phase 4 the Today strip, notification buttons and links, and Phase 5 transcription and deploy (all below; the runbook is `docs/loops-deploy.md`). Phases: 2 the capture dock, 3 the /loops page, 4 Today + push action
 buttons + Network links, 5 transcription provider and deploy runbook.
 
 ## The loop
@@ -99,3 +99,13 @@ opens that capture (the notification deep link).
 - **Links:** a capture stores ids (`links.linked.personId / sourceId / jobUrl`, chosen at review). `GET /loops/<id>` also returns their names, shown on
   the page as "Linked in Atriveo". `GET /loops/related?personId=|sourceId=` returns the counts per state and the latest five thoughts tied to a person or
   company, ready for Network to show "Sarah: 3 thoughts, 2 done". That Network view is not built (kept out of v1).
+
+## Transcription (Phase 5)
+
+`scripts/loops-transcribe.mjs` (provider: `whisperCppProvider`, `providerFromEnv`) behind `transcribePending(db, provider)` in `loops.mjs`.
+`scripts/loops-transcriber.mjs` is the process that runs it: every 30 s it takes one RECORDED capture, converts the audio with ffmpeg to 16 kHz
+mono, runs `whisper-cli` at `nice 19` (ggml-small.en), and moves it to WAITING_FOR_CODEX with the transcript, the same pipeline as typed text.
+Whisper's noise markers ("[BLANK_AUDIO]") are removed; silence fails the capture kindly (audio kept, "Try again" or type the words). A transcriber
+killed mid-recording is recovered after 45 minutes. With no engine configured the process stays up and says so. Another engine is one more
+provider with `{ name, transcribe(buffer, mime) }`. Deploy: `deploy/loops-transcriber/Dockerfile`, `scripts/ship-loops-transcriber.sh`.
+The Mac worker has a LaunchAgent installer: `scripts/install-loops-worker-service.mjs`.

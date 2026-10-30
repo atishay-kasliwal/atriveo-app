@@ -6,7 +6,7 @@ import { extractionRequest, validateExtraction } from "./loops-schema.mjs";
 
 // The Mac half of Loops: asks Atriveo for a waiting capture (outbound calls only, so Atriveo never needs to reach this Mac),
 // has the local Codex CLI read it, checks the answer, and sends it back. Nothing is activated here: a reading goes to review.
-// Config: ~/.playatriveo/loops-worker.json { "base": "https://…", "token": "…", "provider": "codex" }
+// Config: ~/.playatriveo/loops-worker.json { "base": "http://127.0.0.1:18789", "token": "…", "provider": "codex" }, or the resume AI worker's resume-ai-worker.json.
 /** Calls the worker routes: outbound only, with the shared token. */
 export function workerClient({ base, token, workerId }) {
   return async function call(op, body = {}) {
@@ -33,7 +33,10 @@ export async function processOne(capture, { call, generate = subscriptionGenerat
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const config = JSON.parse(fs.readFileSync(path.join(os.homedir(), ".playatriveo", "loops-worker.json"), "utf8"));
+  // Its own loops-worker.json, else the same relay settings the Mac's resume AI worker already uses.
+  const configFile = ["loops-worker.json", "resume-ai-worker.json"].map((f) => path.join(os.homedir(), ".playatriveo", f)).find((f) => fs.existsSync(f));
+  if (!configFile) { console.error("No ~/.playatriveo/loops-worker.json (or resume-ai-worker.json) with { base, token }."); process.exit(1); }
+  const config = JSON.parse(fs.readFileSync(configFile, "utf8"));
   const workerId = `${os.hostname()}:${process.pid}`;
   const call = workerClient({ base: config.base, token: config.token, workerId });
   let stopped = false; process.on("SIGTERM", () => { stopped = true; }); process.on("SIGINT", () => { stopped = true; });
