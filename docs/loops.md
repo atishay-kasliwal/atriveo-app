@@ -1,7 +1,7 @@
 # Loops
 
 Say or type a thought once; Atriveo keeps it, has your Mac's Codex read it, asks you to confirm, then reminds you until you finish it.
-Phase 1 (this change) is the backend and the Mac worker, with no UI. Phases: 2 the capture dock, 3 the /loops page, 4 Today + push action
+Phase 1 is the backend and the Mac worker; Phase 2 is the capture dock (below). Phases: 2 the capture dock, 3 the /loops page, 4 Today + push action
 buttons + Network links, 5 transcription provider and deploy runbook.
 
 ## The loop
@@ -49,3 +49,21 @@ Worker routes: `POST /loops/worker/claim|heartbeat|complete|fail` (token only).
 
 No UI; no transcription provider (`transcribePending(db, provider)` is the interface; with none configured, recordings wait as RECORDED);
 no service-worker action buttons. Tests: `npm run test:loops`.
+
+## The capture dock (Phase 2)
+
+`src/apply/CaptureDock.tsx` (mounted once in `Console`, so it is on every signed-in screen), `src/apply/loops.ts` (API + on-device queue),
+`src/apply/capture-dock.css`.
+
+- **Rest:** a 36 px hairline ring, bottom-right, 96 px above the bottom edge (clear of the resume page's AI Help button and the Today footer).
+  Unfinished intentions show as a small number beside it; when one is past its reminder time the dot breathes in the primary colour. No badge.
+- **Open:** it grows in place from the ring (no modal, nothing dimmed) into "What's on your mind?" with a text box and **Speak**.
+  Enter captures, Shift+Enter is a new line, Esc closes (a typed draft is kept for the tab). Ctrl/⌘+Shift+Space opens it with the box focused
+  (no existing shortcut uses it); pressing it again closes it. The unfinished list (up to three, with Done / Remind in 6h) sits under the box.
+- **Speak:** the box becomes a live waveform and timer with Cancel and Finish (5 minute cap). Chrome records WebM/Opus, Safari MP4/AAC.
+  No microphone, permission blocked, or a recorder error: "Mic unavailable. Type it instead." and the box stays.
+- **Never lost:** every capture is written to IndexedDB (`atriveo-loops`) first, sent with a client-made id (so a retry is the same capture),
+  and removed only when the server confirms. If Atriveo is unreachable it says "Saved on this device." and retries every minute and when the
+  browser comes back online. A capture the server refuses (not a network failure) is not kept and the message is shown.
+- Tests: `npm run test:loops:browser` (headless Chromium against the built console with a stand-in `/api/loops`: every screen, shortcut,
+  typing, voice with a fake microphone, no microphone, permission denied, server down then recovered, the unfinished list, a phone viewport).
