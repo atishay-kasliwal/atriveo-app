@@ -374,7 +374,53 @@ async function openResume(db, { jobUrl = null, track = null, appId = null, paste
     ats: atsOf(dir, posting, { fit }),
     posting,
     fit,
+    // Whether you already marked this resume's job applied ("Applied?" in the builder).
+    applied: db ? await appliedStateOf(db, source) : null,
   };
+}
+
+// ── "Applied?": mark the job this resume is for as applied, with the link you applied through ────────────────────
+// The same record as Today's "Mark applied" (a job_swipes row with direction "applied", which every screen's applied
+// count reads), plus the posting's company/title and the resume it was sent with, so the tracker keeps consistent data.
+/** What ties an applied record to its resume: the job's URL, or the pasted resume. A track resume is reused for many jobs, so it has none. */
+const appliedRefOf = (source) => source.kind === "job" ? source.jobUrl : source.kind === "pasted" ? `pasted:${source.pasted}` : null;
+function cleanLink(link) {
+  const text = String(link ?? "").trim();
+  if (!text) return null;
+  let u;
+  try { u = new URL(/^[a-z][a-z0-9+.-]*:/i.test(text) ? text : `https://${text}`); } catch { throw new BuilderError(`"${text.slice(0, 60)}" isn't a link`); }
+  if (u.protocol !== "https:" && u.protocol !== "http:") throw new BuilderError("The link must start with https://");
+  if (!u.hostname.includes(".")) throw new BuilderError(`"${text.slice(0, 60)}" isn't a link`);
+  return u.href.slice(0, 2000);
+}
+async function appliedRecordOf(db, source) {
+  const ref = appliedRefOf(source);
+  return ref ? db.collection("job_swipes").findOne({ direction: "applied", resume_ref: ref }, { projection: { job_url: 1, applied_at: 1, swiped_at: 1, apply_link: 1 } }) : null;
+}
+async function appliedStateOf(db, source) {
+  const row = await appliedRecordOf(db, source);
+  return row ? { at: row.applied_at || row.swiped_at || null, link: row.apply_link ?? null } : null;
+}
+/**
+ * Mark this resume's job applied. link (optional): where you applied, saved with the record. A job is recorded under its
+ * own URL; a pasted resume under the link (else under the resume); a track resume once per submit. Marking the same
+ * job or pasted resume again updates its one record, so it never counts twice.
+ */
+export async function markResumeApplied(db, { source, link = null } = {}, now = new Date()) {
+  if (!source || !["job", "pasted", "track"].includes(source.kind)) throw new BuilderError("Open a resume first.");
+  // Only a resume that exists (the same checks as opening it).
+  const base = await openResume(db, source.kind === "job" ? { jobUrl: source.jobUrl } : source.kind === "pasted" ? { pasted: source.pasted } : { track: source.track });
+  const src = base.source;
+  const applyLink = cleanLink(link);
+  const at = now.toISOString();
+  const existing = await appliedRecordOf(db, src);
+  const key = src.kind === "job" ? src.jobUrl : existing?.job_url ?? applyLink ?? (src.kind === "pasted" ? `pasted:${src.pasted}` : `track:${src.track}:${at}`);
+  await db.collection("job_swipes").updateOne({ job_url: key }, {
+    $set: { job_url: key, direction: "applied", swiped_at: at, applied_at: existing?.applied_at || at, date: at.slice(0, 10), source: "resume-builder",
+      company: src.company || null, title: src.title || null, apply_link: applyLink ?? existing?.apply_link ?? null, resume_ref: appliedRefOf(src) },
+  }, { upsert: true });
+  const applied = { at: existing?.applied_at || at, link: applyLink ?? existing?.apply_link ?? null };
+  return { ok: true, applied: src.kind === "track" ? null : applied };
 }
 
 // ── Your bullets: reworded or new, checked by the bank's rules (ac-bullet-rules.mjs) ──────────────────────────────

@@ -32,6 +32,8 @@ interface Loaded {
   options: Record<string, Bullet[]>; roles: Array<{ role: string; kind: "experience" | "project"; label: string }>;
   current: { pdfPath: string; edited: boolean; generatedPdfPath: string | null; pages?: number | null; room?: number | null }; jd: string | null; layout: Layout;
   ats?: Ats;
+  /** "Applied?": set once you marked this resume's job applied (when, and the link you gave). */
+  applied?: { at: string | null; link: string | null } | null;
 }
 /** A resume's ATS score (scripts/ats, as Job matching and Today show it): Job Match against the posting, Resume Ready. */
 interface Ats { posting: boolean; match: ResumeMatch | null; ready: ResumeReadyState | null; note?: string | null; error?: string }
@@ -191,6 +193,11 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const [savedAt, setSavedAt] = useState(0);
   const [notice, setNotice] = useState("");
   const [dirty, setDirty] = useState(false);
+  // "Applied?": the popup that asks for the link you applied through (optional), then records the job as applied.
+  const [appliedOpen, setAppliedOpen] = useState(false);
+  const [appliedLink, setAppliedLink] = useState("");
+  const [appliedBusy, setAppliedBusy] = useState(false);
+  const [appliedError, setAppliedError] = useState("");
   // Live: the HTML preview (instant, Paged.js); PDF: the compiled file that is sent.
   const [view, setView] = useState<"live" | "pdf">("live");
   const [fit, setFit] = useState<LiveFit | null>(null);
@@ -677,6 +684,34 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const saveBtn = <button className="rv-primary" disabled={!canSave} onClick={() => void save()} title={draft && !draft.problems.length ? "One page · every bullet from your bank · no repeated opening verb (⌘S)" : "⌘S"}>{saving ? "Saving…" : "Save"}</button>;
   const downloadBtn=dirty?<button className="apps-btn" disabled={!canSave} onClick={()=>void save(true)} title="Save the current draft, then download that PDF">Save & download</button>:loaded&&<a className="apps-btn" href={pdfUrl(loaded.current.pdfPath,true)}>Download</a>;
   const aiComparison=(s:AiSuggestion)=>{const diff=resumeChangeDiff(s);return <><div className="rb-ai-compare"><div><small>{s.kind==="skills"?"CURRENT GROUPS":"REPLACED / REMOVED"}</small>{diff.removed.length?diff.removed.map((text,i)=><p key={i}>{text}</p>):<p className="apps-muted">{diff.reordered?"Bullet order updated":"Nothing removed"}</p>}</div><div><small>{s.kind==="skills"?"SUGGESTED GROUPS":"NEW / REWRITTEN"}</small>{diff.added.length?diff.added.map((text,i)=><p className="rb-ai-new" key={i}>{text}</p>):<p className="apps-muted">{diff.reordered?"Same wording, new order":"No new wording"}</p>}</div></div>{diff.unchanged>0&&<small>{diff.unchanged} unchanged {s.kind==="skills"?"groups":"bullets"} hidden</small>}<details><summary>View full {s.kind==="skills"?"skills section":"section"}</summary><small>CURRENT</small><p>{s.current}</p><small>SUGGESTED</small><p>{s.suggested}</p></details></>;};
+  const appliedBtn = loaded && (loaded.applied
+    ? <button className="apps-btn rb-applied is-applied" disabled title={loaded.applied.link ?? "Marked applied"}>Applied ✓</button>
+    : <button className="apps-btn rb-applied" onClick={() => { setAppliedLink(""); setAppliedError(""); setAppliedOpen(true); setSheet(null); }} title="Record that you applied with this resume">Applied?</button>);
+  const submitApplied = async () => {
+    if (!loaded || appliedBusy) return;
+    setAppliedBusy(true); setAppliedError("");
+    try {
+      const r = await call<{ applied: { at: string | null; link: string | null } | null }>("applied", { source: loaded.source, link: appliedLink.trim() || null });
+      if (r.applied) setLoaded({ ...loaded, applied: r.applied }); setAppliedOpen(false);
+      setNotice(`Marked ${loaded.source.company || "the job"} as applied. Updating today's total…`);
+    } catch (e) { setAppliedError(e instanceof Error ? e.message : String(e)); }
+    finally { setAppliedBusy(false); }
+  };
+  const appliedDialog = appliedOpen && loaded && <>
+    <div className="rb-modal-back" onClick={() => !appliedBusy && setAppliedOpen(false)} />
+    <form className="rb-modal rb-applied-modal" role="dialog" aria-label="Mark applied" onSubmit={(e) => { e.preventDefault(); void submitApplied(); }}>
+      <h3>Did you apply?</h3>
+      <p className="apps-muted">{[loaded.source.title, loaded.source.company].filter(Boolean).join(" · ") || "This resume"}</p>
+      <label htmlFor="rb-applied-link">Link you applied through <span className="apps-muted">(optional)</span></label>
+      <input id="rb-applied-link" type="url" inputMode="url" autoFocus placeholder="https://…" value={appliedLink} onChange={(e) => setAppliedLink(e.target.value)} />
+      {dirty && <p className="rb-applied-warn" role="alert">You have unsaved changes. Save first so the resume on record is the one you sent.</p>}
+      {appliedError && <p className="rb-applied-warn" role="alert">{appliedError}</p>}
+      <div className="rb-applied-actions">
+        <button type="button" className="apps-btn" disabled={appliedBusy} onClick={() => setAppliedOpen(false)}>Cancel</button>
+        <button type="submit" className="rv-primary" disabled={appliedBusy || dirty}>{appliedBusy ? "Saving…" : "Submit"}</button>
+      </div>
+    </form>
+  </>;
   const undoBtn = <button className="apps-btn" disabled={!history.current.length} onClick={undo} title="Undo the last change (⌘Z)">Undo</button>;
 
   const aiStale = Boolean(ai && (aiJdStale || aiInput !== aiSnapshot(sections)));
@@ -749,6 +784,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
               {t.kind === "skills" && <><div className="rb-sheet-head"><b>Technical skills</b></div>{skillsField}</>}
               {t.kind === "menu" && <div className="rb-menu">
                 <a className="apps-btn" href={pdfUrl(preview ?? loaded.current.pdfPath)} target="_blank" rel="noreferrer">Open the PDF</a>
+                {appliedBtn}
                 {downloadBtn}{dirty&&<a className="apps-link" href={pdfUrl(loaded.current.pdfPath,true)}>Download previous saved PDF</a>}
                 <button className="apps-btn" disabled={!dirty || saving} onClick={() => { void load(); setSheet(null); }}>Discard changes</button>
                 {loaded.current.edited && <button className="apps-btn" disabled={saving} onClick={() => { void revert(); setSheet(null); }}>Revert to generated</button>}
@@ -757,6 +793,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
               {t.kind !== "bullet" && <button className="rv-primary rb-sheet-done" onClick={() => setSheet(null)}>Done</button>}
             </div>}
         </>}
+        {appliedDialog}
         {notice && <div className="apps-toast" role="status"><span>{notice}</span><button type="button" className="apps-toast-close" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
       </div>
     );
@@ -802,6 +839,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
                 {undoBtn}
                 {loaded.current.edited && <button className="apps-btn" disabled={saving} onClick={() => void revert()} title="Back to the generated resume">Revert</button>}
                 {downloadBtn}
+                {appliedBtn}
                 <button className="apps-btn" disabled={!dirty || saving} onClick={() => void load()}>Discard</button>
                 {saveBtn}
               </span>

@@ -299,3 +299,12 @@
 .rb-ats small { font-size: 11px; color: var(--muted-fg); }
 .rb-ready { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 2px 7px; border-radius: 5px; background: var(--secondary-bg); color: #d5ad61; white-space: nowrap; cursor: default; }
 .rb-ready.is-ready { color: #69c69a; } .rb-ready.is-needs-work { color: #e07a72; }
+
+/* "Applied?": the popup asking for the link you applied through. */
+.rb-applied-modal { top: 18vh; width: min(460px, calc(100vw - 32px)); padding: 20px; gap: 10px; }
+.rb-applied-modal h3 { margin: 0; }
+.rb-applied-modal p { margin: 0; }
+.rb-applied-modal input { width: 100%; box-sizing: border-box; }
+.rb-applied-warn { color: var(--danger, #e5484d); font-size: 13px; }
+.rb-applied-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+.rb-applied.is-applied { opacity: .7; }
