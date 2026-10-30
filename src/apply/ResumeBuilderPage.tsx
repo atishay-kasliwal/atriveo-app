@@ -853,6 +853,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
           </>}
         </main>
       )}
+      {appliedDialog}
       {notice && <div className="apps-toast" role="status"><span>{notice}</span><button type="button" className="apps-toast-close" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
     </div>
   );
