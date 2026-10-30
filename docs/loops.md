@@ -1,7 +1,7 @@
 # Loops
 
 Say or type a thought once; Atriveo keeps it, has your Mac's Codex read it, asks you to confirm, then reminds you until you finish it.
-Phase 1 is the backend and the Mac worker; Phase 2 is the capture dock and Phase 3 the /loops page (both below). Phases: 2 the capture dock, 3 the /loops page, 4 Today + push action
+Phase 1 is the backend and the Mac worker; Phase 2 is the capture dock and Phase 3 the /loops page, and Phase 4 the Today strip, notification buttons and links (all below). Phases: 2 the capture dock, 3 the /loops page, 4 Today + push action
 buttons + Network links, 5 transcription provider and deploy runbook.
 
 ## The loop
@@ -85,3 +85,17 @@ opens that capture (the notification deep link).
 - **Phone:** the list and a capture each take the whole screen, with a back link.
 - Tests: `npm run test:loops:browser` (now includes `page.browser.test.mjs`: sections and states, story, finishing, snooze, review and
   confirm in one step, search and filters, retry/type/reopen, empty and unknown ids, nav and phone).
+
+## Today, notifications, links (Phase 4)
+
+- **Today "Do now"** (`LoopsDoNow.tsx`): one slim row above Today's cards, only when something is open: up to three unfinished intentions
+  (reminder due first, then longest waiting) with Done and Later (6 h), a link to each, and "All loops". It has its own small
+  `/api/loops/summary` fetch (every minute while the tab is visible), so Today's cards never wait for it; nothing is shown when Loops is empty or unreachable.
+- **Notifications:** a Loops reminder is "Atriveo / Still open: <task> / Company · Role / Waiting 18h", tag `loop:<id>` (a new reminder replaces the old
+  one), deep link `/loops?id=<id>`, and Done / Snooze 6h buttons (`actions` in the payload, passed through `safeActions` in `web-push.mjs`).
+  `apply-public/sw.js` runs a button by calling `/api/loops/<id>/done|snooze` with your sign-in cookie; if that fails (signed out, offline) it
+  opens the capture instead. Platforms that don't show buttons (iOS Safari) just get the tap, which opens the capture. Test it for real with a
+  confirmed capture whose `reminder.nextAt` you move into the past.
+- **Links:** a capture stores ids (`links.linked.personId / sourceId / jobUrl`, chosen at review). `GET /loops/<id>` also returns their names, shown on
+  the page as "Linked in Atriveo". `GET /loops/related?personId=|sourceId=` returns the counts per state and the latest five thoughts tied to a person or
+  company, ready for Network to show "Sarah: 3 thoughts, 2 done". That Network view is not built (kept out of v1).

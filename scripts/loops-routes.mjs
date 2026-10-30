@@ -1,4 +1,4 @@
-import { captureAudio, captureText, claimCapture, completeCapture, confirmCapture, dismissCapture, doneCapture, editCapture, failCapture, getCapture, heartbeat, listCaptures, loopsSummary, LoopsError, readAudio, reopenCapture, retryCapture, setTranscript, snoozeCapture } from "./loops.mjs";
+import { captureAudio, captureText, claimCapture, completeCapture, confirmCapture, dismissCapture, doneCapture, editCapture, failCapture, getCapture, heartbeat, listCaptures, loopsSummary, LoopsError, readAudio, relatedLoops, reopenCapture, retryCapture, setTranscript, snoozeCapture } from "./loops.mjs";
 
 // /loops/*: the Loops API (docs/loops.md). The sidecar's token check has already run. Two kinds of caller:
 //   you, through the Pages Function, which verifies your sign-in and sends X-Atriveo-User;
@@ -51,6 +51,7 @@ export async function handleLoops(req, res, url, { withDb, send } = {}) {
       await reply((db) => listCaptures(db, userId, { section: q.get("section"), status: q.get("status"), q: q.get("q") ?? "", from: q.get("from"), to: q.get("to"), limit: Number(q.get("limit")) || 100, skip: Number(q.get("skip")) || 0 }));
       return true;
     }
+    if (req.method === "GET" && parts[0] === "related" && parts.length === 1) { await reply((db) => relatedLoops(db, userId, { personId: url.searchParams.get("personId"), sourceId: url.searchParams.get("sourceId") })); return true; }
     if (req.method === "GET" && parts[0] === "summary") { await reply((db) => loopsSummary(db, userId)); return true; }
     if (req.method === "POST" && parts[0] === "capture" && parts.length === 1) {
       const body = await readJson(req, 20_000);

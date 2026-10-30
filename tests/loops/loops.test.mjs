@@ -324,3 +324,37 @@ test('end to end over HTTP: type, Mac reads it, review, confirm; voice upload an
     assert.equal((await api('GET', '/loops?section=NEEDS_ACTION')).json.captures.length, 1);
   } finally { await new Promise((r) => server.close(r)); }
 });
+
+test('reminders carry Done and Snooze buttons and the capture id for the service worker', async () => {
+  const cid = await reviewed();
+  await L.confirmCapture(db, U, cid, {}, T0);
+  const { sent, send } = sender();
+  await L.tickReminders(db, U, { now: at(6.1), send });
+  assert.deepEqual(sent[0].note.actions, [{ action: 'done', title: 'Done' }, { action: 'snooze', title: 'Snooze 6h' }]);
+  assert.deepEqual(sent[0].note.data, { loopId: cid });
+  const { safeActions } = await import('../../scripts/web-push.mjs');
+  assert.deepEqual(safeActions([{ action: 'done', title: ' Done ' }, { action: 'BAD!', title: 'x' }, { action: 'open', title: '' }, null]), [{ action: 'done', title: 'Done' }]);
+  assert.equal(safeActions('nope'), undefined);
+  assert.equal(safeActions([]), undefined);
+});
+
+test('links resolve to names, and a person or company shows its related thoughts (counts + latest)', async () => {
+  await db.collection('network_sources').insertOne({ _id: 's1', type: 'company', name: 'NVIDIA' });
+  await db.collection('network_people').insertOne({ _id: 'p1', name: 'Sarah Chen', company: 'NVIDIA' });
+  const a = await reviewed();
+  const b = await reviewed({}, 'a second thought about Sarah');
+  const c = await reviewed({ company: 'Stripe', person: 'Nobody' }, 'unrelated');
+  await L.confirmCapture(db, U, a, {}, T0);
+  await L.confirmCapture(db, U, b, {}, T0);
+  await L.doneCapture(db, U, b, {}, at(1));
+  const story = await L.getCapture(db, U, a);
+  assert.equal(story.linked.person.name, 'Sarah Chen');
+  assert.equal(story.linked.company.name, 'NVIDIA');
+  assert.equal((await L.getCapture(db, U, c)).linked.person, undefined);
+  const rel = (await L.relatedLoops(db, U, { personId: 'p1' })).related;
+  assert.deepEqual([rel.total, rel.open, rel.completed], [2, 1, 1]);
+  assert.equal(rel.latest.length, 2);
+  assert.equal((await L.relatedLoops(db, U, { sourceId: 's1' })).related.total, 2);
+  assert.equal((await L.relatedLoops(db, 'other@example.com', { personId: 'p1' })).related.total, 0, 'only your own thoughts');
+  await assert.rejects(L.relatedLoops(db, U, {}), L.LoopsError);
+});

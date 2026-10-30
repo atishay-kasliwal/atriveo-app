@@ -32,7 +32,8 @@ export interface Loop {
 export interface LoopEvent { type: string; at: string; data: Record<string, unknown> }
 export interface LoopQuery { q?: string; status?: string; from?: string; to?: string }
 export const listLoops = (query: LoopQuery = {}) => request<{ ok: true; captures: Loop[] }>(`?limit=200${Object.entries(query).filter(([, v]) => v).map(([k, v]) => `&${k}=${encodeURIComponent(v as string)}`).join("")}`);
-export const getLoop = (id: string) => request<{ ok: true; capture: Loop; events: LoopEvent[] }>(`/${id}`);
+export interface LoopLinked { person?: { id: string; name: string; company: string | null }; company?: { id: string; name: string }; job?: { url: string; title: string | null; company: string | null } }
+export const getLoop = (id: string) => request<{ ok: true; capture: Loop; events: LoopEvent[]; linked: LoopLinked }>(`/${id}`);
 export const loopEdit = (id: string, patch: object) => request<{ ok: true; capture: Loop }>(`/${id}/edit`, json(patch));
 export const loopConfirm = (id: string, reminderHours: number) => request<{ ok: true; capture: Loop }>(`/${id}/confirm`, json({ reminderHours }));
 export const loopDismiss = (id: string) => request(`/${id}/dismiss`, json({}));
