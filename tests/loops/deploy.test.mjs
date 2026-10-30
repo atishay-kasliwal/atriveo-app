@@ -25,6 +25,18 @@ test('the Mac worker LaunchAgent restarts itself, runs the copied worker, and pu
   assert.equal(p.plist, '/Users/test/Library/LaunchAgents/com.atriveo.loops-worker.plist');
 });
 
+test('every package the transcriber imports is installed by its image', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+  const docker = fs.readFileSync(path.join(root, 'deploy/loops-transcriber/Dockerfile'), 'utf8');
+  const installed = { ...pkg.dependencies, ...(/npm ci [^\n]*--omit=dev/.test(docker) ? {} : pkg.devDependencies) };
+  for (const file of importClosure('scripts/loops-transcriber.mjs', root)) {
+    for (const m of fs.readFileSync(path.join(root, file), 'utf8').matchAll(/(?:from\s*|import\s*\(\s*|import\s+)["']([^./"'][^"']*)["']/g)) {
+      const name = m[1].startsWith('node:') ? null : m[1].startsWith('@') ? m[1].split('/').slice(0, 2).join('/') : m[1].split('/')[0];
+      if (name) assert.ok(name in installed, `${file} imports ${name}, which the transcriber image would not have`);
+    }
+  }
+});
+
 test('the transcriber image is pinned and builds gently', () => {
   const docker = fs.readFileSync(path.join(root, 'deploy/loops-transcriber/Dockerfile'), 'utf8');
   assert.match(docker, /ARG WHISPER_REF=v\d+\.\d+\.\d+/);
