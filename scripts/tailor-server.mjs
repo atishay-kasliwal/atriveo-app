@@ -64,7 +64,7 @@ import { insights } from "./insights.mjs";
 import { getResumeEmails, changeResumeEmails, syncDefaultEmail, forgetEmailSync } from "./resume-emails.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
-import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, renderDraft, revertResume, saveBullet, saveDraft, setResumeEmail, startPasted } from "./resume-builder.mjs";
+import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, markResumeApplied, renderDraft, revertResume, saveBullet, saveDraft, setResumeEmail, startPasted } from "./resume-builder.mjs";
 import { BankPageError, bankView, retireBullet } from "./bank-page.mjs";
 import { syncOverlay } from "./ac-bank-overlay.mjs";
 import { approveDraft, draftResult, startDraft } from "./bank-draft.mjs";
@@ -1823,6 +1823,7 @@ const server = http.createServer(async (req, res) => {
       : op === "start" ? startPasted(db, body)
       : op === "delete" ? deletePasted(db, body.id)
       : op === "set-email" ? setResumeEmail(db, body)
+      : op === "applied" ? markResumeApplied(db, body).then((r) => { clearNoTextCache(); invalidateMatchingQueue(); return r; })
       : op === "render" ? renderDraft(db, body)
       : op === "save" ? saveDraft(db, body)
       : op === "bullet" ? saveBullet(db, body)
@@ -1835,7 +1836,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     if (req.method === "GET" && op === "pasted") { void run({}); return; }
-    if (req.method === "POST" && ["render", "save", "revert", "bullet", "check", "guess", "start", "delete", "ai-match", "ai-answer", "ai-decision", "set-email", "ai-version", "ai-result", "ai-worker-claim", "ai-worker-complete", "ai-usage"].includes(op)) {
+    if (req.method === "POST" && ["render", "save", "revert", "bullet", "check", "guess", "start", "delete", "ai-match", "ai-answer", "ai-decision", "set-email", "applied", "ai-version", "ai-result", "ai-worker-claim", "ai-worker-complete", "ai-usage"].includes(op)) {
       let raw = "";
       req.on("data", (c) => { raw += c; if (raw.length > 200_000) req.destroy(); });
       req.on("end", () => { let body; try { body = JSON.parse(raw || "{}"); } catch { return reply(400, { ok: false, error: "Bad JSON" }); } void run(body); });
