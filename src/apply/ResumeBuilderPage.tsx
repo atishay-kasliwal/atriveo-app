@@ -1,3 +1,4 @@
+import CoverLetter from './CoverLetter';
 import { formatLocation } from "../utils/location";
 import CardActions from './CardActions';
 import {resumeChangeDiff} from '../shared/resumeChangeDiff.mjs';
@@ -749,7 +750,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
               {t.kind === "skills" && <><div className="rb-sheet-head"><b>Technical skills</b></div>{skillsField}</>}
               {t.kind === "menu" && <div className="rb-menu">
                 <a className="apps-btn" href={pdfUrl(preview ?? loaded.current.pdfPath)} target="_blank" rel="noreferrer">Open the PDF</a>
-                {downloadBtn}{dirty&&<a className="apps-link" href={pdfUrl(loaded.current.pdfPath,true)}>Download previous saved PDF</a>}
+                {downloadBtn}{loaded&&loaded.source.kind!=="track"&&<CoverLetter source={loaded.source} disabled={dirty}/>}{dirty&&<a className="apps-link" href={pdfUrl(loaded.current.pdfPath,true)}>Download previous saved PDF</a>}
                 <button className="apps-btn" disabled={!dirty || saving} onClick={() => { void load(); setSheet(null); }}>Discard changes</button>
                 {loaded.current.edited && <button className="apps-btn" disabled={saving} onClick={() => { void revert(); setSheet(null); }}>Revert to generated</button>}
                 {projects.length > 0 && <><span className="rb-sheet-label">Add a project</span>{projects.map((p) => <button key={p.role} className="apps-btn" onClick={() => { change((x) => [...x, { role: p.role, kind: "project", label: p.label, bullets: [] }]); setSheet(null); }}>+ {p.label}</button>)}</>}
@@ -801,7 +802,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
               <span className="rb-actions">
                 {undoBtn}
                 {loaded.current.edited && <button className="apps-btn" disabled={saving} onClick={() => void revert()} title="Back to the generated resume">Revert</button>}
-                {downloadBtn}
+                {downloadBtn}{loaded&&loaded.source.kind!=="track"&&<CoverLetter source={loaded.source} disabled={dirty}/>}
                 <button className="apps-btn" disabled={!dirty || saving} onClick={() => void load()}>Discard</button>
                 {saveBtn}
               </span>
