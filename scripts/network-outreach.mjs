@@ -20,14 +20,11 @@ export async function outreachSource(db, { date, name, checkHours } = {}, now = 
   return saveSource(db, { name: String(name ?? "").trim() || `LinkedIn outreach · ${dayName(d)}`, type: "outreach", about: "LinkedIn outreach", when: d, checkHours: checkHours ?? DEFAULT_CHECK_HOURS }, now);
 }
 
-/** Add people to an outreach source, each with the clock started. Today's reach-outs start now; an earlier date starts at noon that day. */
+/** Add people to an outreach source, each with the clock started (addPeople does that for any outreach source). */
 export async function addOutreachPeople(db, { sourceId, rows } = {}, now = new Date()) {
   const source = await db.collection(SOURCES).findOne({ _id: String(sourceId) });
   if (!source || source.type !== "outreach") fail("Pick a LinkedIn outreach source");
-  const reachedAt = !source.when || source.when === dayOf(now) ? now.toISOString() : `${source.when}T12:00:00.000Z`;
-  const res = await addPeople(db, { rows, sourceId: source._id }, now);
-  for (const p of res.added) await db.collection(PEOPLE).updateOne({ _id: p.id }, { $set: { outreach: { reachedAt, status: "waiting", answers: [] } } });
-  return { ...res, added: res.added.map((p) => ({ ...p, outreach: { reachedAt, status: "waiting", answers: [] } })) };
+  return addPeople(db, { rows, sourceId: source._id }, now);
 }
 
 /** The check-in a person is waiting on right now: the earliest hour that has passed and has no answer. Null when nothing is due. */

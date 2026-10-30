@@ -2,7 +2,7 @@ import { useEffect, useState, type CSSProperties } from "react";
 import NetworkSourceContext from "./NetworkSourceContext";
 import KindPicker from "./NetworkKind";
 import {
-  peopleForSource, organisationInitials, JOB_STATUS, LINK_KINDS, kindLabel, ago, colorsFor, followUp, imageUrl, initials, loadMailSettings, loadNetwork, loadPersonJobs, loadSourceJobs, post, sourceLabel, throughFields, throughValue, uploadPhoto,
+  answerCheckIn, checkInToast, dueCheckIn, outreachState, peopleForSource, organisationInitials, JOB_STATUS, LINK_KINDS, kindLabel, ago, colorsFor, followUp, imageUrl, initials, loadMailSettings, loadNetwork, loadPersonJobs, loadSourceJobs, post, sourceLabel, throughFields, throughValue, uploadPhoto,
   type JobRow, type LinkKind, type MailSettings, type NetworkData, type Source, type You,
 } from "./network";
 
@@ -152,7 +152,7 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
         <div className="pp-id">
           <input className="nw-name" aria-label="Name" value={d.name} onChange={(e) => setD({ ...d, name: e.target.value })} onBlur={() => { if (d.name.trim() && d.name !== s.name) void save({ name: d.name }); else setD({ ...d, name: s.name }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
           <input className="nw-role" aria-label="About" placeholder="What it is, like Staffing agency in Raleigh" value={d.about} onChange={(e) => setD({ ...d, about: e.target.value })} onBlur={() => { if (d.about !== (s.about ?? "")) void save({ about: d.about }); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
-          <p className="pp-where">{kindLabel(s)} · {members.length} {members.length === 1 ? "person" : "people"}</p>
+          <p className="pp-where">{kindLabel(s)} · {members.length} {members.length === 1 ? "person" : "people"}{s.type === "outreach" && ` · ${members.filter((p) => p.outreach?.status === "accepted").length} accepted · ${members.filter((p) => p.outreach?.status === "replied").length} replied`}</p>
         </div>
         <span className="nw-saving" aria-live="polite">{saving}</span>
         <button type="button" className="nw-x" aria-label="Close" onClick={onClose}>×</button>
@@ -182,11 +182,16 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
           {children.length > 0 && <div className="pp-days" aria-label="Under it">{children.map((c) => (
             <button key={c.id} type="button" className="pp-day" style={{ "--c": colors.source.get(c.id) } as CSSProperties} onClick={() => onSource(c.id)}>
               <span>{c.name}</span><small>{peopleForSource(c, data).length}</small></button>))}</div>}
-          <ul className="pp-people">{members.slice(pg * per, pg * per + per).map((p) => { const f = followUp(p.nextFollowUp); return (
+          {s.type === "outreach" && members.some((p) => dueCheckIn(p, s)) && <div className="pp-asks" aria-label="Did they respond?">{members.filter((p) => dueCheckIn(p, s)).map((p) => { const due = dueCheckIn(p, s)!; const answer = async (a: "accepted" | "replied" | "no") => { try { const r = await answerCheckIn(p.id, due.hour, a); say({ text: checkInToast(p.name, r) }); await onReload(); } catch (e) { say({ text: String((e as Error).message) }); } }; return (
+            <div key={p.id} className="pp-ask-row"><span><b>{p.name}</b> · {due.hour}h</span>
+              <button type="button" className="nw-chip" onClick={() => void answer("accepted")}>Accepted</button>
+              <button type="button" className="nw-chip" onClick={() => void answer("replied")}>Replied</button>
+              <button type="button" className="nw-chip" onClick={() => void answer("no")}>{due.last ? "No · archive" : "No · message again"}</button></div>); })}</div>}
+          <ul className="pp-people">{members.slice(pg * per, pg * per + per).map((p) => { const f = followUp(p.nextFollowUp), st = s.type === "outreach" ? outreachState(p, s) : null; return (
             <li key={p.id}><button type="button" onClick={() => onPerson(p.id)}>
               <span className={`nw-av${p.photoId ? " ph" : ""}`} style={{ "--c": colors.person.get(p.id) } as CSSProperties} aria-hidden="true">{p.photoId ? <img src={imageUrl(p.photoId)} alt="" /> : initials(p.name)}</span>
               <span className="who"><b>{p.name}</b><small>{p.role || (p.city ? p.city : " ")}</small></span>
-              <span className={`when${f?.due ? " due" : ""}`}>{f?.due ? `follow up ${f.text}` : ago(p.lastContact)}</span>
+              {st ? <span className={`when nw-oc is-${st.tone}`}>{st.text}</span> : <span className={`when${f?.due ? " due" : ""}`}>{f?.due ? `follow up ${f.text}` : ago(p.lastContact)}</span>}
             </button></li>); })}
             {!members.length && <li className="nw-muted">Nobody here yet. Add a list of names, or import a file.</li>}</ul>
           {pages > 1 && <div className="pp-pager"><button type="button" className="nw-chip" disabled={pg === 0} onClick={() => setPage(pg - 1)}>Previous</button><span>{pg + 1} of {pages}</span><button type="button" className="nw-chip" disabled={pg >= pages - 1} onClick={() => setPage(pg + 1)}>Next</button></div>}
@@ -221,7 +226,7 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
         {tab === "details" && <>
           <div className="nw-pair">
             <label className="nw-f"><span>Where</span><input id="nw-src-place" placeholder="Raleigh, NC or Global" value={d.place} onChange={(e) => setD({ ...d, place: e.target.value })} onBlur={() => { if (d.place !== (s.place ?? "")) void save({ place: d.place }); }} /></label>
-            {s.type === "day" && <label className="nw-f"><span>Day</span><input id="nw-src-day" type="date" value={/^\d{4}-\d{2}-\d{2}$/.test(s.when ?? "") ? s.when : ""} onChange={(e) => e.target.value && void save({ when: e.target.value })} /></label>}
+            {(s.type === "day" || s.type === "outreach") && <label className="nw-f"><span>{s.type === "outreach" ? "Reached out on" : "Day"}</span><input id="nw-src-day" type="date" value={/^\d{4}-\d{2}-\d{2}$/.test(s.when ?? "") ? s.when : ""} onChange={(e) => e.target.value && void save({ when: e.target.value })} /></label>}
             {s.type === "event" && <label className="nw-f"><span>When</span><input id="nw-src-when" placeholder="Oct 2024" value={d.when} onChange={(e) => setD({ ...d, when: e.target.value })} onBlur={() => { if (d.when !== (s.when ?? "")) void save({ when: d.when }); }} /></label>}
           </div>
           <KindPicker key={`${s.id}-${s.type}`} id="nw-src-kind" type={s.type} kindName={s.kindName} onChange={(type, kindName) => void save({ type, kindName })} />

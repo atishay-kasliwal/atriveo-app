@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { loadReminders, post, type BoardItem, type NetworkData, type Reminder, colorsFor } from "./network";
+import { answerCheckIn, checkInToast, loadReminders, post, type BoardItem, type NetworkData, type Reminder, colorsFor } from "./network";
 
 /** The bell: how many things need you, the most urgent one beside it, and the full list on click. Each can be opened or snoozed for a week. */
 export default function NetworkBell({ data, board, colors, onPerson, onSource, onWork, say }: { data: NetworkData; board: BoardItem[]; colors: ReturnType<typeof colorsFor>; onPerson: (id: string) => void; onSource: (id: string) => void; onWork: (id: string) => void; say: (t: { text: string } | null) => void }) {
@@ -21,6 +21,11 @@ export default function NetworkBell({ data, board, colors, onPerson, onSource, o
     try { await post("reminders/snooze", { key: r.key, days: 7 }); setList((l) => l.filter((x) => x.key !== r.key)); say({ text: "Snoozed for a week." }); }
     catch (e) { say({ text: String((e as Error).message) }); }
   }
+  async function answer(r: Reminder, a: "accepted" | "replied" | "no") {
+    const name = data.people.find((p) => p.id === r.personId)?.name ?? "They";
+    try { const res = await answerCheckIn(r.personId!, r.hour!, a); setList((l) => l.filter((x) => x.key !== r.key)); say({ text: checkInToast(name, res) }); }
+    catch (e) { say({ text: String((e as Error).message) }); }
+  }
   const top = list[0];
   return (
     <div className="nw-bell" ref={box}>
@@ -36,7 +41,9 @@ export default function NetworkBell({ data, board, colors, onPerson, onSource, o
           <ul>{list.map((r) => (
             <li key={r.key}>
               <button type="button" className="go" onClick={() => go(r)}><i style={{ background: color(r) }} /><span>{r.title}<small>{r.detail}</small></span></button>
-              <button type="button" className="snz" onClick={() => void snooze(r)}>Snooze a week</button>
+              {r.kind === "outreach"
+                ? <span className="nw-asks"><button type="button" onClick={() => void answer(r, "accepted")}>Accepted</button><button type="button" onClick={() => void answer(r, "replied")}>Replied</button><button type="button" onClick={() => void answer(r, "no")}>{r.last ? "No · archive" : "No · message again"}</button></span>
+                : <button type="button" className="snz" onClick={() => void snooze(r)}>Snooze a week</button>}
             </li>))}</ul>
         </div>
       )}

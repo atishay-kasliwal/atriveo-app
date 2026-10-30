@@ -2,6 +2,7 @@ import { nyParts, publishNtfy } from "./phone-summary.mjs";
 import { sendPushNotification } from "./web-push.mjs";
 import { companyOf, jobsForCompanies, sameCompany } from "./network-jobs.mjs";
 import { NetworkError, withFollowUps } from "./network.mjs";
+import { outreachPrompts } from "./network-outreach.mjs";
 import { LATE_ALERT_MS, reminderStart } from "./network-events.mjs";
 
 // What needs you in your network, newest worries first: someone replied and waits for an answer, a follow-up is due, someone has gone
@@ -60,13 +61,16 @@ async function snoozedKeys(db, now) {
 export async function listReminders(db, { now = new Date() } = {}) {
   const [people, sources, board, snoozed] = await Promise.all([db.collection("network_people").find({}).toArray(), db.collection("network_sources").find({}).toArray(), db.collection("network_board").find({}).toArray(), snoozedKeys(db, now)]);
   const id = ({ _id, ...d }) => ({ id: _id, ...d });
-  return { reminders: reminders({ people: people.map(id), sources: sources.map(id), work: board.filter((b) => b.kind === "work").map(id) }, { today: nyParts(now).day, snoozed }) };
+  const ppl = people.map(id), srcs = sources.map(id);
+  // "Did they respond?" questions come first: they are time-bound and a yes or no is one tap.
+  const asks = outreachPrompts({ people: ppl, sources: srcs }, now).filter((r) => !snoozed.has(r.key));
+  return { reminders: [...asks, ...reminders({ people: ppl, sources: srcs, work: board.filter((b) => b.kind === "work").map(id) }, { today: nyParts(now).day, snoozed })] };
 }
 
 /** Hide one reminder for a few days (1 to 60). */
 export async function snoozeReminder(db, { key, days = 7 } = {}, now = new Date()) {
   const k = String(key ?? "");
-  if (!/^(reply|due|quiet|never|work):[\w-]+:[\w.-]+$/.test(k)) throw new NetworkError("That reminder is not known");
+  if (!/^(reply|due|quiet|never|work|outreach):[\w-]+:[\w.-]+$/.test(k)) throw new NetworkError("That reminder is not known");
   const n = Number(days);
   if (!Number.isInteger(n) || n < 1 || n > 60) throw new NetworkError("Snooze for 1 to 60 days");
   const until = new Date(now.getTime() + n * DAY).toISOString();

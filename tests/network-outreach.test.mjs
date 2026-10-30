@@ -74,3 +74,13 @@ test('check-in hours are settable per source and the last one decides archiving'
  assert.equal(dueCheckIn(r.added[0],s,after(13)).hour,12);
  await answerCheckIn(db,{id:r.added[0].id,hour:12},after(13));
  assert.equal((await answerCheckIn(db,{id:r.added[0].id,hour:36},after(37))).archived,true);});
+
+test('adding through the normal paths to an outreach source starts the clock; the bell lists the questions',async()=>{
+ const {addPeople,savePerson}=await import('../scripts/network.mjs');const {listReminders}=await import('../scripts/network-reminders.mjs');
+ const db=fakeDb();const src=await outreachSource(db,{},T);
+ const bulk=await addPeople(db,{rows:[{name:'Ivy Reed'}],sourceId:src.id},T);assert.equal(bulk.added[0].outreach.status,'waiting');
+ const one=await savePerson(db,{name:'Omar Lee',sourceId:src.id,role:'Recruiter'},T);assert.equal(one.outreach.reachedAt,T.toISOString());
+ const other=await saveSource(db,{name:'Conf',type:'event'},T);assert.equal((await savePerson(db,{name:'Zed Kim',sourceId:other.id},T)).outreach,undefined);
+ assert.equal((await listReminders(db,{now:after(10)})).reminders.filter(r=>r.kind==='outreach').length,0);
+ const r=(await listReminders(db,{now:after(25)})).reminders.filter(x=>x.kind==='outreach');
+ assert.equal(r.length,2);assert.match(r[0].key,/^outreach:/);});

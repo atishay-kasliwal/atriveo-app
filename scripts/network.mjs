@@ -177,6 +177,7 @@ export async function addPeople(db, { rows, sourceId, newSource } = {}, now = ne
   if (!Array.isArray(rows) || !rows.length) fail("Paste at least one name");
   if (rows.length > MAX_LIST) fail(`Add up to ${MAX_LIST} people at a time`);
   const src = await sourceFor(db, { sourceId, newSource }, now);
+  const outreach = await outreachFor(db, src, now);
   const current = (await all(db, PEOPLE)).filter((p) => !p.archived);
   const have = new Set(current.map((p) => key(p.name))), mails = new Set(current.map((p) => p.email).filter(Boolean));
   const docs = [], skipped = [];
@@ -187,10 +188,21 @@ export async function addPeople(db, { rows, sourceId, newSource } = {}, now = ne
     have.add(name.toLowerCase()); if (email) mails.add(email);
     // A contacts file brings more than a name; anything that does not check out is simply left empty.
     let linkedin = ""; try { linkedin = r?.linkedin ? link(r.linkedin) : ""; } catch { linkedin = ""; }
-    docs.push(blank({ name, city: str(r?.city, 80), sourceId: src, email, linkedin, company: str(r?.company, 80), role: str(r?.role, 80), phone: str(r?.phone, 40) }, now));
+    docs.push(blank({ name, city: str(r?.city, 80), sourceId: src, email, linkedin, company: str(r?.company, 80), role: str(r?.role, 80), phone: str(r?.phone, 40), ...(outreach ? { outreach } : {}) }, now));
   }
   if (docs.length) await db.collection(PEOPLE).insertMany(docs);
   return { added: docs.map(out), skipped, sourceId: src };
+}
+
+/**
+ * Someone added to a LinkedIn outreach source starts its check-in clock: now for today's reach-outs, noon that day for an earlier date.
+ * Undefined for every other source.
+ */
+async function outreachFor(db, sourceId, now) {
+  const src = sourceId ? await db.collection(SOURCES).findOne({ _id: String(sourceId) }) : null;
+  if (src?.type !== "outreach") return undefined;
+  const reachedAt = !src.when || src.when === dayOf(now) ? now.toISOString() : `${src.when}T12:00:00.000Z`;
+  return { reachedAt, status: "waiting", answers: [] };
 }
 
 function blank(fields, now) {
@@ -236,7 +248,8 @@ export async function savePerson(db, input = {}, now = new Date()) {
   const patch = personPatch(input);
   if (!input.id) {
     if (!patch.name) fail("A person needs a name");
-    const doc = blank(patch, now);
+    const outreach = await outreachFor(db, patch.sourceId, now);
+    const doc = blank(outreach ? { ...patch, outreach } : patch, now);
     await checkPersonRefs(db, doc._id, doc);
     await db.collection(PEOPLE).insertOne(doc);
     return out(doc);
@@ -352,6 +365,7 @@ export async function saveSource(db, input = {}, now = new Date()) {
   if ("place" in input) patch.place = str(input.place, 60);
   if ("when" in input) patch.when = str(input.when, 30);
   // An outreach source asks "did they respond?" this many hours after you reached someone (24, 48, 72 unless you change it).
+  if (patch.type === "outreach" && !cur && !("checkHours" in input)) patch.checkHours = [24, 48, 72];
   if ("checkHours" in input) patch.checkHours = [...new Set((Array.isArray(input.checkHours) ? input.checkHours : []).map(Number).filter((h) => Number.isInteger(h) && h >= 1 && h <= 720))].sort((a, b) => a - b).slice(0, 8);
   if ("photoId" in input) {
     patch.photoId = input.photoId ? String(input.photoId) : null;
