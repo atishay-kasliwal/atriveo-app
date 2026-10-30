@@ -42,7 +42,7 @@ export function reminders({ people: all, sources, work = [] }, { today, snoozed 
   }
   for (const s of sources) {
     if (t - dayNum(s.createdAt) < NEVER_AFTER_DAYS) continue;
-    const never = people.filter((p) => !p.archived && p.sourceId === s.id && !p.via && !p.lastContact && p.followUpPlan?.enabled !== false && !p.nextFollowUp).length;
+    const never = people.filter((p) => !p.archived && !p.mapOnly && p.sourceId === s.id && !p.via && !p.lastContact && p.followUpPlan?.enabled !== false && !p.nextFollowUp).length;
     if (never) out.push({ key: `never:${s.id}:${never}`, kind: "never", sourceId: s.id, title: `${never} ${never === 1 ? "person" : "people"} at ${s.name} ${never === 1 ? "has" : "have"} never heard from you`, detail: "Write one note and reuse it", rank: 3 - never / 1000 });
   }
   for (const w of work) {

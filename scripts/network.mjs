@@ -42,6 +42,9 @@ export function parseList(input) {
 async function all(db, name) { return (await db.collection(name).find({}).toArray()).map(out); }
 
 /** Everything the page shows: people (archived ones left out unless asked), sources, links, and where "You" sits on the canvas. */
+/** A person who belongs to one map only and has never been contacted: a cold list entry, not someone you know. */
+export const isUntouchedMapOnly = (p) => Boolean(p.mapOnly) && !p.lastContact && !(p.history ?? []).some((h) => h.type === "email" || h.type === "message" || h.type === "call" || h.type === "met" || h.type === "reply");
+
 export async function networkView(db, { archived = false, separate = false } = {}) {
   const [people, sources, links, you] = await Promise.all([all(db, PEOPLE), all(db, SOURCES), all(db, LINKS), db.collection("app_settings").findOne({ _id: YOU })]);
   // People and sources that belong to one map only (an event file opened with "keep off My network") are not part of My network.
@@ -62,6 +65,8 @@ export async function networkView(db, { archived = false, separate = false } = {
  */
 export function autoFollowUp(p, sources) {
   if (p.archived || p.outreach || p.followUpPlan?.enabled === false || p.nextFollowUp) return null;
+  // People who belong to one map only (an event's speaker list) are not chased until you have actually been in touch.
+  if (isUntouchedMapOnly(p)) return null;
   const byId = new Map(sources.map((s) => [s.id ?? s._id, s]));
   let family = false, linkedin = false;
   for (let s = byId.get(p.sourceId), n = 0; s && n < 8; s = s.parentSourceId ? byId.get(s.parentSourceId) : null, n++) {
@@ -111,7 +116,7 @@ export async function savePositions(db, { items } = {}) {
 
 /** Rows from a pasted list, marked when the name is already in your network (or repeated in the list). */
 export async function previewList(db, input) {
-  const have = new Set((await all(db, PEOPLE)).filter((p) => !p.archived).map((p) => key(p.name)));
+  const have = new Set((await all(db, PEOPLE)).filter((p) => !p.archived && !p.mapOnly).map((p) => key(p.name)));
   return parseList(input).map((r) => ({ ...r, exists: have.has(r.name.toLowerCase()) }));
 }
 
@@ -170,7 +175,7 @@ export function parseContacts(text) {
 /** A contacts file, previewed: each row marked when the person is already in your network (same name or same email). */
 export async function previewContacts(db, text) {
   const { format, rows } = parseContacts(text);
-  const people = (await all(db, PEOPLE)).filter((p) => !p.archived);
+  const people = (await all(db, PEOPLE)).filter((p) => !p.archived && !p.mapOnly);
   const names = new Set(people.map((p) => key(p.name))), emails = new Set(people.map((p) => p.email).filter(Boolean));
   return { format, rows: rows.map((r) => ({ ...r, exists: names.has(r.name.toLowerCase()) || Boolean(r.email && emails.has(r.email)) })) };
 }
@@ -181,7 +186,7 @@ export async function addPeople(db, { rows, sourceId, newSource } = {}, now = ne
   if (rows.length > MAX_LIST) fail(`Add up to ${MAX_LIST} people at a time`);
   const src = await sourceFor(db, { sourceId, newSource }, now);
   const outreach = await outreachFor(db, src, now);
-  const current = (await all(db, PEOPLE)).filter((p) => !p.archived);
+  const current = (await all(db, PEOPLE)).filter((p) => !p.archived && !p.mapOnly);
   const have = new Set(current.map((p) => key(p.name))), mails = new Set(current.map((p) => p.email).filter(Boolean));
   const docs = [], skipped = [];
   for (const r of rows) {
