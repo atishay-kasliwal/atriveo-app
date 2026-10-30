@@ -24,7 +24,8 @@ COPY --from=whisper /src/build/bin/whisper-cli /opt/whisper/whisper-cli
 COPY --from=whisper /ggml-small.en.bin /opt/whisper/ggml-small.en.bin
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts
+# mongodb and dotenv are devDependencies in this repo (the dashboard image installs them the same way), so no --omit=dev.
+RUN npm ci --ignore-scripts
 COPY scripts ./scripts
 ENV NODE_ENV=production \
     LOOPS_TRANSCRIBER=whisper-cpp \
