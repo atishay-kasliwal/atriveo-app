@@ -165,7 +165,7 @@ export async function openMapFile(db, { name, file, separate } = {}, now = new D
   for (const p of fPeople) {
     if (!p?.id || !str(p.name, 80)) continue;
     const email = cleanEmail(p.email) ?? "", li = linkKey(p.linkedin);
-    const hit = (email && people.find((x) => x.email === email)) || (li && people.find((x) => x.linkedin && linkKey(x.linkedin) === li)) || people.find((x) => keyOf(x.name) === keyOf(p.name));
+    const hit = (email && people.find((x) => x.email === email)) || (li && people.find((x) => x.linkedin && linkKey(x.linkedin) === li)) || people.find((x) => keyOf(x.name) === keyOf(p.name) && (!str(p.company, 80) || !x.company || keyOf(x.company) === keyOf(p.company)));
     if (hit) { ids.set(String(p.id), hit._id); sum.people.matched++; continue; }
     const doc = {
       _id: randomUUID(), name: str(p.name, 80), role: str(p.role, 80), city: str(p.city, 80), company: str(p.company, 80), email, linkedin: /^https?:\/\//i.test(String(p.linkedin ?? "")) ? str(p.linkedin, 300) : "",

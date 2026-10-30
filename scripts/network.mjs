@@ -276,12 +276,26 @@ export async function savePerson(db, input = {}, now = new Date()) {
   return out({ ...cur, ...next });
 }
 
+/**
+ * Change one person from what they are right now, and write only if nobody else changed them in between (the update matches on the
+ * `updatedAt` that was read). Two writes close together used to overwrite each other's history; the loser now reads again and retries.
+ */
+async function updatePerson(db, id, build) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const cur = await db.collection(PEOPLE).findOne({ _id: String(id) });
+    if (!cur) fail("That person is no longer in your network. Reload the page.");
+    const set = await build(cur);
+    const r = await db.collection(PEOPLE).updateOne({ _id: cur._id, updatedAt: cur.updatedAt }, { $set: set });
+    if (r && r.matchedCount === 0) continue;
+    return out({ ...cur, ...set });
+  }
+  fail("They were changed at the same moment. Try again.");
+}
+
 export const FOLLOW_UP_PLATFORMS = ["linkedin", "email", "whatsapp", "phone", "in-person", "other"];
 
 /** Save the next step and, optionally, the previous attempt together in one database update. */
 export async function saveFollowUp(db, input = {}, now = new Date()) {
-  const cur = await db.collection(PEOPLE).findOne({ _id: String(input.id) });
-  if (!cur) fail("That person is no longer in your network. Reload the page.");
   const plan = input.plan;
   if (!plan || typeof plan.enabled !== "boolean") fail("Choose whether a follow-up is needed");
   if (!FOLLOW_UP_PLATFORMS.includes(plan.platform)) fail("Choose a follow-up platform");
@@ -289,44 +303,44 @@ export async function saveFollowUp(db, input = {}, now = new Date()) {
   const nextFollowUp = plan.enabled ? day(input.nextFollowUp) : null;
   if (nextFollowUp && new Date(nextFollowUp).toISOString().slice(0, 10) !== nextFollowUp) fail("Choose a valid follow-up date");
   if (plan.enabled && (!nextFollowUp || !followUpPlan.regarding)) fail("Add a topic and date for the next follow-up");
-  const set = { followUpPlan, nextFollowUp, updatedAt: now.toISOString() };
-  if (input.outcome) {
-    if (typeof input.outcome.completed !== "boolean") fail("Did you follow up? Choose yes or no");
-    const previous = cur.followUpPlan || followUpPlan;
-    const platform = previous.platform || followUpPlan.platform;
-    const completed = input.outcome.completed;
-    const type = completed ? (platform === "email" ? "email" : platform === "phone" ? "call" : platform === "in-person" ? "met" : "message") : "note";
-    const entry = { id: randomUUID(), at: now.toISOString(), type, text: text(input.outcome.notes, 2000), followUp: { completed, platform, regarding: previous.regarding || followUpPlan.regarding, nextNotes: followUpPlan.nextNotes, nextFollowUp } };
-    set.history = [...(cur.history || []), entry].sort((a, b) => a.at.localeCompare(b.at)).slice(-MAX_HISTORY);
-    if (completed && (!cur.lastContact || now.toISOString() > cur.lastContact)) set.lastContact = now.toISOString();
-  }
-  await db.collection(PEOPLE).updateOne({ _id: cur._id }, { $set: set });
-  return out({ ...cur, ...set });
+  return updatePerson(db, input.id, (cur) => {
+    const set = { followUpPlan, nextFollowUp, updatedAt: now.toISOString() };
+    if (input.outcome) {
+      if (typeof input.outcome.completed !== "boolean") fail("Did you follow up? Choose yes or no");
+      const previous = cur.followUpPlan || followUpPlan;
+      const platform = previous.platform || followUpPlan.platform;
+      const completed = input.outcome.completed;
+      const type = completed ? (platform === "email" ? "email" : platform === "phone" ? "call" : platform === "in-person" ? "met" : "message") : "note";
+      const entry = { id: randomUUID(), at: now.toISOString(), type, text: text(input.outcome.notes, 2000), followUp: { completed, platform, regarding: previous.regarding || followUpPlan.regarding, nextNotes: followUpPlan.nextNotes, nextFollowUp } };
+      set.history = [...(cur.history || []), entry].sort((a, b) => a.at.localeCompare(b.at)).slice(-MAX_HISTORY);
+      if (completed && (!cur.lastContact || now.toISOString() > cur.lastContact)) set.lastContact = now.toISOString();
+    }
+    return set;
+  });
 }
 
 /** Add something that happened (a note, an email, a call...). Contact of any kind moves "last contact" forward. */
 export async function logHistory(db, { id, type, text: body, at } = {}, now = new Date()) {
   if (!HISTORY_TYPES.includes(type)) fail("Pick what happened: note, email, message, call, met or reply");
-  const cur = await db.collection(PEOPLE).findOne({ _id: String(id) });
-  if (!cur) fail("That person is no longer in your network. Reload the page.");
   const when = at ? (Number.isNaN(Date.parse(at)) ? fail("That date is not valid") : new Date(at).toISOString()) : now.toISOString();
+  // Contact cannot be in the future: it would push "last contact", and so the next follow-up, out past that date.
+  if (CONTACT.has(type) && Date.parse(when) > now.getTime() + 86_400_000) fail("Contact cannot be dated in the future");
   const entry = { id: randomUUID(), at: when, type, text: text(body, 2000) };
   if (!entry.text && type === "note") fail("Write the note first");
-  const history = [...(cur.history ?? []), entry].sort((a, b) => a.at.localeCompare(b.at)).slice(-MAX_HISTORY);
-  const set = { history, updatedAt: now.toISOString() };
-  if (CONTACT.has(type) && (!cur.lastContact || when > cur.lastContact)) set.lastContact = when;
-  await db.collection(PEOPLE).updateOne({ _id: cur._id }, { $set: set });
-  return out({ ...cur, ...set });
+  return updatePerson(db, id, (cur) => {
+    const history = [...(cur.history ?? []), entry].sort((a, b) => a.at.localeCompare(b.at)).slice(-MAX_HISTORY);
+    const set = { history, updatedAt: now.toISOString() };
+    if (CONTACT.has(type) && (!cur.lastContact || when > cur.lastContact)) set.lastContact = when;
+    return set;
+  });
 }
 
 export async function removeHistory(db, { id, entryId } = {}, now = new Date()) {
-  const cur = await db.collection(PEOPLE).findOne({ _id: String(id) });
-  if (!cur) fail("That person is no longer in your network. Reload the page.");
-  const history = (cur.history ?? []).filter((h) => h.id !== entryId);
-  const lastContact = history.filter((h) => CONTACT.has(h.type)).map((h) => h.at).sort().pop() ?? null;
-  const set = { history, lastContact, updatedAt: now.toISOString() };
-  await db.collection(PEOPLE).updateOne({ _id: cur._id }, { $set: set });
-  return out({ ...cur, ...set });
+  return updatePerson(db, id, (cur) => {
+    const history = (cur.history ?? []).filter((h) => h.id !== entryId);
+    const lastContact = history.filter((h) => CONTACT.has(h.type)).map((h) => h.at).sort().pop() ?? null;
+    return { history, lastContact, updatedAt: now.toISOString() };
+  });
 }
 
 /** Archive hides a person everywhere; restore brings them back with everything they had. */
@@ -443,6 +457,10 @@ export async function removeSource(db, { id } = {}, now = new Date()) {
   const people = (await all(db, PEOPLE)).filter((p) => p.sourceId === sid);
   for (const p of people) await db.collection(PEOPLE).updateOne({ _id: p.id }, { $set: { sourceId: null, updatedAt: now.toISOString() } });
   for (const l of (await all(db, LINKS)).filter((l) => l.a === sid || l.b === sid)) await db.collection(LINKS).deleteOne({ _id: l.id });
+  // Its logo, where it sat on each map, and any "also introduced by" that named it go with it.
+  if (removed.photoId) await db.collection("network_images").deleteOne({ _id: removed.photoId });
+  for (const c of (await db.collection("network_map_cards").find({}).toArray()).filter((c) => c.id === sid)) await db.collection("network_map_cards").deleteOne({ _id: c._id });
+  for (const other of (await all(db, SOURCES)).filter((x) => x.id !== sid && (x.alsoVia ?? []).some((v) => v.id === sid))) await db.collection(SOURCES).updateOne({ _id: other.id }, { $set: { alsoVia: other.alsoVia.filter((v) => v.id !== sid), updatedAt: now.toISOString() } });
   await db.collection(SOURCES).deleteOne({ _id: sid });
   return { id: sid, released: people.length };
 }
