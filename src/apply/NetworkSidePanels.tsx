@@ -182,11 +182,12 @@ export function SourcePanel({ source: s, data, colors, onChange, onClose, onPers
           {children.length > 0 && <div className="pp-days" aria-label="Under it">{children.map((c) => (
             <button key={c.id} type="button" className="pp-day" style={{ "--c": colors.source.get(c.id) } as CSSProperties} onClick={() => onSource(c.id)}>
               <span>{c.name}</span><small>{peopleForSource(c, data).length}</small></button>))}</div>}
-          {s.type === "outreach" && members.some((p) => dueCheckIn(p, s)) && <div className="pp-asks" aria-label="Did they respond?">{members.filter((p) => dueCheckIn(p, s)).map((p) => { const due = dueCheckIn(p, s)!; const answer = async (a: "accepted" | "replied" | "no") => { try { const r = await answerCheckIn(p.id, due.hour, a); say({ text: checkInToast(p.name, r) }); await onReload(); } catch (e) { say({ text: String((e as Error).message) }); } }; return (
+          {s.type === "outreach" && members.some((p) => dueCheckIn(p, s)) && <div className="pp-asks" aria-label="Did they respond?">{members.filter((p) => dueCheckIn(p, s)).map((p) => { const due = dueCheckIn(p, s)!; const answer = async (a: "accepted" | "replied" | "no" | "sent") => { try { const r = await answerCheckIn(p.id, due.hour, a); say({ text: checkInToast(p.name, r, a === "sent") }); await onReload(); } catch (e) { say({ text: String((e as Error).message) }); } }; return (
             <div key={p.id} className="pp-ask-row"><span><b>{p.name}</b> · {due.hour}h</span>
               <button type="button" className="nw-chip" onClick={() => void answer("accepted")}>Accepted</button>
               <button type="button" className="nw-chip" onClick={() => void answer("replied")}>Replied</button>
-              <button type="button" className="nw-chip" onClick={() => void answer("no")}>{due.last ? "No · archive" : "No · message again"}</button></div>); })}</div>}
+              <button type="button" className="nw-chip" onClick={() => void answer("no")}>{due.last ? "No · archive" : "No · message again"}</button>
+              {!due.last && <button type="button" className="nw-chip" onClick={() => void answer("sent")}>No · I messaged again</button>}</div>); })}</div>}
           <ul className="pp-people">{members.slice(pg * per, pg * per + per).map((p) => { const f = followUp(p.nextFollowUp), st = s.type === "outreach" ? outreachState(p, s) : null; return (
             <li key={p.id}><button type="button" onClick={() => onPerson(p.id)}>
               <span className={`nw-av${p.photoId ? " ph" : ""}`} style={{ "--c": colors.person.get(p.id) } as CSSProperties} aria-hidden="true">{p.photoId ? <img src={imageUrl(p.photoId)} alt="" /> : initials(p.name)}</span>
