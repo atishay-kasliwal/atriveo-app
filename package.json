@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "test:network:browser": "npm run build:apply && node --test tests/network-canvas.browser.test.mjs",
+    "test:dayplan:browser": "npm run build:apply && node --test tests/day-plan.browser.test.mjs",
     "test:push:browser": "npm run build:apply && node --test tests/push-browser.test.mjs",
     "test:loops": "node --test --test-global-setup=tests/setup-tmp.mjs --test-timeout=120000 tests/loops/loops.test.mjs tests/loops/sw.test.mjs tests/loops/transcribe.test.mjs tests/loops/deploy.test.mjs",
     "test:loops:browser": "npm run build:apply && node --test --test-global-setup=tests/setup-tmp.mjs --test-timeout=120000 tests/loops/dock.browser.test.mjs tests/loops/page.browser.test.mjs tests/loops/today.browser.test.mjs",
