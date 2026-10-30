@@ -476,5 +476,5 @@ export function outreachState(p: Person, source: Source | undefined, now = Date.
   return { text: next ? `Waiting · ${next}h check` : "Waiting", tone: "wait" };
 }
 export interface CheckInResult { status: string; again: boolean; archived: boolean }
-export const answerCheckIn = (id: string, hour: number, answer: "accepted" | "replied" | "no") => post<CheckInResult & ApiBody>("outreach/answer", { id, hour, accepted: answer === "accepted", replied: answer === "replied" });
-export const checkInToast = (name: string, r: CheckInResult) => r.archived ? `${name} did not respond. Archived; restore any time.` : r.status === "waiting" ? `Drop ${name} another message.` : r.status === "replied" ? `${name} replied. Kept.` : `${name} accepted. Kept.`;
+export const answerCheckIn = (id: string, hour: number, answer: "accepted" | "replied" | "no" | "sent") => post<CheckInResult & ApiBody>("outreach/answer", { id, hour, accepted: answer === "accepted", replied: answer === "replied", sent: answer === "sent" });
+export const checkInToast = (name: string, r: CheckInResult, sent = false) => r.archived ? `${name} did not respond. Archived; restore any time.` : r.status === "waiting" ? (sent ? `Logged: you messaged ${name} again.` : `Drop ${name} another message.`) : r.status === "replied" ? `${name} replied. Kept.` : `${name} accepted. Kept.`;

@@ -21,9 +21,9 @@ export default function NetworkBell({ data, board, colors, onPerson, onSource, o
     try { await post("reminders/snooze", { key: r.key, days: 7 }); setList((l) => l.filter((x) => x.key !== r.key)); say({ text: "Snoozed for a week." }); }
     catch (e) { say({ text: String((e as Error).message) }); }
   }
-  async function answer(r: Reminder, a: "accepted" | "replied" | "no") {
+  async function answer(r: Reminder, a: "accepted" | "replied" | "no" | "sent") {
     const name = data.people.find((p) => p.id === r.personId)?.name ?? "They";
-    try { const res = await answerCheckIn(r.personId!, r.hour!, a); setList((l) => l.filter((x) => x.key !== r.key)); say({ text: checkInToast(name, res) }); }
+    try { const res = await answerCheckIn(r.personId!, r.hour!, a); setList((l) => l.filter((x) => x.key !== r.key)); say({ text: checkInToast(name, res, a === "sent") }); }
     catch (e) { say({ text: String((e as Error).message) }); }
   }
   const top = list[0];
@@ -42,7 +42,7 @@ export default function NetworkBell({ data, board, colors, onPerson, onSource, o
             <li key={r.key}>
               <button type="button" className="go" onClick={() => go(r)}><i style={{ background: color(r) }} /><span>{r.title}<small>{r.detail}</small></span></button>
               {r.kind === "outreach"
-                ? <span className="nw-asks"><button type="button" onClick={() => void answer(r, "accepted")}>Accepted</button><button type="button" onClick={() => void answer(r, "replied")}>Replied</button><button type="button" onClick={() => void answer(r, "no")}>{r.last ? "No · archive" : "No · message again"}</button></span>
+                ? <span className="nw-asks"><button type="button" onClick={() => void answer(r, "accepted")}>Accepted</button><button type="button" onClick={() => void answer(r, "replied")}>Replied</button><button type="button" onClick={() => void answer(r, "no")}>{r.last ? "No · archive" : "No · message again"}</button>{!r.last && <button type="button" onClick={() => void answer(r, "sent")}>No · I messaged again</button>}</span>
                 : <button type="button" className="snz" onClick={() => void snooze(r)}>Snooze a week</button>}
             </li>))}</ul>
         </div>
