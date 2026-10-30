@@ -129,6 +129,8 @@ export async function readAudio(db, userId, id) {
 /** provider: { name, transcribe(buffer, mime) → string }. null provider (not configured yet): recordings simply wait as RECORDED. */
 export async function transcribePending(db, provider, { limit = 1, now = new Date() } = {}) {
   if (!provider) return { done: 0, failed: 0 };
+  // A transcriber that was stopped mid-recording (a restart) leaves it TRANSCRIBING: after 45 minutes it goes back in the queue.
+  await caps(db).updateMany({ status: "TRANSCRIBING", updatedAt: { $lte: new Date(+now - 45 * 60_000) } }, { $set: { status: "RECORDED", updatedAt: now } });
   let done = 0, failed = 0;
   for (let i = 0; i < limit; i++) {
     const claimed = await caps(db).findOneAndUpdate({ status: "RECORDED", $or: [{ retryAt: null }, { retryAt: { $lte: now } }] }, { $set: { status: "TRANSCRIBING", updatedAt: now } }, { sort: { createdAt: 1 }, returnDocument: "after" });
