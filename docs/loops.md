@@ -1,7 +1,7 @@
 # Loops
 
 Say or type a thought once; Atriveo keeps it, has your Mac's Codex read it, asks you to confirm, then reminds you until you finish it.
-Phase 1 is the backend and the Mac worker; Phase 2 is the capture dock (below). Phases: 2 the capture dock, 3 the /loops page, 4 Today + push action
+Phase 1 is the backend and the Mac worker; Phase 2 is the capture dock and Phase 3 the /loops page (both below). Phases: 2 the capture dock, 3 the /loops page, 4 Today + push action
 buttons + Network links, 5 transcription provider and deploy runbook.
 
 ## The loop
@@ -67,3 +67,21 @@ no service-worker action buttons. Tests: `npm run test:loops`.
   browser comes back online. A capture the server refuses (not a network failure) is not kept and the message is shown.
 - Tests: `npm run test:loops:browser` (headless Chromium against the built console with a stand-in `/api/loops`: every screen, shortcut,
   typing, voice with a fake microphone, no microphone, permission denied, server down then recovered, the unfinished list, a phone viewport).
+
+## The Loops page (Phase 3)
+
+`src/apply/LoopsPage.tsx` + `loops-page.css`, route `/loops`, a "Loops" link in the console nav, an "All loops" link in the dock. `/loops?id=<id>`
+opens that capture (the notification deep link).
+
+- **List (left):** unfinished intentions first, in the order Needs action, Needs review, Waiting for your Mac (recorded, transcribing, waiting,
+  reading, failed), Completed, Dismissed. Plain rows with hairlines, no cards. The line under the title says where things stand and when your Mac
+  was last seen. Search (company, person, role, any words in what you said or the tasks; `/` focuses it) and Filters (status, date range)
+  turn it into one flat result list across every state and the full history.
+- **Story (right):** the state and next nudge, then what applies: **Check what I understood** (company, role, person, summary, tasks, matches
+  from Network/jobs, the reminder interval; one Confirm that saves only what you changed, then confirms), **To do** (per-task check, Done, Remind
+  me in…, Not doing this), or honest waiting copy ("Waiting for your Mac · last seen 3h ago", "Recording saved", a failure with Try again and,
+  for a failed transcription, a box to type what you said). Below: the original thought (audio player, transcript on demand), Understood as,
+  and Activity: a day-grouped timeline of everything that happened (captured, read, edited, confirmed, each reminder, snoozes, completion).
+- **Phone:** the list and a capture each take the whole screen, with a back link.
+- Tests: `npm run test:loops:browser` (now includes `page.browser.test.mjs`: sections and states, story, finishing, snooze, review and
+  confirm in one step, search and filters, retry/type/reopen, empty and unknown ids, nav and phone).

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { clock, flushQueue, loopDone, loopsSummary, loopSnooze, newCaptureId, pickRecorderMime, submitCapture, waiting, type LoopOpen, type LoopsSummary } from "./loops";
 import "./capture-dock.css";
@@ -180,6 +181,7 @@ function Dock() {
                   ))}
                 </ul>
               )}
+              <Link className="cd-all" to="/loops" onClick={closeDock}>All loops</Link>
             </>
           )}
         </div>

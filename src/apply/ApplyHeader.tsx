@@ -26,7 +26,7 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
 
       </a>
       <nav className="apply-nav" aria-label="Console">
-        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/network" && path !== "/job-matching" && !path.startsWith("/applied") && path !== "/settings" && path !== "/general" && path !== "/usage" && path !== "/assessments" ? "page" : undefined}>
+        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/network" && path !== "/loops" && path !== "/job-matching" && !path.startsWith("/applied") && path !== "/settings" && path !== "/general" && path !== "/usage" && path !== "/assessments" ? "page" : undefined}>
           Today{waiting !== null ? <span className="apply-nav-n">{waiting}</span> : null}
         </Link>
         <Link to="/job-matching" aria-current={path === "/job-matching" ? "page" : undefined}>Matching</Link>
@@ -38,6 +38,7 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
         <Link to="/bank" aria-current={path === "/bank" ? "page" : undefined}>Bank</Link>
         <Link to="/outreach" aria-current={path === "/outreach" ? "page" : undefined}>Outreach</Link>
         <Link to="/network" aria-current={path === "/network" ? "page" : undefined}>Network</Link>
+        <Link to="/loops" aria-current={path === "/loops" ? "page" : undefined}>Loops</Link>
         <Link to="/stats" aria-current={page === "stats" ? "page" : undefined}>Stats</Link>
       </nav>
       <div className="apply-header-right">

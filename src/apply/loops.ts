@@ -17,8 +17,29 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 const json = (body: unknown): RequestInit => ({ method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 
 export const loopsSummary = () => request<LoopsSummary & { ok: true }>("/summary");
-export const loopDone = (id: string) => request(`/${id}/done`, json({}));
+export const loopDone = (id: string, taskId?: string) => request(`/${id}/done`, json(taskId ? { taskId } : {}));
 export const loopSnooze = (id: string, hours: number) => request(`/${id}/snooze`, json({ hours }));
+
+export type LoopStatus = "RECORDED" | "TRANSCRIBING" | "WAITING_FOR_CODEX" | "PROCESSING" | "NEEDS_REVIEW" | "ACTIVE" | "SNOOZED" | "COMPLETED" | "DISMISSED" | "FAILED";
+export interface LoopTask { id: string; title: string; description: string | null; priority: "high" | "medium" | "low"; done: boolean; doneAt: string | null }
+export interface LoopView { summary: string; company: string | null; position: string | null; person: string | null; intent: string | null; context: string[] }
+export interface LoopLinks { linked: { sourceId?: string; personId?: string; jobUrl?: string; company?: string | null }; candidates: { people: Array<{ id: string; name: string; company: string | null }>; jobs: Array<{ url: string; title: string; company: string }>; companies: Array<{ id: string; name: string }> } }
+export interface Loop {
+  id: string; inputType: "TEXT" | "VOICE"; status: LoopStatus; createdAt: string; updatedAt: string; completedAt: string | null; confirmedAt: string | null;
+  text: string | null; audio: { mime: string; bytes: number; durationMs: number } | null; view: LoopView | null; structured: { action_type: string } | null; edited: boolean;
+  links: LoopLinks | null; tasks: LoopTask[]; reminder: { intervalHours: number | null; nextAt: string | null; lastAt: string | null; count: number }; error: { stage: string; message: string } | null; attempts: number;
+}
+export interface LoopEvent { type: string; at: string; data: Record<string, unknown> }
+export interface LoopQuery { q?: string; status?: string; from?: string; to?: string }
+export const listLoops = (query: LoopQuery = {}) => request<{ ok: true; captures: Loop[] }>(`?limit=200${Object.entries(query).filter(([, v]) => v).map(([k, v]) => `&${k}=${encodeURIComponent(v as string)}`).join("")}`);
+export const getLoop = (id: string) => request<{ ok: true; capture: Loop; events: LoopEvent[] }>(`/${id}`);
+export const loopEdit = (id: string, patch: object) => request<{ ok: true; capture: Loop }>(`/${id}/edit`, json(patch));
+export const loopConfirm = (id: string, reminderHours: number) => request<{ ok: true; capture: Loop }>(`/${id}/confirm`, json({ reminderHours }));
+export const loopDismiss = (id: string) => request(`/${id}/dismiss`, json({}));
+export const loopRetry = (id: string) => request(`/${id}/retry`, json({}));
+export const loopReopen = (id: string) => request(`/${id}/reopen`, json({}));
+export const loopTranscript = (id: string, text: string) => request(`/${id}/transcript`, json({ text }));
+export const audioUrl = (id: string) => `${BASE}/${id}/audio`;
 
 /** The client picks the id, so a retried upload is the same capture. */
 export const newCaptureId = () => (crypto.randomUUID?.() ?? `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`).replace(/[^A-Za-z0-9_-]/g, "").slice(0, 40).padEnd(8, "0");
