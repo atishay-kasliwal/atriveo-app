@@ -6,13 +6,11 @@
 
 /* Editor column */
 .rb-editor { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 0 8px 40px 0; scroll-padding: 80px; }
-.rb-which { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: 15px; }
-.rb-which span { font-size: 13px; color: var(--muted-fg); }
 .rb-group { margin: 12px 0 0; font-size: 11px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-fg); }
 
-/* Header line: three quiet fields, borders only on hover and focus. */
-.rb-headline { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 2px; padding: 4px; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); }
-.rb-headline label { display: flex; flex-direction: column; gap: 2px; padding: 6px 10px; border-radius: 8px; }
+/* Header line: identity fields and the current job. */
+.rb-headline { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.5fr); gap: 2px; padding: 4px; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); }
+.rb-headline label { min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 6px 10px; border-radius: 8px; }
 .rb-headline label:focus-within { background: color-mix(in oklab, var(--accent-bg) 60%, transparent); }
 .rb-headline span { font-size: 11px; color: var(--muted-fg); }
 .rb-headline input { font: inherit; font-size: 14px; color: var(--foreground); background: none; border: 0; padding: 0; outline: none; min-width: 0; }
@@ -87,7 +85,7 @@
 .rb-preview iframe { flex: 1 1 auto; min-height: 0; width: 100%; border: 1px solid var(--border-col); border-radius: 10px; background: #525659; }
 .rb-preview iframe.rb-live { background: #2b2d31; }
 .rb-page-hint { margin: -4px 0 0; font-size: 11.5px; color: var(--muted-fg); text-align: center; }
-.rb-viewbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12.5px; }
+.rb-viewbar { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; overflow-x: auto; flex-shrink: 0; padding-bottom: 2px; font-size: 12.5px; }
 .rb-tabs { display: inline-flex; border: 1px solid var(--border-col); border-radius: 8px; overflow: hidden; }
 .rb-tabs button { font: inherit; font-size: 12.5px; padding: 4px 12px; background: none; border: 0; color: var(--muted-fg); cursor: pointer; }
 .rb-tabs button.is-on { background: var(--accent-bg); color: var(--foreground); font-weight: 600; }
@@ -98,8 +96,9 @@
 .rb-pdf-status { color: var(--muted-fg); white-space: nowrap; }
 .rb-saved { color: #22c55e; font-weight: 600; white-space: nowrap; }
 .rb-match { font-size: 13px; color: var(--muted-fg); white-space: nowrap; } .rb-match b { color: var(--foreground); }
-.rb-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-.rb-actions :is(.apps-btn, .rv-primary) { height: 30px; padding: 0 12px; font-size: 12.5px; }
+.rb-viewbar > * { flex-shrink: 0; }
+.rb-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.rb-actions :is(.apps-btn, .rv-primary) { height: 30px; padding: 0 9px; font-size: 12px; }
 .rb-actions a.apps-btn { text-decoration: none; display: inline-flex; align-items: center; }
 .rb-checks { font-size: 12.5px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-col); }
 .rb-checks.bad { border-color: #f59e0b; color: #fcd34d; } .rb-checks.bad ul { margin: 4px 0 0; padding-left: 18px; }
@@ -299,3 +298,20 @@
 .rb-ats small { font-size: 11px; color: var(--muted-fg); }
 .rb-ready { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 2px 7px; border-radius: 5px; background: var(--secondary-bg); color: #d5ad61; white-space: nowrap; cursor: default; }
 .rb-ready.is-ready { color: #69c69a; } .rb-ready.is-needs-work { color: #e07a72; }
+
+.rb-job-source { min-width: 0; padding: 6px 10px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.rb-job-source > div { display: flex; align-items: baseline; gap: 8px; }
+.rb-job-source > div > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rb-job-source .rb-back { margin-left: auto; font-size: 10px; white-space: nowrap; }
+.rb-job-source b { font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rb-job-source small { font-size: 10px; line-height: 1.35; color: var(--muted-fg); }
+@media (min-width: 901px) and (max-width: 1200px) { .rb-headline { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); } }
+@media (min-width: 901px) and (max-width: 1600px) {
+  .rb-viewbar { gap: 5px; font-size: 11px; }
+  .rb-viewbar .rb-tabs button { padding-inline: 8px; font-size: 11px; }
+  .rb-viewbar .rb-pages { gap: 4px; font-size: 11px; }
+  .rb-viewbar .rb-ats { gap: 4px; font-size: 11px; }
+  .rb-viewbar .rb-ats small { font-size: 10px; }
+  .rb-actions { gap: 4px; }
+  .rb-actions :is(.apps-btn, .rv-primary) { padding-inline: 7px; font-size: 11px; }
+}

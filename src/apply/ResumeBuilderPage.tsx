@@ -502,8 +502,6 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const atsChip = atsBefore && <span className="rb-ats" title={atsTitle}>ATS {!atsBefore.posting ? <small>no posting</small> : atsBefore.error && !atsAfter ? <small>unavailable</small> : <>
     <b>{scoreBefore ?? "–"}</b>{dirty && <> → {atsAfter ? <b className={scoreAfter != null && scoreBefore != null ? (scoreAfter > scoreBefore ? "is-up" : scoreAfter < scoreBefore ? "is-down" : "") : ""}>{scoreAfter ?? "–"}</b> : <small>scoring…</small>}</>}
     {counts?.required?.total ? <small>· req {counts.required.matched}/{counts.required.total}{counts.preferred?.total ? ` · pref ${counts.preferred.matched}/${counts.preferred.total}` : ""}</small> : null}</>}</span>;
-  const ready = atsNow?.ready ?? null;
-  const readyChip = ready && <span className={`rb-ready is-${ready.status.toLowerCase().replace(" ", "-")}`} title={[`Resume Ready${atsAfter ? " (this draft)" : ""}: ${ready.status}`, ...ready.reasons, ready.skills_checked ? "" : "Skills were not checked against Fit yet"].filter(Boolean).join(". ")}>Resume Ready · {ready.status}</span>;
   const projects = (loaded?.roles ?? []).filter((r) => r.kind === "project" && !sections.some((s) => s.role === r.role));
   const resumeName = !loaded ? "" : loaded.source.kind === "track" ? `${TRACK_LABEL[loaded.source.track] ?? loaded.source.track} general resume` : loaded.source.company;
   const metaOf = (s: Section) => {
@@ -525,6 +523,11 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
       <label><span>Title</span><input ref={titleRef} value={title} maxLength={60} onFocus={remember} onChange={(e) => { setTitle(e.target.value); setDirty(true); }} /></label>
       <label><span>Email</span><input type="email" value={email} maxLength={80} onFocus={remember} onChange={(e) => { setEmail(e.target.value); setDirty(true); }} /></label>
       <label><span>Location</span><input value={city} maxLength={40} placeholder="City, ST" onFocus={remember} onChange={(e) => { setCity(e.target.value); setDirty(true); }} /></label>
+      {loaded && <div className="rb-job-source">
+        <div><span>{resumeName}</span><Link className="rb-back" to="/resume_builder">All resumes</Link></div>
+        <b title={loaded.source.kind === "track" ? "Not tailored to a job" : loaded.source.title}>{loaded.source.kind === "track" ? "Not tailored to a job" : loaded.source.title}</b>
+        <small>{loaded.source.kind === "pasted" ? "From a pasted job description · " : ""}{loaded.current.edited ? "edited" : "generated"}</small>
+      </div>}
     </div>
   );
   const skillsField = (
@@ -771,11 +774,6 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
       {loaded && (
         <main className="rb-main">
           <section className="rb-editor" aria-label="Resume content" ref={editorRef}>
-            <div className="rb-which">
-              <b>{resumeName}</b>
-              <span>{loaded.source.kind === "track" ? "Not tailored to a job" : loaded.source.title}{loaded.source.kind === "pasted" ? " · from a pasted job description" : ""}{loaded.current.edited ? " · edited" : " · generated"}</span>
-              <Link className="rb-back" to="/resume_builder">All resumes</Link>
-            </div>
             {headerFields}
             <h3 className="rb-group">Experience</h3>
             {sections.map((s, si) => s.kind === "experience" ? sectionCard(s, si) : null)}
@@ -796,8 +794,8 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
                 <button role="tab" aria-selected={view === "pdf"} className={view === "pdf" ? "is-on" : ""} onClick={() => setView("pdf")}>PDF</button>
               </span>
               {roomChip}
-              {atsChip}{readyChip}
-              {dirty?pdfStatus:savedAt?<span className="rb-saved">Saved ✓</span>:pdfStatus}
+              {atsChip}
+              {dirty && pdfStatus}
               {draft?.jdMatch && <span className="rb-match" title={draft.jdMatch.missing.length ? `Still missing: ${draft.jdMatch.missing.join(", ")}` : "Every skill this job names is on it"}>JD {draft.jdMatch.before ?? "–"} → <b>{draft.jdMatch.after ?? "–"}</b></span>}
               <span className="rb-actions">
                 {undoBtn}
