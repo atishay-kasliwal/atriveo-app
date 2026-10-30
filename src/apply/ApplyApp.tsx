@@ -14,6 +14,7 @@ import { useAuth } from "../hooks/useAuth";
 import Applications from "../pages/Applications";
 import AdminLogin from "./AdminLogin";
 import BankPage from "./BankPage";
+import DayPlanPage from "./DayPlanPage";
 import ApplyHeader from "./ApplyHeader";
 import ReadyPage from "./ReadyPage";
 import ResumeBuilderPage from "./ResumeBuilderPage";
@@ -22,6 +23,8 @@ import JobMatchingPage from "./JobMatchingPage";
 import OutreachPage from "./OutreachPage";
 import NetworkPage from "./NetworkPage";
 import TodayPage from "./TodayPage";
+import CaptureDock from "./CaptureDock";
+import LoopsPage from "./LoopsPage";
 
 /** Signed-in admins see the console; everyone else is sent to the admin login. */
 function Console() {
@@ -41,24 +44,30 @@ function Console() {
   if (loading) return <div className="apply-loading" aria-busy="true"><div className="spin" /></div>;
   if (!user) return <Navigate to="/login" replace />;
   const header = <ApplyHeader user={user} />;
-  if (path === "/outreach") return <OutreachPage header={header} />;
-  if (path === "/network") return <NetworkPage header={header} />;
-  if (path === "/job-matching") return <JobMatchingPage header={header} />;
-  if (path === "/applied" || path.startsWith("/applied/")) return <AppliedPage header={header} />;
-  if (path === "/settings") return <SettingsPage header={header} />;
-  if (path === "/general") return <GeneralPage header={header} />;
-  if (path === "/usage") return <UsagePage header={header} />;
-  if (path === "/assessments") return <AssessmentsPage header={header} />;
-  if (path === "/staffing") return <StaffingPage header={header} />;
-  if (path === "/resume_builder") return <ResumeBuilderPage header={header} />;
-  if (path === "/bank") return <BankPage header={header} />;
-  // The answer pages (To answer, and the full form view) were retired: old links and bookmarks land on Today.
-  if (path === "/unanswered" || path === "/answers") return <Navigate to="/" replace />;
-  if (path === "/ready" || path === "/review") return <ReadyPage header={header} />;
-  if (path === "/stats" || path === "/overview") return <InsightsPage header={header} />;
-  // The earlier, heavier analytics page stays reachable for the detail.
-  if (path === "/analytics") return <Applications header={header} />;
-  return <TodayPage header={header} />;
+  // Every signed-in screen: its page, and the Loops capture dock over it.
+  const page = (() => {
+    if (path === "/outreach") return <OutreachPage header={header} />;
+    if (path === "/network") return <NetworkPage header={header} />;
+    if (path === "/loops") return <LoopsPage header={header} />;
+    if (path === "/job-matching") return <JobMatchingPage header={header} />;
+    if (path === "/applied" || path.startsWith("/applied/")) return <AppliedPage header={header} />;
+    if (path === "/settings") return <SettingsPage header={header} />;
+    if (path === "/general") return <GeneralPage header={header} />;
+    if (path === "/usage") return <UsagePage header={header} />;
+    if (path === "/assessments") return <AssessmentsPage header={header} />;
+    if (path === "/staffing") return <StaffingPage header={header} />;
+    if (path === "/resume_builder") return <ResumeBuilderPage header={header} />;
+    if (path === "/bank") return <BankPage header={header} />;
+    if (path === "/day-plan") return <DayPlanPage header={header} />;
+    // The answer pages (To answer, and the full form view) were retired: old links and bookmarks land on Today.
+    if (path === "/unanswered" || path === "/answers") return <Navigate to="/" replace />;
+    if (path === "/ready" || path === "/review") return <ReadyPage header={header} />;
+    if (path === "/stats" || path === "/overview") return <InsightsPage header={header} />;
+    // The earlier, heavier analytics page stays reachable for the detail.
+    if (path === "/analytics") return <Applications header={header} />;
+    return <TodayPage header={header} />;
+  })();
+  return <>{page}<CaptureDock /></>;
 }
 
 export default function ApplyApp() {

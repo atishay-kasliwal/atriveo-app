@@ -194,14 +194,14 @@ function joinList(items) {
   return `${items.slice(0, -1).join(", ")}, and ${items.at(-1)}`;
 }
 
-function buildTex({ company, role, skills, bullets }) {
-  const { NAME, EMAIL, PHONE, LINKEDIN } = identity();
-  const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+export function buildTex({ company, role, skills = [], bullets = [], paragraphs, profile }) {
+  const { NAME, EMAIL, PHONE, LINKEDIN } = profile ? { NAME: profile.name, EMAIL: profile.email, PHONE: profile.phone, LINKEDIN: profile.linkedin } : identity();
+  const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "America/New_York" });
   const cRole = cleanRole(role);
   // Keep the skills line short — 3 max reads cleaner than a laundry list.
   const skillsPhrase = skills.length ? joinList(skills.slice(0, 3)) : "building full-stack systems";
 
-  const co = cleanCompany(company);
+  const co = paragraphs ? String(company || "Hiring Team") : cleanCompany(company);
 
   // Voice rules (from the humanizer skill): no em dashes, no rule-of-three
   // padding, plain "is/are" over "serves as", react rather than list.
@@ -249,13 +249,7 @@ ${escapeTex(co)}
 
 Dear Hiring Team,
 
-${body1}
-
-${body2}
-
-${body3}
-
-${body4}
+${paragraphs ? paragraphs.map(escapeTex).join("\n\n") : [body1, body2, body3, body4].join("\n\n")}
 
 \\vspace{6pt}
 

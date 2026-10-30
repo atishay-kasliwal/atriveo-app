@@ -6,7 +6,7 @@ import { cleanEmail } from "./resume-emails.mjs";
 // been introduced by another person (via); other connections are explicit links. Archived people are kept, never deleted.
 
 const PEOPLE = "network_people", SOURCES = "network_sources", LINKS = "network_links";
-export const SOURCE_TYPES = ["company", "staffing", "event", "family", "linkedin", "day", "oa", "other"];
+export const SOURCE_TYPES = ["company", "staffing", "event", "family", "linkedin", "day", "oa", "outreach", "other"];
 export const LINK_KINDS = ["works", "family", "intro", "other"];
 export const HISTORY_TYPES = ["note", "email", "message", "call", "met", "reply"];
 const CONTACT = new Set(["email", "message", "call", "met"]);
@@ -42,12 +42,18 @@ export function parseList(input) {
 async function all(db, name) { return (await db.collection(name).find({}).toArray()).map(out); }
 
 /** Everything the page shows: people (archived ones left out unless asked), sources, links, and where "You" sits on the canvas. */
-export async function networkView(db, { archived = false } = {}) {
+/** A person who belongs to one map only and has never been contacted: a cold list entry, not someone you know. */
+export const isUntouchedMapOnly = (p) => Boolean(p.mapOnly) && !p.lastContact && !(p.history ?? []).some((h) => h.type === "email" || h.type === "message" || h.type === "call" || h.type === "met" || h.type === "reply");
+
+export async function networkView(db, { archived = false, separate = false } = {}) {
   const [people, sources, links, you] = await Promise.all([all(db, PEOPLE), all(db, SOURCES), all(db, LINKS), db.collection("app_settings").findOne({ _id: YOU })]);
+  // People and sources that belong to one map only (an event file opened with "keep off My network") are not part of My network.
+  const shown = (x) => separate || !x.mapOnly, hidden = new Set([...people, ...sources].filter((x) => !shown(x)).map((x) => x.id));
+  const mine = sources.filter(shown);
   return {
-    people: withFollowUps(people.filter((p) => archived || !p.archived), sources).sort((a, b) => a.name.localeCompare(b.name)),
-    sources: sources.sort((a, b) => a.name.localeCompare(b.name)),
-    links,
+    people: withFollowUps(people.filter((p) => shown(p) && (archived || !p.archived)), mine).sort((a, b) => a.name.localeCompare(b.name)),
+    sources: mine.sort((a, b) => a.name.localeCompare(b.name)),
+    links: links.filter((l) => !hidden.has(l.a) && !hidden.has(l.b)),
     you: { x: you?.x ?? 0, y: you?.y ?? 0, name: you?.name ?? "", title: you?.title ?? "", photoId: you?.photoId ?? null, note: you?.note ?? "" },
   };
 }
@@ -58,7 +64,9 @@ export async function networkView(db, { archived = false } = {}) {
  * wins, and switching follow-ups off for a person (their plan's "No follow-up") stops it. Worked out each time, never stored.
  */
 export function autoFollowUp(p, sources) {
-  if (p.archived || p.followUpPlan?.enabled === false || p.nextFollowUp) return null;
+  if (p.archived || p.outreach || p.followUpPlan?.enabled === false || p.nextFollowUp) return null;
+  // People who belong to one map only (an event's speaker list) are not chased until you have actually been in touch.
+  if (isUntouchedMapOnly(p)) return null;
   const byId = new Map(sources.map((s) => [s.id ?? s._id, s]));
   let family = false, linkedin = false;
   for (let s = byId.get(p.sourceId), n = 0; s && n < 8; s = s.parentSourceId ? byId.get(s.parentSourceId) : null, n++) {
@@ -108,7 +116,7 @@ export async function savePositions(db, { items } = {}) {
 
 /** Rows from a pasted list, marked when the name is already in your network (or repeated in the list). */
 export async function previewList(db, input) {
-  const have = new Set((await all(db, PEOPLE)).filter((p) => !p.archived).map((p) => key(p.name)));
+  const have = new Set((await all(db, PEOPLE)).filter((p) => !p.archived && !p.mapOnly).map((p) => key(p.name)));
   return parseList(input).map((r) => ({ ...r, exists: have.has(r.name.toLowerCase()) }));
 }
 
@@ -167,7 +175,7 @@ export function parseContacts(text) {
 /** A contacts file, previewed: each row marked when the person is already in your network (same name or same email). */
 export async function previewContacts(db, text) {
   const { format, rows } = parseContacts(text);
-  const people = (await all(db, PEOPLE)).filter((p) => !p.archived);
+  const people = (await all(db, PEOPLE)).filter((p) => !p.archived && !p.mapOnly);
   const names = new Set(people.map((p) => key(p.name))), emails = new Set(people.map((p) => p.email).filter(Boolean));
   return { format, rows: rows.map((r) => ({ ...r, exists: names.has(r.name.toLowerCase()) || Boolean(r.email && emails.has(r.email)) })) };
 }
@@ -177,7 +185,8 @@ export async function addPeople(db, { rows, sourceId, newSource } = {}, now = ne
   if (!Array.isArray(rows) || !rows.length) fail("Paste at least one name");
   if (rows.length > MAX_LIST) fail(`Add up to ${MAX_LIST} people at a time`);
   const src = await sourceFor(db, { sourceId, newSource }, now);
-  const current = (await all(db, PEOPLE)).filter((p) => !p.archived);
+  const outreach = await outreachFor(db, src, now);
+  const current = (await all(db, PEOPLE)).filter((p) => !p.archived && !p.mapOnly);
   const have = new Set(current.map((p) => key(p.name))), mails = new Set(current.map((p) => p.email).filter(Boolean));
   const docs = [], skipped = [];
   for (const r of rows) {
@@ -187,10 +196,21 @@ export async function addPeople(db, { rows, sourceId, newSource } = {}, now = ne
     have.add(name.toLowerCase()); if (email) mails.add(email);
     // A contacts file brings more than a name; anything that does not check out is simply left empty.
     let linkedin = ""; try { linkedin = r?.linkedin ? link(r.linkedin) : ""; } catch { linkedin = ""; }
-    docs.push(blank({ name, city: str(r?.city, 80), sourceId: src, email, linkedin, company: str(r?.company, 80), role: str(r?.role, 80), phone: str(r?.phone, 40) }, now));
+    docs.push(blank({ name, city: str(r?.city, 80), sourceId: src, email, linkedin, company: str(r?.company, 80), role: str(r?.role, 80), phone: str(r?.phone, 40), ...(outreach ? { outreach } : {}) }, now));
   }
   if (docs.length) await db.collection(PEOPLE).insertMany(docs);
   return { added: docs.map(out), skipped, sourceId: src };
+}
+
+/**
+ * Someone added to a LinkedIn outreach source starts its check-in clock: now for today's reach-outs, noon that day for an earlier date.
+ * Undefined for every other source.
+ */
+async function outreachFor(db, sourceId, now) {
+  const src = sourceId ? await db.collection(SOURCES).findOne({ _id: String(sourceId) }) : null;
+  if (src?.type !== "outreach") return undefined;
+  const reachedAt = !src.when || src.when === dayOf(now) ? now.toISOString() : `${src.when}T12:00:00.000Z`;
+  return { reachedAt, status: "waiting", answers: [] };
 }
 
 function blank(fields, now) {
@@ -236,7 +256,8 @@ export async function savePerson(db, input = {}, now = new Date()) {
   const patch = personPatch(input);
   if (!input.id) {
     if (!patch.name) fail("A person needs a name");
-    const doc = blank(patch, now);
+    const outreach = await outreachFor(db, patch.sourceId, now);
+    const doc = blank(outreach ? { ...patch, outreach } : patch, now);
     await checkPersonRefs(db, doc._id, doc);
     await db.collection(PEOPLE).insertOne(doc);
     return out(doc);
@@ -255,12 +276,26 @@ export async function savePerson(db, input = {}, now = new Date()) {
   return out({ ...cur, ...next });
 }
 
+/**
+ * Change one person from what they are right now, and write only if nobody else changed them in between (the update matches on the
+ * `updatedAt` that was read). Two writes close together used to overwrite each other's history; the loser now reads again and retries.
+ */
+async function updatePerson(db, id, build) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const cur = await db.collection(PEOPLE).findOne({ _id: String(id) });
+    if (!cur) fail("That person is no longer in your network. Reload the page.");
+    const set = await build(cur);
+    const r = await db.collection(PEOPLE).updateOne({ _id: cur._id, updatedAt: cur.updatedAt }, { $set: set });
+    if (r && r.matchedCount === 0) continue;
+    return out({ ...cur, ...set });
+  }
+  fail("They were changed at the same moment. Try again.");
+}
+
 export const FOLLOW_UP_PLATFORMS = ["linkedin", "email", "whatsapp", "phone", "in-person", "other"];
 
 /** Save the next step and, optionally, the previous attempt together in one database update. */
 export async function saveFollowUp(db, input = {}, now = new Date()) {
-  const cur = await db.collection(PEOPLE).findOne({ _id: String(input.id) });
-  if (!cur) fail("That person is no longer in your network. Reload the page.");
   const plan = input.plan;
   if (!plan || typeof plan.enabled !== "boolean") fail("Choose whether a follow-up is needed");
   if (!FOLLOW_UP_PLATFORMS.includes(plan.platform)) fail("Choose a follow-up platform");
@@ -268,44 +303,44 @@ export async function saveFollowUp(db, input = {}, now = new Date()) {
   const nextFollowUp = plan.enabled ? day(input.nextFollowUp) : null;
   if (nextFollowUp && new Date(nextFollowUp).toISOString().slice(0, 10) !== nextFollowUp) fail("Choose a valid follow-up date");
   if (plan.enabled && (!nextFollowUp || !followUpPlan.regarding)) fail("Add a topic and date for the next follow-up");
-  const set = { followUpPlan, nextFollowUp, updatedAt: now.toISOString() };
-  if (input.outcome) {
-    if (typeof input.outcome.completed !== "boolean") fail("Did you follow up? Choose yes or no");
-    const previous = cur.followUpPlan || followUpPlan;
-    const platform = previous.platform || followUpPlan.platform;
-    const completed = input.outcome.completed;
-    const type = completed ? (platform === "email" ? "email" : platform === "phone" ? "call" : platform === "in-person" ? "met" : "message") : "note";
-    const entry = { id: randomUUID(), at: now.toISOString(), type, text: text(input.outcome.notes, 2000), followUp: { completed, platform, regarding: previous.regarding || followUpPlan.regarding, nextNotes: followUpPlan.nextNotes, nextFollowUp } };
-    set.history = [...(cur.history || []), entry].sort((a, b) => a.at.localeCompare(b.at)).slice(-MAX_HISTORY);
-    if (completed && (!cur.lastContact || now.toISOString() > cur.lastContact)) set.lastContact = now.toISOString();
-  }
-  await db.collection(PEOPLE).updateOne({ _id: cur._id }, { $set: set });
-  return out({ ...cur, ...set });
+  return updatePerson(db, input.id, (cur) => {
+    const set = { followUpPlan, nextFollowUp, updatedAt: now.toISOString() };
+    if (input.outcome) {
+      if (typeof input.outcome.completed !== "boolean") fail("Did you follow up? Choose yes or no");
+      const previous = cur.followUpPlan || followUpPlan;
+      const platform = previous.platform || followUpPlan.platform;
+      const completed = input.outcome.completed;
+      const type = completed ? (platform === "email" ? "email" : platform === "phone" ? "call" : platform === "in-person" ? "met" : "message") : "note";
+      const entry = { id: randomUUID(), at: now.toISOString(), type, text: text(input.outcome.notes, 2000), followUp: { completed, platform, regarding: previous.regarding || followUpPlan.regarding, nextNotes: followUpPlan.nextNotes, nextFollowUp } };
+      set.history = [...(cur.history || []), entry].sort((a, b) => a.at.localeCompare(b.at)).slice(-MAX_HISTORY);
+      if (completed && (!cur.lastContact || now.toISOString() > cur.lastContact)) set.lastContact = now.toISOString();
+    }
+    return set;
+  });
 }
 
 /** Add something that happened (a note, an email, a call...). Contact of any kind moves "last contact" forward. */
 export async function logHistory(db, { id, type, text: body, at } = {}, now = new Date()) {
   if (!HISTORY_TYPES.includes(type)) fail("Pick what happened: note, email, message, call, met or reply");
-  const cur = await db.collection(PEOPLE).findOne({ _id: String(id) });
-  if (!cur) fail("That person is no longer in your network. Reload the page.");
   const when = at ? (Number.isNaN(Date.parse(at)) ? fail("That date is not valid") : new Date(at).toISOString()) : now.toISOString();
+  // Contact cannot be in the future: it would push "last contact", and so the next follow-up, out past that date.
+  if (CONTACT.has(type) && Date.parse(when) > now.getTime() + 86_400_000) fail("Contact cannot be dated in the future");
   const entry = { id: randomUUID(), at: when, type, text: text(body, 2000) };
   if (!entry.text && type === "note") fail("Write the note first");
-  const history = [...(cur.history ?? []), entry].sort((a, b) => a.at.localeCompare(b.at)).slice(-MAX_HISTORY);
-  const set = { history, updatedAt: now.toISOString() };
-  if (CONTACT.has(type) && (!cur.lastContact || when > cur.lastContact)) set.lastContact = when;
-  await db.collection(PEOPLE).updateOne({ _id: cur._id }, { $set: set });
-  return out({ ...cur, ...set });
+  return updatePerson(db, id, (cur) => {
+    const history = [...(cur.history ?? []), entry].sort((a, b) => a.at.localeCompare(b.at)).slice(-MAX_HISTORY);
+    const set = { history, updatedAt: now.toISOString() };
+    if (CONTACT.has(type) && (!cur.lastContact || when > cur.lastContact)) set.lastContact = when;
+    return set;
+  });
 }
 
 export async function removeHistory(db, { id, entryId } = {}, now = new Date()) {
-  const cur = await db.collection(PEOPLE).findOne({ _id: String(id) });
-  if (!cur) fail("That person is no longer in your network. Reload the page.");
-  const history = (cur.history ?? []).filter((h) => h.id !== entryId);
-  const lastContact = history.filter((h) => CONTACT.has(h.type)).map((h) => h.at).sort().pop() ?? null;
-  const set = { history, lastContact, updatedAt: now.toISOString() };
-  await db.collection(PEOPLE).updateOne({ _id: cur._id }, { $set: set });
-  return out({ ...cur, ...set });
+  return updatePerson(db, id, (cur) => {
+    const history = (cur.history ?? []).filter((h) => h.id !== entryId);
+    const lastContact = history.filter((h) => CONTACT.has(h.type)).map((h) => h.at).sort().pop() ?? null;
+    return { history, lastContact, updatedAt: now.toISOString() };
+  });
 }
 
 /** Archive hides a person everywhere; restore brings them back with everything they had. */
@@ -351,6 +386,9 @@ export async function saveSource(db, input = {}, now = new Date()) {
   // Shown on the card: where it is ("Raleigh, NC", "Global") and, for an event, when ("Oct 2024").
   if ("place" in input) patch.place = str(input.place, 60);
   if ("when" in input) patch.when = str(input.when, 30);
+  // An outreach source asks "did they respond?" this many hours after you reached someone (24, 48, 72 unless you change it).
+  if (patch.type === "outreach" && !cur && !("checkHours" in input)) patch.checkHours = [24, 48, 72];
+  if ("checkHours" in input) patch.checkHours = [...new Set((Array.isArray(input.checkHours) ? input.checkHours : []).map(Number).filter((h) => Number.isInteger(h) && h >= 1 && h <= 720))].sort((a, b) => a - b).slice(0, 8);
   if ("photoId" in input) {
     patch.photoId = input.photoId ? String(input.photoId) : null;
     if (patch.photoId && !(await db.collection("network_images").findOne({ _id: patch.photoId }))) fail("Upload the picture first");
@@ -419,6 +457,10 @@ export async function removeSource(db, { id } = {}, now = new Date()) {
   const people = (await all(db, PEOPLE)).filter((p) => p.sourceId === sid);
   for (const p of people) await db.collection(PEOPLE).updateOne({ _id: p.id }, { $set: { sourceId: null, updatedAt: now.toISOString() } });
   for (const l of (await all(db, LINKS)).filter((l) => l.a === sid || l.b === sid)) await db.collection(LINKS).deleteOne({ _id: l.id });
+  // Its logo, where it sat on each map, and any "also introduced by" that named it go with it.
+  if (removed.photoId) await db.collection("network_images").deleteOne({ _id: removed.photoId });
+  for (const c of (await db.collection("network_map_cards").find({}).toArray()).filter((c) => c.id === sid)) await db.collection("network_map_cards").deleteOne({ _id: c._id });
+  for (const other of (await all(db, SOURCES)).filter((x) => x.id !== sid && (x.alsoVia ?? []).some((v) => v.id === sid))) await db.collection(SOURCES).updateOne({ _id: other.id }, { $set: { alsoVia: other.alsoVia.filter((v) => v.id !== sid), updatedAt: now.toISOString() } });
   await db.collection(SOURCES).deleteOne({ _id: sid });
   return { id: sid, released: people.length };
 }

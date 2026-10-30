@@ -3,19 +3,22 @@ import { getTailorServerBase } from "../utils/tailorServer";
 
 // The Network page's data: people, the sources they come from (a company, an event, family), and the links between them.
 
-export type SourceType = "company" | "staffing" | "event" | "oa" | "linkedin" | "day" | "family" | "other";
+export type SourceType = "company" | "staffing" | "event" | "oa" | "linkedin" | "day" | "outreach" | "family" | "other";
 export type LinkKind = "works" | "family" | "intro" | "other";
 export type HistoryType = "note" | "email" | "message" | "call" | "met" | "reply";
 export type FollowUpPlatform = "linkedin" | "email" | "whatsapp" | "phone" | "in-person" | "other";
 export interface FollowUpPlan { enabled: boolean; platform: FollowUpPlatform; regarding: string; nextNotes: string }
 export const FOLLOW_UP_PLATFORMS: [FollowUpPlatform, string][] = [["linkedin", "LinkedIn"], ["email", "Email"], ["whatsapp", "WhatsApp"], ["phone", "Phone"], ["in-person", "In person"], ["other", "Other"]];
 export interface HistoryEntry { followUp?: { completed: boolean; platform: FollowUpPlatform; regarding: string; nextNotes: string; nextFollowUp: string | null }; id: string; at: string; type: HistoryType; text: string }
+/** A LinkedIn outreach person: when you reached them, and your answers to "did they respond?" (hour = the 24/48/72 check-in). */
+export interface Outreach { reachedAt: string; status: "waiting" | "accepted" | "replied" | "archived"; answers: { hour: number; at: string; accepted: boolean; replied: boolean }[] }
 export interface Person {
   id: string; name: string; role: string; city: string; company: string; photoId: string | null; watchJobs: boolean; email: string; linkedin: string; phone: string; notes: string;
   sourceId: string | null; via: string | null; alsoVia?: string[]; color: string | null; tags: string[];
+  outreach?: Outreach;
   followUpPlan?: FollowUpPlan; followUpAuto?: boolean; lastContact: string | null; nextFollowUp: string | null; history: HistoryEntry[]; archived: boolean; createdAt: string; updatedAt: string; x?: number; y?: number;
 }
-export interface Source { parentSourceId?: string | null; viaPersonId?: string | null; context?: string; photoId?: string | null; notes?: string; place?: string; when?: string; kindName?: string; auto?: string[]; introYear?: string; alsoVia?: { id: string; year: string }[]; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
+export interface Source { checkHours?: number[]; parentSourceId?: string | null; viaPersonId?: string | null; context?: string; photoId?: string | null; notes?: string; place?: string; when?: string; kindName?: string; auto?: string[]; introYear?: string; alsoVia?: { id: string; year: string }[]; id: string; name: string; type: SourceType; about: string; color: string | null; createdAt: string; x?: number; y?: number }
 export interface Link { id: string; a: string; b: string; kind: LinkKind; label: string; color: string | null }
 export interface You { x: number; y: number; name?: string; title?: string; photoId?: string | null; note?: string }
 export interface NetworkData { people: Person[]; sources: Source[]; links: Link[]; you?: You; map?: { id: string; name: string }; onMap?: string[] }
@@ -29,7 +32,7 @@ export function sourceLabel(source: Source, sources: Source[], people: { id: str
   return [source.name, source.context, parent ? `via ${parent.name}` : person ? `via ${person.name}` : null].filter(Boolean).join(' · ');
 }
 
-export const SOURCE_TYPES: [SourceType, string][] = [["company", "Company"], ["staffing", "Staffing agency"], ["event", "Event"], ["oa", "Online assessment (OA)"], ["linkedin", "LinkedIn reach-out"], ["day", "Day"], ["family", "Family"], ["other", "Other"]];
+export const SOURCE_TYPES: [SourceType, string][] = [["company", "Company"], ["staffing", "Staffing agency"], ["event", "Event"], ["oa", "Online assessment (OA)"], ["linkedin", "LinkedIn reach-out"], ["day", "Day"], ["outreach", "LinkedIn outreach (check-ins)"], ["family", "Family"], ["other", "Other"]];
 /** What a source is called on its card: the name you typed for "Something else…", else its kind. */
 export const kindLabel = (s: Pick<Source, "type" | "kindName">) => s.kindName || SOURCE_TYPES.find(([t]) => t === s.type)?.[1] || s.type;
 export const LINK_KINDS: [LinkKind, string][] = [["works", "Works with"], ["family", "Family"], ["intro", "Introduced"], ["other", "Other"]];
@@ -42,6 +45,8 @@ const onMap = () => (activeMap === "main" ? "" : `map=${encodeURIComponent(activ
 export const loadNetwork = (archived = false) => getJson<NetworkData & ApiBody>(`/network?${[onMap(), archived ? "archived=1" : ""].filter(Boolean).join("&")}`);
 /** Everyone and every source, whichever map is open (the "From your network" picker). */
 export const loadWholeNetwork = () => getJson<NetworkData & ApiBody>("/network");
+/** Everyone including people kept off My network (the Day plan marks them on the talks). */
+export const loadEverything = () => getJson<NetworkData & ApiBody>("/network?everything=1");
 export interface CalendarEvent { id: string; title: string; at: string; remind: number; personId: string | null; note: string; done: boolean }
 export const loadEvents = () => getJson<{ events: CalendarEvent[] } & ApiBody>("/network/events").then((r) => r.events);
 export const saveEvent = (event: { title: string; at: string; remind: number; personId: string | null; note: string }) => post<{ event: CalendarEvent }>("events/save", event);
@@ -149,16 +154,20 @@ export function autoLayout(data: NetworkData): Map<string, Point> {
     for (const parent of sources) {
       const c = pos.get(parent.id); if (!c) continue;
       const kids = sources.filter((s) => s.parentSourceId === parent.id && !pos.has(s.id));
-      if (kids.length) { placeGroup(kids.map((s) => s.id), c, away(c) + Math.PI / 3, 380, pos); moved = true; }
+      // An event with a hundred employers under it: each employer with its own people beside it, in a grid, not one blob.
+      if (kids.length > 8 && kids.some((k) => (bySource.get(k.id) ?? []).length)) { placeCells(kids.map((k) => ({ id: k.id, people: (bySource.get(k.id) ?? []).map((p) => p.id) })), c, Math.sin(away(c) + Math.PI / 3) < 0 ? -1 : 1, pos); moved = true; }
+      else if (kids.length) { placeGroup(kids.map((s) => s.id), c, away(c) + Math.PI / 3, 380, pos); moved = true; }
     }
     for (const person of data.people) {
       const c = pos.get(person.id); if (!c) continue;
       const kids = sources.filter((s) => s.viaPersonId === person.id && throughPerson(s) && !pos.has(s.id));
       if (kids.length) { placeGroup(kids.map((s) => s.id), c, away(c) - Math.PI / 5, 300, pos); moved = true; }
     }
-    for (const [sid, list] of bySource) {
+    for (const [sid, all] of bySource) {
       if (done.has(sid)) continue;
       const c = sid ? pos.get(sid) : you; if (!c) continue;
+      const list = all.filter((p) => !pos.has(p.id));
+      if (!list.length) { done.add(sid); continue; }
       placeGroup(list.map((p) => p.id), c, sid ? away(c) : -Math.PI / 2, sid ? 250 : 300, pos); done.add(sid); moved = true;
     }
     for (const [via, kids] of byVia) {
@@ -229,6 +238,25 @@ export function placeGroup(ids: string[], c: Point, out: number, r0: number, pos
   });
 }
 
+/**
+ * Cells for a big group of sources (an event's employers): each source with its people in a column beside it, the cells in a grid below
+ * (dir 1) or above (dir -1) the parent, the busiest first so the rows stay short. Nothing overlaps however many employers there are.
+ */
+export function placeCells(cells: { id: string; people: string[] }[], c: Point, dir: 1 | -1, pos: Map<string, Point>) {
+  const list = [...cells].sort((a, b) => b.people.length - a.people.length), n = list.length;
+  const cols = Math.min(8, Math.max(3, Math.round(Math.sqrt(n * 0.9)))), cellW = 2 * (CARD_W + GAP_X) + 36, rowGap = CARD_H + GAP_Y;
+  let y = c.y + dir * (CARD_H * 3);
+  for (let r = 0; r * cols < n; r++) {
+    const row = list.slice(r * cols, r * cols + cols), tall = Math.max(1, ...row.map((k) => k.people.length));
+    row.forEach((cell, i) => {
+      const x = c.x + (i - (row.length - 1) / 2) * cellW - (CARD_W + GAP_X) / 2, top = dir === 1 ? y : y - (tall - 1) * rowGap;
+      pos.set(cell.id, { x: Math.round(x), y: Math.round(top) });
+      cell.people.forEach((pid, k) => pos.set(pid, { x: Math.round(x + CARD_W + GAP_X), y: Math.round(top + k * rowGap) }));
+    });
+    y += dir * (tall * rowGap + 30);
+  }
+}
+
 export interface Edge { key: string; a: string; b: string; kind: "belongs" | "via" | "you" | "employer" | LinkKind; label: string; color: string; link?: Link }
 
 /** The lines: you to each source, each source to its first connections, each introducer to who they introduced, then your own links. */
@@ -283,7 +311,7 @@ export function starter(p: Person, tone: string, intent: string, signature: stri
 }
 
 /* ---------- reminders ---------- */
-export interface Reminder { key: string; kind: "reply" | "due" | "quiet" | "never" | "work"; personId?: string; sourceId?: string; workId?: string; title: string; detail: string }
+export interface Reminder { key: string; kind: "reply" | "due" | "quiet" | "never" | "work" | "outreach"; hour?: number; last?: boolean; personId?: string; sourceId?: string; workId?: string; title: string; detail: string }
 export const loadReminders = () => getJson<{ reminders: Reminder[] } & ApiBody>("/network/reminders").then((r) => r.reminders);
 
 /* ---------- the board: notes, text, pen strokes, images ---------- */
@@ -451,3 +479,27 @@ export interface IntelligenceItem {
 }
 export interface IntelligenceFeed { items: IntelligenceItem[]; expanded: boolean; generatedAt: string }
 export const loadIntelligence = () => getJson<IntelligenceFeed & ApiBody>('/network/intelligence');
+
+// LinkedIn outreach: who is waiting on a "did they respond?" answer, and what to call each person's state.
+export const CHECK_HOURS = [24, 48, 72];
+export function dueCheckIn(p: Person, source: Source | undefined, now = Date.now()): { hour: number; last: boolean } | null {
+  const o = p.outreach;
+  if (!o || p.archived || o.status !== "waiting") return null;
+  const hours = source?.checkHours?.length ? source.checkHours : CHECK_HOURS, done = new Set(o.answers.map((a) => a.hour));
+  const hour = hours.find((h) => now - Date.parse(o.reachedAt) >= h * 3_600_000 && !done.has(h));
+  return hour ? { hour, last: hour === hours[hours.length - 1] } : null;
+}
+export function outreachState(p: Person, source: Source | undefined, now = Date.now()): { text: string; tone: "wait" | "ask" | "yes" | "gone" } | null {
+  const o = p.outreach;
+  if (!o) return null;
+  if (o.status === "replied") return { text: "Replied", tone: "yes" };
+  if (o.status === "accepted") return { text: "Accepted", tone: "yes" };
+  if (o.status === "archived" || p.archived) return { text: "No response", tone: "gone" };
+  const due = dueCheckIn(p, source, now);
+  if (due) return { text: `Did they respond? · ${due.hour}h`, tone: "ask" };
+  const hours = source?.checkHours?.length ? source.checkHours : CHECK_HOURS, next = hours.find((h) => !o.answers.some((a) => a.hour === h));
+  return { text: next ? `Waiting · ${next}h check` : "Waiting", tone: "wait" };
+}
+export interface CheckInResult { status: string; again: boolean; archived: boolean }
+export const answerCheckIn = (id: string, hour: number, answer: "accepted" | "replied" | "no" | "sent") => post<CheckInResult & ApiBody>("outreach/answer", { id, hour, accepted: answer === "accepted", replied: answer === "replied", sent: answer === "sent" });
+export const checkInToast = (name: string, r: CheckInResult, sent = false) => r.archived ? `${name} did not respond. Archived; restore any time.` : r.status === "waiting" ? (sent ? `Logged: you messaged ${name} again.` : `Drop ${name} another message.`) : r.status === "replied" ? `${name} replied. Kept.` : `${name} accepted. Kept.`;

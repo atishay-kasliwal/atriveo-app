@@ -1,6 +1,7 @@
 import { listIntelligence, intelligenceAction } from './network-intelligence.mjs';
 import { withFollowUps, saveFollowUp, linkedinDay, sortLinkedInByDay, NetworkError, saveYou, savePositions, previewContacts, addFromLinkedIn, addPeople, archivePerson, logHistory, networkView, previewList, removeHistory, removeLink, removeSource, saveLink, savePerson, saveSource } from "./network.mjs";
 import { draftStatus, mailSettings, saveMailSettings, sendNetworkMail, startDraft } from "./network-mail.mjs";
+import { addOutreachPeople, answerCheckIn, outreachSource, restoreOutreach } from "./network-outreach.mjs";
 import { listReminders, snoozeReminder } from "./network-reminders.mjs";
 import { listEvents, markEventDone, removeEvent, saveEvent } from "./network-events.mjs";
 import { boardView, readImage, removeBoardItem, saveBoardItem, saveImage } from "./network-board.mjs";
@@ -21,6 +22,10 @@ const WRITES = {
   "/network/linkedin": (db, b) => addFromLinkedIn(db, b).then(async (r) => { await onMap(db, b, [r.person?.id].filter(Boolean)); return r; }),
   "/network/linkedin/today": (db, b) => linkedinDay(db, new Date(), undefined, b.rootId || null).then(async (source) => { await onMap(db, b, [source.id]); return { source }; }),
   "/network/linkedin/sort": (db, b) => sortLinkedInByDay(db, new Date(), b.rootId || null),
+  "/network/outreach/source": (db, b) => outreachSource(db, b).then(async (source) => { await onMap(db, b, [source.id]); return { source }; }),
+  "/network/outreach/people": (db, b) => addOutreachPeople(db, b).then(async (r) => { await onMap(db, b, r.added.map((p) => p.id)); return r; }),
+  "/network/outreach/answer": (db, b) => answerCheckIn(db, b),
+  "/network/outreach/restore": (db, b) => restoreOutreach(db, b),
   "/network/people": (db, b) => addPeople(db, b).then(async (r) => {
     // On a map, names already in your network are not added again, but they are put on this map.
     const known = b.mapId && b.mapId !== MAIN && r.skipped.length ? (await db.collection("network_people").find({}).toArray()).filter((p) => !p.archived && r.skipped.some((n) => n.toLowerCase() === p.name.toLowerCase())).map((p) => p._id) : [];
@@ -70,7 +75,7 @@ const WRITES = {
 };
 const READS = {
   "/network/intelligence": db => listIntelligence(db),
-  "/network": (db, q) => (q.get("map") && q.get("map") !== MAIN ? mapView(db, q.get("map"), { archived: q.get("archived") === "1" }) : networkView(db, { archived: q.get("archived") === "1" })),
+  "/network": (db, q) => (q.get("map") && q.get("map") !== MAIN ? mapView(db, q.get("map"), { archived: q.get("archived") === "1" }) : networkView(db, { archived: q.get("archived") === "1", separate: q.get("everything") === "1" })),
   "/network/maps": (db) => listMaps(db),
   "/network/mail": (db, _q, o) => mailSettings(db, { outRoot: o.outRoot }).then((settings) => ({ settings })),
   "/network/mail/draft": (db, q) => draftStatus(db, q.get("id")),

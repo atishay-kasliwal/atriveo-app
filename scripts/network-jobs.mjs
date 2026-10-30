@@ -1,4 +1,5 @@
 import { companyKey } from "./applied-history.mjs";
+import { isUntouchedMapOnly } from "./network.mjs";
 
 // Jobs where you know someone: the job board (jobs) and the staffing scraper (staffing_jobs, where the company is the agency) read for
 // the companies your people work at, with your own status on each (applied, passed, resume ready, new). Company names are compared
@@ -73,7 +74,8 @@ export async function jobsForCompanies(db, names, { now = new Date(), days = 45,
 async function people(db) {
   const [ppl, sources] = await Promise.all([db.collection("network_people").find({}).toArray(), db.collection("network_sources").find({}).toArray()]);
   const byId = new Map(sources.map((s) => [s._id, s]));
-  return ppl.filter((p) => !p.archived).map((p) => ({ id: p._id, name: p.name, company: companyOf(p, byId), watchJobs: Boolean(p.watchJobs) })).filter((p) => p.company);
+  // A speaker list you imported is not people you know: they count once you have been in touch.
+  return ppl.filter((p) => !p.archived && !isUntouchedMapOnly(p)).map((p) => ({ id: p._id, name: p.name, company: companyOf(p, byId), watchJobs: Boolean(p.watchJobs) })).filter((p) => p.company);
 }
 
 /** One person's company, its jobs and your applications there. */

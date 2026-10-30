@@ -2,6 +2,7 @@ import { nyParts, publishNtfy } from "./phone-summary.mjs";
 import { sendPushNotification } from "./web-push.mjs";
 import { companyOf, jobsForCompanies, sameCompany } from "./network-jobs.mjs";
 import { NetworkError, withFollowUps } from "./network.mjs";
+import { outreachPrompts } from "./network-outreach.mjs";
 import { LATE_ALERT_MS, reminderStart } from "./network-events.mjs";
 
 // What needs you in your network, newest worries first: someone replied and waits for an answer, a follow-up is due, someone has gone
@@ -41,7 +42,7 @@ export function reminders({ people: all, sources, work = [] }, { today, snoozed 
   }
   for (const s of sources) {
     if (t - dayNum(s.createdAt) < NEVER_AFTER_DAYS) continue;
-    const never = people.filter((p) => !p.archived && p.sourceId === s.id && !p.via && !p.lastContact && p.followUpPlan?.enabled !== false && !p.nextFollowUp).length;
+    const never = people.filter((p) => !p.archived && !p.mapOnly && p.sourceId === s.id && !p.via && !p.lastContact && p.followUpPlan?.enabled !== false && !p.nextFollowUp).length;
     if (never) out.push({ key: `never:${s.id}:${never}`, kind: "never", sourceId: s.id, title: `${never} ${never === 1 ? "person" : "people"} at ${s.name} ${never === 1 ? "has" : "have"} never heard from you`, detail: "Write one note and reuse it", rank: 3 - never / 1000 });
   }
   for (const w of work) {
@@ -60,13 +61,16 @@ async function snoozedKeys(db, now) {
 export async function listReminders(db, { now = new Date() } = {}) {
   const [people, sources, board, snoozed] = await Promise.all([db.collection("network_people").find({}).toArray(), db.collection("network_sources").find({}).toArray(), db.collection("network_board").find({}).toArray(), snoozedKeys(db, now)]);
   const id = ({ _id, ...d }) => ({ id: _id, ...d });
-  return { reminders: reminders({ people: people.map(id), sources: sources.map(id), work: board.filter((b) => b.kind === "work").map(id) }, { today: nyParts(now).day, snoozed }) };
+  const ppl = people.map(id), srcs = sources.map(id);
+  // "Did they respond?" questions come first: they are time-bound and a yes or no is one tap.
+  const asks = outreachPrompts({ people: ppl, sources: srcs }, now).filter((r) => !snoozed.has(r.key));
+  return { reminders: [...asks, ...reminders({ people: ppl, sources: srcs, work: board.filter((b) => b.kind === "work").map(id) }, { today: nyParts(now).day, snoozed })] };
 }
 
 /** Hide one reminder for a few days (1 to 60). */
 export async function snoozeReminder(db, { key, days = 7 } = {}, now = new Date()) {
   const k = String(key ?? "");
-  if (!/^(reply|due|quiet|never|work):[\w-]+:[\w.-]+$/.test(k)) throw new NetworkError("That reminder is not known");
+  if (!/^(reply|due|quiet|never|work|outreach):[\w-]+:[\w.-]+$/.test(k)) throw new NetworkError("That reminder is not known");
   const n = Number(days);
   if (!Number.isInteger(n) || n < 1 || n > 60) throw new NetworkError("Snooze for 1 to 60 days");
   const until = new Date(now.getTime() + n * DAY).toISOString();
@@ -218,13 +222,51 @@ export async function runEventAlerts({ db, now = new Date(), publish = publishNt
   return sent;
 }
 
+/**
+ * "Did they respond?" at each check-in hour (24, 48, 72 by default) for people in a LinkedIn outreach source, once per person and hour
+ * (network_outreach_alerts). Web Push names them and a tap opens them; from the second check on it says to message again if they have
+ * not answered. Held until 8 a.m. New York time, so a 24h check does not wake you. A send that nothing took is undone and retried.
+ */
+export async function runOutreachAlerts({ db, now = new Date(), publish = publishNtfy, webPush, env = process.env, log = () => {} } = {}) {
+  const ch = channels(env);
+  if (!ch.web && !ch.ntfy) return [];
+  if (nyParts(now).hour < 8) return [];
+  const userId = env.PUSH_EVENT_USER_ID?.trim().toLowerCase();
+  const [people, sources, seen] = await Promise.all([db.collection("network_people").find({}).toArray(), db.collection("network_sources").find({}).toArray(), db.collection("network_outreach_alerts").find({}).toArray()]);
+  const bySource = new Map(sources.map((s) => [s._id, s])), done = new Set(seen.map((a) => a._id));
+  const fresh = [];
+  for (const p of people) {
+    const o = p.outreach;
+    if (!o || p.archived || o.status !== "waiting") continue;
+    const hours = bySource.get(p.sourceId)?.checkHours?.length ? bySource.get(p.sourceId).checkHours : [24, 48, 72];
+    const passed = hours.filter((h) => +now - Date.parse(o.reachedAt) >= h * 3_600_000);
+    const hour = passed[passed.length - 1];
+    if (hour && !done.has(`${p._id}:${hour}`) && !(o.answers ?? []).some((a) => a.hour === hour)) fresh.push({ p, hour, last: hour === hours[hours.length - 1], first: hour === hours[0] });
+  }
+  if (!fresh.length) return [];
+  const claims = db.collection("network_outreach_alerts"), won = [];
+  for (const f of fresh) { try { await claims.insertOne({ _id: `${f.p._id}:${f.hour}`, at: now.toISOString() }); won.push(f); } catch (e) { if (e?.code !== 11000) throw e; } }
+  if (!won.length) return [];
+  const one = won.length === 1 ? won[0] : null;
+  const body = (f) => f.first ? `${f.hour} hours since you reached out on LinkedIn. Tap to answer.` : f.last ? `${f.hour} hours. If they have not responded, they are archived when you answer no.` : `${f.hour} hours. If they have not, drop them another message.`;
+  const web = one ? { title: `Did ${one.p.name} respond?`, body: body(one), url: `/network?person=${encodeURIComponent(one.p._id)}`, type: "network_outreach" }
+    : { title: `Did ${won.length} people respond?`, body: won.slice(0, 3).map((f) => f.p.name).join(" · ") + (won.length > 3 ? ` · and ${won.length - 3} more` : ""), url: "/network?view=due", type: "network_outreach" };
+  const ntfy = { title: "Network", message: `${won.length} LinkedIn ${won.length === 1 ? "reach-out" : "reach-outs"} to check on: did they respond?`, tags: ["speech_balloon"], priority: 3, click: "https://apply.atriveo.com/network" };
+  let ok = true;
+  if (ch.ntfy) { let got = false; try { got = await publish(ntfy); } catch (e) { log(`outreach check-in (ntfy): ${e.message}`); } ok &&= got; }
+  if (ch.web) { let r = { sent: 0, failed: 1 }; try { r = await (webPush ?? ((d, m) => sendPushNotification(d, userId, m, { env })))(db, web); } catch (e) { log(`outreach check-in (web push): ${e.message}`); } ok &&= r.sent > 0 || r.failed === 0; }
+  if (!ok) { for (const f of won) await claims.deleteOne({ _id: `${f.p._id}:${f.hour}` }); return []; }
+  log(`outreach check-in sent: ${won.length}`);
+  return won.map((f) => ({ id: f.p._id, hour: f.hour }));
+}
+
 /** Checks every few minutes inside the sidecar; off when neither Web Push nor ntfy is set up, or with PHONE_SUMMARIES=off / NETWORK_REMINDERS=off. */
 export function startNetworkReminders({ withMongo, log = console.log, everyMs = 10 * 60_000, publish = publishNtfy } = {}) {
   const off = (v) => /^(off|0|false)$/i.test(v || "");
   const ch = channels();
   if ((!ch.web && !ch.ntfy) || off(process.env.PHONE_SUMMARIES) || off(process.env.NETWORK_REMINDERS)) { log("network reminders on the phone: off"); return null; }
   let running = false;
-  const tick = async () => { if (running) return; running = true; try { await withMongo(async (db) => { await runNetworkTick({ db, publish, log }); await runJobAlerts({ db, publish, log }); }, { appName: "AtriveoNetworkReminders" }); } catch (e) { log(`network reminders: ${e.message}`); } finally { running = false; } };
+  const tick = async () => { if (running) return; running = true; try { await withMongo(async (db) => { await runNetworkTick({ db, publish, log }); await runJobAlerts({ db, publish, log }); await runOutreachAlerts({ db, publish, log }); }, { appName: "AtriveoNetworkReminders" }); } catch (e) { log(`network reminders: ${e.message}`); } finally { running = false; } };
   setTimeout(tick, 30_000).unref?.();
   const timer = setInterval(tick, everyMs); timer.unref?.();
   // Calendar reminders are checked every minute, so they arrive close to their lead time.

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { matchingCoverLetter } from './matching-cover-letter.mjs';
 import { handlePushRoute } from "./web-push.mjs";
 import { startPushEvents } from "./push-events.mjs";
 import {dashboardAiUsage} from './resume-ai-usage.mjs';
@@ -27,6 +28,7 @@ import { outreachHandler, outreachCors } from "./outreach/routes.mjs";
 import { outreachReplies } from "./outreach/replies.mjs";
 import { handleStaffing } from "./staffing-routes.mjs";
 import { handleNetwork } from "./network-routes.mjs";
+import { handleLoops } from "./loops-routes.mjs";
 import { gmailSender } from "./network-mail.mjs";
 import { startNetworkReminders } from "./network-reminders.mjs";
 import { subscriptionGenerate } from "./resume-ai-provider.mjs";
@@ -1188,6 +1190,7 @@ const server = http.createServer(async (req, res) => {
     // Drafts use the same AI path as application answers: the Mac worker's queue on the server, the signed-in CLI on a Mac.
     generate: (request, db) => { const provider = process.env.RESUME_AI_PROVIDER || "claude"; return process.env.RESUME_AI_REMOTE_WORKER === "mac" ? queueInference(db, provider, request) : subscriptionGenerate(provider, request); },
   })) return;
+  if (await handleLoops(req, res, reqUrl, { withDb: process.env.MONGO_URI ? (fn) => withMongo(fn, { appName: "AtriveoTailorServer" }) : null })) return;
   if (await handleOutreach(req, res, reqUrl)) return;
   // Open & Fill: the Atriveo Fill extension on this Mac only (never through the relay); see fill-routes.mjs.
   if (await handleFillRoute(req, res, reqUrl, (request) => runManualFill(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo"), request), APPLY_HERE_DOCS)) return;
@@ -1960,6 +1963,23 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "POST" && pathname === "/matching-cover-letter") {
+    try {
+      let raw = "";
+      for await (const chunk of req) { raw += chunk; if (raw.length > 30000) throw new Error("Request too large"); }
+      const body = JSON.parse(raw || "{}");
+      const result = await withMongo(db => matchingCoverLetter(db, body, {
+        generate: request => process.env.RESUME_AI_REMOTE_WORKER === "mac" ? queueInference(db, "codex", request) : subscriptionGenerate("codex", request),
+      }), { appName: "AtriveoCoverLetter" });
+      res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+      res.end(JSON.stringify({ ok: true, ...result }));
+    } catch (e) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+    }
+    return;
+  }
+
   // GET /applications/matching-queue?limit=&offset= — Job Matching: the next jobs to decide on, resume and JD ready.
   if (req.method === "GET" && pathname === "/applications/matching-queue") {
     (async () => {
@@ -2664,14 +2684,13 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(409, { "Cache-Control": "no-store" }); res.end("Resume changed. Refresh Job Matching."); return;
       }
       const isDownload = reqUrl.searchParams.get("dl") === "1";
+      const filename = pdfPath.includes(path.sep + ".cover-letters" + path.sep) ? "Atishay Kasliwal - Cover Letter.pdf" : "Atishay Kasliwal.pdf";
       res.writeHead(200, {
         "Content-Type": "application/pdf",
         "Content-Length": data.length,
         "X-Resume-Download-Path": resumeDownloadPath(pdfPath, data),
         "Access-Control-Expose-Headers": "X-Resume-Download-Path",
-        "Content-Disposition": isDownload
-          ? 'attachment; filename="Atishay Kasliwal.pdf"'
-          : 'inline; filename="Atishay Kasliwal.pdf"',
+        "Content-Disposition": `${isDownload ? 'attachment' : 'inline'}; filename="${filename}"`,
       });
       res.end(data);
     } catch (e) {

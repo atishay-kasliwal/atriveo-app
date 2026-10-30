@@ -25,9 +25,10 @@ async function mapDoc(db, id) {
 export async function listMaps(db) {
   const [maps, cards, people] = await Promise.all([db.collection(MAPS).find({}).toArray(), db.collection(CARDS).find({}).toArray(), db.collection(PEOPLE).find({}).toArray()]);
   const live = new Set(people.filter((p) => !p.archived).map((p) => p._id));
+  const onMain = people.filter((p) => !p.archived && !p.mapOnly).length;
   const main = maps.find((m) => m._id === MAIN);
   const latest = people.reduce((t, p) => (p.updatedAt > t ? p.updatedAt : t), "");
-  const out = [{ id: MAIN, name: main?.name || "My network", people: live.size, thumbId: main?.thumbId ?? null, updatedAt: main?.updatedAt && main.updatedAt > latest ? main.updatedAt : latest || null, main: true }];
+  const out = [{ id: MAIN, name: main?.name || "My network", people: onMain, thumbId: main?.thumbId ?? null, updatedAt: main?.updatedAt && main.updatedAt > latest ? main.updatedAt : latest || null, main: true }];
   for (const m of maps.filter((x) => x._id !== MAIN).sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt))))
     out.push({ id: m._id, name: m.name, people: cards.filter((c) => c.mapId === m._id && live.has(c.id)).length, thumbId: m.thumbId ?? null, updatedAt: m.updatedAt, main: false });
   return { maps: out };
@@ -116,9 +117,10 @@ export async function saveMapPositions(db, { mapId, items } = {}) {
  * with this map's positions instead of the ones "My network" keeps.
  */
 export async function mapView(db, mapId, { archived = false } = {}) {
-  const all = await networkView(db, { archived });
+  const all = await networkView(db, { archived, separate: !isMain(mapId) });
   if (isMain(mapId)) return { ...all, map: { id: MAIN, name: (await db.collection(MAPS).findOne({ _id: MAIN }))?.name || "My network" } };
   const m = await mapDoc(db, mapId);
+  all.sources = all.sources.filter((x) => !x.mapOnly || x.mapOnly === m._id);
   const cards = new Map((await db.collection(CARDS).find({ mapId: m._id }).toArray()).map((c) => [c.id, c]));
   const place = ({ x: _x, y: _y, ...rest }) => { const c = cards.get(rest.id); return c && c.x != null ? { ...rest, x: c.x, y: c.y } : rest; };
   const people = all.people.filter((p) => cards.has(p.id)).map(place);
@@ -137,11 +139,13 @@ const linkKey = (u) => String(u ?? "").toLowerCase().replace(/^https?:\/\/(www\.
  * LinkedIn, then name. Matches are reused exactly as they are; everything else is added. Pictures are not in the file, so photos and
  * board images are left out. Returns the new map and what happened.
  */
-export async function openMapFile(db, { name, file } = {}, now = new Date()) {
+export async function openMapFile(db, { name, file, separate } = {}, now = new Date()) {
   if (!file || typeof file !== "object" || file.type !== "atriveo-network") fail("That is not a saved network map. Pick a .json file made with Export, Save a copy.");
   const list = (v, max, what) => { if (v == null) return []; if (!Array.isArray(v)) fail(`The file's ${what} are damaged`); if (v.length > max) fail(`The file has more than ${max} ${what}`); return v; };
   const fSources = list(file.sources, 2000, "sources"), fPeople = list(file.people, 5000, "people"), fLinks = list(file.links, 10000, "links"), fBoard = list(file.board, 3000, "board items");
   const map = await saveMap(db, { name: str(name, 60) || "Opened map" }, now);
+  // Kept off My network: what this file adds belongs to this map only. People and sources you already had are reused as they are.
+  const only = (separate ?? file.separate) === true ? { mapOnly: map.id } : {};
   const at = now.toISOString(), ids = new Map(), sum = { people: { added: 0, matched: 0 }, sources: { added: 0, matched: 0 }, links: 0, board: 0, left: 0 };
 
   const sources = await db.collection(SOURCES).find({}).toArray();
@@ -152,6 +156,7 @@ export async function openMapFile(db, { name, file } = {}, now = new Date()) {
     if (hit) { ids.set(String(s.id), hit._id); sum.sources.matched++; continue; }
     try {
       const made = await saveSource(db, { name: s.name, type: s.type, about: s.about, context: s.context, notes: s.notes, place: s.place, when: s.when, color: s.color }, now);
+      if (only.mapOnly) await db.collection(SOURCES).updateOne({ _id: made.id }, { $set: only });
       ids.set(String(s.id), made.id); sources.push({ _id: made.id, ...made }); newSources.push(s); sum.sources.added++;
     } catch { sum.left++; }
   }
@@ -160,7 +165,7 @@ export async function openMapFile(db, { name, file } = {}, now = new Date()) {
   for (const p of fPeople) {
     if (!p?.id || !str(p.name, 80)) continue;
     const email = cleanEmail(p.email) ?? "", li = linkKey(p.linkedin);
-    const hit = (email && people.find((x) => x.email === email)) || (li && people.find((x) => x.linkedin && linkKey(x.linkedin) === li)) || people.find((x) => keyOf(x.name) === keyOf(p.name));
+    const hit = (email && people.find((x) => x.email === email)) || (li && people.find((x) => x.linkedin && linkKey(x.linkedin) === li)) || people.find((x) => keyOf(x.name) === keyOf(p.name) && (!str(p.company, 80) || !x.company || keyOf(x.company) === keyOf(p.company)));
     if (hit) { ids.set(String(p.id), hit._id); sum.people.matched++; continue; }
     const doc = {
       _id: randomUUID(), name: str(p.name, 80), role: str(p.role, 80), city: str(p.city, 80), company: str(p.company, 80), email, linkedin: /^https?:\/\//i.test(String(p.linkedin ?? "")) ? str(p.linkedin, 300) : "",
@@ -168,7 +173,7 @@ export async function openMapFile(db, { name, file } = {}, now = new Date()) {
       photoId: null, watchJobs: Boolean(p.watchJobs), tags: (Array.isArray(p.tags) ? p.tags : []).map((t) => str(t, 30)).filter(Boolean).slice(0, 12),
       lastContact: typeof p.lastContact === "string" ? p.lastContact : null, nextFollowUp: /^\d{4}-\d{2}-\d{2}$/.test(String(p.nextFollowUp ?? "")) ? p.nextFollowUp : null,
       history: (Array.isArray(p.history) ? p.history : []).slice(-200).filter((h) => h && typeof h.text === "string").map((h) => ({ id: randomUUID(), at: String(h.at ?? at), type: String(h.type ?? "note"), text: String(h.text).slice(0, 2000) })),
-      archived: false, createdAt: at, updatedAt: at,
+      archived: false, createdAt: at, updatedAt: at, ...only,
     };
     await db.collection(PEOPLE).insertOne(doc); people.push(doc); ids.set(String(p.id), doc._id); newPeople.push(p); sum.people.added++;
   }
@@ -213,5 +218,5 @@ export async function openMapFile(db, { name, file } = {}, now = new Date()) {
     if (Array.isArray(input.people)) input.people = input.people.map(remap).filter(Boolean);
     try { await saveBoardItem(db, input, now); sum.board++; } catch { sum.left++; }
   }
-  return { map, summary: sum };
+  return { map, summary: sum, separate: Boolean(only.mapOnly) };
 }

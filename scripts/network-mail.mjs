@@ -134,6 +134,9 @@ export async function sendNetworkMail(db, input = {}, { sender = gmailSender(), 
   const body = text(input.body, 20_000); if (!body) fail("Write the message first");
   const settings = await mailSettings(db, { outRoot });
   if (!settings.fromEmail) fail("Set the address you send from (Sender, at the bottom of the mail window)");
+  // The same message to the same address within a minute is a double click or a retry, not a second email.
+  const recent = (await db.collection(LOG).find({ personId: person._id, to, subject }).toArray()).find((m) => m.personId === person._id && m.to === to && m.subject === subject && m.state !== "failed" && now.getTime() - Date.parse(m.at) < 60_000);
+  if (recent) fail("That email was just sent. Check Sent before sending it again.");
   const attachment = await attachmentFor(input, outRoot, db);
   const result = await sender.send({ from: settings.fromEmail, fromName: settings.fromName, to, subject, body, attachment });
   if (result.state === "failed") fail(result.error);
