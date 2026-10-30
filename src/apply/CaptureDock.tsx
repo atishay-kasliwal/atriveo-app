@@ -163,7 +163,10 @@ function Dock() {
             <p className="cd-kept" role="status">Keeping it…</p>
           ) : (
             <>
-              <label className="cd-label" htmlFor="cd-text">What's on your mind?</label>
+              <div className="cd-head">
+                <label className="cd-label" htmlFor="cd-text">What's on your mind?</label>
+                <button type="button" className="cd-close" aria-label="Close" title="Close (Esc)" onClick={closeDock}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
+              </div>
               <textarea id="cd-text" ref={area} className="cd-text" rows={3} maxLength={12000} value={text} placeholder="Type it, or tap Speak" onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); void submitText(); } }} />
               <div className="cd-row">
