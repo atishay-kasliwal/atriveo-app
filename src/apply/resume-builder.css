@@ -306,3 +306,12 @@
 .rb-job-source b { font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rb-job-source small { font-size: 10px; line-height: 1.35; color: var(--muted-fg); }
 @media (min-width: 901px) and (max-width: 1200px) { .rb-headline { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); } }
+@media (min-width: 901px) and (max-width: 1600px) {
+  .rb-viewbar { gap: 5px; font-size: 11px; }
+  .rb-viewbar .rb-tabs button { padding-inline: 8px; font-size: 11px; }
+  .rb-viewbar .rb-pages { gap: 4px; font-size: 11px; }
+  .rb-viewbar .rb-ats { gap: 4px; font-size: 11px; }
+  .rb-viewbar .rb-ats small { font-size: 10px; }
+  .rb-actions { gap: 4px; }
+  .rb-actions :is(.apps-btn, .rv-primary) { padding-inline: 7px; font-size: 11px; }
+}
