@@ -84,3 +84,24 @@ test('adding through the normal paths to an outreach source starts the clock; th
  assert.equal((await listReminders(db,{now:after(10)})).reminders.filter(r=>r.kind==='outreach').length,0);
  const r=(await listReminders(db,{now:after(25)})).reminders.filter(x=>x.kind==='outreach');
  assert.equal(r.length,2);assert.match(r[0].key,/^outreach:/);});
+
+test('push: one "did they respond?" per person and hour, held overnight, retried when nothing got through, none after an answer',async()=>{
+ const {runOutreachAlerts}=await import('../scripts/network-reminders.mjs');
+ const env={NTFY_TOPIC:'t'};const db=fakeDb();
+ const src=await outreachSource(db,{},T);const r=await addOutreachPeople(db,{sourceId:src.id,rows:[{name:'Dana Whit'},{name:'Marco Lind'}]},T);
+ const sent=[];const publish=async m=>{sent.push(m);return true};
+ // 24h after 11:00 New York = 11:00 next day; before 8:00 New York nothing goes out.
+ assert.deepEqual(await runOutreachAlerts({db,now:after(10),publish,env}),[]);
+ assert.deepEqual(await runOutreachAlerts({db,now:new Date('2026-10-31T11:30:00Z'),publish,env}),[],'7:30 New York: held');
+ const first=await runOutreachAlerts({db,now:after(25),publish,env});assert.equal(first.length,2);assert.equal(sent.length,1);assert.match(sent[0].message,/^2 LinkedIn reach-outs/);
+ assert.deepEqual(await runOutreachAlerts({db,now:after(26),publish,env}),[],'once per person and hour');
+ // a failed send is undone and tried again
+ const fails=async()=>false;assert.deepEqual(await runOutreachAlerts({db,now:after(49),publish:fails,env}),[]);
+ await answerCheckIn(db,{id:r.added[0].id,hour:24,accepted:true},after(30));
+ const again=await runOutreachAlerts({db,now:after(49),publish,env});assert.deepEqual(again.map(a=>[a.id,a.hour]),[[r.added[1].id,48]],'accepted people are never asked again');
+ // web push names the person and says to message again from the second check on
+ const web=[];const wp=async(d,m)=>{web.push(m);return{sent:1,failed:0}};
+ const env2={VAPID_PUBLIC_KEY:'a',VAPID_PRIVATE_KEY:'b',VAPID_SUBJECT:'mailto:x@example.test',PUSH_EVENT_USER_ID:'u'};
+ await runOutreachAlerts({db,now:after(73),webPush:wp,env:env2});
+ assert.equal(web[0].title,'Did Marco Lind respond?');assert.match(web[0].body,/archived/);assert.match(web[0].url,/^\/network\?person=/);
+ assert.deepEqual(await runOutreachAlerts({db,now:after(73),env:{}}),[],'off without a channel');});
