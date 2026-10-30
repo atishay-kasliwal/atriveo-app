@@ -27,6 +27,7 @@ import { outreachHandler, outreachCors } from "./outreach/routes.mjs";
 import { outreachReplies } from "./outreach/replies.mjs";
 import { handleStaffing } from "./staffing-routes.mjs";
 import { handleNetwork } from "./network-routes.mjs";
+import { handleLoops } from "./loops-routes.mjs";
 import { gmailSender } from "./network-mail.mjs";
 import { startNetworkReminders } from "./network-reminders.mjs";
 import { subscriptionGenerate } from "./resume-ai-provider.mjs";
@@ -1188,6 +1189,7 @@ const server = http.createServer(async (req, res) => {
     // Drafts use the same AI path as application answers: the Mac worker's queue on the server, the signed-in CLI on a Mac.
     generate: (request, db) => { const provider = process.env.RESUME_AI_PROVIDER || "claude"; return process.env.RESUME_AI_REMOTE_WORKER === "mac" ? queueInference(db, provider, request) : subscriptionGenerate(provider, request); },
   })) return;
+  if (await handleLoops(req, res, reqUrl, { withDb: process.env.MONGO_URI ? (fn) => withMongo(fn, { appName: "AtriveoTailorServer" }) : null })) return;
   if (await handleOutreach(req, res, reqUrl)) return;
   // Open & Fill: the Atriveo Fill extension on this Mac only (never through the relay); see fill-routes.mjs.
   if (await handleFillRoute(req, res, reqUrl, (request) => runManualFill(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo"), request), APPLY_HERE_DOCS)) return;
