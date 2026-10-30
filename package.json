@@ -7,6 +7,7 @@
     "dev": "vite",
     "test:network:browser": "npm run build:apply && node --test tests/network-canvas.browser.test.mjs",
     "test:push:browser": "npm run build:apply && node --test tests/push-browser.test.mjs",
+    "test:loops": "node --test --test-global-setup=tests/setup-tmp.mjs --test-timeout=120000 tests/loops/*.test.mjs",
     "test:push": "node --test tests/web-push.test.mjs tests/web-push-mongo.test.mjs tests/push-workers.test.mjs tests/push-scheduled.test.mjs",
     "test:companion-link": "node --test tests/companion-link.test.mjs",
     "test:open-fill-queue": "node scripts/test-open-fill-queue.mjs",

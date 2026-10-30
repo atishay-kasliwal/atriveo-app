@@ -2,6 +2,7 @@ import { ensurePushIndexes, sendPushNotification } from './web-push.mjs';
 import { widgetProgress } from './widget-progress.mjs';
 import { listAssessments } from './assessments.mjs';
 import { pushSchedule, scheduledPushes } from './push-scheduled.mjs';
+import { ensureLoopsIndexes, tickReminders as tickLoopReminders } from './loops.mjs';
 import { buildMessage, nyParts, reached, readGoal, streakOf } from './phone-summary.mjs';
 
 export function inboxPush(event) {
@@ -58,6 +59,9 @@ export async function pollPushEvents(db, userId, { now = new Date(), send = send
     schedule.summary ? db.collection('outreach').find({ 'reply.at': { $gte: new Date(+now - 48 * 3600000).toISOString() } }, { projection: { 'reply.at': 1 } }).toArray() : [],
   ]);
   for (const { id, notification } of scheduledPushes({ now, assessments, progress, replies: dailyReplies })) await deliverEvent(db, userId, id, notification, { now, send });
+  // Loops: reminders for confirmed intentions that are still open (scripts/loops.mjs).
+  await ensureLoopsIndexes(db).catch(() => {});
+  await tickLoopReminders(db, userId, { now, send }).catch(() => {});
 }
 export function startPushEvents({ withMongo, log }) {
   const userId = process.env.PUSH_EVENT_USER_ID?.trim().toLowerCase();
