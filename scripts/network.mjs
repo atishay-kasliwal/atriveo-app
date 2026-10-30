@@ -6,7 +6,7 @@ import { cleanEmail } from "./resume-emails.mjs";
 // been introduced by another person (via); other connections are explicit links. Archived people are kept, never deleted.
 
 const PEOPLE = "network_people", SOURCES = "network_sources", LINKS = "network_links";
-export const SOURCE_TYPES = ["company", "staffing", "event", "family", "linkedin", "day", "oa", "other"];
+export const SOURCE_TYPES = ["company", "staffing", "event", "family", "linkedin", "day", "oa", "outreach", "other"];
 export const LINK_KINDS = ["works", "family", "intro", "other"];
 export const HISTORY_TYPES = ["note", "email", "message", "call", "met", "reply"];
 const CONTACT = new Set(["email", "message", "call", "met"]);
@@ -58,7 +58,7 @@ export async function networkView(db, { archived = false } = {}) {
  * wins, and switching follow-ups off for a person (their plan's "No follow-up") stops it. Worked out each time, never stored.
  */
 export function autoFollowUp(p, sources) {
-  if (p.archived || p.followUpPlan?.enabled === false || p.nextFollowUp) return null;
+  if (p.archived || p.outreach || p.followUpPlan?.enabled === false || p.nextFollowUp) return null;
   const byId = new Map(sources.map((s) => [s.id ?? s._id, s]));
   let family = false, linkedin = false;
   for (let s = byId.get(p.sourceId), n = 0; s && n < 8; s = s.parentSourceId ? byId.get(s.parentSourceId) : null, n++) {
@@ -351,6 +351,8 @@ export async function saveSource(db, input = {}, now = new Date()) {
   // Shown on the card: where it is ("Raleigh, NC", "Global") and, for an event, when ("Oct 2024").
   if ("place" in input) patch.place = str(input.place, 60);
   if ("when" in input) patch.when = str(input.when, 30);
+  // An outreach source asks "did they respond?" this many hours after you reached someone (24, 48, 72 unless you change it).
+  if ("checkHours" in input) patch.checkHours = [...new Set((Array.isArray(input.checkHours) ? input.checkHours : []).map(Number).filter((h) => Number.isInteger(h) && h >= 1 && h <= 720))].sort((a, b) => a - b).slice(0, 8);
   if ("photoId" in input) {
     patch.photoId = input.photoId ? String(input.photoId) : null;
     if (patch.photoId && !(await db.collection("network_images").findOne({ _id: patch.photoId }))) fail("Upload the picture first");
