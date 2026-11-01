@@ -61,6 +61,28 @@ function PhoneMenu({ path, onClose }: { path: string; onClose: () => void }) {
   );
 }
 
+const HOLD_MS = 450;
+
+/** Tap to type a capture; hold to start speaking straight away. */
+function CaptureButton() {
+  const timer = useRef<number | undefined>(undefined);
+  const held = useRef(false);
+  const [holding, setHolding] = useState(false);
+  const open = (voice: boolean) => window.dispatchEvent(new CustomEvent(CAPTURE_EVENT, { detail: { voice } }));
+  const release = () => { window.clearTimeout(timer.current); setHolding(false); };
+  return (
+    <button
+      type="button" className={`ph-capture${holding ? " is-holding" : ""}`} aria-label="Capture a note" aria-description="Hold to speak"
+      onPointerDown={() => { held.current = false; setHolding(true); timer.current = window.setTimeout(() => { held.current = true; setHolding(false); open(true); }, HOLD_MS); }}
+      onPointerUp={release} onPointerLeave={release} onPointerCancel={release}
+      onContextMenu={(e) => e.preventDefault()}
+      onClick={() => { if (held.current) { held.current = false; return; } open(false); }}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+    </button>
+  );
+}
+
 export function PhoneTabBar() {
   const path = useLocation().pathname.replace(/\/+$/, "");
   const tab = (t: (typeof TABS)[number]) => (
@@ -69,9 +91,7 @@ export function PhoneTabBar() {
   return (
     <nav className="ph-tabs" aria-label="Main">
       {TABS.slice(0, 2).map(tab)}
-      <button type="button" className="ph-capture" aria-label="Capture a note" onClick={() => window.dispatchEvent(new Event(CAPTURE_EVENT))}>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-      </button>
+      <CaptureButton />
       {TABS.slice(2).map(tab)}
     </nav>
   );
