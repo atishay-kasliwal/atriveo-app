@@ -14,19 +14,19 @@ const SEEN_REPLIES = "phone.seenReplies";
 const readSeen = () => { try { const v = localStorage.getItem(SEEN_REPLIES); return v != null && Number.isFinite(Number(v)) ? Number(v) : null; } catch { return null; } };
 const markRepliesSeen = (n: number) => { try { localStorage.setItem(SEEN_REPLIES, String(n)); } catch { /* private window */ } };
 
-interface Triage { matching: number | null; staffing: number | null }
+interface Triage { matching: number | null; staffing: number | null; saved: { matching: number; staffing: number } }
 interface Replies { replied: number; interview: number; last7: number }
 
 function useTriage(): Triage {
-  const [t, setT] = useState<Triage>({ matching: null, staffing: null });
+  const [t, setT] = useState<Triage>({ matching: null, staffing: null, saved: { matching: 0, staffing: 0 } });
   useEffect(() => {
     let alive = true;
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     // Matching's own defaults (last 7 days, newest first), so the number matches what Triage opens on.
-    getJson<{ total: number }>(`/applications/matching-queue?${new URLSearchParams({ limit: "1", learn: "0", period: "7d", sources: "", role: "", q: "", sort: "latest", tz })}`)
-      .then((q) => { if (alive) setT((c) => ({ ...c, matching: q.total })); }, () => {});
+    getJson<{ total: number; stats?: { saved?: number } }>(`/applications/matching-queue?${new URLSearchParams({ limit: "1", learn: "0", period: "7d", sources: "", role: "", q: "", sort: "latest", tz })}`)
+      .then((q) => { if (alive) setT((c) => ({ ...c, matching: q.total, saved: { ...c.saved, matching: q.stats?.saved ?? 0 } })); }, () => {});
     getJson<{ counts: Record<string, number> }>("/staffing/workspace?view=recommended&offset=0&limit=1&track=all&q=&source=")
-      .then((w) => { if (alive) setT((c) => ({ ...c, staffing: w.counts.recommended ?? 0 })); }, () => {});
+      .then((w) => { if (alive) setT((c) => ({ ...c, staffing: w.counts.recommended ?? 0, saved: { ...c.saved, staffing: w.counts.saved ?? 0 } })); }, () => {});
     return () => { alive = false; };
   }, []);
   return t;
@@ -75,6 +75,7 @@ export default function PhoneHome({ header }: { header: ReactNode }) {
   // The first visit sets the baseline; opening the tile clears "new".
   useEffect(() => { if (replies && seen == null) markRepliesSeen(replies.replied); }, [replies, seen]);
   const laptop = counts ? (counts.fillable ?? 0) + counts.ready : null;
+  const saved = triage.saved.matching + triage.saved.staffing;
   const applied = today.applied;
 
   return (
@@ -101,8 +102,8 @@ export default function PhoneHome({ header }: { header: ReactNode }) {
         </div>
 
         <Link to="/today" className="ph-laptop">
-          <span><b>{laptop ?? "…"}</b> waiting on your laptop</span>
-          <small>Open &amp; Fill needs the desktop extension</small>
+          <span><b>{laptop == null ? "…" : laptop + saved}</b> waiting on your laptop</span>
+          <small>{laptop ?? "…"} ready to Open &amp; Fill · {saved} saved from triage</small>
         </Link>
       </main>
     </div>

@@ -459,3 +459,6 @@
 .re-x{background:none;border:0;color:var(--muted-fg);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:11px;margin-right:4px}.re-x:hover{background:rgba(238,138,128,.16);color:#ee8a80}
 .re-pick:focus-visible,.re-x:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
 .re-new{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted-fg);margin:8px 2px 4px}.re-new input{accent-color:var(--primary)}
+/* Saved (later) view toggle in the tool rail. */
+.jm-saved-tool[aria-pressed=true]{background:var(--primary-soft);border-color:var(--primary);color:var(--foreground)}
+@media(max-height:780px){.jm-filter-tool>summary,.jm-reset-tool{min-height:48px;padding:6px 2px}.jm-filter-rail{gap:4px}}
