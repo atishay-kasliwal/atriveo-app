@@ -23,6 +23,9 @@ const matchingJob = (i) => ({
 });
 const appliedRow = (key, company, h, outcome = null) => ({ key, company, title: 'Engineer', location: 'Remote', appliedAt: hours(h), via: 'Apply with Atriveo', postingUrl: null, outcome, mailCount: 0 });
 
+// A person as the Network API sends one, minus the fields the phone does not read.
+const dana = () => ({ id: 'p1', name: 'Dana Reyes', role: 'Engineer', company: 'Northwind', city: '', email: 'dana@example.org', phone: '+15550100', linkedin: 'dana', notes: '', sourceId: null, via: null, tags: [], lastContact: null, nextFollowUp: null, history: [] });
+
 function reply(u) {
   const p = u.pathname;
   if (p.endsWith('/applications/matching-queue')) return { ok: true, total: 2, jobs: [matchingJob(0), matchingJob(1)], companies: [], stats: { opened: 0, skipped: 0, saved: 1, remaining: 2 }, preference: { active: false, limit: 0 } };
@@ -30,7 +33,8 @@ function reply(u) {
   if (p.endsWith('/applications/applied')) return { ok: true, total: 2, counts: { replied: 1, interview: 1 }, last7: 2, allTime: 2, rows: [appliedRow('a:one', 'Stripe', 2, { status: 'interview', at: hours(1) }), appliedRow('a:two', 'Datadog', 30)] };
   if (p.endsWith('/applications/applied-summary')) return { ok: true, dayKey: new Date().toLocaleString('sv-SE', { timeZone: 'America/New_York' }).slice(0, 10), today: 2, days: [] };
   if (p.endsWith('/network/reminders')) return { ok: true, reminders: [{ key: 'due:p1:x', kind: 'due', personId: 'p1', title: 'Follow up with Dana Reyes, Staff Engineer at a company with a long name', detail: 'Due today' }] };
-  if (p.endsWith('/network')) return { ok: true, people: [{ id: 'p1', name: 'Dana Reyes', role: 'Engineer', company: 'Northwind', email: 'dana@example.org', phone: '+15550100', linkedin: 'dana' }], sources: [], links: [] };
+  if (p.endsWith('/network')) return { ok: true, people: [dana()], sources: [], links: [] };
+  if (p.endsWith('/network/person') || p.endsWith('/network/history')) return { ok: true, person: dana() };
   if (p.endsWith('/api/loops/summary')) return { ok: true, counts: { NEEDS_ACTION: 0 }, worker: { lastSeenAt: null }, open: [] };
   if (p.endsWith('/api/prefs')) return { companies: [], keywords: [] };
   return { ok: true, total: 0, counts: { fillable: 0, ready: 0 }, rows: [], items: [], jobs: [], days: [], people: [], sources: [], links: [], maps: [], events: [], reminders: [], drafts: [], replies: {}, hidden: [], runs: [], fillable: [], ready: [], approved: [], manual: [], inBrowser: [], linkedin: [], open: [] };
@@ -100,4 +104,20 @@ test('the phone tabs write what the desktop buttons write', async (t) => {
   await page.getByRole('dialog').getByRole('button', { name: 'Yes, I emailed them' }).click();
   await page.getByText('Logged: you emailed Dana Reyes.').waitFor();
   assert.deepEqual(writes.at(-1), { path: '/network/history', body: { id: 'p1', type: 'email', text: '' } });
+});
+
+test('People: Everyone opens a person whose follow-up chips write what the Network panel writes', async (t) => {
+  const { page, base, writes } = await open(t, 375);
+  await page.goto(base + '/network');
+  await page.getByRole('tab', { name: /Everyone/ }).click();
+  await page.locator('.ph-row', { hasText: 'Dana Reyes' }).click();
+  const screen = page.getByRole('dialog', { name: 'Dana Reyes' });
+  await screen.getByRole('button', { name: 'In a week' }).click();
+  const week = new Date(); week.setDate(week.getDate() + 7);
+  await page.waitForFunction(() => document.querySelector('.ph-note')?.textContent?.startsWith('Follow up with Dana Reyes'));
+  assert.deepEqual(writes.at(-1), { path: '/network/person', body: { id: 'p1', nextFollowUp: new Date(Date.UTC(week.getFullYear(), week.getMonth(), week.getDate())).toISOString().slice(0, 10) } });
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'no sideways scroll');
+  await page.goBack();
+  await screen.waitFor({ state: 'detached' });
+  assert.match(page.url(), /\/network$/, 'Back closes the screen, not People');
 });

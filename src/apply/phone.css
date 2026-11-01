@@ -166,3 +166,50 @@
 .ph-capture { position: relative; overflow: hidden; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .ph-capture::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: rgb(255 255 255 / .25); transform: scale(0); }
 .ph-capture.is-holding::after { transform: scale(1); transition: transform .45s linear; }
+
+/* People: Everyone (search, grouped by source) and one person's own screen, which covers the tabs like a pushed page. */
+.ph-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ph-search input { box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 14px; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); color: var(--foreground); font: inherit; font-size: 16px; }
+.ph-search input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+.ph-roster { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border: 1px solid var(--border-col); border-radius: 14px; background: var(--card-bg); overflow: hidden; }
+.ph-roster li + li { border-top: 1px solid var(--border-col); }
+.ph-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 8px 12px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ph-row:active, .ph-open:active { background: var(--secondary-bg); }
+.ph-row small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-open { padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ph-av { display: inline-grid; place-items: center; flex: none; overflow: hidden; border-radius: 50%; background: var(--primary-soft); color: var(--primary); font-weight: 650; }
+.ph-av img { width: 100%; height: 100%; object-fit: cover; }
+.ph-due { padding: 3px 9px; border-radius: 999px; background: var(--secondary-bg); color: var(--muted-fg); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.ph-due.is-due { background: var(--primary-soft); color: var(--primary); }
+.ph-screen { position: fixed; inset: 0; z-index: 70; display: flex; flex-direction: column; background: var(--background); color: var(--foreground); }
+.ph-screen-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex: none; min-height: 52px; padding: env(safe-area-inset-top, 0px) 12px 0 4px; border-bottom: 1px solid var(--border-col); background: var(--card-bg); }
+.ph-back { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 10px 0 4px; border: 0; background: transparent; color: var(--primary); font: inherit; font-size: 16px; font-weight: 550; cursor: pointer; }
+.ph-back svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ph-screen-body { flex: 1; min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: 14px; padding: 16px 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
+.ph-who { display: flex; align-items: center; gap: 14px; }
+.ph-who h1 { margin: 0; font-size: 22px; line-height: 1.2; overflow-wrap: anywhere; }
+.ph-facts { display: grid; gap: 0; margin: 0; border: 1px solid var(--border-col); border-radius: 14px; background: var(--card-bg); }
+.ph-facts div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 14px; }
+.ph-facts div + div { border-top: 1px solid var(--border-col); }
+.ph-facts dt { color: var(--muted-fg); font-size: 14px; flex: none; }
+.ph-facts dd { margin: 0; font-size: 14px; font-weight: 550; text-align: right; overflow-wrap: anywhere; }
+.ph-follow { display: grid; gap: 4px; padding: 14px; border: 1px solid var(--border-col); border-radius: 14px; background: var(--card-bg); }
+.ph-follow.is-due { border-color: var(--primary); }
+.ph-follow b { font-size: 15.5px; }
+.ph-follow small { color: var(--muted-fg); font-size: 13px; }
+.ph-chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.ph-chip { min-height: 44px; border: 1px solid var(--border-col); border-radius: 10px; background: var(--secondary-bg); color: var(--foreground); font: inherit; font-size: 14px; cursor: pointer; }
+.ph-chip:disabled { opacity: .6; }
+.ph-error { margin: 6px 0 0; color: #dc2626; font-size: 13px; }
+.ph-block h2 { margin: 4px 0 8px; color: var(--muted-fg); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.ph-notes { margin: 0; white-space: pre-wrap; font-size: 14.5px; line-height: 1.5; overflow-wrap: anywhere; }
+.ph-jobs, .ph-timeline { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.ph-jobs a { display: grid; gap: 2px; padding: 12px 14px; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); color: inherit; text-decoration: none; }
+.ph-jobs b { font-size: 14.5px; overflow-wrap: anywhere; }
+.ph-jobs small { color: var(--muted-fg); font-size: 13px; }
+.ph-timeline li { padding: 10px 0 10px 14px; border-left: 2px solid var(--border-col); }
+.ph-timeline span { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
+.ph-timeline time { color: var(--muted-fg); font-size: 13px; flex: none; }
+.ph-timeline p { margin: 4px 0 0; color: var(--muted-fg); font-size: 13.5px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+/* "Log it" after all three ways to reach them takes its own row, so it never sits alone at a third of the width. */
+.ph-screen .ph-ways:has(> :nth-child(4):last-child) .ph-log { grid-column: 1 / -1; }
