@@ -77,17 +77,27 @@ async function fixture(t, width, linkedin = false, suggested = false, mapId = "m
 }
 for (const width of [1440, 1024, 390, 320]) test(`Network canvas fills the viewport below navigation at ${width}px`, async t => {
   const { page, errors } = await fixture(t, width);
-  // A phone has its own top bar and bottom tabs; the canvas fills the space between them.
+  // On a phone the map takes the whole screen (the phone's top bar and tabs step aside) and the dock replaces the toolbars.
   const phone = width < 760;
-  const header = await page.locator(phone ? '.ph-top' : '.apply-header').boundingBox(); const canvas = await page.locator('.nwg').boundingBox();
-  const bottom = phone ? (await page.locator('.ph-tabs').boundingBox()).y : 900;
+  const canvas = await page.locator('.nwg').boundingBox();
   assert.ok(Math.abs(canvas.x) < 1 && Math.abs(canvas.width - width) < 1);
-  assert.ok(Math.abs(canvas.y - (header.y + header.height)) < 1);
-  assert.ok(Math.abs(canvas.y + canvas.height - bottom) < 1, `canvas ends at ${canvas.y + canvas.height}, tabs at ${bottom}`);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight), false);
-  const controls = await page.getByRole('button', { name: 'Add to network', exact: true }).boundingBox();
-  assert.ok(controls.width <= 40 && controls.height <= 40, 'compact controls');
-  await page.getByRole('button', { name: 'People list', exact: true }).click();
+  if (phone) {
+    assert.ok(Math.abs(canvas.y) < 1 && Math.abs(canvas.y + canvas.height - 900) < 1, `canvas from ${canvas.y} to ${canvas.y + canvas.height}`);
+    assert.equal(await page.locator('.ph-top, .ph-tabs, .nwg-tools, .apply-header').filter({ visible: true }).count(), 0, 'only the map and its own controls');
+    const dock = await page.getByRole('navigation', { name: 'Map tools' }).boundingBox();
+    assert.ok(dock.y + dock.height <= 900 && dock.y + dock.height > 870, `dock ends at ${dock.y + dock.height}`);
+    for (const b of await page.getByRole('navigation', { name: 'Map tools' }).getByRole('button').all()) assert.ok((await b.boundingBox()).height >= 44, 'thumb-sized dock buttons');
+    await page.getByRole('button', { name: 'More', exact: true }).click();
+    await page.getByRole('dialog', { name: 'More on the map' }).getByRole('button', { name: 'People list' }).click();
+  } else {
+    const header = await page.locator('.apply-header').boundingBox();
+    assert.ok(Math.abs(canvas.y - (header.y + header.height)) < 1);
+    assert.ok(Math.abs(canvas.y + canvas.height - 900) < 1, `canvas ends at ${canvas.y + canvas.height}`);
+    const controls = await page.getByRole('button', { name: 'Add to network', exact: true }).boundingBox();
+    assert.ok(controls.width <= 40 && controls.height <= 40, 'compact controls');
+    await page.getByRole('button', { name: 'People list', exact: true }).click();
+  }
   await page.locator('.nw-view-surface').waitFor();
   assert.deepEqual(await page.locator('.nwg').boundingBox(), canvas, 'list floats above unchanged canvas');
   await page.getByRole('button', { name: 'Close view', exact: true }).click();
@@ -264,4 +274,29 @@ for (const width of [1440, 390]) test(`follow-up plan, outcome and next notes su
   assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('data-node')),'person-1','closing returns focus to the selected contact');
  }
 
+});
+test('on a phone: two fingers pinch to zoom, the dock opens Add, a drawing tool shows Done, and Fit opens readable', async t => {
+  const { page, errors } = await fixture(t, 390);
+  const zoom = () => page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.nwg-svg')).backgroundSize) / 28);
+  const start = await zoom();
+  assert.ok(start >= 0.5 - 1e-6, `opens at ${start}`);
+  // Synthetic touches have no real pointer to capture; everything else runs as on a phone.
+  const touch = (type, id, x, y) => page.evaluate(([type, id, x, y]) => { Element.prototype.setPointerCapture = () => {}; document.querySelector('.nwg').dispatchEvent(new PointerEvent(type, { pointerId: id, pointerType: 'touch', isPrimary: id === 1, clientX: x, clientY: y, button: 0, bubbles: true })); }, [type, id, x, y]);
+  await touch('pointerdown', 1, 150, 600); await touch('pointerdown', 2, 240, 600);
+  for (let i = 1; i <= 5; i++) { await touch('pointermove', 1, 150 - i * 15, 600); await touch('pointermove', 2, 240 + i * 15, 600); }
+  await touch('pointerup', 1, 75, 600); await touch('pointerup', 2, 315, 600);
+  const pinched = await zoom();
+  assert.ok(Math.abs(pinched / start - 240 / 90) < 0.05, `spread 90 → 240 px zooms ${pinched / start}x`);
+  await page.getByRole('button', { name: 'Fit the map' }).click();
+  assert.ok(Math.abs(await zoom() - start) < 1e-6, 'Fit goes back');
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.getByRole('group', { name: 'Add to network' }).getByRole('button', { name: 'Add person' }).waitFor();
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'More', exact: true }).click();
+  await page.getByRole('dialog', { name: 'More on the map' }).getByRole('button', { name: 'Draw' }).click();
+  await page.locator('.nwg.tool-pen').waitFor();
+  assert.equal(await page.locator('.ni-dock').filter({ visible: true }).count(), 0, 'the pen bar takes the place of Network Intelligence');
+  await page.getByRole('button', { name: 'Draw: tap to stop' }).click();
+  await page.locator('.nwg.tool-select').waitFor();
+  assert.deepEqual(errors, []);
 });
