@@ -77,10 +77,13 @@ async function fixture(t, width, linkedin = false, suggested = false, mapId = "m
 }
 for (const width of [1440, 1024, 390, 320]) test(`Network canvas fills the viewport below navigation at ${width}px`, async t => {
   const { page, errors } = await fixture(t, width);
-  const header = await page.locator('.apply-header').boundingBox(); const canvas = await page.locator('.nwg').boundingBox();
+  // A phone has its own top bar and bottom tabs; the canvas fills the space between them.
+  const phone = width < 760;
+  const header = await page.locator(phone ? '.ph-top' : '.apply-header').boundingBox(); const canvas = await page.locator('.nwg').boundingBox();
+  const bottom = phone ? (await page.locator('.ph-tabs').boundingBox()).y : 900;
   assert.ok(Math.abs(canvas.x) < 1 && Math.abs(canvas.width - width) < 1);
   assert.ok(Math.abs(canvas.y - (header.y + header.height)) < 1);
-  assert.ok(Math.abs(canvas.y + canvas.height - 900) < 1);
+  assert.ok(Math.abs(canvas.y + canvas.height - bottom) < 1, `canvas ends at ${canvas.y + canvas.height}, tabs at ${bottom}`);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight), false);
   const controls = await page.getByRole('button', { name: 'Add to network', exact: true }).boundingBox();
   assert.ok(controls.width <= 40 && controls.height <= 40, 'compact controls');

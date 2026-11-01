@@ -4,11 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import ApplyLogo from "./ApplyLogo";
 import { useFillableQueue, useReadyQueue, useReviewCounts } from "./reviewQueue";
 import type { User } from "../types";
-
-async function signOut() {
-  try { await fetch("/api/auth/logout", { method: "POST" }); } catch { /* the cookie clears server-side */ }
-  window.location.replace("/login");
-}
+import { signOut } from "./signOut";
 
 export default function ApplyHeader({ todayCount }: { user: User; todayCount?: number | null }) {
   const path = useLocation().pathname.replace(/\/+$/, "");

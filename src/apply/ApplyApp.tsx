@@ -25,6 +25,9 @@ import NetworkPage from "./NetworkPage";
 import TodayPage from "./TodayPage";
 import CaptureDock from "./CaptureDock";
 import LoopsPage from "./LoopsPage";
+import PhoneHome from "./PhoneHome";
+import { PhoneTabBar, PhoneTopBar } from "./PhoneShell";
+import { usePhone } from "./usePhone";
 
 /** Signed-in admins see the console; everyone else is sent to the admin login. */
 function Console() {
@@ -38,12 +41,14 @@ function Console() {
     return () => document.removeEventListener("visibilitychange", visible);
   }, [user]);
   const path = useLocation().pathname.replace(/\/+$/, "");
+  const phone = usePhone();
   // Measure time and feature use (counts only) while someone is signed in; read the path fresh so page changes are noticed.
   useEffect(() => (user ? startUsageTracking(() => window.location.pathname) : undefined), [user]);
   useEffect(() => (user ? startExtensionUsage() : undefined), [user]);
   if (loading) return <div className="apply-loading" aria-busy="true"><div className="spin" /></div>;
   if (!user) return <Navigate to="/login" replace />;
-  const header = <ApplyHeader user={user} />;
+  // A phone gets its own top bar and bottom tabs; the pages below take whichever header they are given.
+  const header = phone ? <PhoneTopBar /> : <ApplyHeader user={user} />;
   // Every signed-in screen: its page, and the Loops capture dock over it.
   const page = (() => {
     if (path === "/outreach") return <OutreachPage header={header} />;
@@ -65,8 +70,11 @@ function Console() {
     if (path === "/stats" || path === "/overview") return <InsightsPage header={header} />;
     // The earlier, heavier analytics page stays reachable for the detail.
     if (path === "/analytics") return <Applications header={header} />;
-    return <TodayPage header={header} />;
+    // Today's work needs the laptop's extension; on a phone, Home comes first and Today stays one tap away.
+    if (path === "/today" || !phone) return <TodayPage header={header} />;
+    return <PhoneHome header={header} />;
   })();
+  if (phone) return <div className="ph-app"><div className="ph-main">{page}</div><PhoneTabBar /><CaptureDock /></div>;
   return <>{page}<CaptureDock /></>;
 }
 

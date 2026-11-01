@@ -7,6 +7,7 @@ import "./capture-dock.css";
 // Speak beside it. Typing is Enter; speaking is Speak → Finish. Both make the same capture, saved on this device before it is sent.
 type Phase = "rest" | "compose" | "recording" | "saving" | "kept";
 const DRAFT = "loops-draft";
+export const CAPTURE_EVENT = "atriveo:capture-open";
 const MAX_RECORDING_MS = 5 * 60_000;
 const read = (k: string) => { try { return sessionStorage.getItem(k) ?? ""; } catch { return ""; } };
 const write = (k: string, v: string) => { try { v ? sessionStorage.setItem(k, v) : sessionStorage.removeItem(k); } catch { /* a private window: the draft just isn't kept */ } };
@@ -49,6 +50,8 @@ function Dock() {
     refocus.current = !document.activeElement || document.activeElement === document.body || Boolean(panel.current?.contains(document.activeElement));
     setPhase("rest"); setNote("");
   }, []);
+  // The phone's + in the bottom tabs opens the same panel.
+  useEffect(() => { window.addEventListener(CAPTURE_EVENT, openDock); return () => window.removeEventListener(CAPTURE_EVENT, openDock); }, [openDock]);
   // Back to the ring once it is visible again, if focus was inside the panel.
   useEffect(() => { if (phase === "rest" && refocus.current) { refocus.current = false; ring.current?.focus({ preventScroll: true }); } }, [phase]);
 
