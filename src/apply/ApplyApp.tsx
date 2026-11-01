@@ -27,6 +27,7 @@ import CaptureDock from "./CaptureDock";
 import LoopsPage from "./LoopsPage";
 import PhoneActivity from "./PhoneActivity";
 import PhoneHome from "./PhoneHome";
+import PhonePeople from "./PhonePeople";
 import PhoneTriage from "./PhoneTriage";
 import { PhoneTabBar, PhoneTopBar } from "./PhoneShell";
 import { usePhone } from "./usePhone";
@@ -42,7 +43,9 @@ function Console() {
     document.addEventListener("visibilitychange", visible);
     return () => document.removeEventListener("visibilitychange", visible);
   }, [user]);
-  const path = useLocation().pathname.replace(/\/+$/, "");
+  const location = useLocation();
+  const path = location.pathname.replace(/\/+$/, "");
+  const search = location.search;
   const phone = usePhone();
   // Measure time and feature use (counts only) while someone is signed in; read the path fresh so page changes are noticed.
   useEffect(() => (user ? startUsageTracking(() => window.location.pathname) : undefined), [user]);
@@ -54,7 +57,8 @@ function Console() {
   // Every signed-in screen: its page, and the Loops capture dock over it.
   const page = (() => {
     if (path === "/outreach") return <OutreachPage header={header} />;
-    if (path === "/network") return <NetworkPage header={header} />;
+    // On a phone, People first; the whole Network (and any ?person= / ?work= link) opens the canvas.
+    if (path === "/network") return phone && !search ? <PhonePeople header={header} /> : <NetworkPage header={header} />;
     if (path === "/loops") return <LoopsPage header={header} />;
     if (path === "/job-matching") return phone ? <PhoneTriage header={header} /> : <JobMatchingPage header={header} />;
     if (path === "/applied" && phone) return <PhoneActivity header={header} />;

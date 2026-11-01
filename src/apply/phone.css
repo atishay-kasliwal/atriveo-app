@@ -149,3 +149,16 @@
 .ph-marks .ph-btn[aria-pressed="true"] { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
 .ph-clear { background: transparent; color: var(--muted-fg); }
 .ph-btn:disabled { opacity: .5; }
+
+/* People: who needs you, with one-tap ways to reach them. */
+.ph-people-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ph-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--primary); font-size: 14px; text-decoration: none; }
+.ph-people { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.ph-person { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--border-col); border-radius: 16px; background: var(--card-bg); }
+.ph-person.is-reply, .ph-person.is-outreach { border-color: var(--primary); }
+.ph-person-name { display: grid; gap: 3px; min-width: 0; }
+.ph-person-name b { font-size: 15.5px; line-height: 1.3; overflow-wrap: anywhere; }
+.ph-person-name small { color: var(--muted-fg); font-size: 13px; overflow-wrap: anywhere; }
+.ph-ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 8px; }
+.ph-ways .ph-btn { min-height: 46px; padding: 0 10px; font-size: 14.5px; }
+.ph-wide { grid-column: 1 / -1; }
