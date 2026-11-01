@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test:mobile": "npm run build:apply && node --test --test-global-setup=tests/setup-tmp.mjs --test-timeout=120000 tests/phone.browser.test.mjs",
     "test:network:browser": "npm run build:apply && node --test tests/network-canvas.browser.test.mjs",
     "test:dayplan:browser": "npm run build:apply && node --test tests/day-plan.browser.test.mjs",
     "test:push:browser": "npm run build:apply && node --test tests/push-browser.test.mjs",

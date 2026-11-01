@@ -150,6 +150,26 @@ test('a hidden company leaves the queue, the company list and the counts at once
   await assert.rejects(() => setCompanyHidden(db, { company: '  ' }), /company is required/);
 });
 
+test('a job saved for later leaves the queue and waits in the Saved view; undo puts it back', async () => {
+  invalidateMatchingQueue();
+  const fit = computeFit(JD, 'Backend Engineer');
+  const jobs = [0, 1, 2, 3].map((i) => job(300 + i, { ...structuredClone(fit), score: 80 - i }));
+  const db = fakeDb(jobs, { descriptions: Object.fromEntries(jobs.map((j) => [j.job_url, JD])) });
+  const kept = jobs[1].job_url;
+  await recordDecision(db, { jobUrl: kept, decision: 'later', now: NOW });
+  const queue = await matchingQueue(db, { limit: 8, now: new Date(NOW.getTime() + 1000), learn: false });
+  assert.equal(queue.total, 3);
+  assert.ok(queue.jobs.every((j) => j.id !== kept), 'not in the queue');
+  const saved = await matchingQueue(db, { limit: 8, now: new Date(NOW.getTime() + 2000), learn: false, saved: true });
+  assert.equal(saved.total, 1);
+  assert.deepEqual(saved.jobs.map((j) => j.id), [kept]);
+  assert.equal(saved.stats.saved, 1);
+  await recordDecision(db, { jobUrl: kept, decision: 'undo', now: NOW });
+  const back = await matchingQueue(db, { limit: 8, now: new Date(NOW.getTime() + 3000), learn: false });
+  assert.equal(back.total, 4);
+  assert.equal((await matchingQueue(db, { limit: 8, now: new Date(NOW.getTime() + 4000), learn: false, saved: true })).total, 0);
+});
+
 test('recent scrape runs group the pipelines of one run, add the staffing runs, and keep the newest five', async () => {
   const at = (m) => new Date(NOW.getTime() - m * 60_000);
   const sessions = [];

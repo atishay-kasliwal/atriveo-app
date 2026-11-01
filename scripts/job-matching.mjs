@@ -170,7 +170,7 @@ export async function matchingQueue(db, opts = {}) {
   try { return await answerQueue(db, opts); } finally { answering--; }
 }
 
-async function answerQueue(db, { limit = 8, offset = 0, now = new Date(), company = null, jobUrl = null, random = false, exclude = [], learn = true, period = '7d', sources = [], role = '', query = '', timeZone = 'America/New_York', sort = 'latest' } = {}) {
+async function answerQueue(db, { limit = 8, offset = 0, now = new Date(), company = null, jobUrl = null, random = false, exclude = [], learn = true, period = '7d', sources = [], role = '', query = '', timeZone = 'America/New_York', sort = 'latest', saved = false } = {}) {
   const { docs: cached, applied, swipes, filter, confirmed, hidden } = await loadBase(db, now);
   // Copies, so this request's Fits never leak into the cached rows.
   const docs = cached.map((d) => ({ ...d }));
@@ -183,6 +183,8 @@ async function answerQueue(db, { limit = 8, offset = 0, now = new Date(), compan
   const byUrl = new Map();
   for (const d of docs) {
     if (taken.has(d.job_url) || d.apply_type === "closed" || byUrl.has(d.job_url) || hidden.has(companyKey(d.company))) continue;
+    // A job saved for later (Later on the laptop, swipe right on the phone) leaves the queue and waits in the Saved view.
+    if (later.has(d.job_url) !== saved) continue;
     byUrl.set(d.job_url, d);
   }
   // Fit (master resume against the posting) is kept on each job; up to FIT_PER_REQUEST missing or stale ones are computed

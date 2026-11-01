@@ -5,6 +5,7 @@ import { appliedItems, appliedCounts } from "./applied-core.mjs";
 // extension or Matching), each with what the employers' emails said afterwards. The Stats history only has the first kind.
 
 const OUTCOMES = ["rejected", "assessment", "interview", "offer"];
+const MARKS = "applied_outcomes";
 const SUFFIX = /\b(incorporated|inc|llc|ltd|limited|corp|corporation|co|company|plc|gmbh|the)\b/g;
 export const companyKey = (name) => String(name || "").toLowerCase().replace(/&/g, " and ").replace(SUFFIX, " ").replace(/[^a-z0-9]+/g, "");
 const iso = (v) => { const t = Date.parse(v); return Number.isFinite(t) ? new Date(t).toISOString() : null; };
@@ -25,7 +26,8 @@ function eventsFor(row, events, appId) {
   }).sort((a, b) => Date.parse(a.receivedAt) - Date.parse(b.receivedAt));
 }
 
-export function buildAppliedRows({ applications, swipes, jobs, events }) {
+export function buildAppliedRows({ applications, swipes, jobs, events, marks = [] }) {
+  const markBy = new Map(marks.map((m) => [m.key, m]));
   const jobBy = new Map();
   for (const j of jobs) if (!jobBy.has(j.job_url)) jobBy.set(j.job_url, j);
   const appBy = new Map(applications.map((a) => [String(a._id), a]));
@@ -53,6 +55,9 @@ export function buildAppliedRows({ applications, swipes, jobs, events }) {
     const last = r.mail.at(-1);
     const fromApp = r.appOutcome && OUTCOMES.concat("confirmed").includes(r.appOutcome.status) ? { status: r.appOutcome.status, at: iso(r.appOutcome.stageAt ?? r.appOutcome.rejectedAt ?? r.appOutcome.confirmedAt) } : null;
     r.outcome = last ? { status: last.kind, at: last.at } : fromApp && fromApp.status !== "confirmed" ? fromApp : null;
+    // What you marked yourself (the phone's Activity) counts like a reply; the newer of it and the mail wins.
+    const mark = markBy.get(r.key);
+    if (mark && OUTCOMES.includes(mark.status) && (!r.outcome || Date.parse(mark.at) >= Date.parse(r.outcome.at ?? 0))) r.outcome = { status: mark.status, at: iso(mark.at), manual: true };
     r.confirmed = Boolean(fromApp?.status === "confirmed" || r.appOutcome?.confirmedAt);
     delete r.appOutcome;
   }
@@ -64,15 +69,28 @@ const matchesOutcome = (r, outcome) => outcome === "all" || (outcome === "replie
 /** Every applied job as a row (with its mail), and the raw items the shared counts are built from. */
 export async function loadAppliedRows(db, { now = Date.now() } = {}) {
   const since = new Date(now - 200 * 86400000).toISOString();
-  const [applications, swipes, events] = await Promise.all([
+  const [applications, swipes, events, marks] = await Promise.all([
     db.collection("applications").find({ status: "APPLIED" }, { projection: { company: 1, title: 1, location: 1, ats: 1, applyUrl: 1, finalUrl: 1, jobUrls: 1, "lifecycle.appliedAt": 1, "submission.submittedAt": 1, "submission.by": 1, outcome: 1, resume: 1 } }).toArray(),
     db.collection("job_swipes").find({ direction: "applied" }, { projection: { _id: 0, job_url: 1, direction: 1, applied_at: 1, swiped_at: 1 } }).toArray(),
     db.collection("inbox_events").find({ receivedAt: { $gte: since }, kind: { $in: OUTCOMES } }, { projection: { _id: 0, receivedAt: 1, kind: 1, subject: 1, companies: 1, state: 1, match: 1 } }).toArray(),
+    db.collection(MARKS).find({}, { projection: { _id: 0, key: 1, status: 1, at: 1 } }).toArray(),
   ]);
   const urls = [...new Set([...applications.flatMap((a) => a.jobUrls || []), ...swipes.map((s) => s.job_url)])].slice(0, 6000);
   const jobs = urls.length ? await db.collection("jobs").find({ job_url: { $in: urls } }, { projection: { _id: 0, job_url: 1, company: 1, title: 1, location: 1, site: 1, run_at: 1, job_url_direct: 1, "resume.pdf_path": 1, "resume.updated_at": 1, "resume.object.sha256": 1 } }).toArray() : [];
-  const all = buildAppliedRows({ applications, swipes, jobs, events });
+  const all = buildAppliedRows({ applications, swipes, jobs, events, marks });
   return { all, applications, swipes };
+}
+
+/**
+ * Mark what happened with an application yourself (Interview, Rejected, ...), or clear your mark. Kept in its own
+ * collection, so engine applications are never written; the list merges it in (buildAppliedRows).
+ */
+export async function setAppliedOutcome(db, { key, status, now = new Date() }) {
+  if (!/^(a:[\w-]{1,80}|j:[a-f0-9]{12})$/.test(String(key || ""))) throw new Error("An application key is required");
+  if (status === "clear") { await db.collection(MARKS).deleteOne({ key }); return { ok: true }; }
+  if (!OUTCOMES.includes(status)) throw new Error("Unknown status");
+  await db.collection(MARKS).updateOne({ key }, { $set: { key, status, at: now.toISOString() } }, { upsert: true });
+  return { ok: true };
 }
 
 export async function appliedHistory(db, { q = "", outcome = "all", skip = 0, limit = 40, key = null, now = Date.now() } = {}) {

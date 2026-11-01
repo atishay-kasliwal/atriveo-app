@@ -171,15 +171,17 @@ test('unfinished intentions: a small count on the ring, listed in the dock with 
   await page.waitForFunction(() => !document.querySelector('.cd-open'));
 });
 
-test('on a phone: fits the screen, does not cover the page header, touch targets are large', async (t) => {
+test('on a phone: the + in the tabs opens it, it fits between the top bar and the tabs, touch targets are large', async (t) => {
   const f = await fixture(t, { viewport: { width: 390, height: 780 }, open: [openItem] }); const { page } = f;
   await page.goto(f.base + '/resume_builder');
-  const ring = page.getByRole('button', { name: /Capture a thought/ });
-  await ring.click();
-  await page.waitForTimeout(450); // the panel opens by growing from the ring
+  assert.equal(await page.getByRole('button', { name: /Capture a thought/ }).isVisible(), false, 'no corner ring on a phone');
+  await page.getByRole('button', { name: 'Capture a note' }).click();
+  await page.waitForTimeout(450); // the panel opens by growing
   const box = await page.getByRole('dialog').boundingBox();
+  const top = await page.locator('.ph-top').boundingBox(), tabs = await page.locator('.ph-tabs').boundingBox();
   assert.ok(box.x >= 0 && box.x + box.width <= 390, 'inside the viewport');
-  assert.ok(box.y >= 0, 'not above the viewport');
+  assert.ok(box.y >= top.y + top.height, 'below the top bar');
+  assert.ok(box.y + box.height <= tabs.y, 'above the tabs');
   const speak = await page.getByRole('button', { name: 'Speak' }).boundingBox();
   assert.ok(speak.height >= 36, `Speak is ${speak.height}px tall`);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, 'no sideways scroll');

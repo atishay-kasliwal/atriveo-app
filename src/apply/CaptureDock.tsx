@@ -7,6 +7,7 @@ import "./capture-dock.css";
 // Speak beside it. Typing is Enter; speaking is Speak → Finish. Both make the same capture, saved on this device before it is sent.
 type Phase = "rest" | "compose" | "recording" | "saving" | "kept";
 const DRAFT = "loops-draft";
+export const CAPTURE_EVENT = "atriveo:capture-open";
 const MAX_RECORDING_MS = 5 * 60_000;
 const read = (k: string) => { try { return sessionStorage.getItem(k) ?? ""; } catch { return ""; } };
 const write = (k: string, v: string) => { try { v ? sessionStorage.setItem(k, v) : sessionStorage.removeItem(k); } catch { /* a private window: the draft just isn't kept */ } };
@@ -108,6 +109,14 @@ function Dock() {
       startDraw(analyser ?? null, r.started);
     } catch { stream.getTracks().forEach((t) => t.stop()); setNote("Mic unavailable. Type it instead."); area.current?.focus(); }
   };
+  // The phone's + in the bottom tabs opens the same panel; holding it starts speaking at once.
+  const startLatest = useRef(startRecording);
+  useEffect(() => { startLatest.current = startRecording; });
+  useEffect(() => {
+    const onOpen = (e: Event) => { openDock(); if ((e as CustomEvent<{ voice?: boolean }>).detail?.voice) void startLatest.current(); };
+    window.addEventListener(CAPTURE_EVENT, onOpen);
+    return () => window.removeEventListener(CAPTURE_EVENT, onOpen);
+  }, [openDock]);
   const finishRecording = () => rec.current?.stop();
   const cancelRecording = () => { if (rec.current) { rec.current.cancelled = true; rec.current.stop(); } else setPhase("compose"); };
 

@@ -7,7 +7,7 @@ import { claimInference, completeInference, queueInference } from './resume-ai-q
 import { analyzeResume, recordAiDecision, resumeAiVersion, enqueueResumeAi, resumeAiResult } from './resume-ai.mjs';
 import { enqueueAnswer } from './application-answer.mjs';
 import { widgetProgress } from './widget-progress.mjs';
-import { appliedHistory } from './applied-history.mjs';
+import { appliedHistory, setAppliedOutcome } from './applied-history.mjs';
 import { appliedSummary } from './applied-core.mjs';
 /**
  * Atriveo local tailor sidecar.
@@ -1993,7 +1993,7 @@ const server = http.createServer(async (req, res) => {
         const data = wantsGeneral
           ? await withMongo((db) => generalQueue(db, { limit, offset, period, role: params.get("role") || "", query: (params.get("q") || "").slice(0, 200), company: params.get("company") || "", exclude: (params.get("exclude") || "").split(",").filter((x) => /^[a-f0-9]{12}$/.test(x)), outRoot: OUT_ROOT }), { appName: "AtriveoTailorServer" })
           : await withMongo(async (db) => {
-            const queue = await matchingQueue(db, { limit, offset, period, sources: (params.get("sources") || "").split(","), role: params.get("role") || "", query: (params.get("q") || "").slice(0,200), timeZone: params.get("tz") || "America/New_York", sort: params.get("sort") === "fit" ? "fit" : "latest", company: params.get("company"), jobUrl: params.get("job"), random: params.get("random") === "1", exclude: (params.get("exclude") || "").split(",").filter(x=>/^[a-f0-9]{16}$/.test(x)), learn: params.get("learn") !== "0" });
+            const queue = await matchingQueue(db, { limit, offset, period, sources: (params.get("sources") || "").split(","), role: params.get("role") || "", query: (params.get("q") || "").slice(0,200), timeZone: params.get("tz") || "America/New_York", sort: params.get("sort") === "fit" ? "fit" : "latest", company: params.get("company"), jobUrl: params.get("job"), random: params.get("random") === "1", exclude: (params.get("exclude") || "").split(",").filter(x=>/^[a-f0-9]{16}$/.test(x)), learn: params.get("learn") !== "0", saved: params.get("saved") === "1" });
             // The source filter shows how many General jobs there are; a failure here must never break the normal queue.
             try { if (queue?.facets?.sources) queue.facets.sources.general = await generalCount(db, { period, outRoot: OUT_ROOT }); } catch { /* count omitted */ }
             return queue;
@@ -2244,6 +2244,25 @@ const server = http.createServer(async (req, res) => {
 
   // GET /applications/applied?q=&outcome=&skip=&limit= — everything you applied to (tracked and marked), with employer replies;
   // &key= returns one row with its mail timeline.
+  // POST /applications/applied-outcome {key, status: interview|assessment|offer|rejected|clear}: your own mark on an application (phone Activity).
+  if (req.method === "POST" && pathname === "/applications/applied-outcome") {
+    let raw = "";
+    req.on("data", (c) => { raw += c; if (raw.length > 2_000) req.destroy(); });
+    req.on("end", async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const body = JSON.parse(raw || "{}");
+        const data = await withMongo((db) => setAppliedOutcome(db, { key: body?.key, status: body?.status }), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    });
+    return;
+  }
+
   if (req.method === "GET" && pathname === "/applications/applied") {
     (async () => {
       try {

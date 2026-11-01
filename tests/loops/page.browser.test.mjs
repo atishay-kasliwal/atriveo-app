@@ -191,10 +191,13 @@ test('empty and unknown states are calm, not broken', async (t) => {
   assert.deepEqual(f.errors, []);
 });
 
-test('Loops is in the nav, and on a phone the list and a capture each get the whole screen', async (t) => {
+test('on a phone Loops is in the menu, and the list and a capture each get the whole screen', async (t) => {
   const f = await fixture(t, { viewport: { width: 390, height: 800 } }); const { page } = f;
-  await page.goto(f.base + '/loops');
-  await page.getByRole('link', { name: 'Loops', exact: true }).waitFor();
+  await page.goto(f.base + '/');
+  await page.getByRole('button', { name: 'All pages and settings' }).click();
+  await page.getByRole('dialog', { name: 'All pages' }).getByRole('link', { name: 'Loops', exact: true }).click();
+  await page.waitForURL(/\/loops$/);
+  await page.getByRole('option', { name: /NVIDIA/ }).waitFor();
   assert.equal(await page.locator('.lp-detail').isVisible(), false);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
   await page.getByRole('option', { name: /NVIDIA/ }).click();
