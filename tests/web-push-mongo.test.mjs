@@ -42,11 +42,11 @@ test('Mongo indexes enforce ownership, multiple devices, event leases and pollin
   await pollPushEvents(db, userId, { now, send }); assert.equal(count, 6, 'only the open assessment alerts');
   await pollPushEvents(db, userId, { now: new Date(+now + 60000), send }); assert.equal(count, 6, 'no repeat on the next minute');
   await Promise.all([pollPushEvents(db, userId, { now: new Date('2026-10-29T00:00:00Z'), send }), pollPushEvents(db, userId, { now: new Date('2026-10-29T00:00:00Z'), send })]);
-  assert.equal(count, 7, 'one daily summary across concurrent pollers');
-  await pollPushEvents(db, userId, { now: new Date('2026-10-29T01:00:00Z'), send }); assert.equal(count, 7, 'summary remains deduplicated on restart');
+  assert.equal(count, 6, 'no daily summary is sent');
+  await pollPushEvents(db, userId, { now: new Date('2026-10-29T01:00:00Z'), send }); assert.equal(count, 6, 'still none on restart');
   // Finishing the assessment suppresses its due-date reminder.
   await db.collection('assessments').updateOne({ _id: 'due-tomorrow' }, { $set: { status: 'done' } });
-  await pollPushEvents(db, userId, { now: new Date('2026-10-29T19:00:00Z'), send }); assert.equal(count, 7);
+  await pollPushEvents(db, userId, { now: new Date('2026-10-29T19:00:00Z'), send }); assert.equal(count, 6);
   let attempts = 0;
   const retry = async () => { attempts++; return { sent: 0, failed: 1 }; };
   await deliverEvent(db, userId, 'retry', {}, { now, send: retry });

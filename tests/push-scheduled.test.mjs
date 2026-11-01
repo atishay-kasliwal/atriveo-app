@@ -21,14 +21,8 @@ test('tomorrow reminder is correct across daylight saving transitions', () => {
   }
   assert.equal(pushSchedule(new Date('2026-11-01T14:00:00Z')).assessmentStage, 'tomorrow');
 });
-test('daily summary counts the New York day, uses accurate reply wording, and has a stable dedup ID', () => {
-  const now = new Date('2026-10-29T00:00:00Z'); // Oct 28, 8 PM NY
+test('no daily summary is pushed', () => {
   const progress = { appliedToday: 30, interviewEmailsToday: 1 };
-  const replies = [{ reply: { at: '2026-10-28T15:00:00Z' } }, { reply: { at: '2026-10-28T22:00:00Z' } }, { reply: { at: '2026-10-28T03:59:00Z' } }];
-  const [out] = scheduledPushes({ now, progress, replies });
-  assert.equal(out.id, 'summary:2026-10-28'); assert.equal(out.notification.body, 'Today: 30 applications, 2 recruiter replies, 1 interview update.'); assert.equal(out.notification.url, '/stats');
-  assert.equal(scheduledPushes({ now: new Date('2026-10-29T01:00:00Z'), progress, replies })[0].id, out.id);
-  assert.equal(scheduledPushes({ now: new Date('2026-10-28T23:59:59Z'), progress }).length, 0);
-  assert.equal(scheduledPushes({ now: new Date('2026-10-29T03:00:00Z'), progress }).length, 0);
-  assert.match(scheduledPushes({ now, progress: { appliedToday: 0, interviewEmailsToday: 0 } })[0].notification.body, /0 applications, 0 recruiter replies, 0 interview updates/);
+  assert.equal(scheduledPushes({ now: new Date('2026-10-29T00:00:00Z'), progress, replies: [{ reply: { at: '2026-10-28T15:00:00Z' } }] }).length, 0);
+  assert.equal(pushSchedule(new Date('2026-10-29T00:00:00Z')).summary, undefined);
 });

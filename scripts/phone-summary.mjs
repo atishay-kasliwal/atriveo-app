@@ -166,6 +166,8 @@ export async function runPhoneTick({ db, now = new Date(), publish = publishNtfy
 
 /** Checks once a minute inside the sidecar. Does nothing without NTFY_TOPIC, or with PHONE_SUMMARIES=off. */
 export function startPhoneSummaries({ withMongo, log = console.log, everyMs = 60_000, publish = publishNtfy } = {}) {
+  // Web Push (the Atriveo app) already sends each milestone and each assessment on its own. A second copy on ntfy, with plans and recaps, is the duplicate.
+  if (process.env.VAPID_PRIVATE_KEY && process.env.VAPID_PUBLIC_KEY && process.env.VAPID_SUBJECT && process.env.PUSH_EVENT_USER_ID && !/^(on|1|true)$/i.test(process.env.PHONE_SUMMARIES || "")) { log("phone summaries on ntfy: off (the Atriveo app sends these; PHONE_SUMMARIES=on brings them back)"); return null; }
   if (!process.env.NTFY_TOPIC || /^(off|0|false)$/i.test(process.env.PHONE_SUMMARIES || "")) { log("phone summaries: off (no NTFY_TOPIC, or PHONE_SUMMARIES=off)"); return null; }
   let running = false;
   const tick = async () => {

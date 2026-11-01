@@ -7,7 +7,11 @@ import { buildMessage, nyParts, reached, readGoal, streakOf } from './phone-summ
 
 export function inboxPush(event) {
   if (!['interview', 'offer'].includes(event.kind) || ['dismissed', 'undone', 'ignored'].includes(event.state)) return null;
-  return { title: event.kind === 'offer' ? 'Offer detected' : 'Interview detected', body: 'A new update is available in Atriveo.', type: event.kind, url: event.applicationId ? `/applied/${encodeURIComponent(event.applicationId)}` : '/applied' };
+  // Like a mail notification: who it is from on top, what it is about underneath.
+  const company = String(event.companies?.[0] || event.from?.replace(/<.*>/, '').replace(/"/g, '').trim() || '').slice(0, 80);
+  const what = event.kind === 'offer' ? 'Offer' : 'Interview';
+  const detail = String(event.titles?.[0] || event.subject || '').replace(/\s+/g, ' ').trim().slice(0, 140);
+  return { title: company || `${what} detected`, body: detail ? `${what}: ${detail}` : `${what} detected`, type: event.kind, url: event.applicationId ? `/applied/${encodeURIComponent(event.applicationId)}` : '/applied' };
 }
 export async function deliverEvent(db, userId, id, notification, { now = new Date(), send = sendPushNotification } = {}) {
   const _id = `${userId}:${id}`;
@@ -36,7 +40,7 @@ export async function pollPushEvents(db, userId, { now = new Date(), send = send
   }
   const replies = await db.collection('outreach').find({ 'reply.at': { $gte: since } }).toArray();
   for (const record of replies) await deliverEvent(db, userId, `reply:${record._id}`, {
-    title: 'Recruiter replied', body: `${String(record.company || 'A recruiter').slice(0, 100)} responded to your outreach.`, type: 'recruiter_reply', url: `/outreach?id=${encodeURIComponent(record._id)}`,
+    title: String(record.company || 'A recruiter').slice(0, 100), body: 'Replied to your outreach', type: 'recruiter_reply', url: `/outreach?id=${encodeURIComponent(record._id)}`,
   }, { now, send });
   const [progress, goal] = await Promise.all([widgetProgress(db, { now, fullHistory: true }), readGoal(db)]);
   // The same milestones as the ntfy messages (first of the day, halfway, goal, twice, four times, personal best, streak), each once a day.
@@ -54,11 +58,8 @@ export async function pollPushEvents(db, userId, { now = new Date(), send = send
     for (const k of [...tiers.slice(-1), ...extra]) await deliverEvent(db, userId, idOf(k), push(k), { now, send });
   }
   const schedule = pushSchedule(now);
-  const [assessments, dailyReplies] = await Promise.all([
-    schedule.assessmentStage ? listAssessments(db, { now: +now }) : [],
-    schedule.summary ? db.collection('outreach').find({ 'reply.at': { $gte: new Date(+now - 48 * 3600000).toISOString() } }, { projection: { 'reply.at': 1 } }).toArray() : [],
-  ]);
-  for (const { id, notification } of scheduledPushes({ now, assessments, progress, replies: dailyReplies })) await deliverEvent(db, userId, id, notification, { now, send });
+  const assessments = schedule.assessmentStage ? await listAssessments(db, { now: +now }) : [];
+  for (const { id, notification } of scheduledPushes({ now, assessments })) await deliverEvent(db, userId, id, notification, { now, send });
   // Loops: reminders for confirmed intentions that are still open (scripts/loops.mjs).
   await ensureLoopsIndexes(db).catch(() => {});
   await tickLoopReminders(db, userId, { now, send }).catch(() => {});

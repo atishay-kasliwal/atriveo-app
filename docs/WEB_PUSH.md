@@ -54,7 +54,7 @@ The one-minute poller consumes existing `outreach.reply.at` records (recruiter r
 
 Assessment reminders run at 9 AM New York on the day before a known deadline (catch-up until noon), and at 3 PM on the due date if still open and before its deadline (catch-up until 7 PM). Done, dismissed, expired and undated assessments do not alert. Each assessment/deadline/reminder stage has its own persistent delivery ID; changing a deadline allows a fresh reminder for the new date.
 
-The daily summary runs at 8 PM New York (catch-up until 11 PM), once per calendar day. It reports the existing applied count, first recruiter replies recorded on outreach messages that day, and interview-email updates. It includes zero-activity days. Schedule calculations use New York calendar dates, including daylight-saving changes. No new environment variables or migrations are needed.
+There is no daily summary: every notification is one event. Interviews and offers show the company on top and the role or subject underneath, like a mail notification. Schedule calculations use New York calendar dates, including daylight-saving changes.
 
 Replies open `/outreach?id=<id>` with the corresponding message panel. Interviews/offers open `/applied/<applicationId>` when linked, otherwise `/applied`. Daily goals open `/job-matching`.
 
