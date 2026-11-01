@@ -49,9 +49,11 @@ export function compileAndMeasure(tex) {
   }
 }
 
-/** Small stretchable space before each section and each entry after the first, so a page within a line of full ends at the margin. */
+/** Small stretchable space before each section, each entry after the first and each bullet after the first, so a page
+ *  within a line of full ends at the margin without one wide gap between sections. A bullet gets half a section's share. */
 export function stretchToBottom(tex) {
   const fill = "\\vspace{0pt plus 1fill}";
+  const bulletFill = "\\vspace{0pt plus 0.5fill}";
   let out = tex.replace(/\n\\section\{(Experience|Projects|Technical Skills)\}/g, `\n${fill}\n\\section{$1}`);
   // Between entries of one list: every heading after the first in its list gets the same space above it.
   out = out.replace(/(\\resumeSubHeadingListStart)([\s\S]*?)(\\resumeSubHeadingListEnd)/g, (all, start, body, end) => {
@@ -59,6 +61,15 @@ export function stretchToBottom(tex) {
     const spaced = body.replace(/\n(\s*)\\(resumeSubheading|resumeProjectHeading)\{/g, (m, ind, cmd) => {
       if (first) { first = false; return m; }
       return `\n${ind}${fill}\\${cmd}{`;
+    });
+    return `${start}${spaced}${end}`;
+  });
+  // Between bullets of one entry.
+  out = out.replace(/(\\resumeItemListStart)([\s\S]*?)(\\resumeItemListEnd)/g, (all, start, body, end) => {
+    let first = true;
+    const spaced = body.replace(/\n(\s*)\\resumeItem\{/g, (m, ind) => {
+      if (first) { first = false; return m; }
+      return `\n${ind}${bulletFill}\\resumeItem{`;
     });
     return `${start}${spaced}${end}`;
   });
