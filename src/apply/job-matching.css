@@ -182,8 +182,9 @@
 .jm-block-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
 .jm-block-foot .jm-facts{flex:1 1 auto;min-width:0}
 .jm-location{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;color:var(--foreground);white-space:nowrap}.jm-location svg{color:var(--muted-fg)}
-/* Tighter workspace so the block, tabs, overview, similar jobs and footer all fit without scrolling. */
-.jm-workspace{gap:7px;overflow:hidden}
+/* Tighter workspace so most of it fits at once; the page itself never scrolls, so what does not fit scrolls inside the column
+   (never cut off). */
+.jm-workspace{gap:7px;overflow-x:hidden;overflow-y:auto}
 .jm-toolbar{padding:0}.jm-toolbar .jm-tabs button{padding:5px 10px}
 .jm-content{padding:0}.jm-assessment-note{margin:0 0 6px}.jm-assessment-note>summary{padding:6px 10px}
 .jm-overview-grid{gap:6px}.jm-card{padding:8px 10px}.jm-card h2{margin:0 0 4px}
@@ -410,9 +411,13 @@
 /* Resume header: always one line. The companion timer label shrinks away first; Download and Edit resume stay. */
 .jm-rhead{flex-wrap:nowrap;gap:8px;overflow:visible}
 .jm-rhead>b{flex:none;white-space:nowrap}
-.jm-rhead>.jm-ready-pop,.jm-rhead>.jm-companion-ready{flex:0 1 auto;min-width:0;white-space:nowrap}
-.jm-rhead>.jm-companion-ready{overflow:hidden;text-overflow:ellipsis}
-.jm-rhead>.jm-download,.jm-rhead>.jm-download+a,.jm-rhead>a{flex:none;white-space:nowrap}
+.jm-rhead>.jm-ready-pop{flex:none;white-space:nowrap}
+/* Only the companion line gives way (it ends in "…"); the badge and the buttons keep their size and never overlap it. */
+.jm-rhead>.jm-companion-ready{flex:0 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jm-rhead>.jm-download,.jm-rhead>.jm-download+a,.jm-rhead>a,.jm-rhead>button.apps-btn{flex:none;white-space:nowrap}
+/* Cover Letter sits with Download PDF on the right, the same size, on one line. */
+.jm-rhead>button.apps-btn{margin-left:auto;min-height:30px;padding:5px 10px;font-size:11px}
+.jm-rhead>button.apps-btn+.jm-download{margin-left:0}
 .jm-rhead>.jm-download+a{margin-left:0}
 @media(max-width:1500px){.jm-rhead .jm-companion-ready{font-size:0}.jm-rhead .jm-companion-ready select{font-size:11px}}
 
