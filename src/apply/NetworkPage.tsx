@@ -20,6 +20,7 @@ import NetworkImport from "./NetworkImport";
 import { AutoCompanyPanel, SourcePanel, YouPanel } from "./NetworkSidePanels";
 import NetworkHome, { PickFromNetwork } from "./NetworkHome";
 import { savePreview, setPendingPreview } from "./networkPicture";
+import { usePhone } from "./usePhone";
 import "./network.css";
 
 type View = { kind: "all" } | { kind: "source"; id: string | null } | { kind: "due" } | { kind: "never" } | { kind: "introduced" };
@@ -74,6 +75,13 @@ function NetworkMap({ initialIntelligence, header, mapId, notice, onHome }: { in
     document.addEventListener('pointerdown', away); window.addEventListener('keydown', escape);
     return () => { document.removeEventListener('pointerdown', away); window.removeEventListener('keydown', escape); };
   }, [drawer]);
+  // On a phone the map takes the whole screen: the phone's top bar and tabs step aside while it is open.
+  const phone = usePhone();
+  useEffect(() => {
+    if (!phone) return;
+    document.documentElement.classList.add("nw-immersive");
+    return () => document.documentElement.classList.remove("nw-immersive");
+  }, [phone]);
   const [intelligenceFocus, setIntelligenceFocus] = useState<{ ids: string[]; target: string; token: number; company?: string } | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [dialog, setDialog] = useState<null | "list" | "person" | "import" | "pick" | { source: Source | null }>(null);
@@ -216,15 +224,18 @@ function NetworkMap({ initialIntelligence, header, mapId, notice, onHome }: { in
           <div className="nw-canvas-island nw-canvas-left" role="toolbar" aria-label="Network controls">
             <button type="button" className="nw-home-btn" aria-label="All maps" title="All maps" onClick={() => void leave()}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
             <h1 className="nw-canvas-title" title={`${counts.all} people · ${mapData.sources.filter((s) => !s.auto).length} sources`}>{data.map?.name ?? (main ? "My network" : "Map")}<span>{counts.all}</span></h1>
-            <CanvasButton label="Show layers and filters" icon="layers" expanded={drawer === 'layers'} controls="nw-canvas-layers" onClick={() => toggleDrawer('layers')} />
+            {!phone && <CanvasButton label="Show layers and filters" icon="layers" expanded={drawer === 'layers'} controls="nw-canvas-layers" onClick={() => toggleDrawer('layers')} />}
             <CanvasButton label="Search network" icon="search" expanded={drawer === 'search'} controls="nw-canvas-search" onClick={() => toggleDrawer('search')} />
-            <CanvasButton label="Add to network" icon="add" expanded={drawer === 'add'} controls="nw-canvas-add" onClick={() => toggleDrawer('add')} />
+            {!phone && <CanvasButton label="Add to network" icon="add" expanded={drawer === 'add'} controls="nw-canvas-add" onClick={() => toggleDrawer('add')} />}
           </div>
           <div className="nw-canvas-island nw-canvas-right" role="toolbar" aria-label="Network views">
-            <CanvasButton label="Map view" icon="map" active={mode === 'graph'} onClick={() => setMode('graph')} />
-            <CanvasButton label="People list" icon="list" active={mode === 'list'} onClick={() => setMode(mode === 'list' ? 'graph' : 'list')} />
-            <CanvasButton label="Jobs view" icon="jobs" active={mode === 'jobs'} onClick={() => setMode(mode === 'jobs' ? 'graph' : 'jobs')} />
-            <CanvasButton label="Calendar" icon="calendar" expanded={drawer === 'calendar'} controls="nw-canvas-calendar" onClick={() => toggleDrawer('calendar')} />
+            {/* On a phone the views live in the dock's More sheet; the top keeps only the bell. */}
+            {!phone && <>
+              <CanvasButton label="Map view" icon="map" active={mode === 'graph'} onClick={() => setMode('graph')} />
+              <CanvasButton label="People list" icon="list" active={mode === 'list'} onClick={() => setMode(mode === 'list' ? 'graph' : 'list')} />
+              <CanvasButton label="Jobs view" icon="jobs" active={mode === 'jobs'} onClick={() => setMode(mode === 'jobs' ? 'graph' : 'jobs')} />
+              <CanvasButton label="Calendar" icon="calendar" expanded={drawer === 'calendar'} controls="nw-canvas-calendar" onClick={() => toggleDrawer('calendar')} />
+            </>}
             {loaded && <NetworkBell data={data} board={board} colors={colors} onPerson={openPerson} onWork={openWork} onSource={(id) => { openPerson(null); setView({ kind: 'source', id }); }} say={say} />}
           </div>
         </div>
@@ -271,7 +282,8 @@ function NetworkMap({ initialIntelligence, header, mapId, notice, onHome }: { in
                 onPerson={(id) => openPerson(id === selected ? null : id)} onWork={openWork}
                 onSource={(id, position, positions) => { if (sideSource?.id === id) { setSide(null); setView({ kind: "all" }); } else openSource(id, position, positions); }} onYou={() => (side === "you" ? setSide(null) : openYou())}
                 onLinks={(links) => setData((d) => ({ ...d, links }))} onPeople={(list) => setData((d) => ({ ...d, people: d.people.map((p) => list.find((x) => x.id === p.id) ?? p) }))}
-                onBulkMail={setBulkMail} say={say} /> : <p className="nw-canvas-loading" role="status">Loading your network…</p>}
+                onBulkMail={setBulkMail} say={say}
+                phoneMenu={phone ? { onAdd: () => setDrawer('add'), onLayers: () => setDrawer('layers'), onList: () => setMode('list'), onJobs: () => setMode('jobs'), onCalendar: () => setDrawer('calendar') } : undefined} /> :<p className="nw-canvas-loading" role="status">Loading your network…</p>}
             {loaded && !data.people.length && mode === 'graph' && <div className="nw-canvas-welcome"><h2>Your network starts here</h2><p>Add a person, drop a note, or import your contacts.</p><button type="button" className="nw-btn" onClick={() => setDialog('person')}>Add your first person</button></div>}
           </section>
           {mode !== 'graph' && <section className="nw-view-surface" aria-label={mode === 'list' ? 'People list' : 'Jobs where you know someone'}>
