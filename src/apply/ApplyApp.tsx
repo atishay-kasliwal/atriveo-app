@@ -25,6 +25,7 @@ import NetworkPage from "./NetworkPage";
 import TodayPage from "./TodayPage";
 import CaptureDock from "./CaptureDock";
 import LoopsPage from "./LoopsPage";
+import PhoneActivity from "./PhoneActivity";
 import PhoneHome from "./PhoneHome";
 import PhoneTriage from "./PhoneTriage";
 import { PhoneTabBar, PhoneTopBar } from "./PhoneShell";
@@ -56,6 +57,7 @@ function Console() {
     if (path === "/network") return <NetworkPage header={header} />;
     if (path === "/loops") return <LoopsPage header={header} />;
     if (path === "/job-matching") return phone ? <PhoneTriage header={header} /> : <JobMatchingPage header={header} />;
+    if (path === "/applied" && phone) return <PhoneActivity header={header} />;
     if (path === "/applied" || path.startsWith("/applied/")) return <AppliedPage header={header} />;
     if (path === "/settings") return <SettingsPage header={header} />;
     if (path === "/general") return <GeneralPage header={header} />;

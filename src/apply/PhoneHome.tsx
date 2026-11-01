@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getJson } from "./engine";
 import LoopsDoNow from "./LoopsDoNow";
 import { loadReminders, type Reminder } from "./network";
+import { markRepliesSeen, readSeenReplies as readSeen } from "./phoneSeen";
 import { useReviewCounts } from "./reviewQueue";
 import { GOALS, readPref, streakOf, useApplyHistory, useAppliedToday } from "./todayGoal";
 import "./phone.css";
@@ -10,9 +11,6 @@ import "./phone.css";
 // Home on a phone: what needs you while you're away from the laptop. Each tile leads to the tab that handles it;
 // every number comes from a light count call, never a full queue.
 
-const SEEN_REPLIES = "phone.seenReplies";
-const readSeen = () => { try { const v = localStorage.getItem(SEEN_REPLIES); return v != null && Number.isFinite(Number(v)) ? Number(v) : null; } catch { return null; } };
-const markRepliesSeen = (n: number) => { try { localStorage.setItem(SEEN_REPLIES, String(n)); } catch { /* private window */ } };
 
 interface Triage { matching: number | null; staffing: number | null; saved: { matching: number; staffing: number } }
 interface Replies { replied: number; interview: number; last7: number }
@@ -95,7 +93,7 @@ export default function PhoneHome({ header }: { header: ReactNode }) {
         <div className="ph-tiles">
           <Tile to="/job-matching" n={triageN} label="to triage"
             detail={triageN == null ? "Loading…" : `Matching ${triage.matching ?? "…"} · Staffing ${triage.staffing ?? "…"}`} />
-          <Tile to="/applied" n={replies?.replied ?? null} label="replies" tone={fresh ? "hot" : undefined} onOpen={() => { if (replies) markRepliesSeen(replies.replied); }}
+          <Tile to="/applied?show=replies" n={replies?.replied ?? null} label="replies" tone={fresh ? "hot" : undefined} onOpen={() => { if (replies) markRepliesSeen(replies.replied); }}
             detail={!replies ? "Loading…" : fresh ? `${fresh} new since you last looked` : `${replies.interview} interview${replies.interview === 1 ? "" : "s"} · ${replies.last7} applied this week`} />
           <Tile to="/network" n={reminders?.length ?? null} label={reminders?.length === 1 ? "follow-up" : "follow-ups"} tone={reminders?.length ? "hot" : undefined}
             detail={!reminders ? "Loading…" : reminders[0] ? reminders[0].title : "Nobody is waiting on you"} />
