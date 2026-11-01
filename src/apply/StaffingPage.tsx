@@ -21,7 +21,8 @@ const VIEWS: Array<[string, string]> = [["recommended", "Recommended"], ["saved"
 /** Today's track bar: one track at a time (keys 1–7), or Mixed, which takes the tracks in turn. */
 const TRACK_FILTERS = ["all", ...Object.keys(TRACK_LABEL), "mixed"];
 
-function rememberedWorkspace(){try{const saved=JSON.parse(sessionStorage.getItem("atriveo-staffing-view")||"{}");return {view:VIEWS.some(([k])=>k===saved.view)?saved.view:"recommended",offset:Number.isInteger(saved.offset)&&saved.offset>=0?saved.offset:0,query:typeof saved.query==="string"?saved.query:"",filter:typeof saved.filter==="string"?saved.filter:"all",track:TRACK_FILTERS.includes(saved.track)?saved.track:"all"};}catch{return {view:"recommended",offset:0,query:"",filter:"all",track:"all"};}}
+// A link with ?view=saved (a saved-job push) opens that view, whatever was open last.
+function rememberedWorkspace(){const linked=new URLSearchParams(window.location.search).get("view");if(linked&&VIEWS.some(([k])=>k===linked))return {view:linked,offset:0,query:"",filter:"all",track:"all"};try{const saved=JSON.parse(sessionStorage.getItem("atriveo-staffing-view")||"{}");return {view:VIEWS.some(([k])=>k===saved.view)?saved.view:"recommended",offset:Number.isInteger(saved.offset)&&saved.offset>=0?saved.offset:0,query:typeof saved.query==="string"?saved.query:"",filter:typeof saved.filter==="string"?saved.filter:"all",track:TRACK_FILTERS.includes(saved.track)?saved.track:"all"};}catch{return {view:"recommended",offset:0,query:"",filter:"all",track:"all"};}}
 export default function StaffingPage({ header }: { header?: React.ReactNode }) {
   const navigate=useNavigate();
   const { exclusions, excludeCompany, removeExclusion } = useExclusions();

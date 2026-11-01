@@ -4,6 +4,7 @@ import { listAssessments } from './assessments.mjs';
 import { pushSchedule, scheduledPushes } from './push-scheduled.mjs';
 import { ensureLoopsIndexes, tickReminders as tickLoopReminders } from './loops.mjs';
 import { buildMessage, nyParts, reached, readGoal, streakOf } from './phone-summary.mjs';
+import { tickSavedNudges } from './saved-nudges.mjs';
 
 export function inboxPush(event) {
   if (!['interview', 'offer'].includes(event.kind) || ['dismissed', 'undone', 'ignored'].includes(event.state)) return null;
@@ -60,6 +61,8 @@ export async function pollPushEvents(db, userId, { now = new Date(), send = send
   const schedule = pushSchedule(now);
   const assessments = schedule.assessmentStage ? await listAssessments(db, { now: +now }) : [];
   for (const { id, notification } of scheduledPushes({ now, assessments })) await deliverEvent(db, userId, id, notification, { now, send });
+  // Saved jobs not applied to yet: 3, 6 and 13 hours after saving (scripts/saved-nudges.mjs).
+  await tickSavedNudges(db, userId, { now, deliver: (id, notification) => deliverEvent(db, userId, id, notification, { now, send }) }).catch(() => {});
   // Loops: reminders for confirmed intentions that are still open (scripts/loops.mjs).
   await ensureLoopsIndexes(db).catch(() => {});
   await tickLoopReminders(db, userId, { now, send }).catch(() => {});
