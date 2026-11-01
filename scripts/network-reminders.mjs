@@ -87,20 +87,6 @@ export function phoneMessage(list) {
   return { title: "Network", message: `${parts.join(", ")}. A two-line note keeps the door open.`, tags: ["handshake"], priority: 3, click: "https://apply.atriveo.com/network" };
 }
 
-/** The week in your network, counts only: emails you sent, replies logged, people added, and what is waiting. Null on an empty week. */
-export async function weeklyDigest(db, now = new Date()) {
-  const since = new Date(now.getTime() - 7 * DAY).toISOString();
-  const [people, mail, { reminders: waiting }] = await Promise.all([db.collection("network_people").find({}).toArray(), db.collection("network_mail_log").find({}).toArray(), listReminders(db, { now })]);
-  const sent = mail.filter((m) => m.at >= since && m.state !== "failed").length;
-  const replies = people.reduce((n, p) => n + (p.history ?? []).filter((h) => h.type === "reply" && h.at >= since).length, 0);
-  const added = people.filter((p) => !p.archived && p.createdAt >= since).length;
-  const open = waiting.filter((r) => r.kind !== "never").length;
-  if (!sent && !replies && !added && !open) return null;
-  const n = (c, one, many) => `${c} ${c === 1 ? one : many}`;
-  const week = [sent && n(sent, "email", "emails"), replies && n(replies, "reply", "replies"), added && n(added, "new person", "new people")].filter(Boolean).join(", ");
-  return { title: "Your week in Network", message: `${week ? `${week}. ` : "A quiet week. "}${open ? `${n(open, "thing waits", "things wait")} for you.` : "Nothing is waiting."}`, tags: ["calendar"], priority: 2, click: "https://apply.atriveo.com/network" };
-}
-
 /** The same reminders for Web Push, which goes only to your own devices, encrypted: names are fine there, and a tap opens the right place. */
 export function webMessage(list) {
   const open = list.filter((r) => r.kind !== "never");
@@ -136,22 +122,34 @@ async function sendOnce(db, id, now, build, out, log, label) {
   return msg;
 }
 
-/** From 9 a.m. New York time, once per day: what needs you. On Sunday from 6 p.m., the week's digest too. */
+/**
+ * From 9 a.m. New York time: each thing that needs you is its own message, once per day (Web Push: the person or piece of work by name,
+ * a tap opens it). At most MAX_TASK_PUSHES per check (every ten minutes), so a long list arrives in a trickle, not a burst. Without Web
+ * Push, ntfy gets one count line, as before. There is no weekly digest.
+ */
+const MAX_TASK_PUSHES = 10;
 export async function runNetworkTick({ db, now = new Date(), publish = publishNtfy, webPush, env = process.env, log = () => {} } = {}) {
   const ch = channels(env);
   if (!ch.web && !ch.ntfy) return null;
   const userId = env.PUSH_EVENT_USER_ID?.trim().toLowerCase();
   const out = { ch, publish, webPush: webPush ?? ((d, m) => sendPushNotification(d, userId, m, { env })) };
-  const { day, hour, weekday } = nyParts(now);
-  if (weekday === "Sun" && hour >= 18) await sendOnce(db, `${day}:network-week`, now, async () => {
-    const w = await weeklyDigest(db, now);
-    return w && { ntfy: w, web: { title: w.title, body: w.message, url: "/network", type: "network_week" } };
-  }, out, log, "network-week");
+  const { day, hour } = nyParts(now);
   if (hour < 9) return null;
-  return sendOnce(db, `${day}:network`, now, async () => {
-    const list = (await listReminders(db, { now })).reminders, ntfy = phoneMessage(list), web = webMessage(list);
-    return ntfy || web ? { ntfy, web } : null;
-  }, out, log, "network");
+  const list = (await listReminders(db, { now })).reminders;
+  const sent = [];
+  if (ch.ntfy) {
+    const m = await sendOnce(db, `${day}:network`, now, async () => { const n = phoneMessage(list); return n && { ntfy: n }; }, { ...out, ch: { web: false, ntfy: true } }, log, "network");
+    if (m) sent.push(m);
+  }
+  if (ch.web) {
+    let n = 0;
+    for (const r of list.filter((x) => x.kind !== "never")) {
+      if (n >= MAX_TASK_PUSHES) break;
+      const m = await sendOnce(db, `${day}:network:${r.key}`, now, async () => ({ web: webMessage([r]) }), { ...out, ch: { web: true, ntfy: false } }, log, "network");
+      if (m) { sent.push(m); n += 1; }
+    }
+  }
+  return sent.length ? sent : null;
 }
 
 /**
