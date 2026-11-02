@@ -9,13 +9,14 @@
 // (the free ntfy app on your phone, subscribed to your secret topic): set NTFY_TOPIC (and NTFY_SERVER if you self-host).
 import fs from "node:fs";
 import { withMongo } from "./mongo-client.mjs";
+import { skippedCompanyFilter } from "./resume-queue.mjs";
 
 export const DEFAULTS = {
   boards_hours: 6,      // newest job from any source other than staffing and LinkedIn (the ATS boards)
   linkedin_hours: 12,   // newest LinkedIn job: LinkedIn rate-limits datacenter addresses, so it can fail while the boards keep working
   staffing_hours: 36,   // newest staffing job
   queue_hours: 3,       // a queued resume this old counts as waiting too long
-  stale_queue_min: 5,   // ...and this many of them is a stuck queue (one or two are usually skipped-company jobs, queued on purpose)
+  stale_queue_min: 5,   // ...and this many of them is a stuck queue (jobs from companies you skip are not counted: they wait on purpose)
   fit_missing: 300,     // recent tailored jobs with no Fit saved
   disk_pct: 80,         // the server's disk this full (a container's root is on the host disk, so statfs("/") reads it)
   remind_hours: 12,
@@ -75,11 +76,13 @@ export async function notify(message, { server = process.env.NTFY_SERVER || "htt
 
 export async function readFacts(db, now = Date.now()) {
   const jobs = db.collection("jobs");
+  // Jobs from companies you skip stay queued on purpose (the worker never claims them), so they are not a stuck queue.
+  const skipped = await skippedCompanyFilter(db);
   const [boards, linkedin, staffing, staleQueued, fitMissing] = await Promise.all([
     jobs.find({ site: { $nin: ["staffing", "linkedin"] } }, { projection: { run_at: 1 } }).sort({ run_at: -1 }).limit(1).toArray(),
     jobs.find({ site: "linkedin" }, { projection: { run_at: 1 } }).sort({ run_at: -1 }).limit(1).toArray(),
     jobs.find({ site: "staffing" }, { projection: { run_at: 1 } }).sort({ run_at: -1 }).limit(1).toArray(),
-    jobs.countDocuments({ "resume.status": "queued", "resume.updated_at": { $lt: new Date(now - DEFAULTS.queue_hours * 3_600_000).toISOString() } }),
+    jobs.countDocuments({ ...skipped, "resume.status": "queued", "resume.updated_at": { $lt: new Date(now - DEFAULTS.queue_hours * 3_600_000).toISOString() } }),
     jobs.countDocuments({ run_at: { $gte: new Date(now - 3 * 86_400_000) }, "resume.status": "success", fit: { $exists: false } }),
   ]);
   return { newestBoards: boards[0]?.run_at ?? null, newestLinkedin: linkedin[0]?.run_at ?? null, newestStaffing: staffing[0]?.run_at ?? null, staleQueued, fitMissing };
