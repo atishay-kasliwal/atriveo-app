@@ -594,6 +594,7 @@
   --platform-ashby: #e0457b;
   --platform-workday: #e8890c;
   --platform-smartrecruiters: #b8a01a;
+  --platform-swelist: #c026d3;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --platform-linkedin: #2f7fd6; }
@@ -606,6 +607,7 @@
 .td-card[data-platform="ashby"] { --platform: var(--platform-ashby); }
 .td-card[data-platform="workday"] { --platform: var(--platform-workday); }
 .td-card[data-platform="smartrecruiters"] { --platform: var(--platform-smartrecruiters); }
+.td-card[data-platform="swelist"] { --platform: var(--platform-swelist); }
 .td-page .td-grid .td-card[data-platform] { border-color: color-mix(in oklab, var(--platform) 70%, var(--border-col)); }
 .td-page .td-grid .td-card[data-platform]:hover { border-color: var(--platform); }
 .td-page .td-grid .td-card[data-platform]:is(.is-focused, .is-selected) { border-color: var(--platform); box-shadow: 0 0 0 1px var(--platform), 0 0 0 4px color-mix(in oklab, var(--platform) 22%, transparent); }

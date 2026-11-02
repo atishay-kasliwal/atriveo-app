@@ -1,6 +1,6 @@
 /** Where a job came from; each one tints the card's border (today.css). */
-export type Platform = "linkedin" | "staffing" | "greenhouse" | "lever" | "ashby" | "workday" | "smartrecruiters";
-export const PLATFORM_LABEL: Record<Platform, string> = { linkedin: "LinkedIn", staffing: "Staffing", greenhouse: "Greenhouse", lever: "Lever", ashby: "Ashby", workday: "Workday", smartrecruiters: "SmartRecruiters" };
+export type Platform = "linkedin" | "staffing" | "greenhouse" | "lever" | "ashby" | "workday" | "smartrecruiters" | "swelist";
+export const PLATFORM_LABEL: Record<Platform, string> = { linkedin: "LinkedIn", staffing: "Staffing", greenhouse: "Greenhouse", lever: "Lever", ashby: "Ashby", workday: "Workday", smartrecruiters: "SmartRecruiters", swelist: "SWElist" };
 const PLATFORM_HOST: [RegExp, Platform][] = [[/(^|\.)linkedin\.com$/, "linkedin"], [/(^|\.)greenhouse\.io$/, "greenhouse"], [/(^|\.)lever\.co$/, "lever"], [/(^|\.)ashbyhq\.com$/, "ashby"], [/(^|\.)(myworkdayjobs|workday)\.com$/, "workday"], [/(^|\.)smartrecruiters\.com$/, "smartrecruiters"]];
 /** One platform per job from data it already carries: the ATS name, else the posting's host. Unknown stays neutral (null). */
 export function platformOf(ats?: string | null, url?: string | null): Platform | null {
