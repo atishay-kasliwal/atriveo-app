@@ -1,6 +1,6 @@
 import {appliedItems,appliedCounts,dayKeyOf} from './applied-core.mjs';
 // A matching query combines time, sources, role and text before pagination or company counts.
-export const MATCHING_SOURCES=['linkedin','staffing','greenhouse','lever','ashby','workday','smartrecruiters'];
+export const MATCHING_SOURCES=['linkedin','staffing','greenhouse','lever','ashby','workday','smartrecruiters','swelist'];
 export function matchingSource(doc){
  const site=String(doc.site||'').toLowerCase();if(MATCHING_SOURCES.includes(site))return site;
  try{const h=new URL(doc.job_url).hostname;return [[/(^|\.)linkedin\.com$/,'linkedin'],[/(^|\.)greenhouse\.(?:io|com)$/,'greenhouse'],[/(^|\.)lever\.co$/,'lever'],[/(^|\.)ashbyhq\.com$/,'ashby'],[/(^|\.)(?:myworkdayjobs|workday)\.com$/,'workday'],[/(^|\.)smartrecruiters\.com$/,'smartrecruiters']].find(([re])=>re.test(h))?.[1]||null;}catch{return null;}
