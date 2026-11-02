@@ -11,7 +11,7 @@ const PUBLIC_API_PATHS = ["/api/push/health", "/api/auth/login", "/api/auth/logo
   "/api/auth/mac",
   // Token-checked by the route itself (inbox watcher on the Mac), not a login cookie.
   "/api/tracker/inbox"];
-const ASSET_RE = /\.(js|css|ico|svg|png|jpe?g|gif|webp|avif|woff2?|ttf|map|webmanifest)$/i;
+const ASSET_RE = /\.(js|css|ico|svg|png|jpe?g|gif|webp|avif|woff2?|ttf|map|webmanifest|m4a|mp3)$/i;
 
 function isJsonRoute(path: string): boolean {
   return path.startsWith("/api/") || path.startsWith("/tailor");
