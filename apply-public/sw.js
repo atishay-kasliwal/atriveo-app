@@ -5,14 +5,26 @@ function destination(value) {
   try { const url = new URL(value || '/', self.location.origin); return url.origin === self.location.origin ? url.href : self.location.origin + '/'; }
   catch { return self.location.origin + '/'; }
 }
+// The Atriveo sound (Settings, on by default) is kept in Cache Storage, which the page and this worker both read.
+const SOUND_PREF = '/__prefs/notification-sound';
+async function soundOn() {
+  try { const res = await caches.match(SOUND_PREF); return !res || (await res.text()) !== 'off'; } catch { return true; }
+}
 self.addEventListener('push', event => {
   let payload = {};
   try { payload = event.data?.json() || {}; } catch { /* Always show a visible notification. */ }
-  event.waitUntil(self.registration.showNotification(payload.title || 'Atriveo', {
-    body: payload.body || '', icon: '/icon-192.png', badge: '/icon-192.png', tag: payload.tag,
-    data: { url: destination(payload.url), type: payload.type, data: payload.data },
-    actions: Array.isArray(payload.actions) ? payload.actions.slice(0, 3) : undefined,
-  }));
+  event.waitUntil((async () => {
+    // Atriveo open on screen: the page plays the Atriveo sound, so the notification itself stays silent.
+    const visible = (await self.clients.matchAll({ type: 'window', includeUncontrolled: true })).filter(c => c.visibilityState === 'visible');
+    const playHere = visible.length > 0 && await soundOn();
+    await self.registration.showNotification(payload.title || 'Atriveo', {
+      body: payload.body || '', icon: '/icon-192.png', badge: '/icon-192.png', tag: payload.tag,
+      data: { url: destination(payload.url), type: payload.type, data: payload.data },
+      actions: Array.isArray(payload.actions) ? payload.actions.slice(0, 3) : undefined,
+      ...(playHere ? { silent: true } : {}),
+    });
+    if (playHere) visible.forEach(c => c.postMessage({ type: 'atriveo-notification-sound' }));
+  })());
 });
 // A Loops reminder's Done / Snooze buttons act from the notification itself, with the signed-in cookie; if that fails (signed out,
 // offline) the capture is opened instead so nothing is silently dropped.

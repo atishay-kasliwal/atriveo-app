@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { notificationSoundOn, playNotificationSound, setNotificationSound } from './notificationSound';
 
 function bounded<T>(promise: Promise<T>, label: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout>;
@@ -29,6 +30,13 @@ export default function PushSettings() {
   const [key, setKey] = useState('');
   const subscription = useRef<PushSubscription | null>(null);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
+  const [sound, setSound] = useState(true);
+  useEffect(() => { void notificationSoundOn().then(setSound); }, []);
+  async function toggleSound(on: boolean) {
+    setSound(on);
+    try { await setNotificationSound(on); if (on) await playNotificationSound(); }
+    catch { setSound(!on); setMessage('The sound setting could not be saved.'); }
+  }
   useEffect(() => {
     if (!supported || needsInstall) { setBusy(false); return; }
     let active = true;
@@ -80,6 +88,7 @@ export default function PushSettings() {
       <button type="button" disabled={busy || !key} onClick={() => enabled ? void action(false) : void enable()}>{busy ? 'Please wait…' : enabled ? 'Disable notifications' : 'Enable notifications'}</button>
       {enabled && <button type="button" disabled={busy} onClick={() => void action(true)}>Send test notification</button>}
     </div>}
+    {enabled && <label className="st-hint"><input type="checkbox" checked={sound} onChange={e => void toggleSound(e.target.checked)} /> Play the Atriveo sound when a notification arrives while the app is open</label>}
     {enabled && <p className="st-hint">Assessment reminders: 9 AM the day before and 3 PM on the due date while still open. Daily summary: 8 PM. All times New York.</p>}
     {message && <p className="st-hint" role="status">{message}</p>}
   </section>;
