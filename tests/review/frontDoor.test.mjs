@@ -35,3 +35,7 @@ test('the landing page, its detail page and login stay public', async () => {
 test('APIs still answer 401 when signed out', async () => {
   assert.equal((await run('/api/jobs?type=today')).status, 401);
 });
+
+test('the notification sound is served as a file, never swapped for the console page', async () => {
+  assert.equal(await (await run('/notification.m4a')).text(), 'public');
+});
