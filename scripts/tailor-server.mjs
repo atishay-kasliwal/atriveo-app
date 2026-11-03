@@ -2,6 +2,7 @@
 import { matchingCoverLetter } from './matching-cover-letter.mjs';
 import { handlePushRoute } from "./web-push.mjs";
 import { startPushEvents } from "./push-events.mjs";
+import { handleLucky } from "./lucky-routes.mjs";
 import {dashboardAiUsage} from './resume-ai-usage.mjs';
 import { claimInference, completeInference, queueInference } from './resume-ai-queue.mjs';
 import { analyzeResume, recordAiDecision, resumeAiVersion, enqueueResumeAi, resumeAiResult } from './resume-ai.mjs';
@@ -1192,6 +1193,7 @@ const server = http.createServer(async (req, res) => {
   })) return;
   if (await handleLoops(req, res, reqUrl, { withDb: process.env.MONGO_URI ? (fn) => withMongo(fn, { appName: "AtriveoTailorServer" }) : null })) return;
   if (await handleOutreach(req, res, reqUrl)) return;
+  if (await handleLucky(req, res, reqUrl, { withDb: process.env.MONGO_URI ? (fn) => withMongo(fn, { appName: "AtriveoTailorServer" }) : null })) return;
   // Open & Fill: the Atriveo Fill extension on this Mac only (never through the relay); see fill-routes.mjs.
   if (await handleFillRoute(req, res, reqUrl, (request) => runManualFill(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo"), request), APPLY_HERE_DOCS)) return;
 

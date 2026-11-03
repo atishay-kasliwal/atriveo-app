@@ -39,3 +39,8 @@ test('APIs still answer 401 when signed out', async () => {
 test('the notification sound is served as a file, never swapped for the console page', async () => {
   assert.equal(await (await run('/notification.m4a')).text(), 'public');
 });
+
+test('signed out: only a well-formed lucky calendar link passes the gate (its route checks the token)', async () => {
+  assert.equal(await (await run(`/calendar/lucky/${'a1'.repeat(24)}.ics`)).text(), 'public');
+  for (const p of ['/calendar/lucky/short.ics', `/calendar/lucky/${'a1'.repeat(24)}`, `/calendar/other/${'a1'.repeat(24)}.ics`]) assert.notEqual(await (await run(p)).text(), 'public', p);
+});

@@ -325,3 +325,50 @@
   .rb-actions { gap: 4px; }
   .rb-actions :is(.apps-btn, .rv-primary) { padding-inline: 7px; font-size: 11px; }
 }
+
+/* Landing as one full screen (Nov 2026): the job description, the general resumes and yours side by side; each panel scrolls
+   inside itself, the page never does. The bank opens over it as a drawer (B). */
+.rb-start-page:has(.rb-desk) { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+.rb-start.rb-desk { flex: 1; min-height: 0; max-width: none; display: grid; grid-template-columns: minmax(340px, 1.35fr) minmax(260px, .8fr) minmax(280px, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 14px; padding: 18px 20px 20px; align-items: stretch; position: relative; }
+.rb-desk .rb-start-heading { grid-column: 1 / -1; display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+.rb-desk .rb-start-heading h1 { margin: 0 0 4px; }
+.rb-desk .rb-start-heading p { margin: 0; }
+.rb-desk kbd { font: 500 11px var(--font-mono, ui-monospace, monospace); border: 1px solid var(--border-col); border-radius: 5px; padding: 1px 5px; margin-left: 6px; color: var(--muted-fg); }
+.rb-desk .rb-panel { min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 10px; padding: 16px; border: 1px solid var(--border-col); border-radius: 14px; background: var(--card-bg); box-shadow: none; }
+.rb-desk .rb-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.rb-desk .rb-panel-head h2 { font-size: 16px; }
+.rb-desk .rb-panel-act { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.rb-desk .rb-panel-act .apps-muted { font-size: 12px; }
+.rb-desk .rb-panel-act .rv-primary { min-height: 38px; padding: 8px 16px; font-size: 14px; }
+.rb-desk .rb-panel-scroll { flex: 1; min-height: 0; overflow: auto; margin: 0 -6px; padding: 0 6px 2px; }
+.rb-desk .rb-paste textarea { flex: 1; min-height: 120px; height: auto; resize: none; }
+.rb-desk .rb-general { grid-column: auto; grid-row: auto; }
+.rb-desk .rb-tracks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.rb-desk .rb-track { padding: 14px; gap: 6px 10px; display: grid; grid-template-columns: 10px 1fr; align-items: center; text-align: left; font: inherit; font-weight: 650; cursor: pointer; transition: transform .2s, border-color .2s, background .2s; }
+.rb-desk .rb-track strong { font-size: 14px; }
+.rb-desk .rb-track span { grid-column: 2; font-size: 12px; }
+.rb-desk .rb-track:hover { transform: translateY(-2px); }
+.rb-desk .rb-track:active { transform: translateY(0) scale(.98); }
+.rb-desk .rb-track-bank { --tr: #f2b33d; }
+.rb-desk .rb-find { background: var(--input-bg); border: 1px solid var(--border-col); border-radius: 8px; padding: 6px 10px; width: 140px; min-width: 0; color: var(--foreground); font: inherit; font-size: 13px; }
+.rb-desk .rb-list { margin: 0; }
+.rb-desk .rb-list li { padding: 12px; flex-wrap: wrap; }
+.rb-desk .rb-list-main { flex: 1 1 160px; min-width: 0; }
+.rb-desk .rb-none { padding: 6px 2px; font-size: 13px; }
+.rb-bank-backdrop { position: fixed; inset: 0; z-index: 80; background: color-mix(in oklab, #000 45%, transparent); }
+.rb-bank-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(1280px, 94vw); z-index: 81; background: var(--background); border-left: 1px solid var(--border-col); translate: 102% 0; transition: translate .45s cubic-bezier(.2,.8,.2,1); display: flex; flex-direction: column; }
+.rb-bank-drawer.is-open { translate: 0 0; }
+.rb-bank-drawer .bk-page { flex: 1; min-height: 0; height: 100%; }
+.bk-close { flex: none; white-space: nowrap; }
+.bk-close kbd { font: 500 11px var(--font-mono, ui-monospace, monospace); border: 1px solid var(--border-col); border-radius: 5px; padding: 1px 5px; margin-left: 6px; color: var(--muted-fg); }
+@media (max-width: 1100px) {
+  .rb-start.rb-desk { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) minmax(0, .8fr); }
+  .rb-desk .rb-paste { grid-row: 2 / 4; }
+}
+@media (max-width: 700px) {
+  .rb-start-page:has(.rb-desk) { height: auto; overflow: visible; }
+  .rb-start.rb-desk { display: flex; flex-direction: column; padding: 16px; }
+  .rb-desk .rb-paste textarea { min-height: 140px; }
+  .rb-bank-drawer { width: 100vw; }
+}
+@media (prefers-reduced-motion: reduce) { .rb-bank-drawer, .rb-desk .rb-track { transition: none; } }

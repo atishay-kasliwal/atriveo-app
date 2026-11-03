@@ -5,6 +5,7 @@ import ApplyLogo from "./ApplyLogo";
 import { useFillableQueue, useReadyQueue, useReviewCounts } from "./reviewQueue";
 import type { User } from "../types";
 import { signOut } from "./signOut";
+import { LuckyNav } from "./LuckyNav";
 
 export default function ApplyHeader({ todayCount }: { user: User; todayCount?: number | null }) {
   const path = useLocation().pathname.replace(/\/+$/, "");
@@ -22,7 +23,7 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
 
       </a>
       <nav className="apply-nav" aria-label="Console">
-        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/network" && path !== "/day-plan" && path !== "/loops" && path !== "/job-matching" && !path.startsWith("/applied") && path !== "/settings" && path !== "/general" && path !== "/usage" && path !== "/assessments" ? "page" : undefined}>
+        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/network" && path !== "/day-plan" && path !== "/loops" && path !== "/job-matching" && !path.startsWith("/applied") && path !== "/settings" && path !== "/general" && path !== "/usage" && path !== "/assessments" && path !== "/lucky" ? "page" : undefined}>
           Today{waiting !== null ? <span className="apply-nav-n">{waiting}</span> : null}
         </Link>
         <Link to="/job-matching" aria-current={path === "/job-matching" ? "page" : undefined}>Matching</Link>
@@ -33,6 +34,7 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
         <Link to="/network" aria-current={path === "/network" ? "page" : undefined}>Network</Link>
         <Link to="/loops" aria-current={path === "/loops" ? "page" : undefined}>Loops</Link>
         <Link to="/stats" aria-current={page === "stats" ? "page" : undefined}>Stats</Link>
+        <LuckyNav current={path === "/lucky"} />
       </nav>
       <div className="apply-header-right">
         <ResumePipeline online={worker ? worker.online : null} />

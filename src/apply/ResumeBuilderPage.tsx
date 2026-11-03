@@ -12,6 +12,7 @@ import ResumeLivePreview, { sbTitle, type Layout, type LiveFit, type PageTarget 
 import { applyContentChanges, type ContentChange } from "../shared/resumeContent.mjs";
 import type { ResumeMatch, ResumeReadyState } from "./reviewQueue";
 import "./resume-builder.css";
+import BankPage from "./BankPage";
 
 // Resume builder (/resume_builder): edit a resume's content (bullets, title, skills); the template never changes.
 // Opens a Today card's resume (?app=<application id> or ?job=<job url>) or a track's general resume (?track=…).
@@ -107,44 +108,72 @@ function StartScreen() {
     if (!window.confirm(`Delete the ${p.company} resume? This can't be undone.`)) return;
     try { await call("delete", { id: p.id }); refresh(); } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
   };
+  const [bankOpen, setBankOpen] = useState(false);
+  const [find, setFind] = useState("");
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      const typing = e.target instanceof HTMLElement && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
+      if (e.key === "Escape" && bankOpen && !typing) setBankOpen(false);
+      if (e.key.toLowerCase() === "b" && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) setBankOpen((o) => !o);
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [bankOpen]);
+  const hint = building ? "Choosing bullets and compiling: usually under half a minute." : tooShort && jd.trim() ? "Add at least 300 characters from the posting." : badEmail ? "Check the email address." : !fields.title.trim() && !tooShort ? "Add the role title." : "";
+  const words = find.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const shown = (list ?? []).filter((p) => words.every((w) => `${p.company} ${p.title} ${p.location ?? ""}`.toLowerCase().includes(w)));
   return (
-    <div className="rb-start">
-      <header className="rb-start-heading"><span className="rb-eyebrow">YOUR NEXT APPLICATION</span><h1>Resume builder</h1><p>Paste a job description or choose a general resume. <Link className="rb-bank-link" to="/bank">Open the bank →</Link></p></header>
-      <section className="rb-paste" aria-label="Start from a job description">
-        <div className="rb-section-heading"><span className="rb-step" aria-hidden="true">01</span><div><h2>Start with a job description</h2></div></div>
-
-        <label className="rb-jd-label" htmlFor="rb-job-description">Job description</label><textarea id="rb-job-description" rows={5} value={jd} disabled={building} placeholder="Paste the whole job description: title, company, responsibilities, requirements…" onChange={(e) => setJd(e.target.value)} />
+    <div className="rb-start rb-desk">
+      <header className="rb-start-heading">
+        <div><h1>Resume builder</h1><p>Paste a job description, or start from a general resume.</p></div>
+        <button type="button" className="apps-btn rb-bank-open" aria-expanded={bankOpen} aria-controls="rb-bank-drawer" onClick={() => setBankOpen(true)}>Open bank <kbd>B</kbd></button>
+      </header>
+      <section className="rb-paste rb-panel" aria-labelledby="rb-paste-h">
+        <div className="rb-panel-head">
+          <h2 id="rb-paste-h">Start with a job description</h2>
+          <div className="rb-panel-act">
+            {hint && <span className="apps-muted" role="status">{hint}</span>}
+            <button className="rv-primary" disabled={building || tooShort || !fields.title.trim() || badEmail} onClick={() => void build()}>{building ? "Building your resume…" : "Build my resume →"}</button>
+          </div>
+        </div>
+        <label className="rb-jd-label" htmlFor="rb-job-description">Job description</label><textarea id="rb-job-description" value={jd} disabled={building} placeholder="Paste the whole job description: title, company, responsibilities, requirements…" onChange={(e) => setJd(e.target.value)} />
         <div className="rb-paste-fields">
           <label><span>Company</span><input value={fields.company} disabled={building} placeholder="e.g. Acme" onChange={(e) => set("company", e.target.value)} /></label>
           <label><span>Role title</span><input value={fields.title} disabled={building} placeholder="e.g. Software Engineer" onChange={(e) => set("title", e.target.value)} /></label>
           <label><span>Location <small>Optional</small></span><input value={fields.location} disabled={building} placeholder="City, ST (optional)" onChange={(e) => set("location", e.target.value)} /></label>
           <label><span>Email <small>On the resume</small></span><input type="email" autoComplete="email" value={emailValue} disabled={building} placeholder={defaultEmail || "you@example.com"} aria-invalid={badEmail} onChange={(e) => setEmail(e.target.value)} /></label>
         </div>
-        <div className="rb-paste-acts">
-          <button className="rv-primary" disabled={building || tooShort || !fields.title.trim() || badEmail} onClick={() => void build()}>{building ? "Building your resume…" : "Build my resume →"}</button>
-          <span className="apps-muted">{building ? "Choosing bullets and compiling: usually under half a minute." : tooShort && jd.trim() ? "Add at least 300 characters from the posting." : badEmail ? "Check the email address." : !fields.title.trim() && !tooShort ? "Add the role title." : "Your resume stays here, separate from Today."}</span>
-        </div>
         {error && <p className="td-error" role="alert">{error}</p>}
       </section>
-      {list && list.length > 0 && <section aria-label="Your resumes">
-        <h2>Your resumes</h2>
-        <ul className="rb-list">{list.map((p) => (
-          <li key={p.id}>
-            <Link to={`/resume_builder?pasted=${p.id}`} className="rb-list-main"><b>{p.company}</b><span>{p.title}{p.location ? ` · ${formatLocation(p.location)}` : ""}</span></Link>
-            <span className="rb-list-meta">{when(p.updatedAt || p.createdAt)}{p.edited ? " · edited" : ""}</span>
-            <span className="rb-list-acts"><CardActions>
-              <Link className="apps-btn" to={`/resume_builder?pasted=${p.id}`}>Edit</Link>
-              {p.pdfPath && <a className="apps-btn" href={pdfUrl(p.pdfPath, true)}>Download</a>}
-              <button className="apps-link rb-del" onClick={() => void remove(p)}>Delete</button>
-            </CardActions></span>
-          </li>
-        ))}</ul>
-      </section>}
-      <section className="rb-general" aria-label="General resumes">
-        <div className="rb-section-heading"><span className="rb-step" aria-hidden="true">02</span><div><h2>Start with a general resume</h2></div></div>
-
-        <div className="rb-tracks">{GENERAL.map((t) => <Link key={t} className={`rb-track tr-${t}`} to={`/resume_builder?track=${t}`}><i /><strong>{TRACK_LABEL[t]}</strong><span>Edit resume <b aria-hidden="true">↗</b></span></Link>)}</div>
+      <section className="rb-general rb-panel" aria-labelledby="rb-general-h">
+        <div className="rb-panel-head"><h2 id="rb-general-h">Start with a general resume</h2></div>
+        <div className="rb-panel-scroll"><div className="rb-tracks">
+          {GENERAL.map((t) => <Link key={t} className={`rb-track tr-${t}`} to={`/resume_builder?track=${t}`}><i /><strong>{TRACK_LABEL[t]}</strong><span>Edit resume <b aria-hidden="true">↗</b></span></Link>)}
+          <button type="button" className="rb-track rb-track-bank" onClick={() => setBankOpen(true)}><i /><strong>Bank</strong><span>All bullets <b aria-hidden="true">↗</b></span></button>
+        </div></div>
       </section>
+      <section className="rb-mine rb-panel" aria-labelledby="rb-mine-h">
+        <div className="rb-panel-head"><h2 id="rb-mine-h">Your resumes{list ? <span className="apps-muted"> · {list.length}</span> : null}</h2><input type="search" className="rb-find" value={find} onChange={(e) => setFind(e.target.value)} placeholder="Search" aria-label="Search your resumes" /></div>
+        <div className="rb-panel-scroll">
+          {list && !list.length && <p className="apps-muted rb-none">Resumes you build from a pasted job description show up here.</p>}
+          {list && list.length > 0 && !shown.length && <p className="apps-muted rb-none">No resume matches “{find.trim()}”.</p>}
+          <ul className="rb-list">{shown.map((p) => (
+            <li key={p.id}>
+              <Link to={`/resume_builder?pasted=${p.id}`} className="rb-list-main"><b>{p.company}</b><span>{p.title}{p.location ? ` · ${formatLocation(p.location)}` : ""}</span></Link>
+              <span className="rb-list-meta">{when(p.updatedAt || p.createdAt)}{p.edited ? " · edited" : ""}</span>
+              <span className="rb-list-acts"><CardActions>
+                <Link className="apps-btn" to={`/resume_builder?pasted=${p.id}`}>Edit</Link>
+                {p.pdfPath && <a className="apps-btn" href={pdfUrl(p.pdfPath, true)}>Download</a>}
+                <button className="apps-link rb-del" onClick={() => void remove(p)}>Delete</button>
+              </CardActions></span>
+            </li>
+          ))}</ul>
+        </div>
+      </section>
+      {bankOpen && <div className="rb-bank-backdrop" onClick={() => setBankOpen(false)} aria-hidden="true" />}
+      <aside id="rb-bank-drawer" className={`rb-bank-drawer${bankOpen ? " is-open" : ""}`} aria-label="Bank" aria-hidden={!bankOpen} inert={!bankOpen}>
+        {bankOpen && <BankPage onClose={() => setBankOpen(false)} />}
+      </aside>
     </div>
   );
 }
