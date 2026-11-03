@@ -25,6 +25,7 @@ import NetworkPage from "./NetworkPage";
 import TodayPage from "./TodayPage";
 import CaptureDock from "./CaptureDock";
 import LoopsPage from "./LoopsPage";
+import LuckyPage from "./LuckyPage";
 import PhoneActivity from "./PhoneActivity";
 import PhoneHome from "./PhoneHome";
 import PhonePeople from "./PhonePeople";
@@ -60,6 +61,7 @@ function Console() {
     // On a phone, People first; the whole Network (and any ?person= / ?work= link) opens the canvas.
     if (path === "/network") return phone && !search ? <PhonePeople header={header} /> : <NetworkPage header={header} />;
     if (path === "/loops") return <LoopsPage header={header} />;
+    if (path === "/lucky") return <LuckyPage header={header} />;
     if (path === "/job-matching") return phone ? <PhoneTriage header={header} /> : <JobMatchingPage header={header} />;
     if (path === "/applied" && phone) return <PhoneActivity header={header} />;
     if (path === "/applied" || path.startsWith("/applied/")) return <AppliedPage header={header} />;

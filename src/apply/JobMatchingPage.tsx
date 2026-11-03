@@ -14,6 +14,7 @@ import { formatLocation } from '../utils/location';
 import { getTailorServerBase } from '../utils/tailorServer';
 import './review-pages.css';
 import './job-matching.css';
+import { LuckyStrip } from './LuckyNav';
 
 type Decision = 'skip'|'apply'|'later';
 type Tab = 'Overview'|'Skill match'|'Evidence'|'Description'|'Company'|'Answer';
@@ -133,7 +134,7 @@ export default function JobMatchingPage({header}:{header?:ReactNode}){
  const activeCompany=meta?.companies?.find(c=>c.key===company);
  const showProof=(p:Proof)=>{setProof(p);};
  const proofButton=(p:Proof)=><button type="button" className={`jm-proof-row is-${p.strength}${proof?.label===p.label?' selected':''}`} key={p.label} onClick={()=>showProof(p)}><span className="jm-proof-icon" aria-hidden="true">{p.strength==='strong'?'✓':p.strength==='missing'?'−':'△'}</span><span><b>{p.label}</b><small>{p.entry|| (p.strength==='missing'?'No evidence in your bank':'Evidence needs a closer look')}</small></span><em>{strengthLabel[p.strength]}</em></button>;
- return <div className="rv-page jm-page"><a className="jm-skip" href="#matching-content">Skip to job</a>{header}
+ return <div className="rv-page jm-page"><a className="jm-skip" href="#matching-content">Skip to job</a>{header}<LuckyStrip/>
   {error&&<div className="jm-error" role="alert">{error}<button onClick={()=>void load()} type="button">Retry</button></div>}
   <main className="jm-layout">
    <aside className="jm-rail" aria-label="Filter jobs by company" tabIndex={0}><button type="button" className="jm-random" onClick={randomJob} disabled={loading||busy||!(meta?.total)} aria-label="Show a random application" title="Show a random application"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3.500" y="3.500" width="17" height="17" rx="4"/><circle cx="8.500" cy="8.500" r="1" fill="currentColor"/><circle cx="15.500" cy="8.500" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="8.500" cy="15.500" r="1" fill="currentColor"/><circle cx="15.500" cy="15.500" r="1" fill="currentColor"/></svg><small>Random</small></button><button type="button" className={!company?'active':''} onClick={()=>chooseCompany('')} aria-label={`All companies, ${meta?.stats?.remaining??0} jobs`} aria-pressed={!company}><span className="jm-grid-icon">▦</span><small>{meta?.stats?.remaining??'—'}</small><span className="jm-company-tip"><b>All companies</b><span>Browse the full matching queue</span></span></button>

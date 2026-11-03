@@ -61,7 +61,8 @@ const Track = ({ id, set }: { id: string; set?: string }) => (
   </span>
 );
 
-export default function BankPage({ header }: { header?: React.ReactNode }) {
+/** The bank: its own page at /bank, or a drawer on the Resumes page (onClose given, no header). */
+export default function BankPage({ header, onClose }: { header?: React.ReactNode; onClose?: () => void }) {
   const [bank, setBank] = useState<Bank | null>(null);
   const [error, setError] = useState("");
   const saved = useMemo(() => store.get(), []);
@@ -129,7 +130,7 @@ export default function BankPage({ header }: { header?: React.ReactNode }) {
   };
 
   return (
-    <div className="rv-page bk-page">
+    <div className={`rv-page bk-page${onClose ? " bk-in-drawer" : ""}`}>
       {header}
       <div className="rv-bar bk-bar">
         <div className="rv-bar-title">
@@ -146,6 +147,7 @@ export default function BankPage({ header }: { header?: React.ReactNode }) {
           </div>
           <label className="bk-check"><input type="checkbox" checked={under} onChange={(e) => setUnder(e.target.checked)} /> Under 9</label>
           <label className="bk-check"><input type="checkbox" checked={retired} onChange={(e) => setRetired(e.target.checked)} /> Retired</label>
+          {onClose && <button type="button" className="apps-btn bk-close" onClick={onClose}>Close <kbd>Esc</kbd></button>}
           <input ref={searchRef} className="bk-search" type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search bullets  /" aria-label="Search bullets" autoComplete="off" spellCheck={false} />
         </div>
       </div>

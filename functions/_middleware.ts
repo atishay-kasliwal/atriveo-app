@@ -36,6 +36,10 @@ export const onRequest: PagesFunction<Env> = async ({ request, env, next }) => {
   if (PUBLIC_API_PATHS.some((p) => path.startsWith(p))) {
     return next();
   }
+  // The lucky-hours calendar feed is fetched by Google's servers; its route checks the token in the link.
+  if (/^\/calendar\/lucky\/[a-f0-9]{48}\.ics$/.test(path)) {
+    return next();
+  }
   if (path === "/login" || path === "/onboarding" || path.startsWith("/landing")) {
     return next();
   }
