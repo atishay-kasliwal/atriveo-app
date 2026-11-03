@@ -508,7 +508,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {(track !== "all" || kind !== "all" || query) && <button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all", query: "" })}>Clear filters</button>}
         </div>
       <div className="td-goal" aria-label={`Applied today: ${goalDay.applied ?? "loading"} of ${goal}`}>
-        <span className="td-goal-n"><b>{goalDay.applied ?? "–"}</b> / <button type="button" title="Daily goal: click to change" onClick={() => { const g = GOALS[(GOALS.indexOf(goal) + 1) % GOALS.length]!; setGoal(g); writePref("goal", g); }}>{goal}</button> applied today</span>
+        <span className="td-goal-n"><b>{goalDay.applied ?? "–"}</b> / <button type="button" title="Daily goal: click to change" onClick={() => { const g = GOALS[(GOALS.indexOf(goal) + 1) % GOALS.length]!; setGoal(g); writePref("goal", g); }}>{goal}</button> <Link className="td-goal-link" to="/applied" title="Everything you applied to">applied today</Link></span>
         <div className={`td-goal-bar ${(goalDay.applied ?? 0) >= goal ? "is-done" : ""}`}>
           <i style={{ width: `${Math.min(100, ((goalDay.applied ?? 0) / goal) * 100)}%` }} />
           {Array.from({ length: Math.floor((goal - 1) / 5) }, (_, n) => <s key={n} className={(goalDay.applied ?? 0) >= (n + 1) * 5 ? "is-hit" : ""} style={{ left: `${((n + 1) * 5 / goal) * 100}%` }} />)}
