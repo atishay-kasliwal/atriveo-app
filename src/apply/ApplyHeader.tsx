@@ -30,9 +30,7 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
         <Link to="/assessments" aria-current={path === "/assessments" ? "page" : undefined}>Assessments</Link>
         <Link to="/staffing" aria-current={path === "/staffing" ? "page" : undefined}>Staffing</Link>
         <Link to="/resume_builder" aria-current={path === "/resume_builder" || path === "/bank" ? "page" : undefined}>Resumes</Link>
-        <Link to="/outreach" aria-current={path === "/outreach" ? "page" : undefined}>Outreach</Link>
         <Link to="/network" aria-current={path === "/network" ? "page" : undefined}>Network</Link>
-        <Link to="/day-plan" aria-current={path === "/day-plan" ? "page" : undefined}>Day plan</Link>
         <Link to="/loops" aria-current={path === "/loops" ? "page" : undefined}>Loops</Link>
         <Link to="/stats" aria-current={page === "stats" ? "page" : undefined}>Stats</Link>
       </nav>
