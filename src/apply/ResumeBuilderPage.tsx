@@ -109,7 +109,7 @@ function StartScreen() {
   };
   return (
     <div className="rb-start">
-      <header className="rb-start-heading"><span className="rb-eyebrow">YOUR NEXT APPLICATION</span><h1>Resume builder</h1><p>Paste a job description or choose a general resume.</p></header>
+      <header className="rb-start-heading"><span className="rb-eyebrow">YOUR NEXT APPLICATION</span><h1>Resume builder</h1><p>Paste a job description or choose a general resume. <Link className="rb-bank-link" to="/bank">Open the bank →</Link></p></header>
       <section className="rb-paste" aria-label="Start from a job description">
         <div className="rb-section-heading"><span className="rb-step" aria-hidden="true">01</span><div><h2>Start with a job description</h2></div></div>
 
