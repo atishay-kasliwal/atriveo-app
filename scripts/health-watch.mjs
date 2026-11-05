@@ -3,20 +3,30 @@
 //   node --env-file=.env scripts/health-watch.mjs --loop 900        check every 15 minutes (this is how it runs on Oracle)
 //   add --dry to print what would be sent without sending
 //
-// It checks Mongo only: new jobs are still arriving per source, and the resume queue is moving. A check that fails sends one
+// It checks Mongo (new jobs are still arriving per source, the resume queue is moving) and the server's disk: a full disk stopped
+// Mongo on Nov 2, so it warns well before that. A check that fails sends one
 // alert when it starts failing, one when it recovers, and a reminder every REMIND_HOURS while it stays down. Alerts go to ntfy
 // (the free ntfy app on your phone, subscribed to your secret topic): set NTFY_TOPIC (and NTFY_SERVER if you self-host).
+import fs from "node:fs";
 import { withMongo } from "./mongo-client.mjs";
+import { skippedCompanyFilter } from "./resume-queue.mjs";
 
 export const DEFAULTS = {
   boards_hours: 6,      // newest job from any source other than staffing and LinkedIn (the ATS boards)
   linkedin_hours: 12,   // newest LinkedIn job: LinkedIn rate-limits datacenter addresses, so it can fail while the boards keep working
   staffing_hours: 36,   // newest staffing job
   queue_hours: 3,       // a queued resume this old counts as waiting too long
-  stale_queue_min: 5,   // ...and this many of them is a stuck queue (one or two are usually skipped-company jobs, queued on purpose)
+  stale_queue_min: 5,   // ...and this many of them is a stuck queue (jobs from companies you skip are not counted: they wait on purpose)
   fit_missing: 300,     // recent tailored jobs with no Fit saved
+  disk_pct: 80,         // the server's disk this full (a container's root is on the host disk, so statfs("/") reads it)
   remind_hours: 12,
 };
+
+/** How full the disk under this container is: { usedPct, freeGb }, or null when it cannot be read. */
+export function diskUse(path = "/") {
+  try { const s = fs.statfsSync(path); return { usedPct: Math.round((1 - s.bavail / s.blocks) * 100), freeGb: Number(((s.bavail * s.bsize) / 1e9).toFixed(1)) }; }
+  catch { return null; }
+}
 
 const hoursSince = (d, now) => (d ? (now - new Date(d).getTime()) / 3_600_000 : Infinity);
 const rounded = (h) => (h === Infinity ? "never" : h >= 48 ? `${Math.round(h / 24)} days` : `${Math.round(h)} hours`);
@@ -29,6 +39,7 @@ export function evaluate(facts, cfg = DEFAULTS, now = Date.now()) {
     { key: "scrape_linkedin", ok: linkedin <= cfg.linkedin_hours, message: `No new LinkedIn jobs for ${rounded(linkedin)}. LinkedIn probably blocks Oracle's address: run the LinkedIn scrape from your Mac, or slow it down.` },
     { key: "scrape_staffing", ok: staffing <= cfg.staffing_hours, message: `No new staffing jobs for ${rounded(staffing)}.` },
     { key: "resume_queue", ok: facts.staleQueued < cfg.stale_queue_min, message: `${facts.staleQueued} resumes have waited more than ${cfg.queue_hours} hours: the resume workers may be stuck.` },
+    ...(facts.disk ? [{ key: "disk", ok: facts.disk.usedPct < cfg.disk_pct, message: `Oracle's disk is ${facts.disk.usedPct}% full (${facts.disk.freeGb} GB free). At 100% Mongo stops: run a ship (it clears old build cache and images) or move old resumes to R2.` }] : []),
     { key: "fit_saved", ok: facts.fitMissing <= cfg.fit_missing, message: `${facts.fitMissing} recent jobs have no Fit saved (the worker or backfill is not writing it).` },
   ];
 }
@@ -65,11 +76,13 @@ export async function notify(message, { server = process.env.NTFY_SERVER || "htt
 
 export async function readFacts(db, now = Date.now()) {
   const jobs = db.collection("jobs");
+  // Jobs from companies you skip stay queued on purpose (the worker never claims them), so they are not a stuck queue.
+  const skipped = await skippedCompanyFilter(db);
   const [boards, linkedin, staffing, staleQueued, fitMissing] = await Promise.all([
     jobs.find({ site: { $nin: ["staffing", "linkedin"] } }, { projection: { run_at: 1 } }).sort({ run_at: -1 }).limit(1).toArray(),
     jobs.find({ site: "linkedin" }, { projection: { run_at: 1 } }).sort({ run_at: -1 }).limit(1).toArray(),
     jobs.find({ site: "staffing" }, { projection: { run_at: 1 } }).sort({ run_at: -1 }).limit(1).toArray(),
-    jobs.countDocuments({ "resume.status": "queued", "resume.updated_at": { $lt: new Date(now - DEFAULTS.queue_hours * 3_600_000).toISOString() } }),
+    jobs.countDocuments({ ...skipped, "resume.status": "queued", "resume.updated_at": { $lt: new Date(now - DEFAULTS.queue_hours * 3_600_000).toISOString() } }),
     jobs.countDocuments({ run_at: { $gte: new Date(now - 3 * 86_400_000) }, "resume.status": "success", fit: { $exists: false } }),
   ]);
   return { newestBoards: boards[0]?.run_at ?? null, newestLinkedin: linkedin[0]?.run_at ?? null, newestStaffing: staffing[0]?.run_at ?? null, staleQueued, fitMissing };
@@ -79,7 +92,7 @@ export async function runOnce({ dry = false, cfg = DEFAULTS, now = Date.now(), s
   return withMongo(async (db) => {
     const store = db.collection("health_state");
     const prev = (await store.findOne({ _id: "watch" }))?.checks ?? {};
-    const checks = evaluate(await readFacts(db, now), cfg, now);
+    const checks = evaluate({ ...(await readFacts(db, now)), disk: diskUse() }, cfg, now);
     const { messages, state } = transitions(checks, prev, cfg, now);
     for (const m of messages) await send(m, { dry });
     if (!dry) await store.updateOne({ _id: "watch" }, { $set: { checks: state, checkedAt: new Date(now), summary: checks.map(({ key, ok }) => ({ key, ok })) } }, { upsert: true });
@@ -98,7 +111,9 @@ async function main() {
     } catch (e) {
       // Mongo itself unreachable: say so (once per outage is not tracked here; the loop's next pass retries).
       console.error(`${new Date().toISOString()}  health check could not run: ${e.message}`);
-      await notify({ title: "Atriveo health check cannot reach Mongo", text: String(e.message).slice(0, 200), tags: "rotating_light", priority: 4 }, { dry }).catch(() => {});
+      // A full disk is the usual reason Mongo stops answering: say so in the same alert.
+      const disk = diskUse(), full = disk && disk.usedPct >= 95 ? ` The disk is ${disk.usedPct}% full (${disk.freeGb} GB free): that is likely why.` : "";
+      await notify({ title: "Atriveo health check cannot reach Mongo", text: String(e.message).slice(0, 200) + full, tags: "rotating_light", priority: 4 }, { dry }).catch(() => {});
     }
     if (every) await new Promise((r) => setTimeout(r, every * 1000));
   } while (every);
