@@ -44,3 +44,24 @@ test('template escapes edited prose and compiles a one-page PDF',t=>{
 test('generated metrics must come from the selected points, never the posting',()=>{
  assert.throws(()=>validateGenerated(['I improved reporting by 80%.',...paragraphs.slice(1)], [{role:'Example',bullets:['Built reports for 50 users.']}],{company:'Example',title:'Analyst'}),/absent/);
 });
+
+test('progress stage is reported, and invented numbers trigger a retry that names them',async t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'cover-retry-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const resume={source:{company:'Example',title:'Analyst'},jd:'Reporting.',skills:[],sections:[{role:'Work',bullets:[{text:'Built reports for 50 users.'}]}]};
+ const inputs=[];const bad=['I built reports for 50 users over 7 years.',...paragraphs.slice(1)];
+ const deps={root,load:async()=>resume,generate:async request=>{inputs.push(JSON.parse(request.user));return {paragraphs:inputs.length===1?bad:paragraphs};}};
+ const source={jobUrl:'https://example.org/retry'};const {version}=await matchingCoverLetter(null,{source,action:'status'},deps);
+ const started=await matchingCoverLetter(null,{source,action:'generate',version,instruction:''},deps);
+ assert.equal(started.stage,'drafting');assert.ok(started.startedAt);
+ await new Promise(r=>setTimeout(r,50));
+ const state=await matchingCoverLetter(null,{source,action:'status'},deps);
+ assert.equal(inputs.length,2);assert.deepEqual(inputs[1].numbersNotAllowed,['7']);assert.equal(state.busy,false);assert.deepEqual(state.draft.paragraphs,paragraphs);
+});
+test('after three tries with invented numbers the error names them',async t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'cover-retry3-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const resume={source:{company:'Example',title:'Analyst'},jd:'Reporting.',skills:[],sections:[{role:'Work',bullets:[{text:'Built reports.'}]}]};
+ let n=0;const deps={root,load:async()=>resume,generate:async()=>{n++;return {paragraphs:['Over 9 years I built reports.',...paragraphs.slice(1)]};}};
+ const source={jobUrl:'https://example.org/retry3'};const {version}=await matchingCoverLetter(null,{source,action:'status'},deps);
+ await matchingCoverLetter(null,{source,action:'generate',version,instruction:''},deps);await new Promise(r=>setTimeout(r,50));
+ assert.equal(n,3);assert.match((await matchingCoverLetter(null,{source,action:'status'},deps)).error,/\(9\)/);
+});

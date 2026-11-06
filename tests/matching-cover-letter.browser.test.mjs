@@ -19,12 +19,15 @@ test('cover letters support drafting, edits, download, reopen, mobile and change
  if((u.pathname==='/serve-pdf'||u.pathname==='/applications/resume-file')&&u.searchParams.get('dl')==='1')return route.fulfill({body:'%PDF-1.4 fixture',contentType:'application/pdf',headers:{...headers,'Content-Disposition':'attachment; filename="Atishay Kasliwal.pdf"'}});
  if(u.pathname==='/applications/resume-image'||u.pathname==='/applications/resume-file')return route.fulfill(process.env.JM_UI_IMAGE?{path:process.env.JM_UI_IMAGE,contentType:'image/png',headers}:{status:404,headers});
  if(u.origin===base)return route.continue();return route.abort();});
- let letterDraft=null;let stale=false;const letterCalls=[];
- await page.route('**/matching-cover-letter',async route=>{const b=route.request().postDataJSON();letterCalls.push(b);if(b.action==='generate')letterDraft={version:'v1',paragraphs:['I am applying for this role.','My selected resume points include financial reporting.','Thank you for considering my application.'],pdfPath:null};if(b.action==='save'||b.action==='pdf')letterDraft={...letterDraft,paragraphs:b.paragraphs,pdfPath:b.action==='pdf'?'/letters/cover-letter.pdf':null};await route.fulfill({json:{ok:true,version:'v1',draft:letterDraft,busy:false,stale}});});
+ let letterDraft=null;let stale=false;let pendingPolls=0;const letterCalls=[];
+ await page.route('**/matching-cover-letter',async route=>{const b=route.request().postDataJSON();letterCalls.push(b);if(b.action==='generate'){pendingPolls=1;return route.fulfill({json:{ok:true,version:'v1',draft:letterDraft,busy:true,stage:'drafting',attempt:1,startedAt:Date.now()-3000,stale}});}if(b.action==='status'&&pendingPolls>0){pendingPolls--;if(pendingPolls===0)letterDraft={version:'v1',paragraphs:['I am applying for this role.','My selected resume points include financial reporting.','Thank you for considering my application.'],pdfPath:null};return route.fulfill({json:{ok:true,version:'v1',draft:letterDraft,busy:pendingPolls>0,stage:'checking',attempt:1,startedAt:Date.now()-5000,stale}});}if(b.action==='save'||b.action==='pdf')letterDraft={...letterDraft,paragraphs:b.paragraphs,pdfPath:b.action==='pdf'?'/letters/cover-letter.pdf':null};await route.fulfill({json:{ok:true,version:'v1',draft:letterDraft,busy:false,stale}});});
  await page.goto(base+'/job-matching');await page.getByRole('heading',{name:list[0].title,exact:true}).waitFor();
  await page.getByRole('button',{name:'Cover Letter',exact:true}).filter({visible:true}).click();
  await page.getByRole('dialog',{name:'Cover Letter',exact:true}).waitFor();
  await page.getByRole('button',{name:'Create with Codex',exact:true}).click();
+ await page.getByText(/Drafting with Codex/).waitFor();
+ await page.getByText('Checking every number against your resume points').waitFor();
+ assert.match(await page.getByText(/s so far/).innerText(),/\d+s so far/);
  await page.getByLabel('Letter body',{exact:true}).waitFor();
  assert.equal(letterCalls.find(b=>b.action==='generate').source.jobUrl,list[0].id);
  await page.getByLabel('Letter body',{exact:true}).fill('I am applying for this role.\n\nI built financial reporting systems.\n\nThank you for your time.');
