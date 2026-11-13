@@ -58,6 +58,13 @@ email, then LinkedIn, then name. Matches are reused exactly as they are; everyth
 and board. Pictures are not in the file, so photos and board images are left out. A preview of each map is saved when you go back to
 all maps. Links from notifications and the extension (`?person=`, `?work=`, `?view=`, `?linkedin=`) open My network.
 
+**Keep off My network.** Tick it next to **Open a saved file** (or a file can say `"separate": true`) and what the file adds belongs to
+the new map only: its new people and sources carry `mapOnly: <map id>`, My network and the "From your network…" picker leave them out,
+and the map shows them. People you already had are reused exactly as they are and stay on My network. `GET /network?everything=1`
+returns everyone including these (the Day plan reads it). For a file opened before this existed, `scripts/network-ato-companies.mjs`
+does the same for the ATO 2026 map (dry run by default, `--apply` to change), and also gives each employer its own card and colour
+under the event and moves each person onto their employer's card. Big events lay out as cells: each employer with its people beside it.
+
 ## Export
 
 **Export** (next to Fit, or Ctrl/Cmd+Shift+E), like Excalidraw's: PNG, SVG or Copy to clipboard (PNG), with a preview and the options
@@ -142,6 +149,22 @@ source, not to the person; only someone marked "introduced by Chani" hangs off C
 Sent from your Gmail through the send-only connection Outreach sets up (`PLAYATRIVEO_HOME/gmail-send-token.json` with
 `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`), only when you press Send. "Write to all" still has one Send per person.
 Draft with AI goes through the same path as application answers (`RESUME_AI_REMOTE_WORKER=mac` uses the Mac AI worker).
+
+## LinkedIn outreach (check-ins)
+
+A source of kind **LinkedIn outreach (check-ins)** (`outreach`) is one day's batch of LinkedIn reach-outs; it is separate from the older
+LinkedIn reach-out / Day cards. New source: the date starts as today and can be changed (Details tab later). Everyone added to it
+(Add people, Paste list, or one person) gets `outreach: { reachedAt, status, answers[] }`; today's reach-outs start the clock now, an
+earlier date at noon that day. The source stores `checkHours` (default 24, 48, 72).
+
+At each check-in "Did they respond?" appears in the source panel and the bell: **Accepted** or **Replied** keeps them (a reply is logged
+in their history); **No** before the last check-in means "message again" and they keep waiting; **No** at the last check-in archives them
+(restore with `/network/outreach/restore`). People in an outreach source get no automatic weekly follow-up.
+
+Web Push (ntfy: a count) goes once per person and hour from the 10-minute tick (`runOutreachAlerts`, claims in
+`network_outreach_alerts`), held until 8 a.m. New York time. From the second check on it says to message again if they have not
+answered. Routes: `/network/outreach/source`, `/people`, `/answer`, `/restore`. Code: `scripts/network-outreach.mjs`;
+tests: `tests/network-outreach.test.mjs`.
 
 ## Reminders
 

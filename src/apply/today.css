@@ -174,6 +174,8 @@
 
 .td-goal { flex: 0 0 auto; display: flex; align-items: center; gap: 14px; padding: 0 20px 10px; font-size: 13px; color: var(--muted-fg); }
 .td-goal-n { white-space: nowrap; font-size: 15px; color: var(--foreground); }
+.td-goal-link { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--muted-fg); }
+.td-goal-link:hover { color: var(--accent); border-bottom-color: currentColor; }
 .td-goal-n b { font-size: 22px; color: #22c55e; font-variant-numeric: tabular-nums; }
 .td-goal-n button { font: inherit; font-size: 22px; font-weight: 700; color: #22c55e; background: none; border: 0; padding: 0; cursor: pointer; border-bottom: 1px dashed color-mix(in oklab, #22c55e 50%, transparent); }
 .td-goal-bar { flex: 1; height: 8px; border-radius: 999px; background: color-mix(in oklab, var(--border-col) 70%, transparent); overflow: hidden; }
@@ -594,6 +596,7 @@
   --platform-ashby: #e0457b;
   --platform-workday: #e8890c;
   --platform-smartrecruiters: #b8a01a;
+  --platform-swelist: #c026d3;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --platform-linkedin: #2f7fd6; }
@@ -606,6 +609,7 @@
 .td-card[data-platform="ashby"] { --platform: var(--platform-ashby); }
 .td-card[data-platform="workday"] { --platform: var(--platform-workday); }
 .td-card[data-platform="smartrecruiters"] { --platform: var(--platform-smartrecruiters); }
+.td-card[data-platform="swelist"] { --platform: var(--platform-swelist); }
 .td-page .td-grid .td-card[data-platform] { border-color: color-mix(in oklab, var(--platform) 70%, var(--border-col)); }
 .td-page .td-grid .td-card[data-platform]:hover { border-color: var(--platform); }
 .td-page .td-grid .td-card[data-platform]:is(.is-focused, .is-selected) { border-color: var(--platform); box-shadow: 0 0 0 1px var(--platform), 0 0 0 4px color-mix(in oklab, var(--platform) 22%, transparent); }

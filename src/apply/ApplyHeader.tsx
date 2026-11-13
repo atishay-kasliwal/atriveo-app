@@ -4,11 +4,8 @@ import { Link, useLocation } from "react-router-dom";
 import ApplyLogo from "./ApplyLogo";
 import { useFillableQueue, useReadyQueue, useReviewCounts } from "./reviewQueue";
 import type { User } from "../types";
-
-async function signOut() {
-  try { await fetch("/api/auth/logout", { method: "POST" }); } catch { /* the cookie clears server-side */ }
-  window.location.replace("/login");
-}
+import { signOut } from "./signOut";
+import { LuckyNav } from "./LuckyNav";
 
 export default function ApplyHeader({ todayCount }: { user: User; todayCount?: number | null }) {
   const path = useLocation().pathname.replace(/\/+$/, "");
@@ -26,19 +23,18 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
 
       </a>
       <nav className="apply-nav" aria-label="Console">
-        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/network" && path !== "/job-matching" && !path.startsWith("/applied") && path !== "/settings" && path !== "/general" && path !== "/usage" && path !== "/assessments" ? "page" : undefined}>
+        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/network" && path !== "/day-plan" && path !== "/loops" && path !== "/job-matching" && !path.startsWith("/applied") && path !== "/settings" && path !== "/general" && path !== "/usage" && path !== "/assessments" && path !== "/lucky" ? "page" : undefined}>
           Today{waiting !== null ? <span className="apply-nav-n">{waiting}</span> : null}
         </Link>
         <Link to="/job-matching" aria-current={path === "/job-matching" ? "page" : undefined}>Matching</Link>
-        <Link to="/applied" aria-current={path === "/applied" || path.startsWith("/applied/") ? "page" : undefined}>Applied</Link>
         <Link to="/general" aria-current={path === "/general" ? "page" : undefined}>General</Link>
         <Link to="/assessments" aria-current={path === "/assessments" ? "page" : undefined}>Assessments</Link>
         <Link to="/staffing" aria-current={path === "/staffing" ? "page" : undefined}>Staffing</Link>
-        <Link to="/resume_builder" aria-current={path === "/resume_builder" ? "page" : undefined}>Resumes</Link>
-        <Link to="/bank" aria-current={path === "/bank" ? "page" : undefined}>Bank</Link>
-        <Link to="/outreach" aria-current={path === "/outreach" ? "page" : undefined}>Outreach</Link>
+        <Link to="/resume_builder" aria-current={path === "/resume_builder" || path === "/bank" ? "page" : undefined}>Resumes</Link>
         <Link to="/network" aria-current={path === "/network" ? "page" : undefined}>Network</Link>
+        <Link to="/loops" aria-current={path === "/loops" ? "page" : undefined}>Loops</Link>
         <Link to="/stats" aria-current={page === "stats" ? "page" : undefined}>Stats</Link>
+        <LuckyNav current={path === "/lucky"} />
       </nav>
       <div className="apply-header-right">
         <ResumePipeline online={worker ? worker.online : null} />

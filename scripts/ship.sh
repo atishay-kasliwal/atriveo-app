@@ -19,6 +19,8 @@ set -euo pipefail
 
 HOST="${SHIP_HOST:-ubuntu@129.213.92.151}"
 KEY="${SHIP_KEY:-$HOME/.ssh/atriveo_oracle}"
+# Every container ship starts keeps at most 2 x 50 MB of logs.
+LOG_CAP="--log-opt max-size=50m --log-opt max-file=2"
 ROOT_REMOTE="${SHIP_ROOT:-atriveo-production}"           # relative to the remote home
 SSH=(ssh -i "$KEY" -o BatchMode=yes -o ConnectTimeout=20 "$HOST")
 # What is live today (the Oct 23 deploy); used only by --init.
@@ -68,8 +70,8 @@ if [ "$RESTART" = 1 ]; then
   S="$(state)"; eval "$S"
   [ "$YES" = 1 ] || { read -r -p "Restart the dashboard, workers, health watch and after-scrape loop? [y/N] " r; [ "$r" = y ] || exit 1; }
   run_remote "cd ~/$ROOT_REMOTE && ./$DASH_START && for s in $WORK_STARTS; do ./\$s; done; \
-    (docker rm -f atriveo-health >/dev/null 2>&1; docker run -d --name atriveo-health --restart unless-stopped --network atriveo-production --user 1001:1001 --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $DASH_IMAGE node /app/scripts/health-watch.mjs --loop 900 >/dev/null && echo 'health watch restarted'); \
-    if docker inspect atriveo-after-scrape >/dev/null 2>&1; then docker rm -f atriveo-after-scrape >/dev/null 2>&1; docker run -d --name atriveo-after-scrape --restart unless-stopped --network atriveo-production --user 1001:1001 -v /home/ubuntu/$ROOT_REMOTE/files:/home/ubuntu/$ROOT_REMOTE/files:ro -v /home/ubuntu/$ROOT_REMOTE/files/resumes:/Users/atishaykasliwal/Documents/tailored-resumes:ro --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $DASH_IMAGE sh /app/deploy/scraper/after-scrape.sh >/dev/null && echo 'after-scrape loop restarted'; fi; \
+    (docker rm -f atriveo-health >/dev/null 2>&1; docker run -d --name atriveo-health $LOG_CAP --restart unless-stopped --network atriveo-production --user 1001:1001 --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $DASH_IMAGE node /app/scripts/health-watch.mjs --loop 900 >/dev/null && echo 'health watch restarted'); \
+    if docker inspect atriveo-after-scrape >/dev/null 2>&1; then docker rm -f atriveo-after-scrape >/dev/null 2>&1; docker run -d --name atriveo-after-scrape $LOG_CAP --restart unless-stopped --network atriveo-production --user 1001:1001 -v /home/ubuntu/$ROOT_REMOTE/files:/home/ubuntu/$ROOT_REMOTE/files:ro -v /home/ubuntu/$ROOT_REMOTE/files/resumes:/Users/atishaykasliwal/Documents/tailored-resumes:ro --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $DASH_IMAGE sh /app/deploy/scraper/after-scrape.sh >/dev/null && echo 'after-scrape loop restarted'; fi; \
     sleep 6; docker ps --format '{{.Names}}  {{.Status}}' | sort | sed 's/^/  /'"
   exit 0
 fi
@@ -166,26 +168,33 @@ if [ -n "$CHANGED" ]; then
   NEW_WORK_STARTS="${NEW_WORK_STARTS# }"
 
   say "Building overlays and start scripts"
+  # Each container's log is capped (2 x 50 MB): an uncapped one filled the disk on Nov 2 and took Mongo down with it.
   DASH_DEPS=""
   if echo "$CHANGED" | grep -q '^package.json$'; then
     DASH_DEPS='USER 0\nCOPY package.json package-lock.json /app/\nWORKDIR /app\nRUN npm ci --ignore-scripts\nUSER 1001:1001\n'
   fi
   OVERLAY="cd $ROOT_REMOTE/staging/ship-$COMMIT && mkdir -p scripts data deploy && printf 'FROM %s\nCOPY scripts /app/scripts\nCOPY data /app/data\nCOPY deploy /app/deploy\n%b' '$DASH_IMAGE' '$DASH_DEPS' > Dockerfile.dash && docker build -q -f Dockerfile.dash -t $NEW_DASH_IMAGE . \
     && printf 'FROM %s\nCOPY scripts /app/scripts\nCOPY data /app/data\n' '$WORK_IMAGE' > Dockerfile.work && docker build -q -f Dockerfile.work -t $NEW_WORK_IMAGE . \
-    && cd ~/$ROOT_REMOTE && sed 's#$DASH_IMAGE#$NEW_DASH_IMAGE#' $DASH_START > $NEW_DASH_START && chmod +x $NEW_DASH_START"
-  i=0; for old in $WORK_STARTS; do i=$((i+1)); new="$(echo "$NEW_WORK_STARTS" | cut -d' ' -f$i)"; OVERLAY="$OVERLAY && sed 's#$WORK_IMAGE#$NEW_WORK_IMAGE#' $old > $new && chmod +x $new"; done
+    && cd ~/$ROOT_REMOTE && sed -e 's#$DASH_IMAGE#$NEW_DASH_IMAGE#' -e '/max-size=/!s#docker run -d #docker run -d $LOG_CAP #' $DASH_START > $NEW_DASH_START && chmod +x $NEW_DASH_START"
+  i=0; for old in $WORK_STARTS; do i=$((i+1)); new="$(echo "$NEW_WORK_STARTS" | cut -d' ' -f$i)"; OVERLAY="$OVERLAY && sed -e 's#$WORK_IMAGE#$NEW_WORK_IMAGE#' -e '/max-size=/!s#docker run -d #docker run -d $LOG_CAP #' $old > $new && chmod +x $new"; done
   run_remote "$OVERLAY"
   # The overlays only add files; a layer copying only changed files (no data/ac-bank) keeps everything else as it was.
 
   say "Restarting"
   run_remote "cd ~/$ROOT_REMOTE && ./$NEW_DASH_START && for s in $NEW_WORK_STARTS; do ./\$s; done; sleep 6; docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}' | grep -E 'dashboard|resume'"
   # The health watch (alerts when scraping or the resume queue stops) runs from the same image, with the dashboard's settings.
-  run_remote "docker rm -f atriveo-health >/dev/null 2>&1; docker run -d --name atriveo-health --restart unless-stopped --network atriveo-production --user 1001:1001 --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $NEW_DASH_IMAGE node /app/scripts/health-watch.mjs --loop 900 >/dev/null && echo 'health watch started'"
+  run_remote "docker rm -f atriveo-health >/dev/null 2>&1; docker run -d --name atriveo-health $LOG_CAP --restart unless-stopped --network atriveo-production --user 1001:1001 --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $NEW_DASH_IMAGE node /app/scripts/health-watch.mjs --loop 900 >/dev/null && echo 'health watch started'"
   say "Health"
   if [ "$DRY" != 1 ]; then
     BAD="$("${SSH[@]}" "docker ps --format '{{.Names}} {{.Status}}' | grep -E 'dashboard|resume|health' | grep -v ' Up ' || true; docker ps -a --filter status=restarting --format '{{.Names}} restarting' | grep -E 'dashboard|resume' || true")"
     if [ -n "$BAD" ]; then echo "$BAD" >&2; echo "A container is not Up. Rolling back." >&2; "$0" --rollback --yes || true; exit 1; fi
     echo "  dashboard and workers are Up."
+    say "Housekeeping (the disk filled up on Nov 2: build cache and old images are cleared after every good ship)"
+    # Kept: this ship's images, the previous ones (for --rollback) and any image a container still uses. Build cache younger than
+    # three days stays, so ships close together are still quick.
+    "${SSH[@]}" "keep=\" $NEW_DASH_IMAGE $NEW_WORK_IMAGE $DASH_IMAGE $WORK_IMAGE \$(docker ps -a --format '{{.Image}}' | tr '\n' ' ') \"; \
+      for img in \$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '^atriveo-dashboard:(workers-)?ship-'); do case \"\$keep\" in *\" \$img \"*) ;; *) docker rmi \"\$img\" >/dev/null 2>&1 && echo \"  removed \$img\";; esac; done; \
+      docker builder prune -f --filter until=72h >/dev/null; docker image prune -f >/dev/null; df -h / | tail -1 | awk '{print \"  disk: \" \$5 \" used, \" \$4 \" free\"}'" || echo "  housekeeping failed (the ship itself is fine)"
     "${SSH[@]}" "cd $ROOT_REMOTE && sed -i -e 's/^PREV_COMMIT=.*/PREV_COMMIT=$DEPLOYED/' -e 's/^PREV_DASH_START=.*/PREV_DASH_START=$DASH_START/' -e 's/^PREV_WORK_STARTS=.*/PREV_WORK_STARTS=\"$WORK_STARTS\"/' -e 's/^DEPLOYED_COMMIT=.*/DEPLOYED_COMMIT=$COMMIT/' -e 's#^DASH_IMAGE=.*#DASH_IMAGE=$NEW_DASH_IMAGE#' -e 's/^DASH_START=.*/DASH_START=$NEW_DASH_START/' -e 's#^WORK_IMAGE=.*#WORK_IMAGE=$NEW_WORK_IMAGE#' -e 's/^WORK_STARTS=.*/WORK_STARTS=\"$NEW_WORK_STARTS\"/' ship-state.env && cat ship-state.env"
   fi
 fi
@@ -198,9 +207,9 @@ if [ "$SCRAPER" = 1 ]; then
     && JPSHA=\$(git rev-parse --short HEAD) && cp $STAGE/ship-$COMMIT/deploy/scraper/loop.sh ./loop.sh && cp $STAGE/ship-$COMMIT/deploy/scraper/Dockerfile.loop ./Dockerfile.loop && cp $STAGE/ship-$COMMIT/deploy/scraper/patch_storage.py ./patch_storage.py \
     && docker build -q -f Dockerfile.loop -t job-pipeline-scraper:\$JPSHA . \
     && (docker rm -f atriveo-scraper >/dev/null 2>&1 || true) \
-    && docker run -d --name atriveo-scraper --restart unless-stopped --memory 1500m --cpus 1 --network atriveo-production --env-file /home/ubuntu/atriveo-muse/private/dashboard.env job-pipeline-scraper:\$JPSHA >/dev/null \
+    && docker run -d --name atriveo-scraper $LOG_CAP --restart unless-stopped --memory 1500m --cpus 1 --network atriveo-production --env-file /home/ubuntu/atriveo-muse/private/dashboard.env job-pipeline-scraper:\$JPSHA >/dev/null \
     && (docker rm -f atriveo-after-scrape >/dev/null 2>&1 || true) \
-    && docker run -d --name atriveo-after-scrape --restart unless-stopped --network atriveo-production --user 1001:1001 -v /home/ubuntu/$ROOT_REMOTE/files:/home/ubuntu/$ROOT_REMOTE/files:ro -v /home/ubuntu/$ROOT_REMOTE/files/resumes:/Users/atishaykasliwal/Documents/tailored-resumes:ro --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $NEW_DASH_IMAGE sh /app/deploy/scraper/after-scrape.sh >/dev/null \
+    && docker run -d --name atriveo-after-scrape $LOG_CAP --restart unless-stopped --network atriveo-production --user 1001:1001 -v /home/ubuntu/$ROOT_REMOTE/files:/home/ubuntu/$ROOT_REMOTE/files:ro -v /home/ubuntu/$ROOT_REMOTE/files/resumes:/Users/atishaykasliwal/Documents/tailored-resumes:ro --env-file /home/ubuntu/atriveo-muse/private/dashboard.env $NEW_DASH_IMAGE sh /app/deploy/scraper/after-scrape.sh >/dev/null \
     && sleep 5 && docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}' | grep -E 'scraper|after-scrape' && docker logs --tail 5 atriveo-scraper"
 fi
 

@@ -5,7 +5,7 @@ const row = (id, deadlineAt, extra = {}) => ({ id, company: 'Example', deadlineA
 test('assessment windows use New York calendar dates and exclude non-actionable deadlines', () => {
   const now = new Date('2026-10-28T13:00:00Z'); // 9 AM NY
   const assessments = [row('tomorrow', '2026-10-30T03:59:00Z'), row('today', '2026-10-29T03:59:00Z'), row('none', null), row('invalid', 'bad'), row('done', '2026-10-30T03:59:00Z', { status: 'done' }), row('dismissed', '2026-10-30T03:59:00Z', { status: 'dismissed' })];
-  const morning = scheduledPushes({ now, assessments });
+  const morning = scheduledPushes({ now, assessments }).filter((x) => x.notification.type === 'assessment_deadline'); // undated ones are covered below
   assert.equal(morning.length, 1); assert.match(morning[0].id, /^assessment:tomorrow:/); assert.match(morning[0].notification.body, /tomorrow at 11:59 PM/);
   assert.equal(scheduledPushes({ now: new Date('2026-10-28T12:59:59Z'), assessments }).length, 0);
   assert.equal(scheduledPushes({ now: new Date('2026-10-28T16:00:00Z'), assessments }).length, 0);
@@ -21,14 +21,16 @@ test('tomorrow reminder is correct across daylight saving transitions', () => {
   }
   assert.equal(pushSchedule(new Date('2026-11-01T14:00:00Z')).assessmentStage, 'tomorrow');
 });
-test('daily summary counts the New York day, uses accurate reply wording, and has a stable dedup ID', () => {
-  const now = new Date('2026-10-29T00:00:00Z'); // Oct 28, 8 PM NY
+test('no daily summary is pushed', () => {
   const progress = { appliedToday: 30, interviewEmailsToday: 1 };
-  const replies = [{ reply: { at: '2026-10-28T15:00:00Z' } }, { reply: { at: '2026-10-28T22:00:00Z' } }, { reply: { at: '2026-10-28T03:59:00Z' } }];
-  const [out] = scheduledPushes({ now, progress, replies });
-  assert.equal(out.id, 'summary:2026-10-28'); assert.equal(out.notification.body, 'Today: 30 applications, 2 recruiter replies, 1 interview update.'); assert.equal(out.notification.url, '/stats');
-  assert.equal(scheduledPushes({ now: new Date('2026-10-29T01:00:00Z'), progress, replies })[0].id, out.id);
-  assert.equal(scheduledPushes({ now: new Date('2026-10-28T23:59:59Z'), progress }).length, 0);
-  assert.equal(scheduledPushes({ now: new Date('2026-10-29T03:00:00Z'), progress }).length, 0);
-  assert.match(scheduledPushes({ now, progress: { appliedToday: 0, interviewEmailsToday: 0 } })[0].notification.body, /0 applications, 0 recruiter replies, 0 interview updates/);
+  assert.equal(scheduledPushes({ now: new Date('2026-10-29T00:00:00Z'), progress, replies: [{ reply: { at: '2026-10-28T15:00:00Z' } }] }).length, 0);
+  assert.equal(pushSchedule(new Date('2026-10-29T00:00:00Z')).summary, undefined);
+});
+test('an open assessment with no deadline gets its own message on Monday, Wednesday and Friday mornings only', () => {
+  const rows = [{ id: 'a1', company: 'Acme', status: 'open', deadlineAt: null }, { id: 'a2', company: 'Beta', status: 'open', deadlineAt: null }, { id: 'a3', company: 'Done', status: 'done', deadlineAt: null }];
+  const mon = scheduledPushes({ now: new Date('2026-11-02T15:00:00Z'), assessments: rows }); // Monday 10 AM NY
+  assert.deepEqual(mon.map((x) => x.notification.title), ['Acme', 'Beta']);
+  assert.equal(new Set(mon.map((x) => x.id)).size, 2);
+  assert.equal(scheduledPushes({ now: new Date('2026-11-03T15:00:00Z'), assessments: rows }).length, 0, 'Tuesday');
+  assert.equal(scheduledPushes({ now: new Date('2026-11-02T20:00:00Z'), assessments: rows }).length, 0, 'afternoon');
 });

@@ -28,6 +28,9 @@ test('push route refuses caller identity without backend secret', async () => {
 test('detected events exclude dismissed mail and preserve application links', () => {
   assert.equal(inboxPush({ kind: 'interview', state: 'dismissed' }), null);
   assert.equal(inboxPush({ kind: 'offer', applicationId: 'abc' }).url, '/applied/abc');
+  const n = inboxPush({ kind: 'interview', companies: ['Stripe'], titles: ['Software Engineer'], subject: 'Hi' });
+  assert.deepEqual([n.title, n.body], ['Stripe', 'Interview: Software Engineer']);
+  assert.deepEqual([inboxPush({ kind: 'offer', from: 'Acme Jobs <jobs@acme.com>', subject: 'Your offer' }).title, inboxPush({ kind: 'offer', from: 'Acme Jobs <jobs@acme.com>', subject: 'Your offer' }).body], ['Acme Jobs', 'Offer: Your offer']);
 });
 test('duplicate event claims never send again', async () => {
   let sends = 0;

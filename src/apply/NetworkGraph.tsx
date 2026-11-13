@@ -5,6 +5,7 @@ import {
 } from "./network";
 import { BoardBox, PenBar, Toolbar } from "./NetworkBoard";
 import ExportDialog from "./NetworkExport";
+import NetworkPhoneDock, { type PhoneMenu } from "./NetworkPhoneDock";
 import { companyLogoUrls } from "../utils/jobPresentation";
 
 /** Keep uploaded logos, then try the same company assets as the job cards. */
@@ -27,7 +28,8 @@ type Gesture =
   | { kind: "box"; id: string; mode: "move" | "size"; dx: number; dy: number; moved: boolean }
   | { kind: "pen"; points: [number, number][] }
   | { kind: "erase" }
-  | { kind: "area"; sx: number; sy: number; x: number; y: number; add: boolean };
+  | { kind: "area"; sx: number; sy: number; x: number; y: number; add: boolean }
+  | { kind: "pinch"; d: number; mx: number; my: number; view: View };
 const ORGANISATION = { w: 330, h: 94 }, ORGANISATION_SCALE = 0.9;
 const PERSON = { w: 196, h: 52 }, YOU = { w: 246, h: 80 }, WORK = { w: 176, h: 58 };
 const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
@@ -51,7 +53,9 @@ const inkOf = (c?: string) => (!c || c === "ink" ? "var(--nw-ink)" : c);
  * sticky notes, pen strokes, images). Drag cards (positions are saved), drag the background to pan, scroll to zoom. Clicking a person
  * opens them; a source shows only its people; one of your own links can be renamed, recoloured or removed.
  */
-export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeople, onRevealLayer, colors, visible, selected, selectedWork, board, setBoard, onPerson, onSource, onYou, onWork, onLinks, onPeople, onBulkMail, say }: {
+export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeople, onRevealLayer, colors, visible, selected, selectedWork, board, setBoard, onPerson, onSource, onYou, onWork, onLinks, onPeople, onBulkMail, say, phoneMenu }: {
+  /** Set on a phone: the dock replaces the toolbar and zoom bar, and the map opens at a size you can read. */
+  phoneMenu?: PhoneMenu;
   intelligenceFocus?: { ids: string[]; target: string; token: number } | null;
   data: NetworkData; layers: CanvasLayers; stackPeople: boolean; onRevealLayer: (layer: keyof CanvasLayers) => void; colors: Colors; visible: Set<string> | null; selected: string | null; selectedWork: string | null;
   board: BoardItem[]; setBoard: (f: (b: BoardItem[]) => BoardItem[]) => void;
@@ -131,14 +135,23 @@ export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeo
     return { x: it.x, y: it.y };
   }, [pos, people, data.sources]);
 
-  // Fit always brings "you" to the middle of the canvas at 75%, so the view opens in the same place every time.
   const fit = useCallback(() => {
     const el = stage.current; if (!el) return;
-    const you = moved.get("you") ?? base.get("you") ?? { x: 0, y: 0 };
+    const you = moved.get("you") ?? base.get("you") ?? { x: 0, y: 0 }, top = phoneMenu ? 64 : 56;
+    // On a desktop, Fit always brings "you" to the middle of the canvas at 75%, so the view opens in the same place every time.
     // Leave the strips at the top (tools) and bottom (zoom and legend) clear.
-    const w = el.clientWidth, h = el.clientHeight - 112, k = 0.75;
-    setView({ k, x: w / 2 - you.x * k, y: 56 + h / 2 - you.y * k });
-  }, [moved, base]);
+    if (!phoneMenu) { const w = el.clientWidth, h = el.clientHeight - 112, k = 0.75; setView({ k, x: w / 2 - you.x * k, y: top + h / 2 - you.y * k }); return; }
+    const pts = ["you", ...shownSources.map((s) => s.id), ...shownPeople.map((p) => p.id)].map((id) => moved.get(id) ?? base.get(id) ?? { x: 0, y: 0 });
+    pts.push(...stacks.map(({ x, y }) => ({ x, y })));
+    for (const it of board) { if (it.kind === "stroke" || it.kind === "group" || (it.kind === "work" ? !layers.work : !layers.board)) continue; const p = at(it); pts.push(p, { x: p.x + (it.w ?? 0), y: p.y + (it.h ?? 0) }); }
+    const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+    // On a phone, leave the top strip and the dock clear.
+    const w = el.clientWidth, h = el.clientHeight - 150, bw = Math.max(...xs) - Math.min(...xs) + 320, bh = Math.max(...ys) - Math.min(...ys) + 160;
+    const k = Math.max(0.25, Math.min(1.1, w / bw, h / bh));
+    // A whole network on a phone is too small to read: below half size it opens around you instead, and you pinch out for the rest.
+    if (k < 0.5) { setView({ k: 0.5, x: w / 2 - you.x * 0.5, y: top + h / 2 - you.y * 0.5 }); return; }
+    setView({ k, x: w / 2 - ((Math.max(...xs) + Math.min(...xs)) / 2) * k, y: top + h / 2 - ((Math.max(...ys) + Math.min(...ys)) / 2) * k });
+  }, [shownSources, shownPeople, stacks, layers.work, layers.board, moved, base, board, at, phoneMenu]);
   // Fit on the first draw, and again whenever several cards arrive at once (a list, an import, people put on this map).
   const fitted = useRef(-1), cardCount = data.people.length + data.sources.length;
   useEffect(() => { if (stage.current && (fitted.current < 0 || cardCount - fitted.current >= 2)) fit(); if (stage.current) fitted.current = cardCount; }, [fit, cardCount]);
@@ -215,10 +228,25 @@ export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeo
   function eraseAt(e: { clientX: number; clientY: number }) {
     for (const n of document.elementsFromPoint(e.clientX, e.clientY)) { const id = (n as Element).getAttribute?.("data-stroke"); if (id) void remove(id); }
   }
+  // Fingers on the map: a second one turns whatever the first was doing into a pinch (zoom about the middle of the two, and pan with it).
+  const touches = useRef(new Map<number, Point>());
+  const spread = () => { const [a, b] = [...touches.current.values()]; return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; };
   function down(e: RPointerEvent<HTMLDivElement>) {
     if (e.button !== 0) return;
     const t = e.target as Element;
     if (t.closest(".nwg-ui")) return;
+    if (e.pointerType === "touch") {
+      touches.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (touches.current.size === 2) {
+        stage.current?.setPointerCapture(e.pointerId);
+        if (gesture.current?.kind === "pen") setDrawing(null);
+        if (gesture.current?.kind === "area") setMarquee(null);
+        const r = stage.current!.getBoundingClientRect(), s = spread();
+        gesture.current = { kind: "pinch", d: s.d, mx: s.mx - r.left, my: s.my - r.top, view };
+        return;
+      }
+      if (touches.current.size > 2) return;
+    }
     const boxEl = t.closest<SVGForeignObjectElement>("[data-board]");
     // Typing, clicking a note's buttons: let the box have the event.
     if (boxEl && !t.closest(".nwgb-grip,.nwgb-rz") && boxEl.getAttribute("data-kind") !== "image") return;
@@ -267,7 +295,15 @@ export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeo
     gesture.current = { kind: "pan", sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y, moved: false };
   }
   function move(e: RPointerEvent<HTMLDivElement>) {
+    if (touches.current.has(e.pointerId)) touches.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const g = gesture.current; if (!g) return;
+    if (g.kind === "pinch") {
+      if (touches.current.size < 2) return;
+      const r = stage.current!.getBoundingClientRect(), s = spread(), mx = s.mx - r.left, my = s.my - r.top;
+      const k = Math.max(0.2, Math.min(2.5, g.view.k * (s.d / g.d))), f = k / g.view.k;
+      setView({ k, x: mx - (g.mx - g.view.x) * f, y: my - (g.my - g.view.y) * f });
+      return;
+    }
     if (g.kind === "pan") { if (Math.abs(e.clientX - g.sx) + Math.abs(e.clientY - g.sy) > 3) g.moved = true; setView((v) => ({ ...v, x: g.vx + e.clientX - g.sx, y: g.vy + e.clientY - g.sy })); return; }
     if (g.kind === "pen") { const w = world(e); g.points.push([w.x, w.y]); setDrawing([...g.points]); return; }
     if (g.kind === "erase") { eraseAt(e); return; }
@@ -289,6 +325,9 @@ export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeo
     setMoved((m) => { const n = new Map(m).set(g.id, to); for (const id of g.group) { const p = n.get(id) ?? base.get(id) ?? { x: 0, y: 0 }; n.set(id, { x: p.x + dx, y: p.y + dy }); } return n; });
   }
   function up(e: RPointerEvent<HTMLDivElement>) {
+    touches.current.delete(e.pointerId);
+    // A pinch ends when either finger lifts; the one left on the glass does nothing until it lifts too.
+    if (gesture.current?.kind === "pinch") { if (!touches.current.size) gesture.current = null; return; }
     const g = gesture.current; gesture.current = null; if (!g) return;
     if (g.kind === "pen") {
       setDrawing(null);
@@ -358,6 +397,8 @@ export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeo
   const card = "var(--nw-card)", bg = "var(--nw-bg)";
   const youSub = `${data.people.length} ${data.people.length === 1 ? "person" : "people"} · ${data.sources.length} ${data.sources.length === 1 ? "source" : "sources"}`;
   const youPos = pos("you");
+  const pickTool = (next: Tool) => { if (['text', 'note', 'pen', 'eraser'].includes(next)) onRevealLayer('board'); if (next === 'work') onRevealLayer('work'); setTool(next); };
+  const pickImage = () => { onRevealLayer('board'); fileInput.current?.click(); };
   const pinName = (it: BoardItem) => (it.pin ? people.get(it.pin.id)?.name.split(" ")[0] ?? data.sources.find((s) => s.id === it.pin!.id)?.name ?? null : null);
 
   return (
@@ -529,7 +570,9 @@ export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeo
           </g>
         </g>
       </svg>
-      <Toolbar tool={tool} setTool={(next) => { if (['text', 'note', 'pen', 'eraser'].includes(next)) onRevealLayer('board'); if (next === 'work') onRevealLayer('work'); setTool(next); }} onImage={() => { onRevealLayer('board'); fileInput.current?.click(); }} onUndo={undo} canUndo={added.length > 0} onPath={() => setPathOpen((o) => !o)} pathOpen={pathOpen} />
+      {phoneMenu
+        ? <NetworkPhoneDock tool={tool} setTool={pickTool} onImage={pickImage} onUndo={undo} canUndo={added.length > 0} onPath={() => setPathOpen((o) => !o)} pathOpen={pathOpen} onFit={fit} onExport={() => setExporting(true)} menu={phoneMenu} />
+        : <Toolbar tool={tool} setTool={pickTool} onImage={pickImage} onUndo={undo} canUndo={added.length > 0} onPath={() => setPathOpen((o) => !o)} pathOpen={pathOpen} />}
       {marquee && <div className="nwg-marquee" style={{ left: marquee.x, top: marquee.y, width: marquee.w, height: marquee.h }} />}
       {pathOpen && <PathFinder data={data} to={pathTo} setTo={setPathTo} route={route} colors={colors} onClose={() => { setPathOpen(false); setPathTo(""); }} onOpen={onPerson} />}
       {multi.size > 0 && <BulkBar ids={[...multi]} people={people} onDone={(list, msg) => { onPeople(list); say({ text: msg }); }} say={say}
@@ -539,10 +582,10 @@ export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeo
         onRename={(label) => { replace({ ...gr, label }); void saveItem({ id: gr.id, label }); }} onRemove={() => { void remove(gr.id); setGroupEdit(null); }} /> : null; })()}
       {(tool === "pen" || tool === "eraser") && <PenBar pen={pen} setPen={setPen} eraser={tool === "eraser"} />}
       <input ref={fileInput} type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void addImage(f); }} />
-      <div className="nwg-ui nwg-zoom"><button type="button" aria-label="Zoom out" onClick={() => zoomBy(1 / 1.2)}>−</button><span>{Math.round(view.k * 100)}%</span><button type="button" aria-label="Zoom in" onClick={() => zoomBy(1.2)}>+</button><button type="button" className="txt" onClick={fit}>Fit</button><button type="button" className="txt" title="Export (Ctrl/Cmd+Shift+E)" onClick={() => setExporting(true)}>Export</button></div>
+      <div className="nwg-ui nwg-zoom" hidden={Boolean(phoneMenu)}><button type="button" aria-label="Zoom out" onClick={() => zoomBy(1 / 1.2)}>−</button><span>{Math.round(view.k * 100)}%</span><button type="button" aria-label="Zoom in" onClick={() => zoomBy(1.2)}>+</button><button type="button" className="txt" onClick={fit}>Fit</button><button type="button" className="txt" title="Export (Ctrl/Cmd+Shift+E)" onClick={() => setExporting(true)}>Export</button></div>
       {exporting && <ExportDialog svg={getSvg} selection={multi} data={data} board={board} onClose={() => setExporting(false)} say={say} />}
       {stackPeople && expandedStacks.size > 0 && <button type="button" className="nwg-ui nwg-restack" onClick={() => setExpandedStacks(new Set())}>Collapse stacks</button>}
-      <div className="nwg-ui nwg-legend" aria-hidden="true" hidden={multi.size > 0 || !layers.connections}>
+      <div className="nwg-ui nwg-legend" aria-hidden="true" hidden={Boolean(phoneMenu) || multi.size > 0 || !layers.connections}>
         <span><svg viewBox="0 0 30 6"><path d="M0 3H30" /></svg>first connection</span>
         <span><svg viewBox="0 0 30 6"><path d="M0 3H30" strokeDasharray="7 5" /></svg>introduced</span>
         <span><svg viewBox="0 0 30 6"><path d="M0 3H30" strokeDasharray="2 5" strokeLinecap="round" /></svg>family</span>

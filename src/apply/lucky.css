@@ -1,0 +1,146 @@
+/* Lucky (LuckyPage.tsx): the day as the sky. One arc carries everything; the ground colour follows the real hour of the place.
+   Motion is one-shot (bands draw in, the sun climbs, the gold slides between days); nothing loops. */
+.lk-page { --sky: #0a0c18; --sky-ink: #eef0f7; --sky-muted: #8a90a8; --sky-line: #2a2f45; --gold: #f2b33d; --sun: #ffd36b; --rahu: #e5534b;
+  min-height: 100vh; display: flex; flex-direction: column; background: var(--sky); color: var(--sky-ink); transition: background 1.2s; }
+.lk-page[data-phase="dawn"] { --sky: #1b1424; --sky-line: #3a2b42; }
+.lk-page[data-phase="day"] { --sky: #0c1622; --sky-line: #22344a; --sky-muted: #8fa0b5; }
+.lk-page[data-phase="dusk"] { --sky: #1d1220; --sky-line: #3d2638; }
+body.apply-console { transition: background 1.2s; }
+body.apply-console[data-lucky-phase="night"] { background: #0a0c18; }
+body.apply-console[data-lucky-phase="dawn"] { background: #1b1424; }
+body.apply-console[data-lucky-phase="day"] { background: #0c1622; }
+body.apply-console[data-lucky-phase="dusk"] { background: #1d1220; }
+.lk-main { flex: 1; min-height: 0; height: calc(100dvh - 64px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; padding: 14px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); position: relative; }
+.lk-loading { margin: auto; color: var(--sky-muted); }
+.lk-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.lk-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.lk-where { margin: 0; font: 500 13px var(--font-mono, "JetBrains Mono", ui-monospace, monospace); color: var(--sky-muted); }
+.lk-actions, .lk-cal { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.lk-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--sky-line); background: transparent; color: var(--sky-ink); padding: 8px 14px; border-radius: 9px; font: 500 14px inherit; text-decoration: none; cursor: pointer; transition: transform .15s, border-color .15s, background .15s; }
+.lk-btn:hover { transform: translateY(-1px); border-color: var(--gold); }
+.lk-btn:active { transform: translateY(1px) scale(.98); }
+.lk-btn.gold { background: var(--gold); border-color: var(--gold); color: #101113; font-weight: 600; }
+.lk-btn:disabled { opacity: .5; cursor: default; transform: none; }
+.lk-cal-msg { font-size: 12px; color: var(--sky-muted); max-width: 320px; overflow-wrap: anywhere; }
+.lk-page :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* The stage keeps the arc's own shape, so the countdown sits inside the dome at every size. */
+.lk-stage { position: relative; align-self: end; justify-self: center; width: min(100%, calc((100dvh - 330px) * 2.857)); aspect-ratio: 1000 / 350; container-type: inline-size; }
+.lk-arc { display: block; width: 100%; height: 100%; overflow: visible; }
+.lk-arc text { font-family: inherit; }
+.lk-horizon { stroke: var(--sky-line); stroke-width: 1; animation: lk-fade .9s ease 1.2s backwards; }
+.lk-night { fill: none; stroke: var(--sky-line); stroke-width: 2; stroke-dasharray: 1 6; stroke-linecap: round; opacity: .8; animation: lk-fade .9s ease 1.2s backwards; }
+.lk-band { fill: none; stroke: var(--sky-line); stroke-width: 7; stroke-dasharray: 1; animation: lk-draw .9s cubic-bezier(.65,0,.35,1) backwards; animation-delay: calc(.15s + var(--i) * .13s); }
+.lk-band.good { stroke: color-mix(in oklab, var(--sky-ink) 32%, var(--sky)); }
+.lk-cname { font-size: 12px; font-weight: 500; fill: var(--sky-muted); letter-spacing: .02em; animation: lk-fade .5s ease backwards; animation-delay: calc(.35s + var(--i, 0) * .11s); }
+.lk-cname.good { fill: var(--sky-ink); }
+.lk-hours line { stroke: var(--sky-line); stroke-width: 1.2; }
+.lk-hours text { font: 500 11px var(--font-mono, "JetBrains Mono", ui-monospace, monospace); fill: var(--sky-muted); opacity: .7; }
+.lk-hours, .lk-elapsed, .lk-halo, .lk-lucky, .lk-llabel, .lk-lsub { animation: lk-fade .8s ease 1.9s backwards; }
+.lk-elapsed { fill: none; stroke: var(--sun); stroke-width: 2; opacity: .75; stroke-linecap: round; }
+.lk-hlabel { font: 500 12px var(--font-mono, "JetBrains Mono", ui-monospace, monospace); fill: var(--sky-muted); animation: lk-fade .9s ease 1.2s backwards; }
+.lk-rahu { fill: none; stroke: var(--rahu); stroke-width: 7; opacity: .9; animation: lk-fade .7s ease 1.7s backwards; }
+.lk-rlabel { font: 500 12px var(--font-mono, "JetBrains Mono", ui-monospace, monospace); fill: color-mix(in oklab, var(--rahu) 85%, var(--sky-ink)); animation: lk-fade .7s ease 1.7s backwards; }
+.lk-halo { fill: none; stroke: var(--gold); stroke-width: 30; stroke-linecap: round; opacity: .16; }
+.lk-lucky { fill: none; stroke: var(--gold); stroke-width: 12; stroke-linecap: round; transition: stroke-width .3s cubic-bezier(.2,.8,.2,1); }
+.lk-lucky:hover { stroke-width: 16; }
+.lk-llabel { font-size: 24px; font-weight: 700; letter-spacing: -.02em; fill: var(--gold); }
+.lk-lsub { font: 500 12px var(--font-mono, "JetBrains Mono", ui-monospace, monospace); fill: var(--gold); opacity: .85; }
+.lk-sun { transition: opacity .4s; }
+.lk-sun.away { opacity: 0; }
+.lk-sunglow { fill: var(--sun); opacity: .14; }
+.lk-suncore { fill: var(--sun); }
+.lk-mooncore { fill: #dfe3f0; }
+@keyframes lk-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes lk-fade { from { opacity: 0; } }
+
+.lk-dome { position: absolute; left: 24%; right: 24%; top: 34%; bottom: 23%; display: grid; justify-items: center; align-content: end; gap: .5cqw; text-align: center; pointer-events: none; }
+.lk-dome-label { font-size: max(12px, 1.4cqw); color: var(--sky-muted); }
+.lk-count { display: block; font-size: 10.4cqw; line-height: .9; font-weight: 700; letter-spacing: -.055em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lk-count span { display: inline-block; }
+.lk-count .roll { animation: lk-roll .55s cubic-bezier(.2,.8,.2,1) backwards; }
+@keyframes lk-roll { from { transform: translateY(.32em); opacity: 0; } }
+.lk-dome-cap { font: 500 max(11px, 1.3cqw) var(--font-mono, "JetBrains Mono", ui-monospace, monospace); color: var(--gold); }
+.lk-tone { font-size: max(11px, 1.2cqw); padding: 2px 10px; border-radius: 99px; border: 1px solid var(--sky-line); color: var(--sky-muted); }
+.lk-tone.good { color: var(--gold); border-color: color-mix(in oklab, var(--gold) 40%, var(--sky-line)); }
+.lk-tone.avoid { color: color-mix(in oklab, var(--rahu) 80%, var(--sky-ink)); }
+
+/* The week: one dock under the arc, as wide as sunrise to sunset. */
+.lk-dock { justify-self: center; width: min(100%, calc((100dvh - 330px) * 2.857 * .94)); display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--sky-line); margin-top: 8px; }
+.lk-day { position: relative; border: 0; border-right: 1px solid var(--sky-line); background: transparent; color: var(--sky-ink); text-align: center; justify-items: center; padding: 14px 10px 12px; display: grid; gap: 3px; min-width: 0; cursor: pointer; font: inherit; transition: background .25s; }
+.lk-day:last-child { border-right: 0; }
+.lk-day::before { content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 3px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+.lk-day[aria-pressed="true"]::before { transform: scaleX(1); }
+.lk-day:hover { background: color-mix(in oklab, var(--sky-ink) 4%, transparent); }
+.lk-day:active { background: color-mix(in oklab, var(--sky-ink) 7%, transparent); }
+.lk-day svg { width: 100%; height: 46px; overflow: visible; margin-bottom: 4px; transition: translate .35s cubic-bezier(.2,.8,.2,1); }
+.lk-day:hover svg, .lk-day[aria-pressed="true"] svg { translate: 0 -3px; }
+.lk-day svg .d { fill: none; stroke: var(--sky-line); stroke-width: 2; }
+.lk-day svg .n { fill: none; stroke: var(--sky-line); stroke-width: 1.5; stroke-dasharray: 1 4; stroke-linecap: round; }
+.lk-day svg .r { fill: none; stroke: var(--rahu); stroke-width: 3; }
+.lk-day svg .g { fill: none; stroke: var(--gold); stroke-width: 5; stroke-linecap: round; }
+.lk-day .dd { font: 500 11px var(--font-mono, "JetBrains Mono", ui-monospace, monospace); letter-spacing: .06em; text-transform: uppercase; color: var(--sky-muted); }
+.lk-day[aria-pressed="true"] .dd { color: var(--gold); }
+.lk-day .dt { font-size: 22px; font-weight: 600; line-height: 1.1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lk-day .dl { font-size: 12px; color: var(--sky-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.lk-foot { text-align: center; margin: 10px 0 0; font-size: 12px; color: var(--sky-muted); }
+.lk-link { background: none; border: 0; padding: 0; color: var(--gold); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+.lk-details { position: absolute; left: 50%; top: 56px; translate: -50% 0; width: min(560px, calc(100% - 32px)); max-height: calc(100% - 72px); overflow: auto; z-index: 5; background: #121624; border: 1px solid var(--sky-line); border-radius: 14px; padding: 18px; display: grid; gap: 12px; }
+.lk-details h2 { margin: 0; font-size: 17px; }
+.lk-details p { margin: 0; color: var(--sky-muted); font-size: 13px; }
+.lk-details fieldset { border: 1px solid var(--sky-line); border-radius: 10px; margin: 0; padding: 10px 12px 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.lk-details legend { font-size: 12px; color: var(--sky-muted); padding: 0 6px; }
+.lk-details legend small { color: var(--gold); margin-left: 6px; }
+.lk-details label { display: grid; gap: 4px; font-size: 12px; color: var(--sky-muted); min-width: 0; }
+.lk-details :is(input, select) { background: #0b0e18; border: 1px solid var(--sky-line); border-radius: 8px; color: var(--sky-ink); padding: 7px 9px; font: inherit; min-width: 0; color-scheme: dark; }
+.lk-details-act { display: flex; justify-content: flex-end; gap: 8px; }
+.lk-error { color: color-mix(in oklab, var(--rahu) 85%, var(--sky-ink)) !important; }
+
+@media (max-width: 720px) {
+  .lk-main { height: auto; grid-template-rows: auto auto auto auto; }
+  .lk-top { justify-content: center; }
+  .lk-stage, .lk-dock { width: 100%; }
+  .lk-stage { align-self: start; margin-top: 12px; }
+  .lk-cname, .lk-hours, .lk-hlabel, .lk-rlabel, .lk-llabel, .lk-lsub { display: none; }
+  .lk-dome { position: static; margin: 4px 0 6px; gap: 6px; }
+  .lk-count { font-size: 64px; }
+  .lk-dome-label, .lk-tone { font-size: 13px; }
+  .lk-dome-cap { font-size: 12px; }
+  .lk-dock { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .lk-day { border-bottom: 1px solid var(--sky-line); }
+  .lk-day .dt { font-size: 18px; }
+  .lk-details fieldset { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .lk-page *, .lk-page *::before { animation: none !important; transition: none !important; } }
+
+/* The nav item (LuckyNav in ApplyHeader): a tiny sky, the time, and a loading bar. */
+.apply-nav a.lk-nav { position: relative; display: inline-flex; align-items: center; gap: 7px; color: #f2b33d; padding-bottom: 9px; transition: background .3s, color .3s; }
+.apply-nav a.lk-nav b { font: 500 12px var(--font-mono, "JetBrains Mono", ui-monospace, monospace); color: #f2b33d; transition: color .3s; }
+.lk-nav-arc { width: 24px; height: 14px; overflow: visible; flex: none; }
+.lk-nav-arc .d { fill: none; stroke: color-mix(in oklab, #f2b33d 35%, #2b2e34); stroke-width: 1.6; }
+.lk-nav-arc .g { fill: none; stroke: #f2b33d; stroke-width: 3; stroke-linecap: round; }
+.lk-nav-arc circle { fill: #ffd36b; transition: opacity .3s; }
+.lk-nav-bar { position: absolute; left: 12px; right: 12px; bottom: 3px; height: 3px; border-radius: 99px; background: color-mix(in oklab, #f2b33d 16%, transparent); overflow: hidden; }
+.lk-nav-bar i { display: block; height: 100%; border-radius: inherit; background: #f2b33d; transition: width .8s cubic-bezier(.2,.8,.2,1), background .3s; }
+.apply-nav a.lk-nav[data-state="soon"] { background: color-mix(in oklab, #f2b33d 12%, transparent); }
+.apply-nav a.lk-nav[data-state="soon"] b { color: var(--foreground); }
+body.apply-console .apply-nav a.lk-nav[data-state="on"] { background: #f2b33d; color: #101113; }
+.apply-nav a.lk-nav[data-state="on"] b { color: #101113; font-weight: 600; }
+.apply-nav a.lk-nav[data-state="on"] .lk-nav-arc :is(.d, .g) { stroke: #101113; }
+.apply-nav a.lk-nav[data-state="on"] .lk-nav-arc circle { fill: #101113; }
+.apply-nav a.lk-nav[data-state="on"] .lk-nav-bar { background: color-mix(in oklab, #101113 22%, transparent); }
+.apply-nav a.lk-nav[data-state="on"] .lk-nav-bar i { background: #101113; }
+.apply-nav a.lk-nav:is([data-state="after"], [data-state="none"]) { color: var(--muted-fg); }
+.apply-nav a.lk-nav:is([data-state="after"], [data-state="none"]) b { color: var(--muted-fg); }
+.apply-nav a.lk-nav[data-state="after"] .lk-nav-arc .g { stroke: var(--muted-fg); }
+
+/* The strip on Matching while a window is on. */
+.lk-strip { display: flex; align-items: center; gap: 14px; padding: 8px max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); background: color-mix(in oklab, #f2b33d 10%, var(--background)); border-bottom: 1px solid color-mix(in oklab, #f2b33d 35%, var(--border-col)); font-size: 13px; }
+.lk-strip b { color: #f2b33d; font: 500 13px var(--font-mono, "JetBrains Mono", ui-monospace, monospace); }
+.lk-strip-track { flex: 1; min-width: 80px; height: 6px; border-radius: 99px; background: color-mix(in oklab, #f2b33d 18%, var(--border-col)); overflow: hidden; }
+.lk-strip-track i { display: block; height: 100%; background: #f2b33d; transition: width 1s linear; }
+.lk-strip a { color: #f2b33d; }
+/* A crowded nav keeps the sky and the bar: the word goes first, then the time (the hover text still says everything). */
+@media (max-width: 1200px) { .apply-nav a.lk-nav > span { display: none; } }
+@media (max-width: 1050px) { .apply-nav a.lk-nav > b { display: none; } }

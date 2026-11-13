@@ -35,3 +35,18 @@ test('filters, counts and the single-row view',async()=>{
  const one=await appliedHistory(fakeDb(),{key:'a:app1',now});assert.equal(one.row.mail[0].subject,'Your Databricks assessment');
  assert.equal((await appliedHistory(fakeDb(),{key:'a:nope',now})).ok,false);
 });
+
+test('your own mark counts like a reply; the newer of it and the mail wins; clear takes it away',async()=>{
+ const rows=buildAppliedRows({applications,swipes,jobs,events,marks:[{key:'a:app1',status:'interview',at:'2026-10-23T09:00:00Z'}]});
+ const dbRow=rows.find(r=>r.key==='a:app1');
+ assert.deepEqual(dbRow.outcome,{status:'interview',at:'2026-10-23T09:00:00.000Z',manual:true},'newer than the assessment mail');
+ const ibm=buildAppliedRows({applications,swipes,jobs,events,marks:[{key:rows.find(r=>r.company==='IBM').key,status:'rejected',at:'2026-10-25T09:00:00Z'}]}).find(r=>r.company==='IBM');
+ assert.equal(ibm.outcome.status,'interview','the later interview mail wins over an older mark');
+ const {setAppliedOutcome}=await import('../scripts/applied-history.mjs');
+ const store=[];const db={collection:()=>({updateOne:async(f,u)=>{const i=store.findIndex(m=>m.key===f.key);if(i>=0)store[i]=u.$set;else store.push(u.$set);},deleteOne:async f=>{const i=store.findIndex(m=>m.key===f.key);if(i>=0)store.splice(i,1);}})};
+ await setAppliedOutcome(db,{key:'a:app1',status:'offer',now:new Date('2026-10-28T00:00:00Z')});
+ assert.deepEqual(store,[{key:'a:app1',status:'offer',at:'2026-10-28T00:00:00.000Z'}]);
+ await setAppliedOutcome(db,{key:'a:app1',status:'clear'});assert.deepEqual(store,[]);
+ await assert.rejects(()=>setAppliedOutcome(db,{key:'a:app1',status:'closed'}),/Unknown status/);
+ await assert.rejects(()=>setAppliedOutcome(db,{key:'nope',status:'offer'}),/key is required/);
+});

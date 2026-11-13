@@ -11,7 +11,7 @@ const PUBLIC_API_PATHS = ["/api/push/health", "/api/auth/login", "/api/auth/logo
   "/api/auth/mac",
   // Token-checked by the route itself (inbox watcher on the Mac), not a login cookie.
   "/api/tracker/inbox"];
-const ASSET_RE = /\.(js|css|ico|svg|png|jpe?g|gif|webp|avif|woff2?|ttf|map|webmanifest)$/i;
+const ASSET_RE = /\.(js|css|ico|svg|png|jpe?g|gif|webp|avif|woff2?|ttf|map|webmanifest|m4a|mp3)$/i;
 
 function isJsonRoute(path: string): boolean {
   return path.startsWith("/api/") || path.startsWith("/tailor");
@@ -34,6 +34,10 @@ export const onRequest: PagesFunction<Env> = async ({ request, env, next }) => {
     return next();
   }
   if (PUBLIC_API_PATHS.some((p) => path.startsWith(p))) {
+    return next();
+  }
+  // The lucky-hours calendar feed is fetched by Google's servers; its route checks the token in the link.
+  if (/^\/calendar\/lucky\/[a-f0-9]{48}\.ics$/.test(path)) {
     return next();
   }
   if (path === "/login" || path === "/onboarding" || path.startsWith("/landing")) {

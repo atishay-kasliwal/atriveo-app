@@ -12,6 +12,12 @@ export function validateSubscription(value) {
   if (!keys || typeof keys.p256dh !== 'string' || typeof keys.auth !== 'string' || !/^[A-Za-z0-9_-]{87}$/.test(keys.p256dh) || !/^[A-Za-z0-9_-]{22}$/.test(keys.auth) || Buffer.from(keys.p256dh, 'base64url')[0] !== 4) throw new Error('Invalid subscription keys');
   return { endpoint, keys: { p256dh: keys.p256dh, auth: keys.auth } };
 }
+/** Notification action buttons: up to three { action, title }, plain short strings (the service worker decides what each does). */
+export function safeActions(value) {
+  if (!Array.isArray(value)) return undefined;
+  const list = value.slice(0, 3).filter(a => a && /^[a-z-]{1,20}$/.test(String(a.action)) && String(a.title || '').trim()).map(a => ({ action: String(a.action), title: String(a.title).trim().slice(0, 30) }));
+  return list.length ? list : undefined;
+}
 export function safePushUrl(value) {
   return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') && !/[\\\r\n]/.test(value) ? value.slice(0, 1500) : '/';
 }
@@ -37,7 +43,7 @@ export async function saveSubscription(db, userId, input) {
 /** Provider-independent application entry point. Only this module knows Web Push. */
 export async function sendPushNotification(db, userId, notification, { env = process.env, send = webpush.sendNotification } = {}) {
   if (!env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY || !env.VAPID_SUBJECT) throw new Error('Web Push is not configured');
-  const payload = JSON.stringify({ title: String(notification.title || 'Atriveo').slice(0, 120), body: String(notification.body || '').slice(0, 500), url: safePushUrl(notification.url), type: String(notification.type || '').slice(0, 80), data: notification.data, tag: notification.tag });
+  const payload = JSON.stringify({ title: String(notification.title || 'Atriveo').slice(0, 120), body: String(notification.body || '').slice(0, 500), url: safePushUrl(notification.url), type: String(notification.type || '').slice(0, 80), data: notification.data, tag: notification.tag, actions: safeActions(notification.actions) });
   if (Buffer.byteLength(payload) > 3000) throw new Error('Notification too large');
   const subs = await db.collection('push_subscriptions').find({ userId }).toArray();
   let sent = 0, failed = 0;

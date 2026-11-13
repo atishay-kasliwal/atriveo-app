@@ -56,6 +56,14 @@ While you type, the rules' verdict shows under the box (RESUME_BULLET_GUIDE.md, 
 opening verb must be one no other bullet that can share a resume uses; when it isn't, the box offers free verbs (click
 one to swap it in). A this-resume-only edit needs a verb not used elsewhere on that resume.
 
+### Applied?
+
+The toolbar's **Applied?** button asks for the link you applied through (optional) and records the job as applied: the same
+`job_swipes` row as Today's "Mark applied", so every applied count reads it, plus the link (`apply_link`), the company and
+title, and the resume it was sent with (`resume_ref`). Marking the same job or pasted resume again updates its one record
+(never counted twice). A track's general resume is reused for many jobs, so each submit is its own record and the button
+doesn't lock. It is disabled while you have unsaved edits, so the resume on record is the one you sent. `POST /resume-builder/applied {source, link?}`.
+
 ### Live preview
 
 One toolbar over the preview holds everything: **Live** / **PDF** tabs, the page chip, the PDF's page count, JD match,

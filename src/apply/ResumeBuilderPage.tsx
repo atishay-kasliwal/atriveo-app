@@ -1,3 +1,4 @@
+import CoverLetter from './CoverLetter';
 import { formatLocation } from "../utils/location";
 import CardActions from './CardActions';
 import {resumeChangeDiff} from '../shared/resumeChangeDiff.mjs';
@@ -11,6 +12,7 @@ import ResumeLivePreview, { sbTitle, type Layout, type LiveFit, type PageTarget 
 import { applyContentChanges, type ContentChange } from "../shared/resumeContent.mjs";
 import type { ResumeMatch, ResumeReadyState } from "./reviewQueue";
 import "./resume-builder.css";
+import BankPage from "./BankPage";
 
 // Resume builder (/resume_builder): edit a resume's content (bullets, title, skills); the template never changes.
 // Opens a Today card's resume (?app=<application id> or ?job=<job url>) or a track's general resume (?track=…).
@@ -32,6 +34,8 @@ interface Loaded {
   options: Record<string, Bullet[]>; roles: Array<{ role: string; kind: "experience" | "project"; label: string }>;
   current: { pdfPath: string; edited: boolean; generatedPdfPath: string | null; pages?: number | null; room?: number | null }; jd: string | null; layout: Layout;
   ats?: Ats;
+  /** "Applied?": set once you marked this resume's job applied (when, and the link you gave). */
+  applied?: { at: string | null; link: string | null } | null;
 }
 /** A resume's ATS score (scripts/ats, as Job matching and Today show it): Job Match against the posting, Resume Ready. */
 interface Ats { posting: boolean; match: ResumeMatch | null; ready: ResumeReadyState | null; note?: string | null; error?: string }
@@ -104,44 +108,72 @@ function StartScreen() {
     if (!window.confirm(`Delete the ${p.company} resume? This can't be undone.`)) return;
     try { await call("delete", { id: p.id }); refresh(); } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
   };
+  const [bankOpen, setBankOpen] = useState(false);
+  const [find, setFind] = useState("");
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      const typing = e.target instanceof HTMLElement && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
+      if (e.key === "Escape" && bankOpen && !typing) setBankOpen(false);
+      if (e.key.toLowerCase() === "b" && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) setBankOpen((o) => !o);
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [bankOpen]);
+  const hint = building ? "Choosing bullets and compiling: usually under half a minute." : tooShort && jd.trim() ? "Add at least 300 characters from the posting." : badEmail ? "Check the email address." : !fields.title.trim() && !tooShort ? "Add the role title." : "";
+  const words = find.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const shown = (list ?? []).filter((p) => words.every((w) => `${p.company} ${p.title} ${p.location ?? ""}`.toLowerCase().includes(w)));
   return (
-    <div className="rb-start">
-      <header className="rb-start-heading"><span className="rb-eyebrow">YOUR NEXT APPLICATION</span><h1>Resume builder</h1><p>Paste a job description or choose a general resume.</p></header>
-      <section className="rb-paste" aria-label="Start from a job description">
-        <div className="rb-section-heading"><span className="rb-step" aria-hidden="true">01</span><div><h2>Start with a job description</h2></div></div>
-
-        <label className="rb-jd-label" htmlFor="rb-job-description">Job description</label><textarea id="rb-job-description" rows={5} value={jd} disabled={building} placeholder="Paste the whole job description: title, company, responsibilities, requirements…" onChange={(e) => setJd(e.target.value)} />
+    <div className="rb-start rb-desk">
+      <header className="rb-start-heading">
+        <div><h1>Resume builder</h1><p>Paste a job description, or start from a general resume.</p></div>
+        <button type="button" className="apps-btn rb-bank-open" aria-expanded={bankOpen} aria-controls="rb-bank-drawer" onClick={() => setBankOpen(true)}>Open bank <kbd>B</kbd></button>
+      </header>
+      <section className="rb-paste rb-panel" aria-labelledby="rb-paste-h">
+        <div className="rb-panel-head">
+          <h2 id="rb-paste-h">Start with a job description</h2>
+          <div className="rb-panel-act">
+            {hint && <span className="apps-muted" role="status">{hint}</span>}
+            <button className="rv-primary" disabled={building || tooShort || !fields.title.trim() || badEmail} onClick={() => void build()}>{building ? "Building your resume…" : "Build my resume →"}</button>
+          </div>
+        </div>
+        <label className="rb-jd-label" htmlFor="rb-job-description">Job description</label><textarea id="rb-job-description" value={jd} disabled={building} placeholder="Paste the whole job description: title, company, responsibilities, requirements…" onChange={(e) => setJd(e.target.value)} />
         <div className="rb-paste-fields">
           <label><span>Company</span><input value={fields.company} disabled={building} placeholder="e.g. Acme" onChange={(e) => set("company", e.target.value)} /></label>
           <label><span>Role title</span><input value={fields.title} disabled={building} placeholder="e.g. Software Engineer" onChange={(e) => set("title", e.target.value)} /></label>
           <label><span>Location <small>Optional</small></span><input value={fields.location} disabled={building} placeholder="City, ST (optional)" onChange={(e) => set("location", e.target.value)} /></label>
           <label><span>Email <small>On the resume</small></span><input type="email" autoComplete="email" value={emailValue} disabled={building} placeholder={defaultEmail || "you@example.com"} aria-invalid={badEmail} onChange={(e) => setEmail(e.target.value)} /></label>
         </div>
-        <div className="rb-paste-acts">
-          <button className="rv-primary" disabled={building || tooShort || !fields.title.trim() || badEmail} onClick={() => void build()}>{building ? "Building your resume…" : "Build my resume →"}</button>
-          <span className="apps-muted">{building ? "Choosing bullets and compiling: usually under half a minute." : tooShort && jd.trim() ? "Add at least 300 characters from the posting." : badEmail ? "Check the email address." : !fields.title.trim() && !tooShort ? "Add the role title." : "Your resume stays here, separate from Today."}</span>
-        </div>
         {error && <p className="td-error" role="alert">{error}</p>}
       </section>
-      {list && list.length > 0 && <section aria-label="Your resumes">
-        <h2>Your resumes</h2>
-        <ul className="rb-list">{list.map((p) => (
-          <li key={p.id}>
-            <Link to={`/resume_builder?pasted=${p.id}`} className="rb-list-main"><b>{p.company}</b><span>{p.title}{p.location ? ` · ${formatLocation(p.location)}` : ""}</span></Link>
-            <span className="rb-list-meta">{when(p.updatedAt || p.createdAt)}{p.edited ? " · edited" : ""}</span>
-            <span className="rb-list-acts"><CardActions>
-              <Link className="apps-btn" to={`/resume_builder?pasted=${p.id}`}>Edit</Link>
-              {p.pdfPath && <a className="apps-btn" href={pdfUrl(p.pdfPath, true)}>Download</a>}
-              <button className="apps-link rb-del" onClick={() => void remove(p)}>Delete</button>
-            </CardActions></span>
-          </li>
-        ))}</ul>
-      </section>}
-      <section className="rb-general" aria-label="General resumes">
-        <div className="rb-section-heading"><span className="rb-step" aria-hidden="true">02</span><div><h2>Start with a general resume</h2></div></div>
-
-        <div className="rb-tracks">{GENERAL.map((t) => <Link key={t} className={`rb-track tr-${t}`} to={`/resume_builder?track=${t}`}><i /><strong>{TRACK_LABEL[t]}</strong><span>Edit resume <b aria-hidden="true">↗</b></span></Link>)}</div>
+      <section className="rb-general rb-panel" aria-labelledby="rb-general-h">
+        <div className="rb-panel-head"><h2 id="rb-general-h">Start with a general resume</h2></div>
+        <div className="rb-panel-scroll"><div className="rb-tracks">
+          {GENERAL.map((t) => <Link key={t} className={`rb-track tr-${t}`} to={`/resume_builder?track=${t}`}><i /><strong>{TRACK_LABEL[t]}</strong><span>Edit resume <b aria-hidden="true">↗</b></span></Link>)}
+          <button type="button" className="rb-track rb-track-bank" onClick={() => setBankOpen(true)}><i /><strong>Bank</strong><span>All bullets <b aria-hidden="true">↗</b></span></button>
+        </div></div>
       </section>
+      <section className="rb-mine rb-panel" aria-labelledby="rb-mine-h">
+        <div className="rb-panel-head"><h2 id="rb-mine-h">Your resumes{list ? <span className="apps-muted"> · {list.length}</span> : null}</h2><input type="search" className="rb-find" value={find} onChange={(e) => setFind(e.target.value)} placeholder="Search" aria-label="Search your resumes" /></div>
+        <div className="rb-panel-scroll">
+          {list && !list.length && <p className="apps-muted rb-none">Resumes you build from a pasted job description show up here.</p>}
+          {list && list.length > 0 && !shown.length && <p className="apps-muted rb-none">No resume matches “{find.trim()}”.</p>}
+          <ul className="rb-list">{shown.map((p) => (
+            <li key={p.id}>
+              <Link to={`/resume_builder?pasted=${p.id}`} className="rb-list-main"><b>{p.company}</b><span>{p.title}{p.location ? ` · ${formatLocation(p.location)}` : ""}</span></Link>
+              <span className="rb-list-meta">{when(p.updatedAt || p.createdAt)}{p.edited ? " · edited" : ""}</span>
+              <span className="rb-list-acts"><CardActions>
+                <Link className="apps-btn" to={`/resume_builder?pasted=${p.id}`}>Edit</Link>
+                {p.pdfPath && <a className="apps-btn" href={pdfUrl(p.pdfPath, true)}>Download</a>}
+                <button className="apps-link rb-del" onClick={() => void remove(p)}>Delete</button>
+              </CardActions></span>
+            </li>
+          ))}</ul>
+        </div>
+      </section>
+      {bankOpen && <div className="rb-bank-backdrop" onClick={() => setBankOpen(false)} aria-hidden="true" />}
+      <aside id="rb-bank-drawer" className={`rb-bank-drawer${bankOpen ? " is-open" : ""}`} aria-label="Bank" aria-hidden={!bankOpen} inert={!bankOpen}>
+        {bankOpen && <BankPage onClose={() => setBankOpen(false)} />}
+      </aside>
     </div>
   );
 }
@@ -191,6 +223,11 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const [savedAt, setSavedAt] = useState(0);
   const [notice, setNotice] = useState("");
   const [dirty, setDirty] = useState(false);
+  // "Applied?": the popup that asks for the link you applied through (optional), then records the job as applied.
+  const [appliedOpen, setAppliedOpen] = useState(false);
+  const [appliedLink, setAppliedLink] = useState("");
+  const [appliedBusy, setAppliedBusy] = useState(false);
+  const [appliedError, setAppliedError] = useState("");
   // Live: the HTML preview (instant, Paged.js); PDF: the compiled file that is sent.
   const [view, setView] = useState<"live" | "pdf">("live");
   const [fit, setFit] = useState<LiveFit | null>(null);
@@ -501,8 +538,6 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const atsChip = atsBefore && <span className="rb-ats" title={atsTitle}>ATS {!atsBefore.posting ? <small>no posting</small> : atsBefore.error && !atsAfter ? <small>unavailable</small> : <>
     <b>{scoreBefore ?? "–"}</b>{dirty && <> → {atsAfter ? <b className={scoreAfter != null && scoreBefore != null ? (scoreAfter > scoreBefore ? "is-up" : scoreAfter < scoreBefore ? "is-down" : "") : ""}>{scoreAfter ?? "–"}</b> : <small>scoring…</small>}</>}
     {counts?.required?.total ? <small>· req {counts.required.matched}/{counts.required.total}{counts.preferred?.total ? ` · pref ${counts.preferred.matched}/${counts.preferred.total}` : ""}</small> : null}</>}</span>;
-  const ready = atsNow?.ready ?? null;
-  const readyChip = ready && <span className={`rb-ready is-${ready.status.toLowerCase().replace(" ", "-")}`} title={[`Resume Ready${atsAfter ? " (this draft)" : ""}: ${ready.status}`, ...ready.reasons, ready.skills_checked ? "" : "Skills were not checked against Fit yet"].filter(Boolean).join(". ")}>Resume Ready · {ready.status}</span>;
   const projects = (loaded?.roles ?? []).filter((r) => r.kind === "project" && !sections.some((s) => s.role === r.role));
   const resumeName = !loaded ? "" : loaded.source.kind === "track" ? `${TRACK_LABEL[loaded.source.track] ?? loaded.source.track} general resume` : loaded.source.company;
   const metaOf = (s: Section) => {
@@ -524,6 +559,11 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
       <label><span>Title</span><input ref={titleRef} value={title} maxLength={60} onFocus={remember} onChange={(e) => { setTitle(e.target.value); setDirty(true); }} /></label>
       <label><span>Email</span><input type="email" value={email} maxLength={80} onFocus={remember} onChange={(e) => { setEmail(e.target.value); setDirty(true); }} /></label>
       <label><span>Location</span><input value={city} maxLength={40} placeholder="City, ST" onFocus={remember} onChange={(e) => { setCity(e.target.value); setDirty(true); }} /></label>
+      {loaded && <div className="rb-job-source">
+        <div><span>{resumeName}</span><Link className="rb-back" to="/resume_builder">All resumes</Link></div>
+        <b title={loaded.source.kind === "track" ? "Not tailored to a job" : loaded.source.title}>{loaded.source.kind === "track" ? "Not tailored to a job" : loaded.source.title}</b>
+        <small>{loaded.source.kind === "pasted" ? "From a pasted job description · " : ""}{loaded.current.edited ? "edited" : "generated"}</small>
+      </div>}
     </div>
   );
   const skillsField = (
@@ -677,6 +717,34 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
   const saveBtn = <button className="rv-primary" disabled={!canSave} onClick={() => void save()} title={draft && !draft.problems.length ? "One page · every bullet from your bank · no repeated opening verb (⌘S)" : "⌘S"}>{saving ? "Saving…" : "Save"}</button>;
   const downloadBtn=dirty?<button className="apps-btn" disabled={!canSave} onClick={()=>void save(true)} title="Save the current draft, then download that PDF">Save & download</button>:loaded&&<a className="apps-btn" href={pdfUrl(loaded.current.pdfPath,true)}>Download</a>;
   const aiComparison=(s:AiSuggestion)=>{const diff=resumeChangeDiff(s);return <><div className="rb-ai-compare"><div><small>{s.kind==="skills"?"CURRENT GROUPS":"REPLACED / REMOVED"}</small>{diff.removed.length?diff.removed.map((text,i)=><p key={i}>{text}</p>):<p className="apps-muted">{diff.reordered?"Bullet order updated":"Nothing removed"}</p>}</div><div><small>{s.kind==="skills"?"SUGGESTED GROUPS":"NEW / REWRITTEN"}</small>{diff.added.length?diff.added.map((text,i)=><p className="rb-ai-new" key={i}>{text}</p>):<p className="apps-muted">{diff.reordered?"Same wording, new order":"No new wording"}</p>}</div></div>{diff.unchanged>0&&<small>{diff.unchanged} unchanged {s.kind==="skills"?"groups":"bullets"} hidden</small>}<details><summary>View full {s.kind==="skills"?"skills section":"section"}</summary><small>CURRENT</small><p>{s.current}</p><small>SUGGESTED</small><p>{s.suggested}</p></details></>;};
+  const appliedBtn = loaded && (loaded.applied
+    ? <button className="apps-btn rb-applied is-applied" disabled title={loaded.applied.link ?? "Marked applied"}>Applied ✓</button>
+    : <button className="apps-btn rb-applied" onClick={() => { setAppliedLink(""); setAppliedError(""); setAppliedOpen(true); setSheet(null); }} title="Record that you applied with this resume">Applied?</button>);
+  const submitApplied = async () => {
+    if (!loaded || appliedBusy) return;
+    setAppliedBusy(true); setAppliedError("");
+    try {
+      const r = await call<{ applied: { at: string | null; link: string | null } | null }>("applied", { source: loaded.source, link: appliedLink.trim() || null });
+      if (r.applied) setLoaded({ ...loaded, applied: r.applied }); setAppliedOpen(false);
+      setNotice(`Marked ${loaded.source.company || "the job"} as applied. Updating today's total…`);
+    } catch (e) { setAppliedError(e instanceof Error ? e.message : String(e)); }
+    finally { setAppliedBusy(false); }
+  };
+  const appliedDialog = appliedOpen && loaded && <>
+    <div className="rb-modal-back" onClick={() => !appliedBusy && setAppliedOpen(false)} />
+    <form className="rb-modal rb-applied-modal" role="dialog" aria-label="Mark applied" onSubmit={(e) => { e.preventDefault(); void submitApplied(); }}>
+      <h3>Did you apply?</h3>
+      <p className="apps-muted">{[loaded.source.title, loaded.source.company].filter(Boolean).join(" · ") || "This resume"}</p>
+      <label htmlFor="rb-applied-link">Link you applied through <span className="apps-muted">(optional)</span></label>
+      <input id="rb-applied-link" type="url" inputMode="url" autoFocus placeholder="https://…" value={appliedLink} onChange={(e) => setAppliedLink(e.target.value)} />
+      {dirty && <p className="rb-applied-warn" role="alert">You have unsaved changes. Save first so the resume on record is the one you sent.</p>}
+      {appliedError && <p className="rb-applied-warn" role="alert">{appliedError}</p>}
+      <div className="rb-applied-actions">
+        <button type="button" className="apps-btn" disabled={appliedBusy} onClick={() => setAppliedOpen(false)}>Cancel</button>
+        <button type="submit" className="rv-primary" disabled={appliedBusy || dirty}>{appliedBusy ? "Saving…" : "Submit"}</button>
+      </div>
+    </form>
+  </>;
   const undoBtn = <button className="apps-btn" disabled={!history.current.length} onClick={undo} title="Undo the last change (⌘Z)">Undo</button>;
 
   const aiStale = Boolean(ai && (aiJdStale || aiInput !== aiSnapshot(sections)));
@@ -749,7 +817,8 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
               {t.kind === "skills" && <><div className="rb-sheet-head"><b>Technical skills</b></div>{skillsField}</>}
               {t.kind === "menu" && <div className="rb-menu">
                 <a className="apps-btn" href={pdfUrl(preview ?? loaded.current.pdfPath)} target="_blank" rel="noreferrer">Open the PDF</a>
-                {downloadBtn}{dirty&&<a className="apps-link" href={pdfUrl(loaded.current.pdfPath,true)}>Download previous saved PDF</a>}
+                {appliedBtn}
+                {downloadBtn}{loaded&&loaded.source.kind!=="track"&&<CoverLetter source={loaded.source} disabled={dirty}/>}{dirty&&<a className="apps-link" href={pdfUrl(loaded.current.pdfPath,true)}>Download previous saved PDF</a>}
                 <button className="apps-btn" disabled={!dirty || saving} onClick={() => { void load(); setSheet(null); }}>Discard changes</button>
                 {loaded.current.edited && <button className="apps-btn" disabled={saving} onClick={() => { void revert(); setSheet(null); }}>Revert to generated</button>}
                 {projects.length > 0 && <><span className="rb-sheet-label">Add a project</span>{projects.map((p) => <button key={p.role} className="apps-btn" onClick={() => { change((x) => [...x, { role: p.role, kind: "project", label: p.label, bullets: [] }]); setSheet(null); }}>+ {p.label}</button>)}</>}
@@ -757,6 +826,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
               {t.kind !== "bullet" && <button className="rv-primary rb-sheet-done" onClick={() => setSheet(null)}>Done</button>}
             </div>}
         </>}
+        {appliedDialog}
         {notice && <div className="apps-toast" role="status"><span>{notice}</span><button type="button" className="apps-toast-close" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
       </div>
     );
@@ -770,11 +840,6 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
       {loaded && (
         <main className="rb-main">
           <section className="rb-editor" aria-label="Resume content" ref={editorRef}>
-            <div className="rb-which">
-              <b>{resumeName}</b>
-              <span>{loaded.source.kind === "track" ? "Not tailored to a job" : loaded.source.title}{loaded.source.kind === "pasted" ? " · from a pasted job description" : ""}{loaded.current.edited ? " · edited" : " · generated"}</span>
-              <Link className="rb-back" to="/resume_builder">All resumes</Link>
-            </div>
             {headerFields}
             <h3 className="rb-group">Experience</h3>
             {sections.map((s, si) => s.kind === "experience" ? sectionCard(s, si) : null)}
@@ -795,13 +860,14 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
                 <button role="tab" aria-selected={view === "pdf"} className={view === "pdf" ? "is-on" : ""} onClick={() => setView("pdf")}>PDF</button>
               </span>
               {roomChip}
-              {atsChip}{readyChip}
-              {dirty?pdfStatus:savedAt?<span className="rb-saved">Saved ✓</span>:pdfStatus}
+              {atsChip}
+              {dirty && pdfStatus}
               {draft?.jdMatch && <span className="rb-match" title={draft.jdMatch.missing.length ? `Still missing: ${draft.jdMatch.missing.join(", ")}` : "Every skill this job names is on it"}>JD {draft.jdMatch.before ?? "–"} → <b>{draft.jdMatch.after ?? "–"}</b></span>}
               <span className="rb-actions">
                 {undoBtn}
                 {loaded.current.edited && <button className="apps-btn" disabled={saving} onClick={() => void revert()} title="Back to the generated resume">Revert</button>}
-                {downloadBtn}
+                {downloadBtn}{loaded&&loaded.source.kind!=="track"&&<CoverLetter source={loaded.source} disabled={dirty}/>}
+                {appliedBtn}
                 <button className="apps-btn" disabled={!dirty || saving} onClick={() => void load()}>Discard</button>
                 {saveBtn}
               </span>
@@ -816,6 +882,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
           </>}
         </main>
       )}
+      {appliedDialog}
       {notice && <div className="apps-toast" role="status"><span>{notice}</span><button type="button" className="apps-toast-close" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
     </div>
   );

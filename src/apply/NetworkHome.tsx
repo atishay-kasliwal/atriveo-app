@@ -5,7 +5,7 @@ import "./network.css";
 
 // The Network home page: your maps as cards, New map, and Open a saved file (a copy made with Export becomes a new map).
 
-type OpenResult = { map: { id: string; name: string }; summary: { people: { added: number; matched: number }; sources: { added: number; matched: number }; links: number; board: number; left: number } };
+type OpenResult = { separate?: boolean; map: { id: string; name: string }; summary: { people: { added: number; matched: number }; sources: { added: number; matched: number }; links: number; board: number; left: number } };
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 /** What opening a file did, in one sentence for the map it opens. */
@@ -15,7 +15,7 @@ function opened(r: OpenResult) {
   if (s.people.matched) parts.push(s.people.added ? `${s.people.matched} already in your network (left as they are)` : `${s.people.matched === 1 ? "the one person" : `all ${s.people.matched} people`} already in your network (left as they are)`);
   if (!parts.length) parts.push("nobody in it");
   if (s.sources.added) parts.push(plural(s.sources.added, "new source"));
-  return `Opened ${r.map.name}: ${parts.join(", ")}.${s.left ? ` ${plural(s.left, "picture or item")} could not come with it.` : ""}`;
+  return `Opened ${r.map.name}: ${parts.join(", ")}${r.separate ? ", kept off My network" : ""}.${s.left ? ` ${plural(s.left, "picture or item")} could not come with it.` : ""}`;
 }
 
 export default function NetworkHome({ header, onOpen }: { header?: ReactNode; onOpen: (id: string, message?: string) => void }) {
@@ -27,6 +27,8 @@ export default function NetworkHome({ header, onOpen }: { header?: ReactNode; on
   const [confirm, setConfirm] = useState<string | null>(null);
   const [busy, setBusy] = useState("");
   const [dragging, setDragging] = useState(false);
+  // Keep what a file adds off My network: the new people and sources belong to the new map only.
+  const [separate, setSeparate] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const load = useCallback(async () => {
     try { await previewSaved(); setMaps(await loadMaps()); setError(""); } catch (e) { setError(String((e as Error).message || e)); }
@@ -47,7 +49,7 @@ export default function NetworkHome({ header, onOpen }: { header?: ReactNode; on
       try { json = JSON.parse(await file.text()); } catch { throw new Error("That file is not a saved map. Pick a .json file made with Export, Save a copy."); }
       if (json?.type !== "atriveo-network") throw new Error("That file is not a saved map. Pick a .json file made with Export, Save a copy.");
       const name = file.name.replace(/\.json$/i, "").replace(/[-_]+/g, " ").trim() || json.name || "Opened map";
-      const r = await post<OpenResult>("maps/open", { name, file: json });
+      const r = await post<OpenResult>("maps/open", { name, file: json, ...(separate ? { separate: true } : {}) });
       onOpen(r.map.id, opened(r));
     } catch (e) { setError(String((e as Error).message || e)); setBusy(""); }
   }
@@ -74,6 +76,8 @@ export default function NetworkHome({ header, onOpen }: { header?: ReactNode; on
             <p>Maps of the people around your job search. My network holds everyone; make a map for one search, one event or one company.</p>
           </div>
           <div className="nwh-actions">
+            <label className="nwh-separate" title="The people and companies in the file belong to the new map only and stay off My network">
+              <input type="checkbox" checked={separate} onChange={(e) => setSeparate(e.target.checked)} /> Keep off My network</label>
             <button type="button" className="nw-btn ghost" disabled={busy === "open"} onClick={() => fileInput.current?.click()}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5A1.5 1.5 0 015.5 6H10l2 2h6.5A1.5 1.5 0 0120 9.5v8a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 17.5z" /></svg>
               {busy === "open" ? "Opening…" : "Open a saved file"}</button>

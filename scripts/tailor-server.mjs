@@ -1,12 +1,14 @@
 #!/usr/bin/env node
+import { matchingCoverLetter } from './matching-cover-letter.mjs';
 import { handlePushRoute } from "./web-push.mjs";
 import { startPushEvents } from "./push-events.mjs";
+import { handleLucky } from "./lucky-routes.mjs";
 import {dashboardAiUsage} from './resume-ai-usage.mjs';
 import { claimInference, completeInference, queueInference } from './resume-ai-queue.mjs';
 import { analyzeResume, recordAiDecision, resumeAiVersion, enqueueResumeAi, resumeAiResult } from './resume-ai.mjs';
 import { enqueueAnswer } from './application-answer.mjs';
 import { widgetProgress } from './widget-progress.mjs';
-import { appliedHistory } from './applied-history.mjs';
+import { appliedHistory, setAppliedOutcome } from './applied-history.mjs';
 import { appliedSummary } from './applied-core.mjs';
 /**
  * Atriveo local tailor sidecar.
@@ -27,6 +29,7 @@ import { outreachHandler, outreachCors } from "./outreach/routes.mjs";
 import { outreachReplies } from "./outreach/replies.mjs";
 import { handleStaffing } from "./staffing-routes.mjs";
 import { handleNetwork } from "./network-routes.mjs";
+import { handleLoops } from "./loops-routes.mjs";
 import { gmailSender } from "./network-mail.mjs";
 import { startNetworkReminders } from "./network-reminders.mjs";
 import { subscriptionGenerate } from "./resume-ai-provider.mjs";
@@ -62,7 +65,7 @@ import { insights } from "./insights.mjs";
 import { getResumeEmails, changeResumeEmails, syncDefaultEmail, forgetEmailSync } from "./resume-emails.mjs";
 import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume-profile.mjs";
 import { withMongo, closeMongo } from "./mongo-client.mjs";
-import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, renderDraft, revertResume, saveBullet, saveDraft, setResumeEmail, startPasted } from "./resume-builder.mjs";
+import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, markResumeApplied, renderDraft, revertResume, saveBullet, saveDraft, setResumeEmail, startPasted } from "./resume-builder.mjs";
 import { BankPageError, bankView, retireBullet } from "./bank-page.mjs";
 import { syncOverlay } from "./ac-bank-overlay.mjs";
 import { approveDraft, draftResult, startDraft } from "./bank-draft.mjs";
@@ -1188,7 +1191,9 @@ const server = http.createServer(async (req, res) => {
     // Drafts use the same AI path as application answers: the Mac worker's queue on the server, the signed-in CLI on a Mac.
     generate: (request, db) => { const provider = process.env.RESUME_AI_PROVIDER || "claude"; return process.env.RESUME_AI_REMOTE_WORKER === "mac" ? queueInference(db, provider, request) : subscriptionGenerate(provider, request); },
   })) return;
+  if (await handleLoops(req, res, reqUrl, { withDb: process.env.MONGO_URI ? (fn) => withMongo(fn, { appName: "AtriveoTailorServer" }) : null })) return;
   if (await handleOutreach(req, res, reqUrl)) return;
+  if (await handleLucky(req, res, reqUrl, { withDb: process.env.MONGO_URI ? (fn) => withMongo(fn, { appName: "AtriveoTailorServer" }) : null })) return;
   // Open & Fill: the Atriveo Fill extension on this Mac only (never through the relay); see fill-routes.mjs.
   if (await handleFillRoute(req, res, reqUrl, (request) => runManualFill(process.env.PLAYATRIVEO_DIR || path.join(os.homedir(), "playatriveo"), request), APPLY_HERE_DOCS)) return;
 
@@ -1820,6 +1825,7 @@ const server = http.createServer(async (req, res) => {
       : op === "start" ? startPasted(db, body)
       : op === "delete" ? deletePasted(db, body.id)
       : op === "set-email" ? setResumeEmail(db, body)
+      : op === "applied" ? markResumeApplied(db, body).then((r) => { clearNoTextCache(); invalidateMatchingQueue(); return r; })
       : op === "render" ? renderDraft(db, body)
       : op === "save" ? saveDraft(db, body)
       : op === "bullet" ? saveBullet(db, body)
@@ -1832,7 +1838,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     if (req.method === "GET" && op === "pasted") { void run({}); return; }
-    if (req.method === "POST" && ["render", "save", "revert", "bullet", "check", "guess", "start", "delete", "ai-match", "ai-answer", "ai-decision", "set-email", "ai-version", "ai-result", "ai-worker-claim", "ai-worker-complete", "ai-usage"].includes(op)) {
+    if (req.method === "POST" && ["render", "save", "revert", "bullet", "check", "guess", "start", "delete", "ai-match", "ai-answer", "ai-decision", "set-email", "applied", "ai-version", "ai-result", "ai-worker-claim", "ai-worker-complete", "ai-usage"].includes(op)) {
       let raw = "";
       req.on("data", (c) => { raw += c; if (raw.length > 200_000) req.destroy(); });
       req.on("end", () => { let body; try { body = JSON.parse(raw || "{}"); } catch { return reply(400, { ok: false, error: "Bad JSON" }); } void run(body); });
@@ -1959,6 +1965,23 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "POST" && pathname === "/matching-cover-letter") {
+    try {
+      let raw = "";
+      for await (const chunk of req) { raw += chunk; if (raw.length > 30000) throw new Error("Request too large"); }
+      const body = JSON.parse(raw || "{}");
+      const result = await withMongo(db => matchingCoverLetter(db, body, {
+        generate: request => process.env.RESUME_AI_REMOTE_WORKER === "mac" ? queueInference(db, "codex", request) : subscriptionGenerate("codex", request),
+      }), { appName: "AtriveoCoverLetter" });
+      res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+      res.end(JSON.stringify({ ok: true, ...result }));
+    } catch (e) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+    }
+    return;
+  }
+
   // GET /applications/matching-queue?limit=&offset= — Job Matching: the next jobs to decide on, resume and JD ready.
   if (req.method === "GET" && pathname === "/applications/matching-queue") {
     (async () => {
@@ -1972,7 +1995,7 @@ const server = http.createServer(async (req, res) => {
         const data = wantsGeneral
           ? await withMongo((db) => generalQueue(db, { limit, offset, period, role: params.get("role") || "", query: (params.get("q") || "").slice(0, 200), company: params.get("company") || "", exclude: (params.get("exclude") || "").split(",").filter((x) => /^[a-f0-9]{12}$/.test(x)), outRoot: OUT_ROOT }), { appName: "AtriveoTailorServer" })
           : await withMongo(async (db) => {
-            const queue = await matchingQueue(db, { limit, offset, period, sources: (params.get("sources") || "").split(","), role: params.get("role") || "", query: (params.get("q") || "").slice(0,200), timeZone: params.get("tz") || "America/New_York", sort: params.get("sort") === "fit" ? "fit" : "latest", company: params.get("company"), jobUrl: params.get("job"), random: params.get("random") === "1", exclude: (params.get("exclude") || "").split(",").filter(x=>/^[a-f0-9]{16}$/.test(x)), learn: params.get("learn") !== "0" });
+            const queue = await matchingQueue(db, { limit, offset, period, sources: (params.get("sources") || "").split(","), role: params.get("role") || "", query: (params.get("q") || "").slice(0,200), timeZone: params.get("tz") || "America/New_York", sort: params.get("sort") === "fit" ? "fit" : "latest", company: params.get("company"), jobUrl: params.get("job"), random: params.get("random") === "1", exclude: (params.get("exclude") || "").split(",").filter(x=>/^[a-f0-9]{16}$/.test(x)), learn: params.get("learn") !== "0", saved: params.get("saved") === "1" });
             // The source filter shows how many General jobs there are; a failure here must never break the normal queue.
             try { if (queue?.facets?.sources) queue.facets.sources.general = await generalCount(db, { period, outRoot: OUT_ROOT }); } catch { /* count omitted */ }
             return queue;
@@ -2223,6 +2246,25 @@ const server = http.createServer(async (req, res) => {
 
   // GET /applications/applied?q=&outcome=&skip=&limit= — everything you applied to (tracked and marked), with employer replies;
   // &key= returns one row with its mail timeline.
+  // POST /applications/applied-outcome {key, status: interview|assessment|offer|rejected|clear}: your own mark on an application (phone Activity).
+  if (req.method === "POST" && pathname === "/applications/applied-outcome") {
+    let raw = "";
+    req.on("data", (c) => { raw += c; if (raw.length > 2_000) req.destroy(); });
+    req.on("end", async () => {
+      try {
+        if (!process.env.MONGO_URI) throw new Error("MONGO_URI not configured");
+        const body = JSON.parse(raw || "{}");
+        const data = await withMongo((db) => setAppliedOutcome(db, { key: body?.key, status: body?.status }), { appName: "AtriveoTailorServer" });
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(data));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+      }
+    });
+    return;
+  }
+
   if (req.method === "GET" && pathname === "/applications/applied") {
     (async () => {
       try {
@@ -2663,14 +2705,13 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(409, { "Cache-Control": "no-store" }); res.end("Resume changed. Refresh Job Matching."); return;
       }
       const isDownload = reqUrl.searchParams.get("dl") === "1";
+      const filename = pdfPath.includes(path.sep + ".cover-letters" + path.sep) ? "Atishay Kasliwal - Cover Letter.pdf" : "Atishay Kasliwal.pdf";
       res.writeHead(200, {
         "Content-Type": "application/pdf",
         "Content-Length": data.length,
         "X-Resume-Download-Path": resumeDownloadPath(pdfPath, data),
         "Access-Control-Expose-Headers": "X-Resume-Download-Path",
-        "Content-Disposition": isDownload
-          ? 'attachment; filename="Atishay Kasliwal.pdf"'
-          : 'inline; filename="Atishay Kasliwal.pdf"',
+        "Content-Disposition": `${isDownload ? 'attachment' : 'inline'}; filename="${filename}"`,
       });
       res.end(data);
     } catch (e) {

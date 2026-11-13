@@ -85,6 +85,14 @@ test("the last bit of space is spread between sections and entries, never added 
   assert.match(out, /\\resumeSubHeadingListStart\n    \\resumeSubheading\{A\}/);
 });
 
+test("bullets after the first in each entry get half a section's share of the space; the first bullet gets none", () => {
+  const tex = "  \\resumeItemListStart\n    \\resumeItem{a}\n    \\resumeItem{b}\n    \\resumeItem{c}\n  \\resumeItemListEnd\n  \\resumeItemListStart\n    \\resumeItem{d}\n  \\resumeItemListEnd";
+  const out = stretchToBottom(tex);
+  assert.equal((out.match(/plus 0\.5fill/g) || []).length, 2, "before b and c only");
+  assert.match(out, /\\resumeItemListStart\n    \\resumeItem\{a\}/);
+  assert.match(out, /\\resumeItemListStart\n    \\resumeItem\{d\}/);
+});
+
 test("Resume Ready: one project, a short project or an empty line at the bottom is reported", () => {
   const config = loadAtsConfig();
   const base = { readiness: { status: "PASS" }, ledger: { skills: [] }, config };
