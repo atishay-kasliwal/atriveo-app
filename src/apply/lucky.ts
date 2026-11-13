@@ -23,7 +23,8 @@ let cache: LuckyData | null = null, loadedAt = 0, inflight: Promise<LuckyData> |
 const listeners = new Set<(d: LuckyData) => void>();
 export function loadLucky(force = false): Promise<LuckyData> {
   if (!force && cache && Date.now() - loadedAt < 55_000) return Promise.resolve(cache);
-  inflight ??= getJson<LuckyData>("/lucky").then((d) => { cache = d; loadedAt = Date.now(); listeners.forEach((f) => f(d)); return d; }).finally(() => { inflight = null; });
+  // An error body or a half-filled reply must not reach the nav, which every desktop page renders.
+  inflight ??= getJson<LuckyData>("/lucky").then((d) => { if (!d?.location?.tz || !Array.isArray(d.days) || !d.days.length) throw new Error("Lucky data is incomplete"); cache = d; loadedAt = Date.now(); listeners.forEach((f) => f(d)); return d; }).finally(() => { inflight = null; });
   return inflight;
 }
 export function useLucky(): LuckyData | null {
