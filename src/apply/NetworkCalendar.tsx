@@ -3,9 +3,13 @@ import { finishEvent, loadEvents, removeEvent, saveEvent, type CalendarEvent, ty
 import { nyToIso } from './ny-time';
 
 const TZ = 'America/New_York';
-const REMIND: Record<number, string> = { 0: 'At the time', 15: '15 minutes before', 60: '1 hour before', 1440: '1 day before' };
+const REMIND: Record<number, string> = { 0: 'At start', 15: '15 min before', 60: '1 hour before', 1440: '1 day before' };
 const when = (iso: string) => new Date(iso).toLocaleString('en-US', { timeZone: TZ, weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 const today = () => new Date().toLocaleDateString('en-CA', { timeZone: TZ });
+
+function CloseIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>;
+}
 
 /** Calendar events for your network: add one with a reminder, see what is coming up, mark it done. */
 export default function NetworkCalendar({ people, onClose }: { people: Person[]; onClose: () => void }) {
@@ -42,42 +46,52 @@ export default function NetworkCalendar({ people, onClose }: { people: Person[];
   }
 
   return (
-    <div id="nw-canvas-calendar" className="nw-canvas-popover nw-canvas-calendar" role="dialog" aria-label="Calendar" data-canvas-controls>
-      <div className="nw-canvas-panel-head"><b>Calendar</b><button type="button" className="nw-x" aria-label="Close calendar" onClick={onClose}>×</button></div>
-      <form className="nw-cal-form" onSubmit={add}>
-        <label><span>Title</span><input required maxLength={120} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Coffee with Ankit" /></label>
-        <div className="nw-cal-row">
-          <label><span>Date</span><input type="date" required value={date} onChange={(e) => setDate(e.target.value)} /></label>
-          <label><span>Time (New York)</span><input type="time" required value={time} onChange={(e) => setTime(e.target.value)} /></label>
+    <div id="nw-canvas-calendar" className="nw-canvas-popover nw-canvas-calendar" role="dialog" aria-labelledby="nw-cal-title" data-canvas-controls>
+      <div className="nw-cal-head">
+        <div>
+          <h2 id="nw-cal-title">Calendar</h2>
+          <small>Times are New York time</small>
         </div>
-        <label><span>Remind me</span>
+        <button type="button" className="nw-cal-close" aria-label="Close calendar" onClick={onClose}><CloseIcon /></button>
+      </div>
+
+      <form className="nw-cal-card nw-cal-form" onSubmit={add}>
+        <label className="nw-cal-field nw-cal-wide"><span>What</span><input required maxLength={120} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Coffee with Ankit" /></label>
+        <label className="nw-cal-field"><span>Date</span><input type="date" required value={date} onChange={(e) => setDate(e.target.value)} /></label>
+        <label className="nw-cal-field"><span>Time</span><input type="time" required value={time} onChange={(e) => setTime(e.target.value)} /></label>
+        <label className="nw-cal-field"><span>Remind me</span>
           <select value={remind} onChange={(e) => setRemind(Number(e.target.value))}>
             {Object.entries(REMIND).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
         </label>
-        <label><span>Person (optional)</span>
+        <label className="nw-cal-field"><span>Person</span>
           <select value={personId} onChange={(e) => setPersonId(e.target.value)}>
             <option value="">No one</option>
             {sorted.map((p) => <option key={p.id} value={p.id}>{p.name}{p.company ? ` · ${p.company}` : ''}</option>)}
           </select>
         </label>
-        <label><span>Note (optional)</span><input maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} /></label>
+        <label className="nw-cal-field nw-cal-wide"><span>Note</span><input maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Optional" /></label>
         <button type="submit" className="nw-cal-save" disabled={busy}>Add to calendar</button>
       </form>
+
       {error && <p className="nw-cal-error" role="alert">{error}</p>}
-      <h3 className="nw-cal-heading">Coming up</h3>
+
+      <div className="nw-cal-section-head"><h3>Coming up</h3>{events && events.length > 0 && <span>{events.length}</span>}</div>
       {events === null && !error && <p className="nw-cal-empty">Loading…</p>}
       {events?.length === 0 && <p className="nw-cal-empty">Nothing scheduled. Add an event above.</p>}
       <ul className="nw-cal-list">
         {events?.map((event) => (
-          <li key={event.id}>
-            <div>
+          <li key={event.id} className="nw-cal-item">
+            <div className="nw-cal-item-body">
+              <time dateTime={event.at}>{when(event.at)}</time>
               <b>{event.title}</b>
-              <small>{when(event.at)} · {REMIND[event.remind] ?? 'Reminder'}{personName(event.personId) ? ` · ${personName(event.personId)}` : ''}</small>
+              <small>{REMIND[event.remind] ?? 'Reminder'}{personName(event.personId) ? ` · ${personName(event.personId)}` : ''}</small>
               {event.note && <small>{event.note}</small>}
             </div>
-            <button type="button" disabled={busy} onClick={() => void act(() => finishEvent(event.id))}>Done</button>
-            <button type="button" className="nw-x" disabled={busy} aria-label={`Remove ${event.title}`} onClick={() => void act(() => removeEvent(event.id))}>×</button>
+            <div className="nw-cal-item-actions">
+              <button type="button" className="nw-cal-done" disabled={busy} onClick={() => void act(() => finishEvent(event.id))}>Done</button>
+              <button type="button" className="nw-cal-close small" disabled={busy} aria-label={`Remove ${event.title}`} onClick={() => void act(() => removeEvent(event.id))}><CloseIcon /></button>
+            </div>
           </li>
         ))}
       </ul>

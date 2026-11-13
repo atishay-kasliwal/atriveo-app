@@ -137,15 +137,19 @@ export default function NetworkGraph({ intelligenceFocus, data, layers, stackPeo
 
   const fit = useCallback(() => {
     const el = stage.current; if (!el) return;
+    const you = moved.get("you") ?? base.get("you") ?? { x: 0, y: 0 }, top = phoneMenu ? 64 : 56;
+    // On a desktop, Fit always brings "you" to the middle of the canvas at 75%, so the view opens in the same place every time.
+    // Leave the strips at the top (tools) and bottom (zoom and legend) clear.
+    if (!phoneMenu) { const w = el.clientWidth, h = el.clientHeight - 112, k = 0.75; setView({ k, x: w / 2 - you.x * k, y: top + h / 2 - you.y * k }); return; }
     const pts = ["you", ...shownSources.map((s) => s.id), ...shownPeople.map((p) => p.id)].map((id) => moved.get(id) ?? base.get(id) ?? { x: 0, y: 0 });
     pts.push(...stacks.map(({ x, y }) => ({ x, y })));
     for (const it of board) { if (it.kind === "stroke" || it.kind === "group" || (it.kind === "work" ? !layers.work : !layers.board)) continue; const p = at(it); pts.push(p, { x: p.x + (it.w ?? 0), y: p.y + (it.h ?? 0) }); }
     const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
-    // Leave the strips at the top (tools) and bottom (zoom and legend, or the phone dock) clear.
-    const w = el.clientWidth, h = el.clientHeight - (phoneMenu ? 150 : 112), bw = Math.max(...xs) - Math.min(...xs) + 320, bh = Math.max(...ys) - Math.min(...ys) + 160;
-    const k = Math.max(0.25, Math.min(1.1, w / bw, h / bh)), top = phoneMenu ? 64 : 56;
+    // On a phone, leave the top strip and the dock clear.
+    const w = el.clientWidth, h = el.clientHeight - 150, bw = Math.max(...xs) - Math.min(...xs) + 320, bh = Math.max(...ys) - Math.min(...ys) + 160;
+    const k = Math.max(0.25, Math.min(1.1, w / bw, h / bh));
     // A whole network on a phone is too small to read: below half size it opens around you instead, and you pinch out for the rest.
-    if (phoneMenu && k < 0.5) { const you = moved.get("you") ?? base.get("you") ?? { x: 0, y: 0 }; setView({ k: 0.5, x: w / 2 - you.x * 0.5, y: top + h / 2 - you.y * 0.5 }); return; }
+    if (k < 0.5) { setView({ k: 0.5, x: w / 2 - you.x * 0.5, y: top + h / 2 - you.y * 0.5 }); return; }
     setView({ k, x: w / 2 - ((Math.max(...xs) + Math.min(...xs)) / 2) * k, y: top + h / 2 - ((Math.max(...ys) + Math.min(...ys)) / 2) * k });
   }, [shownSources, shownPeople, stacks, layers.work, layers.board, moved, base, board, at, phoneMenu]);
   // Fit on the first draw, and again whenever several cards arrive at once (a list, an import, people put on this map).
