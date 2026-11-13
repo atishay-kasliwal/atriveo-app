@@ -59,3 +59,14 @@ test("notify posts to the topic, and is a quiet no-op without one", async () => 
   assert.equal(await notify({ title: "T", text: "x" }, { topic: undefined, fetchImpl }), false);
   assert.equal(calls.length, 1);
 });
+
+test("the Nov 2 outage would have been caught: the disk is watched, warned at 80% full", async () => {
+  const { diskUse } = await import("../../scripts/health-watch.mjs");
+  const cs = evaluate(facts({ disk: { usedPct: 86, freeGb: 6.3 } }), DEFAULTS, NOW);
+  assert.deepEqual(failing(cs), ["disk"]);
+  assert.match(cs.find((c) => c.key === "disk").message, /86% full \(6\.3 GB free\)/);
+  assert.deepEqual(failing(evaluate(facts({ disk: { usedPct: 79, freeGb: 9 } }), DEFAULTS, NOW)), []);
+  assert.equal(evaluate(facts(), DEFAULTS, NOW).some((c) => c.key === "disk"), false, "no disk reading, no disk check");
+  const here = diskUse();
+  assert.ok(here && here.usedPct >= 0 && here.usedPct <= 100 && here.freeGb >= 0, "reads this machine's disk");
+});

@@ -412,7 +412,7 @@ export async function enqueueFreshSessionJobs(db, { limit = null, minScore = 0, 
  * Companies you skip (Mongo company_rules, written by Today's Skip company and `npm run apply:manual` in
  * playatriveo): their jobs stay queued, unbuilt, until the company is removed. Matched by name, any case.
  */
-async function skippedCompanyFilter(db) {
+export async function skippedCompanyFilter(db) {
   const rules = await db.collection("company_rules").find({}, { projection: { names: 1 } }).toArray().catch(() => []);
   const names = [...new Set(rules.flatMap((r) => r.names ?? []).map((n) => String(n).trim()).filter(Boolean))];
   return names.length ? { $nor: names.map((n) => ({ company: { $regex: `^${n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" } })) } : {};
