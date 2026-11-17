@@ -1,0 +1,58 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-271
+role: open-source
+fits:
+  - ai-engineer
+  - software-engineer
+slot_kind: project
+achievement_theme: ai-devtools
+display_order: 19
+wow_score: 0.88
+metrics_claimed:
+  - stars_16000
+  - keys_246_of_307
+concepts_claimed:
+  - llm-tools
+  - configuration
+  - testing
+signature_technologies:
+  - Python
+fact: >-
+  Open source contribution (PR-Agent), draft P1 (was AC-218 before the port) approved 2026-11-16. Never employment at
+  PR-Agent.
+oss:
+  org: ''
+  project: PR-Agent
+  status: merged
+  prs:
+    - https://github.com/The-PR-Agent/pr-agent/pull/4706
+capabilities:
+  ai: 82
+  backend: 80
+  data: 66
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - pytest
+  - LLM
+  - code review
+  - AI
+  - automation
+  - agents
+facets:
+  ai-devtools:
+    phrase: PR-Agent open source contribution
+    keywords:
+      - python
+      - pytest
+      - llm
+      - code review
+      - ai
+variants:
+  - facet: ai-devtools
+    emphasis: ai-devtools
+    strength: 9
+    text: >-
+      Surveyed 307 configuration keys in PR-Agent (16K+ GitHub stars) and pinned the 246 that PR comments can override
+      in a maintainer agreed Python test ledger.

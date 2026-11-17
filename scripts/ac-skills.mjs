@@ -1,7 +1,11 @@
 // Dynamic skills lines from selected AC evidence only — no untraceable drift.
 
 import { parseAtsKeywords } from "./ac-bank.mjs";
-import { confirmedSkillKeys, isConfirmedSkill, loadTracks } from "./ac-tracks.mjs";
+import { confirmedSkillKeys, confirmedSkillSources, isConfirmedSkill, loadTracks } from "./ac-tracks.mjs";
+import { openOnlySkillKeys, skillEvidenceKey, skillEvidenceSources } from "./skill-evidence.mjs";
+
+// A confirmation backed only by open PRs ranks after merged and bullet evidence on a full Skills line.
+const OPEN_ONLY_CONFIDENCE = 0.75;
 import {
   SKILLS_LIBRARY,
   SKILL_BY_DISPLAY,
@@ -154,20 +158,27 @@ function skillInEvidence(skill, evidenceTerms) {
 }
 
 // Skills Atishay confirmed using (TRACKS.yaml) back a skill the JD asks for, with no bullet naming it.
-const CONFIRMED_SOURCE = "confirmed by Atishay (TRACKS.yaml)";
 const confirmedForJd = (skill, hay, keys) => isConfirmedSkill(skill, keys) && jdMentionsSkill(skill, hay);
 
 export function buildSkillsEvidenceAudit(composition, bank, jd, opts = {}) {
   const { terms, evidenceBySkill, confidenceMap } = collectBulletEvidence(composition, bank, opts);
   const hay = normJd(jd);
-  const confirmed = confirmedSkillKeys();
+  const tracks = loadTracks(bank?.bank_dir);
+  const confirmed = confirmedSkillKeys(tracks);
+  const confirmedSources = confirmedSkillSources(tracks);
+  const pendingSources = skillEvidenceSources(tracks.skill_evidence, { pending: true });
+  const openOnly = openOnlySkillKeys(tracks.skill_evidence);
   const audit = [];
 
   for (const cat of SKILLS_LIBRARY) {
     for (const skill of cat.skills) {
       const fromBullets = skillInEvidence(skill, terms);
       const fromEvidence = fromBullets || confirmedForJd(skill, hay, confirmed);
-      const sources = fromBullets ? [...(evidenceBySkill.get(norm(skill.name)) || [])] : fromEvidence ? [CONFIRMED_SOURCE] : [];
+      const confirmedMatch = confirmedForJd(skill, hay, confirmed);
+      const sources = new Set(fromBullets ? evidenceBySkill.get(norm(skill.name)) || [] : []);
+      if (confirmedMatch) {
+        for (const source of confirmedSources.get(skillEvidenceKey(skill.name)) || []) sources.add(source);
+      }
       const jdRelevant = jdMentionsSkill(skill, hay);
       audit.push({
         skill: skill.displayName,
@@ -177,8 +188,9 @@ export function buildSkillsEvidenceAudit(composition, bank, jd, opts = {}) {
         evidence_mode: skill.evidence,
         priority: skill.priority,
         covered: fromEvidence,
-        evidence: sources.length ? sources.join(", ") : null,
-        evidence_confidence: confidenceMap.get(skill.name) ?? null,
+        evidence: sources.size ? [...sources].join(", ") : null,
+        evidence_confidence: confidenceMap.get(skill.name) ?? (confirmedMatch ? (openOnly.has(skillEvidenceKey(skill.name)) ? OPEN_ONLY_CONFIDENCE : 1.0) : null),
+        pending_evidence: [...(pendingSources.get(skillEvidenceKey(skill.name)) || [])],
         jd_relevant: jdRelevant,
         marketFrequency: skill.marketFrequency,
         display: fromEvidence ? "✓" : "✗",
@@ -197,7 +209,15 @@ export function buildSkillsFromComposition(composition, bank, jd, {
 } = {}) {
   const hay = normJd(jd);
   const { terms, confidenceMap } = collectBulletEvidence(composition, bank, { useSelectedAcCorpus });
-  const confirmed = confirmedSkillKeys();
+  const tracks = loadTracks(bank?.bank_dir);
+  const confirmed = confirmedSkillKeys(tracks);
+  // Open only confirmations sort after merged ones, so a full line drops them first.
+  const openOnly = openOnlySkillKeys(tracks.skill_evidence);
+  for (const cat of SKILLS_LIBRARY) {
+    for (const skill of cat.skills) {
+      if (!confidenceMap.has(skill.name) && openOnly.has(skillEvidenceKey(skill.name))) confidenceMap.set(skill.name, OPEN_ONLY_CONFIDENCE);
+    }
+  }
   const seen = new Set();
   const lines = [];
 

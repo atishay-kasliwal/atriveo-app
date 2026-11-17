@@ -6,9 +6,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { resolveBankDir } from "./ac-role-meta.mjs";
+import { loadSkillEvidence, skillEvidenceSources } from "./skill-evidence.mjs";
 
 export function loadTracks(bankDir = resolveBankDir()) {
-  return yaml.load(fs.readFileSync(path.join(bankDir, "TRACKS.yaml"), "utf8")) || {};
+  const doc = yaml.load(fs.readFileSync(path.join(bankDir, "TRACKS.yaml"), "utf8")) || {};
+  return { ...doc, skill_evidence: loadSkillEvidence(bankDir).records || [] };
 }
 
 const matches = (patterns, title) => (patterns || []).some((p) => new RegExp(p, "i").test(title));
@@ -139,7 +141,21 @@ const skillKey = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9+#.]/g, "
 /** Skills Atishay confirmed using (any employer), as normalized names; never the not-confirmed ones. */
 export function confirmedSkillKeys(doc = loadTracks()) {
   const lists = Object.entries(doc.confirmed_skills || {}).filter(([key]) => key !== "not_confirmed");
-  return new Set(lists.flatMap(([, skills]) => skills || []).map(skillKey));
+  const keys = new Set(lists.flatMap(([, skills]) => skills || []).map(skillKey));
+  // Merged and open contribution evidence (open at lower priority: ac-skills.mjs sorts it after merged).
+  for (const key of skillEvidenceSources(doc.skill_evidence, { includeOpen: true }).keys()) keys.add(key);
+  return keys;
+}
+
+// PR evidence takes precedence over a generic confirmation label in the audit.
+export function confirmedSkillSources(doc = loadTracks()) {
+  const sources = new Map();
+  for (const [scope, names] of Object.entries(doc.confirmed_skills || {})) {
+    if (scope === "not_confirmed") continue;
+    for (const name of names || []) sources.set(skillKey(name), new Set([`confirmed by Atishay (TRACKS.yaml: ${scope})`]));
+  }
+  for (const [key, urls] of skillEvidenceSources(doc.skill_evidence, { includeOpen: true })) sources.set(key, urls);
+  return sources;
 }
 
 /** Whether a skills-library entry is one Atishay confirmed (by its name, never an alias). */

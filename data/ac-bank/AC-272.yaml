@@ -1,0 +1,54 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-272
+role: open-source
+fits:
+  - ai-engineer
+slot_kind: project
+achievement_theme: agent-testing
+display_order: 20
+wow_score: 0.8
+metrics_claimed:
+  - tests_41
+concepts_claimed:
+  - agent-testing
+  - determinism
+signature_technologies:
+  - LangGraph
+  - Python
+fact: >-
+  Open source contribution (Intuit | StuntDouble), draft S1 (was AC-219 before the port) approved 2026-11-16. Never
+  employment at Intuit.
+oss:
+  org: Intuit
+  project: StuntDouble
+  status: open
+  prs:
+    - https://github.com/intuit/stunt-double/pull/95
+capabilities:
+  ai: 90
+  backend: 78
+  data: 64
+strength:
+  recruiter: 8
+ats_keywords:
+  - LangGraph
+  - Python
+  - AI agents
+  - agent evaluation
+  - testing
+facets:
+  agent-testing:
+    phrase: StuntDouble open source contribution
+    keywords:
+      - langgraph
+      - python
+      - ai agents
+      - agent evaluation
+      - testing
+variants:
+  - facet: agent-testing
+    emphasis: agent-testing
+    strength: 9
+    text: >-
+      Added deterministic replay, seeded randomness and injectable clocks to Intuit's StuntDouble LangGraph agent
+      testing library, adding 41 Python tests for isolation and parallel calls.

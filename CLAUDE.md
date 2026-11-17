@@ -24,7 +24,7 @@ folder as the engine. Do NOT improvise a resume here. Follow its system exactly:
 6. The engine's compile hook builds `Atishay Kasliwal.pdf` automatically on `.tex` write.
 7. Log the run to the engine's `Memory/JD_RUNS/`.
 
-The engine's rules (truth-only, fixed structure, heading stacks, one page, 9+/10 bullets,
+The engine's rules (truth-only, fixed structure, title-only employer lines with tools on project lines only, one page, 9+/10 bullets,
 single-line skills, no Research suffix on Stony Brook) are authoritative. This file only
 points to them; it does not restate or override them.
 

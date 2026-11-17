@@ -1,0 +1,55 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-280
+role: open-source
+fits:
+  - data-science
+  - ai-engineer
+slot_kind: project
+achievement_theme: graph-ml
+display_order: 28
+wow_score: 0.8
+metrics_claimed:
+  - stars_820
+concepts_claimed:
+  - graph-ml
+  - training
+signature_technologies:
+  - Java
+  - GraphSAGE
+fact: >-
+  Open source contribution (Neo4j | Graph Data Science), draft G1 (was AC-227 before the port) approved 2026-11-16.
+  Never employment at Neo4j.
+oss:
+  org: Neo4j
+  project: Graph Data Science
+  status: open
+  prs:
+    - https://github.com/neo4j/graph-data-science/pull/379
+capabilities:
+  ml: 88
+  ai: 82
+  data: 84
+strength:
+  recruiter: 8
+ats_keywords:
+  - GraphSAGE
+  - Java
+  - graph neural networks
+  - machine learning
+  - Neo4j
+facets:
+  graph-ml:
+    phrase: Graph Data Science open source contribution
+    keywords:
+      - graphsage
+      - java
+      - graph neural networks
+      - machine learning
+      - neo4j
+variants:
+  - facet: graph-ml
+    emphasis: graph-ml
+    strength: 9
+    text: >-
+      Added patience based early stopping to GraphSAGE training in Neo4j Graph Data Science (820+ GitHub stars) in Java,
+      with convergence tests for patience one through three.

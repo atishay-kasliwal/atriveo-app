@@ -1,0 +1,59 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-265
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: provisioning-fixes
+display_order: 13
+wow_score: 0.88
+metrics_claimed:
+  - bugs_3
+  - tests_5
+concepts_claimed:
+  - provisioning
+  - context-propagation
+signature_technologies:
+  - Go
+fact: >-
+  Open source contribution (Red Hat | mapt), draft R1 (was AC-212 before the port) approved 2026-11-16. Never employment
+  at Red Hat.
+oss:
+  org: Red Hat
+  project: mapt
+  status: merged
+  prs:
+    - https://github.com/redhat-developer/mapt/pull/959
+    - https://github.com/redhat-developer/mapt/pull/956
+    - https://github.com/redhat-developer/mapt/pull/960
+capabilities:
+  backend: 84
+  cloud: 88
+  data: 56
+strength:
+  recruiter: 9
+ats_keywords:
+  - Go
+  - Golang
+  - provisioning
+  - cloud
+  - AWS
+  - Azure
+facets:
+  provisioning-fixes:
+    phrase: mapt open source contribution
+    keywords:
+      - go
+      - golang
+      - provisioning
+      - cloud
+      - aws
+      - azure
+variants:
+  - facet: provisioning-fixes
+    emphasis: provisioning-fixes
+    strength: 9
+    text: >-
+      Examined context handling in Red Hat's mapt provisioning tool in Go and fixed 3 propagation and preflight bugs,
+      rejecting invalid output paths before cloud calls with 5 regression tests.

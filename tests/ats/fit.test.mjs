@@ -67,11 +67,14 @@ test("one ledger: required plus preferred is the total and the missing list is w
   assert.deepEqual(ledger.missing.filter((l) => rows.some((i) => i.label === l && i.lost > 0)), ledger.missing.filter((l) => ledger.skills.find((s) => s.label === l).class === "required"));
 });
 
-test("a skill counts only with evidence: Kubernetes is in a bullet, Rust is not", () => {
-  const r = fit(jdText.replace("Go is a plus.", "Go is a plus.\n- Rust experience."));
+// Kotlin has no evidence anywhere. Rust is backed by approved merged PRs (SKILL_EVIDENCE.yaml, 2026-11-16), so it is
+// no longer missing: approved skills count as the weakest evidence.
+test("a skill counts only with evidence: Kubernetes is in a bullet, Kotlin is not", () => {
+  const r = fit(jdText.replace("Go is a plus.", "Go is a plus.\n- Kotlin experience.\n- Rust experience."));
   assert.ok(r.ledger.matched.includes("Java"));
   assert.ok(r.ledger.matched.includes("Kubernetes"));
-  assert.ok(r.ledger.missing.includes("Rust"));
+  assert.ok(r.ledger.missing.includes("Kotlin"));
+  assert.ok(!r.ledger.missing.includes("Rust"));
 });
 
 test("blank or unreadable postings have no fabricated score and Low Confidence", () => {
@@ -166,7 +169,7 @@ test("knockouts: substantially higher seniority, a mandatory degree we lack, and
   assert.equal(seniority.knockouts.items.find((i) => i.type === "seniority").status, "blocked");
   const degree = fit("Research Scientist\nRequirements:\n- PhD in computer science required.\n- Python.\n");
   assert.equal(degree.knockouts.items.find((i) => i.type === "degree").status, "blocked");
-  const weak = fit("Systems Engineer\nRequirements:\n- Rust experience.\n- Scala experience.\n- Ruby experience.\n- Swift experience.\n");
+  const weak = fit("Systems Engineer\nRequirements:\n- Kotlin experience.\n- Scala experience.\n- Ruby experience.\n- Swift experience.\n");
   assert.equal(weak.knockouts.items.find((i) => i.type === "weak_overlap")?.status, "blocked");
   const ok = fit();
   assert.ok(!ok.knockouts.items.some((i) => i.status === "blocked"));

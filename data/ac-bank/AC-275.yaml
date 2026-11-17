@@ -1,0 +1,54 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-275
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: ansible-ide
+display_order: 23
+wow_score: 0.8
+metrics_claimed:
+  - tests_11
+concepts_claimed:
+  - developer-tools
+  - language-server
+signature_technologies:
+  - TypeScript
+fact: >-
+  Open source contribution (Ansible | VS Code Ansible), draft X2 (was AC-222 before the port) approved 2026-11-16. Never
+  employment at Ansible.
+oss:
+  org: Ansible
+  project: VS Code Ansible
+  status: open
+  prs:
+    - https://github.com/ansible/vscode-ansible/pull/3287
+capabilities:
+  frontend: 70
+  backend: 78
+  cloud: 70
+strength:
+  recruiter: 8
+ats_keywords:
+  - Ansible
+  - TypeScript
+  - VS Code
+  - language server
+  - DevOps
+facets:
+  ansible-ide:
+    phrase: VS Code Ansible open source contribution
+    keywords:
+      - ansible
+      - typescript
+      - vs code
+      - language server
+      - devops
+variants:
+  - facet: ansible-ide
+    emphasis: ansible-ide
+    strength: 9
+    text: >-
+      Reconciled fallback documentation ranges with primary results in the Ansible VS Code language server, adding 11
+      TypeScript tests with mutation checks.

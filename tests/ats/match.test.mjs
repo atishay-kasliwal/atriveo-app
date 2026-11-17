@@ -276,3 +276,43 @@ test("Bonus Points starts preferred requirements without promoting them to requi
  assert.deepEqual(parsed.required.map(r=>r.label),["TypeScript","Kafka"]);
  assert.deepEqual(parsed.preferred.map(r=>r.label),["Snowflake","Terraform"]);
 });
+
+test("approved skills bank changes recommendations only, never the score", () => {
+  const approvedSkills = [
+    { name: "Rust", category: "Languages", terms: ["Rust"], sources: ["https://github.com/example/repo/pull/1", "https://github.com/example/repo/pull/2"] },
+    { name: "Swift", category: "Languages", terms: ["Swift"], sources: [] },
+  ];
+  const plain = score();
+  const withBank = scoreJobMatch(resume, jd, config, { asOf: "2026-10-01", approvedSkills });
+  assert.deepEqual(withBank.categories, plain.categories);
+  assert.equal(withBank.score, plain.score);
+  const rust = withBank.recommendations.find((r) => r.requirement === "Go / Rust / TypeScript");
+  assert.ok(rust, "missing Go/Rust/TypeScript requirement is recommended");
+  assert.equal(rust.approved_skill.name, "Rust");
+  assert.match(rust.message, /approved skills bank backs Rust .*pull\/1 \+1 more.*earns no points/);
+  // A skill without merged sources is not approved evidence.
+  assert.ok(!withBank.recommendations.some((r) => r.approved_skill?.name === "Swift"));
+});
+
+test("an approved skill already in Skills is not told to be added again", () => {
+  const skillsOnly = parseResume({ ...CLEAN_LAYOUT }, config.sections);
+  skillsOnly.skills.items = [...skillsOnly.skills.items, "Rust"];
+  const approvedSkills = [{ name: "Rust", terms: ["Rust"], sources: ["https://github.com/example/repo/pull/1"] }];
+  // One requirement, so the recommendation limit never hides it.
+  const oneSkill = parseJobDescription("Backend Engineer\nRequirements:\n- Strong Go/Rust/TypeScript experience.", config);
+  const result = scoreJobMatch(skillsOnly, oneSkill, config, { asOf: "2026-10-01", approvedSkills });
+  const row = result.categories.find((c) => c.key === "required_skills").items.find((i) => i.label === "Go / Rust / TypeScript");
+  const rec = result.recommendations.find((r) => r.requirement === "Go / Rust / TypeScript");
+  assert.equal(row.evidence_tier, "skills_only");
+  assert.ok(rec);
+  assert.match(rec.message, /skills section only\. Listed in Skills/);
+  assert.doesNotMatch(rec.message, /list it under Skills/);
+});
+
+test("Job Match accepts the bank's Harvard action verbs as strong openings", async () => {
+  const { default: fs } = await import("node:fs");
+  const { HARVARD_VERBS_FILE } = await import("../../scripts/ats/config.mjs");
+  const harvard = Object.values(JSON.parse(fs.readFileSync(HARVARD_VERBS_FILE, "utf8")).categories).flat().map((v) => v.toLowerCase());
+  const verbs = config.scoring.job_match.achievement.action_verbs;
+  for (const v of [...harvard.slice(0, 5), "architected", "built"]) assert.ok(verbs.includes(v), v);
+});

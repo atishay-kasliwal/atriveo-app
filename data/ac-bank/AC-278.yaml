@@ -1,0 +1,54 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-278
+role: open-source
+fits:
+  - software-engineer
+slot_kind: project
+achievement_theme: e2e-focus
+display_order: 26
+wow_score: 0.88
+metrics_claimed:
+  - paths_3
+concepts_claimed:
+  - frontend
+  - e2e-testing
+  - accessibility
+signature_technologies:
+  - Playwright
+fact: >-
+  Open source contribution (MisterDownloadManager), draft D2 (was AC-225 before the port) approved 2026-11-16. Never
+  employment at MisterDownloadManager.
+oss:
+  org: ''
+  project: MisterDownloadManager
+  status: merged
+  prs:
+    - https://github.com/anefzaoui/misterdownloadmanager/pull/483
+capabilities:
+  frontend: 84
+  backend: 60
+  data: 50
+strength:
+  recruiter: 9
+ats_keywords:
+  - JavaScript
+  - Playwright
+  - accessibility
+  - frontend
+  - browser extension
+facets:
+  e2e-focus:
+    phrase: MisterDownloadManager open source contribution
+    keywords:
+      - javascript
+      - playwright
+      - accessibility
+      - frontend
+      - browser extension
+variants:
+  - facet: e2e-focus
+    emphasis: e2e-focus
+    strength: 9
+    text: >-
+      Repaired a video button that stayed visible after mouse focus in MisterDownloadManager's browser extension,
+      verified with a Playwright harness across 3 interaction paths.

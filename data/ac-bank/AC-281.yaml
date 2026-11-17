@@ -1,0 +1,55 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-281
+role: open-source
+fits:
+  - data-science
+  - ai-engineer
+slot_kind: project
+achievement_theme: ml-test-infra
+display_order: 29
+wow_score: 0.8
+metrics_claimed:
+  - tests_69
+  - files_15
+concepts_claimed:
+  - ml-testing
+  - test-isolation
+signature_technologies:
+  - pytest
+fact: >-
+  Open source contribution (OpenSearch | opensearch-py-ml), draft O1 (was AC-228 before the port) approved 2026-11-16.
+  Never employment at OpenSearch.
+oss:
+  org: OpenSearch
+  project: opensearch-py-ml
+  status: open
+  prs:
+    - https://github.com/opensearch-project/opensearch-py-ml/pull/625
+capabilities:
+  ml: 80
+  data: 82
+  backend: 72
+strength:
+  recruiter: 8
+ats_keywords:
+  - pytest
+  - Python
+  - OpenSearch
+  - machine learning
+  - MLOps
+facets:
+  ml-test-infra:
+    phrase: opensearch-py-ml open source contribution
+    keywords:
+      - pytest
+      - python
+      - opensearch
+      - machine learning
+      - mlops
+variants:
+  - facet: ml-test-infra
+    emphasis: ml-test-infra
+    strength: 9
+    text: >-
+      Rewrote 69 OpenSearch py-ml tests across 15 files to use pytest managed temporary paths, isolating artifacts on
+      secured OpenSearch 2.19 and 3.1 clusters.

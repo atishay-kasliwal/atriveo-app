@@ -1,0 +1,60 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-255
+role: open-source
+fits:
+  - software-engineer
+  - ai-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: mcp-gating
+display_order: 3
+wow_score: 0.88
+metrics_claimed:
+  - tests_7
+concepts_claimed:
+  - mcp
+  - agents
+  - tool-calling
+signature_technologies:
+  - MCP
+  - Rust
+fact: >-
+  Open source contribution (Mezmo | AURA), draft A3 (was AC-202 before the port) approved 2026-11-16. Never employment
+  at Mezmo.
+oss:
+  org: Mezmo
+  project: AURA
+  status: merged
+  prs:
+    - https://github.com/mezmo/aura/pull/865
+    - https://github.com/mezmo/aura/pull/863
+capabilities:
+  backend: 84
+  ai: 88
+  cloud: 60
+strength:
+  recruiter: 9
+ats_keywords:
+  - MCP
+  - Rust
+  - AI agents
+  - tool calling
+  - function calling
+  - agents
+  - automation
+facets:
+  mcp-gating:
+    phrase: AURA open source contribution
+    keywords:
+      - mcp
+      - rust
+      - ai agents
+      - tool calling
+      - function calling
+variants:
+  - facet: mcp-gating
+    emphasis: mcp-gating
+    strength: 9
+    text: >-
+      Added approval gating for native MCP tools and fixed single agent tool filtering in Mezmo's AURA, with 7 Rust
+      tests keeping Read available while excluding Shell.

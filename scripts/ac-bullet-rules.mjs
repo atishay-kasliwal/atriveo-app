@@ -125,18 +125,43 @@ export function resumeRoles(bankDir) {
  * compose refuses a resume that repeats a verb (assertUniqueCompositionVerbs), so a shared
  * verb here would fail that resume's build.
  */
-export function sharedOpeningVerbs(acs, roles) {
-  return sharedVerbsIn(acs.filter((a) => roles.has(a.role)).flatMap((ac) => (ac.variants || []).map((v) => [ac, v])));
+export function sharedOpeningVerbs(acs, roles, pools = plannerPools()) {
+  return sharedVerbsIn(acs.filter((a) => roles.has(a.role)).flatMap((ac) => (ac.variants || []).map((v) => [ac, v])), pools);
 }
 
-function sharedVerbsIn(pairs) {
+function sharedVerbsIn(pairs, pools = plannerPools()) {
   const byVerb = new Map();
+  const roleOf = new Map();
   for (const [ac, v] of pairs) {
+    roleOf.set(ac.id, ac.role);
     const verb = openingVerb(v.text);
     if (!byVerb.has(verb)) byVerb.set(verb, new Set());
     byVerb.get(verb).add(ac.id);
   }
-  return [...byVerb].filter(([, ids]) => ids.size > 1).map(([verb, ids]) => ({ verb, ids: [...ids] }));
+  // A pool with exclusive_verbs_by_package (open source) only ever puts one package on a resume, so two of its
+  // bullets can share a verb unless they sit in the same package. Across roles every verb stays unique.
+  const together = (a, b) => {
+    const role = roleOf.get(a);
+    if (role !== roleOf.get(b)) return true;
+    const pool = pools?.[role];
+    if (!pool?.exclusive_verbs_by_package) return true;
+    return (pool.story_packages || []).some((p) => p.ids?.includes(a) && p.ids?.includes(b));
+  };
+  const out = [];
+  for (const [verb, set] of byVerb) {
+    const ids = [...set];
+    const clash = ids.filter((a) => ids.some((b) => b !== a && together(a, b)));
+    if (clash.length > 1) out.push({ verb, ids: clash });
+  }
+  return out;
+}
+
+function plannerPools() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "planner", "v2.json"), "utf8")).canonical_pools || {};
+  } catch {
+    return {};
+  }
 }
 
 /**

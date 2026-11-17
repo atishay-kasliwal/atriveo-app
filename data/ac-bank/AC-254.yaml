@@ -1,0 +1,57 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-254
+role: open-source
+fits:
+  - software-engineer
+  - ai-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: failure-recovery
+display_order: 2
+wow_score: 0.88
+metrics_claimed:
+  - tests_29
+concepts_claimed:
+  - failure-recovery
+  - rust
+  - agents
+signature_technologies:
+  - Rust
+fact: >-
+  Open source contribution (Mezmo | AURA), draft A2 (was AC-201 before the port) approved 2026-11-16. Never employment
+  at Mezmo.
+oss:
+  org: Mezmo
+  project: AURA
+  status: merged
+  prs:
+    - https://github.com/mezmo/aura/pull/868
+    - https://github.com/mezmo/aura/pull/888
+    - https://github.com/mezmo/aura/pull/864
+capabilities:
+  backend: 88
+  ai: 76
+  cloud: 66
+strength:
+  recruiter: 9
+ats_keywords:
+  - Rust
+  - failure recovery
+  - orchestration
+  - agent
+  - agents
+facets:
+  failure-recovery:
+    phrase: AURA open source contribution
+    keywords:
+      - rust
+      - failure recovery
+      - orchestration
+      - agent
+variants:
+  - facet: failure-recovery
+    emphasis: failure-recovery
+    strength: 9
+    text: >-
+      Repaired failure handling across 3 orchestration paths in AURA so output survives hard retry errors and missing
+      artifact storage, backed by 29 new Rust regression tests.

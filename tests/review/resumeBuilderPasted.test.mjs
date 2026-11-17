@@ -56,6 +56,18 @@ test('paste → build → edit → save → revert → list → delete, never to
     const draft = await renderDraft(db, { source: r.source, headerTitle: r.headerTitle, skills: r.skills, sections: edit });
     assert.deepEqual(draft.problems, []);
     assert.ok(typeof draft.jdMatch.after === 'number');
+    // The generated Skills lines are built by the same truth rule, so none are flagged as unbacked.
+    assert.deepEqual(draft.skillWarnings, []);
+    // JD skills the approved skills bank backs (merged PRs) are offered separately, never counted as plain gaps.
+    assert.ok(Array.isArray(draft.jdMatch.approved));
+    for (const g of draft.jdMatch.approved) {
+      assert.match(g.source, /^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\/\d+$/);
+      assert.ok(!draft.jdMatch.missing.includes(g.skill));
+    }
+    // A library skill nothing on this resume or in the JD backs is flagged (shown, not enforced).
+    const padded = await renderDraft(db, { source: r.source, headerTitle: r.headerTitle, skills: [...r.skills.slice(0, -1), `${r.skills.at(-1)}, Haskell, Svelte`], sections: edit });
+    assert.ok(padded.skillWarnings.includes('Svelte'), JSON.stringify(padded.skillWarnings));
+    assert.ok(!padded.skillWarnings.includes('Haskell'), 'names outside the skills library are not judged');
     await saveDraft(db, { source: r.source, draftId: draft.draftId });
     assert.ok(fs.existsSync(path.join(dir, 'generated', 'Atishay Kasliwal.pdf')));
     const again = await loadResume(db, { pasted: source.pasted });

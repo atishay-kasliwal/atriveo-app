@@ -93,8 +93,10 @@ git cat-file -e "$DEPLOYED^{commit}" 2>/dev/null || { echo "The live commit $DEP
 echo "live now: $DEPLOYED   dashboard $DASH_IMAGE   workers $WORK_IMAGE"
 [ "$ONLY_SCRAPER" = 1 ] || [ "$DEPLOYED" != "$COMMIT" ] || { echo "The live commit is already $COMMIT."; [ "$WEBSITE" = 1 ] || exit 0; }
 
-# Files that change on the server: everything under scripts/ and data/ats that differs between the live commit and this one.
-CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats deploy package.json package-lock.json | grep -v -e '^scripts/ship\.sh$' -e '^scripts/ship-lib\.sh$' -e '^scripts/ats/validate' -e '^scripts/test-' || true)"
+# Files that change on the server: everything under scripts/, data/ats, the resume bank (data/ac-bank) and the approved skills
+# inventory (data/skill-inventory.json) that differs between the live commit and this one. The bank ships too (2026-11-16):
+# resumes, Fit and the builder read it from the image, and leaving it out kept bank v66 live after v68 was merged.
+CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats data/ac-bank data/skill-inventory.json deploy package.json package-lock.json | grep -v -e '^scripts/ship\.sh$' -e '^scripts/ship-lib\.sh$' -e '^scripts/ats/validate' -e '^scripts/test-' || true)"
 SRC_CHANGED="$(git diff --name-only "$DEPLOYED" HEAD -- src public apply-public functions vite.apply.config.ts apply.html | head -1 || true)"
 if [ "$ONLY_SCRAPER" = 1 ]; then CHANGED="$(git ls-files deploy)"; fi
 # The scraper step copies loop.sh, Dockerfile.loop and patch_storage.py from the shipped set, so --scraper always ships them, changed or not.
@@ -178,7 +180,7 @@ if [ -n "$CHANGED" ]; then
     && cd ~/$ROOT_REMOTE && sed -e 's#$DASH_IMAGE#$NEW_DASH_IMAGE#' -e '/max-size=/!s#docker run -d #docker run -d $LOG_CAP #' $DASH_START > $NEW_DASH_START && chmod +x $NEW_DASH_START"
   i=0; for old in $WORK_STARTS; do i=$((i+1)); new="$(echo "$NEW_WORK_STARTS" | cut -d' ' -f$i)"; OVERLAY="$OVERLAY && sed -e 's#$WORK_IMAGE#$NEW_WORK_IMAGE#' -e '/max-size=/!s#docker run -d #docker run -d $LOG_CAP #' $old > $new && chmod +x $new"; done
   run_remote "$OVERLAY"
-  # The overlays only add files; a layer copying only changed files (no data/ac-bank) keeps everything else as it was.
+  # The overlays only add files; a layer copying only the changed files keeps everything else as it was.
 
   say "Restarting"
   run_remote "cd ~/$ROOT_REMOTE && ./$NEW_DASH_START && for s in $NEW_WORK_STARTS; do ./\$s; done; sleep 6; docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}' | grep -E 'dashboard|resume'"

@@ -15,7 +15,13 @@ export function loadBank(dir = path.resolve(path.dirname(fileURLToPath(import.me
   });
 }
 
-export function scoreTarget(target, { jdPath = null, title: suppliedTitle = null, asOf = new Date().toISOString().slice(0, 10), config = loadAtsConfig(), bank = [] } = {}) {
+// Approved skills only (merged PR evidence); OPEN exposure never reaches this export. Used for advice, never score.
+export const SKILL_INVENTORY_FILE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../data/skill-inventory.json");
+export function loadApprovedSkills(file = SKILL_INVENTORY_FILE) {
+  try { return JSON.parse(fs.readFileSync(file, "utf8")).skills || []; } catch { return []; }
+}
+
+export function scoreTarget(target, { jdPath = null, title: suppliedTitle = null, asOf = new Date().toISOString().slice(0, 10), config = loadAtsConfig(), bank = [], approvedSkills = [] } = {}) {
   const { result: readiness } = readinessFor(target, config);
   const resolved = jdPath || (fs.statSync(target).isDirectory() ? path.join(target, "jd.txt") : null);
   if (!resolved || !fs.existsSync(resolved)) return { readiness, job_match: null, note: "No JD supplied; Readiness only" };
@@ -26,7 +32,7 @@ export function scoreTarget(target, { jdPath = null, title: suppliedTitle = null
     const meta = path.join(target, "meta.json");
     if (fs.existsSync(meta)) title = JSON.parse(fs.readFileSync(meta, "utf8")).role || null;
   }
-  return scoreAts(readiness, jdText, config, { asOf, bank, title });
+  return scoreAts(readiness, jdText, config, { asOf, bank, approvedSkills, title });
 }
 
 export function formatMatch(output) {
@@ -76,14 +82,14 @@ function runDirs(root) {
   return out;
 }
 
-function baseline(root, limit, asOf, config, bank) {
+function baseline(root, limit, asOf, config, bank, approvedSkills) {
   const scores = [];
   const errors = [];
   let unscorable = 0;
   const dirs = runDirs(root).slice(-(limit || Infinity));
   for (const dir of dirs) {
     try {
-      const r = scoreTarget(dir, { asOf, config, bank });
+      const r = scoreTarget(dir, { asOf, config, bank, approvedSkills });
       if (r.job_match) scores.push({ dir, score: r.job_match.score, readiness: r.readiness.status,
         required: r.job_match.requirement_counts.required, preferred: r.job_match.requirement_counts.preferred });
       else unscorable++;
@@ -100,14 +106,15 @@ function main() {
   const target = args.find((a, i) => !a.startsWith("--") && !["--jd", "--title", "--as-of", "--root", "--limit"].includes(args[i - 1]));
   const config = loadAtsConfig();
   const bank = loadBank();
+  const approvedSkills = loadApprovedSkills();
   const asOf = flag("--as-of") || new Date().toISOString().slice(0, 10);
   if (args.includes("--baseline")) {
-    const summary = baseline(flag("--root") || path.join(os.homedir(), "Documents/tailored-resumes"), Number(flag("--limit")) || 0, asOf, config, bank);
+    const summary = baseline(flag("--root") || path.join(os.homedir(), "Documents/tailored-resumes"), Number(flag("--limit")) || 0, asOf, config, bank, approvedSkills);
     console.log(JSON.stringify(summary, null, 2));
     return;
   }
   if (!target) throw new Error("Usage: npm run ats:match -- <resume.pdf | run-dir> [--jd job.txt] [--title 'Job title'] [--as-of YYYY-MM-DD] [--json] | --baseline [--root dir] [--limit N]");
-  const output = scoreTarget(path.resolve(target), { jdPath: flag("--jd") && path.resolve(flag("--jd")), title: flag("--title"), asOf, config, bank });
+  const output = scoreTarget(path.resolve(target), { jdPath: flag("--jd") && path.resolve(flag("--jd")), title: flag("--title"), asOf, config, bank, approvedSkills });
   console.log(args.includes("--json") ? JSON.stringify(output, null, 2) : formatMatch(output));
 }
 

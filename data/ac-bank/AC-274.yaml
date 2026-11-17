@@ -1,0 +1,55 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-274
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: ansible-lint
+display_order: 22
+wow_score: 0.8
+metrics_claimed:
+  - stars_3900
+  - tests_5
+concepts_claimed:
+  - linting
+  - infrastructure-as-code
+signature_technologies:
+  - Python
+fact: >-
+  Open source contribution (Ansible | ansible-lint), draft X1 (was AC-221 before the port) approved 2026-11-16. Never
+  employment at Ansible.
+oss:
+  org: Ansible
+  project: ansible-lint
+  status: open
+  prs:
+    - https://github.com/ansible/ansible-lint/pull/5250
+capabilities:
+  backend: 80
+  cloud: 84
+  data: 56
+strength:
+  recruiter: 8
+ats_keywords:
+  - Ansible
+  - Python
+  - YAML
+  - infrastructure as code
+  - DevOps
+facets:
+  ansible-lint:
+    phrase: ansible-lint open source contribution
+    keywords:
+      - ansible
+      - python
+      - yaml
+      - infrastructure as code
+      - devops
+variants:
+  - facet: ansible-lint
+    emphasis: ansible-lint
+    strength: 9
+    text: >-
+      Classified deprecated top level fact usage with a new ansible-lint rule (3.9K+ GitHub stars) in Python, adding 5
+      tests checked against Ansible's runtime deprecation warnings.

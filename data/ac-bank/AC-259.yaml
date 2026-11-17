@@ -1,0 +1,58 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-259
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: go-cli-ux
+display_order: 7
+wow_score: 0.88
+metrics_claimed:
+  - features_3
+  - test_cases_54
+concepts_claimed:
+  - cli
+  - kubernetes
+signature_technologies:
+  - Go
+  - Cobra
+fact: >-
+  Open source contribution (NVIDIA | Workload Map), draft N2 (was AC-206 before the port) approved 2026-11-16. Never
+  employment at NVIDIA.
+oss:
+  org: NVIDIA
+  project: Workload Map
+  status: merged
+  prs:
+    - https://github.com/dsx-ai-factory/workload-map/pull/668
+    - https://github.com/dsx-ai-factory/workload-map/pull/674
+    - https://github.com/dsx-ai-factory/workload-map/pull/675
+capabilities:
+  backend: 86
+  cloud: 84
+  data: 60
+strength:
+  recruiter: 9
+ats_keywords:
+  - Go
+  - Golang
+  - Cobra
+  - CLI
+  - Kubernetes
+facets:
+  go-cli-ux:
+    phrase: Workload Map open source contribution
+    keywords:
+      - go
+      - golang
+      - cobra
+      - cli
+      - kubernetes
+variants:
+  - facet: go-cli-ux
+    emphasis: go-cli-ux
+    strength: 9
+    text: >-
+      Updated NVIDIA Workload Map's kli CLI with 3 Go and Cobra features including sort flags and a STATUS column for
+      overridden definitions, covered by 54 test cases.

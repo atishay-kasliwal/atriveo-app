@@ -20,11 +20,19 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { loadBank } from "./ac-bank.mjs";
-import { assembleAcResume, EDUCATION_ROWS, toolsFromBullets } from "./ac-tex.mjs";
+import { assembleAcResume, EDUCATION_ROWS, ossHeading, toolsFromBullets } from "./ac-tex.mjs";
+
+// The open source project prints a heading and tools built from its bullets (ac-tex.mjs ossHeading), so the builder
+// shows the same: "Kiali, Numaflow (Open Source)" with Go, Kubernetes. Every other project keeps its fixed name.
+const autoTools = (bullets, role) => (role === "open-source" ? ossHeading(bullets).tools : toolsFromBullets(bullets, role));
+const headingOf = (bullets, role) => (role === "open-source" && bullets.length ? ossHeading(bullets).text : null);
 import { displayUrl } from "./ats/patterns.mjs";
 import { allowedProjects, bankForTrack, classifyTrack, employerTitle, loadTracks, RESUME_MIN_PROJECTS } from "./ac-tracks.mjs";
 import { resolveExperienceMeta, resolveProjectMeta, roleKindOf, sortProjectsByRecency } from "./ac-role-meta.mjs";
 import { jdSkillMatch, loadSkills } from "./ac-jd-skills.mjs";
+import { loadApprovedSkills } from "./ats/match-cli.mjs";
+import { buildSkillsEvidenceAudit } from "./ac-skills.mjs";
+import { SKILLS_LIBRARY } from "./skills-library.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
 import { lintBullet, openingVerb as bankVerb, resumeRoles, techPattern } from "./ac-bullet-rules.mjs";
@@ -360,7 +368,7 @@ async function openResume(db, { jobUrl = null, track = null, appId = null, paste
     city: c.city ?? resolveHeaderLocation(source.location, me.location) ?? "",
     skills: c.skills,
     // A project's tools line: yours (stack set) or the one the bullets give (stackAuto), as the PDF shows it.
-    sections: c.sections.map((s) => ({ ...s, label: labelOf(s.role), stack: s.stack ?? null, stackAuto: toolsFromBullets(s.bullets, s.role) })),
+    sections: c.sections.map((s) => ({ ...s, label: labelOf(s.role), heading: headingOf(s.bullets, s.role), stack: s.stack ?? null, stackAuto: autoTools(s.bullets, s.role) })),
     // Bullets this resume's track may use: a track's own bullets (tracks: [...]) only on that track's resumes.
     options: bankOptions(bankForTrack(bank, resumeTrack)),
     // Employers, and the projects this resume's track may print (allowedProjects): "Add a project" offers only these.
@@ -572,10 +580,38 @@ function validate(edit, bank, track = classifyTrack(edit.headerTitle)) {
   return problems;
 }
 
+// Every skills-library spelling (name, display name, alias) → its canonical name.
+let skillSpellings = null;
+const librarySkill = (item) => {
+  skillSpellings ??= new Map(SKILLS_LIBRARY.flatMap((cat) => cat.skills.flatMap((sk) =>
+    [sk.name, sk.displayName, ...(sk.aliases || [])].filter(Boolean).map((form) => [String(form).toLowerCase(), sk.name]))));
+  return skillSpellings.get(String(item).trim().toLowerCase()) ?? null;
+};
+
+/**
+ * Skills-line items your bank doesn't back on this resume (the truth rule the pipeline builds Skills by): a library
+ * skill counts when this resume's bullets show it, or it is confirmed / approved with merged PRs and the JD asks
+ * for it (ac-skills.mjs buildSkillsEvidenceAudit). Names outside the skills library can't be judged and pass.
+ */
+export function unbackedSkills(skillsLines, composition, bank, jd) {
+  const covered = new Map(buildSkillsEvidenceAudit(composition, bank, jd || "").map((a) => [a.canonical, a.covered]));
+  const out = [];
+  for (const line of skillsLines || []) {
+    for (const item of String(line).slice(String(line).indexOf(":") + 1).split(",").map((x) => x.trim()).filter(Boolean)) {
+      const name = librarySkill(item);
+      if (name && !covered.get(name) && !out.includes(item)) out.push(item);
+    }
+  }
+  return out;
+}
+
 /**
  * Render an edit into a draft PDF and check it. edit = { source, headerTitle, skills, sections } as loadResume gave
- * it, changed. Returns { draftId, pdfPath, pages, problems, jdMatch: { before, after, missing }, ats: { before, after, ms } }
- * (ats: the saved resume's and this draft's ATS score, as atsOf gives them).
+ * it, changed. Returns { draftId, pdfPath, pages, problems, jdMatch: { before, after, missing, approved }, ats: { before, after, ms } }
+ * (ats: the saved resume's and this draft's ATS score, as atsOf gives them). jdMatch.missing = skills the JD names with no
+ * backing at all; approved = ones your approved skills bank backs with open source PRs ({ skill, name, category, source }),
+ * which may go on a Skills line but never an employer bullet. skillWarnings: Skills-line items the bank doesn't back on
+ * this resume (shown, not enforced; see unbackedSkills). headings: the open source project's printed heading.
  */
 export async function renderDraft(db, edit) {
   if (db) await syncOverlay(db);
@@ -622,16 +658,26 @@ export async function renderDraft(db, edit) {
     const skills = loadSkills();
     const before = jdSkillMatch(base.jd, textOf(base), skills);
     const after = jdSkillMatch(base.jd, textOf(clean), skills);
-    jdMatch = { before: before.score, after: after.score, missing: after.missing.slice(0, 8).map((m) => m.skill) };
+    const approvedSkills = loadApprovedSkills();
+    const backing = (name) => {
+      const forms = [name, ...((skills.find((sk) => sk.name === name)?.forms || []).map((f) => f.form))].map((f) => String(f).toLowerCase());
+      return approvedSkills.find((a) => a.terms.some((t) => forms.includes(t.toLowerCase())));
+    };
+    const missing = after.missing.map((m) => ({ skill: m.skill, approved: backing(m.skill) }));
+    jdMatch = { before: before.score, after: after.score,
+      missing: missing.filter((m) => !m.approved).slice(0, 8).map((m) => m.skill),
+      approved: missing.filter((m) => m.approved).slice(0, 8).map((m) => ({ skill: m.skill, name: m.approved.name, category: m.approved.category, source: m.approved.sources[0] })) };
   }
   // Each project's tools line as this draft prints it (the page shows the automatic one while you haven't set yours).
-  const stacks = Object.fromEntries(clean.sections.map((s) => [s.role, s.stack ?? (s.kind === "project" ? toolsFromBullets(s.bullets, s.role) : [])]));
+  const stacks = Object.fromEntries(clean.sections.map((s) => [s.role, s.stack ?? (s.kind === "project" ? autoTools(s.bullets, s.role) : [])]));
+  const headings = Object.fromEntries(clean.sections.map((s) => [s.role, headingOf(s.bullets, s.role)]).filter(([, h]) => h));
+  const skillWarnings = unbackedSkills(clean.skills, composition, bank, base.jd);
   // The draft's ATS score against the same posting (saved in the draft folder, so Save carries it with the PDF), and the
   // saved resume's for "before → after". About 0.1-0.2 s on top of a compile of a few seconds; reused for a repeat render.
   const started = Date.now();
   const after = atsOf(dir, base.posting, { fit: base.fit, overwrite: true });
   const ats = { before: base.ats, after, ms: Date.now() - started };
-  return { ok: true, draftId, pdfPath, pages, room: pages ? pageRoom(pdfPath) : null, problems, jdMatch, stacks, ats };
+  return { ok: true, draftId, pdfPath, pages, room: pages ? pageRoom(pdfPath) : null, problems, jdMatch, stacks, headings, skillWarnings, ats };
 }
 
 const nextEditDir = (runDir) => {

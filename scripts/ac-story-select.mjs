@@ -435,8 +435,12 @@ export function scoreStoryTriple(acs, {
   }
 
   if (pkg?.jd_signals?.length) {
-    total += jdSignalHits(jd, pkg.jd_signals) * w.story_completion;
+    total += (jdSignalHits(jd, pkg.jd_signals) + jdSignalHits(jd, pkg.strong_signals || [])) * w.story_completion;
   }
+
+  // Open source work: a bullet whose upstream PR is still open ranks below merged work at similar fit
+  // (canonical_pools[role].open_penalty per open bullet; QUESTION_ANSWERS "Open Source Work on Resumes").
+  if (pkg?.openPenalty) total -= pkg.openPenalty * acs.filter((a) => a.oss?.status === "open").length;
 
   total -= overlapPenalty(
     null,
@@ -541,7 +545,7 @@ export function selectStoryTriple({
       score: scoreStoryTriple(acs, {
         jd,
         scoreAc,
-        pkg: { ...pkg, roleName, atsCounts: budgetCtx?.atsCounts },
+        pkg: { ...pkg, roleName, atsCounts: budgetCtx?.atsCounts, openPenalty: poolCfg.open_penalty || 0 },
         weights,
       }),
       source: "package",

@@ -59,6 +59,17 @@ export default function BulkJobAnalysisPanel({ analysis }: Props) {
                 </div>
               ))}
               {analysis.missingSkills.length === 0 && <p>No major selected-job gaps detected.</p>}
+              {analysis.bankSkills.length > 0 && (
+                <p className="jd-analysis-bank-note">
+                  In your approved skills bank (not on this resume):{" "}
+                  {analysis.bankSkills.slice(0, 6).map((skill, i) => (
+                    <span key={skill.skill}>
+                      {i > 0 && ", "}
+                      <a href={skill.bankSource} target="_blank" rel="noreferrer">{skill.skill}</a>
+                    </span>
+                  ))}
+                </p>
+              )}
             </div>
           ) : (
             <p>Save your resume in Settings to compare these requirements against your actual resume.</p>

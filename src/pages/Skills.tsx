@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import AppHeader from "../components/AppHeader";
+import { approvedSkills, bankSkillForLabel, matchesSkill } from "../utils/skillInventory";
 
 // Mirror of Python extraction patterns — must stay in sync with build_skills_summary.py
 const RESUME_PATTERNS: Record<string, Record<string, RegExp[]>> = {
@@ -194,6 +195,9 @@ function extractResumeSkills(text: string): Set<string> {
       if (patterns.some(p => p.test(text))) found.add(name);
     }
   }
+  for (const skill of approvedSkills) {
+    if (matchesSkill(text, skill.terms)) found.add(skill.name);
+  }
   return found;
 }
 
@@ -227,17 +231,20 @@ export default function Skills() {
 
   const gapData = useMemo(() => {
     if (!summary) return [];
-    const all: Array<{ skill: string; count: number; category: string; have: boolean }> = [];
+    const all: Array<{ skill: string; count: number; category: string; have: boolean; bankSource?: string }> = [];
     for (const [cat, { skills }] of Object.entries(summary.categories)) {
       for (const [skill, count] of Object.entries(skills)) {
-        all.push({ skill, count, category: cat, have: resumeSkills.has(skill) });
+        const have = resumeSkills.has(skill);
+        // Approved skills bank (open source PRs) is a Skills-section add, not resume coverage.
+        all.push({ skill, count, category: cat, have, bankSource: have ? undefined : bankSkillForLabel(skill)?.sources[0] });
       }
     }
     return all.sort((a, b) => b.count - a.count);
   }, [summary, resumeSkills]);
 
   const top20 = useMemo(() => summary ? flatTopSkills(summary, 20) : [], [summary]);
-  const missing = useMemo(() => gapData.filter(s => !s.have).slice(0, 20), [gapData]);
+  const missing = useMemo(() => gapData.filter(s => !s.have && !s.bankSource).slice(0, 20), [gapData]);
+  const inBank = useMemo(() => gapData.filter(s => !s.have && s.bankSource), [gapData]);
   const covered = useMemo(() => gapData.filter(s => s.have), [gapData]);
   const hasResume = resumeText.trim().length > 50;
 
@@ -469,6 +476,26 @@ export default function Skills() {
                     })}
                   </div>
                 </div>
+
+                {/* Approved bank, not on this resume */}
+                {inBank.length > 0 && (
+                  <div className="arsenal-tile">
+                    <div className="arsenal-tile-label">IN YOUR APPROVED SKILLS BANK — NOT ON THIS RESUME</div>
+                    <p className="arsenal-tile-sub">Backed by your open source PRs. Add to Skills when a role asks for it; never as employer bullets.</p>
+                    <div className="arsenal-top-grid">
+                      {inBank.map(({ skill, count, category, bankSource }) => {
+                        const col = catColor(category);
+                        return (
+                          <a key={skill} href={bankSource} target="_blank" rel="noreferrer" className="arsenal-top-chip" style={{ borderLeftColor: col }}>
+                            <span className="arsenal-top-rank">PR</span>
+                            <span className="arsenal-top-name">{skill}</span>
+                            <span className="arsenal-top-count" style={{ color: col }}>{count.toLocaleString()}</span>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {/* Covered */}
                 <div className="arsenal-tile">

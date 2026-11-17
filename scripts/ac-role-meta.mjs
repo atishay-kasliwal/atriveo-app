@@ -75,8 +75,15 @@ function scoreProjectForJd(role, jd, cfg) {
     for (const sig of pkg.jd_signals || []) {
       if (hay.includes(String(sig).toLowerCase())) hits += 1;
     }
+    // strong_signals: the technologies that define a package (Rust, Kubernetes, React) count once more.
+    for (const sig of pkg.strong_signals || []) {
+      if (hay.includes(String(sig).toLowerCase())) hits += 1;
+    }
     best = Math.max(best, hits);
   }
+  // A pool that needs a JD signal (open source) has to beat the other projects outright: half a hit lower, so a
+  // tie (or a JD it doesn't match at all) never reaches the recency tie break, which it would win as the newest.
+  if (pool.requires_jd_signal) return best - 0.5;
   return best;
 }
 
@@ -130,6 +137,8 @@ export const PROJECT_SLUG_TO_NAME = {
   "cpp-encryption": "Encryption and Decryption Application",
   "fomc-dashboard": "FOMC Intelligence Dashboard",
   "fomc-market-llm": "FOMC Market LLM",
+  // The printed heading is built from the picked bullets (ac-tex.mjs ossHeading); this names the slot.
+  "open-source": "Open Source",
 };
 
 function readRoleYamlDates(bankDir = resolveBankDir()) {

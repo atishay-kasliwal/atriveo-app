@@ -1,0 +1,54 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-279
+role: open-source
+fits:
+  - ai-engineer
+  - software-engineer
+slot_kind: project
+achievement_theme: mcp-server
+display_order: 27
+wow_score: 0.88
+metrics_claimed:
+  - bugs_2
+concepts_claimed:
+  - mcp
+  - numeric-correctness
+signature_technologies:
+  - TypeScript
+  - MCP
+fact: >-
+  Open source contribution (math-mcp), draft M1 (was AC-226 before the port) approved 2026-11-16. Never employment at
+  math-mcp.
+oss:
+  org: ''
+  project: math-mcp
+  status: merged
+  prs:
+    - https://github.com/EthanHenrickson/math-mcp/pull/9
+capabilities:
+  ai: 80
+  backend: 80
+  data: 60
+strength:
+  recruiter: 9
+ats_keywords:
+  - TypeScript
+  - MCP
+  - LLM
+  - tools
+  - agents
+facets:
+  mcp-server:
+    phrase: math-mcp open source contribution
+    keywords:
+      - typescript
+      - mcp
+      - llm
+      - tools
+variants:
+  - facet: mcp-server
+    emphasis: mcp-server
+    strength: 9
+    text: >-
+      Solved 2 numeric correctness bugs in math-mcp's TypeScript MCP server (190+ GitHub stars), sorting medians
+      numerically and returning division by zero as a tool error.

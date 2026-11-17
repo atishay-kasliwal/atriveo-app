@@ -6,7 +6,7 @@
 
 # Names that are also everyday words ("the rest of", "excel at", "a swift", "X-ray") match only
 # when written with this exact capitalization.
-case_sensitive: [REST, Excel, Swift, Spark, Ray, Bedrock, Express.js, SAS]
+case_sensitive: [REST, Excel, Swift, Spark, Ray, Bedrock, Express.js, SAS, Go]
 
 skills:
   AI & Machine Learning:
@@ -102,7 +102,7 @@ skills:
     TypeScript: []
     C++: []
     C#: []
-    Golang: []
+    Golang: [Go]
     Rust: []
     Scala: []
     Kotlin: []
@@ -128,11 +128,20 @@ skills:
     REST APIs: [REST, RESTful, REST API]
     GraphQL: []
     gRPC: []
+    Server-Sent Events: [SSE]
+    API Design: []
+    Asynchronous Programming: [async programming]
+    Concurrency: []
+    Tokio: []
+    Serde: []
     Microservices: [microservice]
     Distributed Systems: []
     System Design: []
     HTML: []
     CSS: []
+    Web Accessibility: [accessibility, a11y]
+    Internationalization: [i18n, localization]
+    Content Security Policy: [CSP]
 
   Databases:
     PostgreSQL: [Postgres]
@@ -160,8 +169,21 @@ skills:
     Observability: []
     Prometheus: []
     Grafana: []
+    Structured Logging: []
+    Stream Processing: []
+    controller-runtime: []
+    cloud-init: []
+    Release Engineering: []
 
   Practices:
     Agile: [Scrum]
     Unit Testing: [unit test]
     Test-Driven Development: [TDD]
+    Integration Testing: [integration test]
+    Regression Testing: [regression test]
+    Failure Injection: [fault injection]
+    Code Review: []
+    pytest: []
+    JUnit: []
+    Playwright: []
+    Cross-Browser Testing: [cross browser testing]

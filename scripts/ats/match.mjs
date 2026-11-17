@@ -64,10 +64,24 @@ function skillRows(requirements, resume, config) {
   });
 }
 
-function recommendation(item, categoryName, bank) {
+// Approved skills (data/skill-inventory.json `skills`: open source PR evidence, merged first) for a missed JD skill.
+// Advice only: the score above is computed from the parsed resume and never reads this.
+export function approvedSkillFor(item, approvedSkills = []) {
+  const wanted = [...(item.alternatives || []), item.label].filter(Boolean).map((s) => String(s).toLowerCase());
+  return approvedSkills.find((s) => s.sources?.length && (s.terms || [s.name]).some((t) => wanted.includes(String(t).toLowerCase()))) || null;
+}
+
+function recommendation(item, categoryName, bank, approvedSkills) {
   if (item.lost <= 0 || item.classification === "no requirement stated") return null;
   const keyword = item.alternatives?.[0] || item.label;
   const match = bank?.find((b) => b.ats_keywords?.some((k) => phrase(k, keyword)));
+  const approved = /_skills$/.test(categoryName) ? approvedSkillFor(item, approvedSkills) : null;
+  const prs = approved ? `${approved.sources[0]}${approved.sources.length > 1 ? ` +${approved.sources.length - 1} more` : ""}` : "";
+  const inSkillsOnly = item.evidence_tier === "skills_only";
+  const approvedNote = !approved ? ""
+    // Already listed: the rest of the credit needs a bullet, and open-source work never becomes an employer bullet.
+    : inSkillsOnly ? ` Listed in Skills and backed by your open source PRs (${prs}); full credit needs a job bullet, which this evidence cannot supply under an employer.`
+    : ` Your approved skills bank backs ${approved.name} with open source PR evidence (${prs}); list it under Skills only if it fits this role. It earns no points until it is on the resume.`;
   const guidance = {
     role_alignment: "Check whether your truthful headline clearly describes your relevant work; keep past job titles accurate.",
     seniority: "Dates and title level come from the parsed resume. Verify the parser before changing any source dates.",
@@ -78,9 +92,11 @@ function recommendation(item, categoryName, bank) {
   return {
     category: categoryName, requirement: item.label, recoverable_points: item.lost,
     message: guidance[categoryName] || (match
-      ? `${item.label}: resume evidence is weak or absent. Your bank has ${match.id}; review whether that truthful bullet belongs in this resume.`
+      ? `${item.label}: resume evidence is weak or absent. Your bank has ${match.id}; review whether that truthful bullet belongs in this resume.${approvedNote}`
+      : approved ? `${item.label}: ${inSkillsOnly ? "skills section only." : "not evidenced in this resume."}${approvedNote}`
       : `${item.label}: add evidence only if you have genuinely used it.`),
     ...(match && { bank_id: match.id }),
+    ...(approved && { approved_skill: { name: approved.name, sources: approved.sources.slice(0, 3) } }),
   };
 }
 
@@ -102,7 +118,7 @@ export function buildSkillLedger(categories) {
   };
 }
 
-export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOString().slice(0, 10), bank = [], fit = false, candidate = null } = {}) {
+export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOString().slice(0, 10), bank = [], fit = false, candidate = null, approvedSkills = [] } = {}) {
   const cfg = config.scoring.job_match;
   const weights = cfg.weights;
   // A category the JD gives nothing to score on is left out and its weight shared: no listed skills, or
@@ -203,7 +219,7 @@ export function scoreJobMatch(resume, jd, config, { asOf = new Date().toISOStrin
   const earnedTicks = categories.reduce((n, c) => n + ticks(c.earned), 0);
   const maxTicks = categories.reduce((n, c) => n + ticks(c.max), 0);
   if (maxTicks !== 1000 || categories.some((c) => ticks(c.earned) + ticks(c.lost) !== ticks(c.max) || c.items.some((i) => ticks(i.earned) + ticks(i.lost) !== ticks(i.max)))) throw new Error("Job Match accounting mismatch");
-  const recommendations = categories.flatMap((c) => c.items.map((i) => recommendation(i, c.key, bank)).filter(Boolean))
+  const recommendations = categories.flatMap((c) => c.items.map((i) => recommendation(i, c.key, bank, approvedSkills)).filter(Boolean))
     .sort((a, b) => b.recoverable_points - a.recoverable_points || a.requirement.localeCompare(b.requirement)).slice(0, cfg.recommendations_limit);
   const count = (rows) => ({ matched: rows.filter((r) => r.classification !== "missing" && r.classification !== "related" && r.evidence_tier !== "missing").length, total: rows.length });
   return {

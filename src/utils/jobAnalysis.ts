@@ -1,5 +1,6 @@
 import type { Job } from "../types";
 import { careerOpsRating, jobBoardLabel } from "./jobPresentation";
+import { approvedSkills, bankSkillForLabel, matchesSkill } from "./skillInventory";
 
 type SkillPattern = {
   skill: string;
@@ -13,6 +14,9 @@ export type JobSkillHit = {
   jobCount: number;
   percent: number;
   inResume: boolean;
+  /** Not on the resume, but the approved skills bank has open source PR evidence (a Skills-section add, not a gap). */
+  inBank: boolean;
+  bankSource?: string;
 };
 
 export type JobThemeHit = {
@@ -29,6 +33,7 @@ export type SelectedJobAnalysis = {
   topCompanies: Array<{ company: string; count: number }>;
   topSkills: JobSkillHit[];
   missingSkills: JobSkillHit[];
+  bankSkills: JobSkillHit[];
   coveredSkills: JobSkillHit[];
   themes: JobThemeHit[];
   actionBullets: string[];
@@ -55,6 +60,7 @@ const SKILL_PATTERNS: SkillPattern[] = [
   { category: "Backend", skill: "Spring Boot", patterns: [/spring boot/i] },
   { category: "Backend", skill: "REST APIs", patterns: [/rest api|restful|\brest\b|api design|api development/i] },
   { category: "Backend", skill: "GraphQL", patterns: [/\bgraphql\b/i] },
+  { category: "Backend", skill: "gRPC", patterns: [/\bgrpc\b/i] },
   { category: "Backend", skill: "Microservices", patterns: [/microservices?|distributed services?/i] },
   { category: "Backend", skill: "Distributed Systems", patterns: [/distributed systems?|distributed computing/i] },
   { category: "Cloud", skill: "AWS", patterns: [/\baws\b|amazon web services/i] },
@@ -81,6 +87,7 @@ const SKILL_PATTERNS: SkillPattern[] = [
   { category: "Security", skill: "OAuth/OIDC", patterns: [/\boauth\b|\boidc\b|openid connect/i] },
   { category: "Security", skill: "JWT", patterns: [/\bjwt\b/i] },
   { category: "Security", skill: "IAM", patterns: [/\biam\b|identity and access/i] },
+  { category: "Quality", skill: "Playwright", patterns: [/\bplaywright\b/i] },
   { category: "Quality", skill: "Testing", patterns: [/\btesting\b|unit tests?|integration tests?|test automation|pytest|jest/i] },
   { category: "Quality", skill: "Observability", patterns: [/observability|monitoring|logging|metrics|prometheus|grafana|datadog/i] },
 ];
@@ -111,8 +118,15 @@ function countBy<T extends string>(values: T[]): Array<{ value: T; count: number
   return [...counts.entries()].map(([value, count]) => ({ value, count })).sort((a, b) => b.count - a.count);
 }
 
+// Recognize the expanded inventory without treating it as resume content.
+for (const entry of approvedSkills) {
+  if (SKILL_PATTERNS.some((skill) => skill.skill.toLowerCase() === entry.name.toLowerCase())) continue;
+  SKILL_PATTERNS.push({ category: entry.category, skill: entry.name, patterns: entry.terms.map((term) =>
+    new RegExp("(^|[^a-z0-9])" + term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?=$|[^a-z0-9])", "i")) });
+}
+
 function inResume(skill: SkillPattern, resumeText: string): boolean {
-  return Boolean(resumeText) && skill.patterns.some((pattern) => pattern.test(resumeText));
+  return Boolean(resumeText) && (skill.skill === "Go" ? matchesSkill(resumeText, ["Go", "golang"]) : skill.patterns.some((pattern) => pattern.test(resumeText)));
 }
 
 export function analyzeSelectedJobs(
@@ -128,12 +142,16 @@ export function analyzeSelectedJobs(
   const topSkills = SKILL_PATTERNS
     .map((skill) => {
       const jobCount = texts.filter((text) => skill.patterns.some((pattern) => pattern.test(text))).length;
+      const resumeHas = inResume(skill, resumeText);
+      const bank = resumeHas ? undefined : bankSkillForLabel(skill.skill);
       return {
         skill: skill.skill,
         category: skill.category,
         jobCount,
         percent: selectedCount ? Math.round((jobCount / selectedCount) * 100) : 0,
-        inResume: inResume(skill, resumeText),
+        inResume: resumeHas,
+        inBank: Boolean(bank),
+        bankSource: bank?.sources[0],
       };
     })
     .filter((hit) => hit.jobCount > 0)
@@ -150,7 +168,8 @@ export function analyzeSelectedJobs(
   const avgCareerOps = selectedCount
     ? Math.round(jobs.reduce((sum, job) => sum + careerOpsRating(job).score, 0) / selectedCount)
     : 0;
-  const missingSkills = topSkills.filter((skill) => !skill.inResume).slice(0, 10);
+  const missingSkills = topSkills.filter((skill) => !skill.inResume && !skill.inBank).slice(0, 10);
+  const bankSkills = topSkills.filter((skill) => !skill.inResume && skill.inBank).slice(0, 10);
   const coveredSkills = topSkills.filter((skill) => skill.inResume).slice(0, 10);
   const strongestTheme = themes[0]?.theme || "Selected jobs";
   const strongestMissing = missingSkills.slice(0, 4).map((skill) => skill.skill);
@@ -164,6 +183,9 @@ export function analyzeSelectedJobs(
       : hasResume
         ? "Your saved resume covers the top repeated skills in this selection."
         : "Paste/save your resume in Settings to unlock gap analysis.",
+    ...(hasResume && bankSkills.length
+      ? [`Approved skills bank backs ${bankSkills.slice(0, 4).map((skill) => skill.skill).join(", ")} (open source PRs): add to Skills where the role asks, not as job bullets.`]
+      : []),
     avgCareerOps >= 70
       ? "This is a strong batch — apply first, then tailor bullets."
       : avgCareerOps >= 45
@@ -181,6 +203,7 @@ export function analyzeSelectedJobs(
       .map(({ value, count }) => ({ company: value, count })),
     topSkills: topSkills.slice(0, 14),
     missingSkills,
+    bankSkills,
     coveredSkills,
     themes,
     actionBullets,

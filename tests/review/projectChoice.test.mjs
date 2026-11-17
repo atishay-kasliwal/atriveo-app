@@ -60,7 +60,8 @@ test('the bank: FOMC Market LLM and Atriveo are projects by their own definition
 });
 
 test('every track may print FOMC Market LLM; no pinned set prints a project bullet under Stony Brook', () => {
-  assert.deepEqual(jdSelectedProjects(), ['fomc-market-llm']);
+  // Open source joined the posting-chosen projects on 2026-11-16 (OPEN-SOURCE.yaml).
+  assert.deepEqual(jdSelectedProjects(), ['fomc-market-llm', 'open-source']);
   const doc = loadTracks();
   for (const track of Object.keys(doc.tracks)) assert.ok(allowedProjects(track).includes('fomc-market-llm'), track);
   const sets = Object.values(doc.tracks).flatMap((t) => (t.pinned ? [t.pinned, ...(t.pinned_variants || [])] : []));
