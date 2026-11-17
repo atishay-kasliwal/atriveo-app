@@ -181,6 +181,10 @@ export function sharedOpeningVerbsByTrack(acs, roles, tracksDoc) {
   }).filter(Boolean);
   for (const track of [...Object.keys(tracksDoc?.tracks || {}), null]) {
     const t = track ? tracksDoc.tracks[track] : null;
+    // A master-only set (general_pinned) is a whole resume too: its fields over the default set's.
+    if (t?.general_pinned) {
+      for (const s of sharedVerbsIn(refPairs({ ...(t.pinned || {}), ...t.general_pinned }))) out.push({ ...s, track: `${track}/general` });
+    }
     if (t?.pinned) {
       // Each pinned set is a whole resume: the default and every variant.
       for (const set of [{ name: "default", ...t.pinned }, ...(t.pinned_variants || [])]) {

@@ -16,7 +16,7 @@ signature_technologies:
   - Python
   - SQL
 fact: >-
-  67.7% directional accuracy across 13 sessions (vs 50% chance); 200K+ financial and text records over 7 years processed with Python and SQL pipelines (your DS resume); used by 20-30 analysts and traders.
+  67.7% directional accuracy across 13 sessions (vs 50% chance); 200K+ financial and text records over 7 years processed with Python and SQL pipelines (your DS resume); used by 200+ daily users (2026-11-17, Atishay: the earlier 20-30 figure was outdated).
 provenance:
   level: USER_CONFIRMED
   confirmed_at: '2026-10-08'
@@ -44,4 +44,7 @@ variants:
     emphasis: ds
     strength: 9
     text: >-
-      Forecasted FOMC-driven market direction from 200K+ financial and text records cleaned in scalable Python and SQL pipelines, reaching 67.7% directional accuracy versus 50% chance for 20-30 analysts.
+      Forecasted FOMC-driven market direction from 200K+ financial and text records cleaned in scalable Python and SQL pipelines,
+      reaching 67.7% directional accuracy versus 50% chance for 200+ daily users.
+    earlier_texts:
+      - "Forecasted FOMC-driven market direction from 200K+ financial and text records cleaned in scalable Python and SQL pipelines, reaching 67.7% directional accuracy versus 50% chance for 20-30 analysts."

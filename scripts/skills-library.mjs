@@ -9,6 +9,8 @@
 //   • Exactly SKILLS_MAX_CATEGORIES lines (JD-ranked)
 //   • Each line MUST fit one physical row — never wrap
 
+import { scaledChars } from "./resume-page.mjs";
+
 export const SKILLS_MAX_CATEGORIES = 5;
 /** @deprecated Use single-line greedy fit; no minimum fill that causes wraps. */
 export const SKILLS_MIN_PER_CATEGORY = 0;
@@ -88,7 +90,9 @@ export const SKILLS_LIBRARY = [
       defineSkill({ name: "CSS", displayName: "CSS", aliases: ["scss", "sass"], match: ["css"], marketFrequency: 2600, priority: 6, tier: "B" }),
       defineSkill({ name: "Shell Scripting", displayName: "Shell Scripting", aliases: ["bash", "sh"], match: ["shell", "bash"], marketFrequency: 1200, priority: 5, tier: "B" }),
       defineSkill({ name: "JSON", displayName: "JSON", match: ["json"], marketFrequency: 800, priority: 2, tier: "C" }),
-      defineSkill({ name: "GraphQL", displayName: "GraphQL", aliases: ["gql"], match: ["graphql"], marketFrequency: 1800, priority: 6, tier: "B" }),
+      // GraphQL is an API query language: it prints under Backend Frameworks (defined there), not as a language.
+      // R is a language (moved from Data Science & Statistics 2026-11-17, so data resumes read "Python, SQL, R").
+      defineSkill({ name: "R", displayName: "R", match: ["r", "rstudio", "tidyverse", "r programming"], marketFrequency: 2600, priority: 8, tier: "A", bankBacked: false, related: ["Statistics", "Statistical Analysis"] }),
     ],
   },
   {
@@ -106,6 +110,8 @@ export const SKILLS_LIBRARY = [
       defineSkill({ name: "NestJS", displayName: "NestJS", match: ["nestjs", "nest.js"], marketFrequency: 900, priority: 5, tier: "C", related: ["Node.js", "TypeScript"] }),
       defineSkill({ name: "REST APIs", displayName: "REST APIs", aliases: ["restful api", "web api"], match: ["rest api", "rest apis", "restful"], marketFrequency: 4297, priority: 9, tier: "A", related: ["FastAPI", "OpenAPI"] }),
       defineSkill({ name: "GraphQL APIs", displayName: "GraphQL", match: ["graphql api"], marketFrequency: 1800, priority: 6, tier: "B", related: ["GraphQL"] }),
+      // Moved from Languages (2026-11-17): the confirmed-skills lists name it "GraphQL".
+      defineSkill({ name: "GraphQL", displayName: "GraphQL", aliases: ["gql"], match: ["graphql"], marketFrequency: 1800, priority: 6, tier: "B" }),
       defineSkill({ name: "Kafka", displayName: "Kafka", aliases: ["apache kafka"], match: ["kafka"], marketFrequency: 2200, priority: 8, tier: "B", related: ["Event-Driven Architecture", "Stream Processing"] }),
       defineSkill({ name: "API Gateway", displayName: "API Gateway", match: ["api gateway", "gateway"], marketFrequency: 1100, priority: 6, tier: "B", related: ["REST APIs", "OAuth"] }),
       defineSkill({ name: "OpenAPI", displayName: "OpenAPI", aliases: ["swagger"], match: ["openapi", "swagger"], marketFrequency: 1400, priority: 5, tier: "B", related: ["REST APIs"] }),
@@ -312,7 +318,6 @@ export const SKILLS_LIBRARY = [
     skills: [
       defineSkill({ name: "SAS", displayName: "SAS", match: ["sas"], marketFrequency: 700, priority: 5, tier: "C", bankBacked: false }),
       defineSkill({ name: "MATLAB", displayName: "MATLAB", match: ["matlab"], marketFrequency: 700, priority: 5, tier: "C", bankBacked: false }),
-      defineSkill({ name: "R", displayName: "R", match: ["r", "rstudio", "tidyverse", "r programming"], marketFrequency: 2600, priority: 8, tier: "A", bankBacked: false, related: ["Statistics", "Statistical Analysis"] }),
       defineSkill({ name: "Statistical Analysis", displayName: "Statistical Analysis", aliases: ["statistics", "statistical modeling"], match: ["statistic", "statistical analysis", "statistical modeling"], marketFrequency: 3000, priority: 9, tier: "A", bankBacked: false, related: ["Hypothesis Testing", "Regression"] }),
       defineSkill({ name: "A/B Testing", displayName: "A/B Testing", aliases: ["experimentation"], match: ["a/b test", "a/b tests", "a/b testing", "ab test", "ab testing", "experimentation", "experiments", "controlled experiment"], marketFrequency: 2400, priority: 8, tier: "A", bankBacked: false, related: ["Hypothesis Testing", "Statistical Analysis"] }),
       defineSkill({ name: "Hypothesis Testing", displayName: "Hypothesis Testing", match: ["hypothesis test", "statistical significance", "t-test", "anova", "chi-square"], marketFrequency: 1800, priority: 8, tier: "B", bankBacked: false, related: ["A/B Testing"] }),
@@ -506,8 +511,8 @@ export function expandRelatedSkills(terms, evidenceBySkill) {
 }
 
 const BOLD_FACTOR = 1.18;
-/** One physical line on the resume template (\small skills block). */
-const LINE_BUDGET = 94;
+/** One physical line on the resume template (\small skills block): 94 on the old 7.5in line, scaled to its width. */
+const LINE_BUDGET = scaledChars(94);
 
 function lineWidthUnits(label, items) {
   let w = (label.length + 2) * BOLD_FACTOR;

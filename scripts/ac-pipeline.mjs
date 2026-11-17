@@ -13,7 +13,7 @@ import { acTier } from "./ac-bank.mjs";
 import { scoreResumeCandidate } from "./ac-artifacts.mjs";
 import { optimizeResumeGlobally } from "./ac-global-optimize.mjs";
 import { buildComposeExplain } from "./ac-compose-explain.mjs";
-import { bankForTrack, classifyTrack, trackPins } from "./ac-tracks.mjs";
+import { bankForTrack, classifyTrack, trackPins, withPinnedEntries } from "./ac-tracks.mjs";
 
 // Part of every resume cache key: bump it when the output changes for the same JD and bank
 // (2.1.0: role tracks, title-only experience lines, Education after the header; 2.1.1: AI track
@@ -179,11 +179,13 @@ function applyGlobalOptimize(candidate, { bank, jd, planner, meta, pages, cfg })
  * that role (docs/resume-tracks/). They replace what the pipeline chose; skills, coverage and scores are rebuilt for
  * this JD. "AC-001:fde" is that entry's wording with facet fde; a bare id is its first wording.
  */
-function applyTrackPins(candidate, { trackBank, jd, planner, meta, pages }) {
+function applyTrackPins(candidate, { trackBank: poolBank, jd, planner, meta, pages }) {
   const track = classifyTrack(meta.title);
   // The set is chosen on the real posting (meta.postingJd), even when composing ran on a baseline JD.
-  const pins = trackPins(track, undefined, { title: meta.title, jd: meta.postingJd || jd });
+  const pins = trackPins(track, undefined, { title: meta.title, jd: meta.postingJd || jd, general: Boolean(meta.general) });
   if (!pins || !candidate?.composition) return candidate;
+  // A master-only set may name bullets from another track's tested set (withPinnedEntries).
+  const trackBank = pins.name === "general" ? withPinnedEntries(poolBank, loadBank(), pins) : poolBank;
   const byId = new Map(trackBank.acs.map((a) => [a.id, a]));
   const resolve = (ref) => {
     const [id, facet] = String(ref).split(":");

@@ -44,15 +44,25 @@ tracks:
         atriveo: [AC-228, AC-229]
       project_stacks:
         atriveo: [Python, TypeScript, Claude, MongoDB, Node.js, Docker]
+    # The AI general (master) resume only (scripts/general-resumes.mjs), 2026-11-17, Atishay: open source in the
+    # second project slot, 3 merged bullets (agent orchestration, MCP tool gating, PR-Agent). Job resumes still choose
+    # their second project by fit.
+    general_pinned:
+      projects:
+        atriveo: [AC-228, AC-229]
+        open-source: [AC-253, AC-255, AC-271]
+      project_stacks:
+        atriveo: [Python, TypeScript, Claude, MongoDB, Node.js, Docker]
 
   data-science:
     label: Data science
     title_patterns: ['data scien', 'applied scien', 'research scien', 'machine learning scien', '\bml scien', 'quantitative', 'statistic']
     # Titles on DS resumes, from Atishay's own DS resume (2026-10-08).
     stony_brook_title: Graduate Data Analyst
+    # Accolite is "Senior Software Developer" here too (2026-11-17, Atishay: that is the title; was Senior Software
+    # Engineer on DS resumes only).
     employer_titles:
       wake-forest: AI and Data Analytics Intern
-      accolite: Senior Software Engineer
     # The tested DS set (docs/resume-tracks/ds-da.md). Every data-science-track resume uses these; skills still tailor.
     pinned:
       experience:
@@ -78,6 +88,15 @@ tracks:
           mri-research: [AC-114]
         project_stacks:
           atriveo: [Python, SQL, MongoDB, TypeScript, Node.js]
+    # The DS general (master) resume only, 2026-11-17 (toward 9.5): Atriveo's recommendation ranking instead of the PDF
+    # regression tests, and the clinical radiomics project (real cohorts: survival models, SHAP) instead of the
+    # simulated marketing mix model.
+    general_pinned:
+      projects:
+        atriveo: [AC-225, AC-015]
+        mri-research: [AC-114, AC-116]
+      project_stacks:
+        atriveo: [Python, TypeScript, MongoDB, LLMs, Node.js]
 
   data-analytics:
     label: Data analytics
@@ -85,6 +104,23 @@ tracks:
     exclude_patterns: ['engineer']
     # No open source here: none of it is analytics work (user decision 2026-11-16).
     projects: [atriveo, insurance-platform]
+    # Wake Forest's title on analytics resumes, as on DS ones (Atishay's own DS resume, 2026-10-08).
+    employer_titles:
+      wake-forest: AI and Data Analytics Intern
+    # The DA general (master) resume only, 2026-11-17 (toward 9.5): the DS track's analytics set (dashboards, SQL KPIs,
+    # Power BI, A/B tests, reconciliation) and the marketing mix model's A/B test and budget allocation bullets. Those
+    # DS entries stay tagged data-science only; a master set borrows them (ac-tracks withPinnedEntries), so data
+    # analytics job resumes keep their own pool.
+    general_pinned:
+      experience:
+        stony-brook: [AC-215, AC-226, AC-216, AC-217]
+        wake-forest: [AC-220, AC-218, AC-221, AC-219]
+        accolite: [AC-223, AC-224, AC-222]
+      projects:
+        atriveo: [AC-225, AC-052]
+        bayesian-mmm: [AC-097, AC-100]
+      project_stacks:
+        atriveo: [Python, SQL, MongoDB, TypeScript, Node.js]
 
   forward-deployed:
     label: Forward deployed
@@ -101,6 +137,14 @@ tracks:
         atriveo: [AC-207, AC-208, AC-209]
         insurance-platform: [AC-066]
       # The tools after a project's name (else picked from its bullets).
+      project_stacks:
+        atriveo: [TypeScript, React, Node.js, MongoDB, Playwright, Docker]
+    # The FDE general (master) resume only, 2026-11-17, Atishay: open source replaces the insurance platform, 3 merged
+    # bullets (Red Hat mapt provisioning and CI runners, NVIDIA NVKR). Job resumes still choose by fit.
+    general_pinned:
+      projects:
+        atriveo: [AC-208, AC-209]
+        open-source: [AC-265, AC-266, AC-258]
       project_stacks:
         atriveo: [TypeScript, React, Node.js, MongoDB, Playwright, Docker]
     # Other tested sets, each used when its rule matches the posting (title + JD); else the set above. Infrastructure:
@@ -136,6 +180,19 @@ tracks:
       projects:
         atriveo: [AC-214, AC-057:swe-security]
         insurance-platform: [AC-067]
+      project_stacks:
+        atriveo: [React, TypeScript, Node.js, MongoDB, FastAPI, PostgreSQL]
+    # The SWE general (master) resume only, 2026-11-17, Atishay: open source replaces the insurance platform, 3 merged
+    # bullets (NVIDIA NVKR and Workload Map in Go, Keycloak's React console). Job resumes still choose by fit.
+    # Accolite keeps 4 (AC-213, the test-coverage bullet, makes room: the open source bullets show that work).
+    general_pinned:
+      experience:
+        stony-brook: [AC-211, AC-019, AC-003, AC-025]
+        wake-forest: [AC-047, AC-033, AC-031:production-ml]
+        accolite: [AC-212, AC-190, AC-191, AC-183:swe]
+      projects:
+        atriveo: [AC-214, AC-057:swe-security]
+        open-source: [AC-258, AC-259, AC-269]
       project_stacks:
         atriveo: [React, TypeScript, Node.js, MongoDB, FastAPI, PostgreSQL]
     # C++ postings (2026-10-09): InsureRaft, Atishay's C++ and NuRaft project, replaces the insurance microservices

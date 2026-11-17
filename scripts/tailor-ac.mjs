@@ -35,6 +35,8 @@ import {
 // import { ollamaHealth, DEFAULT_MODEL as OLLAMA_DEFAULT_MODEL } from "./ac-ollama.mjs";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
+/** A track's general (master) resume (scripts/general-resumes.mjs builds it as job_url "general:<track>"). */
+const isGeneralResume = (job) => String(job?.job_url || "").startsWith("general:");
 export const MIN_FULL_JD_CHARS = MIN_JD_IDEAL;
 // A neutral general-SWE posting. A job whose own posting fails the fit check
 // is composed against this instead, so it still gets the basic resume.
@@ -359,7 +361,7 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     const pipeline = generateResume({
       jd: composeJd,
       planner,
-      meta: { company, title: composeTitle, location: job.location, postingJd: jd },
+      meta: { company, title: composeTitle, location: job.location, postingJd: jd, general: isGeneralResume(job) },
       forceBorderline: job.force_borderline === true,
       strictJdGate: job.strict_jd_gate === true,
       jdGate: composeGate,
@@ -390,6 +392,7 @@ export async function tailorOneAc(job, seq, dateDir, ctx, {
     try {
       pageFill = fillResumePage({
         compact: pipeline.result.compact, skills, headerTitle, location: job.location, jd: composeJd, track: classifyTrack(composeTitle),
+        general: isGeneralResume(job),
       });
     } catch (e) {
       // The page rules never stop a resume: on an error it is built as planned, and Resume Ready reports what it breaks.

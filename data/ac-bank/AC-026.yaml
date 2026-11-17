@@ -49,9 +49,15 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Led the FOMC platform from a professor's lab idea to daily use by 20-30 analysts and traders, combining Python pipelines and multi-agent reasoning to cut analysis from 3 days to under 20 minutes.
+      Led the FOMC platform from a professor's lab idea to 200+ daily users, combining Python pipelines and multi-agent reasoning to
+      cut analysis from 3 days to under 20 minutes.
+    earlier_texts:
+      - "Led the FOMC platform from a professor's lab idea to daily use by 20-30 analysts and traders, combining Python pipelines and multi-agent reasoning to cut analysis from 3 days to under 20 minutes."
   - facet: production-ml
     emphasis: ml
     strength: 9
     text: >-
-      Led an AI platform over 7 years of FOMC data from lab idea to 20-30 daily analysts and traders, using Python RAG retrieval and multi-agent reasoning to cut analysis from 3 days to 20 minutes.
+      Led an AI platform over 7 years of FOMC data from lab idea to 200+ daily users, using Python RAG retrieval and multi-agent
+      reasoning to cut analysis from 3 days to 20 minutes.
+    earlier_texts:
+      - "Led an AI platform over 7 years of FOMC data from lab idea to 20-30 daily analysts and traders, using Python RAG retrieval and multi-agent reasoning to cut analysis from 3 days to 20 minutes."

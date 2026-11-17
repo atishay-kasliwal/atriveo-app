@@ -36,4 +36,7 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Presented macro analysis and multi-agent outputs to 20-30 analysts and traders through a React dashboard, turning each Fed event into a read within minutes.
+      Presented macro analysis and multi-agent outputs to 200+ daily users through a React dashboard, turning each Fed event into a
+      read within minutes.
+    earlier_texts:
+      - "Presented macro analysis and multi-agent outputs to 20-30 analysts and traders through a React dashboard, turning each Fed event into a read within minutes."

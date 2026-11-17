@@ -62,6 +62,9 @@ variants:
     strength: 9
     tracks:
       - ai-engineer
-    signature_technologies: [Gemini]
+    signature_technologies: [Claude, Gemini]
+    # 2026-11-17, Atishay: Kai is an AI agent; Anthropic's Claude ran behind it and Gemini was used too.
     text: >-
-      Orchestrated Kai's 3-agent RL debate engine with a teammate so fundamental, sentiment and valuation agents argue until 70% agree, reaching 60% directional accuracy on 30 S&P 500 stocks with Gemini.
+      Orchestrated AI agent Kai's 3-agent RL debate engine with a teammate so fundamental, sentiment and valuation agents argue until 70% agree, reaching 60% directional accuracy on 30 S&P 500 stocks with Claude and Gemini.
+    earlier_texts:
+      - Orchestrated Kai's 3-agent RL debate engine with a teammate so fundamental, sentiment and valuation agents argue until 70% agree, reaching 60% directional accuracy on 30 S&P 500 stocks with Gemini.

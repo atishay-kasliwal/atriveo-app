@@ -21,6 +21,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { loadBank } from "./ac-bank.mjs";
 import { assembleAcResume, EDUCATION_ROWS, ossHeading, toolsFromBullets } from "./ac-tex.mjs";
+import { RESUME_BOTTOM_MARGIN_PT } from "./resume-page.mjs";
 
 // The open source project prints a heading and tools built from its bullets (ac-tex.mjs ossHeading), so the builder
 // shows the same: "Kiali, Numaflow (Open Source)" with Go, Kubernetes. Every other project keeps its fixed name.
@@ -527,7 +528,7 @@ function pageCount(pdfPath) {
 
 /** Room on the page, in bullet lines (10pt type on a 12pt baseline): lines free under the last text of a one-page
  *  resume, or negative, the lines past the first page. From the words' boxes (pdftotext -bbox); null when unreadable.
- *  The template's margins are 0.5in (36pt). */
+ *  The template's margins: resume-page.mjs. */
 export function pageRoom(pdfPath) {
   const r = spawnSync("pdftotext", ["-bbox", pdfPath, "-"], { encoding: "utf8", maxBuffer: 16 << 20 });
   if (r.status !== 0 || !r.stdout) return null;
@@ -536,8 +537,8 @@ export function pageRoom(pdfPath) {
     bottom: Math.max(0, ...[...pg.matchAll(/yMax="([\d.]+)"/g)].map((m) => Number(m[1]))),
   }));
   if (!pages.length || !pages[0].height) return null;
-  if (pages.length === 1) return Math.floor((pages[0].height - 36 - pages[0].bottom) / 12);
-  return -Math.ceil(pages.slice(1).reduce((n, p) => n + Math.max(0, p.bottom - 36), 0) / 12);
+  if (pages.length === 1) return Math.floor((pages[0].height - RESUME_BOTTOM_MARGIN_PT - pages[0].bottom) / 12);
+  return -Math.ceil(pages.slice(1).reduce((n, p) => n + Math.max(0, p.bottom - RESUME_BOTTOM_MARGIN_PT), 0) / 12);
 }
 
 /**

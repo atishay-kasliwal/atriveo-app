@@ -9,10 +9,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { assembleAcResume, toolsFromBullets } from "./ac-tex.mjs";
+import { assembleAcResume, ossHeading, toolsFromBullets } from "./ac-tex.mjs";
+import { PAGE_HEIGHT_PT, RESUME_BOTTOM_MARGIN_PT, scaledChars } from "./resume-page.mjs";
 import { stripBanned } from "./tailor-dynamic.mjs";
 import { loadBank } from "./ac-bank.mjs";
-import { bankForTrack, jdSelectedProjects, loadTracks, trackPins } from "./ac-tracks.mjs";
+import { bankForTrack, jdSelectedProjects, loadTracks, trackPins, withPinnedEntries } from "./ac-tracks.mjs";
 import { PROJECT_SLUG_TO_NAME as PROJECT_NAME } from "./ac-role-meta.mjs";
 import { fileURLToPath } from "node:url";
 
@@ -26,10 +27,11 @@ const PLANNER_POOLS = (() => {
   }
 })();
 
-// Where the last line of this template ends when the page is full (measured: a resume stretched to the bottom margin ends
-// its last printed line at 746pt of 792; the skills list leaves its own small space under it).
-export const PAGE_HEIGHT_PT = 792;
-export const TEXT_BOTTOM_PT = 746;
+// Where the last line of this template ends when the page is full (measured with 0.5in margins: a resume stretched to
+// the bottom margin ends its last printed line at 746pt of 792, 10pt above the margin; the skills list leaves its own
+// small space under it). The margin itself is resume-page.mjs's.
+export { PAGE_HEIGHT_PT };
+export const TEXT_BOTTOM_PT = PAGE_HEIGHT_PT - RESUME_BOTTOM_MARGIN_PT - 10;
 // One \small bullet line is about 12pt; more than this left under the last line is an empty line.
 export const LINE_PT = 12;
 const MAX_ROUNDS = 8;
@@ -254,7 +256,7 @@ export function enforceProjects(compact, bank, { jd = "", track = null, pool = n
  * best bullets score higher against the posting than that project's printed bullets. The first project (the newest,
  * Atriveo) is never replaced, and nothing is forced: no fit, no change.
  */
-export function chooseProjects(compact, bank, { jd = "", track = null, extra = jdSelectedProjects(), minBullets = 2 } = {}) {
+export function chooseProjects(compact, bank, { jd = "", track = null, extra = jdSelectedProjects(), minBullets = 2, keep = [] } = {}) {
   const jdLower = String(jd).toLowerCase();
   const out = { ...compact, projects: (compact.projects || []).map((p) => ({ ...p, bullets: [...(p.bullets || [])] })) };
   const changes = [];
@@ -262,8 +264,10 @@ export function chooseProjects(compact, bank, { jd = "", track = null, extra = j
   const fitOf = (p) => p.bullets.reduce((s, b) => s + scoreOfPrinted(b, bank, jdLower), 0) / Math.max(1, p.bullets.length);
   for (const role of extra) {
     if (out.projects.some((p) => p.role === role || sameProduct(p.role, role))) continue;
-    // The weakest project after the first is the one it would replace.
-    const slot = out.projects.map((p, i) => ({ i, fit: fitOf(p) })).slice(1).sort((a, b) => a.fit - b.fit)[0];
+    // The weakest project after the first is the one it would replace (never one in `keep`).
+    const slot = out.projects.map((p, i) => ({ i, fit: fitOf(p), role: p.role })).slice(1)
+      .filter((s) => !keep.includes(s.role)).sort((a, b) => a.fit - b.fit)[0];
+    if (!slot) continue;
     const others = out.projects.filter((_, i) => i !== slot.i);
     const used = new Map([...(out.experience || []), ...others].flatMap((s) => s.bullets.map((b) => [b.ac_id, b.text])));
     const list = pickTogether(role, distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track, [...used.values()], factKeys)), minBullets);
@@ -355,26 +359,33 @@ export function fillOnePage(compact, { bank, jd = "", track = null, render, meas
  * The build's entry point: the composition the pipeline chose, made to follow the page rules.
  * Returns { compact, tex, report } where report says what changed and how full the page is.
  */
-export function fillResumePage({ compact, skills, headerTitle, location, jd, track, measure = compileAndMeasure, bank = null }) {
+export function fillResumePage({ compact, skills, headerTitle, location, jd, track, general = false, measure = compileAndMeasure, bank = null }) {
   const full = bank || loadBank();
-  const trackBank = bankForTrack(full, track || null);
+  // A master resume's pinned bullets may come from another track's tested set (withPinnedEntries).
+  const trackBank = general
+    ? withPinnedEntries(bankForTrack(full, track || null), full, trackPins(track, undefined, { jd, general }))
+    : bankForTrack(full, track || null);
   const pool = track ? loadTracks().tracks?.[track]?.projects : null;
-  // A project heading is its name and tools on one line; past about 85 characters the template shrinks the whole heading,
+  // A project heading is its name and tools on one line; past about 82 characters (on a 7.5in line) the template shrinks the whole heading,
   // so a tools line made from the bullets keeps only as many tools as fit.
   const fitTools = (c) => ({ ...c, projects: (c.projects || []).map((p) => {
     if (p.stack?.length) return p;
-    const name = PROJECT_NAME[p.role] || p.role;
+    // Open source: its heading names the orgs and projects, its tools are the bullets' declared technologies (ossHeading).
+    const oss = p.role === "open-source" ? ossHeading(p.bullets || []) : null;
+    const name = oss ? oss.text : PROJECT_NAME[p.role] || p.role;
     const tools = [];
-    for (const t of toolsFromBullets(p.bullets, p.role)) {
-      if (`${name} | ${[...tools, t].join(", ")}`.length > 85) break;
+    for (const t of oss ? oss.tools : toolsFromBullets(p.bullets, p.role)) {
+      // 82 characters filled the heading box on the 7.5in line without shrinking (measured 2026-11-17).
+      if (`${name} | ${[...tools, t].join(", ")}`.length > scaledChars(82)) break;
       tools.push(t);
     }
     return { ...p, stack: tools };
   }) });
   const render = (c) => assembleAcResume(fitTools(c), { headerTitle, skillsLines: skills, bank: trackBank, location });
-  const pinned = Object.keys(trackPins(track, undefined, { jd })?.projects || {});
+  const pinned = Object.keys(trackPins(track, undefined, { jd, general })?.projects || {});
   const projects = enforceProjects(compact, trackBank, { jd, track, pool, pinned });
-  const chosen = chooseProjects(projects.compact, trackBank, { jd, track });
+  // A general (master) resume prints exactly its pinned projects; a job's resume may swap in a better-fitting one.
+  const chosen = chooseProjects(projects.compact, trackBank, { jd, track, keep: general ? pinned : [] });
   const deduped = dropRepeatedFigures(chosen.compact);
   const filled = fillOnePage(deduped.compact, { bank: trackBank, jd, track, render, measure });
   const count = (c) => ({
