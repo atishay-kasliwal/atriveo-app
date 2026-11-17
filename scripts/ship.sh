@@ -98,6 +98,13 @@ echo "live now: $DEPLOYED   dashboard $DASH_IMAGE   workers $WORK_IMAGE"
 # resumes, Fit and the builder read it from the image, and leaving it out kept bank v66 live after v68 was merged.
 CHANGED="$(git diff --name-only --diff-filter=ACMR "$DEPLOYED" HEAD -- scripts data/ats data/ac-bank data/skill-inventory.json deploy package.json package-lock.json | grep -v -e '^scripts/ship\.sh$' -e '^scripts/ship-lib\.sh$' -e '^scripts/ats/validate' -e '^scripts/test-' || true)"
 SRC_CHANGED="$(git diff --name-only "$DEPLOYED" HEAD -- src public apply-public functions vite.apply.config.ts apply.html | head -1 || true)"
+# The bank and the skills inventory also ship by content: every file whose hash in the live image differs from this commit.
+# A commit diff alone missed bank changes merged before a ship that left data/ac-bank out (bank v66 stayed live after v68).
+if [ "$ONLY_SCRAPER" != 1 ] && "${SSH[@]}" true 2>/dev/null; then
+  LIVE_BANK="$("${SSH[@]}" "docker run --rm --entrypoint sh $DASH_IMAGE -c 'cd /app && sha256sum data/ac-bank/* data/skill-inventory.json 2>/dev/null; true'")"
+  BANK_STALE="$(git ls-files data/ac-bank data/skill-inventory.json | while read -r f; do h="$(shasum -a 256 "$f" | cut -d' ' -f1)"; printf '%s\n' "$LIVE_BANK" | grep -qx "$h  $f" || echo "$f"; done)"
+  CHANGED="$(printf '%s\n%s\n' "$CHANGED" "$BANK_STALE" | grep -v '^$' | sort -u)"
+fi
 if [ "$ONLY_SCRAPER" = 1 ]; then CHANGED="$(git ls-files deploy)"; fi
 # The scraper step copies loop.sh, Dockerfile.loop and patch_storage.py from the shipped set, so --scraper always ships them, changed or not.
 # The after-scrape loop's own scripts go with it (the two LinkedIn ones ran only on the Mac before, so they were never in the image).
