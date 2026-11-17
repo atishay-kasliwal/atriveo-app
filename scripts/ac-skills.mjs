@@ -207,8 +207,13 @@ export function buildSkillsFromComposition(composition, bank, jd, {
   evidenceOnly = true,
   maxCategories = SKILLS_MAX_CATEGORIES,
   useSelectedAcCorpus = true,
+  // Skills that must print, treated like skills the JD names (first in their line, never dropped as filler). By default
+  // the tools the employer title lines no longer show and no bullet names (unprintedEmployerTools).
+  mustInclude = null,
 } = {}) {
+  const must = new Set((mustInclude ?? unprintedEmployerTools(composition, jd, bank)).map((s) => String(s).toLowerCase()));
   const hay = normJd(jd);
+  const asked = (sk) => jdMentionsSkill(sk, hay) || must.has(sk.name.toLowerCase()) || must.has(sk.displayName.toLowerCase());
   const { terms, confidenceMap } = collectBulletEvidence(composition, bank, { useSelectedAcCorpus });
   const tracks = loadTracks(bank?.bank_dir);
   const confirmed = confirmedSkillKeys(tracks);
@@ -238,10 +243,10 @@ export function buildSkillsFromComposition(composition, bank, jd, {
   // "Additional Skills" holding them first (then that category's own JD skills), so no asked-for skill is lost.
   const pickedLabels = new Set(categories.map((c) => c.label));
   const leftovers = SKILLS_LIBRARY.filter((c) => !pickedLabels.has(c.label)).flatMap((c) => c.skills)
-    .filter((sk) => hasEvidence(sk) && jdMentionsSkill(sk, hay));
+    .filter((sk) => hasEvidence(sk) && asked(sk));
   if (leftovers.length && categories.length >= maxCategories) {
     const last = categories[categories.length - 1];
-    categories[categories.length - 1] = { ...last, label: "Additional Skills", skills: [...leftovers, ...last.skills.filter((sk) => jdMentionsSkill(sk, hay))] };
+    categories[categories.length - 1] = { ...last, label: "Additional Skills", skills: [...leftovers, ...last.skills.filter((sk) => asked(sk))] };
   }
 
   for (const cat of categories) {
@@ -256,11 +261,12 @@ export function buildSkillsFromComposition(composition, bank, jd, {
 
     if (!candidates.length) continue;
 
-    const jdHit = (s) => jdMentionsSkill(s, hay);
-    const relevant = candidates.filter((s) => jdHit(s));
-    const filler = candidates.filter((s) => !jdHit(s));
-    // Skills the JD names go first, so a line that runs out of room drops filler, never a JD skill.
-    const ordered = [...sortSkillsByScore(relevant, jd, confidenceMap), ...sortSkillsByScore(filler, jd, confidenceMap)];
+    const isMust = (s) => must.has(s.name.toLowerCase()) || must.has(s.displayName.toLowerCase());
+    const required = candidates.filter((s) => isMust(s));
+    const relevant = candidates.filter((s) => !isMust(s) && asked(s));
+    const filler = candidates.filter((s) => !asked(s));
+    // Must-print skills first, then the ones the JD names, so a line that runs out of room drops filler, never these.
+    const ordered = [...required, ...sortSkillsByScore(relevant, jd, confidenceMap), ...sortSkillsByScore(filler, jd, confidenceMap)];
     const displayNames = ordered.map((s) => s.displayName);
     const capped = fitSkillsToSingleLine(cat.label, displayNames);
 
@@ -284,6 +290,17 @@ const isTool = (sk) => TOOL_CATEGORIES.has(CATEGORY_OF.get(sk.name)) && !NOT_TOO
  * the employer's other tools follow, so the line stays honest (only tools used there) and full. It is shorter only when the
  * employer has fewer than 5 such tools.
  */
+/**
+ * The tools an employer's title line used to name (employerTools: the JD's skills Atishay used there) that no bullet on
+ * the resume names. Since 2026-11-17 title lines print the title alone, so these go into Technical Skills instead.
+ */
+export function unprintedEmployerTools(composition, jd, bank) {
+  const printed = [...(composition?.experience || []), ...(composition?.projects || [])]
+    .flatMap((s) => (s.bullets || []).map((b) => b.text || b.face?.text || "")).join(" ");
+  const named = (tool) => new RegExp(`(^|[^A-Za-z0-9])${tool.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")}($|[^A-Za-z0-9])`, "i").test(printed);
+  return [...new Set((composition?.experience || []).flatMap((role) => employerTools(role.role, jd, bank)))].filter((t) => !named(t));
+}
+
 // 58 and 72 characters on the old 7.5in line, scaled to the template's width (resume-page.mjs).
 export function employerTools(roleSlug, jd, bank, { max = 6, min = 5, maxChars = scaledChars(58), hardChars = scaledChars(72) } = {}) {
   const hay = normJd(jd);

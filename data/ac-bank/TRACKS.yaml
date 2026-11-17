@@ -59,9 +59,10 @@ tracks:
     title_patterns: ['data scien', 'applied scien', 'research scien', 'machine learning scien', '\bml scien', 'quantitative', 'statistic']
     # Titles on DS resumes, from Atishay's own DS resume (2026-10-08).
     stony_brook_title: Graduate Data Analyst
+    # Accolite is "Senior Software Developer" here too (2026-11-17, Atishay: that is the title; was Senior Software
+    # Engineer on DS resumes only).
     employer_titles:
       wake-forest: AI and Data Analytics Intern
-      accolite: Senior Software Engineer
     # The tested DS set (docs/resume-tracks/ds-da.md). Every data-science-track resume uses these; skills still tailor.
     pinned:
       experience:
@@ -87,6 +88,15 @@ tracks:
           mri-research: [AC-114]
         project_stacks:
           atriveo: [Python, SQL, MongoDB, TypeScript, Node.js]
+    # The DS general (master) resume only, 2026-11-17 (toward 9.5): Atriveo's recommendation ranking instead of the PDF
+    # regression tests, and the clinical radiomics project (real cohorts: survival models, SHAP) instead of the
+    # simulated marketing mix model.
+    general_pinned:
+      projects:
+        atriveo: [AC-225, AC-015]
+        mri-research: [AC-114, AC-116]
+      project_stacks:
+        atriveo: [Python, TypeScript, MongoDB, LLMs, Node.js]
 
   data-analytics:
     label: Data analytics
@@ -94,6 +104,23 @@ tracks:
     exclude_patterns: ['engineer']
     # No open source here: none of it is analytics work (user decision 2026-11-16).
     projects: [atriveo, insurance-platform]
+    # Wake Forest's title on analytics resumes, as on DS ones (Atishay's own DS resume, 2026-10-08).
+    employer_titles:
+      wake-forest: AI and Data Analytics Intern
+    # The DA general (master) resume only, 2026-11-17 (toward 9.5): the DS track's analytics set (dashboards, SQL KPIs,
+    # Power BI, A/B tests, reconciliation) and the marketing mix model's A/B test and budget allocation bullets. Those
+    # DS entries stay tagged data-science only; a master set borrows them (ac-tracks withPinnedEntries), so data
+    # analytics job resumes keep their own pool.
+    general_pinned:
+      experience:
+        stony-brook: [AC-215, AC-226, AC-216, AC-217]
+        wake-forest: [AC-220, AC-218, AC-221, AC-219]
+        accolite: [AC-223, AC-224, AC-222]
+      projects:
+        atriveo: [AC-225, AC-052]
+        bayesian-mmm: [AC-097, AC-100]
+      project_stacks:
+        atriveo: [Python, SQL, MongoDB, TypeScript, Node.js]
 
   forward-deployed:
     label: Forward deployed

@@ -16,7 +16,7 @@ import {
   projectRecencyMs,
   sortProjectsByRecency,
 } from "./ac-role-meta.mjs";
-import { buildSkillsFromComposition, employerTools } from "./ac-skills.mjs";
+import { buildSkillsFromComposition } from "./ac-skills.mjs";
 import { SKILLS_MAX_CATEGORIES } from "./skills-library.mjs";
 import { resolveBankDir } from "./ac-bank.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
@@ -283,9 +283,9 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
       }));
       const displayTitle = roleTitle;
       const items = bullets.map((b) => `        \\resumeItem{${esc(b.text)}}`).join("\n");
-      // An employer's tools (role.stack: the JD's skills used there, or the resume builder's own) follow the job title
-      // ("AI Engineer | Python, AWS"), as the user asked (2026-10-10); ATS readiness warns that a parser may file them
-      // as part of the title (title_extra_text).
+      // Generated resumes print the title alone (2026-11-17; prepareResumeArtifacts moves those tools into Technical
+      // Skills when no bullet names them). A tools line set in the resume builder (role.stack) still follows the title
+      // ("AI Engineer | Python, AWS"); ATS readiness warns that a parser may file it as part of the title.
       const titleLine = role.stack?.length ? `${esc(displayTitle)} $|$ ${esc(role.stack.join(", "))}` : esc(displayTitle);
       return {
         order: meta.order || 0,
@@ -382,9 +382,10 @@ export function prepareResumeArtifacts({ jd, composition, bank, headerTitle, loc
   const compact0 = composition.experience?.[0]?.bullets?.[0]?.ac
     ? compactCompositionForTex(composition)
     : composition;
-  // Each employer's tools line: the JD's skills Atishay used there. The resume builder's own line (role.stack) wins.
-  const compact = { ...compact0, experience: (compact0.experience || []).map((role) => (role.stack !== undefined ? role
-    : { ...role, stack: employerTools(role.role, jd, bank) })) };
+  // Employer title lines print the title only (2026-11-17, Atishay: an ATS files "Developer | Python, AWS" as the whole
+  // title). The tools that line used to name still reach the page: buildSkillsFromComposition puts any that no bullet
+  // names into Technical Skills (unprintedEmployerTools). A stack set in the resume builder (role.stack) still prints.
+  const compact = compact0;
   const skillsCfg = composition.minimum_visual_targets?.skills || {};
   const skills = composition.skills?.length
     ? composition.skills

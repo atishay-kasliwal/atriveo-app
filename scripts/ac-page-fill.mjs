@@ -13,7 +13,7 @@ import { assembleAcResume, ossHeading, toolsFromBullets } from "./ac-tex.mjs";
 import { PAGE_HEIGHT_PT, RESUME_BOTTOM_MARGIN_PT, scaledChars } from "./resume-page.mjs";
 import { stripBanned } from "./tailor-dynamic.mjs";
 import { loadBank } from "./ac-bank.mjs";
-import { bankForTrack, jdSelectedProjects, loadTracks, trackPins } from "./ac-tracks.mjs";
+import { bankForTrack, jdSelectedProjects, loadTracks, trackPins, withPinnedEntries } from "./ac-tracks.mjs";
 import { PROJECT_SLUG_TO_NAME as PROJECT_NAME } from "./ac-role-meta.mjs";
 import { fileURLToPath } from "node:url";
 
@@ -361,7 +361,10 @@ export function fillOnePage(compact, { bank, jd = "", track = null, render, meas
  */
 export function fillResumePage({ compact, skills, headerTitle, location, jd, track, general = false, measure = compileAndMeasure, bank = null }) {
   const full = bank || loadBank();
-  const trackBank = bankForTrack(full, track || null);
+  // A master resume's pinned bullets may come from another track's tested set (withPinnedEntries).
+  const trackBank = general
+    ? withPinnedEntries(bankForTrack(full, track || null), full, trackPins(track, undefined, { jd, general }))
+    : bankForTrack(full, track || null);
   const pool = track ? loadTracks().tracks?.[track]?.projects : null;
   // A project heading is its name and tools on one line; past about 82 characters (on a 7.5in line) the template shrinks the whole heading,
   // so a tools line made from the bullets keeps only as many tools as fit.

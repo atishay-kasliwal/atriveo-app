@@ -47,11 +47,15 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Installed Jenkins, Docker and Kubernetes CI/CD across 20 engineers cutting release cycles from 6 hours
-      to 90 seconds with 20+ monthly production releases.
+      Installed Jenkins, Docker and Kubernetes CI/CD across 20 engineers, cutting build and test time from 6 hours to 90 seconds with
+      20+ monthly production releases.
+    earlier_texts:
+      - "Installed Jenkins, Docker and Kubernetes CI/CD across 20 engineers cutting release cycles from 6 hours to 90 seconds with 20+ monthly production releases."
   - facet: production-ml
     emphasis: ml
     strength: 9
     text: >-
-      Installed Docker and Kubernetes CI/CD with automated testing across 20 engineers, cutting release cycles
-      from 6 hours to 90 seconds for distributed enterprise applications.
+      Installed Docker and Kubernetes CI/CD with automated testing across 20 engineers, cutting build and test time from 6 hours to 90
+      seconds for distributed enterprise applications.
+    earlier_texts:
+      - "Installed Docker and Kubernetes CI/CD with automated testing across 20 engineers, cutting release cycles from 6 hours to 90 seconds for distributed enterprise applications."

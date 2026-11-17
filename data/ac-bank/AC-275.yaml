@@ -4,6 +4,11 @@ role: open-source
 fits:
   - software-engineer
   - forward-deployed
+# Only the tracks it fits (2026-11-17): untagged, it shared "Reconciled" with Wake Forest's AC-220 on data analytics
+# resumes, which print no open source.
+tracks:
+  - software-engineer
+  - forward-deployed
 slot_kind: project
 achievement_theme: ansible-ide
 display_order: 23

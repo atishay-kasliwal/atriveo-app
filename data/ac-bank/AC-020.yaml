@@ -38,4 +38,6 @@ variants:
     emphasis: default
     strength: 9
     text: >-
-      Operated GPT-backed macro analysis APIs in Python on AWS, answering 20-30 analysts and traders within a minute of each Fed statement.
+      Operated GPT-backed macro analysis APIs in Python on AWS, answering 200+ daily users within a minute of each Fed statement.
+    earlier_texts:
+      - "Operated GPT-backed macro analysis APIs in Python on AWS, answering 20-30 analysts and traders within a minute of each Fed statement."

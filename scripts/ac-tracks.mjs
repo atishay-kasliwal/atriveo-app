@@ -52,8 +52,9 @@ export function bankForTrack(bank, track) {
  */
 export function trackPins(track, doc = loadTracks(), { title = "", jd = "", general = false } = {}) {
   const t = track ? doc.tracks?.[track] : null;
+  // A track without a tested set for job resumes (data analytics) may still pin its master resume.
+  if (general && t?.general_pinned) return { name: "general", ...(t.pinned || {}), ...t.general_pinned };
   if (!t?.pinned) return null;
-  if (general && t.general_pinned) return { name: "general", ...t.pinned, ...t.general_pinned };
   // Markdown-escaped JDs write "C\\+\\+": unescape before matching signals.
   const text = `${title}\n${jd}`.replace(/\\([+&#.*-])/g, "$1").toLowerCase();
   for (const v of t.pinned_variants || []) {
@@ -63,14 +64,34 @@ export function trackPins(track, doc = loadTracks(), { title = "", jd = "", gene
   return { name: "default", ...t.pinned };
 }
 
+/**
+ * A track's bank plus the entries a pinned set names that the track's tags leave out, with the pinned wordings. A
+ * master-only set (general_pinned) may borrow another track's tested bullets (the data analytics master prints the data
+ * science analytics set) without opening them to that track's job resumes.
+ */
+export function withPinnedEntries(trackBank, fullBank, pins) {
+  if (!pins) return trackBank;
+  const have = new Set(trackBank.acs.map((a) => a.id));
+  const refs = [...Object.values(pins.experience || {}), ...Object.values(pins.projects || {})].flat().map((r) => String(r).split(":"));
+  const add = [];
+  for (const [id, facet] of refs) {
+    if (have.has(id)) continue;
+    const ac = fullBank.acs.find((a) => a.id === id);
+    const v = ac && (facet ? ac.variants.find((x) => x.facet === facet) : ac.variants[0]);
+    if (!v) continue;
+    have.add(id);
+    add.push({ ...ac, tracks: undefined, variants: [{ ...v, tracks: undefined }] });
+  }
+  return add.length ? { ...trackBank, acs: [...trackBank.acs, ...add] } : trackBank;
+}
+
 /** Every pinned set a track has (the default and its variants), for checks that cover them all. */
 export function allPinnedSets(track, doc = loadTracks()) {
   const t = doc.tracks?.[track];
-  return t?.pinned ? [
-    { name: "default", ...t.pinned },
-    ...(t.pinned_variants || []),
-    ...(t.general_pinned ? [{ name: "general", ...t.pinned, ...t.general_pinned }] : []),
-  ] : [];
+  return [
+    ...(t?.pinned ? [{ name: "default", ...t.pinned }, ...(t.pinned_variants || [])] : []),
+    ...(t?.general_pinned ? [{ name: "general", ...(t.pinned || {}), ...t.general_pinned }] : []),
+  ];
 }
 
 /** Every resume prints at least this many projects (Atishay, 2026-10-23; ac-page-fill enforceProjects). */

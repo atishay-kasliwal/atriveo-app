@@ -14,7 +14,7 @@ concepts_claimed:
   - data-science
 signature_technologies: []
 fact: >-
-  A/B test: ~10,000 in-house users in two groups on two UI designs; feedback; final design combined both;
+  A/B test: ~10,000 in-house ERP users in two groups (both true with the platform's 3,000 employees, Atishay 2026-11-17) on two UI designs; feedback; final design combined both;
   features tested with leadership the same way (you, 2026-10-08).
 provenance:
   level: USER_CONFIRMED
@@ -41,5 +41,7 @@ variants:
     emphasis: ds
     strength: 9
     text: >-
-      Tested two interface designs across about 10K in-house users split into two cohorts, merging the elements
-      each group preferred into the final ERP platform.
+      Tested two interface designs with about 10K ERP users split into two cohorts, merging the elements each group preferred into the
+      final platform.
+    earlier_texts:
+      - "Tested two interface designs across about 10K in-house users split into two cohorts, merging the elements each group preferred into the final ERP platform."

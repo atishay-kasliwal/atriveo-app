@@ -48,7 +48,10 @@ variants:
     emphasis: ml
     strength: 9
     text: >-
-      Consolidated FinBERT sentiment models from SageMaker and EC2 A100 GPUs onto AWS Bedrock to cut maintenance, tracking runs in MLflow while scoring 110+ Fed events yearly since 2019.
+      Consolidated FinBERT sentiment models from SageMaker and EC2 A100 GPUs onto AWS Bedrock to cut maintenance, tracking runs in
+      MLflow while scoring 110+ Fed events a year back to 2019.
+    earlier_texts:
+      - "Consolidated FinBERT sentiment models from SageMaker and EC2 A100 GPUs onto AWS Bedrock to cut maintenance, tracking runs in MLflow while scoring 110+ Fed events yearly since 2019."
   - facet: ai-track
     emphasis: ai
     strength: 9
