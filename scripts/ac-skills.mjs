@@ -17,6 +17,7 @@ import {
   skillHaystack,
   jdMentionsSkill,
   fitSkillsToSingleLine,
+  fitsOnePhysicalLine,
 } from "./skills-library.mjs";
 
 function norm(text) {
@@ -234,43 +235,66 @@ export function buildSkillsFromComposition(composition, bank, jd, {
     return skillInEvidence(skill, terms);
   };
 
-  const categories = pickCategoriesForJd(jd, {
+  let categories = pickCategoriesForJd(jd, {
     maxCategories,
     hasEvidence,
   });
+  // Languages always print, first (2026-11-17, toward 9.5): a recruiter's scan starts there, and when the JD's ranking
+  // left the line out, Python ended up in "Additional Skills". It takes the lowest-ranked line's place.
+  const languages = SKILLS_LIBRARY.find((c) => c.label === "Languages");
+  if (languages?.skills.some((s) => hasEvidence(s))) {
+    categories = [languages, ...categories.filter((c) => c.label !== "Languages")].slice(0, Math.max(1, maxCategories));
+  }
 
   // JD skills Atishay has whose categories didn't make the cut: rather than drop them, the last line becomes
-  // "Additional Skills" holding them first (then that category's own JD skills), so no asked-for skill is lost.
+  // "Additional Skills" holding them first (then that category's own skills), so no asked-for skill is lost.
   const pickedLabels = new Set(categories.map((c) => c.label));
   const leftovers = SKILLS_LIBRARY.filter((c) => !pickedLabels.has(c.label)).flatMap((c) => c.skills)
     .filter((sk) => hasEvidence(sk) && asked(sk));
-  if (leftovers.length && categories.length >= maxCategories) {
+  if (leftovers.length && categories.length >= maxCategories && categories.length > 1) {
     const last = categories[categories.length - 1];
-    categories[categories.length - 1] = { ...last, label: "Additional Skills", skills: [...leftovers, ...last.skills.filter((sk) => asked(sk))] };
+    categories[categories.length - 1] = { ...last, label: "Additional Skills", skills: [...leftovers, ...last.skills] };
   }
 
+  const pageText = [...(composition?.experience || []), ...(composition?.projects || [])]
+    .flatMap((s) => (s.bullets || []).map((b) => b.text || b.face?.text || "")).join(" ");
+  const namedOnPage = (sk) => [sk.displayName, sk.name, ...(sk.aliases || [])].some((n) => n && new RegExp(`(^|[^A-Za-z0-9])${String(n).replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")}($|[^A-Za-z0-9])`, "i").test(pageText));
+  const keyOf = (name) => name.toLowerCase().replace(/[^a-z0-9+#.]/g, "");
+  // "HTML/CSS" says what "HTML" and "CSS" already say (and the reverse).
+  const shown = (key) => seen.has(key) || (key === "htmlcss" && (seen.has("html") || seen.has("css")))
+    || ((key === "html" || key === "css") && seen.has("htmlcss"));
+  const isMust = (s) => must.has(s.name.toLowerCase()) || must.has(s.displayName.toLowerCase());
+
   for (const cat of categories) {
-    const candidates = [];
-
-    for (const skill of cat.skills) {
-      const key = skill.displayName.toLowerCase().replace(/[^a-z0-9+#.]/g, "");
-      if (seen.has(key)) continue;
-      if (!hasEvidence(skill)) continue;
-      candidates.push(skill);
-    }
-
+    // One entry per printed name (two library entries may print the same name, e.g. GraphQL and GraphQL APIs).
+    const candidates = [...new Map(cat.skills.filter((skill) => !shown(keyOf(skill.displayName)) && hasEvidence(skill))
+      .map((skill) => [keyOf(skill.displayName), skill])).values()];
     if (!candidates.length) continue;
 
-    const isMust = (s) => must.has(s.name.toLowerCase()) || must.has(s.displayName.toLowerCase());
-    const required = candidates.filter((s) => isMust(s));
-    const relevant = candidates.filter((s) => !isMust(s) && asked(s));
-    const filler = candidates.filter((s) => !asked(s));
-    // Must-print skills first, then the ones the JD names, so a line that runs out of room drops filler, never these.
-    const ordered = [...required, ...sortSkillsByScore(relevant, jd, confidenceMap), ...sortSkillsByScore(filler, jd, confidenceMap)];
-    const displayNames = ordered.map((s) => s.displayName);
-    const capped = fitSkillsToSingleLine(cat.label, displayNames);
+    // Skills the JD names (and the must-print ones) by score, then filler, so a line that runs out of room drops filler.
+    const top = sortSkillsByScore(candidates.filter((s) => asked(s)), jd, confidenceMap);
+    // Languages filler (not asked for) prints when a bullet on this page uses it, or to bring the line to 3 (2026-11-17:
+    // "Languages: Python, SQL, Java, TypeScript, CSS" on a data resume listed languages nothing on the page used).
+    // Other lines keep their confirmed filler.
+    const fillerAll = sortSkillsByScore(candidates.filter((s) => !asked(s) && !NEVER_LISTED.has(s.displayName)), jd, confidenceMap);
+    const onPage = fillerAll.filter((s) => namedOnPage(s));
+    const filler = cat.label !== "Languages" ? fillerAll
+      : [...onPage, ...fillerAll.filter((s) => !namedOnPage(s)).slice(0, Math.max(0, 3 - top.length - onPage.length))];
+    let capped = fitSkillsToSingleLine(cat.label, [...top, ...filler].map((s) => s.displayName));
+    // A must-print skill that didn't fit takes the place of the last skill on the line that isn't one.
+    const mustNames = new Set(top.filter(isMust).map((s) => s.displayName));
+    for (const name of mustNames) {
+      if (capped.includes(name)) continue;
+      const trial = [...capped];
+      while (!fitsOnePhysicalLine(cat.label, [...trial, name])) {
+        const at = trial.findLastIndex((n) => !mustNames.has(n));
+        if (at < 0) break;
+        trial.splice(at, 1);
+      }
+      if (fitsOnePhysicalLine(cat.label, [...trial, name])) capped = [...trial, name];
+    }
 
-    capped.forEach((n) => seen.add(n.toLowerCase().replace(/[^a-z0-9+#.]/g, "")));
+    capped.forEach((n) => seen.add(keyOf(n)));
     if (capped.length) lines.push(`${cat.label}: ${capped.join(", ")}`);
   }
 
@@ -290,6 +314,9 @@ const isTool = (sk) => TOOL_CATEGORIES.has(CATEGORY_OF.get(sk.name)) && !NOT_TOO
  * the employer's other tools follow, so the line stays honest (only tools used there) and full. It is shorter only when the
  * employer has fewer than 5 such tools.
  */
+/** Formats, not skills: they print only when a JD asks for them by name. */
+const NEVER_LISTED = new Set(["JSON"]);
+
 /**
  * The tools an employer's title line used to name (employerTools: the JD's skills Atishay used there) that no bullet on
  * the resume names. Since 2026-11-17 title lines print the title alone, so these go into Technical Skills instead.
