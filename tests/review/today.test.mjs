@@ -86,14 +86,16 @@ test('each card runs only its own action; Approve all lists what goes out and wa
   } finally { await f.close(); }
 });
 
-test('Open & Fill on a drafted or approved card opens its job page and sends nothing', async () => {
+test('Open on a drafted or approved card opens its job page and sends nothing', async () => {
   const f = await fixture(); const { page, calls } = f;
   try {
     await page.goto(`${f.base}/`);
     const figma = page.getByRole('article', { name: 'Figma: Answers drafted' });
-    await figma.getByRole('button', { name: 'Open & Fill' }).click();
-    await page.getByText(/Opened Figma\. Click Apply with Atriveo/).waitFor();
-    await page.getByRole('article', { name: 'Anthropic: Answers approved' }).getByRole('button', { name: 'Open & Fill' }).click();
+    // Open & Fill needed the Atriveo Fill extension, which Apply with Atriveo replaced: the card opens its page, answers stay under Answers.
+    assert.equal(await page.getByRole('button', { name: 'Open & Fill' }).count(), 0);
+    await figma.getByRole('button', { name: /^Open/ }).click();
+    await page.getByText(/Opened Figma\. Its answers are under Answers/).waitFor();
+    await page.getByRole('article', { name: 'Anthropic: Answers approved' }).getByRole('button', { name: /^Open/ }).click();
     await page.getByText(/Opened Anthropic\./).waitFor();
     assert.deepEqual(await page.evaluate(() => window.__opened), ['https://jobs.example.test/d1', 'https://jobs.example.test/c1']);
     assert.equal(calls.length, 0, 'opening the job page changes nothing in the engine');
@@ -126,66 +128,6 @@ test('Fill and verify all lists the approved forms and starts them only on confi
     await dialog.getByRole('button', { name: 'Fill and verify 1' }).click();
     await page.getByText(/Started filling 1 of 1/).waitFor();
     assert.deepEqual(calls, [{ action: 'continue_application', applicationId: 'c1', expectedUpdatedAt: at }]);
-  } finally { await f.close(); }
-});
-
-test('with Atriveo Fill 0.5, Open & Fill hands the job to the extension, which opens and fills it', async () => {
-  const f = await fixture(); const { page, calls } = f;
-  try {
-    // Stand-in for the extension's dashboard script: answers "apply" like 0.5 does.
-    await page.addInitScript(() => {
-      window.__asked = [];
-      document.addEventListener('DOMContentLoaded', () => document.documentElement.setAttribute('data-atriveo-fill-apply', '1'));
-      window.addEventListener('message', (e) => {
-        if (e.data?.source !== 'atriveo-dashboard') return;
-        window.__asked.push({ type: e.data.type, url: e.data.url, applicationId: e.data.applicationId });
-        window.postMessage({ source: 'atriveo-fill', type: 'armed', nonce: e.data.nonce, reply: { ok: true } }, location.origin);
-      });
-    });
-    await page.goto(`${f.base}/`);
-    await page.getByRole('article', { name: 'Figma: Answers drafted' }).getByRole('button', { name: 'Open & Fill' }).click();
-    await page.getByText(/Opened Figma\. Atriveo is filling it now/).waitFor();
-    assert.deepEqual(await page.evaluate(() => window.__asked), [{ type: 'apply', url: 'https://jobs.example.test/d1', applicationId: 'd1' }]);
-    assert.deepEqual(await page.evaluate(() => window.__opened), [], 'the extension opens the tab, not the page');
-    assert.equal(calls.length, 0);
-  } finally { await f.close(); }
-});
-
-test('Select all Open & Fill queues every fillable card and opens them one at a time through the extension', async () => {
-  const f = await fixture(); const { page, calls } = f;
-  try {
-    // Stand-in for Atriveo Fill 0.7.1: queue-capable, and each "apply" answers once its fill is done.
-    await page.addInitScript(() => {
-      window.__asked = [];
-      document.addEventListener('DOMContentLoaded', () => { document.documentElement.setAttribute('data-atriveo-fill-apply', '2'); document.documentElement.setAttribute('data-atriveo-fill-queue', '1'); });
-      window.addEventListener('message', (e) => {
-        if (e.data?.source !== 'atriveo-dashboard') return;
-        window.__asked.push({ type: e.data.type, applicationId: e.data.applicationId, wait: e.data.wait });
-        setTimeout(() => window.postMessage({ source: 'atriveo-fill', type: 'armed', nonce: e.data.nonce, reply: { ok: true, auto: { state: 'filled', message: 'Filled 3.' } } }, location.origin), 50);
-      });
-    });
-    // The application's status: still in review until you submit it (submitted is APPLIED).
-    const status = {};
-    await page.route('**/applications/detail?**', (route) => route.fulfill({ json: { ok: true, status: status[new URL(route.request().url()).searchParams.get('id')] ?? 'NEEDS_REVIEW' } }));
-    await page.goto(`${f.base}/`);
-    await page.getByRole('button', { name: /^Select all Open & Fill \(\d+\)$/ }).click();
-    await page.getByRole('button', { name: /^Open & Fill selected \(\d+\)$/ }).click();
-    // Spotify (You submit) takes the verified path; this fake sidecar gives it no form, so the queue pauses on it.
-    await page.getByRole('button', { name: 'Skip & continue' }).click();
-    const applies = async () => (await page.evaluate(() => window.__asked)).filter((a) => a.type === 'apply').map((a) => a.applicationId);
-    // The first is filled: the queue waits for your Submit; nothing else opens meanwhile.
-    await page.getByRole('button', { name: 'Next ›' }).waitFor();
-    const first = (await applies())[0];
-    await page.waitForTimeout(5000);
-    assert.deepEqual(await applies(), [first], 'the next one waits until this one is submitted');
-    // You submit it: the queue moves on by itself to the second, which you move past with Next.
-    status[first] = 'APPLIED';
-    await page.waitForFunction((n) => window.__asked.filter((a) => a.type === 'apply').length === n, 2, { timeout: 15_000 });
-    await page.getByRole('button', { name: 'Next ›' }).click();
-    await page.getByText(/Queue finished/).waitFor();
-    assert.deepEqual((await applies()).sort(), ['c1', 'd1'], 'the approved and drafted cards, each through the extension');
-    assert.ok((await page.evaluate(() => window.__asked)).filter((a) => a.type === 'apply').every((a) => a.wait === true), 'each waits for its fill before the next');
-    assert.ok(calls.every((c) => c.action !== 'approve_submit'), 'nothing is submitted or approved');
   } finally { await f.close(); }
 });
 
@@ -231,6 +173,49 @@ test('LinkedIn postings show as On LinkedIn cards: the button opens the posting,
     await page.getByText('Discarded 1').waitFor();
     assert.deepEqual(calls.filter((c) => c.dismiss), [{ dismiss: { jobUrl: 'https://www.linkedin.com/jobs/view/111' } }]);
     assert.ok(calls.every((c) => c.dismiss || c.action !== 'discard_applications'), 'a LinkedIn posting is not an application');
+  } finally { await f.close(); LINKEDIN = []; }
+});
+
+// Apply with Atriveo (playatriveo extension 1.9.0+): answers the page's companion messages as the real one does.
+const fakeCompanion = () => {
+  window.__companion = [];
+  window.addEventListener('message', (e) => {
+    const m = e.data;
+    if (e.source !== window || m?.channel !== 'atriveo-companion-v1' || m.source !== 'workspace') return;
+    window.__companion.push({ action: m.action, job: m.kit?.job?.id ?? null, resume: m.kit?.resume?.sha256 ?? null });
+    window.postMessage({ channel: 'atriveo-companion-v1', source: 'extension', id: m.id, ok: true, panelOpened: m.action === 'OPEN' }, location.origin);
+  });
+};
+const SHA = 'a'.repeat(64);
+
+test('Open Link hands the posting and its exact tailored resume to the Apply with Atriveo panel', async () => {
+  LINKEDIN = [{ ...PENDO[0], resumeSha256: SHA }];
+  const f = await fixture(); const { page, calls } = f;
+  try {
+    await page.addInitScript(fakeCompanion);
+    await page.route('**/applications/application-kit', (route) => {
+      const body = route.request().postDataJSON(); calls.push({ kit: body });
+      return route.fulfill({ json: { ok: true, kit: { version: 1, id: '00000000-0000-4000-8000-000000000001', expiresAt: '2099-01-01T00:00:00.000Z', job: { id: body.jobUrl, applyUrl: body.jobUrl }, resume: { sha256: body.resumeSha256 } } } });
+    });
+    await page.goto(`${f.base}/`);
+    const card = page.getByRole('article', { name: 'Pendo: On LinkedIn' });
+    await card.getByRole('link', { name: /Open Link/ }).click();
+    await page.getByText(/Opened Pendo with its tailored resume in the Atriveo panel/).waitFor();
+    assert.deepEqual(calls.filter((c) => c.kit), [{ kit: { jobUrl: 'https://www.linkedin.com/jobs/view/111', resumeSha256: SHA } }]);
+    const sent = await page.evaluate(() => window.__companion);
+    assert.ok(sent.some((m) => m.action === 'OPEN' && m.job === 'https://www.linkedin.com/jobs/view/111' && m.resume === SHA), JSON.stringify(sent));
+    assert.ok(!(await page.evaluate(() => window.__opened)).includes('https://www.linkedin.com/jobs/view/111'), 'the extension opens the job tab, not the page');
+  } finally { await f.close(); LINKEDIN = []; }
+});
+
+test('Open Link without the extension opens the posting in a plain tab and says why', async () => {
+  LINKEDIN = [{ ...PENDO[0], resumeSha256: SHA }];
+  const f = await fixture(); const { page } = f;
+  try {
+    await page.goto(`${f.base}/`);
+    await page.getByRole('article', { name: 'Pendo: On LinkedIn' }).getByRole('link', { name: /Open Link/ }).click();
+    await page.getByText(/Opened Pendo without the Atriveo panel/).waitFor({ timeout: 15000 });
+    assert.ok((await page.evaluate(() => window.__opened)).includes('https://www.linkedin.com/jobs/view/111'));
   } finally { await f.close(); LINKEDIN = []; }
 });
 

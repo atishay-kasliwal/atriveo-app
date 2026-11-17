@@ -7,6 +7,7 @@ import { loadAtsConfig } from './ats/config.mjs';
 import { scoreAndSaveRun } from './ats/persist.mjs';
 import { assessmentFreshness } from './ats/identity.mjs';
 import { resumeReady } from './ats/ready.mjs';
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { classifyTrack, loadTracks } from "./ac-tracks.mjs";
@@ -494,11 +495,17 @@ export async function addResumeEta(db, rows, now = new Date()) {
   return rows;
 }
 
+/** A resume's version as application-kit.mjs resumeRevision computes it (kept here: that module imports this one). */
+function resumeVersion(resume) {
+  if (/^[a-f0-9]{64}$/.test(resume?.object?.sha256 || "")) return resume.object.sha256;
+  try { return crypto.createHash("sha256").update(fs.readFileSync(resume.pdf_path)).digest("hex"); } catch { return null; }
+}
+
 export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600, light = false } = {}) {
   const since = new Date(now.getTime() - days * 86_400_000);
   const [docs, applied, dismissed] = await Promise.all([
     db.collection("jobs").find({ run_at: { $gte: since }, job_url: /^https:\/\/(www\.)?linkedin\.com\//, "resume.status": "success" },
-      { projection: { _id: 0, job_url: 1, company: 1, title: 1, location: 1, score_pct: 1, date_posted: 1, run_at: 1, apply_type: 1, "resume.pdf_path": 1, fit: 1 } }).toArray(),
+      { projection: { _id: 0, job_url: 1, company: 1, title: 1, location: 1, score_pct: 1, date_posted: 1, run_at: 1, apply_type: 1, "resume.pdf_path": 1, "resume.object.sha256": 1, fit: 1 } }).toArray(),
     db.collection("applications").distinct("jobUrls"),
     db.collection("job_swipes").distinct("job_url", { direction: { $in: ["left", "applied"] } }),
   ]);
@@ -516,6 +523,9 @@ export async function linkedinJobs(db, { now = new Date(), days = 3, limit = 600
         resumePath: d.resume?.pdf_path ?? null,
         // The file is on this machine, so Apply with Atriveo can attach it now.
         resumeReady: Boolean(d.resume?.pdf_path && fs.existsSync(d.resume.pdf_path)),
+        // Its exact version: Open Link hands this job and resume to the Apply with Atriveo panel (application-kit).
+        // Kept in the light list Today loads: hashing ~600 PDFs of ~40 KB is well under a second.
+        resumeSha256: resumeVersion(d.resume),
         ...(light ? {} : { resumeMatch: resumeMatchOf(d.resume?.pdf_path), readyState: readyBrief(resumeReadyOf(d.resume?.pdf_path, d.fit)) }),
         // "offsite" (the company's own form), "easy_apply" (LinkedIn's), or null until checked.
         applyType: d.apply_type ?? null });

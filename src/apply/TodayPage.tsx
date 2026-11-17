@@ -9,7 +9,7 @@ import ApplicationReview from "./ApplicationReview";
 import ResumeDownloadLink from "../components/ResumeDownloadLink";
 import PdfPreviewModal from "../components/PdfPreviewModal";
 import { postAction, when } from "./engine";
-import { applyWithExtension, armExtension, canApplyAnywhere, canQueueApply, extensionVersion, noteLinkedinOpen } from "./openFill";
+import { CompanionNotReady, companionIsConnected, companionProblem, openWithApplicationCompanion, warmApplicationCompanion, type CompanionJob } from "./applicationCompanion";
 import { discardNow, dismissJobs, markJobsApplied } from "./discard";
 import { adjustCounts, loadDetails, refreshFillable, refreshLinkedin, refreshReady, useCardDetails, useFillableQueue, useLinkedinQueue, useReadyQueue, type ManualApp, type QueuedApp, type ReadyApp, type ResumeEta, type ResumeMatch, type ResumeReadyState } from "./reviewQueue";
 import { GOALS, readPref, streakOf, useApplyHistory, useAppliedToday, useSprint, writePref } from "./todayGoal";
@@ -28,7 +28,7 @@ import "./today.css";
 // a required question nobody has answered aren't shown: answering in the console was retired.
 
 type Kind = "you_submit" | "approve" | "fill" | "drafted" | "linkedin";
-interface Item { resumeMatch?: ResumeMatch | null; readyState?: ResumeReadyState | null; resumeEta?: ResumeEta; resumeReady?: boolean; easyApply?: boolean; resumePath?: string | null; track?: string | null; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
+interface Item { resumeSha256?: string | null; resumeMatch?: ResumeMatch | null; readyState?: ResumeReadyState | null; resumeEta?: ResumeEta; resumeReady?: boolean; easyApply?: boolean; resumePath?: string | null; track?: string | null; location?: string | null; score?: number | null; age?: string | null; id: string; kind: Kind; company: string; title: string; ats: string | null; url?: string; updatedAt: string; priorityTags?: string[]; ready?: ReadyApp | ManualApp; queued?: QueuedApp }
 
 
 
@@ -38,7 +38,7 @@ const TRACK_FILTERS: TrackFilter[] = ["all", ...Object.keys(TRACK_LABEL), "mixed
 /** What you do with it: Open & Fill (you submit, approve, approved or drafted answers) or On LinkedIn. */
 type KindFilter = "all" | "fill" | "linkedin";
 const KIND_OF: Record<Kind, KindFilter> = { you_submit: "fill", approve: "fill", fill: "fill", drafted: "fill", linkedin: "linkedin" };
-const KIND_LABEL: Record<Exclude<KindFilter, "all">, string> = { fill: "Open & Fill", linkedin: "On LinkedIn" };
+const KIND_LABEL: Record<Exclude<KindFilter, "all">, string> = { fill: "Applications", linkedin: "On LinkedIn" };
 
 /** The tracks in turn (a SWE, an AI, a Data Analyst…), each in its own order; untracked jobs keep their place in the turn. */
 function interleave<T extends { track?: string | null }>(list: T[]): T[] {
@@ -72,9 +72,6 @@ function etaLabel(eta?: ResumeEta): { text: string; title: string } {
 
 
 export { inNC };
-
-/** Sites Atriveo Fill fills by itself (Apply with Atriveo, full support). */
-const AUTO_ATS = ["greenhouse", "lever", "ashby"];
 
 const STAGE: Record<Kind, { label: string; tone: string }> = {
   you_submit: { label: "You submit", tone: "go" },
@@ -158,7 +155,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       ...(queue.data?.fillable ?? []).map(fromQueue),
       // LinkedIn postings: no application (the engine never applies on LinkedIn); same score, place and age.
       ...(linkedin.data?.linkedin ?? []).map((l): Item => ({ id: l.id, kind: "linkedin", company: l.company, title: l.title, ats: null, url: l.url,
-        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null, easyApply: l.applyType === "easy_apply", resumeReady: l.resumeReady, resumeEta: l.resumeEta, resumeMatch: l.resumeMatch ?? null, readyState: l.readyState ?? null })),
+        updatedAt: l.foundAt ?? "", location: l.location, score: l.score, track: l.track, age: l.postedAt ?? l.foundAt, resumePath: l.resumePath ?? null, resumeSha256: l.resumeSha256 ?? null, easyApply: l.applyType === "easy_apply", resumeReady: l.resumeReady, resumeEta: l.resumeEta, resumeMatch: l.resumeMatch ?? null, readyState: l.readyState ?? null })),
     ];
     return all
       // The resume facts of the cards on screen, loaded with them (the lists come without).
@@ -199,10 +196,10 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const trackCount = (t: TrackFilter) => found.filter((i) => inTrack(i, t) && inKind(i, kind)).length;
   const approvable = items.filter((i) => i.kind === "approve");
   const fillable = items.filter((i) => i.kind === "fill");
-  // The queue takes You submit (armed Open & Fill), and with Atriveo Fill 0.7.1 every other Open & Fill card it can fill by itself.
-  const selectable = (i: Item) => i.kind === "you_submit" || ((i.kind === "fill" || i.kind === "drafted") && Boolean(i.url) && AUTO_ATS.includes(i.ats ?? "") && canQueueApply());
-  const queueable = items.filter(selectable);
-  const queued = items.filter((i) => selectable(i) && selectedIds.includes(i.id)).map((i) => ({ id: i.id, company: i.company, ...(i.kind === "you_submit" ? {} : { url: i.url }) }));
+  // The Open & Fill queue filled forms through the Atriveo Fill extension, which Apply with Atriveo replaced (Oct 25);
+  // nothing fills them now, so no card is queueable (selection stays for Discard selected).
+  const queueable: Item[] = [];
+  const queued: { id: string; company: string; url?: string }[] = [];
 
   const finish = (item: Item, message: string, delta: Parameters<typeof adjustCounts>[0]) => {
     setDone((d) => ({ ...d, [item.id]: item.updatedAt }));
@@ -219,56 +216,16 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     onOk();
   };
 
-  /** Open & Fill, as on the Ready page: the tab opens during your click, then points at the form once armed. */
-  const openFill = async (item: Item) => {
-    const version = (extensionVersion() ?? "0.0.0").split(".").map(Number);
-    const minimum = item.ats === "workday" ? [0, 3, 0] : [0, 2, 3];
-    const installed = (version[0] ?? 0) * 1_000_000 + (version[1] ?? 0) * 1000 + (version[2] ?? 0);
-    const required = minimum[0]! * 1_000_000 + minimum[1]! * 1000 + minimum[2]!;
-    if (["greenhouse", "workday"].includes(item.ats ?? "") && (!Number.isFinite(installed) || installed < required)) {
-      setErrors(e => ({ ...e, [item.id]: `Reload Atriveo Fill ${minimum.join(".")} or newer in chrome://extensions, then refresh this page.` }));
-      return;
-    }
-    const tab = window.open("about:blank", "_blank");
-    setBusy(item.id);
-    setErrors((e) => ({ ...e, [item.id]: "" }));
-    const res = await postAction({ action: "open_and_fill", applicationId: item.id, expectedUpdatedAt: item.updatedAt });
-    const armed = res.ok && res.url ? await armExtension(res.url, item.id) : null;
-    setBusy(null);
-    if (!res.ok || !res.url || !armed?.ok) {
-      tab?.close();
-      setErrors((e) => ({ ...e, [item.id]: !res.ok ? res.error ?? "Couldn't open it" : armed?.error ?? "Couldn't open it" }));
-      return;
-    }
-    if (tab) { tab.opener = null; tab.location.href = res.url; } else window.open(res.url, "_blank", "noopener");
-    setNotice(`Opened ${item.company}. Atriveo Fill fills it and stops; review it and click Submit yourself.`);
-    setTimeout(() => void refreshReady(), 1500);
-  };
-
   /**
-   * Open & Fill for a form the engine hasn't verified. Atriveo Fill 0.5+ opens it and fills it by itself
-   * (Greenhouse, Lever, Ashby); older versions and other sites open the page for the toolbar button.
+   * An application card's page. Open & Fill needed the Atriveo Fill extension, which filled the form; Apply with Atriveo
+   * (Oct 25) doesn't fill, so this opens the application and its answers stay under Answers to copy.
    */
-  const openInBrowser = async (item: Item) => {
-    if (canApplyAnywhere() && item.url && AUTO_ATS.includes(item.ats ?? "")) {
-      setBusy(item.id);
-      setErrors((e) => ({ ...e, [item.id]: "" }));
-      const res = await applyWithExtension(item.url, item.id);
-      setBusy(null);
-      if (!res.ok) { setErrors((e) => ({ ...e, [item.id]: res.error ?? "Atriveo Fill didn't answer" })); return; }
-      setDone((d) => ({ ...d, [item.id]: item.updatedAt }));
-      setNotice(`Opened ${item.company}. Atriveo is filling it now; check the page and click Submit. The Atriveo icon shows what it did.`);
-      return;
-    }
-    const [major = 0, minor = 0] = (extensionVersion() ?? "0.0.0").split(".").map(Number);
-    if (major * 1000 + minor < 4) {
-      setErrors((e) => ({ ...e, [item.id]: "Needs Atriveo Fill 0.4 or newer: reload it in chrome://extensions, then refresh this page." }));
-      return;
-    }
+  const openApplicationPage = (item: Item) => {
     if (!item.url) { setErrors((e) => ({ ...e, [item.id]: "Still loading this job's link; try again in a moment." })); return; }
-    window.open(item.url, "_blank", "noopener");
-    setDone((d) => ({ ...d, [item.id]: item.updatedAt }));
-    setNotice(`Opened ${item.company}. Click Apply with Atriveo in Chrome's toolbar there: it fills the form and lists every answer in its side panel. You click Submit.`);
+    window.open(item.url, "_blank", "noopener,noreferrer");
+    // As Open & Fill did: a drafted or approved card slides out once its page is open.
+    if (item.kind === "fill" || item.kind === "drafted") setDone((d) => ({ ...d, [item.id]: item.updatedAt }));
+    setNotice(`Opened ${item.company}. Its answers are under Answers on this card; fill them in, then Submit and mark it applied.`);
   };
 
   /** Start filling every application whose answers you approved. Filling checks the form; it never submits. */
@@ -339,11 +296,47 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const focused = Math.min(focus, Math.max(0, shown.length - 1));
   const later_ = (item: Item) => setLaterAt((l) => { const next = { ...l, [item.id]: Date.now() }; writePref("later", next); return next; });
   const skipCompany = (company: string) => { excludeCompany(company); setNotice(`Skipping ${company}: its jobs stay off Today until you remove it from Skipped companies.`); };
-  /** O: the card's main way in (LinkedIn posting, Open & Fill); nothing for cards that need approval. */
+  /**
+   * Open Link / Easy Apply: the job opens with the Apply with Atriveo panel and its exact tailored resume, as Job
+   * Matching's Apply does (2026-11-17: Today still spoke the Atriveo Fill extension's protocol, which Apply with Atriveo
+   * replaced on Oct 25, so these links opened with no panel). A plain tab only when the resume isn't ready or the
+   * extension doesn't answer, and the notice says which.
+   */
+  const companionJob = (item: Item): CompanionJob => ({ id: item.id, resumeSha256: item.resumeSha256 ?? null, applyUrl: item.url ?? item.id });
+  const warmPanel = (item: Item) => { if (item.resumeSha256 && companionIsConnected()) void warmApplicationCompanion(companionJob(item)).catch(() => {}); };
+  const openWithPanel = async (item: Item) => {
+    if (!item.url) return;
+    const job = companionJob(item);
+    // Not connected yet (a sleeping extension): hold a tab from this click, so falling back isn't blocked as a pop-up.
+    let fallback: Window | null = null;
+    if (!companionIsConnected()) { fallback = window.open("about:blank", "_blank"); if (fallback) fallback.opener = null; }
+    let why = "";
+    setBusy(item.id);
+    setErrors((e) => ({ ...e, [item.id]: "" }));
+    try {
+      if (!job.resumeSha256) why = "its tailored resume isn't ready yet.";
+      else if (await warmApplicationCompanion(job, { attempts: 2, timeoutMs: 2000 })) {
+        try {
+          const opened = await openWithApplicationCompanion(job);
+          fallback?.close();
+          setNotice(opened.panelOpened
+            ? `Opened ${item.company} with its tailored resume in the Atriveo panel. You fill it in and submit.`
+            : `Opened ${item.company}. Click the Atriveo icon in Chrome's toolbar for its resume and your details.`);
+          return;
+        } catch (e) {
+          if (!(e instanceof CompanionNotReady)) { fallback?.close(); setErrors((x) => ({ ...x, [item.id]: e instanceof Error ? e.message : String(e) })); return; }
+          why = e.message;
+        }
+      } else why = companionProblem() || "the Atriveo extension didn't answer.";
+      if (fallback) fallback.location.href = item.url;
+      else if (!window.open(item.url, "_blank", "noopener,noreferrer")) why += " Your browser blocked the new tab: open the job from its link.";
+      setNotice(`Opened ${item.company} without the Atriveo panel: ${why}`);
+    } finally { setBusy(null); }
+  };
+  /** O: the card's main way in (the job with the Atriveo panel, or the application page); nothing for cards that need approval. */
   const openCard = (item: Item) => {
-    if (item.kind === "linkedin" && item.url) { noteLinkedinOpen(item.url, item.company, item.title); window.open(item.url, "_blank", "noreferrer"); }
-    else if (item.kind === "fill" || item.kind === "drafted") void openInBrowser(item);
-    else if (item.kind === "you_submit") void openFill(item);
+    if (item.kind === "linkedin") void openWithPanel(item);
+    else if (item.kind === "fill" || item.kind === "drafted" || item.kind === "you_submit") openApplicationPage(item);
   };
   // Keys: 1–7 pick a track, ←/→ (↑/↓ by row) move between cards and pages, A/L/D/O act on the outlined card.
   const keys = useRef<(e: KeyboardEvent) => void>(() => {});
@@ -394,12 +387,12 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         tags={<>{item.resumeReady === false && (() => { const e = etaLabel(item.resumeEta); return <span className="td-tag td-notready" title={`${e.title} It moves up once the resume is ready.`}>{e.text}</span>; })()}{item.kind === "linkedin" && item.easyApply && <span className="td-tag" title="Applied on LinkedIn itself (Easy Apply), not a company form">Easy Apply</span>}{tags.map((t) => <span key={t} className={`td-tag ${t === "Strong match" ? "is-strong" : ""}`}>{t}</span>)}</>}
         notes={<>{item.kind === "approve" && r?.companySubmittedToday && <p className="td-note warn">Already submitted to {item.company} today: this one goes out tomorrow.</p>}{errors[item.id] && <p className="td-error" role="alert">{errors[item.id]}</p>}</>}
         primary={<>
-          {item.kind === "linkedin" && <a className="td-cta td-cta-linkedin" title={item.easyApply ? "Apply using LinkedIn Easy Apply" : "Open the LinkedIn posting to view application options"} href={item.url} target="_blank" rel="noreferrer" onClick={() => noteLinkedinOpen(item.url!, item.company, item.title)}>
+          {item.kind === "linkedin" && <a className="td-cta td-cta-linkedin" title={item.easyApply ? "Apply using LinkedIn Easy Apply" : "Open the LinkedIn posting to view application options"} href={item.url} target="_blank" rel="noreferrer" onMouseEnter={() => warmPanel(item)} onFocus={() => warmPanel(item)} onClick={(e) => { if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return; e.preventDefault(); void openWithPanel(item); }}>
             <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
             <span>{item.easyApply ? "Easy Apply" : "Open Link"}</span><svg className="td-cta-ext" aria-hidden="true" viewBox="0 0 16 16"><path d="M6 3.5H3.5v9h9V10M9 3h4v4M13 3L7.5 8.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"/></svg></a>}
-          {(item.kind === "drafted" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => void openInBrowser(item)}>{busy === item.id ? "Opening…" : "Open & Fill"}</button>}
+          {(item.kind === "drafted" || item.kind === "fill") && <button className="rv-primary" disabled={isBusy} onClick={() => openApplicationPage(item)}>Open ↗</button>}
           {item.kind === "approve" && <button className="rv-primary" disabled={isBusy} onClick={() => void run(item, { action: "approve_submit" }, () => finish(item, `Approved ${item.company}. The worker refills it, checks it again and submits.`, { ready: -1 }))}>{isBusy ? "Approving…" : "Approve submit"}</button>}
-          {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => void openFill(item)}>{isBusy ? "Opening…" : "Open & Fill"}</button>}
+          {item.kind === "you_submit" && <button className="rv-primary" disabled={isBusy} onClick={() => openApplicationPage(item)}>Open ↗</button>}
           {item.resumeReady !== false ? <Link className="apps-btn td-ai-review" to={`/resume_builder?${item.kind === "linkedin" ? `job=${encodeURIComponent(item.id)}` : `app=${encodeURIComponent(item.id)}`}&ai=review`}>✦ Review with AI</Link> : <button className="apps-btn td-ai-review" disabled title="A resume needs to be created before AI can review it">✦ Review with AI</button>}
 </>}
         actionNote={item.resumeReady === false && <p className="card-action-note">{etaLabel(item.resumeEta).text}. AI review becomes available when your resume is ready.</p>}
@@ -412,20 +405,20 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
         <div className="td-detail-copy">
           {item.kind === "drafted" && q && <>
             <p className="td-big">{drafted || q.n} answer{(drafted || q.n) === 1 ? "" : "s"} drafted</p>
-            <p className="td-note">Atriveo fills them on the job page; you check, then Submit.</p>
+            <p className="td-note">Open the job, fill them in from Answers, then Submit.</p>
           </>}
-          {item.kind === "fill" && <p className="td-note">Every answer is approved. Atriveo fills it on the job page; you check, then Submit.</p>}
+          {item.kind === "fill" && <p className="td-note">Every answer is approved. Open the job, fill them in from Answers, then Submit.</p>}
           {item.kind === "approve" && r && <>
             <p className="td-big">{r.answered} answers verified</p>
             <p className="td-note">Filled {when(r.filledAt)}{r.resumeFile ? ` · ${r.resumeFile}` : ""}.</p>
           </>}
           {item.kind === "you_submit" && r && <>
             <p className="td-big">{r.answered} answers verified</p>
-            <p className="td-note">{r.openFill?.filledAt ? `Atriveo Fill filled ${r.openFill.filled ?? 0} fields ${when(r.openFill.filledAt)}.` : "Opens in your Chrome; Atriveo Fill fills it and you click Submit."}</p>
+            <p className="td-note">{r.openFill?.filledAt ? `Atriveo Fill filled ${r.openFill.filled ?? 0} fields ${when(r.openFill.filledAt)}.` : "Open the job, fill it in from Answers, then click Submit."}</p>
           </>}
         </div>
 
-          {item.kind === "approve" && ["greenhouse", "ashby", "lever", "workday"].includes(item.ats ?? "") && <button className="apps-btn" disabled={isBusy} onClick={() => void openFill(item)}>Open & Fill</button>}
+          {item.kind === "approve" && item.url && <button className="apps-btn" disabled={isBusy} onClick={() => openApplicationPage(item)}>Open ↗</button>}
           <div className="td-review-links">
             {(item.kind === "approve" || item.kind === "you_submit") && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "answers" })}>Answers</button>}
             {item.kind !== "linkedin" && <button className="apps-btn" onClick={() => setReview({ ...item, mode: "resume" })}>Resume</button>}
