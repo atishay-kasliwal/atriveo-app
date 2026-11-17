@@ -21,7 +21,9 @@ import { bankForTrack, classifyTrack, trackPins, withPinnedEntries } from "./ac-
 // "Senior Software Developer"; 2.3.0: page rules: one page filled to the bottom, two projects with two bullets each).
 // 2.4.0: the second project is the one the posting fits best (FOMC Market LLM on any track), no figure printed twice
 // on the page, tools lines name tools only, whole-word skills with no guessed related skills.
-export const PIPELINE_VERSION = "2.4.0";
+// 2.5.0 (2026-11-17): centred page (top 0.36in, bottom 0.24in, sides 0.4in), employer title lines without tools,
+// Technical Skills with Languages first and every line at least 80% full, open source with three bullets.
+export const PIPELINE_VERSION = "2.5.0";
 
 export const PIPELINE_STEPS = [
   "load_bank",
