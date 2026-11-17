@@ -320,6 +320,8 @@ export function buildSkillsFromComposition(composition, bank, jd, {
       label = "Languages & Frameworks";
       names = fitLine(label, [...names, ...ranked.filter((s) => asked(s)).map((s) => s.displayName), ...ranked.map((s) => s.displayName)].filter((n, i, a) => a.indexOf(n) === i));
     }
+    // Python leads the languages line whenever it prints (the first thing a recruiter reads).
+    if (label.startsWith("Languages") && names.includes("Python")) names = ["Python", ...names.filter((n) => n !== "Python")];
     names.forEach((n) => seen.add(keyOf(n)));
     if (names.length) built.push({ label, names });
   }
@@ -334,7 +336,8 @@ export function buildSkillsFromComposition(composition, bank, jd, {
     carry.push(...l.names);
     return false;
   });
-  const reserve = () => (carry.length || !kept.some((l) => l.label === "Additional Skills") ? 1 : 0);
+  // One slot stays for "Additional Skills" unless that line is already kept (carried skills then join it).
+  const reserve = () => (kept.some((l) => l.label === "Additional Skills") ? 0 : 1);
   for (const cat of pickCategoriesForJd(jd, { maxCategories: SKILLS_LIBRARY.length, hasEvidence })) {
     if (kept.length >= maxCategories - reserve()) break;
     if (built.some((l) => l.label === cat.label)) continue;
@@ -343,8 +346,9 @@ export function buildSkillsFromComposition(composition, bank, jd, {
     names.forEach((n) => seen.add(keyOf(n)));
     kept.push({ label: cat.label, names });
   }
-  // "Additional Skills": the carried skills first, then evidenced skills from any category (the JD's first), filling the line.
-  if (kept.length < maxCategories) {
+  // "Additional Skills", always last: the carried skills first, then its own, then evidenced skills from any category
+  // (the JD's first), filling the line.
+  if (kept.length < maxCategories || carry.length || kept.some((l) => l.label === "Additional Skills")) {
     const at = kept.findIndex((l) => l.label === "Additional Skills");
     const base = at >= 0 ? kept.splice(at, 1)[0].names : [];
     const rest = sortSkillsByScore(candidatesOf(SKILLS_LIBRARY.flatMap((c) => c.skills)).filter((s) => !NEVER_LISTED.has(s.displayName) || asked(s)), jd, confidenceMap);

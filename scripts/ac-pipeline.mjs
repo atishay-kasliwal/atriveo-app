@@ -23,7 +23,8 @@ import { bankForTrack, classifyTrack, trackPins, withPinnedEntries } from "./ac-
 // on the page, tools lines name tools only, whole-word skills with no guessed related skills.
 // 2.5.0 (2026-11-17): centred page (top 0.36in, bottom 0.24in, sides 0.4in), employer title lines without tools,
 // Technical Skills with Languages first and every line at least 80% full, open source with three bullets.
-export const PIPELINE_VERSION = "2.5.0";
+// 2.5.1: five skills lines when a short one gave way beside an existing "Additional Skills" line; Python first.
+export const PIPELINE_VERSION = "2.5.1";
 
 export const PIPELINE_STEPS = [
   "load_bank",
