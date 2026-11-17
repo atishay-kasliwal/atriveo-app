@@ -18,7 +18,13 @@ import {
   jdMentionsSkill,
   fitSkillsToSingleLine,
   fitsOnePhysicalLine,
+  lineFill,
 } from "./skills-library.mjs";
+
+/** Every Technical Skills line fills at least this much of its width (2026-11-17, Atishay: at least 80%). */
+export const MIN_LINE_FILL = 0.8;
+/** Lines whose skills can finish a short Languages line ("Languages & Frameworks"). */
+const FRAMEWORK_LINES = new Set(["ML Frameworks", "Backend Frameworks", "Frontend"]);
 
 function norm(text) {
   return String(text || "").toLowerCase().replace(/[^a-z0-9+#./ ]/g, " ").replace(/\s+/g, " ").trim();
@@ -265,39 +271,89 @@ export function buildSkillsFromComposition(composition, bank, jd, {
     || ((key === "html" || key === "css") && seen.has("htmlcss"));
   const isMust = (s) => must.has(s.name.toLowerCase()) || must.has(s.displayName.toLowerCase());
 
-  for (const cat of categories) {
-    // One entry per printed name (two library entries may print the same name, e.g. GraphQL and GraphQL APIs).
-    const candidates = [...new Map(cat.skills.filter((skill) => !shown(keyOf(skill.displayName)) && hasEvidence(skill))
-      .map((skill) => [keyOf(skill.displayName), skill])).values()];
-    if (!candidates.length) continue;
-
-    // Skills the JD names (and the must-print ones) by score, then filler, so a line that runs out of room drops filler.
+  // A category's skills still to print: evidenced, not shown yet, one entry per printed name (two library entries may
+  // print the same name, e.g. GraphQL and GraphQL APIs).
+  const candidatesOf = (skills) => [...new Map(skills.filter((skill) => !shown(keyOf(skill.displayName)) && hasEvidence(skill))
+    .map((skill) => [keyOf(skill.displayName), skill])).values()];
+  const fitLine = (label, names) => fitSkillsToSingleLine(label, names);
+  /** One line's skills: the JD's (and must-print ones) by score, then filler, so a line that runs out of room drops filler. */
+  const lineFor = (label, candidates) => {
     const top = sortSkillsByScore(candidates.filter((s) => asked(s)), jd, confidenceMap);
-    // Languages filler (not asked for) prints when a bullet on this page uses it, or to bring the line to 3 (2026-11-17:
-    // "Languages: Python, SQL, Java, TypeScript, CSS" on a data resume listed languages nothing on the page used).
-    // Other lines keep their confirmed filler.
     const fillerAll = sortSkillsByScore(candidates.filter((s) => !asked(s) && !NEVER_LISTED.has(s.displayName)), jd, confidenceMap);
-    const onPage = fillerAll.filter((s) => namedOnPage(s));
-    const filler = cat.label !== "Languages" ? fillerAll
-      : [...onPage, ...fillerAll.filter((s) => !namedOnPage(s)).slice(0, Math.max(0, 3 - top.length - onPage.length))];
-    let capped = fitSkillsToSingleLine(cat.label, [...top, ...filler].map((s) => s.displayName));
+    let filler = fillerAll;
+    if (label === "Languages") {
+      // Languages the page uses first (2026-11-17: a data resume listed Java and CSS nothing on it used); others only
+      // as far as the line needs to reach MIN_LINE_FILL.
+      filler = fillerAll.filter((s) => namedOnPage(s));
+      for (const s of fillerAll.filter((x) => !namedOnPage(x))) {
+        if (lineFill(label, fitLine(label, [...top, ...filler].map((x) => x.displayName))) >= MIN_LINE_FILL) break;
+        filler.push(s);
+      }
+    }
+    let capped = fitLine(label, [...top, ...filler].map((s) => s.displayName));
     // A must-print skill that didn't fit takes the place of the last skill on the line that isn't one.
     const mustNames = new Set(top.filter(isMust).map((s) => s.displayName));
     for (const name of mustNames) {
       if (capped.includes(name)) continue;
       const trial = [...capped];
-      while (!fitsOnePhysicalLine(cat.label, [...trial, name])) {
+      while (!fitsOnePhysicalLine(label, [...trial, name])) {
         const at = trial.findLastIndex((n) => !mustNames.has(n));
         if (at < 0) break;
         trial.splice(at, 1);
       }
-      if (fitsOnePhysicalLine(cat.label, [...trial, name])) capped = [...trial, name];
+      if (fitsOnePhysicalLine(label, [...trial, name])) capped = [...trial, name];
     }
+    return capped;
+  };
 
-    capped.forEach((n) => seen.add(keyOf(n)));
-    if (capped.length) lines.push(`${cat.label}: ${capped.join(", ")}`);
+  const built = [];
+  for (const cat of categories) {
+    let label = cat.label;
+    let names = lineFor(label, candidatesOf(cat.skills));
+    // Languages short of MIN_LINE_FILL (only the evidenced ones may print, TRACKS.yaml truth rule): the line goes on with
+    // the frameworks the JD ranks highest, as "Languages & Frameworks"; later lines then skip those frameworks.
+    if (label === "Languages" && names.length && lineFill(label, names) < MIN_LINE_FILL) {
+      names.forEach((n) => seen.add(keyOf(n)));
+      const frameworks = pickCategoriesForJd(jd, { maxCategories: SKILLS_LIBRARY.length, hasEvidence })
+        .filter((c) => FRAMEWORK_LINES.has(c.label)).flatMap((c) => candidatesOf(c.skills));
+      const ranked = sortSkillsByScore(frameworks.filter((s) => !NEVER_LISTED.has(s.displayName)), jd, confidenceMap);
+      label = "Languages & Frameworks";
+      names = fitLine(label, [...names, ...ranked.filter((s) => asked(s)).map((s) => s.displayName), ...ranked.map((s) => s.displayName)].filter((n, i, a) => a.indexOf(n) === i));
+    }
+    names.forEach((n) => seen.add(keyOf(n)));
+    if (names.length) built.push({ label, names });
   }
 
+  // Every line fills at least MIN_LINE_FILL of its width (2026-11-17, Atishay: "Visualization & BI: Plotly" alone on a
+  // line). A short line other than Languages gives way: its skills move to "Additional Skills" (first, so an asked-for
+  // or must-print skill stays on the page), and its slot goes to the next category the JD ranks that fills a line.
+  const short = (l) => lineFill(l.label, l.names) < MIN_LINE_FILL;
+  const carry = [];
+  const kept = built.filter((l) => {
+    if (l.label.startsWith("Languages") || !short(l)) return true;
+    carry.push(...l.names);
+    return false;
+  });
+  const reserve = () => (carry.length || !kept.some((l) => l.label === "Additional Skills") ? 1 : 0);
+  for (const cat of pickCategoriesForJd(jd, { maxCategories: SKILLS_LIBRARY.length, hasEvidence })) {
+    if (kept.length >= maxCategories - reserve()) break;
+    if (built.some((l) => l.label === cat.label)) continue;
+    const names = lineFor(cat.label, candidatesOf(cat.skills));
+    if (!names.length || short({ label: cat.label, names })) continue;
+    names.forEach((n) => seen.add(keyOf(n)));
+    kept.push({ label: cat.label, names });
+  }
+  // "Additional Skills": the carried skills first, then evidenced skills from any category (the JD's first), filling the line.
+  if (kept.length < maxCategories) {
+    const at = kept.findIndex((l) => l.label === "Additional Skills");
+    const base = at >= 0 ? kept.splice(at, 1)[0].names : [];
+    const rest = sortSkillsByScore(candidatesOf(SKILLS_LIBRARY.flatMap((c) => c.skills)).filter((s) => !NEVER_LISTED.has(s.displayName) || asked(s)), jd, confidenceMap);
+    const ordered = [...new Set([...carry, ...base, ...rest.filter((s) => asked(s)).map((s) => s.displayName), ...rest.map((s) => s.displayName)])];
+    const names = fitLine("Additional Skills", ordered);
+    if (names.length) kept.push({ label: "Additional Skills", names });
+  }
+
+  for (const l of kept) lines.push(`${l.label}: ${l.names.join(", ")}`);
   return lines;
 }
 
