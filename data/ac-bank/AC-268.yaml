@@ -1,0 +1,54 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-268
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: gitops
+display_order: 16
+wow_score: 0.8
+metrics_claimed:
+  - test_cases_5
+concepts_claimed:
+  - kubernetes-operators
+  - gitops
+signature_technologies:
+  - Go
+fact: >-
+  Open source contribution (Red Hat | GitOps Operator), draft R4 (was AC-215 before the port) approved 2026-11-16. Never
+  employment at Red Hat.
+oss:
+  org: Red Hat
+  project: GitOps Operator
+  status: open
+  prs:
+    - https://github.com/redhat-developer/gitops-operator/pull/1563
+capabilities:
+  backend: 82
+  cloud: 88
+  data: 50
+strength:
+  recruiter: 8
+ats_keywords:
+  - Go
+  - GitOps
+  - Argo CD
+  - Kubernetes
+  - operator
+facets:
+  gitops:
+    phrase: GitOps Operator open source contribution
+    keywords:
+      - go
+      - gitops
+      - argo cd
+      - kubernetes
+      - operator
+variants:
+  - facet: gitops
+    emphasis: gitops
+    strength: 9
+    text: >-
+      Inspected target namespace labels before cleanup in Red Hat's GitOps Operator in Go, closing a consent removal bug
+      with 5 regression test cases.

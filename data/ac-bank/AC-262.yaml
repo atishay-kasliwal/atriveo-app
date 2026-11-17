@@ -1,0 +1,60 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-262
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+  - data-science
+slot_kind: project
+achievement_theme: streaming-metrics
+display_order: 10
+wow_score: 0.88
+metrics_claimed:
+  - stars_2800
+  - tests_4
+concepts_claimed:
+  - stream-processing
+  - observability
+  - metrics
+signature_technologies:
+  - Go
+  - Kubernetes
+fact: >-
+  Open source contribution (Numaflow), draft F1 (was AC-209 before the port) approved 2026-11-16. Never employment at
+  Numaflow.
+oss:
+  org: ''
+  project: Numaflow
+  status: merged
+  prs:
+    - https://github.com/numaproj/numaflow/pull/3761
+capabilities:
+  backend: 84
+  data: 88
+  cloud: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Go
+  - Kubernetes
+  - stream processing
+  - watermark
+  - Prometheus
+  - observability
+facets:
+  streaming-metrics:
+    phrase: Numaflow open source contribution
+    keywords:
+      - go
+      - kubernetes
+      - stream processing
+      - watermark
+      - prometheus
+      - observability
+variants:
+  - facet: streaming-metrics
+    emphasis: streaming-metrics
+    strength: 9
+    text: >-
+      Computed per edge watermark metrics in Numaflow (2.8K+ GitHub stars), exposing event time progress from its Go
+      pipeline daemon on Kubernetes with 4 unit tests for joins and stale series.

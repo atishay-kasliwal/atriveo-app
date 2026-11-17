@@ -1,0 +1,55 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-257
+role: open-source
+fits:
+  - ai-engineer
+  - software-engineer
+slot_kind: project
+achievement_theme: llm-providers
+display_order: 5
+wow_score: 0.8
+metrics_claimed:
+  - tests_7
+concepts_claimed:
+  - llm-providers
+  - rust
+signature_technologies:
+  - Rust
+fact: >-
+  Open source contribution (Mezmo | rig), draft A6 (was AC-204 before the port) approved 2026-11-16. Never employment at
+  Mezmo.
+oss:
+  org: Mezmo
+  project: rig
+  status: open
+  prs:
+    - https://github.com/mezmo/rig/pull/19
+    - https://github.com/mezmo/rig/pull/20
+capabilities:
+  backend: 82
+  ai: 86
+  cloud: 60
+strength:
+  recruiter: 8
+ats_keywords:
+  - Rust
+  - LLM
+  - Anthropic
+  - Gemini
+  - tool calling
+facets:
+  llm-providers:
+    phrase: rig open source contribution
+    keywords:
+      - rust
+      - llm
+      - anthropic
+      - gemini
+      - tool calling
+variants:
+  - facet: llm-providers
+    emphasis: llm-providers
+    strength: 9
+    text: >-
+      Repaired truncated Anthropic tool call reporting and Gemini request settings in Mezmo's fork of the rig Rust LLM
+      library, adding 7 regression tests for provider serialization.

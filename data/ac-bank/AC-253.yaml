@@ -1,0 +1,59 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-253
+role: open-source
+fits:
+  - software-engineer
+  - ai-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: rust-concurrency
+display_order: 1
+wow_score: 0.88
+metrics_claimed:
+  - regression_runs_500
+  - library_tests_1525
+concepts_claimed:
+  - concurrency
+  - rust
+  - reliability
+signature_technologies:
+  - Rust
+  - Tokio
+fact: >-
+  Open source contribution (Mezmo | AURA), draft A1 (was AC-200 before the port) approved 2026-11-16. Never employment
+  at Mezmo.
+oss:
+  org: Mezmo
+  project: AURA
+  status: merged
+  prs:
+    - https://github.com/mezmo/aura/pull/904
+capabilities:
+  backend: 90
+  ai: 78
+  cloud: 70
+strength:
+  recruiter: 9
+ats_keywords:
+  - Rust
+  - Tokio
+  - concurrency
+  - deadlock
+  - async
+  - agents
+facets:
+  rust-concurrency:
+    phrase: AURA open source contribution
+    keywords:
+      - rust
+      - tokio
+      - concurrency
+      - deadlock
+      - async
+variants:
+  - facet: rust-concurrency
+    emphasis: rust-concurrency
+    strength: 9
+    text: >-
+      Diagnosed a Tokio lock contention deadlock in Mezmo's AURA Rust agent orchestrator and moved artifact writes
+      outside the persistence lock, passing 500 repeated modeled regression runs and 1,525 library tests.

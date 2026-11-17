@@ -1,0 +1,53 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-263
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: k8s-webhook
+display_order: 11
+wow_score: 0.88
+metrics_claimed:
+  - test_cases_12
+concepts_claimed:
+  - kubernetes
+  - admission-webhooks
+  - validation
+signature_technologies:
+  - Kubernetes
+fact: >-
+  Open source contribution (Numaflow), draft F2 (was AC-210 before the port) approved 2026-11-16. Never employment at
+  Numaflow.
+oss:
+  org: ''
+  project: Numaflow
+  status: merged
+  prs:
+    - https://github.com/numaproj/numaflow/pull/3767
+capabilities:
+  backend: 84
+  cloud: 86
+  data: 70
+strength:
+  recruiter: 9
+ats_keywords:
+  - Kubernetes
+  - admission webhook
+  - Go
+  - validation
+facets:
+  k8s-webhook:
+    phrase: Numaflow open source contribution
+    keywords:
+      - kubernetes
+      - admission webhook
+      - go
+      - validation
+variants:
+  - facet: k8s-webhook
+    emphasis: k8s-webhook
+    strength: 9
+    text: >-
+      Screened MonoVertex specs in Numaflow's Kubernetes admission webhook to block scale minimums above maximums,
+      covered by 12 test cases and verified on a local k3d cluster.

@@ -28,6 +28,6 @@ export interface AtsAssessment {
     categories: Array<{ key: string; earned: number; max: number; note?: string; items: AtsItem[] }>;
     unparsed_requirements: Array<{ classification: string; source: string }>;
     potential_knockouts: Array<{ type: string; status: string; source: string }>;
-    recommendations: Array<{ message: string; recoverable_points: number }>;
+    recommendations: Array<{ message: string; recoverable_points: number; approved_skill?: { name: string; sources: string[] } }>;
   } | null;
 }

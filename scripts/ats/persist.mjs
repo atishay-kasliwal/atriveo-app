@@ -2,9 +2,9 @@
 // The file is advisory: scoring failures must not turn a successful compile into a failure.
 import fs from "node:fs";
 import path from "node:path";
-import { loadAtsConfig } from "./config.mjs";
+import { loadAtsConfig, sha256 } from "./config.mjs";
 import { resolveInput } from "./cli.mjs";
-import { loadBank, scoreTarget } from "./match-cli.mjs";
+import { loadBank, loadApprovedSkills, scoreTarget } from "./match-cli.mjs";
 
 export const ATS_SCORE_FILE = "ats-score.json";
 export { ATS_ALGORITHM_HASH } from "./identity.mjs";
@@ -15,14 +15,15 @@ export function readSavedAts(dir) {
   catch { return null; }
 }
 
-export function scoreAndSaveRun(dir, { asOf = new Date().toISOString().slice(0, 10), config = loadAtsConfig(), bank = loadBank(), force = false } = {}) {
+export function scoreAndSaveRun(dir, { asOf = new Date().toISOString().slice(0, 10), config = loadAtsConfig(), bank = loadBank(), approvedSkills = loadApprovedSkills(), force = false } = {}) {
   const { pdf } = resolveInput(dir);
-  const inputs = assessmentInputs(pdf, dir);
+  // Recommendations cite the approved skills bank, so a changed bank refreshes the saved advice.
+  const inputs = { ...assessmentInputs(pdf, dir), skills_sha256: sha256(JSON.stringify(approvedSkills)).slice(0, 16) };
   const previous = readSavedAts(dir);
   if (!force && previous?.schema_version === 1 && previous.algorithm_hash === ATS_ALGORITHM_HASH && previous.config_hash === config.hash
     && previous.as_of === asOf && Object.entries(inputs).every(([key, value]) => previous.inputs?.[key] === value)) return { saved: previous, changed: false };
 
-  const result = scoreTarget(dir, { asOf, config, bank });
+  const result = scoreTarget(dir, { asOf, config, bank, approvedSkills });
   const saved = {
     schema_version: 1,
     scored_at: new Date().toISOString(),

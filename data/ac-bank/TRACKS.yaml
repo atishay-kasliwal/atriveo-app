@@ -7,7 +7,9 @@
 
 # Projects any track may print in the second project slot, chosen only when the posting fits them better than the
 # project already there (ac-page-fill chooseProjects): FOMC Market LLM (2026-10-25, Atishay: keep it, never forced).
-jd_selected_projects: [fomc-market-llm]
+# Open source (OPEN-SOURCE.yaml, approved 2026-11-16) joins the same way: one of its story packages, only when its two
+# bullets fit the posting better than the second project already there; never forced, never the first project.
+jd_selected_projects: [fomc-market-llm, open-source]
 
 tracks:
   ai-engineer:
@@ -24,7 +26,7 @@ tracks:
       wake-forest: 4
       accolite: 2
     # The newest project first, the second by fit to the JD. Never the Java insurance platform.
-    projects: [atriveo, mri-research, user-data-platform, fomc-market-llm]
+    projects: [atriveo, mri-research, user-data-platform, fomc-market-llm, open-source]
     # Bullets that claim the "ai" concept (every other track: planner default, 4).
     max_ai_bullets: 12
     # The fixed SWE keyword list (ATS_COVERAGE_MATRIX.yaml) caps LangChain, RAG and Python at
@@ -81,6 +83,8 @@ tracks:
     label: Data analytics
     title_patterns: ['data analyst', 'analytics', 'business intelligence', '\bbi\b', 'business analyst', 'insights analyst', 'product analyst']
     exclude_patterns: ['engineer']
+    # No open source here: none of it is analytics work (user decision 2026-11-16).
+    projects: [atriveo, insurance-platform]
 
   forward-deployed:
     label: Forward deployed
@@ -174,6 +178,9 @@ stony_brook_title_patterns:
 # Skills section once it is listed here (and only when the JD asks for it); a bullet may name it
 # only at an employer listed for it. Names match data/ac-bank skill names (skills-library.mjs).
 confirmed_skills:
+  # Approved upstream skills are loaded separately from SKILL_EVIDENCE.yaml (merged first, open PRs at lower
+  # priority since 2026-11-16). Keep them out of these flat lists so their status and order stay attached.
+  # Open-source sources are project evidence, never employment at the upstream company.
   stony-brook: [PyTorch, TensorFlow, scikit-learn, LangGraph, Vector Databases, Hugging Face, MLflow, MLOps, AWS Bedrock, FinBERT, Pinecone, R, SQL, Excel, Tableau, Power BI, Plotly, R Shiny, Statistical Analysis, A/B Testing, Time Series Forecasting, Predictive Modeling, Model Evaluation, Hypothesis Testing, Regression, Pandas, NumPy, Data Visualization, Dashboards, MongoDB, MySQL, PostgreSQL, GraphQL, Agile, Scrum, AWS IAM, Claude, Anthropic]
   wake-forest: [PyTorch, TensorFlow, scikit-learn, Vector Databases, Anthropic, N4ITK, R, SQL, Excel, XGBoost, LightGBM, ggplot2, R Shiny, Statistical Analysis, A/B Testing, Predictive Modeling, Model Evaluation, Hypothesis Testing, Regression, Pandas, NumPy, Data Visualization, MongoDB, MySQL, PostgreSQL, GraphQL, Agile, Scrum, HIPAA, Airflow]
   # 2026-10-08 (docs/resume-tracks/facts): A/B tests, SQL and Power BI dashboards at Accolite.
@@ -190,4 +197,6 @@ confirmed_skills:
   # CloudWatch for observability; Hadoop and .NET from coursework at SBU and SUAS); skills section only, when the JD asks.
   tools_confirmed: [Linux, Jira, MySQL, SQL Server, HTML, CSS, HTML/CSS, Terraform, Angular, C++, Snowflake, dbt, Airflow, BigQuery, Redshift, PowerPoint, SAS, MATLAB, Salesforce, CloudWatch, Hadoop, .NET, DevOps, Observability, Cursor, Cassandra]
   # Asked about and not confirmed: never claim (2026-10-09: C#, Go, Rust, Looker, OWASP, OpenTelemetry).
-  not_confirmed: [FAISS, Fine-tuning, LlamaIndex, Kubeflow, Milvus, Conversational AI, C#, Go, Rust, Looker, OWASP, OpenTelemetry]
+  # 2026-11-16: Go and Rust are confirmed by merged upstream PRs (SKILL_EVIDENCE.yaml, user approved), so they left
+  # this list. They stay off employer bullets: open source work is never employment.
+  not_confirmed: [FAISS, Fine-tuning, LlamaIndex, Kubeflow, Milvus, Conversational AI, C#, Looker, OWASP, OpenTelemetry]

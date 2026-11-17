@@ -14,6 +14,17 @@ import { stripBanned } from "./tailor-dynamic.mjs";
 import { loadBank } from "./ac-bank.mjs";
 import { bankForTrack, jdSelectedProjects, loadTracks, trackPins } from "./ac-tracks.mjs";
 import { PROJECT_SLUG_TO_NAME as PROJECT_NAME } from "./ac-role-meta.mjs";
+import { fileURLToPath } from "node:url";
+
+// Planner pools (scripts/planner/v2.json). A pool with exclusive_verbs_by_package (open source) prints one of its
+// story packages whole: the pair was approved together, and its bullets may share a verb with other packages.
+const PLANNER_POOLS = (() => {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "planner", "v2.json"), "utf8")).canonical_pools || {};
+  } catch {
+    return {};
+  }
+})();
 
 // Where the last line of this template ends when the page is full (measured: a resume stretched to the bottom margin ends
 // its last printed line at 746pt of 792; the skills list leaves its own small space under it).
@@ -88,6 +99,8 @@ export function bulletScore(ac, face, jdLower) {
 }
 
 const firstVerb = (text) => (words(text)[0] || "");
+// What an open upstream PR costs a bullet's score: the gap one rating point makes (0.6 x 1/10).
+const OPEN_SOURCE_OPEN_PENALTY = 0.06;
 
 /** The wording of an entry to print for this track: its track facet when it has one, otherwise its first. */
 function faceFor(ac, track) {
@@ -115,7 +128,8 @@ export function candidatesFor(role, kind, bank, used, jdLower, track, sectionTex
     .filter(({ face }) => face?.text && !usedVerbs.has(firstVerb(face.text)))
     .filter(({ face }) => stripBanned(face.text) === face.text && /^[A-Z]/.test(face.text.trim()))
     .filter(({ face }) => ![...keys(face.text)].some((f) => sectionFigures.has(f)))
-    .map((c) => ({ ...c, score: bulletScore(c.ac, c.face, jdLower) }))
+    // Open source work whose upstream PR is still open ranks below merged work at the same fit (ac.oss.status; merged first).
+    .map((c) => ({ ...c, score: bulletScore(c.ac, c.face, jdLower) - (c.ac.oss?.status === "open" ? OPEN_SOURCE_OPEN_PENALTY : 0) }))
     .sort((a, b) => b.score - a.score || a.ac.id.localeCompare(b.ac.id));
 }
 
@@ -148,6 +162,34 @@ function distinctFigures(list) {
 }
 
 const bulletOf = ({ ac, face }) => ({ ac_id: ac.id, facet: face.facet, text: face.text });
+
+/**
+ * The bullets a new project prints, chosen together from its candidates (best first): an exclusive-package pool's best
+ * whole package (highest average fit, every bullet still a candidate, no shared verb), else the best bullets with
+ * different opening verbs (candidatesFor only rules out verbs already on the page, not two new picks sharing one).
+ */
+export function pickTogether(role, list, n) {
+  const pool = PLANNER_POOLS[role];
+  if (pool?.exclusive_verbs_by_package && pool.story_packages?.length) {
+    const byId = new Map(list.map((c) => [c.ac.id, c]));
+    const best = pool.story_packages
+      .map((p) => (p.ids || []).map((id) => byId.get(id)))
+      .filter((cs) => cs.length >= n && cs.every(Boolean) && new Set(cs.map((c) => firstVerb(c.face.text))).size === cs.length)
+      .map((cs) => ({ cs, fit: cs.reduce((sum, c) => sum + c.score, 0) / cs.length }))
+      .sort((a, b) => b.fit - a.fit)[0];
+    return best ? best.cs.slice(0, n) : [];
+  }
+  const kept = [];
+  const verbs = new Set();
+  for (const c of list) {
+    const verb = firstVerb(c.face.text);
+    if (verbs.has(verb)) continue;
+    verbs.add(verb);
+    kept.push(c);
+    if (kept.length >= n) break;
+  }
+  return kept;
+}
 const usedMap = (compact) => new Map([...(compact.experience || []), ...(compact.projects || [])]
   .flatMap((s) => (s.bullets || []).map((b) => [b.ac_id, b.text])));
 
@@ -164,7 +206,7 @@ export function enforceProjects(compact, bank, { jd = "", track = null, pool = n
   while (out.projects.length < minProjects) {
     const used = usedMap(out);
     const options = roles.filter((r) => !have.has(r) && ![...have].some((h) => sameProduct(r, h)))
-      .map((role) => ({ role, list: distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track, [...used.values()], factKeys)) }))
+      .map((role) => ({ role, list: pickTogether(role, distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track, [...used.values()], factKeys)), minBullets) }))
       .filter((o) => o.list.length >= minBullets)
       .map((o) => ({ ...o, tagged: projectFits(bank, o.role, track), fit: o.list.slice(0, minBullets).reduce((s, c) => s + c.score, 0) / minBullets }))
       .sort((a, b) => Number(b.tagged) - Number(a.tagged) || b.fit - a.fit || roles.indexOf(a.role) - roles.indexOf(b.role));
@@ -194,7 +236,7 @@ export function enforceProjects(compact, bank, { jd = "", track = null, pool = n
     const allRoles = [...new Set([...(roles || []), ...(bank.acs || []).filter((a) => a.slot_kind === "project").map((a) => a.role)])];
     const swap = allRoles.filter((r) => !out.projects.some((q) => q.role === r || sameProduct(q.role, r)))
       .filter((r) => !offTrack || short || duplicate || projectFits(bank, r, track))
-      .map((role) => ({ role, list: distinctFigures(candidatesFor(role, "project", bank, others, jdLower, track, [...others.values()], factKeys)) }))
+      .map((role) => ({ role, list: pickTogether(role, distinctFigures(candidatesFor(role, "project", bank, others, jdLower, track, [...others.values()], factKeys)), minBullets) }))
       .filter((o) => o.list.length >= minBullets)
       .map((o) => ({ ...o, tagged: projectFits(bank, o.role, track), fit: o.list.slice(0, minBullets).reduce((x, c) => x + c.score, 0) / minBullets }))
       .sort((a, b) => Number(b.tagged) - Number(a.tagged) || b.fit - a.fit)[0];
@@ -224,7 +266,7 @@ export function chooseProjects(compact, bank, { jd = "", track = null, extra = j
     const slot = out.projects.map((p, i) => ({ i, fit: fitOf(p) })).slice(1).sort((a, b) => a.fit - b.fit)[0];
     const others = out.projects.filter((_, i) => i !== slot.i);
     const used = new Map([...(out.experience || []), ...others].flatMap((s) => s.bullets.map((b) => [b.ac_id, b.text])));
-    const list = distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track, [...used.values()], factKeys));
+    const list = pickTogether(role, distinctFigures(candidatesFor(role, "project", bank, used, jdLower, track, [...used.values()], factKeys)), minBullets);
     if (list.length < minBullets) continue;
     const fit = list.slice(0, minBullets).reduce((s, c) => s + c.score, 0) / minBullets;
     if (fit <= slot.fit) continue;

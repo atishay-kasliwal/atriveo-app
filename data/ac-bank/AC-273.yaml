@@ -1,0 +1,55 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-273
+role: open-source
+fits:
+  - ai-engineer
+slot_kind: project
+achievement_theme: agent-mocks
+display_order: 21
+wow_score: 0.8
+metrics_claimed:
+  - tests_17
+concepts_claimed:
+  - agent-testing
+  - tool-calling
+signature_technologies:
+  - LangGraph
+  - Python
+fact: >-
+  Open source contribution (Intuit | StuntDouble), draft S2 (was AC-220 before the port) approved 2026-11-16. Never
+  employment at Intuit.
+oss:
+  org: Intuit
+  project: StuntDouble
+  status: open
+  prs:
+    - https://github.com/intuit/stunt-double/pull/94
+    - https://github.com/intuit/stunt-double/pull/93
+capabilities:
+  ai: 86
+  backend: 78
+  data: 60
+strength:
+  recruiter: 8
+ats_keywords:
+  - LangGraph
+  - LangChain
+  - Python
+  - AI agents
+  - tool calling
+facets:
+  agent-mocks:
+    phrase: StuntDouble open source contribution
+    keywords:
+      - langgraph
+      - langchain
+      - python
+      - ai agents
+      - tool calling
+variants:
+  - facet: agent-mocks
+    emphasis: agent-mocks
+    strength: 9
+    text: >-
+      Updated StuntDouble's mocks to return native LangGraph ToolMessage and Command objects directly, adding 17 Python
+      tests including malformed placeholder index cases.

@@ -21,10 +21,21 @@ export function canonicalJson(value) {
 
 export const sha256 = (data) => crypto.createHash("sha256").update(data).digest("hex");
 
+// The bank's bullet lint (ac-bullet-rules.mjs) requires these openings; the Job Match verb check accepts them too.
+export const HARVARD_VERBS_FILE = path.resolve(ATS_CONFIG_DIR, "../ac-bank/HARVARD_ACTION_VERBS.json");
+
+function withHarvardVerbs(scoring, file = HARVARD_VERBS_FILE) {
+  const achievement = scoring?.job_match?.achievement;
+  if (!achievement || !fs.existsSync(file)) return scoring;
+  const harvard = Object.values(JSON.parse(fs.readFileSync(file, "utf8")).categories || {}).flat().map((v) => String(v).toLowerCase());
+  achievement.action_verbs = [...new Set([...(achievement.action_verbs || []), ...harvard])];
+  return scoring;
+}
+
 export function loadAtsConfig(dir = ATS_CONFIG_DIR) {
   const read = (name) => yaml.load(fs.readFileSync(path.join(dir, name), "utf8")) || {};
   return withHash({
-    scoring: read("scoring.yaml"), sections: read("sections.yaml"),
+    scoring: withHarvardVerbs(read("scoring.yaml")), sections: read("sections.yaml"),
     skills: read("skills.yaml"), responsibilities: read("responsibilities.yaml"),
     domains: read("domains.yaml"),
   });

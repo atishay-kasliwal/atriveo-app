@@ -1,5 +1,8 @@
 // Deterministic LaTeX assembly from AC compose() output — no Ollama rewrite.
 
+import fs from "node:fs";
+import path from "node:path";
+import yaml from "js-yaml";
 import {
   ROLE_META,
   PROJECT_META,
@@ -99,6 +102,32 @@ function esc(s) {
     // No ligatures: the font draws "fi", "fl", "ff" as one glyph (ﬁ), which a parser reads as a different
     // character, so "unified" no longer matches. A zero-width kern keeps the two letters (ATS readiness).
     .replace(/f(?=[fil])/g, "f\\kern0pt{}");
+}
+
+// Open source bullets name their upstream project in data (oss: { org, project, status }), not in a fixed role name.
+function ossEntry(bullet, bankDir) {
+  if (bullet.ac?.oss) return bullet.ac;
+  const id = bullet.ac?.id || bullet.ac_id;
+  if (!id || !/^AC-\d+$/.test(id)) return null;
+  try { return yaml.load(fs.readFileSync(path.join(bankDir, `${id}.yaml`), "utf8")); } catch { return null; }
+}
+
+/**
+ * The open source project line, from the bullets picked for this resume: "NVIDIA | NVKR, Workload Map (Open Source)"
+ * when one org owns them all, else each project with its own org: "Mezmo AURA, PR-Agent (Open Source)".
+ * Tools: the bullets' declared technologies.
+ * Status (open / merged) is never printed (QUESTION_ANSWERS "Open Source Work on Resumes").
+ */
+export function ossHeading(bullets, bankDir = resolveBankDir()) {
+  const entries = bullets.map((b) => ossEntry(b, bankDir)).filter((e) => e?.oss);
+  const orgs = [...new Set(entries.map((e) => e.oss.org || ""))];
+  const org = orgs.length === 1 ? orgs[0] : "";
+  // Mixed orgs: each project keeps its own org for recognition ("Mezmo AURA, PR-Agent"), unless the name has it.
+  const named = (e) => (org || !e.oss.org || e.oss.project.toLowerCase().includes(e.oss.org.toLowerCase()) ? e.oss.project : `${e.oss.org} ${e.oss.project}`);
+  const projects = [...new Set(entries.map(named))];
+  const label = `${projects.join(", ") || "Open Source"} (Open Source)`;
+  const tools = [...new Set(entries.flatMap((e) => e.signature_technologies || []))].slice(0, 6);
+  return { org, label, tools, text: org ? `${org} | ${label}` : label };
 }
 
 export function toolsFromBullets(bullets, roleSlug) {
@@ -264,10 +293,13 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
       const name = PROJECT_SLUG_TO_NAME[project.role] || project.role;
       const meta = resolveProjectMeta(project.role, bankDir);
       const bullets = (project.bullets || []).map((b) => ({ text: bulletText(b) }));
+      const oss = project.role === "open-source" ? ossHeading(project.bullets || [], bankDir) : null;
       // The resume builder may set a project's tools line (project.stack); otherwise it comes from the bullets.
-      const stack = project.stack?.length ? project.stack : toolsFromBullets(bullets, project.role);
+      const stack = project.stack?.length ? project.stack : oss ? oss.tools : toolsFromBullets(bullets, project.role);
       const items = bullets.map((b) => `      \\resumeItem{${esc(b.text)}}`).join("\n");
-      return `    \\resumeProjectHeading{\\textbf{${esc(name)}}${stack.length ? " $|$ \\emph{" + esc(stack.join(", ")) + "}" : ""}}{${meta.dates}}\n    \\resumeItemListStart\n${items}\n    \\resumeItemListEnd`;
+      // "|" must be math mode in this font; the org and project share the bold name.
+      const title = oss ? `${oss.org ? `${esc(oss.org)} $|$ ` : ""}${esc(oss.label)}` : esc(name);
+      return `    \\resumeProjectHeading{\\textbf{${title}}${stack.length ? " $|$ \\emph{" + esc(stack.join(", ")) + "}" : ""}}{${meta.dates}}\n    \\resumeItemListStart\n${items}\n    \\resumeItemListEnd`;
     })
     .join("\n\n");
 

@@ -22,10 +22,11 @@ function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function countTerm(text, term) {
+// caseSensitive: a keyword that is also an everyday word ("Go" vs "go live") counts only as written.
+function countTerm(text, term, caseSensitive = false) {
   if (term === "C++") return (text.match(/C\+\+/g) || []).length;
   if (term === "CI/CD") return (text.match(/\bCI\/CD\b/gi) || []).length;
-  const re = new RegExp(`\\b${escapeRe(term)}\\b`, "gi");
+  const re = new RegExp(`\\b${escapeRe(term)}\\b`, caseSensitive ? "g" : "gi");
   return (text.match(re) || []).length;
 }
 
@@ -98,7 +99,7 @@ export function auditAtsMatrix(composition, skills = [], matrix = loadMatrix()) 
     let count = 0;
     const matchedBy = {};
     for (const term of terms) {
-      const n = countTerm(corpus, term);
+      const n = countTerm(corpus, term, term === keyword && cfg.case_sensitive);
       if (n) matchedBy[term] = n;
       count += n;
     }
@@ -156,7 +157,7 @@ export function keywordCountsFromTexts(texts, matrix = loadMatrix()) {
     if (!text) continue;
     for (const [keyword, cfg] of Object.entries(matrix.keywords || {})) {
       const terms = [keyword, ...(cfg.synonyms || [])];
-      for (const term of terms) counts[keyword] += countTerm(text, term);
+      for (const term of terms) counts[keyword] += countTerm(text, term, term === keyword && cfg.case_sensitive);
     }
   }
   return counts;

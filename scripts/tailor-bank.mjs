@@ -10,6 +10,7 @@
  * Pure parsing, no side effects. Node built-ins only.
  */
 import fs from "node:fs";
+import { loadSkillEvidence, skillEvidenceSources } from "./skill-evidence.mjs";
 
 const ENGINE = "/Users/atishaykasliwal/atriveo-app/resume-engine/Memory";
 
@@ -61,6 +62,16 @@ export function loadSafeClaims(bank) {
   const text = fs.readFileSync(`${ENGINE}/QUESTION_ANSWERS.md`, "utf8");
   const claims = new Set();
   const add = (s) => { if (s) claims.add(s.trim().toLowerCase()); };
+
+  // Structured contribution evidence (merged and open; a closed PR never counts), not unrelated project tools.
+  const evidence = loadSkillEvidence();
+  const eligible = skillEvidenceSources(evidence.records, { includeOpen: true });
+  for (const record of evidence.records || []) {
+    for (const name of record.skills || []) {
+      const key = name.toLowerCase().replace(/[^a-z0-9+#.]/g, "");
+      if (eligible.has(key)) add(name);
+    }
+  }
 
   // tech tags from every bullet (these are definitionally safe — they're on the resume)
   for (const group of [...bank.roles, ...bank.projects])

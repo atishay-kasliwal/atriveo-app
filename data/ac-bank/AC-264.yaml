@@ -1,0 +1,62 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-264
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+  - data-science
+slot_kind: project
+achievement_theme: streaming-reliability
+display_order: 12
+wow_score: 0.8
+metrics_claimed:
+  - fixes_4
+  - tests_15
+concepts_claimed:
+  - stream-processing
+  - reliability
+signature_technologies:
+  - Pulsar
+  - Kubernetes
+fact: >-
+  Open source contribution (Numaflow), draft F4 (was AC-211 before the port) approved 2026-11-16. Never employment at
+  Numaflow.
+oss:
+  org: ''
+  project: Numaflow
+  status: open
+  prs:
+    - https://github.com/numaproj/numaflow/pull/3756
+    - https://github.com/numaproj/numaflow/pull/3759
+    - https://github.com/numaproj/numaflow/pull/3760
+    - https://github.com/numaproj/numaflow/pull/3787
+capabilities:
+  backend: 86
+  data: 88
+  cloud: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Pulsar
+  - NATS
+  - JetStream
+  - stream processing
+  - Kubernetes
+  - reliability
+facets:
+  streaming-reliability:
+    phrase: Numaflow open source contribution
+    keywords:
+      - pulsar
+      - nats
+      - jetstream
+      - stream processing
+      - kubernetes
+      - reliability
+variants:
+  - facet: streaming-reliability
+    emphasis: streaming-reliability
+    strength: 9
+    text: >-
+      Repaired 4 reliability gaps in Numaflow's JetStream and Pulsar paths by bounding ack retries and rebuilding
+      stalled consumers, with 15 tests plus local multi node Kubernetes reproductions.

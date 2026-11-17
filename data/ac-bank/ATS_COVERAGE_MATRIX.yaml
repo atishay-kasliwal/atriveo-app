@@ -19,6 +19,16 @@ keywords:
   SQL:
     min: 0
     max: 2
+  # Approved through merged open-source PRs (SKILL_EVIDENCE.yaml): Skills line only, never an employer bullet,
+  # so no minimum. Listed so repetition is still capped.
+  Go:
+    min: 0
+    max: 2
+    case_sensitive: true   # "Go", never "go live"
+    synonyms: [golang]
+  Rust:
+    min: 0
+    max: 2
 
   React:
     min: 1
@@ -32,6 +42,9 @@ keywords:
     max: 2
   "Spring Boot":
     min: 1
+    max: 2
+  gRPC:
+    min: 0
     max: 2
   PostgreSQL:
     min: 1
@@ -126,6 +139,9 @@ stuffing:
     - Elasticsearch
     - Node.js
     - Spring Boot
+    - Go
+    - Rust
+    - gRPC
 
 scoring:
   missing_penalty: 8

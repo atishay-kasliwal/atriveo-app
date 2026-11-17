@@ -17,8 +17,8 @@
   },
   "min_project_bullets": 2,
   "max_resume_projects": 2,
-  "resume_project_pool": ["atriveo", "insurance-platform"],
-  "fixed_project_roles": ["atriveo", "insurance-platform"],
+  "resume_project_pool": ["atriveo", "insurance-platform", "open-source"],
+  "fixed_project_roles": ["atriveo", "insurance-platform", "open-source"],
   "apply_delete_test": false,
   "global_optimize": true,
   "skills_evidence_only": true,
@@ -192,7 +192,7 @@
           "name": "platform",
           "anchor": "AC-063",
           "ids": ["AC-063", "AC-064"],
-          "jd_signals": ["microservice", "platform", "distributed", "insurance", "spring", "java", "software engineer"]
+          "jd_signals": ["microservice", "platform", "distributed", "insurtech", "insurance industry", "insurance carrier", "spring", "java,", "java ", "java/", "(java", "java)"]
         },
         {
           "name": "streaming",
@@ -204,7 +204,7 @@
           "name": "data",
           "anchor": "AC-066",
           "ids": ["AC-066", "AC-067"],
-          "jd_signals": ["elasticsearch", "data engineering", "etl", "index", "search", "analytics"]
+          "jd_signals": ["elasticsearch", "data engineering", "etl", "full text search", "search engine", "analytics"]
         },
         {
           "name": "security",
@@ -222,7 +222,7 @@
           "name": "api",
           "anchor": "AC-071",
           "ids": ["AC-071", "AC-066"],
-          "jd_signals": ["rest", "api", "openapi", "swagger", "hateoas", "backend engineer"]
+          "jd_signals": ["rest api", "restful", "openapi", "swagger", "hateoas", "backend engineer"]
         }
       ]
     },
@@ -297,6 +297,143 @@
           "jd_signals": ["financial services", "insurance", "fidelity", "banking", "encrypted", "mysql"]
         }
       ]
+    },
+    "open-source": {
+      "pick": 2,
+      "pinned": [],
+      "dynamic_anchors": true,
+      "packages_only": true,
+      "exclusive_verbs_by_package": true,
+      "requires_jd_signal": true,
+      "open_penalty": 0.75,
+      "story_weights": {
+        "jd_match": 0.25,
+        "story_completion": 1.6,
+        "wow": 0.9,
+        "recruiter": 1.0
+      },
+      "ac_ids": ["AC-253", "AC-254", "AC-255", "AC-256", "AC-257", "AC-258", "AC-259", "AC-260", "AC-261", "AC-262", "AC-263", "AC-264", "AC-265", "AC-266", "AC-267", "AC-268", "AC-269", "AC-270", "AC-271", "AC-272", "AC-273", "AC-274", "AC-275", "AC-276", "AC-277", "AC-278", "AC-279", "AC-280", "AC-281"],
+      "story_packages": [
+        {
+          "name": "rust-concurrency",
+          "anchor": "AC-253",
+          "ids": ["AC-253",  "AC-254"],
+          "jd_signals": ["rust", "tokio", "async rust", "concurrency", "deadlock", "lock contention", " sre", "site reliability"],
+          "strong_signals": ["rust", "tokio"]
+        },
+        {
+          "name": "mcp-agents",
+          "anchor": "AC-255",
+          "ids": ["AC-255",  "AC-271"],
+          "jd_signals": ["mcp", "model context protocol", "llm", "agentic", "ai agent", "agents", "automation", "workflow", "tool calling", "function calling", "foundation model"],
+          "strong_signals": ["mcp", "ai agent", "agentic", "agents"]
+        },
+        {
+          "name": "llm-rust",
+          "anchor": "AC-256",
+          "ids": ["AC-256",  "AC-257"],
+          "jd_signals": ["llm", "anthropic", "gemini", "serde", "rust", "inference", "model provider"],
+          "strong_signals": ["rust", "serde", "anthropic", "gemini"]
+        },
+        {
+          "name": "go-cli",
+          "anchor": "AC-258",
+          "ids": ["AC-258",  "AC-259"],
+          "jd_signals": ["golang", " go ", "go,", "(go", "go)", "/go", "go/", "cli", "command line", "developer tools", "developer experience", "release engineering", "nvidia"],
+          "strong_signals": ["golang", " go ", "go,", "(go", "go)", "/go", "go/"]
+        },
+        {
+          "name": "k8s-gpu",
+          "anchor": "AC-258",
+          "ids": ["AC-258",  "AC-260"],
+          "jd_signals": ["kubernetes", "k8s", "gpu", "controller", "operator", "nvidia", "cluster", "infrastructure", "golang", " go ", "go,", "(go", "go)", "/go", "go/"],
+          "strong_signals": ["kubernetes", "k8s", "gpu"]
+        },
+        {
+          "name": "k8s-reliability",
+          "anchor": "AC-261",
+          "ids": ["AC-261",  "AC-263"],
+          "jd_signals": ["kubernetes", "k8s", "informer", "webhook", "admission", "istio", "service mesh", "reliability", "outage", "infrastructure", "golang", " go ", "go,", "(go", "go)", "/go", "go/"],
+          "strong_signals": ["kubernetes", "k8s", "istio", "golang", " go ", "go,", "(go", "go)", "/go", "go/"]
+        },
+        {
+          "name": "streaming",
+          "anchor": "AC-262",
+          "ids": ["AC-262",  "AC-264"],
+          "jd_signals": ["streaming", "stream processing", "event time", "pulsar", "nats", "jetstream", "kafka", "real time", "real-time", "watermark", "data pipeline", "event driven", "event-driven"],
+          "strong_signals": ["pulsar", "nats", "jetstream", "stream processing"]
+        },
+        {
+          "name": "provisioning",
+          "anchor": "AC-265",
+          "ids": ["AC-265",  "AC-266"],
+          "jd_signals": ["provisioning", "cloud-init", "ci runner", "devops", "infrastructure as code", "ibm cloud", "multi cloud", "multi-cloud", "bare metal", "golang", " go ", "go,", "(go", "go)", "/go", "go/"],
+          "strong_signals": ["cloud-init", "provisioning"]
+        },
+        {
+          "name": "gitops",
+          "anchor": "AC-265",
+          "ids": ["AC-265",  "AC-268"],
+          "jd_signals": ["gitops", "argo cd", "argocd", "argo workflows", "openshift", "operator", "red hat"],
+          "strong_signals": ["gitops", "openshift"]
+        },
+        {
+          "name": "ci-runners",
+          "anchor": "AC-266",
+          "ids": ["AC-266",  "AC-267"],
+          "jd_signals": ["ci/cd", "github actions", "gitlab", "ci runner", "github runner", "azure", "build infrastructure", "build system"],
+          "strong_signals": ["github actions", "gitlab"]
+        },
+        {
+          "name": "frontend-a11y",
+          "anchor": "AC-269",
+          "ids": ["AC-269",  "AC-270"],
+          "jd_signals": ["frontend", "front end", "front-end", "react", "typescript", "accessibility", "a11y", "wcag", "web console", "user interface"],
+          "strong_signals": ["accessibility", "wcag", "a11y", "frontend engineer", "front end engineer", "front-end engineer", "frontend developer", "ui engineer"]
+        },
+        {
+          "name": "agent-testing",
+          "anchor": "AC-272",
+          "ids": ["AC-272",  "AC-273"],
+          "jd_signals": ["langgraph", "langchain", "agentic", "ai agent", "agents", "agent evaluation", "evals", "mocking", "llm testing"],
+          "strong_signals": ["langgraph", "langchain"]
+        },
+        {
+          "name": "ai-tools",
+          "anchor": "AC-271",
+          "ids": ["AC-271",  "AC-279"],
+          "jd_signals": ["mcp", "llm", "developer tools", "ai tools", "pytest", "code review", "copilot"],
+          "strong_signals": ["mcp"]
+        },
+        {
+          "name": "ansible",
+          "anchor": "AC-274",
+          "ids": ["AC-274",  "AC-275"],
+          "jd_signals": ["ansible", "configuration management", "infrastructure as code", "yaml", "vs code", "language server", "automation"],
+          "strong_signals": ["ansible"]
+        },
+        {
+          "name": "rust-desktop",
+          "anchor": "AC-276",
+          "ids": ["AC-276",  "AC-277"],
+          "jd_signals": ["rust", "desktop", "gui framework", "graphical user interface", "cross platform", "cross-platform", "macos", "native app"],
+          "strong_signals": ["rust", "desktop app", "gui framework"]
+        },
+        {
+          "name": "frontend-e2e",
+          "anchor": "AC-269",
+          "ids": ["AC-269",  "AC-278"],
+          "jd_signals": ["playwright", "e2e", "end to end", "end-to-end", "test automation", "accessibility", "browser", "javascript", "selenium", "cypress"],
+          "strong_signals": ["playwright"]
+        },
+        {
+          "name": "ml-infra",
+          "anchor": "AC-280",
+          "ids": ["AC-280",  "AC-281"],
+          "jd_signals": ["graph neural", "gnn", "graphsage", "embeddings", "machine learning", "mlops", "ml platform", "ml infrastructure", "pytest", "opensearch", "elasticsearch"],
+          "strong_signals": ["graphsage", "gnn", "graph neural", "mlops"]
+        }
+      ]
     }
   },
   "minimum_visual_targets": {
@@ -308,7 +445,8 @@
     "projects": {
       "default": { "preferred": 2, "minimum": 2 },
       "atriveo": { "preferred": 2, "minimum": 2 },
-      "insurance-platform": { "preferred": 2, "minimum": 2 }
+      "insurance-platform": { "preferred": 2, "minimum": 2 },
+      "open-source": { "preferred": 2, "minimum": 2 }
     },
     "skills": {
       "max_categories": 5,

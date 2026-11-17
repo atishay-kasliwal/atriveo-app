@@ -1,0 +1,63 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-258
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: go-cli
+display_order: 6
+wow_score: 0.88
+metrics_claimed:
+  - features_5
+  - test_cases_92
+concepts_claimed:
+  - cli
+  - kubernetes
+  - release-engineering
+signature_technologies:
+  - Go
+  - Kubernetes
+fact: >-
+  Open source contribution (NVIDIA | NVKR), draft N1 (was AC-205 before the port) approved 2026-11-16. Never employment
+  at NVIDIA.
+oss:
+  org: NVIDIA
+  project: NVKR
+  status: merged
+  prs:
+    - https://github.com/dsx-ai-factory/nvkr/pull/453
+    - https://github.com/dsx-ai-factory/nvkr/pull/460
+    - https://github.com/dsx-ai-factory/nvkr/pull/469
+    - https://github.com/dsx-ai-factory/nvkr/pull/470
+    - https://github.com/dsx-ai-factory/nvkr/pull/481
+capabilities:
+  backend: 90
+  cloud: 88
+  data: 64
+strength:
+  recruiter: 9
+ats_keywords:
+  - Go
+  - Golang
+  - Kubernetes
+  - CLI
+  - OCI
+  - release engineering
+facets:
+  go-cli:
+    phrase: NVKR open source contribution
+    keywords:
+      - go
+      - golang
+      - kubernetes
+      - cli
+      - oci
+      - release engineering
+variants:
+  - facet: go-cli
+    emphasis: go-cli
+    strength: 9
+    text: >-
+      Added 5 Go CLI features to NVIDIA's NVKR Kubernetes recipe build system, including release inventory diffs and
+      platform filters, covered by 92 test cases against OCI layout fixtures.

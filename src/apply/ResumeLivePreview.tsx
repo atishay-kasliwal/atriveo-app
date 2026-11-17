@@ -20,7 +20,7 @@ export interface Layout {
   sbTrackTitles?: Array<{ patterns: string[]; exclude: string[]; title: string | null; employers?: Record<string, string> }>;
 }
 /** si: the section's place in the editor, so a line on the page maps back to it. */
-export interface PreviewSection { si: number; role: string; kind: "experience" | "project"; bullets: Array<{ text: string }>; tools?: string[] }
+export interface PreviewSection { si: number; role: string; kind: "experience" | "project"; bullets: Array<{ text: string }>; tools?: string[]; heading?: string | null }
 /** What a click on the page points at. */
 export type PageTarget = { kind: "bullet"; si: number; bi: number } | { kind: "section"; si: number } | { kind: "header" } | { kind: "skills"; line: number };
 
@@ -89,7 +89,7 @@ function resumeHtml(layout: Layout, p: { title: string; email: string; city: str
     .sort((a, b) => (layout.projects[a.role]?.rank ?? 99) - (layout.projects[b.role]?.rank ?? 99))
     .map((s) => {
       const m = layout.projects[s.role] ?? { name: s.role, dates: "", rank: 99 };
-      return `<div class="entry"><div class="row" data-s="${s.si}"><span class="proj"><b>${esc(m.name)}</b>${s.tools?.length ? ` | <em>${esc(s.tools.join(", "))}</em>` : ""}</span><span>${dates(m.dates)}</span></div>
+      return `<div class="entry"><div class="row" data-s="${s.si}"><span class="proj"><b>${esc(s.heading || m.name)}</b>${s.tools?.length ? ` | <em>${esc(s.tools.join(", "))}</em>` : ""}</span><span>${dates(m.dates)}</span></div>
         ${items(s)}</div>`;
     }).join("");
   const skills = p.skills.map((l, i) => ({ l, i })).filter(({ l }) => l.includes(":")).map(({ l, i }) => `<div data-sk="${i}"><b>${esc(l.split(":")[0]!)}</b>: ${esc(l.split(":").slice(1).join(":").trim())}</div>`).join("");

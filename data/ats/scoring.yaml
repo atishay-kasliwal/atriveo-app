@@ -92,7 +92,9 @@ job_match:
     quantified_points: 3
     action_verb_points: 1
     clear_wording_points: 1
-    action_verbs: [built, designed, developed, delivered, implemented, improved, increased, reduced, automated, optimized, led, launched, created, deployed, scaled, shipped, analyzed, evaluated, integrated, migrated]
+    # Plus every verb in data/ac-bank/HARVARD_ACTION_VERBS.json (merged in by config.mjs), the list the bank's
+    # bullet lint requires, so a bank bullet never reads as a weak opening here.
+    action_verbs: [built, designed, developed, delivered, implemented, improved, increased, reduced, automated, optimized, led, launched, created, deployed, scaled, shipped, analyzed, evaluated, integrated, migrated, architected, engineered, owned, cut, secured, provisioned, instrumented, shortened, benchmarked]
     weak_phrases: [responsible for, helped with, worked on, various tasks, assisted with]
   role:
     title_points: 5

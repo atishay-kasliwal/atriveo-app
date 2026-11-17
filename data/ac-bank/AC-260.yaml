@@ -1,0 +1,59 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-260
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: k8s-controller
+display_order: 8
+wow_score: 0.8
+metrics_claimed:
+  - changes_4
+  - test_cases_18
+concepts_claimed:
+  - kubernetes-controllers
+  - gpu
+signature_technologies:
+  - Go
+  - Kubernetes
+fact: >-
+  Open source contribution (NVIDIA | NVKE), draft N3 (was AC-207 before the port) approved 2026-11-16. Never employment
+  at NVIDIA.
+oss:
+  org: NVIDIA
+  project: NVKE
+  status: open
+  prs:
+    - https://github.com/dsx-ai-factory/nvke/pull/2336
+    - https://github.com/dsx-ai-factory/nvke/pull/2288
+    - https://github.com/dsx-ai-factory/nvke/pull/2337
+    - https://github.com/dsx-ai-factory/nvke/pull/2246
+capabilities:
+  backend: 88
+  cloud: 90
+  data: 60
+strength:
+  recruiter: 8
+ats_keywords:
+  - Go
+  - Golang
+  - Kubernetes
+  - controller
+  - GPU
+facets:
+  k8s-controller:
+    phrase: NVKE open source contribution
+    keywords:
+      - go
+      - golang
+      - kubernetes
+      - controller
+      - gpu
+variants:
+  - facet: k8s-controller
+    emphasis: k8s-controller
+    strength: 9
+    text: >-
+      Revised 4 Go controller paths in NVIDIA's NVKE GPU Kubernetes engine to skip unchanged node writes and log
+      readiness transitions with typed probe causes, backed by 18 test cases.

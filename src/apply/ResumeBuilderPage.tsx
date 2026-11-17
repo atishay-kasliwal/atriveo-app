@@ -24,7 +24,8 @@ import BankPage from "./BankPage";
 interface Bullet { ac_id: string; facet: string | null; text: string; custom?: boolean }
 /** The tools line after the name ("Atriveo | FastAPI, Docker…"): stack = yours. null: a project's is picked from its
  *  bullets (stackAuto); an employer prints none, and stackAuto is only offered as a suggestion. */
-interface Section { role: string; kind: "experience" | "project"; label: string; bullets: Bullet[]; stack?: string[] | null; stackAuto?: string[] }
+/** heading: a printed name built from the bullets (the open source project), else null and the fixed name is used. */
+interface Section { role: string; kind: "experience" | "project"; label: string; heading?: string | null; bullets: Bullet[]; stack?: string[] | null; stackAuto?: string[] }
 type Source = { kind: "job"; jobUrl: string; company: string; title: string; location: string | null } | { kind: "track"; track: string; company: string; title: string; location: null }
   | { kind: "pasted"; pasted: string; company: string; title: string; location: string | null };
 /** A resume built from a job description you pasted (standalone: not a job, not on Today). */
@@ -42,10 +43,12 @@ interface Ats { posting: boolean; match: ResumeMatch | null; ready: ResumeReadyS
 interface AiSuggestion extends ContentChange { id: string; bi: number; suggested: string; reason: string; requirements: string[]; evidence_source: string[] }
 interface AiAnalysis { id: string; score: number; original_match_score: number; optimized_match_score: number; subscores: Record<string, number>; requirements: Array<{requirement: string; importance: string; status: "STRONG" | "PARTIAL" | "MISSING"; evidence: string}>; suggestions: AiSuggestion[]; atsProblems: string[]; resumeVersion: string; jdVersion: string; rejected: Array<{section:string;reason:string}> }
 interface AiPending { requestId:string; mode:"rewrite"|"question"; provider:string; instruction:string; source:Source; sections:Section[]; headerTitle:string; skills:string[]; sessionId:string; startedAt:number; input:string; baseline:string; doneIds?:string[]; draft?:{sections:Section[];skills:string}; }
-interface Draft { draftId: string; pdfPath: string; pages: number | null; room?: number | null; problems: string[]; jdMatch: { before: number | null; after: number | null; missing: string[] } | null; stacks?: Record<string, string[]>; ats?: { before: Ats; after: Ats; ms: number } }
+interface Draft { draftId: string; pdfPath: string; pages: number | null; room?: number | null; problems: string[]; jdMatch: { before: number | null; after: number | null; missing: string[]; approved?: ApprovedGap[] } | null; stacks?: Record<string, string[]>; headings?: Record<string, string>; skillWarnings?: string[]; ats?: { before: Ats; after: Ats; ms: number } }
 /** Writing a bullet: rewording one (bi) or a new one (bi = -1, inserted at `at`) in section si. */
 interface Writing { si: number; bi: number; at?: number; text: string; issues: string[] | null; verbs: string[]; busy: boolean; error: string }
 /** The bullet picker: add to a section (at a place), or swap bullet bi for another. */
+/** A skill this JD names that the resume lacks but your approved skills bank backs with open source PRs. */
+interface ApprovedGap { skill: string; name: string; category: string; source: string }
 interface Picker { si: number; mode: "add" | "swap"; bi: number; tab: "bank" | "write"; q: string }
 /** What undo restores. */
 interface Snapshot { title: string; email: string; city: string; skills: string; sections: Section[] }
@@ -513,7 +516,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
 
   const preview = draft?.pdfPath || loaded?.current.pdfPath || null;
   const skillLines = skills.split("\n").map((l) => l.trim()).filter(Boolean);
-  const liveSections = sections.map((s, si) => ({ si, role: s.role, kind: s.kind, bullets: s.bullets, tools: s.kind === "project" ? s.stack ?? draft?.stacks?.[s.role] ?? s.stackAuto ?? [] : s.stack ?? [] }));
+  const liveSections = sections.map((s, si) => ({ si, role: s.role, kind: s.kind, bullets: s.bullets, heading: draft?.headings?.[s.role] ?? s.heading ?? null, tools: s.kind === "project" ? s.stack ?? draft?.stacks?.[s.role] ?? s.stackAuto ?? [] : s.stack ?? [] }));
   // "Room for 2 more lines": a line is a bullet's line (a bullet is usually two).
   // The compiled PDF's measure once it's in for this edit (exact); the live preview's while it compiles (about).
   const pdfRoom = !dirty ? (loaded?.current.room != null && loaded.current.pages ? { pages: loaded.current.pages, lines: loaded.current.room } : null)
@@ -566,9 +569,40 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
       </div>}
     </div>
   );
+  // Add an approved skill to the Skills line whose label shares a word with its inventory category (else the last line).
+  const addApproved = (gap: ApprovedGap) => {
+    remember();
+    const lines = skills.split("\n");
+    const words = (t: string) => t.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2);
+    const want = words(gap.category);
+    const filled = lines.map((l, i) => ({ l, i })).filter(({ l }) => l.includes(":"));
+    const target = filled.find(({ l }) => words(l.split(":")[0]).some((w) => want.includes(w))) ?? filled.at(-1);
+    if (!target) { setSkills([...lines.filter((l) => l.trim()), `Skills: ${gap.name}`].join("\n")); setDirty(true); return; }
+    lines[target.i] = `${lines[target.i].replace(/[\s,]+$/, "")}${/:\s*$/.test(lines[target.i]) ? " " : ", "}${gap.name}`;
+    setSkills(lines.join("\n")); setDirty(true);
+  };
+  const approvedGaps = (draft?.jdMatch?.approved ?? []).filter((g) => ![g.skill, g.name].some((n) => skillLines.some((l) => new RegExp(`(^|[^a-z0-9])${n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}($|[^a-z0-9])`, "i").test(l))));
   const skillsField = (
-    <label className="rb-skills"><span>One line each: <code>Category: a, b, c</code></span>
-      <textarea ref={skillsRef} rows={Math.max(5, skillLines.length + 1)} value={skills} onFocus={remember} onChange={(e) => { setSkills(e.target.value); setDirty(true); }} /></label>
+    <div className="rb-skills">
+      <label className="rb-skills-label"><span>One line each: <code>Category: a, b, c</code></span>
+        <textarea ref={skillsRef} rows={Math.max(5, skillLines.length + 1)} value={skills} onFocus={remember} onChange={(e) => { setSkills(e.target.value); setDirty(true); }} /></label>
+      {(draft?.skillWarnings?.length ?? 0) > 0 && (
+        <p className="rb-skill-warn" role="status">
+          Not backed by your bank for this resume: <b>{draft!.skillWarnings!.join(", ")}</b>. A skill belongs here when a bullet on this resume shows it, or you confirmed it (or open source PRs back it) and this job asks for it.
+        </p>
+      )}
+      {approvedGaps.length > 0 && (
+        <div className="rb-approved" title="Backed by your open source PRs (merged first). Skills line only, never a job bullet under an employer.">
+          <span>This job asks for, and your approved bank backs:</span>
+          {approvedGaps.map((g) => (
+            <span key={g.skill} className="rb-approved-chip">
+              <button type="button" onClick={() => addApproved(g)}>+ {g.name}</button>
+              <a href={g.source} target="_blank" rel="noreferrer" aria-label={`${g.name} evidence`}>PR</a>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
   );
   // The tools after a section's name, as chips; click to edit them as text.
   const tools = (s: Section, si: number) => {
@@ -652,7 +686,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
       <section key={s.role} className={`rb-sec ${flash === `s${si}` ? "is-flash" : ""}`} data-key={`s${si}`}>
         <header onMouseEnter={() => setHover(`s${si}`)} onMouseLeave={() => setHover(null)}>
           <button type="button" className="rb-fold" aria-expanded={!isFolded} aria-label={isFolded ? "Show bullets" : "Hide bullets"} onClick={() => setFolded((f) => { const n = new Set(f); if (n.has(s.role)) n.delete(s.role); else n.add(s.role); return n; })}>{isFolded ? "▸" : "▾"}</button>
-          <div className="rb-sec-title"><b>{s.label}</b><span>{metaOf(s)}</span></div>
+          <div className="rb-sec-title"><b>{draft?.headings?.[s.role] ?? s.heading ?? s.label}</b><span>{metaOf(s)}</span></div>
           <span className="rb-sec-count">{plural(s.bullets.length, "bullet")}{fit && lines ? ` · ${plural(lines, "line")}` : ""}</span>
           {s.kind === "project" && <button type="button" className="rb-sec-remove apps-link" onClick={() => change((x) => x.filter((_, i) => i !== si))}>Remove</button>}
         </header>
@@ -805,7 +839,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
                 </div>
               </>}
               {t.kind === "section" && s && <>
-                <div className="rb-sheet-head"><b>{s.label}</b><span>{metaOf(s)}</span></div>
+                <div className="rb-sheet-head"><b>{draft?.headings?.[s.role] ?? s.heading ?? s.label}</b><span>{metaOf(s)}</span></div>
                 <label className="rb-sheet-label">Tools after the name{s.kind === "experience" ? " (optional)" : ""}</label>
                 {tools(s, t.si)}
                 <div className="rb-sheet-acts">
@@ -862,7 +896,7 @@ export default function ResumeBuilderPage({ header }: { header?: React.ReactNode
               {roomChip}
               {atsChip}
               {dirty && pdfStatus}
-              {draft?.jdMatch && <span className="rb-match" title={draft.jdMatch.missing.length ? `Still missing: ${draft.jdMatch.missing.join(", ")}` : "Every skill this job names is on it"}>JD {draft.jdMatch.before ?? "–"} → <b>{draft.jdMatch.after ?? "–"}</b></span>}
+              {draft?.jdMatch && <span className="rb-match" title={[draft.jdMatch.missing.length ? `Still missing: ${draft.jdMatch.missing.join(", ")}` : "", draft.jdMatch.approved?.length ? `In your approved bank, not on it yet: ${draft.jdMatch.approved.map((g) => g.skill).join(", ")}` : ""].filter(Boolean).join("\n") || "Every skill this job names is on it"}>JD {draft.jdMatch.before ?? "–"} → <b>{draft.jdMatch.after ?? "–"}</b></span>}
               <span className="rb-actions">
                 {undoBtn}
                 {loaded.current.edited && <button className="apps-btn" disabled={saving} onClick={() => void revert()} title="Back to the generated resume">Revert</button>}

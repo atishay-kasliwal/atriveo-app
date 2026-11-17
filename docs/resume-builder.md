@@ -94,6 +94,10 @@ column's width and height), so nothing scrolls on the right.
 - **Email** looks like an email address.
 - **JD skill match before → after** (jobs only; `ac-jd-skills.mjs`): shown, not enforced. Hover it for the skills
   the job names that the resume still misses.
+- **Approved skills for this JD** (under Technical skills): JD skills the resume lacks but the approved skills bank
+  backs with open source PRs (`data/skill-inventory.json`, from `SKILL_EVIDENCE.yaml`; merged first, a closed PR never
+  counts). **+ Skill** adds it to the Skills line whose label matches its category; **PR** opens the evidence. They
+  are Skills-line additions only, never bullets under an employer, and they are not counted as plain gaps.
 
 ## ATS score (shown, not enforced)
 

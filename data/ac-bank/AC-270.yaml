@@ -1,0 +1,55 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-270
+role: open-source
+fits:
+  - software-engineer
+slot_kind: project
+achievement_theme: terminal-ui
+display_order: 18
+wow_score: 0.88
+metrics_claimed:
+  - stars_15000
+  - regressions_2
+concepts_claimed:
+  - frontend
+  - terminal-ui
+signature_technologies:
+  - xterm.js
+fact: >-
+  Open source contribution (Cockpit), draft W2 (was AC-217 before the port) approved 2026-11-16. Never employment at
+  Cockpit.
+oss:
+  org: ''
+  project: Cockpit
+  status: merged
+  prs:
+    - https://github.com/cockpit-project/cockpit/pull/23897
+    - https://github.com/cockpit-project/cockpit/pull/23910
+capabilities:
+  frontend: 86
+  backend: 56
+  cloud: 50
+strength:
+  recruiter: 9
+ats_keywords:
+  - TypeScript
+  - CSS
+  - xterm.js
+  - frontend
+  - Linux
+facets:
+  terminal-ui:
+    phrase: Cockpit open source contribution
+    keywords:
+      - typescript
+      - css
+      - xterm.js
+      - frontend
+      - linux
+variants:
+  - facet: terminal-ui
+    emphasis: terminal-ui
+    strength: 9
+    text: >-
+      Revised terminal scrollbar and selection styling in Cockpit's web console (15K+ GitHub stars) to resolve 2
+      xterm.js regressions across light and dark themes.

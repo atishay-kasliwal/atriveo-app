@@ -1,0 +1,58 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-256
+role: open-source
+fits:
+  - software-engineer
+  - ai-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: protocol-compat
+display_order: 4
+wow_score: 0.88
+metrics_claimed:
+  - tests_14
+concepts_claimed:
+  - protocol-compatibility
+  - serialization
+signature_technologies:
+  - Rust
+  - Serde
+  - MCP
+fact: >-
+  Open source contribution (Mezmo | AURA), draft A4 (was AC-203 before the port) approved 2026-11-16. Never employment
+  at Mezmo.
+oss:
+  org: Mezmo
+  project: AURA
+  status: merged
+  prs:
+    - https://github.com/mezmo/aura/pull/862
+    - https://github.com/mezmo/aura/pull/890
+capabilities:
+  backend: 86
+  ai: 80
+  data: 70
+strength:
+  recruiter: 9
+ats_keywords:
+  - Rust
+  - Serde
+  - MCP
+  - protocol
+  - serialization
+facets:
+  protocol-compat:
+    phrase: AURA open source contribution
+    keywords:
+      - rust
+      - serde
+      - mcp
+      - protocol
+      - serialization
+variants:
+  - facet: protocol-compat
+    emphasis: protocol-compat
+    strength: 9
+    text: >-
+      Translated unknown tool outcomes and MCP transports into explicit unknown values in AURA's Rust event layer with
+      Serde, keeping event identity and server details across 14 tests.

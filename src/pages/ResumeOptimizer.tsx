@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import AppHeader from "../components/AppHeader";
 import PageIntro from "../components/PageIntro";
+import { skillsContextForJd } from "../utils/skillInventory";
 
 const RESUME_KEY = "atriveo_resume";
 const OLLAMA_BASE = "http://localhost:11434";
@@ -16,6 +17,7 @@ TRUTH RULES (non-negotiable):
 - Never fabricate tools, metrics, companies, companies, or outcomes.
 - Never invent experience the candidate does not have.
 - If a JD term has no evidence in the resume, list it as missing. Do not claim it.
+- An APPROVED SKILLS BANK block may follow the resume. Those skills are backed by open source PRs (merged ones listed first) but are NOT in the supplied resume: never count them in have_now or ats_before, never put them in bullet rewrites or attribute them to an employer. You may list them in skills_to_add, and may count them in ats_after only as Skills-section additions.
 
 BULLET QUALITY STANDARD:
 - Every rewritten bullet must contain: strong action verb + scope/stack + measurable impact or concrete scale.
@@ -178,7 +180,7 @@ export default function ResumeOptimizer() {
     abortRef.current = new AbortController();
 
     const userMessage =
-      `--- JOB DESCRIPTION ---\n${jdText.trim()}\n\n--- MY RESUME ---\n${resumeText.trim()}`;
+      `--- JOB DESCRIPTION ---\n${jdText.trim()}\n\n--- MY RESUME ---\n${resumeText.trim()}${skillsContextForJd(jdText)}`;
 
     try {
       const res = await fetch(`${OLLAMA_BASE}/api/chat`, {

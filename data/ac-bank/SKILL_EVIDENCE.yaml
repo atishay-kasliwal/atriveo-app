@@ -1,0 +1,1653 @@
+{
+  "version": 1,
+  "approved_on": "2026-11-16",
+  "evidence_snapshot": "2026-11-16",
+  "scope": "User-approved skills exposure from contribution research. Statuses are a snapshot, not live checks.",
+  "policy": {
+    "resume_gate": "approved AND resume_eligible AND every source MERGED or OPEN (a CLOSED source drops the record). MERGED first: merged evidence outranks open evidence on the Skills line and in project selection.",
+    "open_status": "USABLE AT LOWER PRIORITY (user decision 2026-11-16, QUESTION_ANSWERS \"Open Source Work on Resumes\"). Status is never printed on a resume.",
+    "attribution": "Open-source project work, never corporate employment.",
+    "proficiency": "No automatic advanced/expert labels.",
+    "verification": "Upstream-reported results were researched, not rerun in this skills-bank update."
+  },
+  "records": [
+    {
+      "id": "OSS-SKILL-001",
+      "project": "dsx-ai-factory/nvkr",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Go",
+        "CLI Development",
+        "OCI Artifacts",
+        "Dependency Graphs",
+        "Release Engineering",
+        "Deterministic Output",
+        "Argument Validation",
+        "API Design",
+        "Integration Testing",
+        "Regression Testing",
+        "Context Cancellation",
+        "Timeout Handling"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/dsx-ai-factory/nvkr/pull/453",
+          "status": "MERGED"
+        },
+        {
+          "url": "https://github.com/dsx-ai-factory/nvkr/pull/460",
+          "status": "MERGED"
+        },
+        {
+          "url": "https://github.com/dsx-ai-factory/nvkr/pull/469",
+          "status": "MERGED"
+        },
+        {
+          "url": "https://github.com/dsx-ai-factory/nvkr/pull/470",
+          "status": "MERGED"
+        },
+        {
+          "url": "https://github.com/dsx-ai-factory/nvkr/pull/481",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Local catalog, Run and OCI-layout fixtures plus upstream review.",
+      "limits": "Metadata inspection is not payload, signature or deployment-policy verification."
+    },
+    {
+      "id": "OSS-SKILL-002",
+      "project": "dsx-ai-factory/workload-map",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Go",
+        "Cobra",
+        "Kubernetes",
+        "CLI Development",
+        "Deterministic Output",
+        "Argument Validation",
+        "Table-Driven Testing",
+        "Regression Testing",
+        "Git",
+        "Code Review"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/dsx-ai-factory/workload-map/pull/668",
+          "status": "MERGED"
+        },
+        {
+          "url": "https://github.com/dsx-ai-factory/workload-map/pull/674",
+          "status": "MERGED"
+        },
+        {
+          "url": "https://github.com/dsx-ai-factory/workload-map/pull/675",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Command/resolver tests, denied-cluster cases and output-format checks.",
+      "limits": "No measured operator productivity improvement."
+    },
+    {
+      "id": "OSS-SKILL-003",
+      "project": "kiali/kiali",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Go",
+        "Kubernetes",
+        "Kubernetes Informers",
+        "controller-runtime",
+        "Context Cancellation",
+        "Timeout Handling",
+        "Failure Recovery",
+        "Structured Logging",
+        "Integration Testing",
+        "Regression Testing",
+        "Code Review",
+        "Distributed Systems"
+      ],
+      "activity": [
+        "implemented",
+        "debugged",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/kiali/kiali/pull/10514",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Deadline regressions and reported two-cluster RBAC reproduction.",
+      "limits": "Individual cache reads are bounded. Requests can still exceed 45 seconds during an outage. No broad Istio administration claim."
+    },
+    {
+      "id": "OSS-SKILL-004",
+      "project": "numaproj/numaflow",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Go",
+        "Kubernetes",
+        "Prometheus",
+        "Observability",
+        "Event-Time Watermarks",
+        "Stream Processing",
+        "Structured Logging",
+        "Integration Testing",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/numaproj/numaflow/pull/3761",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Unit cases for joins/stale series plus reported local Kubernetes join-pipeline metrics.",
+      "limits": "Metrics instrumentation and local verification, not production fleet ownership."
+    },
+    {
+      "id": "OSS-SKILL-005",
+      "project": "numaproj/numaflow",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Go",
+        "Kubernetes",
+        "Kubernetes Admission Webhooks",
+        "Argument Validation",
+        "Regression Testing",
+        "Integration Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/numaproj/numaflow/pull/3767",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Shared scale validator, webhook create/update coverage and local k3d admission checks.",
+      "limits": "Invalid replica bounds only, not general autoscaler ownership."
+    },
+    {
+      "id": "OSS-SKILL-006",
+      "project": "numaproj/numaflow-python",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Python",
+        "Asynchronous Programming",
+        "gRPC",
+        "Docker",
+        "Stream Processing",
+        "Integration Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/numaproj/numaflow-python/pull/390",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Built container and reportedly sent ten reduce requests to each implementation.",
+      "limits": "SDK example repair, not production reducer service ownership."
+    },
+    {
+      "id": "OSS-SKILL-007",
+      "project": "numaproj/numaflow-rs",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Rust",
+        "gRPC",
+        "Stream Processing",
+        "Regression Testing",
+        "Failure Injection"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/numaproj/numaflow-rs/pull/187",
+          "status": "MERGED",
+          "skills": [
+            "Rust",
+            "Stream Processing",
+            "Regression Testing"
+          ]
+        },
+        {
+          "url": "https://github.com/numaproj/numaflow-rs/pull/191",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Source API migration and side-input returned-value, no-broadcast and panic cases.",
+      "limits": "SDK examples and tests, not measured streaming throughput gains."
+    },
+    {
+      "id": "OSS-SKILL-008",
+      "project": "mezmo/aura",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Rust",
+        "Tokio",
+        "Asynchronous Programming",
+        "Concurrency",
+        "Deadlock Diagnosis",
+        "Failure Recovery",
+        "Concurrency Testing",
+        "Regression Testing",
+        "Failure Injection",
+        "Agent Systems"
+      ],
+      "activity": [
+        "implemented",
+        "debugged",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/mezmo/aura/pull/904",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Reported 500 repeated modeled-wave regression runs and 1525 library tests.",
+      "limits": "Modeled collector/worker contention with real file I/O, not a full end-to-end race test."
+    },
+    {
+      "id": "OSS-SKILL-009",
+      "project": "mezmo/aura",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Rust",
+        "Agent Systems",
+        "Failure Recovery",
+        "Regression Testing",
+        "Protocol Compatibility"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/mezmo/aura/pull/868",
+          "status": "MERGED"
+        },
+        {
+          "url": "https://github.com/mezmo/aura/pull/888",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Retained output across hard retry failures and no-artifact-storage paths.",
+      "limits": "Longer inline outputs can increase coordinator prompt size."
+    },
+    {
+      "id": "OSS-SKILL-010",
+      "project": "mezmo/aura",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Rust",
+        "Dynamic Dispatch",
+        "MCP",
+        "Agent Systems",
+        "Function Calling",
+        "Regression Testing",
+        "Code Review"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/mezmo/aura/pull/865",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Native run tools passed through approval middleware while preserving serialization.",
+      "limits": "Excludes CLI passthrough tools and Slack-started human approval."
+    },
+    {
+      "id": "OSS-SKILL-011",
+      "project": "mezmo/aura",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Rust",
+        "Agent Systems",
+        "Function Calling",
+        "Regression Testing",
+        "API Design"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/mezmo/aura/pull/863",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Single-agent tool-filter regression keeps Read and excludes Shell.",
+      "limits": "Configured tool filtering, not a general authorization boundary."
+    },
+    {
+      "id": "OSS-SKILL-012",
+      "project": "mezmo/aura",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Rust",
+        "Serde",
+        "Server-Sent Events",
+        "Protocol Compatibility",
+        "MCP",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/mezmo/aura/pull/862",
+          "status": "MERGED"
+        },
+        {
+          "url": "https://github.com/mezmo/aura/pull/890",
+          "status": "MERGED",
+          "skills": [
+            "Rust",
+            "Serde",
+            "Protocol Compatibility",
+            "MCP",
+            "Regression Testing"
+          ]
+        }
+      ],
+      "verification": "Unknown event values retain event identity and unknown transports retain server information.",
+      "limits": "Read-only unknown values cannot be serialized back. Not the separate open SSE dispatch fix."
+    },
+    {
+      "id": "OSS-SKILL-013",
+      "project": "mezmo/aura",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Rust",
+        "Regression Testing",
+        "Agent Systems"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/mezmo/aura/pull/864",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Raw-output cache removal regression for calls without task context.",
+      "limits": "Current orchestration supplies task context, so no demonstrated production orchestrator leak."
+    },
+    {
+      "id": "OSS-SKILL-014",
+      "project": "mezmo/aura",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "CI/CD",
+        "Jenkins",
+        "JUnit",
+        "Code Review"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/mezmo/aura/pull/873",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Maintainer confirmed failing-test details reached GitHub through JUnit reporting.",
+      "limits": "JUnit publisher configuration, not Java JUnit test authoring."
+    },
+    {
+      "id": "OSS-SKILL-015",
+      "project": "mezmo/aura",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Shell Scripting",
+        "Ingestion Verification",
+        "Timeout Handling",
+        "Failure Recovery",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "debugged",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/mezmo/aura/pull/867",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "PostHog read-back self-tests, bounded probe query and transient-failure handling.",
+      "limits": "No evidence of general PostHog analytics ownership or production ingestion SLA."
+    },
+    {
+      "id": "OSS-SKILL-016",
+      "project": "keycloak/keycloak",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "TypeScript",
+        "React",
+        "Web Accessibility",
+        "Accessible Names",
+        "Internationalization",
+        "Playwright",
+        "Regression Testing",
+        "Integration Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/keycloak/keycloak/pull/54773",
+          "status": "MERGED"
+        },
+        {
+          "url": "https://github.com/keycloak/keycloak/pull/54780",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Accessible-name browser regressions against a nightly server with patched theme messages.",
+      "limits": "Accessible-name fixes only, not a claim of complete WCAG conformance or identity backend development."
+    },
+    {
+      "id": "OSS-SKILL-017",
+      "project": "cockpit-project/cockpit",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "TypeScript",
+        "CSS",
+        "Linux",
+        "Content Security Policy",
+        "xterm.js",
+        "Web Accessibility",
+        "Code Review"
+      ],
+      "activity": [
+        "implemented",
+        "debugged",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/cockpit-project/cockpit/pull/23897",
+          "status": "MERGED"
+        },
+        {
+          "url": "https://github.com/cockpit-project/cockpit/pull/23910",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Reported real Fedora Chromium/WebGL terminal checks across light/dark themes.",
+      "limits": "Visual verification, not a new automated selection test or complete accessibility certification."
+    },
+    {
+      "id": "OSS-SKILL-018",
+      "project": "anefzaoui/misterdownloadmanager",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Rust",
+        "Linux",
+        "Regression Testing",
+        "Integration Testing",
+        "Failure Injection",
+        "Code Review"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/anefzaoui/misterdownloadmanager/pull/477",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Isolated executable-discovery tests and offline system-copy resolution checks.",
+      "limits": "Local author verification on macOS, with additional maintainer Ubuntu checks."
+    },
+    {
+      "id": "OSS-SKILL-019",
+      "project": "anefzaoui/misterdownloadmanager",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "JavaScript",
+        "Keyboard Focus Management",
+        "Web Accessibility",
+        "Playwright",
+        "Cross-Browser Testing",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "debugged",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/anefzaoui/misterdownloadmanager/pull/483",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Real pointer/keyboard/fullscreen checks via a Playwright adapter, plus maintainer Windows checks.",
+      "limits": "Firefox fullscreen coverage limited and explicitly skipped upstream."
+    },
+    {
+      "id": "OSS-SKILL-020",
+      "project": "anefzaoui/misterdownloadmanager",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Rust",
+        "Integration Testing",
+        "Code Review"
+      ],
+      "activity": [
+        "implemented",
+        "debugged",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/anefzaoui/misterdownloadmanager/pull/489",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Localized light/dark dialog-focus checks on macOS with maintainer Ubuntu X11 confirmation.",
+      "limits": "Wayland behavior unverified. Used existing translations rather than implementing localization."
+    },
+    {
+      "id": "OSS-SKILL-021",
+      "project": "redhat-developer/mapt",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Go",
+        "CI Runner Configuration",
+        "Table-Driven Testing",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "configuration-only",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/redhat-developer/mapt/pull/967",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "GitHub/GitLab platform scripts and macOS architecture-mapping unit tests.",
+      "limits": "No Windows or macOS cloud host provisioned."
+    },
+    {
+      "id": "OSS-SKILL-022",
+      "project": "redhat-developer/mapt",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Go",
+        "Provisioning Preflight",
+        "Regression Testing",
+        "Failure Injection"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/redhat-developer/mapt/pull/960",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Invalid output paths rejected before provider calls; usable probes cleaned up.",
+      "limits": "Does not prevent all late output failures or prove cloud fleet operation."
+    },
+    {
+      "id": "OSS-SKILL-023",
+      "project": "redhat-developer/mapt",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Go",
+        "Argument Validation",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "debugged",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/redhat-developer/mapt/pull/959",
+          "status": "MERGED"
+        },
+        {
+          "url": "https://github.com/redhat-developer/mapt/pull/956",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Context propagation fixes and nil-context AWS-path reproduction using fake credentials.",
+      "limits": "Execution-context use, not a new cancellation algorithm or verified live Azure provisioning."
+    },
+    {
+      "id": "OSS-SKILL-024",
+      "project": "redhat-developer/mapt",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "cloud-init",
+        "Shell Scripting",
+        "Linux",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "configuration-only",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/redhat-developer/mapt/pull/958",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Rendered YAML assertions for three IBM backend login accounts.",
+      "limits": "New provisions only. No author live IBM hardware verification."
+    },
+    {
+      "id": "OSS-SKILL-025",
+      "project": "EthanHenrickson/math-mcp",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "TypeScript",
+        "MCP",
+        "Numeric Correctness",
+        "Non-Mutating Transformations",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "debugged",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/EthanHenrickson/math-mcp/pull/9",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Mixed-digit median, input-array preservation and explicit zero-denominator tool errors.",
+      "limits": "Mathematical-tool correctness, not statistical model development."
+    },
+    {
+      "id": "OSS-SKILL-026",
+      "project": "The-PR-Agent/pr-agent",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Python",
+        "pytest",
+        "Regression Testing",
+        "Code Review"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/The-PR-Agent/pr-agent/pull/4706",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Maintainer-agreed test ledger of 246 comment-overridable keys among 307 configuration keys.",
+      "limits": "Records existing exposure, not runtime default-deny enforcement."
+    },
+    {
+      "id": "OSS-SKILL-027",
+      "project": "Seagey/couch-tv",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Python",
+        "Integration Testing",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/Seagey/couch-tv/pull/60",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "Self-signed HTTPS test server and full local application build.",
+      "limits": "No real LG television tested. Filename hardening was added by the maintainer."
+    },
+    {
+      "id": "OSS-SKILL-028",
+      "project": "neo4j/graph-data-science",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Java",
+        "GraphSAGE",
+        "Early Stopping",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/neo4j/graph-data-science/pull/379",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Reported convergence tests for patience one through three.",
+      "limits": "No measured downstream model-quality lift."
+    },
+    {
+      "id": "OSS-SKILL-029",
+      "project": "intuit/stunt-double",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Python",
+        "LangGraph",
+        "Agent Evaluation",
+        "Deterministic Mocking",
+        "Seeded Randomness",
+        "Injectable Clocks",
+        "Concurrency Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/intuit/stunt-double/pull/95",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Reported replay/isolation/reset/parallel-call cases across supported Python versions.",
+      "limits": "Hosted CI awaiting approval at research snapshot."
+    },
+    {
+      "id": "OSS-SKILL-030",
+      "project": "intuit/stunt-double",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Python",
+        "LangGraph",
+        "LangChain",
+        "Function Calling",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/intuit/stunt-double/pull/94",
+          "status": "OPEN",
+          "skills": [
+            "Python",
+            "LangGraph",
+            "LangChain",
+            "Function Calling",
+            "Regression Testing"
+          ]
+        },
+        {
+          "url": "https://github.com/intuit/stunt-double/pull/93",
+          "status": "OPEN",
+          "skills": [
+            "Python",
+            "Regression Testing"
+          ]
+        }
+      ],
+      "verification": "Native ToolMessage/Command behavior and malformed placeholder-index cases.",
+      "limits": "Additional pending evidence does not block independently confirmed LangGraph/Python skills."
+    },
+    {
+      "id": "OSS-SKILL-031",
+      "project": "mezmo/rig",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Rust",
+        "Anthropic",
+        "Gemini",
+        "Server-Sent Events",
+        "Function Calling",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/mezmo/rig/pull/19",
+          "status": "OPEN",
+          "skills": [
+            "Rust",
+            "Anthropic",
+            "Server-Sent Events",
+            "Function Calling",
+            "Regression Testing"
+          ]
+        },
+        {
+          "url": "https://github.com/mezmo/rig/pull/20",
+          "status": "OPEN",
+          "skills": [
+            "Rust",
+            "Gemini",
+            "Regression Testing"
+          ]
+        }
+      ],
+      "verification": "Provider serialization and truncated-stream regressions.",
+      "limits": "No live Gemini API verification. Contributions target the Mezmo fork."
+    },
+    {
+      "id": "OSS-SKILL-032",
+      "project": "numaproj/numaflow",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Rust",
+        "Go",
+        "NATS JetStream",
+        "Apache Pulsar",
+        "Stream Processing",
+        "Failure Recovery",
+        "Integration Testing",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/numaproj/numaflow/pull/3756",
+          "status": "OPEN",
+          "skills": [
+            "Rust",
+            "NATS JetStream",
+            "Regression Testing",
+            "Integration Testing"
+          ]
+        },
+        {
+          "url": "https://github.com/numaproj/numaflow/pull/3759",
+          "status": "OPEN",
+          "skills": [
+            "Go",
+            "NATS JetStream",
+            "Stream Processing",
+            "Integration Testing"
+          ]
+        },
+        {
+          "url": "https://github.com/numaproj/numaflow/pull/3760",
+          "status": "OPEN",
+          "skills": [
+            "Rust",
+            "NATS JetStream",
+            "Stream Processing",
+            "Failure Recovery",
+            "Integration Testing"
+          ]
+        },
+        {
+          "url": "https://github.com/numaproj/numaflow/pull/3787",
+          "status": "OPEN",
+          "skills": [
+            "Rust",
+            "Apache Pulsar",
+            "Stream Processing",
+            "Failure Recovery",
+            "Integration Testing"
+          ]
+        }
+      ],
+      "verification": "Reported local NATS, Pulsar and multi-node Kubernetes reproductions.",
+      "limits": "Open contribution details remain unavailable for resume claims until merged."
+    },
+    {
+      "id": "OSS-SKILL-033",
+      "project": "NVIDIA/nodewright",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Go",
+        "Kustomize",
+        "Kubernetes Operators",
+        "RBAC",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "configuration-only",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/NVIDIA/nodewright/pull/1047",
+          "status": "OPEN",
+          "skills": [
+            "Kustomize",
+            "RBAC"
+          ]
+        },
+        {
+          "url": "https://github.com/NVIDIA/nodewright/pull/1048",
+          "status": "OPEN",
+          "skills": [
+            "Go",
+            "Kubernetes Operators",
+            "Regression Testing"
+          ]
+        }
+      ],
+      "verification": "Rendered base-manifest checks and budget-one upgrade regression.",
+      "limits": "No local kind/e2e run. Overlay patch ordering remains a documented limitation."
+    },
+    {
+      "id": "OSS-SKILL-034",
+      "project": "dsx-ai-factory/nvke",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Go",
+        "TLS",
+        "gRPC",
+        "Kubernetes Operators",
+        "Regression Testing",
+        "Failure Injection",
+        "Shell Scripting"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/dsx-ai-factory/nvke/pull/2336",
+          "status": "OPEN",
+          "skills": [
+            "Go",
+            "TLS",
+            "gRPC",
+            "Kubernetes Operators",
+            "Regression Testing"
+          ]
+        },
+        {
+          "url": "https://github.com/dsx-ai-factory/nvke/pull/2288",
+          "status": "OPEN",
+          "skills": [
+            "Go",
+            "Kubernetes Operators",
+            "Regression Testing"
+          ]
+        },
+        {
+          "url": "https://github.com/dsx-ai-factory/nvke/pull/2337",
+          "status": "OPEN",
+          "skills": [
+            "Shell Scripting",
+            "Regression Testing",
+            "Failure Injection"
+          ]
+        },
+        {
+          "url": "https://github.com/dsx-ai-factory/nvke/pull/2246",
+          "status": "OPEN",
+          "skills": [
+            "Go",
+            "Regression Testing"
+          ]
+        }
+      ],
+      "verification": "Local real-transport causes, write-count tests, mocked EFI cleanup and test-report attribution.",
+      "limits": "No measured production database/WAL reduction or physical EFI boot validation."
+    },
+    {
+      "id": "OSS-SKILL-035",
+      "project": "dsx-ai-factory/infra-controller",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Rust",
+        "DPU Infrastructure",
+        "Failure Recovery",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/dsx-ai-factory/infra-controller/pull/9248",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Agent unit tests and DNS failure-path coverage.",
+      "limits": "No physical DPU integration verification."
+    },
+    {
+      "id": "OSS-SKILL-036",
+      "project": "opensearch-project/opensearch-py-ml",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS-AI"
+      ],
+      "skills": [
+        "Python",
+        "pytest",
+        "pytest-xdist",
+        "ML Test Infrastructure",
+        "Integration Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/opensearch-project/opensearch-py-ml/pull/625",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Reported isolated artifacts and affected training tests on secured OpenSearch 2.19 and 3.1.",
+      "limits": "Not evidence of Elasticsearch administration or ML model accuracy improvement."
+    },
+    {
+      "id": "OSS-SKILL-037",
+      "project": "ansible/ansible-lint",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Python",
+        "Ansible",
+        "Jinja",
+        "GitHub Actions",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/ansible/ansible-lint/pull/5250",
+          "status": "OPEN"
+        },
+        {
+          "url": "https://github.com/ansible/ansible-lint/pull/5253",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Rule comparison with runtime deprecations plus fork workflow-permission reproduction.",
+      "limits": "Dynamic interface facts and default-branch-only workflow behavior limit verification."
+    },
+    {
+      "id": "OSS-SKILL-038",
+      "project": "ansible/vscode-ansible",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "TypeScript",
+        "Ansible",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/ansible/vscode-ansible/pull/3287",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Fallback documentation ranges and mutation checks.",
+      "limits": "Container-dependent execution-environment tests skipped locally."
+    },
+    {
+      "id": "OSS-SKILL-039",
+      "project": "ansible/molecule",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Python",
+        "Ansible",
+        "Integration Testing",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/ansible/molecule/pull/4734",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Custom playbook verified with a real Molecule scenario.",
+      "limits": "No general collection/platform ownership implied."
+    },
+    {
+      "id": "OSS-SKILL-040",
+      "project": "ustaxes/UsTaxes",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "TypeScript",
+        "TypeScript Compiler API",
+        "ESLint",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/ustaxes/UsTaxes/pull/2650",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Emitted-JavaScript comparison and form-tooling regression cases.",
+      "limits": "Tax logic unchanged."
+    },
+    {
+      "id": "OSS-SKILL-041",
+      "project": "podman-desktop/podman-desktop",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Svelte",
+        "CSS",
+        "ESLint",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/podman-desktop/podman-desktop/pull/20128",
+          "status": "OPEN"
+        },
+        {
+          "url": "https://github.com/podman-desktop/podman-desktop/pull/20152",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Responsive onboarding checks and inline dialog-button lint cases.",
+      "limits": "Lint approach misses variables and spreads and was questioned in review."
+    },
+    {
+      "id": "OSS-SKILL-042",
+      "project": "PackageKit/PackageKit",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "libdnf5",
+        "Linux",
+        "Integration Testing",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/PackageKit/PackageKit/pull/1035",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Reported cancelled Fedora transaction with no installed updates.",
+      "limits": "End-to-end reproduction applied equivalent changes to an older release."
+    },
+    {
+      "id": "OSS-SKILL-043",
+      "project": "FrostyX/tracer",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Python",
+        "psutil",
+        "Linux",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/FrostyX/tracer/pull/233",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Zombie-process reproduction and real Cockpit query.",
+      "limits": "Scoped process-metadata handling."
+    },
+    {
+      "id": "OSS-SKILL-044",
+      "project": "emilk/egui",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Rust",
+        "wgpu",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/emilk/egui/pull/8895",
+          "status": "OPEN"
+        },
+        {
+          "url": "https://github.com/emilk/egui/pull/8892",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Byte-identical readback and first-frame zoom regressions.",
+      "limits": "Intel speedup is the issue reporter measurement, not reproduced on author Metal hardware."
+    },
+    {
+      "id": "OSS-SKILL-045",
+      "project": "tonl-dev/tonl",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "TypeScript",
+        "Data Serialization",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/tonl-dev/tonl/pull/35",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Quoted/nested round-trip cases and reported randomized JSON comparison.",
+      "limits": "Generator seed/method should accompany percentages. Some cases still fail."
+    },
+    {
+      "id": "OSS-SKILL-046",
+      "project": "redhat-developer/gitops-operator",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Go",
+        "RBAC",
+        "Kubernetes Operators",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/redhat-developer/gitops-operator/pull/1563",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "Target-namespace consent cleanup regression.",
+      "limits": "No OpenShift e2e cluster run locally."
+    },
+    {
+      "id": "OSS-SKILL-047",
+      "project": "redhat-developer/mapt",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Go",
+        "CI Runner Configuration",
+        "GitHub Actions",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "configuration-only",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/redhat-developer/mapt/pull/971",
+          "status": "OPEN",
+          "skills": [
+            "Go",
+            "CI Runner Configuration",
+            "GitHub Actions",
+            "Regression Testing"
+          ]
+        },
+        {
+          "url": "https://github.com/redhat-developer/mapt/pull/966",
+          "status": "OPEN",
+          "skills": [
+            "Go",
+            "CI Runner Configuration",
+            "Regression Testing"
+          ]
+        },
+        {
+          "url": "https://github.com/redhat-developer/mapt/pull/962",
+          "status": "OPEN",
+          "skills": [
+            "Go",
+            "Regression Testing"
+          ]
+        }
+      ],
+      "verification": "JIT/proxy rendered scripts and Azure machine-selection unit tests.",
+      "limits": "No real JIT runner, proxy host or Azure SKU/provisioning validation."
+    }
+  ]
+}

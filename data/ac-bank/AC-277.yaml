@@ -1,0 +1,53 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-277
+role: open-source
+fits:
+  - software-engineer
+slot_kind: project
+achievement_theme: rust-desktop
+display_order: 25
+wow_score: 0.88
+metrics_claimed:
+  - stars_11000
+  - tests_3
+concepts_claimed:
+  - desktop
+  - rust
+  - linux
+signature_technologies:
+  - Rust
+fact: >-
+  Open source contribution (MisterDownloadManager), draft D1 (was AC-224 before the port) approved 2026-11-16. Never
+  employment at MisterDownloadManager.
+oss:
+  org: ''
+  project: MisterDownloadManager
+  status: merged
+  prs:
+    - https://github.com/anefzaoui/misterdownloadmanager/pull/477
+capabilities:
+  backend: 80
+  frontend: 66
+  data: 50
+strength:
+  recruiter: 9
+ats_keywords:
+  - Rust
+  - Linux
+  - macOS
+  - desktop
+facets:
+  rust-desktop:
+    phrase: MisterDownloadManager open source contribution
+    keywords:
+      - rust
+      - linux
+      - macos
+      - desktop
+variants:
+  - facet: rust-desktop
+    emphasis: rust-desktop
+    strength: 9
+    text: >-
+      Added system installed yt-dlp support on Linux and macOS to MisterDownloadManager (11K+ GitHub stars) in Rust,
+      with 3 executable discovery tests and offline resolution checks.

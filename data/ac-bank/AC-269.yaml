@@ -1,0 +1,57 @@
+# Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
+id: AC-269
+role: open-source
+fits:
+  - software-engineer
+slot_kind: project
+achievement_theme: accessibility
+display_order: 17
+wow_score: 0.88
+metrics_claimed:
+  - stars_37000
+  - controls_2
+  - tests_5
+concepts_claimed:
+  - accessibility
+  - frontend
+signature_technologies:
+  - React
+  - Playwright
+fact: >-
+  Open source contribution (Keycloak), draft W1 (was AC-216 before the port) approved 2026-11-16. Never employment at
+  Keycloak.
+oss:
+  org: ''
+  project: Keycloak
+  status: merged
+  prs:
+    - https://github.com/keycloak/keycloak/pull/54773
+    - https://github.com/keycloak/keycloak/pull/54780
+capabilities:
+  frontend: 90
+  backend: 62
+  cloud: 50
+strength:
+  recruiter: 9
+ats_keywords:
+  - React
+  - TypeScript
+  - Playwright
+  - accessibility
+  - frontend
+facets:
+  accessibility:
+    phrase: Keycloak open source contribution
+    keywords:
+      - react
+      - typescript
+      - playwright
+      - accessibility
+      - frontend
+variants:
+  - facet: accessibility
+    emphasis: accessibility
+    strength: 9
+    text: >-
+      Clarified 2 unlabeled controls for screen readers in Keycloak's React Account Console (37K+ GitHub stars), adding
+      5 Playwright regression tests run against a nightly server.
