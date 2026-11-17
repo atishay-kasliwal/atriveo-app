@@ -295,8 +295,21 @@ export function dropRepeatedFigures(compact) {
 // Never fewer than these when making room; never more than these when filling.
 const FLOOR = { experience: { "stony-brook": 4, default: 2 }, project: 2 };
 // What goes first when the page runs over: a project's third bullet, then the oldest employer, Stony Brook last.
-const REMOVE_ORDER = { project: 0, accolite: 1, "wake-forest": 2, "stony-brook": 9 };
-const removeRank = (kind, role) => (kind === "project" ? REMOVE_ORDER.project : REMOVE_ORDER[role] ?? 5);
+// Open source keeps its third bullet longer than Accolite keeps a bullet above its floor (2026-11-17, Atishay: open
+// source prints three bullets).
+const REMOVE_ORDER = { project: 0, accolite: 1, "open-source": 1.5, "wake-forest": 2, "stony-brook": 9 };
+const removeRank = (kind, role) => (kind === "project" ? (role === "open-source" ? REMOVE_ORDER["open-source"] : REMOVE_ORDER.project) : REMOVE_ORDER[role] ?? 5);
+
+/** Open source prints three bullets: when the page has it with two, the best remaining one joins (its verb is new to the page). */
+export function addThirdOpenSource(compact, bank, { jd = "", track = null } = {}) {
+  const oss = (compact.projects || []).find((p) => p.role === "open-source");
+  if (!oss || oss.bullets.length >= 3) return { compact, changes: [] };
+  const used = usedMap(compact);
+  const [best] = candidatesFor("open-source", "project", bank, used, String(jd).toLowerCase(), track, [...used.values()]);
+  if (!best) return { compact, changes: [] };
+  const projects = compact.projects.map((p) => (p === oss ? { ...p, bullets: [...p.bullets, bulletOf(best)] } : p));
+  return { compact: { ...compact, projects }, changes: [`added ${best.ac.id} to open-source (three bullets)`] };
+}
 const CAP = { experience: { "stony-brook": 6, "wake-forest": 5, default: 4 }, project: 3 };
 const floorOf = (kind, role) => (kind === "project" ? FLOOR.project : FLOOR.experience[role] ?? FLOOR.experience.default);
 const capOf = (kind, role) => (kind === "project" ? CAP.project : CAP.experience[role] ?? CAP.experience.default);
@@ -387,7 +400,8 @@ export function fillResumePage({ compact, skills, headerTitle, location, jd, tra
   // A general (master) resume prints exactly its pinned projects; a job's resume may swap in a better-fitting one.
   const chosen = chooseProjects(projects.compact, trackBank, { jd, track, keep: general ? pinned : [] });
   const deduped = dropRepeatedFigures(chosen.compact);
-  const filled = fillOnePage(deduped.compact, { bank: trackBank, jd, track, render, measure });
+  const third = addThirdOpenSource(deduped.compact, trackBank, { jd, track });
+  const filled = fillOnePage(third.compact, { bank: trackBank, jd, track, render, measure });
   const count = (c) => ({
     experience: Object.fromEntries((c.experience || []).map((s) => [s.role, s.bullets.length])),
     projects: Object.fromEntries((c.projects || []).map((s) => [s.role, s.bullets.length])),
@@ -398,7 +412,7 @@ export function fillResumePage({ compact, skills, headerTitle, location, jd, tra
     report: {
       before: count(compact),
       after: count(filled.compact),
-      changes: [...projects.changes, ...chosen.changes, ...deduped.changes, ...filled.log],
+      changes: [...projects.changes, ...chosen.changes, ...deduped.changes, ...third.changes, ...filled.log],
       pages: filled.measure.pages,
       bottom_gap_pt: filled.measure.bottom_gap_pt,
       filled: filled.filled && filled.measure.bottom_gap_pt < LINE_PT,

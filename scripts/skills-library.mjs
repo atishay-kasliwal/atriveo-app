@@ -523,6 +523,11 @@ function lineWidthUnits(label, items) {
   return w;
 }
 
+/** How much of one physical line a skills line fills (1 = full), by the same estimate fitsOnePhysicalLine uses. */
+export function lineFill(label, displayNames) {
+  return lineWidthUnits(label, displayNames) / LINE_BUDGET;
+}
+
 export function fitsOnePhysicalLine(label, displayNames) {
   return lineWidthUnits(label, displayNames) <= LINE_BUDGET;
 }
