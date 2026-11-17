@@ -9,6 +9,8 @@
 //   • Exactly SKILLS_MAX_CATEGORIES lines (JD-ranked)
 //   • Each line MUST fit one physical row — never wrap
 
+import { scaledChars } from "./resume-page.mjs";
+
 export const SKILLS_MAX_CATEGORIES = 5;
 /** @deprecated Use single-line greedy fit; no minimum fill that causes wraps. */
 export const SKILLS_MIN_PER_CATEGORY = 0;
@@ -506,8 +508,8 @@ export function expandRelatedSkills(terms, evidenceBySkill) {
 }
 
 const BOLD_FACTOR = 1.18;
-/** One physical line on the resume template (\small skills block). */
-const LINE_BUDGET = 94;
+/** One physical line on the resume template (\small skills block): 94 on the old 7.5in line, scaled to its width. */
+const LINE_BUDGET = scaledChars(94);
 
 function lineWidthUnits(label, items) {
   let w = (label.length + 2) * BOLD_FACTOR;

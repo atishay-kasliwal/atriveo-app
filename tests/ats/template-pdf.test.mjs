@@ -47,12 +47,14 @@ test("template source: education alignment, clean experience titles, printed pro
   assert.match(tex, /\\fontsize\{[0-9.]+\}\{[0-9.]+\}\\selectfont/);
   assert.match(tex, /\\sbox\{\\contactbox\}/);
   assert.match(tex, /\\resizebox\{\\textwidth\}/);
-  // No links and no city: one contact line and no spacing change.
+  // No links and no city: one contact line and the same spacing under the header as a full one (since 2026-11-17 the
+  // header always ends with the same fixed space, which centres the contact line between the name and Education).
   const bare = assembleAcResume(fixture.composition, {
     headerTitle: "Backend Engineer", skillsLines: fixture.skills, location: null,
     profile: { ...fixture.profile, linkedin: "", github: "", portfolio: "", location: "" },
   });
-  assert.doesNotMatch(bare, /\\end\{center\}\\vspace/);
+  const headerEnd = (t) => t.match(/\\end\{center\}(\\vspace\{[^}]*\})?/)?.[0];
+  assert.equal(headerEnd(bare), headerEnd(tex));
 });
 
 test("generated PDF: one page, clean title extraction and intact contact fields", { skip }, () => {

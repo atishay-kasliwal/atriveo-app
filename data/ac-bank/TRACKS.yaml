@@ -44,6 +44,15 @@ tracks:
         atriveo: [AC-228, AC-229]
       project_stacks:
         atriveo: [Python, TypeScript, Claude, MongoDB, Node.js, Docker]
+    # The AI general (master) resume only (scripts/general-resumes.mjs), 2026-11-17, Atishay: open source in the
+    # second project slot, 3 merged bullets (agent orchestration, MCP tool gating, PR-Agent). Job resumes still choose
+    # their second project by fit.
+    general_pinned:
+      projects:
+        atriveo: [AC-228, AC-229]
+        open-source: [AC-253, AC-255, AC-271]
+      project_stacks:
+        atriveo: [Python, TypeScript, Claude, MongoDB, Node.js, Docker]
 
   data-science:
     label: Data science
@@ -103,6 +112,14 @@ tracks:
       # The tools after a project's name (else picked from its bullets).
       project_stacks:
         atriveo: [TypeScript, React, Node.js, MongoDB, Playwright, Docker]
+    # The FDE general (master) resume only, 2026-11-17, Atishay: open source replaces the insurance platform, 3 merged
+    # bullets (Red Hat mapt provisioning and CI runners, NVIDIA NVKR). Job resumes still choose by fit.
+    general_pinned:
+      projects:
+        atriveo: [AC-208, AC-209]
+        open-source: [AC-265, AC-266, AC-258]
+      project_stacks:
+        atriveo: [TypeScript, React, Node.js, MongoDB, Playwright, Docker]
     # Other tested sets, each used when its rule matches the posting (title + JD); else the set above. Infrastructure:
     # postings with 6+ distinct infrastructure signals (FDE median is 1; the three infrastructure FDE roles that beat
     # the set above had 8-10, every posting it won had 4 or fewer). docs/resume-tracks/fde.md.
@@ -136,6 +153,19 @@ tracks:
       projects:
         atriveo: [AC-214, AC-057:swe-security]
         insurance-platform: [AC-067]
+      project_stacks:
+        atriveo: [React, TypeScript, Node.js, MongoDB, FastAPI, PostgreSQL]
+    # The SWE general (master) resume only, 2026-11-17, Atishay: open source replaces the insurance platform, 3 merged
+    # bullets (NVIDIA NVKR and Workload Map in Go, Keycloak's React console). Job resumes still choose by fit.
+    # Accolite keeps 4 (AC-213, the test-coverage bullet, makes room: the open source bullets show that work).
+    general_pinned:
+      experience:
+        stony-brook: [AC-211, AC-019, AC-003, AC-025]
+        wake-forest: [AC-047, AC-033, AC-031:production-ml]
+        accolite: [AC-212, AC-190, AC-191, AC-183:swe]
+      projects:
+        atriveo: [AC-214, AC-057:swe-security]
+        open-source: [AC-258, AC-259, AC-269]
       project_stacks:
         atriveo: [React, TypeScript, Node.js, MongoDB, FastAPI, PostgreSQL]
     # C++ postings (2026-10-09): InsureRaft, Atishay's C++ and NuRaft project, replaces the insurance microservices

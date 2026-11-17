@@ -47,10 +47,13 @@ export function bankForTrack(bank, track) {
  * A track's pinned bullet set for a posting (TRACKS.yaml tracks.<id>.pinned), or null. With a title and JD, the first
  * of `pinned_variants` whose rule matches wins: `when.min_signals` distinct `when.signals` words in the title + JD.
  * The chosen set carries its `name` ("default" for `pinned`).
+ * A track's general (master) resume, built by scripts/general-resumes.mjs, uses `general_pinned` when the track has
+ * one: its fields replace the default set's (e.g. only `projects`), and no variant applies.
  */
-export function trackPins(track, doc = loadTracks(), { title = "", jd = "" } = {}) {
+export function trackPins(track, doc = loadTracks(), { title = "", jd = "", general = false } = {}) {
   const t = track ? doc.tracks?.[track] : null;
   if (!t?.pinned) return null;
+  if (general && t.general_pinned) return { name: "general", ...t.pinned, ...t.general_pinned };
   // Markdown-escaped JDs write "C\\+\\+": unescape before matching signals.
   const text = `${title}\n${jd}`.replace(/\\([+&#.*-])/g, "$1").toLowerCase();
   for (const v of t.pinned_variants || []) {
@@ -63,7 +66,11 @@ export function trackPins(track, doc = loadTracks(), { title = "", jd = "" } = {
 /** Every pinned set a track has (the default and its variants), for checks that cover them all. */
 export function allPinnedSets(track, doc = loadTracks()) {
   const t = doc.tracks?.[track];
-  return t?.pinned ? [{ name: "default", ...t.pinned }, ...(t.pinned_variants || [])] : [];
+  return t?.pinned ? [
+    { name: "default", ...t.pinned },
+    ...(t.pinned_variants || []),
+    ...(t.general_pinned ? [{ name: "general", ...t.pinned, ...t.general_pinned }] : []),
+  ] : [];
 }
 
 /** Every resume prints at least this many projects (Atishay, 2026-10-23; ac-page-fill enforceProjects). */

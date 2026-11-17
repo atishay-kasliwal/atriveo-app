@@ -23,14 +23,15 @@ import { resolveHeaderLocation } from "./ac-header-location.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
 import {resumeContactLink} from "../src/shared/resumeContact.mjs";
 import { employerTitle } from "./ac-tracks.mjs";
+import { RESUME_BOTTOM_MARGIN_IN, RESUME_SIDE_MARGIN_IN, RESUME_TOP_MARGIN_IN } from "./resume-page.mjs";
 
 const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 \\usepackage{graphicx}\\newsavebox{\\contactbox}\\newsavebox{\\projectbox}\n\\usepackage{latexsym}\\usepackage[empty]{fullpage}\\usepackage{titlesec}
 \\usepackage[usenames,dvipsnames]{color}\\usepackage{verbatim}\\usepackage{enumitem}
 \\usepackage[hidelinks]{hyperref}\\usepackage{fancyhdr}\\usepackage[english]{babel}\\usepackage{tabularx}
 \\pagestyle{fancy}\\fancyhf{}\\fancyfoot{}\\renewcommand{\\headrulewidth}{0pt}\\renewcommand{\\footrulewidth}{0pt}
-\\addtolength{\\oddsidemargin}{-0.5in}\\addtolength{\\evensidemargin}{-0.5in}\\addtolength{\\textwidth}{1in}
-\\addtolength{\\topmargin}{-.5in}\\addtolength{\\textheight}{1.0in}
+\\addtolength{\\oddsidemargin}{-${(1 - RESUME_SIDE_MARGIN_IN).toFixed(2)}in}\\addtolength{\\evensidemargin}{-${(1 - RESUME_SIDE_MARGIN_IN).toFixed(2)}in}\\addtolength{\\textwidth}{${(2 * (1 - RESUME_SIDE_MARGIN_IN)).toFixed(2)}in}
+\\addtolength{\\topmargin}{-${(1 - RESUME_TOP_MARGIN_IN).toFixed(2)}in}\\addtolength{\\textheight}{${(2 - RESUME_TOP_MARGIN_IN - RESUME_BOTTOM_MARGIN_IN).toFixed(2)}in}
 \\urlstyle{same}\\raggedbottom\\raggedright\\setlength{\\tabcolsep}{0in}
 \\titleformat{\\section}{\\vspace{-1pt}\\raggedright\\large}{}{0em}{}[\\color{black}\\titlerule \\vspace{2pt}]
 \\titlespacing*{\\section}{0pt}{2pt}{2pt}
@@ -40,7 +41,8 @@ const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 \\newcommand{\\resumeEducation}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\textbf{#1} & #4 \\\\ \\textit{\\small #3} & \\textit{\\small #2} \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
 \\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.15in, label={}]}
-\\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}}
+\\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}\\vspace{-4pt}}
+\\newcommand{\\resumeEducationListEnd}{\\end{itemize}}
 \\newcommand{\\resumeItemListStart}{\\begin{itemize}}
 \\newcommand{\\resumeItemListEnd}{\\end{itemize}\\vspace{-5pt}}`;
 
@@ -51,8 +53,8 @@ import { EDUCATION_ROWS } from "./resume-education.mjs";
 export { EDUCATION_ROWS };
 const EDUCATION = `\\section{Education}
   \\resumeSubHeadingListStart
-${EDUCATION_ROWS.map((e) => `    \\resumeEducation{${e.school}}{${e.place}}{${e.degree}}{${e.dates}}`).join("\n")}
-  \\resumeSubHeadingListEnd`;
+${EDUCATION_ROWS.map((e) => `    \\resumeEducation{${e.school}}{${e.place}}{${e.degree}}{${e.dates}}`).join("\n    \\vspace{3pt}\n")}
+  \\resumeEducationListEnd`;
 
 // Stack shown after a project's name when its bullets name fewer than five tools.
 const ROLE_STACK_DEFAULTS = {
@@ -123,8 +125,16 @@ export function ossHeading(bullets, bankDir = resolveBankDir()) {
   const orgs = [...new Set(entries.map((e) => e.oss.org || ""))];
   const org = orgs.length === 1 ? orgs[0] : "";
   // Mixed orgs: each project keeps its own org for recognition ("Mezmo AURA, PR-Agent"), unless the name has it.
-  const named = (e) => (org || !e.oss.org || e.oss.project.toLowerCase().includes(e.oss.org.toLowerCase()) ? e.oss.project : `${e.oss.org} ${e.oss.project}`);
-  const projects = [...new Set(entries.map(named))];
+  // An org with several projects is named once, before its first ("NVIDIA NVKR, Workload Map, Keycloak").
+  const seenOrgs = new Set();
+  const named = (e) => {
+    if (org || !e.oss.org || e.oss.project.toLowerCase().includes(e.oss.org.toLowerCase()) || seenOrgs.has(e.oss.org)) return e.oss.project;
+    seenOrgs.add(e.oss.org);
+    return `${e.oss.org} ${e.oss.project}`;
+  };
+  // One name per project (two bullets from AURA name it once), then the org once per org.
+  const unique = [...new Map(entries.map((e) => [`${e.oss.org || ""}|${e.oss.project}`, e])).values()];
+  const projects = [...new Set(unique.map(named))];
   const label = `${projects.join(", ") || "Open Source"} (Open Source)`;
   const tools = [...new Set(entries.flatMap((e) => e.signature_technologies || []))].slice(0, 6);
   return { org, label, tools, text: org ? `${org} | ${label}` : label };
@@ -248,13 +258,14 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
   // Only the fields that are set, so a blank phone or email leaves no "| |".
   const contactLine = [esc(title), me.phone && esc(me.phone), me.email && `\\href{mailto:${me.email}}{${esc(me.email)}}`, me.linkedin && link(me.linkedin), me.github && link(me.github), city && esc(city)].filter(Boolean).join(" $|$ ");
   // Keep all contact fields on one line; shrink only when the actual width requires it.
+  // The contact line sits midway between the name and the Education heading (about 4pt and 5pt, 2026-11-17).
   const header = `\\begin{center}
-    \\textbf{\\Huge \\scshape ${esc(me.name)}} \\\\ \\vspace{1pt}
+    \\textbf{\\Huge \\scshape ${esc(me.name)}} \\\\ \\vspace{3pt}
     \\sbox{\\contactbox}{\\fontsize{8.5}{11}\\selectfont ${contactLine}}
     \\ifdim\\wd\\contactbox>\\textwidth
       \\resizebox{\\textwidth}{!}{\\usebox{\\contactbox}}
     \\else\\usebox{\\contactbox}\\fi
-\\end{center}`;
+\\end{center}\\vspace{-5pt}`;
 
   const skills = skillsLines?.length
     ? skillsLines

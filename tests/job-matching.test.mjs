@@ -37,8 +37,9 @@ test('the full description is retained beyond the old 12KB cutoff', () => {
 });
 
 test('space accounts for the bottom margin and never offers room on a multipage resume', () => {
-  assert.deepEqual(pageSpace('<page width="612" height="792"><word yMax="720">skills</word></page>'), {pages: 1, roomLines: 3});
-  assert.deepEqual(pageSpace('<page height="792"><word yMax="755">skills</word></page>'), {pages: 1, roomLines: 0});
+  // 0.24in (17.3pt) bottom margin: text ending at 720pt leaves 54.7pt, 4 lines of 12pt; at 765pt, none.
+  assert.deepEqual(pageSpace('<page width="612" height="792"><word yMax="720">skills</word></page>'), {pages: 1, roomLines: 4});
+  assert.deepEqual(pageSpace('<page height="792"><word yMax="765">skills</word></page>'), {pages: 1, roomLines: 0});
   assert.equal(pageSpace('<page height="792"></page><page height="792"></page>').roomLines, null);
 });
 

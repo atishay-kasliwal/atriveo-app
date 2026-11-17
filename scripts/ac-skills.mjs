@@ -1,6 +1,7 @@
 // Dynamic skills lines from selected AC evidence only — no untraceable drift.
 
 import { parseAtsKeywords } from "./ac-bank.mjs";
+import { scaledChars } from "./resume-page.mjs";
 import { confirmedSkillKeys, confirmedSkillSources, isConfirmedSkill, loadTracks } from "./ac-tracks.mjs";
 import { openOnlySkillKeys, skillEvidenceKey, skillEvidenceSources } from "./skill-evidence.mjs";
 
@@ -283,7 +284,8 @@ const isTool = (sk) => TOOL_CATEGORIES.has(CATEGORY_OF.get(sk.name)) && !NOT_TOO
  * the employer's other tools follow, so the line stays honest (only tools used there) and full. It is shorter only when the
  * employer has fewer than 5 such tools.
  */
-export function employerTools(roleSlug, jd, bank, { max = 6, min = 5, maxChars = 58, hardChars = 72 } = {}) {
+// 58 and 72 characters on the old 7.5in line, scaled to the template's width (resume-page.mjs).
+export function employerTools(roleSlug, jd, bank, { max = 6, min = 5, maxChars = scaledChars(58), hardChars = scaledChars(72) } = {}) {
   const hay = normJd(jd);
   const confirmed = loadTracks().confirmed_skills?.[roleSlug] || [];
   const fromBank = (bank?.acs || []).filter((a) => a.role === roleSlug)

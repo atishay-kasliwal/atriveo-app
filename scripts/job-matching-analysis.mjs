@@ -5,6 +5,7 @@ import { promisify } from 'node:util';
 import { loadAtsConfig, sha256 } from './ats/config.mjs';
 import { termRegex } from './ats/jd-parse.mjs';
 import { keywordCoverage } from './ats/evidence.mjs';
+import { RESUME_BOTTOM_MARGIN_PT } from './resume-page.mjs';
 export { keywordCoverage };
 
 const run = promisify(execFile);
@@ -29,7 +30,7 @@ export function pageSpace(bbox) {
   const pages = [...bbox.matchAll(/<page\b[^>]*height="([\d.]+)"[^>]*>([\s\S]*?)<\/page>/g)];
   if (pages.length !== 1) return { pages: pages.length || null, roomLines: null };
   const bottom = Math.max(0, ...[...pages[0][2].matchAll(/yMax="([\d.]+)"/g)].map(m => Number(m[1])));
-  return { pages: 1, roomLines: bottom ? Math.max(0, Math.floor((Number(pages[0][1]) - 36 - bottom) / 12)) : null };
+  return { pages: 1, roomLines: bottom ? Math.max(0, Math.floor((Number(pages[0][1]) - RESUME_BOTTOM_MARGIN_PT - bottom) / 12)) : null };
 }
 
 // What Matching needs from the PDF itself: its page count, how much room is left, and which words of the posting to
