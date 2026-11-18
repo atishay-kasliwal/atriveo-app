@@ -615,3 +615,43 @@
 .td-page .td-grid .td-card[data-platform]:is(.is-focused, .is-selected) { border-color: var(--platform); box-shadow: 0 0 0 1px var(--platform), 0 0 0 4px color-mix(in oklab, var(--platform) 22%, transparent); }
 .td-card[data-platform] .td-source { display: inline-flex; align-items: center; gap: 5px; }
 .td-card[data-platform] .td-source::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--platform); flex: none; }
+
+/* Minimal (2026-11-17, Atishay: simple and compact, as on Job Matching). Neutral hairline cards packed tighter (no
+   platform-coloured outlines), plain tags, 32px buttons; more applications per screen (rows: JobCard useLayout).
+   These rules come last, so they win over the layers above. */
+@media (min-width: 760px) {
+  .td-page .td-grid { gap: 10px; padding: 2px 16px 10px; grid-auto-rows: minmax(0, 1fr); align-content: stretch; }
+  .td-page .td-grid .td-card, .td-page .td-grid .td-card[data-platform], .td-page .td-card.is-top {
+    border: 1px solid var(--border-col); border-radius: 8px; padding: 11px 12px; gap: 6px; box-shadow: none; background: var(--card-bg); }
+  .td-page .td-card::before { content: none; }
+  .td-page .td-card.is-focused, .td-page .td-card.is-selected, .td-page .td-grid .td-card[data-platform].is-focused { border-color: var(--primary); box-shadow: none; }
+  .td-page .td-head { gap: 8px; }
+  .td-page .td-id strong { font-size: 13px; }
+  .td-page .td-role, .td-page .td-role-link { font-size: 15px; line-height: 1.3; margin: 0; }
+  .td-page .td-loc { font-size: 12px; }
+  .td-page .td-tags { gap: 5px; }
+  .td-page .td-tag, .td-page .td-track { font-size: 11px; padding: 2px 7px; border: 0; border-radius: 4px; background: var(--secondary-bg); }
+  .td-page .td-body { gap: 5px; }
+  .td-page .td-foot { gap: 6px; }
+  .td-page .td-cta, .td-page .td-foot .rv-primary, .td-page .td-primary-actions .apps-btn { height: 32px; min-height: 32px; border-radius: 6px; font-size: 12.5px; box-shadow: none; }
+  /* About 225px a card so three rows fit a 900px screen: a smaller logo, a one-line title (the full one is its
+     tooltip), 32px buttons (the older 44px minimum is matched in specificity here). */
+  .td-page .td-head .company-logo { width: 28px; height: 28px; min-width: 28px; font-size: 12px; border-radius: 6px; }
+  .td-page .td-role { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  .td-page .td-primary-actions > :is(a, button) { min-height: 32px; height: 32px; }
+  /* Filters and the goal bar: on the page, not in boxes. */
+  .td-page .td-mood, .td-page .td-kind { height: 30px; padding: 0 11px; border-color: transparent; background: transparent; font-size: 12.5px; }
+  .td-page .td-mood:hover, .td-page .td-kind:hover { background: var(--secondary-bg); border-color: transparent; }
+  .td-page .td-mood.is-on, .td-page .td-kind.is-on { background: var(--secondary-bg); border-color: var(--border-col); box-shadow: none; }
+  .td-page .td-bar { padding: 10px 16px 6px; gap: 12px; }
+  .td-page .td-goal { margin: 0 16px 8px; padding: 6px 2px; border: 0; border-top: 1px solid var(--border-col); border-radius: 0; background: transparent; }
+}
+@media (min-width: 760px) {
+  .td-page .td-grid .td-card, .td-page .td-grid .td-card[data-platform], .td-page .td-card.is-top { padding: 9px 11px; gap: 4px; }
+  .td-page .td-foot { gap: 4px; }
+  .td-page .td-grid { gap: 8px; }
+}
+/* The bottom toolbar: a hairline above it, on the page background, not a rounded box. */
+@media (min-width: 760px) {
+  .td-page .td-bottom.td-toolbar { border: 0; border-top: 1px solid var(--border-col); border-radius: 0; background: transparent; box-shadow: none; }
+}
