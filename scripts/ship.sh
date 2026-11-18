@@ -103,7 +103,8 @@ SRC_CHANGED="$(git diff --name-only "$DEPLOYED" HEAD -- src public apply-public 
 if [ "$ONLY_SCRAPER" != 1 ] && "${SSH[@]}" true 2>/dev/null; then
   LIVE_BANK="$("${SSH[@]}" "docker run --rm --entrypoint sh $DASH_IMAGE -c 'cd /app && sha256sum data/ac-bank/* data/skill-inventory.json 2>/dev/null; true'")"
   BANK_STALE="$(git ls-files data/ac-bank data/skill-inventory.json | while read -r f; do h="$(shasum -a 256 "$f" | cut -d' ' -f1)"; printf '%s\n' "$LIVE_BANK" | grep -qx "$h  $f" || echo "$f"; done)"
-  CHANGED="$(printf '%s\n%s\n' "$CHANGED" "$BANK_STALE" | grep -v '^$' | sort -u)"
+  # A website-only ship has no server files: grep finds nothing, and with pipefail that must not end the run.
+  CHANGED="$(printf '%s\n%s\n' "$CHANGED" "$BANK_STALE" | { grep -v '^$' || true; } | sort -u)"
 fi
 if [ "$ONLY_SCRAPER" = 1 ]; then CHANGED="$(git ls-files deploy)"; fi
 # The scraper step copies loop.sh, Dockerfile.loop and patch_storage.py from the shipped set, so --scraper always ships them, changed or not.
