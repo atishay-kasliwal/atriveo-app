@@ -25,7 +25,8 @@ function useLayout() {
   const pick = () => ({
     mobile: window.innerWidth < 760,
     columns: window.innerWidth >= 1600 ? 5 : window.innerWidth >= 1200 ? 4 : window.innerWidth >= 1100 ? 3 : window.innerWidth >= 760 ? 2 : 1,
-    rows: window.innerWidth < 760 ? 12 : window.innerHeight >= 860 ? 2 : 1,
+    // Compact cards (2026-11-17): three rows on a 900px screen, two on a laptop.
+    rows: window.innerWidth < 760 ? 12 : window.innerHeight >= 860 ? 3 : window.innerHeight >= 700 ? 2 : 1,
   });
   const [n, setN] = useState(pick);
   useEffect(() => { const f = () => setN(pick()); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);

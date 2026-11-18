@@ -249,8 +249,9 @@ test('Easy Apply LinkedIn postings carry a chip and sit after company-site ones'
     await page.getByRole('article', { name: 'Siteco: On LinkedIn' }).waitFor();
     const names = await page.locator('.td-card .td-id strong').allTextContents();
     assert.ok(names.indexOf('Siteco') < names.indexOf('Easyco') || !names.includes('Easyco'), 'company-site posting first');
-    if (names.includes('Easyco')) assert.equal(await page.getByRole('article', { name: 'Easyco: On LinkedIn' }).getByText('Easy Apply', { exact: true }).count(), 1);
-    assert.equal(await page.getByRole('article', { name: 'Siteco: On LinkedIn' }).getByText('Easy Apply', { exact: true }).count(), 0);
+    // The chip (the card's button also reads Easy Apply on an Easy Apply posting, Open Link otherwise).
+    if (names.includes('Easyco')) assert.equal(await page.getByRole('article', { name: 'Easyco: On LinkedIn' }).locator('.td-tag').getByText('Easy Apply', { exact: true }).count(), 1);
+    assert.equal(await page.getByRole('article', { name: 'Siteco: On LinkedIn' }).locator('.td-tag').getByText('Easy Apply', { exact: true }).count(), 0);
   } finally { await f.close(); LINKEDIN = []; }
 });
 
