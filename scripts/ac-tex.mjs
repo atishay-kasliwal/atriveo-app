@@ -318,7 +318,9 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
     .map((s) => `     \\textbf{${esc(s.split(":")[0])}}{: ${esc(s.split(":").slice(1).join(":").trim())}} \\\\`)
     .join("\n");
 
+  // PDF title and author, so search results and the portfolio's SEO check show the name rather than the file name.
   return `${PREAMBLE}
+\\hypersetup{pdftitle={${esc(me.name)} - Resume}, pdfauthor={${esc(me.name)}}}
 
 \\begin{document}
 ${header}

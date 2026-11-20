@@ -59,10 +59,15 @@ test("template source: education alignment, clean experience titles, printed pro
 
 test("generated PDF: one page, clean title extraction and intact contact fields", { skip }, () => {
   const tex = newTex();
-  const x = extractPdf(compile(tex, "new"));
+  const pdf = compile(tex, "new");
+  const x = extractPdf(pdf);
   const r = assessReadiness(x, config, { expected: expectedFromTex(tex) });
 
   assert.equal(x.pages, 1);
+  // Document properties carry the name, so search results do not show the file name.
+  const info = spawnSync("pdfinfo", [pdf], { encoding: "utf8" }).stdout;
+  assert.match(info, new RegExp(`^Title:\\s+${fixture.profile.name} - Resume$`, "m"));
+  assert.match(info, new RegExp(`^Author:\\s+${fixture.profile.name}$`, "m"));
   const contact = x.views.layout.split("\n").find(l => l.includes("jordan.rivera@example.com"));
   assert.ok(contact.includes("linkedin.com/in/jordan-rivera") && contact.includes("github.com/jrivera") && contact.includes("Austin, TX"), "all contact fields fit one physical line");
   assert.equal(r.status, "PASS", JSON.stringify(r.findings, null, 2));
