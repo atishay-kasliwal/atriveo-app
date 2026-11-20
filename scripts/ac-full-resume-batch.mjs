@@ -17,8 +17,8 @@ const PLANNER_PATH = path.join(ROOT, "scripts/planner/v2.json");
 
 const ROLE_LABELS = {
   "stony-brook": "Stony Brook University — Software Engineer",
-  "wake-forest": "Wake Forest – CAIR — Software Engineer",
-  accolite: "Accolite Digital — Senior Software Engineer",
+  "wake-forest": "Wake Forest – CAIR — AI/ML Engineer",
+  accolite: "Accolite Digital — Senior Software Developer",
   atriveo: "Atriveo — Founder / Full Stack Engineer",
   "insurance-platform": "Insurance Microservices Platform — Project",
 };
