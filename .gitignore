@@ -35,3 +35,6 @@ data/resume-profile.json
 
 # Local Web Push credentials (private key stays server-side)
 .env.push.local
+
+# Résumé generation log (scripts/ac-snapshot.mjs): it names the companies applied to, so it stays local.
+/data/snapshots/
