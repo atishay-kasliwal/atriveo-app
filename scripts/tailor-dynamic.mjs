@@ -21,8 +21,8 @@ import { loadResumeProfile } from "./resume-profile.mjs";
 // the engine template). SBU title is ALWAYS "Software Engineer" (never Research).
 export const ROLE_META = {
   "Stony Brook University": { title: "Software Engineer", loc: "Stony Brook, NY", dates: "November 2024 -- May 2026", order: 5 },
-  "Wake Forest – CAIR":     { title: "Software Engineer", loc: "Winston-Salem, NC", dates: "May 2025 -- August 2025", order: 3 },
-  "Accolite Digital":       { title: "Senior Software Engineer", loc: "Hyderabad, TG", dates: "August 2021 -- August 2024", order: 2 },
+  "Wake Forest – CAIR":     { title: "AI/ML Engineer", loc: "Winston-Salem, NC", dates: "May 2025 -- August 2025", order: 3 },
+  "Accolite Digital":       { title: "Senior Software Developer", loc: "Hyderabad, TG", dates: "August 2021 -- August 2024", order: 2 },
   "Shriffle":               { title: "Software Engineer - Intern", loc: "Remote", dates: "January 2021 -- July 2021", order: 1 },
 };
 export const PROJECT_META = {
