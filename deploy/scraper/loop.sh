@@ -1,6 +1,7 @@
 #!/bin/sh
-# The hourly scrape, as a loop inside a container (replaces the Mac's com.atriveo.scrape-hourly). Each cycle: prune old rows, then
-# scrape every pipeline into Mongo (LinkedIn and Indeed through JobSpy: public pages, no login). A failed cycle waits at least
+# The hourly scrape, as a loop inside a container (replaces the Mac's com.atriveo.scrape-hourly). Each cycle scrapes every pipeline
+# into Mongo (LinkedIn and Indeed through JobSpy: public pages, no login). Old rows are pruned by the after-scrape loop
+# (resume-retention.mjs jobs), which keeps jobs you applied to; job_pipeline.prune did not, so it no longer runs here. A failed cycle waits at least
 # RETRY_MIN minutes before trying again, so a block never turns into a tight loop. The health watch alerts when jobs stop arriving.
 #   env: SCRAPE_EVERY_MIN (default 60)  RETRY_MIN (default 15)  SCRAPE_ARGS (default "--pipeline all")  PY (default python)
 EVERY="${SCRAPE_EVERY_MIN:-60}"
@@ -12,7 +13,6 @@ ONCE="${LOOP_ONCE:-0}"          # tests: run one cycle and stop
 while true; do
   started=$(date +%s)
   echo "[$(date -u +%FT%TZ)] scrape cycle start"
-  "$PY" -m job_pipeline.prune || echo "[$(date -u +%FT%TZ)] prune failed (continuing)"
   # shellcheck disable=SC2086
   "$PY" -m job_pipeline.main $ARGS
   code=$?

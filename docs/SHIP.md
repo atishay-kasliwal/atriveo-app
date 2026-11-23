@@ -41,7 +41,10 @@ Notes
 - `atriveo-scraper`: `python -m job_pipeline.main --pipeline all` every 60 minutes (a failed cycle retries after 15), from a fresh clone of
   github.com/atishay-kasliwal/job-pipeline (`SCRAPER_REF`, default main). LinkedIn and Indeed through JobSpy: public pages, **no login, no account**.
   Memory-capped at 1.5 GB so it cannot starve Mongo.
-- `atriveo-after-scrape`: every 15 minutes, `linkedin-apply-type`, `linkedin-board-match --apply`, then `resume-enqueue` (what ran on the Mac at :55).
+- `atriveo-after-scrape`: every 15 minutes, `linkedin-apply-type`, `linkedin-board-match --apply`, `fill-descriptions`, `swelist-feed`, `resume-enqueue`,
+  `repair-resume-paths`, then `resume-retention.mjs jobs --apply`: jobs you did not apply to or save for later, scraped more than `PRUNE_DAYS` (3) days ago,
+  leave Mongo with their resume folder and R2 files. Its resumes mount is writable for that. Mongo reuses the freed space; to give it back to the disk once,
+  run `node scripts/resume-retention.mjs jobs --apply --compact` in that container.
 - `atriveo-health` (started by every ship): `health-watch.mjs` every 15 minutes. It sends a phone push through ntfy when no new LinkedIn/board jobs
   arrive for 6 h, no staffing jobs for 36 h, 5+ resumes wait over 3 h, or 300+ recent jobs have no Fit. One alert when it starts, one when it recovers,
   a reminder every 12 h. Set `NTFY_TOPIC=<your secret topic>` in `/home/ubuntu/atriveo-muse/private/dashboard.env` (and `NTFY_SERVER` if self-hosted),
