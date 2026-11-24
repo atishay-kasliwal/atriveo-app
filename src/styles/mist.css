@@ -227,6 +227,51 @@ html body .apply-nav a:not(.lk-nav)[aria-current="page"] { color: var(--foregrou
   box-shadow: var(--mist-shadow);
 }
 
+/* ---- Widgets (Mist) -------------------------------------------------------------------------
+ * Popovers, menus, tooltips and toasts float on the popover grey with 12px corners and a soft deep
+ * shadow. Dialogs and modals take 16px corners and the same shadow. Every backdrop behind a modal,
+ * sheet or drawer is one 60% black (they ranged from 40% to 72%). Drawers sit against an edge and
+ * keep their shape; the More menus open in place and stay as they are. Status toasts (Top 500's
+ * green and red, Network's light one) keep their colours.
+ */
+.jm-filter-popover,
+.jm-filter-popover[popover],
+.lp-menu,
+.nw-canvas-popover,
+.nav-tools-menu,
+.apps-tooltip,
+.apps-toast {
+  border-radius: 12px;
+  box-shadow: var(--mist-pop-shadow);
+}
+.cl-dialog,
+.nw-dialog,
+.rb-modal,
+.rv-modal,
+.td-review-dialog,
+.pdf-modal,
+.tailor-log-modal {
+  border-radius: 16px;
+  box-shadow: var(--mist-pop-shadow);
+}
+.jm-overlay,
+.outreach-overlay,
+.ph-sheet-wrap,
+.nwp-sheet-wrap,
+.rb-modal-back,
+.rb-sheet-back,
+.rb-bank-backdrop,
+.staffing-modal-back,
+.td-modal,
+.apps-scrim,
+.resume-diff-overlay,
+.jd-drawer-overlay,
+.pdf-modal-overlay,
+.tailor-log-modal-backdrop,
+.inspector-overlay {
+  background: rgb(0 0 0 / 0.6);
+}
+
 /* ---- Inputs (Mist) ------------------------------------------------------------------------- */
 html body :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), textarea, select):focus-visible {
   outline: none;
