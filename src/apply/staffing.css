@@ -1,7 +1,7 @@
 .staffing-page:not(.td-page) { overflow: auto; }
 .staffing-main { width: min(1400px, 100%); margin: 0 auto; padding: 24px; box-sizing: border-box; }
 .staffing-title { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 16px; }
-.staffing-title h1 { margin: 0; font-size: 26px; }
+.staffing-title h1 { margin: 0; font-size: 24px; }
 .staffing-title p { margin: 6px 0 0; color: var(--muted-fg); }
 .staffing-kpis { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
 .staffing-kpis > span { border: 1px solid var(--border-col); background: var(--card-bg); padding: 12px 16px; border-radius: 12px; }
@@ -12,28 +12,28 @@
 .staffing-source-top, .staffing-source-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .staffing-source-top a { font-weight: 650; color: var(--foreground); }
 .staffing-source label { font-size: 12px; white-space: nowrap; }
-.staffing-source p { color: var(--muted-fg); font-size: 12.5px; margin: 10px 0; }
-.staffing-state { display: inline-block; border-radius: 99px; padding: 3px 8px; font-size: 11px; margin-top: 10px; background: var(--accent-bg); }
+.staffing-source p { color: var(--muted-fg); font-size: 12px; margin: 10px 0; }
+.staffing-state { display: inline-block; border-radius: 99px; padding: 3px 8px; font-size: 12px; margin-top: 10px; background: var(--accent-bg); }
 .staffing-state.is-ready { color: #34d399; }.staffing-state.is-running { color: #60a5fa; }
 .staffing-state.is-blocked, .staffing-state.is-needs_connector, .staffing-error { color: #fbbf24; }
 .staffing-source small, .staffing-run { color: var(--muted-fg); font-size: 12px; }
 .staffing-job { display: flex; justify-content: space-between; gap: 16px; padding: 16px; background: var(--card-bg); border: 1px solid var(--border-col); border-radius: 12px; margin-bottom: 10px; }
 .staffing-job > div { min-width: 0; }.staffing-job span { display: block; color: var(--muted-fg); font-size: 12px; margin-top: 5px; }
-.staffing-job p { font-size: 13px; overflow-wrap: anywhere; }.staffing-job > a { flex-shrink: 0; align-self: center; }
+.staffing-job p { font-size: 14px; overflow-wrap: anywhere; }.staffing-job > a { flex-shrink: 0; align-self: center; }
 .staffing-title select { max-width: 220px; padding: 8px; background: var(--card-bg); color: var(--foreground); border: 1px solid var(--border-col); border-radius: 8px; }
 @media (max-width: 1000px) { .staffing-sources { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .staffing-main { padding: 16px; }.staffing-sources { grid-template-columns: 1fr; }.staffing-job { flex-direction: column; }.staffing-job > a { align-self: flex-start; } }
 
 .staffing-last-crawl { border: 1px solid var(--border-col); background: var(--card-bg); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; overflow-wrap: anywhere; }
 .staffing-last-crawl strong { margin-right: 8px; }
-.staffing-last-crawl > div + div { margin-top: 6px; font-size: 13px; }
+.staffing-last-crawl > div + div { margin-top: 6px; font-size: 14px; }
 
 .staffing-carousel-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .staffing-carousel { overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; }
 .staffing-carousel-track { display: flex; gap: 16px; }
 .staffing-job-card { flex: 0 0 min(340px, 85vw); box-sizing: border-box; display: flex; flex-direction: column; padding: 18px; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); scroll-snap-align: start; }
 .staffing-job-card h3 { font-size: 18px; margin: 10px 0; overflow-wrap: anywhere; }
-.staffing-job-card p { font-size: 13px; color: var(--muted-fg); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.staffing-job-card p { font-size: 14px; color: var(--muted-fg); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 .staffing-job-dates { display: flex; flex-direction: column; gap: 5px; margin-top: auto; padding: 12px 0; color: var(--muted-fg); }
 .staffing-job-card > a { align-self: flex-start; }
 @media (prefers-reduced-motion: reduce) { .staffing-carousel { scroll-behavior: auto; } }
@@ -45,8 +45,8 @@
 .staffing-match { display: flex; justify-content: space-between; gap: 20px; padding: 20px; border: 1px solid var(--border-col); background: var(--card-bg); border-radius: 14px; margin-bottom: 12px; }
 .staffing-match-main { min-width: 0; }
 .staffing-job-title { font: inherit; font-size: 18px; font-weight: 650; color: var(--foreground); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
-.staffing-match-main p { color: var(--muted-fg); margin: 6px 0 12px; font-size: 13px; }
-.staffing-match-facts { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.staffing-match-main p { color: var(--muted-fg); margin: 6px 0 12px; font-size: 14px; }
+.staffing-match-facts { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
 .staffing-match-facts small { color: var(--muted-fg); }
 .staffing-match-actions { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; flex-shrink: 0; }
 .staffing-match-actions > div { display: flex; gap: 14px; font-size: 12px; }

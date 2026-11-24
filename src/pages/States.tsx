@@ -157,9 +157,9 @@ export default function States() {
               border: `1px solid ${card.color}22`, borderLeft: `3px solid ${card.color}`,
               boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
             }}>
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{card.label}</div>
-              <div style={{ fontSize: 26, fontWeight: 800, color: card.color, letterSpacing: "-0.5px", lineHeight: 1 }}>{card.value}</div>
-              <div style={{ fontSize: 11, color: "var(--text-2)", marginTop: 5 }}>{card.sub}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{card.label}</div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: card.color, letterSpacing: "-0.5px", lineHeight: 1 }}>{card.value}</div>
+              <div style={{ fontSize: 12, color: "var(--text-2)", marginTop: 5 }}>{card.sub}</div>
             </div>
           ))}
         </div>
@@ -169,7 +169,7 @@ export default function States() {
           <input
             value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search state…"
-            style={{ padding: "7px 12px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 13, outline: "none", width: 200, background: "var(--surface-2)" }}
+            style={{ padding: "7px 12px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 14, outline: "none", width: 200, background: "var(--surface-2)" }}
           />
           <div style={{ display: "flex", gap: 4, marginLeft: "auto" }}>
             {(["count", "avg", "name"] as const).map(s => (
@@ -177,7 +177,7 @@ export default function States() {
                 padding: "6px 12px", borderRadius: 7, border: "1px solid var(--border)",
                 background: sort === s ? "var(--bean-dark)" : "var(--surface-2)",
                 color: sort === s ? "#fff" : "var(--text-2)",
-                fontSize: 11.5, fontWeight: 700, cursor: "pointer",
+                fontSize: 12, fontWeight: 700, cursor: "pointer",
               }}>
                 {s === "count" ? "Job Count" : s === "avg" ? "Avg Score" : "A–Z"}
               </button>
@@ -193,7 +193,7 @@ export default function States() {
             gridTemplateColumns: "36px 180px 1fr 160px 160px 70px 70px 24px",
             padding: "10px 16px", gap: 12,
             background: "rgba(237,232,208,0.42)", borderBottom: "1px solid var(--border)",
-            fontSize: 10.5, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.06em",
+            fontSize: 12, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.06em",
           }}>
             <div>#</div><div>State</div><div>Jobs</div>
             <div>Top Companies</div><div>Roles</div>
@@ -225,16 +225,16 @@ export default function States() {
                   onMouseEnter={e => { if (row.count > 0 && !isOpen) (e.currentTarget as HTMLElement).style.background = "#fbf8ec"; }}
                   onMouseLeave={e => { if (!isOpen) (e.currentTarget as HTMLElement).style.background = row.count === 0 ? "#f7f3e5" : "var(--bean-milk)"; }}
                 >
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--bean-taupe)" }}>{row.count > 0 ? i + 1 : "—"}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "var(--bean-taupe)" }}>{row.count > 0 ? i + 1 : "—"}</div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <div style={{
                       width: 32, height: 22, borderRadius: 5, flexShrink: 0,
                       background: row.count > 0 ? `linear-gradient(135deg,${tierColor},${tierColor}aa)` : "var(--bean-cream)",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 10, fontWeight: 800, color: row.count > 0 ? "#fff" : "var(--muted)",
+                      fontSize: 12, fontWeight: 800, color: row.count > 0 ? "#fff" : "var(--muted)",
                     }}>{row.abbr}</div>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: row.count > 0 ? "var(--text)" : "var(--muted)" }}>{row.name}</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: row.count > 0 ? "var(--text)" : "var(--muted)" }}>{row.name}</span>
                   </div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -253,22 +253,22 @@ export default function States() {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
                     {row.topCompanies.length ? row.topCompanies.map(c => (
                       <span key={c} style={{ fontSize: 9.5, fontWeight: 600, padding: "1px 5px", borderRadius: 4, background: "var(--bean-cream)", color: "var(--text-2)", border: "1px solid var(--border)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 90 }}>{c}</span>
-                    )) : <span style={{ fontSize: 11, color: "var(--bean-taupe)" }}>—</span>}
+                    )) : <span style={{ fontSize: 12, color: "var(--bean-taupe)" }}>—</span>}
                   </div>
 
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
                     {row.topRoles.length ? row.topRoles.map(r => (
                       <span key={r} style={{ fontSize: 9.5, fontWeight: 700, padding: "1px 5px", borderRadius: 4, background: "rgba(79,79,71,0.08)", color: "var(--bean-dark)", border: "1px solid rgba(79,79,71,0.16)" }}>{r}</span>
-                    )) : <span style={{ fontSize: 11, color: "var(--bean-taupe)" }}>—</span>}
+                    )) : <span style={{ fontSize: 12, color: "var(--bean-taupe)" }}>—</span>}
                   </div>
 
                   <div style={{ fontSize: 12, fontWeight: 800, color: row.avgScore > 0 ? tierColor : "var(--bean-taupe)" }}>
                     {row.avgScore > 0 ? `★${row.avgScore}` : "—"}
                   </div>
 
-                  <div style={{ fontSize: 11, color: "var(--muted)" }}>{fmtTime(row.latestTime)}</div>
+                  <div style={{ fontSize: 12, color: "var(--muted)" }}>{fmtTime(row.latestTime)}</div>
 
-                  <div style={{ fontSize: 13, color: row.count > 0 ? "var(--muted)" : "transparent", transition: "transform 0.2s", transform: isOpen ? "rotate(90deg)" : "none" }}>›</div>
+                  <div style={{ fontSize: 14, color: row.count > 0 ? "var(--muted)" : "transparent", transition: "transform 0.2s", transform: isOpen ? "rotate(90deg)" : "none" }}>›</div>
                 </div>
 
                 {/* Expanded job sub-table */}
@@ -279,7 +279,7 @@ export default function States() {
                       display: "grid",
                       gridTemplateColumns: "36px 2fr 1fr 1fr 90px 80px 220px",
                       padding: "8px 24px", gap: 16,
-                      fontSize: 10.5, fontWeight: 700, color: "var(--muted)",
+                      fontSize: 12, fontWeight: 700, color: "var(--muted)",
                       textTransform: "uppercase", letterSpacing: "0.06em",
                       borderBottom: "1px solid var(--border)", background: "rgba(237,232,208,0.72)",
                     }}>
@@ -313,10 +313,10 @@ export default function States() {
                           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isApplied ? "rgba(105,114,90,0.06)" : "transparent"; }}
                         >
                           {/* Index */}
-                          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--bean-taupe)" }}>{ji + 1}</div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--bean-taupe)" }}>{ji + 1}</div>
 
                           {/* Title */}
-                          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {job.title || "—"}
                           </div>
 
@@ -326,7 +326,7 @@ export default function States() {
                           </div>
 
                           {/* Location */}
-                          <div style={{ fontSize: 11.5, color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <div style={{ fontSize: 12, color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             📍 {job.location || "—"}
                           </div>
 
@@ -339,7 +339,7 @@ export default function States() {
                           }}>★ {jScore}</div>
 
                           {/* Level */}
-                          <div style={{ fontSize: 11, color: "var(--text-2)", fontWeight: 600 }}>{job.level || "—"}</div>
+                          <div style={{ fontSize: 12, color: "var(--text-2)", fontWeight: 600 }}>{job.level || "—"}</div>
 
                           {/* Actions */}
                           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -348,7 +348,7 @@ export default function States() {
                                 onClick={() => recordClick(job.job_url, job.title || "", job.company || "", { location: job.location || null })}
                                 style={{
                                   padding: "5px 12px", borderRadius: 6, border: "1px solid var(--border)",
-                                  background: "var(--surface-2)", color: "var(--text-2)", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                                  background: "var(--surface-2)", color: "var(--text-2)", fontSize: 12, fontWeight: 700, cursor: "pointer",
                                   whiteSpace: "nowrap",
                                 }}
                               >Add to tracker</button>
@@ -361,13 +361,13 @@ export default function States() {
                                 style={{
                                   padding: "5px 14px", borderRadius: 6,
                                   background: isApplied ? "linear-gradient(135deg,#69725a,#4f4f47)" : `linear-gradient(135deg,${jColor},${jColor}cc)`,
-                                  color: "#fff", fontSize: 11, fontWeight: 700,
+                                  color: "#fff", fontSize: 12, fontWeight: 700,
                                   textDecoration: "none", whiteSpace: "nowrap",
                                 }}
                               >{isApplied ? "Open ↗" : "Apply ↗"}</a>
                             )}
                             {isApplied && (
-                              <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 700 }}>
+                              <span style={{ fontSize: 12, color: "var(--green)", fontWeight: 700 }}>
                                 tracked ×{rec?.clicks}
                               </span>
                             )}

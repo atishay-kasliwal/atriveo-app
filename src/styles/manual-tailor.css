@@ -97,7 +97,7 @@
 
 .mt-metrics dt {
   margin: 0 0 4px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -146,7 +146,7 @@
 }
 
 .mt-mac-status code {
-  font-size: 11px;
+  font-size: 12px;
   background: var(--secondary-bg);
   padding: 1px 5px;
   border-radius: 4px;
@@ -223,7 +223,7 @@
 
 .mt-rail-label {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -232,7 +232,7 @@
 
 .mt-rail-count {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted-fg);
 }
 
@@ -263,7 +263,7 @@
 
 .mt-shortcuts kbd {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
   padding: 2px 6px;
   border: 1px solid var(--border-col);
   border-radius: 4px;
@@ -335,7 +335,7 @@
 }
 
 .mt-session-copy span {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted-fg);
   white-space: nowrap;
   overflow: hidden;
@@ -380,19 +380,19 @@
 
 .mt-detail-head h2 {
   margin: 0;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--foreground);
 }
 
 .mt-detail-title {
   margin: 4px 0 0;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--muted-fg);
 }
 
 .mt-detail-time {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted-fg);
   white-space: nowrap;
 }
@@ -429,7 +429,7 @@
 
 .mt-welcome h2 {
   margin: 0 0 14px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--foreground);
 }
@@ -463,7 +463,7 @@
   border-radius: 50%;
   background: oklch(0.66 0.19 255 / 0.15);
   color: var(--primary);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -471,7 +471,7 @@
 }
 
 .mt-steps strong {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--foreground);
 }
 
@@ -497,7 +497,7 @@
 
 .mt-compose-head h2 {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
   letter-spacing: -0.01em;
   color: var(--foreground);
@@ -510,7 +510,7 @@
 }
 
 .mt-compose-hint {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted-fg);
   font-family: var(--font-mono);
   white-space: nowrap;
@@ -531,7 +531,7 @@
 }
 
 .mt-field span {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -544,7 +544,7 @@
   border-radius: 10px;
   padding: 9px 11px;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   background: var(--secondary-bg);
   color: var(--foreground);
   transition: border-color 0.18s, box-shadow 0.18s;
@@ -569,7 +569,7 @@
   border-radius: 12px;
   padding: 12px 14px;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.55;
   resize: vertical;
   min-height: 160px;
@@ -609,7 +609,7 @@
 }
 
 .mt-parse-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -623,7 +623,7 @@
 
 .mt-parse-tip {
   flex: 1 1 100%;
-  font-size: 11px;
+  font-size: 12px;
   color: oklch(0.78 0.16 90);
 }
 
@@ -642,7 +642,7 @@
 }
 
 .mt-char-count {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted-fg);
   font-variant-numeric: tabular-nums;
   font-family: var(--font-mono);
@@ -655,7 +655,7 @@
   border: none;
   border-radius: 10px;
   padding: 10px 20px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: var(--primary-foreground);
@@ -734,7 +734,7 @@
 }
 
 .manual-tailor-assistant-status {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
   display: inline-flex;
@@ -783,7 +783,7 @@
 .manual-tailor-assistant-meta {
   margin: 0;
   padding: 8px 14px 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted-fg);
   min-height: 27px;
 }
@@ -928,7 +928,7 @@
 }
 
 .tailor-explain code {
-  font-size: 11px;
+  font-size: 12px;
   background: var(--secondary-bg);
   padding: 1px 4px;
   border-radius: 4px;
@@ -983,7 +983,7 @@
 
 .mt-rail-card--queue .tq-status-slot--manual {
   padding: 6px 14px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 /* ── Animations ─────────────────────────────────────────────────────────── */
@@ -1055,7 +1055,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1140,13 +1140,13 @@
 .mt-tracker-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .mt-tracker-table thead th {
   text-align: left;
   padding: 8px 16px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1187,7 +1187,7 @@
 }
 
 .mt-tracker-status {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
   display: inline-flex;

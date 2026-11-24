@@ -335,7 +335,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div style={{ fontSize: 11.5, color: "var(--muted)", marginTop: 8 }}>
+        <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 8 }}>
           Filters stored locally for <strong>{user?.email}</strong>.
         </div>
       </div>

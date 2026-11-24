@@ -5,6 +5,7 @@ import "./apply.css";
 import ApplyApp from "./ApplyApp";
 import { installNotificationSound } from "./notificationSound";
 import "./visual-theme.css";
+import "../styles/mist.css";
 document.body.classList.add("apply-console");
 installNotificationSound();
 

@@ -106,7 +106,7 @@ export default function Cart() {
             <div>No saved jobs here. Cards now use Click, Apply, and Tracker instead.</div>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="state-msg" style={{ fontSize: 13 }}>No jobs match your search.</div>
+          <div className="state-msg" style={{ fontSize: 14 }}>No jobs match your search.</div>
         ) : (
           <JobTable
             jobs={visibleJobs}
