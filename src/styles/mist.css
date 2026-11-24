@@ -272,6 +272,63 @@ html body .apply-nav a:not(.lk-nav)[aria-current="page"] { color: var(--foregrou
   background: rgb(0 0 0 / 0.6);
 }
 
+/* ---- Main app chrome (Mist) ------------------------------------------------------------------
+ * The main app's header, Today board sidebar and stat tiles. Header: quiet group labels, and the
+ * current tab is a soft neutral pill instead of blue text with a blue underline. Sidebar: the
+ * current item and session are a soft neutral highlight instead of a blue fill (the blue and grey
+ * dots beside Top 500 and Others stay; they mean something). Stat tiles: plain Mist cards, without
+ * the dot grid, glow, coloured bottom line and glowing icon boxes; each icon keeps its colour.
+ */
+.nav-group-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  opacity: 1;
+  color: #71717a;
+}
+.nav-tab { border-radius: 10px; }
+.nav-tab.active,
+body.is-today-board .nav-tab.active {
+  background: rgb(255 255 255 / 0.08);
+  color: var(--foreground);
+  font-weight: 500;
+  box-shadow: none;
+}
+body.is-today-board .nav-tab.active:hover { background: rgb(255 255 255 / 0.1); color: var(--foreground); }
+.nav-tab.active::after { display: none; }
+
+.today-board-group-label.is-active,
+.today-board-nav-item.is-active {
+  background: rgb(255 255 255 / 0.06);
+  color: var(--foreground);
+  font-weight: 500;
+}
+.today-board-group-label.is-active .today-board-nav-count,
+.today-board-nav-item.is-active .today-board-nav-count { color: var(--foreground); }
+.today-board-session-item.is-active {
+  background: rgb(255 255 255 / 0.05) !important;
+  border-color: rgb(255 255 255 / 0.1) !important;
+}
+
+.board-metric {
+  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-col);
+  box-shadow: var(--mist-shadow);
+}
+.board-metric::before,
+.board-metric::after { display: none; }
+.board-metric:hover {
+  border-color: #3f3f46;
+  box-shadow: var(--mist-shadow);
+}
+.board-metric .board-metric-icon {
+  background: rgb(255 255 255 / 0.05);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+  border-radius: 8px;
+}
+
 /* ---- Inputs (Mist) ------------------------------------------------------------------------- */
 html body :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), textarea, select):focus-visible {
   outline: none;

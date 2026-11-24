@@ -32,7 +32,7 @@
 .t5-title {
   margin: 0;
   font-size: 1.2rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--foreground);
 }
@@ -57,7 +57,7 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.45rem 0.9rem;
-  border-radius: 7px;
+  border-radius: 8px;
   border: 1px solid transparent;
   font-size: 0.8rem;
   font-weight: 500;
@@ -89,9 +89,9 @@
 }
 
 .t5-btn--ghost:hover:not(:disabled) {
-  background: oklch(0.22 0.006 260);
+  background: oklch(0.22 0.004 286);
   color: var(--foreground);
-  border-color: oklch(0.32 0.006 260);
+  border-color: oklch(0.32 0.004 286);
 }
 
 .t5-btn--save {
@@ -205,8 +205,8 @@
 .t5-label {
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--muted-fg);
 }
 
@@ -230,7 +230,7 @@
 }
 
 .t5-input::placeholder {
-  color: oklch(0.45 0.006 260);
+  color: oklch(0.45 0.004 286);
 }
 
 .t5-input--inline {
@@ -267,10 +267,10 @@
   text-align: left;
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--muted-fg);
-  background: oklch(0.16 0.005 260);
+  background: oklch(0.16 0.004 286);
   border-bottom: 1px solid var(--border-col);
 }
 
@@ -288,7 +288,7 @@
 }
 
 .t5-tr:hover {
-  background: oklch(0.19 0.005 260);
+  background: oklch(0.19 0.004 286);
 }
 
 .t5-tr--editing {
@@ -329,7 +329,7 @@
 }
 
 .t5-empty-cell {
-  color: oklch(0.38 0.004 260);
+  color: oklch(0.38 0.004 286);
 }
 
 /* Empty states */

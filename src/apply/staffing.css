@@ -42,7 +42,7 @@
 .staffing-views small { margin-left: 6px; opacity: .7; }
 .staffing-search input, .staffing-search select, .staffing-detail input, .staffing-detail textarea { background: var(--card-bg); color: var(--foreground); border: 1px solid var(--border-col); padding: 12px; border-radius: 10px; font: inherit; min-width: 0; }
 .staffing-search input { flex: 1; }
-.staffing-match { display: flex; justify-content: space-between; gap: 20px; padding: 20px; border: 1px solid var(--border-col); background: var(--card-bg); border-radius: 14px; margin-bottom: 12px; }
+.staffing-match { display: flex; justify-content: space-between; gap: 20px; padding: 20px; border: 1px solid var(--border-col); background: var(--card-bg); border-radius: 12px; margin-bottom: 12px; }
 .staffing-match-main { min-width: 0; }
 .staffing-job-title { font: inherit; font-size: 18px; font-weight: 650; color: var(--foreground); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
 .staffing-match-main p { color: var(--muted-fg); margin: 6px 0 12px; font-size: 14px; }

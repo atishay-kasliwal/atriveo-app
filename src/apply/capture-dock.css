@@ -1,6 +1,6 @@
 /* Loops capture dock: a quiet ring bottom-right that opens in place. Flat, hairlines, no glow; the app's own tokens. */
 .cd { position: fixed; z-index: 48; right: 24px; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); font-family: var(--font-display); font-size: 14px; color: var(--foreground); }
-.cd-ring { display: flex; align-items: center; gap: 8px; height: 36px; min-width: 36px; padding: 0; border: 0; background: transparent; color: var(--muted-fg); cursor: pointer; border-radius: 18px; }
+.cd-ring { display: flex; align-items: center; gap: 8px; height: 36px; min-width: 36px; padding: 0; border: 0; background: transparent; color: var(--muted-fg); cursor: pointer; border-radius: 16px; }
 .cd-ring::before { content: ""; position: absolute; right: 0; top: 0; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border-col); background: var(--background); transition: border-color .2s, background .2s, transform .2s; }
 .cd-ring:hover::before, .cd-ring:focus-visible::before { border-color: var(--muted-fg); background: var(--surface-elev); }
 .cd-ring:active::before { transform: scale(.94); }
@@ -15,7 +15,7 @@
 .cd[data-open="true"] .cd-ring { visibility: hidden; }
 
 .cd-panel { position: absolute; right: 0; bottom: 0; width: min(372px, calc(100vw - 32px)); box-sizing: border-box; padding: 14px 14px 12px; border: 1px solid var(--border-col); border-radius: 12px; background: var(--surface-elev); box-shadow: 0 10px 30px #0006; transform-origin: bottom right; animation: cd-open .24s cubic-bezier(.2, .8, .2, 1); }
-@keyframes cd-open { from { opacity: 0; transform: scale(.35); border-radius: 18px; } 60% { opacity: 1; } to { opacity: 1; transform: none; } }
+@keyframes cd-open { from { opacity: 0; transform: scale(.35); border-radius: 16px; } 60% { opacity: 1; } to { opacity: 1; transform: none; } }
 .cd-label { display: block; margin: 0; color: var(--muted-fg); font-size: 12px; letter-spacing: .02em; }
 .cd-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 8px; }
 .cd-close { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin: -4px -6px -4px 0; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--muted-fg); cursor: pointer; transition: background .15s, color .15s; }
@@ -31,7 +31,7 @@
 .cd-btn:focus-visible, .cd-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .cd-btn:disabled { opacity: .4; cursor: default; }
 .cd-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
-.cd-primary { background: var(--primary); border-color: var(--primary); color: #0b0d10; font-weight: 600; }
+.cd-primary { background: var(--primary); border-color: var(--primary); color: #0d0d10; font-weight: 600; }
 .cd-primary:hover:not(:disabled) { background: var(--primary); filter: brightness(1.08); }
 .cd-btn kbd { font: inherit; opacity: .6; }
 .cd-note { min-height: 16px; margin: 8px 0 0; font-size: 12px; color: var(--muted-fg); }

@@ -77,7 +77,7 @@ export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) 
         {/* Nav */}
         <div className={`header-right${toolsOpen ? " header-right--tools-open" : ""}`}>
           <nav className={`nav-tabs${toolsOpen ? " nav-tabs--tools-open" : ""}`}>
-            <span className="nav-group-label">DAILY</span>
+            <span className="nav-group-label">Daily</span>
             {DAILY.map((n) => (
               <Link key={n.href} to={n.href} className={`nav-tab${n.match(path) ? " active" : ""}`}>
                 {n.label}
@@ -86,7 +86,7 @@ export default function AppHeader({ hideLogo = false }: { hideLogo?: boolean }) 
 
             <span className="nav-separator" aria-hidden />
 
-            <span className="nav-group-label">WORKBENCH</span>
+            <span className="nav-group-label">Workbench</span>
             {WORKBENCH.map((n) => (
               <Link key={n.href} to={n.href} className={`nav-tab${n.match(path) ? " active" : ""}`}>
                 {n.label}

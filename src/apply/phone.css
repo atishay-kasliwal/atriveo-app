@@ -46,8 +46,8 @@
 .ph-goal-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; font-size: 16px; color: var(--muted-fg); }
 .ph-goal-row b { font-size: 30px; color: var(--foreground); font-variant-numeric: tabular-nums; }
 .ph-streak { font-size: 16px; color: var(--foreground); white-space: nowrap; }
-.ph-goal-bar { height: 8px; border-radius: 4px; background: var(--secondary-bg); overflow: hidden; }
-.ph-goal-bar i { display: block; height: 100%; border-radius: 4px; background: var(--primary); transition: width .4s ease; }
+.ph-goal-bar { height: 8px; border-radius: 6px; background: var(--secondary-bg); overflow: hidden; }
+.ph-goal-bar i { display: block; height: 100%; border-radius: 6px; background: var(--primary); transition: width .4s ease; }
 .ph-goal-bar.is-done i { background: #73b591; }
 .ph-home .dn { margin: 0; }
 .ph-tiles { display: grid; gap: 12px; }
@@ -67,17 +67,17 @@
 /* Triage: one card at a time, swipe or thumb buttons. */
 .ph-triage { flex: 1 1 auto; display: flex; flex-direction: column; gap: 10px; min-height: 0; padding: 12px 16px 8px; }
 .ph-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 12px; background: var(--secondary-bg); }
-.ph-seg button { min-height: 40px; border: 0; border-radius: 9px; background: transparent; color: var(--muted-fg); font: inherit; font-size: 14px; font-weight: 550; cursor: pointer; }
+.ph-seg button { min-height: 40px; border: 0; border-radius: 10px; background: transparent; color: var(--muted-fg); font: inherit; font-size: 14px; font-weight: 550; cursor: pointer; }
 .ph-seg button[aria-selected="true"] { background: var(--card-bg); color: var(--foreground); box-shadow: inset 0 0 0 1px var(--border-col); }
 .ph-triage-count { margin: 0; color: var(--muted-fg); font-size: 14px; text-align: center; font-variant-numeric: tabular-nums; }
 .ph-deck { position: relative; flex: 1 1 auto; min-height: 320px; display: grid; }
 .ph-card, .ph-empty { grid-area: 1 / 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; overflow: hidden; box-sizing: border-box; padding: 20px;
-  border-radius: 20px; background: var(--card-bg); border: 1px solid var(--border-col); touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
+  border-radius: 16px; background: var(--card-bg); border: 1px solid var(--border-col); touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
 .ph-card { position: relative; z-index: 1; }
 .ph-card.is-behind { z-index: 0; transform: scale(.96) translateY(10px); opacity: .5; pointer-events: none; }
 .ph-card.is-keep { border-color: #73b591; }
 .ph-card.is-skip { border-color: #d9827e; }
-.ph-stamp { position: absolute; top: 18px; padding: 4px 10px; border: 2px solid currentColor; border-radius: 8px; font-size: 16px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; opacity: 0; transition: opacity .1s; }
+.ph-stamp { position: absolute; top: 18px; padding: 4px 10px; border: 2px solid currentColor; border-radius: 8px; font-size: 16px; font-weight: 600; letter-spacing: 0; text-transform: none; opacity: 0; transition: opacity .1s; }
 .ph-stamp.is-keep { left: 18px; color: #73b591; }
 .ph-stamp.is-skip { right: 18px; color: #d9827e; }
 .ph-card.is-keep .ph-stamp.is-keep, .ph-card.is-skip .ph-stamp.is-skip { opacity: 1; }
@@ -119,10 +119,10 @@
 /* Activity: what happened, by day. */
 .ph-activity { display: flex; flex-direction: column; gap: 12px; padding: 12px 16px 16px; }
 .ph-seg-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.ph-day h2 { margin: 8px 0 6px; color: var(--muted-fg); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.ph-day h2 { margin: 8px 0 6px; color: var(--muted-fg); font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
 .ph-day ul { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .ph-event { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; min-height: 60px; box-sizing: border-box; padding: 10px 14px;
-  border: 1px solid var(--border-col); border-radius: 14px; background: var(--card-bg); color: var(--foreground); font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); color: var(--foreground); font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .ph-event:active { background: var(--accent-bg); }
 .ph-event:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .ph-event > i { width: 10px; height: 10px; border-radius: 50%; background: var(--muted-fg); }
@@ -171,7 +171,7 @@
 .ph-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .ph-search input { box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 14px; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); color: var(--foreground); font: inherit; font-size: 16px; }
 .ph-search input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
-.ph-roster { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border: 1px solid var(--border-col); border-radius: 14px; background: var(--card-bg); overflow: hidden; }
+.ph-roster { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); overflow: hidden; }
 .ph-roster li + li { border-top: 1px solid var(--border-col); }
 .ph-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 8px 12px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .ph-row:active, .ph-open:active { background: var(--secondary-bg); }
@@ -188,12 +188,12 @@
 .ph-screen-body { flex: 1; min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: 14px; padding: 16px 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
 .ph-who { display: flex; align-items: center; gap: 14px; }
 .ph-who h1 { margin: 0; font-size: 24px; line-height: 1.2; overflow-wrap: anywhere; }
-.ph-facts { display: grid; gap: 0; margin: 0; border: 1px solid var(--border-col); border-radius: 14px; background: var(--card-bg); }
+.ph-facts { display: grid; gap: 0; margin: 0; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); }
 .ph-facts div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 14px; }
 .ph-facts div + div { border-top: 1px solid var(--border-col); }
 .ph-facts dt { color: var(--muted-fg); font-size: 14px; flex: none; }
 .ph-facts dd { margin: 0; font-size: 14px; font-weight: 550; text-align: right; overflow-wrap: anywhere; }
-.ph-follow { display: grid; gap: 4px; padding: 14px; border: 1px solid var(--border-col); border-radius: 14px; background: var(--card-bg); }
+.ph-follow { display: grid; gap: 4px; padding: 14px; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); }
 .ph-follow.is-due { border-color: var(--primary); }
 .ph-follow b { font-size: 16px; }
 .ph-follow small { color: var(--muted-fg); font-size: 14px; }
@@ -201,7 +201,7 @@
 .ph-chip { min-height: 44px; border: 1px solid var(--border-col); border-radius: 10px; background: var(--secondary-bg); color: var(--foreground); font: inherit; font-size: 14px; cursor: pointer; }
 .ph-chip:disabled { opacity: .6; }
 .ph-error { margin: 6px 0 0; color: #dc2626; font-size: 14px; }
-.ph-block h2 { margin: 4px 0 8px; color: var(--muted-fg); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.ph-block h2 { margin: 4px 0 8px; color: var(--muted-fg); font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
 .ph-notes { margin: 0; white-space: pre-wrap; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
 .ph-jobs, .ph-timeline { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .ph-jobs a { display: grid; gap: 2px; padding: 12px 14px; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); color: inherit; text-decoration: none; }

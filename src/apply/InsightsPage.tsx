@@ -112,15 +112,18 @@ export default function InsightsPage({ header }: { header?: ReactNode }) {
         {data && view && (
           <div className="in-layout">
             <div className="in-hero" style={{ ["--tone" as string]: tone }}>
-              <small className="in-eyebrow">Your search, at a glance</small>
-              <h1><b>{weekCount}</b><span>applied in the last 7 days</span></h1>
-              <div className="in-chips">
-                <span className={`in-chip ${view.delta >= 0 ? "up" : "down"}`}>{view.delta >= 0 ? "▲" : "▼"} {Math.abs(view.delta)} vs the week before</span>
-                <span className="in-chip" style={{ ["--c" as string]: tone }}><i /> Today {data.today.applied} of {data.today.goal}</span>
-                <span className="in-chip"><i style={{ background: "#f0a23b" }} /> {data.streak}-day streak</span>
-                <span className="in-chip">{data.totals.avg7} a day</span>
-                <span className="in-chip">{data.totals.all} in all</span>
+              <div className="in-hero-head">
+                <small className="in-eyebrow">Your search, at a glance</small>
+                <h1><b>{weekCount}</b><span>applied in the last 7 days</span></h1>
               </div>
+              {/* Tailark's stats strip: one card, divided into cells, each a number over its label. */}
+              <dl className="in-stats">
+                <div className={view.delta >= 0 ? "up" : "down"}><dt>vs last week</dt><dd>{view.delta >= 0 ? "+" : "−"}{Math.abs(view.delta)}</dd></div>
+                <div style={{ ["--c" as string]: tone }}><dt><i aria-hidden="true" />Today</dt><dd>{data.today.applied}<small> of {data.today.goal}</small></dd></div>
+                <div><dt>Streak</dt><dd>{data.streak}<small> {data.streak === 1 ? "day" : "days"}</small></dd></div>
+                <div><dt>Per day</dt><dd>{data.totals.avg7}</dd></div>
+                <div><dt>In all</dt><dd>{data.totals.all}</dd></div>
+              </dl>
               {strip && usage && <Link className="in-glance" to="/usage" aria-label="Where your time went this week, open Usage"><span className="in-glance-strip">{strip}</span><span>{usage.pages.slice(0, 3).map((p) => `${p.label} ${duration(p.seconds)}`).join(" · ")} · Usage →</span></Link>}
             </div>
 
