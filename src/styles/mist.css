@@ -59,13 +59,31 @@ html body.apply-console {
 *::-webkit-scrollbar-thumb { background: #3f3f46; }
 *::-webkit-scrollbar-thumb:hover { background: #52525b; }
 
+/* ---- Feature palettes (Mist) ----------------------------------------------------------------
+ * Assessments, General, Insights, Network, Usage and Ready each defined their own blue-tinted greys
+ * and a periwinkle accent. Their greys now point at the Mist ones and their accent at the app's
+ * one blue. Lucky's sky, Network Intelligence's violet and Day plan's purple are their own looks.
+ */
+html body :is(.rv-page.as-page, .rv-page.gn-page, .rv-page.in-page, .rv-page.nw-page, .rv-page.us-page) {
+  --as-card: var(--card-bg); --gn-card: var(--card-bg); --in-card: var(--card-bg); --nw-card: var(--card-bg); --us-card: var(--card-bg);
+  --gn-bg: var(--background); --nw-bg: var(--background);
+  --as-ink: var(--foreground); --gn-ink: var(--foreground); --in-ink: var(--foreground); --nw-ink: var(--foreground); --us-ink: var(--foreground);
+  --as-muted: var(--muted-fg); --gn-muted: var(--muted-fg); --in-muted: var(--muted-fg); --nw-muted: var(--muted-fg); --us-muted: var(--muted-fg);
+  --as-line: var(--border-col); --gn-line: var(--border-col); --in-line: var(--border-col); --nw-line: var(--border-col); --us-line: var(--border-col);
+  --nw-line-strong: #3f3f46;
+  --as-soft: var(--secondary-bg); --gn-soft: var(--secondary-bg); --in-soft: var(--secondary-bg); --nw-soft: var(--secondary-bg); --us-soft: var(--secondary-bg);
+  --as-accent: var(--primary); --gn-accent: var(--primary); --in-accent: var(--primary); --nw-accent: var(--primary); --us-accent: var(--primary);
+  --gn-on-accent: #09090b;
+}
+html body .ready-workspace { --background: #09090b; --foreground: #fafafa; --card-bg: #121214; }
+
 /* ---- Buttons (Mist) -------------------------------------------------------------------------
  * Every primary button in both apps takes Mist's primary: a neutral light fill, dark text, 12px
  * corners, medium weight, no glow. Found by scanning for primary buttons with a solid fill.
  * Left alone on purpose: the LinkedIn-coloured Apply buttons (.td-cta, .td-cta-linkedin), a toggle's
  * selected state (.st-flags button.on), and Network Intelligence's tinted chip (.ni-primary).
  */
-html body :is(.apply-btn, .apply-submit, .apps-review-actions button.primary, .bulk-copy-btn.primary, .cd-primary, .ej-btn, .feed-btn--primary, .inspector-btn--primary, .job-resume-btn--primary, .job-table-board-apply--primary, .login-submit, .lp-primary, .manual-tailor-foot-btn--primary, .mt-submit, .nw-btn.main, .ob-next-btn, .optimizer-run-btn, .ph-btn.is-primary, .recon-btn-primary, .rv-primary, .settings-add-btn, .t5-btn--primary, .t5-btn--save, .tailor-panel-btn, .tailored-btn--primary, .tq-btn--primary) {
+html body :is(.apply-btn, .as-save, .gn-apply, .gn-bar .apps-btn, .apply-submit, .apps-review-actions button.primary, .bulk-copy-btn.primary, .cd-primary, .ej-btn, .feed-btn--primary, .inspector-btn--primary, .job-resume-btn--primary, .job-table-board-apply--primary, .login-submit, .lp-primary, .manual-tailor-foot-btn--primary, .mt-submit, .nw-btn.main, .ob-next-btn, .optimizer-run-btn, .ph-btn.is-primary, .recon-btn-primary, .rv-primary, .settings-add-btn, .t5-btn--primary, .t5-btn--save, .tailor-panel-btn, .tailored-btn--primary, .tq-btn--primary) {
   background: #fafafa;
   background-image: none;
   color: #09090b;
@@ -75,13 +93,13 @@ html body :is(.apply-btn, .apply-submit, .apps-review-actions button.primary, .b
   font-weight: 500;
   text-shadow: none;
 }
-html body :is(.apply-btn, .apply-submit, .apps-review-actions button.primary, .bulk-copy-btn.primary, .cd-primary, .ej-btn, .feed-btn--primary, .inspector-btn--primary, .job-resume-btn--primary, .job-table-board-apply--primary, .login-submit, .lp-primary, .manual-tailor-foot-btn--primary, .mt-submit, .nw-btn.main, .ob-next-btn, .optimizer-run-btn, .ph-btn.is-primary, .recon-btn-primary, .rv-primary, .settings-add-btn, .t5-btn--primary, .t5-btn--save, .tailor-panel-btn, .tailored-btn--primary, .tq-btn--primary):hover:not(:disabled) {
+html body :is(.apply-btn, .as-save, .gn-apply, .gn-bar .apps-btn, .apply-submit, .apps-review-actions button.primary, .bulk-copy-btn.primary, .cd-primary, .ej-btn, .feed-btn--primary, .inspector-btn--primary, .job-resume-btn--primary, .job-table-board-apply--primary, .login-submit, .lp-primary, .manual-tailor-foot-btn--primary, .mt-submit, .nw-btn.main, .ob-next-btn, .optimizer-run-btn, .ph-btn.is-primary, .recon-btn-primary, .rv-primary, .settings-add-btn, .t5-btn--primary, .t5-btn--save, .tailor-panel-btn, .tailored-btn--primary, .tq-btn--primary):hover:not(:disabled) {
   background: #e4e4e7;
   background-image: none;
   color: #09090b;
   filter: none;
 }
-html body :is(.apply-btn, .apply-submit, .apps-review-actions button.primary, .bulk-copy-btn.primary, .cd-primary, .ej-btn, .feed-btn--primary, .inspector-btn--primary, .job-resume-btn--primary, .job-table-board-apply--primary, .login-submit, .lp-primary, .manual-tailor-foot-btn--primary, .mt-submit, .nw-btn.main, .ob-next-btn, .optimizer-run-btn, .ph-btn.is-primary, .recon-btn-primary, .rv-primary, .settings-add-btn, .t5-btn--primary, .t5-btn--save, .tailor-panel-btn, .tailored-btn--primary, .tq-btn--primary) :is(svg, i) { color: inherit; }
+html body :is(.apply-btn, .as-save, .gn-apply, .gn-bar .apps-btn, .apply-submit, .apps-review-actions button.primary, .bulk-copy-btn.primary, .cd-primary, .ej-btn, .feed-btn--primary, .inspector-btn--primary, .job-resume-btn--primary, .job-table-board-apply--primary, .login-submit, .lp-primary, .manual-tailor-foot-btn--primary, .mt-submit, .nw-btn.main, .ob-next-btn, .optimizer-run-btn, .ph-btn.is-primary, .recon-btn-primary, .rv-primary, .settings-add-btn, .t5-btn--primary, .t5-btn--save, .tailor-panel-btn, .tailored-btn--primary, .tq-btn--primary) :is(svg, i) { color: inherit; }
 
 /* Mist's outline button, for primaries a page deliberately tones down (Today's card actions). */
 html body .td-page .td-primary-actions :is(.rv-primary, .td-cta:not(.td-cta-linkedin)) {
@@ -174,6 +192,39 @@ html body .apply-nav a:not(.lk-nav)[aria-current="page"] { color: var(--foregrou
 .tq-next-item,
 .tq-manage-item {
   border-radius: 10px;
+}
+
+/* ---- Tables (Mist) --------------------------------------------------------------------------
+ * Mist's table, as shadcn draws it: headers in sentence case, the normal font, medium weight and
+ * muted grey (not small uppercase mono), thin dividers, and a soft neutral hover. Selected and
+ * applied rows keep their blue tint. Same selectors as the originals, so more specific states win.
+ */
+.gn-table thead th,
+.job-table thead th,
+.job-table--board thead th,
+.apply-click-table th,
+.apply-click-log--board .apply-click-table th,
+.clicked-jobs-table th,
+.mt-tracker-table thead th,
+.t5-th,
+.nwi-prev th,
+.apps-table th {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted-fg);
+}
+.gn-table tbody tr:hover,
+.job-table-row:hover td,
+.clicked-jobs-table tbody tr:hover,
+.t5-tr:hover,
+.mt-tracker-table tbody tr:hover {
+  background: rgb(255 255 255 / 0.035);
+}
+.job-table-wrap {
+  box-shadow: var(--mist-shadow);
 }
 
 /* ---- Inputs (Mist) ------------------------------------------------------------------------- */
