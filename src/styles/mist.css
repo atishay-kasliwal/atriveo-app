@@ -210,7 +210,7 @@ html body .apply-nav a:not(.lk-nav)[aria-current="page"] { color: var(--foregrou
 .nwi-prev th,
 .apps-table th {
   font-family: var(--font-sans);
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;

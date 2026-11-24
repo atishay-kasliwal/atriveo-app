@@ -53,7 +53,7 @@ header.header--tools-open {
   border-radius: 8px;
   text-decoration: none;
   color: var(--foreground);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .nav-tools-item:hover {
@@ -62,7 +62,7 @@ header.header--tools-open {
 
 .nav-tools-item small {
   color: var(--muted-fg);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .compiler-strip {
@@ -90,7 +90,7 @@ header.header--tools-open {
 
 .compiler-strip-title {
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   margin-right: 4px;
 }
 
@@ -113,13 +113,13 @@ header.header--tools-open {
 .compiler-strip-chevron {
   margin-left: auto;
   color: var(--muted-fg);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .compiler-strip-drawer {
   padding: 10px 14px 14px;
   border-top: 1px solid var(--border-col);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .compiler-strip-active {
@@ -166,7 +166,7 @@ header.header--tools-open {
 .job-resume-status--muted { color: var(--muted-fg); }
 
 .job-resume-sub {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted-fg);
   line-height: 1.35;
 }
@@ -178,7 +178,7 @@ header.header--tools-open {
 }
 
 .job-resume-btn {
-  font-size: 10px;
+  font-size: 12px;
   padding: 2px 6px;
   border-radius: 6px;
   border: 1px solid var(--border-col);
@@ -214,7 +214,7 @@ header.header--tools-open {
 
 .explain-summary-conf {
   color: var(--muted-fg);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .trust-report {
@@ -228,7 +228,7 @@ header.header--tools-open {
 
 .trust-report-loading {
   color: var(--muted-fg);
-  font-size: 11px;
+  font-size: 12px;
   margin: 6px 0 0;
 }
 
@@ -238,7 +238,7 @@ header.header--tools-open {
   border-radius: 6px;
   background: oklch(0.75 0.17 60 / 0.12);
   color: oklch(0.75 0.17 60);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .trust-report-section {
@@ -248,7 +248,7 @@ header.header--tools-open {
 }
 
 .trust-report-heading {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -268,7 +268,7 @@ header.header--tools-open {
 
 .trust-report-conf {
   color: var(--muted-fg);
-  font-size: 11px;
+  font-size: 12px;
   margin: 0;
 }
 
@@ -289,7 +289,7 @@ header.header--tools-open {
   gap: 8px;
   align-items: center;
   margin-bottom: 4px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .trust-capability-label {
@@ -320,7 +320,7 @@ header.header--tools-open {
 
 .trust-report-gaps {
   margin: 6px 0 0;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -336,7 +336,7 @@ header.header--tools-open {
 
 .trust-rejection-list li {
   margin-bottom: 6px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.35;
 }
 
@@ -353,7 +353,7 @@ header.header--tools-open {
 
 .trust-report-note {
   margin: 2px 0;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .trust-report-note--warn {
@@ -364,7 +364,7 @@ header.header--tools-open {
   list-style: none;
   margin: 10px 0 0;
   padding: 0;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .compiler-worker-row {
@@ -399,7 +399,7 @@ header.header--tools-open {
   list-style: none;
   margin: 10px 0 0;
   padding: 0;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .compiler-queue-row {
@@ -439,7 +439,7 @@ header.header--tools-open {
   list-style: none;
   padding: 0;
   margin: 0 0 8px;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .compiler-health-list li {
@@ -464,7 +464,7 @@ header.header--tools-open {
   background: oklch(0.75 0.17 60 / 0.10);
   border: 1px solid oklch(0.75 0.17 60 / 0.35);
   color: oklch(0.75 0.17 60);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .job-table--board .col-tailored {
@@ -483,7 +483,7 @@ header.header--tools-open {
   list-style: none;
   margin: 16px 0 4px;
   padding: 0 0 0 28px;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--muted-fg);
 }
 
@@ -569,7 +569,7 @@ header.header--tools-open {
 }
 
 .resume-history-badge {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 99px;
@@ -604,7 +604,7 @@ header.header--tools-open {
   border-top: 1px solid var(--border-col);
 }
 
-.ats-assessment { padding-top: 14px; font-size: 13px; color: var(--foreground); }
+.ats-assessment { padding-top: 14px; font-size: 14px; color: var(--foreground); }
 .ats-assessment-note { color: var(--muted-fg); line-height: 1.5; margin: 0 0 12px; }
 .ats-assessment-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 12px; }
 .ats-assessment-summary > div { display: flex; flex-direction: column; gap: 4px; padding: 12px; border: 1px solid var(--border-col); border-radius: 10px; }
@@ -672,7 +672,7 @@ header.header--tools-open {
 .resume-diff-close {
   border: none;
   background: none;
-  font-size: 22px;
+  font-size: 24px;
   cursor: pointer;
   line-height: 1;
   color: var(--muted-fg);
@@ -729,7 +729,7 @@ header.header--tools-open {
 .resume-diff-swaps {
   margin: 0;
   padding-left: 1.2em;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .pipeline-timeline {
@@ -753,7 +753,7 @@ header.header--tools-open {
   align-items: flex-start;
   gap: 8px;
   padding: 2px 0 8px 0;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .pipeline-step-dot {
@@ -784,10 +784,10 @@ header.header--tools-open {
 }
 
 .pipeline-step-label { font-weight: 600; }
-.pipeline-step-when { color: var(--muted-fg); font-size: 10px; }
+.pipeline-step-when { color: var(--muted-fg); font-size: 12px; }
 
 .pipeline-chip {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 99px;
@@ -822,7 +822,7 @@ header.header--tools-open {
 }
 
 .pipeline-stage-btn {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   padding: 2px 6px;
   border-radius: 6px;

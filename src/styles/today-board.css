@@ -244,7 +244,7 @@ body.is-today-board .nav-tab.active:hover {
 .today-board-nav-count {
   flex-shrink: 0;
   color: oklch(0.32 0.004 260);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
@@ -258,7 +258,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .today-board-nav-clicked {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--board-muted);
   font-variant-numeric: tabular-nums;
@@ -330,7 +330,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .today-board-session-time {
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
   color: oklch(0.68 0.006 260);
   letter-spacing: -0.01em;
@@ -341,7 +341,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .today-board-session-meta {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--board-muted);
 }
 
@@ -431,7 +431,7 @@ body.is-today-board .nav-tab.active:hover {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  font-size: 17px;
+  font-size: 18px;
   flex-shrink: 0;
   position: relative;
   z-index: 1;
@@ -452,7 +452,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .board-metric-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -462,7 +462,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .board-metric-value {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.1;
@@ -490,7 +490,7 @@ body.is-today-board .nav-tab.active:hover {
 .board-metric--amber  .board-metric-value { color: oklch(0.80 0.16 80);  }
 
 .board-metric-sub {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 400;
   color: oklch(0.36 0.005 260);
 }
@@ -541,7 +541,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .today-board-table-shell .bulk-copy-bar--board .bulk-copy-copy strong {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--board-muted);
 }
@@ -590,7 +590,7 @@ body.is-today-board .nav-tab.active:hover {
   border-radius: 6px;
   border: 1px solid var(--orange);
   background: var(--card-bg);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: #92400e;
   cursor: pointer;
@@ -602,7 +602,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .feed-stale-notice-msg {
-  font-size: 11px;
+  font-size: 12px;
   color: #78716c;
 }
 
@@ -645,7 +645,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .feed-table-views-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -756,7 +756,7 @@ body.is-today-board .nav-tab.active:hover {
   top: 50%;
   transform: translateY(-50%);
   color: var(--board-muted);
-  font-size: 13px;
+  font-size: 14px;
   pointer-events: none;
 }
 
@@ -793,7 +793,7 @@ body.is-today-board .nav-tab.active:hover {
   border-radius: 4px;
   background: var(--board-canvas);
   color: var(--board-muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   font-family: inherit;
   line-height: 1.2;
@@ -805,7 +805,7 @@ body.is-today-board .nav-tab.active:hover {
 .job-table--board {
   table-layout: fixed;
   min-width: 100%;
-  font-size: 13px;
+  font-size: 14px;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -953,7 +953,7 @@ body.is-today-board .nav-tab.active:hover {
   vertical-align: middle;
   text-align: left;
   color: var(--board-ink);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.35;
 }
 
@@ -1050,7 +1050,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .job-table-band-name {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--board-ink);
@@ -1058,14 +1058,14 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .job-table-band-openings {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: var(--board-sub);
 }
 
 .job-table-band-link {
   margin-left: auto;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: var(--board-muted);
   text-decoration: none;
@@ -1154,7 +1154,7 @@ body.is-today-board .nav-tab.active:hover {
   margin-top: 3px;
   padding: 1px 5px;
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   background: oklch(72% 0.18 145 / 0.13);
   color: oklch(72% 0.18 145);
@@ -1173,7 +1173,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .job-table--board .job-table-job--role .job-table-role-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   color: var(--board-muted);
   line-height: 1.3;
@@ -1208,7 +1208,7 @@ body.is-today-board .nav-tab.active:hover {
   border-radius: 4px;
   background: transparent;
   color: oklch(0.50 0.008 260);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   opacity: 0;
@@ -1239,7 +1239,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .job-table-role-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   color: var(--board-muted);
   line-height: 1.3;
@@ -1251,7 +1251,7 @@ body.is-today-board .nav-tab.active:hover {
 
 .job-table-role-company {
   margin-top: 1px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.06em;
   color: var(--board-muted);
@@ -1277,7 +1277,7 @@ body.is-today-board .nav-tab.active:hover {
 
 .job-table--board .job-table-stars {
   display: inline-block;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   line-height: 1;
   color: var(--board-star);
@@ -1362,7 +1362,7 @@ body.is-today-board .nav-tab.active:hover {
   border: 1px solid var(--board-line);
   color: var(--board-sub);
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1;
   text-decoration: none;
@@ -1412,7 +1412,7 @@ body.is-today-board .nav-tab.active:hover {
   justify-content: center;
   min-height: 24px;
   padding: 3px 10px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1;
   border-radius: 5px;
@@ -1424,7 +1424,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .bulk-copy-count {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--board-muted);
   margin-right: 4px;
@@ -1462,7 +1462,7 @@ body.is-today-board .nav-tab.active:hover {
   padding: 8px 16px;
   border-top: 1px solid var(--board-line);
   background: var(--board-surface);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--board-sub);
   text-transform: uppercase;
@@ -1485,7 +1485,7 @@ body.is-today-board .nav-tab.active:hover {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--board-muted);
   text-transform: none;
   letter-spacing: 0;
@@ -1501,7 +1501,7 @@ body.is-today-board .nav-tab.active:hover {
   border: 1px solid var(--board-line);
   border-radius: 4px;
   background: var(--board-canvas);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   font-family: inherit;
   color: var(--board-sub);
@@ -1522,7 +1522,7 @@ body.is-today-board .nav-tab.active:hover {
 .today-board-footer-end {
   text-transform: none;
   letter-spacing: 0;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 @media (max-width: 1100px) {
@@ -1625,7 +1625,7 @@ body.is-today-board .nav-tab.active:hover {
 .apply-click-log--board .apply-click-log-kicker {
   color: var(--board-muted);
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.1em;
 }
@@ -1641,7 +1641,7 @@ body.is-today-board .nav-tab.active:hover {
 .apply-click-log--board p {
   margin-top: 2px;
   color: var(--board-sub);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .apply-click-log--board .apply-click-log-head > strong {
@@ -1650,7 +1650,7 @@ body.is-today-board .nav-tab.active:hover {
   background: var(--board-accent-soft);
   color: var(--board-accent-strong);
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   padding: 5px 9px;
 }
@@ -1672,7 +1672,7 @@ body.is-today-board .nav-tab.active:hover {
   top: 0;
   z-index: 2;
   padding: 7px 12px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1707,7 +1707,7 @@ body.is-today-board .nav-tab.active:hover {
   border-radius: 5px;
   background: var(--card-bg);
   color: var(--board-sub);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   padding: 3px 8px;
 }
@@ -1760,7 +1760,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .tq-kicker {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1768,7 +1768,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .tq-meta {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--board-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -1800,7 +1800,7 @@ body.is-today-board .nav-tab.active:hover {
   border-radius: 999px;
   background: var(--card-bg);
   color: var(--board-sub);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   padding: 5px 12px;
   cursor: pointer;
@@ -1836,7 +1836,7 @@ body.is-today-board .nav-tab.active:hover {
 .tq-sync-msg {
   margin: 0;
   padding: 6px 16px 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--board-accent-strong);
 }
 
@@ -1857,7 +1857,7 @@ body.is-today-board .nav-tab.active:hover {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1880,7 +1880,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .tq-now-elapsed {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--board-muted);
   font-variant-numeric: tabular-nums;
@@ -1895,14 +1895,14 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .tq-now-company {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--board-ink);
   letter-spacing: -0.01em;
 }
 
 .tq-now-title {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--board-sub);
   white-space: nowrap;
   overflow: hidden;
@@ -1953,7 +1953,7 @@ body.is-today-board .nav-tab.active:hover {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--board-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -1984,7 +1984,7 @@ body.is-today-board .nav-tab.active:hover {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   background: var(--card-bg);
 }
@@ -2000,7 +2000,7 @@ body.is-today-board .nav-tab.active:hover {
 
 .tq-finished-time {
   flex-shrink: 0;
-  font-size: 10px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   opacity: 0.75;
 }
@@ -2080,7 +2080,7 @@ body.is-today-board .nav-tab.active:hover {
 
 .tq-next-label {
   margin: 0 0 8px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2108,7 +2108,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .tq-next-rank {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--board-muted);
   text-align: center;
@@ -2132,7 +2132,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .tq-next-copy span {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--board-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -2140,7 +2140,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .tq-next-score {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--board-accent-strong);
   background: var(--board-accent-soft);
@@ -2151,7 +2151,7 @@ body.is-today-board .nav-tab.active:hover {
 
 .tq-next-more {
   margin: 8px 0 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--board-muted);
 }
 
@@ -2188,7 +2188,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .tq-manage-rank {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--board-muted);
   text-align: center;
@@ -2207,7 +2207,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .tq-manage-copy span {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--board-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -2215,7 +2215,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .tq-manage-score {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--board-accent-strong);
 }
@@ -2230,7 +2230,7 @@ body.is-today-board .nav-tab.active:hover {
   border-radius: 5px;
   background: var(--card-bg);
   color: var(--board-sub);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   padding: 3px 7px;
   cursor: pointer;
@@ -2259,7 +2259,7 @@ body.is-today-board .nav-tab.active:hover {
 .job-table-tailored-path {
   display: block;
   max-width: 100%;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.2;
   color: var(--board-muted);
   white-space: nowrap;
@@ -2281,7 +2281,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .job-table-tailored-log-icon {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 /* ─── JD Drawer ──────────────────────────────────────────── */
@@ -2320,7 +2320,7 @@ body.is-today-board .nav-tab.active:hover {
   min-width: 0;
 }
 .jd-drawer-company {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -2364,7 +2364,7 @@ body.is-today-board .nav-tab.active:hover {
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 14px;
   background: transparent;
   color: var(--board-muted, oklch(60% 0.01 260));
   border: 1px solid transparent;
@@ -2379,14 +2379,14 @@ body.is-today-board .nav-tab.active:hover {
 .jd-drawer-text {
   margin: 0;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.65;
   color: var(--board-text, oklch(92% 0.01 260));
   white-space: pre-wrap;
   word-break: break-word;
 }
 .jd-drawer-state {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--board-muted);
   padding: 24px 0;
   text-align: center;
@@ -2424,7 +2424,7 @@ body.is-today-board .nav-tab.active:hover {
   flex-shrink: 0;
 }
 .pdf-modal-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--board-text, oklch(92% 0.01 260));
   white-space: nowrap;
@@ -2461,7 +2461,7 @@ body.is-today-board .nav-tab.active:hover {
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 14px;
   background: transparent;
   color: var(--board-muted, oklch(65% 0.01 260));
   border: 1px solid transparent;
@@ -2485,7 +2485,7 @@ body.is-today-board .nav-tab.active:hover {
   align-items: center;
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   background: oklch(55% 0.18 260 / 0.15);
   color: oklch(72% 0.16 260);
@@ -2531,7 +2531,7 @@ body.is-today-board .nav-tab.active:hover {
 
 .tailor-log-modal-kicker {
   margin: 0 0 4px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2546,7 +2546,7 @@ body.is-today-board .nav-tab.active:hover {
 
 .tailor-log-modal-sub {
   margin: 4px 0 0;
-  font-size: 13px;
+  font-size: 14px;
   color: #4b5563;
 }
 
@@ -2593,7 +2593,7 @@ body.is-today-board .nav-tab.active:hover {
 .tailor-log-modal-empty {
   margin: 0;
   padding: 18px;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--muted-fg);
 }
 
@@ -2606,7 +2606,7 @@ body.is-today-board .nav-tab.active:hover {
   min-height: 22px;
   padding: 3px 8px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0.02em;
@@ -2638,7 +2638,7 @@ body.is-today-board .nav-tab.active:hover {
   border: none;
   background: none;
   padding: 2px 0;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1.2;
   color: var(--board-accent-strong);
@@ -2698,7 +2698,7 @@ body.is-today-board .nav-tab.active:hover {
 .job-table-tailored-errmsg {
   display: block;
   margin-top: 3px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 400;
   color: oklch(0.55 0.14 25);
   line-height: 1.3;
@@ -2782,7 +2782,7 @@ body.is-today-board .nav-tab.active:hover {
   background: transparent;
   color: oklch(0.38 0.005 260);
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   text-align: left;
   cursor: pointer;
@@ -2805,7 +2805,7 @@ body.is-today-board .nav-tab.active:hover {
 
 .today-board-sub-item .today-board-nav-count {
   margin-left: auto;
-  font-size: 10.5px;
+  font-size: 12px;
 }
 
 .today-board-sub-dot {
@@ -2839,7 +2839,7 @@ body.is-today-board .nav-tab.active:hover {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
@@ -2871,7 +2871,7 @@ body.is-today-board .nav-tab.active:hover {
 
 .today-board-session-count {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: oklch(0.32 0.004 260);
@@ -2946,7 +2946,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .inspector-company {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -2974,7 +2974,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .inspector-level-badge {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -3057,7 +3057,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .inspector-score-stars {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--board-star, #f0b429);
   letter-spacing: 1px;
 }
@@ -3098,7 +3098,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .inspector-reasons li {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--board-muted);
   padding-left: 10px;
   position: relative;
@@ -3121,7 +3121,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .inspector-meta-chip {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   padding: 3px 8px;
   border-radius: 4px;
@@ -3197,7 +3197,7 @@ body.is-today-board .nav-tab.active:hover {
 
 .inspector-btn--sm {
   padding: 4px 9px;
-  font-size: 11px;
+  font-size: 12px;
   border-radius: 5px;
 }
 
@@ -3212,7 +3212,7 @@ body.is-today-board .nav-tab.active:hover {
 }
 
 .inspector-section-title {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
