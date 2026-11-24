@@ -61,7 +61,7 @@
   border: 1px solid transparent;
   font-size: 0.8rem;
   font-weight: 500;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s, opacity 0.12s;
   white-space: nowrap;
@@ -146,7 +146,7 @@
   border-radius: 8px;
   color: var(--foreground);
   font-size: 0.875rem;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
   box-sizing: border-box;
@@ -217,7 +217,7 @@
   border-radius: 6px;
   color: var(--foreground);
   font-size: 0.85rem;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
   width: 100%;
@@ -316,7 +316,7 @@
 }
 
 .t5-td--mono {
-  font-family: "Fira Code", "Fira Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
   color: oklch(0.75 0.1 255);
 }
@@ -358,7 +358,7 @@
   border-radius: 8px;
   font-size: 0.83rem;
   font-weight: 500;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
   z-index: 9999;
   animation: t5-slide-in 0.2s ease;
   box-shadow: 0 4px 16px rgba(0,0,0,0.35);

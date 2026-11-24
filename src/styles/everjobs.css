@@ -130,7 +130,7 @@
 }
 
 .ej-chip {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   border-radius: 4px;
   padding: 0.2rem 0.45rem;
@@ -175,7 +175,7 @@
 
 .ej-trail b {
   color: var(--text);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
 }
 
 .ej-cached {
@@ -244,7 +244,7 @@
 
 .ej-row-src,
 .ej-row-age {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--muted);
 }

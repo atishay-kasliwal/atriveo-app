@@ -1,12 +1,11 @@
 /* Shared application UI. Resume documents render in their own unchanged iframe. */
-@font-face { font-family:'Atriveo Sans';src:url('/fonts/dm-sans-variable.ttf') format('truetype');font-style:normal;font-weight:100 1000;font-display:swap; }
 body.apply-console {
  --background:#101113;--foreground:#eceef1;--card-bg:#17191c;--popover-bg:#1b1d21;
  --secondary-bg:#202328;--muted-bg:#202328;--muted-fg:#a3a9b2;--accent-bg:#24272c;
  --border-col:#2b2e34;--input-bg:#141619;--surface-elev:#1c1f23;--primary:#83adf0;
  --bg:var(--background);--surface:var(--card-bg);--surface-2:var(--secondary-bg);--border:var(--border-col);--text:var(--foreground);--text-2:#c2c7cf;--muted:var(--muted-fg);
  --font-display:'Atriveo Sans',system-ui,sans-serif;--font-stat:var(--font-display);
- font-family:'Atriveo Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+ font-family: var(--font-sans);
  font-size:14px;line-height:1.55;letter-spacing:0;font-optical-sizing:auto;-webkit-font-smoothing:antialiased;
  background:var(--background);color:var(--foreground);
 }

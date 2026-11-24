@@ -1,0 +1,112 @@
+/*
+ * Tailark "Mist" foundation (tailark.com, MIT). Loaded last by both apps (src/main.tsx and
+ * src/apply/main.tsx), so these tokens win over index.css and the Apply console's visual-theme.css.
+ *
+ * - Neutral zinc greys instead of the blue-tinted ones. Blue stays for status and selection:
+ *   --primary (progress, dots, meters, selected) is unchanged here; buttons go neutral in their own step.
+ * - Geist and Geist Mono (OFL, from @fontsource-variable), shipped with the app.
+ * - Mist's shape: 12px corners on cards and controls, a thin 6% white edge and a light shadow.
+ *   Components move onto --mist-* one at a time.
+ */
+@font-face { font-family: "Geist"; src: url("../assets/fonts/geist-latin.woff2") format("woff2-variations"), url("../assets/fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Geist Mono"; src: url("../assets/fonts/geist-mono-latin.woff2") format("woff2-variations"), url("../assets/fonts/geist-mono-latin.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+
+html:root,
+html body.apply-console {
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-sans);
+  --font-stat: var(--font-sans);
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Zinc neutrals (Tailwind zinc, as Tailark uses them on dark). */
+  --background: #09090b;         /* zinc-950 */
+  --foreground: #fafafa;         /* zinc-50 */
+  --card-bg: #121214;            /* between zinc-950 and zinc-900 */
+  --popover-bg: #18181b;         /* zinc-900 */
+  --secondary-bg: #1f1f23;
+  --muted-bg: #1f1f23;
+  --muted-fg: #a1a1aa;           /* zinc-400 */
+  --accent-bg: #27272a;          /* zinc-800, hover surface */
+  --border-col: #232326;         /* about 8% white on the background */
+  --input-bg: #0f0f11;
+  --surface-elev: #18181b;
+  --sidebar: #09090b;
+  --text-2: #d4d4d8;             /* zinc-300 */
+  --bean-dark: #050506;
+
+  /* Mist shape. */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --mist-edge: rgb(255 255 255 / 0.06);
+  --mist-ring: 0 0 0 1px var(--mist-edge);
+  --mist-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --mist-card-shadow: var(--mist-ring), var(--mist-shadow);
+  --mist-pop-shadow: var(--mist-ring), 0 10px 30px -8px rgb(0 0 0 / 0.6);
+}
+
+html,
+body,
+html body.apply-console {
+  font-family: var(--font-sans);
+  background: var(--background);
+  font-feature-settings: "ss01" 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+* { scrollbar-color: #3f3f46 transparent; }
+*::-webkit-scrollbar-thumb { background: #3f3f46; }
+*::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+/* ---- Buttons (Mist) -------------------------------------------------------------------------
+ * Every primary button in both apps takes Mist's primary: a neutral light fill, dark text, 12px
+ * corners, medium weight, no glow. Found by scanning for primary buttons with a solid fill.
+ * Left alone on purpose: the LinkedIn-coloured Apply buttons (.td-cta, .td-cta-linkedin), a toggle's
+ * selected state (.st-flags button.on), and Network Intelligence's tinted chip (.ni-primary).
+ */
+html body :is(.apply-btn, .apply-submit, .apps-review-actions button.primary, .bulk-copy-btn.primary, .cd-primary, .ej-btn, .feed-btn--primary, .inspector-btn--primary, .job-resume-btn--primary, .job-table-board-apply--primary, .login-submit, .lp-primary, .manual-tailor-foot-btn--primary, .mt-submit, .nw-btn.main, .ob-next-btn, .optimizer-run-btn, .ph-btn.is-primary, .recon-btn-primary, .rv-primary, .settings-add-btn, .t5-btn--primary, .t5-btn--save, .tailor-panel-btn, .tailored-btn--primary, .tq-btn--primary) {
+  background: #fafafa;
+  background-image: none;
+  color: #09090b;
+  border-color: transparent;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.25);
+  font-weight: 500;
+  text-shadow: none;
+}
+html body :is(.apply-btn, .apply-submit, .apps-review-actions button.primary, .bulk-copy-btn.primary, .cd-primary, .ej-btn, .feed-btn--primary, .inspector-btn--primary, .job-resume-btn--primary, .job-table-board-apply--primary, .login-submit, .lp-primary, .manual-tailor-foot-btn--primary, .mt-submit, .nw-btn.main, .ob-next-btn, .optimizer-run-btn, .ph-btn.is-primary, .recon-btn-primary, .rv-primary, .settings-add-btn, .t5-btn--primary, .t5-btn--save, .tailor-panel-btn, .tailored-btn--primary, .tq-btn--primary):hover:not(:disabled) {
+  background: #e4e4e7;
+  background-image: none;
+  color: #09090b;
+  filter: none;
+}
+html body :is(.apply-btn, .apply-submit, .apps-review-actions button.primary, .bulk-copy-btn.primary, .cd-primary, .ej-btn, .feed-btn--primary, .inspector-btn--primary, .job-resume-btn--primary, .job-table-board-apply--primary, .login-submit, .lp-primary, .manual-tailor-foot-btn--primary, .mt-submit, .nw-btn.main, .ob-next-btn, .optimizer-run-btn, .ph-btn.is-primary, .recon-btn-primary, .rv-primary, .settings-add-btn, .t5-btn--primary, .t5-btn--save, .tailor-panel-btn, .tailored-btn--primary, .tq-btn--primary) :is(svg, i) { color: inherit; }
+
+/* Mist's outline button, for primaries a page deliberately tones down (Today's card actions). */
+html body .td-page .td-primary-actions :is(.rv-primary, .td-cta:not(.td-cta-linkedin)) {
+  background: var(--card-bg);
+  color: var(--foreground);
+  border-color: transparent;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1), 0 1px 2px 0 rgb(0 0 0 / 0.3);
+}
+html body .td-page .td-primary-actions :is(.rv-primary, .td-cta:not(.td-cta-linkedin)):hover:not(:disabled) {
+  background: var(--accent-bg);
+  color: var(--foreground);
+}
+
+/* ---- Navigation (Mist) ----------------------------------------------------------------------
+ * Nav links are neutral: muted, white on hover and when current. (A page-wide `.rv-page a` rule
+ * used to paint them blue.) Counts beside them keep the blue status colour; Lucky keeps its gold.
+ */
+html body .apply-nav a:not(.lk-nav) { color: var(--muted-fg); border-radius: 10px; }
+html body .apply-nav a:not(.lk-nav):hover { color: var(--foreground); background: rgb(255 255 255 / 0.05); }
+html body .apply-nav a:not(.lk-nav)[aria-current="page"] { color: var(--foreground); background: rgb(255 255 255 / 0.08); box-shadow: none; }
+
+/* ---- Inputs (Mist) ------------------------------------------------------------------------- */
+html body :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), textarea, select):focus-visible {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 35%, transparent);
+}
+html body :is(input, textarea)::placeholder { color: #71717a; }

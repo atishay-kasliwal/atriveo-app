@@ -462,7 +462,7 @@
 
 /* Minimal (2026-11-17, Atishay: simple and compact, no boxes or matte panels). Content sits on the page with hairlines
    between parts; one font; nothing under 11px. These rules come last, so they win over the layers above. */
-/* A site-wide `footer { font-family: Inter, monospace }` reached this page's bottom bar (Inter isn't loaded here). */
+/* A site-wide `footer { font-family: var(--font-sans)}` reached this page's bottom bar (Inter isn't loaded here). */
 .jm-actions{font-family:inherit}
 /* Header: flat on the page, a hairline below it instead of a black box. */
 .jm-workspace:has(.hx){background:transparent}

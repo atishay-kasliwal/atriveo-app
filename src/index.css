@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Fonts: Geist and Geist Mono, from src/styles/mist.css. */
 @import url('./styles/today-board.css');
 @import url('./styles/manual-tailor.css');
 @import url('./styles/compiler-ui.css');
@@ -103,7 +103,7 @@ html {
 body {
   background: oklch(0.13 0.005 260);
   color: oklch(0.98 0.003 250);
-  font-family: "Work Sans", "Inter", "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.5;
   min-height: 100vh;
@@ -546,7 +546,7 @@ header {
 
 .today-apps-kicker {
   color: var(--green);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -577,7 +577,7 @@ header {
   justify-content: center;
   background: linear-gradient(135deg, var(--tier-green), var(--blue-hi));
   color: #fff;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 22px;
   font-weight: 900;
   box-shadow: 0 10px 22px color-mix(in oklch, var(--blue) 18%, transparent);
@@ -638,7 +638,7 @@ header {
   justify-items: end;
   gap: 2px;
   color: var(--muted);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 9.5px;
   font-weight: 800;
 }
@@ -679,7 +679,7 @@ header {
 
 .best-jobs-kicker {
   color: var(--blue);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -729,7 +729,7 @@ header {
   color: var(--bean-dark);
   background: color-mix(in oklch, var(--blue) 12%, transparent);
   border: 1px solid color-mix(in oklch, var(--blue) 22%, transparent);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 900;
 }
@@ -763,7 +763,7 @@ header {
   padding: 4px 8px 3px;
   border-radius: 999px;
   color: #fff;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   text-align: center;
   display: grid;
   gap: 1px;
@@ -803,7 +803,7 @@ header {
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid color-mix(in oklch, var(--muted) 16%, transparent);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
 }
 
 .best-jobs-footer span {
@@ -908,7 +908,7 @@ header {
 /* ── Typography — dark on light bg ── */
 .kpi-label {
   font-size: 9px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.12em; font-family: "Inter", monospace;
+  letter-spacing: 0.12em; font-family: var(--font-sans);
   color: var(--muted);
 }
 .kpi-value {
@@ -964,7 +964,7 @@ header {
   border: none; background: none;
   font-size: 12px; font-weight: 600; color: var(--muted);
   cursor: pointer; transition: all 0.18s;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
 }
 .period-tab:hover { text-decoration: none; }
 .period-tab:hover { color: var(--text); }
@@ -972,7 +972,7 @@ header {
   background: linear-gradient(135deg, var(--bean-dark), var(--bean-olive));
   color: #fff; box-shadow: 0 0 14px var(--blue-glow);
 }
-.period-tab .count { font-size: 10px; opacity: 0.8; font-family: "Inter", monospace; }
+.period-tab .count { font-size: 10px; opacity: 0.8; font-family: var(--font-sans); }
 
 .sort-group {
   display: flex; background: var(--card-bg);
@@ -983,7 +983,7 @@ header {
   padding: 5px 12px; border-radius: 99px; border: none;
   background: none; font-size: 11px; font-weight: 600;
   color: var(--muted-fg); cursor: pointer; transition: all 0.18s;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
 }
 .sort-btn:hover { color: var(--foreground); }
 .sort-btn.active { background: oklch(0.22 0.005 260); color: var(--foreground); border: 1px solid var(--border-col); }
@@ -995,7 +995,7 @@ header {
   gap: 6px;
   flex-wrap: wrap;
   min-width: 190px;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
 }
 
 .feed-summary-primary {
@@ -1048,7 +1048,7 @@ header {
 
 .bulk-copy-copy span {
   color: var(--blue);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -1143,7 +1143,7 @@ header {
 .jd-analysis-head span,
 .jd-analysis-card-title {
   color: var(--blue);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -1270,7 +1270,7 @@ header {
 .jd-analysis-row strong,
 .jd-analysis-bar-row strong {
   color: var(--foreground);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
 }
 
 .jd-analysis-bar-row {
@@ -1325,7 +1325,7 @@ header {
 .tailor-panel-kicker {
   display: block;
   color: #6c685d;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -1353,7 +1353,7 @@ header {
   border-radius: 8px;
   background: var(--border);
   color: var(--muted-fg);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10.5px;
   word-break: break-all;
 }
@@ -1407,7 +1407,7 @@ header {
 .tailor-panel-progress strong {
   min-width: 36px;
   color: var(--blue);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 11px;
   text-align: right;
 }
@@ -1422,7 +1422,7 @@ header {
 
 .tailor-panel-eta {
   color: var(--muted-fg);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 600;
   white-space: nowrap;
@@ -1502,7 +1502,7 @@ header {
 .tailor-job-main small {
   margin-top: 4px;
   color: var(--muted-fg);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
 }
 
@@ -1566,7 +1566,7 @@ header {
 
 .tailor-thought-toggle-label {
   color: var(--muted-fg);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -1578,7 +1578,7 @@ header {
   border-radius: 999px;
   background: var(--border);
   color: var(--muted-fg);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 700;
   padding: 2px 8px;
@@ -1589,7 +1589,7 @@ header {
   border-radius: 999px;
   background: rgba(99, 102, 241, 0.12);
   color: var(--blue);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -1608,7 +1608,7 @@ header {
 .tailor-thought-preview {
   padding: 0 12px 8px 34px;
   color: var(--muted-fg);
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   line-height: 1.4;
   white-space: nowrap;
@@ -1622,7 +1622,7 @@ header {
   gap: 10px;
   padding: 0 12px 6px;
   color: var(--muted-fg);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -1653,7 +1653,7 @@ header {
   padding: 8px 10px 10px;
   max-height: 360px;
   overflow-y: auto;
-  font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   line-height: 1.5;
   scroll-behavior: smooth;
@@ -2243,7 +2243,7 @@ header {
 
 .run-strip-label {
   color: var(--text-2);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -2252,7 +2252,7 @@ header {
 
 .run-strip-status {
   color: var(--muted);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   white-space: nowrap;
 }
@@ -2320,7 +2320,7 @@ header {
 .run-card-countline { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .run-card-time {
   font-size: 14px; font-weight: 800; color: var(--text);
-  letter-spacing: -0.04em; font-family: "Inter", monospace;
+  letter-spacing: -0.04em; font-family: var(--font-sans);
 }
 .run-card-pill {
   display: inline-flex;
@@ -2333,7 +2333,7 @@ header {
   background: var(--green-lo);
   border: 1px solid color-mix(in oklch, var(--blue) 22%, transparent);
   white-space: nowrap;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   letter-spacing: 0.01em;
 }
 .run-card.active .run-card-pill { background: color-mix(in oklch, var(--blue) 16%, transparent); }
@@ -2341,13 +2341,13 @@ header {
   font-size: 12px; font-weight: 700;
   color: var(--green);
   white-space: nowrap;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   letter-spacing: -0.02em;
 }
 .run-card-count {
   font-size: 10px;
   color: var(--muted);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   background: color-mix(in oklch, var(--muted) 10%, transparent);
   padding: 1px 6px; border-radius: 4px;
 }
@@ -2403,7 +2403,7 @@ header {
   background: var(--card-bg);
   font-size: 12.5px; color: var(--foreground); outline: none;
   transition: border-color 0.18s, box-shadow 0.18s;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
 }
 .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px oklch(0.66 0.19 255 / 0.15); }
 .search-input::placeholder { color: var(--muted-fg); }
@@ -2418,7 +2418,7 @@ header {
   border: 1px solid var(--border); background: var(--surface);
   font-size: 11px; font-weight: 600; color: var(--muted);
   cursor: pointer; transition: all 0.18s;
-  font-family: "Inter", sans-serif; backdrop-filter: blur(8px);
+  font-family: var(--font-sans); backdrop-filter: blur(8px);
 }
 .chip:hover { border-color: var(--border-hi); color: var(--blue-hi); }
 .chip.active {
@@ -2433,7 +2433,7 @@ header {
   background: rgba(0,0,0,0.05);
   border-radius: 6px; padding: 0 5px;
   font-size: 10px; font-weight: 700; min-width: 18px; text-align: center;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
 }
 .chip.active .chip-count { background: var(--border); }
 
@@ -2442,11 +2442,11 @@ header {
   border: 1px solid var(--border); background: var(--surface);
   font-size: 11px; font-weight: 600; color: var(--muted);
   cursor: pointer; transition: all 0.18s; backdrop-filter: blur(8px);
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
 }
 .chip-toggle:hover { border-color: color-mix(in oklch, var(--blue) 45%, transparent); color: var(--green); }
 .chip-toggle.active { background: var(--green-lo); border-color: color-mix(in oklch, var(--blue) 50%, transparent); color: var(--green); box-shadow: 0 0 10px color-mix(in oklch, var(--blue) 16%, transparent); }
-.chip-toggle .chip-count { background: rgba(0,0,0,0.05); border-radius: 6px; padding: 0 5px; font-size: 10px; font-weight: 700; font-family: "Inter", monospace; }
+.chip-toggle .chip-count { background: rgba(0,0,0,0.05); border-radius: 6px; padding: 0 5px; font-size: 10px; font-weight: 700; font-family: var(--font-sans); }
 .chip-toggle.active .chip-count { background: color-mix(in oklch, var(--blue) 20%, transparent); }
 
 .chip-toggle-purple:hover { border-color: color-mix(in oklch, var(--muted) 45%, transparent); color: var(--bean-olive); }
@@ -2466,7 +2466,7 @@ header {
   color: var(--muted);
   margin-right: 2px;
   flex-shrink: 0;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
 }
 
 .chip-tailor--done { border-color: rgba(31, 122, 63, 0.28); color: #1f7a3f; }
@@ -2525,7 +2525,7 @@ header {
   backdrop-filter: blur(8px); color: var(--muted);
   border-radius: 99px; font-size: 11px; font-weight: 600;
   padding: 7px 26px 7px 12px; cursor: pointer; outline: none;
-  transition: all 0.18s; font-family: "Inter", sans-serif;
+  transition: all 0.18s; font-family: var(--font-sans);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235a6a82' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 10px center;
 }
@@ -2543,7 +2543,7 @@ header {
   font-weight: 700;
   cursor: pointer;
   transition: background 0.16s, border-color 0.16s, transform 0.12s;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
 }
 .clear-filters-btn:hover {
   background: rgba(220,38,38,0.12);
@@ -2620,7 +2620,7 @@ header {
   color: var(--muted);
   margin-bottom: 10px;
   min-height: 16px;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   padding-left: 2px;
 }
 
@@ -2648,7 +2648,7 @@ header {
 
 .apply-click-log-kicker {
   color: var(--tier-blue);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -2674,7 +2674,7 @@ header {
   border-radius: 999px;
   background: color-mix(in oklch, var(--blue) 10%, transparent);
   color: var(--tier-blue);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 900;
   padding: 7px 10px;
@@ -2703,7 +2703,7 @@ header {
 
 .apply-click-table th {
   color: var(--muted);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -2719,7 +2719,7 @@ header {
 .apply-click-index {
   width: 42px;
   color: var(--muted);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 900;
 }
@@ -2739,7 +2739,7 @@ header {
 
 .apply-click-table td:nth-child(5),
 .apply-click-table td:nth-child(6) {
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 11px;
 }
 
@@ -2756,7 +2756,7 @@ header {
   background: color-mix(in oklch, var(--blue) 8%, transparent);
   color: var(--green);
   cursor: pointer;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
   font-size: 10.5px;
   font-weight: 900;
   transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.12s;
@@ -2906,7 +2906,7 @@ header {
   overflow-y: auto;
   white-space: pre-wrap;
   word-break: break-word;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-size: 12px;
   line-height: 1.5;
   color: var(--muted-fg);
@@ -3160,7 +3160,7 @@ header {
   border-radius: 999px;
   background: var(--card-bg);
   color: var(--text-2);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 8.5px;
   font-weight: 900;
   letter-spacing: 0.04em;
@@ -3247,14 +3247,14 @@ header {
 }
 
 .job-tile-match strong {
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 15px;
   line-height: 1;
   letter-spacing: -0.04em;
 }
 
 .job-tile-match span:last-child {
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 7.4px;
   font-weight: 900;
   letter-spacing: 0.055em;
@@ -3270,7 +3270,7 @@ header {
   border-radius: 999px;
   background: rgba(255,255,255,0.2);
   color: #fff;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 8px;
   font-style: normal;
   font-weight: 900;
@@ -3333,7 +3333,7 @@ header {
   justify-content: flex-start;
   gap: 6px;
   padding: 5px 11px 0;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
 }
 
 .job-tile-confidence span {
@@ -3387,7 +3387,7 @@ header {
 .job-tile-reason {
   max-width: 86px;
   color: var(--job-accent);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 9px;
   font-weight: 800;
   line-height: 1.05;
@@ -3410,7 +3410,7 @@ header {
   border-radius: 6px;
   background: var(--card-bg);
   color: var(--text-2);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   font-size: 9px;
   font-weight: 700;
   line-height: 1;
@@ -3478,7 +3478,7 @@ header {
   height: 24px;
   border-radius: 6px;
   border: none;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 700;
   cursor: pointer;
@@ -3606,7 +3606,7 @@ header {
   color: #8ec1ff;
   font-size: 10px; font-weight: 700; white-space: nowrap;
   cursor: pointer; transition: all 0.15s;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
 }
 .message-btn:hover { background: rgba(123, 185, 255, 0.2); border-color: rgba(123, 185, 255, 0.6); }
 
@@ -3658,19 +3658,19 @@ header {
 .badge-src-glassdoor { background: var(--green-lo);  color: var(--green); }
 .badge-src-zip       { background: var(--orange-lo); color: var(--orange); }
 
-.match-pct { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; white-space: nowrap; font-family: "Inter", monospace; opacity: 0.92; }
+.match-pct { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; white-space: nowrap; font-family: var(--font-sans); opacity: 0.92; }
 .match-hi  { background: var(--green-lo);  color: var(--green);  border: 1px solid color-mix(in oklch, var(--blue) 20%, transparent); }
 .match-md  { background: var(--cyan-lo);   color: var(--cyan);   border: 1px solid color-mix(in oklch, var(--muted) 20%, transparent); }
 .match-lo  { background: var(--orange-lo); color: var(--orange); border: 1px solid color-mix(in oklch, var(--blue) 20%, transparent); }
 
-.job-date { font-size: 10px; font-weight: 600; color: var(--muted); white-space: nowrap; font-family: "Inter", monospace; }
+.job-date { font-size: 10px; font-weight: 600; color: var(--muted); white-space: nowrap; font-family: var(--font-sans); }
 .job-date.fresh { color: var(--cyan); }
 
 .tracker-actions { display: flex; gap: 4px; justify-content: flex-end; }
 .tracker-btn {
   padding: 3px 8px; border-radius: 99px;
   font-size: 10px; font-weight: 700; white-space: nowrap; border: none; cursor: default;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
 }
 .tracker-right  { background: var(--blue-lo); color: var(--blue); border: 1px solid var(--border-hi); cursor: pointer; }
 .tracker-wrong  { background: var(--red-lo);  color: var(--red);  border: 1px solid rgba(220,38,38,0.3); cursor: pointer; }
@@ -3685,7 +3685,7 @@ header {
   color: var(--primary-foreground); font-size: 11px; font-weight: 600;
   border: none; cursor: pointer; white-space: nowrap;
   transition: filter 0.15s, box-shadow 0.15s; text-decoration: none;
-  font-family: "Work Sans", "Inter", sans-serif;
+  font-family: var(--font-sans);
 }
 .apply-btn:hover { filter: brightness(1.1); text-decoration: none; color: var(--primary-foreground); }
 .apply-btn.applied {
@@ -3702,7 +3702,7 @@ header {
 .state-msg .sub  { font-size: 12px; margin-top: 6px; opacity: 0.6; }
 
 /* footer */
-footer { padding: 20px 0; text-align: center; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); font-family: "Inter", monospace; position: relative; z-index: 1; }
+footer { padding: 20px 0; text-align: center; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); font-family: var(--font-sans); position: relative; z-index: 1; }
 footer a { color: var(--muted); }
 footer a:hover { color: var(--blue); }
 
@@ -4011,7 +4011,7 @@ footer a:hover { color: var(--blue); }
 .ob-copy-btn:hover { color: var(--foreground); }
 .ob-terminal-body {
   background: oklch(0.10 0.004 260); padding: 20px;
-  font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  font-family: var(--font-mono); font-size: 13px;
   color: oklch(0.82 0.04 140); line-height: 1.7; text-align: left;
   overflow-x: auto; white-space: pre;
 }
@@ -4030,7 +4030,7 @@ footer a:hover { color: var(--blue); }
 }
 .ob-field input:focus { border-color: var(--primary); }
 .ob-field-hint { font-size: 12px; color: var(--muted-fg); }
-.ob-field-hint code { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.75 0.12 180); }
+.ob-field-hint code { font-family: var(--font-mono); font-size: 11px; color: oklch(0.75 0.12 180); }
 .ob-error {
   background: oklch(0.62 0.22 25 / 0.1); border: 1px solid oklch(0.62 0.22 25 / 0.25);
   border-radius: 8px; padding: 10px 14px;
@@ -4096,7 +4096,7 @@ footer a:hover { color: var(--blue); }
   color: var(--text-2);
   font-size: 12px;
   font-weight: 600;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
@@ -5382,7 +5382,7 @@ footer a:hover { color: var(--blue); }
   border: 1px solid var(--border-hi);
   border-radius: 99px;
   padding: 4px 10px;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
 }
 
 .split-panel { min-width: 0; }
@@ -5398,7 +5398,7 @@ footer a:hover { color: var(--blue); }
 }
 .split-panel-count {
   font-size: 10px; color: var(--muted);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
 }
 
 /* Location filter cards */
@@ -5451,14 +5451,14 @@ footer a:hover { color: var(--blue); }
   font-size: 11px;
   font-weight: 700;
   text-align: center;
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
 }
 .location-panel-meta {
   display: flex;
   gap: 10px;
   font-size: 11px;
   color: var(--muted);
-  font-family: "Inter", monospace;
+  font-family: var(--font-sans);
 }
 
 @media (max-width: 1100px) {
@@ -6513,7 +6513,7 @@ body::after {
   margin: 0;
   padding: 12px;
   font-size: 11px;
-  font-family: ui-monospace, "Cascadia Code", "Fira Mono", monospace;
+  font-family: var(--font-mono);
   color: var(--text-2);
   white-space: pre-wrap;
   word-break: break-all;
