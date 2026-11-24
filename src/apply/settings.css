@@ -13,7 +13,7 @@
 .st-stepper input{font:inherit;font-size:16px;width:76px;text-align:center;padding:9px 6px;border:1px solid var(--border-col);border-radius:10px;background:var(--card-bg);color:var(--foreground);font-variant-numeric:tabular-nums}
 .st-stepper input:focus-visible,.st-presets button:focus-visible,.st-stepper button:focus-visible,.st-flags button:focus-visible,.st-accents button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .st-saved{font-size:12px;color:var(--muted-fg);margin-left:6px}
-.st-flags{list-style:none;margin:0;padding:0;border:1px solid var(--border-col);border-radius:14px;overflow:hidden}
+.st-flags{list-style:none;margin:0;padding:0;border:1px solid var(--border-col);border-radius:12px;overflow:hidden}
 .st-flags li{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px}.st-flags li+li{border-top:1px solid var(--border-col)}
 .st-flags span{display:grid;gap:2px}.st-flags b{font-size:14px;font-weight:600}.st-flags small{font-size:12px;color:var(--muted-fg)}
 .st-flags button{position:relative;width:44px;height:26px;border-radius:99px;border:0;background:rgba(255,255,255,.14);cursor:pointer;flex:none;transition:background .18s}
@@ -25,13 +25,13 @@
 .st-note{margin:0;color:var(--muted-fg);font-size:12px;line-height:1.55}
 .st-error{color:#ee8a80;font-size:14px}
 .st-preview{position:sticky;top:20px;display:grid;gap:18px}
-.st-card{border:1px solid var(--border-col);border-radius:22px;padding:20px;background:linear-gradient(180deg,color-mix(in oklab,var(--card-bg) 92%,#fff 8%),var(--card-bg));box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 18px 40px -20px rgba(0,0,0,.7)}
+.st-card{border:1px solid var(--border-col);border-radius:16px;padding:20px;background:linear-gradient(180deg,color-mix(in oklab,var(--card-bg) 92%,#fff 8%),var(--card-bg));box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 18px 40px -20px rgba(0,0,0,.7)}
 .st-card-small{width:176px}
 /* The widget card itself (shared with the Mac app's look). */
-.wp{color:var(--foreground);font-family:inherit}.wp-logo{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600}.wp-logo i{display:inline-block;width:14px;height:14px;border-radius:4px}
+.wp{color:var(--foreground);font-family:inherit}.wp-logo{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600}.wp-logo i{display:inline-block;width:14px;height:14px;border-radius:6px}
 .wp-ring{position:relative;flex:none}.wp-ring svg{display:block}
 .wp-ring-text{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;line-height:1.05}
-.wp-ring-text b{font-weight:600;font-variant-numeric:tabular-nums}.wp-ring-text span{color:var(--muted-fg);font-weight:500}.wp-ring-text i{font-style:normal;font-weight:700;font-size:16px}
+.wp-ring-text b{font-weight:600;font-variant-numeric:tabular-nums}.wp-ring-text span{color:var(--muted-fg);font-weight:500}.wp-ring-text i{font-style:normal;font-weight:600;font-size:16px}
 .wp-medium{display:flex;align-items:center;gap:22px}.wp-left{display:grid;justify-items:center;gap:8px}.wp-left p{margin:0;font-size:12px;font-weight:500;color:var(--muted-fg)}
 .wp-right{display:grid;gap:13px;min-width:0;flex:1}.wp-head{display:flex;justify-content:space-between;align-items:center}.wp-head>span{font-size:12px;color:var(--muted-fg);font-weight:500}
 .wp-streak{margin:0;font-size:16px;font-weight:600}

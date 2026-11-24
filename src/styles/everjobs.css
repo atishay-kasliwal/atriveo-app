@@ -132,7 +132,7 @@
 .ej-chip {
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 0.2rem 0.45rem;
   border: 1px solid transparent;
 }
@@ -182,8 +182,8 @@
   margin-left: 0.5rem;
   color: var(--blue-hi);
   font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 /* ── Rows ─────────────────────────────────────────────────────────────── */
@@ -251,7 +251,7 @@
 
 .ej-apply {
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: 8px;
   color: var(--blue-hi);
   font-size: 0.78rem;
   font-weight: 600;

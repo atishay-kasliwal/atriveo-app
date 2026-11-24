@@ -57,7 +57,7 @@ header.header--tools-open {
 }
 
 .nav-tools-item:hover {
-  background: oklch(0.22 0.005 260);
+  background: oklch(0.22 0.004 286);
 }
 
 .nav-tools-item small {
@@ -89,7 +89,7 @@ header.header--tools-open {
 }
 
 .compiler-strip-title {
-  font-weight: 700;
+  font-weight: 600;
   font-size: 14px;
   margin-right: 4px;
 }
@@ -182,7 +182,7 @@ header.header--tools-open {
   padding: 2px 6px;
   border-radius: 6px;
   border: 1px solid var(--border-col);
-  background: oklch(0.22 0.005 260);
+  background: oklch(0.22 0.004 286);
   color: var(--foreground);
   cursor: pointer;
 }
@@ -250,8 +250,8 @@ header.header--tools-open {
 .trust-report-heading {
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  text-transform: none;
+  letter-spacing: 0;
   color: var(--muted-fg);
   margin: 0 0 6px;
 }
@@ -300,7 +300,7 @@ header.header--tools-open {
 
 .trust-capability-bar {
   height: 6px;
-  background: oklch(0.22 0.005 260);
+  background: oklch(0.22 0.004 286);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -549,12 +549,12 @@ header.header--tools-open {
 }
 
 .resume-history-when {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--foreground);
 }
 
 .resume-history-company-inline {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .resume-history-role {
@@ -570,10 +570,10 @@ header.header--tools-open {
 
 .resume-history-badge {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   padding: 2px 8px;
   border-radius: 99px;
-  background: oklch(0.22 0.005 260);
+  background: oklch(0.22 0.004 286);
   color: var(--muted-fg);
 }
 
@@ -608,7 +608,7 @@ header.header--tools-open {
 .ats-assessment-note { color: var(--muted-fg); line-height: 1.5; margin: 0 0 12px; }
 .ats-assessment-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 12px; }
 .ats-assessment-summary > div { display: flex; flex-direction: column; gap: 4px; padding: 12px; border: 1px solid var(--border-col); border-radius: 10px; }
-.ats-assessment-summary span { font-size: 18px; font-weight: 700; }
+.ats-assessment-summary span { font-size: 18px; font-weight: 600; }
 .ats-assessment-summary small, .ats-assessment li small { display: block; color: var(--muted-fg); line-height: 1.45; }
 .ats-assessment-warning { padding: 10px 12px; border-radius: 8px; background: oklch(0.75 0.17 60 / 0.12); color: oklch(0.84 0.13 65); line-height: 1.45; }
 .ats-assessment details { border-top: 1px solid var(--border-col); padding: 9px 0; }
@@ -640,7 +640,7 @@ header.header--tools-open {
   overflow: auto;
   background: var(--card-bg);
   border: 1px solid var(--border-col);
-  border-radius: 14px;
+  border-radius: 12px;
   box-shadow: 0 16px 48px oklch(0 0 0 / 0.4);
 }
 
@@ -689,8 +689,8 @@ header.header--tools-open {
 .resume-diff-section h3 {
   margin: 0 0 6px;
   font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  text-transform: none;
+  letter-spacing: 0;
   color: var(--muted-fg);
 }
 
@@ -711,7 +711,7 @@ header.header--tools-open {
 }
 
 .resume-diff-slot-num {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--muted-fg);
   min-width: 28px;
 }
@@ -775,7 +775,7 @@ header.header--tools-open {
 }
 
 .pipeline-step.is-success .pipeline-step-dot { background: oklch(0.72 0.18 142); }
-.pipeline-step.is-muted .pipeline-step-dot { background: oklch(0.45 0.005 260); }
+.pipeline-step.is-muted .pipeline-step-dot { background: oklch(0.45 0.004 286); }
 
 .pipeline-step-body {
   display: flex;
@@ -788,10 +788,10 @@ header.header--tools-open {
 
 .pipeline-chip {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   padding: 2px 7px;
   border-radius: 99px;
-  background: oklch(0.22 0.005 260);
+  background: oklch(0.22 0.004 286);
   color: var(--muted-fg);
 }
 

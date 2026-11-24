@@ -293,7 +293,7 @@ export default function EverJobs() {
               {res.early_career_metrics && (
                 <> · <b>{res.early_career_metrics.inputCount - res.early_career_metrics.outputCount}</b> over-level</>
               )}
-              {res.cached && <span className="ej-cached">cached</span>}
+              {res.cached && <span className="ej-cached">Cached</span>}
             </p>
           )}
         </section>

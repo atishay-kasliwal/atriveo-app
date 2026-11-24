@@ -14,7 +14,7 @@
 .lp-btn:active:not(:disabled) { transform: translateY(1px); }
 .lp-btn:disabled { opacity: .45; cursor: default; }
 .lp-btn:focus-visible, .lp-filter-btn:focus-visible, .lp-row:focus-visible, .lp-link:focus-visible, .lp-check:focus-visible, .lp-back:focus-visible, .lp-menu button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.lp-primary { background: var(--primary); border-color: var(--primary); color: #0b0d10; font-weight: 600; }
+.lp-primary { background: var(--primary); border-color: var(--primary); color: #0d0d10; font-weight: 600; }
 .lp-primary:hover:not(:disabled) { background: var(--primary); filter: brightness(1.08); }
 .lp-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; padding: 0 24px 12px; font-size: 12px; color: var(--muted-fg); }
 .lp-filters label { display: grid; gap: 4px; }
@@ -25,7 +25,7 @@
 
 .lp-scroll { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 24px; }
 .lp-group { padding-top: 18px; }
-.lp-group h2 { display: flex; align-items: baseline; gap: 8px; margin: 0; padding: 0 24px 4px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-fg); }
+.lp-group h2 { display: flex; align-items: baseline; gap: 8px; margin: 0; padding: 0 24px 4px; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--muted-fg); }
 .lp-group h2 span { font-variant-numeric: tabular-nums; opacity: .7; }
 .lp-hint { margin: 0; padding: 0 24px 8px; font-size: 12px; color: var(--muted-fg); line-height: 1.45; }
 .lp-empty { display: grid; gap: 6px; margin: 40px 24px; font-size: 14px; color: var(--muted-fg); line-height: 1.5; }
@@ -60,7 +60,7 @@
 .lp-person { margin: 0; font-size: 16px; }
 .lp-summary { margin: 0; font-size: 14px; color: var(--muted-fg); line-height: 1.5; }
 .lp-block { display: grid; gap: 12px; padding-top: 20px; border-top: 1px solid var(--border-col); }
-.lp-block h3 { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-fg); }
+.lp-block h3 { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--muted-fg); }
 .lp-block h3 span { font-weight: 400; letter-spacing: 0; text-transform: none; font-size: 12px; }
 .lp-wait p { margin: 0; line-height: 1.55; font-size: 14px; color: var(--muted-fg); }
 .lp-wait p b { color: var(--foreground); font-weight: 600; }
@@ -76,7 +76,7 @@
 .lp-check svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 18; stroke-dashoffset: 18; transition: stroke-dashoffset .28s ease .05s; }
 .lp-check:hover:not(:disabled) { border-color: var(--primary); }
 .lp-check:hover:not(:disabled) svg { color: var(--primary); stroke-dashoffset: 0; opacity: .6; }
-.lp-tasks .is-done .lp-check { border-color: #2fb87a; background: #2fb87a; color: #0b0d10; }
+.lp-tasks .is-done .lp-check { border-color: #2fb87a; background: #2fb87a; color: #0d0d10; }
 .lp-tasks .is-done .lp-check svg { stroke-dashoffset: 0; }
 .is-done-now .lp-head h2 { animation: lp-done 1.2s ease; }
 @keyframes lp-done { 0% { color: var(--foreground); } 30% { color: #2fb87a; } 100% { color: var(--foreground); } }
@@ -117,7 +117,7 @@
 .lp-ev-reminder_sent::before { background: var(--primary); }
 .lp-ev-reminder_failed::before, .lp-ev-codex_failed::before, .lp-ev-malformed::before, .lp-ev-transcription_failed::before { background: #ee5d52; }
 .lp-ev time { color: var(--muted-fg); font-variant-numeric: tabular-nums; }
-.lp-ev-day { grid-column: 1 / -1; margin-bottom: -4px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); }
+.lp-ev-day { grid-column: 1 / -1; margin-bottom: -4px; font-size: 12px; letter-spacing: 0; text-transform: none; color: var(--muted-fg); }
 
 @media (max-width: 900px) {
   .lp-main { grid-template-columns: 1fr; }

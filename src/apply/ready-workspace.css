@@ -1,15 +1,15 @@
 /* Ready's workspace treatment is scoped to keep the other console screens intact. */
 .ready-workspace {
-  --background: #101113; --foreground: #e6e7eb; --card-bg: #181a1d;
-  --border-col: #2a2d32; --muted-fg: #9ca2ad; --muted-bg: #24272c;
-  --secondary-bg: #24272c; --accent-bg: #24272c; --input-bg: #141619;
-  --primary: #548ee8; --primary-foreground: #ffffff; --primary-soft: #24272c;
+  --background: #111114; --foreground: #e6e7eb; --card-bg: #1a1a1d;
+  --border-col: #2e2e31; --muted-fg: #a4a4a7; --muted-bg: #28282b;
+  --secondary-bg: #28282b; --accent-bg: #28282b; --input-bg: #161619;
+  --primary: #548ee8; --primary-foreground: #ffffff; --primary-soft: #28282b;
   --primary-line: #548ee8; --ring: #548ee8; --green: #2faa4a; --r: 12px;
   font-size: 14px;
 }
 .ready-workspace .rv-bar { padding: 32px 32px 24px; gap: 24px; align-items: center; }
 .ready-workspace .rv-bar-title { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-.ready-eyebrow { color: var(--muted-fg); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+.ready-eyebrow { color: var(--muted-fg); font-size: 12px; letter-spacing: 0; text-transform: none; }
 .ready-workspace .rv-bar-title h1 { font-size: clamp(26px, 2.6vw, 38px); line-height: 1.15; letter-spacing: -.035em; }
 .ready-subtitle { margin: 0; color: var(--muted-fg); font-size: 16px; line-height: 1.6; }
 .ready-counts { display: flex; align-items: center; gap: 12px 20px; flex-wrap: wrap; margin-top: 12px; color: var(--muted-fg); font-size: 12px; }
@@ -49,10 +49,10 @@
 .ready-workspace .rv-modal { padding: 24px; gap: 16px; }
 @media (min-width: 1200px) {
   .ready-workspace.has-header { display: grid; grid-template-columns: 224px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
-  .ready-workspace > .apply-header { grid-column: 1; grid-row: 1 / 3; position: static; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; padding: 32px 18px 24px; gap: 32px; border-bottom: 0; border-right: 1px solid var(--border-col); background: #141619; overflow-y: auto; }
+  .ready-workspace > .apply-header { grid-column: 1; grid-row: 1 / 3; position: static; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; padding: 32px 18px 24px; gap: 32px; border-bottom: 0; border-right: 1px solid var(--border-col); background: #161619; overflow-y: auto; }
   .ready-workspace .apply-brand { flex-wrap: wrap; padding: 0 10px; }
   .ready-workspace .apply-nav { display: flex; flex-direction: column; align-items: stretch; margin: 0; gap: 8px; }
-  .ready-workspace .apply-nav::before { content: "WORKSPACE"; padding: 16px 12px 8px; color: var(--muted-fg); font-size: 12px; letter-spacing: .14em; }
+  .ready-workspace .apply-nav::before { content: "WORKSPACE"; padding: 16px 12px 8px; color: var(--muted-fg); font-size: 12px; letter-spacing: 0; }
   .ready-workspace .apply-nav a { justify-content: space-between; padding: 14px 12px; }
   .ready-workspace .apply-header-right { margin-top: auto; flex-wrap: wrap; gap: 16px; padding: 20px 8px 0; border-top: 1px solid var(--border-col); }
   .ready-workspace .rv-bar { grid-column: 2; grid-row: 1; }

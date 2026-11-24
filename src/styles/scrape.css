@@ -99,9 +99,9 @@
 
 .scrape-panel-title {
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--text);
 }
 
@@ -145,7 +145,7 @@
   padding: 0.15rem 0.45rem;
   font-family: var(--font-mono);
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 600;
   color: inherit;
   background: transparent;
   border: 1px solid currentColor;
@@ -318,7 +318,7 @@
   flex: 1;
   margin: 0;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--text);
 }

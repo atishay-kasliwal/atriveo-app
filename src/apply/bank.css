@@ -46,7 +46,7 @@
 .bk-card-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .bk-text { font-size: 12px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 .bk-id { font-family: var(--font-mono); font-size: 12px; color: var(--muted-fg); }
-.bk-score { flex: none; font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 1px 6px; border-radius: 4px; font-variant-numeric: tabular-nums; }
+.bk-score { flex: none; font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 1px 6px; border-radius: 6px; font-variant-numeric: tabular-nums; }
 .bk-score.is-good { color: var(--bk-good); background: color-mix(in oklab, var(--bk-good) 14%, transparent); }
 .bk-score.is-near { color: var(--bk-near); background: color-mix(in oklab, var(--bk-near) 14%, transparent); }
 .bk-score.is-low { color: var(--bk-low); background: color-mix(in oklab, var(--bk-low) 16%, transparent); }
@@ -55,7 +55,7 @@
 .bk-fit { --c: var(--muted-fg); font-size: 12px; color: var(--c); white-space: nowrap; }
 .bk-fit + .bk-fit::before { content: "·"; color: var(--muted-fg); margin-right: 4px; }
 .bk-pins { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-size: 12px; }
-.bk-track { --c: var(--muted-fg); font-size: 12px; font-weight: 700; letter-spacing: .03em; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--c); color: var(--c); white-space: nowrap; }
+.bk-track { --c: var(--muted-fg); font-size: 12px; font-weight: 600; letter-spacing: .03em; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--c); color: var(--c); white-space: nowrap; }
 .bk-note { font-size: 12px; line-height: 1.4; color: var(--bk-near); }
 .bk-variant p.bk-note { font-size: 12px; }
 .bk-tag { font-size: 12px; padding: 1px 7px; border-radius: 999px; background: var(--secondary-bg); color: var(--muted-fg); }
@@ -66,7 +66,7 @@
 .bk-detail > header p { margin: 4px 0 0; font-size: 12px; }
 .bk-close { flex: none; width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border-col); background: none; color: var(--foreground); font-size: 18px; line-height: 1; cursor: pointer; }
 .bk-close:hover { background: var(--accent-bg); }
-.bk-label { font-size: 12px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-fg); }
+.bk-label { font-size: 12px; font-weight: 650; letter-spacing: 0; text-transform: none; color: var(--muted-fg); }
 .bk-fact { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 8px; border: 1px solid var(--border-col); background: var(--card-bg); }
 .bk-fact p { margin: 0; line-height: 1.5; font-size: 14px; }
 .bk-confirmed { font-size: 12px; color: var(--bk-good); }

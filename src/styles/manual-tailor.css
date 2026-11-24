@@ -21,7 +21,7 @@
   position: relative;
   overflow: hidden;
   border: 1px solid var(--border-col);
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--card-bg);
   padding: 14px 20px;
 }
@@ -53,8 +53,8 @@
 .mt-hero-eyebrow {
   font-family: var(--font-mono);
   font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
+  font-weight: 600;
+  letter-spacing: 0;
   color: var(--muted-fg);
   margin-bottom: 5px;
 }
@@ -62,7 +62,7 @@
 .mt-hero-title {
   margin: 0 0 4px;
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.03em;
   color: var(--foreground);
   line-height: 1.2;
@@ -98,17 +98,17 @@
 .mt-metrics dt {
   margin: 0 0 4px;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--muted-fg);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
 }
 
 .mt-metrics dd {
   margin: 0;
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   color: var(--foreground);
@@ -149,7 +149,7 @@
   font-size: 12px;
   background: var(--secondary-bg);
   padding: 1px 5px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-family: var(--font-mono);
   color: var(--foreground);
 }
@@ -222,11 +222,11 @@
 }
 
 .mt-rail-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--muted-fg);
 }
 
@@ -266,7 +266,7 @@
   font-size: 12px;
   padding: 2px 6px;
   border: 1px solid var(--border-col);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--secondary-bg);
   color: var(--muted-fg);
 }
@@ -280,7 +280,7 @@
   flex-direction: column;
   gap: 4px;
   scrollbar-width: thin;
-  scrollbar-color: oklch(0.30 0.005 260) transparent;
+  scrollbar-color: oklch(0.30 0.004 286) transparent;
 }
 
 .mt-session-btn {
@@ -381,7 +381,7 @@
 .mt-detail-head h2 {
   margin: 0;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--foreground);
 }
 
@@ -430,7 +430,7 @@
 .mt-welcome h2 {
   margin: 0 0 14px;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--foreground);
 }
 
@@ -464,7 +464,7 @@
   background: oklch(0.66 0.19 255 / 0.15);
   color: var(--primary);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -498,7 +498,7 @@
 .mt-compose-head h2 {
   margin: 0;
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--foreground);
 }
@@ -532,11 +532,11 @@
 
 .mt-field span {
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--muted-fg);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
 }
 
 .mt-field-input {
@@ -610,11 +610,11 @@
 
 .mt-parse-label {
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--muted-fg);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
 }
 
 .mt-parse-preview strong {
@@ -656,7 +656,7 @@
   border-radius: 10px;
   padding: 10px 20px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.01em;
   color: var(--primary-foreground);
   background: var(--primary);
@@ -735,7 +735,7 @@
 
 .manual-tailor-assistant-status {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
@@ -931,7 +931,7 @@
   font-size: 12px;
   background: var(--secondary-bg);
   padding: 1px 4px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-family: var(--font-mono);
 }
 
@@ -1056,11 +1056,11 @@
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--muted-fg);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
 }
 
 .tracker-form-close {
@@ -1113,7 +1113,7 @@
 
 .mt-tracker-section {
   border: 1px solid var(--border-col);
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--card-bg);
   overflow: hidden;
 }
@@ -1129,7 +1129,7 @@
 .mt-tracker-section-head h2 {
   margin: 0;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--foreground);
 }
 
@@ -1147,11 +1147,11 @@
   text-align: left;
   padding: 8px 16px;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--muted-fg);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   background: var(--secondary-bg);
   border-bottom: 1px solid var(--border-col);
   white-space: nowrap;
@@ -1188,7 +1188,7 @@
 
 .mt-tracker-status {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
