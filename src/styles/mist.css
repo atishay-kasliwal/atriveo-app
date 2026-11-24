@@ -103,6 +103,79 @@ html body .apply-nav a:not(.lk-nav) { color: var(--muted-fg); border-radius: 10p
 html body .apply-nav a:not(.lk-nav):hover { color: var(--foreground); background: rgb(255 255 255 / 0.05); }
 html body .apply-nav a:not(.lk-nav)[aria-current="page"] { color: var(--foreground); background: rgb(255 255 255 / 0.08); box-shadow: none; }
 
+/* ---- Cards (Mist) ---------------------------------------------------------------------------
+ * Cards and panels: 12px corners and Mist's light shadow. Rows inside lists: 10px, no shadow.
+ * Floating panels and modals keep their own deeper shadow and take only the corners. Each rule
+ * uses the original selector, not a stronger one: this file loads last, so it replaces the base
+ * look, while hover, selected and open states (all more specific) keep winning. Phone sheets keep
+ * their top-only corners; chips and menus are restyled with the widgets.
+ */
+.ai-usage-panel,
+.apply-login-card,
+.bk-card,
+.cd-panel,
+.jm-card,
+.jm-sheet,
+.nw-panel,
+.nwh-card,
+.ph-tile,
+.ph-card,
+.rb-desk .rb-panel,
+.rv-card,
+.review-workspace .rv-card,
+.staffing-job-card,
+.td-card,
+.td-page .td-card,
+.td-page .td-grid .td-card,
+.kpi-card,
+.jd-analysis-card,
+.run-card,
+.tailored-card,
+.clicked-jobs-panel,
+.ob-card,
+.settings-section,
+.recon-tile,
+.recon-template-card,
+.arsenal-tile,
+.arsenal-cat-tile,
+.location-panel-card,
+.apps-panel,
+.apps-section,
+.resume-history-card,
+.resume-diff-panel,
+.ins-panel,
+.t5-add-panel,
+.mt-hero-card,
+.mt-rail-card,
+.mt-tracker-section,
+.scrape-panel,
+.tq-panel {
+  border-radius: 12px;
+  box-shadow: var(--mist-shadow);
+}
+
+.rb-ai-panel,
+.td-modal-card,
+.scrape-overlay-card {
+  border-radius: 12px;
+}
+
+.dp-block,
+.jm-job-block,
+.nw-cal-item,
+.outreach-list-row,
+.today-app-row,
+.best-job-row,
+.tailor-job-row,
+.tailor-thought-block,
+.job-tile-select,
+.recon-contact-row,
+.recon-bulk-row,
+.tq-next-item,
+.tq-manage-item {
+  border-radius: 10px;
+}
+
 /* ---- Inputs (Mist) ------------------------------------------------------------------------- */
 html body :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), textarea, select):focus-visible {
   outline: none;
