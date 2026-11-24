@@ -146,3 +146,38 @@
  .in-rail-right .in-waiting:only-child{flex:1 1 auto}.in-rail-left .in-usage:only-child{flex:1 1 auto}
  .in-rail .in-recs{justify-content:space-between}.in-rail .in-recs li{flex:0 1 auto;padding:clamp(8px,1.6vh,16px) 0}
 }
+
+/* Mist pass (Tailark): no glows or gradients. The hero is the weekly number beside a stats strip, one card divided into
+   cells, each a number over its label. Cards are plain Mist cards; bars are solid (their colour still says how far into the
+   goal a day got), the best day has a thin outline, the tooltip is a popover, and the reply and source bars are solid blue. */
+.rv-page.in-page{background:var(--background)}
+.in-hero{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:end;gap:12px clamp(20px,3vw,48px);text-align:left}
+.in-hero::before{display:none}
+.in-hero-head{display:flex;flex-direction:column;gap:4px;min-width:0}
+.in-hero h1{justify-content:flex-start}
+.in-hero h1 b{font-size:clamp(46px,9vh,88px);font-weight:600;letter-spacing:-0.025em;background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--in-ink);filter:none}
+.in-hero h1 span{font-size:clamp(16px,2.4vh,20px);letter-spacing:0}
+.in-stats{margin:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--in-card);border:1px solid var(--in-line);border-radius:12px;box-shadow:var(--mist-shadow);overflow:hidden}
+.in-stats>div{display:flex;flex-direction:column-reverse;justify-content:flex-end;gap:4px;min-width:0;padding:clamp(10px,1.6vh,16px) clamp(12px,1.2vw,20px);border-left:1px solid var(--in-line)}
+.in-stats>div:first-child{border-left:0}
+.in-stats dt{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--in-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.in-stats dt i{width:8px;height:8px;border-radius:50%;flex:none;background:var(--c)}
+.in-stats dd{margin:0;font-size:clamp(20px,3vh,30px);font-weight:600;letter-spacing:-0.025em;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--in-ink);white-space:nowrap}
+.in-stats dd small{font-size:14px;font-weight:500;letter-spacing:0;color:var(--in-muted)}
+.in-stats .up dd{color:#4ade80}.in-stats .down dd{color:#f87171}
+.in-glance{grid-column:1 / -1;align-items:flex-start}
+
+.in-card{background:var(--in-card);border:1px solid var(--in-line);border-radius:12px;box-shadow:var(--mist-shadow)}
+.in-bar{background:var(--c);border-radius:4px 4px 2px 2px}
+.in-bar.on,.in-bar:hover{filter:brightness(1.15);box-shadow:none}
+.in-bar.best{box-shadow:0 0 0 1.5px rgb(255 255 255 / .7)}
+.in-goal{border-top-color:rgb(255 255 255 / .18)}
+.in-tip{background:var(--popover-bg);color:var(--in-ink);border-radius:8px;font-weight:500;box-shadow:var(--mist-pop-shadow)}
+.in-tip.is-best{background:var(--popover-bg);color:#fbbf24}
+.rail b{background:var(--primary)}
+.in-dial .fill{filter:none}
+.in-wd i{border-radius:4px 4px 2px 2px}
+.in-wd.best i{background:var(--primary);box-shadow:none}
+.in-wait b,.in-recs b,.in-dial-text b,.in-donut-text b,.in-miles b{font-weight:600;letter-spacing:-0.025em}
+@media(max-width:1000px){.in-hero{grid-template-columns:1fr}.in-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.in-stats>div:nth-child(4){border-left:0}.in-stats>div:nth-child(n+4){border-top:1px solid var(--in-line)}}
+@media(max-width:560px){.in-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.in-stats>div:last-child:nth-child(odd){grid-column:span 2}.in-stats>div{border-left:0}.in-stats>div:nth-child(even){border-left:1px solid var(--in-line)}.in-stats>div:nth-child(n+3){border-top:1px solid var(--in-line)}}
