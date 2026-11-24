@@ -105,8 +105,9 @@ html body :is(.apply-btn, .as-save, .gn-apply, .gn-bar .apps-btn, .apply-submit,
 html body .td-page .td-primary-actions :is(.rv-primary, .td-cta:not(.td-cta-linkedin)) {
   background: var(--card-bg);
   color: var(--foreground);
-  border-color: transparent;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1), 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  border-color: rgb(255 255 255 / 0.1);
+  border-radius: 8px;
+  box-shadow: none;
 }
 html body .td-page .td-primary-actions :is(.rv-primary, .td-cta:not(.td-cta-linkedin)):hover:not(:disabled) {
   background: var(--accent-bg);
@@ -336,3 +337,165 @@ html body :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 35%, transparent);
 }
 html body :is(input, textarea)::placeholder { color: #71717a; }
+
+
+/* ---- Company logos (Mist) --------------------------------------------------------------------
+ * A flat neutral tile with a thin edge, in both apps, instead of a coloured gradient with a glow.
+ */
+.company-logo,
+.job-tile-avatar {
+  background: var(--accent-bg);
+  box-shadow: inset 0 0 0 1px var(--mist-edge);
+  border-radius: 8px;
+}
+.company-logo span { font-weight: 500; }
+
+/* "Strong match" follows the app's dark theme, not the computer's light/dark setting. */
+.priority-tag--strong { background: rgb(74 222 128 / 0.12); color: #4ade80; font-weight: 500; }
+
+/* ---- Apply: Today and Staffing cards (Mist) --------------------------------------------------
+ * One quiet kind of chip. Colour says what something is through its dot (stage, track, source) or
+ * its text when it needs you (resume state, top match, warnings). Links are neutral.
+ */
+.td-page .td-grid .td-card,
+.td-page .td-grid .td-card[data-platform] { border-color: var(--border-col); border-radius: 12px; box-shadow: var(--mist-shadow); }
+.td-page .td-grid .td-card[data-platform]:hover { border-color: #3f3f46; }
+.td-page .td-grid .td-card[data-platform]:is(.is-focused, .is-selected),
+.td-page .td-grid .td-card:is(.is-focused, .is-selected) { border-color: var(--primary); box-shadow: var(--mist-shadow); }
+
+.td-page .td-tags :is(.td-stage, .td-track, .td-tag, .td-top) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--secondary-bg);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: none;
+}
+.td-page .td-tags .td-tag { color: var(--muted-fg); }
+.td-page .td-tags .td-tag.td-notready { color: #f59e0b; }
+.td-page .td-tags .td-top { color: #facc15; }
+.td-page .td-tags :is(.td-stage, .td-track)::before { content: ""; width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--dot, #71717a); }
+.td-page .td-tags .td-track { --dot: var(--tr); }
+.td-page .td-tags .td-stage.is-go { --dot: #4ade80; }
+.td-page .td-tags .td-stage.is-info { --dot: var(--primary); }
+.td-page .td-tags .td-stage.is-warn { --dot: #f59e0b; }
+
+/* The card's bottom row: one line, one baseline; a long source name shortens instead of spilling out. */
+.td-page .td-foot > .td-card-tools { gap: 9px; align-items: center; }
+.td-page .td-card-tools > :is(a, button.apps-link),
+.td-page .td-card-tools > .card-actions > summary {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: var(--muted-fg);
+  font-weight: 400;
+  line-height: 1;
+}
+.td-page .td-card-tools > :is(a, button.apps-link):hover,
+.td-page .td-card-tools > .card-actions > summary:hover { color: var(--foreground); text-decoration: none; }
+.td-page .td-card-tools > .card-actions > summary > span { display: none; } /* the dots: their room goes to the source name */
+.td-page .td-card-tools > .card-actions[open] > summary { color: var(--foreground); background: none; }
+.td-page .td-card[data-platform] .td-card-tools > .td-source,
+.td-page .td-card-tools > .td-source { display: block; min-width: 0; flex: 0 1 auto; margin-left: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #71717a; }
+.td-page .td-card[data-platform] .td-card-tools > .td-source::before { display: inline-block; margin-right: 5px; vertical-align: 1px; }
+.td-page .td-card-tools > .td-age { border-left: 0; padding-left: 0; color: #71717a; }
+.td-page .td-card-tools > .td-source + .td-age { margin-left: 0; }
+.td-page .td-card-tools > .td-age.is-new { color: #4ade80; font-weight: 500; }
+
+/* Card buttons: the same 8px outline button side by side. */
+html body .td-page .td-primary-actions > :is(a, button) {
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 8px;
+  box-shadow: none;
+  color: var(--foreground);
+  font-weight: 500;
+}
+html body .td-page .td-primary-actions > .td-ai-review { background: transparent; color: var(--text-2); }
+html body .td-page .td-primary-actions > .td-ai-review:hover:not(:disabled) { background: var(--accent-bg); color: var(--foreground); }
+
+/* More: floats on the popover grey, neutral links, its last row on one line. */
+.td-page .td-foot .card-actions > .card-actions-content { border-radius: 12px; background: var(--popover-bg); box-shadow: var(--mist-pop-shadow); border-color: var(--border-col); }
+.td-page .card-actions-content a { color: var(--foreground); }
+.td-page .card-actions-content .td-links { flex-direction: row; justify-content: space-between; }
+
+/* Filters, goal and toolbar. */
+.td-page .td-mood.is-on,
+.td-page .td-kind.is-on { border-color: transparent; background: rgb(255 255 255 / 0.08); box-shadow: none; color: var(--foreground); }
+.td-page .td-mood,
+.td-page .td-kind { font-weight: 500; }
+.td-page .td-goal-n b,
+.td-page .td-goal-n button { color: var(--foreground); border-bottom-color: #52525b; }
+.td-page .td-goal-n .td-goal-link { color: var(--muted-fg); border-bottom-color: #52525b; }
+.td-page .td-goal-n .td-goal-link:hover { color: var(--foreground); text-decoration: none; }
+.td-page .td-goal-bar i { background: var(--primary); }
+.td-page .td-goal-bar.is-done i { background: #4ade80; }
+.td-page .td-goal-bar s,
+.td-page .td-goal-bar s.is-hit { background: var(--background); }
+.td-page .td-streak { color: var(--muted-fg); }
+.td-page .td-skip-pop { border-radius: 12px; background: var(--popover-bg); box-shadow: var(--mist-pop-shadow); }
+.td-modal-card { border-radius: 16px; background: var(--popover-bg); box-shadow: var(--mist-pop-shadow); }
+
+/* ---- Main app: Today board (Mist) ------------------------------------------------------------
+ * The sidebar sits on the page's own background with text you can read (it was dark grey on black),
+ * the logo mark is flat, and the table header matches its rows. Score tiers keep their colour on the
+ * number; the row's edge bar is thinner. Actions has room for its resume button, which was cut off.
+ */
+.nav-group-label { margin-right: 6px; }
+.today-board-sidebar { background: var(--background); border-right-color: var(--border-col); scrollbar-color: #3f3f46 transparent; }
+.today-board-brand { border-bottom-color: var(--border-col); }
+.today-board-brand-mark { background: var(--primary); box-shadow: none; }
+.today-board-brand-title { font-size: 14px; color: var(--foreground); }
+.today-board-nav-label { padding-top: 12px; font-size: 12px; font-weight: 500; color: #71717a; }
+.today-board-group-label,
+.today-board-nav-item { color: var(--text-2); }
+.today-board-sub-item { color: var(--muted-fg); }
+.today-board-nav-count { color: #71717a; }
+.today-board-group-label:hover,
+.today-board-nav-item:hover,
+.today-board-sub-item:hover { background: rgb(255 255 255 / 0.05); color: var(--foreground); }
+.today-board-sub-item.is-active { background: rgb(255 255 255 / 0.06); color: var(--foreground); }
+.today-board-sub-item.is-active .today-board-nav-count { color: var(--foreground); }
+.today-board-sub-dot { opacity: 1; }
+.today-board-sub-dot--others,
+.session-dot--others { background: #71717a; opacity: 1; }
+.today-board-sessions { border-top-color: var(--border-col); }
+.today-board-session-item:hover { background: rgb(255 255 255 / 0.05) !important; border-color: transparent; }
+.today-board-session-index,
+.today-board-session-item.is-active .today-board-session-index { width: 18px; height: 18px; font-size: 10px; font-weight: 500; color: var(--muted-fg); background: var(--secondary-bg); }
+.today-board-session-time,
+.today-board-session-item.is-active .today-board-session-time { font-weight: 500; letter-spacing: 0; color: var(--text-2); }
+.today-board-session-count,
+.today-board-session-item.is-active .today-board-session-count { font-weight: 500; color: var(--muted-fg); background: var(--secondary-bg); border-radius: 6px; }
+
+.board-metric .board-metric-label { font-weight: 500; color: var(--muted-fg); }
+.board-metric .board-metric-sub { color: #71717a; }
+.board-metric .board-metric-value { color: var(--foreground); letter-spacing: -0.025em; }
+.board-metric .board-metric-dual-sep { color: #52525b; }
+
+.job-table--board thead th,
+.job-table--board thead th.job-table-sort-th.is-active { background: var(--card-bg); border-bottom-color: var(--border-col); }
+.job-table--board thead th.job-table-sort-th.is-active,
+.job-table--board .job-table-sort-th.is-active .job-table-sort-btn,
+.job-table--board .job-table-sort-th.is-active .job-table-sort-icon,
+.job-table--board .job-table-sort-btn:hover { color: var(--foreground); }
+.job-table--board tbody td { border-bottom-color: var(--border-col); }
+.job-table--board .job-table-num { color: #71717a; font-weight: 500; }
+.job-table--board .job-table-row--board.job-table-row--green td:first-child { box-shadow: inset 2px 0 0 oklch(0.72 0.18 145 / 0.7); }
+.job-table--board .job-table-row--board.job-table-row--blue td:first-child { box-shadow: inset 2px 0 0 oklch(0.62 0.16 255 / 0.7); }
+.job-table--board .job-table-row--board.job-table-row--yellow td:first-child { box-shadow: inset 2px 0 0 oklch(0.78 0.14 80 / 0.7); }
+@media (min-width: 1440px) { /* narrower screens need the room for company and role */
+  .job-table--board .col-role { width: 27%; }
+  .job-table--board .col-level { width: 80px; }
+  .job-table--board .col-actions { width: 330px; }
+}
+.job-table-board-apply { border-radius: 8px; font-weight: 500; color: var(--text-2); }
+.job-table-board-apply:not(.job-table-board-apply--primary):hover { background: var(--accent-bg); border-color: #3f3f46; color: var(--foreground); }
+html body .job-table-board-apply--primary { border-radius: 8px; }

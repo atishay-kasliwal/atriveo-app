@@ -34,3 +34,43 @@
 @keyframes us-grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @media(prefers-reduced-motion:reduce){.us-strip b,.us-pages .share b{animation:none}}
 @media(max-width:1000px){.rv-page.us-page{height:auto;overflow:visible}.us-body{grid-template-columns:1fr}.us-stats{grid-template-columns:repeat(2,1fr)}.us-g-matching ul{grid-template-columns:1fr;grid-template-rows:none;grid-auto-flow:row}.us-feat-grid,.us-rest{grid-template-columns:1fr}.us-rest .us-g-general{grid-row:auto}.us-pages li{grid-template-columns:1fr 56px 0 44px 86px}.us-pages .share{display:none}}
+
+/* Mist pass: the Stats page's strip of numbers, a neutral segmented control, quiet tags; the colours left are the pages' own.
+   Matching's features take two columns of one-line names (they had outgrown ten rows and squeezed into a third), and narrow
+   screens no longer leave an empty column that pushed the counts and dates over each other. */
+.rv-page.us-page{background:var(--background)}
+.us-page .us-title h1{font-size:clamp(24px,3.6vh,30px);font-weight:600}
+.us-page .us-title b{font-weight:500}
+.us-page .us-tabs{gap:2px;padding:3px;border-radius:12px;background:var(--us-soft)}
+.us-page .us-tabs button,.us-page .us-tabs button.on{border:0;padding:6px 14px;border-radius:9px;background:none;color:var(--us-muted)}
+.us-page .us-tabs button:hover{color:var(--us-ink)}
+.us-page .us-tabs button.on{background:var(--background);color:var(--us-ink);box-shadow:var(--mist-ring),var(--mist-shadow)}
+.us-page .us-stats{gap:0;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--us-card);border:1px solid var(--us-line);border-radius:12px;box-shadow:var(--mist-shadow);overflow:hidden}
+.us-page .us-stats>div{background:none;border:0;border-left:1px solid var(--us-line);border-radius:0;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:4px;min-width:0;padding:clamp(8px,1.4vh,14px) 20px}
+.us-page .us-stats>div:first-child{border-left:0}
+.us-page .us-stats b{font-size:clamp(20px,3vh,28px);font-weight:600;letter-spacing:-.025em;line-height:1.1}
+.us-page .us-stats b i{letter-spacing:0}
+.us-page .us-card{border-radius:12px;box-shadow:var(--mist-shadow)}
+.us-page .us-card h2{margin:0 0 clamp(8px,1.4vh,14px);letter-spacing:-.01em}
+.us-page .us-strip{height:8px;gap:2px;flex:none}
+.us-page .us-pages .share{height:6px}
+.us-page .us-group h3{margin:0 0 4px;color:var(--us-muted);font-weight:500}
+.us-page .us-group .tag{padding:0;background:none;color:#71717a;white-space:nowrap}
+.us-page .us-group .tag.never{padding:1px 8px;border-radius:6px;background:var(--us-soft);color:var(--us-muted)}
+.us-page .us-group .muted{white-space:nowrap}
+.us-page .us-group .name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.us-page .us-group li{grid-template-columns:minmax(0,1fr) 44px 84px}
+.us-page .us-g-matching ul{display:block;columns:2;column-gap:28px}
+.us-page .us-g-matching li{break-inside:avoid}
+@media(max-width:1000px){
+  .us-page .us-body,.us-page .us-feat-grid,.us-page .us-rest{grid-template-columns:minmax(0,1fr)}
+  .us-page .us-pages li{grid-template-columns:minmax(0,1fr) 64px 44px 86px}
+}
+@media(max-width:700px){
+  .us-page .us-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .us-page .us-stats>div:nth-child(odd){border-left:0}
+  .us-page .us-stats>div:nth-child(n+3){border-top:1px solid var(--us-line)}
+  .us-page .us-tabs{width:100%}.us-page .us-tabs button,.us-page .us-tabs button.on{flex:1;padding:6px 4px;white-space:nowrap}
+  .us-page .us-g-matching ul{columns:1}
+  .us-page .us-card{padding:16px}
+}
