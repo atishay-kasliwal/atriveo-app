@@ -129,7 +129,8 @@ function StartScreen() {
     <div className="rb-start rb-desk">
       <header className="rb-start-heading">
         <div><h1>Resume builder</h1><p>Paste a job description, or start from a general resume.</p></div>
-        <button type="button" className="apps-btn rb-bank-open" aria-expanded={bankOpen} aria-controls="rb-bank-drawer" onClick={() => setBankOpen(true)}>Open bank <kbd>B</kbd></button>
+        <div className="rb-start-links"><Link className="apps-btn" to="/open-source">Open source</Link>
+        <button type="button" className="apps-btn rb-bank-open" aria-expanded={bankOpen} aria-controls="rb-bank-drawer" onClick={() => setBankOpen(true)}>Open bank <kbd>B</kbd></button></div>
       </header>
       <section className="rb-paste rb-panel" aria-labelledby="rb-paste-h">
         <div className="rb-panel-head">

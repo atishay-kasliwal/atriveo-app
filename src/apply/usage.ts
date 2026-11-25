@@ -7,11 +7,11 @@ export interface Feature { key: string; page: string; label: string; test?: RegE
 
 export const PAGES: Record<string, string> = {
   today: "Today", matching: "Matching", applied: "Applied", general: "General", assessments: "Assessments", extension: "Extension", staffing: "Staffing", resumes: "Resumes",
-  bank: "Bank", outreach: "Outreach", network: "Network", stats: "Stats", ready: "Ready", settings: "Settings", usage: "Usage",
+  bank: "Bank", opensource: "Open source", outreach: "Outreach", network: "Network", stats: "Stats", ready: "Ready", settings: "Settings", usage: "Usage",
 };
 
 /** One colour per page, so the strip, the rows and the feature groups read as the same thing. */
-export const PAGE_HUE: Record<string, string> = { today: "#6d7bff", matching: "#4f9dff", applied: "#2fb87a", general: "#a86be0", assessments: "#e56fb0", extension: "#9bb0ff", staffing: "#f0a23b", resumes: "#e5584f", bank: "#3fc6c0", outreach: "#e56fb0", network: "#34d399", stats: "#9bb0ff", ready: "#c9b458", settings: "#8a919c", usage: "#5f6773" };
+export const PAGE_HUE: Record<string, string> = { today: "#6d7bff", matching: "#4f9dff", applied: "#2fb87a", general: "#a86be0", assessments: "#e56fb0", extension: "#9bb0ff", staffing: "#f0a23b", resumes: "#e5584f", bank: "#3fc6c0", opensource: "#9ec5ff", outreach: "#e56fb0", network: "#34d399", stats: "#9bb0ff", ready: "#c9b458", settings: "#8a919c", usage: "#5f6773" };
 
 export function pageIdOf(path: string): string {
   const p = path.replace(/\/+$/, "");
@@ -22,6 +22,7 @@ export function pageIdOf(path: string): string {
   if (p === "/staffing") return "staffing";
   if (p === "/resume_builder") return "resumes";
   if (p === "/bank") return "bank";
+  if (p === "/open-source") return "opensource";
   if (p === "/outreach") return "outreach";
   if (p === "/network") return "network";
   if (p === "/stats" || p === "/overview") return "stats";

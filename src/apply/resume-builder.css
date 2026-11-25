@@ -339,6 +339,7 @@
 .rb-start.rb-desk { flex: 1; min-height: 0; max-width: none; display: grid; grid-template-columns: minmax(340px, 1.35fr) minmax(260px, .8fr) minmax(280px, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 14px; padding: 18px 20px 20px; align-items: stretch; position: relative; }
 .rb-desk .rb-start-heading { grid-column: 1 / -1; display: flex; align-items: end; justify-content: space-between; gap: 16px; }
 .rb-desk .rb-start-heading h1 { margin: 0 0 4px; }
+.rb-start-links { display: flex; flex-wrap: wrap; gap: 8px; }
 .rb-desk .rb-start-heading p { margin: 0; }
 .rb-desk kbd { font: 500 12px var(--font-mono, ui-monospace, monospace); border: 1px solid var(--border-col); border-radius: 6px; padding: 1px 5px; margin-left: 6px; color: var(--muted-fg); }
 .rb-desk .rb-panel { min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 10px; padding: 16px; border: 1px solid var(--border-col); border-radius: 12px; background: var(--card-bg); box-shadow: none; }

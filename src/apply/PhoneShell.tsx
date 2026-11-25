@@ -17,7 +17,7 @@ const TABS: { to: string; label: string; icon: string; match: (p: string) => boo
 
 const PAGES: [string, string][] = [
   ["/today", "Today queue"], ["/staffing", "Staffing"], ["/general", "General"], ["/assessments", "Assessments"],
-  ["/resume_builder", "Resumes"], ["/bank", "Bank"], ["/outreach", "Outreach"], ["/loops", "Loops"],
+  ["/resume_builder", "Resumes"], ["/bank", "Bank"], ["/open-source", "Open source"], ["/outreach", "Outreach"], ["/loops", "Loops"],
   ["/day-plan", "Day plan"], ["/lucky", "Lucky hours"], ["/stats", "Stats"], ["/usage", "Usage"], ["/settings", "Settings"],
 ];
 

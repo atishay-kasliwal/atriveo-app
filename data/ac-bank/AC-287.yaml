@@ -33,6 +33,8 @@ oss:
   org: ''
   project: Kiali
   status: merged
+  # The maintainer wrote part of this PR: never counted as ready for a general resume on the open source page.
+  shared: true
   prs:
     - https://github.com/kiali/kiali/pull/10523
 capabilities:
