@@ -62,7 +62,7 @@ html body.apply-console {
 /* ---- Feature palettes (Mist) ----------------------------------------------------------------
  * Assessments, General, Insights, Network, Usage and Ready each defined their own blue-tinted greys
  * and a periwinkle accent. Their greys now point at the Mist ones and their accent at the app's
- * one blue. Lucky's sky, Network Intelligence's violet and Day plan's purple are their own looks.
+ * one blue. Network Intelligence's violet and Day plan's purple are their own looks.
  */
 html body :is(.rv-page.as-page, .rv-page.gn-page, .rv-page.in-page, .rv-page.nw-page, .rv-page.us-page) {
   --as-card: var(--card-bg); --gn-card: var(--card-bg); --in-card: var(--card-bg); --nw-card: var(--card-bg); --us-card: var(--card-bg);
@@ -116,11 +116,12 @@ html body .td-page .td-primary-actions :is(.rv-primary, .td-cta:not(.td-cta-link
 
 /* ---- Navigation (Mist) ----------------------------------------------------------------------
  * Nav links are neutral: muted, white on hover and when current. (A page-wide `.rv-page a` rule
- * used to paint them blue.) Counts beside them keep the blue status colour; Lucky keeps its gold.
+ * used to paint them blue.) Counts beside them keep the blue status colour; Lucky's time and
+ * bar keep their gold (lucky.css).
  */
-html body .apply-nav a:not(.lk-nav) { color: var(--muted-fg); border-radius: 10px; }
-html body .apply-nav a:not(.lk-nav):hover { color: var(--foreground); background: rgb(255 255 255 / 0.05); }
-html body .apply-nav a:not(.lk-nav)[aria-current="page"] { color: var(--foreground); background: rgb(255 255 255 / 0.08); box-shadow: none; }
+html body.apply-console .apply-nav a { color: var(--muted-fg); border-radius: 10px; }
+html body.apply-console .apply-nav a:hover { color: var(--foreground); background: rgb(255 255 255 / 0.05); }
+html body.apply-console .apply-nav a[aria-current="page"] { color: var(--foreground); background: rgb(255 255 255 / 0.08); box-shadow: none; }
 
 /* ---- Cards (Mist) ---------------------------------------------------------------------------
  * Cards and panels: 12px corners and Mist's light shadow. Rows inside lists: 10px, no shadow.
