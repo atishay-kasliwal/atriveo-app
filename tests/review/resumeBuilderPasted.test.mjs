@@ -65,8 +65,8 @@ test('paste → build → edit → save → revert → list → delete, never to
       assert.ok(!draft.jdMatch.missing.includes(g.skill));
     }
     // A library skill nothing on this resume or in the JD backs is flagged (shown, not enforced).
-    const padded = await renderDraft(db, { source: r.source, headerTitle: r.headerTitle, skills: [...r.skills.slice(0, -1), `${r.skills.at(-1)}, Haskell, Svelte`], sections: edit });
-    assert.ok(padded.skillWarnings.includes('Svelte'), JSON.stringify(padded.skillWarnings));
+    const padded = await renderDraft(db, { source: r.source, headerTitle: r.headerTitle, skills: [...r.skills.slice(0, -1), `${r.skills.at(-1)}, Haskell, FAISS`], sections: edit });
+    assert.ok(padded.skillWarnings.includes('FAISS'), JSON.stringify(padded.skillWarnings));
     assert.ok(!padded.skillWarnings.includes('Haskell'), 'names outside the skills library are not judged');
     await saveDraft(db, { source: r.source, draftId: draft.draftId });
     assert.ok(fs.existsSync(path.join(dir, 'generated', 'Atishay Kasliwal.pdf')));

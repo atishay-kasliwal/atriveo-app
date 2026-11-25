@@ -4,6 +4,9 @@ role: open-source
 fits:
   - software-engineer
   - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - platform
 slot_kind: project
 achievement_theme: ansible-lint
 display_order: 22

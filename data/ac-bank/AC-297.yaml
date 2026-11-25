@@ -1,0 +1,61 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft A8).
+id: AC-297
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+  - platform
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-numaflow-a8
+display_order: 45
+wow_score: 0.88
+metrics_claimed:
+  - "2.8"
+  - "3"
+  - "8"
+  - "4"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Rust
+fact: >-
+  Open source contribution (Numaflow), approved 2026-11-25. Never employment at Numaflow.
+oss:
+  org: ''
+  project: Numaflow
+  status: merged
+  prs:
+    - https://github.com/numaproj/numaflow/pull/3756
+capabilities:
+  backend: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Rust
+  - JetStream
+  - NATS
+  - Kubernetes
+  - observability
+facets:
+  oss-numaflow-a8:
+    phrase: Numaflow open source contribution
+    keywords:
+      - rust
+      - jetstream
+      - nats
+      - kubernetes
+      - observability
+variants:
+  - facet: oss-numaflow-a8
+    emphasis: oss-numaflow-a8
+    strength: 9
+    text: >-
+      Added payload sizes to Numaflow's JetStream oversize warnings (2.8K+ GitHub stars) in Rust, verified on a
+      local k3s cluster with 8 KB messages against a 4 KB limit.

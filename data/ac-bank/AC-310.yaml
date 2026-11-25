@@ -1,0 +1,59 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B12).
+id: AC-310
+role: open-source
+fits:
+  - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+slot_kind: project
+achievement_theme: oss-egui-b12
+display_order: 58
+wow_score: 0.8
+metrics_claimed:
+  - "4"
+  - "32"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Rust
+fact: >-
+  Open source contribution (egui), approved 2026-11-25. Never employment at egui.
+oss:
+  org: ''
+  project: egui
+  status: open
+  prs:
+    - https://github.com/emilk/egui/pull/8929
+    - https://github.com/emilk/egui/pull/8930
+    - https://github.com/emilk/egui/pull/8931
+    - https://github.com/emilk/egui/pull/8932
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Rust
+  - GUI
+  - accessibility
+  - egui
+  - UI testing
+facets:
+  oss-egui-b12:
+    phrase: egui open source contribution
+    keywords:
+      - rust
+      - gui
+      - accessibility
+      - egui
+      - ui testing
+variants:
+  - facet: oss-egui-b12
+    emphasis: oss-egui-b12
+    strength: 9
+    text: >-
+      Repaired 4 widget bugs in egui (32K+ GitHub stars) in Rust including modal clicks and focus reporting, each
+      with a UI test that fails without the fix.

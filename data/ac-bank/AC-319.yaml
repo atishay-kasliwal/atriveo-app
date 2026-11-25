@@ -1,0 +1,58 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B21).
+id: AC-319
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+  - platform
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-infra-controller-b21
+display_order: 67
+wow_score: 0.8
+metrics_claimed:
+  - "2"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Rust
+fact: >-
+  Open source contribution (NVIDIA | Infra Controller), approved 2026-11-25. Never employment at NVIDIA.
+oss:
+  org: NVIDIA
+  project: Infra Controller
+  status: open
+  prs:
+    - https://github.com/dsx-ai-factory/infra-controller/pull/9248
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Rust
+  - DPU
+  - DNS
+  - networking
+  - GPU infrastructure
+facets:
+  oss-infra-controller-b21:
+    phrase: Infra Controller open source contribution
+    keywords:
+      - rust
+      - dpu
+      - dns
+      - networking
+      - gpu infrastructure
+variants:
+  - facet: oss-infra-controller-b21
+    emphasis: oss-infra-controller-b21
+    strength: 9
+    text: >-
+      Revised startup of NVIDIA's Infra Controller DPU agent in Rust to continue with a warning when a boot host
+      name does not resolve, adding 2 unit tests.

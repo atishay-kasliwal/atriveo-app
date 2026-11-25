@@ -1,0 +1,54 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B9).
+id: AC-307
+role: open-source
+fits:
+  - ai-engineer
+# Only the tracks it fits.
+tracks:
+  - ai-engineer
+slot_kind: project
+achievement_theme: oss-stuntdouble-b9
+display_order: 55
+wow_score: 0.8
+metrics_claimed:
+  - "42"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Python
+  - LangGraph
+fact: >-
+  Open source contribution (Intuit | StuntDouble), approved 2026-11-25. Never employment at Intuit.
+oss:
+  org: Intuit
+  project: StuntDouble
+  status: open
+  prs:
+    - https://github.com/intuit/stunt-double/pull/98
+    - https://github.com/intuit/stunt-double/pull/99
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - LangGraph
+  - AI agents
+  - agent testing
+  - error handling
+facets:
+  oss-stuntdouble-b9:
+    phrase: StuntDouble open source contribution
+    keywords:
+      - python
+      - langgraph
+      - ai agents
+      - agent testing
+      - error handling
+variants:
+  - facet: oss-stuntdouble-b9
+    emphasis: oss-stuntdouble-b9
+    strength: 9
+    text: >-
+      Added simulated tool errors and async mock validation to Intuit's StuntDouble LangGraph testing library in
+      Python, adding 42 tests for agent error recovery.

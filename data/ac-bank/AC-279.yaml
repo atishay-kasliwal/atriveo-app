@@ -4,6 +4,10 @@ role: open-source
 fits:
   - ai-engineer
   - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+  - full-stack
 slot_kind: project
 achievement_theme: mcp-server
 display_order: 27

@@ -1,0 +1,53 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B2).
+id: AC-300
+role: open-source
+fits:
+  - data-science
+# Only the tracks it fits.
+tracks:
+  - data-science
+slot_kind: project
+achievement_theme: oss-scipy-b2
+display_order: 48
+wow_score: 0.8
+metrics_claimed:
+  - "15"
+  - "2,500"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - SciPy
+fact: >-
+  Open source contribution (SciPy), approved 2026-11-25. Never employment at SciPy.
+oss:
+  org: ''
+  project: SciPy
+  status: open
+  prs:
+    - https://github.com/scipy/scipy/pull/26813
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - SciPy
+  - hypothesis testing
+  - statistics
+  - numerical methods
+  - p values
+facets:
+  oss-scipy-b2:
+    phrase: SciPy open source contribution
+    keywords:
+      - scipy
+      - hypothesis testing
+      - statistics
+      - numerical methods
+      - p values
+variants:
+  - facet: oss-scipy-b2
+    emphasis: oss-scipy-b2
+    strength: 9
+    text: >-
+      Repaired exact tests in SciPy (15K+ GitHub stars) that rounding errors made underestimate p values, checking
+      the fix against exact arithmetic in about 2,500 cases.

@@ -1,0 +1,57 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B1).
+id: AC-299
+role: open-source
+fits:
+  - data-science
+  - ai-engineer
+# Only the tracks it fits.
+tracks:
+  - data-science
+  - ai-engineer
+slot_kind: project
+achievement_theme: oss-statsforecast-b1
+display_order: 47
+wow_score: 0.8
+metrics_claimed:
+  - "4.9"
+  - "1"
+  - "12"
+  - "300"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Python
+fact: >-
+  Open source contribution (Nixtla | statsforecast), approved 2026-11-25. Never employment at Nixtla.
+oss:
+  org: Nixtla
+  project: statsforecast
+  status: open
+  prs:
+    - https://github.com/Nixtla/statsforecast/pull/1363
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - time series
+  - forecasting
+  - ARIMA
+  - statistical testing
+facets:
+  oss-statsforecast-b1:
+    phrase: statsforecast open source contribution
+    keywords:
+      - python
+      - time series
+      - forecasting
+      - arima
+      - statistical testing
+variants:
+  - facet: oss-statsforecast-b1
+    emphasis: oss-statsforecast-b1
+    strength: 9
+    text: >-
+      Repaired unit root test selection in Nixtla's statsforecast AutoARIMA (4.9K+ GitHub stars) in Python,
+      matching R p values to 1e-12 across 300 simulated series.

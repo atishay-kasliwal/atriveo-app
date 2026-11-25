@@ -5,6 +5,10 @@ fits:
   - software-engineer
   - forward-deployed
   - data-science
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+  - platform
 slot_kind: project
 achievement_theme: streaming-metrics
 display_order: 10

@@ -4,6 +4,10 @@ role: open-source
 fits:
   - software-engineer
   - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+  - platform
 slot_kind: project
 achievement_theme: go-cli-ux
 display_order: 7

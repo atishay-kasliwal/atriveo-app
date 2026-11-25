@@ -4,6 +4,9 @@ role: open-source
 fits:
   - software-engineer
   - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - full-stack
 # Only the tracks it fits (2026-11-17): untagged, it shared "Reconciled" with Wake Forest's AC-220 on data analytics
 # resumes, which print no open source.
 tracks:

@@ -5,6 +5,9 @@ fits:
   - data-science
   - ai-engineer
   - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
 # Only the tracks it fits.
 tracks:
   - data-science

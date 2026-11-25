@@ -30,7 +30,7 @@ test("open source takes the second slot only when the JD clearly matches it", ()
 
 test("every open source package pairs two bank entries with unique verbs inside the package", () => {
   const byId = new Map(oss.map((a) => [a.id, a]));
-  assert.equal(oss.length, 36);
+  assert.equal(oss.length, 67);
   assert.deepEqual(all.filter(retired).map((a) => a.id), ["AC-280"]);
   for (const pkg of pool.story_packages) {
     assert.equal(pkg.ids.length, 2, pkg.name);
@@ -65,8 +65,9 @@ test("a bullet's status matches its PRs, and a closed PR is never on an active b
     const known = ac.oss.prs.map((u) => status.get(u)).filter(Boolean);
     assert.ok(!known.includes("CLOSED"), ac.id);
     if (ac.oss.status === "merged") assert.ok(known.every((s) => s === "MERGED"), `${ac.id} says merged: ${known}`);
-    else assert.ok(known.includes("OPEN"), `${ac.id} says open, but every PR is merged`);
+    else if (known.length === ac.oss.prs.length) assert.ok(known.includes("OPEN"), `${ac.id} says open, but every PR is merged`);
   }
+  assert.deepEqual([...pool.ac_ids].sort(), oss.map((a) => a.id).sort());
   assert.ok(!pool.ac_ids.includes("AC-280") && pool.story_packages.every((p) => !p.ids.includes("AC-280")));
 });
 

@@ -1,0 +1,56 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B3).
+id: AC-301
+role: open-source
+fits:
+  - data-science
+  - ai-engineer
+# Only the tracks it fits.
+tracks:
+  - data-science
+  - ai-engineer
+slot_kind: project
+achievement_theme: oss-timesfm-b3
+display_order: 49
+wow_score: 0.8
+metrics_claimed:
+  - "35"
+  - "4.65"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Python
+fact: >-
+  Open source contribution (Google | TimesFM), approved 2026-11-25. Never employment at Google. Measured on the
+  random-init model the tests use.
+oss:
+  org: Google
+  project: TimesFM
+  status: open
+  prs:
+    - https://github.com/google-research/timesfm/pull/578
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - forecasting
+  - foundation model
+  - time series
+  - covariates
+facets:
+  oss-timesfm-b3:
+    phrase: TimesFM open source contribution
+    keywords:
+      - python
+      - forecasting
+      - foundation model
+      - time series
+      - covariates
+variants:
+  - facet: oss-timesfm-b3
+    emphasis: oss-timesfm-b3
+    strength: 9
+    text: >-
+      Added per input covariate fitting to Google Research's TimesFM (35K+ GitHub stars) in Python so a forecast
+      stays identical alone or batched, where it differed by up to 4.65.

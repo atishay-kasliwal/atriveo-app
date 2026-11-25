@@ -4,6 +4,9 @@ role: open-source
 fits:
   - ai-engineer
   - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
 slot_kind: project
 achievement_theme: llm-providers
 display_order: 5
