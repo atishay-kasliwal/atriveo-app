@@ -55,5 +55,5 @@ variants:
     emphasis: rust-concurrency
     strength: 9
     text: >-
-      Diagnosed a Tokio lock contention deadlock in Mezmo's AURA Rust agent orchestrator and moved artifact writes
+      Solved a Tokio lock contention hang in Mezmo's AURA Rust agent orchestrator by moving artifact writes
       outside the persistence lock, passing 500 repeated modeled regression runs and 1,525 library tests.

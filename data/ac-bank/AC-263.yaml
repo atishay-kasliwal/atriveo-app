@@ -9,7 +9,7 @@ achievement_theme: k8s-webhook
 display_order: 11
 wow_score: 0.88
 metrics_claimed:
-  - test_cases_12
+  - test_cases_11
 concepts_claimed:
   - kubernetes
   - admission-webhooks
@@ -50,4 +50,4 @@ variants:
     strength: 9
     text: >-
       Screened MonoVertex specs in Numaflow's Kubernetes admission webhook to block scale minimums above maximums,
-      covered by 12 test cases and verified on a local k3d cluster.
+      covered by 11 test cases and verified on a local k3d cluster.

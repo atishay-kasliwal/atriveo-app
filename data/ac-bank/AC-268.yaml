@@ -9,7 +9,7 @@ achievement_theme: gitops
 display_order: 16
 wow_score: 0.8
 metrics_claimed:
-  - test_cases_5
+  - test_cases_4
 concepts_claimed:
   - kubernetes-operators
   - gitops
@@ -50,5 +50,5 @@ variants:
     emphasis: gitops
     strength: 9
     text: >-
-      Inspected target namespace labels before cleanup in Red Hat's GitOps Operator in Go, closing a consent removal bug
-      with 5 regression test cases.
+      Inspected target namespace labels before cleanup in Red Hat's GitOps Operator in Go, closing a consent
+      removal bug with 4 regression test cases.

@@ -7,7 +7,7 @@ import { loadSafeClaims } from "../../scripts/tailor-bank.mjs";
 import { SKILLS_LIBRARY } from "../../scripts/skills-library.mjs";
 
 const empty = { experience: [], projects: [] };
-const jd = "Go Rust Tokio Serde gRPC Prometheus Kubernetes GraphSAGE Kustomize Apache Pulsar";
+const jd = "Go Rust Tokio Serde gRPC Prometheus Kubernetes GraphSAGE Kustomize Apache Pulsar Ansible";
 
 test("approved merged evidence is eligible, incomplete or mixed-status evidence fails closed", () => {
   const record = { approved: true, resume_eligible: true, status: "MERGED", skills: ["Rust"], sources: [{ url: "https://github.com/mezmo/aura/pull/904", status: "MERGED" }] };
@@ -52,7 +52,9 @@ test("merged and open skills are available without pretending the source is an e
   const confirmed = confirmedSkillKeys(doc);
   for (const name of ["Go", "Rust", "Tokio", "Serde", "gRPC", "Prometheus", "Kubernetes"]) assert.ok(confirmed.has(skillEvidenceKey(name)));
   // Open PR work counts too (the user did the work); it only ranks after merged evidence.
-  for (const name of ["GraphSAGE", "Kustomize", "Apache Pulsar"]) assert.ok(confirmed.has(skillEvidenceKey(name)), name);
+  for (const name of ["Kustomize", "Apache Pulsar", "Ansible"]) assert.ok(confirmed.has(skillEvidenceKey(name)), name);
+  // Its only PR (neo4j#379) was closed without merging on 2026-11-18.
+  assert.equal(confirmed.has(skillEvidenceKey("GraphSAGE")), false);
   assert.equal(confirmedSkillKeys({ confirmed_skills: { unplaced: ["Python"], not_confirmed: ["FAISS"] } }).has("faiss"), false);
 });
 
@@ -63,12 +65,13 @@ test("audits list merged PR provenance first and mark open only evidence at lowe
   assert.equal(rust.evidence_confidence, 1);
   // Merged sources come before the open ones in the evidence list.
   assert.ok(rust.evidence.indexOf("mezmo/aura/pull/904") < rust.evidence.indexOf("mezmo/rig/pull/19"));
-  for (const name of ["GraphSAGE", "Kustomize", "Apache Pulsar"]) {
+  for (const name of ["Apache Pulsar", "Ansible"]) {
     const row = audit.find((entry) => entry.canonical === name);
     assert.equal(row.covered, true, name);
     assert.ok(row.evidence_confidence < 1, `${name} ranks after merged evidence`);
     assert.ok(row.pending_evidence.length);
   }
+  assert.equal(audit.find((entry) => entry.canonical === "GraphSAGE").covered, false);
 });
 
 test("generated skills put merged evidence first and still require JD relevance", () => {
@@ -94,7 +97,7 @@ test("legacy allowlist receives merged and open skills, never a closed PR's", ()
   const claims = loadSafeClaims({ roles: [], projects: [] });
   assert.ok(claims.has("rust"));
   assert.ok(claims.has("tokio"));
-  assert.ok(claims.has("graphsage"));
+  assert.equal(claims.has("graphsage"), false);
   assert.ok(claims.has("kustomize"));
 });
 

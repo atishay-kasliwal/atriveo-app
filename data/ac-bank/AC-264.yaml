@@ -10,14 +10,13 @@ achievement_theme: streaming-reliability
 display_order: 12
 wow_score: 0.8
 metrics_claimed:
-  - fixes_4
-  - tests_15
+  - fixes_3
+  - tests_18
 concepts_claimed:
   - stream-processing
   - reliability
 signature_technologies:
   - Pulsar
-  - Kubernetes
 fact: >-
   Open source contribution (Numaflow), draft F4 (was AC-211 before the port) approved 2026-11-16. Never employment at
   Numaflow.
@@ -26,7 +25,6 @@ oss:
   project: Numaflow
   status: open
   prs:
-    - https://github.com/numaproj/numaflow/pull/3756
     - https://github.com/numaproj/numaflow/pull/3759
     - https://github.com/numaproj/numaflow/pull/3760
     - https://github.com/numaproj/numaflow/pull/3787
@@ -58,5 +56,5 @@ variants:
     emphasis: streaming-reliability
     strength: 9
     text: >-
-      Repaired 4 reliability gaps in Numaflow's JetStream and Pulsar paths by bounding ack retries and rebuilding
-      stalled consumers, with 15 tests plus local multi node Kubernetes reproductions.
+      Repaired 3 reliability gaps in Numaflow's JetStream and Pulsar paths by bounding ack retries and rebuilding
+      stalled consumers, with 18 tests.

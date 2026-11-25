@@ -1,0 +1,60 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md).
+id: AC-286
+role: open-source
+fits:
+  - data-science
+  - ai-engineer
+# Only the tracks it fits.
+tracks:
+  - data-science
+  - ai-engineer
+slot_kind: project
+achievement_theme: mixture-sampling
+display_order: 34
+wow_score: 0.88
+metrics_claimed:
+  - stars_4300
+  - seconds_6.3_to_0.56
+concepts_claimed:
+  - forecasting
+  - performance
+signature_technologies:
+  - PyTorch
+fact: >-
+  Open source contribution (Nixtla | neuralforecast), approved 2026-11-25. Never employment at Nixtla. The maintainer
+  added one test commit; the fix and the benchmark (CPU, batch 64, horizon 96, 1000 samples) are his.
+oss:
+  org: Nixtla
+  project: neuralforecast
+  status: merged
+  prs:
+    - https://github.com/Nixtla/neuralforecast/pull/1777
+capabilities:
+  ml: 92
+  ai: 84
+  data: 82
+strength:
+  recruiter: 9
+ats_keywords:
+  - PyTorch
+  - forecasting
+  - time series
+  - neural networks
+  - deep learning
+  - probabilistic forecasting
+facets:
+  mixture-sampling:
+    phrase: neuralforecast open source contribution
+    keywords:
+      - pytorch
+      - forecasting
+      - time series
+      - neural networks
+      - deep learning
+variants:
+  - facet: mixture-sampling
+    emphasis: mixture-sampling
+    strength: 9
+    text: >-
+      Updated mixture loss sampling in Nixtla's neuralforecast (4.3K+ GitHub stars) in PyTorch, cutting a 10
+      component NBMM sampling run from 6.3 seconds to 0.56.

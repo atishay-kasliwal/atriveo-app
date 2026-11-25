@@ -10,7 +10,7 @@ wow_score: 0.88
 metrics_claimed:
   - stars_37000
   - controls_2
-  - tests_5
+  - tests_3
 concepts_claimed:
   - accessibility
   - frontend
@@ -53,5 +53,5 @@ variants:
     emphasis: accessibility
     strength: 9
     text: >-
-      Clarified 2 unlabeled controls for screen readers in Keycloak's React Account Console (37K+ GitHub stars), adding
-      5 Playwright regression tests run against a nightly server.
+      Clarified 2 unlabeled controls for screen readers in Keycloak's React Account Console (37K+ GitHub stars),
+      adding 3 Playwright regression tests run against a nightly server.

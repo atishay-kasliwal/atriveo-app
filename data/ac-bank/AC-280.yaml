@@ -1,6 +1,9 @@
 # Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
 id: AC-280
 role: open-source
+# Retired 2026-11-25: neo4j/graph-data-science#379 was closed without merging (2026-11-18); a closed PR never prints.
+tracks:
+  - retired
 fits:
   - data-science
   - ai-engineer
@@ -22,7 +25,7 @@ fact: >-
 oss:
   org: Neo4j
   project: Graph Data Science
-  status: open
+  status: closed
   prs:
     - https://github.com/neo4j/graph-data-science/pull/379
 capabilities:

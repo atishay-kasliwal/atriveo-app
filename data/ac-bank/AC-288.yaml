@@ -1,0 +1,60 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md).
+id: AC-288
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: k8s-operator
+display_order: 36
+wow_score: 0.88
+metrics_claimed:
+  - bugs_2
+  - test_cases_8
+concepts_claimed:
+  - kubernetes-operators
+  - reliability
+signature_technologies:
+  - Kubernetes
+  - Go
+fact: >-
+  Open source contribution (NVIDIA | nodewright), approved 2026-11-25. Never employment at NVIDIA.
+oss:
+  org: NVIDIA
+  project: nodewright
+  status: merged
+  prs:
+    - https://github.com/NVIDIA/nodewright/pull/1048
+    - https://github.com/NVIDIA/nodewright/pull/1067
+capabilities:
+  backend: 88
+  cloud: 92
+strength:
+  recruiter: 9
+ats_keywords:
+  - Go
+  - Golang
+  - Kubernetes
+  - Kubernetes operator
+  - GPU
+  - node upgrades
+facets:
+  k8s-operator:
+    phrase: nodewright open source contribution
+    keywords:
+      - go
+      - golang
+      - kubernetes
+      - kubernetes operator
+      - gpu
+variants:
+  - facet: k8s-operator
+    emphasis: k8s-operator
+    strength: 9
+    text: >-
+      Repaired 2 upgrade and drain bugs in NVIDIA's nodewright Kubernetes operator in Go so version bumps stay
+      within the interruption budget, covered by 8 test cases.

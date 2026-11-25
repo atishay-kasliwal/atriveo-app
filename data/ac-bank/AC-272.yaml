@@ -6,7 +6,7 @@ fits:
 slot_kind: project
 achievement_theme: agent-testing
 display_order: 20
-wow_score: 0.8
+wow_score: 0.88
 metrics_claimed:
   - tests_41
 concepts_claimed:
@@ -21,7 +21,7 @@ fact: >-
 oss:
   org: Intuit
   project: StuntDouble
-  status: open
+  status: merged
   prs:
     - https://github.com/intuit/stunt-double/pull/95
 capabilities:
@@ -29,7 +29,7 @@ capabilities:
   backend: 78
   data: 64
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - LangGraph
   - Python

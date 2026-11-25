@@ -56,5 +56,5 @@ variants:
     emphasis: mcp-gating
     strength: 9
     text: >-
-      Added approval gating for native MCP tools and fixed single agent tool filtering in Mezmo's AURA, with 7 Rust
-      tests keeping Read available while excluding Shell.
+      Added MCP style approval gating to native tools in Mezmo's AURA and fixed client tool filtering for single
+      agents, backed by 7 Rust tests.

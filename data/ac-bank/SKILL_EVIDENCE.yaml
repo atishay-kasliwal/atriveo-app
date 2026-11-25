@@ -1,7 +1,7 @@
 {
   "version": 1,
   "approved_on": "2026-11-16",
-  "evidence_snapshot": "2026-11-16",
+  "evidence_snapshot": "2026-11-25",
   "scope": "User-approved skills exposure from contribution research. Statuses are a snapshot, not live checks.",
   "policy": {
     "resume_gate": "approved AND resume_eligible AND every source MERGED or OPEN (a CLOSED source drops the record). MERGED first: merged evidence outranks open evidence on the Skills line and in project selection.",
@@ -921,7 +921,7 @@
     {
       "id": "OSS-SKILL-028",
       "project": "neo4j/graph-data-science",
-      "status": "OPEN",
+      "status": "CLOSED",
       "approved": true,
       "resume_eligible": true,
       "tracks": [
@@ -941,7 +941,7 @@
       "sources": [
         {
           "url": "https://github.com/neo4j/graph-data-science/pull/379",
-          "status": "OPEN"
+          "status": "CLOSED"
         }
       ],
       "verification": "Reported convergence tests for patience one through three.",
@@ -950,7 +950,7 @@
     {
       "id": "OSS-SKILL-029",
       "project": "intuit/stunt-double",
-      "status": "OPEN",
+      "status": "MERGED",
       "approved": true,
       "resume_eligible": true,
       "tracks": [
@@ -973,7 +973,7 @@
       "sources": [
         {
           "url": "https://github.com/intuit/stunt-double/pull/95",
-          "status": "OPEN"
+          "status": "MERGED"
         }
       ],
       "verification": "Reported replay/isolation/reset/parallel-call cases across supported Python versions.",
@@ -1013,7 +1013,7 @@
         },
         {
           "url": "https://github.com/intuit/stunt-double/pull/93",
-          "status": "OPEN",
+          "status": "MERGED",
           "skills": [
             "Python",
             "Regression Testing"
@@ -1097,7 +1097,7 @@
       "sources": [
         {
           "url": "https://github.com/numaproj/numaflow/pull/3756",
-          "status": "OPEN",
+          "status": "MERGED",
           "skills": [
             "Rust",
             "NATS JetStream",
@@ -1144,7 +1144,7 @@
     {
       "id": "OSS-SKILL-033",
       "project": "NVIDIA/nodewright",
-      "status": "OPEN",
+      "status": "MERGED",
       "approved": true,
       "resume_eligible": true,
       "tracks": [
@@ -1165,7 +1165,7 @@
       "sources": [
         {
           "url": "https://github.com/NVIDIA/nodewright/pull/1047",
-          "status": "OPEN",
+          "status": "MERGED",
           "skills": [
             "Kustomize",
             "RBAC"
@@ -1173,7 +1173,7 @@
         },
         {
           "url": "https://github.com/NVIDIA/nodewright/pull/1048",
-          "status": "OPEN",
+          "status": "MERGED",
           "skills": [
             "Go",
             "Kubernetes Operators",
@@ -1229,7 +1229,7 @@
         },
         {
           "url": "https://github.com/dsx-ai-factory/nvke/pull/2337",
-          "status": "OPEN",
+          "status": "MERGED",
           "skills": [
             "Shell Scripting",
             "Regression Testing",
@@ -1397,7 +1397,7 @@
     {
       "id": "OSS-SKILL-040",
       "project": "ustaxes/UsTaxes",
-      "status": "OPEN",
+      "status": "MERGED",
       "approved": true,
       "resume_eligible": true,
       "tracks": [
@@ -1416,7 +1416,7 @@
       "sources": [
         {
           "url": "https://github.com/ustaxes/UsTaxes/pull/2650",
-          "status": "OPEN"
+          "status": "MERGED"
         }
       ],
       "verification": "Emitted-JavaScript comparison and form-tooling regression cases.",
@@ -1434,7 +1434,6 @@
       "skills": [
         "Svelte",
         "CSS",
-        "ESLint",
         "Regression Testing"
       ],
       "activity": [
@@ -1446,14 +1445,10 @@
         {
           "url": "https://github.com/podman-desktop/podman-desktop/pull/20128",
           "status": "OPEN"
-        },
-        {
-          "url": "https://github.com/podman-desktop/podman-desktop/pull/20152",
-          "status": "OPEN"
         }
       ],
-      "verification": "Responsive onboarding checks and inline dialog-button lint cases.",
-      "limits": "Lint approach misses variables and spreads and was questioned in review."
+      "verification": "Responsive onboarding checks.",
+      "limits": "Open and awaiting merge. The dialog lint PR (#20152) was closed without merging and is not evidence."
     },
     {
       "id": "OSS-SKILL-042",
@@ -1486,7 +1481,7 @@
     {
       "id": "OSS-SKILL-043",
       "project": "FrostyX/tracer",
-      "status": "OPEN",
+      "status": "MERGED",
       "approved": true,
       "resume_eligible": true,
       "tracks": [
@@ -1505,7 +1500,7 @@
       "sources": [
         {
           "url": "https://github.com/FrostyX/tracer/pull/233",
-          "status": "OPEN"
+          "status": "MERGED"
         }
       ],
       "verification": "Zombie-process reproduction and real Cockpit query.",
@@ -1514,7 +1509,7 @@
     {
       "id": "OSS-SKILL-044",
       "project": "emilk/egui",
-      "status": "OPEN",
+      "status": "MERGED",
       "approved": true,
       "resume_eligible": true,
       "tracks": [
@@ -1532,11 +1527,11 @@
       "sources": [
         {
           "url": "https://github.com/emilk/egui/pull/8895",
-          "status": "OPEN"
+          "status": "MERGED"
         },
         {
           "url": "https://github.com/emilk/egui/pull/8892",
-          "status": "OPEN"
+          "status": "MERGED"
         }
       ],
       "verification": "Byte-identical readback and first-frame zoom regressions.",
@@ -1600,7 +1595,7 @@
     {
       "id": "OSS-SKILL-047",
       "project": "redhat-developer/mapt",
-      "status": "OPEN",
+      "status": "MERGED",
       "approved": true,
       "resume_eligible": true,
       "tracks": [
@@ -1620,7 +1615,7 @@
       "sources": [
         {
           "url": "https://github.com/redhat-developer/mapt/pull/971",
-          "status": "OPEN",
+          "status": "MERGED",
           "skills": [
             "Go",
             "CI Runner Configuration",
@@ -1630,7 +1625,7 @@
         },
         {
           "url": "https://github.com/redhat-developer/mapt/pull/966",
-          "status": "OPEN",
+          "status": "MERGED",
           "skills": [
             "Go",
             "CI Runner Configuration",
@@ -1639,7 +1634,7 @@
         },
         {
           "url": "https://github.com/redhat-developer/mapt/pull/962",
-          "status": "OPEN",
+          "status": "MERGED",
           "skills": [
             "Go",
             "Regression Testing"

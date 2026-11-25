@@ -1,0 +1,56 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md).
+id: AC-289
+role: open-source
+fits:
+  - software-engineer
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+slot_kind: project
+achievement_theme: log-viewer
+display_order: 37
+wow_score: 0.88
+metrics_claimed:
+  - stars_15000
+  - processes_110_to_28
+concepts_claimed:
+  - frontend
+  - resource-leaks
+signature_technologies:
+  - React
+fact: >-
+  Open source contribution (Cockpit), approved 2026-11-25. Never employment at Cockpit.
+oss:
+  org: ''
+  project: Cockpit
+  status: merged
+  prs:
+    - https://github.com/cockpit-project/cockpit/pull/23896
+capabilities:
+  frontend: 86
+  backend: 72
+strength:
+  recruiter: 9
+ats_keywords:
+  - React
+  - JavaScript
+  - Linux
+  - systemd
+  - frontend
+  - web console
+facets:
+  log-viewer:
+    phrase: Cockpit open source contribution
+    keywords:
+      - react
+      - javascript
+      - linux
+      - systemd
+      - frontend
+variants:
+  - facet: log-viewer
+    emphasis: log-viewer
+    strength: 9
+    text: >-
+      Solved leaked journalctl processes in Cockpit's React log viewer (15K+ GitHub stars), cutting processes
+      started over 5 page visits from 110 to 28 and leaving 1 running instead of 6.

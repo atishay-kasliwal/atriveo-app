@@ -1,0 +1,61 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md).
+id: AC-287
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: k8s-access
+display_order: 35
+wow_score: 0.88
+metrics_claimed:
+  - stars_3600
+  - timeout_45s_to_1s
+concepts_claimed:
+  - kubernetes
+  - reliability
+  - rbac
+signature_technologies:
+  - Go
+  - Kubernetes
+fact: >-
+  Open source contribution (Kiali), approved 2026-11-25. Never employment at Kiali. The maintainer wrote 10 of the
+  PR's 19 commits; the bullet claims only his access check and the result he measured on two k3d clusters.
+oss:
+  org: ''
+  project: Kiali
+  status: merged
+  prs:
+    - https://github.com/kiali/kiali/pull/10523
+capabilities:
+  backend: 88
+  cloud: 92
+strength:
+  recruiter: 9
+ats_keywords:
+  - Go
+  - Golang
+  - Kubernetes
+  - RBAC
+  - Istio
+  - multi cluster
+facets:
+  k8s-access:
+    phrase: Kiali open source contribution
+    keywords:
+      - go
+      - golang
+      - kubernetes
+      - rbac
+      - istio
+variants:
+  - facet: k8s-access
+    emphasis: k8s-access
+    strength: 9
+    text: >-
+      Added a Go access check to Kiali (3.6K+ GitHub stars) for revoked Kubernetes permissions, cutting responses
+      from 45 second timeouts to under 1 second in a two cluster test.

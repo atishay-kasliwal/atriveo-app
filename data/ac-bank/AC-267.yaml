@@ -7,7 +7,7 @@ fits:
 slot_kind: project
 achievement_theme: ci-runners
 display_order: 15
-wow_score: 0.8
+wow_score: 0.88
 metrics_claimed:
   - features_3
   - test_cases_30
@@ -23,7 +23,7 @@ fact: >-
 oss:
   org: Red Hat
   project: mapt
-  status: open
+  status: merged
   prs:
     - https://github.com/redhat-developer/mapt/pull/971
     - https://github.com/redhat-developer/mapt/pull/966
@@ -33,7 +33,7 @@ capabilities:
   cloud: 90
   data: 50
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Go
   - GitHub Actions

@@ -10,7 +10,7 @@ achievement_theme: failure-recovery
 display_order: 2
 wow_score: 0.88
 metrics_claimed:
-  - tests_29
+  - tests_28
 concepts_claimed:
   - failure-recovery
   - rust
@@ -27,7 +27,6 @@ oss:
   prs:
     - https://github.com/mezmo/aura/pull/868
     - https://github.com/mezmo/aura/pull/888
-    - https://github.com/mezmo/aura/pull/864
 capabilities:
   backend: 88
   ai: 76
@@ -53,5 +52,5 @@ variants:
     emphasis: failure-recovery
     strength: 9
     text: >-
-      Repaired failure handling across 3 orchestration paths in AURA so output survives hard retry errors and missing
-      artifact storage, backed by 29 new Rust regression tests.
+      Repaired failure handling across 2 orchestration paths in AURA so output survives hard retry errors and
+      missing artifact storage, backed by 28 new Rust regression tests.

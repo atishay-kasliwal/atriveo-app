@@ -10,7 +10,7 @@ display_order: 29
 wow_score: 0.8
 metrics_claimed:
   - tests_69
-  - files_15
+  - files_11
 concepts_claimed:
   - ml-testing
   - test-isolation
@@ -51,5 +51,5 @@ variants:
     emphasis: ml-test-infra
     strength: 9
     text: >-
-      Rewrote 69 OpenSearch py-ml tests across 15 files to use pytest managed temporary paths, isolating artifacts on
-      secured OpenSearch 2.19 and 3.1 clusters.
+      Rewrote 69 OpenSearch py-ml tests across 11 files to use pytest managed temporary paths, passing the
+      affected suite on a secured OpenSearch 3.1 cluster.
