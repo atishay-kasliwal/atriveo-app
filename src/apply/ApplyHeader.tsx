@@ -23,14 +23,14 @@ export default function ApplyHeader({ todayCount }: { user: User; todayCount?: n
 
       </a>
       <nav className="apply-nav" aria-label="Console">
-        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/outreach" && path !== "/network" && path !== "/day-plan" && path !== "/loops" && path !== "/job-matching" && !path.startsWith("/applied") && path !== "/settings" && path !== "/general" && path !== "/usage" && path !== "/assessments" && path !== "/lucky" ? "page" : undefined}>
+        <Link to="/" aria-current={page === "today" && path !== "/staffing" && path !== "/resume_builder" && path !== "/bank" && path !== "/open-source" && path !== "/outreach" && path !== "/network" && path !== "/day-plan" && path !== "/loops" && path !== "/job-matching" && !path.startsWith("/applied") && path !== "/settings" && path !== "/general" && path !== "/usage" && path !== "/assessments" && path !== "/lucky" ? "page" : undefined}>
           Today{waiting !== null ? <span className="apply-nav-n">{waiting}</span> : null}
         </Link>
         <Link to="/job-matching" aria-current={path === "/job-matching" ? "page" : undefined}>Matching</Link>
         <Link to="/general" aria-current={path === "/general" ? "page" : undefined}>General</Link>
         <Link to="/assessments" aria-current={path === "/assessments" ? "page" : undefined}>Assessments</Link>
         <Link to="/staffing" aria-current={path === "/staffing" ? "page" : undefined}>Staffing</Link>
-        <Link to="/resume_builder" aria-current={path === "/resume_builder" || path === "/bank" ? "page" : undefined}>Resumes</Link>
+        <Link to="/resume_builder" aria-current={path === "/resume_builder" || path === "/bank" || path === "/open-source" ? "page" : undefined}>Resumes</Link>
         <Link to="/network" aria-current={path === "/network" ? "page" : undefined}>Network</Link>
         <Link to="/loops" aria-current={path === "/loops" ? "page" : undefined}>Loops</Link>
         <Link to="/stats" aria-current={page === "stats" ? "page" : undefined}>Stats</Link>

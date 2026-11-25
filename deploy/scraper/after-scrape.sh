@@ -4,6 +4,7 @@
 #   2. linkedin-board-match --apply: match LinkedIn jobs to the company boards
 #   2b. fill-descriptions: fetch the job text the scraper missed from the board's public API, and re-open resumes that failed for lack of it
 #   2c. swelist-feed: add the new US jobs from SimplifyJobs' new-grad list (what the SWElist mail is made from), with their text, and queue resumes
+#   2d. open-source-sync: your pull requests on GitHub for /open-source, at most once an hour
 #   3. resume-enqueue: queue the fresh jobs for the resume workers
 #   4. repair-resume-paths: repoint applications whose resume file is gone to a finished resume of the same job
 #   5. prune-jobs: jobs you did not apply to (or save for later), scraped more than PRUNE_DAYS days ago (default 3), leave Mongo
@@ -18,6 +19,8 @@ while true; do
   step linkedin-board-match "$NODE" /app/scripts/linkedin-board-match.mjs --apply
   step fill-descriptions "$NODE" /app/scripts/fill-descriptions.mjs --apply
   step swelist-feed "$NODE" /app/scripts/swelist-feed.mjs --apply
+  # Your pull requests on GitHub, for the open source page; at most once an hour.
+  step open-source-sync "$NODE" /app/scripts/open-source-sync.mjs --if-older 60
   step resume-enqueue "$NODE" /app/scripts/resume-enqueue.mjs --limit=all
   # An application whose resume file is gone gets pointed at a finished resume of the same job, once one exists (logged, undoable).
   step repair-resume-paths "$NODE" /app/scripts/repair-resume-paths.mjs --apply

@@ -26,6 +26,8 @@ oss:
   org: ''
   project: MisterDownloadManager
   status: merged
+  # The maintainer wrote part of this PR: never counted as ready for a general resume on the open source page.
+  shared: true
   prs:
     - https://github.com/anefzaoui/misterdownloadmanager/pull/477
 capabilities:

@@ -14,6 +14,7 @@ import { useAuth } from "../hooks/useAuth";
 import Applications from "../pages/Applications";
 import AdminLogin from "./AdminLogin";
 import BankPage from "./BankPage";
+import OpenSourcePage from "./OpenSourcePage";
 import DayPlanPage from "./DayPlanPage";
 import ApplyHeader from "./ApplyHeader";
 import ReadyPage from "./ReadyPage";
@@ -72,6 +73,7 @@ function Console() {
     if (path === "/staffing") return <StaffingPage header={header} />;
     if (path === "/resume_builder") return <ResumeBuilderPage header={header} />;
     if (path === "/bank") return <BankPage header={header} />;
+    if (path === "/open-source") return <OpenSourcePage header={header} />;
     if (path === "/day-plan") return <DayPlanPage header={header} />;
     // The answer pages (To answer, and the full form view) were retired: old links and bookmarks land on Today.
     if (path === "/unanswered" || path === "/answers") return <Navigate to="/" replace />;
