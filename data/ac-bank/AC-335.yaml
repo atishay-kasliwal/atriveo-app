@@ -49,5 +49,6 @@ variants:
     emphasis: oss-final-335
     strength: 9
     text: >-
-      Added Python build-time icon retrieval for Couch TV apps missing bundled logos, verifying downloads and
-      rejection paths with 2 self-signed HTTPS regression tests so LG packages include usable app icons.
+      Repaired missing app icons in Couch TV's LG packages with Python build-time retrieval, verifying
+      downloads and rejection paths with 2 self-signed HTTPS regression tests before packaging the downloaded
+      assets.

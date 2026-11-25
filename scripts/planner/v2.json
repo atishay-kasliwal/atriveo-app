@@ -677,6 +677,104 @@
           "ids": ["AC-340","AC-266"],
           "jd_signals": ["jenkins","junit","integration report","coverage failure"],
           "strong_signals": ["jenkins","junit"]
+        },
+        {
+          "name": "node-local-dns",
+          "anchor": "AC-322",
+          "ids": ["AC-322","AC-331"],
+          "jd_signals": ["node-local dns","coredns","dns cache","local dns zone"],
+          "strong_signals": ["coredns","node-local dns"]
+        },
+        {
+          "name": "vault-guide-verification",
+          "anchor": "AC-324",
+          "ids": ["AC-324","AC-331"],
+          "jd_signals": ["hashicorp vault","vault setup","gitleaks","secret scanning"],
+          "strong_signals": ["hashicorp vault","gitleaks"]
+        },
+        {
+          "name": "agent-budget-injection",
+          "anchor": "AC-326",
+          "ids": ["AC-326","AC-279"],
+          "jd_signals": ["nestjs","price list","dependency injection","budget module"],
+          "strong_signals": ["nestjs","dependency injection"]
+        },
+        {
+          "name": "koi-rendering",
+          "anchor": "AC-327",
+          "ids": ["AC-327","AC-328"],
+          "jd_signals": ["git-koi","feeding animation","pigment sampling","pixel rendering"],
+          "strong_signals": ["git-koi","pigment sampling"]
+        },
+        {
+          "name": "forecast-calendar-inputs",
+          "anchor": "AC-329",
+          "ids": ["AC-329","AC-286"],
+          "jd_signals": ["calendar features","calendar augmentation","feature collision","augment_calendar_df"],
+          "strong_signals": ["calendar features","augment_calendar_df"]
+        },
+        {
+          "name": "artifact-cutover",
+          "anchor": "AC-332",
+          "ids": ["AC-332","AC-331"],
+          "jd_signals": ["build digest","definition composition","release composition","artifact equivalence"],
+          "strong_signals": ["build digest","artifact equivalence"]
+        },
+        {
+          "name": "browser-lifecycle",
+          "anchor": "AC-333",
+          "ids": ["AC-333","AC-270"],
+          "jd_signals": ["browser lifecycle","pagehide","unload handler","back-forward cache"],
+          "strong_signals": ["pagehide","browser lifecycle"]
+        },
+        {
+          "name": "qualification-diagnostics",
+          "anchor": "AC-334",
+          "ids": ["AC-334","AC-322"],
+          "jd_signals": ["ginkgo","gomega","junit failure","eventually retry"],
+          "strong_signals": ["ginkgo","gomega"]
+        },
+        {
+          "name": "lg-app-packaging",
+          "anchor": "AC-335",
+          "ids": ["AC-335","AC-291"],
+          "jd_signals": ["lg webos","webos","lg app icons","self-signed https"],
+          "strong_signals": ["webos","lg app icons"]
+        },
+        {
+          "name": "oidc-client-tests",
+          "anchor": "AC-336",
+          "ids": ["AC-336","AC-269"],
+          "jd_signals": ["oidc","public client","keycloak","client authentication"],
+          "strong_signals": ["oidc","keycloak"]
+        },
+        {
+          "name": "offline-job-reconciliation",
+          "anchor": "AC-337",
+          "ids": ["AC-337","AC-326"],
+          "jd_signals": ["job export","job comparison","offline comparison","job reconciliation"],
+          "strong_signals": ["job export","job reconciliation"]
+        },
+        {
+          "name": "scanner-action-reporting",
+          "anchor": "AC-338",
+          "ids": ["AC-338","AC-339"],
+          "jd_signals": ["skillguard action","github action outputs","scan counts","scanner exit code"],
+          "strong_signals": ["skillguard action","scan counts"]
+        },
+        {
+          "name": "container-owner-console",
+          "anchor": "AC-341",
+          "ids": ["AC-341","AC-333"],
+          "jd_signals": ["podman","container owners","cockpit podman","multi-user container"],
+          "strong_signals": ["podman","cockpit podman"]
+        },
+        {
+          "name": "agent-example-arithmetic",
+          "anchor": "AC-343",
+          "ids": ["AC-343","AC-344"],
+          "jd_signals": ["math-mcp","agent examples","mcp arithmetic","division by zero"],
+          "strong_signals": ["math-mcp","mcp arithmetic"]
         }
       ]
     }

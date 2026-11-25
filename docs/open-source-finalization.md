@@ -152,7 +152,7 @@ Limits: Test tooling only; a progress report can suppress a genuine cause but fu
 
 ### AC-335: Seagey/couch-tv#60
 
-Added Python build-time icon retrieval for Couch TV apps missing bundled logos, verifying downloads and rejection paths with 2 self-signed HTTPS regression tests so LG packages include usable app icons.
+Repaired missing app icons in Couch TV's LG packages with Python build-time retrieval, verifying downloads and rejection paths with 2 self-signed HTTPS regression tests before packaging the downloaded assets.
 
 Source: https://github.com/Seagey/couch-tv/pull/60
 

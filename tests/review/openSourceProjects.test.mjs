@@ -75,6 +75,10 @@ test("a bullet's status matches its PRs, and a closed PR is never on an active b
 
 test("finalized drafts retain attribution and validation boundaries", () => {
   const point = (n) => oss.find((a) => a.id === `AC-${n}`);
+  const paired = new Set(pool.story_packages.flatMap((p) => p.ids));
+  for (let n = 321; n <= 344; n += 1) {
+    assert.ok(paired.has(`AC-${n}`), `AC-${n} must be reachable by paired selection, not only page fill`);
+  }
   assert.equal(point(322).oss.shared, true, "NVKE DNS applies another contributor's fix");
   assert.match(point(322).fact, /cluster validation was performed by that contributor/);
   assert.equal(point(326).oss.status, "open", "Macaron's upstream draft is still open work");
