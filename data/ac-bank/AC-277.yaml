@@ -8,8 +8,8 @@ achievement_theme: rust-desktop
 display_order: 25
 wow_score: 0.88
 metrics_claimed:
-  - stars_11000
-  - tests_3
+  - stars_18000
+  - tests_2
 concepts_claimed:
   - desktop
   - rust
@@ -49,5 +49,5 @@ variants:
     emphasis: rust-desktop
     strength: 9
     text: >-
-      Added system installed yt-dlp support on Linux and macOS to MisterDownloadManager (11K+ GitHub stars) in Rust,
-      with 3 executable discovery tests and offline resolution checks.
+      Added system installed yt-dlp support on Linux and macOS to MisterDownloadManager (18K+ GitHub stars) in
+      Rust, with 2 executable discovery tests and offline resolution checks.

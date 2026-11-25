@@ -312,7 +312,7 @@
         "wow": 0.9,
         "recruiter": 1.0
       },
-      "ac_ids": ["AC-253", "AC-254", "AC-255", "AC-256", "AC-257", "AC-258", "AC-259", "AC-260", "AC-261", "AC-262", "AC-263", "AC-264", "AC-265", "AC-266", "AC-267", "AC-268", "AC-269", "AC-270", "AC-271", "AC-272", "AC-273", "AC-274", "AC-275", "AC-276", "AC-277", "AC-278", "AC-279", "AC-280", "AC-281"],
+      "ac_ids": ["AC-253", "AC-254", "AC-255", "AC-256", "AC-257", "AC-258", "AC-259", "AC-260", "AC-261", "AC-262", "AC-263", "AC-264", "AC-265", "AC-266", "AC-267", "AC-268", "AC-269", "AC-270", "AC-271", "AC-272", "AC-273", "AC-274", "AC-275", "AC-276", "AC-277", "AC-278", "AC-279", "AC-281", "AC-282", "AC-283", "AC-284", "AC-285", "AC-286", "AC-287", "AC-288", "AC-289"],
       "story_packages": [
         {
           "name": "rust-concurrency",
@@ -428,10 +428,52 @@
         },
         {
           "name": "ml-infra",
-          "anchor": "AC-280",
-          "ids": ["AC-280",  "AC-281"],
-          "jd_signals": ["graph neural", "gnn", "graphsage", "embeddings", "machine learning", "mlops", "ml platform", "ml infrastructure", "pytest", "opensearch", "elasticsearch"],
-          "strong_signals": ["graphsage", "gnn", "graph neural", "mlops"]
+          "anchor": "AC-281",
+          "ids": ["AC-281",  "AC-271"],
+          "jd_signals": ["machine learning", "mlops", "ml platform", "ml infrastructure", "pytest", "opensearch", "elasticsearch"],
+          "strong_signals": ["opensearch", "elasticsearch", "mlops"]
+        },
+        {
+          "name": "scientific-python",
+          "anchor": "AC-282",
+          "ids": ["AC-282",  "AC-284"],
+          "jd_signals": ["scipy", "statsmodels", "scientific computing", "numerical", "statistical model", "optimization", "time series", "data scientist"],
+          "strong_signals": ["scipy", "statsmodels", "scientific computing"]
+        },
+        {
+          "name": "scipy",
+          "anchor": "AC-282",
+          "ids": ["AC-282",  "AC-283"],
+          "jd_signals": ["scipy", "statistics", "probability", "numerical", "scientific computing"],
+          "strong_signals": ["scipy"]
+        },
+        {
+          "name": "ml-libraries",
+          "anchor": "AC-285",
+          "ids": ["AC-285",  "AC-286"],
+          "jd_signals": ["pytorch", "forecasting", "time series", "embeddings", "dimensionality reduction", "deep learning", "neural network", "tensorflow", "keras"],
+          "strong_signals": ["forecasting", "umap", "dimensionality reduction"]
+        },
+        {
+          "name": "k8s-multicluster",
+          "anchor": "AC-261",
+          "ids": ["AC-261",  "AC-287"],
+          "jd_signals": ["kubernetes", "k8s", "multi cluster", "multi-cluster", "rbac", "istio", "service mesh", "reliability"],
+          "strong_signals": ["multi-cluster", "multi cluster", "istio", "service mesh"]
+        },
+        {
+          "name": "gpu-operators",
+          "anchor": "AC-258",
+          "ids": ["AC-258",  "AC-288"],
+          "jd_signals": ["kubernetes operator", "operator", "nvidia", "gpu", "kubernetes", "node management"],
+          "strong_signals": ["kubernetes operator", "gpu"]
+        },
+        {
+          "name": "linux-console",
+          "anchor": "AC-289",
+          "ids": ["AC-289",  "AC-270"],
+          "jd_signals": ["linux", "systemd", "web console", "react", "frontend", "front-end"],
+          "strong_signals": ["systemd", "web console"]
         }
       ]
     }

@@ -9,12 +9,15 @@ import { sharedOpeningVerbs, sharedOpeningVerbsByTrack, resumeRoles, lintBullet 
 import { loadTracks } from "../../scripts/ac-tracks.mjs";
 import { ossHeading } from "../../scripts/ac-tex.mjs";
 import { loadBank } from "../../scripts/ac-bank.mjs";
+import { loadSkillEvidence } from "../../scripts/skill-evidence.mjs";
 
 // Open source project slot (QUESTION_ANSWERS "Open Source Work on Resumes", approved 2026-11-16).
 const planner = JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "../../scripts/planner/v2.json"), "utf8"));
 const pool = planner.canonical_pools["open-source"];
 const bank = loadBank();
-const oss = bank.acs.filter((a) => a.role === "open-source");
+const all = bank.acs.filter((a) => a.role === "open-source");
+const retired = (a) => (a.tracks || []).includes("retired");
+const oss = all.filter((a) => !retired(a));
 const pick = (jd) => pickResumeProjectRoles(["atriveo", "insurance-platform", "open-source"], jd, planner)[1];
 
 test("open source takes the second slot only when the JD clearly matches it", () => {
@@ -27,7 +30,8 @@ test("open source takes the second slot only when the JD clearly matches it", ()
 
 test("every open source package pairs two bank entries with unique verbs inside the package", () => {
   const byId = new Map(oss.map((a) => [a.id, a]));
-  assert.equal(oss.length, 29);
+  assert.equal(oss.length, 36);
+  assert.deepEqual(all.filter(retired).map((a) => a.id), ["AC-280"]);
   for (const pkg of pool.story_packages) {
     assert.equal(pkg.ids.length, 2, pkg.name);
     const verbs = pkg.ids.map((id) => byId.get(id).variants[0].text.split(/\s+/)[0].toLowerCase());
@@ -52,6 +56,18 @@ test("every open source bullet passes the bank lint and carries its upstream pro
     assert.doesNotMatch(ac.variants[0].text, /\b(merged|open PR|pull request)\b/i, ac.id);
     if (ac.oss.status === "open") assert.doesNotMatch(ac.variants[0].text, /\b(shipped|released|adopted|used by)\b/i, ac.id);
   }
+});
+
+// 2026-11-25: 10 bullets had drifted from their PRs. Statuses come from SKILL_EVIDENCE.yaml, so this stays offline.
+test("a bullet's status matches its PRs, and a closed PR is never on an active bullet", () => {
+  const status = new Map(loadSkillEvidence().records.flatMap((r) => r.sources.map((s) => [s.url, s.status])));
+  for (const ac of oss) {
+    const known = ac.oss.prs.map((u) => status.get(u)).filter(Boolean);
+    assert.ok(!known.includes("CLOSED"), ac.id);
+    if (ac.oss.status === "merged") assert.ok(known.every((s) => s === "MERGED"), `${ac.id} says merged: ${known}`);
+    else assert.ok(known.includes("OPEN"), `${ac.id} says open, but every PR is merged`);
+  }
+  assert.ok(!pool.ac_ids.includes("AC-280") && pool.story_packages.every((p) => !p.ids.includes("AC-280")));
 });
 
 test("merged work outranks open work at the same JD fit", () => {

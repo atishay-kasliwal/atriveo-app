@@ -1,0 +1,55 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md).
+id: AC-283
+role: open-source
+fits:
+  - data-science
+# Only the tracks it fits.
+tracks:
+  - data-science
+slot_kind: project
+achievement_theme: scipy-stats
+display_order: 31
+wow_score: 0.88
+metrics_claimed:
+  - stars_15000
+  - grid_points_84
+concepts_claimed:
+  - statistics
+  - numerical-accuracy
+signature_technologies:
+  - SciPy
+fact: >-
+  Open source contribution (SciPy), approved 2026-11-25. Never employment at SciPy.
+oss:
+  org: ''
+  project: SciPy
+  status: merged
+  prs:
+    - https://github.com/scipy/scipy/pull/26812
+capabilities:
+  ml: 80
+  data: 88
+strength:
+  recruiter: 9
+ats_keywords:
+  - SciPy
+  - statistics
+  - probability distributions
+  - numerical methods
+  - scientific computing
+facets:
+  scipy-stats:
+    phrase: SciPy open source contribution
+    keywords:
+      - scipy
+      - statistics
+      - probability distributions
+      - numerical methods
+      - scientific computing
+variants:
+  - facet: scipy-stats
+    emphasis: scipy-stats
+    strength: 9
+    text: >-
+      Revised the Rice distribution tail functions in SciPy (15K+ GitHub stars) to stop underflow, matching or
+      beating the previous accuracy at all 84 grid points checked.

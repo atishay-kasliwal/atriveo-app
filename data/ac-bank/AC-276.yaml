@@ -6,7 +6,7 @@ fits:
 slot_kind: project
 achievement_theme: rust-gui
 display_order: 24
-wow_score: 0.8
+wow_score: 0.88
 metrics_claimed:
   - stars_32000
   - tests_2
@@ -19,7 +19,7 @@ fact: Open source contribution (egui), draft E1 (was AC-223 before the port) app
 oss:
   org: ''
   project: egui
-  status: open
+  status: merged
   prs:
     - https://github.com/emilk/egui/pull/8892
 capabilities:
@@ -27,7 +27,7 @@ capabilities:
   backend: 76
   data: 50
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Rust
   - GUI

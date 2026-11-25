@@ -10,7 +10,7 @@ display_order: 7
 wow_score: 0.88
 metrics_claimed:
   - features_3
-  - test_cases_54
+  - test_cases_50
 concepts_claimed:
   - cli
   - kubernetes
@@ -54,5 +54,5 @@ variants:
     emphasis: go-cli-ux
     strength: 9
     text: >-
-      Updated NVIDIA Workload Map's kli CLI with 3 Go and Cobra features including sort flags and a STATUS column for
-      overridden definitions, covered by 54 test cases.
+      Updated NVIDIA Workload Map's kli CLI with 3 Go and Cobra features including sort flags and a STATUS column
+      for overridden definitions, covered by 50 test cases.

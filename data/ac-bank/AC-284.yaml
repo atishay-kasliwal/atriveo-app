@@ -1,0 +1,64 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md).
+id: AC-284
+role: open-source
+fits:
+  - data-science
+  - ai-engineer
+  - software-engineer
+# Only the tracks it fits.
+tracks:
+  - data-science
+  - ai-engineer
+  - software-engineer
+slot_kind: project
+achievement_theme: statsmodels-cython
+display_order: 32
+wow_score: 0.88
+metrics_claimed:
+  - stars_11000
+  - cases_270
+  - failures_42
+concepts_claimed:
+  - statistics
+  - time-series
+  - testing
+signature_technologies:
+  - Python
+  - Cython
+fact: >-
+  Open source contribution (statsmodels), approved 2026-11-25. Never employment at statsmodels.
+oss:
+  org: ''
+  project: statsmodels
+  status: merged
+  prs:
+    - https://github.com/statsmodels/statsmodels/pull/10795
+capabilities:
+  ml: 82
+  data: 88
+  backend: 70
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - Cython
+  - statsmodels
+  - time series
+  - statistical modeling
+  - econometrics
+facets:
+  statsmodels-cython:
+    phrase: statsmodels open source contribution
+    keywords:
+      - python
+      - cython
+      - statsmodels
+      - time series
+      - statistical modeling
+variants:
+  - facet: statsmodels-cython
+    emphasis: statsmodels-cython
+    strength: 9
+    text: >-
+      Examined statsmodels (11K+ GitHub stars) Cython entry points with 270 Python array layout cases and fixed
+      the 42 that failed across KDE, ETS and state space models.

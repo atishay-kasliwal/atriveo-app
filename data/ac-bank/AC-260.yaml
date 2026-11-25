@@ -9,8 +9,8 @@ achievement_theme: k8s-controller
 display_order: 8
 wow_score: 0.8
 metrics_claimed:
-  - changes_4
-  - test_cases_18
+  - changes_2
+  - test_cases_50
 concepts_claimed:
   - kubernetes-controllers
   - gpu
@@ -27,8 +27,6 @@ oss:
   prs:
     - https://github.com/dsx-ai-factory/nvke/pull/2336
     - https://github.com/dsx-ai-factory/nvke/pull/2288
-    - https://github.com/dsx-ai-factory/nvke/pull/2337
-    - https://github.com/dsx-ai-factory/nvke/pull/2246
 capabilities:
   backend: 88
   cloud: 90
@@ -55,5 +53,5 @@ variants:
     emphasis: k8s-controller
     strength: 9
     text: >-
-      Revised 4 Go controller paths in NVIDIA's NVKE GPU Kubernetes engine to skip unchanged node writes and log
-      readiness transitions with typed probe causes, backed by 18 test cases.
+      Revised 2 Go controller paths in NVIDIA's NVKE GPU Kubernetes engine to skip unchanged node writes and log
+      readiness transitions with typed probe causes, covered by 50+ test cases.

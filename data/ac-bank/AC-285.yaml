@@ -1,0 +1,58 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md).
+id: AC-285
+role: open-source
+fits:
+  - data-science
+  - ai-engineer
+# Only the tracks it fits.
+tracks:
+  - data-science
+  - ai-engineer
+slot_kind: project
+achievement_theme: umap-loss
+display_order: 33
+wow_score: 0.88
+metrics_claimed:
+  - stars_8300
+  - cases_22
+concepts_claimed:
+  - machine-learning
+  - loss-functions
+signature_technologies:
+  - UMAP
+fact: >-
+  Open source contribution (UMAP), approved 2026-11-25. Never employment at UMAP.
+oss:
+  org: ''
+  project: UMAP
+  status: merged
+  prs:
+    - https://github.com/lmcinnes/umap/pull/1353
+capabilities:
+  ml: 90
+  ai: 82
+strength:
+  recruiter: 9
+ats_keywords:
+  - UMAP
+  - dimensionality reduction
+  - embeddings
+  - TensorFlow
+  - Keras
+  - loss function
+facets:
+  umap-loss:
+    phrase: UMAP open source contribution
+    keywords:
+      - umap
+      - dimensionality reduction
+      - embeddings
+      - tensorflow
+      - keras
+variants:
+  - facet: umap-loss
+    emphasis: umap-loss
+    strength: 9
+    text: >-
+      Repaired the parametric UMAP loss (8.3K+ GitHub stars) that applied log sigmoid to log probabilities, adding
+      22 regression cases of which 17 failed before the fix.
