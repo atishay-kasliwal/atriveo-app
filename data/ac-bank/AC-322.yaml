@@ -1,0 +1,63 @@
+# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+id: AC-322
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+areas:
+  - backend
+  - platform
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-final-322
+display_order: 70
+wow_score: 0.8
+metrics_claimed:
+  - dns_zones_4
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Go
+  - Kubernetes
+  - CoreDNS
+fact: >-
+  User-approved open source contribution, finalized 2026-11-25. Regression reads the applied ConfigMap and
+  compares all four base zones with the DaemonSet local address. Applies kfelternv's upstream fix; cluster
+  validation was performed by that contributor, not this author. Never employment at the upstream
+  organization.
+oss:
+  org: NVIDIA
+  project: NVKE
+  status: open
+  prs:
+    - https://github.com/dsx-ai-factory/nvke/pull/2423
+  shared: true
+capabilities:
+  backend: 85
+  cloud: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - Go
+  - Kubernetes
+  - CoreDNS
+  - Regression Testing
+  - NVKE
+facets:
+  oss-final-322:
+    phrase: NVKE open source contribution
+    keywords:
+      - go
+      - kubernetes
+      - coredns
+      - regression testing
+variants:
+  - facet: oss-final-322
+    emphasis: oss-final-322
+    strength: 9
+    text: >-
+      Repaired conflicting CoreDNS listener bindings across 4 Kubernetes zones by applying an upstream fix,
+      adding Go regression coverage that keeps base-zone bindings consistent with the node-cache address
+      during configuration changes.

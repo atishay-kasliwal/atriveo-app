@@ -1,0 +1,61 @@
+# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+id: AC-334
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+areas:
+  - backend
+  - platform
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-final-334
+display_order: 82
+wow_score: 0.8
+metrics_claimed:
+  - race_repetitions_30
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Go
+fact: >-
+  User-approved open source contribution, finalized 2026-11-25. Race-enabled unit selection repeated thirty
+  times; a Ginkgo harness verifies JUnit stale-cause removal. Test tooling only; a progress report can
+  suppress a genuine cause but full system-err is retained. Never employment at the upstream organization.
+oss:
+  org: NVIDIA
+  project: NVKE
+  status: open
+  prs:
+    - https://github.com/dsx-ai-factory/nvke/pull/2246
+capabilities:
+  backend: 85
+  cloud: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - Go
+  - Ginkgo
+  - Gomega
+  - JUnit
+  - Regression Testing
+  - NVKE
+facets:
+  oss-final-334:
+    phrase: NVKE open source contribution
+    keywords:
+      - go
+      - ginkgo
+      - gomega
+      - junit
+      - regression testing
+variants:
+  - facet: oss-final-334
+    emphasis: oss-final-334
+    strength: 9
+    text: >-
+      Diagnosed misleading NVKE qualification failures caused by stale retry errors and corrected Go failure
+      attribution, verifying behavior across 30 race-enabled unit repetitions so JUnit reports retain only
+      relevant failure causes.

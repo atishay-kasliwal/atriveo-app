@@ -1,0 +1,56 @@
+# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+id: AC-329
+role: open-source
+fits:
+  - software-engineer
+  - data-science
+areas:
+  - backend
+tracks:
+  - software-engineer
+  - data-science
+slot_kind: project
+achievement_theme: oss-final-329
+display_order: 77
+wow_score: 0.8
+metrics_claimed:
+  - duplicate_feature_columns_2
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Python
+fact: >-
+  User-approved open source contribution, finalized 2026-11-25. Duplicate calendar-feature regression fails on
+  the original implementation and passes with validation. Rejects naming collisions; no forecast-accuracy
+  improvement claimed. Never employment at the upstream organization.
+oss:
+  org: Nixtla
+  project: NeuralForecast
+  status: open
+  prs:
+    - https://github.com/Nixtla/neuralforecast/pull/1774
+capabilities:
+  backend: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - NeuralForecast
+  - Regression Testing
+  - Data Validation
+facets:
+  oss-final-329:
+    phrase: NeuralForecast open source contribution
+    keywords:
+      - python
+      - neuralforecast
+      - regression testing
+      - data validation
+variants:
+  - facet: oss-final-329
+    emphasis: oss-final-329
+    strength: 9
+    text: >-
+      Repaired NeuralForecast Python preprocessing that could return 2 identically named columns by validating
+      calendar features before insertion, giving users explicit conflict errors instead of ambiguous
+      forecasting inputs with regression coverage.

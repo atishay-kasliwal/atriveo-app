@@ -1,0 +1,59 @@
+# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+id: AC-325
+role: open-source
+fits:
+  - software-engineer
+  - ai-engineer
+  - forward-deployed
+areas:
+  - frontend
+  - full-stack
+tracks:
+  - software-engineer
+  - ai-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-final-325
+display_order: 73
+wow_score: 0.8
+metrics_claimed:
+  - chat_cases_7
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - React
+fact: >-
+  User-approved open source contribution, finalized 2026-11-25. Seven added chatbot tests cover copy,
+  navigation, auto-navigation, empty responses and streaming. User-facing React change; no backend Go
+  implementation or adoption metric. Never employment at the upstream organization.
+oss:
+  org: ''
+  project: Kiali
+  status: open
+  prs:
+    - https://github.com/kiali/kiali/pull/10570
+capabilities:
+  backend: 70
+  frontend: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - React
+  - TypeScript
+  - Regression Testing
+  - Kiali
+facets:
+  oss-final-325:
+    phrase: Kiali open source contribution
+    keywords:
+      - react
+      - typescript
+      - regression testing
+variants:
+  - facet: oss-final-325
+    emphasis: oss-final-325
+    strength: 9
+    text: >-
+      Clarified incomplete AI responses in Kiali's React chatbot through explicit navigation feedback and
+      text-aware copy controls, covering 7 regression cases so users can distinguish actionable links from
+      genuinely empty answers.

@@ -1,0 +1,53 @@
+# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+id: AC-335
+role: open-source
+fits:
+  - software-engineer
+areas:
+  - full-stack
+tracks:
+  - software-engineer
+slot_kind: project
+achievement_theme: oss-final-335
+display_order: 83
+wow_score: 0.8
+metrics_claimed:
+  - icon_tests_2
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Python
+fact: >-
+  User-approved open source contribution, finalized 2026-11-25. Two tests cover packaging and
+  invalid/unreachable icons against a self-signed HTTPS server. No physical LG TV validation; TV icon requests
+  deliberately disable certificate checks for the local self-signed endpoint. Never employment at the upstream
+  organization.
+oss:
+  org: ''
+  project: Couch TV
+  status: merged
+  prs:
+    - https://github.com/Seagey/couch-tv/pull/60
+capabilities:
+  backend: 70
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - HTTPS
+  - Regression Testing
+  - Couch TV
+facets:
+  oss-final-335:
+    phrase: Couch TV open source contribution
+    keywords:
+      - python
+      - https
+      - regression testing
+variants:
+  - facet: oss-final-335
+    emphasis: oss-final-335
+    strength: 9
+    text: >-
+      Added Python build-time icon retrieval for Couch TV apps missing bundled logos, verifying downloads and
+      rejection paths with 2 self-signed HTTPS regression tests so LG packages include usable app icons.

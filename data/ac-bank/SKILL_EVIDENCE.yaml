@@ -1643,6 +1643,666 @@
       ],
       "verification": "JIT/proxy rendered scripts and Azure machine-selection unit tests.",
       "limits": "No real JIT runner, proxy host or Azure SKU/provisioning validation."
+    },
+    {
+      "id": "OSS-SKILL-048",
+      "project": "OSSAfrica/skillguard",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "AI"
+      ],
+      "skills": [
+        "Go",
+        "JSON",
+        "CLI Development",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/OSSAfrica/skillguard/pull/233",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. JSON report version round-trip regression; file and stdin paths use the same report construction.",
+      "limits": "Release provenance, not measured scanner accuracy or adoption."
+    },
+    {
+      "id": "OSS-SKILL-049",
+      "project": "dsx-ai-factory/nvke",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "FDE"
+      ],
+      "skills": [
+        "Go",
+        "Kubernetes",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/dsx-ai-factory/nvke/pull/2423",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Regression reads the applied ConfigMap and compares all four base zones with the DaemonSet local address.",
+      "limits": "Applies kfelternv's upstream fix; cluster validation was performed by that contributor, not this author."
+    },
+    {
+      "id": "OSS-SKILL-050",
+      "project": "lmcinnes/umap",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS"
+      ],
+      "skills": [
+        "Python",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/lmcinnes/umap/pull/1360",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Three empty-string cases exercise the uncompiled path; original behavior fails before the early returns.",
+      "limits": "No ppc64el hardware run; platform-independent regression reproduces the undefined-shift cause."
+    },
+    {
+      "id": "OSS-SKILL-051",
+      "project": "kroxylicious/kroxylicious",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "FDE"
+      ],
+      "skills": [],
+      "activity": [
+        "documented",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/kroxylicious/kroxylicious/pull/5368",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Gitleaks 8.30.1 reports one service-token finding before the guide edit and none afterwards.",
+      "limits": "Documentation only; no Java implementation or real credential-rotation claim."
+    },
+    {
+      "id": "OSS-SKILL-052",
+      "project": "kiali/kiali",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "AI",
+        "FDE"
+      ],
+      "skills": [
+        "React",
+        "TypeScript",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/kiali/kiali/pull/10570",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Seven added chatbot tests cover copy, navigation, auto-navigation, empty responses and streaming.",
+      "limits": "User-facing React change; no backend Go implementation or adoption metric."
+    },
+    {
+      "id": "OSS-SKILL-053",
+      "project": "open-macaron/macaron",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "AI"
+      ],
+      "skills": [
+        "TypeScript",
+        "NestJS",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/open-macaron/macaron/pull/183",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Module regression verifies one PriceList file read and shared calls from key minting and model preferences.",
+      "limits": "Upstream draft PR; controller suite has known failures and database integration was not run."
+    },
+    {
+      "id": "OSS-SKILL-054",
+      "project": "yalongwastaken/git-koi",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Rust",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/yalongwastaken/git-koi/pull/74",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Forty render variants remain byte-identical; deliberately changing ring dither affects feeding renders.",
+      "limits": "Behavior-preserving refactor; no performance improvement or user-growth claim."
+    },
+    {
+      "id": "OSS-SKILL-055",
+      "project": "yalongwastaken/git-koi",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Rust",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/yalongwastaken/git-koi/pull/72",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Red and blue nose markings checked across six bodies; regenerated light and dark reference sheets reviewed.",
+      "limits": "Rendering correctness, not measured engagement or rendering speed."
+    },
+    {
+      "id": "OSS-SKILL-056",
+      "project": "Nixtla/neuralforecast",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DS"
+      ],
+      "skills": [
+        "Python",
+        "Regression Testing",
+        "Data Validation"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/Nixtla/neuralforecast/pull/1774",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Duplicate calendar-feature regression fails on the original implementation and passes with validation.",
+      "limits": "Rejects naming collisions; no forecast-accuracy improvement claimed."
+    },
+    {
+      "id": "OSS-SKILL-057",
+      "project": "Nixtla/neuralforecast",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "AI",
+        "DS"
+      ],
+      "skills": [
+        "Python",
+        "Regression Testing",
+        "Model Evaluation"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/Nixtla/neuralforecast/pull/1773",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Corrected model/loss checks pass 35 CPU tests after exceptions propagate and test series are long enough.",
+      "limits": "Suite count, not model accuracy or production throughput."
+    },
+    {
+      "id": "OSS-SKILL-058",
+      "project": "NVIDIA/nodewright",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "FDE"
+      ],
+      "skills": [
+        "Kustomize",
+        "Kubernetes",
+        "RBAC"
+      ],
+      "activity": [
+        "configuration-only",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/NVIDIA/nodewright/pull/1047",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Pinned Kustomize build confirms the base manager environment and Role Secret rule change together.",
+      "limits": "Configuration only, no Go code or cluster e2e; overlays that patch the env value still need the documented replacement."
+    },
+    {
+      "id": "OSS-SKILL-059",
+      "project": "dsx-ai-factory/nvkr",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "FDE"
+      ],
+      "skills": [
+        "Release Engineering"
+      ],
+      "activity": [
+        "documented",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/dsx-ai-factory/nvkr/pull/482",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. ADR reconciliation checks pass; authored definitions account for fourteen added family-only outputs.",
+      "limits": "Documentation defines a cutover gate; no implemented migration or Go work claimed."
+    },
+    {
+      "id": "OSS-SKILL-060",
+      "project": "cockpit-project/cockpit",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "JavaScript",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/cockpit-project/cockpit/pull/23924",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Installed bundles reproduced removal of unload deprecations across the reported Chrome page visits; reload/navigation checked.",
+      "limits": "Manual Fedora/Chrome reproduction, not the integration suite; unrelated xterm CSP issue remains."
+    },
+    {
+      "id": "OSS-SKILL-061",
+      "project": "dsx-ai-factory/nvke",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "FDE"
+      ],
+      "skills": [
+        "Go",
+        "JUnit",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/dsx-ai-factory/nvke/pull/2246",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Race-enabled unit selection repeated thirty times; a Ginkgo harness verifies JUnit stale-cause removal.",
+      "limits": "Test tooling only; a progress report can suppress a genuine cause but full system-err is retained."
+    },
+    {
+      "id": "OSS-SKILL-062",
+      "project": "Seagey/couch-tv",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Python",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/Seagey/couch-tv/pull/60",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Two tests cover packaging and invalid/unreachable icons against a self-signed HTTPS server.",
+      "limits": "No physical LG TV validation; TV icon requests deliberately disable certificate checks for the local self-signed endpoint."
+    },
+    {
+      "id": "OSS-SKILL-063",
+      "project": "keycloak/keycloak",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE"
+      ],
+      "skills": [
+        "Java",
+        "Integration Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/keycloak/keycloak/pull/54938",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. OIDC test passes against embedded server; both authenticator and public-client changes use managed cleanup.",
+      "limits": "Migration of one test, not ownership of the authentication subsystem or the entire framework."
+    },
+    {
+      "id": "OSS-SKILL-064",
+      "project": "aschiff98/triangle-startups-community",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "DA"
+      ],
+      "skills": [
+        "TypeScript",
+        "Data Validation",
+        "CLI Development",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/aschiff98/triangle-startups-community/pull/22",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Thirty-nine tests plus build/check pass; deterministic reports verified with fictional exported jobs.",
+      "limits": "Fictional export fixtures; no real aggregator coverage, production jobs processed or adoption claim."
+    },
+    {
+      "id": "OSS-SKILL-065",
+      "project": "OSSAfrica/skillguard",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "FDE"
+      ],
+      "skills": [
+        "GitHub Actions",
+        "Docker",
+        "Shell Scripting",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/OSSAfrica/skillguard/pull/218",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Eight local stand-in-Docker harness scenarios cover pass/fail/error both with and without output.",
+      "limits": "Real Docker Action and container permissions were not tested locally."
+    },
+    {
+      "id": "OSS-SKILL-066",
+      "project": "OSSAfrica/skillguard",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "AI"
+      ],
+      "skills": [
+        "Go",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/OSSAfrica/skillguard/pull/217",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Thirteen Go parser table cases cover scalar/list forms and rejection of malformed mappings/nested lists.",
+      "limits": "Parser correctness; no claim of improving security detection rates."
+    },
+    {
+      "id": "OSS-SKILL-067",
+      "project": "mezmo/aura",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "FDE"
+      ],
+      "skills": [
+        "Jenkins",
+        "JUnit",
+        "CI/CD",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/mezmo/aura/pull/873",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Local Jenkins control-flow harness publishes one report on success, test failure and coverage failure.",
+      "limits": "Live failing-run Jenkins validation pending; no Rust code or CI runtime improvement claimed."
+    },
+    {
+      "id": "OSS-SKILL-068",
+      "project": "cockpit-project/cockpit-podman",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "FDE"
+      ],
+      "skills": [
+        "React",
+        "JavaScript",
+        "Linux"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/cockpit-project/cockpit-podman/pull/2720",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Manually checked two container-owning users on Fedora; added steps to testOtherUsers.",
+      "limits": "Integration suite not run locally; only owners with running containers are discovered."
+    },
+    {
+      "id": "OSS-SKILL-069",
+      "project": "FrostyX/tracer",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "FDE"
+      ],
+      "skills": [
+        "Python",
+        "psutil",
+        "Linux",
+        "Regression Testing"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/FrostyX/tracer/pull/233",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Affected Fedora system reproduces stock failure and corrected Cockpit output; 127 Python tests pass, 23 skipped.",
+      "limits": "Fixes missing process metadata; no measured latency, uptime or adoption improvement."
+    },
+    {
+      "id": "OSS-SKILL-070",
+      "project": "mezmo/aura",
+      "status": "OPEN",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "AI"
+      ],
+      "skills": [
+        "Docker",
+        "MCP"
+      ],
+      "activity": [
+        "configuration-only",
+        "reviewed"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/mezmo/aura/pull/866",
+          "status": "OPEN"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Both Docker definitions pin the upstream math-mcp arithmetic-fix commit and matching build command.",
+      "limits": "Dependency/configuration only; no local image build or upstream arithmetic-code ownership claimed in this point."
+    },
+    {
+      "id": "OSS-SKILL-071",
+      "project": "mezmo/aura",
+      "status": "MERGED",
+      "approved": true,
+      "resume_eligible": true,
+      "tracks": [
+        "SWE",
+        "AI"
+      ],
+      "skills": [
+        "Rust",
+        "Regression Testing",
+        "Agent Systems"
+      ],
+      "activity": [
+        "implemented",
+        "tested"
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/mezmo/aura/pull/864",
+          "status": "MERGED"
+        }
+      ],
+      "verification": "PR description and diff reviewed 2026-11-25; results are author-reported, not rerun in this bank update. Context-free raw-output cleanup regression plus 47 persistence-wrapper library tests pass.",
+      "limits": "Existing orchestrator sets task context and was unaffected; fix covers other stacks using the wrapper."
     }
   ]
 }
