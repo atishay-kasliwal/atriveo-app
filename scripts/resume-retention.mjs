@@ -7,7 +7,7 @@
 //        --compact then gives the freed space back to the disk (Mongo reuses deleted space but does not shrink its files on its own).
 //
 // Never touched: a resume of a job you applied to (any application, any status other than discarded, or an applied swipe),
-// and anything newer than the cutoff. An R2 object shared by several jobs (the same file) goes only when none of them is kept.
+// anything newer than the cutoff, and the general resumes (the general/ folder of a resume root). An R2 object shared by several jobs (the same file) goes only when none of them is kept.
 // A local copy goes only when its bytes still match the hash recorded in R2.
 // "jobs" also keeps: jobs saved for later, Create-tab builds (resume.source manual), resumes being built (queued/running), resumes
 // you edited within the window, and rows with no scrape date (staffing). A job's rows go only after its resume files are gone.
@@ -46,7 +46,7 @@ export async function planPrune(db, { days = 60, now = new Date() } = {}) {
   return { delete: [...drop.keys()].filter((k) => !keep.has(k)), jobs: new Set([...drop.values()]).size, kept: keep.size };
 }
 
-export async function planLocal(db, { days = 14, now = new Date(), exists = fs.existsSync, read = fs.readFileSync } = {}) {
+export async function planLocal(db, { days = 14, now = new Date(), exists = fs.existsSync, read = fs.readFileSync, roots = resumeRoots() } = {}) {
   const cutoff = new Date(now.getTime() - days * 86_400_000);
   const kept = await keptJobUrls(db);
   const docs = await db.collection("jobs").find({ "resume.object.sha256": { $type: "string" }, "resume.pdf_path": { $type: "string" } }, { projection: { job_url: 1, run_at: 1, resume: 1 } }).toArray();
@@ -54,6 +54,7 @@ export async function planLocal(db, { days = 14, now = new Date(), exists = fs.e
   for (const d of docs) {
     const file = d.resume.pdf_path, when = new Date(d.resume.updated_at ?? d.run_at ?? 0);
     if (when >= cutoff) { skipped.too_new++; continue; }
+    if (isGeneral(path.resolve(file), roots)) { skipped.general = (skipped.general ?? 0) + 1; continue; }
     if (kept.has(d.job_url)) { skipped.kept_application++; continue; }
     if (!exists(file)) { skipped.missing++; continue; }
     if (sha(read(file)) !== d.resume.object.sha256) { skipped.changed++; continue; }
@@ -69,10 +70,14 @@ export function resumeRoots(env = process.env) {
     .filter(Boolean).map((r) => path.resolve(r)))];
 }
 
-/** A resume's folder, only when it sits strictly inside one of the roots (never a root itself). */
+/** The general resumes (one per role track) belong to no job: a job that used one never takes it along when it leaves. */
+const isGeneral = (p, roots) => roots.some((r) => { const g = path.join(r, "general"); return p === g || p.startsWith(g + path.sep); });
+
+/** A resume's folder, only when it sits strictly inside one of the roots (never a root itself, never the general resumes). */
 export function resumeFolder(file, roots) {
   if (typeof file !== "string" || !file) return null;
   const dir = path.dirname(path.resolve(file));
+  if (isGeneral(dir, roots)) return null;
   return roots.some((r) => dir.startsWith(r + path.sep)) ? dir : null;
 }
 

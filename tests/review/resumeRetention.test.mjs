@@ -103,3 +103,17 @@ test("jobs: a folder that cannot be deleted keeps its job in Mongo for the next 
   assert.equal(out.skipped, 1);
   assert.deepEqual(removed.sort(), ["https://x/b", "https://x/c"]);
 });
+
+test("general resumes stay: neither an expired job that used one nor the local cleanup deletes them", async () => {
+  const { planJobs } = await import("../../scripts/resume-retention.mjs");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "general-ret-"));
+  const mk = (...p) => { const f = path.join(root, ...p); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, "pdf a"); return f; };
+  const general = mk("general", "Software Engineer", "r.pdf"), loose = mk("general", "r.pdf"), lookalike = mk("general-old", "x", "r.pdf");
+  const job = (n, pdf_path) => ({ job_url: `https://x/${n}`, run_at: new Date("2026-11-01T00:00:00Z"), resume: { pdf_path, object: obj("a"), updated_at: "2026-10-01T00:00:00Z" } });
+  const jobs = [job("general", general), job("loose", loose), job("lookalike", lookalike)];
+  const plan = await planJobs(fakeDb(jobs), { days: 3, now: NOW, roots: [root] });
+  assert.deepEqual([...plan.folders.keys()], [path.join(root, "general-old", "x")]);
+  const local = await planLocal(fakeDb(jobs), { days: 14, now: NOW, roots: [root] });
+  assert.deepEqual(local.files, [lookalike]);
+  assert.equal(local.skipped.general, 2);
+});
