@@ -93,7 +93,7 @@ export default function DayPlanPage({ header }: { header: React.ReactNode }) {
               </div>
             ))}
           </div>
-          <p className="dp-legend"><i className="is-mine" />In your agenda <i className="is-top" />Someone from your Network speaks <i className="is-hire" />Company is hiring <i className="is-live" />On at the chosen time</p>
+          <p className="dp-legend"><span><i className="is-mine" />In your agenda</span><span><i className="is-top" />Someone from your Network speaks</span><span><i className="is-hire" />Company is hiring</span><span><i className="is-live" />On at the chosen time</span></p>
           <div className="dp-now">
             <h2>At {clock(minute)} <span>{now.length}</span></h2>
             {now.length === 0 ? <p className="apps-muted">Nothing scheduled at this time.</p> : (
@@ -104,15 +104,15 @@ export default function DayPlanPage({ header }: { header: React.ReactNode }) {
         <aside className="dp-side" aria-label="Meet today and details">
           {sel ? (
             <div className="dp-card">
-              <div className="dp-card-head"><span className="dp-kind">{sel.kind === "workshop" ? "WORKSHOP" : "SESSION"}</span><button type="button" className="dp-x" aria-label="Close details" onClick={() => setSelected(null)}>✕</button></div>
+              <div className="dp-card-head"><span className="dp-kind">{sel.kind === "workshop" ? "Workshop" : "Session"}</span><button type="button" className="dp-x" aria-label="Close details" onClick={() => setSelected(null)}>✕</button></div>
               <h2>{sel.title}</h2>
               <dl><dt>When</dt><dd>{ATO_DAYS.find(([d]) => d === sel.date)?.[1]} · {clock(sel.start)} to {clock(sel.end)}</dd><dt>Where</dt><dd>{sel.room || "Room not listed"}{sel.track ? ` · ${sel.track}` : ""}</dd>{sel.company ? <><dt>Company</dt><dd>{sel.company}{hires(sel) ? " · hiring at the job board" : ""}</dd></> : null}{sel.speakers.length ? <><dt>Speakers</dt><dd>{sel.speakers.join(", ")}</dd></> : null}{sel.link ? <><dt>Official page</dt><dd><a href={sel.link} target="_blank" rel="noreferrer">allthingsopen.org</a></dd></> : null}</dl>
               {mine(sel).length ? <section><h3>From your Network</h3>{mine(sel).map(person)}</section> : null}
-              <button type="button" className="dp-btn" aria-pressed={agenda.includes(sel.id)} onClick={() => toggle(sel.id)}>{agenda.includes(sel.id) ? "✓ In your agenda" : "Add to agenda"}</button>
+              <button type="button" className={`dp-btn ${agenda.includes(sel.id) ? "apps-btn" : "rv-primary"}`} aria-pressed={agenda.includes(sel.id)} onClick={() => toggle(sel.id)}>{agenda.includes(sel.id) ? "✓ In your agenda" : "Add to agenda"}</button>
             </div>
           ) : (
             <div className="dp-card">
-              <span className="dp-kind">MEET TODAY</span>
+              <span className="dp-kind">Meet today</span>
               <h2>{ATO_DAYS.find(([d]) => d === day)?.[1]}</h2>
               {meet.length === 0 ? <p className="apps-muted">None of your Network people speak this day.</p> : <div className="dp-meet">{meet.map(({ s, p }) => <button key={s.id + p.id} type="button" className="dp-meet-row" onClick={() => setSelected(s.id)}>{tierOf(p) ? <b className={`dp-tier is-${tierOf(p)[0]}`}>{tierOf(p)}</b> : null}<span>{p.name}<small>{clock(s.start)} · {s.room} · {s.title}</small></span></button>)}</div>}
               {clashes.length ? <section><h3>Agenda overlaps <span>{clashes.length}</span></h3>{clashes.map(([a, b]) => <p className="dp-clash" key={a.id + b.id}>{a.title} overlaps {b.title}</p>)}</section> : null}

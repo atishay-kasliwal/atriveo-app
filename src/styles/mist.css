@@ -62,7 +62,7 @@ html body.apply-console {
 /* ---- Feature palettes (Mist) ----------------------------------------------------------------
  * Assessments, General, Insights, Network, Usage and Ready each defined their own blue-tinted greys
  * and a periwinkle accent. Their greys now point at the Mist ones and their accent at the app's
- * one blue. Network Intelligence's violet and Day plan's purple are their own looks.
+ * one blue.
  */
 html body :is(.rv-page.as-page, .rv-page.gn-page, .rv-page.in-page, .rv-page.nw-page, .rv-page.us-page) {
   --as-card: var(--card-bg); --gn-card: var(--card-bg); --in-card: var(--card-bg); --nw-card: var(--card-bg); --us-card: var(--card-bg);
@@ -81,7 +81,7 @@ html body .ready-workspace { --background: #09090b; --foreground: #fafafa; --car
  * Every primary button in both apps takes Mist's primary: a neutral light fill, dark text, 12px
  * corners, medium weight, no glow. Found by scanning for primary buttons with a solid fill.
  * Left alone on purpose: the LinkedIn-coloured Apply buttons (.td-cta, .td-cta-linkedin), a toggle's
- * selected state (.st-flags button.on), and Network Intelligence's tinted chip (.ni-primary).
+ * selected state (.st-flags button.on), and Network Intelligence's .ni-primary (its own file).
  */
 html body :is(.apply-btn, .as-save, .gn-apply, .gn-bar .apps-btn, .apply-submit, .apps-review-actions button.primary, .bulk-copy-btn.primary, .cd-primary, .ej-btn, .feed-btn--primary, .inspector-btn--primary, .job-resume-btn--primary, .job-table-board-apply--primary, .login-submit, .lp-primary, .manual-tailor-foot-btn--primary, .mt-submit, .nw-btn.main, .ob-next-btn, .optimizer-run-btn, .ph-btn.is-primary, .recon-btn-primary, .rv-primary, .settings-add-btn, .t5-btn--primary, .t5-btn--save, .tailor-panel-btn, .tailored-btn--primary, .tq-btn--primary) {
   background: #fafafa;
