@@ -53,14 +53,6 @@ function Roll({ text }: { text: string }) {
   return <span className="lk-count" aria-label={text}>{[...text].map((ch, i) => <span key={`${i}-${ch}`} aria-hidden="true" className="roll">{ch === " " ? "\u00a0" : ch}</span>)}</span>;
 }
 
-function phaseOf(d: LuckyDay, now: number) {
-  const rise = at(d.sunrise), set = at(d.sunset);
-  if (now < rise - 30 * 60_000 || now > set + 60 * 60_000) return "night";
-  if (now < rise + 60 * 60_000) return "dawn";
-  if (now > set - 60 * 60_000) return "dusk";
-  return "day";
-}
-
 function Sky({ day, live, now, tz }: { day: LuckyDay; live: boolean; now: number; tz: string }) {
   const arcs = useSlide(arcsOf(day)), sun = useSunrise();
   const nowU = uOf(day, now), sunU = nowU * sun, [sx, sy] = pt(sunU);
@@ -68,29 +60,32 @@ function Sky({ day, live, now, tz }: { day: LuckyDay; live: boolean; now: number
   for (let h = 7; h <= 18; h++) {
     const hourAt = at(zonedToUtc(day.day, `${h}:00`, tz));
     if (hourAt <= at(day.sunrise) + 15 * 60_000 || hourAt >= at(day.sunset) - 15 * 60_000) continue;
-    hours.push({ u: uOf(day, hourAt), label: h % 2 === 0 ? String(h > 12 ? h - 12 : h) : null });
+    hours.push({ u: uOf(day, hourAt), label: h % 2 === 0 && hourAt > at(day.sunrise) + 45 * 60_000 && hourAt < at(day.sunset) - 45 * 60_000 ? String(h > 12 ? h - 12 : h) : null });
   }
   const mid = arcs.la != null && arcs.lb != null ? (arcs.la + arcs.lb) / 2 : null;
   const label = (u: number, d: number, text: string, cls: string, key: string, hidden = false) => { const [x, y] = outward(u, d); return <text key={key} className={cls} x={x} y={y} textAnchor="middle" dominantBaseline="middle" transform={`rotate(${tangent(u).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})`} visibility={hidden ? "hidden" : undefined}>{text}</text>; };
   const dayParts = day.choghadiya.slice(0, 8);
   return (
-    <svg className="lk-arc" viewBox="0 0 1000 350" role="img" aria-label={`Today as the sun's path. ${day.lucky ? `Lucky hour ${clock(day.lucky.start, tz)} to ${clock(day.lucky.end, tz)}.` : "No lucky hour."} Rahu Kaal ${clock(day.rahu.start, tz)}.`}>
+    <svg className="lk-arc" viewBox="0 -40 1000 396" role="img" aria-label={`Today as the sun's path. ${day.lucky ? `Lucky hour ${clock(day.lucky.start, tz)} to ${clock(day.lucky.end, tz)}.` : "No lucky hour."} Rahu Kaal ${clock(day.rahu.start, tz)}.`}>
       <line className="lk-horizon" x1={20} x2={980} y1={H} y2={H} />
       <path className="lk-night" d={pathU(1, 2, 90)} />
       {dayParts.map((c, k) => <path key={k} className={`lk-band${GOOD.has(c.name) ? " good" : ""}`} d={pathU(k / 8 + 0.005, (k + 1) / 8 - 0.005, 24)} pathLength={1} style={{ "--i": k } as CSSProperties} />)}
       {dayParts.map((c, k) => { const rahu = at(day.rahu.start) < at(c.end) - 60_000 && at(day.rahu.end) > at(c.start) + 60_000, lucky = day.lucky && at(day.lucky.start) < at(c.end) && at(day.lucky.end) > at(c.start); return label((k + 0.5) / 8, 22, c.name, `lk-cname${GOOD.has(c.name) ? " good" : ""}`, `n${k}`, !!(rahu || lucky)); })}
       <g className="lk-hours">{hours.map((h, i) => { const [x1, y1] = outward(h.u, -6), [x2, y2] = outward(h.u, -12), [lx, ly] = outward(h.u, -26); return <g key={i}><line x1={x1} y1={y1} x2={x2} y2={y2} />{h.label && <text x={lx} y={ly + 4} textAnchor="middle">{h.label}</text>}</g>; })}</g>
       {live && sunU > 0.002 && <path className="lk-elapsed" d={pathU(0, Math.min(sunU, 1), 60)} />}
-      <text className="lk-hlabel" x={CX - RX} y={H + 26} textAnchor="middle">sunrise {clock(day.sunrise, tz)}</text>
-      <text className="lk-hlabel" x={CX + RX} y={H + 26} textAnchor="middle">sunset {clock(day.sunset, tz)}</text>
+      <text className="lk-hlabel" x={CX - RX + 24} y={H - 10}>Sunrise {clock(day.sunrise, tz)}</text>
+      <text className="lk-hlabel" x={CX + RX - 24} y={H - 10} textAnchor="end">Sunset {clock(day.sunset, tz)}</text>
       <path className="lk-rahu" d={pathU(arcs.ra, arcs.rb, 24)} />
       {label((arcs.ra + arcs.rb) / 2, 22, `Rahu Kaal ${clock(day.rahu.start, tz)}`, "lk-rlabel", "rahu")}
       {mid != null && day.lucky && <>
-        <path className="lk-halo" d={pathU(arcs.la!, arcs.lb!, 24)} />
         <path className="lk-lucky" d={pathU(arcs.la!, arcs.lb!, 24)}><title>{`${clock(day.lucky.start, tz)} to ${clock(day.lucky.end, tz)}`}</title></path>
-        {(() => { const below = mid > 1, [x1, y1] = outward(mid, 60), [x2, y2] = outward(mid, 34); return <><text className="lk-llabel" x={x1} y={y1 + (below ? 16 : 0)} textAnchor="middle">{clock(day.lucky.start, tz)}</text><text className="lk-lsub" x={x2} y={y2 + (below ? 12 : 0)} textAnchor="middle">{day.lucky.choghadiya} · {day.lucky.hora} hora</text></>; })()}
+        {(() => {
+          // An evening window sits on the night line, with little room under it: one line, as the dome already names the hour.
+          const below = mid > 1, [x1, y1] = below ? [pt(mid)[0], pt(mid)[1] + 26] : outward(mid, 60), [x2, y2] = outward(mid, 34);
+          return <><text className={`lk-llabel${below ? " is-night" : ""}`} x={x1} y={y1} textAnchor="middle" dominantBaseline={below ? "middle" : undefined}>{clock(day.lucky.start, tz)}</text>{!below && <text className="lk-lsub" x={x2} y={y2} textAnchor="middle">{day.lucky.choghadiya} · {day.lucky.hora} hora</text>}</>;
+        })()}
       </>}
-      <g className={`lk-sun${live ? "" : " away"}`} transform={`translate(${sx.toFixed(1)} ${sy.toFixed(1)})`}><circle className="lk-sunglow" r={24} /><circle className={sunU <= 1 ? "lk-suncore" : "lk-mooncore"} r={sunU <= 1 ? 13 : 10} /></g>
+      <g className={`lk-sun${live ? "" : " away"}`} transform={`translate(${sx.toFixed(1)} ${sy.toFixed(1)})`}><circle className={sunU <= 1 ? "lk-suncore" : "lk-mooncore"} r={sunU <= 1 ? 12 : 9} /></g>
     </svg>
   );
 }
@@ -127,36 +122,39 @@ function Details({ data, onClose }: { data: LuckyData; onClose: () => void }) {
     } catch (err) { setError(err instanceof Error ? err.message : String(err)); } finally { setBusy(false); }
   };
   return (
-    <form className="lk-details" onSubmit={save} aria-labelledby="lk-details-h">
-      <h2 id="lk-details-h">Your details</h2>
-      <p>Your birth moment sets your nakshatra and moon sign. Where you are now sets every time on this page.</p>
-      <fieldset><legend>Birth {p.hasBirth && <small>saved: {p.birthLocal || "on file"}</small>}</legend>
-        <label>Date<input type="date" value={form.birthDate} onChange={set("birthDate")} /></label>
-        <label>Time<input type="time" value={form.birthTime} onChange={set("birthTime")} /></label>
-        <label>Time zone of birth<select value={form.birthTz} onChange={set("birthTz")}><option value="Asia/Kolkata">India (IST)</option><option value="America/New_York">US Eastern</option><option value="America/Chicago">US Central</option><option value="America/Los_Angeles">US Pacific</option><option value="UTC">UTC</option></select></label>
-        <label>Place<input value={form.birthPlace} onChange={set("birthPlace")} placeholder="e.g. Ujjain" /></label>
-      </fieldset>
-      <fieldset><legend>Now</legend>
-        <label>Where you are<select value={place} onChange={(e) => setPlace(e.target.value)}>{PLACES.map((x) => <option key={x.name}>{x.name}</option>)}</select></label>
-        <label>Work from<input type="number" min={0} max={23} value={form.workStart} onChange={set("workStart")} /></label>
-        <label>until<input type="number" min={1} max={24} value={form.workEnd} onChange={set("workEnd")} /></label>
-      </fieldset>
-      {error && <p className="lk-error" role="alert">{error}</p>}
-      <div className="lk-details-act"><button type="button" className="lk-btn ghost" onClick={onClose}>Cancel</button><button className="lk-btn gold" disabled={busy}>{busy ? "Saving…" : "Save"}</button></div>
-    </form>
+    <>
+      <div className="lk-scrim" onClick={onClose} />
+      <form className="lk-details" role="dialog" aria-modal="true" onSubmit={save} onKeyDown={(e) => { if (e.key === "Escape") onClose(); }} aria-labelledby="lk-details-h">
+        <h2 id="lk-details-h">Your details</h2>
+        <p>Your birth moment sets your nakshatra and moon sign. Where you are now sets every time on this page.</p>
+        <fieldset><legend>Birth {p.hasBirth && <small>saved: {p.birthLocal || "on file"}</small>}</legend>
+          <label>Date<input autoFocus type="date" value={form.birthDate} onChange={set("birthDate")} /></label>
+          <label>Time<input type="time" value={form.birthTime} onChange={set("birthTime")} /></label>
+          <label>Time zone of birth<select value={form.birthTz} onChange={set("birthTz")}><option value="Asia/Kolkata">India (IST)</option><option value="America/New_York">US Eastern</option><option value="America/Chicago">US Central</option><option value="America/Los_Angeles">US Pacific</option><option value="UTC">UTC</option></select></label>
+          <label>Place<input value={form.birthPlace} onChange={set("birthPlace")} placeholder="e.g. Ujjain" /></label>
+        </fieldset>
+        <fieldset className="lk-three"><legend>Now</legend>
+          <label>Where you are<select value={place} onChange={(e) => setPlace(e.target.value)}>{PLACES.map((x) => <option key={x.name}>{x.name}</option>)}</select></label>
+          <label>Work from<input type="number" min={0} max={23} value={form.workStart} onChange={set("workStart")} /></label>
+          <label>Work until<input type="number" min={1} max={24} value={form.workEnd} onChange={set("workEnd")} /></label>
+        </fieldset>
+        {error && <p className="lk-error" role="alert">{error}</p>}
+        <div className="lk-details-act"><button type="button" className="apps-btn" onClick={onClose}>Cancel</button><button className="rv-primary" disabled={busy}>{busy ? "Saving…" : "Save"}</button></div>
+      </form>
+    </>
   );
 }
 
 function CalendarLink() {
   const [url, setUrl] = useState(""), [msg, setMsg] = useState("");
   const get = async (reset = false) => { try { const { token } = await postLucky<{ ok: boolean; token: string }>("/lucky/calendar", { reset }); setUrl(`${location.origin}/calendar/lucky/${token}.ics`); setMsg(reset ? "New link made. The old one stopped working." : ""); } catch (e) { setMsg(e instanceof Error ? e.message : String(e)); } };
-  if (!url) return <button type="button" className="lk-btn ghost" onClick={() => void get()}>Add to Google Calendar</button>;
+  if (!url) return <button type="button" className="apps-btn" onClick={() => void get()}>Add to Google Calendar</button>;
   const google = `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(url.replace(/^https:/, "webcal:"))}`;
   return (
     <div className="lk-cal" role="group" aria-label="Calendar link">
-      <a className="lk-btn gold" href={google} target="_blank" rel="noreferrer">Open Google Calendar ↗</a>
-      <button type="button" className="lk-btn ghost" onClick={() => { navigator.clipboard.writeText(url).then(() => setMsg("Link copied"), () => setMsg(url)); }}>Copy link</button>
-      <button type="button" className="lk-btn ghost" onClick={() => void get(true)} title="Make a new private link; the old one stops working">New link</button>
+      <a className="apps-btn" href={google} target="_blank" rel="noreferrer">Open Google Calendar ↗</a>
+      <button type="button" className="apps-btn" onClick={() => { navigator.clipboard.writeText(url).then(() => setMsg("Link copied"), () => setMsg(url)); }}>Copy link</button>
+      <button type="button" className="apps-btn" onClick={() => void get(true)} title="Make a new private link; the old one stops working">New link</button>
       {msg && <span className="lk-cal-msg" role="status">{msg}</span>}
     </div>
   );
@@ -166,9 +164,7 @@ export default function LuckyPage({ header }: { header?: ReactNode }) {
   const data = useLucky(), now = useNow(1000);
   const [picked, setPicked] = useState(0), [editing, setEditing] = useState(false);
   const today = data?.days[0];
-  const phase = today ? phaseOf(today, now) : "night";
-  useEffect(() => { document.body.dataset.luckyPhase = phase; return () => { delete document.body.dataset.luckyPhase; }; }, [phase]);
-  if (!data || !today) return <div className="rv-page lk-page" data-phase="night">{header}<main className="lk-main"><p className="lk-loading">Reading the sky…</p></main></div>;
+  if (!data || !today) return <div className="rv-page lk-page">{header}<main className="lk-main"><p className="lk-loading">Reading the sky…</p></main></div>;
   const tz = data.location.tz, day = data.days[Math.min(picked, data.days.length - 1)]!;
   let label = "", count = "", cap = "";
   const w = day.lucky;
@@ -178,23 +174,27 @@ export default function LuckyPage({ header }: { header?: ReactNode }) {
   else { const next = data.days.slice(1).find((d) => d.lucky); label = next ? "Tomorrow’s lucky hour starts in" : "No lucky hour soon"; count = next?.lucky ? countdown(at(next.lucky.start) - now) : "Rest"; cap = next?.lucky ? `${next.weekday} ${clock(next.lucky.start, tz)} · ${next.lucky.choghadiya} · ${next.lucky.hora} hora` : ""; }
   const s = day.strength;
   return (
-    <div className="rv-page lk-page" data-phase={phase}>
+    <div className="rv-page lk-page">
       {header}
       <main className="lk-main">
         <div className="lk-top">
-          <p className="lk-where">{data.location.name} · {new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "long", month: "long", day: "numeric" }).format(new Date(now))}</p>
-          <h1 className="lk-sr">Lucky hours</h1>
-          <div className="lk-actions"><CalendarLink /><Link className="lk-btn gold" to="/job-matching">Open Matching</Link></div>
-        </div>
-        <div className="lk-stage">
-          <Sky day={day} live={picked === 0} now={now} tz={tz} />
-          <div className="lk-dome" aria-live="polite">
-            <span className="lk-dome-label">{label}</span>
-            <Roll text={count} />
-            <span className="lk-dome-cap">{cap}</span>
-            {s && <span className={`lk-tone ${s.verdict}`}>{s.verdict === "good" ? "A good day for you" : s.verdict === "avoid" ? "A careful day for you" : "A mixed day for you"} · Tara {s.tara}</span>}
+          <div className="lk-title">
+            <h1>Lucky hours</h1>
+            <p>{data.location.name} · {new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "long", month: "long", day: "numeric" }).format(new Date(now))}</p>
           </div>
+          <div className="lk-actions"><CalendarLink /><Link className="rv-primary" to="/job-matching">Open Matching</Link></div>
         </div>
+        <section className="lk-sky" aria-label="The day">
+          <div className="lk-stage">
+            <Sky day={day} live={picked === 0} now={now} tz={tz} />
+            <div className="lk-dome" aria-live="polite">
+              <span className="lk-dome-label">{label}</span>
+              <Roll text={count} />
+              <span className="lk-dome-cap">{cap}</span>
+              {s && <span className={`lk-tone ${s.verdict}`}>{s.verdict === "good" ? "A good day for you" : s.verdict === "avoid" ? "A careful day for you" : "A mixed day for you"} · Tara {s.tara}</span>}
+            </div>
+          </div>
+        </section>
         <div className="lk-dock" role="group" aria-label="This week">
           {data.days.slice(0, 7).map((d, k) => (
             <button key={d.day} type="button" className="lk-day" aria-pressed={k === picked} onClick={() => setPicked(k)}>

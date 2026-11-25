@@ -31,9 +31,9 @@ The lucky hour is the longest stretch where a good Choghadiya overlaps a good ho
 - **The nav:** the last item. It shows a tiny arc with your window and the sun, the start time, and a loading bar.
   - The bar fills over the 6 hours before the window.
   - In the last 15 minutes it reads "in 12m".
-  - During the window the item turns gold, the bar drains, and it shows the time left.
+  - During the window the item takes a gold tint, the bar drains, and it shows the time left.
   - After the window it shows the next one.
-- **Matching:** a gold strip while the window is on, with the time left and how many you applied in it.
+- **Matching:** a strip with a gold bar while the window is on, with the time left and how many you applied in it.
 - **Phone notifications:** four, sent by the push loop in `push-events.mjs` → `tickLucky`, each sent once:
   - 15 minutes before
   - at the start
