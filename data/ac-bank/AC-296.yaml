@@ -1,0 +1,65 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft A7).
+id: AC-296
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - platform
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-numaflow-a7
+display_order: 44
+wow_score: 0.88
+metrics_claimed:
+  - "2.8"
+  - "4"
+  - "3"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Rust
+  - Python
+fact: >-
+  Open source contribution (Numaflow), approved 2026-11-25. Never employment at Numaflow.
+oss:
+  org: ''
+  project: Numaflow
+  status: merged
+  prs:
+    - https://github.com/numaproj/numaflow/pull/3757
+    - https://github.com/numaproj/numaflow/pull/3758
+    - https://github.com/numaproj/numaflow/pull/3768
+    - https://github.com/numaproj/numaflow-rs/pull/187
+    - https://github.com/numaproj/numaflow-rs/pull/191
+    - https://github.com/numaproj/numaflow-python/pull/390
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Rust
+  - Python
+  - Java
+  - stream processing
+  - documentation
+facets:
+  oss-numaflow-a7:
+    phrase: Numaflow open source contribution
+    keywords:
+      - rust
+      - python
+      - java
+      - stream processing
+      - documentation
+variants:
+  - facet: oss-numaflow-a7
+    emphasis: oss-numaflow-a7
+    strength: 9
+    text: >-
+      Updated Numaflow's stream processing guides (2.8K+ GitHub stars) with examples in 4 languages, adding 3 Rust
+      server tests and repairing a broken Python reducer example.

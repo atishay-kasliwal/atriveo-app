@@ -1,0 +1,60 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B6).
+id: AC-304
+role: open-source
+fits:
+  - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+slot_kind: project
+achievement_theme: oss-packagekit-b6
+display_order: 52
+wow_score: 0.8
+metrics_claimed:
+  - "5"
+  - "14"
+  - "6.4"
+  - "56"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - C++
+fact: >-
+  Open source contribution (PackageKit), approved 2026-11-25. Never employment at PackageKit. Measured on stable-1.4.x
+  (#1049), Fedora 44.
+oss:
+  org: ''
+  project: PackageKit
+  status: open
+  prs:
+    - https://github.com/PackageKit/PackageKit/pull/1035
+    - https://github.com/PackageKit/PackageKit/pull/1049
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - C++
+  - Linux
+  - package management
+  - D-Bus
+  - systems programming
+facets:
+  oss-packagekit-b6:
+    phrase: PackageKit open source contribution
+    keywords:
+      - c++
+      - linux
+      - package management
+      - d-bus
+      - systems programming
+variants:
+  - facet: oss-packagekit-b6
+    emphasis: oss-packagekit-b6
+    strength: 9
+    text: >-
+      Added working cancellation to PackageKit's dnf5 backend in C++, ending a cancelled 14 package update in 6.4
+      seconds with nothing installed instead of 56 seconds with everything installed.

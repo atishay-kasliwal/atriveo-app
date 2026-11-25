@@ -1,0 +1,53 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B5).
+id: AC-303
+role: open-source
+fits:
+  - data-science
+# Only the tracks it fits.
+tracks:
+  - data-science
+slot_kind: project
+achievement_theme: oss-utilsforecast-b5
+display_order: 51
+wow_score: 0.8
+metrics_claimed:
+  - "5"
+  - "20"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Python
+fact: >-
+  Open source contribution (Nixtla | utilsforecast), approved 2026-11-25. Never employment at Nixtla.
+oss:
+  org: Nixtla
+  project: utilsforecast
+  status: open
+  prs:
+    - https://github.com/Nixtla/utilsforecast/pull/341
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - pandas
+  - Polars
+  - forecast accuracy
+  - metrics
+facets:
+  oss-utilsforecast-b5:
+    phrase: utilsforecast open source contribution
+    keywords:
+      - python
+      - pandas
+      - polars
+      - forecast accuracy
+      - metrics
+variants:
+  - facet: oss-utilsforecast-b5
+    emphasis: oss-utilsforecast-b5
+    strength: 9
+    text: >-
+      Solved row order errors in 5 Nixtla utilsforecast accuracy metrics in Python, adding 20 pandas and Polars
+      regression cases that all fail without the fix.

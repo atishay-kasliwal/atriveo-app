@@ -1,0 +1,57 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft A3).
+id: AC-292
+role: open-source
+fits:
+  - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+slot_kind: project
+achievement_theme: oss-misterdownloadmanager-a3
+display_order: 40
+wow_score: 0.88
+metrics_claimed:
+  - "18"
+  - "7"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Rust
+fact: >-
+  Open source contribution (MisterDownloadManager), approved 2026-11-25. Never employment at MisterDownloadManager.
+  The maintainer's one commit changed the roadmap only.
+oss:
+  org: ''
+  project: MisterDownloadManager
+  status: merged
+  prs:
+    - https://github.com/anefzaoui/misterdownloadmanager/pull/489
+capabilities:
+  backend: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Rust
+  - macOS
+  - desktop
+  - GUI
+  - egui
+facets:
+  oss-misterdownloadmanager-a3:
+    phrase: MisterDownloadManager open source contribution
+    keywords:
+      - rust
+      - macos
+      - desktop
+      - gui
+      - egui
+variants:
+  - facet: oss-misterdownloadmanager-a3
+    emphasis: oss-misterdownloadmanager-a3
+    strength: 9
+    text: >-
+      Solved a macOS dialog that opened hidden in MisterDownloadManager (18K+ GitHub stars) in Rust, bringing it
+      in front of Chrome in all 7 tested runs.

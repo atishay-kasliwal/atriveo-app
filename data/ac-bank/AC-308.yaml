@@ -1,0 +1,61 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B10).
+id: AC-308
+role: open-source
+fits:
+  - ai-engineer
+  - software-engineer
+  - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+# Only the tracks it fits.
+tracks:
+  - ai-engineer
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-kiali-b10
+display_order: 56
+wow_score: 0.8
+metrics_claimed:
+  - "3.6"
+  - "11,000"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - MCP
+  - Go
+fact: >-
+  Open source contribution (Kiali), approved 2026-11-25. Never employment at Kiali.
+oss:
+  org: ''
+  project: Kiali
+  status: open
+  prs:
+    - https://github.com/kiali/kiali/pull/10567
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Go
+  - Golang
+  - MCP
+  - Prometheus
+  - AI agents
+facets:
+  oss-kiali-b10:
+    phrase: Kiali open source contribution
+    keywords:
+      - go
+      - golang
+      - mcp
+      - prometheus
+      - ai agents
+variants:
+  - facet: oss-kiali-b10
+    emphasis: oss-kiali-b10
+    strength: 9
+    text: >-
+      Added time range queries to Kiali's MCP metrics tool in Go (3.6K+ GitHub stars), keeping long ranges under
+      Prometheus's limit of 11,000 points per series.

@@ -1,0 +1,59 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B17).
+id: AC-315
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - platform
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-mapt-b17
+display_order: 63
+wow_score: 0.8
+metrics_claimed:
+  - "4"
+  - "3"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - PowerShell
+  - Go
+fact: >-
+  Open source contribution (Red Hat | mapt), approved 2026-11-25. Never employment at Red Hat.
+oss:
+  org: Red Hat
+  project: mapt
+  status: open
+  prs:
+    - https://github.com/redhat-developer/mapt/pull/983
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Go
+  - PowerShell
+  - Windows
+  - CI/CD
+  - GitHub Actions
+facets:
+  oss-mapt-b17:
+    phrase: mapt open source contribution
+    keywords:
+      - go
+      - powershell
+      - windows
+      - ci/cd
+      - github actions
+variants:
+  - facet: oss-mapt-b17
+    emphasis: oss-mapt-b17
+    strength: 9
+    text: >-
+      Repaired unquoted runner tokens in the Windows PowerShell setup of Red Hat's mapt in Go, adding 4 rendered
+      test cases of which 3 fail without the fix.

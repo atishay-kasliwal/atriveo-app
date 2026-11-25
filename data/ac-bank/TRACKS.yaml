@@ -88,13 +88,13 @@ tracks:
           mri-research: [AC-114]
         project_stacks:
           atriveo: [Python, SQL, MongoDB, TypeScript, Node.js]
-    # The DS general (master) resume only, 2026-11-17 (toward 9.5): Atriveo's recommendation ranking instead of the PDF
-    # regression tests, and the clinical radiomics project (real cohorts: survival models, SHAP) instead of the
-    # simulated marketing mix model.
+    # The DS general (master) resume only: Atriveo's recommendation ranking instead of the PDF regression tests
+    # (2026-11-17), and 3 merged open source bullets (SciPy, statsmodels, neuralforecast) instead of the radiomics
+    # project (2026-11-25, Atishay). Job resumes still choose their second project by fit.
     general_pinned:
       projects:
         atriveo: [AC-225, AC-015]
-        mri-research: [AC-114, AC-116]
+        open-source: [AC-282, AC-284, AC-286]
       project_stacks:
         atriveo: [Python, TypeScript, MongoDB, LLMs, Node.js]
 

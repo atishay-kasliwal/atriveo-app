@@ -39,7 +39,7 @@ ac_id_ranges:
   encryption-app: [AC-133, AC-134, AC-135, AC-136, AC-137, AC-138, AC-139, AC-140, AC-141, AC-142]
   fomc-intelligence: [AC-143, AC-144, AC-145, AC-146, AC-147, AC-148, AC-149, AC-150, AC-151, AC-152]
   user-data-platform: [AC-153, AC-154, AC-155, AC-156, AC-157, AC-158, AC-159, AC-160, AC-161, AC-162]
-  open-source: [AC-253, AC-254, AC-255, AC-256, AC-257, AC-258, AC-259, AC-260, AC-261, AC-262, AC-263, AC-264, AC-265, AC-266, AC-267, AC-268, AC-269, AC-270, AC-271, AC-272, AC-273, AC-274, AC-275, AC-276, AC-277, AC-278, AC-279, AC-281, AC-282, AC-283, AC-284, AC-285, AC-286, AC-287, AC-288, AC-289]
+  open-source: [AC-253, AC-254, AC-255, AC-256, AC-257, AC-258, AC-259, AC-260, AC-261, AC-262, AC-263, AC-264, AC-265, AC-266, AC-267, AC-268, AC-269, AC-270, AC-271, AC-272, AC-273, AC-274, AC-275, AC-276, AC-277, AC-278, AC-279, AC-281, AC-282, AC-283, AC-284, AC-285, AC-286, AC-287, AC-288, AC-289, AC-290, AC-291, AC-292, AC-293, AC-294, AC-295, AC-296, AC-297, AC-298, AC-299, AC-300, AC-301, AC-302, AC-303, AC-304, AC-305, AC-306, AC-307, AC-308, AC-309, AC-310, AC-311, AC-312, AC-313, AC-314, AC-315, AC-316, AC-317, AC-318, AC-319, AC-320]
 
 projects:
   - order: 1
@@ -148,7 +148,7 @@ projects:
     status: done
     on_resume: true
     bank: data/ac-bank/OPEN-SOURCE.yaml
-    bullets: 36
+    bullets: 67
     note: >-
       Approved 2026-11-16, corrected and extended 2026-11-25. Competes for the second project slot when the JD names one of its signals (planner
       pool open-source). Heading is built from the picked bullets, never as employment at the upstream org.

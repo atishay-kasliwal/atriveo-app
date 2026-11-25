@@ -1,0 +1,57 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B7).
+id: AC-305
+role: open-source
+fits:
+  - ai-engineer
+  - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+# Only the tracks it fits.
+tracks:
+  - ai-engineer
+  - software-engineer
+slot_kind: project
+achievement_theme: oss-aura-b7
+display_order: 53
+wow_score: 0.8
+metrics_claimed:
+  - "33"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Rust
+fact: >-
+  Open source contribution (Mezmo | AURA), approved 2026-11-25. Never employment at Mezmo.
+oss:
+  org: Mezmo
+  project: AURA
+  status: open
+  prs:
+    - https://github.com/mezmo/aura/pull/871
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Rust
+  - LLM
+  - AI agents
+  - Anthropic
+  - OpenAI
+facets:
+  oss-aura-b7:
+    phrase: AURA open source contribution
+    keywords:
+      - rust
+      - llm
+      - ai agents
+      - anthropic
+      - openai
+variants:
+  - facet: oss-aura-b7
+    emphasis: oss-aura-b7
+    strength: 9
+    text: >-
+      Added provider quota detection to Mezmo's AURA agent orchestrator in Rust so exhausted Anthropic or OpenAI
+      accounts stop further billable calls, backed by 33 tests.

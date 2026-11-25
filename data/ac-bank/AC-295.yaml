@@ -1,0 +1,58 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft A6).
+id: AC-295
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - platform
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-nvke-a6
+display_order: 43
+wow_score: 0.88
+metrics_claimed:
+  - "4"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Bash
+fact: >-
+  Open source contribution (NVIDIA | NVKE), approved 2026-11-25. Never employment at NVIDIA. Builds on another
+  contributor's approach and regression tests (closed draft #2124).
+oss:
+  org: NVIDIA
+  project: NVKE
+  status: merged
+  prs:
+    - https://github.com/dsx-ai-factory/nvke/pull/2337
+capabilities:
+  backend: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - Bash
+  - shell scripting
+  - Linux
+  - LVM
+  - GPU infrastructure
+facets:
+  oss-nvke-a6:
+    phrase: NVKE open source contribution
+    keywords:
+      - bash
+      - shell scripting
+      - linux
+      - lvm
+      - gpu infrastructure
+variants:
+  - facet: oss-nvke-a6
+    emphasis: oss-nvke-a6
+    strength: 9
+    text: >-
+      Revised Bash disk imaging in NVIDIA's NVKE so failures in 4 required storage cleanup steps stop the install
+      before any image is written.

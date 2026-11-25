@@ -1,0 +1,58 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft A2).
+id: AC-291
+role: open-source
+fits:
+  - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - full-stack
+  - frontend
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+slot_kind: project
+achievement_theme: oss-couch-tv-a2
+display_order: 39
+wow_score: 0.88
+metrics_claimed:
+  - "1.6"
+  - "16"
+  - "63"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - JavaScript
+fact: >-
+  Open source contribution (couch-tv), approved 2026-11-25. Never employment at couch-tv.
+oss:
+  org: ''
+  project: couch-tv
+  status: merged
+  prs:
+    - https://github.com/Seagey/couch-tv/pull/323
+capabilities:
+  backend: 80
+strength:
+  recruiter: 9
+ats_keywords:
+  - JavaScript
+  - frontend
+  - UI
+  - settings
+  - browser testing
+facets:
+  oss-couch-tv-a2:
+    phrase: couch-tv open source contribution
+    keywords:
+      - javascript
+      - frontend
+      - ui
+      - settings
+      - browser testing
+variants:
+  - facet: oss-couch-tv-a2
+    emphasis: oss-couch-tv-a2
+    strength: 9
+    text: >-
+      Added a poster view to couch-tv's TV interface (1.6K+ GitHub stars) in JavaScript with its setting labelled
+      in 16 languages, verified by 63 browser checks.

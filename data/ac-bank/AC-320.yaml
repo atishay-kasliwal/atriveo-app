@@ -1,0 +1,56 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B22).
+id: AC-320
+role: open-source
+fits:
+  - data-science
+  - ai-engineer
+# Only the tracks it fits.
+tracks:
+  - data-science
+  - ai-engineer
+slot_kind: project
+achievement_theme: oss-pytensor-b22
+display_order: 68
+wow_score: 0.8
+metrics_claimed:
+  - "2"
+  - "650"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Python
+fact: >-
+  Open source contribution (PyTensor), approved 2026-11-25. Never employment at PyTensor.
+oss:
+  org: ''
+  project: PyTensor
+  status: open
+  prs:
+    - https://github.com/pymc-devs/pytensor/pull/2718
+    - https://github.com/pymc-devs/pytensor/pull/2719
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - automatic differentiation
+  - PyTensor
+  - Bayesian
+  - tensors
+facets:
+  oss-pytensor-b22:
+    phrase: PyTensor open source contribution
+    keywords:
+      - python
+      - automatic differentiation
+      - pytensor
+      - bayesian
+      - tensors
+variants:
+  - facet: oss-pytensor-b22
+    emphasis: oss-pytensor-b22
+    strength: 9
+    text: >-
+      Repaired 2 PyTensor bugs (650+ GitHub stars) in Python covering gradients through integer outputs and
+      keyword dimensions in stacked tensors, adding 2 regression tests.

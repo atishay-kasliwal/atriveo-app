@@ -4,6 +4,10 @@ role: open-source
 fits:
   - software-engineer
   - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+  - platform
 # Only the tracks it fits.
 tracks:
   - software-engineer

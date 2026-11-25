@@ -1,0 +1,59 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B15).
+id: AC-313
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - platform
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-molecule-b15
+display_order: 61
+wow_score: 0.8
+metrics_claimed:
+  - "4.1"
+  - "200"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Python
+fact: >-
+  Open source contribution (Ansible | Molecule), approved 2026-11-25. Never employment at Ansible.
+oss:
+  org: Ansible
+  project: Molecule
+  status: open
+  prs:
+    - https://github.com/ansible/molecule/pull/4734
+    - https://github.com/ansible/ansible-lint/pull/5253
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Python
+  - Ansible
+  - GitHub Actions
+  - CI/CD
+  - infrastructure as code
+facets:
+  oss-molecule-b15:
+    phrase: Molecule open source contribution
+    keywords:
+      - python
+      - ansible
+      - github actions
+      - ci/cd
+      - infrastructure as code
+variants:
+  - facet: oss-molecule-b15
+    emphasis: oss-molecule-b15
+    strength: 9
+    text: >-
+      Repaired skipped verify playbooks in Ansible Molecule (4.1K+ GitHub stars) in Python plus an ansible-lint
+      GitHub Actions check that failed on its last 200 runs.

@@ -1,0 +1,60 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B8).
+id: AC-306
+role: open-source
+fits:
+  - ai-engineer
+  - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+# Only the tracks it fits.
+tracks:
+  - ai-engineer
+  - software-engineer
+slot_kind: project
+achievement_theme: oss-aura-b8
+display_order: 54
+wow_score: 0.8
+metrics_claimed:
+  - "3"
+  - "7"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Rust
+fact: >-
+  Open source contribution (Mezmo | AURA), approved 2026-11-25. Never employment at Mezmo.
+oss:
+  org: Mezmo
+  project: AURA
+  status: open
+  prs:
+    - https://github.com/mezmo/aura/pull/902
+    - https://github.com/mezmo/aura/pull/911
+    - https://github.com/mezmo/aura/pull/912
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Rust
+  - AI agents
+  - Slack
+  - WebSocket
+  - event streaming
+facets:
+  oss-aura-b8:
+    phrase: AURA open source contribution
+    keywords:
+      - rust
+      - ai agents
+      - slack
+      - websocket
+      - event streaming
+variants:
+  - facet: oss-aura-b8
+    emphasis: oss-aura-b8
+    strength: 9
+    text: >-
+      Solved 3 reliability bugs in Mezmo's AURA in Rust across blank agent retries, Slack reconnects and event
+      parsing, adding 7 regression tests.

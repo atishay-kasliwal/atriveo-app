@@ -3,6 +3,10 @@ id: AC-289
 role: open-source
 fits:
   - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - full-stack
+  - frontend
 # Only the tracks it fits.
 tracks:
   - software-engineer

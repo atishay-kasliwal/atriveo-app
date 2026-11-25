@@ -1,0 +1,57 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft A9).
+id: AC-298
+role: open-source
+fits:
+  - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - full-stack
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+slot_kind: project
+achievement_theme: oss-ustaxes-a9
+display_order: 46
+wow_score: 0.88
+metrics_claimed:
+  - "1.6"
+  - "288"
+  - "5"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - TypeScript
+fact: >-
+  Open source contribution (UsTaxes), approved 2026-11-25. Never employment at UsTaxes.
+oss:
+  org: ''
+  project: UsTaxes
+  status: merged
+  prs:
+    - https://github.com/ustaxes/UsTaxes/pull/2650
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - TypeScript
+  - ESLint
+  - refactoring
+  - tooling
+  - Jest
+facets:
+  oss-ustaxes-a9:
+    phrase: UsTaxes open source contribution
+    keywords:
+      - typescript
+      - eslint
+      - refactoring
+      - tooling
+      - jest
+variants:
+  - facet: oss-ustaxes-a9
+    emphasis: oss-ustaxes-a9
+    strength: 9
+    text: >-
+      Rewrote type imports across UsTaxes (1.6K+ GitHub stars) in TypeScript for build tool compatibility, keeping
+      all 288 existing tests passing and adding 5 for its form tooling.

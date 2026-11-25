@@ -1,0 +1,56 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B14).
+id: AC-312
+role: open-source
+fits:
+  - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - frontend
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+slot_kind: project
+achievement_theme: oss-podman-desktop-b14
+display_order: 60
+wow_score: 0.8
+metrics_claimed:
+  - "8.2"
+  - "6"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Svelte
+fact: >-
+  Open source contribution (Podman Desktop), approved 2026-11-25. Never employment at Podman Desktop.
+oss:
+  org: ''
+  project: Podman Desktop
+  status: open
+  prs:
+    - https://github.com/podman-desktop/podman-desktop/pull/20128
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Svelte
+  - CSS Grid
+  - TypeScript
+  - frontend
+  - responsive design
+facets:
+  oss-podman-desktop-b14:
+    phrase: Podman Desktop open source contribution
+    keywords:
+      - svelte
+      - css grid
+      - typescript
+      - frontend
+      - responsive design
+variants:
+  - facet: oss-podman-desktop-b14
+    emphasis: oss-podman-desktop-b14
+    strength: 9
+    text: >-
+      Revised Podman Desktop's welcome screen (8.2K+ GitHub stars) in Svelte with a 6 column grid so extension
+      cards stay equal and content is no longer cut off in small windows.

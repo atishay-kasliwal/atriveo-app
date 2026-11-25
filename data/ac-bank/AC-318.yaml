@@ -1,0 +1,59 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B20).
+id: AC-318
+role: open-source
+fits:
+  - software-engineer
+  - ai-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+  - full-stack
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+  - ai-engineer
+slot_kind: project
+achievement_theme: oss-tonl-b20
+display_order: 66
+wow_score: 0.8
+metrics_claimed:
+  - "830"
+  - "8"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - TypeScript
+fact: >-
+  Open source contribution (TONL), approved 2026-11-25. Never employment at TONL.
+oss:
+  org: ''
+  project: TONL
+  status: open
+  prs:
+    - https://github.com/tonl-dev/tonl/pull/35
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - TypeScript
+  - serialization
+  - parsers
+  - data format
+  - LLM
+facets:
+  oss-tonl-b20:
+    phrase: TONL open source contribution
+    keywords:
+      - typescript
+      - serialization
+      - parsers
+      - data format
+      - llm
+variants:
+  - facet: oss-tonl-b20
+    emphasis: oss-tonl-b20
+    strength: 9
+    text: >-
+      Solved lossy round trips in the TONL data format (830+ GitHub stars) in TypeScript by correcting quoting and
+      nested array parsing, adding 8 regression tests.

@@ -5,6 +5,9 @@ fits:
   - software-engineer
   - ai-engineer
   - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
 slot_kind: project
 achievement_theme: failure-recovery
 display_order: 2

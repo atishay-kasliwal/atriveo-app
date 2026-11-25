@@ -3,6 +3,10 @@ id: AC-278
 role: open-source
 fits:
   - software-engineer
+# Label only (the open source page): selection never reads it.
+areas:
+  - full-stack
+  - frontend
 slot_kind: project
 achievement_theme: e2e-focus
 display_order: 26

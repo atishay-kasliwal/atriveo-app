@@ -1,0 +1,58 @@
+# Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B11).
+id: AC-309
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - backend
+  - platform
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-nodewright-b11
+display_order: 57
+wow_score: 0.8
+metrics_claimed:
+  - "25"
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Go
+fact: >-
+  Open source contribution (NVIDIA | nodewright), approved 2026-11-25. Never employment at NVIDIA.
+oss:
+  org: NVIDIA
+  project: nodewright
+  status: open
+  prs:
+    - https://github.com/NVIDIA/nodewright/pull/1087
+capabilities:
+  backend: 80
+strength:
+  recruiter: 8
+ats_keywords:
+  - Go
+  - Golang
+  - CLI
+  - Kubernetes
+  - Ginkgo
+facets:
+  oss-nodewright-b11:
+    phrase: nodewright open source contribution
+    keywords:
+      - go
+      - golang
+      - cli
+      - kubernetes
+      - ginkgo
+variants:
+  - facet: oss-nodewright-b11
+    emphasis: oss-nodewright-b11
+    strength: 9
+    text: >-
+      Added a Go CLI command to NVIDIA's nodewright that recovers nodes with stale errors through conflict safe
+      patches, covered by 25 Ginkgo test cases.
