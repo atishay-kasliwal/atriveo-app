@@ -69,15 +69,23 @@ function scoreProjectForJd(role, jd, cfg) {
   const pool = cfg?.canonical_pools?.[role];
   if (!pool?.story_packages?.length) return 0;
   const hay = String(jd || "").toLowerCase();
+  // Open source signals are whole words ("rust" is not in "trust"); a longer one may be a stem ("time series" in plural).
+  // One written with its own edges (" go ", "go,") is matched as it is. Other pools keep their plain text signals.
+  const names = (sig) => {
+    const t = String(sig).toLowerCase();
+    if (!pool.requires_jd_signal || !/^[a-z0-9].*[a-z0-9+#]$/.test(t)) return hay.includes(t);
+    const esc = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(?<![a-z0-9+#])${esc}${t.length <= 5 ? "s?(?![a-z0-9+#])" : ""}`).test(hay);
+  };
   let best = 0;
   for (const pkg of pool.story_packages) {
     let hits = 0;
     for (const sig of pkg.jd_signals || []) {
-      if (hay.includes(String(sig).toLowerCase())) hits += 1;
+      if (names(sig)) hits += 1;
     }
     // strong_signals: the technologies that define a package (Rust, Kubernetes, React) count once more.
     for (const sig of pkg.strong_signals || []) {
-      if (hay.includes(String(sig).toLowerCase())) hits += 1;
+      if (names(sig)) hits += 1;
     }
     best = Math.max(best, hits);
   }

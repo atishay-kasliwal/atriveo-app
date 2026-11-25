@@ -92,10 +92,27 @@ export function stretchToBottom(tex) {
 const words = (s) => String(s || "").toLowerCase().match(/[a-z][a-z0-9+#.]*/g) || [];
 
 /** How well a bank bullet serves this posting: its rating, and how many of its tools and keywords the posting names. */
+/**
+ * A posting names a term: whole words, singular or plural. Plain text search found "rust" in "trust", "go" in "good" and
+ * "cli" in "client", so Go and Rust bullets printed on postings that never ask for them (2026-11-25: 104 of 515 postings
+ * got a Go bullet, 7 asked for Go). "go" alone counts only where it reads as the language.
+ */
+const termCache = new Map();
+export function jdNames(jdLower, term) {
+  const t = String(term || "").toLowerCase().trim();
+  if (!t) return false;
+  if (!termCache.has(t)) {
+    const esc = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    termCache.set(t, t === "go" ? /(?<![\w-])golang(?![\w-])|(?<![\w-])go(?=\s*[,/;)]|\s+(?:and|or|programming|language|developer|services|microservices)(?![a-z]))/
+      : new RegExp(`(?<![a-z0-9+#])${esc}(?:e?s)?(?![a-z0-9+#])`));
+  }
+  return termCache.get(t).test(jdLower);
+}
+
 export function bulletScore(ac, face, jdLower) {
   const strength = Number(face?.strength ?? ac?.strength?.recruiter ?? 7) / 10;
   const terms = [...new Set([...(ac?.signature_technologies || []), ...(ac?.ats_keywords || [])].map((t) => String(t).toLowerCase()))];
-  const hits = terms.filter((t) => t && jdLower.includes(t)).length;
+  const hits = terms.filter((t) => jdNames(jdLower, t)).length;
   const overlap = terms.length ? hits / terms.length : 0;
   return Math.round((strength * 0.6 + overlap * 0.4) * 1000) / 1000;
 }
@@ -300,12 +317,21 @@ const FLOOR = { experience: { "stony-brook": 4, default: 2 }, project: 2 };
 const REMOVE_ORDER = { project: 0, accolite: 1, "open-source": 1.5, "wake-forest": 2, "stony-brook": 9 };
 const removeRank = (kind, role) => (kind === "project" ? (role === "open-source" ? REMOVE_ORDER["open-source"] : REMOVE_ORDER.project) : REMOVE_ORDER[role] ?? 5);
 
-/** Open source prints three bullets: when the page has it with two, the best remaining one joins (its verb is new to the page). */
+/**
+ * Open source prints three bullets: when the page has it with two, the best remaining one joins (its verb is new to the
+ * page). Work related to the two comes first (same project or company, or a technology in common), so a heading reads as
+ * one body of work; only when nothing related is left does the best of the rest join.
+ */
 export function addThirdOpenSource(compact, bank, { jd = "", track = null } = {}) {
   const oss = (compact.projects || []).find((p) => p.role === "open-source");
   if (!oss || oss.bullets.length >= 3) return { compact, changes: [] };
   const used = usedMap(compact);
-  const [best] = candidatesFor("open-source", "project", bank, used, String(jd).toLowerCase(), track, [...used.values()]);
+  const list = candidatesFor("open-source", "project", bank, used, String(jd).toLowerCase(), track, [...used.values()]);
+  const have = oss.bullets.map((b) => (bank.acs || []).find((a) => a.id === b.ac_id)).filter(Boolean);
+  const names = new Set(have.flatMap((a) => [a.oss?.org, a.oss?.project]).filter(Boolean));
+  const techs = new Set(have.flatMap((a) => a.signature_technologies || []));
+  const related = (a) => names.has(a.oss?.org) || names.has(a.oss?.project) || (a.signature_technologies || []).some((t) => techs.has(t));
+  const best = list.find((c) => related(c.ac)) || list[0];
   if (!best) return { compact, changes: [] };
   const projects = compact.projects.map((p) => (p === oss ? { ...p, bullets: [...p.bullets, bulletOf(best)] } : p));
   return { compact: { ...compact, projects }, changes: [`added ${best.ac.id} to open-source (three bullets)`] };

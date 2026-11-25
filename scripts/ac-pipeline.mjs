@@ -24,7 +24,9 @@ import { bankForTrack, classifyTrack, trackPins, withPinnedEntries } from "./ac-
 // 2.5.0 (2026-11-17): centred page (top 0.36in, bottom 0.24in, sides 0.4in), employer title lines without tools,
 // Technical Skills with Languages first and every line at least 80% full, open source with three bullets.
 // 2.5.1: five skills lines when a short one gave way beside an existing "Additional Skills" line; Python first.
-export const PIPELINE_VERSION = "2.5.1";
+// 2.5.2 (2026-11-25): a bullet matches the posting on whole words ("rust" is not in "trust"); open source's third bullet
+// is related to the first two.
+export const PIPELINE_VERSION = "2.5.2";
 
 export const PIPELINE_STEPS = [
   "load_bank",

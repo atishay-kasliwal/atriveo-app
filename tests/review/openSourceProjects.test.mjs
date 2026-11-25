@@ -9,6 +9,8 @@ import { sharedOpeningVerbs, sharedOpeningVerbsByTrack, resumeRoles, lintBullet 
 import { loadTracks } from "../../scripts/ac-tracks.mjs";
 import { ossHeading } from "../../scripts/ac-tex.mjs";
 import { loadBank } from "../../scripts/ac-bank.mjs";
+import { addThirdOpenSource, jdNames } from "../../scripts/ac-page-fill.mjs";
+import { bankForTrack } from "../../scripts/ac-tracks.mjs";
 import { loadSkillEvidence } from "../../scripts/skill-evidence.mjs";
 
 // Open source project slot (QUESTION_ANSWERS "Open Source Work on Resumes", approved 2026-11-16).
@@ -85,4 +87,27 @@ test("the heading names the org when one org owns the bullets, else each project
   assert.equal(ossHeading([{ ac_id: "AC-261" }, { ac_id: "AC-263" }]).text, "Kiali, Numaflow (Open Source)");
   assert.equal(ossHeading([{ ac_id: "AC-255" }, { ac_id: "AC-271" }]).text, "Mezmo AURA, PR-Agent (Open Source)");
   assert.deepEqual(ossHeading([{ ac_id: "AC-253" }, { ac_id: "AC-254" }]).tools, ["Rust", "Tokio"]);
+});
+
+test("a posting names a term only as a whole word", () => {
+  const jd = "we are good at building trust with clients, associates and enrollment; guidance provided. go to market.";
+  for (const t of ["Rust", "Go", "CLI", "OCI", "LLM", "GUI", "Java"]) assert.equal(jdNames(jd, t), false, t);
+  for (const [text, t] of [["golang services", "Go"], ["python, go, and rust", "Go"], ["python, go, and rust", "Rust"], ["c++/linux", "C++"], ["several llms", "LLM"], ["java/spring", "Java"], ["microservices", "microservice"], ["ci/cd pipelines", "CI/CD"], ["node.js", "Node.js"]]) assert.equal(jdNames(text, t), true, `${t} in ${text}`);
+  assert.equal(jdNames("javascript", "Java"), false);
+  // The project choice too: words inside other words never bring open source in.
+  assert.equal(pick("Good communication builds trust with clients and associates; guidance on enrollment."), "insurance-platform");
+});
+
+test("the third open source bullet is related to the first two", () => {
+  const track = "software-engineer", b = bankForTrack(bank, track);
+  for (const pkg of pool.story_packages) {
+    const two = pkg.ids.map((id) => b.acs.find((a) => a.id === id));
+    if (two.some((a) => !a)) continue;
+    const { compact } = addThirdOpenSource({ experience: [], projects: [{ role: "open-source", bullets: two.map((a) => ({ ac_id: a.id, text: a.variants[0].text })) }] }, b, { jd: "Software engineer", track });
+    const ids = compact.projects[0].bullets.map((x) => x.ac_id), third = b.acs.find((a) => a.id === ids[2]);
+    assert.ok(third, pkg.name);
+    const related = (a) => two.some((x) => (x.oss.org && x.oss.org === a.oss.org) || x.oss.project === a.oss.project || (x.signature_technologies || []).some((t) => (a.signature_technologies || []).includes(t)));
+    const anyLeft = b.acs.some((a) => a.role === "open-source" && !ids.slice(0, 2).includes(a.id) && related(a) && !two.some((x) => x.variants[0].text.split(" ")[0] === a.variants[0].text.split(" ")[0]));
+    if (anyLeft) assert.ok(related(third), `${pkg.name}: ${ids}`);
+  }
 });
