@@ -1,0 +1,58 @@
+# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+id: AC-324
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+areas:
+  - platform
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-final-324
+display_order: 72
+wow_score: 0.8
+metrics_claimed:
+  - vault_findings_1_to_0
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Vault
+  - gitleaks
+fact: >-
+  User-approved open source contribution, finalized 2026-11-25. Gitleaks 8.30.1 reports one service-token
+  finding before the guide edit and none afterwards. Documentation only; no Java implementation or real
+  credential-rotation claim. Never employment at the upstream organization.
+oss:
+  org: ''
+  project: Kroxylicious
+  status: merged
+  prs:
+    - https://github.com/kroxylicious/kroxylicious/pull/5368
+capabilities:
+  backend: 70
+  cloud: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - Vault
+  - gitleaks
+  - HashiCorp Vault
+  - Technical Documentation
+  - Kroxylicious
+facets:
+  oss-final-324:
+    phrase: Kroxylicious open source contribution
+    keywords:
+      - hashicorp vault
+      - gitleaks
+      - technical documentation
+variants:
+  - facet: oss-final-324
+    emphasis: oss-final-324
+    strength: 9
+    text: >-
+      Revised Kroxylicious Vault setup examples to replace token-shaped credentials with explicit
+      placeholders, reducing the guide's gitleaks service-token findings from 1 to 0 so documentation avoids
+      triggering credential-leak alerts.

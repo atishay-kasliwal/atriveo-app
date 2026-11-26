@@ -1,0 +1,59 @@
+# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+id: AC-340
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+areas:
+  - platform
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-final-340
+display_order: 88
+wow_score: 0.8
+metrics_claimed:
+  - jenkins_harness_outcomes_3
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Jenkins
+  - JUnit
+fact: >-
+  User-approved open source contribution, finalized 2026-11-25. Local Jenkins control-flow harness publishes
+  one report on success, test failure and coverage failure. Live failing-run Jenkins validation pending; no
+  Rust code or CI runtime improvement claimed. Never employment at the upstream organization.
+oss:
+  org: Mezmo
+  project: AURA
+  status: merged
+  prs:
+    - https://github.com/mezmo/aura/pull/873
+capabilities:
+  backend: 70
+  cloud: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - Jenkins
+  - JUnit
+  - CI/CD
+  - Regression Testing
+  - AURA
+facets:
+  oss-final-340:
+    phrase: AURA open source contribution
+    keywords:
+      - jenkins
+      - junit
+      - ci/cd
+      - regression testing
+variants:
+  - facet: oss-final-340
+    emphasis: oss-final-340
+    strength: 9
+    text: >-
+      Repaired missing Jenkins integration reports in Mezmo AURA by publishing JUnit results during
+      unconditional stage cleanup, verifying 3 local harness outcomes so failed test runs preserve structured
+      diagnostics for reviewers.

@@ -1,0 +1,60 @@
+# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+id: AC-331
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+areas:
+  - platform
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: oss-final-331
+display_order: 79
+wow_score: 0.8
+metrics_claimed:
+  - secret_settings_2_to_1
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Kustomize
+  - Kubernetes
+fact: >-
+  User-approved open source contribution, finalized 2026-11-25. Pinned Kustomize build confirms the base
+  manager environment and Role Secret rule change together. Configuration only, no Go code or cluster e2e;
+  overlays that patch the env value still need the documented replacement. Never employment at the upstream
+  organization.
+oss:
+  org: NVIDIA
+  project: nodewright
+  status: merged
+  prs:
+    - https://github.com/NVIDIA/nodewright/pull/1047
+capabilities:
+  backend: 70
+  cloud: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - Kustomize
+  - Kubernetes
+  - RBAC
+  - Configuration Management
+  - nodewright
+facets:
+  oss-final-331:
+    phrase: nodewright open source contribution
+    keywords:
+      - kustomize
+      - kubernetes
+      - rbac
+      - configuration management
+variants:
+  - facet: oss-final-331
+    emphasis: oss-final-331
+    strength: 9
+    text: >-
+      Simplified NVIDIA Nodewright's webhook Secret configuration by deriving 2 settings from one Kustomize
+      source, synchronizing the manager's Secret name with its Kubernetes RBAC permission when the base
+      configuration changes.

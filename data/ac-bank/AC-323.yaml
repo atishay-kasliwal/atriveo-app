@@ -1,0 +1,55 @@
+# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+id: AC-323
+role: open-source
+fits:
+  - software-engineer
+  - data-science
+areas:
+  - backend
+tracks:
+  - software-engineer
+  - data-science
+slot_kind: project
+achievement_theme: oss-final-323
+display_order: 71
+wow_score: 0.8
+metrics_claimed:
+  - empty_string_cases_3
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Python
+fact: >-
+  User-approved open source contribution, finalized 2026-11-25. Three empty-string cases exercise the
+  uncompiled path; original behavior fails before the early returns. No ppc64el hardware run;
+  platform-independent regression reproduces the undefined-shift cause. Never employment at the upstream
+  organization.
+oss:
+  org: ''
+  project: UMAP
+  status: open
+  prs:
+    - https://github.com/lmcinnes/umap/pull/1360
+capabilities:
+  backend: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - Python
+  - Numba
+  - Regression Testing
+  - UMAP
+facets:
+  oss-final-323:
+    phrase: UMAP open source contribution
+    keywords:
+      - python
+      - numba
+      - regression testing
+variants:
+  - facet: oss-final-323
+    emphasis: oss-final-323
+    strength: 9
+    text: >-
+      Solved UMAP's empty-string distance bug by guarding undefined bit shifts in Python, covering 3 input
+      cases with uncompiled regression checks that expose the failure independently of processor architecture.

@@ -96,7 +96,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test:outreach": "node --test tests/outreach/outreach.test.mjs",
-    "test:outreach:browser": "npm run build:apply && node --test tests/outreach/browser.test.mjs"
+    "test:outreach:browser": "npm run build:apply && node --test tests/outreach/browser.test.mjs",
+    "test:oss": "node --test --test-global-setup=tests/setup-tmp.mjs --test-timeout=120000 tests/review/openSourceProjects.test.mjs tests/review/openSourcePage.test.mjs tests/review/skillEvidence.test.mjs tests/review/projectChoice.test.mjs tests/review/pageFill.test.mjs"
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.14.4",

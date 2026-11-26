@@ -312,7 +312,7 @@
         "wow": 0.9,
         "recruiter": 1.0
       },
-      "ac_ids": ["AC-253", "AC-254", "AC-255", "AC-256", "AC-257", "AC-258", "AC-259", "AC-260", "AC-261", "AC-262", "AC-263", "AC-264", "AC-265", "AC-266", "AC-267", "AC-268", "AC-269", "AC-270", "AC-271", "AC-272", "AC-273", "AC-274", "AC-275", "AC-276", "AC-277", "AC-278", "AC-279", "AC-281", "AC-282", "AC-283", "AC-284", "AC-285", "AC-286", "AC-287", "AC-288", "AC-289", "AC-290", "AC-291", "AC-292", "AC-293", "AC-294", "AC-295", "AC-296", "AC-297", "AC-298", "AC-299", "AC-300", "AC-301", "AC-302", "AC-303", "AC-304", "AC-305", "AC-306", "AC-307", "AC-308", "AC-309", "AC-310", "AC-311", "AC-312", "AC-313", "AC-314", "AC-315", "AC-316", "AC-317", "AC-318", "AC-319", "AC-320"],
+      "ac_ids": ["AC-253","AC-254","AC-255","AC-256","AC-257","AC-258","AC-259","AC-260","AC-261","AC-262","AC-263","AC-264","AC-265","AC-266","AC-267","AC-268","AC-269","AC-270","AC-271","AC-272","AC-273","AC-274","AC-275","AC-276","AC-277","AC-278","AC-279","AC-281","AC-282","AC-283","AC-284","AC-285","AC-286","AC-287","AC-288","AC-289","AC-290","AC-291","AC-292","AC-293","AC-294","AC-295","AC-296","AC-297","AC-298","AC-299","AC-300","AC-301","AC-302","AC-303","AC-304","AC-305","AC-306","AC-307","AC-308","AC-309","AC-310","AC-311","AC-312","AC-313","AC-314","AC-315","AC-316","AC-317","AC-318","AC-319","AC-320","AC-321","AC-322","AC-323","AC-324","AC-325","AC-326","AC-327","AC-328","AC-329","AC-330","AC-331","AC-332","AC-333","AC-334","AC-335","AC-336","AC-337","AC-338","AC-339","AC-340","AC-341","AC-342","AC-343","AC-344"],
       "story_packages": [
         {
           "name": "rust-concurrency",
@@ -621,6 +621,160 @@
           "ids": ["AC-296",  "AC-297"],
           "jd_signals": ["stream processing", "streaming", "nats", "jetstream", "rust"],
           "strong_signals": ["jetstream", "nats", "stream processing"]
+        },
+        {
+          "name": "linux-process-recovery",
+          "anchor": "AC-342",
+          "ids": ["AC-342","AC-289"],
+          "jd_signals": ["tracer","psutil","zombie process","service restart"],
+          "strong_signals": ["psutil","zombie process"]
+        },
+        {
+          "name": "agent-output-cleanup",
+          "anchor": "AC-344",
+          "ids": ["AC-344","AC-253"],
+          "jd_signals": ["aura","agent orchestration","rust persistence","raw output","memory leak"],
+          "strong_signals": ["agent orchestration","raw output"]
+        },
+        {
+          "name": "skillguard-parser",
+          "anchor": "AC-339",
+          "ids": ["AC-339","AC-321"],
+          "jd_signals": ["skillguard","yaml parser","frontmatter","ai skill"],
+          "strong_signals": ["skillguard","frontmatter"]
+        },
+        {
+          "name": "nodewright-webhooks",
+          "anchor": "AC-331",
+          "ids": ["AC-331","AC-288"],
+          "jd_signals": ["nodewright","kustomize","webhook certificate","secret rbac"],
+          "strong_signals": ["nodewright","kustomize"]
+        },
+        {
+          "name": "forecast-validation",
+          "anchor": "AC-330",
+          "ids": ["AC-330","AC-286"],
+          "jd_signals": ["neuralforecast","model loss","loss function","forecast validation"],
+          "strong_signals": ["neuralforecast","forecast validation"]
+        },
+        {
+          "name": "umap-string-metrics",
+          "anchor": "AC-323",
+          "ids": ["AC-323","AC-285"],
+          "jd_signals": ["umap","levenshtein","numba","string distance"],
+          "strong_signals": ["levenshtein","numba"]
+        },
+        {
+          "name": "chatbot-navigation",
+          "anchor": "AC-325",
+          "ids": ["AC-325","AC-270"],
+          "jd_signals": ["kiali chatbot","chatbot ui","conversational ui","chat navigation"],
+          "strong_signals": ["kiali chatbot","chatbot ui"]
+        },
+        {
+          "name": "ci-report-diagnostics",
+          "anchor": "AC-340",
+          "ids": ["AC-340","AC-266"],
+          "jd_signals": ["jenkins","junit","integration report","coverage failure"],
+          "strong_signals": ["jenkins","junit"]
+        },
+        {
+          "name": "node-local-dns",
+          "anchor": "AC-322",
+          "ids": ["AC-322","AC-331"],
+          "jd_signals": ["node-local dns","coredns","dns cache","local dns zone"],
+          "strong_signals": ["coredns","node-local dns"]
+        },
+        {
+          "name": "vault-guide-verification",
+          "anchor": "AC-324",
+          "ids": ["AC-324","AC-331"],
+          "jd_signals": ["hashicorp vault","vault setup","gitleaks","secret scanning"],
+          "strong_signals": ["hashicorp vault","gitleaks"]
+        },
+        {
+          "name": "agent-budget-injection",
+          "anchor": "AC-326",
+          "ids": ["AC-326","AC-279"],
+          "jd_signals": ["nestjs","price list","dependency injection","budget module"],
+          "strong_signals": ["nestjs","dependency injection"]
+        },
+        {
+          "name": "koi-rendering",
+          "anchor": "AC-327",
+          "ids": ["AC-327","AC-328"],
+          "jd_signals": ["git-koi","feeding animation","pigment sampling","pixel rendering"],
+          "strong_signals": ["git-koi","pigment sampling"]
+        },
+        {
+          "name": "forecast-calendar-inputs",
+          "anchor": "AC-329",
+          "ids": ["AC-329","AC-286"],
+          "jd_signals": ["calendar features","calendar augmentation","feature collision","augment_calendar_df"],
+          "strong_signals": ["calendar features","augment_calendar_df"]
+        },
+        {
+          "name": "artifact-cutover",
+          "anchor": "AC-332",
+          "ids": ["AC-332","AC-331"],
+          "jd_signals": ["build digest","definition composition","release composition","artifact equivalence"],
+          "strong_signals": ["build digest","artifact equivalence"]
+        },
+        {
+          "name": "browser-lifecycle",
+          "anchor": "AC-333",
+          "ids": ["AC-333","AC-270"],
+          "jd_signals": ["browser lifecycle","pagehide","unload handler","back-forward cache"],
+          "strong_signals": ["pagehide","browser lifecycle"]
+        },
+        {
+          "name": "qualification-diagnostics",
+          "anchor": "AC-334",
+          "ids": ["AC-334","AC-322"],
+          "jd_signals": ["ginkgo","gomega","junit failure","eventually retry"],
+          "strong_signals": ["ginkgo","gomega"]
+        },
+        {
+          "name": "lg-app-packaging",
+          "anchor": "AC-335",
+          "ids": ["AC-335","AC-291"],
+          "jd_signals": ["lg webos","webos","lg app icons","self-signed https"],
+          "strong_signals": ["webos","lg app icons"]
+        },
+        {
+          "name": "oidc-client-tests",
+          "anchor": "AC-336",
+          "ids": ["AC-336","AC-269"],
+          "jd_signals": ["oidc","public client","keycloak","client authentication"],
+          "strong_signals": ["oidc","keycloak"]
+        },
+        {
+          "name": "offline-job-reconciliation",
+          "anchor": "AC-337",
+          "ids": ["AC-337","AC-326"],
+          "jd_signals": ["job export","job comparison","offline comparison","job reconciliation"],
+          "strong_signals": ["job export","job reconciliation"]
+        },
+        {
+          "name": "scanner-action-reporting",
+          "anchor": "AC-338",
+          "ids": ["AC-338","AC-339"],
+          "jd_signals": ["skillguard action","github action outputs","scan counts","scanner exit code"],
+          "strong_signals": ["skillguard action","scan counts"]
+        },
+        {
+          "name": "container-owner-console",
+          "anchor": "AC-341",
+          "ids": ["AC-341","AC-333"],
+          "jd_signals": ["podman","container owners","cockpit podman","multi-user container"],
+          "strong_signals": ["podman","cockpit podman"]
+        },
+        {
+          "name": "agent-example-arithmetic",
+          "anchor": "AC-343",
+          "ids": ["AC-343","AC-344"],
+          "jd_signals": ["math-mcp","agent examples","mcp arithmetic","division by zero"],
+          "strong_signals": ["math-mcp","mcp arithmetic"]
         }
       ]
     }

@@ -1,0 +1,57 @@
+# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+id: AC-343
+role: open-source
+fits:
+  - software-engineer
+  - ai-engineer
+areas:
+  - platform
+tracks:
+  - software-engineer
+  - ai-engineer
+slot_kind: project
+achievement_theme: oss-final-343
+display_order: 91
+wow_score: 0.8
+metrics_claimed:
+  - math_build_definitions_2
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Docker
+fact: >-
+  User-approved open source contribution, finalized 2026-11-25. Both Docker definitions pin the upstream
+  math-mcp arithmetic-fix commit and matching build command. Dependency/configuration only; no local image
+  build or upstream arithmetic-code ownership claimed in this point. Never employment at the upstream
+  organization.
+oss:
+  org: Mezmo
+  project: AURA
+  status: open
+  prs:
+    - https://github.com/mezmo/aura/pull/866
+capabilities:
+  backend: 70
+  cloud: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - Docker
+  - MCP
+  - Dependency Management
+  - AURA
+facets:
+  oss-final-343:
+    phrase: AURA open source contribution
+    keywords:
+      - docker
+      - mcp
+      - dependency management
+variants:
+  - facet: oss-final-343
+    emphasis: oss-final-343
+    strength: 9
+    text: >-
+      Updated 2 Mezmo AURA Docker build definitions to pin upstream math-mcp arithmetic fixes, giving agent
+      example builds numeric median ordering and division-by-zero errors from the corrected dependency
+      revision.

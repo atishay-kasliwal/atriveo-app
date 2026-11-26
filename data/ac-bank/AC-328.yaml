@@ -1,0 +1,53 @@
+# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+id: AC-328
+role: open-source
+fits:
+  - software-engineer
+areas:
+  - frontend
+tracks:
+  - software-engineer
+slot_kind: project
+achievement_theme: oss-final-328
+display_order: 76
+wow_score: 0.8
+metrics_claimed:
+  - body_shapes_6
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Rust
+fact: >-
+  User-approved open source contribution, finalized 2026-11-25. Red and blue nose markings checked across six
+  bodies; regenerated light and dark reference sheets reviewed. Rendering correctness, not measured engagement
+  or rendering speed. Never employment at the upstream organization.
+oss:
+  org: ''
+  project: git-koi
+  status: open
+  prs:
+    - https://github.com/yalongwastaken/git-koi/pull/72
+capabilities:
+  backend: 70
+  frontend: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - Rust
+  - Graphics
+  - Regression Testing
+  - git-koi
+facets:
+  oss-final-328:
+    phrase: git-koi open source contribution
+    keywords:
+      - rust
+      - graphics
+      - regression testing
+variants:
+  - facet: oss-final-328
+    emphasis: oss-final-328
+    strength: 9
+    text: >-
+      Repaired truncated color markings across 6 git-koi body shapes by extending Rust pigment sampling to the
+      nose, verifying red and blue patches through regression tests and regenerated visual reference sheets.

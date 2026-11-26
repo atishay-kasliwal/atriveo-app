@@ -1,0 +1,54 @@
+# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+id: AC-327
+role: open-source
+fits:
+  - software-engineer
+areas:
+  - frontend
+tracks:
+  - software-engineer
+slot_kind: project
+achievement_theme: oss-final-327
+display_order: 75
+wow_score: 0.8
+metrics_claimed:
+  - render_comparisons_40
+concepts_claimed:
+  - open-source
+signature_technologies:
+  - Rust
+fact: >-
+  User-approved open source contribution, finalized 2026-11-25. Forty render variants remain byte-identical;
+  deliberately changing ring dither affects feeding renders. Behavior-preserving refactor; no performance
+  improvement or user-growth claim. Never employment at the upstream organization.
+oss:
+  org: ''
+  project: git-koi
+  status: open
+  prs:
+    - https://github.com/yalongwastaken/git-koi/pull/74
+capabilities:
+  backend: 70
+  frontend: 85
+strength:
+  recruiter: 9
+ats_keywords:
+  - Rust
+  - Graphics
+  - Regression Testing
+  - git-koi
+facets:
+  oss-final-327:
+    phrase: git-koi open source contribution
+    keywords:
+      - rust
+      - graphics
+      - regression testing
+variants:
+  - facet: oss-final-327
+    emphasis: oss-final-327
+    strength: 9
+    text: >-
+      Simplified git-koi's Rust feeding renderer into separate ring and pellet routines, preserving
+      byte-identical output across 40 render comparisons so animation logic can be changed independently
+      without altering existing visuals.
