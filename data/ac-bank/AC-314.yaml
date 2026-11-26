@@ -26,6 +26,8 @@ oss:
   org: Cisco
   project: Genie
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   prs:
     - https://github.com/CiscoTestAutomation/genieparser/pull/1009
 capabilities:

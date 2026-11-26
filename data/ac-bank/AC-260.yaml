@@ -31,6 +31,8 @@ oss:
   org: NVIDIA
   project: NVKE
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-16"
   prs:
     - https://github.com/dsx-ai-factory/nvke/pull/2336
     - https://github.com/dsx-ai-factory/nvke/pull/2288

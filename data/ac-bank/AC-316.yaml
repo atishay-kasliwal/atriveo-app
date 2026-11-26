@@ -28,6 +28,8 @@ oss:
   org: ''
   project: UsTaxes
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   prs:
     - https://github.com/ustaxes/UsTaxes/pull/2681
 capabilities:

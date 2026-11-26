@@ -27,6 +27,8 @@ oss:
   org: NVIDIA
   project: Infra Controller
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   prs:
     - https://github.com/dsx-ai-factory/infra-controller/pull/9248
 capabilities:

@@ -115,3 +115,26 @@ test("the third open source bullet is related to the first two", () => {
     if (anyLeft) assert.ok(related(third), `${pkg.name}: ${ids}`);
   }
 });
+
+test("only approved bullets are live, and every pull request is either a bullet or a recorded decision", async () => {
+  const fs = await import("node:fs");
+  const yaml = (await import("js-yaml")).default;
+  const { audit } = await import("../../scripts/oss-audit.mjs");
+  // Each live open source bullet carries the date Atishay approved it (docs/open-source-rules.md, rule 1).
+  assert.deepEqual(oss.filter((a) => !/^\d{4}-\d{2}-\d{2}$/.test(String(a.oss.approved || ""))).map((a) => a.id), []);
+  const decisions = yaml.load(fs.readFileSync(path.join(bank.bank_dir, "OSS_DECISIONS.yaml"), "utf8")).decisions;
+  assert.ok(decisions.every((d) => /^[\w.-]+\/[\w.-]+#\d+$/.test(d.pr) && d.decision === "no-bullet" && d.why && d.decided), "every decision has a reason");
+  const cited = new Set(all.flatMap((a) => a.oss.prs));
+  assert.deepEqual(decisions.filter((d) => cited.has(`https://github.com/${d.pr.replace("#", "/pull/")}`)).map((d) => d.pr), [], "a PR is a bullet or a decision, not both");
+  // The audit on a made-up GitHub answer: status drift, a closed PR, a merged PR with no decision, a decided PR that merged.
+  const pr = (id, state, over = {}) => { const [repo, n] = id.split("#"); return { url: `https://github.com/${repo}/pull/${n}`, repo, owner: repo.split("/")[0], n: Number(n), title: id, state, stars: 20000, code: 80, test: 40, files: 3, tested: true, measured: true, ...over }; };
+  const ghNow = [
+    ...all.filter((a) => !retired(a)).flatMap((a) => a.oss.prs.map((u) => pr(u.replace("https://github.com/", "").replace("/pull/", "#"), a.oss.status === "merged" ? "MERGED" : "OPEN"))),
+    pr("scipy/scipy#26813", "MERGED"), pr("brand/new#1", "MERGED"), pr("cockpit-project/cockpit#23924", "MERGED"),
+  ].map((p) => (p.repo === "kiali/kiali" && p.n === 10514 ? { ...p, state: "CLOSED" } : p));
+  const r = audit(bank, decisions, ghNow);
+  assert.ok(r.fix.some((x) => x.id === "AC-300" && /merged/.test(x.issue)), "open bullet whose PR merged");
+  assert.ok(r.fix.some((x) => x.id === "AC-261" && /closed/.test(x.issue)), "closed PR still cited");
+  assert.deepEqual(r.draft.map((x) => x.pr), ["brand/new#1"]);
+  assert.deepEqual(r.decidedChanged.map((x) => x.pr), ["cockpit-project/cockpit#23924"]);
+});

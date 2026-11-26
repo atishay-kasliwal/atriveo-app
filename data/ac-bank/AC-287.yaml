@@ -33,6 +33,8 @@ oss:
   org: ''
   project: Kiali
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   # The maintainer wrote part of this PR: never counted as ready for a general resume on the open source page.
   shared: true
   prs:
