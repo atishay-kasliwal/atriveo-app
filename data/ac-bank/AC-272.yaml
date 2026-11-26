@@ -22,6 +22,8 @@ oss:
   org: Intuit
   project: StuntDouble
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-16"
   prs:
     - https://github.com/intuit/stunt-double/pull/95
 capabilities:
