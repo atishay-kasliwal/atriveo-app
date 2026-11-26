@@ -32,8 +32,12 @@ test("open source takes the second slot only when the JD clearly matches it", ()
 
 test("every open source package pairs two bank entries with unique verbs inside the package", () => {
   const byId = new Map(oss.map((a) => [a.id, a]));
-  assert.equal(oss.length, 91);
-  assert.deepEqual(all.filter(retired).map((a) => a.id), ["AC-280"]);
+  assert.equal(oss.length, 43);
+  assert.equal(all.filter(retired).length, 25);
+  // Every live open source bullet scores 9+ (bank rubric), and the ranking follows the score (2026-11-25).
+  assert.deepEqual(oss.filter((a) => !(a.strength.recruiter >= 9 && a.variants[0].strength >= 9)).map((a) => a.id), []);
+  const ranked = [...oss].sort((a, b) => a.display_order - b.display_order);
+  for (let i = 1; i < ranked.length; i += 1) assert.ok(ranked[i - 1].strength.recruiter >= ranked[i].strength.recruiter, ranked[i].id);
   for (const pkg of pool.story_packages) {
     assert.equal(pkg.ids.length, 2, pkg.name);
     const verbs = pkg.ids.map((id) => byId.get(id).variants[0].text.split(/\s+/)[0].toLowerCase());
@@ -71,24 +75,6 @@ test("a bullet's status matches its PRs, and a closed PR is never on an active b
   }
   assert.deepEqual([...pool.ac_ids].sort(), oss.map((a) => a.id).sort());
   assert.ok(!pool.ac_ids.includes("AC-280") && pool.story_packages.every((p) => !p.ids.includes("AC-280")));
-});
-
-test("finalized drafts retain attribution and validation boundaries", () => {
-  const point = (n) => oss.find((a) => a.id === `AC-${n}`);
-  const paired = new Set(pool.story_packages.flatMap((p) => p.ids));
-  for (let n = 321; n <= 344; n += 1) {
-    assert.ok(paired.has(`AC-${n}`), `AC-${n} must be reachable by paired selection, not only page fill`);
-  }
-  assert.equal(point(322).oss.shared, true, "NVKE DNS applies another contributor's fix");
-  assert.match(point(322).fact, /cluster validation was performed by that contributor/);
-  assert.equal(point(326).oss.status, "open", "Macaron's upstream draft is still open work");
-  assert.match(point(326).fact, /controller suite has known failures/);
-  assert.deepEqual(point(332).signature_technologies, [], "ADR-only work does not become Go implementation");
-  assert.deepEqual(point(331).signature_technologies, ["Kustomize", "Kubernetes"]);
-  assert.match(point(337).fact, /Fictional export fixtures/);
-  assert.match(point(344).fact, /Existing orchestrator sets task context and was unaffected/);
-  const notes = ["git-koi/pull/73", "aura/pull/903", "nvkr/pull/461", "developer-portfolios/pull/4050"];
-  assert.ok(oss.every((a) => a.oss.prs.every((url) => notes.every((note) => !url.endsWith(note)))));
 });
 
 test("merged work outranks open work at the same JD fit", () => {

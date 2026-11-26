@@ -1,14 +1,14 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft A9).
 id: AC-298
 role: open-source
+# Retired 2026-11-25 (every open source bullet 9+): a mechanical import sweep across 481 files.
+tracks:
+  - retired
 fits:
   - software-engineer
 # Label only (the open source page): selection never reads it.
 areas:
   - full-stack
-# Only the tracks it fits.
-tracks:
-  - software-engineer
 slot_kind: project
 achievement_theme: oss-ustaxes-a9
 display_order: 46

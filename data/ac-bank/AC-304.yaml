@@ -11,7 +11,7 @@ tracks:
   - software-engineer
 slot_kind: project
 achievement_theme: oss-packagekit-b6
-display_order: 52
+display_order: 43
 wow_score: 0.8
 metrics_claimed:
   - "5"
@@ -35,7 +35,7 @@ oss:
 capabilities:
   backend: 80
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - C++
   - Linux

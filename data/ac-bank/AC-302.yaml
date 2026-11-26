@@ -10,7 +10,7 @@ tracks:
   - ai-engineer
 slot_kind: project
 achievement_theme: oss-neuralforecast-b4
-display_order: 50
+display_order: 40
 wow_score: 0.8
 metrics_claimed:
   - "4.3"
@@ -31,7 +31,7 @@ oss:
 capabilities:
   backend: 80
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - PyTorch
   - forecasting

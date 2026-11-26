@@ -108,9 +108,13 @@ export function allowedProjects(track, doc = loadTracks()) {
   return [...new Set([...pinned, ...(t?.projects ?? []), ...(planner.resume_project_pool ?? []), ...jdSelectedProjects(doc)])];
 }
 
-/** Projects any track may print in the second slot when the posting fits them best (TRACKS.yaml jd_selected_projects). */
-export function jdSelectedProjects(doc = loadTracks()) {
-  return [...(doc.jd_selected_projects ?? [])];
+/**
+ * Projects any track may print in the second slot when the posting fits them best (TRACKS.yaml jd_selected_projects),
+ * less the ones a track turns down (`no_jd_selected`: data analytics prints no open source, 2026-11-16).
+ */
+export function jdSelectedProjects(doc = loadTracks(), track = null) {
+  const no = new Set(doc.tracks?.[track]?.no_jd_selected ?? []);
+  return (doc.jd_selected_projects ?? []).filter((p) => !no.has(p));
 }
 
 /** Planner settings a track changes, applied over the planner's own (see buildPlannerRuntimeConfig). */

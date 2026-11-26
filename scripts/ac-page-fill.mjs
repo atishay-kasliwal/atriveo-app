@@ -273,7 +273,7 @@ export function enforceProjects(compact, bank, { jd = "", track = null, pool = n
  * best bullets score higher against the posting than that project's printed bullets. The first project (the newest,
  * Atriveo) is never replaced, and nothing is forced: no fit, no change.
  */
-export function chooseProjects(compact, bank, { jd = "", track = null, extra = jdSelectedProjects(), minBullets = 2, keep = [] } = {}) {
+export function chooseProjects(compact, bank, { jd = "", track = null, extra = jdSelectedProjects(undefined, track), minBullets = 2, keep = [] } = {}) {
   const jdLower = String(jd).toLowerCase();
   const out = { ...compact, projects: (compact.projects || []).map((p) => ({ ...p, bullets: [...(p.bullets || [])] })) };
   const changes = [];

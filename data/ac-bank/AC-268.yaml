@@ -9,7 +9,7 @@ areas:
   - platform
 slot_kind: project
 achievement_theme: gitops
-display_order: 16
+display_order: 41
 wow_score: 0.8
 metrics_claimed:
   - test_cases_4
@@ -32,7 +32,7 @@ capabilities:
   cloud: 88
   data: 50
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Go
   - GitOps
@@ -53,5 +53,5 @@ variants:
     emphasis: gitops
     strength: 9
     text: >-
-      Inspected target namespace labels before cleanup in Red Hat's GitOps Operator in Go, closing a consent
-      removal bug with 4 regression test cases.
+      Inspected target namespace labels before cleanup in Red Hat's GitOps Operator in Go, so a manager namespace
+      loses access once a target withdraws consent, with 4 regression test cases.

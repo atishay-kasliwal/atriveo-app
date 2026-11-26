@@ -9,7 +9,7 @@ areas:
   - platform
 slot_kind: project
 achievement_theme: ansible-lint
-display_order: 22
+display_order: 39
 wow_score: 0.8
 metrics_claimed:
   - stars_3900
@@ -33,7 +33,7 @@ capabilities:
   cloud: 84
   data: 56
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Ansible
   - Python
@@ -54,5 +54,5 @@ variants:
     emphasis: ansible-lint
     strength: 9
     text: >-
-      Classified deprecated top level fact usage with a new ansible-lint rule (3.9K+ GitHub stars) in Python, adding 5
-      tests checked against Ansible's runtime deprecation warnings.
+      Classified deprecated top level fact usage with a new ansible-lint rule (3.9K+ GitHub stars) in Python that
+      flagged 71 real reads in kubespray, with 5 tests.

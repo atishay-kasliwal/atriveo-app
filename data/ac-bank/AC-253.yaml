@@ -10,7 +10,7 @@ areas:
   - backend
 slot_kind: project
 achievement_theme: rust-concurrency
-display_order: 1
+display_order: 26
 wow_score: 0.88
 metrics_claimed:
   - regression_runs_500

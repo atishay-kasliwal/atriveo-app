@@ -148,7 +148,7 @@ projects:
     status: done
     on_resume: true
     bank: data/ac-bank/OPEN-SOURCE.yaml
-    bullets: 91
+    bullets: 43
     note: >-
       Approved 2026-11-16, corrected and extended 2026-11-25. Competes for the second project slot when the JD names one of its signals (planner
       pool open-source). Heading is built from the picked bullets, never as employment at the upstream org.

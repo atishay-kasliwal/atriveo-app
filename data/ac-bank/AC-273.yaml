@@ -1,6 +1,9 @@
 # Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
 id: AC-273
 role: open-source
+# Retired 2026-11-25 (every open source bullet 9+): one of 2 PRs open; mock return types, no measured result.
+tracks:
+  - retired
 fits:
   - ai-engineer
 slot_kind: project

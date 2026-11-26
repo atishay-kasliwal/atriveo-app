@@ -1,6 +1,9 @@
 # Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
 id: AC-257
 role: open-source
+# Retired 2026-11-25 (every open source bullet 9+): open, in a 0-star fork; no measured result.
+tracks:
+  - retired
 fits:
   - ai-engineer
   - software-engineer

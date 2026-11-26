@@ -12,7 +12,7 @@ tracks:
   - software-engineer
 slot_kind: project
 achievement_theme: oss-couch-tv-a2
-display_order: 39
+display_order: 16
 wow_score: 0.88
 metrics_claimed:
   - "1.6"
@@ -54,5 +54,5 @@ variants:
     emphasis: oss-couch-tv-a2
     strength: 9
     text: >-
-      Added a poster view to couch-tv's TV interface (1.6K+ GitHub stars) in JavaScript with its setting labelled
-      in 16 languages, verified by 63 browser checks.
+      Added a poster view to couch-tv's TV interface (1.6K+ GitHub stars) in JavaScript that fits 6 titles per row
+      instead of 3, verified by 63 browser checks.

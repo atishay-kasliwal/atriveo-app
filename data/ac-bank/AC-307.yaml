@@ -1,10 +1,10 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B9).
 id: AC-307
 role: open-source
-fits:
-  - ai-engineer
-# Only the tracks it fits.
+# Retired 2026-11-25 (every open source bullet 9+): open; no measured result.
 tracks:
+  - retired
+fits:
   - ai-engineer
 slot_kind: project
 achievement_theme: oss-stuntdouble-b9

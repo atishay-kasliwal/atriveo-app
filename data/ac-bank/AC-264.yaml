@@ -11,7 +11,7 @@ areas:
   - platform
 slot_kind: project
 achievement_theme: streaming-reliability
-display_order: 12
+display_order: 35
 wow_score: 0.8
 metrics_claimed:
   - fixes_3
@@ -37,7 +37,7 @@ capabilities:
   data: 88
   cloud: 80
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Pulsar
   - NATS
@@ -60,5 +60,5 @@ variants:
     emphasis: streaming-reliability
     strength: 9
     text: >-
-      Repaired 3 reliability gaps in Numaflow's JetStream and Pulsar paths by bounding ack retries and rebuilding
-      stalled consumers, with 18 tests.
+      Repaired 3 reliability gaps in Numaflow's JetStream and Pulsar paths so a stalled Pulsar source resumes 4
+      seconds after its topic returns instead of staying idle, with 18 tests.

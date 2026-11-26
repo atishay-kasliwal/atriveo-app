@@ -10,7 +10,7 @@ tracks:
   - ai-engineer
 slot_kind: project
 achievement_theme: mixture-sampling
-display_order: 34
+display_order: 4
 wow_score: 0.88
 metrics_claimed:
   - stars_4300
@@ -34,7 +34,7 @@ capabilities:
   ai: 84
   data: 82
 strength:
-  recruiter: 9
+  recruiter: 10
 ats_keywords:
   - PyTorch
   - forecasting
@@ -54,7 +54,7 @@ facets:
 variants:
   - facet: mixture-sampling
     emphasis: mixture-sampling
-    strength: 9
+    strength: 10
     text: >-
       Updated mixture loss sampling in Nixtla's neuralforecast (4.3K+ GitHub stars) in PyTorch, cutting a 10
       component NBMM sampling run from 6.3 seconds to 0.56.

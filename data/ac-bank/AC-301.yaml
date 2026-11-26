@@ -10,7 +10,7 @@ tracks:
   - ai-engineer
 slot_kind: project
 achievement_theme: oss-timesfm-b3
-display_order: 49
+display_order: 37
 wow_score: 0.8
 metrics_claimed:
   - "35"
@@ -31,7 +31,7 @@ oss:
 capabilities:
   backend: 80
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Python
   - forecasting

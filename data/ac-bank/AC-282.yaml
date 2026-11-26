@@ -12,7 +12,7 @@ tracks:
   - software-engineer
 slot_kind: project
 achievement_theme: scipy-optimize
-display_order: 30
+display_order: 2
 wow_score: 0.88
 metrics_claimed:
   - stars_15000
@@ -36,7 +36,7 @@ capabilities:
   data: 86
   backend: 72
 strength:
-  recruiter: 9
+  recruiter: 10
 ats_keywords:
   - SciPy
   - Python
@@ -56,7 +56,7 @@ facets:
 variants:
   - facet: scipy-optimize
     emphasis: scipy-optimize
-    strength: 9
+    strength: 10
     text: >-
       Solved an infinite loop in the lsq_linear optimizer of SciPy (15K+ GitHub stars) in Python so 8 hanging
       problems converge, with no other changes across 6,000 checked.
