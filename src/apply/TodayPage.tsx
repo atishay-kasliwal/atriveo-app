@@ -2,8 +2,9 @@ import OutreachPanel from "./OutreachPanel";
 import { outreachApi, useOutreachList, type OutreachTarget } from "./outreach";
 import JobCard, { ago, useLayout } from './JobCard';
 import { placeRank } from '../../scripts/place.mjs';
-import { usePlace } from './place';
+import { setNearOnly, useNearOnly, usePlace } from './place';
 import HerePill from './HerePill';
+import NearMePill from './NearMePill';
 import { platformOf } from './platform';
 import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -101,6 +102,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const [laterAt, setLaterAt] = useState<Record<string, number>>(() => Object.fromEntries(Object.entries(readPref<Record<string, number>>("later", {})).filter(([, at]) => at > Date.now() - 7 * 86_400_000)));
   const later = useMemo(() => Object.keys(laterAt), [laterAt]);
   const place = usePlace();
+  const nearOnly = useNearOnly();
   const [busy, setBusy] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
@@ -134,8 +136,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   }, [skipKey, syncedSkips, skipsLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
   const skipped = (company: string) => { const co = company.toLowerCase(); return exclusions.companies.some((c) => co.includes(c)); };
   // A new mood starts at the top: first page, first card, nothing selected.
-  const pick = (next: { track?: TrackFilter; kind?: KindFilter; query?: string }) => {
+  const pick = (next: { track?: TrackFilter; kind?: KindFilter; query?: string; near?: boolean }) => {
     if (next.track !== undefined) { setTrack(next.track); writePref("track", next.track); }
+    if (next.near !== undefined) setNearOnly(next.near);
     if (next.kind !== undefined) { setKind(next.kind); writePref("kind", next.kind); }
     if (next.query !== undefined) setQuery(next.query);
     setPage(0); setFocus(0); setSelectedIds([]);
@@ -173,16 +176,19 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   // Counts on each pill: a track's count follows the chosen kind, and a kind's count follows the chosen track.
   const inTrack = (i: Item, t: TrackFilter) => t === "all" || t === "mixed" || i.track === t;
   const inKind = (i: Item, k: KindFilter) => k === "all" || KIND_OF[i.kind] === k;
+  // Near me: only the starred cards (placeRank > 0). Counts on the other pills follow it, as they follow each other.
+  const isNear = (i: Item) => placeRank(i.location, place) > 0;
+  const inNear = (i: Item, on: boolean) => !on || isNear(i);
   // Every word has to appear in the company or the title ("goo eng" finds Google's engineer jobs).
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
   const found = useMemo(() => words.length ? everything.filter((i) => { const text = `${i.company} ${i.title}`.toLowerCase(); return words.every((w) => text.includes(w)); }) : everything, [everything, query]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = useMemo(() => {
-    const list = found.filter((i) => inTrack(i, track) && inKind(i, kind));
+    const list = found.filter((i) => inTrack(i, track) && inKind(i, kind) && inNear(i, nearOnly));
     if (track !== "mixed") return list;
     // Mixed keeps Later cards last.
     const later_ = list.filter((i) => later.includes(i.id));
     return [...interleave(list.filter((i) => !later.includes(i.id))), ...later_];
-  }, [found, track, kind, later]);
+  }, [found, track, kind, later, nearOnly, place]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The resume folder, from any tailored resume's path (general resumes sit in its general/ folder).
   const resumeRoot = useMemo(() => { const p = (linkedin.data?.linkedin ?? []).find((l) => l.resumePath?.includes("/tailored-resumes/"))?.resumePath; return p ? p.slice(0, p.indexOf("/tailored-resumes/") + "/tailored-resumes".length) : null; }, [linkedin.data]);
@@ -195,8 +201,9 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   const detailIds = shown.filter((i) => i.queued || i.kind === "linkedin").map((i) => i.id);
   const detailKey = `${detailIds.join(",")}|${queue.data?.generatedAt ?? ""}|${linkedin.data?.generatedAt ?? ""}`;
   useEffect(() => { if (detailIds.length) void loadDetails(detailIds); }, [detailKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  const kindCount = (k: KindFilter) => found.filter((i) => inTrack(i, track) && inKind(i, k)).length;
-  const trackCount = (t: TrackFilter) => found.filter((i) => inTrack(i, t) && inKind(i, kind)).length;
+  const kindCount = (k: KindFilter) => found.filter((i) => inTrack(i, track) && inKind(i, k) && inNear(i, nearOnly)).length;
+  const trackCount = (t: TrackFilter) => found.filter((i) => inTrack(i, t) && inKind(i, kind) && inNear(i, nearOnly)).length;
+  const nearCount = found.filter((i) => inTrack(i, track) && inKind(i, kind) && isNear(i)).length;
   const approvable = items.filter((i) => i.kind === "approve");
   const fillable = items.filter((i) => i.kind === "fill");
   // The Open & Fill queue filled forms through the Atriveo Fill extension, which Apply with Atriveo replaced (Oct 25);
@@ -341,7 +348,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     if (item.kind === "linkedin") void openWithPanel(item);
     else if (item.kind === "fill" || item.kind === "drafted" || item.kind === "you_submit") openApplicationPage(item);
   };
-  // Keys: 1–7 pick a track, ←/→ (↑/↓ by row) move between cards and pages, A/L/D/O act on the outlined card.
+  // Keys: 1–7 pick a track, N shows only jobs near you, ←/→ (↑/↓ by row) move between cards and pages, A/L/D/O act on the outlined card.
   const keys = useRef<(e: KeyboardEvent) => void>(() => {});
   keys.current = (e: KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey || e.altKey || review || pdf || confirmAll || queueRunning || outreachTarget) return;
@@ -349,6 +356,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     if (el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName))) return;
     const n = Number(e.key);
     if (Number.isInteger(n) && n >= 1 && n <= TRACK_FILTERS.length) { pick({ track: TRACK_FILTERS[n - 1]! }); e.preventDefault(); return; }
+    if (e.key === "n" || e.key === "N") { pick({ near: !nearOnly }); e.preventDefault(); return; }
     const move = (delta: number) => {
       const at = current * perPage + focused + delta;
       if (at < 0 || at >= items.length) return;
@@ -451,6 +459,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {words.length > 0 && !loading && <span className="td-search-n" role="status">{found.length} found</span>}
         </form>
         <HerePill />
+        <NearMePill on={nearOnly} count={loading ? null : nearCount} onToggle={() => pick({ near: !nearOnly })} />
         <div className="td-moods" role="group" aria-label="Track">
           {TRACK_FILTERS.map((t, n) => (
             <button key={t} type="button" className={`td-mood is-${t} ${track === t ? "is-on" : ""}`} aria-pressed={track === t} title={`Key ${n + 1}${t === "mixed" ? ": the tracks in turn" : ""}`} onClick={() => pick({ track: t })}>
@@ -471,7 +480,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       {(queue.error || ready.error) && <p className="ar-error" role="alert">{queue.error || ready.error}</p>}
       <main className="td-grid" style={mobile ? undefined : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(min-content, 1fr))` }}>
         {loading && <div className="td-empty">Loading your applications…</div>}
-        {!loading && !items.length && everything.length > 0 && <div className="td-empty"><strong>{words.length && !found.length ? `No company or role matches “${query.trim()}”.` : "Nothing here for this filter."}</strong>{words.length > 0 && !found.length && <span>Skipped companies stay hidden; jobs you already applied to or discarded aren't on Today.</span>}<button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all", query: "" })}>Show everything</button></div>}
+        {!loading && !items.length && everything.length > 0 && <div className="td-empty"><strong>{words.length && !found.length ? `No company or role matches “${query.trim()}”.` : nearOnly ? "Nothing near you for this filter." : "Nothing here for this filter."}</strong>{words.length > 0 && !found.length && <span>Skipped companies stay hidden; jobs you already applied to or discarded aren't on Today.</span>}{nearOnly && !(words.length && !found.length) && <span>Near me counts {[place.here, ...place.states.filter((x) => x !== place.here)].filter(Boolean).join(", ") || "no states"}{place.remote ? " and remote / US-wide jobs" : ""}. Change it in <Link to="/settings">Settings → Where I am</Link>.</span>}<button type="button" className="apps-link" onClick={() => pick({ track: "all", kind: "all", query: "", near: false })}>Show everything</button></div>}
         {!loading && !everything.length && <div className="td-empty"><strong>Nothing is waiting for you.</strong><span>New applications show up here once their questions are collected.</span><Link className="apps-btn" to="/staffing">Find more jobs</Link></div>}
         {shown.map((item, index) => card(item, index))}
       </main>

@@ -8,8 +8,9 @@ import {useNavigate} from 'react-router-dom';
 import { useEffect, useRef, useState } from "react";
 import { getJson, when } from "./engine";
 import { placeQuery } from "../../scripts/place.mjs";
-import { usePlace } from "./place";
+import { setNearOnly, useNearOnly, usePlace } from "./place";
 import HerePill from "./HerePill";
+import NearMePill from "./NearMePill";
 import { getTailorServerBase } from "../utils/tailorServer";
 import { applyWithExtension, canApplyAnywhere } from "./openFill";
 import "./staffing.css";
@@ -17,7 +18,7 @@ import "./staffing.css";
 type Source = { _id: string; name: string; url: string; tier: number; enabled: boolean; status: string; detail: string; last_checked_at?: string; matching_jobs?: number; connector_state?: string; limited?: boolean; parse_errors?: number; errors?: number };
 type Run = { _id: string; status: string; started_at: string; finished_at?: string; jobs_seen: number; new_jobs: number; published_jobs?: number; error?: string };
 type Job = { track?: string | null; resume_match?: ResumeMatch | null; resume_ready?: ResumeReadyState | null; _id: string; company: string; title: string; location: string; job_url: string; summary: string; source_id: string; first_seen_at: string; observed_at?: string; description?: string; reasons: string[]; warning?: string; resume?: string; resume_status?: string | null; builder_id?: string; state: string; eligible: boolean };
-type Workspace = { jobs: Job[]; total: number; counts: Record<string, number>; track_counts?: Record<string, number> };
+type Workspace = { jobs: Job[]; total: number; counts: Record<string, number>; track_counts?: Record<string, number>; near_count?: number };
 type Status = { sources: Source[]; runs: Run[]; schedule: { label: string; next_at: string }; total_jobs: number };
 const LABELS: Record<string, string> = { access_pending: "Needs provider access", not_checked: "Not checked yet", running: "Checking", ready: "Jobs readable", needs_connector: "Needs connector", blocked: "Access blocked", failed: "Check failed" };
 const VIEWS: Array<[string, string]> = [["recommended", "Recommended"], ["saved", "Saved"], ["applied", "Applied"], ["browse", "Browse all"]];
@@ -62,15 +63,17 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
   // A page is whatever fits the window, so its start stays on a page boundary when the window changes.
   useEffect(() => { setOffset((o: number) => Math.floor(o / perPage) * perPage); }, [perPage]);
   /** Change a filter: back to the first page, first card, nothing selected (as on Today). */
-  const pick = (next: { view?: string; track?: string; query?: string; filter?: string }) => {
+  const pick = (next: { view?: string; track?: string; query?: string; filter?: string; near?: boolean }) => {
     if (next.view !== undefined) { setView(next.view); setFilter("all"); }
+    if (next.near !== undefined) setNearOnly(next.near);
     if (next.track !== undefined) setTrack(next.track);
     if (next.query !== undefined) setQuery(next.query);
     if (next.filter !== undefined) setFilter(next.filter);
     setOffset(0); setFocus(0); setSelectedIds([]); setConfirmPass(false);
   };
-  // Near you first (Settings → Where I am); the server orders by it.
-  const near = placeQuery(usePlace());
+  // Near you first (Settings → Where I am); the server orders by it, and with Near me on keeps only those.
+  const nearOnly = useNearOnly();
+  const near = `${placeQuery(usePlace())}${nearOnly ? "&near_only=1" : ""}`;
   async function refresh() {
     const sequence = ++refreshSequence.current;
     try {
@@ -157,7 +160,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
   useEffect(() => { if (workspace && offset > 0 && offset >= total) setOffset(Math.max(0, (pages - 1) * perPage)); }, [workspace, offset, total, pages, perPage]);
   const needResume = selected.filter(j => !j.resume && !waitingFor(j) && j.state !== "applied");
 
-  // Keys, as on Today: 1–7 pick a track, ←/→ (↑/↓ by row) move between cards and pages, O/A/L/S/D act on the outlined card.
+  // Keys, as on Today: 1–7 pick a track, N shows only jobs near you, ←/→ (↑/↓ by row) move between cards and pages, O/A/L/S/D act on the outlined card.
   const keys = useRef<(e: KeyboardEvent) => void>(() => {});
   keys.current = (e: KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey || e.altKey || dialogOpen || busy) return;
@@ -165,6 +168,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
     if (el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName))) return;
     const n = Number(e.key);
     if (Number.isInteger(n) && n >= 1 && n <= TRACK_FILTERS.length) { pick({ track: TRACK_FILTERS[n - 1]! }); e.preventDefault(); return; }
+    if (e.key === "n" || e.key === "N") { pick({ near: !nearOnly }); e.preventDefault(); return; }
     const move = (delta: number) => {
       const at = offset + focused + delta;
       if (at < 0 || at >= total) return;
@@ -195,7 +199,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
   const crawlTime = lastCrawl && (lastCrawl.finished_at || lastCrawl.started_at);
   const crawlLabels: Record<string, string> = { done: "Completed", completed: "Completed", finished: "Completed", success: "Completed", partial: "Partial crawl", failed: "Failed", interrupted: "Interrupted" };
   const sources = status?.sources ?? [];
-  const filtered = track !== "all" || query || filter !== "all";
+  const filtered = track !== "all" || query || filter !== "all" || nearOnly;
   const card = (j: Job, index: number) => {
     const waiting = waitingFor(j); const applied = j.state === "applied";
     return <JobCard key={j._id} id={j._id} company={j.company} title={j.title} location={j.location || "Location not specified"} track={j.track} resumeMatch={j.resume_match} readyState={j.resume_ready} resumeReady={Boolean(j.resume)} busy={busy} platform="staffing"
@@ -223,6 +227,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
         {query ? <button type="button" className="td-search-clear" aria-label="Clear search" onClick={() => { pick({ query: "" }); searchRef.current?.focus(); }}>×</button> : <kbd aria-hidden="true">/</kbd>}
       </form>
       <HerePill />
+      <NearMePill on={nearOnly} count={workspace?.near_count ?? null} onToggle={() => pick({ near: !nearOnly })} />
       <div className="td-moods" role="group" aria-label="Track">
         {TRACK_FILTERS.map((t, n) => (
           <button key={t} type="button" className={`td-mood is-${t} ${track === t ? "is-on" : ""}`} aria-pressed={track === t} title={`Key ${n + 1}${t === "mixed" ? ": the tracks in turn" : ""}`} onClick={() => pick({ track: t })}>
@@ -246,7 +251,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
         </span>
         <button type="button" className="td-kind" onClick={() => setSourcesOpen(true)} title={`${sources.filter(s => s.status === "ready").length} readable · Last crawl ${when(crawlTime || null)}`}>Sources{running ? " · crawling" : ""}</button>
         <button type="button" className="td-kind" onClick={() => setAdding(true)}>+ Add a job</button>
-        {filtered && <button type="button" className="apps-link" onClick={() => pick({ track: "all", query: "", filter: "all" })}>Clear filters</button>}
+        {filtered && <button type="button" className="apps-link" onClick={() => pick({ track: "all", query: "", filter: "all", near: false })}>Clear filters</button>}
       </div>
       <div className="td-actions">
         {selected.length > 0 && <>
@@ -262,7 +267,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
     {error && <p className="ar-error" role="alert">{error} <button className="apps-link" onClick={() => void refresh()}>Retry</button></p>}
     <main className="td-grid" aria-label="Job shortlist" style={mobile ? undefined : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(min-content, 1fr))` }}>
       {!workspace && <div className="td-empty">Finding your matches…</div>}
-      {workspace && !jobs.length && <div className="td-empty"><strong>{filtered ? "Nothing here for this filter." : view === "recommended" ? "You’re caught up." : "No jobs here yet."}</strong>{!filtered && view === "recommended" && <span>Browse all jobs or add a posting you like.</span>}<span className="product-empty-actions">{filtered ? <button className="apps-link" onClick={() => pick({ track: "all", query: "", filter: "all" })}>Show everything</button> : <><button className="apps-btn" onClick={() => pick({ view: "browse" })}>Browse jobs</button><button className="apps-btn" onClick={() => setAdding(true)}>Add a job</button></>}</span></div>}
+      {workspace && !jobs.length && <div className="td-empty"><strong>{filtered ? "Nothing here for this filter." : view === "recommended" ? "You’re caught up." : "No jobs here yet."}</strong>{!filtered && view === "recommended" && <span>Browse all jobs or add a posting you like.</span>}<span className="product-empty-actions">{filtered ? <button className="apps-link" onClick={() => pick({ track: "all", query: "", filter: "all", near: false })}>Show everything</button> : <><button className="apps-btn" onClick={() => pick({ view: "browse" })}>Browse jobs</button><button className="apps-btn" onClick={() => setAdding(true)}>Add a job</button></>}</span></div>}
       {jobs.map((j, i) => card(j, i))}
     </main>
     <div className="td-bottom">
