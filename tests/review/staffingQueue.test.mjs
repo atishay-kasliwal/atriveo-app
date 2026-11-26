@@ -100,6 +100,7 @@ test('the workspace filters like Today: track, Mixed in turn, every search word,
   assert.deepEqual(await ids(`view=recommended&q=software backend&${near}`), ['swe-new']);
   assert.deepEqual(await ids('view=recommended&near=WA,IL,MI&remote=0'), ['swe-wa', 'swe-new', 'ds', 'ai', 'swe-old'], 'remote off: only your states lead');
   assert.deepEqual(await ids('view=recommended'), ['swe-new', 'ds', 'ai', 'swe-wa', 'swe-old'], 'no place asked for: newest first, North Carolina no longer leads');
+  assert.deepEqual(await ids('view=recommended&near=WA,IL,MI&remote=1&here=NC'), ['ds', 'swe-wa', 'swe-new', 'ai', 'swe-old'], 'where you are now (NC) comes before your saved states');
   const page = await list(db, new URLSearchParams(`view=recommended&limit=2&offset=2&${near}`));
   assert.deepEqual(page.jobs.map(j => j._id), ['ai', 'swe-old']);
   assert.equal(page.jobs[0].near, undefined, 'the rank stays on the server');

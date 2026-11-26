@@ -164,6 +164,9 @@
 .td-mood.is-data-analytics { --td-c: #fbbf24; }
 .td-mood.is-data-science { --td-c: #34d399; }
 .td-mood.is-forward-deployed { --td-c: #f472b6; }
+.td-mood.td-here { --td-c: #22c55e; gap: 6px; font-weight: 500; color: var(--muted-fg); }
+.td-mood.td-here.is-on { color: var(--foreground); font-weight: 600; }
+.td-mood.td-here:disabled { cursor: progress; opacity: .7; }
 .td-mood:hover, .td-kind:hover { border-color: color-mix(in oklab, var(--td-c, var(--primary)) 60%, var(--border-col)); }
 .td-mood.is-on { border-color: var(--td-c); background: color-mix(in oklab, var(--td-c) 22%, var(--card-bg)); box-shadow: 0 0 0 1px var(--td-c), 0 0 18px -4px color-mix(in oklab, var(--td-c) 70%, transparent); }
 .td-mood.is-on b { color: var(--foreground); }

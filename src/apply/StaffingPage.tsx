@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { getJson, when } from "./engine";
 import { placeQuery } from "../../scripts/place.mjs";
 import { usePlace } from "./place";
+import HerePill from "./HerePill";
 import { getTailorServerBase } from "../utils/tailorServer";
 import { applyWithExtension, canApplyAnywhere } from "./openFill";
 import "./staffing.css";
@@ -221,6 +222,7 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
           onChange={(e) => pick({ query: e.target.value })} onKeyDown={(e) => { if (e.key === "Escape") { pick({ query: "" }); e.currentTarget.blur(); } }} />
         {query ? <button type="button" className="td-search-clear" aria-label="Clear search" onClick={() => { pick({ query: "" }); searchRef.current?.focus(); }}>×</button> : <kbd aria-hidden="true">/</kbd>}
       </form>
+      <HerePill />
       <div className="td-moods" role="group" aria-label="Track">
         {TRACK_FILTERS.map((t, n) => (
           <button key={t} type="button" className={`td-mood is-${t} ${track === t ? "is-on" : ""}`} aria-pressed={track === t} title={`Key ${n + 1}${t === "mixed" ? ": the tracks in turn" : ""}`} onClick={() => pick({ track: t })}>
