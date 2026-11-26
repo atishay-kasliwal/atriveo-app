@@ -1472,7 +1472,7 @@
       "sources": [
         {
           "url": "https://github.com/PackageKit/PackageKit/pull/1035",
-          "status": "OPEN"
+          "status": "MERGED"
         }
       ],
       "verification": "Reported cancelled Fedora transaction with no installed updates.",
