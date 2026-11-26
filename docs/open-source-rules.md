@@ -61,5 +61,23 @@ relevance 1. Score honestly and never round up:
    wider review tests, and compare their failures with `main`.
 2. Build the five masters into a scratch folder first (`TAILOR_OUT_ROOT=<tmp>`; a worktree needs a link to
    `data/resume-profile.json` or the contact line is missing) and diff their text against the live ones.
-3. After he merges, rebuild the changed masters from a clean `main` and install them.
-4. Deploy only when he says so (rule 1).
+3. Deploy only when he says so (rule 1). Until it is deployed, Oracle keeps building job resumes with the old bank.
+
+## 8. Resumes already built
+A bank change doesn't touch resumes that were already built. Each resume's `composition.json` keeps the ids and wording it
+printed, and `scripts/rebuild-stale-bullets.mjs` compares them with the bank: a bullet that was retired, removed or reworded
+since makes the resume stale.
+- **Masters** (the five general resumes): after the merge, `node scripts/rebuild-stale-bullets.mjs --masters` names the stale
+  ones. Rebuild only those, from a clean `main`, into a scratch `TAILOR_OUT_ROOT`. Check one page, ATS readiness 100, the
+  contact line, and a text diff against the live one showing only the intended change. Then install it (the PDF,
+  `composition.json` and `resume.tex`, and `builtAt` in the manifest), keeping a backup of the old one. A master he edited in
+  the builder (`builder.json`) is his: show him the change instead.
+- **Pasted resumes** (Resumes, built from a posting he pasted) are listed by the same `--masters` run. Never rebuild them; tell
+  him which ones carry an old bullet.
+- **Job resumes** (Today, Matching, Staffing): after the deploy, run the report on Oracle, where the files are:
+  `node scripts/rebuild-stale-bullets.mjs` in the dashboard container. It covers the last 7 days, since older unapplied jobs
+  are removed. With his go-ahead, `--apply` re-queues the stale ones below fresh jobs. A job he **applied** to is never
+  rebuilt: that resume may be the one he sent, so it is only listed. A resume he edited in the builder is listed too, not
+  rebuilt.
+- A bank change that alters how bullets are chosen (not just one bullet's wording) bumps `PIPELINE_VERSION` in
+  `scripts/ac-pipeline.mjs`, so cached builds are not reused.

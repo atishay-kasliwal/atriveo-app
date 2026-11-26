@@ -44,5 +44,16 @@ where each one came from.
 - Open one PR with a body that says what changed, why, and the test results against `main`. **Do not merge it**, unless
   he asked you to in this conversation. Never deploy without his go-ahead.
 
-## 6. Afterwards
-Tell him, in a short message: the PR link, what is live in production, and anything still waiting on him.
+## 6. After he merges: the resumes already built (rule 8)
+1. **Masters:** `node scripts/rebuild-stale-bullets.mjs --masters` names the stale ones. Rebuild those from a clean `main` into a
+   scratch `TAILOR_OUT_ROOT` (link `data/resume-profile.json` into a worktree first). Check one page, ATS 100, the contact
+   line, and a text diff showing only the intended change. Then install them with a backup. A master edited in the builder is
+   his to review.
+2. **Pasted resumes:** report the stale ones to him. Never rebuild them.
+3. **Deploy:** only with his go-ahead (`cd ~/atriveo-app-deploy && git checkout --detach origin/main && npm run ship`).
+4. **Job resumes:** after the deploy, run `node scripts/rebuild-stale-bullets.mjs` in the dashboard container on Oracle and show
+   him the report. With his go-ahead, run it again with `--apply`. Applied jobs and builder edits are never rebuilt.
+
+## 7. Afterwards
+Tell him, in a short message: the PR link, which masters changed, what is live in production, the job resumes report, and
+anything still waiting on him.
