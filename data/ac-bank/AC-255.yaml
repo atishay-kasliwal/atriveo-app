@@ -1,5 +1,6 @@
 # Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
 id: AC-255
+# Retired 2026-11-26 (company projects): folded into AC-322 (Mezmo project).
 role: open-source
 fits:
   - software-engineer
@@ -8,6 +9,8 @@ fits:
 # Label only (the open source page): selection never reads it.
 areas:
   - backend
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: mcp-gating
 display_order: 28

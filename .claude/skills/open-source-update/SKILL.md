@@ -32,13 +32,16 @@ where each one came from.
 - One bullet per PR, or per small set of PRs in the same project. Each must honestly score 9+ (rule 3); otherwise propose
   a `no-bullet` decision with the reason.
 - Check every draft with the bank lint before showing it.
+- If the new work belongs to a company project (rule 9), draft it as an alternate in that company's pool and say whether
+  it should replace one of the 2 printed bullets. If a project now has enough depth for its own company project, propose the
+  heading, skills and description line.
 - Show Atishay a table: the bullet, its PRs, its score with the reason, its resumes (`fits`), the facts and where they
   came from. Show the proposed decisions and the fixes from section 1 the same way. **Stop and wait for his approval.**
 
 ## 5. After he approves
 - Add the approved bullets (`AC-<next>.yaml`, the next free id after `ls data/ac-bank`) with `oss.approved: "<today>"`,
   `oss.status`, `oss.prs`, `fits`/`tracks`, score, and `display_order`. Re-rank every live bullet.
-- Pair each new bullet in a story package. Update `ac_ids`, PROJECTS.yaml `ac_id_ranges` and `bullets`, OPEN-SOURCE.yaml,
+- Pair each new bullet in a story package (a company bullet with another bullet of the same company). Update `ac_ids`, PROJECTS.yaml `ac_id_ranges` and `bullets`, OPEN-SOURCE.yaml,
   BANK_VERSION.yaml (a new version with a one-line note), TIERS.yaml for merged ones, and the decisions file.
 - Run everything in rule 7 and build the five masters to a scratch folder. Report any master that changes.
 - Open one PR with a body that says what changed, why, and the test results against `main`. **Do not merge it**, unless

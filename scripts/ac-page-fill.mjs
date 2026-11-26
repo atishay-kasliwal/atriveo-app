@@ -71,7 +71,7 @@ export function stretchToBottom(tex) {
   // Between entries of one list: every heading after the first in its list gets the same space above it.
   out = out.replace(/(\\resumeSubHeadingListStart)([\s\S]*?)(\\resumeSubHeadingListEnd)/g, (all, start, body, end) => {
     let first = true;
-    const spaced = body.replace(/\n(\s*)\\(resumeSubheading|resumeProjectHeading)\{/g, (m, ind, cmd) => {
+    const spaced = body.replace(/\n(\s*)\\(resumeSubheading|resumeProjectHeadingAbout|resumeProjectHeading)\{/g, (m, ind, cmd) => {
       if (first) { first = false; return m; }
       return `\n${ind}${fill}\\${cmd}{`;
     });
@@ -118,8 +118,9 @@ export function bulletScore(ac, face, jdLower) {
 }
 
 const firstVerb = (text) => (words(text)[0] || "");
-// What an open upstream PR costs a bullet's score: the gap one rating point makes (0.6 x 1/10).
-const OPEN_SOURCE_OPEN_PENALTY = 0.06;
+// What an open upstream PR costs a bullet's score. 2026-11-26 (Atishay): open PRs count fully, since the work is done; the
+// 9+ bar still decides which bullets are live (docs/open-source-rules.md).
+const OPEN_SOURCE_OPEN_PENALTY = 0;
 
 /** The wording of an entry to print for this track: its track facet when it has one, otherwise its first. */
 function faceFor(ac, track) {
@@ -325,6 +326,8 @@ const removeRank = (kind, role) => (kind === "project" ? (role === "open-source"
 export function addThirdOpenSource(compact, bank, { jd = "", track = null } = {}) {
   const oss = (compact.projects || []).find((p) => p.role === "open-source");
   if (!oss || oss.bullets.length >= 3) return { compact, changes: [] };
+  // A company project prints its description line and 2 bullets (2026-11-26); a third would break it up.
+  if (isCompanyBlock(oss)) return { compact, changes: [] };
   const used = usedMap(compact);
   const list = candidatesFor("open-source", "project", bank, used, String(jd).toLowerCase(), track, [...used.values()]);
   const have = oss.bullets.map((b) => (bank.acs || []).find((a) => a.id === b.ac_id)).filter(Boolean);
@@ -337,6 +340,8 @@ export function addThirdOpenSource(compact, bank, { jd = "", track = null } = {}
   return { compact: { ...compact, projects }, changes: [`added ${best.ac.id} to open-source (three bullets)`] };
 }
 const CAP = { experience: { "stony-brook": 6, "wake-forest": 5, default: 4 }, project: 3 };
+// The open source slot printed as one company project (OPEN-SOURCE.yaml company_projects): exactly its 2 bullets.
+const isCompanyBlock = (p) => p.role === "open-source" && Boolean(ossHeading(p.bullets || []).company);
 const floorOf = (kind, role) => (kind === "project" ? FLOOR.project : FLOOR.experience[role] ?? FLOOR.experience.default);
 const capOf = (kind, role) => (kind === "project" ? CAP.project : CAP.experience[role] ?? CAP.experience.default);
 
@@ -376,7 +381,7 @@ export function fillOnePage(compact, { bank, jd = "", track = null, render, meas
     if (m.bottom_gap_pt < LINE_PT) break;
     // More than a line left: the best bullet that still fits.
     const used = usedMap(cur);
-    const options = sections(cur).filter(({ kind, s }) => s.bullets.length < capOf(kind, s.role))
+    const options = sections(cur).filter(({ kind, s }) => s.bullets.length < capOf(kind, s.role) && !isCompanyBlock(s))
       .flatMap(({ kind, s }) => candidatesFor(s.role, kind, bank, used, jdLower, track, [...used.values()]).slice(0, 3).map((c) => ({ ...c, kind, role: s.role })))
       .filter((c) => !tried.has(c.ac.id))
       .sort((a, b) => b.score - a.score);

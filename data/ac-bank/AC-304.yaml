@@ -28,7 +28,7 @@ fact: >-
 oss:
   org: ''
   project: PackageKit
-  status: open
+  status: merged
   # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
   approved: "2026-11-25"
   prs:

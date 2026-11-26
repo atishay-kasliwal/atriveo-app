@@ -30,7 +30,7 @@ oss:
   project: AURA
   status: merged
   # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
-  approved: "2026-11-16"
+  approved: "2026-11-26"
   prs:
     - https://github.com/mezmo/aura/pull/904
 capabilities:
@@ -60,5 +60,5 @@ variants:
     emphasis: rust-concurrency
     strength: 9
     text: >-
-      Solved a Tokio lock contention hang in Mezmo's AURA Rust agent orchestrator by moving artifact writes
-      outside the persistence lock, passing 500 repeated modeled regression runs and 1,525 library tests.
+      Solved a Tokio lock hang in AURA's Rust orchestrator by moving artifact writes out of the shared persistence
+      lock, verified across 500 repeated runs.

@@ -29,7 +29,7 @@ oss:
   project: Numaflow
   status: open
   # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
-  approved: "2026-11-16"
+  approved: "2026-11-26"
   prs:
     - https://github.com/numaproj/numaflow/pull/3759
     - https://github.com/numaproj/numaflow/pull/3760
@@ -62,5 +62,5 @@ variants:
     emphasis: streaming-reliability
     strength: 9
     text: >-
-      Repaired 3 reliability gaps in Numaflow's JetStream and Pulsar paths so a stalled Pulsar source resumes 4
-      seconds after its topic returns instead of staying idle, with 18 tests.
+      Repaired Numaflow's Pulsar source and JetStream acks so a stalled consumer recovers 4 seconds after its topic
+      returns instead of halting the pipeline, with 18 tests.

@@ -73,7 +73,7 @@ export function report(r, { date = new Date().toISOString().slice(0, 10), full =
   L.push(`## 2. Retired bullets that can come back (${r.revive.length})`, "", ...(r.revive.length ? r.revive.map((x) => `- **${x.id}**: ${x.issue}`) : ["Nothing."]), "");
   L.push(`## 3. Merged, no bullet, no decision yet (${r.draft.length})`, "", "Draft a bullet only for those that can honestly reach 9; record the rest in OSS_DECISIONS.yaml.", "", ...(r.draft.length ? table(r.draft) : ["Nothing."]), "");
   L.push(`## 4. Decided earlier, status changed since (${r.decidedChanged.length})`, "", ...(r.decidedChanged.length ? table(r.decidedChanged) : ["Nothing."]), "");
-  L.push(`## 5. Still open, no bullet (${r.watch.length})`, "", "An open pull request needs a measured result to reach 9. Most wait here until they merge.", "", ...(r.watch.length ? table(r.watch) : ["Nothing."]), "");
+  L.push(`## 5. Still open, no bullet (${r.watch.length})`, "", "Open pull requests count fully (2026-11-26). Draft one only when it can honestly reach 9; the rest wait here.", "", ...(r.watch.length ? table(r.watch) : ["Nothing."]), "");
   return L.join("\n");
 }
 
