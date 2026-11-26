@@ -96,7 +96,7 @@
 .td-score.is-high { --td-score: #22c55e; }
 .td-meta { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 12px; color: var(--muted-fg); }
 .td-loc { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.td-loc.is-nc { color: #22c55e; font-weight: 600; }
+.td-loc.is-near { color: #22c55e; font-weight: 600; }
 .td-age { flex: 0 0 auto; padding-left: 8px; border-left: 1px solid var(--border-col); }
 .td-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .td-tags .td-stage { font-size: 12px; }
@@ -437,7 +437,7 @@
 .td-page .td-check:checked, .td-page .td-check:focus-visible { opacity: 1; }
 .td-page .td-role { font-size: 18px; line-height: 1.45; margin: 2px 0; min-height: 0; }
 .td-page .td-meta { font-size: 14px; }
-.td-page .td-meta .td-loc.is-nc { font-weight: 500; }
+.td-page .td-meta .td-loc.is-near { font-weight: 500; }
 .td-page .td-stage, .td-page .td-track, .td-page .td-tag { border-radius: 6px; font-size: 12px; font-weight: 500; padding: 4px 7px; }
 .td-page .td-foot { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; padding-top: 14px; font-family: inherit; }
 .td-profile-match { display: flex; flex-direction: column; gap: 8px; color: var(--muted-fg); font-size: 12px; --match-color: #959598; }

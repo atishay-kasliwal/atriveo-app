@@ -7,6 +7,8 @@ import { TRACK_LABEL } from "./tracks";
 import {useNavigate} from 'react-router-dom';
 import { useEffect, useRef, useState } from "react";
 import { getJson, when } from "./engine";
+import { placeQuery } from "../../scripts/place.mjs";
+import { usePlace } from "./place";
 import { getTailorServerBase } from "../utils/tailorServer";
 import { applyWithExtension, canApplyAnywhere } from "./openFill";
 import "./staffing.css";
@@ -66,17 +68,19 @@ export default function StaffingPage({ header }: { header?: React.ReactNode }) {
     if (next.filter !== undefined) setFilter(next.filter);
     setOffset(0); setFocus(0); setSelectedIds([]); setConfirmPass(false);
   };
+  // Near you first (Settings → Where I am); the server orders by it.
+  const near = placeQuery(usePlace());
   async function refresh() {
     const sequence = ++refreshSequence.current;
     try {
-      const [s, j] = await Promise.all([getJson<Status>("/staffing/status"), getJson<Workspace>(`/staffing/workspace?view=${view}&offset=${offset}&limit=${perPage}&track=${track}&q=${encodeURIComponent(query)}&source=${filter === "all" ? "" : encodeURIComponent(filter)}${skipQuery}`)]);
+      const [s, j] = await Promise.all([getJson<Status>("/staffing/status"), getJson<Workspace>(`/staffing/workspace?view=${view}&offset=${offset}&limit=${perPage}&track=${track}&q=${encodeURIComponent(query)}&source=${filter === "all" ? "" : encodeURIComponent(filter)}&${near}${skipQuery}`)]);
       if (sequence !== refreshSequence.current) return;
       setStatus(s); setJobs(j.jobs); setWorkspace(j); setError("");
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
   }
   // Resumes build in the background; poll faster while any card on screen is waiting for one.
   const building = Boolean(workspace?.jobs.some(j => j.resume_status === "queued" || j.resume_status === "running"));
-  useEffect(() => { void refresh(); const timer = setInterval(() => void refresh(), building ? 5000 : 15000); return () => clearInterval(timer); }, [view, offset, query, filter, track, perPage, building, skipQuery]);
+  useEffect(() => { void refresh(); const timer = setInterval(() => void refresh(), building ? 5000 : 15000); return () => clearInterval(timer); }, [view, offset, query, filter, track, perPage, building, skipQuery, near]);
   const dialogOpen = Boolean(detail) || adding || sourcesOpen;
   const closeDialogs = () => { setDetail(null); setAdding(false); setSourcesOpen(false); };
   useEffect(() => {

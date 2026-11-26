@@ -1,4 +1,6 @@
 import { formatLocation } from "../utils/location";
+import { placeRank } from "../../scripts/place.mjs";
+import { usePlace } from "./place";
 import KnownHere from "./KnownHere";
 import { useEffect, useState, type ReactNode } from "react";
 import CompanyLogo from "../components/CompanyLogo";
@@ -8,9 +10,6 @@ import type { ResumeMatch, ResumeReadyState } from "./reviewQueue";
 import { PLATFORM_LABEL, type Platform } from "./platform";
 import "./today.css";
 
-/** A North Carolina job (they come first). */
-const NC = /\b(NC|North Carolina|Raleigh|Durham|Charlotte|Cary|Chapel Hill|Morrisville|Research Triangle|RTP|Greensboro|Winston[- ]Salem|Wilmington|Apex)\b/i;
-export const inNC = (location?: string | null) => Boolean(location && NC.test(location));
 
 export /** "3h", "2d", "5w": how long ago the posting went up (or was found). */
 function ago(iso?: string | null): string | null {
@@ -85,7 +84,8 @@ interface Props {
 
 /** One job on Today or Staffing: the same card, header to caption, on both pages. */
 export default function JobCard(p: Props) {
-  const nc = inNC(p.location);
+  // Near you (Settings → Where I am): one of your states, or remote / US-wide when you count those.
+  const near = placeRank(p.location, usePlace());
   const readyTitle = p.readyState ? [p.readyState.status, ...p.readyState.reasons, p.readyState.skills_checked ? "" : "Skills were not checked against Fit yet"].filter(Boolean).join(". ") : (p.resumeReady === false ? "Shown once the tailored resume is built and checked" : "This resume has not been checked yet");
   const trackLabel = p.track ? TRACK_LABEL[p.track as keyof typeof TRACK_LABEL] : undefined;
   return (
@@ -99,7 +99,7 @@ export default function JobCard(p: Props) {
       </header>
       {p.onTitle ? <h2 className="td-role" title={p.title}><button type="button" className="td-role-link" onClick={p.onTitle}>{p.title}</button></h2> : <h2 className="td-role" title={p.title}>{p.title}</h2>}
       <div className="td-meta">
-        {p.location && <span className={`td-loc ${nc ? "is-nc" : ""}`} title={p.location}>{nc ? "★ " : ""}{formatLocation(p.location)}</span>}
+        {p.location && <span className={`td-loc ${near ? "is-near" : ""}`} title={near === 2 ? `${p.location} · in one of your states` : near === 1 ? `${p.location} · remote or US-wide` : p.location}>{near ? "★ " : ""}{formatLocation(p.location)}</span>}
       </div>
       <div className="td-tags">{p.leadTags}{trackLabel && <span className={`td-track is-${p.track}`} title="Resume track">{trackLabel}</span>}{p.tags}</div>
       {p.notes}

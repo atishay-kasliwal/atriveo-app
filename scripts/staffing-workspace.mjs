@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { withMongo } from './mongo-client.mjs';
 import { enqueueJob } from './resume-queue.mjs';
+import { placeFromQuery, placeRank } from './place.mjs';
 import { markJobApplied, readyBrief, resumeMatchOf, resumeReadyOf, trackOf } from './applications-analytics.mjs';
 
 export function postingUrl(value) {
@@ -40,8 +41,6 @@ async function workspaceRows(db) {
   }).sort((a, b) => Number(b.eligible) - Number(a.eligible) || b.score - a.score || String(b.first_seen_at).localeCompare(String(a.first_seen_at)))
     .filter(j => { const group = j.fingerprint || j.key; if (seen.has(j.key) || seen.has(group)) return false; seen.add(j.key); seen.add(group); return true; });
 }
-/** A North Carolina job (Today's rule: they come first). */
-const NC = /\b(NC|North Carolina|Raleigh|Durham|Charlotte|Cary|Chapel Hill|Morrisville|Research Triangle|RTP|Greensboro|Winston[- ]Salem|Wilmington|Apex)\b/i;
 const TRACKS = ['software-engineer', 'ai-engineer', 'data-analytics', 'data-science', 'forward-deployed'];
 /** The tracks in turn (a SWE, an AI, a Data Analyst…), each in its own order, as Today's Mixed. */
 function interleave(list) {
@@ -53,8 +52,8 @@ function interleave(list) {
 }
 /**
  * One page of Staffing, filtered like Today: view, skipped companies (skip=…), search words (q, every word in the
- * company or title), source, then track (one of TRACKS, all, or mixed: the tracks in turn). North Carolina first,
- * then the newest find, then the best score. track_counts are for the view and search before the track filter.
+ * company or title), source, then track (one of TRACKS, all, or mixed: the tracks in turn). Near you first (near=WA,IL&remote=1:
+ * your states, then remote / US-wide; Settings → Where I am), then the newest find, then the best score. track_counts are for the view and search before the track filter.
  */
 export async function list(db, params) {
   const skip = params.getAll('skip').map(s => s.trim().toLowerCase()).filter(Boolean);
@@ -64,9 +63,11 @@ export async function list(db, params) {
   rows = rows.filter(j => view === 'recommended' ? j.eligible && j.state === 'new' : view === 'browse' ? !['passed', 'applied'].includes(j.state) : j.state === view);
   const words = (params.get('q') || '').toLowerCase().split(/\s+/).filter(Boolean);
   const source = params.get('source');
+  const place = placeFromQuery(params);
   rows = rows.filter(j => words.every(w => `${j.title} ${j.company} ${j.location}`.toLowerCase().includes(w)) && (!source || j.source_id === source))
     .map(j => ({ ...j, track: trackOf(j.title) }))
-    .sort((a, b) => Number(NC.test(b.location || '')) - Number(NC.test(a.location || '')) || String(b.first_seen_at).localeCompare(String(a.first_seen_at)) || b.score - a.score);
+    .map(j => ({ ...j, near: place ? placeRank(j.location, place) : 0 }))
+    .sort((a, b) => b.near - a.near || String(b.first_seen_at).localeCompare(String(a.first_seen_at)) || b.score - a.score);
   const track_counts = Object.fromEntries([['all', rows.length], ...TRACKS.map(t => [t, rows.filter(j => j.track === t).length])]);
   const track = params.get('track') || 'all';
   if (TRACKS.includes(track)) rows = rows.filter(j => j.track === track);
@@ -75,7 +76,7 @@ export async function list(db, params) {
   const limit = Math.max(1, Math.min(30, Number(params.get('limit')) || 10));
   const offset = Math.max(0, Math.min(100000, Number(params.get('offset')) || 0));
   // The card's resume match (ats-score.json beside the PDF), only for the page shown.
-  return { ok: true, counts, track_counts, total, jobs: rows.slice(offset, offset + limit).map(({ description, fit, ...j }) => ({ ...j, resume_match: resumeMatchOf(j.resume), resume_ready: readyBrief(resumeReadyOf(j.resume, fit)) })) };
+  return { ok: true, counts, track_counts, total, jobs: rows.slice(offset, offset + limit).map(({ description, fit, near, ...j }) => ({ ...j, resume_match: resumeMatchOf(j.resume), resume_ready: readyBrief(resumeReadyOf(j.resume, fit)) })) };
 }
 // Staffing resumes are built by the resume worker, like every other job. A click goes to the fast lane (1001,
 // beside the extension's Tailor); the background sweep queues Recommended jobs just below it.

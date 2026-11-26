@@ -3,6 +3,7 @@ import { getJson } from "./engine";
 import WidgetPreview, { ACCENT_COLOR, DEFAULT_WIDGET, SAMPLE, type WidgetData, type WidgetPrefs } from "./WidgetPreview";
 import "./settings.css";
 import PushSettings from "./PushSettings";
+import PlaceSettings from "./PlaceSettings";
 
 const PRESETS = [10, 15, 20, 25, 30];
 const FLAGS: { key: "responses" | "interviews" | "review" | "streak" | "trend"; label: string; hint: string }[] = [
@@ -46,11 +47,12 @@ export default function SettingsPage({ header }: { header?: ReactNode }) {
     <div className="rv-page st-page">
       {header}
       <main className="st-main">
-        <div className="st-title"><h1>Settings</h1><p>What your daily goal is, and what the Mac widget shows. Changes save as you make them. <a href="/usage">See how you use Atriveo →</a></p></div>
+        <div className="st-title"><h1>Settings</h1><p>Where you are, what your daily goal is, and what the Mac widget shows. Changes save as you make them. <a href="/usage">See how you use Atriveo →</a></p></div>
         {error && goal == null && <p className="st-error" role="alert">{error}</p>}
         <div className="st-grid">
           <div className="st-controls">
             <PushSettings />
+            <PlaceSettings />
             <section aria-labelledby="st-goal">
               <h2 id="st-goal">Daily goal</h2>
               <p className="st-hint">How many applications make a day complete. It drives the ring, the streak and the goal on Today.</p>

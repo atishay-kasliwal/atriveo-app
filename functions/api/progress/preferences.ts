@@ -1,5 +1,6 @@
 import {jwtVerify} from 'jose';
 import {emailAllowed,isAdminSite,type AdminEnv} from '../../_lib/admin';
+import {normalizePlace,parsePlace,type Place} from '../../../scripts/place.mjs';
 interface Env extends AdminEnv {JWT_SECRET:string;atriveo_auth:D1Database}
 const ACCENTS=['blue','green','amber','rose'] as const;
 type Accent=typeof ACCENTS[number];
@@ -30,19 +31,24 @@ export function parseWidget(input:unknown):Widget|null{
  if('accent' in v){if(typeof v.accent!=='string'||!(ACCENTS as readonly string[]).includes(v.accent))return null;out.accent=v.accent as Accent;}
  return out;
 }
+/** Where you are (the states whose jobs come first), saved beside the widget settings; defaults when missing. */
+export function readPlace(raw:unknown):Place{
+ try{const v=JSON.parse(String(raw||'{}'));return normalizePlace(v&&typeof v==='object'?(v as {place?:unknown}).place:undefined);}catch{return normalizePlace(undefined);}
+}
 export const onRequest:PagesFunction<Env>=async({request,env})=>{
  const email=await identity(request,env);if(!email)return json({error:'Unauthorized'},401);
  const row=await env.atriveo_auth.prepare('SELECT goal, prefs FROM daily_goals WHERE email = ?').bind(email).first<{goal:number;prefs:string}>();
- const current={goal:row?.goal??15,widget:readWidget(row?.prefs)};
+ const current={goal:row?.goal??15,widget:readWidget(row?.prefs),place:readPlace(row?.prefs)};
  if(request.method==='GET')return json({...current,timeZone:'America/New_York'});
  if(request.method==='PUT'){
   if(!request.headers.get('content-type')?.startsWith('application/json'))return json({error:'JSON required'},415);
-  let body:{goal?:unknown;widget?:unknown};try{body=await request.json();}catch{return json({error:'Invalid JSON'},400);}
-  let goal=current.goal,widget=current.widget;
+  let body:{goal?:unknown;widget?:unknown;place?:unknown};try{body=await request.json();}catch{return json({error:'Invalid JSON'},400);}
+  let goal=current.goal,widget=current.widget,place=current.place;
   if('goal' in body){if(!Number.isInteger(body.goal)||Number(body.goal)<1||Number(body.goal)>200)return json({error:'Goal must be between 1 and 200'},400);goal=Number(body.goal);}
   if('widget' in body){const next=parseWidget({...current.widget,...(body.widget as object)});if(!next)return json({error:'Unknown widget setting'},400);widget=next;}
-  await env.atriveo_auth.prepare("INSERT INTO daily_goals(email,goal,prefs,updated_at) VALUES(?,?,?,datetime('now')) ON CONFLICT(email) DO UPDATE SET goal=excluded.goal,prefs=excluded.prefs,updated_at=excluded.updated_at").bind(email,goal,JSON.stringify(widget)).run();
-  return json({goal,widget,timeZone:'America/New_York'});
+  if('place' in body){const next=parsePlace(body.place);if(!next)return json({error:'Unknown state'},400);place=next;}
+  await env.atriveo_auth.prepare("INSERT INTO daily_goals(email,goal,prefs,updated_at) VALUES(?,?,?,datetime('now')) ON CONFLICT(email) DO UPDATE SET goal=excluded.goal,prefs=excluded.prefs,updated_at=excluded.updated_at").bind(email,goal,JSON.stringify({...widget,place})).run();
+  return json({goal,widget,place,timeZone:'America/New_York'});
  }
  return json({error:'Method not allowed'},405);
 };

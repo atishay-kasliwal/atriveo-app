@@ -82,22 +82,27 @@ test('the workspace leaves out skipped companies and gives each card its role tr
   fs.rmSync(dir, { recursive: true, force: true });
 }));
 
-test('the workspace filters like Today: track, Mixed in turn, every search word, North Carolina first, then newest; a page is limit long', () => withDb(async db => {
+test('the workspace filters like Today: track, Mixed in turn, every search word, near you first, then newest; a page is limit long', () => withDb(async db => {
   await db.collection('staffing_jobs').insertMany([
     posting('swe-old', { title: 'Software Engineer', day: 1 }),
     posting('swe-new', { title: 'Backend Software Engineer', day: 5 }),
-    posting('swe-nc', { title: 'Software Engineer', location: 'Durham, NC', day: 2 }),
+    posting('swe-wa', { title: 'Software Engineer', location: 'Seattle, WA', day: 2 }),
     posting('ai', { title: 'AI Engineer', day: 3 }),
-    posting('ds', { title: 'Data Scientist', day: 4 }),
+    posting('ds', { title: 'Data Scientist', location: 'Durham, NC', day: 4 }),
   ]);
-  await db.collection('jobs').insertMany(['swe-old', 'swe-new', 'swe-nc', 'ai', 'ds'].map(id => ({ job_url: `https://jobs.test/${id}`, site: 'staffing', score_pct: 70 })));
+  await db.collection('jobs').insertMany(['swe-old', 'swe-new', 'swe-wa', 'ai', 'ds'].map(id => ({ job_url: `https://jobs.test/${id}`, site: 'staffing', score_pct: 70 })));
   const ids = async q => (await list(db, new URLSearchParams(q))).jobs.map(j => j._id);
-  assert.deepEqual(await ids('view=recommended'), ['swe-nc', 'swe-new', 'ds', 'ai', 'swe-old']);
-  assert.deepEqual(await ids('view=recommended&track=software-engineer'), ['swe-nc', 'swe-new', 'swe-old']);
-  assert.deepEqual(await ids('view=recommended&track=mixed'), ['swe-nc', 'ds', 'ai', 'swe-new', 'swe-old']);
-  assert.deepEqual(await ids('view=recommended&q=software backend'), ['swe-new']);
-  const page = await list(db, new URLSearchParams('view=recommended&limit=2&offset=2'));
-  assert.deepEqual(page.jobs.map(j => j._id), ['ds', 'ai']);
+  const near = 'near=WA,IL,MI&remote=1';
+  // Your states (Seattle), then remote (the rest say Remote), then elsewhere (Durham): each newest first.
+  assert.deepEqual(await ids(`view=recommended&${near}`), ['swe-wa', 'swe-new', 'ai', 'swe-old', 'ds']);
+  assert.deepEqual(await ids(`view=recommended&track=software-engineer&${near}`), ['swe-wa', 'swe-new', 'swe-old']);
+  assert.deepEqual(await ids(`view=recommended&track=mixed&${near}`), ['swe-wa', 'ai', 'ds', 'swe-new', 'swe-old']);
+  assert.deepEqual(await ids(`view=recommended&q=software backend&${near}`), ['swe-new']);
+  assert.deepEqual(await ids('view=recommended&near=WA,IL,MI&remote=0'), ['swe-wa', 'swe-new', 'ds', 'ai', 'swe-old'], 'remote off: only your states lead');
+  assert.deepEqual(await ids('view=recommended'), ['swe-new', 'ds', 'ai', 'swe-wa', 'swe-old'], 'no place asked for: newest first, North Carolina no longer leads');
+  const page = await list(db, new URLSearchParams(`view=recommended&limit=2&offset=2&${near}`));
+  assert.deepEqual(page.jobs.map(j => j._id), ['ai', 'swe-old']);
+  assert.equal(page.jobs[0].near, undefined, 'the rank stays on the server');
   assert.equal(page.total, 5);
   assert.equal(page.track_counts.all, 5); assert.equal(page.track_counts['software-engineer'], 3); assert.equal(page.track_counts['ai-engineer'], 1);
 }));

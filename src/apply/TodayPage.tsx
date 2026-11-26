@@ -1,6 +1,8 @@
 import OutreachPanel from "./OutreachPanel";
 import { outreachApi, useOutreachList, type OutreachTarget } from "./outreach";
-import JobCard, { ago, inNC, useLayout } from './JobCard';
+import JobCard, { ago, useLayout } from './JobCard';
+import { placeRank } from '../../scripts/place.mjs';
+import { usePlace } from './place';
 import { platformOf } from './platform';
 import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -71,7 +73,6 @@ function etaLabel(eta?: ResumeEta): { text: string; title: string } {
 /** Postings older than this have no freshness left on the bar. */
 
 
-export { inNC };
 
 const STAGE: Record<Kind, { label: string; tone: string }> = {
   you_submit: { label: "You submit", tone: "go" },
@@ -98,6 +99,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
   // Later is remembered in this browser for a week, so a refresh keeps those cards at the end.
   const [laterAt, setLaterAt] = useState<Record<string, number>>(() => Object.fromEntries(Object.entries(readPref<Record<string, number>>("later", {})).filter(([, at]) => at > Date.now() - 7 * 86_400_000)));
   const later = useMemo(() => Object.keys(laterAt), [laterAt]);
+  const place = usePlace();
   const [busy, setBusy] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
@@ -147,7 +149,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
     const fromQueue = (q: QueuedApp): Item => ({ id: q.id, kind: !q.n ? "fill" : "drafted", company: q.company ?? "", title: q.title ?? "", ats: q.ats ?? null, url: q.url ?? undefined, updatedAt: q.updatedAt, priorityTags: q.priorityTags, queued: q,
       location: q.location ?? null, score: q.score ?? null, track: q.track ?? null, age: q.postedAt ?? q.foundAt ?? q.createdAt ?? null, resumeReady: q.resumeReady, resumeEta: q.resumeEta, resumeMatch: q.resumeMatch ?? null, readyState: q.readyState ?? null });
     // You submit, then approve, then Open & Fill (approved or drafted alike) and LinkedIn;
-    // within each, North Carolina first, then the newest posting, then the best match.
+    // within each, near you first (your states, then remote / US-wide), then the newest posting, then the best match.
     const order: Record<Kind, number> = { you_submit: 0, approve: 1, fill: 2, drafted: 2, linkedin: 2 };
     const all = [
       ...manual.map((r) => fromReady(r, "you_submit")),
@@ -165,8 +167,8 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
       // Easy Apply postings (LinkedIn's own form) come after everything you can fill on a company's site.
       // Ready to apply first: a card whose resume isn't on the server yet waits behind every one that is.
       .sort((a, b) => Number(later.includes(a.id)) - Number(later.includes(b.id)) || Number(a.resumeReady === false) - Number(b.resumeReady === false) || (order[a.kind] + (a.easyApply ? 0.5 : 0)) - (order[b.kind] + (b.easyApply ? 0.5 : 0))
-        || Number(inNC(b.location)) - Number(inNC(a.location)) || (b.age ?? "").localeCompare(a.age ?? "") || (b.score ?? -1) - (a.score ?? -1));
-  }, [ready.data, queue.data, linkedin.data, detail, done, later, exclusions]); // eslint-disable-line react-hooks/exhaustive-deps
+        || placeRank(b.location, place) - placeRank(a.location, place) || (b.age ?? "").localeCompare(a.age ?? "") || (b.score ?? -1) - (a.score ?? -1));
+  }, [ready.data, queue.data, linkedin.data, detail, done, later, exclusions, place]); // eslint-disable-line react-hooks/exhaustive-deps
   // Counts on each pill: a track's count follows the chosen kind, and a kind's count follows the chosen track.
   const inTrack = (i: Item, t: TrackFilter) => t === "all" || t === "mixed" || i.track === t;
   const inKind = (i: Item, k: KindFilter) => k === "all" || KIND_OF[i.kind] === k;
