@@ -10,7 +10,7 @@ tracks:
   - ai-engineer
 slot_kind: project
 achievement_theme: oss-statsforecast-b1
-display_order: 47
+display_order: 38
 wow_score: 0.8
 metrics_claimed:
   - "4.9"
@@ -32,7 +32,7 @@ oss:
 capabilities:
   backend: 80
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Python
   - time series

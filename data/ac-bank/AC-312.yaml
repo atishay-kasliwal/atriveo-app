@@ -1,14 +1,14 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B14).
 id: AC-312
 role: open-source
+# Retired 2026-11-25 (every open source bullet 9+): open; a layout change, no measured result.
+tracks:
+  - retired
 fits:
   - software-engineer
 # Label only (the open source page): selection never reads it.
 areas:
   - frontend
-# Only the tracks it fits.
-tracks:
-  - software-engineer
 slot_kind: project
 achievement_theme: oss-podman-desktop-b14
 display_order: 60

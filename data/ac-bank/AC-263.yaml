@@ -9,7 +9,7 @@ areas:
   - platform
 slot_kind: project
 achievement_theme: k8s-webhook
-display_order: 11
+display_order: 24
 wow_score: 0.88
 metrics_claimed:
   - test_cases_11

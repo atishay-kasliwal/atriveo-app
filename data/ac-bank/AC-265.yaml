@@ -9,7 +9,7 @@ areas:
   - platform
 slot_kind: project
 achievement_theme: provisioning-fixes
-display_order: 13
+display_order: 31
 wow_score: 0.88
 metrics_claimed:
   - bugs_3
@@ -58,5 +58,5 @@ variants:
     emphasis: provisioning-fixes
     strength: 9
     text: >-
-      Examined context handling in Red Hat's mapt provisioning tool in Go and fixed 3 propagation and preflight bugs,
-      rejecting invalid output paths before cloud calls with 5 regression tests.
+      Examined context handling in Red Hat's mapt in Go and fixed 3 bugs so a bad output path fails before any
+      cloud call instead of after 12 minutes of provisioning, with 5 tests.

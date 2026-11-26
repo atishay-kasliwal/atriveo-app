@@ -102,8 +102,10 @@ tracks:
     label: Data analytics
     title_patterns: ['data analyst', 'analytics', 'business intelligence', '\bbi\b', 'business analyst', 'insights analyst', 'product analyst']
     exclude_patterns: ['engineer']
-    # No open source here: none of it is analytics work (user decision 2026-11-16).
+    # No open source here: none of it is analytics work (user decision 2026-11-16). no_jd_selected keeps it out of the
+    # second slot too (it could still be swapped in by fit until 2026-11-25).
     projects: [atriveo, insurance-platform]
+    no_jd_selected: [open-source]
     # Wake Forest's title on analytics resumes, as on DS ones (Atishay's own DS resume, 2026-10-08).
     employer_titles:
       wake-forest: AI and Data Analytics Intern

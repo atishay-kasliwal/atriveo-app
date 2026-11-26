@@ -1,4 +1,4 @@
-version: 71
+version: 73
 updated_at: "2026-11-25"
 note: "Harvard action verbs and unique resume openings; confirmed SBU/Wake Forest technology context. Resume scope remains Atriveo+Insurance."
 
@@ -20,3 +20,4 @@ fomc_project: "v68: FOMC Market LLM project (FOMC-MARKET-LLM.yaml) with AC-230 (
 open_source_project: "v69: open source project slot (OPEN-SOURCE.yaml): 29 approved bullets AC-253..AC-281 from upstream PRs (SKILL_EVIDENCE.yaml), 17 story packages in planner v2, merged before open, heading built from the picked bullets; open PR skills usable on the Skills line after merged ones (QUESTION_ANSWERS 2026-11-16). Go and Rust confirmed by merged PRs."
 open_source_corrections: "v70: open source bullets checked against GitHub (140 PRs, 2026-11-25). 11 reworded to what the PRs show (AC-253/254/255/259/260/263/264/268/269/277/281; table wrappers and maintainer tests no longer counted), PRs that do not support a claim unlinked (aura#864, nvke#2337, nvke#2246, numaflow#3756), AC-267/272/276 merged, AC-280 retired (neo4j#379 closed). New merged work AC-282..AC-289: SciPy, statsmodels, UMAP, neuralforecast, Kiali, nodewright, Cockpit. SKILL_EVIDENCE statuses refreshed."
 open_source_round_two: "v71: 31 more open source bullets AC-290..AC-320 (9 merged, 22 open), each limited to the tracks it fits; areas labels (backend, full-stack, frontend, platform) on every software bullet for the open source page, never read by selection; the DS master prints SciPy, statsmodels and neuralforecast instead of the radiomics project (2026-11-25, Atishay)."
+open_source_nine: "v73 (v72 was an unapproved change, reverted): every live open source bullet scores 9+ on the bank rubric (impact 3, specificity 2, credibility 2, clarity 2, relevance 1); an open pull request earns half the credibility, so it stays only with a measured result. 10 reworded from facts already in their PRs, 24 retired (reasons in each file), 4 at 10; display_order ranks them; 32 story packages. Data analytics never takes open source into the second slot (no_jd_selected)."

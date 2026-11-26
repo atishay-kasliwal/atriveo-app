@@ -8,7 +8,7 @@ areas:
   - backend
 slot_kind: project
 achievement_theme: rust-gui
-display_order: 24
+display_order: 8
 wow_score: 0.88
 metrics_claimed:
   - stars_32000
@@ -49,5 +49,5 @@ variants:
     emphasis: rust-gui
     strength: 9
     text: >-
-      Solved a wrong first frame content area in egui (32K+ GitHub stars) when zoom is set early in this Rust GUI
-      library, adding 2 regression tests.
+      Solved a first frame bug in egui (32K+ GitHub stars) where an early zoom made the content area over 12 times
+      wider than the window, adding 2 Rust regression tests.
