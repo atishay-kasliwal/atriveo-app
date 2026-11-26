@@ -1,13 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import yaml from "js-yaml";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { pickResumeProjectRoles } from "../../scripts/ac-role-meta.mjs";
 import { scoreStoryTriple } from "../../scripts/ac-story-select.mjs";
 import { sharedOpeningVerbs, sharedOpeningVerbsByTrack, resumeRoles, lintBullet } from "../../scripts/ac-bullet-rules.mjs";
 import { loadTracks } from "../../scripts/ac-tracks.mjs";
-import { ossHeading } from "../../scripts/ac-tex.mjs";
+import { ossHeading, companyProjects, companyOf, assembleAcResume } from "../../scripts/ac-tex.mjs";
 import { loadBank } from "../../scripts/ac-bank.mjs";
 import { addThirdOpenSource, jdNames } from "../../scripts/ac-page-fill.mjs";
 import { bankForTrack } from "../../scripts/ac-tracks.mjs";
@@ -32,8 +33,8 @@ test("open source takes the second slot only when the JD clearly matches it", ()
 
 test("every open source package pairs two bank entries with unique verbs inside the package", () => {
   const byId = new Map(oss.map((a) => [a.id, a]));
-  assert.equal(oss.length, 43);
-  assert.equal(all.filter(retired).length, 25);
+  assert.equal(oss.length, 41);
+  assert.equal(all.filter(retired).length, 30);
   // Every live open source bullet scores 9+ (bank rubric), and the ranking follows the score (2026-11-25).
   assert.deepEqual(oss.filter((a) => !(a.strength.recruiter >= 9 && a.variants[0].strength >= 9)).map((a) => a.id), []);
   const ranked = [...oss].sort((a, b) => a.display_order - b.display_order);
@@ -77,20 +78,26 @@ test("a bullet's status matches its PRs, and a closed PR is never on an active b
   assert.ok(!pool.ac_ids.includes("AC-280") && pool.story_packages.every((p) => !p.ids.includes("AC-280")));
 });
 
-test("merged work outranks open work at the same JD fit", () => {
+// 2026-11-26 (Atishay): open PRs count fully, since the work is done. The 9+ bar decides what is live.
+test("open work counts the same as merged work at the same JD fit", () => {
   const [merged, open] = [oss.find((a) => a.oss.status === "merged"), oss.find((a) => a.oss.status === "open")];
   const pkg = { name: "t", ids: [], jd_signals: [], roleName: "open-source", openPenalty: pool.open_penalty };
   const same = (ac) => ({ ...merged, id: ac.id, oss: ac.oss });
   const a = scoreStoryTriple([same(merged), same(merged)], { jd: "", scoreAc: () => 0, pkg, weights: pool.story_weights });
   const b = scoreStoryTriple([same(merged), same(open)], { jd: "", scoreAc: () => 0, pkg, weights: pool.story_weights });
-  assert.ok(a - b >= pool.open_penalty - 1e-9, `${a} vs ${b}`);
+  assert.equal(pool.open_penalty, 0);
+  assert.ok(Math.abs(a - b) < 1e-9, `${a} vs ${b}`);
+  // Tier A holds every live open source bullet, open or merged.
+  const tiers = yaml.load(fs.readFileSync(path.join(bank.bank_dir, "TIERS.yaml"), "utf8"));
+  assert.deepEqual(oss.map((a) => a.id).filter((id) => !tiers.A.includes(id)), []);
 });
 
 test("the heading names the org when one org owns the bullets, else each project with its own org", () => {
-  assert.equal(ossHeading([{ ac_id: "AC-258" }, { ac_id: "AC-259" }]).text, "NVIDIA | NVKR, Workload Map (Open Source)");
+  assert.equal(ossHeading([{ ac_id: "AC-261" }, { ac_id: "AC-287" }]).text, "Kiali (Open Source)");
   assert.equal(ossHeading([{ ac_id: "AC-261" }, { ac_id: "AC-263" }]).text, "Kiali, Numaflow (Open Source)");
-  assert.equal(ossHeading([{ ac_id: "AC-255" }, { ac_id: "AC-271" }]).text, "Mezmo AURA, PR-Agent (Open Source)");
-  assert.deepEqual(ossHeading([{ ac_id: "AC-253" }, { ac_id: "AC-254" }]).tools, ["Rust", "Tokio"]);
+  assert.equal(ossHeading([{ ac_id: "AC-256" }, { ac_id: "AC-271" }]).text, "Mezmo AURA, PR-Agent (Open Source)");
+  assert.equal(ossHeading([{ ac_id: "AC-258" }, { ac_id: "AC-269" }]).text, "NVIDIA NVKR, Keycloak (Open Source)");
+  assert.deepEqual(ossHeading([{ ac_id: "AC-253" }, { ac_id: "AC-254" }]).tools, ["Rust", "Tokio", "MCP"]); // both Mezmo: the company project
 });
 
 test("a posting names a term only as a whole word", () => {
@@ -109,6 +116,8 @@ test("the third open source bullet is related to the first two", () => {
     if (two.some((a) => !a)) continue;
     const { compact } = addThirdOpenSource({ experience: [], projects: [{ role: "open-source", bullets: two.map((a) => ({ ac_id: a.id, text: a.variants[0].text })) }] }, b, { jd: "Software engineer", track });
     const ids = compact.projects[0].bullets.map((x) => x.ac_id), third = b.acs.find((a) => a.id === ids[2]);
+    // A company project prints its description line and exactly 2 bullets.
+    if (ossHeading(two.map((a) => ({ ac_id: a.id }))).company) { assert.equal(ids.length, 2, pkg.name); continue; }
     assert.ok(third, pkg.name);
     const related = (a) => two.some((x) => (x.oss.org && x.oss.org === a.oss.org) || x.oss.project === a.oss.project || (x.signature_technologies || []).some((t) => (a.signature_technologies || []).includes(t)));
     const anyLeft = b.acs.some((a) => a.role === "open-source" && !ids.slice(0, 2).includes(a.id) && related(a) && !two.some((x) => x.variants[0].text.split(" ")[0] === a.variants[0].text.split(" ")[0]));
@@ -137,4 +146,41 @@ test("only approved bullets are live, and every pull request is either a bullet 
   assert.ok(r.fix.some((x) => x.id === "AC-261" && /closed/.test(x.issue)), "closed PR still cited");
   assert.deepEqual(r.draft.map((x) => x.pr), ["brand/new#1"]);
   assert.deepEqual(r.decidedChanged.map((x) => x.pr), ["cockpit-project/cockpit#23924"]);
+});
+
+// Company projects (2026-11-26, Atishay): "NVIDIA (Open Source) | Go, Kubernetes, Cobra", a line saying what the project is,
+// then 2 bullets. The line names the project's purpose, stack and one scale number, never "Contributed to" or praise.
+test("company projects print a heading, a description line and 2 bullets from one company", () => {
+  const list = companyProjects(bank.bank_dir);
+  assert.deepEqual(list.map((c) => c.id), ["nvidia", "mezmo", "red-hat", "numaflow"]);
+  for (const c of list) {
+    assert.match(c.heading, /^[\w .]+ \(Open Source\)$/, c.id);
+    assert.ok(c.skills.length >= 2 && c.skills.length <= 4, c.id);
+    assert.match(c.description, /\d/, `${c.id}: a scale number`);
+    assert.doesNotMatch(c.description, /\b(contribut\w*|merged|pull requests?|PRs?|leading|world class|renowned|prestigious|cutting edge|I|my)\b/i, c.id);
+    assert.ok(c.description.split(/\s+/).length <= 20, c.id);
+    assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(c.approved), c.id);
+    // Every company has live bullets and at least one package of two of them.
+    const members = oss.filter((a) => companyOf(a, bank.bank_dir)?.id === c.id).map((a) => a.id);
+    assert.ok(pool.story_packages.some((p) => p.ids.every((id) => members.includes(id))), c.id);
+  }
+  const h = ossHeading([{ ac_id: "AC-258" }, { ac_id: "AC-321" }]);
+  assert.equal(h.text, "NVIDIA (Open Source)");
+  assert.deepEqual(h.tools, ["Go", "Kubernetes", "Cobra"]);
+  assert.match(h.description, /^NVIDIA's GPU Kubernetes stack/);
+  // One company bullet with another project's keeps the heading built from the bullets.
+  assert.equal(ossHeading([{ ac_id: "AC-258" }, { ac_id: "AC-284" }]).company, null);
+  // Bullets never count PRs ("18 PRs merged" is logistics, not what he built).
+  for (const a of oss) assert.doesNotMatch(a.variants[0].text, /\b\d+ (pull requests?|PRs?)\b/i, a.id);
+});
+
+test("the masters print the company projects Atishay chose", () => {
+  const pins = (t) => loadTracks().tracks[t].general_pinned.projects["open-source"];
+  assert.deepEqual(pins("software-engineer"), ["AC-258", "AC-321"]);
+  assert.deepEqual(pins("forward-deployed"), ["AC-258", "AC-321"]);
+  assert.deepEqual(pins("ai-engineer"), ["AC-253", "AC-322"]);
+  assert.deepEqual(pins("data-science"), ["AC-282", "AC-284", "AC-286"]);
+  const tex = assembleAcResume({ experience: [], projects: [{ role: "open-source", bullets: ["AC-258", "AC-321"].map((id) => ({ ac_id: id, text: bank.acs.find((a) => a.id === id).variants[0].text })) }] }, { skillsLines: [] });
+  assert.match(tex, /\\textbf\{NVIDIA \(Open Source\)\} \$\|\$ \\emph\{Go, Kubernetes, Cobra\}/);
+  assert.match(tex, /\\resumeProjectHeadingAbout\{\\textbf\{NVIDIA \(Open Source\)\}.*\}\{NVIDIA's GPU Kubernetes stack/);
 });

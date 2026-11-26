@@ -1,5 +1,6 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md).
 id: AC-288
+# Retired 2026-11-26 (company projects): folded into AC-321 (NVIDIA project).
 role: open-source
 fits:
   - software-engineer
@@ -10,8 +11,7 @@ areas:
   - platform
 # Only the tracks it fits.
 tracks:
-  - software-engineer
-  - forward-deployed
+  - retired
 slot_kind: project
 achievement_theme: k8s-operator
 display_order: 6

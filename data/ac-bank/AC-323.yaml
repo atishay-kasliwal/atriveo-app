@@ -1,0 +1,75 @@
+# Open source contribution, approved 2026-11-26: one bullet for AC-266 + AC-265 (company projects).
+id: AC-323
+role: open-source
+fits:
+  - software-engineer
+  - forward-deployed
+# Label only (the open source page): selection never reads it.
+areas:
+  - platform
+# Only the tracks it fits.
+tracks:
+  - software-engineer
+  - forward-deployed
+slot_kind: project
+achievement_theme: runner-fixes
+display_order: 17
+wow_score: 0.88
+metrics_claimed:
+  - days_90
+  - minutes_12
+  - tests_25
+concepts_claimed:
+  - ci-runners
+  - provisioning
+  - cloud-init
+signature_technologies:
+  - Go
+fact: >-
+  Open source contribution (Red Hat | mapt), combines AC-266 and AC-265, approved 2026-11-26. Never employment at Red Hat.
+oss:
+  org: Red Hat
+  project: mapt
+  status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-26"
+  prs:
+    - https://github.com/redhat-developer/mapt/pull/967
+    - https://github.com/redhat-developer/mapt/pull/958
+    - https://github.com/redhat-developer/mapt/pull/959
+    - https://github.com/redhat-developer/mapt/pull/956
+    - https://github.com/redhat-developer/mapt/pull/960
+capabilities:
+  backend: 82
+  cloud: 92
+  data: 50
+strength:
+  recruiter: 9
+ats_keywords:
+  - Go
+  - Golang
+  - CI/CD
+  - provisioning
+  - Windows
+  - macOS
+  - SSH
+  - IBM Cloud
+facets:
+  runner-fixes:
+    phrase: mapt open source contribution
+    keywords:
+      - go
+      - golang
+      - ci/cd
+      - provisioning
+      - windows
+      - macos
+      - ssh
+      - ibm cloud
+variants:
+  - facet: runner-fixes
+    emphasis: runner-fixes
+    strength: 9
+    text: >-
+      Repaired mapt runner setup on Windows and macOS, SSH lockouts on IBM Cloud after 90 days and late failures
+      after 12 minutes of provisioning, covered by 25 Go tests.

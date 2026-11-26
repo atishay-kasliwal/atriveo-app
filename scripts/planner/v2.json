@@ -305,238 +305,224 @@
       "packages_only": true,
       "exclusive_verbs_by_package": true,
       "requires_jd_signal": true,
-      "open_penalty": 0.75,
+      "open_penalty": 0,
       "story_weights": {
         "jd_match": 0.25,
         "story_completion": 1.6,
         "wow": 0.9,
         "recruiter": 1.0
       },
-      "ac_ids": ["AC-253", "AC-254", "AC-255", "AC-256", "AC-258", "AC-259", "AC-261", "AC-262", "AC-263", "AC-264", "AC-265", "AC-266", "AC-267", "AC-268", "AC-269", "AC-270", "AC-271", "AC-272", "AC-274", "AC-276", "AC-277", "AC-278", "AC-279", "AC-282", "AC-283", "AC-284", "AC-285", "AC-286", "AC-287", "AC-288", "AC-289", "AC-290", "AC-291", "AC-292", "AC-294", "AC-297", "AC-299", "AC-300", "AC-301", "AC-302", "AC-303", "AC-304", "AC-309"],
+      "ac_ids": ["AC-253", "AC-254", "AC-256", "AC-258", "AC-259", "AC-261", "AC-262", "AC-263", "AC-264", "AC-267", "AC-268", "AC-269", "AC-270", "AC-271", "AC-272", "AC-274", "AC-276", "AC-277", "AC-278", "AC-279", "AC-282", "AC-283", "AC-284", "AC-285", "AC-286", "AC-287", "AC-289", "AC-290", "AC-291", "AC-292", "AC-294", "AC-297", "AC-299", "AC-300", "AC-301", "AC-302", "AC-303", "AC-304", "AC-321", "AC-322", "AC-323"],
       "story_packages": [
         {
-          "name": "rust-concurrency",
+          "name": "mezmo",
           "anchor": "AC-253",
-          "ids": ["AC-253",  "AC-254"],
+          "ids": ["AC-253", "AC-322"],
+          "jd_signals": ["mcp", "model context protocol", "llm", "agentic", "ai agent", "agents", "rust", "tokio", "tool calling", "function calling", "human in the loop", "anthropic", "openai"],
+          "strong_signals": ["mcp", "ai agent", "agentic", "agents", "rust"]
+        },
+        {
+          "name": "mezmo-orchestration",
+          "anchor": "AC-253",
+          "ids": ["AC-253", "AC-254"],
           "jd_signals": ["rust", "tokio", "async rust", "concurrency", "deadlock", "lock contention", " sre", "site reliability"],
           "strong_signals": ["rust", "tokio"]
         },
         {
-          "name": "mcp-agents",
-          "anchor": "AC-255",
-          "ids": ["AC-255",  "AC-271"],
-          "jd_signals": ["mcp", "model context protocol", "llm", "agentic", "ai agent", "agents", "automation", "workflow", "tool calling", "function calling", "foundation model"],
-          "strong_signals": ["mcp", "ai agent", "agentic", "agents"]
-        },
-        {
-          "name": "go-cli",
+          "name": "nvidia",
           "anchor": "AC-258",
-          "ids": ["AC-258",  "AC-259"],
-          "jd_signals": ["golang", " go ", "go,", "(go", "go)", "/go", "go/", "cli", "command line", "developer tools", "developer experience", "release engineering", "nvidia"],
-          "strong_signals": ["golang", " go ", "go,", "(go", "go)", "/go", "go/"]
+          "ids": ["AC-258", "AC-321"],
+          "jd_signals": ["golang", " go ", "go,", "(go", "go)", "/go", "go/", "cli", "command line", "developer tools", "developer experience", "release engineering", "nvidia", "kubernetes", "kubernetes operator", "gpu", "node management"],
+          "strong_signals": ["golang", " go ", "go,", "(go", "go)", "/go", "go/", "nvidia", "gpu"]
         },
         {
-          "name": "k8s-reliability",
-          "anchor": "AC-261",
-          "ids": ["AC-261",  "AC-263"],
-          "jd_signals": ["kubernetes", "k8s", "informer", "webhook", "admission", "istio", "service mesh", "reliability", "outage", "infrastructure", "golang", " go ", "go,", "(go", "go)", "/go", "go/"],
-          "strong_signals": ["kubernetes", "k8s", "istio", "golang", " go ", "go,", "(go", "go)", "/go", "go/"]
-        },
-        {
-          "name": "streaming",
-          "anchor": "AC-262",
-          "ids": ["AC-262",  "AC-264"],
+          "name": "numaflow",
+          "anchor": "AC-264",
+          "ids": ["AC-264", "AC-262"],
           "jd_signals": ["streaming", "stream processing", "event time", "pulsar", "nats", "jetstream", "kafka", "real time", "real-time", "watermark", "data pipeline", "event driven", "event-driven"],
           "strong_signals": ["pulsar", "nats", "jetstream", "stream processing"]
         },
         {
-          "name": "provisioning",
-          "anchor": "AC-265",
-          "ids": ["AC-265",  "AC-266"],
-          "jd_signals": ["provisioning", "cloud-init", "ci runner", "devops", "infrastructure as code", "ibm cloud", "multi cloud", "multi-cloud", "bare metal", "golang", " go ", "go,", "(go", "go)", "/go", "go/"],
-          "strong_signals": ["cloud-init", "provisioning"]
-        },
-        {
           "name": "gitops",
-          "anchor": "AC-265",
-          "ids": ["AC-265",  "AC-268"],
+          "anchor": "AC-268",
+          "ids": ["AC-268", "AC-323"],
           "jd_signals": ["gitops", "argo cd", "argocd", "argo workflows", "openshift", "operator", "red hat"],
           "strong_signals": ["gitops", "openshift"]
         },
         {
-          "name": "ci-runners",
-          "anchor": "AC-266",
-          "ids": ["AC-266",  "AC-267"],
-          "jd_signals": ["ci/cd", "github actions", "gitlab", "ci runner", "github runner", "azure", "build infrastructure", "build system"],
-          "strong_signals": ["github actions", "gitlab"]
+          "name": "red-hat",
+          "anchor": "AC-267",
+          "ids": ["AC-267", "AC-323"],
+          "jd_signals": ["ci/cd", "github actions", "gitlab", "ci runner", "github runner", "azure", "build infrastructure", "build system", "provisioning", "cloud-init", "devops", "multi cloud", "multi-cloud", "aws", "red hat", " go ", "go,", "(go", "go)", "/go", "go/", "golang"],
+          "strong_signals": ["github actions", "gitlab", "provisioning"]
         },
         {
           "name": "frontend-a11y",
           "anchor": "AC-269",
-          "ids": ["AC-269",  "AC-270"],
+          "ids": ["AC-269", "AC-270"],
           "jd_signals": ["frontend", "front end", "front-end", "react", "typescript", "accessibility", "a11y", "wcag", "web console", "user interface"],
           "strong_signals": ["accessibility", "wcag", "a11y", "frontend engineer", "front end engineer", "front-end engineer", "frontend developer", "ui engineer"]
         },
         {
           "name": "ai-tools",
           "anchor": "AC-271",
-          "ids": ["AC-271",  "AC-279"],
+          "ids": ["AC-271", "AC-279"],
           "jd_signals": ["mcp", "llm", "developer tools", "ai tools", "pytest", "code review", "copilot"],
           "strong_signals": ["mcp"]
         },
         {
           "name": "rust-desktop",
           "anchor": "AC-276",
-          "ids": ["AC-276",  "AC-277"],
+          "ids": ["AC-276", "AC-277"],
           "jd_signals": ["rust", "desktop", "gui framework", "graphical user interface", "cross platform", "cross-platform", "macos", "native app"],
           "strong_signals": ["rust", "desktop app", "gui framework"]
         },
         {
           "name": "frontend-e2e",
           "anchor": "AC-269",
-          "ids": ["AC-269",  "AC-278"],
+          "ids": ["AC-269", "AC-278"],
           "jd_signals": ["playwright", "e2e", "end to end", "end-to-end", "test automation", "accessibility", "browser", "javascript", "selenium", "cypress"],
           "strong_signals": ["playwright"]
         },
         {
           "name": "scientific-python",
           "anchor": "AC-282",
-          "ids": ["AC-282",  "AC-284"],
+          "ids": ["AC-282", "AC-284"],
           "jd_signals": ["scipy", "statsmodels", "scientific computing", "numerical", "statistical model", "optimization", "time series", "data scientist"],
           "strong_signals": ["scipy", "statsmodels", "scientific computing"]
         },
         {
           "name": "scipy",
           "anchor": "AC-282",
-          "ids": ["AC-282",  "AC-283"],
+          "ids": ["AC-282", "AC-283"],
           "jd_signals": ["scipy", "statistics", "probability", "numerical", "scientific computing"],
           "strong_signals": ["scipy"]
         },
         {
           "name": "ml-libraries",
           "anchor": "AC-285",
-          "ids": ["AC-285",  "AC-286"],
+          "ids": ["AC-285", "AC-286"],
           "jd_signals": ["pytorch", "forecasting", "time series", "embeddings", "dimensionality reduction", "deep learning", "neural network", "tensorflow", "keras"],
           "strong_signals": ["forecasting", "umap", "dimensionality reduction"]
         },
         {
           "name": "k8s-multicluster",
           "anchor": "AC-261",
-          "ids": ["AC-261",  "AC-287"],
+          "ids": ["AC-261", "AC-287"],
           "jd_signals": ["kubernetes", "k8s", "multi cluster", "multi-cluster", "rbac", "istio", "service mesh", "reliability"],
           "strong_signals": ["multi-cluster", "multi cluster", "istio", "service mesh"]
         },
         {
-          "name": "gpu-operators",
-          "anchor": "AC-258",
-          "ids": ["AC-258",  "AC-288"],
-          "jd_signals": ["kubernetes operator", "operator", "nvidia", "gpu", "kubernetes", "node management"],
-          "strong_signals": ["kubernetes operator", "gpu"]
-        },
-        {
           "name": "linux-console",
           "anchor": "AC-289",
-          "ids": ["AC-289",  "AC-270"],
+          "ids": ["AC-289", "AC-270"],
           "jd_signals": ["linux", "systemd", "web console", "react", "frontend", "front-end"],
           "strong_signals": ["systemd", "web console"]
         },
         {
           "name": "statistics",
           "anchor": "AC-300",
-          "ids": ["AC-300",  "AC-284"],
+          "ids": ["AC-300", "AC-284"],
           "jd_signals": ["statistics", "hypothesis test", "a/b test", "experimentation", "scipy", "statistical"],
           "strong_signals": ["scipy", "hypothesis test"]
         },
         {
           "name": "forecasting",
           "anchor": "AC-299",
-          "ids": ["AC-299",  "AC-301"],
+          "ids": ["AC-299", "AC-301"],
           "jd_signals": ["forecasting", "time series", "arima", "demand forecast", "statistical model"],
           "strong_signals": ["forecasting", "time series", "arima"]
         },
         {
           "name": "forecast-metrics",
           "anchor": "AC-303",
-          "ids": ["AC-303",  "AC-299"],
+          "ids": ["AC-303", "AC-299"],
           "jd_signals": ["forecasting", "pandas", "polars", "metrics", "model evaluation"],
           "strong_signals": ["polars", "forecasting"]
         },
         {
           "name": "rust-desktop-fixes",
           "anchor": "AC-292",
-          "ids": ["AC-292",  "AC-277"],
+          "ids": ["AC-292", "AC-277"],
           "jd_signals": ["rust", "macos", "desktop"],
           "strong_signals": ["rust", "desktop app"]
         },
         {
           "name": "code-tools",
           "anchor": "AC-290",
-          "ids": ["AC-290",  "AC-271"],
+          "ids": ["AC-290", "AC-271"],
           "jd_signals": ["rust", "developer tools", "code analysis", "code search", "ai"],
           "strong_signals": ["rust", "code analysis"]
         },
         {
           "name": "systems-cpp",
           "anchor": "AC-304",
-          "ids": ["AC-304",  "AC-289"],
+          "ids": ["AC-304", "AC-289"],
           "jd_signals": ["c++", "linux", "systemd", "package manage", "systems programming"],
           "strong_signals": ["c++", "systems programming"]
         },
         {
           "name": "aura-events",
           "anchor": "AC-256",
-          "ids": ["AC-256",  "AC-255"],
+          "ids": ["AC-256", "AC-322"],
           "jd_signals": ["mcp", "rust", "serde", "agents", "protocol"],
           "strong_signals": ["serde", "mcp"]
         },
         {
           "name": "intuit-tools",
           "anchor": "AC-272",
-          "ids": ["AC-272",  "AC-290"],
+          "ids": ["AC-272", "AC-290"],
           "jd_signals": ["langgraph", "rust", "python", "developer tools", "testing"],
           "strong_signals": ["langgraph"]
         },
         {
-          "name": "ansible-ci",
+          "name": "python-tooling",
           "anchor": "AC-274",
-          "ids": ["AC-274",  "AC-266"],
-          "jd_signals": ["ansible", "cloud-init", "ci/cd", "infrastructure as code", "linux"],
-          "strong_signals": ["ansible", "cloud-init"]
+          "ids": ["AC-274", "AC-271"],
+          "jd_signals": ["ansible", "python", "linting", "developer tools", "code review", "infrastructure as code"],
+          "strong_signals": ["ansible"]
         },
         {
           "name": "tv-ui",
           "anchor": "AC-291",
-          "ids": ["AC-291",  "AC-278"],
+          "ids": ["AC-291", "AC-278"],
           "jd_signals": ["javascript", "frontend", "front end", "browser", "user interface"],
           "strong_signals": ["frontend engineer", "frontend developer", "ui engineer"]
         },
         {
           "name": "aura-ops",
           "anchor": "AC-294",
-          "ids": ["AC-294",  "AC-253"],
+          "ids": ["AC-294", "AC-253"],
           "jd_signals": ["bash", "shell script", "rust", "sre", "site reliability", "automation"],
           "strong_signals": ["bash", "shell script"]
         },
         {
           "name": "numaflow-ops",
           "anchor": "AC-297",
-          "ids": ["AC-297",  "AC-262"],
+          "ids": ["AC-297", "AC-264"],
           "jd_signals": ["jetstream", "nats", "observability", "stream processing", "kubernetes"],
           "strong_signals": ["jetstream", "observability"]
         },
         {
           "name": "forecast-perf",
           "anchor": "AC-302",
-          "ids": ["AC-302",  "AC-286"],
+          "ids": ["AC-302", "AC-286"],
           "jd_signals": ["pytorch", "forecasting", "time series", "probabilistic", "deep learning"],
           "strong_signals": ["forecasting", "pytorch"]
         },
         {
-          "name": "gpu-operations",
-          "anchor": "AC-309",
-          "ids": ["AC-309",  "AC-288"],
-          "jd_signals": ["kubernetes operator", "nvidia", "gpu", "cli", "golang"],
-          "strong_signals": ["nvidia", "gpu"]
+          "name": "nvidia-cli",
+          "anchor": "AC-259",
+          "ids": ["AC-259", "AC-321"],
+          "jd_signals": ["cli", "command line", "developer tools", "kubernetes", "nvidia", " go ", "go,", "(go", "go)", "/go", "go/", "golang"],
+          "strong_signals": ["nvidia", " go ", "go,", "(go", "go)", "/go", "go/", "golang"]
+        },
+        {
+          "name": "numaflow-webhook",
+          "anchor": "AC-263",
+          "ids": ["AC-263", "AC-264"],
+          "jd_signals": ["kubernetes", "k8s", "webhook", "admission", "streaming", "stream processing", "pulsar"],
+          "strong_signals": ["admission", "webhook", "pulsar"]
         }
       ]
     }

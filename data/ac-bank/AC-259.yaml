@@ -20,7 +20,7 @@ concepts_claimed:
   - kubernetes
 signature_technologies:
   - Go
-  - Cobra
+  - Kubernetes
 fact: >-
   Open source contribution (NVIDIA | Workload Map), draft N2 (was AC-206 before the port) approved 2026-11-16. Never
   employment at NVIDIA.
@@ -29,7 +29,7 @@ oss:
   project: Workload Map
   status: merged
   # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
-  approved: "2026-11-16"
+  approved: "2026-11-26"
   prs:
     - https://github.com/dsx-ai-factory/workload-map/pull/668
     - https://github.com/dsx-ai-factory/workload-map/pull/674
@@ -60,5 +60,5 @@ variants:
     emphasis: go-cli-ux
     strength: 9
     text: >-
-      Updated NVIDIA Workload Map's kli CLI with 3 Go and Cobra features including sort flags and a STATUS column
-      for overridden definitions, covered by 50 test cases.
+      Updated kli, the Go CLI for NVIDIA's Workload Map view of Kubernetes framework workloads, with 3 features such
+      as sorting and override status across 50 test cases.

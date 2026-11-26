@@ -30,7 +30,7 @@ oss:
   project: NVKR
   status: merged
   # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
-  approved: "2026-11-16"
+  approved: "2026-11-26"
   prs:
     - https://github.com/dsx-ai-factory/nvkr/pull/453
     - https://github.com/dsx-ai-factory/nvkr/pull/460
@@ -65,5 +65,5 @@ variants:
     emphasis: go-cli
     strength: 9
     text: >-
-      Added 5 Go CLI features to NVIDIA's NVKR Kubernetes recipe build system, including release inventory diffs and
-      platform filters, covered by 92 test cases against OCI layout fixtures.
+      Added 5 Go CLI commands to NVKR, the build system behind NVIDIA's GPU Kubernetes node images, including a
+      release diff showing exactly what changed across 92 test cases.

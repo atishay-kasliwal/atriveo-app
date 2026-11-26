@@ -7,7 +7,7 @@ export function analyzeVisualLayout(tex) {
   const vspaceNeg = (t.match(/\\vspace\{-/g) || []).length;
   const lineBreaks = (t.match(/\\\\/g) || []).length;
   const expBlocks = (t.match(/\\resumeSubheading\{/g) || []).length;
-  const projBlocks = (t.match(/\\resumeProjectHeading\{/g) || []).length;
+  const projBlocks = (t.match(/\\resumeProjectHeading(?:About)?\{/g) || []).length;
 
   const experienceBullets = [];
   const expSection = t.split("\\section{Experience}")[1]?.split("\\section{Projects}")[0] || "";
