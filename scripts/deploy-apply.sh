@@ -28,6 +28,10 @@ npm run build:apply
 rm -rf "$STAGE"
 mkdir -p "$STAGE"
 cp -R functions "$STAGE/functions"
+# Files outside functions/ that the functions import, at the same relative path (Pages bundles from $STAGE).
+# tests/functions-staged-bundle.test.mjs bundles every function from a copy staged like this.
+FUNCTION_SHARED=(scripts/place.mjs)
+for f in "${FUNCTION_SHARED[@]}"; do mkdir -p "$STAGE/$(dirname "$f")"; cp "$f" "$STAGE/$f"; done
 cp -R dist-apply "$STAGE/dist"
 # Same D1 user database as the main site (accounts are shared; the allowlist decides who gets in).
 D1_ID="$(sed -n 's/^database_id *= *"\(.*\)"/\1/p' wrangler.toml | head -1)"
