@@ -1,9 +1,10 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B8).
 id: AC-306
 role: open-source
-# Retired 2026-11-25 (every open source bullet 9+): open; three small fixes, no measured result.
+# Revived 2026-11-27 (open PRs count fully, Atishay): retired 2026-11-25 as "open; three small fixes, no measured result"; his own work scores 9.
 tracks:
-  - retired
+  - ai-engineer
+  - software-engineer
 fits:
   - ai-engineer
   - software-engineer
@@ -12,7 +13,7 @@ areas:
   - backend
 slot_kind: project
 achievement_theme: oss-aura-b8
-display_order: 54
+display_order: 45
 wow_score: 0.8
 metrics_claimed:
   - "3"
@@ -36,7 +37,7 @@ oss:
 capabilities:
   backend: 80
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Rust
   - AI agents

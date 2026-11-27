@@ -1,9 +1,10 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B16).
 id: AC-314
 role: open-source
-# Retired 2026-11-25 (every open source bullet 9+): open; a parser pattern fix.
+# Revived 2026-11-27 (open PRs count fully, Atishay): retired 2026-11-25 as "open; a parser pattern fix"; his own work scores 9.
 tracks:
-  - retired
+  - software-engineer
+  - forward-deployed
 fits:
   - software-engineer
   - forward-deployed
@@ -12,7 +13,7 @@ areas:
   - platform
 slot_kind: project
 achievement_theme: oss-genie-b16
-display_order: 62
+display_order: 49
 wow_score: 0.8
 metrics_claimed:
   - "3"
@@ -33,7 +34,7 @@ oss:
 capabilities:
   backend: 80
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Python
   - networking
