@@ -53,7 +53,9 @@ function interleave(list) {
 /**
  * One page of Staffing, filtered like Today: view, skipped companies (skip=…), search words (q, every word in the
  * company or title), source, then track (one of TRACKS, all, or mixed: the tracks in turn). Near you first (near=WA,IL&remote=1:
- * your states, then remote / US-wide; Settings → Where I am), then the newest find, then the best score. track_counts are for the view and search before the track filter.
+ * your states, then remote / US-wide; Settings → Where I am), then the newest find, then the best score. near_only=1 keeps only
+ * those near you (Near me). track_counts are for the view, search and Near me before the track filter; near_count is how
+ * many are near you with the view, search and track as they are.
  */
 export async function list(db, params) {
   const skip = params.getAll('skip').map(s => s.trim().toLowerCase()).filter(Boolean);
@@ -68,15 +70,17 @@ export async function list(db, params) {
     .map(j => ({ ...j, track: trackOf(j.title) }))
     .map(j => ({ ...j, near: place ? placeRank(j.location, place) : 0 }))
     .sort((a, b) => b.near - a.near || String(b.first_seen_at).localeCompare(String(a.first_seen_at)) || b.score - a.score);
-  const track_counts = Object.fromEntries([['all', rows.length], ...TRACKS.map(t => [t, rows.filter(j => j.track === t).length])]);
   const track = params.get('track') || 'all';
+  const near_count = rows.filter(j => j.near > 0 && (!TRACKS.includes(track) || j.track === track)).length;
+  if (params.get('near_only') === '1') rows = rows.filter(j => j.near > 0);
+  const track_counts = Object.fromEntries([['all', rows.length], ...TRACKS.map(t => [t, rows.filter(j => j.track === t).length])]);
   if (TRACKS.includes(track)) rows = rows.filter(j => j.track === track);
   else if (track === 'mixed') rows = interleave(rows);
   const total = rows.length;
   const limit = Math.max(1, Math.min(30, Number(params.get('limit')) || 10));
   const offset = Math.max(0, Math.min(100000, Number(params.get('offset')) || 0));
   // The card's resume match (ats-score.json beside the PDF), only for the page shown.
-  return { ok: true, counts, track_counts, total, jobs: rows.slice(offset, offset + limit).map(({ description, fit, near, ...j }) => ({ ...j, resume_match: resumeMatchOf(j.resume), resume_ready: readyBrief(resumeReadyOf(j.resume, fit)) })) };
+  return { ok: true, counts, track_counts, near_count, total, jobs: rows.slice(offset, offset + limit).map(({ description, fit, near, ...j }) => ({ ...j, resume_match: resumeMatchOf(j.resume), resume_ready: readyBrief(resumeReadyOf(j.resume, fit)) })) };
 }
 // Staffing resumes are built by the resume worker, like every other job. A click goes to the fast lane (1001,
 // beside the extension's Tailor); the background sweep queues Recommended jobs just below it.

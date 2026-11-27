@@ -102,6 +102,19 @@ export function usePlace(): Place {
   return useSyncExternalStore(subscribe, currentPlace);
 }
 
+/** "Near me" (Today and Staffing): show only the starred jobs. One choice for both pages, kept in this browser. */
+const NEAR_KEY = "atriveo.nearOnly";
+let nearOnly = (() => { try { return localStorage.getItem(NEAR_KEY) === "1"; } catch { return false; } })();
+const nearListeners = new Set<() => void>();
+export function setNearOnly(on: boolean) {
+  nearOnly = on;
+  try { if (on) localStorage.setItem(NEAR_KEY, "1"); else localStorage.removeItem(NEAR_KEY); } catch { /* only for this visit */ }
+  for (const l of nearListeners) l();
+}
+export function useNearOnly(): boolean {
+  return useSyncExternalStore((l) => { nearListeners.add(l); return () => { nearListeners.delete(l); }; }, () => nearOnly);
+}
+
 /** The state you are in now and how the last check went. */
 export function useHere(): Here {
   return useSyncExternalStore(subscribe, currentHere);

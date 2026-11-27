@@ -167,6 +167,10 @@
 .td-mood.td-here { --td-c: #22c55e; gap: 6px; font-weight: 500; color: var(--muted-fg); }
 .td-mood.td-here.is-on { color: var(--foreground); font-weight: 600; }
 .td-mood.td-here:disabled { cursor: progress; opacity: .7; }
+.td-mood.td-here.is-icon { padding: 0 10px; }
+.td-mood.td-here.is-icon svg { width: 16px; height: 16px; }
+.td-mood.td-near { --td-c: #22c55e; gap: 6px; }
+.td-mood.td-near svg { width: 13px; height: 13px; color: #22c55e; }
 .td-mood:hover, .td-kind:hover { border-color: color-mix(in oklab, var(--td-c, var(--primary)) 60%, var(--border-col)); }
 .td-mood.is-on { border-color: var(--td-c); background: color-mix(in oklab, var(--td-c) 22%, var(--card-bg)); box-shadow: 0 0 0 1px var(--td-c), 0 0 18px -4px color-mix(in oklab, var(--td-c) 70%, transparent); }
 .td-mood.is-on b { color: var(--foreground); }
@@ -657,4 +661,9 @@
 /* The bottom toolbar: a hairline above it, on the page background, not a rounded box. */
 @media (min-width: 760px) {
   .td-page .td-bottom.td-toolbar { border: 0; border-top: 1px solid var(--border-col); border-radius: 0; background: transparent; box-shadow: none; }
+}
+/* Laptop widths: the toolbar keeps one line with the location and Near me buttons. "Near me" stays for screen readers. */
+@media (min-width: 760px) and (max-width: 1399px) {
+  .td-page .td-search { flex-basis: 180px; width: 180px; }
+  .td-mood.td-near .td-near-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }

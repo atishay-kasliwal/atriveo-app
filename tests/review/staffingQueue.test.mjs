@@ -101,6 +101,17 @@ test('the workspace filters like Today: track, Mixed in turn, every search word,
   assert.deepEqual(await ids('view=recommended&near=WA,IL,MI&remote=0'), ['swe-wa', 'swe-new', 'ds', 'ai', 'swe-old'], 'remote off: only your states lead');
   assert.deepEqual(await ids('view=recommended'), ['swe-new', 'ds', 'ai', 'swe-wa', 'swe-old'], 'no place asked for: newest first, North Carolina no longer leads');
   assert.deepEqual(await ids('view=recommended&near=WA,IL,MI&remote=1&here=NC'), ['ds', 'swe-wa', 'swe-new', 'ai', 'swe-old'], 'where you are now (NC) comes before your saved states');
+  // Near me: only the ones near you; the counts say how many with the other filters as they are.
+  const nearMe = await list(db, new URLSearchParams(`view=recommended&${near}&near_only=1`));
+  assert.deepEqual(nearMe.jobs.map(j => j._id), ['swe-wa', 'swe-new', 'ai', 'swe-old'], 'Durham, NC is not near you');
+  assert.equal(nearMe.total, 4); assert.equal(nearMe.near_count, 4);
+  assert.equal(nearMe.track_counts.all, 4); assert.equal(nearMe.track_counts['data-science'], 0);
+  const nearSwe = await list(db, new URLSearchParams(`view=recommended&track=software-engineer&${near}`));
+  assert.equal(nearSwe.near_count, 3, 'near_count follows the track');
+  assert.equal(nearSwe.total, 3);
+  const nearNoRemote = await list(db, new URLSearchParams('view=recommended&near=WA&remote=0&near_only=1'));
+  assert.deepEqual(nearNoRemote.jobs.map(j => j._id), ['swe-wa']);
+  assert.equal((await list(db, new URLSearchParams('view=recommended&near_only=1'))).total, 0, 'no place asked for: nothing is near');
   const page = await list(db, new URLSearchParams(`view=recommended&limit=2&offset=2&${near}`));
   assert.deepEqual(page.jobs.map(j => j._id), ['ai', 'swe-old']);
   assert.equal(page.jobs[0].near, undefined, 'the rank stays on the server');

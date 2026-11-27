@@ -270,6 +270,40 @@ test('Settings → Where I am → Right now: use this device, then stop using it
   } finally { await f.close(); PLACE = null; }
 });
 
+test('Near me shows only the starred cards (button or N), counts follow the filters, and Show everything turns it off', async () => {
+  const saved = FILLABLE.fillable.map((q) => ({ ...q }));
+  Object.assign(FILLABLE.fillable.find((q) => q.id === 'c1'), { location: 'Chicago, IL' });
+  Object.assign(FILLABLE.fillable.find((q) => q.id === 'd1'), { location: 'Raleigh, NC' });
+  // The three ready rows say 'NY': not near (saved states WA, IL, MI; remote on).
+  const f = await fixture(); const { page, errors } = f;
+  try {
+    await page.goto(`${f.base}/`);
+    await page.locator('.td-card').nth(4).waitFor();
+    const pill = page.getByRole('button', { name: /^Near me/ });
+    assert.equal((await pill.textContent()).trim(), 'Near me1');
+    await pill.click();
+    assert.equal(await pill.getAttribute('aria-pressed'), 'true');
+    assert.deepEqual(await page.locator('.td-card .td-id strong').allTextContents(), ['Anthropic'], 'only the Chicago card');
+    assert.match(await page.locator('.td-mood.is-all').textContent(), /All\s*1/, 'the All count follows Near me');
+    assert.equal(await page.evaluate(() => localStorage.getItem('atriveo.nearOnly')), '1', 'remembered');
+    await page.keyboard.press('n');
+    assert.equal(await pill.getAttribute('aria-pressed'), 'false');
+    assert.equal(await page.locator('.td-card').count(), 5);
+    await page.keyboard.press('N');
+    await page.getByPlaceholder(/Search/).fill('figma');
+    await page.getByText('Nothing near you for this filter.').waitFor();
+    assert.match(await page.locator('.td-empty').textContent(), /Near me counts WA, IL, MI and remote \/ US-wide jobs/);
+    await page.getByPlaceholder(/Search/).fill('');
+    await page.keyboard.press('Escape');
+    await page.locator('.td-card').first().waitFor();
+    await page.getByPlaceholder(/Search/).fill('zzz-none');
+    await page.getByRole('button', { name: 'Show everything' }).click();
+    assert.equal(await pill.getAttribute('aria-pressed'), 'false', 'Show everything turns Near me off');
+    assert.equal(await page.locator('.td-card').count(), 5);
+    assert.deepEqual(errors, []);
+  } finally { await f.close(); FILLABLE.fillable.splice(0, FILLABLE.fillable.length, ...saved); }
+});
+
 test('LinkedIn postings show as On LinkedIn cards: the button opens the posting, Discard records it as not interested', async () => {
   LINKEDIN = PENDO;
   const f = await fixture(); const { page, calls } = f;
