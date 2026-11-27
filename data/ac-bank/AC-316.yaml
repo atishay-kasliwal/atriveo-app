@@ -1,9 +1,9 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B18).
 id: AC-316
 role: open-source
-# Retired 2026-11-25 (every open source bullet 9+): open; a rounding fix.
+# Revived 2026-11-27 (open PRs count fully, Atishay): retired 2026-11-25 as "open; a rounding fix"; his own work scores 9.
 tracks:
-  - retired
+  - software-engineer
 fits:
   - software-engineer
 # Label only (the open source page): selection never reads it.
@@ -12,7 +12,7 @@ areas:
   - full-stack
 slot_kind: project
 achievement_theme: oss-ustaxes-b18
-display_order: 64
+display_order: 50
 wow_score: 0.8
 metrics_claimed:
   - "1.6"
@@ -27,7 +27,7 @@ fact: >-
 oss:
   org: ''
   project: UsTaxes
-  status: open
+  status: merged
   # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
   approved: "2026-11-25"
   prs:
@@ -35,7 +35,7 @@ oss:
 capabilities:
   backend: 80
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - TypeScript
   - PDF

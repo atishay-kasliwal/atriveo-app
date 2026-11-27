@@ -1,5 +1,5 @@
-version: 74
-updated_at: "2026-11-26"
+version: 75
+updated_at: "2026-11-27"
 note: "Harvard action verbs and unique resume openings; confirmed SBU/Wake Forest technology context. Resume scope remains Atriveo+Insurance."
 
 user_update: "Added 12 user-provided Deloitte production ML and data-workflow variants; existing variants retained."
@@ -22,3 +22,4 @@ open_source_corrections: "v70: open source bullets checked against GitHub (140 P
 open_source_round_two: "v71: 31 more open source bullets AC-290..AC-320 (9 merged, 22 open), each limited to the tracks it fits; areas labels (backend, full-stack, frontend, platform) on every software bullet for the open source page, never read by selection; the DS master prints SciPy, statsmodels and neuralforecast instead of the radiomics project (2026-11-25, Atishay)."
 open_source_nine: "v73 (v72 was an unapproved change, reverted): every live open source bullet scores 9+ on the bank rubric (impact 3, specificity 2, credibility 2, clarity 2, relevance 1); an open pull request earns half the credibility, so it stays only with a measured result. 10 reworded from facts already in their PRs, 24 retired (reasons in each file), 4 at 10; display_order ranks them; 32 story packages. Data analytics never takes open source into the second slot (no_jd_selected)."
 open_source_companies: "v74 (2026-11-26, Atishay): company projects. When both open source bullets belong to one company project (OPEN-SOURCE.yaml company_projects: NVIDIA, Mezmo, Red Hat, Numaflow), the resume prints 'NVIDIA (Open Source) | Go, Kubernetes, Cobra', an italic line saying what the project is, and 2 bullets. Reworded AC-253/258/259/262/264/267/268 (what the project is and what he did, no PR counts); AC-321 (nodewright, from AC-288 + AC-309), AC-322 (AURA agent safety, from AC-255 + AC-305), AC-323 (mapt runner fixes, from AC-265 + AC-266); those five retired. Open PRs count fully: open_penalty 0 and every live open source bullet in tier A. Masters: NVIDIA on SWE and FDE, Mezmo on AI; DS unchanged; DA none."
+open_source_revived: "v75 (2026-11-27, Atishay): with open PRs counting fully, 7 bullets retired on 2026-11-25 only for being open or unmeasured score 9 and come back: AC-260 (NVIDIA NVKE, pairs with AC-321 as an NVIDIA project), AC-306 (Mezmo AURA, with AC-322), AC-307 (Intuit StuntDouble, with AC-290), AC-308 (Kiali MCP, with AC-261), AC-310 (egui, with AC-276), AC-314 (Cisco Genie, with AC-274), AC-316 (UsTaxes, merged, with AC-291). 48 live, 23 retired."

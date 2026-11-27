@@ -33,8 +33,8 @@ test("open source takes the second slot only when the JD clearly matches it", ()
 
 test("every open source package pairs two bank entries with unique verbs inside the package", () => {
   const byId = new Map(oss.map((a) => [a.id, a]));
-  assert.equal(oss.length, 41);
-  assert.equal(all.filter(retired).length, 30);
+  assert.equal(oss.length, 48);
+  assert.equal(all.filter(retired).length, 23);
   // Every live open source bullet scores 9+ (bank rubric), and the ranking follows the score (2026-11-25).
   assert.deepEqual(oss.filter((a) => !(a.strength.recruiter >= 9 && a.variants[0].strength >= 9)).map((a) => a.id), []);
   const ranked = [...oss].sort((a, b) => a.display_order - b.display_order);

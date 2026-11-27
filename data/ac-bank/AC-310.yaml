@@ -1,9 +1,9 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B12).
 id: AC-310
 role: open-source
-# Retired 2026-11-25 (every open source bullet 9+): open; four small widget fixes.
+# Revived 2026-11-27 (open PRs count fully, Atishay): retired 2026-11-25 as "open; four small widget fixes"; his own work scores 9.
 tracks:
-  - retired
+  - software-engineer
 fits:
   - software-engineer
 # Label only (the open source page): selection never reads it.
@@ -11,7 +11,7 @@ areas:
   - backend
 slot_kind: project
 achievement_theme: oss-egui-b12
-display_order: 58
+display_order: 48
 wow_score: 0.8
 metrics_claimed:
   - "4"
@@ -36,7 +36,7 @@ oss:
 capabilities:
   backend: 80
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Rust
   - GUI

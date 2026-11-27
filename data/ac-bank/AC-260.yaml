@@ -1,9 +1,10 @@
 # Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
 id: AC-260
 role: open-source
-# Retired 2026-11-25 (every open source bullet 9+): open; skipped writes and logging, no measured result.
+# Revived 2026-11-27 (open PRs count fully, Atishay): retired 2026-11-25 as "open; skipped writes and logging, no measured result"; his own work scores 9.
 tracks:
-  - retired
+  - software-engineer
+  - forward-deployed
 fits:
   - software-engineer
   - forward-deployed
@@ -13,7 +14,7 @@ areas:
   - platform
 slot_kind: project
 achievement_theme: k8s-controller
-display_order: 8
+display_order: 44
 wow_score: 0.8
 metrics_claimed:
   - changes_2
@@ -41,7 +42,7 @@ capabilities:
   cloud: 90
   data: 60
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Go
   - Golang

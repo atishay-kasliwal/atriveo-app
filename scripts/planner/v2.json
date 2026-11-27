@@ -312,7 +312,7 @@
         "wow": 0.9,
         "recruiter": 1.0
       },
-      "ac_ids": ["AC-253", "AC-254", "AC-256", "AC-258", "AC-259", "AC-261", "AC-262", "AC-263", "AC-264", "AC-267", "AC-268", "AC-269", "AC-270", "AC-271", "AC-272", "AC-274", "AC-276", "AC-277", "AC-278", "AC-279", "AC-282", "AC-283", "AC-284", "AC-285", "AC-286", "AC-287", "AC-289", "AC-290", "AC-291", "AC-292", "AC-294", "AC-297", "AC-299", "AC-300", "AC-301", "AC-302", "AC-303", "AC-304", "AC-321", "AC-322", "AC-323"],
+      "ac_ids": ["AC-253", "AC-254", "AC-256", "AC-258", "AC-259", "AC-260", "AC-261", "AC-262", "AC-263", "AC-264", "AC-267", "AC-268", "AC-269", "AC-270", "AC-271", "AC-272", "AC-274", "AC-276", "AC-277", "AC-278", "AC-279", "AC-282", "AC-283", "AC-284", "AC-285", "AC-286", "AC-287", "AC-289", "AC-290", "AC-291", "AC-292", "AC-294", "AC-297", "AC-299", "AC-300", "AC-301", "AC-302", "AC-303", "AC-304", "AC-306", "AC-307", "AC-308", "AC-310", "AC-314", "AC-316", "AC-321", "AC-322", "AC-323"],
       "story_packages": [
         {
           "name": "mezmo",
@@ -523,6 +523,55 @@
           "ids": ["AC-263", "AC-264"],
           "jd_signals": ["kubernetes", "k8s", "webhook", "admission", "streaming", "stream processing", "pulsar"],
           "strong_signals": ["admission", "webhook", "pulsar"]
+        },
+        {
+          "name": "nvidia-engine",
+          "anchor": "AC-260",
+          "ids": ["AC-260", "AC-321"],
+          "jd_signals": ["nvidia", "gpu", "kubernetes", "kubernetes operator", "controller", "bare metal", "golang", " go ", "go,", "(go", "go)", "/go", "go/"],
+          "strong_signals": ["nvidia", "gpu"]
+        },
+        {
+          "name": "mezmo-reliability",
+          "anchor": "AC-306",
+          "ids": ["AC-306", "AC-322"],
+          "jd_signals": ["rust", "ai agent", "agents", "agentic", "reliability", "slack", "llm"],
+          "strong_signals": ["ai agent", "agentic", "rust"]
+        },
+        {
+          "name": "intuit-agents",
+          "anchor": "AC-307",
+          "ids": ["AC-307", "AC-290"],
+          "jd_signals": ["langgraph", "ai agent", "agents", "testing", "python", "rust", "developer tools"],
+          "strong_signals": ["langgraph"]
+        },
+        {
+          "name": "kiali-mcp",
+          "anchor": "AC-308",
+          "ids": ["AC-308", "AC-261"],
+          "jd_signals": ["mcp", "prometheus", "kubernetes", "istio", "service mesh", "observability", "golang", " go ", "go,", "(go", "go)", "/go", "go/"],
+          "strong_signals": ["mcp", "prometheus", "istio"]
+        },
+        {
+          "name": "egui",
+          "anchor": "AC-310",
+          "ids": ["AC-310", "AC-276"],
+          "jd_signals": ["rust", "gui framework", "desktop", "user interface", "ui testing"],
+          "strong_signals": ["rust", "gui framework"]
+        },
+        {
+          "name": "network-automation",
+          "anchor": "AC-314",
+          "ids": ["AC-314", "AC-274"],
+          "jd_signals": ["network automation", "networking", "cisco", "ansible", "python", "parsers"],
+          "strong_signals": ["cisco", "network automation", "ansible"]
+        },
+        {
+          "name": "ustaxes-ts",
+          "anchor": "AC-316",
+          "ids": ["AC-316", "AC-291"],
+          "jd_signals": ["typescript", "javascript", "frontend", "front end", "react", "pdf"],
+          "strong_signals": ["typescript", "frontend engineer", "front end engineer"]
         }
       ]
     }
