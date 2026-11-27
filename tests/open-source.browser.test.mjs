@@ -45,11 +45,15 @@ async function open(viewport, view = sample()) {
     if (p.startsWith('/resume-builder/oss-')) {
       const body = route.request().postDataJSON(); posts.push({ op: p.split('/').pop(), body });
       if (p.endsWith('oss-sync')) { syncs += 1; return route.fulfill({ json: { ok: true, syncing: true } }); }
-      if (p.endsWith('oss-check')) return route.fulfill({ json: { ok: true, issues: ['too short (3 words, min 12)'] } });
+      if (p.endsWith('oss-check')) return route.fulfill({ json: { ok: true, issues: String(body.text).startsWith('Simplified') ? [] : ['too short (3 words, min 12)'] } });
       const next = structuredClone(view);
       const pr = next.prs.find((x) => x.id === body.id);
       if (p.endsWith('oss-save') && pr) { if (body.skip) pr.coverage = 'skipped'; if (body.rating) { pr.rating = body.rating; pr.ratedByYou = true; } }
       if (p.endsWith('oss-delete') && pr) pr.coverage = 'deleted';
+      if (p.endsWith('oss-approve') && pr) {
+        Object.assign(pr, { coverage: 'covered', bullets: ['AC-U001'], text: body.text });
+        next.bullets.push({ id: 'AC-U001', source: 'bank', org: '', project: 'thing', text: body.text, fits: body.fits, areas: [], tech: [], prs: [pr.id], shared: false, score: 7, rating: 'good', merged: true, stars: 15000, ready: true, pending: true, company: null, pair: body.pair });
+      }
       if (p.endsWith('oss-add')) return route.fulfill({ status: 400, json: { ok: false, error: 'That pull request is already on the page.' } });
       view = next;
       return route.fulfill({ json: next });
@@ -168,6 +172,49 @@ test('phone: one column, nothing wider than the screen, the detail is a full-scr
     assert.deepEqual([box.x, box.width], [0, 390]);
     await page.locator('.os-detail').getByRole('button', { name: 'Close' }).click();
     for (const name of ['By resume', 'Analytics']) { await page.getByRole('button', { name, exact: true }).click(); assert.equal(await wide(), true, name); await shot(`phone-${name}`); }
+    assert.deepEqual(errors, []);
+  } finally { await close(); }
+});
+
+test('this week and approving: the strip opens a card, approve needs the rules, a partner and a second click; skip asks why', async () => {
+  const view = sample();
+  view.audit = { at: '2026-11-27T10:00:00Z', fix: [{ id: 'AC-258', issue: 'scores 8: reword it' }], revive: [], draft: [{ pr: 'new/thing#1', title: 'A new merged change', state: 'MERGED', rating: 'good', score: 7 }], decidedChanged: [], watch: 2 };
+  const { page, errors, posts, shot, close } = await open({ width: 1440, height: 900 }, view);
+  try {
+    const week = page.locator('.os-week');
+    await week.getByText('2 to decide').waitFor();
+    assert.equal(await week.locator('.os-wk').count(), 2);
+    await week.locator('.os-wk', { hasText: 'new/thing#1' }).click();
+    const detail = page.locator('.os-detail');
+    await detail.locator('h2', { hasText: 'A new merged change' }).waitFor();
+    const approve = detail.getByRole('button', { name: 'Approve', exact: true });
+    assert.equal(await approve.isDisabled(), true, 'nothing written yet');
+    await detail.locator('textarea').fill('Simplified the new thing in Go so a stale cache clears in 1 step instead of 3, covered by 12 tests.');
+    await detail.getByText('Passes every bullet rule').waitFor();
+    assert.equal(await approve.isDisabled(), true, 'no resume picked yet');
+    const fits = detail.getByRole('group', { name: 'Fits' });
+    await fits.getByRole('button', { name: 'SWE', exact: true }).click();
+    assert.equal(await fits.getByRole('button', { name: 'DA', exact: true }).isDisabled(), true, 'data analytics never prints open source');
+    assert.ok((await detail.getByLabel('Prints with').locator('option').count()) > 5);
+    await shot('approve');
+    await approve.click();
+    await detail.getByText('Approve only if it honestly scores 9').waitFor();
+    assert.equal(posts.filter((x) => x.op === 'oss-approve').length, 0, 'the first click only asks');
+    await detail.getByRole('button', { name: 'Yes, approve it' }).click();
+    await page.locator('.os-detail').getByText('You approved this here').waitFor();
+    const sent = posts.find((x) => x.op === 'oss-approve').body;
+    assert.equal(sent.id, 'new/thing#1');
+    assert.deepEqual(sent.fits, ['SWE']);
+    assert.match(sent.pair, /^AC-\d+$/);
+    assert.ok(await page.locator('.os-detail').getByRole('button', { name: 'Take it back' }).isVisible());
+    // Skip asks why, and sends the reason with it.
+    await page.locator('.os-card', { hasText: 'new/thing#2' }).click();
+    await page.locator('.os-detail').getByRole('button', { name: 'Skip', exact: true }).click();
+    await page.locator('.os-detail').getByLabel('Why no bullet').fill('docs only');
+    await page.locator('.os-detail').getByRole('button', { name: 'Skip it' }).click();
+    await page.waitForFunction(() => true);
+    const skip = posts.filter((x) => x.op === 'oss-save').at(-1).body;
+    assert.deepEqual({ id: skip.id, skip: skip.skip, why: skip.why }, { id: 'new/thing#2', skip: true, why: 'docs only' });
     assert.deepEqual(errors, []);
   } finally { await close(); }
 });

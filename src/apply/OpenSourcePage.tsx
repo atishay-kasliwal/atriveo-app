@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "./review-pages.css";
 import "./open-source.css";
 import { Analytics, LevelBar, ReadyPie, RoleCharts } from "./OpenSourceCharts";
-import { FITS, LEVELS, RATING, ROLES, SEGMENTS, call, countLevels, dateOf, day, heading, pool, prsOf, rank, remember, roleLabel, stars, suggest, verb, when, whose, type Bullet, type Coverage, type Pr, type Rating, type View } from "./openSource";
+import { FITS, LEVELS, RATING, ROLES, SEGMENTS, call, countLevels, dateOf, day, heading, partnersFor, pool, prsOf, rank, remember, roleLabel, stars, suggest, verb, weekItems, when, whose, type Audit, type Bullet, type Coverage, type Pr, type Rating, type View } from "./openSource";
 
 // Open source (/open-source): your pull requests in other people's repositories, synced from GitHub, next to the bank
 // bullets that cite them. Board: what is covered and what is not. By resume: the section each general resume could
@@ -44,8 +44,16 @@ function Detail({ p, view, onView, onClose, pie }: { p: Pr; view: View; onView: 
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ text: string; bad?: boolean } | null>(null);
   const [confirm, setConfirm] = useState(false);
+  const [approving, setApproving] = useState(false);
+  const [skipping, setSkipping] = useState(false);
+  const [why, setWhy] = useState(p.why);
+  const partners = useMemo(() => partnersFor(view, p, text), [view, p, text]);
+  const [pair, setPair] = useState("");
+  const pairId = partners.some((b) => b.id === pair) ? pair : partners[0]?.id ?? "";
   const inBank = p.bullets.length > 0;
+  const mine = view.bullets.find((b) => p.bullets.includes(b.id) && b.pending);
   const closed = p.state === "CLOSED";
+  const canApprove = !inBank && !closed && !!text.trim() && issues !== null && issues.length === 0 && fits.length > 0 && !fits.includes("DA") && !!pairId;
   // The bank's bullet rules on what you type, a moment after you stop (nothing saved).
   useEffect(() => {
     setIssues(null);
@@ -55,7 +63,7 @@ function Detail({ p, view, onView, onClose, pie }: { p: Pr; view: View; onView: 
   }, [text, inBank]);
   const run = async (what: () => Promise<View>, done: string) => {
     setBusy(true); setNote(null);
-    try { onView(await what()); setNote({ text: done }); } catch (e) { setNote({ text: String((e as Error).message || e), bad: true }); } finally { setBusy(false); setConfirm(false); }
+    try { onView(await what()); setNote({ text: done }); } catch (e) { setNote({ text: String((e as Error).message || e), bad: true }); } finally { setBusy(false); setConfirm(false); setApproving(false); setSkipping(false); }
   };
   const PARTS: Array<[string, "recognition" | "size" | "proof" | "status", number]> = [["Recognition", "recognition", 3], ["Size", "size", 3], ["Proof", "proof", 2], ["Status", "status", 2]];
   return (
@@ -71,13 +79,24 @@ function Detail({ p, view, onView, onClose, pie }: { p: Pr; view: View; onView: 
           <option value="auto">{p.autoRating ? `${RATING[p.autoRating]}, computed` : "Not rated yet"}</option>
           {LEVELS.map((l) => <option key={l} value={l}>{RATING[l]}, set by you</option>)}
         </select></label> : null}
-      {inBank ? <div className="os-field"><span>In the bank as {p.bullets.join(", ")} · <Link to="/bank">edit on Bank</Link></span><p className="os-wording">{p.text}</p></div>
+      {inBank ? <div className="os-field"><span>In the bank as {p.bullets.join(", ")} · <Link to="/bank">edit on Bank</Link></span><p className="os-wording">{p.text}</p>
+        {mine ? <p className="os-note">You approved this here. It prints from the next resume build, paired with {mine.pair}; the weekly export puts it in git.</p> : null}</div>
         : <label className="os-field">Resume bullet<textarea value={text} readOnly={closed} rows={4} placeholder="Write the bullet, or leave it empty" onChange={(e) => setText(e.target.value)} /></label>}
       {inBank ? null : issues?.length ? <ul className="os-issues">{issues.map((i) => <li key={i}>{i}</li>)}</ul> : issues ? <p className="os-ok">Passes every bullet rule</p> : null}
-      <div className="os-field" role="group" aria-label="Fits">Fits<div className="os-pills">{FITS.map((f) => <button key={f} type="button" className="os-pill" disabled={inBank} aria-pressed={fits.includes(f)} onClick={() => setFits(fits.includes(f) ? fits.filter((x) => x !== f) : [...fits, f])}>{f}</button>)}</div></div>
+      <div className="os-field" role="group" aria-label="Fits">Fits<div className="os-pills">{FITS.map((f) => <button key={f} type="button" className="os-pill" disabled={inBank || f === "DA"} title={f === "DA" ? "Data analytics resumes never print open source" : undefined} aria-pressed={fits.includes(f)} onClick={() => setFits(fits.includes(f) ? fits.filter((x) => x !== f) : [...fits, f])}>{f}</button>)}</div></div>
+      {!inBank && !closed ? <label className="os-field">Prints with
+        <select value={pairId} onChange={(e) => setPair(e.target.value)}>
+          {partners.slice(0, 40).map((b) => <option key={b.id} value={b.id}>{b.id} · {b.org && !b.project.includes(b.org) ? `${b.org} ${b.project}` : b.project} · {b.text.slice(0, 70)}…</option>)}
+        </select>
+        <span className="os-note">The resume prints open source two at a time. A bullet from the same company makes it a company project.</span></label> : null}
+      {skipping ? <label className="os-field">Why no bullet (kept as the decision)<input value={why} maxLength={200} placeholder="e.g. docs only, a one line fix" onChange={(e) => setWhy(e.target.value)} /></label> : null}
+      {approving ? <p className="os-warn">Approve only if it honestly scores 9 or more and every number comes from the pull request itself.</p> : null}
       <div className="os-acts">
         <button type="button" className="os-btn is-main" disabled={busy || closed} onClick={() => run(() => call<View>("oss-save", { id: p.id, rating, ...(inBank ? {} : { text, fits }) }), "Saved")}>Save</button>
-        {!closed ? <button type="button" className="os-btn" disabled={busy} onClick={() => run(() => call<View>("oss-save", { id: p.id, skip: p.coverage !== "skipped" }), p.coverage === "skipped" ? "Restored" : "Skipped")}>{p.coverage === "skipped" ? "Restore" : "Skip"}</button> : null}
+        {!inBank && !closed ? <button type="button" className="os-btn is-main" disabled={busy || !canApprove} title={canApprove ? "Into the bank, with today's date" : "Needs a bullet that passes every rule, a resume it fits and the bullet it prints with"}
+          onClick={() => (approving ? run(() => call<View>("oss-approve", { id: p.id, text, fits, pair: pairId }), "Approved. It prints from the next build.") : setApproving(true))}>{approving ? "Yes, approve it" : "Approve"}</button> : null}
+        {mine ? <button type="button" className="os-btn" disabled={busy} onClick={() => run(() => call<View>("oss-unapprove", { id: p.id }), "Taken back")}>Take it back</button> : null}
+        {!closed && !inBank ? <button type="button" className="os-btn" disabled={busy} onClick={() => (p.coverage === "skipped" ? run(() => call<View>("oss-save", { id: p.id, skip: false }), "Restored") : skipping ? run(() => call<View>("oss-save", { id: p.id, skip: true, why }), "Skipped") : setSkipping(true))}>{p.coverage === "skipped" ? "Restore" : skipping ? "Skip it" : "Skip"}</button> : null}
         {p.coverage === "deleted" ? <button type="button" className="os-btn" disabled={busy} onClick={() => run(() => call<View>("oss-delete", { id: p.id, restore: true }), "Back on the page")}>Bring back</button>
           : <button type="button" className="os-btn is-danger" disabled={busy} onClick={() => (confirm ? run(() => call<View>("oss-delete", { id: p.id }), "Deleted") : setConfirm(true))}>{confirm ? "Delete it?" : "Delete"}</button>}
         {note ? <span className={note.bad ? "os-warn" : "os-ok"} role={note.bad ? "alert" : "status"}>{note.text}</span> : null}
@@ -108,7 +127,7 @@ function ByResume({ view, role, setRole, drafts, setDrafts }: { view: View; role
   const weak = lines.filter((b) => !b.ready);
   const keep = (ids: string[] | null) => { const next = { ...picks }; if (ids) next[role] = ids; else delete next[role]; setPicks(next); remember.set("os-picks", next); };
   const use = (id: string) => { const ids = lines.map((b) => b.id); ids[lines.length < 3 ? lines.length : at] = id; keep(ids); };
-  const h = heading(lines);
+  const h = heading(lines, view.companies);
   const message = clash ? `Two bullets start with ${clash}. Swap one.` : weak.length ? `${weak.map((b) => b.id).join(", ")} is ${!weak[0].merged ? "still an open PR" : weak[0].shared ? "shared work" : "not rated Good"}.` : isMaster ? "This is what your master prints today." : isBest ? "Suggested three, highest rated with different opening verbs." : "Your own selection, saved in this browser.";
   const others = list.filter((b) => !lines.includes(b));
   const shown = others.filter((b) => show === "all" || (show === "ready" ? b.ready : !b.merged)).sort((a, b) => Number(b.ready) - Number(a.ready) || rank(role)(a, b));
@@ -116,7 +135,7 @@ function ByResume({ view, role, setRole, drafts, setDrafts }: { view: View; role
   const pick = (r: string) => { setRole(r); setSlot(2); setHit(""); };
   useEffect(() => { if (hit) document.getElementById(`os-b-${hit}`)?.scrollIntoView({ block: "nearest" }); }, [hit, show]);
   const copy = async () => {
-    try { await navigator.clipboard.writeText([`${h.name}${h.tools ? ` | ${h.tools}` : ""}`, ...lines.map((b) => `• ${b.text}`)].join("\n")); setCopied("Copied"); }
+    try { await navigator.clipboard.writeText([`${h.name}${h.tools ? ` | ${h.tools}` : ""}`, ...(h.about ? [h.about] : []), ...lines.map((b) => `• ${b.text}`)].join("\n")); setCopied("Copied"); }
     catch { const r = document.createRange(); if (sheet.current) { r.selectNodeContents(sheet.current); const s = getSelection(); s?.removeAllRanges(); s?.addRange(r); } setCopied("Selected, press copy"); }
     setTimeout(() => setCopied(""), 1600);
   };
@@ -131,7 +150,7 @@ function ByResume({ view, role, setRole, drafts, setDrafts }: { view: View; role
         <div className="os-rmain">
           <div className="os-rleft">
             <div className="os-rhead"><h2>{roleLabel(role)}</h2><span>{verdict}</span></div>
-            {lines.length ? <div className="os-sheet" ref={sheet}><div className="os-sec">Projects</div><div className="os-ph"><span><b>{h.name}</b>{h.tools ? ` | ${h.tools}` : ""}</span><span>November 2026 – Present</span></div>
+            {lines.length ? <div className="os-sheet" ref={sheet}><div className="os-sec">Projects</div><div className="os-ph"><span><b>{h.name}</b>{h.tools ? ` | ${h.tools}` : ""}</span><span>November 2026 – Present</span></div>{h.about ? <div className="os-about">{h.about}</div> : null}
               {lines.map((b, i) => <button key={b.id} type="button" className="os-slot" aria-pressed={i === at} onClick={() => setSlot(i)}><span>•</span><span>{b.text}</span><span className="os-slot-t">{i === at ? "Replacing this" : ""}</span></button>)}</div> : <p className="os-note">Nothing is ready yet. Pick one on the right.</p>}
             <div className="os-acts">
               {lines.length ? <button type="button" className="os-btn is-main" onClick={() => void copy()}>{copied || "Copy section"}</button> : null}
@@ -248,6 +267,7 @@ export default function OpenSourcePage({ header }: { header?: React.ReactNode })
         {top}
         {tab === "analytics" ? <Analytics view={view} drafts={drafts} setDrafts={setDrafts} onRole={build} /> : tab === "resume" ? <ByResume view={view} role={role} setRole={setRole} drafts={drafts} setDrafts={setDrafts} /> : (
           <>
+            <WeekStrip audit={view.audit} onPick={(id) => { setStatus("all"); setLevel("all"); setQuery(""); setPie(null); if (view.prs.some((p) => p.id === id)) setSelected(id); }} />
             <div className="os-filters">
               <Pills label="Status" value={status} onChange={setStatus} items={[["all", "All"], ["MERGED", "Merged"], ["OPEN", "Open"], ["CLOSED", "Closed"]]} />
               <Pills label="Rating" value={level} onChange={setLevel} items={[["all", "Any rating"], ["impressive", "Impressive"], ["good", "Good"], ["average", "Average"]]} />
@@ -274,4 +294,27 @@ export default function OpenSourcePage({ header }: { header?: React.ReactNode })
 function Numbers({ view }: { view: View }) {
   const prs = view.prs.filter((p) => p.coverage !== "deleted"), merged = prs.filter((p) => p.state === "MERGED");
   return <div className="os-nums"><span><b>{merged.length}</b> merged</span><span><b>{prs.filter((p) => p.state === "OPEN").length}</b> open</span><span><b>{merged.filter((p) => p.coverage === "covered").length}</b> of {merged.length} merged in the bank</span><span><b>{prs.filter((p) => p.rating === "impressive" && p.coverage === "todo").length}</b> impressive, not covered</span></div>;
+}
+
+/** The weekly check, kept with every sync: what to decide now. A pull request opens its card; a bullet links to Bank. */
+function WeekStrip({ audit, onPick }: { audit: Audit | null | undefined; onPick: (id: string) => void }) {
+  const [open, setOpen] = useState(() => remember.get("os-week", true));
+  if (!audit) return null;
+  const n = weekItems(audit);
+  const toggle = () => { setOpen(!open); remember.set("os-week", !open); };
+  const pr = (x: { pr: string; title: string }, tag: string) => <button key={`${tag}:${x.pr}`} type="button" className="os-wk" onClick={() => onPick(x.pr)}><span className="os-tag">{tag}</span><span className="os-mono">{x.pr}</span><span>{x.title}</span></button>;
+  const bank = (x: { id: string; issue: string }, tag: string) => <Link key={`${tag}:${x.id}`} className="os-wk" to="/bank"><span className="os-tag">{tag}</span><span className="os-mono">{x.id}</span><span>{x.issue}</span></Link>;
+  return (
+    <section className={`os-week${n ? "" : " is-clear"}`} aria-label="This week">
+      <button type="button" className="os-week-h" aria-expanded={open} onClick={toggle}>
+        <b>This week</b><span>{n ? `${n} to decide` : "Nothing to decide"}</span><span className="os-note">checked {day(audit.at)}{audit.watch ? `, ${audit.watch} open without a bullet` : ""}</span><span className="os-grow" /><span>{open ? "Hide" : "Show"}</span>
+      </button>
+      {open && n ? <div className="os-week-items">
+        {audit.draft.map((x) => pr(x, "Merged, no bullet"))}
+        {audit.fix.map((x) => bank(x, "Fix"))}
+        {audit.revive.map((x) => bank(x, "Bring back"))}
+        {audit.decidedChanged.map((x) => pr(x, "Decision to recheck"))}
+      </div> : null}
+    </section>
+  );
 }

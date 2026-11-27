@@ -8,6 +8,7 @@ import { generateResume } from "./ac-pipeline.mjs";
 import { retrieveCandidateAcs } from "./ac-embeddings.mjs";
 import { warmStartBoosts } from "./ac-case-memory.mjs";
 import { trackPlannerOverrides } from "./ac-tracks.mjs";
+import { withOverlayOssPackages } from "./ac-bank-overlay.mjs";
 
 const PLANNER_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "planner");
 
@@ -20,7 +21,8 @@ export function listPlanners() {
 export function loadPlannerConfig(version = "v1") {
   const file = path.join(PLANNER_DIR, `${version}.json`);
   if (!fs.existsSync(file)) throw new Error(`Unknown planner: ${version}`);
-  return JSON.parse(fs.readFileSync(file, "utf8"));
+  // Open source bullets approved on the open source page bring their story package with them (ac-bank-overlay.mjs).
+  return withOverlayOssPackages(JSON.parse(fs.readFileSync(file, "utf8")));
 }
 
 export function buildPlannerRuntimeConfig(version, { jd, bank, company = null, title = null } = {}) {

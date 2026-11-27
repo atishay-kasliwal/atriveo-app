@@ -13,19 +13,28 @@ import { assembleAcResume, ossHeading, toolsFromBullets } from "./ac-tex.mjs";
 import { PAGE_HEIGHT_PT, RESUME_BOTTOM_MARGIN_PT, scaledChars } from "./resume-page.mjs";
 import { stripBanned } from "./tailor-dynamic.mjs";
 import { loadBank } from "./ac-bank.mjs";
+import { readOverlay, withOverlayOssPackages } from "./ac-bank-overlay.mjs";
 import { bankForTrack, jdSelectedProjects, loadTracks, trackPins, withPinnedEntries } from "./ac-tracks.mjs";
 import { PROJECT_SLUG_TO_NAME as PROJECT_NAME } from "./ac-role-meta.mjs";
 import { fileURLToPath } from "node:url";
 
 // Planner pools (scripts/planner/v2.json). A pool with exclusive_verbs_by_package (open source) prints one of its
 // story packages whole: the pair was approved together, and its bullets may share a verb with other packages.
-const PLANNER_POOLS = (() => {
+const PLANNER_CFG = (() => {
   try {
-    return JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "planner", "v2.json"), "utf8")).canonical_pools || {};
+    return JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "planner", "v2.json"), "utf8"));
   } catch {
-    return {};
+    return { canonical_pools: {} };
   }
 })();
+// With the open source packages of bullets approved on the open source page (ac-bank-overlay.mjs), cached per overlay.
+let poolsFor = { fingerprint: null, pools: PLANNER_CFG.canonical_pools || {} };
+const plannerPools = () => {
+  const overlay = readOverlay();
+  const fingerprint = overlay?.fingerprint ?? null;
+  if (fingerprint !== poolsFor.fingerprint) poolsFor = { fingerprint, pools: withOverlayOssPackages(PLANNER_CFG, overlay).canonical_pools || {} };
+  return poolsFor.pools;
+};
 
 // Where the last line of this template ends when the page is full (measured with 0.5in margins: a resume stretched to
 // the bottom margin ends its last printed line at 746pt of 792, 10pt above the margin; the skills list leaves its own
@@ -189,7 +198,7 @@ const bulletOf = ({ ac, face }) => ({ ac_id: ac.id, facet: face.facet, text: fac
  * different opening verbs (candidatesFor only rules out verbs already on the page, not two new picks sharing one).
  */
 export function pickTogether(role, list, n) {
-  const pool = PLANNER_POOLS[role];
+  const pool = plannerPools()[role];
   if (pool?.exclusive_verbs_by_package && pool.story_packages?.length) {
     const byId = new Map(list.map((c) => [c.ac.id, c]));
     const best = pool.story_packages

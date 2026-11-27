@@ -220,6 +220,48 @@ export function lintBank(bankDir) {
   return { ok: r.status === 0, output: `${r.stdout ?? ""}${r.stderr ?? ""}`.trim() };
 }
 
+/** Write the open source packages and tiers of page-approved bullets into scripts/planner/v2.json and TIERS.yaml. */
+export function exportOssPackages(entries, bankDir, plannerFile = path.join(ROOT, "scripts", "planner", "v2.json")) {
+  const out = [];
+  const oss = entries.filter((e) => e.type === "new" && e.ac?.role === "open-source" && e.ac?.oss?.package?.partner);
+  if (!oss.length) return out;
+  let text = fs.readFileSync(plannerFile, "utf8");
+  const cfg = JSON.parse(text);
+  const pool = cfg.canonical_pools?.["open-source"];
+  const start = text.indexOf('"open-source": {', text.indexOf('"canonical_pools"'));
+  for (const e of oss) {
+    const ids = [e.ac.id, e.ac.oss.package.partner];
+    if (!pool || pool.story_packages.some((p) => p.ids.join("+") === ids.join("+"))) continue;
+    const pkg = { name: e.ac.oss.package.name, anchor: e.ac.id, ids, jd_signals: e.ac.oss.package.jd_signals || [], strong_signals: e.ac.oss.package.strong_signals || [] };
+    const json = (v) => JSON.stringify(v).replace(/","/g, '", "');
+    const block = `        {\n          "name": ${JSON.stringify(pkg.name)},\n          "anchor": ${JSON.stringify(pkg.anchor)},\n          "ids": ${json(pkg.ids)},\n          "jd_signals": ${json(pkg.jd_signals)},\n          "strong_signals": ${json(pkg.strong_signals)}\n        }`;
+    const end = text.indexOf("\n      ]", text.indexOf('"story_packages": [', start));
+    text = `${text.slice(0, end)},\n${block}${text.slice(end)}`;
+    pool.story_packages.push(pkg);
+    if (!pool.ac_ids.includes(e.ac.id)) {
+      const re = /("ac_ids": )\[([^\]]*)\]/;
+      const at = text.slice(start).search(re);
+      const m = re.exec(text.slice(start + at));
+      pool.ac_ids.push(e.ac.id);
+      text = text.slice(0, start + at) + `${m[1]}${json(pool.ac_ids)}` + text.slice(start + at + m[0].length);
+    }
+    out.push(`  + package ${pkg.name} (${ids.join(" + ")}) in scripts/planner/v2.json`);
+  }
+  JSON.parse(text);
+  fs.writeFileSync(plannerFile, text);
+  // Tier A, beside the other open source bullets.
+  const tiersFile = path.join(bankDir, "TIERS.yaml");
+  let tiers = fs.readFileSync(tiersFile, "utf8");
+  const listed = new Set((yaml.load(tiers)?.A || []));
+  const add = oss.map((e) => e.ac.id).filter((id) => !listed.has(id));
+  if (add.length) {
+    const head = /  # Open source: every live bullet[^\n]*\n((?:  - AC-\d+\n)+)/.exec(tiers);
+    if (head) { const end = head.index + head[0].length; tiers = tiers.slice(0, end) + add.map((id) => `  - ${id}\n`).join("") + tiers.slice(end); fs.writeFileSync(tiersFile, tiers); out.push(`  + tier A: ${add.join(", ")}`); }
+    else out.push(`  ! add ${add.join(", ")} to tier A in TIERS.yaml by hand`);
+  }
+  return out;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const dry = args.includes("--dry-run");
@@ -246,6 +288,9 @@ async function main() {
     for (const p of plan) console.log(`  ${p.kind === "new" ? "+" : p.kind === "reword" ? "~" : p.kind === "retire" ? "-" : p.kind === "fact" || p.kind === "score" ? "*" : "!"} ${path.basename(p.file)}  ${p.kind === "missing" ? `(${p.id}: its bank entry or variant is gone; left in the overlay)` : p.id}`);
     if (!plan.some((p) => p.after)) console.log("  Nothing to write: the bank already has every bullet.");
     if (!dry) for (const p of plan) if (p.after) fs.writeFileSync(p.file, p.after.endsWith("\n") ? p.after : `${p.after}\n`);
+    // Open source bullets approved on the open source page bring their story package and tier (ac-bank-overlay.mjs);
+    // in git those live in the planner and TIERS.yaml, so they keep printing once the overlay copy is pruned.
+    if (!dry) for (const line of exportOssPackages(entries, bankDir)) console.log(line);
     if (!dry && plan.some((p) => p.after)) {
       const lint = lintBank(bankDir);
       console.log(`\nBank lint: ${lint.ok ? "passes" : "FAILS"}`);

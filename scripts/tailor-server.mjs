@@ -67,7 +67,7 @@ import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, markResumeApplied, renderDraft, revertResume, saveBullet, saveDraft, setResumeEmail, startPasted } from "./resume-builder.mjs";
 import { BankPageError, bankView, retireBullet } from "./bank-page.mjs";
-import { OpenSourceError, addPr, checkDraft, deletePr, loadOpenSource, savePr, startSync } from "./open-source.mjs";
+import { OpenSourceError, addPr, approveDraft, checkDraft, deletePr, loadOpenSource, savePr, startSync, unapproveDraft } from "./open-source.mjs";
 import { syncOverlay } from "./ac-bank-overlay.mjs";
 import { approveDraft, draftResult, startDraft } from "./bank-draft.mjs";
 import { applicationsAnalytics, applicationDetail, dismissJob, linkJobToApplication, markJobApplied, saveLinkedinDirect, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
@@ -1790,19 +1790,21 @@ const server = http.createServer(async (req, res) => {
         .then((stale) => reply(200, { ...bankView(), stale }), (e) => reply(500, { ok: false, error: String(e.message || e) }));
       return;
     }
-    // The open source page (scripts/open-source.mjs): GET oss; POST oss-sync | oss-save {id, rating?, text?, fits?, skip?} |
-    // oss-add {url, title, state, date} | oss-delete {id, restore?} | oss-check {text} (the bullet rules, nothing saved).
+    // The open source page (scripts/open-source.mjs): GET oss; POST oss-sync | oss-save {id, rating?, text?, fits?, skip?, why?} |
+    // oss-add {url, title, state, date} | oss-delete {id, restore?} | oss-check {text} (the bullet rules, nothing saved) |
+    // oss-approve {id, text, fits, pair} (into the bank overlay, prints from the next build) | oss-unapprove {id}.
     if (req.method === "GET" && op === "oss") {
       withMongo((db) => loadOpenSource(db), { appName: "AtriveoTailorServer" }).then((data) => reply(200, data), (e) => reply(500, { ok: false, error: String(e.message || e) }));
       return;
     }
-    if (req.method === "POST" && ["oss-sync", "oss-save", "oss-add", "oss-delete", "oss-check"].includes(op)) {
+    if (req.method === "POST" && ["oss-sync", "oss-save", "oss-add", "oss-delete", "oss-check", "oss-approve", "oss-unapprove"].includes(op)) {
       let raw = "";
       req.on("data", (c) => { raw += c; if (raw.length > 10_000) req.destroy(); });
       req.on("end", () => {
         let body; try { body = JSON.parse(raw || "{}"); } catch { return reply(400, { ok: false, error: "Bad JSON" }); }
         withMongo(async (db) => (op === "oss-check" ? { ok: true, issues: checkDraft(body.text) }
           : op === "oss-sync" ? startSync(db)
+          : op === "oss-approve" ? approveDraft(db, body) : op === "oss-unapprove" ? unapproveDraft(db, body)
           : op === "oss-save" ? savePr(db, body) : op === "oss-add" ? addPr(db, body) : deletePr(db, body)), { appName: "AtriveoTailorServer" })
           .then((data) => reply(200, data), (e) => reply(e instanceof OpenSourceError ? 400 : 500, { ok: false, error: String(e.message || e) }));
       });

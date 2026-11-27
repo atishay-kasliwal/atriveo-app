@@ -19,6 +19,7 @@ import {
 import { buildSkillsFromComposition } from "./ac-skills.mjs";
 import { SKILLS_MAX_CATEGORIES } from "./skills-library.mjs";
 import { resolveBankDir } from "./ac-bank.mjs";
+import { readOverlay } from "./ac-bank-overlay.mjs";
 import { resolveHeaderLocation } from "./ac-header-location.mjs";
 import { loadResumeProfile } from "./resume-profile.mjs";
 import {resumeContactLink} from "../src/shared/resumeContact.mjs";
@@ -111,8 +112,10 @@ function esc(s) {
 function ossEntry(bullet, bankDir) {
   if (bullet.ac?.oss) return bullet.ac;
   const id = bullet.ac?.id || bullet.ac_id;
-  if (!id || !/^AC-\d+$/.test(id)) return null;
-  try { return yaml.load(fs.readFileSync(path.join(bankDir, `${id}.yaml`), "utf8")); } catch { return null; }
+  if (!id || !/^AC-U?\d+$/.test(id)) return null;
+  try { return yaml.load(fs.readFileSync(path.join(bankDir, `${id}.yaml`), "utf8")); } catch { /* not in git: approved on the page */ }
+  // A bullet approved on the open source page lives in the overlay until it is exported to git (ac-bank-overlay.mjs).
+  return readOverlay()?.entries.find((e) => e.type === "new" && e.ac?.id === id)?.ac ?? null;
 }
 
 // Company projects (OPEN-SOURCE.yaml company_projects, 2026-11-26): several contributions to one company's projects print

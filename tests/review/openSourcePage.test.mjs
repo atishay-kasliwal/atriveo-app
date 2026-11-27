@@ -103,7 +103,7 @@ test('edits: save, skip, add, delete and restore; bad input is refused', async (
   for (const bad of [() => savePr(db, { id: 'x/y#9', rating: 'amazing' }), () => savePr(db, { id: 'x/y#9', fits: ['CEO'] }), () => savePr(db, { id: 'nope' }), () => addPr(db, { url: 'https://evil.com/a/b/pull/1', title: 't' }), () => addPr(db, { url: 'https://github.com/a/b/pull/2', title: 't', date: 'yesterday' })]) await assert.rejects(bad, OpenSourceError);
 }));
 
-test('the view: every bank bullet once, ready only when merged, rated good and clearly yours', () => {
+test('the view: every bank bullet once, ready when rated good and clearly yours (open counts fully)', () => {
   const bank = loadBank();
   const live = bank.acs.filter((a) => a.role === 'open-source' && !(a.tracks || []).includes('retired'));
   const docs = live.flatMap((a) => a.oss.prs.map((u) => ({ _id: prId(u), gh: { ...fromGraphql(node(prId(u).split('#')[0], Number(prId(u).split('#')[1]), { url: u, state: a.oss.status === 'open' ? 'OPEN' : 'MERGED' }), ME) } })));
@@ -112,7 +112,9 @@ test('the view: every bank bullet once, ready only when merged, rated good and c
   const by = new Map(v.bullets.map((b) => [b.id, b]));
   assert.equal(by.get('AC-282').ready, true);
   assert.equal(by.get('AC-287').ready, false, 'shared with the maintainer');
-  assert.equal(by.get('AC-299').ready, false, 'still open');
+  // Open pull requests count fully (2026-11-26): an open one is ready on its rating alone.
+  assert.equal(by.get('AC-299').merged, false);
+  assert.equal(by.get('AC-299').ready, by.get('AC-299').score >= 6, 'open counts fully');
   assert.deepEqual(by.get('AC-289').areas, ['FS', 'FE']);
   assert.deepEqual(v.masters.DS, ['AC-282', 'AC-284', 'AC-286']);
   assert.deepEqual(v.masters.DA, []);

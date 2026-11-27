@@ -66,6 +66,8 @@ export async function pollPushEvents(db, userId, { now = new Date(), send = send
   await tickSavedNudges(db, userId, { now, deliver: (id, notification) => deliverEvent(db, userId, id, notification, { now, send }) }).catch(() => {});
   // Lucky hours: 15 minutes before, the start, 15 minutes left, and the end of today's window (scripts/lucky-routes.mjs).
   await tickLucky(db, { now, deliver: (id, notification) => deliverEvent(db, userId, id, notification, { now, send }) }).catch(() => {});
+  // Open source: on Sundays, once, what the weekly check found for you to decide (scripts/open-source.mjs).
+  await import('./open-source.mjs').then(({ tickOpenSourceWeek }) => tickOpenSourceWeek(db, { now, deliver: (id, notification) => deliverEvent(db, userId, id, notification, { now, send }) })).catch(() => {});
   // Loops: reminders for confirmed intentions that are still open (scripts/loops.mjs).
   await ensureLoopsIndexes(db).catch(() => {});
   await tickLoopReminders(db, userId, { now, send }).catch(() => {});
