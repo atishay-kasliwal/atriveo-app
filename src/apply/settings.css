@@ -29,6 +29,9 @@
 .st-places button:hover{color:var(--foreground);background:rgba(255,255,255,.08)}
 .st-place-add{font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--border-col);border-radius:10px;background:var(--card-bg);color:var(--foreground);margin-bottom:12px}
 .st-places button:focus-visible,.st-place-add:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.st-here{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;margin:0 0 14px;border:1px solid var(--border-col);border-radius:12px}
+.st-here>span:first-child{display:grid;gap:2px;min-width:0}.st-here b{font-size:14px;font-weight:600}.st-here small{font-size:12px;color:var(--muted-fg);line-height:1.45}
+.st-here-actions{display:flex;align-items:center;gap:10px;flex:none}
 .st-note{margin:0;color:var(--muted-fg);font-size:12px;line-height:1.55}
 .st-error{color:#ee8a80;font-size:14px}
 .st-preview{position:sticky;top:20px;display:grid;gap:18px}

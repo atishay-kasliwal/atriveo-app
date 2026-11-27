@@ -3,6 +3,7 @@ import { outreachApi, useOutreachList, type OutreachTarget } from "./outreach";
 import JobCard, { ago, useLayout } from './JobCard';
 import { placeRank } from '../../scripts/place.mjs';
 import { usePlace } from './place';
+import HerePill from './HerePill';
 import { platformOf } from './platform';
 import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -449,6 +450,7 @@ export default function TodayPage({ header }: { header?: React.ReactNode }) {
           {query ? <button type="button" className="td-search-clear" aria-label="Clear search" onClick={() => { pick({ query: "" }); searchRef.current?.focus(); }}>×</button> : <kbd aria-hidden="true">/</kbd>}
           {words.length > 0 && !loading && <span className="td-search-n" role="status">{found.length} found</span>}
         </form>
+        <HerePill />
         <div className="td-moods" role="group" aria-label="Track">
           {TRACK_FILTERS.map((t, n) => (
             <button key={t} type="button" className={`td-mood is-${t} ${track === t ? "is-on" : ""}`} aria-pressed={track === t} title={`Key ${n + 1}${t === "mixed" ? ": the tracks in turn" : ""}`} onClick={() => pick({ track: t })}>

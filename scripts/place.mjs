@@ -86,12 +86,14 @@ export function remoteOrUs(location) {
 }
 
 /**
- * How near a posting is to you: 2 = in one of your states, 1 = remote or US-wide (when you count those),
- * 0 = anywhere else. Higher comes first and gets the star.
+ * How near a posting is to you: 3 = in the state you are in right now (place.here, from "Use my location"),
+ * 2 = in one of your saved states, 1 = remote or US-wide (when you count those), 0 = anywhere else.
+ * Higher comes first and gets the star.
  */
 export function placeRank(location, place) {
   const p = place || DEFAULT_PLACE;
   const states = statesIn(location);
+  if (p.here && states.has(p.here)) return 3;
   if (p.states.some((s) => states.has(s))) return 2;
   if (p.remote && remoteOrUs(location)) return 1;
   return 0;
@@ -114,15 +116,53 @@ export function parsePlace(input) {
   return normalizePlace(input);
 }
 
-/** The place as query parameters for the Staffing server: "near=WA,IL,MI&remote=1". */
+/** The place as query parameters for the Staffing server: "near=WA,IL,MI&remote=1", plus "&here=WA" when known. */
 export function placeQuery(place) {
   const p = place || DEFAULT_PLACE;
-  return `near=${p.states.join(',')}&remote=${p.remote ? 1 : 0}`;
+  return `near=${p.states.join(',')}&remote=${p.remote ? 1 : 0}${p.here && CODES.has(p.here) ? `&here=${p.here}` : ''}`;
 }
 
 /** The place a Staffing request asks for, or null when it names none (then location doesn't change the order). */
 export function placeFromQuery(params) {
   if (!params.has('near')) return null;
   const states = (params.get('near') || '').split(',').map((s) => s.trim().toUpperCase()).filter((s) => CODES.has(s));
-  return { states: [...new Set(states)], remote: params.get('remote') === '1' };
+  const here = (params.get('here') || '').trim().toUpperCase();
+  return { states: [...new Set(states)], remote: params.get('remote') === '1', ...(CODES.has(here) ? { here } : {}) };
+}
+
+/** A state's name from its code ("WA" → "Washington"). */
+export const stateName = (code) => STATE_LIST.find(([c]) => c === code)?.[1] ?? code;
+
+/**
+ * The state a point is in, from the borders in src/data/us-states.json (loaded by the caller, so the browser only
+ * fetches them when you ask to use your location). Null outside the 50 states and DC.
+ */
+export function stateAt(lat, lon, borders) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  const hit = inState(lat * 100, lon * 100, borders);
+  if (hit) return hit;
+  // The borders are rounded to about 1 km, so a point on a shore can land in the water: look about 1 km around
+  // (no further, or a city just over the border, like Windsor or Tijuana, would count as the US).
+  for (const [dy, dx] of [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [0.7, -0.7], [-0.7, 0.7], [-0.7, -0.7]]) {
+    const near = inState(lat * 100 + dy, lon * 100 + dx, borders);
+    if (near) return near;
+  }
+  return null;
+}
+
+function inState(y, x, borders) {
+  for (const [code, rings] of Object.entries(borders)) {
+    // Even-odd over every ring of the state, so lakes and enclaves (holes) count as outside.
+    let inside = false;
+    for (const flat of rings) {
+      const pts = [];
+      for (let i = 0, px = 0, py = 0; i < flat.length; i += 2) { px += flat[i]; py += flat[i + 1]; pts.push(px, py); }
+      for (let i = 0, j = pts.length - 2; i < pts.length; j = i, i += 2) {
+        const xi = pts[i], yi = pts[i + 1], xj = pts[j], yj = pts[j + 1];
+        if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+      }
+    }
+    if (inside) return code;
+  }
+  return null;
 }

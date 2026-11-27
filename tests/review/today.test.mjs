@@ -27,7 +27,7 @@ const READY = { ...view, ready: [readyRow('r1', 'Stripe'), readyRow('r2', 'Ramp'
 const link = (id) => ({ ats: 'ashby', url: `https://jobs.example.test/${id}` });
 const FILLABLE = { ...view, fillable: [queued('c1', 'Anthropic', 0, link('c1')), queued('d1', 'Figma', 3, { readyForReview: 3, ...link('d1') })] };
 
-async function fixture() {
+async function fixture(contextOptions = {}) {
   const server = http.createServer((req, res) => {
     const requested = path.join(root, 'dist-apply', req.url.split('?')[0]);
     const file = fs.existsSync(requested) && fs.statSync(requested).isFile() ? requested : path.join(root, 'dist-apply/index.html');
@@ -36,7 +36,7 @@ async function fixture() {
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const port = server.address().port;
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ viewport: { width: 1600, height: 800 } });
+  const page = await browser.newPage({ viewport: { width: 1600, height: 800 }, ...contextOptions });
   const calls = [], errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.route('**/*', (route) => {
@@ -212,6 +212,61 @@ test('Settings → Where I am: add and remove a state, turn remote off; each cha
     ]);
     assert.equal(await page.getByRole('switch', { name: 'Remote and US-wide jobs too' }).getAttribute('aria-checked'), 'false');
     assert.deepEqual(errors, []);
+  } finally { await f.close(); PLACE = null; }
+});
+
+test('Use my location: the state you are in comes first; only the state is kept, on this device, and nothing is sent', async () => {
+  const saved = FILLABLE.fillable.map((q) => ({ ...q }));
+  Object.assign(FILLABLE.fillable.find((q) => q.id === 'c1'), { location: 'Seattle, WA', postedAt: '2026-10-04T10:00:00.000Z' });
+  Object.assign(FILLABLE.fillable.find((q) => q.id === 'd1'), { location: 'Austin, TX', postedAt: '2026-09-20T10:00:00.000Z' });
+  // Standing in downtown Austin: Texas is not one of the saved states (WA, IL, MI), but it is where you are.
+  const f = await fixture({ permissions: ['geolocation'], geolocation: { latitude: 30.2672, longitude: -97.7431 } }); const { page, errors } = f;
+  const sent = [];
+  page.on('request', (r) => sent.push(r.url() + ' ' + (r.postData() ?? '')));
+  try {
+    await page.goto(`${f.base}/`);
+    await page.locator('.td-card').nth(4).waitFor();
+    let names = await page.locator('.td-card .td-id strong').allTextContents();
+    assert.deepEqual(names.slice(3, 5), ['Anthropic', 'Figma'], 'before: Seattle (a saved state) leads');
+    await page.getByRole('button', { name: 'Use my location' }).click();
+    await page.getByRole('button', { name: 'Near Texas' }).waitFor();
+    assert.equal(await page.getByRole('button', { name: 'Near Texas' }).getAttribute('aria-pressed'), 'true');
+    names = await page.locator('.td-card .td-id strong').allTextContents();
+    assert.deepEqual(names.slice(3, 5), ['Figma', 'Anthropic'], 'after: Austin (where you are) leads');
+    assert.match(await page.getByRole('article', { name: 'Figma: Answers drafted' }).locator('.td-loc').textContent(), /★ Austin, TX/);
+    const kept = await page.evaluate(() => localStorage.getItem('atriveo.here'));
+    assert.equal(JSON.parse(kept).state, 'TX');
+    assert.doesNotMatch(kept, /30\.2|97\.7/, 'no coordinates are stored');
+    assert.ok(sent.every((s) => !/30\.26|97\.74/.test(s)), 'no coordinates are sent');
+    assert.deepEqual(errors, []);
+  } finally { await f.close(); FILLABLE.fillable.splice(0, FILLABLE.fillable.length, ...saved); }
+});
+
+test('Use my location when the browser blocks it says so, and the saved states still decide', async () => {
+  const f = await fixture(); const { page } = f;
+  try {
+    await page.goto(`${f.base}/`);
+    await page.locator('.td-card').first().waitFor();
+    await page.evaluate(() => { navigator.geolocation.getCurrentPosition = (_ok, fail) => fail({ code: 1, message: 'User denied Geolocation' }); });
+    await page.getByRole('button', { name: 'Use my location' }).click();
+    await page.getByRole('button', { name: 'Location blocked' }).waitFor();
+    assert.match(await page.getByRole('button', { name: 'Location blocked' }).getAttribute('title'), /Allow it in the browser's site settings/);
+    assert.equal(await page.evaluate(() => localStorage.getItem('atriveo.here')), null);
+  } finally { await f.close(); }
+});
+
+test('Settings → Where I am → Right now: use this device, then stop using it', async () => {
+  PLACE = { states: ['WA', 'IL', 'MI'], remote: true }; puts.length = 0;
+  const f = await fixture({ permissions: ['geolocation'], geolocation: { latitude: 47.6062, longitude: -122.3321 } }); const { page } = f;
+  try {
+    await page.goto(`${f.base}/settings`);
+    const row = page.getByLabel('Your location');
+    await row.getByRole('button', { name: 'Use my location' }).click();
+    await row.getByText(/^Washington, from this device's location/).waitFor();
+    await row.getByRole('button', { name: 'Stop using it' }).click();
+    await row.getByRole('button', { name: 'Use my location' }).waitFor();
+    assert.equal(await page.evaluate(() => localStorage.getItem('atriveo.here')), null);
+    assert.deepEqual(puts, [], 'where you are is never saved to the server');
   } finally { await f.close(); PLACE = null; }
 });
 
