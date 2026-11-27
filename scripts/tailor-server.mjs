@@ -67,7 +67,7 @@ import { loadResumeProfile, saveResumeProfile, PROFILE_DEFAULTS } from "./resume
 import { withMongo, closeMongo } from "./mongo-client.mjs";
 import { BuilderError, checkText, deletePasted, freeVerbs, guessPosting, listPasted, loadResume, markResumeApplied, renderDraft, revertResume, saveBullet, saveDraft, setResumeEmail, startPasted } from "./resume-builder.mjs";
 import { BankPageError, bankView, retireBullet } from "./bank-page.mjs";
-import { OpenSourceError, addPr, approveDraft, checkDraft, deletePr, loadOpenSource, savePr, startSync, unapproveDraft } from "./open-source.mjs";
+import { OpenSourceError, addPr, approveDraft as approveOssDraft, checkDraft, deletePr, loadOpenSource, savePr, startSync, unapproveDraft } from "./open-source.mjs";
 import { syncOverlay } from "./ac-bank-overlay.mjs";
 import { approveDraft, draftResult, startDraft } from "./bank-draft.mjs";
 import { applicationsAnalytics, applicationDetail, dismissJob, linkJobToApplication, markJobApplied, saveLinkedinDirect, overviewHistory, overviewSummary, questionOptions, reviewQueue } from "./applications-analytics.mjs";
@@ -1804,7 +1804,7 @@ const server = http.createServer(async (req, res) => {
         let body; try { body = JSON.parse(raw || "{}"); } catch { return reply(400, { ok: false, error: "Bad JSON" }); }
         withMongo(async (db) => (op === "oss-check" ? { ok: true, issues: checkDraft(body.text) }
           : op === "oss-sync" ? startSync(db)
-          : op === "oss-approve" ? approveDraft(db, body) : op === "oss-unapprove" ? unapproveDraft(db, body)
+          : op === "oss-approve" ? approveOssDraft(db, body) : op === "oss-unapprove" ? unapproveDraft(db, body)
           : op === "oss-save" ? savePr(db, body) : op === "oss-add" ? addPr(db, body) : deletePr(db, body)), { appName: "AtriveoTailorServer" })
           .then((data) => reply(200, data), (e) => reply(e instanceof OpenSourceError ? 400 : 500, { ok: false, error: String(e.message || e) }));
       });

@@ -163,3 +163,10 @@ test("bank:export writes a page-approved bullet's package into the planner and t
   // Running it again changes nothing.
   assert.deepEqual(exportOssPackages([{ _id: "AC-U901", type: "new", ac }], dir, planner), []);
 });
+
+// The server imports from open-source.mjs and bank-draft.mjs, which both export approveDraft. A clash only shows when the
+// server file is parsed, so parse it here rather than at ship time (the Nov 27 ship stopped on exactly this).
+test("the tailor server parses with the open source routes", async () => {
+  const { execFileSync } = await import("node:child_process");
+  execFileSync(process.execPath, ["--check", path.join(import.meta.dirname, "../../scripts/tailor-server.mjs")]);
+});
