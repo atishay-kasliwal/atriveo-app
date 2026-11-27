@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { getTailorServerBase } from "../utils/tailorServer";
 import { fetchJson, getJson, type ApiBody } from "./engine";
+import { placeQuery } from "../../scripts/place.mjs";
+import { currentPlace } from "./place";
 import "./phone.css";
 
 // Triage on a phone: one job at a time from Matching and Staffing. Swipe right (or Save) keeps it for the laptop,
@@ -79,7 +81,7 @@ function useDeck(source: Source) {
     try {
       const [m, s] = await Promise.all([
         wantM ? getJson<{ total: number; jobs: MatchingJob[] }>(`/applications/matching-queue?${new URLSearchParams({ limit: "8", learn: "0", period: "7d", sources: "", role: "", q: "", sort: "latest", tz, exclude: [...seen.current].filter((k) => /^[a-f0-9]{16}$/.test(k)).slice(-512).join(",") })}`) : null,
-        wantS ? getJson<{ total: number; jobs: StaffingJob[] }>("/staffing/workspace?view=recommended&offset=0&limit=12&track=all&q=&source=") : null,
+        wantS ? getJson<{ total: number; jobs: StaffingJob[] }>(`/staffing/workspace?view=recommended&offset=0&limit=12&track=all&q=&source=&${placeQuery(currentPlace())}`) : null,
       ]);
       const ms = (m?.jobs ?? []).map(fromMatching), ss = (s?.jobs ?? []).map(fromStaffing);
       // All: take them in turn, so both sources get looked at.

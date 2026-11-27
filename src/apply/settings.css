@@ -22,6 +22,13 @@
 .st-accents{display:flex;gap:12px}
 .st-accents button{width:34px;height:34px;border-radius:50%;border:2px solid transparent;cursor:pointer;box-shadow:0 0 0 2px var(--background) inset}
 .st-accents button.on{border-color:var(--foreground)}
+.st-places{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.st-places li{display:inline-flex;align-items:center;gap:4px;padding:6px 6px 6px 12px;border:1px solid var(--border-col);border-radius:99px;font-size:14px;font-weight:500}
+.st-places li.st-places-none{padding:6px 0;border:0;color:var(--muted-fg);font-weight:400}
+.st-places button{font:inherit;font-size:16px;line-height:1;width:24px;height:24px;border:0;border-radius:50%;background:transparent;color:var(--muted-fg);cursor:pointer}
+.st-places button:hover{color:var(--foreground);background:rgba(255,255,255,.08)}
+.st-place-add{font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--border-col);border-radius:10px;background:var(--card-bg);color:var(--foreground);margin-bottom:12px}
+.st-places button:focus-visible,.st-place-add:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .st-note{margin:0;color:var(--muted-fg);font-size:12px;line-height:1.55}
 .st-error{color:#ee8a80;font-size:14px}
 .st-preview{position:sticky;top:20px;display:grid;gap:18px}

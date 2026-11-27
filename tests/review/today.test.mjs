@@ -16,6 +16,9 @@ const readyRow = (id, company, extra = {}) => ({ id, company, companyKey: compan
 const queued = (id, company, n, extra = {}) => ({ id, company, title: 'Backend Engineer', updatedAt: at, n, readyForReview: Math.max(0, n - 1), needsInput: n ? 1 : 0, actionRequired: 0, ...extra });
 // A LinkedIn posting with a resume ready and no application (only the LinkedIn test lists it).
 let LINKEDIN = [];
+// Settings → Where I am, as the preferences API returns it (null: not served, so Today uses WA, IL, MI with remote).
+let PLACE = null;
+const puts = [];
 const PENDO = [{ id: 'https://www.linkedin.com/jobs/view/111', url: 'https://www.linkedin.com/jobs/view/111', company: 'Pendo', title: 'Software Engineer', location: 'Raleigh, NC', score: 66, postedAt: null, foundAt: at, track: 'software-engineer', resumeFile: 'Pendo/Jane Doe.pdf', resumePath: '/Users/x/Documents/tailored-resumes/Pendo/Jane Doe.pdf' }];
 const view = { ok: true, generatedAt: at, killSwitch: null, worker: { online: true, updatedAt: at }, counts: { fillable: 2, ready: 3 } };
 const READY = { ...view, ready: [readyRow('r1', 'Stripe'), readyRow('r2', 'Ramp'), readyRow('m1', 'Spotify', { ats: 'lever' })], manual: [{ ...readyRow('m1', 'Spotify', { ats: 'lever' }), openFill: null }], approved: [] };
@@ -43,6 +46,10 @@ async function fixture() {
       const v = url.searchParams.get('view');
       if (v === 'linkedin') return route.fulfill({ json: { ok: true, generatedAt: at, linkedin: LINKEDIN } });
       return route.fulfill({ json: v === 'ready' ? READY : v === 'counts' ? view : v === 'fillable' ? FILLABLE : { ok: false, error: `unexpected view ${v}` } });
+    }
+    if (url.pathname === '/api/progress/preferences') {
+      if (route.request().method() === 'PUT') { const body = route.request().postDataJSON(); puts.push(body); PLACE = body.place; return route.fulfill({ json: { goal: 15, widget: {}, place: PLACE } }); }
+      return PLACE ? route.fulfill({ json: { goal: 15, widget: {}, place: PLACE } }) : route.continue();
     }
     if (url.pathname === '/applications/action') { calls.push(route.request().postDataJSON()); return route.fulfill({ json: { ok: true } }); }
     if (url.hostname === '127.0.0.1' && url.port === String(port)) return route.continue();
@@ -131,10 +138,25 @@ test('Fill and verify all lists the approved forms and starts them only on confi
   } finally { await f.close(); }
 });
 
-test('within Open & Fill: North Carolina first, then the newest posting; score and age on the card; Discard', async () => {
+test('within Open & Fill: near you first, then the newest posting', async () => {
   const saved = FILLABLE.fillable.map((q) => ({ ...q }));
   Object.assign(FILLABLE.fillable.find((q) => q.id === 'c1'), { location: 'New York, NY', postedAt: '2026-10-04T10:00:00.000Z', score: 72 });
-  Object.assign(FILLABLE.fillable.find((q) => q.id === 'd1'), { location: 'Raleigh, NC', postedAt: '2026-09-20T10:00:00.000Z', score: 20 });
+  Object.assign(FILLABLE.fillable.find((q) => q.id === 'd1'), { location: 'Seattle, WA', postedAt: '2026-09-20T10:00:00.000Z', score: 20 });
+  const f = await fixture(); const { page } = f;
+  try {
+    await page.goto(`${f.base}/`);
+    await page.locator('.td-card').nth(4).waitFor();
+    const names = await page.locator('.td-card .td-id strong').allTextContents();
+    assert.deepEqual(names.slice(3, 5), ['Figma', 'Anthropic'], 'the Seattle job (one of your states) comes before a newer New York one');
+    const anthropic = page.getByRole('article', { name: 'Anthropic: Answers approved' });
+    assert.match(await page.getByRole('article', { name: 'Figma: Answers drafted' }).locator('.td-loc').textContent(), /★ Seattle, WA/);
+    assert.doesNotMatch(await anthropic.locator('.td-loc').textContent(), /★/, 'New York is not one of your states');
+  } finally { await f.close(); FILLABLE.fillable.splice(0, FILLABLE.fillable.length, ...saved); }
+});
+
+test('score and age on the card; Discard', async () => {
+  const saved = FILLABLE.fillable.map((q) => ({ ...q }));
+  Object.assign(FILLABLE.fillable.find((q) => q.id === 'c1'), { location: 'New York, NY', postedAt: '2026-10-04T10:00:00.000Z', score: 72 });
   const f = await fixture(); const { page, calls } = f;
   try {
     await page.route('**/applications/action', (route) => {
@@ -143,16 +165,54 @@ test('within Open & Fill: North Carolina first, then the newest posting; score a
     });
     await page.goto(`${f.base}/`);
     await page.getByRole('heading', { name: 'Today', exact: true }).waitFor();
-    const names = await page.locator('.td-card .td-id strong').allTextContents();
-    assert.deepEqual(names.slice(3, 5), ['Figma', 'Anthropic'], 'the North Carolina job comes before a newer New York one');
     const anthropic = page.getByRole('article', { name: 'Anthropic: Answers approved' });
     assert.equal(await anthropic.locator('.td-score').textContent(), '72');
-    assert.match(await page.getByRole('article', { name: 'Figma: Answers drafted' }).locator('.td-loc').textContent(), /★ Raleigh, NC/);
     await anthropic.getByRole('button', { name: 'Discard' }).click();
     await page.getByText('Discarded 1').waitFor();
     assert.deepEqual(calls.filter((c) => c.action === 'discard_applications').map((c) => c.operation), ['preview', 'confirm']);
     assert.equal(await anthropic.count(), 0, 'a discarded card leaves Today');
   } finally { await f.close(); FILLABLE.fillable.splice(0, FILLABLE.fillable.length, ...saved); }
+});
+
+test('the place saved in Settings decides the star and the order; Wilmington, DE is not North Carolina', async () => {
+  const saved = FILLABLE.fillable.map((q) => ({ ...q }));
+  Object.assign(FILLABLE.fillable.find((q) => q.id === 'c1'), { location: 'Wilmington, DE', postedAt: '2026-10-04T10:00:00.000Z' });
+  Object.assign(FILLABLE.fillable.find((q) => q.id === 'd1'), { location: 'Raleigh, NC', postedAt: '2026-09-20T10:00:00.000Z' });
+  PLACE = { states: ['NC'], remote: false };
+  const f = await fixture(); const { page } = f;
+  try {
+    await page.goto(`${f.base}/`);
+    await page.locator('.td-card').nth(4).waitFor();
+    const figma = page.getByRole('article', { name: 'Figma: Answers drafted' }).locator('.td-loc');
+    await page.waitForFunction(() => document.querySelectorAll('.td-loc.is-near').length === 1);
+    assert.match(await figma.textContent(), /★ Raleigh, NC/);
+    assert.doesNotMatch(await page.getByRole('article', { name: 'Anthropic: Answers approved' }).locator('.td-loc').textContent(), /★/, 'Wilmington, DE gets no star');
+    const names = await page.locator('.td-card .td-id strong').allTextContents();
+    assert.deepEqual(names.slice(3, 5), ['Figma', 'Anthropic']);
+  } finally { await f.close(); PLACE = null; FILLABLE.fillable.splice(0, FILLABLE.fillable.length, ...saved); }
+});
+
+test('Settings → Where I am: add and remove a state, turn remote off; each change is saved', async () => {
+  PLACE = { states: ['WA', 'IL', 'MI'], remote: true }; puts.length = 0;
+  const f = await fixture(); const { page, errors } = f;
+  try {
+    await page.goto(`${f.base}/settings`);
+    const list = page.getByRole('list', { name: 'Your states' });
+    await list.getByText('Washington').waitFor();
+    assert.deepEqual(await list.locator('li span').allTextContents(), ['Washington', 'Illinois', 'Michigan']);
+    await page.getByRole('combobox', { name: 'Add a state' }).selectOption('NY');
+    await list.getByText('New York').waitFor();
+    await page.getByRole('button', { name: 'Remove Michigan' }).click();
+    await page.getByRole('switch', { name: 'Remote and US-wide jobs too' }).click();
+    await page.getByRole('status').filter({ hasText: 'Saved' }).first().waitFor();
+    assert.deepEqual(puts.map((b) => b.place), [
+      { states: ['WA', 'IL', 'MI', 'NY'], remote: true },
+      { states: ['WA', 'IL', 'NY'], remote: true },
+      { states: ['WA', 'IL', 'NY'], remote: false },
+    ]);
+    assert.equal(await page.getByRole('switch', { name: 'Remote and US-wide jobs too' }).getAttribute('aria-checked'), 'false');
+    assert.deepEqual(errors, []);
+  } finally { await f.close(); PLACE = null; }
 });
 
 test('LinkedIn postings show as On LinkedIn cards: the button opens the posting, Discard records it as not interested', async () => {
