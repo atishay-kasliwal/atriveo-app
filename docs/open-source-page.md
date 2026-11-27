@@ -16,9 +16,18 @@ on 2026-11-25; the layout was approved from a mockup the same day. Linked from R
 ## Words
 - **Rating** (`scripts/open-source-rating.mjs`): 0-10 from recognition, size, proof and status, with caps for docs, tiny or
   mechanical changes, and a point off for shared work. Impressive 8+, Good 6-7, Average below. You can set it by hand.
-- **Ready** for a general resume: every pull request merged, rating Good or better, and not `oss.shared` in the bank.
+- **Ready** for a general resume: rating Good or better, and not `oss.shared` in the bank. Open pull requests count fully
+  (2026-11-26), so an open one can be ready.
 - **In the bank:** a live bullet in `data/ac-bank` cites the pull request. Wording changes there (or on /bank), not here.
-- **Draft:** a bullet you typed here, checked with the bank's rules. It prints nowhere until it is reviewed into the bank.
+- **Draft:** a bullet you typed here, checked with the bank's rules. It prints nowhere until you approve it.
+- **Approve** (2026-11-27): the draft passes every rule, fits at least one resume (never data analytics) and names the bullet
+  it **prints with** (a different first word; one from the same company makes a company project). It goes into the bank
+  overlay with today's date (`approveDraft`), prints from the next resume build, and shows as pending until the weekly
+  `npm run bank:export` writes it, its story package and its tier into git. **Take it back** undoes it before that.
+- **Skip** asks why; the reason is the decision "no bullet", written to `OSS_DECISIONS.yaml` by `npm run oss:export`.
+- **This week** (top of the Board): the weekly check (`scripts/oss-audit.mjs`), refreshed with every sync: merged pull
+  requests with no bullet, bullets to fix, retired bullets that can come back, decisions whose pull request changed. A pull
+  request opens its card. On Sundays from 10:00 New York, one push says how many there are (none when it is clear).
 - **Areas** (backend, full-stack, frontend, platform) are labels in the bank (`areas:`); selection never reads them.
 
 ## Sync
@@ -31,8 +40,10 @@ on 2026-11-25; the layout was approved from a mockup the same day. Linked from R
 - The account is `github_user` in `data/ac-bank/PROJECTS.yaml`. Descriptions are read for the rating and not stored.
 
 ## API (tailor-server, under /resume-builder/)
-`GET oss`, `POST oss-sync`, `POST oss-save {id, rating?, text?, fits?, skip?}`, `POST oss-add {url, title, state, date}`,
-`POST oss-delete {id, restore?}`, `POST oss-check {text}`. A deleted pull request stays in Mongo so a sync can't bring it back.
+`GET oss`, `POST oss-sync`, `POST oss-save {id, rating?, text?, fits?, skip?, why?}`, `POST oss-add {url, title, state, date}`,
+`POST oss-delete {id, restore?}`, `POST oss-check {text}`, `POST oss-approve {id, text, fits, pair}`, `POST oss-unapprove {id}`.
+A deleted pull request stays in Mongo so a sync can't bring it back.
 
 ## Tests
-`tests/review/openSourcePage.test.mjs` (rating, sync, edits, view) and `npm run test:open-source:browser` (the built page).
+`tests/review/openSourcePage.test.mjs` (rating, sync, edits, view), `tests/review/openSourceApprove.test.mjs` (approving,
+the overlay package and heading, decisions, the Sunday push, the export) and `npm run test:open-source:browser` (the built page).

@@ -73,3 +73,39 @@ export function applyOverlay(acs, overlay) {
   }
   return out;
 }
+
+/**
+ * Open source bullets approved on the open source page (scripts/open-source.mjs approveDraft) are overlay "new" entries
+ * that name their story package (ac.oss.package: { name, partner, jd_signals }). The open source slot prints only
+ * whole packages, so the planner's pool gets them here until `npm run bank:export` moves them into git.
+ */
+export function overlayOssPackages(overlay = readOverlay()) {
+  if (!overlay) return [];
+  return overlay.entries
+    .filter((e) => e.type === "new" && e.ac?.role === "open-source" && e.ac?.oss?.package?.partner && !(e.ac.tracks || []).includes("retired"))
+    .map((e) => ({
+      name: e.ac.oss.package.name || `page-${e.ac.id}`,
+      anchor: e.ac.id,
+      ids: [e.ac.id, e.ac.oss.package.partner],
+      jd_signals: e.ac.oss.package.jd_signals || [],
+      strong_signals: e.ac.oss.package.strong_signals || [],
+      overlay: true,
+    }));
+}
+
+/** A planner config (scripts/planner/v2.json) with the overlay's open source packages in its open source pool. */
+export function withOverlayOssPackages(cfg, overlay = readOverlay()) {
+  const extra = overlayOssPackages(overlay);
+  const pool = cfg?.canonical_pools?.["open-source"];
+  if (!extra.length || !pool) return cfg;
+  const known = new Set(pool.story_packages.map((p) => p.ids.join("+")));
+  const add = extra.filter((p) => !known.has(p.ids.join("+")));
+  if (!add.length) return cfg;
+  return {
+    ...cfg,
+    canonical_pools: {
+      ...cfg.canonical_pools,
+      "open-source": { ...pool, ac_ids: [...new Set([...pool.ac_ids, ...add.map((p) => p.anchor)])], story_packages: [...pool.story_packages, ...add] },
+    },
+  };
+}

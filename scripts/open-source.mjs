@@ -2,7 +2,9 @@
 // from GitHub into Mongo `oss_prs`, next to the bank bullets that cite them.
 //   gh.*    what GitHub says; every sync replaces it
 //   mine.*  what you set on the page (rating, draft bullet, fits, skip, deleted); a sync never touches it
-// The bank stays in git: a draft here is a note until it is reviewed into data/ac-bank.
+// A draft is a note until you approve it (approveDraft): it then goes into the bank overlay (Mongo `bank_overlay`, merged over
+// the git bank by loadBank) with today's approval date and the bullet it prints with, and prints from the next build.
+// `npm run bank:export` moves approved bullets into git (docs/open-source-rules.md section 1).
 
 import { loadBank } from "./ac-bank.mjs";
 import { classifyTrack, loadTracks } from "./ac-tracks.mjs";
@@ -11,6 +13,8 @@ import { COMPANIES, measure, rate, ratingOf, SCORE_OF } from "./open-source-rati
 import fs from "node:fs";
 import path from "node:path";
 import yaml from "js-yaml";
+import { OVERLAY_COLLECTION, syncOverlay } from "./ac-bank-overlay.mjs";
+import { nyParts } from "./phone-summary.mjs";
 
 export const PRS = "oss_prs";
 export const STATE = "oss_state";
@@ -137,6 +141,7 @@ async function runSync(db, { ifOlderMin = 0, now = new Date(), login = githubUse
   const result = { at: now.toISOString(), login, full, count: prs.length, added, changed };
   await db.collection(STATE).updateOne({ _id: "sync" }, { $set: result }, { upsert: true });
   await refreshDemand(db, { now }).catch(() => {});
+  await storeAudit(db, { now }).catch(() => {});
   return { ok: true, ...result };
 }
 
@@ -196,7 +201,23 @@ function bankBullets(bank) {
     id: a.id, source: "bank", org: a.oss.org || "", project: a.oss.project, text: String(a.variants[0].text).trim(),
     fits: (a.fits || []).map((t) => TRACK_CODE[t]).filter(Boolean), areas: (a.areas || []).map((x) => AREA_CODE[x]).filter(Boolean),
     tech: a.signature_technologies || [], prs: (a.oss.prs || []).map(prId).filter(Boolean), shared: a.oss.shared === true,
+    // Approved on this page and not yet exported to git (AC-U ids live in the overlay).
+    pending: /^AC-U\d+$/.test(a.id) && a.oss.approved != null, company: companyOf(a)?.id ?? null, pair: a.oss.package?.partner ?? null,
   }));
+}
+
+// Company projects (OPEN-SOURCE.yaml company_projects): several bullets from one company print as one project.
+let companiesCache = null;
+function companies(bankDir) {
+  if (companiesCache?.dir === bankDir) return companiesCache.list;
+  let list = [];
+  try { list = yaml.load(fs.readFileSync(path.join(bankDir, "OPEN-SOURCE.yaml"), "utf8"))?.company_projects || []; } catch { list = []; }
+  companiesCache = { dir: bankDir, list };
+  return list;
+}
+function companyOf(a, bankDir = loadBank().bank_dir) {
+  const o = a?.oss;
+  return o ? companies(bankDir).find((c) => (c.match?.org ? c.match.org === o.org : c.match?.project === o.project)) || null : null;
 }
 
 /** Everything the page shows. `docs`: oss_prs; `state`: { sync, demand }. Pure apart from reading the bank files. */
@@ -215,6 +236,7 @@ export function openSourceView(docs, state = {}, { bank = loadBank(), doc = load
       personal: gh.personal ?? null, shared: !!gh.shared, score: RATINGS.has(mine.rating) ? SCORE_OF[mine.rating] : auto?.score ?? null, parts: auto?.parts ?? null,
       rating, autoRating: auto?.rating ?? null, ratedByYou: RATINGS.has(mine.rating), coverage, bullets: cited.map((b) => b.id),
       text: mine.text || cited[0]?.text || "", fits: mine.fits || cited[0]?.fits || [], manual: !!d.manual, deleted: !!mine.deleted,
+      why: mine.why || "",
     };
   });
   const byId = new Map(prs.map((p) => [p.id, p]));
@@ -224,19 +246,25 @@ export function openSourceView(docs, state = {}, { bank = loadBank(), doc = load
     const scores = own.map((p) => p.score).filter((s) => s != null);
     const score = scores.length ? Math.max(...scores) : null;
     const merged = own.length === b.prs.length && own.length > 0 && own.every((p) => p.state === "MERGED");
-    return { ...b, score, rating: score == null ? null : ratingOf(score), merged, stars: Math.max(0, ...own.map((p) => p.stars || 0)), ready: merged && score != null && score >= 6 && !b.shared };
+    // Ready for a resume: rated Good or better and his own work. Open pull requests count fully (2026-11-26, Atishay).
+    return { ...b, score, rating: score == null ? null : ratingOf(score), merged, stars: Math.max(0, ...own.map((p) => p.stars || 0)), ready: own.length > 0 && score != null && score >= 6 && !b.shared };
   });
   const masters = Object.fromEntries(Object.entries(doc.tracks || {}).map(([t, x]) => [TRACK_CODE[t], (x.general_pinned?.projects?.["open-source"] || []).map((r) => String(r).split(":")[0])]).filter(([k]) => k));
-  return { ok: true, sync: state.sync ?? null, demand: state.demand ?? null, bankVersion: String(bank.bank_version), prs, bullets: rated, masters, skills: Object.fromEntries(rated.map((b) => [b.id, skillsIn(`${b.text} ${b.tech.join(" ")}`)])) };
+  return {
+    ok: true, sync: state.sync ?? null, demand: state.demand ?? null, audit: state.audit ?? null, bankVersion: String(bank.bank_version), prs, bullets: rated, masters,
+    companies: companies(bank.bank_dir).map((c) => ({ id: c.id, heading: c.heading, skills: c.skills, description: c.description })),
+    skills: Object.fromEntries(rated.map((b) => [b.id, skillsIn(`${b.text} ${b.tech.join(" ")}`)])),
+  };
 }
 
 export async function loadOpenSource(db) {
-  const [docs, sync, demand] = await Promise.all([
+  const [docs, sync, demand, audit] = await Promise.all([
     db.collection(PRS).find({}).toArray(),
     db.collection(STATE).findOne({ _id: "sync" }, { projection: { _id: 0 } }),
     db.collection(STATE).findOne({ _id: "demand" }, { projection: { _id: 0 } }),
+    db.collection(STATE).findOne({ _id: "audit" }, { projection: { _id: 0 } }),
   ]);
-  return { ...openSourceView(docs, { sync, demand }), syncing: syncing() };
+  return { ...openSourceView(docs, { sync, demand, audit }), syncing: syncing() };
 }
 
 // ---- Your edits ---------------------------------------------------------------------------------------------------
@@ -260,7 +288,7 @@ const need = async (db, id) => {
 };
 
 /** Save what you set for one pull request. A field left out is unchanged; rating null goes back to the computed one. */
-export async function savePr(db, { id, rating, text, fits, skip } = {}) {
+export async function savePr(db, { id, rating, text, fits, skip, why } = {}) {
   const d = await need(db, id);
   const set = {}, unset = {};
   if (rating !== undefined) {
@@ -277,7 +305,11 @@ export async function savePr(db, { id, rating, text, fits, skip } = {}) {
     if (!Array.isArray(fits) || fits.some((f) => !FITS.has(f))) throw new OpenSourceError("Unknown resume in Fits.");
     set["mine.fits"] = [...new Set(fits)];
   }
-  if (skip !== undefined) { if (skip) set["mine.skip"] = true; else unset["mine.skip"] = ""; }
+  // Skipping is the decision "no bullet"; its reason goes into data/ac-bank/OSS_DECISIONS.yaml with `npm run oss:export`.
+  if (skip !== undefined) {
+    if (skip) { set["mine.skip"] = true; const w = String(why ?? "").replace(/\s+/g, " ").trim().slice(0, 200); if (w) set["mine.why"] = w; }
+    else { unset["mine.skip"] = ""; unset["mine.why"] = ""; }
+  }
   if (Object.keys(set).length || Object.keys(unset).length) {
     await db.collection(PRS).updateOne({ _id: d._id }, { ...(Object.keys(set).length ? { $set: { ...set, "mine.at": new Date() } } : {}), ...(Object.keys(unset).length ? { $unset: unset } : {}) });
   }
@@ -308,4 +340,121 @@ export async function deletePr(db, { id, restore = false } = {}) {
   const d = await need(db, id);
   await db.collection(PRS).updateOne({ _id: d._id }, restore ? { $unset: { "mine.deleted": "" } } : { $set: { "mine.deleted": true, "mine.at": new Date() } });
   return loadOpenSource(db);
+}
+
+// ---- Approving a bullet (docs/open-source-rules.md: only Atishay approves) --------------------------------------------
+
+const TRACK_OF = Object.fromEntries(Object.entries(TRACK_CODE).map(([k, v]) => [v, k]));
+const firstWord = (t) => String(t || "").trim().split(/\s+/)[0].toLowerCase();
+
+/** The overlay entry for an approved draft. Pure: everything it needs is passed in. */
+export function approvedEntry({ id, gh, text, fits, partner, bank, day }) {
+  // Org and project as the bank already writes them for this repository, else the company and the repository's name.
+  const same = bank.acs.find((a) => a.role === "open-source" && a.oss && (a.oss.prs || []).some((u) => prId(u)?.startsWith(`${gh.repo}#`)));
+  const org = same?.oss.org ?? COMPANIES[gh.owner] ?? "";
+  const project = same?.oss.project ?? gh.repo.split("/")[1];
+  // Signature technologies must appear in the text (bank lint), so only names written in it count.
+  const tech = skillsIn(text).filter((k) => text.toLowerCase().includes(k.toLowerCase()));
+  const theme = `oss-page-${id.toLowerCase()}`;
+  const tracks = fits.map((f) => TRACK_OF[f]);
+  const signals = [...new Set([...tech.map((k) => k.toLowerCase()), project.toLowerCase(), org.toLowerCase()].filter(Boolean))];
+  return {
+    id, role: "open-source", fits: tracks, tracks, tier: "A", slot_kind: "project", achievement_theme: theme, display_order: 900, wow_score: 0.85,
+    metrics_claimed: [...new Set((text.match(/\d[\d,.]*/g) || []).map((n) => `n_${n.replace(/[,.]/g, "")}`))], concepts_claimed: ["open-source"],
+    signature_technologies: tech,
+    fact: `Open source contribution (${org ? `${org} | ` : ""}${project}), approved ${day} on the open source page. Never employment${org ? ` at ${org}` : ""}.`,
+    oss: {
+      org, project, status: gh.state === "MERGED" ? "merged" : "open", approved: day, prs: [gh.url], ...(gh.shared ? { shared: true } : {}),
+      package: { name: `page-${id.toLowerCase()}`, partner: partner.id, jd_signals: signals, strong_signals: [project.toLowerCase()] },
+    },
+    capabilities: { backend: 80 }, strength: { recruiter: 9 }, ats_keywords: tech,
+    facets: { [theme]: { phrase: `${project} open source contribution`, keywords: tech.map((k) => k.toLowerCase()) } },
+    variants: [{ facet: theme, emphasis: theme, strength: 9, text }],
+  };
+}
+
+/**
+ * Approve a draft into the bank: its wording passes every bullet rule, it fits at least one resume (never data analytics),
+ * and it names the bullet it prints with (a different opening verb). Prints from the next resume build.
+ */
+export async function approveDraft(db, { id, text, fits, pair, now = new Date() } = {}) {
+  const d = await need(db, id);
+  const gh = d.gh || {};
+  if (gh.state === "CLOSED") throw new OpenSourceError("Closed without merging, so it can't go on a resume.");
+  await syncOverlay(db);
+  const bank = loadBank();
+  if (bankBullets(bank).some((b) => b.prs.includes(d._id))) throw new OpenSourceError("This pull request already has a bullet.");
+  const t = String(text ?? d.mine?.text ?? "").replace(/\s+/g, " ").trim();
+  if (!t) throw new OpenSourceError("Write the bullet first.");
+  const issues = checkDraft(t, bank);
+  if (issues.length) throw new OpenSourceError(`Not approved: ${issues.join("; ")}`);
+  const codes = [...new Set(Array.isArray(fits) ? fits : d.mine?.fits || [])];
+  if (codes.some((f) => !FITS.has(f))) throw new OpenSourceError("Unknown resume in Fits.");
+  if (codes.includes("DA")) throw new OpenSourceError("Data analytics resumes never print open source; untick DA.");
+  if (!codes.length) throw new OpenSourceError("Pick at least one resume it fits.");
+  const partner = bank.acs.find((a) => a.id === pair && a.role === "open-source" && a.oss && !isRetired(a));
+  if (!partner) throw new OpenSourceError("Pick the bullet it prints with.");
+  if (firstWord(partner.variants?.[0]?.text) === firstWord(t)) throw new OpenSourceError(`It starts with the same word as ${partner.id}; pick another or change the verb.`);
+  const col = db.collection(OVERLAY_COLLECTION);
+  let n = (await col.countDocuments({ type: "new" })) + 1, newId = `AC-U${String(n).padStart(3, "0")}`;
+  while (bank.acs.some((a) => a.id === newId) || await col.findOne({ _id: newId })) newId = `AC-U${String(++n).padStart(3, "0")}`;
+  const ac = approvedEntry({ id: newId, gh, text: t, fits: codes, partner, bank, day: nyParts(now).day });
+  await col.insertOne({ _id: newId, type: "new", source: "open-source page", pr: d._id, ac, createdAt: now.toISOString() });
+  await db.collection(PRS).updateOne({ _id: d._id }, { $set: { "mine.approved": { id: newId, at: now } }, $unset: { "mine.skip": "", "mine.why": "" } });
+  await syncOverlay(db);
+  return { ...(await loadOpenSource(db)), approved: newId };
+}
+
+/** Take back a bullet approved on this page that is not in git yet. */
+export async function unapproveDraft(db, { id } = {}) {
+  const d = await need(db, id);
+  const newId = d.mine?.approved?.id;
+  if (!newId) throw new OpenSourceError("Nothing approved here to take back.");
+  const r = await db.collection(OVERLAY_COLLECTION).deleteOne({ _id: newId, source: "open-source page" });
+  if (!r.deletedCount) throw new OpenSourceError(`${newId} is already in git; retire it on the Bank page instead.`);
+  await db.collection(PRS).updateOne({ _id: d._id }, { $unset: { "mine.approved": "" } });
+  await syncOverlay(db);
+  return loadOpenSource(db);
+}
+
+// ---- The weekly check (scripts/oss-audit.mjs), kept with each sync, and one push a week --------------------------------
+
+/** Decisions: the file's, plus pull requests skipped on this page (with their reason). */
+export function decisionsWith(fileDecisions, docs) {
+  const known = new Set((fileDecisions || []).map((d) => d.pr));
+  const page = docs.filter((d) => d.mine?.skip && !known.has(d._id)).map((d) => ({ pr: d._id, decision: "no-bullet", why: d.mine.why || "skipped on the open source page", decided: String(d.mine.at?.toISOString?.() ?? d.mine.at ?? "").slice(0, 10), state: d.gh?.state, page: true }));
+  return [...(fileDecisions || []), ...page];
+}
+
+async function storeAudit(db, { now = new Date() } = {}) {
+  const { audit } = await import("./oss-audit.mjs");
+  const bank = loadBank();
+  let file = [];
+  try { file = yaml.load(fs.readFileSync(path.join(bank.bank_dir, "OSS_DECISIONS.yaml"), "utf8"))?.decisions || []; } catch { file = []; }
+  const docs = await db.collection(PRS).find({}).toArray();
+  const r = audit(bank, decisionsWith(file, docs), docs.filter((d) => d.gh?.repo).map((d) => d.gh));
+  const slim = (x) => ({ pr: x.pr, title: x.title, state: x.state, rating: x.rating, score: x.score });
+  const out = { at: now.toISOString(), fix: r.fix, revive: r.revive, draft: r.draft.map(slim), decidedChanged: r.decidedChanged.map(slim), watch: r.watch.length, totals: r.totals };
+  await db.collection(STATE).updateOne({ _id: "audit" }, { $set: out }, { upsert: true });
+  return out;
+}
+
+/** What the week's check asks you to decide: [count, sentence]. */
+export function weekSummary(a) {
+  if (!a) return [0, ""];
+  const parts = [[a.draft?.length, "merged without a bullet"], [a.fix?.length, "bullets to fix"], [a.revive?.length, "retired bullets that can come back"], [a.decidedChanged?.length, "decisions whose pull request changed"]]
+    .filter(([n]) => n > 0).map(([n, l]) => `${n} ${l}`);
+  const n = (a.draft?.length || 0) + (a.fix?.length || 0) + (a.revive?.length || 0) + (a.decidedChanged?.length || 0);
+  return [n, parts.join(", ")];
+}
+
+/** Sundays from 10:00 (New York), once a week, when the check found something: "Open source: 3 to decide". */
+export async function tickOpenSourceWeek(db, { now = new Date(), deliver } = {}) {
+  const { weekday, hour, day } = nyParts(now);
+  if (weekday !== "Sun" || hour < 10 || hour >= 22) return false;
+  const a = await db.collection(STATE).findOne({ _id: "audit" });
+  const [n, what] = weekSummary(a);
+  if (!n) return false;
+  await deliver(`oss-week:${day}`, { title: `Open source: ${n} to decide`, body: what.charAt(0).toUpperCase() + what.slice(1), type: "oss_week", url: "/open-source" });
+  return true;
 }

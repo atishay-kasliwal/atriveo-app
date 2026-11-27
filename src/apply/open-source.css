@@ -208,3 +208,13 @@
   .os-bench { border: 0; padding: 0; }
   .os-sheet { padding: 14px 12px; }
 }
+
+/* This week (the weekly check) and the company description line. */
+.os-week { border: 1px solid var(--os-line, rgba(127,127,127,.25)); border-radius: 10px; margin: 0 0 10px; }
+.os-week-h { display: flex; align-items: baseline; gap: 10px; width: 100%; padding: 8px 12px; background: none; border: 0; color: inherit; font: inherit; cursor: pointer; text-align: left; }
+.os-week.is-clear .os-week-h b { opacity: .7; }
+.os-week-items { display: flex; flex-direction: column; gap: 4px; padding: 0 12px 10px; max-height: 180px; overflow: auto; }
+.os-wk { display: flex; gap: 8px; align-items: baseline; padding: 4px 6px; border-radius: 6px; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; text-decoration: none; }
+.os-wk:hover { background: rgba(127,127,127,.12); }
+.os-wk > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.os-about { font-style: italic; opacity: .8; margin: 0 0 4px; }

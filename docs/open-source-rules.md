@@ -7,6 +7,10 @@ the 2026-11-25 audit, where 10 of 29 bullets had drifted from their PRs and an u
 ## 1. Who decides
 - **Only Atishay approves a bullet.** Agents draft; he approves the exact wording. The date goes in `oss.approved` and a test
   refuses any live open source bullet without one. Never write that date without his approval in the conversation.
+- **He can approve on the open source page** (since 2026-11-27). Approve checks the bullet rules, needs a resume it fits
+  and the bullet it prints with, and writes it to the bank overlay (Mongo `bank_overlay`, an `AC-U` id) with today's date.
+  It prints from the next resume build. "Take it back" removes it until it is exported. Agents never call `oss-approve`.
+  Skipping a pull request there, with a reason, is his decision "no bullet".
 - **Never merge a bank change yourself unless he asked for that merge in this conversation.** Open the PR and stop.
 - **Never deploy** (`npm run ship`, `npm run deploy:apply`) without his go-ahead for that deploy. Check what is live first
   (`npm run ship -- --dry-run` prints `live now:`), and say what it is.

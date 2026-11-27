@@ -68,6 +68,8 @@ export function loadBank(dir = BANK_DIR) {
   const bankMeta = readYaml(path.join(bankDir, "BANK_VERSION.yaml")) || {};
   const tiersRaw = readYaml(path.join(bankDir, "TIERS.yaml")) || {};
   const tiers = buildTierMap(tiersRaw);
+  // An entry may name its own tier (open source bullets approved on the open source page are A, as in TIERS.yaml).
+  for (const ac of acs) if (ac.tier && !tiers[ac.id] && ["S", "A", "B", "C"].includes(ac.tier)) tiers[ac.id] = ac.tier;
   return {
     acs,
     concepts,
