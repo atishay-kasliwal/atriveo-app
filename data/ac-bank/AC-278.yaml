@@ -9,7 +9,7 @@ areas:
   - frontend
 slot_kind: project
 achievement_theme: e2e-focus
-display_order: 26
+display_order: 10
 wow_score: 0.88
 metrics_claimed:
   - paths_3
@@ -26,6 +26,8 @@ oss:
   org: ''
   project: MisterDownloadManager
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-16"
   prs:
     - https://github.com/anefzaoui/misterdownloadmanager/pull/483
 capabilities:

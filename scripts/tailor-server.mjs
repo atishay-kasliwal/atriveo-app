@@ -711,7 +711,7 @@ function bulletsToResumeText(tex, bullets) {
   // pull experience/project subheadings for context
   const subs = [...tex.matchAll(/\\resumeSubheading\s*\{([^}]*)\}\{[^}]*\}\s*\{([^}]*)\}/g)]
     .map((m) => `${m[1]} — ${latexToPlain(m[2])}`);
-  const projs = [...tex.matchAll(/\\resumeProjectHeading\s*\{([\s\S]*?)\}\{[^}]*\}/g)]
+  const projs = [...tex.matchAll(/\\resumeProjectHeading(?:About)?\s*\{([\s\S]*?)\}\{[^}]*\}/g)]
     .map((m) => latexToPlain(m[1]));
   if (subs.length) lines.push("EXPERIENCE ROLES:", ...subs.map((s) => "  " + s), "");
   if (projs.length) lines.push("PROJECTS:", ...projs.map((p) => "  " + p), "");

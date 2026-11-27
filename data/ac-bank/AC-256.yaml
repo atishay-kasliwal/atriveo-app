@@ -10,7 +10,7 @@ areas:
   - backend
 slot_kind: project
 achievement_theme: protocol-compat
-display_order: 4
+display_order: 29
 wow_score: 0.88
 metrics_claimed:
   - tests_14
@@ -28,6 +28,8 @@ oss:
   org: Mezmo
   project: AURA
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-16"
   prs:
     - https://github.com/mezmo/aura/pull/862
     - https://github.com/mezmo/aura/pull/890
@@ -57,5 +59,5 @@ variants:
     emphasis: protocol-compat
     strength: 9
     text: >-
-      Translated unknown tool outcomes and MCP transports into explicit unknown values in AURA's Rust event layer with
-      Serde, keeping event identity and server details across 14 tests.
+      Translated unknown tool outcomes and MCP transports into explicit unknown values in AURA's Rust event layer
+      with Serde, so older clients keep each event instead of dropping it across 14 tests.

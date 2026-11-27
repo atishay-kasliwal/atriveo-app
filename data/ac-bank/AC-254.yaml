@@ -10,7 +10,7 @@ areas:
   - backend
 slot_kind: project
 achievement_theme: failure-recovery
-display_order: 2
+display_order: 27
 wow_score: 0.88
 metrics_claimed:
   - tests_28
@@ -27,6 +27,8 @@ oss:
   org: Mezmo
   project: AURA
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-16"
   prs:
     - https://github.com/mezmo/aura/pull/868
     - https://github.com/mezmo/aura/pull/888

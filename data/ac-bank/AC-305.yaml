@@ -1,16 +1,15 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B7).
 id: AC-305
 role: open-source
+# Retired 2026-11-25 (every open source bullet 9+): open with changes requested; no measured result.
+tracks:
+  - retired
 fits:
   - ai-engineer
   - software-engineer
 # Label only (the open source page): selection never reads it.
 areas:
   - backend
-# Only the tracks it fits.
-tracks:
-  - ai-engineer
-  - software-engineer
 slot_kind: project
 achievement_theme: oss-aura-b7
 display_order: 53
@@ -27,6 +26,8 @@ oss:
   org: Mezmo
   project: AURA
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   prs:
     - https://github.com/mezmo/aura/pull/871
 capabilities:

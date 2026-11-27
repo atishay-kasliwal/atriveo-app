@@ -26,7 +26,7 @@ import { bankForTrack, classifyTrack, trackPins, withPinnedEntries } from "./ac-
 // 2.5.1: five skills lines when a short one gave way beside an existing "Additional Skills" line; Python first.
 // 2.5.2 (2026-11-25): a bullet matches the posting on whole words ("rust" is not in "trust"); open source's third bullet
 // is related to the first two.
-export const PIPELINE_VERSION = "2.5.2";
+export const PIPELINE_VERSION = "2.6.0";
 
 export const PIPELINE_STEPS = [
   "load_bank",

@@ -9,7 +9,7 @@ areas:
   - platform
 slot_kind: project
 achievement_theme: gitops
-display_order: 16
+display_order: 41
 wow_score: 0.8
 metrics_claimed:
   - test_cases_4
@@ -17,7 +17,7 @@ concepts_claimed:
   - kubernetes-operators
   - gitops
 signature_technologies:
-  - Go
+  - OpenShift
 fact: >-
   Open source contribution (Red Hat | GitOps Operator), draft R4 (was AC-215 before the port) approved 2026-11-16. Never
   employment at Red Hat.
@@ -25,6 +25,8 @@ oss:
   org: Red Hat
   project: GitOps Operator
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-26"
   prs:
     - https://github.com/redhat-developer/gitops-operator/pull/1563
 capabilities:
@@ -32,7 +34,7 @@ capabilities:
   cloud: 88
   data: 50
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Go
   - GitOps
@@ -53,5 +55,5 @@ variants:
     emphasis: gitops
     strength: 9
     text: >-
-      Inspected target namespace labels before cleanup in Red Hat's GitOps Operator in Go, closing a consent
-      removal bug with 4 regression test cases.
+      Inspected namespace labels in Red Hat's GitOps Operator for Argo CD on OpenShift, so a manager namespace loses
+      access once a target withdraws consent, covered by 4 test cases.

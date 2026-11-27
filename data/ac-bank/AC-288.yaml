@@ -1,5 +1,6 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md).
 id: AC-288
+# Retired 2026-11-26 (company projects): folded into AC-321 (NVIDIA project).
 role: open-source
 fits:
   - software-engineer
@@ -10,11 +11,10 @@ areas:
   - platform
 # Only the tracks it fits.
 tracks:
-  - software-engineer
-  - forward-deployed
+  - retired
 slot_kind: project
 achievement_theme: k8s-operator
-display_order: 36
+display_order: 6
 wow_score: 0.88
 metrics_claimed:
   - bugs_2
@@ -31,6 +31,8 @@ oss:
   org: NVIDIA
   project: nodewright
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   prs:
     - https://github.com/NVIDIA/nodewright/pull/1048
     - https://github.com/NVIDIA/nodewright/pull/1067

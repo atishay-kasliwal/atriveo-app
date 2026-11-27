@@ -11,7 +11,7 @@ areas:
   - platform
 slot_kind: project
 achievement_theme: streaming-metrics
-display_order: 10
+display_order: 15
 wow_score: 0.88
 metrics_claimed:
   - stars_2800
@@ -22,7 +22,6 @@ concepts_claimed:
   - metrics
 signature_technologies:
   - Go
-  - Kubernetes
 fact: >-
   Open source contribution (Numaflow), draft F1 (was AC-209 before the port) approved 2026-11-16. Never employment at
   Numaflow.
@@ -30,6 +29,8 @@ oss:
   org: ''
   project: Numaflow
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-26"
   prs:
     - https://github.com/numaproj/numaflow/pull/3761
 capabilities:
@@ -60,5 +61,5 @@ variants:
     emphasis: streaming-metrics
     strength: 9
     text: >-
-      Computed per edge watermark metrics in Numaflow (2.8K+ GitHub stars), exposing event time progress from its Go
-      pipeline daemon on Kubernetes with 4 unit tests for joins and stale series.
+      Added per edge watermark metrics to Numaflow's Go pipeline daemon so operators see which join input lags,
+      covered by 4 unit tests.

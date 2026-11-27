@@ -10,7 +10,7 @@ areas:
   - platform
 slot_kind: project
 achievement_theme: k8s-reliability
-display_order: 9
+display_order: 13
 wow_score: 0.88
 metrics_claimed:
   - stars_3600
@@ -29,6 +29,8 @@ oss:
   org: ''
   project: Kiali
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-16"
   prs:
     - https://github.com/kiali/kiali/pull/10514
 capabilities:

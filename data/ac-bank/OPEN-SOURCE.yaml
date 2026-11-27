@@ -1,7 +1,6 @@
-# Open Source | Approved contribution bullets (AC-253..AC-344, AC-280 retired), one project slot
+# Open Source | Approved contribution bullets (AC-253..AC-320, AC-280 retired), one project slot
 # Source review: resume-engine/Memory/OSS_BULLETS_DRAFT.md (v3, approved by the user 2026-11-16);
 #   corrections and AC-282..AC-320 approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md)
-#   AC-321..AC-344 finalized by user 2026-11-25; docs/open-source-finalization.md records the review.
 # Facts: data/ac-bank/SKILL_EVIDENCE.yaml + GitHub PR diffs. Rules: resume-engine/Memory/QUESTION_ANSWERS.md
 #   "Open Source Work on Resumes" — merged first, open lower priority, status never printed, never employment.
 # Heading is built from the picked bullets: "Org | Project, Project (Open Source)", or the projects alone
@@ -16,3 +15,34 @@ role:
   dates: November 2026 -- Present
   slot_kind: project
   resume_pick_count: 2
+
+# Company projects (2026-11-26, Atishay). When both printed bullets belong to one company project, the resume prints it as
+# a project: "NVIDIA (Open Source) | Go, Kubernetes, Cobra", an italic line saying what the project is (its purpose,
+# stack and one scale number; no "Contributed to", no praise), then the 2 bullets. Bullets from different projects keep the
+# heading built from the bullets (scripts/ac-tex.mjs ossHeading). A bullet belongs to the project whose `match` its
+# oss.org (or, for a project with no company, oss.project) equals. Rules: docs/open-source-rules.md section 9.
+company_projects:
+  - id: nvidia
+    heading: NVIDIA (Open Source)
+    match: { org: NVIDIA }
+    skills: [Go, Kubernetes, Cobra]
+    description: NVIDIA's GPU Kubernetes stack across 5 repositories, from node image builds to bare metal clusters, in Go.
+    approved: "2026-11-26"
+  - id: mezmo
+    heading: Mezmo (Open Source)
+    match: { org: Mezmo }
+    skills: [Rust, Tokio, MCP]
+    description: Mezmo's platform for running AI agents safely on production infrastructure (400+ GitHub stars), in Rust.
+    approved: "2026-11-26"
+  - id: red-hat
+    heading: Red Hat (Open Source)
+    match: { org: Red Hat }
+    skills: [Go, AWS, Azure, GitHub Actions]
+    description: Red Hat's tool that provisions CI runner machines on 3 clouds for GitHub Actions and GitLab, in Go.
+    approved: "2026-11-26"
+  - id: numaflow
+    heading: Numaflow (Open Source)
+    match: { project: Numaflow }
+    skills: [Go, Rust, Kubernetes]
+    description: A Kubernetes platform for massively parallel streaming jobs (2.8K+ GitHub stars), in Go and Rust.
+    approved: "2026-11-26"

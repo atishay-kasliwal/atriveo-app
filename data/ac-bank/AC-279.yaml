@@ -10,7 +10,7 @@ areas:
   - full-stack
 slot_kind: project
 achievement_theme: mcp-server
-display_order: 27
+display_order: 33
 wow_score: 0.88
 metrics_claimed:
   - bugs_2
@@ -27,6 +27,8 @@ oss:
   org: ''
   project: math-mcp
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-16"
   prs:
     - https://github.com/EthanHenrickson/math-mcp/pull/9
 capabilities:

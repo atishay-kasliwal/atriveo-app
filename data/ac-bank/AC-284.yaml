@@ -15,7 +15,7 @@ tracks:
   - software-engineer
 slot_kind: project
 achievement_theme: statsmodels-cython
-display_order: 32
+display_order: 1
 wow_score: 0.88
 metrics_claimed:
   - stars_11000
@@ -34,6 +34,8 @@ oss:
   org: ''
   project: statsmodels
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   prs:
     - https://github.com/statsmodels/statsmodels/pull/10795
 capabilities:
@@ -41,7 +43,7 @@ capabilities:
   data: 88
   backend: 70
 strength:
-  recruiter: 9
+  recruiter: 10
 ats_keywords:
   - Python
   - Cython
@@ -61,7 +63,7 @@ facets:
 variants:
   - facet: statsmodels-cython
     emphasis: statsmodels-cython
-    strength: 9
+    strength: 10
     text: >-
       Examined statsmodels (11K+ GitHub stars) Cython entry points with 270 Python array layout cases and fixed
       the 42 that failed across KDE, ETS and state space models.

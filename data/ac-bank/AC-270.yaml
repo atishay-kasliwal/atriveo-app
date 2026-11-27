@@ -8,7 +8,7 @@ areas:
   - frontend
 slot_kind: project
 achievement_theme: terminal-ui
-display_order: 18
+display_order: 22
 wow_score: 0.88
 metrics_claimed:
   - stars_15000
@@ -25,6 +25,8 @@ oss:
   org: ''
   project: Cockpit
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-16"
   prs:
     - https://github.com/cockpit-project/cockpit/pull/23897
     - https://github.com/cockpit-project/cockpit/pull/23910

@@ -27,7 +27,7 @@ export function expectedFromTex(tex) {
   return {
     experience: count(section("Experience"), /\\resumeSubheading\{/g),
     education: count(section("Education"), /\\resume(?:Subheading|Education)\{/g),
-    projects: count(section("Projects"), /\\resumeProjectHeading\{/g),
+    projects: count(section("Projects"), /\\resumeProjectHeading(?:About)?\{/g),
   };
 }
 

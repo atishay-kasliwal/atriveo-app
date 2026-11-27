@@ -1,6 +1,9 @@
 # Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
 id: AC-275
 role: open-source
+# Retired 2026-11-25 (every open source bullet 9+): open; an editor jump one line off is a small result.
+tracks:
+  - retired
 fits:
   - software-engineer
   - forward-deployed
@@ -9,9 +12,6 @@ areas:
   - full-stack
 # Only the tracks it fits (2026-11-17): untagged, it shared "Reconciled" with Wake Forest's AC-220 on data analytics
 # resumes, which print no open source.
-tracks:
-  - software-engineer
-  - forward-deployed
 slot_kind: project
 achievement_theme: ansible-ide
 display_order: 23
@@ -30,6 +30,8 @@ oss:
   org: Ansible
   project: VS Code Ansible
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-16"
   prs:
     - https://github.com/ansible/vscode-ansible/pull/3287
 capabilities:

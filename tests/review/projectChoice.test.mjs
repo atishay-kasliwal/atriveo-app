@@ -83,3 +83,15 @@ test('a project bullet never restates a count printed elsewhere ("13 live sessio
   assert.ok(fomc, 'FOMC still fits this posting');
   assert.ok(!fomc.bullets.some((b) => b.ac_id === 'AC-251'), 'AC-251 says 13 live FOMC sessions, as AC-025 does');
 });
+
+test("data analytics never prints open source, even when a posting fits it", async () => {
+  const { chooseProjects } = await import("../../scripts/ac-page-fill.mjs");
+  const { loadBank } = await import("../../scripts/ac-bank.mjs");
+  const { bankForTrack } = await import("../../scripts/ac-tracks.mjs");
+  const full = loadBank(), jd = "Data Analyst. React and TypeScript dashboards, Playwright accessibility tests, Keycloak, Cockpit web console, xterm.js.";
+  const t = (id) => ({ ac_id: id, text: full.acs.find((a) => a.id === id).variants[0].text });
+  const compact = { experience: [], projects: [{ role: "atriveo", bullets: ["AC-225", "AC-052"].map(t) }, { role: "bayesian-mmm", bullets: ["AC-097", "AC-100"].map(t) }] };
+  const roles = (track) => chooseProjects(compact, bankForTrack(full, track), { jd, track }).compact.projects.map((p) => p.role);
+  assert.ok(!roles("data-analytics").includes("open-source"));
+  assert.ok(roles("software-engineer").includes("open-source"), "other tracks still may");
+});

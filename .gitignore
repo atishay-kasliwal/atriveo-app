@@ -11,7 +11,9 @@ scripts/preview.html
 migration-output/
 
 # Claude Code local settings (machine-specific)
-.claude/
+# Local Claude settings stay private; project skills are shared.
+.claude/*
+!.claude/skills/
 
 # Lovable reference export (local only — not part of the app build)
 Dark Mode Magic/
