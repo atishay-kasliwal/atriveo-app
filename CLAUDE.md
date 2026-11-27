@@ -32,6 +32,10 @@ points to them; it does not restate or override them.
 Normal app development tasks here are unrelated to the resume engine. Use the resume
 engine only for resume/JD work.
 
+## Open source resume bullets
+For any change to open source on resumes, read `docs/open-source-rules.md` and use the `open-source-update` skill
+(`.claude/skills/open-source-update/SKILL.md`). Only Atishay approves a bullet; never merge or deploy without his go-ahead.
+
 ## Production is main
 Only `main` is production. Every change goes branch → PR → merge into `main`; nothing is deployed from a branch or a worktree with
 local changes, and nothing is pushed straight to `main` (except the job-data bot). Deploy with `npm run ship` / `npm run deploy:apply`

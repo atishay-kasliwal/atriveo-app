@@ -11,7 +11,7 @@ tracks:
   - software-engineer
 slot_kind: project
 achievement_theme: oss-misterdownloadmanager-a3
-display_order: 40
+display_order: 21
 wow_score: 0.88
 metrics_claimed:
   - "18"
@@ -27,6 +27,8 @@ oss:
   org: ''
   project: MisterDownloadManager
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   prs:
     - https://github.com/anefzaoui/misterdownloadmanager/pull/489
 capabilities:

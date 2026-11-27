@@ -1,5 +1,6 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B11).
 id: AC-309
+# Retired 2026-11-26 (company projects): folded into AC-321 (NVIDIA project).
 role: open-source
 fits:
   - software-engineer
@@ -10,11 +11,10 @@ areas:
   - platform
 # Only the tracks it fits.
 tracks:
-  - software-engineer
-  - forward-deployed
+  - retired
 slot_kind: project
 achievement_theme: oss-nodewright-b11
-display_order: 57
+display_order: 36
 wow_score: 0.8
 metrics_claimed:
   - "25"
@@ -28,12 +28,14 @@ oss:
   org: NVIDIA
   project: nodewright
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   prs:
     - https://github.com/NVIDIA/nodewright/pull/1087
 capabilities:
   backend: 80
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Go
   - Golang
@@ -54,5 +56,5 @@ variants:
     emphasis: oss-nodewright-b11
     strength: 9
     text: >-
-      Added a Go CLI command to NVIDIA's nodewright that recovers nodes with stale errors through conflict safe
-      patches, covered by 25 Ginkgo test cases.
+      Added a Go CLI command to NVIDIA's nodewright that turns the documented manual recovery of stale erroring
+      nodes into one step, covered by 25 Ginkgo test cases.

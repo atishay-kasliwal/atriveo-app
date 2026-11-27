@@ -1,5 +1,6 @@
 # Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
 id: AC-266
+# Retired 2026-11-26 (company projects): folded into AC-323 (Red Hat project).
 role: open-source
 fits:
   - software-engineer
@@ -7,9 +8,11 @@ fits:
 # Label only (the open source page): selection never reads it.
 areas:
   - platform
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: ci-provisioning
-display_order: 14
+display_order: 17
 wow_score: 0.88
 metrics_claimed:
   - accounts_3
@@ -27,6 +30,8 @@ oss:
   org: Red Hat
   project: mapt
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-16"
   prs:
     - https://github.com/redhat-developer/mapt/pull/967
     - https://github.com/redhat-developer/mapt/pull/958

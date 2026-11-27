@@ -1,63 +1,73 @@
-# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+# Open source contribution, approved 2026-11-26: one bullet for AC-255 + AC-305 (company projects).
 id: AC-322
 role: open-source
 fits:
   - software-engineer
+  - ai-engineer
   - forward-deployed
+# Label only (the open source page): selection never reads it.
 areas:
   - backend
-  - platform
+# Only the tracks it fits.
 tracks:
   - software-engineer
+  - ai-engineer
   - forward-deployed
 slot_kind: project
-achievement_theme: oss-final-322
-display_order: 70
-wow_score: 0.8
+achievement_theme: agent-safety
+display_order: 28
+wow_score: 0.88
 metrics_claimed:
-  - dns_zones_4
+  - tests_40
 concepts_claimed:
-  - open-source
+  - mcp
+  - agents
+  - tool-calling
 signature_technologies:
-  - Go
-  - Kubernetes
-  - CoreDNS
+  - Rust
 fact: >-
-  User-approved open source contribution, finalized 2026-11-25. Regression reads the applied ConfigMap and
-  compares all four base zones with the DaemonSet local address. Applies kfelternv's upstream fix; cluster
-  validation was performed by that contributor, not this author. Never employment at the upstream
-  organization.
+  Open source contribution (Mezmo | AURA), combines AC-255 and AC-305, approved 2026-11-26. Never employment at Mezmo.
 oss:
-  org: NVIDIA
-  project: NVKE
+  org: Mezmo
+  project: AURA
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-26"
   prs:
-    - https://github.com/dsx-ai-factory/nvke/pull/2423
-  shared: true
+    - https://github.com/mezmo/aura/pull/865
+    - https://github.com/mezmo/aura/pull/863
+    - https://github.com/mezmo/aura/pull/871
 capabilities:
-  backend: 85
-  cloud: 85
+  backend: 84
+  ai: 90
+  cloud: 60
 strength:
   recruiter: 9
 ats_keywords:
-  - Go
-  - Kubernetes
-  - CoreDNS
-  - Regression Testing
-  - NVKE
+  - Rust
+  - MCP
+  - AI agents
+  - human in the loop
+  - tool calling
+  - Anthropic
+  - OpenAI
+  - LLM
 facets:
-  oss-final-322:
-    phrase: NVKE open source contribution
+  agent-safety:
+    phrase: AURA open source contribution
     keywords:
-      - go
-      - kubernetes
-      - coredns
-      - regression testing
+      - rust
+      - mcp
+      - ai agents
+      - human in the loop
+      - tool calling
+      - anthropic
+      - openai
+      - llm
 variants:
-  - facet: oss-final-322
-    emphasis: oss-final-322
+  - facet: agent-safety
+    emphasis: agent-safety
     strength: 9
     text: >-
-      Repaired conflicting CoreDNS listener bindings across 4 Kubernetes zones by applying an upstream fix,
-      adding Go regression coverage that keeps base-zone bindings consistent with the node-cache address
-      during configuration changes.
+      Improved agent safety in AURA by holding gated tools for human approval and stopping runs when an Anthropic or
+      OpenAI account runs out of quota, backed by 40 Rust tests.

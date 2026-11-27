@@ -1,6 +1,9 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft B10).
 id: AC-308
 role: open-source
+# Retired 2026-11-25 (every open source bullet 9+): open; a new query option, no measured result.
+tracks:
+  - retired
 fits:
   - ai-engineer
   - software-engineer
@@ -8,11 +11,6 @@ fits:
 # Label only (the open source page): selection never reads it.
 areas:
   - backend
-# Only the tracks it fits.
-tracks:
-  - ai-engineer
-  - software-engineer
-  - forward-deployed
 slot_kind: project
 achievement_theme: oss-kiali-b10
 display_order: 56
@@ -31,6 +29,8 @@ oss:
   org: ''
   project: Kiali
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   prs:
     - https://github.com/kiali/kiali/pull/10567
 capabilities:

@@ -1,58 +1,67 @@
-# Finalized by user 2026-11-25; source evidence and limits in SKILL_EVIDENCE.yaml.
+# Open source contribution, approved 2026-11-26: one bullet for AC-288 + AC-309 (company projects).
 id: AC-321
 role: open-source
 fits:
   - software-engineer
-  - ai-engineer
+  - forward-deployed
+# Label only (the open source page): selection never reads it.
 areas:
   - backend
   - platform
+# Only the tracks it fits.
 tracks:
   - software-engineer
-  - ai-engineer
+  - forward-deployed
 slot_kind: project
-achievement_theme: oss-final-321
-display_order: 69
-wow_score: 0.8
+achievement_theme: nodewright-ops
+display_order: 6
+wow_score: 0.88
 metrics_claimed:
-  - version_paths_2
+  - bugs_2
+  - commands_1
 concepts_claimed:
-  - open-source
+  - kubernetes-operators
+  - reliability
 signature_technologies:
-  - Go
+  - Kubernetes
 fact: >-
-  User-approved open source contribution, finalized 2026-11-25. JSON report version round-trip regression;
-  file and stdin paths use the same report construction. Release provenance, not measured scanner accuracy or
-  adoption. Never employment at the upstream organization.
+  Open source contribution (NVIDIA | nodewright), combines AC-288 and AC-309, approved 2026-11-26. Never employment at NVIDIA.
 oss:
-  org: ''
-  project: SkillGuard
+  org: NVIDIA
+  project: nodewright
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-26"
   prs:
-    - https://github.com/OSSAfrica/skillguard/pull/233
+    - https://github.com/NVIDIA/nodewright/pull/1048
+    - https://github.com/NVIDIA/nodewright/pull/1067
+    - https://github.com/NVIDIA/nodewright/pull/1087
 capabilities:
-  backend: 85
-  cloud: 85
+  backend: 88
+  cloud: 92
 strength:
   recruiter: 9
 ats_keywords:
   - Go
-  - JSON
-  - CLI Development
-  - Regression Testing
-  - SkillGuard
+  - Golang
+  - Kubernetes
+  - Kubernetes operator
+  - GPU
+  - node upgrades
 facets:
-  oss-final-321:
-    phrase: SkillGuard open source contribution
+  nodewright-ops:
+    phrase: nodewright open source contribution
     keywords:
       - go
-      - json
-      - cli development
-      - regression testing
+      - golang
+      - kubernetes
+      - kubernetes operator
+      - gpu
+      - node upgrades
 variants:
-  - facet: oss-final-321
-    emphasis: oss-final-321
+  - facet: nodewright-ops
+    emphasis: nodewright-ops
     strength: 9
     text: >-
-      Added scanner-version provenance to SkillGuard's Go JSON reports across 2 input paths, linking file and
-      stdin scan results to their release so users can compare findings as detection rules change.
+      Repaired 2 upgrade and drain bugs in NVIDIA's nodewright node operator for Kubernetes so version bumps stay
+      within the interruption budget, and cut stale node recovery to 1 command.

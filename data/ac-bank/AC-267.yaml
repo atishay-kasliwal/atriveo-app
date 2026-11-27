@@ -9,7 +9,7 @@ areas:
   - platform
 slot_kind: project
 achievement_theme: ci-runners
-display_order: 15
+display_order: 18
 wow_score: 0.88
 metrics_claimed:
   - features_3
@@ -19,7 +19,6 @@ concepts_claimed:
   - provisioning
 signature_technologies:
   - Go
-  - Azure
 fact: >-
   Open source contribution (Red Hat | mapt), draft R3 (was AC-214 before the port) approved 2026-11-16. Never employment
   at Red Hat.
@@ -27,6 +26,8 @@ oss:
   org: Red Hat
   project: mapt
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-26"
   prs:
     - https://github.com/redhat-developer/mapt/pull/971
     - https://github.com/redhat-developer/mapt/pull/966
@@ -57,5 +58,4 @@ variants:
     emphasis: ci-runners
     strength: 9
     text: >-
-      Added just in time GitHub runners, a GitLab egress proxy and Azure nested virtualization sizes to Red Hat's mapt
-      in Go, covered by 30 test cases.
+      Added just in time GitHub runners and 2 more runner features to mapt in Go, covered by 30 test cases.

@@ -38,6 +38,7 @@ const PREAMBLE = `\\documentclass[letterpaper,11pt]{article}
 \\newcommand{\\resumeItem}[1]{\\item\\small{{#1 \\vspace{-2pt}}}}
 \\newcommand{\\resumeSubheading}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\textbf{#1} & #2 \\\\ \\sbox{\\projectbox}{\\textit{\\small#3}}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & \\textit{\\small #4} \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\newcommand{\\resumeProjectHeading}[2]{\\item\\begin{tabular*}{0.97\\textwidth}{l@{\\extracolsep{\\fill}}r}\\sbox{\\projectbox}{\\small#1}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & #2 \\\\ \\end{tabular*}\\vspace{-7pt}}
+\\newcommand{\\resumeProjectHeadingAbout}[3]{\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\sbox{\\projectbox}{\\small#1}\\ifdim\\wd\\projectbox>0.72\\textwidth\\resizebox{0.72\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi & #2 \\\\ \\multicolumn{2}{l}{\\sbox{\\projectbox}{\\textit{\\small#3}}\\ifdim\\wd\\projectbox>0.97\\textwidth\\resizebox{0.97\\textwidth}{!}{\\usebox{\\projectbox}}\\else\\usebox{\\projectbox}\\fi} \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\newcommand{\\resumeEducation}[4]{\\vspace{-2pt}\\item\\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\\textbf{#1} & #4 \\\\ \\textit{\\small #3} & \\textit{\\small #2} \\\\ \\end{tabular*}\\vspace{-7pt}}
 \\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
 \\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.15in, label={}]}
@@ -114,14 +115,39 @@ function ossEntry(bullet, bankDir) {
   try { return yaml.load(fs.readFileSync(path.join(bankDir, `${id}.yaml`), "utf8")); } catch { return null; }
 }
 
+// Company projects (OPEN-SOURCE.yaml company_projects, 2026-11-26): several contributions to one company's projects print
+// as one project with a line saying what it is.
+const companyCache = new Map();
+export function companyProjects(bankDir = resolveBankDir()) {
+  if (!companyCache.has(bankDir)) {
+    let list = [];
+    try { list = yaml.load(fs.readFileSync(path.join(bankDir, "OPEN-SOURCE.yaml"), "utf8"))?.company_projects || []; } catch { list = []; }
+    companyCache.set(bankDir, list);
+  }
+  return companyCache.get(bankDir);
+}
+
+/** The company project an open source entry belongs to (its oss.org, or oss.project for a project with no company). */
+export function companyOf(entry, bankDir = resolveBankDir()) {
+  const o = entry?.oss;
+  if (!o) return null;
+  return companyProjects(bankDir).find((c) => (c.match?.org ? c.match.org === o.org : c.match?.project === o.project)) || null;
+}
+
 /**
- * The open source project line, from the bullets picked for this resume: "NVIDIA | NVKR, Workload Map (Open Source)"
- * when one org owns them all, else each project with its own org: "Mezmo AURA, PR-Agent (Open Source)".
- * Tools: the bullets' declared technologies.
+ * The open source project line, from the bullets picked for this resume.
+ * - Every bullet from one company project: "NVIDIA (Open Source)", its skills, and its description line.
+ * - Otherwise "NVIDIA | NVKR, Workload Map (Open Source)" when one org owns them all, else each project with its own
+ *   org: "Mezmo AURA, PR-Agent (Open Source)". Tools: the bullets' declared technologies.
  * Status (open / merged) is never printed (QUESTION_ANSWERS "Open Source Work on Resumes").
  */
 export function ossHeading(bullets, bankDir = resolveBankDir()) {
   const entries = bullets.map((b) => ossEntry(b, bankDir)).filter((e) => e?.oss);
+  const companies = [...new Set(entries.map((e) => companyOf(e, bankDir)))];
+  if (entries.length >= 2 && entries.length === bullets.length && companies.length === 1 && companies[0]) {
+    const c = companies[0];
+    return { org: "", label: c.heading, tools: [...c.skills], text: c.heading, company: c.id, description: c.description };
+  }
   const orgs = [...new Set(entries.map((e) => e.oss.org || ""))];
   const org = orgs.length === 1 ? orgs[0] : "";
   // Mixed orgs: each project keeps its own org for recognition ("Mezmo AURA, PR-Agent"), unless the name has it.
@@ -137,7 +163,7 @@ export function ossHeading(bullets, bankDir = resolveBankDir()) {
   const projects = [...new Set(unique.map(named))];
   const label = `${projects.join(", ") || "Open Source"} (Open Source)`;
   const tools = [...new Set(entries.flatMap((e) => e.signature_technologies || []))].slice(0, 6);
-  return { org, label, tools, text: org ? `${org} | ${label}` : label };
+  return { org, label, tools, text: org ? `${org} | ${label}` : label, company: null, description: "" };
 }
 
 export function toolsFromBullets(bullets, roleSlug) {
@@ -310,7 +336,11 @@ export function assembleAcResume(composition, { headerTitle, skillsLines, bank, 
       const items = bullets.map((b) => `      \\resumeItem{${esc(b.text)}}`).join("\n");
       // "|" must be math mode in this font; the org and project share the bold name.
       const title = oss ? `${oss.org ? `${esc(oss.org)} $|$ ` : ""}${esc(oss.label)}` : esc(name);
-      return `    \\resumeProjectHeading{\\textbf{${title}}${stack.length ? " $|$ \\emph{" + esc(stack.join(", ")) + "}" : ""}}{${meta.dates}}\n    \\resumeItemListStart\n${items}\n    \\resumeItemListEnd`;
+      const head = `{\\textbf{${title}}${stack.length ? " $|$ \\emph{" + esc(stack.join(", ")) + "}" : ""}}{${meta.dates}}`;
+      // A company project says what the project is, in italics under its heading, as the second row of the heading's table
+      // (like an employer's title line), so text extractors keep every bullet in order. Not a bullet, so no verb.
+      const heading = oss?.description ? `\\resumeProjectHeadingAbout${head}{${esc(oss.description)}}` : `\\resumeProjectHeading${head}`;
+      return `    ${heading}\n    \\resumeItemListStart\n${items}\n    \\resumeItemListEnd`;
     })
     .join("\n\n");
 

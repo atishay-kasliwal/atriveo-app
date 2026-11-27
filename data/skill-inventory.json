@@ -30,14 +30,11 @@
         "https://github.com/redhat-developer/mapt/pull/971",
         "https://github.com/redhat-developer/mapt/pull/966",
         "https://github.com/redhat-developer/mapt/pull/962",
-        "https://github.com/OSSAfrica/skillguard/pull/217",
         "https://github.com/numaproj/numaflow/pull/3759",
         "https://github.com/dsx-ai-factory/nvke/pull/2336",
         "https://github.com/dsx-ai-factory/nvke/pull/2288",
         "https://github.com/dsx-ai-factory/nvke/pull/2246",
-        "https://github.com/redhat-developer/gitops-operator/pull/1563",
-        "https://github.com/OSSAfrica/skillguard/pull/233",
-        "https://github.com/dsx-ai-factory/nvke/pull/2423"
+        "https://github.com/redhat-developer/gitops-operator/pull/1563"
       ]
     },
     {
@@ -67,9 +64,7 @@
         "https://github.com/numaproj/numaflow/pull/3756",
         "https://github.com/numaproj/numaflow/pull/3760",
         "https://github.com/numaproj/numaflow/pull/3787",
-        "https://github.com/dsx-ai-factory/infra-controller/pull/9248",
-        "https://github.com/yalongwastaken/git-koi/pull/74",
-        "https://github.com/yalongwastaken/git-koi/pull/72"
+        "https://github.com/dsx-ai-factory/infra-controller/pull/9248"
       ]
     },
     {
@@ -90,21 +85,7 @@
         "https://github.com/opensearch-project/opensearch-py-ml/pull/625",
         "https://github.com/ansible/ansible-lint/pull/5250",
         "https://github.com/ansible/ansible-lint/pull/5253",
-        "https://github.com/ansible/molecule/pull/4734",
-        "https://github.com/lmcinnes/umap/pull/1360",
-        "https://github.com/Nixtla/neuralforecast/pull/1774",
-        "https://github.com/Nixtla/neuralforecast/pull/1773"
-      ]
-    },
-    {
-      "name": "Java",
-      "category": "Languages",
-      "terms": [
-        "Java"
-      ],
-      "merged": false,
-      "sources": [
-        "https://github.com/keycloak/keycloak/pull/54938"
+        "https://github.com/ansible/molecule/pull/4734"
       ]
     },
     {
@@ -122,10 +103,7 @@
         "https://github.com/EthanHenrickson/math-mcp/pull/9",
         "https://github.com/ustaxes/UsTaxes/pull/2650",
         "https://github.com/ansible/vscode-ansible/pull/3287",
-        "https://github.com/tonl-dev/tonl/pull/35",
-        "https://github.com/kiali/kiali/pull/10570",
-        "https://github.com/open-macaron/macaron/pull/183",
-        "https://github.com/aschiff98/triangle-startups-community/pull/22"
+        "https://github.com/tonl-dev/tonl/pull/35"
       ]
     },
     {
@@ -136,9 +114,7 @@
       ],
       "merged": true,
       "sources": [
-        "https://github.com/anefzaoui/misterdownloadmanager/pull/483",
-        "https://github.com/cockpit-project/cockpit/pull/23924",
-        "https://github.com/cockpit-project/cockpit-podman/pull/2720"
+        "https://github.com/anefzaoui/misterdownloadmanager/pull/483"
       ]
     },
     {
@@ -166,19 +142,7 @@
       "sources": [
         "https://github.com/mezmo/aura/pull/867",
         "https://github.com/redhat-developer/mapt/pull/958",
-        "https://github.com/dsx-ai-factory/nvke/pull/2337",
-        "https://github.com/OSSAfrica/skillguard/pull/218"
-      ]
-    },
-    {
-      "name": "JSON",
-      "category": "Languages",
-      "terms": [
-        "JSON"
-      ],
-      "merged": false,
-      "sources": [
-        "https://github.com/OSSAfrica/skillguard/pull/233"
+        "https://github.com/dsx-ai-factory/nvke/pull/2337"
       ]
     },
     {
@@ -218,17 +182,6 @@
         "https://github.com/dsx-ai-factory/workload-map/pull/668",
         "https://github.com/dsx-ai-factory/workload-map/pull/674",
         "https://github.com/dsx-ai-factory/workload-map/pull/675"
-      ]
-    },
-    {
-      "name": "NestJS",
-      "category": "Backend Frameworks",
-      "terms": [
-        "NestJS"
-      ],
-      "merged": false,
-      "sources": [
-        "https://github.com/open-macaron/macaron/pull/183"
       ]
     },
     {
@@ -368,8 +321,7 @@
         "https://github.com/dsx-ai-factory/nvkr/pull/460",
         "https://github.com/dsx-ai-factory/nvkr/pull/469",
         "https://github.com/dsx-ai-factory/nvkr/pull/470",
-        "https://github.com/dsx-ai-factory/nvkr/pull/481",
-        "https://github.com/dsx-ai-factory/nvkr/pull/482"
+        "https://github.com/dsx-ai-factory/nvkr/pull/481"
       ]
     },
     {
@@ -387,9 +339,7 @@
         "https://github.com/dsx-ai-factory/nvkr/pull/481",
         "https://github.com/dsx-ai-factory/workload-map/pull/668",
         "https://github.com/dsx-ai-factory/workload-map/pull/674",
-        "https://github.com/dsx-ai-factory/workload-map/pull/675",
-        "https://github.com/OSSAfrica/skillguard/pull/233",
-        "https://github.com/aschiff98/triangle-startups-community/pull/22"
+        "https://github.com/dsx-ai-factory/workload-map/pull/675"
       ]
     },
     {
@@ -556,8 +506,7 @@
         "https://github.com/mezmo/aura/pull/865",
         "https://github.com/mezmo/aura/pull/862",
         "https://github.com/mezmo/aura/pull/890",
-        "https://github.com/EthanHenrickson/math-mcp/pull/9",
-        "https://github.com/mezmo/aura/pull/866"
+        "https://github.com/EthanHenrickson/math-mcp/pull/9"
       ]
     },
     {
@@ -714,18 +663,6 @@
         "https://github.com/numaproj/numaflow/pull/3759",
         "https://github.com/numaproj/numaflow/pull/3760",
         "https://github.com/numaproj/numaflow/pull/3787"
-      ]
-    },
-    {
-      "name": "Data Validation",
-      "category": "Data Engineering",
-      "terms": [
-        "Data Validation"
-      ],
-      "merged": false,
-      "sources": [
-        "https://github.com/Nixtla/neuralforecast/pull/1774",
-        "https://github.com/aschiff98/triangle-startups-community/pull/22"
       ]
     },
     {
@@ -916,9 +853,7 @@
       ],
       "merged": true,
       "sources": [
-        "https://github.com/numaproj/numaflow-python/pull/390",
-        "https://github.com/OSSAfrica/skillguard/pull/218",
-        "https://github.com/mezmo/aura/pull/866"
+        "https://github.com/numaproj/numaflow-python/pull/390"
       ]
     },
     {
@@ -935,9 +870,7 @@
         "https://github.com/dsx-ai-factory/workload-map/pull/675",
         "https://github.com/kiali/kiali/pull/10514",
         "https://github.com/numaproj/numaflow/pull/3761",
-        "https://github.com/numaproj/numaflow/pull/3767",
-        "https://github.com/NVIDIA/nodewright/pull/1047",
-        "https://github.com/dsx-ai-factory/nvke/pull/2423"
+        "https://github.com/numaproj/numaflow/pull/3767"
       ]
     },
     {
@@ -961,8 +894,7 @@
       "sources": [
         "https://github.com/redhat-developer/mapt/pull/971",
         "https://github.com/ansible/ansible-lint/pull/5250",
-        "https://github.com/ansible/ansible-lint/pull/5253",
-        "https://github.com/OSSAfrica/skillguard/pull/218"
+        "https://github.com/ansible/ansible-lint/pull/5253"
       ]
     },
     {
@@ -978,8 +910,7 @@
         "https://github.com/anefzaoui/misterdownloadmanager/pull/477",
         "https://github.com/redhat-developer/mapt/pull/958",
         "https://github.com/FrostyX/tracer/pull/233",
-        "https://github.com/PackageKit/PackageKit/pull/1035",
-        "https://github.com/cockpit-project/cockpit-podman/pull/2720"
+        "https://github.com/PackageKit/PackageKit/pull/1035"
       ]
     },
     {
@@ -1002,17 +933,6 @@
       "merged": true,
       "sources": [
         "https://github.com/numaproj/numaflow/pull/3761"
-      ]
-    },
-    {
-      "name": "Model Evaluation",
-      "category": "Data Science & Statistics",
-      "terms": [
-        "Model Evaluation"
-      ],
-      "merged": false,
-      "sources": [
-        "https://github.com/Nixtla/neuralforecast/pull/1773"
       ]
     },
     {
@@ -1113,9 +1033,7 @@
       "merged": true,
       "sources": [
         "https://github.com/keycloak/keycloak/pull/54773",
-        "https://github.com/keycloak/keycloak/pull/54780",
-        "https://github.com/kiali/kiali/pull/10570",
-        "https://github.com/cockpit-project/cockpit-podman/pull/2720"
+        "https://github.com/keycloak/keycloak/pull/54780"
       ]
     },
     {
@@ -1138,8 +1056,7 @@
       ],
       "merged": true,
       "sources": [
-        "https://github.com/mezmo/aura/pull/873",
-        "https://github.com/dsx-ai-factory/nvke/pull/2246"
+        "https://github.com/mezmo/aura/pull/873"
       ]
     },
     {
@@ -1183,8 +1100,7 @@
         "https://github.com/numaproj/numaflow/pull/3787",
         "https://github.com/opensearch-project/opensearch-py-ml/pull/625",
         "https://github.com/ansible/molecule/pull/4734",
-        "https://github.com/PackageKit/PackageKit/pull/1035",
-        "https://github.com/keycloak/keycloak/pull/54938"
+        "https://github.com/PackageKit/PackageKit/pull/1035"
       ]
     },
     {
@@ -1237,8 +1153,6 @@
         "https://github.com/redhat-developer/mapt/pull/971",
         "https://github.com/redhat-developer/mapt/pull/966",
         "https://github.com/redhat-developer/mapt/pull/962",
-        "https://github.com/OSSAfrica/skillguard/pull/217",
-        "https://github.com/mezmo/aura/pull/873",
         "https://github.com/intuit/stunt-double/pull/94",
         "https://github.com/intuit/stunt-double/pull/93",
         "https://github.com/mezmo/rig/pull/19",
@@ -1256,19 +1170,7 @@
         "https://github.com/podman-desktop/podman-desktop/pull/20128",
         "https://github.com/PackageKit/PackageKit/pull/1035",
         "https://github.com/tonl-dev/tonl/pull/35",
-        "https://github.com/redhat-developer/gitops-operator/pull/1563",
-        "https://github.com/OSSAfrica/skillguard/pull/233",
-        "https://github.com/dsx-ai-factory/nvke/pull/2423",
-        "https://github.com/lmcinnes/umap/pull/1360",
-        "https://github.com/kiali/kiali/pull/10570",
-        "https://github.com/open-macaron/macaron/pull/183",
-        "https://github.com/yalongwastaken/git-koi/pull/74",
-        "https://github.com/yalongwastaken/git-koi/pull/72",
-        "https://github.com/Nixtla/neuralforecast/pull/1774",
-        "https://github.com/Nixtla/neuralforecast/pull/1773",
-        "https://github.com/cockpit-project/cockpit/pull/23924",
-        "https://github.com/aschiff98/triangle-startups-community/pull/22",
-        "https://github.com/OSSAfrica/skillguard/pull/218"
+        "https://github.com/redhat-developer/gitops-operator/pull/1563"
       ]
     },
     {
@@ -1489,14 +1391,11 @@
         "https://github.com/redhat-developer/mapt/pull/971",
         "https://github.com/redhat-developer/mapt/pull/966",
         "https://github.com/redhat-developer/mapt/pull/962",
-        "https://github.com/OSSAfrica/skillguard/pull/217",
         "https://github.com/numaproj/numaflow/pull/3759",
         "https://github.com/dsx-ai-factory/nvke/pull/2336",
         "https://github.com/dsx-ai-factory/nvke/pull/2288",
         "https://github.com/dsx-ai-factory/nvke/pull/2246",
-        "https://github.com/redhat-developer/gitops-operator/pull/1563",
-        "https://github.com/OSSAfrica/skillguard/pull/233",
-        "https://github.com/dsx-ai-factory/nvke/pull/2423"
+        "https://github.com/redhat-developer/gitops-operator/pull/1563"
       ]
     },
     {
@@ -1526,9 +1425,7 @@
         "https://github.com/numaproj/numaflow/pull/3756",
         "https://github.com/numaproj/numaflow/pull/3760",
         "https://github.com/numaproj/numaflow/pull/3787",
-        "https://github.com/dsx-ai-factory/infra-controller/pull/9248",
-        "https://github.com/yalongwastaken/git-koi/pull/74",
-        "https://github.com/yalongwastaken/git-koi/pull/72"
+        "https://github.com/dsx-ai-factory/infra-controller/pull/9248"
       ]
     },
     {
@@ -1549,10 +1446,7 @@
         "https://github.com/opensearch-project/opensearch-py-ml/pull/625",
         "https://github.com/ansible/ansible-lint/pull/5250",
         "https://github.com/ansible/ansible-lint/pull/5253",
-        "https://github.com/ansible/molecule/pull/4734",
-        "https://github.com/lmcinnes/umap/pull/1360",
-        "https://github.com/Nixtla/neuralforecast/pull/1774",
-        "https://github.com/Nixtla/neuralforecast/pull/1773"
+        "https://github.com/ansible/molecule/pull/4734"
       ]
     },
     {
@@ -1562,9 +1456,7 @@
         "Java"
       ],
       "merged": false,
-      "sources": [
-        "https://github.com/keycloak/keycloak/pull/54938"
-      ]
+      "sources": []
     },
     {
       "name": "TypeScript",
@@ -1581,10 +1473,7 @@
         "https://github.com/EthanHenrickson/math-mcp/pull/9",
         "https://github.com/ustaxes/UsTaxes/pull/2650",
         "https://github.com/ansible/vscode-ansible/pull/3287",
-        "https://github.com/tonl-dev/tonl/pull/35",
-        "https://github.com/kiali/kiali/pull/10570",
-        "https://github.com/open-macaron/macaron/pull/183",
-        "https://github.com/aschiff98/triangle-startups-community/pull/22"
+        "https://github.com/tonl-dev/tonl/pull/35"
       ]
     },
     {
@@ -1595,9 +1484,7 @@
       ],
       "merged": true,
       "sources": [
-        "https://github.com/anefzaoui/misterdownloadmanager/pull/483",
-        "https://github.com/cockpit-project/cockpit/pull/23924",
-        "https://github.com/cockpit-project/cockpit-podman/pull/2720"
+        "https://github.com/anefzaoui/misterdownloadmanager/pull/483"
       ]
     },
     {
@@ -1643,8 +1530,7 @@
       "sources": [
         "https://github.com/mezmo/aura/pull/867",
         "https://github.com/redhat-developer/mapt/pull/958",
-        "https://github.com/dsx-ai-factory/nvke/pull/2337",
-        "https://github.com/OSSAfrica/skillguard/pull/218"
+        "https://github.com/dsx-ai-factory/nvke/pull/2337"
       ]
     },
     {
@@ -1654,9 +1540,7 @@
         "JSON"
       ],
       "merged": false,
-      "sources": [
-        "https://github.com/OSSAfrica/skillguard/pull/233"
-      ]
+      "sources": []
     },
     {
       "name": "R",
@@ -1758,9 +1642,7 @@
         "NestJS"
       ],
       "merged": false,
-      "sources": [
-        "https://github.com/open-macaron/macaron/pull/183"
-      ]
+      "sources": []
     },
     {
       "name": "REST APIs",
@@ -2044,8 +1926,7 @@
         "https://github.com/dsx-ai-factory/nvkr/pull/460",
         "https://github.com/dsx-ai-factory/nvkr/pull/469",
         "https://github.com/dsx-ai-factory/nvkr/pull/470",
-        "https://github.com/dsx-ai-factory/nvkr/pull/481",
-        "https://github.com/dsx-ai-factory/nvkr/pull/482"
+        "https://github.com/dsx-ai-factory/nvkr/pull/481"
       ]
     },
     {
@@ -2063,9 +1944,7 @@
         "https://github.com/dsx-ai-factory/nvkr/pull/481",
         "https://github.com/dsx-ai-factory/workload-map/pull/668",
         "https://github.com/dsx-ai-factory/workload-map/pull/674",
-        "https://github.com/dsx-ai-factory/workload-map/pull/675",
-        "https://github.com/OSSAfrica/skillguard/pull/233",
-        "https://github.com/aschiff98/triangle-startups-community/pull/22"
+        "https://github.com/dsx-ai-factory/workload-map/pull/675"
       ]
     },
     {
@@ -2331,8 +2210,7 @@
         "https://github.com/mezmo/aura/pull/865",
         "https://github.com/mezmo/aura/pull/862",
         "https://github.com/mezmo/aura/pull/890",
-        "https://github.com/EthanHenrickson/math-mcp/pull/9",
-        "https://github.com/mezmo/aura/pull/866"
+        "https://github.com/EthanHenrickson/math-mcp/pull/9"
       ]
     },
     {
@@ -2769,10 +2647,7 @@
         "Data Validation"
       ],
       "merged": false,
-      "sources": [
-        "https://github.com/Nixtla/neuralforecast/pull/1774",
-        "https://github.com/aschiff98/triangle-startups-community/pull/22"
-      ]
+      "sources": []
     },
     {
       "name": "Cassandra",
@@ -3196,9 +3071,7 @@
       ],
       "merged": true,
       "sources": [
-        "https://github.com/numaproj/numaflow-python/pull/390",
-        "https://github.com/OSSAfrica/skillguard/pull/218",
-        "https://github.com/mezmo/aura/pull/866"
+        "https://github.com/numaproj/numaflow-python/pull/390"
       ]
     },
     {
@@ -3215,9 +3088,7 @@
         "https://github.com/dsx-ai-factory/workload-map/pull/675",
         "https://github.com/kiali/kiali/pull/10514",
         "https://github.com/numaproj/numaflow/pull/3761",
-        "https://github.com/numaproj/numaflow/pull/3767",
-        "https://github.com/NVIDIA/nodewright/pull/1047",
-        "https://github.com/dsx-ai-factory/nvke/pull/2423"
+        "https://github.com/numaproj/numaflow/pull/3767"
       ]
     },
     {
@@ -3277,8 +3148,7 @@
       "sources": [
         "https://github.com/redhat-developer/mapt/pull/971",
         "https://github.com/ansible/ansible-lint/pull/5250",
-        "https://github.com/ansible/ansible-lint/pull/5253",
-        "https://github.com/OSSAfrica/skillguard/pull/218"
+        "https://github.com/ansible/ansible-lint/pull/5253"
       ]
     },
     {
@@ -3312,8 +3182,7 @@
         "https://github.com/anefzaoui/misterdownloadmanager/pull/477",
         "https://github.com/redhat-developer/mapt/pull/958",
         "https://github.com/FrostyX/tracer/pull/233",
-        "https://github.com/PackageKit/PackageKit/pull/1035",
-        "https://github.com/cockpit-project/cockpit-podman/pull/2720"
+        "https://github.com/PackageKit/PackageKit/pull/1035"
       ]
     },
     {
@@ -3480,9 +3349,7 @@
         "Model Evaluation"
       ],
       "merged": false,
-      "sources": [
-        "https://github.com/Nixtla/neuralforecast/pull/1773"
-      ]
+      "sources": []
     },
     {
       "name": "XGBoost",
@@ -3717,9 +3584,7 @@
       "merged": true,
       "sources": [
         "https://github.com/keycloak/keycloak/pull/54773",
-        "https://github.com/keycloak/keycloak/pull/54780",
-        "https://github.com/kiali/kiali/pull/10570",
-        "https://github.com/cockpit-project/cockpit-podman/pull/2720"
+        "https://github.com/keycloak/keycloak/pull/54780"
       ]
     },
     {
@@ -3814,8 +3679,7 @@
       ],
       "merged": true,
       "sources": [
-        "https://github.com/mezmo/aura/pull/873",
-        "https://github.com/dsx-ai-factory/nvke/pull/2246"
+        "https://github.com/mezmo/aura/pull/873"
       ]
     },
     {
@@ -3859,8 +3723,7 @@
         "https://github.com/numaproj/numaflow/pull/3787",
         "https://github.com/opensearch-project/opensearch-py-ml/pull/625",
         "https://github.com/ansible/molecule/pull/4734",
-        "https://github.com/PackageKit/PackageKit/pull/1035",
-        "https://github.com/keycloak/keycloak/pull/54938"
+        "https://github.com/PackageKit/PackageKit/pull/1035"
       ]
     },
     {
@@ -3913,8 +3776,6 @@
         "https://github.com/redhat-developer/mapt/pull/971",
         "https://github.com/redhat-developer/mapt/pull/966",
         "https://github.com/redhat-developer/mapt/pull/962",
-        "https://github.com/OSSAfrica/skillguard/pull/217",
-        "https://github.com/mezmo/aura/pull/873",
         "https://github.com/intuit/stunt-double/pull/94",
         "https://github.com/intuit/stunt-double/pull/93",
         "https://github.com/mezmo/rig/pull/19",
@@ -3932,19 +3793,7 @@
         "https://github.com/podman-desktop/podman-desktop/pull/20128",
         "https://github.com/PackageKit/PackageKit/pull/1035",
         "https://github.com/tonl-dev/tonl/pull/35",
-        "https://github.com/redhat-developer/gitops-operator/pull/1563",
-        "https://github.com/OSSAfrica/skillguard/pull/233",
-        "https://github.com/dsx-ai-factory/nvke/pull/2423",
-        "https://github.com/lmcinnes/umap/pull/1360",
-        "https://github.com/kiali/kiali/pull/10570",
-        "https://github.com/open-macaron/macaron/pull/183",
-        "https://github.com/yalongwastaken/git-koi/pull/74",
-        "https://github.com/yalongwastaken/git-koi/pull/72",
-        "https://github.com/Nixtla/neuralforecast/pull/1774",
-        "https://github.com/Nixtla/neuralforecast/pull/1773",
-        "https://github.com/cockpit-project/cockpit/pull/23924",
-        "https://github.com/aschiff98/triangle-startups-community/pull/22",
-        "https://github.com/OSSAfrica/skillguard/pull/218"
+        "https://github.com/redhat-developer/gitops-operator/pull/1563"
       ]
     },
     {

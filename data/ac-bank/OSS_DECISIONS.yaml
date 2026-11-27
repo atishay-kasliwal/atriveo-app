@@ -1,0 +1,144 @@
+# Open source decisions: pull requests that get no bullet, and why (docs/open-source-rules.md).
+# The weekly audit (npm run oss:audit) leaves these out unless their status changes (an open one that merges is shown again).
+# Bullets in the bank (live or retired) are not listed here: the bank file itself is the decision.
+decisions:
+  - pr: aschiff98/triangle-startups-community#22
+    state: OPEN
+    decision: no-bullet
+    why: "a 0-star project; Atishay paused that work"
+    decided: "2026-11-25"
+  - pr: cockpit-project/cockpit#23924
+    state: OPEN
+    decision: no-bullet
+    why: "7 lines for console warnings, changes requested"
+    decided: "2026-11-25"
+  - pr: cockpit-project/cockpit-podman#2720
+    state: OPEN
+    decision: no-bullet
+    why: "a hint text, no measured result"
+    decided: "2026-11-25"
+  - pr: dsx-ai-factory/nvke#2246
+    state: OPEN
+    decision: no-bullet
+    why: "test report attribution, no user-facing result"
+    decided: "2026-11-25"
+  - pr: dsx-ai-factory/nvke#2423
+    state: OPEN
+    decision: no-bullet
+    why: "another contributor's fix (#2123) applied by Atishay"
+    decided: "2026-11-25"
+  - pr: dsx-ai-factory/nvkr#461
+    state: MERGED
+    decision: no-bullet
+    why: "a one-line test count update"
+    decided: "2026-11-25"
+  - pr: dsx-ai-factory/nvkr#482
+    state: MERGED
+    decision: no-bullet
+    why: "architecture docs only"
+    decided: "2026-11-25"
+  - pr: emmabostian/developer-portfolios#4050
+    state: MERGED
+    decision: no-bullet
+    why: "a listing of your own portfolio"
+    decided: "2026-11-25"
+  - pr: FrostyX/tracer#233
+    state: MERGED
+    decision: no-bullet
+    why: "an 11-line crash fix in an 85-star project"
+    decided: "2026-11-25"
+  - pr: keycloak/keycloak#54938
+    state: OPEN
+    decision: no-bullet
+    why: "a test moved to a new framework"
+    decided: "2026-11-25"
+  - pr: kiali/kiali#10570
+    state: OPEN
+    decision: no-bullet
+    why: "an interface note in the AI chat, no measured result"
+    decided: "2026-11-25"
+  - pr: kroxylicious/kroxylicious#5368
+    state: MERGED
+    decision: no-bullet
+    why: "a 2-line docs edit"
+    decided: "2026-11-25"
+  - pr: lmcinnes/umap#1360
+    state: OPEN
+    decision: no-bullet
+    why: "a 14-line early return"
+    decided: "2026-11-25"
+  - pr: mezmo/aura#864
+    state: MERGED
+    decision: no-bullet
+    why: "a small leak fix the app does not hit"
+    decided: "2026-11-25"
+  - pr: mezmo/aura#866
+    state: OPEN
+    decision: no-bullet
+    why: "a 6-line Dockerfile pin, changes requested"
+    decided: "2026-11-25"
+  - pr: mezmo/aura#873
+    state: MERGED
+    decision: no-bullet
+    why: "CI config only"
+    decided: "2026-11-25"
+  - pr: mezmo/aura#903
+    state: MERGED
+    decision: no-bullet
+    why: "a one-line doc comment"
+    decided: "2026-11-25"
+  - pr: Nixtla/neuralforecast#1773
+    state: OPEN
+    decision: no-bullet
+    why: "test harness only"
+    decided: "2026-11-25"
+  - pr: Nixtla/neuralforecast#1774
+    state: OPEN
+    decision: no-bullet
+    why: "a 20-line input check"
+    decided: "2026-11-25"
+  - pr: NVIDIA/nodewright#1047
+    state: MERGED
+    decision: no-bullet
+    why: "a config fix too small for its own bullet"
+    decided: "2026-11-25"
+  - pr: open-macaron/macaron#183
+    state: OPEN
+    decision: no-bullet
+    why: "a draft PR in a 1-star project"
+    decided: "2026-11-25"
+  - pr: OSSAfrica/skillguard#217
+    state: MERGED
+    decision: no-bullet
+    why: "a 2-star project"
+    decided: "2026-11-25"
+  - pr: OSSAfrica/skillguard#218
+    state: OPEN
+    decision: no-bullet
+    why: "a 2-star project"
+    decided: "2026-11-25"
+  - pr: OSSAfrica/skillguard#233
+    state: OPEN
+    decision: no-bullet
+    why: "a 2-star project"
+    decided: "2026-11-25"
+  - pr: Seagey/couch-tv#60
+    state: MERGED
+    decision: no-bullet
+    why: "a build helper; the poster view (AC-291) represents couch-tv"
+    decided: "2026-11-25"
+  - pr: yalongwastaken/git-koi#72
+    state: OPEN
+    decision: no-bullet
+    why: "a small visual fix, changes requested"
+    decided: "2026-11-25"
+  - pr: yalongwastaken/git-koi#73
+    state: OPEN
+    decision: no-bullet
+    why: "constants renamed, output unchanged"
+    decided: "2026-11-25"
+  - pr: yalongwastaken/git-koi#74
+    state: OPEN
+    decision: no-bullet
+    why: "a refactor, output unchanged"
+    decided: "2026-11-25"

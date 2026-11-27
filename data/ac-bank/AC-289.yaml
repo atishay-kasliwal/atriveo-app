@@ -12,7 +12,7 @@ tracks:
   - software-engineer
 slot_kind: project
 achievement_theme: log-viewer
-display_order: 37
+display_order: 3
 wow_score: 0.88
 metrics_claimed:
   - stars_15000
@@ -28,13 +28,15 @@ oss:
   org: ''
   project: Cockpit
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   prs:
     - https://github.com/cockpit-project/cockpit/pull/23896
 capabilities:
   frontend: 86
   backend: 72
 strength:
-  recruiter: 9
+  recruiter: 10
 ats_keywords:
   - React
   - JavaScript
@@ -54,7 +56,7 @@ facets:
 variants:
   - facet: log-viewer
     emphasis: log-viewer
-    strength: 9
+    strength: 10
     text: >-
       Solved leaked journalctl processes in Cockpit's React log viewer (15K+ GitHub stars), cutting processes
       started over 5 page visits from 110 to 28 and leaving 1 running instead of 6.

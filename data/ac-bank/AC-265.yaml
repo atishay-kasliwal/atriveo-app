@@ -1,5 +1,6 @@
 # Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
 id: AC-265
+# Retired 2026-11-26 (company projects): folded into AC-323 (Red Hat project).
 role: open-source
 fits:
   - software-engineer
@@ -7,9 +8,11 @@ fits:
 # Label only (the open source page): selection never reads it.
 areas:
   - platform
+tracks:
+  - retired
 slot_kind: project
 achievement_theme: provisioning-fixes
-display_order: 13
+display_order: 31
 wow_score: 0.88
 metrics_claimed:
   - bugs_3
@@ -26,6 +29,8 @@ oss:
   org: Red Hat
   project: mapt
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-16"
   prs:
     - https://github.com/redhat-developer/mapt/pull/959
     - https://github.com/redhat-developer/mapt/pull/956
@@ -58,5 +63,5 @@ variants:
     emphasis: provisioning-fixes
     strength: 9
     text: >-
-      Examined context handling in Red Hat's mapt provisioning tool in Go and fixed 3 propagation and preflight bugs,
-      rejecting invalid output paths before cloud calls with 5 regression tests.
+      Examined context handling in Red Hat's mapt in Go and fixed 3 bugs so a bad output path fails before any
+      cloud call instead of after 12 minutes of provisioning, with 5 tests.

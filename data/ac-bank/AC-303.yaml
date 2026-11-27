@@ -8,7 +8,7 @@ tracks:
   - data-science
 slot_kind: project
 achievement_theme: oss-utilsforecast-b5
-display_order: 51
+display_order: 42
 wow_score: 0.8
 metrics_claimed:
   - "5"
@@ -23,12 +23,14 @@ oss:
   org: Nixtla
   project: utilsforecast
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   prs:
     - https://github.com/Nixtla/utilsforecast/pull/341
 capabilities:
   backend: 80
 strength:
-  recruiter: 8
+  recruiter: 9
 ats_keywords:
   - Python
   - pandas
@@ -49,5 +51,5 @@ variants:
     emphasis: oss-utilsforecast-b5
     strength: 9
     text: >-
-      Solved row order errors in 5 Nixtla utilsforecast accuracy metrics in Python, adding 20 pandas and Polars
-      regression cases that all fail without the fix.
+      Solved row order errors in 5 Nixtla utilsforecast accuracy metrics in Python, where shuffled training data
+      moved MASE from 0.176 to 0.198, adding 20 regression cases.

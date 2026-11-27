@@ -1,16 +1,15 @@
 # Open source contribution, approved 2026-11-25 (resume-engine/Memory/OSS_LEDGER.md, draft A6).
 id: AC-295
 role: open-source
+# Retired 2026-11-25 (every open source bullet 9+): built on another contributor's approach and tests.
+tracks:
+  - retired
 fits:
   - software-engineer
   - forward-deployed
 # Label only (the open source page): selection never reads it.
 areas:
   - platform
-# Only the tracks it fits.
-tracks:
-  - software-engineer
-  - forward-deployed
 slot_kind: project
 achievement_theme: oss-nvke-a6
 display_order: 43
@@ -28,6 +27,8 @@ oss:
   org: NVIDIA
   project: NVKE
   status: merged
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-25"
   prs:
     - https://github.com/dsx-ai-factory/nvke/pull/2337
 capabilities:

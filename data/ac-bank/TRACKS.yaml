@@ -50,7 +50,8 @@ tracks:
     general_pinned:
       projects:
         atriveo: [AC-228, AC-229]
-        open-source: [AC-253, AC-255, AC-271]
+        # 2026-11-26 (Atishay): the Mezmo company project (OPEN-SOURCE.yaml company_projects).
+        open-source: [AC-253, AC-322]
       project_stacks:
         atriveo: [Python, TypeScript, Claude, MongoDB, Node.js, Docker]
 
@@ -102,8 +103,10 @@ tracks:
     label: Data analytics
     title_patterns: ['data analyst', 'analytics', 'business intelligence', '\bbi\b', 'business analyst', 'insights analyst', 'product analyst']
     exclude_patterns: ['engineer']
-    # No open source here: none of it is analytics work (user decision 2026-11-16).
+    # No open source here: none of it is analytics work (user decision 2026-11-16). no_jd_selected keeps it out of the
+    # second slot too (it could still be swapped in by fit until 2026-11-25).
     projects: [atriveo, insurance-platform]
+    no_jd_selected: [open-source]
     # Wake Forest's title on analytics resumes, as on DS ones (Atishay's own DS resume, 2026-10-08).
     employer_titles:
       wake-forest: AI and Data Analytics Intern
@@ -144,7 +147,8 @@ tracks:
     general_pinned:
       projects:
         atriveo: [AC-208, AC-209]
-        open-source: [AC-265, AC-266, AC-258]
+        # 2026-11-26 (Atishay): the NVIDIA company project (OPEN-SOURCE.yaml company_projects).
+        open-source: [AC-258, AC-321]
       project_stacks:
         atriveo: [TypeScript, React, Node.js, MongoDB, Playwright, Docker]
     # Other tested sets, each used when its rule matches the posting (title + JD); else the set above. Infrastructure:
@@ -192,7 +196,8 @@ tracks:
         accolite: [AC-212, AC-190, AC-191, AC-183:swe]
       projects:
         atriveo: [AC-214, AC-057:swe-security]
-        open-source: [AC-258, AC-259, AC-269]
+        # 2026-11-26 (Atishay): the NVIDIA company project (OPEN-SOURCE.yaml company_projects).
+        open-source: [AC-258, AC-321]
       project_stacks:
         atriveo: [React, TypeScript, Node.js, MongoDB, FastAPI, PostgreSQL]
     # C++ postings (2026-10-09): InsureRaft, Atishay's C++ and NuRaft project, replaces the insurance microservices

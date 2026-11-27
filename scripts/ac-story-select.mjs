@@ -532,9 +532,19 @@ export function selectStoryTriple({
     // A track can ask for more bullets than a package holds (the AI track: Stony Brook 5, Wake Forest 4):
     // keep the package's story and add the role's best other bullets for this JD; a longer package is cut.
     if (acs.length > count) acs = acs.slice(0, count);
+    // A package approved as a pair (open source) prints whole or not at all: one of its bullets can be off this track.
+    if (poolCfg.exclusive_verbs_by_package && acs.length < (pkg.ids?.length ?? 0)) continue;
     if (acs.length < count && typeof scoreAc === "function") {
       const inPkg = new Set(acs.map((a) => a.id));
-      const extra = roleAcs.filter((a) => !inPkg.has(a.id)).map((a) => ({ a, s: scoreAc(a) })).sort((x, y) => y.s - x.s).slice(0, count - acs.length).map((x) => x.a);
+      // The added ones never repeat an opening verb already in the package (a resume never prints one twice).
+      const opening = (a) => String(a.variants?.[0]?.text || "").trim().split(/\s+/)[0].toLowerCase();
+      const verbs = new Set(acs.map(opening));
+      const extra = [];
+      for (const { a } of roleAcs.filter((a) => !inPkg.has(a.id)).map((a) => ({ a, s: scoreAc(a) })).sort((x, y) => y.s - x.s)) {
+        if (extra.length >= count - acs.length) break;
+        if (verbs.has(opening(a))) continue;
+        verbs.add(opening(a)); extra.push(a);
+      }
       acs = [...acs, ...extra];
     }
     if (acs.length !== count) continue;

@@ -1,6 +1,9 @@
 # Open source contribution, approved 2026-11-16 (resume-engine/Memory/OSS_BULLETS_DRAFT.md).
 id: AC-260
 role: open-source
+# Retired 2026-11-25 (every open source bullet 9+): open; skipped writes and logging, no measured result.
+tracks:
+  - retired
 fits:
   - software-engineer
   - forward-deployed
@@ -28,6 +31,8 @@ oss:
   org: NVIDIA
   project: NVKE
   status: open
+  # The date Atishay approved this wording. Only he gives it (docs/open-source-rules.md).
+  approved: "2026-11-16"
   prs:
     - https://github.com/dsx-ai-factory/nvke/pull/2336
     - https://github.com/dsx-ai-factory/nvke/pull/2288
