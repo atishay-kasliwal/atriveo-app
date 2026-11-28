@@ -601,9 +601,12 @@ function pickFace(ac, jd, theme, plan, narrative = null) {
     }
   }
 
+  // The label is the wording printed. When the picked facet has no wording on this track (a `tracks: [ai-engineer]`
+  // wording on a full stack job), the default prints, and the bullet says so (Nov 28: AC-023/AC-025 printed the default
+  // labelled "ai-track", which the stale report and the page fill's scoring then read as the AI wording).
   return {
     ...best,
-    facet: facet || best.facet || best.emphasis || null,
+    facet: best.facet || best.emphasis || facet || null,
     text: best.text,
   };
 }
